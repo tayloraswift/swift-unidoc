@@ -37,15 +37,6 @@
       }
     },
     {
-      "identity" : "swift-json",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kelvin13/swift-json",
-      "state" : {
-        "revision" : "0c3f7b2de726884ba32f54bc145dedbf0a2430ee",
-        "version" : "0.4.2"
-      }
-    },
-    {
       "identity" : "swift-mongodb",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kelvin13/swift-mongodb",
