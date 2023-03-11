@@ -19,13 +19,13 @@ extension SymbolGraph
     public
     init(merging json:[JSON.Object]) throws
     {
-        try self.init(merging: try json.map(SymbolGraphNamespace.init(json:)))
+        try self.init(merging: try json.map(SymbolNamespace.init(json:)))
     }
-    init(merging namespaces:[SymbolGraphNamespace]) throws
+    init(merging namespaces:[SymbolNamespace]) throws
     {
         let format:SemanticVersion
 
-        if let first:SymbolGraphNamespace = namespaces.first
+        if let first:SymbolNamespace = namespaces.first
         {
             format = first.metadata.version.semantic
         }
@@ -34,7 +34,7 @@ extension SymbolGraph
             throw SymbolGraphEmptyError.init()
         }
 
-        for namespace:SymbolGraphNamespace in namespaces
+        for namespace:SymbolNamespace in namespaces
         {
             guard namespace.metadata.version.semantic == format
             else

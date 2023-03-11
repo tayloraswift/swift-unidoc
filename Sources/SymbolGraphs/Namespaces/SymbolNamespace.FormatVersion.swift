@@ -1,7 +1,7 @@
 import JSONDecoding
 import SemanticVersion
 
-extension SymbolGraphNamespace
+extension SymbolNamespace
 {
     struct FormatVersion:Equatable, Sendable
     {
@@ -13,7 +13,7 @@ extension SymbolGraphNamespace
         }
     }
 }
-extension SymbolGraphNamespace.FormatVersion:JSONObjectDecodable
+extension SymbolNamespace.FormatVersion:JSONObjectDecodable
 {
     enum CodingKeys:String
     {

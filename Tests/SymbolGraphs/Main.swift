@@ -17,9 +17,15 @@ enum Main:SyncTests
                 let file:[UInt8] = try filepath.read()
 
                 let json:JSON.Object = try .init(parsing: file)
-                let symbols:SymbolGraph = try .init(merging: [json])
-
-                tests.expect(symbols.format ==? .init(0, 6, 0))
+                do
+                {
+                    let symbols:SymbolGraph = try .init(merging: [json])
+                    tests.expect(symbols.format ==? .init(0, 6, 0))
+                }
+                catch let error
+                {
+                    throw error
+                }
             }
         }
     }

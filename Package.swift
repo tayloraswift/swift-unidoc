@@ -8,7 +8,8 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.2")),
+        //.package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.2")),
+        .package(path: "../swift-json"),
 
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
         .package(url: "https://github.com/kelvin13/swift-hash", .upToNextMinor(from: "0.5.0")),
@@ -48,28 +49,22 @@ let package:Package = .init(
             path: "Tests/SymbolGraphs"),
 
 
+        .target(name: "ZooDeclarations",
+            path: "Zoo/Declarations"),
+
         .target(name: "ZooInheritedTypePrecedence",
-            dependencies:
-            [
-            ], 
             path: "Zoo/InheritedTypePrecedence"),
 
         .target(name: "ZooInheritedTypes",
-            dependencies:
-            [
-            ], 
             path: "Zoo/InheritedTypes"),
 
         .target(name: "ZooOverloadedTypealiases",
-            dependencies:
-            [
-            ], 
             path: "Zoo/OverloadedTypealiases"),
 
+        .target(name: "ZooUnderscoredProtocols",
+            path: "Zoo/UnderscoredProtocols"),
+
         .target(name: "ZooProtocols",
-            dependencies:
-            [
-            ], 
             path: "Zoo/Protocols"),
 
         .target(name: "ZooProtocolConformers",

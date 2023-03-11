@@ -1,6 +1,6 @@
 import JSONDecoding
 
-extension SymbolGraphNamespace
+extension SymbolNamespace
 {
     struct Metadata:Equatable, Sendable
     {
@@ -15,7 +15,7 @@ extension SymbolGraphNamespace
     }
 }
 
-extension SymbolGraphNamespace.Metadata:JSONObjectDecodable
+extension SymbolNamespace.Metadata:JSONObjectDecodable
 {
     enum CodingKeys:String
     {
