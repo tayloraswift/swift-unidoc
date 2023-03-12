@@ -19,16 +19,25 @@ let package:Package = .init(
     ],
     targets: 
     [
-        .target(name: "SemanticVersion"),
+        .target(name: "Generics"),
+
+        .target(name: "SemanticVersions"),
 
         .target(name: "Symbols"),
+
+        .target(name: "SymbolAvailability",
+            dependencies:
+            [
+                .target(name: "SemanticVersions"),
+                .target(name: "Symbols"),
+            ]),
 
         .target(name: "SymbolGraphs",
             dependencies:
             [
+                .target(name: "Generics"),
                 .target(name: "System"),
-                .target(name: "SemanticVersion"),
-                .target(name: "Symbols"),
+                .target(name: "SymbolAvailability"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
@@ -46,11 +55,21 @@ let package:Package = .init(
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphs"),
+            path: "Tests/SymbolGraphs",
+            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
 
+
+        .target(name: "ZooAvailability",
+            path: "Zoo/Availability"),
+
+        .target(name: "ZooConstraints",
+            path: "Zoo/Constraints"),
 
         .target(name: "ZooDeclarations",
             path: "Zoo/Declarations"),
+
+        .target(name: "ZooDoccomments",
+            path: "Zoo/Doccomments"),
 
         .target(name: "ZooInheritedTypePrecedence",
             path: "Zoo/InheritedTypePrecedence"),
@@ -61,9 +80,6 @@ let package:Package = .init(
         .target(name: "ZooOverloadedTypealiases",
             path: "Zoo/OverloadedTypealiases"),
 
-        .target(name: "ZooUnderscoredProtocols",
-            path: "Zoo/UnderscoredProtocols"),
-
         .target(name: "ZooProtocols",
             path: "Zoo/Protocols"),
 
@@ -73,4 +89,10 @@ let package:Package = .init(
                 .target(name: "ZooProtocols"),
             ], 
             path: "Zoo/ProtocolConformers"),
+
+        .target(name: "ZooSPI",
+            path: "Zoo/SPI"),
+
+        .target(name: "ZooUnderscoredProtocols",
+            path: "Zoo/UnderscoredProtocols"),
     ])
