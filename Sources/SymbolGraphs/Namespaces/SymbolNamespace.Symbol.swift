@@ -4,24 +4,43 @@ extension SymbolNamespace
 {
     struct Symbol:Equatable
     {
+        let doccomment:Doccomment?
+        let spi:SymbolSPI?
+
+        let availability:SymbolAvailability
         let visibility:SymbolVisibility
         let fragments:[DeclarationFragment]
         let signature:[DeclarationFragment]
+        let generics:GenericContext<SymbolIdentifier>?
+        
+        let location:SourceLocation<String>?
         let phylum:SymbolPhylum
         let path:SymbolPath
         let usr:SymbolIdentifier.CompoundUSR
 
         private
-        init(visibility:SymbolVisibility,
+        init(doccomment:Doccomment?,
+            spi:SymbolSPI?,
+            availability:SymbolAvailability,
+            visibility:SymbolVisibility,
             fragments:[DeclarationFragment],
             signature:[DeclarationFragment],
+            generics:GenericContext<SymbolIdentifier>?,
+            location:SourceLocation<String>?,
             phylum:SymbolPhylum,
             path:SymbolPath,
             usr:SymbolIdentifier.CompoundUSR)
         {
+            self.doccomment = doccomment
+            self.spi = spi
+
+            self.availability = availability
             self.visibility = visibility
             self.fragments = fragments
             self.signature = signature
+            self.generics = generics
+
+            self.location = location
             self.phylum = phylum
             self.path = path
             self.usr = usr
@@ -31,51 +50,66 @@ extension SymbolNamespace
 extension SymbolNamespace.Symbol
 {
     private
-    init(visibility:SymbolVisibility,
+    init(doccomment:Doccomment?,
+        spi:SymbolSPI?,
+        availability:SymbolAvailability,
+        visibility:SymbolVisibility,
         fragments:[DeclarationFragment],
         signature:[DeclarationFragment],
+        generics:GenericContext<SymbolIdentifier>?,
+        location:SourceLocation<String>?,
         kind:Kind,
         path:SymbolPath,
         usr:SymbolIdentifier.CompoundUSR)
     {
-        self.visibility = visibility
-        self.fragments = fragments
-        self.signature = signature
-
+        let phylum:SymbolPhylum
         switch kind
         {
-        case .protocol:             self.phylum = .protocol
-        case .associatedtype:       self.phylum = .associatedtype
-        case .enum:                 self.phylum = .enum
-        case .struct:               self.phylum = .struct
-        case .class:                self.phylum = .class
-        case .case:                 self.phylum = .case
-        case .initializer:          self.phylum = .initializer
-        case .deinitializer:        self.phylum = .deinitializer
-        case .instanceMethod:       self.phylum = .instanceMethod
-        case .instanceProperty:     self.phylum = .instanceProperty
-        case .instanceSubscript:    self.phylum = .instanceSubscript
-        case .typeMethod:           self.phylum = .typeMethod
-        case .typeProperty:         self.phylum = .typeProperty
-        case .typeSubscript:        self.phylum = .typeSubscript
+        case .protocol:             phylum = .protocol
+        case .associatedtype:       phylum = .associatedtype
+        case .enum:                 phylum = .enum
+        case .struct:               phylum = .struct
+        case .class:                phylum = .class
+        case .case:                 phylum = .case
+        case .initializer:          phylum = .initializer
+        case .deinitializer:        phylum = .deinitializer
+        case .instanceMethod:       phylum = .instanceMethod
+        case .instanceProperty:     phylum = .instanceProperty
+        case .instanceSubscript:    phylum = .instanceSubscript
+        case .typeMethod:           phylum = .typeMethod
+        case .typeProperty:         phylum = .typeProperty
+        case .typeSubscript:        phylum = .typeSubscript
 
-        case .operator:             self.phylum = path.prefix.isEmpty ?
+        case .operator:             phylum = path.prefix.isEmpty ?
             .operator : .typeOperator
         
-        case .func:                 self.phylum = .func
-        case .var:                  self.phylum = .var
-        case .typealias:            self.phylum = .typealias
+        case .func:                 phylum = .func
+        case .var:                  phylum = .var
+        case .typealias:            phylum = .typealias
         }
 
-        self.path = path
-        self.usr = usr
+        self.init(
+            doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
+            spi: spi,
+            availability: availability,
+            visibility: visibility,
+            fragments: fragments,
+            signature: signature,
+            generics: generics.flatMap { $0.isEmpty ? nil : $0 },
+            location: location,
+            phylum: phylum,
+            path: path,
+            usr: usr)
     }
 }
 extension SymbolNamespace.Symbol:JSONObjectDecodable
 {
     enum CodingKeys:String
     {
+        case availability
+        case doccomment = "docComment"
         case fragments = "declarationFragments"
+        case generics = "swiftGenerics"
 
         case names
         enum Names:String
@@ -96,16 +130,44 @@ extension SymbolNamespace.Symbol:JSONObjectDecodable
             case identifier
         }
 
+        case location
+        enum Location:String
+        {
+            case uri
+            case position
+            enum Position:String
+            {
+                case line
+                case column = "character"
+            }
+        }
+
+        case spi
         case visibility = "accessLevel"
     }
 
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        self.init(visibility: try json[.visibility].decode(),
+        self.init(
+            doccomment: try json[.doccomment]?.decode(),
+            spi: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
+            availability: try json[.availability]?.decode() ?? [:],
+            visibility: try json[.visibility].decode(),
             fragments: try json[.fragments].decode(),
             signature: try json[.names].decode(using: CodingKeys.Names.self)
             {
                 try $0[.subheading].decode()
+            },
+            generics: try json[.generics]?.decode(),
+            location: try json[.location]?.decode(using: CodingKeys.Location.self)
+            {
+                let file:String = try $0[.uri].decode()
+                return try $0[.position].decode(using: CodingKeys.Location.Position.self)
+                {
+                    .init(file: file,
+                        try $0[.line].decode(),
+                        try $0[.column].decode())
+                }
             },
             kind: try json[.kind].decode(using: CodingKeys.Kind.self)
             {

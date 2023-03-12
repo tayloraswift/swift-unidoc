@@ -1,4 +1,4 @@
-import SemanticVersion
+import SemanticVersions
 import JSONDecoding
 
 public
@@ -27,7 +27,7 @@ extension SymbolGraph
 
         if let first:SymbolNamespace = namespaces.first
         {
-            format = first.metadata.version.semantic
+            format = first.metadata.version
         }
         else
         {
@@ -36,11 +36,11 @@ extension SymbolGraph
 
         for namespace:SymbolNamespace in namespaces
         {
-            guard namespace.metadata.version.semantic == format
+            guard namespace.metadata.version == format
             else
             {
                 throw SymbolGraphVersionError.inconsistent(Set<SemanticVersion>.init(
-                    namespaces.lazy.map(\.metadata.version.semantic)).sorted())
+                    namespaces.lazy.map(\.metadata.version)).sorted())
             }
         }
 

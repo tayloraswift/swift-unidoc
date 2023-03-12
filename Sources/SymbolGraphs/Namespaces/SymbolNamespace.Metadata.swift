@@ -1,13 +1,13 @@
 import JSONDecoding
+import SemanticVersions
 
 extension SymbolNamespace
 {
     struct Metadata:Equatable, Sendable
     {
         let generator:String
-        let version:FormatVersion
-
-        init(generator:String, version:FormatVersion)
+        let version:SemanticVersion
+        init(generator:String, version:SemanticVersion)
         {
             self.generator = generator
             self.version = version
