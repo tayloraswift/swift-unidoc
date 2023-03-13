@@ -9,27 +9,25 @@ extension SymbolNamespace
 
         let availability:SymbolAvailability
         let visibility:SymbolVisibility
-        let fragments:[DeclarationFragment]
-        let signature:[DeclarationFragment]
+        let fragments:Declaration<SymbolIdentifier>
         let generics:GenericContext<SymbolIdentifier>?
         
         let location:SourceLocation<String>?
         let phylum:SymbolPhylum
         let path:SymbolPath
-        let usr:SymbolIdentifier.CompoundUSR
+        let usr:UnifiedSymbolResolution
 
         private
         init(doccomment:Doccomment?,
             spi:SymbolSPI?,
             availability:SymbolAvailability,
             visibility:SymbolVisibility,
-            fragments:[DeclarationFragment],
-            signature:[DeclarationFragment],
+            fragments:Declaration<SymbolIdentifier>,
             generics:GenericContext<SymbolIdentifier>?,
             location:SourceLocation<String>?,
             phylum:SymbolPhylum,
             path:SymbolPath,
-            usr:SymbolIdentifier.CompoundUSR)
+            usr:UnifiedSymbolResolution)
         {
             self.doccomment = doccomment
             self.spi = spi
@@ -37,7 +35,6 @@ extension SymbolNamespace
             self.availability = availability
             self.visibility = visibility
             self.fragments = fragments
-            self.signature = signature
             self.generics = generics
 
             self.location = location
@@ -54,13 +51,13 @@ extension SymbolNamespace.Symbol
         spi:SymbolSPI?,
         availability:SymbolAvailability,
         visibility:SymbolVisibility,
-        fragments:[DeclarationFragment],
-        signature:[DeclarationFragment],
+        expanded:[DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
+        abridged:[DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
         generics:GenericContext<SymbolIdentifier>?,
         location:SourceLocation<String>?,
         kind:Kind,
         path:SymbolPath,
-        usr:SymbolIdentifier.CompoundUSR)
+        usr:UnifiedSymbolResolution)
     {
         let phylum:SymbolPhylum
         switch kind
@@ -86,6 +83,9 @@ extension SymbolNamespace.Symbol
         case .func:                 phylum = .func
         case .var:                  phylum = .var
         case .typealias:            phylum = .typealias
+    
+        case .extension:
+            fatalError("unimplemented")
         }
 
         self.init(
@@ -93,8 +93,7 @@ extension SymbolNamespace.Symbol
             spi: spi,
             availability: availability,
             visibility: visibility,
-            fragments: fragments,
-            signature: signature,
+            fragments: .init(expanded: expanded, abridged: abridged),
             generics: generics.flatMap { $0.isEmpty ? nil : $0 },
             location: location,
             phylum: phylum,
@@ -107,8 +106,8 @@ extension SymbolNamespace.Symbol:JSONObjectDecodable
     enum CodingKeys:String
     {
         case availability
+        case declaration = "declarationFragments"
         case doccomment = "docComment"
-        case fragments = "declarationFragments"
         case generics = "swiftGenerics"
 
         case names
@@ -153,8 +152,8 @@ extension SymbolNamespace.Symbol:JSONObjectDecodable
             spi: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
             availability: try json[.availability]?.decode() ?? [:],
             visibility: try json[.visibility].decode(),
-            fragments: try json[.fragments].decode(),
-            signature: try json[.names].decode(using: CodingKeys.Names.self)
+            expanded: try json[.declaration].decode(),
+            abridged: try json[.names].decode(using: CodingKeys.Names.self)
             {
                 try $0[.subheading].decode()
             },

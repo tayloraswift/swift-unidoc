@@ -1,5 +1,5 @@
 public
-protocol BarProtocol:FooProtocol
+protocol BarProtocol:FooProtocol, Identifiable
 {
 }
 extension BarProtocol
@@ -14,4 +14,10 @@ extension BarProtocol
     func barExtensionMethod()
     {
     }
+}
+extension Identifiable where Self:BarProtocol
+{
+    /// Comment for id
+    public var id:Int { 0 }
+
 }

@@ -23,5 +23,6 @@ extension SymbolNamespace.Symbol
         case `func`             = "swift.func"
         case `var`              = "swift.var"
         case `typealias`        = "swift.typealias"
+        case `extension`        = "swift.extension"
     }
 }

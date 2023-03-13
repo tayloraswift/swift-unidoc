@@ -14,9 +14,9 @@ extension GenericConstraint<SymbolIdentifier>:JSONObjectDecodable, JSONDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         let type:TypeExpression
-        if  let usr:SymbolIdentifier.USR = try json[.rhsPrecise]?.decode()
+        if  let usr:UnifiedScalarResolution = try json[.rhsPrecise]?.decode()
         {
-            type = .nominal(usr.symbol)
+            type = .nominal(usr.id)
         }
         else
         {
