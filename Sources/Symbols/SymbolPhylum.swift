@@ -7,6 +7,7 @@ enum SymbolPhylum:Hashable, Comparable, Sendable
     case `class`
     case  deinitializer
     case `enum`
+    case `extension`
     case `func`
     case  initializer
     case  instanceMethod

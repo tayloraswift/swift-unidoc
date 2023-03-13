@@ -6,10 +6,22 @@ struct SymbolIdentifier:RawRepresentable, Sendable
     public 
     let rawValue:String 
     
-    @inlinable public 
-    init(rawValue:String)
+    @inlinable internal 
+    init(unchecked rawValue:String)
     {
         self.rawValue = rawValue
+    }
+    @inlinable public 
+    init?(rawValue:String)
+    {
+        if !rawValue.isEmpty
+        {
+            self.rawValue = rawValue
+        }
+        else
+        {
+            return nil
+        }
     }
 }
 extension SymbolIdentifier
@@ -17,9 +29,9 @@ extension SymbolIdentifier
     /// Creates a symbol identifier from the given language prefix and
     /// mangled suffix. This initializer does not validate the suffix.
     @inlinable public 
-    init(_ language:Language, ascii suffix:some StringProtocol)
+    init(_ language:Unicode.Scalar, ascii suffix:some StringProtocol)
     {
-        self.init(rawValue: "\(language.rawValue)\(suffix)")
+        self.init(unchecked: "\(language)\(suffix)")
     }
     /// Creates a symbol identifier from the given language prefix and
     /// mangled suffix, returning nil if the suffix contains characters
@@ -27,7 +39,7 @@ extension SymbolIdentifier
     ///
     /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, and `@`.
     @inlinable public 
-    init?(_ language:Language, _ suffix:some StringProtocol)
+    init?(_ language:Unicode.Scalar, _ suffix:some StringProtocol)
     {
         for ascii:UInt8 in suffix.utf8
         {
@@ -44,9 +56,10 @@ extension SymbolIdentifier
     }
     
     @inlinable public 
-    var language:Language?
+    var language:Unicode.Scalar
     {
-        self.rawValue.unicodeScalars.first.flatMap(Language.init(rawValue:))
+        //  Should not be possible to generate an empty symbol identifier.
+        self.rawValue.unicodeScalars.first!
     }
 }
 extension SymbolIdentifier:Equatable

@@ -1,13 +1,4 @@
-extension SymbolIdentifier
-{
-    @frozen public 
-    enum Language:Unicode.Scalar, Hashable, Sendable 
-    {
-        case c      = "c"
-        case swift  = "s"
-    }
-}
-extension SymbolIdentifier.Language
+extension Unicode.Scalar
 {
     @inlinable internal
     init?(_ string:Substring)
@@ -15,7 +6,7 @@ extension SymbolIdentifier.Language
         if  let rawValue:Unicode.Scalar = string.unicodeScalars.first,
                 string.unicodeScalars.count == 1
         {
-            self.init(rawValue: rawValue)
+            self = rawValue
         }
         else
         {
