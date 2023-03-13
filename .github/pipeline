@@ -1,0 +1,5 @@
+swift --version &&
+swift build -c release &&
+swift run -c release DeclarationsTests &&
+swift run -c release SymbolResolutionTests &&
+swift run -c release SymbolGraphsTests

@@ -10,7 +10,7 @@ struct DeclarationFragment<Symbol, Color>:Equatable, Hashable
     let color:Color
 
     @inlinable public
-    init(_ spelling:String, symbol:Symbol?, color:Color)
+    init(_ spelling:String, symbol:Symbol? = nil, color:Color)
     {
         self.spelling = spelling
         self.symbol = symbol
@@ -31,8 +31,21 @@ extension DeclarationFragment:CustomStringConvertible where Color == Declaration
 extension DeclarationFragment
 {
     @inlinable public
+    func with<Symbol>(symbol:Symbol?) -> DeclarationFragment<Symbol, Color>
+    {
+        .init(self.spelling, symbol: symbol, color: self.color)
+    }
+    @inlinable public
+    func with<Color>(color:Color) -> DeclarationFragment<Symbol, Color>
+    {
+        .init(self.spelling, symbol: self.symbol, color: color)
+    }
+}
+extension DeclarationFragment
+{
+    @inlinable public
     func map<T>(_ transform:(Symbol) throws -> T) rethrows -> DeclarationFragment<T, Color>
     {
-        .init(self.spelling, symbol: try self.symbol.map(transform), color: self.color)
+        self.with(symbol: try self.symbol.map(transform))
     }
 }
