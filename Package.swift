@@ -66,6 +66,14 @@ let package:Package = .init(
                 .product(name: "SystemPackage", package: "swift-system"),
             ]),
         
+        .executableTarget(name: "DeclarationsTests",
+            dependencies:
+            [
+                .target(name: "Declarations"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/Declarations"),
+        
         .executableTarget(name: "SymbolResolutionTests",
             dependencies:
             [

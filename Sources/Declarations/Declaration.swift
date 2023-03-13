@@ -13,6 +13,36 @@ struct Declaration<Symbol>:Hashable, Equatable where Symbol:Hashable
 extension Declaration:Sendable where Symbol:Sendable
 {
 }
+
+extension Declaration
+{
+    @inlinable public
+    var identifiers:Identifiers { .init(self) }
+
+    @inlinable public
+    var abridged:Abridged { .init(self) }
+
+    @inlinable public
+    var expanded:Expanded { .init(self) }
+}
+extension Declaration:RandomAccessCollection
+{
+    @inlinable public
+    var startIndex:Int
+    {
+        self.fragments.startIndex
+    }
+    @inlinable public
+    var endIndex:Int
+    {
+        self.fragments.endIndex
+    }
+    @inlinable public
+    subscript(index:Int) -> DeclarationFragment<Symbol, DeclarationOverlay>
+    {
+        self.fragments[index]
+    }
+}
 extension Declaration
 {
     @inlinable public
@@ -48,38 +78,29 @@ extension Declaration
                         elision = nil
                     }
 
-                    self.append(fragment, with: .init(
+                    self.fragments.append(fragment.with(color: .init(
                         classification: fragment.color,
-                        elision: elision))
+                        elision: elision)))
                     
                     continue matching
                 }
                 else
                 {
-                    self.append(fragment, with: .init(
+                    self.fragments.append(fragment.with(color: .init(
                         classification: fragment.color,
-                        elision: .abridged))
+                        elision: .abridged)))
                 }
             }
 
             //  Ran out of fragments.
-            self.append(current, with: .init(classification: current.color,
-                elision: .expanded))
+            self.fragments.append(current.with(color: .init(classification: current.color,
+                elision: .expanded)))
         }
         while   let fragment:DeclarationFragment<Symbol, DeclarationFragmentClass?> =
                     expanded.next()
         {
-            self.append(fragment, with: .init(classification: fragment.color,
-                elision: .abridged))
+            self.fragments.append(fragment.with(color: .init(classification: fragment.color,
+                elision: .abridged)))
         }
-    }
-
-    @inlinable internal mutating
-    func append(_ fragment:DeclarationFragment<Symbol, some Hashable>,
-        with overlay:DeclarationOverlay)
-    {
-        self.fragments.append(.init(fragment.spelling,
-            symbol: fragment.symbol,
-            color: overlay))
     }
 }
