@@ -15,8 +15,7 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        //.package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.2")),
-        .package(path: "../swift-json"),
+        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.3")),
 
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
         .package(url: "https://github.com/kelvin13/swift-hash", .upToNextMinor(from: "0.5.0")),
