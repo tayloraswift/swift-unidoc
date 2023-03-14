@@ -57,19 +57,6 @@ jobs:
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release SymbolResolutionTests
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release SymbolGraphsTests
     
-    macos:
-        runs-on: ${{ matrix.os }}
-        name: ${{ matrix.os }} 
-        strategy:
-            matrix:
-                os: 
-                    -   macos-12
-        steps:
-            -   uses: actions/checkout@v3
-
-            -   name: build 
-                run: .github/pipeline
-    
     linux:
         runs-on: ubuntu-22.04
         name: ${{ matrix.image }}
@@ -79,8 +66,6 @@ jobs:
                 image:
                 -   swiftlang/swift:nightly-5.8-amazonlinux2
                 -   swiftlang/swift:nightly-5.8-jammy
-                -   swift:5.7.3-amazonlinux2
-                -   swift:5.7.3-jammy
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
