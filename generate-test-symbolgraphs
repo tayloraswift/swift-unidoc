@@ -2,7 +2,7 @@
 
 swift build --package-path TestModules
 
-for TARGET in $(basename -a -s .build TestModules/.build/debug/*.build)
+for TARGET in Swift $(basename -a -s .build TestModules/.build/debug/*.build)
 do
     swift symbolgraph-extract -I TestModules/.build/debug \
         -target x86_64-unknown-linux-gnu \
