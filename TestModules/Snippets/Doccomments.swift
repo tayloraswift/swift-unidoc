@@ -2,7 +2,7 @@
 /// Line 2 (ending in space) 
 ///  Line 3 (prefixed with space)
 public
-enum Doccommented
+enum Doccomments
 {
     ///     Line 1 (indented)
     ///         Line 2 (indented twice)

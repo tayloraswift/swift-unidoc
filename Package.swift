@@ -3,11 +3,16 @@ import PackageDescription
 
 let package:Package = .init(
     name: "swift-unidoc",
-    products: 
+    products:
     [
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Generics", targets: ["Generics"]),
+
+        .library(name: "Packages", targets: ["Packages"]),
+        .library(name: "PackageResolution", targets: ["PackageResolution"]),
+
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
+
         .library(name: "SymbolAvailability", targets: ["SymbolAvailability"]),
         .library(name: "SymbolResolution", targets: ["SymbolResolution"]),
         .library(name: "Symbols", targets: ["Symbols"]),
@@ -23,25 +28,36 @@ let package:Package = .init(
         
         .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(from: "1.2.1")),
     ],
-    targets: 
+    targets:
     [
         .target(name: "Declarations"),
 
         .target(name: "Generics"),
 
+        .target(name: "Packages", dependencies:
+            [
+                .target(name: "SemanticVersions"),
+            ]),
+
+        .target(name: "PackageResolution", dependencies:
+            [
+                .target(name: "Packages"),
+
+                .product(name: "JSONDecoding", package: "swift-json"),
+                .product(name: "JSONEncoding", package: "swift-json"),
+            ]),
+
         .target(name: "SemanticVersions"),
 
         .target(name: "Symbols"),
 
-        .target(name: "SymbolAvailability",
-            dependencies:
+        .target(name: "SymbolAvailability", dependencies:
             [
                 .target(name: "SemanticVersions"),
                 .target(name: "Symbols"),
             ]),
 
-        .target(name: "SymbolResolution",
-            dependencies:
+        .target(name: "SymbolResolution", dependencies:
             [
                 .target(name: "Symbols"),
 
@@ -49,8 +65,7 @@ let package:Package = .init(
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
 
-        .target(name: "SymbolGraphs",
-            dependencies:
+        .target(name: "SymbolGraphs", dependencies:
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
@@ -59,30 +74,41 @@ let package:Package = .init(
                 .target(name: "SymbolResolution"),
             ]),
         
-        .target(name: "System",
-            dependencies:
+        .target(name: "System", dependencies:
             [
                 .product(name: "SystemPackage", package: "swift-system"),
             ]),
+
         
-        .executableTarget(name: "DeclarationsTests",
-            dependencies:
+        .executableTarget(name: "DeclarationsTests", dependencies:
             [
                 .target(name: "Declarations"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/Declarations"),
         
-        .executableTarget(name: "SymbolResolutionTests",
-            dependencies:
+        .executableTarget(name: "PackageResolutionTests", dependencies:
+            [
+                .target(name: "PackageResolution"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/PackageResolution"),
+        
+        .executableTarget(name: "SemanticVersionsTests", dependencies:
+            [
+                .target(name: "SemanticVersions"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/SemanticVersions"),
+        
+        .executableTarget(name: "SymbolResolutionTests", dependencies:
             [
                 .target(name: "SymbolResolution"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolResolution"),
         
-        .executableTarget(name: "SymbolGraphsTests",
-            dependencies:
+        .executableTarget(name: "SymbolGraphsTests", dependencies:
             [
                 .target(name: "SymbolGraphs"),
                 .target(name: "System"),
@@ -90,52 +116,4 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolGraphs",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
-
-
-        .target(name: "ZooAvailability",
-            path: "Zoo/Availability"),
-
-        .target(name: "ZooConstraints",
-            path: "Zoo/Constraints"),
-
-        .target(name: "ZooDeclarations",
-            path: "Zoo/Declarations"),
-
-        .target(name: "ZooDoccomments",
-            path: "Zoo/Doccomments"),
-
-        .target(name: "ZooExtensions",
-            path: "Zoo/Extensions"),
-
-        .target(name: "ZooExtensionsDeep",
-            dependencies:
-            [
-                .target(name: "ZooExtensions"),
-            ],
-            path: "Zoo/ExtensionsDeep"),
-
-        .target(name: "ZooInheritedTypePrecedence",
-            path: "Zoo/InheritedTypePrecedence"),
-
-        .target(name: "ZooInheritedTypes",
-            path: "Zoo/InheritedTypes"),
-
-        .target(name: "ZooOverloadedTypealiases",
-            path: "Zoo/OverloadedTypealiases"),
-
-        .target(name: "ZooProtocols",
-            path: "Zoo/Protocols"),
-
-        .target(name: "ZooProtocolConformers",
-            dependencies:
-            [
-                .target(name: "ZooProtocols"),
-            ], 
-            path: "Zoo/ProtocolConformers"),
-
-        .target(name: "ZooSPI",
-            path: "Zoo/SPI"),
-
-        .target(name: "ZooUnderscoredProtocols",
-            path: "Zoo/UnderscoredProtocols"),
     ])

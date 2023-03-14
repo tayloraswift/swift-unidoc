@@ -33,8 +33,43 @@ extension SemanticVersionMask
         }
     }
 }
-extension SemanticVersionMask:CustomStringConvertible 
+extension SemanticVersionMask:LosslessStringConvertible, CustomStringConvertible 
 {
+    @inlinable public
+    init?(_ string:String)
+    {
+        let components:[Substring] = string.split(separator: ".", maxSplits: 3,
+            omittingEmptySubsequences: false)
+        
+        guard components.count > 0, let major:UInt16 = .init(components[0])
+        else
+        {
+            return nil
+        }
+        guard components.count > 1
+        else
+        {
+            self = .major(major)
+            return
+        }
+        guard let minor:UInt16 = .init(components[1])
+        else
+        {
+            return nil
+        }
+        guard components.count > 2
+        else
+        {
+            self = .minor(major, minor)
+            return
+        }
+        guard components.count == 3, let patch:UInt16 = .init(components[2])
+        else
+        {
+            return nil
+        }
+        self = .patch(major, minor, patch)
+    }
     @inlinable public 
     var description:String
     {

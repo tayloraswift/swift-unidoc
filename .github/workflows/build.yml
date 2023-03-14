@@ -53,6 +53,7 @@ jobs:
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift --version
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift build -c release
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release DeclarationsTests
+                    $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release SemanticVersionsTests
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release SymbolResolutionTests
                     $SWIFT_TOOLCHAIN_DIRECTORY/usr/bin/swift run -c release SymbolGraphsTests
     
