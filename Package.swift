@@ -3,6 +3,7 @@ import PackageDescription
 
 let package:Package = .init(
     name: "swift-unidoc",
+    platforms: [.macOS(.v11)],
     products:
     [
         .library(name: "Declarations", targets: ["Declarations"]),
