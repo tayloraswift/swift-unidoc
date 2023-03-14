@@ -1,4 +1,4 @@
-import ZooExtensions
+import Extensions
 
 extension Int.OuterIntExtension
 {

@@ -13,7 +13,7 @@ enum Main:SyncTests
         {
             tests.do
             {
-                let filepath:FilePath = ".zoo/ZooProtocols.symbols.json"
+                let filepath:FilePath = "TestModules/Symbolgraphs/Protocols.symbols.json"
                 let file:[UInt8] = try filepath.read()
 
                 let json:JSON.Object = try .init(parsing: file)
@@ -33,7 +33,7 @@ enum Main:SyncTests
         {
             tests.do
             {
-                let filepath:FilePath = ".zoo/Swift.symbols.json"
+                let filepath:FilePath = "TestModules/Symbolgraphs/Swift.symbols.json"
                 let file:[UInt8] = try filepath.read()
 
                 let json:JSON.Object = try .init(parsing: file)

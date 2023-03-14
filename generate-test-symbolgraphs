@@ -1,0 +1,14 @@
+#!/bin/bash
+
+swift build --package-path TestModules
+
+for TARGET in $(basename -a -s .build TestModules/.build/debug/*.build)
+do
+    swift symbolgraph-extract -I TestModules/.build/debug \
+        -target x86_64-unknown-linux-gnu \
+        -minimum-access-level internal \
+        -output-dir TestModules/Symbolgraphs \
+        -emit-extension-block-symbols \
+        -pretty-print \
+        -module-name $TARGET
+done
