@@ -1,16 +1,9 @@
-@frozen public
-struct ModuleIdentifier:RawRepresentable, Equatable, Hashable, Sendable
+public
+protocol StringBackedIdentifier:RawRepresentable<String>
 {
-    public
-    let rawValue:String 
-
-    @inlinable public
     init(rawValue:String)
-    {
-        self.rawValue = rawValue
-    }
 }
-extension ModuleIdentifier:Comparable
+extension StringBackedIdentifier where Self:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool 
@@ -18,7 +11,7 @@ extension ModuleIdentifier:Comparable
         lhs.rawValue < rhs.rawValue
     }
 }
-extension ModuleIdentifier:ExpressibleByStringLiteral 
+extension StringBackedIdentifier where Self:ExpressibleByStringLiteral 
 {
     @inlinable public
     init(stringLiteral:String)
@@ -26,7 +19,7 @@ extension ModuleIdentifier:ExpressibleByStringLiteral
         self.init(rawValue: stringLiteral)
     }
 }
-extension ModuleIdentifier:CustomStringConvertible
+extension StringBackedIdentifier where Self:CustomStringConvertible
 {
     @inlinable public 
     var description:String 

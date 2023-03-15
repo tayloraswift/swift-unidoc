@@ -1,5 +1,6 @@
 import JSON
 import PackageResolution
+import System
 import Testing
 
 @main
@@ -51,6 +52,17 @@ enum Main:SyncTests
                         location: "https://github.com/kelvin13/swift-grammar"),
                 ]
                 tests.expect(try .init(json: json) ==? expected)
+            }
+        }
+        if  let tests:TestGroup = tests / "dogfood"
+        {
+            tests.do
+            {
+                let filepath:FilePath = "Package.resolved"
+                let file:[UInt8] = try filepath.read()
+                let json:JSON.Object = try .init(parsing: file)
+
+                let _:PackageResolution = try .init(json: json)
             }
         }
     }

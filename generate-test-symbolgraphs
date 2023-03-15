@@ -1,6 +1,7 @@
 #!/bin/bash
 
 swift build --package-path TestModules
+swift package --package-path TestModules dump-package > TestModules/Package.swift.json
 
 for TARGET in Swift $(basename -a -s .build TestModules/.build/debug/*.build)
 do
