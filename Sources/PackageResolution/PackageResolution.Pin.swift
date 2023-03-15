@@ -43,10 +43,13 @@ extension PackageResolution.Pin:JSONObjectDecodable
             case revision
             case version
         }
+
+        case type = "kind"
     }
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws 
     {
+        let _:PackageResolution.DependencyType = try json[.type].decode()
         let state:State = try json[.state].decode()
         self.init(id: try json[.id].decode(),
             requirement: state.requirement,

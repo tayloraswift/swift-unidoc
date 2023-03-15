@@ -10,6 +10,7 @@ let package:Package = .init(
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "Packages", targets: ["Packages"]),
+        .library(name: "PackageManifest", targets: ["PackageManifest"]),
         .library(name: "PackageResolution", targets: ["PackageResolution"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
@@ -21,7 +22,7 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.3")),
+        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
 
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
         .package(url: "https://github.com/kelvin13/swift-hash", .upToNextMinor(from: "0.5.0")),
@@ -38,6 +39,15 @@ let package:Package = .init(
         .target(name: "Packages", dependencies:
             [
                 .target(name: "SemanticVersions"),
+            ]),
+
+        .target(name: "PackageManifest", dependencies:
+            [
+                .target(name: "Packages"),
+                .target(name: "Symbols"),
+
+                .product(name: "JSONDecoding", package: "swift-json"),
+                .product(name: "JSONEncoding", package: "swift-json"),
             ]),
 
         .target(name: "PackageResolution", dependencies:
@@ -88,9 +98,18 @@ let package:Package = .init(
             ],
             path: "Tests/Declarations"),
         
+        .executableTarget(name: "PackageManifestTests", dependencies:
+            [
+                .target(name: "PackageManifest"),
+                .target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/PackageManifest"),
+
         .executableTarget(name: "PackageResolutionTests", dependencies:
             [
                 .target(name: "PackageResolution"),
+                .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/PackageResolution"),
