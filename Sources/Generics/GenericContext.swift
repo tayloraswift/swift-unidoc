@@ -1,14 +1,14 @@
 @frozen public
-struct GenericContext<TypeIdentifier> where TypeIdentifier:Hashable
+struct GenericContext<TypeReference> where TypeReference:Hashable
 {
     public
     var parameters:[GenericParameter]
     public
-    var constraints:[GenericConstraint<TypeIdentifier>]
+    var constraints:[GenericConstraint<TypeReference>]
 
     @inlinable public
     init(_ parameters:[GenericParameter] = [],
-        constraints:[GenericConstraint<TypeIdentifier>] = [])
+        constraints:[GenericConstraint<TypeReference>] = [])
     {
         self.parameters = parameters
         self.constraints = constraints
@@ -22,20 +22,20 @@ extension GenericContext
         self.parameters.isEmpty && self.constraints.isEmpty
     }
 }
-extension GenericContext:Equatable where TypeIdentifier:Equatable
+extension GenericContext:Equatable where TypeReference:Equatable
 {
 }
-extension GenericContext:Hashable where TypeIdentifier:Hashable
+extension GenericContext:Hashable where TypeReference:Hashable
 {
 }
-extension GenericContext:Sendable where TypeIdentifier:Sendable
+extension GenericContext:Sendable where TypeReference:Sendable
 {
 }
 extension GenericContext
 {
     @inlinable public
     func map<T>(
-        _ transform:(TypeIdentifier) throws -> T) rethrows -> GenericContext<T>
+        _ transform:(TypeReference) throws -> T) rethrows -> GenericContext<T>
     {
         .init(self.parameters, constraints: try self.constraints.map{ try $0.map(transform) })
     }

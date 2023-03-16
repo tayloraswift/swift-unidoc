@@ -12,8 +12,8 @@ extension GenericConstraint
 }
 extension GenericConstraint.Kind
 {
-    func callAsFunction(_ name:String, is type:GenericConstraint<TypeIdentifier>.TypeExpression)
-        -> GenericConstraint<TypeIdentifier>
+    func callAsFunction(_ name:String, is type:GenericConstraint<TypeReference>.TypeExpression)
+        -> GenericConstraint<TypeReference>
     {
         switch self
         {

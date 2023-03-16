@@ -40,7 +40,7 @@ extension Constraints
 extension Constraints
 {
     public
-    enum Shadowed<T, A> where T:Collection
+    enum Shadowed<T, A> where T:Equatable
     {
     }
 }
