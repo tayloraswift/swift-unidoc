@@ -38,8 +38,8 @@
     },
     {
       "identity" : "swift-json",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kelvin13/swift-json",
+      "kind" : "localSourceControl",
+      "location" : "/swift/swift-json",
       "state" : {
         "revision" : "36ef4bf1e6ae38f881ed253d5656839a046456f1",
         "version" : "0.4.5"
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kelvin13/swift-mongodb",
       "state" : {
-        "revision" : "462c665170d33299fcf16cf9b0cac2a00940e74f",
-        "version" : "0.1.10"
+        "revision" : "477f33af403b480158f4d4a4ec6fa1a548f6350c",
+        "version" : "0.1.12"
       }
     },
     {

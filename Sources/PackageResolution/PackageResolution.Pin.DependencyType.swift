@@ -1,14 +1,15 @@
 import JSONDecoding
 import JSONEncoding
 
-extension PackageResolution
+extension PackageResolution.Pin
 {
     @frozen public
     enum DependencyType:String, Hashable, Equatable, Sendable
     {
         case remoteSourceControl
+        case localSourceControl
     }
 }
-extension PackageResolution.DependencyType:JSONDecodable, JSONEncodable
+extension PackageResolution.Pin.DependencyType:JSONDecodable, JSONEncodable
 {
 }
