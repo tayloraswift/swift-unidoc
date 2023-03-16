@@ -1,5 +1,5 @@
 @frozen public
-struct GenericConstraint<TypeIdentifier> where TypeIdentifier:Hashable
+struct GenericConstraint<TypeReference> where TypeReference:Hashable
 {
     public
     let name:String
@@ -13,20 +13,20 @@ struct GenericConstraint<TypeIdentifier> where TypeIdentifier:Hashable
         self.is = type
     }
 }
-extension GenericConstraint:Equatable where TypeIdentifier:Equatable
+extension GenericConstraint:Equatable where TypeReference:Equatable
 {
 }
-extension GenericConstraint:Hashable where TypeIdentifier:Hashable
+extension GenericConstraint:Hashable where TypeReference:Hashable
 {
 }
-extension GenericConstraint:Sendable where TypeIdentifier:Sendable
+extension GenericConstraint:Sendable where TypeReference:Sendable
 {
 }
 extension GenericConstraint
 {
     @inlinable public
     func map<T>(
-        _ transform:(TypeIdentifier) throws -> T) rethrows -> GenericConstraint<T>
+        _ transform:(TypeReference) throws -> T) rethrows -> GenericConstraint<T>
     {
         .init(self.name, is: try self.is.map(transform))
     }
