@@ -22,11 +22,12 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
+        //.package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
+        .package(url: "file:///swift/swift-json", .upToNextMinor(from: "0.4.5")),
+        //.package(path: "file:///swift/swift-json"),
 
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
-        .package(url: "https://github.com/kelvin13/swift-hash", .upToNextMinor(from: "0.5.0")),
-        .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(from: "0.1.10")),
+        .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(from: "0.1.12")),
         
         .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(from: "1.2.1")),
     ],
@@ -43,8 +44,13 @@ let package:Package = .init(
 
         .target(name: "PackageManifest", dependencies:
             [
-                .target(name: "Packages"),
+                .target(name: "PackageMetadata"),
                 .target(name: "Symbols"),
+            ]),
+
+        .target(name: "PackageMetadata", dependencies:
+            [
+                .target(name: "Packages"),
 
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -52,10 +58,7 @@ let package:Package = .init(
 
         .target(name: "PackageResolution", dependencies:
             [
-                .target(name: "Packages"),
-
-                .product(name: "JSONDecoding", package: "swift-json"),
-                .product(name: "JSONEncoding", package: "swift-json"),
+                .target(name: "PackageMetadata"),
             ]),
 
         .target(name: "SemanticVersions"),

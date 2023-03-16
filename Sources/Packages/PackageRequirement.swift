@@ -1,8 +1,9 @@
 import SemanticVersions
 
-public 
+@frozen public
 enum PackageRequirement:Hashable, Equatable, Sendable
 {
-    case version(SemanticVersion)
-    case branch(String)
+    case range(Range<SemanticVersion>)
+    case reference(GitReference)
+    case revision(GitRevision)
 }

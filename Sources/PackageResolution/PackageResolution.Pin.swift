@@ -9,20 +9,20 @@ extension PackageResolution
         public 
         let id:PackageIdentifier
         public
-        let requirement:PackageRequirement
+        let reference:GitReference
         public 
-        let revision:String
-        public 
-        let location:String?
+        let revision:GitRevision
+        public
+        let location:PackageRepository
 
         @inlinable public 
         init(id:PackageIdentifier,
-            requirement:PackageRequirement,
-            revision:String,
-            location:String? = nil)
+            reference:GitReference,
+            revision:GitRevision,
+            location:PackageRepository)
         {
             self.id = id 
-            self.requirement = requirement
+            self.reference = reference
             self.revision = revision 
             self.location = location 
         }
@@ -49,11 +49,21 @@ extension PackageResolution.Pin:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws 
     {
-        let _:PackageResolution.DependencyType = try json[.type].decode()
         let state:State = try json[.state].decode()
+
+        let location:PackageRepository
+        switch try json[.type].decode(to: DependencyType.self)
+        {
+        case .localSourceControl:
+            location = .local(file: try json[.location].decode())
+        
+        case .remoteSourceControl:
+            location = .remote(url: try json[.location].decode())
+        }
+
         self.init(id: try json[.id].decode(),
-            requirement: state.requirement,
+            reference: state.reference,
             revision: state.revision,
-            location: try json[.location]?.decode())
+            location: location)
     }
 }

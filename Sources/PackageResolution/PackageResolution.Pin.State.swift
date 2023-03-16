@@ -1,16 +1,18 @@
 import JSONDecoding
+import PackageMetadata
+import SemanticVersions
 
 extension PackageResolution.Pin
 {
     struct State
     {
-        let requirement:PackageRequirement
-        let revision:String
+        let reference:GitReference
+        let revision:GitRevision
 
         private
-        init(requirement:PackageRequirement, revision:String)
+        init(reference:GitReference, revision:GitRevision)
         {
-            self.requirement = requirement
+            self.reference = reference
             self.revision = revision
         }
     }
@@ -25,15 +27,17 @@ extension PackageResolution.Pin.State:JSONObjectDecodable
     }
     init(json:JSON.ObjectDecoder<CodingKeys>) throws 
     {
-        let requirement:PackageRequirement
-        if  let version:Version = try json[.version]?.decode()
+        let reference:GitReference
+        if  let version:SemanticVersion = try json[.version]?.decode(
+                as: JSON.StringRepresentation<SemanticVersion>.self,
+                with: \.value)
         {
-            requirement = .version(version.semantic)
+            reference = .version(version)
         }
         else 
         {
-            requirement = .branch(try json[.branch].decode())
+            reference = .branch(try json[.branch].decode())
         }
-        self.init(requirement: requirement, revision: try json[.revision].decode())
+        self.init(reference: reference, revision: try json[.revision].decode())
     }
 }

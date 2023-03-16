@@ -1,47 +1,5 @@
 import JSONDecoding
-
-extension PackageManifest
-{
-    @frozen public
-    struct Root:Hashable, Equatable, Sendable
-    {
-        /// The absolute path to the package root, without the `file://` prefix.
-        public
-        let path:String
-
-        @inlinable public
-        init(_ path:String)
-        {
-            self.path = path
-        }
-    }
-}
-extension PackageManifest.Root:ExpressibleByStringLiteral
-{
-    @inlinable public
-    init(stringLiteral:String)
-    {
-        self.init(stringLiteral)
-    }
-}
-extension PackageManifest.Root:JSONObjectDecodable
-{
-    public
-    enum CodingKeys:String
-    {
-        case root
-    }
-    public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
-    {
-        self.init(try json[.root].decode(as: JSON.Array.self)
-        {
-            try $0.shape.expect(count: 1)
-            return try $0[0].decode()
-        })
-    }
-}
-
+import PackageMetadata
 
 public
 struct PackageManifest:Identifiable, Equatable, Sendable
@@ -49,15 +7,21 @@ struct PackageManifest:Identifiable, Equatable, Sendable
     public
     let id:PackageIdentifier
     public
-    let root:Root
+    let root:PackageRoot
+    public
+    let dependencies:[Dependency]
     public
     let products:[Product]
 
     @inlinable public
-    init(id:PackageIdentifier, root:Root, products:[Product])
+    init(id:PackageIdentifier,
+        root:PackageRoot,
+        dependencies:[Dependency] = [],
+        products:[Product] = [])
     {
         self.id = id
         self.root = root
+        self.dependencies = dependencies
         self.products = products
     }
 }
@@ -66,8 +30,10 @@ extension PackageManifest:JSONObjectDecodable
     public
     enum CodingKeys:String
     {
+        case dependencies
         case id = "name"
         case products
+
         case root = "packageKind"
         enum Root:String
         {
@@ -78,7 +44,12 @@ extension PackageManifest:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(id: try json[.id].decode(),
-            root: try json[.root].decode(),
+            root: try json[.root].decode(as: JSON.ObjectDecoder<CodingKeys.Root>.self)
+            {
+                try $0[.root].decode(as: JSON.SingleElementRepresentation<PackageRoot>.self,
+                    with: \.value)
+            },
+            dependencies: try json[.dependencies].decode(),
             products: try json[.products].decode())
     }
 }

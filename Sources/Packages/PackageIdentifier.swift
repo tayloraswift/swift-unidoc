@@ -1,13 +1,13 @@
 @frozen public 
-struct PackageIdentifier:RawRepresentable, Hashable, Equatable, Sendable
+struct PackageIdentifier:Hashable, Equatable, Sendable
 {
     public
-    let rawValue:String
+    let canonical:String
 
     @inlinable public
-    init(rawValue:String)
+    init(canonical:String)
     {
-        self.rawValue = rawValue
+        self.canonical = canonical
     }
 }
 extension PackageIdentifier
@@ -15,12 +15,12 @@ extension PackageIdentifier
     @inlinable public static
     var corelibs:Self
     {
-        .init(rawValue: "corelibs")
+        .init(canonical: "corelibs")
     }
     @inlinable public static
     var swift:Self
     {
-        .init(rawValue: "swift")
+        .init(canonical: "swift")
     }
 }
 extension PackageIdentifier:LosslessStringConvertible
@@ -41,13 +41,13 @@ extension PackageIdentifier:LosslessStringConvertible
             self = .corelibs
         
         case let name:
-            self.init(rawValue: name)
+            self.init(canonical: name)
         }
     }
     @inlinable public 
     var description:String 
     {
-        self.rawValue
+        self.canonical
     }
 }
 extension PackageIdentifier:ExpressibleByStringLiteral
@@ -70,7 +70,7 @@ extension PackageIdentifier:Comparable
         case (.swift, _):
             return true
         case (let lhs, let rhs):
-            return lhs.rawValue < rhs.rawValue
+            return lhs.canonical < rhs.canonical
         }
     }
 }
