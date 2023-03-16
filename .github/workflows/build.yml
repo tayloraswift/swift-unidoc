@@ -24,7 +24,7 @@ jobs:
                 run: |
                     docker run -t --rm \
                         --name swift-environment \
-                        -v $PWD:/swift-unidoc \
+                        -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         ${{ matrix.image }} \
                         /bin/bash $(echo .github/pipeline)
