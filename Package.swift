@@ -22,9 +22,7 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        //.package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
-        .package(url: "file:///swift/swift-json", .upToNextMinor(from: "0.4.5")),
-        //.package(path: "file:///swift/swift-json"),
+        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
 
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
         .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(from: "0.1.12")),
@@ -40,12 +38,12 @@ let package:Package = .init(
         .target(name: "Packages", dependencies:
             [
                 .target(name: "SemanticVersions"),
+                .target(name: "Symbols"),
             ]),
 
         .target(name: "PackageManifest", dependencies:
             [
                 .target(name: "PackageMetadata"),
-                .target(name: "Symbols"),
             ]),
 
         .target(name: "PackageMetadata", dependencies:

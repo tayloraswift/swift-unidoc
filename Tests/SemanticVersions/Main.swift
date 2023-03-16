@@ -9,7 +9,7 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "version-parsing" / "valid"
         {
-            tests.expect(SemanticVersion.init("0.1.2") ==? .init(0, 1, 2))
+            tests.expect(SemanticVersion.init("0.1.2") ==? .v(0, 1, 2))
         }
         if  let tests:TestGroup = tests / "version-parsing" / "invalid"
         {

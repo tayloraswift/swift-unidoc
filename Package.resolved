@@ -38,8 +38,8 @@
     },
     {
       "identity" : "swift-json",
-      "kind" : "localSourceControl",
-      "location" : "/swift/swift-json",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kelvin13/swift-json",
       "state" : {
         "revision" : "36ef4bf1e6ae38f881ed253d5656839a046456f1",
         "version" : "0.4.5"

@@ -1,15 +1,6 @@
 import JSONDecoding
 
-extension PackageManifest
-{
-    @frozen public
-    enum Dependency:Equatable, Sendable
-    {
-        case filesystem(Filesystem)
-        case resolvable(Resolvable)
-    }
-}
-extension PackageManifest.Dependency:JSONObjectDecodable
+extension PackageDependency:JSONObjectDecodable
 {
     public
     enum CodingKeys:String
