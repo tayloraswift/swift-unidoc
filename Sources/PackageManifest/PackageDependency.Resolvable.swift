@@ -1,28 +1,7 @@
 import JSONDecoding
 import SemanticVersions
 
-extension PackageManifest.Dependency
-{
-    @frozen public
-    struct Resolvable:Equatable, Sendable
-    {
-        public
-        let id:PackageIdentifier
-        public
-        let requirement:PackageRequirement
-        public
-        let location:PackageRepository
-
-        @inlinable public
-        init(id:PackageIdentifier, requirement:PackageRequirement, location:PackageRepository)
-        {
-            self.id = id
-            self.requirement = requirement
-            self.location = location
-        }
-    }
-}
-extension PackageManifest.Dependency.Resolvable:JSONObjectDecodable
+extension PackageDependency.Resolvable:JSONObjectDecodable
 {
     public
     enum CodingKeys:String

@@ -20,7 +20,7 @@ enum Main:SyncTests
                 do
                 {
                     let symbols:SymbolGraph = try .init(merging: [json])
-                    tests.expect(symbols.format ==? .init(0, 6, 0))
+                    tests.expect(symbols.format ==? .v(0, 6, 0))
                 }
                 catch let error
                 {

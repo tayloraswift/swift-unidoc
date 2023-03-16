@@ -1,5 +1,5 @@
 @frozen public 
-struct SemanticVersion:Sendable 
+struct SemanticVersion:Equatable, Hashable, Sendable 
 {
     public 
     var major:UInt16 
@@ -8,12 +8,21 @@ struct SemanticVersion:Sendable
     public 
     var patch:UInt16 
 
-    @inlinable public 
-    init(_ major:UInt16, _ minor:UInt16, _ patch:UInt16)
+    @inlinable internal
+    init(major:UInt16, minor:UInt16, patch:UInt16)
     {
         self.major = major 
         self.minor = minor 
         self.patch = patch 
+    }
+}
+extension SemanticVersion
+{
+    /// Creates a semantic version with the given components.
+    @inlinable public static
+    func v(_ major:UInt16, _ minor:UInt16, _ patch:UInt16) -> Self
+    {
+        self.init(major: major, minor: minor, patch: patch)
     }
 }
 extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
@@ -28,7 +37,7 @@ extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
             let minor:UInt16 = .init(components[1]),
             let patch:UInt16 = .init(components[2])
         {
-            self.init(major, minor, patch)
+            self.init(major: major, minor: minor, patch: patch)
         }
         else
         {
@@ -42,7 +51,7 @@ extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
         "\(self.major).\(self.minor).\(self.patch)"
     }
 }
-extension SemanticVersion:Hashable, Comparable
+extension SemanticVersion:Comparable
 {
     @inlinable public static 
     func < (lhs:Self, rhs:Self) -> Bool 

@@ -9,20 +9,28 @@ struct PackageManifest:Identifiable, Equatable, Sendable
     public
     let root:PackageRoot
     public
-    let dependencies:[Dependency]
+    let requirements:[PlatformRequirement]
+    public
+    let dependencies:[PackageDependency]
     public
     let products:[Product]
+    public
+    let targets:[Target]
 
     @inlinable public
     init(id:PackageIdentifier,
         root:PackageRoot,
-        dependencies:[Dependency] = [],
-        products:[Product] = [])
+        requirements:[PlatformRequirement] = [],
+        dependencies:[PackageDependency] = [],
+        products:[Product] = [],
+        targets:[Target] = [])
     {
         self.id = id
         self.root = root
+        self.requirements = requirements
         self.dependencies = dependencies
         self.products = products
+        self.targets = targets
     }
 }
 extension PackageManifest:JSONObjectDecodable
@@ -39,6 +47,9 @@ extension PackageManifest:JSONObjectDecodable
         {
             case root
         }
+
+        case requirements = "platforms"
+        case targets
     }
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
@@ -49,7 +60,9 @@ extension PackageManifest:JSONObjectDecodable
                 try $0[.root].decode(as: JSON.SingleElementRepresentation<PackageRoot>.self,
                     with: \.value)
             },
+            requirements: try json[.requirements].decode(),
             dependencies: try json[.dependencies].decode(),
-            products: try json[.products].decode())
+            products: try json[.products].decode(),
+            targets: try json[.targets].decode())
     }
 }

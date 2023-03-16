@@ -1,3 +1,5 @@
+import Symbols
+
 @frozen public
 struct ProductIdentifier:StringBackedIdentifier, RawRepresentable, Equatable, Hashable, Sendable
 {

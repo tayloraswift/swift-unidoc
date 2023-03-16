@@ -1,5 +1,5 @@
 @frozen public 
-enum SemanticVersionMask:Hashable, Sendable
+enum SemanticVersionMask:Equatable, Hashable, Sendable
 {
     case major(UInt16)
     case minor(UInt16, UInt16)

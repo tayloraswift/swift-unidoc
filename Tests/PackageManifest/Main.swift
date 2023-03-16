@@ -59,6 +59,10 @@ enum Main:SyncTests
                     let json:JSON.Object = try .init(parsing: json)
                     let expected:PackageManifest = .init(id: "swift-unidoc",
                         root: "/swift/swift-unidoc",
+                        requirements:
+                        [
+                            .init(id: .macOS, min: .minor(11, 0)),
+                        ],
                         dependencies:
                         [
                             .filesystem(.init(id: "swift-json",
@@ -202,7 +206,7 @@ enum Main:SyncTests
                                     url: "https://github.com/kelvin13/swift-json"))),
                             
                             .resolvable(.init(id: "swift-grammar",
-                                requirement: .range(.init(0, 3, 1) ..< .init(0, 4, 0)),
+                                requirement: .range(.v(0, 3, 1) ..< .v(0, 4, 0)),
                                 location: .remote(
                                     url: "https://github.com/kelvin13/swift-grammar"))),
                             
@@ -213,14 +217,131 @@ enum Main:SyncTests
                                     url: "https://github.com/kelvin13/swift-hash"))),
                             
                             .resolvable(.init(id: "swift-mongodb",
-                                requirement: .range(.init(0, 4, 5) ..< .init(0, 5, 0)),
+                                requirement: .range(.v(0, 4, 5) ..< .v(0, 5, 0)),
                                 location: .local(
                                     file: "/swift/swift-mongodb"))),
                             
                             .resolvable(.init(id: "swift-system",
-                                requirement: .reference(.version(.init(0, 4, 5))),
+                                requirement: .reference(.version(.v(0, 4, 5))),
                                 location: .remote(
                                     url: "https://github.com/apple/swift-system"))),
+                        ])
+                    tests.expect(try .init(json: json) ==? expected)
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "targets"
+        {
+            if  let tests:TestGroup = tests / "target-dependencies"
+            {
+                let json:String =
+                """
+                {
+                  "dependencies" : [
+                    {
+                      "target" : [
+                        "SemanticVersions",
+                        {
+                          "platformNames" : [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "target" : [
+                        "Symbols",
+                        null
+                      ]
+                    }
+                  ],
+                  "exclude" : [
+                    
+                  ],
+                  "name" : "SymbolAvailability",
+                  "resources" : [
+                    
+                  ],
+                  "settings" : [
+                    
+                  ],
+                  "type" : "regular"
+                }
+                """
+                tests.do
+                {
+                    let json:JSON.Object = try .init(parsing: json)
+                    let expected:PackageManifest.Target = .init(id: "SymbolAvailability",
+                        dependencies:
+                        [
+                            .target(.init(id: "SemanticVersions", platforms: [.linux])),
+                            .target(.init(id: "Symbols")),
+                        ])
+                    tests.expect(try .init(json: json) ==? expected)
+                }
+            }
+            if  let tests:TestGroup = tests / "product-dependencies"
+            {
+                let json:String =
+                """
+                {
+                  "dependencies" : [
+                    {
+                      "target" : [
+                        "Symbols",
+                        null
+                      ]
+                    },
+                    {
+                      "product" : [
+                        "JSONDecoding",
+                        "swift-json",
+                        null,
+                        null
+                      ]
+                    },
+                    {
+                      "product" : [
+                        "JSONEncoding",
+                        "swift-json",
+                        {
+                          "_Foo" : "_Bar"
+                        },
+                        {
+                          "platformNames" : [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "exclude" : [
+                
+                  ],
+                  "name" : "SymbolResolution",
+                  "resources" : [
+                
+                  ],
+                  "settings" : [
+                
+                  ],
+                  "type" : "regular"
+                }
+                """
+                tests.do
+                {
+                    let json:JSON.Object = try .init(parsing: json)
+                    let expected:PackageManifest.Target = .init(id: "SymbolResolution",
+                        dependencies:
+                        [
+                            .target(.init(id: "Symbols")),
+
+                            .product(.init(id: "JSONDecoding",
+                                package: "swift-json")),
+                                
+                            .product(.init(id: "JSONEncoding",
+                                package: "swift-json",
+                                platforms: [.linux])),
                         ])
                     tests.expect(try .init(json: json) ==? expected)
                 }
