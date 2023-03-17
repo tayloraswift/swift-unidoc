@@ -1,19 +1,6 @@
 import JSONDecoding
 
-extension PackageManifest
-{
-    @frozen public
-    enum ProductType:Hashable, Equatable, Sendable
-    {
-        case executable
-        case library(LibraryType)
-        case macro
-        case plugin
-        case snippet
-        case test
-    }
-}
-extension PackageManifest.ProductType:JSONObjectDecodable
+extension ProductType:JSONObjectDecodable
 {
     public
     enum CodingKeys:String

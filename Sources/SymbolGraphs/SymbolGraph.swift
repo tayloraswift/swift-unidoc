@@ -1,15 +1,14 @@
-import SemanticVersions
 import JSONDecoding
 
-public
+@frozen public
 struct SymbolGraph:Sendable
 {
     public
-    let format:SemanticVersion
+    let metadata:Metadata
 
     public
-    init(format:SemanticVersion)
+    init(metadata:Metadata)
     {
-        self.format = format
+        self.metadata = metadata
     }
 }

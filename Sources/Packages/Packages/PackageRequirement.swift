@@ -1,5 +1,3 @@
-import SemanticVersions
-
 @frozen public
 enum PackageRequirement:Hashable, Equatable, Sendable
 {

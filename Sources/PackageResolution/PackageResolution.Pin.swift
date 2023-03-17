@@ -1,5 +1,4 @@
 import JSONDecoding
-import SemanticVersions
 
 extension PackageResolution
 {

@@ -1,10 +1,15 @@
 import JSONDecoding
 
+@frozen public
 struct SymbolNamespace:Equatable, Sendable
 {
+    public
     let metadata:Metadata
+    public
     let culture:ModuleIdentifier
+    public
     let symbols:[SymbolDescription]
+    public
     let relationships:[SymbolRelationship]
 
     init(metadata:Metadata,
@@ -20,6 +25,7 @@ struct SymbolNamespace:Equatable, Sendable
 }
 extension SymbolNamespace:JSONObjectDecodable
 {
+    public
     enum CodingKeys:String
     {
         case metadata
@@ -34,6 +40,7 @@ extension SymbolNamespace:JSONObjectDecodable
         case relationships
     }
 
+    public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(

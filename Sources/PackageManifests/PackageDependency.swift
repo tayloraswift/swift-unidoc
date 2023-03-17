@@ -1,5 +1,11 @@
 import JSONDecoding
 
+@frozen public
+enum PackageDependency:Equatable, Sendable
+{
+    case filesystem(Filesystem)
+    case resolvable(Resolvable)
+}
 extension PackageDependency:JSONObjectDecodable
 {
     public

@@ -2,18 +2,22 @@ import JSONDecoding
 
 extension SymbolDescription
 {
+    @frozen public
     struct GenericContext:Equatable, Sendable
     {
         /// Constraints directly specified by the relevant symbol.
+        public
         var constraints:[GenericConstraint<SymbolIdentifier>]
         /// Constraints inherited by the relevant symbol from its
         /// enclosing scope. These can be thought of as ‘extension’
         /// constraints, and can be used to group members by
         /// generic conditions.
+        public
         var conditions:[GenericConstraint<SymbolIdentifier>]
         /// All of the relevant symbol’s type parameters, including
         /// type parameters inherited from the enclosing scope, and
         /// type parameters shadowed by other type parameters.
+        public
         var parameters:[GenericParameter]
 
         private

@@ -45,6 +45,6 @@ extension PackageManifest.Target:JSONObjectDecodable
         self.init(id: try json[.id].decode(),
             dependencies: try json[.dependencies].decode(),
             path: try json[.path]?.decode(),
-            type: try json[.type].decode())
+            type: try json[.type].decode(as: Keyword.self, with: \.type))
     }
 }
