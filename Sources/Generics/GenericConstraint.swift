@@ -1,5 +1,5 @@
 @frozen public
-struct GenericConstraint<TypeReference> where TypeReference:Hashable
+struct GenericConstraint<TypeReference>:Equatable, Hashable where TypeReference:Hashable
 {
     public
     let name:String
@@ -12,12 +12,6 @@ struct GenericConstraint<TypeReference> where TypeReference:Hashable
         self.name = name
         self.is = type
     }
-}
-extension GenericConstraint:Equatable where TypeReference:Equatable
-{
-}
-extension GenericConstraint:Hashable where TypeReference:Hashable
-{
 }
 extension GenericConstraint:Sendable where TypeReference:Sendable
 {
