@@ -1,7 +1,7 @@
 import JSONDecoding
 import JSONEncoding
 
-extension SymbolNamespace.Symbol
+extension SymbolDescription
 {
     //  https://github.com/apple/swift/blob/main/lib/SymbolGraphGen/DeclarationFragmentPrinter.cpp
     enum FragmentColor:String, Sendable
@@ -23,10 +23,10 @@ extension SymbolNamespace.Symbol
         case string
     }
 }
-extension SymbolNamespace.Symbol.FragmentColor:JSONDecodable, JSONEncodable
+extension SymbolDescription.FragmentColor:JSONDecodable, JSONEncodable
 {
 }
-extension SymbolNamespace.Symbol.FragmentColor
+extension SymbolDescription.FragmentColor
 {
     var classification:DeclarationFragmentClass?
     {

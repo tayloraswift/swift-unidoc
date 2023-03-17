@@ -6,4 +6,4 @@ swift run -c release PackageManifestTests &&
 swift run -c release PackageResolutionTests &&
 swift run -c release SemanticVersionsTests &&
 swift run -c release SymbolResolutionTests &&
-swift run -c release SymbolGraphsTests
+swift run -c release SymbolNamespacesTests

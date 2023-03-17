@@ -1,66 +1,62 @@
 import JSONDecoding
 
-extension SymbolNamespace
+struct SymbolDescription:Equatable, Sendable
 {
-    struct Symbol:Equatable
+    let doccomment:Doccomment?
+    let spi:SymbolSPI?
+
+    let availability:SymbolAvailability
+    let visibility:SymbolVisibility
+    let fragments:Declaration<SymbolIdentifier>
+    let generics:GenericContext
+    
+    let location:SourceLocation<String>?
+    let phylum:SymbolPhylum
+    let path:SymbolPath
+    let usr:UnifiedSymbolResolution
+
+    private
+    init(doccomment:Doccomment?,
+        spi:SymbolSPI?,
+        availability:SymbolAvailability,
+        visibility:SymbolVisibility,
+        fragments:Declaration<SymbolIdentifier>,
+        generics:GenericContext,
+        location:SourceLocation<String>?,
+        phylum:SymbolPhylum,
+        path:SymbolPath,
+        usr:UnifiedSymbolResolution)
     {
-        let doccomment:Doccomment?
-        let spi:SymbolSPI?
+        self.doccomment = doccomment
+        self.spi = spi
 
-        let availability:SymbolAvailability
-        let visibility:SymbolVisibility
-        let fragments:Declaration<SymbolIdentifier>
-        let generics:GenericContext<SymbolIdentifier>?
-        
-        let location:SourceLocation<String>?
-        let phylum:SymbolPhylum
-        let path:SymbolPath
-        let usr:UnifiedSymbolResolution
+        self.availability = availability
+        self.visibility = visibility
+        self.fragments = fragments
+        self.generics = generics
 
-        private
-        init(doccomment:Doccomment?,
-            spi:SymbolSPI?,
-            availability:SymbolAvailability,
-            visibility:SymbolVisibility,
-            fragments:Declaration<SymbolIdentifier>,
-            generics:GenericContext<SymbolIdentifier>?,
-            location:SourceLocation<String>?,
-            phylum:SymbolPhylum,
-            path:SymbolPath,
-            usr:UnifiedSymbolResolution)
-        {
-            self.doccomment = doccomment
-            self.spi = spi
-
-            self.availability = availability
-            self.visibility = visibility
-            self.fragments = fragments
-            self.generics = generics
-
-            self.location = location
-            self.phylum = phylum
-            self.path = path
-            self.usr = usr
-        }
+        self.location = location
+        self.phylum = phylum
+        self.path = path
+        self.usr = usr
     }
 }
-extension SymbolNamespace.Symbol
+extension SymbolDescription
 {
     private
     init(doccomment:Doccomment?,
         spi:SymbolSPI?,
         availability:SymbolAvailability,
         visibility:SymbolVisibility,
-        expanded:[DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
-        abridged:[DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
-        generics:GenericContext<SymbolIdentifier>?,
+        fragments:Declaration<SymbolIdentifier>,
+        generics:GenericContext,
         location:SourceLocation<String>?,
-        kind:Kind,
+        type:SymbolDescriptionType,
         path:SymbolPath,
         usr:UnifiedSymbolResolution)
     {
         let phylum:SymbolPhylum
-        switch kind
+        switch type
         {
         case .protocol:             phylum = .protocol
         case .associatedtype:       phylum = .associatedtype
@@ -93,22 +89,35 @@ extension SymbolNamespace.Symbol
             spi: spi,
             availability: availability,
             visibility: visibility,
-            fragments: .init(expanded: expanded, abridged: abridged),
-            generics: generics.flatMap { $0.isEmpty ? nil : $0 },
+            fragments: fragments,
+            generics: generics,
             location: location,
             phylum: phylum,
             path: path,
             usr: usr)
     }
 }
-extension SymbolNamespace.Symbol:JSONObjectDecodable
+extension SymbolDescription:JSONObjectDecodable
 {
     enum CodingKeys:String
     {
         case availability
+
         case declaration = "declarationFragments"
         case doccomment = "docComment"
+
+        case `extension` = "swiftExtension"
+        enum Extension:String
+        {
+            case constraints
+        }
+
         case generics = "swiftGenerics"
+        enum Generics:String
+        {
+            case parameters
+            case constraints
+        }
 
         case names
         enum Names:String
@@ -152,12 +161,24 @@ extension SymbolNamespace.Symbol:JSONObjectDecodable
             spi: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
             availability: try json[.availability]?.decode() ?? [:],
             visibility: try json[.visibility].decode(),
-            expanded: try json[.declaration].decode(),
-            abridged: try json[.names].decode(using: CodingKeys.Names.self)
-            {
-                try $0[.subheading].decode()
-            },
-            generics: try json[.generics]?.decode(),
+            fragments: .init(
+                expanded: try json[.declaration].decode(),
+                abridged: try json[.names].decode(using: CodingKeys.Names.self)
+                {
+                    try $0[.subheading].decode()
+                }),
+            generics: .init(
+                conditions: try json[.extension]?.decode(using: CodingKeys.Extension.self)
+                {
+                    try $0[.constraints]?.decode() ?? []
+                },
+                generics: try json[.generics]?.decode(using: CodingKeys.Generics.self)
+                {
+                    (
+                        try $0[.constraints]?.decode() ?? [],
+                        try $0[.parameters]?.decode() ?? []
+                    )
+                }),
             location: try json[.location]?.decode(using: CodingKeys.Location.self)
             {
                 let file:String = try $0[.uri].decode()
@@ -168,7 +189,7 @@ extension SymbolNamespace.Symbol:JSONObjectDecodable
                         try $0[.column].decode())
                 }
             },
-            kind: try json[.kind].decode(using: CodingKeys.Kind.self)
+            type: try json[.kind].decode(using: CodingKeys.Kind.self)
             {
                 try $0[.identifier].decode()
             },

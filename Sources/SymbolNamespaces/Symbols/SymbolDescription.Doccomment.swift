@@ -1,6 +1,6 @@
 import JSONDecoding
 
-extension SymbolNamespace.Symbol
+extension SymbolDescription
 {
     struct Doccomment:Equatable, Sendable
     {
@@ -14,7 +14,7 @@ extension SymbolNamespace.Symbol
         }
     }
 }
-extension SymbolNamespace.Symbol.Doccomment:JSONObjectDecodable
+extension SymbolDescription.Doccomment:JSONObjectDecodable
 {
     enum CodingKeys:String
     {

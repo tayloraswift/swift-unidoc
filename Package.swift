@@ -69,6 +69,11 @@ let package:Package = .init(
                 .target(name: "Symbols"),
             ]),
 
+        .target(name: "SymbolNamespaces", dependencies:
+            [
+                .target(name: "SymbolGraphs"),
+            ]),
+        
         .target(name: "SymbolResolution", dependencies:
             [
                 .target(name: "Symbols"),
@@ -81,7 +86,6 @@ let package:Package = .init(
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
-                .target(name: "System"),
                 .target(name: "SymbolAvailability"),
                 .target(name: "SymbolResolution"),
             ]),
@@ -129,12 +133,12 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolResolution"),
         
-        .executableTarget(name: "SymbolGraphsTests", dependencies:
+        .executableTarget(name: "SymbolNamespacesTests", dependencies:
             [
-                .target(name: "SymbolGraphs"),
+                .target(name: "SymbolNamespaces"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphs",
+            path: "Tests/SymbolNamespaces",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
     ])
