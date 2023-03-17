@@ -1,5 +1,4 @@
-import SemanticVersions
-import SymbolGraphs
+import SymbolNamespaces
 import JSON
 
 extension SymbolGraph
@@ -31,8 +30,7 @@ extension SymbolGraph
                     namespaces.lazy.map(\.metadata.version)).sorted())
             }
         }
-
-        self.init(format: format)
+        fatalError("unimplemented")
     }
 }
 

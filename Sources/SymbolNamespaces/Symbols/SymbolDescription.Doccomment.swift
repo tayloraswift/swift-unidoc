@@ -2,11 +2,15 @@ import JSONDecoding
 
 extension SymbolDescription
 {
+    @frozen public
     struct Doccomment:Equatable, Sendable
     {
+        public
         let culture:ModuleIdentifier?
+        public
         let text:String
 
+        public
         init(culture:ModuleIdentifier?, text:String)
         {
             self.culture = culture
@@ -16,6 +20,7 @@ extension SymbolDescription
 }
 extension SymbolDescription.Doccomment:JSONObjectDecodable
 {
+    public
     enum CodingKeys:String
     {
         case culture = "module"
@@ -27,6 +32,7 @@ extension SymbolDescription.Doccomment:JSONObjectDecodable
         }
     }
 
+    public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(culture: try json[.culture]?.decode(),

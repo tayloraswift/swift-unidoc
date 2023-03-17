@@ -1,18 +1,29 @@
 import JSONDecoding
 
+@frozen public
 struct SymbolDescription:Equatable, Sendable
 {
+    public
     let doccomment:Doccomment?
+    public
     let spi:SymbolSPI?
 
+    public
     let availability:SymbolAvailability
+    public
     let visibility:SymbolVisibility
+    public
     let fragments:Declaration<SymbolIdentifier>
+    public
     let generics:GenericContext
     
+    public
     let location:SourceLocation<String>?
+    public
     let phylum:SymbolPhylum
+    public
     let path:SymbolPath
+    public
     let usr:UnifiedSymbolResolution
 
     private
@@ -99,6 +110,7 @@ extension SymbolDescription
 }
 extension SymbolDescription:JSONObjectDecodable
 {
+    public
     enum CodingKeys:String
     {
         case availability
@@ -154,6 +166,7 @@ extension SymbolDescription:JSONObjectDecodable
         case visibility = "accessLevel"
     }
 
+    public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(

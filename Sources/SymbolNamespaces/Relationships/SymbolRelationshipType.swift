@@ -1,6 +1,7 @@
 import JSONDecoding
 import JSONEncoding
 
+@frozen public
 enum SymbolRelationshipType:String, Equatable, Hashable, JSONDecodable, JSONEncodable, Sendable
 {
     case conformer              = "conformsTo"

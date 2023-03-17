@@ -1,5 +1,3 @@
-import SemanticVersions
-
 @frozen public
 struct PlatformRequirement:Identifiable, Equatable, Hashable, Sendable
 {

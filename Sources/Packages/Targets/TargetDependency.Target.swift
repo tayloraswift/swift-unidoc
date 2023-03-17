@@ -1,5 +1,3 @@
-import Symbols
-
 extension TargetDependency
 {
     @frozen public

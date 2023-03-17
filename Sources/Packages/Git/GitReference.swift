@@ -1,5 +1,3 @@
-import SemanticVersions
-
 public 
 enum GitReference:Hashable, Equatable, Sendable
 {

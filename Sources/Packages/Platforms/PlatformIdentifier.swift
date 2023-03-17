@@ -1,5 +1,3 @@
-import Symbols
-
 @frozen public
 struct PlatformIdentifier:Equatable, Hashable, Sendable
 {

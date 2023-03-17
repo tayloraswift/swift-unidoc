@@ -1,6 +1,5 @@
 import JSON
 import SymbolNamespaces
-import SymbolGraphs
 import System
 import Testing
 
@@ -18,15 +17,8 @@ enum Main:SyncTests
                 let file:[UInt8] = try filepath.read()
 
                 let json:JSON.Object = try .init(parsing: file)
-                do
-                {
-                    let symbols:SymbolGraph = try .init(merging: [json])
-                    tests.expect(symbols.format ==? .v(0, 6, 0))
-                }
-                catch let error
-                {
-                    throw error
-                }
+                let namespace:SymbolNamespace = try .init(json: json)
+                tests.expect(namespace.metadata.version ==? .v(0, 6, 0))
             }
         }
         #if !DEBUG
@@ -38,15 +30,8 @@ enum Main:SyncTests
                 let file:[UInt8] = try filepath.read()
 
                 let json:JSON.Object = try .init(parsing: file)
-                do
-                {
-                    let symbols:SymbolGraph = try .init(merging: [json])
-                    tests.expect(symbols.format ==? .v(0, 6, 0))
-                }
-                catch let error
-                {
-                    throw error
-                }
+                let namespace:SymbolNamespace = try .init(json: json)
+                tests.expect(namespace.metadata.version ==? .v(0, 6, 0))
             }
         }
         #endif

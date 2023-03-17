@@ -1,12 +1,18 @@
 import JSONDecoding
 
+@frozen public
 struct SymbolRelationship:Equatable, Hashable, Sendable
 {
+    public
     let conditions:[GenericConstraint<SymbolIdentifier>]
+    public
     let source:UnifiedSymbolResolution
+    public
     let target:UnifiedSymbolResolution
+    public
     let type:SymbolRelationshipType
     
+    public
     init(_ source:UnifiedSymbolResolution,
         is type:SymbolRelationshipType,
         of target:UnifiedSymbolResolution,
@@ -20,6 +26,7 @@ struct SymbolRelationship:Equatable, Hashable, Sendable
 }
 extension SymbolRelationship:JSONObjectDecodable
 {
+    public
     enum CodingKeys:String
     {
         case conditions = "swiftConstraints"
@@ -28,6 +35,7 @@ extension SymbolRelationship:JSONObjectDecodable
         case type = "kind"
     }
 
+    public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(try json[.source].decode(),

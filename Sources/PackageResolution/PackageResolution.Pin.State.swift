@@ -1,6 +1,5 @@
 import JSONDecoding
 import PackageMetadata
-import SemanticVersions
 
 extension PackageResolution.Pin
 {

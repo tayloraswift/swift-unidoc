@@ -3,10 +3,15 @@ import SemanticVersions
 
 extension SymbolNamespace
 {
+    public
     struct Metadata:Equatable, Sendable
     {
+        public
         let generator:String
+        public
         let version:SemanticVersion
+
+        public
         init(generator:String, version:SemanticVersion)
         {
             self.generator = generator
@@ -17,12 +22,14 @@ extension SymbolNamespace
 
 extension SymbolNamespace.Metadata:JSONObjectDecodable
 {
+    public
     enum CodingKeys:String
     {
         case formatVersion
         case generator
     }
 
+    public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(generator: try json[.generator].decode(),

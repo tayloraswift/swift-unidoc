@@ -1,5 +1,3 @@
-import SemanticVersions
-
 @frozen public
 enum SymbolGraphVersionError:Equatable, Error, Sendable
 {

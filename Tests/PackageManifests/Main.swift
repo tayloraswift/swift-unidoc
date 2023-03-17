@@ -1,5 +1,5 @@
 import JSON
-import PackageManifest
+import PackageManifests
 import System
 import Testing
 
