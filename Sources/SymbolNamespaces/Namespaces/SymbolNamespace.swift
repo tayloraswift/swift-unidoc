@@ -4,13 +4,18 @@ struct SymbolNamespace:Equatable, Sendable
 {
     let metadata:Metadata
     let culture:ModuleIdentifier
-    let symbols:[Symbol]
+    let symbols:[SymbolDescription]
+    let relationships:[SymbolRelationship]
 
-    init(metadata:Metadata, culture:ModuleIdentifier, symbols:[Symbol])
+    init(metadata:Metadata,
+        culture:ModuleIdentifier,
+        symbols:[SymbolDescription],
+        relationships:[SymbolRelationship])
     {
         self.metadata = metadata
         self.culture = culture
         self.symbols = symbols
+        self.relationships = relationships
     }
 }
 extension SymbolNamespace:JSONObjectDecodable
@@ -37,6 +42,7 @@ extension SymbolNamespace:JSONObjectDecodable
             {
                 try $0[.name].decode()
             },
-            symbols: try json[.symbols].decode())
+            symbols: try json[.symbols].decode(),
+            relationships: try json[.relationships].decode())
     }
 }

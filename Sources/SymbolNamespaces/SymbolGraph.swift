@@ -1,18 +1,6 @@
 import SemanticVersions
-import JSONDecoding
-
-public
-struct SymbolGraph:Sendable
-{
-    public
-    let format:SemanticVersion
-
-    public
-    init(format:SemanticVersion)
-    {
-        self.format = format
-    }
-}
+import SymbolGraphs
+import JSON
 
 extension SymbolGraph
 {
@@ -47,3 +35,4 @@ extension SymbolGraph
         self.init(format: format)
     }
 }
+

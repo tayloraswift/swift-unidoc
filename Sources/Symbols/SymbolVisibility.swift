@@ -1,5 +1,5 @@
 @frozen public
-enum SymbolVisibility:Hashable, Comparable
+enum SymbolVisibility:Hashable, Comparable, Sendable
 {
     case `private`
     case `fileprivate`

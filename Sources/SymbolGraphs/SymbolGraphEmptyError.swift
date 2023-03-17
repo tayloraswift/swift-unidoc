@@ -1,6 +1,7 @@
 public
 struct SymbolGraphEmptyError:Equatable, Error, Sendable
 {
+    public
     init()
     {
     }

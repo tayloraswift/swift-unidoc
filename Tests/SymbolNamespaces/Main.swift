@@ -1,4 +1,5 @@
 import JSON
+import SymbolNamespaces
 import SymbolGraphs
 import System
 import Testing
