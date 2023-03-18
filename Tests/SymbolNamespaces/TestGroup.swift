@@ -9,9 +9,7 @@ extension TestGroup
     {
         self.expect(value: namespace.symbols.first { $0.path == path })
     }
-}
-extension TestGroup
-{
+
     func load(namespace filepath:FilePath) -> SymbolNamespace?
     {
         self.do
@@ -25,13 +23,5 @@ extension TestGroup
 
             return namespace
         }
-    }
-    func loadSymbols<Key>(filepath:FilePath,
-        groups key:(SymbolDescription) throws -> Key) rethrows -> [Key: [SymbolDescription]]
-    {
-        try self.load(namespace: filepath).map
-        {
-            try .init(grouping: $0.symbols.lazy.filter { $0.visibility >= .public }, by: key)
-        } ?? [:]
     }
 }
