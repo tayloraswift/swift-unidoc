@@ -20,12 +20,12 @@ struct UnifiedScalarResolution
 extension UnifiedScalarResolution:Hashable, Equatable
 {
 }
-extension UnifiedScalarResolution:RawRepresentable
+extension UnifiedScalarResolution:LosslessStringConvertible, CustomStringConvertible
 {
     @inlinable public
-    init?(rawValue:String)
+    init?(_ description:String)
     {
-        let fragments:[Substring] = rawValue.split(separator: ":",
+        let fragments:[Substring] = description.split(separator: ":",
             omittingEmptySubsequences: true)
         
         if  fragments.count == 2,
@@ -40,22 +40,11 @@ extension UnifiedScalarResolution:RawRepresentable
         }
     }
     @inlinable public
-    var rawValue:String
-    {
-        self.id.rawValue.unicodeScalars.first.map
-        {
-            "\($0):\(self.id.rawValue.unicodeScalars.dropFirst())"
-        } ?? ""
-    }
-}
-extension UnifiedScalarResolution:CustomStringConvertible
-{
-    @inlinable public
     var description:String
     {
-        self.rawValue
+        "\(self.id.language):\(self.id.suffix)"
     }
 }
-extension UnifiedScalarResolution:JSONDecodable, JSONEncodable
+extension UnifiedScalarResolution:JSONStringDecodable, JSONStringEncodable
 {
 }

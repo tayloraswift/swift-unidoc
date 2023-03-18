@@ -15,21 +15,21 @@ enum UnifiedSymbolResolution:Hashable, Equatable, Sendable
     /// The compiler calls these extension-declarations.
     case block(String)
 }
-extension UnifiedSymbolResolution:RawRepresentable
+extension UnifiedSymbolResolution:LosslessStringConvertible, CustomStringConvertible
 {
     @inlinable public
-    init?(rawValue:String)
+    init?(_ description:String)
     {
-        if  let index:String.Index = rawValue.index(rawValue.startIndex,
+        if  let index:String.Index = description.index(description.startIndex,
                 offsetBy: 4,
-                limitedBy: rawValue.endIndex),
-            rawValue.prefix(upTo: index) == "s:e:"
+                limitedBy: description.endIndex),
+            description.prefix(upTo: index) == "s:e:"
         {
-            self = .block(.init(rawValue.suffix(from: index)))
+            self = .block(.init(description.suffix(from: index)))
             return
         }
 
-        let fragments:[Substring] = rawValue.split(separator: ":",
+        let fragments:[Substring] = description.split(separator: ":",
             omittingEmptySubsequences: true)
         
         switch fragments.count
@@ -64,29 +64,21 @@ extension UnifiedSymbolResolution:RawRepresentable
         }
     }
     @inlinable public
-    var rawValue:String
+    var description:String
     {
         switch self
         {
         case .compound(let base, self: let type):
-            return base.rawValue + "::SYNTHESIZED::" + type.rawValue
+            return base.description + "::SYNTHESIZED::" + type.description
         
         case .scalar(let base):
-            return base.rawValue
+            return base.description
         
         case .block(let name):
             return "s:e:" + name
         }
     }
 }
-extension UnifiedSymbolResolution:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        self.rawValue
-    }
-}
-extension UnifiedSymbolResolution:JSONDecodable, JSONEncodable
+extension UnifiedSymbolResolution:JSONStringDecodable, JSONStringEncodable
 {
 }

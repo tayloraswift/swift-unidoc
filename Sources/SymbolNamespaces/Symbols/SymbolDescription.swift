@@ -59,40 +59,80 @@ extension SymbolDescription
         spi:SymbolSPI?,
         availability:SymbolAvailability,
         visibility:SymbolVisibility,
-        fragments:Declaration<SymbolIdentifier>,
+        expanded:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
+        abridged:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
         generics:GenericContext,
         location:SourceLocation<String>?,
         type:SymbolDescriptionType,
         path:SymbolPath,
         usr:UnifiedSymbolResolution)
     {
+        let fragments:Declaration<SymbolIdentifier>
         let phylum:SymbolPhylum
-        switch type
+        //  Heuristic for inferring actor types
+        if  case "actor"? = expanded.first(where: { $0.color == .keyword })?.spelling
         {
-        case .protocol:             phylum = .protocol
-        case .associatedtype:       phylum = .associatedtype
-        case .enum:                 phylum = .enum
-        case .struct:               phylum = .struct
-        case .class:                phylum = .class
-        case .case:                 phylum = .case
-        case .initializer:          phylum = .initializer
-        case .deinitializer:        phylum = .deinitializer
-        case .instanceMethod:       phylum = .instanceMethod
-        case .instanceProperty:     phylum = .instanceProperty
-        case .instanceSubscript:    phylum = .instanceSubscript
-        case .typeMethod:           phylum = .typeMethod
-        case .typeProperty:         phylum = .typeProperty
-        case .typeSubscript:        phylum = .typeSubscript
+            //  SymbolGraphGen incorrectly prints the fragment as 'class' in
+            //  the abridged signature
+            fragments = .init(expanded: expanded, abridged: abridged.map
+            {
+                if  case .keyword? = $0.color,
+                    case "class" = $0.spelling
+                {
+                    return $0.spelled("actor")
+                }
+                else
+                {
+                    return $0
+                }
+            })
 
-        case .operator:             phylum = path.prefix.isEmpty ?
-            .operator : .typeOperator
-        
-        case .func:                 phylum = .func
-        case .var:                  phylum = .var
-        case .typealias:            phylum = .typealias
-    
-        case .extension:
-            fatalError("unimplemented")
+            phylum = .actor
+        }
+        else
+        {
+            fragments = .init(expanded: expanded, abridged: abridged)
+
+            switch type
+            {
+            case .associatedtype:       phylum = .associatedtype
+            case .enum:                 phylum = .enum
+            case .extension:            phylum = .extension
+            case .case:                 phylum = .case
+            case .class:                phylum = .class
+            case .deinitializer:        phylum = .deinitializer
+            case .func:                 phylum = .func
+            case .initializer:          phylum = .initializer
+            case .instanceMethod:       phylum = .instanceMethod
+            case .instanceProperty:     phylum = .instanceProperty
+            case .instanceSubscript:    phylum = .instanceSubscript
+            case .protocol:             phylum = .protocol
+            case .macro:                phylum = .macro
+            case .struct:               phylum = .struct
+            case .typealias:            phylum = .typealias
+            case .typeMethod:           phylum = .typeMethod
+            case .typeProperty:         phylum = .typeProperty
+            case .typeSubscript:        phylum = .typeSubscript
+
+            case .operator:             phylum = path.prefix.isEmpty ?
+                .operator : .typeOperator
+            
+            case .var:                  phylum = .var
+            }
+        }
+
+        //  strip empty parentheses from last path component
+        let simplified:SymbolPath
+        if  let index:String.Index = path.last.index(path.last.endIndex,
+                offsetBy: -2,
+                limitedBy: path.last.startIndex),
+            path.last[index...] == "()"
+        {
+            simplified = .init(prefix: path.prefix, last: .init(path.last[..<index]))
+        }
+        else
+        {
+            simplified = path
         }
 
         self.init(
@@ -104,7 +144,7 @@ extension SymbolDescription
             generics: generics,
             location: location,
             phylum: phylum,
-            path: path,
+            path: simplified,
             usr: usr)
     }
 }
@@ -174,12 +214,11 @@ extension SymbolDescription:JSONObjectDecodable
             spi: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
             availability: try json[.availability]?.decode() ?? [:],
             visibility: try json[.visibility].decode(),
-            fragments: .init(
-                expanded: try json[.declaration].decode(),
-                abridged: try json[.names].decode(using: CodingKeys.Names.self)
-                {
-                    try $0[.subheading].decode()
-                }),
+            expanded: try json[.declaration].decode(),
+            abridged: try json[.names].decode(using: CodingKeys.Names.self)
+            {
+                try $0[.subheading].decode()
+            },
             generics: .init(
                 conditions: try json[.extension]?.decode(using: CodingKeys.Extension.self)
                 {

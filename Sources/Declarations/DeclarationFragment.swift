@@ -31,14 +31,20 @@ extension DeclarationFragment:CustomStringConvertible where Color == Declaration
 extension DeclarationFragment
 {
     @inlinable public
-    func with<Symbol>(symbol:Symbol?) -> DeclarationFragment<Symbol, Color>
+    func with<Symbol>(symbol:__owned Symbol?) -> DeclarationFragment<Symbol, Color>
     {
         .init(self.spelling, symbol: symbol, color: self.color)
     }
     @inlinable public
-    func with<Color>(color:Color) -> DeclarationFragment<Symbol, Color>
+    func with<Color>(color:__owned Color) -> DeclarationFragment<Symbol, Color>
     {
         .init(self.spelling, symbol: self.symbol, color: color)
+    }
+
+    @inlinable public
+    func spelled(_ spelling:__owned String) -> Self
+    {
+        .init(spelling, symbol: self.symbol, color: self.color)
     }
 }
 extension DeclarationFragment
