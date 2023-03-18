@@ -10,17 +10,21 @@ struct SymbolRelationship:Equatable, Hashable, Sendable
     public
     let target:UnifiedSymbolResolution
     public
+    let origin:UnifiedScalarResolution?
+    public
     let type:SymbolRelationshipType
     
     public
     init(_ source:UnifiedSymbolResolution,
         is type:SymbolRelationshipType,
         of target:UnifiedSymbolResolution,
+        origin:UnifiedScalarResolution? = nil,
         where conditions:[GenericConstraint<SymbolIdentifier>] = [])
     {
         self.conditions = conditions
         self.source = source 
         self.target = target
+        self.origin = origin
         self.type = type
     }
 }
@@ -32,6 +36,13 @@ extension SymbolRelationship:JSONObjectDecodable
         case conditions = "swiftConstraints"
         case source
         case target
+
+        case origin = "sourceOrigin"
+        enum Origin:String
+        {
+            case identifier
+        }
+
         case type = "kind"
     }
 
@@ -41,6 +52,10 @@ extension SymbolRelationship:JSONObjectDecodable
         self.init(try json[.source].decode(),
             is: try json[.type].decode(),
             of: try json[.target].decode(),
+            origin: try json[.origin]?.decode(using: CodingKeys.Origin.self)
+            {
+                try $0[.identifier].decode()
+            },
             where: try json[.conditions]?.decode() ?? [])
     }
 }
