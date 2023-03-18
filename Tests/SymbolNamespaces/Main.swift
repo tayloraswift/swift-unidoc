@@ -3,6 +3,27 @@ import SymbolNamespaces
 import System
 import Testing
 
+extension TestGroup
+{
+    func loadSymbols<Key>(filepath:FilePath,
+        groups key:(SymbolDescription) throws -> Key) -> [Key: [SymbolDescription]]
+    {
+        self.do
+        {
+            let file:[UInt8] = try filepath.read()
+
+            let json:JSON.Object = try .init(parsing: file)
+            let namespace:SymbolNamespace = try .init(json: json)
+
+            self.expect(namespace.metadata.version ==? .v(0, 6, 0))
+
+            return try .init(
+                grouping: namespace.symbols.lazy.filter { $0.visibility >= .public },
+                by: key)
+        } ?? [:]
+    }
+}
+
 @main
 enum Main:SyncTests
 {
@@ -11,20 +32,9 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "phyla"
         {
-            let phyla:[SymbolPhylum: [SymbolDescription]] = tests.do
-            {
-                let filepath:FilePath = "TestModules/Symbolgraphs/Phyla.symbols.json"
-                let file:[UInt8] = try filepath.read()
-
-                let json:JSON.Object = try .init(parsing: file)
-                let namespace:SymbolNamespace = try .init(json: json)
-
-                tests.expect(namespace.metadata.version ==? .v(0, 6, 0))
-
-                return .init(
-                    grouping: namespace.symbols.lazy.filter { $0.visibility >= .public },
-                    by: \.phylum)
-            } ?? [:]
+            let phyla:[SymbolPhylum: [SymbolDescription]] = tests.loadSymbols(
+                filepath: "TestModules/Symbolgraphs/Phyla.symbols.json",
+                groups: \.phylum)
 
             for (phylum, path):(SymbolPhylum, SymbolPath) in
             [
@@ -123,20 +133,9 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "phyla" / "extension"
         {
-            let phyla:[SymbolPhylum: [SymbolDescription]] = tests.do
-            {
-                let filepath:FilePath = "TestModules/Symbolgraphs/Phyla@Swift.symbols.json"
-                let file:[UInt8] = try filepath.read()
-
-                let json:JSON.Object = try .init(parsing: file)
-                let namespace:SymbolNamespace = try .init(json: json)
-
-                tests.expect(namespace.metadata.version ==? .v(0, 6, 0))
-
-                return .init(
-                    grouping: namespace.symbols.lazy.filter { $0.visibility >= .public },
-                    by: \.phylum)
-            } ?? [:]
+            let phyla:[SymbolPhylum: [SymbolDescription]] = tests.loadSymbols(
+                filepath: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json",
+                groups: \.phylum)
 
             for (phylum, path):(SymbolPhylum, SymbolPath) in
             [
@@ -146,6 +145,25 @@ enum Main:SyncTests
             {
                 if  let tests:TestGroup = tests / path.last.lowercased(),
                     let symbols:[SymbolDescription] = tests.expect(value: phyla[phylum]),
+                    tests.expect(symbols.count ==? 1)
+                {
+                    tests.expect(symbols[0].path ==? path)
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "spi"
+        {
+            let symbols:[SymbolSPI?: [SymbolDescription]] = tests.loadSymbols(
+                filepath: "TestModules/Symbolgraphs/SPI.symbols.json",
+                groups: \.spi)
+            for (spi, path):(SymbolSPI?, SymbolPath) in
+            [
+                (nil,       "NoSPI"),
+                (.init(),   "SPI"),
+            ]
+            {
+                if  let tests:TestGroup = tests / path.last.lowercased(),
+                    let symbols:[SymbolDescription] = tests.expect(value: symbols[spi]),
                     tests.expect(symbols.count ==? 1)
                 {
                     tests.expect(symbols[0].path ==? path)

@@ -4,3 +4,8 @@ public
 enum SPI
 {
 }
+
+public
+enum NoSPI
+{
+}
