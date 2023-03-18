@@ -34,6 +34,25 @@ extension SymbolPath
         self.last = component
     }
 }
+extension SymbolPath:ExpressibleByStringLiteral
+{
+    /// Creates a symbol path with a single path component.
+    @inlinable public
+    init(stringLiteral:String)
+    {
+        self.init(last: stringLiteral)
+    }
+}
+extension SymbolPath
+{
+    @inlinable public static
+    func / (prefix:__owned Self, last:String) -> Self
+    {
+        var prefix:Self = prefix
+            prefix.append(last)
+        return prefix
+    }
+}
 extension SymbolPath:Comparable
 {
     @inlinable public static

@@ -13,6 +13,7 @@ enum SymbolPhylum:Hashable, Comparable, Sendable
     case  instanceMethod
     case  instanceProperty
     case  instanceSubscript
+    case  macro
     case `operator`
     case `protocol`
     case `struct`

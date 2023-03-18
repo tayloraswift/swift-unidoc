@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kelvin13/swift-grammar",
       "state" : {
-        "revision" : "69613825b2ad1d0538c59d72e548867ce7568cc2",
-        "version" : "0.3.1"
+        "revision" : "3ed94966b1fd8145c2624a5955a9f0d17663280b",
+        "version" : "0.3.2"
       }
     },
     {

@@ -26,7 +26,7 @@ let package:Package = .init(
     [
         .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
 
-        .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.1")),
+        .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.2")),
         .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(from: "0.1.12")),
         
         .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(from: "1.2.1")),

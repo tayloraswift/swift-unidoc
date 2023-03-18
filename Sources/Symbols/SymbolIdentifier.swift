@@ -55,11 +55,17 @@ extension SymbolIdentifier
         self.init(language, ascii: suffix)
     }
     
-    @inlinable public 
+    @inlinable public
     var language:Unicode.Scalar
     {
         //  Should not be possible to generate an empty symbol identifier.
         self.rawValue.unicodeScalars.first!
+    }
+    @inlinable public
+    var suffix:Substring
+    {
+        self.rawValue.suffix(from: self.rawValue.unicodeScalars.index(
+            after: self.rawValue.startIndex))
     }
 }
 extension SymbolIdentifier:Equatable
