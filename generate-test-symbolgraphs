@@ -9,6 +9,7 @@ do
         -target x86_64-unknown-linux-gnu \
         -minimum-access-level internal \
         -output-dir TestModules/Symbolgraphs \
+        -skip-inherited-docs \
         -emit-extension-block-symbols \
         -pretty-print \
         -module-name $TARGET
