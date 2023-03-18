@@ -121,6 +121,37 @@ enum Main:SyncTests
                 tests.expect(symbols[0].path ==? "Struct" / "subscript(_:)")
             }
         }
+        if  let tests:TestGroup = tests / "phyla" / "extension"
+        {
+            let phyla:[SymbolPhylum: [SymbolDescription]] = tests.do
+            {
+                let filepath:FilePath = "TestModules/Symbolgraphs/Phyla@Swift.symbols.json"
+                let file:[UInt8] = try filepath.read()
+
+                let json:JSON.Object = try .init(parsing: file)
+                let namespace:SymbolNamespace = try .init(json: json)
+
+                tests.expect(namespace.metadata.version ==? .v(0, 6, 0))
+
+                return .init(
+                    grouping: namespace.symbols.lazy.filter { $0.visibility >= .public },
+                    by: \.phylum)
+            } ?? [:]
+
+            for (phylum, path):(SymbolPhylum, SymbolPath) in
+            [
+                (.extension,    "Int"),
+                (.typealias,    "Int" / "AssociatedType"),
+            ]
+            {
+                if  let tests:TestGroup = tests / path.last.lowercased(),
+                    let symbols:[SymbolDescription] = tests.expect(value: phyla[phylum]),
+                    tests.expect(symbols.count ==? 1)
+                {
+                    tests.expect(symbols[0].path ==? path)
+                }
+            }
+        }
         if  let tests:TestGroup = tests / "protocols"
         {
             tests.do
