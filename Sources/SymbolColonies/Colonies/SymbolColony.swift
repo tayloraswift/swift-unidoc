@@ -1,7 +1,7 @@
 import JSONDecoding
 
 @frozen public
-struct SymbolNamespace:Equatable, Sendable
+struct SymbolColony:Equatable, Sendable
 {
     public
     let metadata:Metadata
@@ -23,7 +23,7 @@ struct SymbolNamespace:Equatable, Sendable
         self.relationships = relationships
     }
 }
-extension SymbolNamespace:JSONObjectDecodable
+extension SymbolColony:JSONObjectDecodable
 {
     public
     enum CodingKeys:String

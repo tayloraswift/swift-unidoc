@@ -18,7 +18,7 @@ let package:Package = .init(
         .library(name: "SymbolAvailability", targets: ["SymbolAvailability"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
-        .library(name: "SymbolNamespaces", targets: ["SymbolNamespaces"]),
+        .library(name: "SymbolColonies", targets: ["SymbolColonies"]),
         .library(name: "SymbolResolution", targets: ["SymbolResolution"]),
         .library(name: "Symbols", targets: ["Symbols"]),
     ],
@@ -68,10 +68,9 @@ let package:Package = .init(
         .target(name: "SymbolAvailability", dependencies:
             [
                 .target(name: "SemanticVersions"),
-                .target(name: "Symbols"),
             ]),
 
-        .target(name: "SymbolNamespaces", dependencies:
+        .target(name: "SymbolColonies", dependencies:
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
@@ -91,14 +90,16 @@ let package:Package = .init(
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
+                .target(name: "Packages"),
                 .target(name: "SymbolAvailability"),
+                .target(name: "Symbols"),
             ]),
         
         .target(name: "SymbolGraphCompiler", dependencies:
             [
                 .target(name: "PackageManifests"),
                 .target(name: "PackageResolution"),
-                .target(name: "SymbolNamespaces"),
+                .target(name: "SymbolColonies"),
                 .target(name: "System"),
             ]),
         
@@ -144,12 +145,20 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolResolution"),
         
-        .executableTarget(name: "SymbolNamespacesTests", dependencies:
+        .executableTarget(name: "SymbolColoniesTests", dependencies:
             [
-                .target(name: "SymbolNamespaces"),
+                .target(name: "SymbolColonies"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolNamespaces",
+            path: "Tests/SymbolColonies",
+            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
+        
+        .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
+            [
+                .target(name: "SymbolGraphCompiler"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/SymbolGraphCompiler",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
     ])
