@@ -1,4 +1,4 @@
-import SymbolNamespaces
+import SymbolColonies
 import System
 import Testing
 
@@ -9,8 +9,8 @@ enum Main:SyncTests
     func run(tests:Tests)
     {
         if  let tests:TestGroup = tests / "phyla",
-            let namespace:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/Phyla.symbols.json")
+            let colony:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/Phyla.symbols.json")
         {
             for (symbol, phylum):(SymbolPath, SymbolPhylum) in
             [
@@ -27,7 +27,7 @@ enum Main:SyncTests
             ]
             {
                 if  let tests:TestGroup = tests / symbol.last.lowercased(),
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.phylum ==? phylum)
                 }
@@ -54,7 +54,7 @@ enum Main:SyncTests
             ]
             {
                 if  let tests:TestGroup = tests / name,
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.phylum ==? phylum)
                 }
@@ -62,12 +62,12 @@ enum Main:SyncTests
 
             if  let tests:TestGroup = tests / "deinit"
             {
-                tests.expect(nil: namespace.symbols.first { $0.phylum == .deinitializer })
+                tests.expect(nil: colony.symbols.first { $0.phylum == .deinitializer })
             }
         }
         if  let tests:TestGroup = tests / "phyla" / "extension",
-            let namespace:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
+            let colony:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
         {
             for (symbol, phylum):(SymbolPath, SymbolPhylum) in
             [
@@ -75,31 +75,31 @@ enum Main:SyncTests
                 ("Int" / "AssociatedType", .typealias),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.phylum ==? phylum)
                 }
             }
         }
         if  let tests:TestGroup = tests / "spi",
-            let namespace:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/SPI.symbols.json")
+            let colony:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/SPI.symbols.json")
         {
-            for (symbol, spi):(SymbolPath, SymbolSPI?) in
+            for (symbol, interfaces):(SymbolPath, SymbolInterfaces?) in
             [
                 ("NoSPI", nil),
                 ("SPI", .init()),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
-                    tests.expect(symbol.spi ==? spi)
+                    tests.expect(symbol.interfaces ==? interfaces)
                 }
             }
         }
-        if  let tests:TestGroup = tests / "documentation-inheritance",
-            let namespace:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/DocumentationInheritance.symbols.json")
+        if  let tests:TestGroup = tests / "internal-documentation-inheritance",
+            let colony:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/DocumentationInheritance.symbols.json")
         {
             for (symbol, culture, text):(SymbolPath, ModuleIdentifier?, String?) in
             [
@@ -171,14 +171,14 @@ enum Main:SyncTests
                     "DocumentationInheritance",
                     "This comment is from the conforming type."
                 ),
-                //  This would inherit (from Protocol) if the namespace
+                //  This would inherit (from Protocol) if the colony
                 //  were generated without `-skip-inherited-docs`.
                 (
                     "Conformer" / "protocol" as SymbolPath,
                     nil,
                     nil
                 ),
-                //  This would inherit (from Refinement) if the namespace
+                //  This would inherit (from Refinement) if the colony
                 //  were generated without `-skip-inherited-docs`.
                 (
                     "Conformer" / "refinement" as SymbolPath,
@@ -198,10 +198,10 @@ enum Main:SyncTests
             ]
             {
                 if  let tests:TestGroup = tests / symbol[0].lowercased() / symbol.last,
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
-                    tests.expect(symbol.doccomment?.culture ==? culture)
-                    tests.expect(symbol.doccomment?.text ==? text)
+                    tests.expect(symbol.documentation?.culture ==? culture)
+                    tests.expect(symbol.documentation?.text ==? text)
                 }
             }
 
@@ -221,7 +221,7 @@ enum Main:SyncTests
                 ///
                 /// Default implementations only get an origin edge if they actually
                 /// had no documentation of their own, and successfully inherited some.
-                tests.expect(namespace.relationships.filter
+                tests.expect(colony.relationships.filter
                 {
                     $0.origin != nil
                 }
@@ -272,9 +272,10 @@ enum Main:SyncTests
                 ])
             }
         }
-        if  let tests:TestGroup = tests / "cross-module-documentation-inheritance",
-            let namespace:SymbolNamespace = tests.load(namespace:
-                "TestModules/Symbolgraphs/DocumentationInheritanceFromSwift.symbols.json")
+        if  let tests:TestGroup = tests / "external-documentation-inheritance",
+            let colony:SymbolColony = tests.load(colony: """
+                TestModules/Symbolgraphs/DocumentationInheritanceFromSwift.symbols.json
+                """)
         {
             for (symbol, culture, text):(SymbolPath, ModuleIdentifier?, String?) in
             [
@@ -291,10 +292,10 @@ enum Main:SyncTests
             ]
             {
                 if  let tests:TestGroup = tests / symbol[0].lowercased(),
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: namespace)
+                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
-                    tests.expect(symbol.doccomment?.culture ==? culture)
-                    tests.expect(symbol.doccomment?.text ==? text)
+                    tests.expect(symbol.documentation?.culture ==? culture)
+                    tests.expect(symbol.documentation?.text ==? text)
                 }
             }
 
@@ -314,7 +315,7 @@ enum Main:SyncTests
                 ///
                 /// Default implementations only get an origin edge if they actually
                 /// had no documentation of their own, and successfully inherited some.
-                tests.expect(namespace.relationships.filter
+                tests.expect(colony.relationships.filter
                 {
                     if case _? = $0.origin, case .scalar = $0.source
                     {
@@ -343,15 +344,88 @@ enum Main:SyncTests
                 ])
             }
         }
+        
+        if  let tests:TestGroup = tests / "internal-extension-constraints",
+            let colony:SymbolColony = tests.load(colony: """
+                TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json
+                """)
+        {
+            for (symbol, conditions):(SymbolPath, [GenericConstraint<SymbolIdentifier>]) in
+            [
+                (
+                    "Struct" / "internal(_:)",
+                    [
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                    ]
+                ),
+                (
+                    "Protocol" / "internal(_:)",
+                    [
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                    ]
+                ),
+            ]
+            {
+                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
+                {
+                    tests.expect(symbol.extension.conditions ..? conditions)
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "external-extension-constraints",
+            let colony:SymbolColony = tests.load(colony: """
+                TestModules/Symbolgraphs/\
+                ExternalExtensionsWithConstraints@\
+                ExtendableTypesWithConstraints.symbols.json
+                """)
+        {
+            for (symbol, conditions):(SymbolPath, [GenericConstraint<SymbolIdentifier>]) in
+            [
+                (
+                    "Struct",
+                    [
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                    ]
+                ),
+                (
+                    "Struct" / "external(_:)",
+                    [
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                    ]
+                ),
+                (
+                    "Protocol",
+                    [
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                    ]
+                ),
+                (
+                    "Protocol" / "external(_:)",
+                    [
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                    ]
+                ),
+            ]
+            {
+                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
+                {
+                    tests.expect(symbol.extension.conditions ..? conditions)
+                }
+            }
+        }
+
         if  let tests:TestGroup = tests / "protocols",
-            let _:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/Protocols.symbols.json")
+            let _:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/Protocols.symbols.json")
         {
         }
         #if !DEBUG
         if  let tests:TestGroup = tests / "stdlib",
-            let _:SymbolNamespace = tests.load(
-                namespace: "TestModules/Symbolgraphs/Swift.symbols.json")
+            let _:SymbolColony = tests.load(
+                colony: "TestModules/Symbolgraphs/Swift.symbols.json")
         {
         }
         #endif

@@ -4,19 +4,21 @@ import JSONDecoding
 struct SymbolDescription:Equatable, Sendable
 {
     public
-    let doccomment:Doccomment?
-    public
-    let spi:SymbolSPI?
-
+    let documentation:Documentation?
     public
     let availability:SymbolAvailability
+    public
+    let interfaces:SymbolInterfaces?
     public
     let visibility:SymbolVisibility
     public
     let fragments:Declaration<SymbolIdentifier>
+
+    public
+    let `extension`:ExtensionContext
     public
     let generics:GenericContext
-    
+
     public
     let location:SourceLocation<String>?
     public
@@ -27,23 +29,25 @@ struct SymbolDescription:Equatable, Sendable
     let usr:UnifiedSymbolResolution
 
     private
-    init(doccomment:Doccomment?,
-        spi:SymbolSPI?,
+    init(documentation:Documentation?,
         availability:SymbolAvailability,
+        interfaces:SymbolInterfaces?,
         visibility:SymbolVisibility,
         fragments:Declaration<SymbolIdentifier>,
+        extension:ExtensionContext,
         generics:GenericContext,
         location:SourceLocation<String>?,
         phylum:SymbolPhylum,
         path:SymbolPath,
         usr:UnifiedSymbolResolution)
     {
-        self.doccomment = doccomment
-        self.spi = spi
-
+        self.documentation = documentation
         self.availability = availability
+        self.interfaces = interfaces
         self.visibility = visibility
         self.fragments = fragments
+
+        self.extension = `extension`
         self.generics = generics
 
         self.location = location
@@ -55,12 +59,13 @@ struct SymbolDescription:Equatable, Sendable
 extension SymbolDescription
 {
     private
-    init(doccomment:Doccomment?,
-        spi:SymbolSPI?,
+    init(documentation:Documentation?,
         availability:SymbolAvailability,
+        interfaces:SymbolInterfaces?,
         visibility:SymbolVisibility,
         expanded:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
         abridged:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
+        extension:ExtensionContext,
         generics:GenericContext,
         location:SourceLocation<String>?,
         type:SymbolDescriptionType,
@@ -136,11 +141,12 @@ extension SymbolDescription
         }
 
         self.init(
-            doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
-            spi: spi,
+            documentation: documentation.flatMap { $0.text.isEmpty ? nil : $0 },
             availability: availability,
+            interfaces: interfaces,
             visibility: visibility,
             fragments: fragments,
+            extension: `extension`,
             generics: generics,
             location: location,
             phylum: phylum,
@@ -156,20 +162,10 @@ extension SymbolDescription:JSONObjectDecodable
         case availability
 
         case declaration = "declarationFragments"
-        case doccomment = "docComment"
+        case documentation = "docComment"
 
         case `extension` = "swiftExtension"
-        enum Extension:String
-        {
-            case constraints
-        }
-
         case generics = "swiftGenerics"
-        enum Generics:String
-        {
-            case parameters
-            case constraints
-        }
 
         case names
         enum Names:String
@@ -183,6 +179,7 @@ extension SymbolDescription:JSONObjectDecodable
             case precise
         }
 
+        case interfaces = "spi"
         case path = "pathComponents"
         case kind
         enum Kind:String
@@ -202,7 +199,6 @@ extension SymbolDescription:JSONObjectDecodable
             }
         }
 
-        case spi
         case visibility = "accessLevel"
     }
 
@@ -210,27 +206,17 @@ extension SymbolDescription:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(
-            doccomment: try json[.doccomment]?.decode(),
-            spi: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
+            documentation: try json[.documentation]?.decode(),
             availability: try json[.availability]?.decode() ?? [:],
+            interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
             visibility: try json[.visibility].decode(),
             expanded: try json[.declaration].decode(),
             abridged: try json[.names].decode(using: CodingKeys.Names.self)
             {
                 try $0[.subheading].decode()
             },
-            generics: .init(
-                conditions: try json[.extension]?.decode(using: CodingKeys.Extension.self)
-                {
-                    try $0[.constraints]?.decode() ?? []
-                },
-                generics: try json[.generics]?.decode(using: CodingKeys.Generics.self)
-                {
-                    (
-                        try $0[.constraints]?.decode() ?? [],
-                        try $0[.parameters]?.decode() ?? []
-                    )
-                }),
+            extension: try json[.extension]?.decode() ?? .init(),
+            generics: try json[.generics]?.decode() ?? .init(),
             location: try json[.location]?.decode(using: CodingKeys.Location.self)
             {
                 let file:String = try $0[.uri].decode()

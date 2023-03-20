@@ -3,7 +3,7 @@ import JSONDecoding
 extension SymbolDescription
 {
     @frozen public
-    struct Doccomment:Equatable, Sendable
+    struct Documentation:Equatable, Sendable
     {
         public
         let culture:ModuleIdentifier?
@@ -18,7 +18,7 @@ extension SymbolDescription
         }
     }
 }
-extension SymbolDescription.Doccomment:JSONObjectDecodable
+extension SymbolDescription.Documentation:JSONObjectDecodable
 {
     public
     enum CodingKeys:String

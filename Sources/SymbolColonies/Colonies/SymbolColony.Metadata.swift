@@ -1,7 +1,7 @@
 import JSONDecoding
 import SemanticVersions
 
-extension SymbolNamespace
+extension SymbolColony
 {
     public
     struct Metadata:Equatable, Sendable
@@ -20,7 +20,7 @@ extension SymbolNamespace
     }
 }
 
-extension SymbolNamespace.Metadata:JSONObjectDecodable
+extension SymbolColony.Metadata:JSONObjectDecodable
 {
     public
     enum CodingKeys:String
