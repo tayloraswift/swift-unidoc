@@ -5,14 +5,17 @@ extension Compiler
     struct Extension
     {
         var conformances:Set<SymbolIdentifier>
+        var features:Set<SymbolIdentifier>
         var members:Set<SymbolIdentifier>
         var blocks:[Block]
 
         init(conformances:Set<SymbolIdentifier> = [],
+            features:Set<SymbolIdentifier> = [],
             members:Set<SymbolIdentifier> = [],
             blocks:[Block] = [])
         {
             self.conformances = conformances
+            self.features = features
             self.members = members
             self.blocks = blocks
         }

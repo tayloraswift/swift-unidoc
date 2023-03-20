@@ -5,11 +5,14 @@ struct Compiler
 {
     private
     var extensions:Extensions
+    private
+    var scalars:Scalars
 
     public
     init()
     {
         self.extensions = .init()
+        self.scalars = .init()
     }
 }
 extension Compiler
@@ -45,9 +48,9 @@ extension Compiler
                     //  their generic/extension contexts.
                     continue
                 
-                case .scalar(_):
+                case .scalar(let scalar):
                     //  TODO: unimplemented
-                    continue
+                    self.scalars[scalar.id] = .init(conditions: symbol.extension.conditions)
                 
                 case .block(let block):
                     let type:SymbolIdentifier = try blocks.extendee(of: block)
@@ -82,6 +85,13 @@ extension Compiler
                 throw SymbolRelationshipError.source(of: relationship)
             
             case .scalar(let type):
+                //  If the colonial graph was generated with '-emit-extension-symbols',
+                //  we should never see an external type reference here.
+                guard self.scalars.contains(type.id)
+                else
+                {
+                    throw ExternalConformanceError.init(conformance: conformance, type: type)
+                }
                 //  Generate an implicit, internal extension for this conformance,
                 //  if one does not already exist.
                 self.extensions[type.id, where: relationship.conditions].conformances.insert(
@@ -106,13 +116,83 @@ extension Compiler
                 self.extensions[type, where: relationship.conditions].conformances.insert(
                     conformance.id)
             }
+            //  Return before checking that the relationship is unconditional.
+            return
         
         case .defaultImplementation:
             break
         case .extension:
-            break
+            //  Already handled these.
+            return
+        
         case .member:
-            break
+            switch (relationship.source, relationship.target)
+            {
+            case (.compound(_, self: _), .scalar(_)):
+                //  TODO: unimplemented
+                break 
+            
+            case (.compound(_, self: _), .block(_)):
+                //  TODO: unimplemented
+                break
+            
+            case (.scalar(let member), .scalar(let type)):
+                //  If the colonial graph was generated with '-emit-extension-symbols',
+                //  we should never see an external type reference here.
+                guard self.scalars.contains(type.id)
+                else
+                {
+                    throw ExternalMembershipError.init(member: member, type: type)
+                }
+                //  We should never see an external symbol reference here either.
+                guard   let conditions:[GenericConstraint<SymbolIdentifier>] =
+                            try self.scalars[member.id]?.assign(membership: type.id)
+                else
+                {
+                    throw ExternalMemberError.init(member: member, type: type)
+                }
+
+                //  Generate an implicit, internal extension for this membership,
+                //  if one does not already exist.
+                self.extensions[type.id, where: conditions].members.insert(member.id) 
+            
+            case (.scalar(let member), .block(let block)):
+                //  Look up the type extended by this extension block.
+                let type:SymbolIdentifier = try blocks.extendee(of: block)
+
+                //  Look up this member’s extension constraints.
+                guard   let conditions:[GenericConstraint<SymbolIdentifier>] =
+                            try self.scalars[member.id]?.assign(membership: type)
+                else
+                {
+                    throw ExtensionBlockMemberError.init(member: member,
+                        type: .init(type),
+                        usr: .block(block))
+                }
+                //  There must already exist an extension block with this
+                //  member’s exact extension constraints.
+                //
+                //  The extension block should also be from this colony,
+                //  but we don’t care about that right now.
+                guard self.extensions.contains(type, where: conditions)
+                else
+                {
+                    throw ExtensionBlockMembershipError.init(member: member,
+                        type: .init(type),
+                        usr: .block(block))
+                }
+
+                self.extensions[type, where: conditions].members.insert(member.id)
+            
+            case (_, .compound):
+                //  Nothing can be a member of a compound symbol.
+                throw SymbolRelationshipError.target(of: relationship)
+            
+            case (.block, _):
+                //  Extension blocks cannot be members of things.
+                throw SymbolRelationshipError.source(of: relationship)
+            }
+        
         case .optionalRequirement:
             break
         case .override:
@@ -122,5 +202,15 @@ extension Compiler
         case .requirement:
             break
         }
+
+        //  TODO: ensure relationship has no conditions
+    }
+    private mutating
+    func add(conformer:UnifiedSymbolResolution,
+        to type:UnifiedSymbolResolution,
+        where conditions:[GenericConstraint<SymbolIdentifier>],
+        blocks:ExtensionBlockIndex) throws
+    {
+
     }
 }
