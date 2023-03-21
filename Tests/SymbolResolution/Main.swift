@@ -75,7 +75,8 @@ enum Main:SyncTests
             if  let usr:UnifiedSymbolResolution = tests.expect(value: .init(
                     "s:e:s:Sq17ZooExtensionsDeepSiRszlE2ids5NeverOvp"))
             {
-                tests.expect(usr ==? .block("s:Sq17ZooExtensionsDeepSiRszlE2ids5NeverOvp"))
+                tests.expect(usr ==? .block(.init(
+                    name: "s:Sq17ZooExtensionsDeepSiRszlE2ids5NeverOvp")))
             }
         }
         if  let tests:TestGroup = tests / "block" / "first-conformance"
@@ -83,7 +84,7 @@ enum Main:SyncTests
             if  let usr:UnifiedSymbolResolution = tests.expect(value: .init(
                     "s:e:s:Sqs:s8SendableP"))
             {
-                tests.expect(usr ==? .block("s:Sqs:s8SendableP"))
+                tests.expect(usr ==? .block(.init(name: "s:Sqs:s8SendableP")))
             }
         }
         if  let tests:TestGroup = tests / "block" / "gibberish"
@@ -91,7 +92,7 @@ enum Main:SyncTests
             if  let usr:UnifiedSymbolResolution = tests.expect(value: .init(
                     "s:e: \n!\u{0} 🇺🇸"))
             {
-                tests.expect(usr ==? .block(" \n!\u{0} 🇺🇸"))
+                tests.expect(usr ==? .block(.init(name: " \n!\u{0} 🇺🇸")))
             }
         }
         if  let tests:TestGroup = tests / "block" / "empty"
@@ -99,7 +100,7 @@ enum Main:SyncTests
             if  let usr:UnifiedSymbolResolution = tests.expect(value: .init(
                     "s:e:"))
             {
-                tests.expect(usr ==? .block(""))
+                tests.expect(usr ==? .block(.init(name: "")))
             }
         }
     }

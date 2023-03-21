@@ -13,19 +13,16 @@ enum UnifiedSymbolResolution:Hashable, Equatable, Sendable
     /// An arbitrary code block. The payload is everything after the
     /// `s:e:` prefix, including any colons and special characters.
     /// The compiler calls these extension-declarations.
-    case block(String)
+    case block(ExtensionBlockResolution)
 }
 extension UnifiedSymbolResolution:LosslessStringConvertible, CustomStringConvertible
 {
     @inlinable public
     init?(_ description:String)
     {
-        if  let index:String.Index = description.index(description.startIndex,
-                offsetBy: 4,
-                limitedBy: description.endIndex),
-            description.prefix(upTo: index) == "s:e:"
+        if  let block:ExtensionBlockResolution = .init(description)
         {
-            self = .block(.init(description.suffix(from: index)))
+            self = .block(block)
             return
         }
 
@@ -74,8 +71,8 @@ extension UnifiedSymbolResolution:LosslessStringConvertible, CustomStringConvert
         case .scalar(let base):
             return base.description
         
-        case .block(let name):
-            return "s:e:" + name
+        case .block(let block):
+            return block.description
         }
     }
 }

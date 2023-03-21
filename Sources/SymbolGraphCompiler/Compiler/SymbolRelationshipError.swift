@@ -1,8 +1,12 @@
-import SymbolColonies
+import SymbolResolution
 
 public
 enum SymbolRelationshipError:Equatable, Error
 {
-    case source(of:SymbolRelationship)
-    case target(of:SymbolRelationship)
+    case conformance(UnifiedSymbolResolution, of:UnifiedSymbolResolution)
+    case conformer(UnifiedSymbolResolution, of:UnifiedSymbolResolution)
+
+    case membership(UnifiedSymbolResolution, of:UnifiedSymbolResolution)
+    case member(UnifiedSymbolResolution, of:UnifiedSymbolResolution)
 }
+
