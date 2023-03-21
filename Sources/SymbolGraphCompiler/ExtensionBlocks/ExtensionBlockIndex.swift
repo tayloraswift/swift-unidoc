@@ -3,19 +3,19 @@ import SymbolColonies
 struct ExtensionBlockIndex
 {
     private
-    var extendees:[String: SymbolIdentifier]
+    var extendees:[ExtensionBlockResolution: UnifiedScalarResolution]
 
     private 
-    init(extendees:[String: SymbolIdentifier] = [:])
+    init(extendees:[ExtensionBlockResolution: UnifiedScalarResolution] = [:])
     {
         self.extendees = extendees
     }
 }
 extension ExtensionBlockIndex
 {
-    func extendee(of block:String) throws -> SymbolIdentifier
+    func extendee(of block:ExtensionBlockResolution) throws -> UnifiedScalarResolution
     {
-        if let type:SymbolIdentifier = extendees[block]
+        if let type:UnifiedScalarResolution = extendees[block]
         {
             return type
         }
@@ -36,17 +36,17 @@ extension ExtensionBlockIndex
         {
             switch (relationship.source, relationship.target)
             {
-            case (.block(let name), .scalar(let usr)):
-                self.extendees[name] = usr.id
+            case (.block(let block), .scalar(let type)):
+                self.extendees[block] = type
 
-            case (.block, _):
+            case (.block(let block), let type):
                 //  Extension block cannot extend a compound, or another
                 //  extension block.
-                throw SymbolRelationshipError.target(of: relationship)
+                throw ExtensionBlockRelationshipError.target(extension: block, of: type)
             
-            case (_, _):
+            case (let source, let type):
                 //  Extension block must have an extension block name.
-                throw SymbolRelationshipError.source(of: relationship)
+                throw ExtensionBlockRelationshipError.source(extension: source, of: type)
             }
         }
     }
