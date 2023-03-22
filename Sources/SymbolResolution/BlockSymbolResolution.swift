@@ -1,5 +1,8 @@
+import JSONDecoding
+import JSONEncoding
+
 @frozen public
-struct ExtensionBlockResolution:Hashable, Equatable, Sendable
+struct BlockSymbolResolution:Hashable, Equatable, Sendable
 {
     /// The name of this extension block, without the `s:e:` prefix.
     /// An extension block name can include any colons and special characters.
@@ -12,7 +15,7 @@ struct ExtensionBlockResolution:Hashable, Equatable, Sendable
         self.name = name
     }
 }
-extension ExtensionBlockResolution:LosslessStringConvertible, CustomStringConvertible
+extension BlockSymbolResolution:LosslessStringConvertible, CustomStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -36,3 +39,7 @@ extension ExtensionBlockResolution:LosslessStringConvertible, CustomStringConver
         "s:e:" + self.name
     }
 }
+extension BlockSymbolResolution:JSONStringDecodable, JSONStringEncodable
+{
+}
+

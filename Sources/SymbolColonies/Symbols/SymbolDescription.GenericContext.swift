@@ -6,7 +6,7 @@ extension SymbolDescription
     struct GenericContext:Equatable, Sendable
     {
         public
-        var constraints:[GenericConstraint<SymbolIdentifier>]
+        var constraints:[GenericConstraint<ScalarSymbolResolution>]
         /// All of the relevant symbol’s type parameters, including
         /// type parameters inherited from the enclosing scope, and
         /// type parameters shadowed by other type parameters.
@@ -14,7 +14,7 @@ extension SymbolDescription
         var parameters:[GenericParameter]
 
         @inlinable public
-        init(constraints:[GenericConstraint<SymbolIdentifier>] = [],
+        init(constraints:[GenericConstraint<ScalarSymbolResolution>] = [],
             parameters:[GenericParameter] = [])
         {
             self.constraints = constraints
