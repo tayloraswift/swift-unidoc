@@ -2,12 +2,12 @@ extension Compiler
 {
     struct Scalar
     {
-        let conditions:[GenericConstraint<SymbolIdentifier>]
+        let conditions:[GenericConstraint<ScalarSymbolResolution>]
 
         private(set)
-        var membership:SymbolIdentifier?
+        var membership:ScalarSymbolResolution?
 
-        init(conditions:[GenericConstraint<SymbolIdentifier>])
+        init(conditions:[GenericConstraint<ScalarSymbolResolution>])
         {
             self.conditions = conditions
             self.membership = nil
@@ -17,7 +17,8 @@ extension Compiler
 extension Compiler.Scalar
 {
     mutating
-    func assign(membership:SymbolIdentifier) throws -> [GenericConstraint<SymbolIdentifier>]
+    func assign(
+        membership:ScalarSymbolResolution) throws -> [GenericConstraint<ScalarSymbolResolution>]
     {
         switch self.membership
         {
@@ -26,7 +27,7 @@ extension Compiler.Scalar
             return self.conditions
         
         case let other?:
-            throw SymbolMembershipError.multiple(other, membership)
+            throw Compiler.MembershipConflictError.member(of: other, and: membership)
         }
     }
 }

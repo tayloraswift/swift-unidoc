@@ -7,20 +7,20 @@ enum UnifiedSymbolResolution:Hashable, Equatable, Sendable
 {
     /// A declaration compound. The compiler calls these synthesized
     /// value-declarations.
-    case compound(UnifiedScalarResolution, self:UnifiedScalarResolution)
+    case compound(ScalarSymbolResolution, self:ScalarSymbolResolution)
     /// A declaration scalar. The compiler calls these value-declarations.
-    case scalar(UnifiedScalarResolution)
+    case scalar(ScalarSymbolResolution)
     /// An arbitrary code block. The payload is everything after the
     /// `s:e:` prefix, including any colons and special characters.
     /// The compiler calls these extension-declarations.
-    case block(ExtensionBlockResolution)
+    case block(BlockSymbolResolution)
 }
 extension UnifiedSymbolResolution:LosslessStringConvertible, CustomStringConvertible
 {
     @inlinable public
     init?(_ description:String)
     {
-        if  let block:ExtensionBlockResolution = .init(description)
+        if  let block:BlockSymbolResolution = .init(description)
         {
             self = .block(block)
             return

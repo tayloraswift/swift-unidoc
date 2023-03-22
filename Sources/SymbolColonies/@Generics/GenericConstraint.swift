@@ -1,6 +1,6 @@
 import JSONDecoding
 
-extension GenericConstraint<SymbolIdentifier>:JSONObjectDecodable, JSONDecodable
+extension GenericConstraint:JSONObjectDecodable, JSONDecodable where TypeReference:JSONDecodable
 {
     public
     enum CodingKeys:String
@@ -14,9 +14,9 @@ extension GenericConstraint<SymbolIdentifier>:JSONObjectDecodable, JSONDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         let type:TypeExpression
-        if  let usr:UnifiedScalarResolution = try json[.rhsPrecise]?.decode()
+        if  let reference:TypeReference = try json[.rhsPrecise]?.decode()
         {
-            type = .nominal(usr.id)
+            type = .nominal(reference)
         }
         else
         {

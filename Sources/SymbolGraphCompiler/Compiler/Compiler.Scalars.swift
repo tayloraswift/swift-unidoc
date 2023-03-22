@@ -3,7 +3,7 @@ extension Compiler
     struct Scalars
     {
         private
-        var table:[SymbolIdentifier: Scalar]
+        var table:[ScalarSymbolResolution: Scalar]
 
         init()
         {
@@ -13,12 +13,12 @@ extension Compiler
 }
 extension Compiler.Scalars
 {
-    func contains(_ id:SymbolIdentifier) -> Bool
+    func contains(_ id:ScalarSymbolResolution) -> Bool
     {
         self.table.keys.contains(id)
     }
 
-    subscript(id:SymbolIdentifier) -> Compiler.Scalar?
+    subscript(id:ScalarSymbolResolution) -> Compiler.Scalar?
     {
         _read
         {

@@ -1,6 +1,6 @@
-extension Compiler.Extension
+extension Compiler
 {
-    struct Block
+    struct ExtensionBlock
     {
         let location:SourceLocation<String>?
         let text:String?

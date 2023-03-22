@@ -1,8 +1,7 @@
 import JSONDecoding
 
-extension DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>:
-    JSONObjectDecodable,
-    JSONDecodable
+extension DeclarationFragment:JSONObjectDecodable, JSONDecodable
+    where Symbol:JSONDecodable, Color == DeclarationFragmentClass?
 {
     public
     enum CodingKeys:String
@@ -16,8 +15,7 @@ extension DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>:
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(try json[.spelling].decode(),
-            symbol: try json[.symbol]?.decode(as: UnifiedScalarResolution.self,
-                with: \.id),
+            symbol: try json[.symbol]?.decode(),
             color: try json[.color].decode(as: SymbolDescription.FragmentColor.self,
                 with: \.classification))
     }

@@ -227,48 +227,41 @@ enum Main:SyncTests
                 }
                     **?
                 [
-                    .init(.scalar(.init(
-                        "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!),
-                        is: .defaultImplementation,
-                        of: .scalar(.init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!),
+                    .defaultImplementation(.init(.init(
+                        "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!,
+                        of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!)),
                     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
-                        is: .member,
-                        of: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance10RefinementP7nowhereytvp")!),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance10RefinementP7nowhereytvp")!)),
                     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
-                        is: .member,
-                        of: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance10RefinementP10refinementytvp")!),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance10RefinementP10refinementytvp")!)),
                     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
-                        is: .member,
-                        of: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance10RefinementP9conformerytvp")!),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance10RefinementP9conformerytvp")!)),
                     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
-                        is: .member,
-                        of: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance10RefinementP10everywhereytvp")!),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance10RefinementP10everywhereytvp")!)),
     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
-                        is: .member,
-                        of: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        origin: .init(.init(
+                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!)),
                 ])
             }
         }
@@ -317,7 +310,8 @@ enum Main:SyncTests
                 /// had no documentation of their own, and successfully inherited some.
                 tests.expect(colony.relationships.filter
                 {
-                    if case _? = $0.origin, case .scalar = $0.source
+                    if  case .membership(let membership, origin: _?) = $0,
+                        case .scalar = membership.source
                     {
                         return true
                     }
@@ -328,19 +322,17 @@ enum Main:SyncTests
                 }
                     **?
                 [
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp")!),
-                        is: .member,
-                        of: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
-                        origin: .init("s:s12IdentifiableP2id2IDQzvp")!),
+                        in: .scalar(.init(
+                        "s:33DocumentationInheritanceFromSwift12UndocumentedV")!)),
+                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!)),
                     
-                    .init(.scalar(.init(
+                    .membership(.init(of: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp")!),
-                        is: .member,
-                        of: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift10DocumentedV")!),
-                        origin: .init("s:s12IdentifiableP2id2IDQzvp")!),
+                        in: .scalar(.init(
+                        "s:33DocumentationInheritanceFromSwift10DocumentedV")!)),
+                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!)),
                 ])
             }
         }
@@ -350,19 +342,20 @@ enum Main:SyncTests
                 TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):(SymbolPath, [GenericConstraint<SymbolIdentifier>]) in
+            for (symbol, conditions):(SymbolPath, [GenericConstraint<ScalarSymbolResolution>])
+                in
             [
                 (
                     "Struct" / "internal(_:)",
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
                     "Protocol" / "internal(_:)",
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]
                 ),
             ]
@@ -380,32 +373,33 @@ enum Main:SyncTests
                 ExtendableTypesWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):(SymbolPath, [GenericConstraint<SymbolIdentifier>]) in
+            for (symbol, conditions):(SymbolPath, [GenericConstraint<ScalarSymbolResolution>])
+                in
             [
                 (
                     "Struct",
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
                     "Struct" / "external(_:)",
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
-                        .init("T", is: .conformer(of: .nominal(.init("s", ascii: "ST")))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
                     "Protocol",
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]
                 ),
                 (
                     "Protocol" / "external(_:)",
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s", ascii: "SQ")))),
+                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]
                 ),
             ]

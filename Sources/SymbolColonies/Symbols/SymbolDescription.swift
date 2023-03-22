@@ -12,7 +12,7 @@ struct SymbolDescription:Equatable, Sendable
     public
     let visibility:SymbolVisibility
     public
-    let fragments:Declaration<SymbolIdentifier>
+    let fragments:Declaration<ScalarSymbolResolution>
 
     public
     let `extension`:ExtensionContext
@@ -33,7 +33,7 @@ struct SymbolDescription:Equatable, Sendable
         availability:SymbolAvailability,
         interfaces:SymbolInterfaces?,
         visibility:SymbolVisibility,
-        fragments:Declaration<SymbolIdentifier>,
+        fragments:Declaration<ScalarSymbolResolution>,
         extension:ExtensionContext,
         generics:GenericContext,
         location:SourceLocation<String>?,
@@ -63,8 +63,10 @@ extension SymbolDescription
         availability:SymbolAvailability,
         interfaces:SymbolInterfaces?,
         visibility:SymbolVisibility,
-        expanded:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
-        abridged:__shared [DeclarationFragment<SymbolIdentifier, DeclarationFragmentClass?>],
+        expanded:
+        __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
+        abridged:
+        __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
         extension:ExtensionContext,
         generics:GenericContext,
         location:SourceLocation<String>?,
@@ -72,7 +74,7 @@ extension SymbolDescription
         path:SymbolPath,
         usr:UnifiedSymbolResolution)
     {
-        let fragments:Declaration<SymbolIdentifier>
+        let fragments:Declaration<ScalarSymbolResolution>
         let phylum:SymbolPhylum
         //  Heuristic for inferring actor types
         if  case "actor"? = expanded.first(where: { $0.color == .keyword })?.spelling
