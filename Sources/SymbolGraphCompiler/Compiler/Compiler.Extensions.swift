@@ -1,4 +1,5 @@
 import SymbolColonies
+
 extension Compiler
 {
     struct Extensions
