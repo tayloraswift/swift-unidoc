@@ -17,3 +17,13 @@ extension SymbolRelationship
         }
     }
 }
+extension SymbolRelationship.Inheritance:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        """
+        (inheritance by: \(self.source), of: \(self.target))
+        """
+    }
+}

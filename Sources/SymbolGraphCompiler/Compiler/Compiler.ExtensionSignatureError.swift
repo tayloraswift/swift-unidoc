@@ -3,14 +3,20 @@ import SymbolColonies
 extension Compiler
 {
     public
-    enum ExtensionSignatureError:Equatable, Error
+    struct ExtensionSignatureError:Equatable, Error
     {
-        case conformance(SymbolRelationship.Conformance,
-            expected:ExtensionSignature)
-        
-        case membership(SymbolRelationship.Membership,
-            expected:ExtensionSignature,
-            declared:[GenericConstraint<ScalarSymbolResolution>])
+        public
+        let expected:ExtensionSignature
+        public
+        let declared:[GenericConstraint<ScalarSymbolResolution>]?
+
+        public
+        init(expected:ExtensionSignature,
+            declared:[GenericConstraint<ScalarSymbolResolution>]? = nil)
+        {
+            self.expected = expected
+            self.declared = declared
+        }
     }
 }
 extension Compiler.ExtensionSignatureError:CustomStringConvertible
@@ -18,19 +24,19 @@ extension Compiler.ExtensionSignatureError:CustomStringConvertible
     public
     var description:String
     {
-        switch self
+        if  let _:[GenericConstraint<ScalarSymbolResolution>] = self.declared
         {
-        case .conformance(let conformance, expected: let signature):
             return """
-            Cannot declare an external conformance (of '\(conformance.source)' to \
-            '\(signature.type)') with different generic constraints than its \
-            extension block ('\(conformance.target)').
+            Cannot declare an extension (of \(self.expected.type)) containing a \
+            symbol with different extension constraints than its extension block.
             """
-        case .membership(let membership, expected: let signature, declared: _):
+        }
+        else
+        {
             return """
-            Cannot declare an external membership (of '\(membership.source)' in \
-            '\(signature.type)') with different generic constraints than its \
-            extension block ('\(membership.target)').
+            Cannot declare an extension (of \(self.expected.type)) containing a \
+            relationship with different extension constraints than its extension \
+            block.
             """
         }
     }

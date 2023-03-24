@@ -38,7 +38,7 @@ extension SymbolIdentifier
     /// that are not allowed to appear in a symbol identifier.
     ///
     /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, and `@`.
-    @inlinable public 
+    @inlinable public
     init?(_ language:Unicode.Scalar, _ suffix:some StringProtocol)
     {
         for ascii:UInt8 in suffix.utf8

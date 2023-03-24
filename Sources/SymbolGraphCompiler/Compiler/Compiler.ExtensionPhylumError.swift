@@ -1,5 +1,3 @@
-import SymbolResolution
-
 extension Compiler
 {
     public
@@ -8,13 +6,13 @@ extension Compiler
         public
         let phylum:SymbolPhylum
         public
-        let usr:UnifiedSymbolResolution
+        let block:BlockSymbolResolution
 
         public
-        init(invalid phylum:SymbolPhylum, usr:UnifiedSymbolResolution)
+        init(invalid phylum:SymbolPhylum, block:BlockSymbolResolution)
         {
             self.phylum = phylum
-            self.usr = usr
+            self.block = block
         }
     }
 }
@@ -23,6 +21,6 @@ extension Compiler.ExtensionPhylumError:CustomStringConvertible
     public
     var description:String
     {
-        "Extension block '\(self.usr)' has invalid phylum '\(self.phylum)'."
+        "Extension block '\(self.block)' has invalid phylum '\(self.phylum)'."
     }
 }

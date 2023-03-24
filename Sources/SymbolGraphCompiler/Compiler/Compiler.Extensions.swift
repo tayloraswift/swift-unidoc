@@ -1,6 +1,4 @@
 import SymbolColonies
-import SymbolResolution
-
 extension Compiler
 {
     struct Extensions
@@ -25,22 +23,22 @@ extension Compiler
 extension Compiler.Extensions
 {
     mutating
-    func extend(type:ScalarSymbolResolution,
-        with symbol:SymbolDescription,
-        as block:__owned BlockSymbolResolution) throws
+    func include(extended type:ScalarSymbolResolution,
+        with description:SymbolDescription,
+        by block:__owned BlockSymbolResolution) throws
     {
-        guard case .extension = symbol.phylum
+        guard case .extension = description.phylum
         else
         {
-            throw Compiler.ExtensionPhylumError.init(invalid: symbol.phylum, usr: symbol.usr)
+            throw Compiler.ExtensionPhylumError.init(invalid: description.phylum, block: block)
         }
 
-        let object:Compiler.Extension = self[type, where: symbol.extension.conditions]
+        let object:Compiler.Extension = self[type, where: description.extension.conditions]
 
-        if  let block:Compiler.ExtensionBlock = .init(location: symbol.location,
-                text: symbol.documentation?.text)
+        if  let description:Compiler.ExtensionBlock = .init(location: description.location,
+                text: description.documentation?.text)
         {
-            object.blocks.append(block)
+            object.blocks.append(description)
         }
 
         self.named[block] = object
