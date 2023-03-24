@@ -21,3 +21,13 @@ extension SymbolRelationship
         }
     }
 }
+extension SymbolRelationship.Conformance:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        """
+        (conformance: \(self.source), to: \(self.target))
+        """
+    }
+}

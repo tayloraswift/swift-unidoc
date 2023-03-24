@@ -17,3 +17,13 @@ extension SymbolRelationship
         }
     }
 }
+extension SymbolRelationship.OptionalRequirement:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        """
+        (optional requirement: \(self.source), of: \(self.target))
+        """
+    }
+}

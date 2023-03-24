@@ -1,14 +1,24 @@
 extension Compiler
 {
-    struct Scalar
+    /// A scalar is the smallest “unit” a symbol can be broken down into.
+    ///
+    /// This is a reference type, because we want to be able to query
+    /// things about the existence or knowledge of a scalar, and then
+    /// separately write updates to the scalar without looking it up
+    /// again.
+    final
+    class Scalar:Identifiable
     {
+        let resolution:ScalarSymbolResolution
         let conditions:[GenericConstraint<ScalarSymbolResolution>]
-
+        
         private(set)
         var membership:ScalarSymbolResolution?
 
-        init(conditions:[GenericConstraint<ScalarSymbolResolution>])
+        init(resolution:ScalarSymbolResolution,
+            conditions:[GenericConstraint<ScalarSymbolResolution>])
         {
+            self.resolution = resolution
             self.conditions = conditions
             self.membership = nil
         }
@@ -16,18 +26,15 @@ extension Compiler
 }
 extension Compiler.Scalar
 {
-    mutating
-    func assign(
-        membership:ScalarSymbolResolution) throws -> [GenericConstraint<ScalarSymbolResolution>]
+    func assign(membership:ScalarSymbolResolution) throws
     {
         switch self.membership
         {
         case nil, membership?:
             self.membership = membership
-            return self.conditions
         
         case let other?:
-            throw Compiler.MembershipConflictError.member(of: other, and: membership)
+            throw Compiler.MembershipConflictError.member(of: other)
         }
     }
 }

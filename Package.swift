@@ -101,6 +101,8 @@ let package:Package = .init(
                 .target(name: "PackageResolution"),
                 .target(name: "SymbolColonies"),
                 .target(name: "System"),
+
+                .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
         
         .target(name: "System", dependencies:

@@ -1,7 +1,7 @@
 extension Compiler
 {
     public
-    struct ExtensionSignature:Hashable, Sendable
+    struct ExtensionSignature:Equatable, Hashable, Sendable
     {
         public
         let type:ScalarSymbolResolution
