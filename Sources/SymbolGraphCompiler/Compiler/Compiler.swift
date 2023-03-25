@@ -75,50 +75,89 @@ extension Compiler
             {
                 switch relationship
                 {
-                case .conformance(let conformance, origin: let origin):
+                case .conformance(let edge, origin: let origin):
                     do
                     {
-                        try self.add(conformance: conformance)
+                        try self.add(conformance: edge)
                         try self.add(origin: origin)
                     }
                     catch let error
                     {
                         throw SymbolRelationshipError<SymbolRelationship.Conformance>.init(
                             underlying: error,
-                            edge: conformance)
+                            edge: edge)
                     }
                 
                 case .extension:
                     //  Already handled these.
                     continue
                 
-                case .defaultImplementation  (_, origin: let origin):
-                    try self.add(origin: origin)
-
-                case .inheritance            (_, origin: let origin):
-                    try self.add(origin: origin)
-
-                case .membership(let membership, origin: let origin):
+                case .defaultImplementation(let edge, origin: let origin):
                     do
                     {
-                        try self.add(membership: membership)
+                        try self.add(superform: edge, as: LatticeSuperform.implements(_:))
+                        try self.add(origin: origin)
+                    }
+                    catch let error
+                    {
+                        throw SymbolRelationshipError<
+                            SymbolRelationship.DefaultImplementation>.init(
+                            underlying: error,
+                            edge: edge)
+                    }
+
+                case .inheritance(let edge, origin: let origin):
+                    do
+                    {
+                        try self.add(superform: edge, as: LatticeSuperform.inherits(_:))
+                        try self.add(origin: origin)
+                    }
+                    catch let error
+                    {
+                        throw SymbolRelationshipError<SymbolRelationship.Inheritance>.init(
+                            underlying: error,
+                            edge: edge)
+                    }
+
+
+                case .membership(let edge, origin: let origin):
+                    do
+                    {
+                        try self.add(membership: edge)
                         try self.add(origin: origin)
                     }
                     catch let error
                     {
                         throw SymbolRelationshipError<SymbolRelationship.Membership>.init(
                             underlying: error,
-                            edge: membership)
+                            edge: edge)
                     }
 
-                case .optionalRequirement    (_, origin: let origin):
-                    try self.add(origin: origin)
+                case .override(let edge, origin: let origin):
+                    do
+                    {
+                        try self.add(superform: edge, as: LatticeSuperform.overrides(_:))
+                        try self.add(origin: origin)
+                    }
+                    catch let error
+                    {
+                        throw SymbolRelationshipError<SymbolRelationship.Override>.init(
+                            underlying: error,
+                            edge: edge)
+                    }
 
-                case .override               (_, origin: let origin):
-                    try self.add(origin: origin)
-
-                case .requirement            (_, origin: let origin):
-                    try self.add(origin: origin)
+                case .requirement(let edge, origin: let origin):
+                    do
+                    {
+                        try self.add(requirement: edge)
+                        try self.add(origin: origin)
+                    }
+                    catch let error
+                    {
+                        throw SymbolRelationshipError<SymbolRelationship.Requirement>.init(
+                            underlying: error,
+                            edge: edge)
+                    }
                 }
             }
         }
@@ -174,9 +213,9 @@ extension Compiler
         `extension`.conformances.insert(`protocol`)
     }
     private mutating
-    func add(membership:SymbolRelationship.Membership) throws
+    func add(membership relationship:SymbolRelationship.Membership) throws
     {
-        switch membership.source
+        switch relationship.source
         {
         case .compound(let feature, self: let selftype):
             guard let feature:ScalarSymbolResolution = self.scalars[feature]
@@ -184,7 +223,7 @@ extension Compiler
             {
                 return // Feature is hidden.
             }
-            switch membership.target
+            switch relationship.target
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
@@ -209,7 +248,7 @@ extension Compiler
                 }
                 else
                 {
-                    throw MembershipConflictError.feature(of: type.resolution)
+                    throw FeatureMembershipError.init(invalid: type.resolution)
                 }
             
             case .block(let block):
@@ -221,7 +260,7 @@ extension Compiler
                 }
                 else
                 {
-                    throw MembershipConflictError.feature(of: named.type)
+                    throw FeatureMembershipError.init(invalid: named.type)
                 }
             }
         
@@ -234,7 +273,7 @@ extension Compiler
                 return // Member is hidden.
             }
 
-            switch membership.target
+            switch relationship.target
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
@@ -244,7 +283,7 @@ extension Compiler
                 //  We should never see an external type reference here either.
                 if  let type:Scalar = try self.scalars(internal: type)
                 {
-                    try member.assign(membership: type.resolution)
+                    try member.assign(membership: .member(of: type.resolution))
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
                     self.extensions[type.resolution, where: member.conditions].members.insert(
@@ -255,7 +294,7 @@ extension Compiler
                 let named:Extension = try self.extensions.named(block)
                 if  named.conditions == member.conditions
                 {
-                    try member.assign(membership: named.type)
+                    try member.assign(membership: .member(of: named.type))
                     named.members.insert(member.resolution)
                 }
                 else
@@ -270,6 +309,37 @@ extension Compiler
         case .block:
             //  Extension blocks cannot be members of things.
             throw SymbolReferenceError.source
+        }
+    }
+    private mutating
+    func add(requirement relationship:SymbolRelationship.Requirement) throws
+    {
+        /// Protocol must always be from the same module.
+        guard let `protocol`:Scalar = try self.scalars(internal: relationship.target)
+        else
+        {
+            return // Protocol is hidden.
+        }
+        if  let requirement:Scalar = try self.scalars(internal: relationship.source)
+        {
+            try requirement.assign(membership: .requirement(of: `protocol`.resolution,
+                optional: relationship.optional))
+        }
+    }
+    private mutating
+    func add(superform relationship:some SuperformRelationship,
+        as edge:(ScalarSymbolResolution) -> LatticeSuperform) throws
+    {
+        guard let superform:ScalarSymbolResolution = self.scalars[relationship.target]
+        else
+        {
+            return // Superform is hidden.
+        }
+        /// Superform relationships are intrinsic. They must always originate from
+        /// internal symbols.
+        if let subform:Scalar = try self.scalars(internal: relationship.source)
+        {
+            try subform.assign(superform: edge(superform))
         }
     }
 }

@@ -8,7 +8,6 @@ enum SymbolRelationship:Equatable, Hashable, Sendable
     case `extension`            (Extension)
     case inheritance            (Inheritance,           origin:SymbolOrigin? = nil)
     case membership             (Membership,            origin:SymbolOrigin? = nil)
-    case optionalRequirement    (OptionalRequirement,   origin:SymbolOrigin? = nil)
     case override               (Override,              origin:SymbolOrigin? = nil)
     case requirement            (Requirement,           origin:SymbolOrigin? = nil)
 }
@@ -23,7 +22,6 @@ extension SymbolRelationship
                 .defaultImplementation  (_, origin: let origin),
                 .inheritance            (_, origin: let origin),
                 .membership             (_, origin: let origin),
-                .optionalRequirement    (_, origin: let origin),
                 .override               (_, origin: let origin),
                 .requirement            (_, origin: let origin):
             return origin
@@ -86,9 +84,10 @@ extension SymbolRelationship:JSONObjectDecodable
             try json[.conditions]?.decode(to: Never.self)
         
         case .optionalRequirement:
-            self = .optionalRequirement(.init(
+            self = .requirement(.init(
                     _ : try json[.source].decode(),
-                    of: try json[.target].decode()),
+                    of: try json[.target].decode(),
+                    optional: true),
                 origin: try json[.origin]?.decode())
             try json[.conditions]?.decode(to: Never.self)
         

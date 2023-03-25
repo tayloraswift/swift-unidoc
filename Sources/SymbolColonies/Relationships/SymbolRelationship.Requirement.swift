@@ -7,13 +7,17 @@ extension SymbolRelationship
         let source:ScalarSymbolResolution
         public
         let target:ScalarSymbolResolution
+        public
+        let optional:Bool
 
         @inlinable public
         init(_ source:ScalarSymbolResolution,
-            of target:ScalarSymbolResolution)
+            of target:ScalarSymbolResolution,
+            optional:Bool = false)
         {
             self.source = source
             self.target = target
+            self.optional = optional
         }
     }
 }
@@ -23,7 +27,7 @@ extension SymbolRelationship.Requirement:CustomStringConvertible
     var description:String
     {
         """
-        (requirement: \(self.source), of: \(self.target))
+        (\(self.optional ? "optional " : "")requirement: \(self.source), of: \(self.target))
         """
     }
 }
