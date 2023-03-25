@@ -1,7 +1,7 @@
 extension SymbolRelationship
 {
     @frozen public
-    struct DefaultImplementation:Equatable, Hashable, Sendable
+    struct DefaultImplementation:SuperformRelationship, Equatable, Hashable, Sendable
     {
         public
         let source:ScalarSymbolResolution
