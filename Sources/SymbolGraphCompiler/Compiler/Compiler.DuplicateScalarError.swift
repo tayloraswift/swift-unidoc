@@ -4,12 +4,8 @@ extension Compiler
     struct DuplicateScalarError:Equatable, Error
     {
         public
-        let resolution:ScalarSymbolResolution
-
-        public
-        init(duplicated resolution:ScalarSymbolResolution)
+        init()
         {
-            self.resolution = resolution
         }
     }
 }

@@ -23,8 +23,8 @@ extension Compiler.Scalars
     mutating
     func include(scalar:ScalarSymbolResolution, with description:SymbolDescription) throws
     {
-        try self.recognize(scalar: scalar, as: .included(.init(resolution: scalar,
-            conditions: description.extension.conditions)))
+        try self.recognize(scalar: scalar, as: .included(.infer(from: description,
+            as: scalar)))
     }
     private mutating
     func recognize(scalar:ScalarSymbolResolution, as recognition:Recognition) throws
@@ -35,7 +35,7 @@ extension Compiler.Scalars
             return
         
         case .included:
-            throw Compiler.DuplicateScalarError.init(duplicated: scalar)
+            throw Compiler.DuplicateScalarError.init()
         }
     }
 }
@@ -62,19 +62,6 @@ extension Compiler.Scalars
             return scalar
         case .excluded?:
             return nil
-        case nil:
-            throw Compiler.ScalarReferenceError.external(resolution)
-        }
-    }
-    @available(*, deprecated, message: "do we really need this?")
-    func callAsFunction(internal resolution:ScalarSymbolResolution) throws -> Compiler.Scalar
-    {
-        switch self.recognized[resolution]
-        {
-        case .included(let scalar)?:
-            return scalar
-        case .excluded?:
-            throw Compiler.ScalarReferenceError.excluded(resolution)
         case nil:
             throw Compiler.ScalarReferenceError.external(resolution)
         }
