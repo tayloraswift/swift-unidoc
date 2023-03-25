@@ -31,7 +31,7 @@ extension Compiler.Extensions
         guard case .extension = description.phylum
         else
         {
-            throw Compiler.ExtensionPhylumError.init(invalid: description.phylum, block: block)
+            throw Compiler.ExtensionPhylumError.unsupported(description.phylum)
         }
 
         let object:Compiler.Extension = self[type, where: description.extension.conditions]

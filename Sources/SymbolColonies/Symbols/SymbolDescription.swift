@@ -17,7 +17,7 @@ struct SymbolDescription:Equatable, Sendable
     public
     let `extension`:ExtensionContext
     public
-    let generics:GenericContext
+    let generics:GenericSignature<ScalarSymbolResolution>
 
     public
     let location:SourceLocation<String>?
@@ -35,7 +35,7 @@ struct SymbolDescription:Equatable, Sendable
         visibility:SymbolVisibility,
         fragments:Declaration<ScalarSymbolResolution>,
         extension:ExtensionContext,
-        generics:GenericContext,
+        generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
         phylum:SymbolPhylum,
         path:SymbolPath,
@@ -68,7 +68,7 @@ extension SymbolDescription
         abridged:
         __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
         extension:ExtensionContext,
-        generics:GenericContext,
+        generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
         type:SymbolDescriptionType,
         path:SymbolPath,

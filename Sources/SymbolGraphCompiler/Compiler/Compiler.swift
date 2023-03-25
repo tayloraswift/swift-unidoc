@@ -49,18 +49,34 @@ extension Compiler
                     //  their generic/extension contexts.
                     continue
                 
-                case (.scalar(let scalar), included: false):
-                    //  Remember this symbol’s resolution, so we can prune edges
-                    //  connected to it.
-                    try self.scalars.exclude(scalar: scalar)
-                
-                case (.scalar(let scalar), included: true):
-                    try self.scalars.include(scalar: scalar, with: symbol)
+                case (.scalar(let scalar), included: let included):
+                    do
+                    {
+                        included ?
+                        try self.scalars.include(scalar: scalar, with: symbol) :
+                        try self.scalars.exclude(scalar: scalar)
+                    }
+                    catch let error
+                    {
+                        throw SymbolDescriptionError<ScalarSymbolResolution>.init(
+                            underlying: error,
+                            in: scalar)
+                    }
                 
                 case (.block(let block), included: true):
-                    try self.extensions.include(extended: try extensions.extendee(of: block),
-                        with: symbol,
-                        by: block)
+                    do
+                    {
+                        try self.extensions.include(
+                            extended: try extensions.extendee(of: block),
+                            with: symbol,
+                            by: block)
+                    }
+                    catch let error
+                    {
+                        throw SymbolDescriptionError<BlockSymbolResolution>.init(
+                            underlying: error,
+                            in: block)
+                    }
                 
                 case (.block, included: false):
                     //  We do not care about extension blocks that only contain

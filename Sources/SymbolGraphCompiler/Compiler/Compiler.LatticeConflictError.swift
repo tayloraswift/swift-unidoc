@@ -1,18 +1,18 @@
 extension Compiler
 {
     public
-    struct LatticeConflictError<LatticeVector>:Error, Sendable where LatticeVector:Sendable
+    struct LatticeConflictError<HalfEdge>:Error, Sendable where HalfEdge:Sendable
     {
         public
-        let other:LatticeVector
+        let other:HalfEdge
 
         public
-        init(existing other:LatticeVector)
+        init(existing other:HalfEdge)
         {
             self.other = other
         }
     }
 }
-extension Compiler.LatticeConflictError:Equatable where LatticeVector:Equatable
+extension Compiler.LatticeConflictError:Equatable where HalfEdge:Equatable
 {
 }
