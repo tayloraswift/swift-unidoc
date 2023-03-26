@@ -1,4 +1,5 @@
 import Markdown
+import MarkdownTree
 
 extension MarkdownTree
 {
@@ -16,5 +17,13 @@ extension MarkdownTree
     init(from document:Document)
     {
         self.init(document.blockChildren.map(Block.create(from:)))
+    }
+}
+extension MarkdownTree:ExpressibleByStringLiteral
+{
+    @inlinable public
+    init(stringLiteral:String)
+    {
+        self.init(parsing: stringLiteral)
     }
 }
