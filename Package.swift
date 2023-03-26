@@ -9,6 +9,9 @@ let package:Package = .init(
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Generics", targets: ["Generics"]),
 
+        .library(name: "MarkdownTree", targets: ["MarkdownTree"]),
+        .library(name: "MarkdownParser", targets: ["MarkdownParser"]),
+
         .library(name: "Packages", targets: ["Packages"]),
         .library(name: "PackageManifests", targets: ["PackageManifests"]),
         .library(name: "PackageResolution", targets: ["PackageResolution"]),
@@ -24,15 +27,30 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(from: "0.4.5")),
-
-        .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(from: "0.3.2")),
-        .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(from: "0.1.12")),
+        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(
+            from: "0.4.5")),
+        .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(
+            from: "0.3.2")),
+        .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(
+            from: "0.1.12")),
         
-        .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(from: "1.2.1")),
+        .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
+            from: "0.50700.0")),
+
+        .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(
+            from: "1.2.1")),
     ],
     targets:
     [
+        .target(name: "MarkdownTree"),
+
+        .target(name: "MarkdownParser", dependencies:
+            [
+                .target(name: "MarkdownTree"),
+                //  TODO: this links Foundation. Need to find a replacement.
+                .product(name: "Markdown", package: "swift-markdown"),
+            ]),
+
         .target(name: "Declarations"),
 
         .target(name: "Generics"),
