@@ -1,4 +1,5 @@
 import Markdown
+import MarkdownTree
 
 extension MarkdownTree.InlineBlock:ParsableAsInlineMarkup
 {
