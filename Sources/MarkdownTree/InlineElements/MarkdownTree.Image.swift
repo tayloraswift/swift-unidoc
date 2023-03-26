@@ -19,3 +19,11 @@ extension MarkdownTree
         }
     }
 }
+extension MarkdownTree.Image:MarkdownTextConvertibleElement
+{
+    @inlinable public
+    var text:String
+    {
+        self.elements.lazy.map(\.text).joined()
+    }
+}
