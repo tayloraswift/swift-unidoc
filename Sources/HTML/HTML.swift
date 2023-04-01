@@ -13,6 +13,19 @@ struct HTML
 extension HTML
 {
     @inlinable public
+    var utf8:[UInt8]
+    {
+        _read
+        {
+            yield  self.encoder.utf8
+        }
+        _modify
+        {
+            yield &self.encoder.utf8
+        }
+    }
+
+    @inlinable public
     init(with encode:(inout Self) throws -> ()) rethrows
     {
         self.init()
@@ -24,7 +37,7 @@ extension HTML:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        self.encoder.string
+        .init(decoding: self.utf8, as: Unicode.UTF8.self)
     }
 }
 extension HTML
@@ -32,10 +45,10 @@ extension HTML
     @inlinable internal mutating
     func emit(_ tag:some RawRepresentable<String>, with yield:(inout AttributeEncoder) -> ())
     {
-        self.encoder.string.append("<")
-        self.encoder.string.append(tag.rawValue)
+        self.utf8.append(0x3C) // '<'
+        self.utf8.append(contentsOf: tag.rawValue.utf8)
         yield(&self.encoder)
-        self.encoder.string.append(">")
+        self.utf8.append(0x3E) // '>'
     }
 }
 extension HTML
@@ -43,9 +56,10 @@ extension HTML
     @inlinable public mutating
     func close(_ tag:ContainerElement)
     {
-        self.encoder.string.append("</")
-        self.encoder.string.append(tag.rawValue)
-        self.encoder.string.append(">")
+        self.utf8.append(0x3C) // '<'
+        self.utf8.append(0x2F) // '/'
+        self.utf8.append(contentsOf: tag.rawValue.utf8)
+        self.utf8.append(0x3E) // '>'
     }
     @inlinable public mutating
     func open(_ tag:ContainerElement, with yield:(inout AttributeEncoder) -> () = { _ in })
