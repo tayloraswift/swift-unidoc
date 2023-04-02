@@ -4,12 +4,12 @@ extension HTML
     struct AttributeEncoder
     {
         @usableFromInline internal
-        var string:String
+        var utf8:[UInt8]
 
         @inlinable internal
-        init(string:String = "")
+        init(utf8:[UInt8] = [])
         {
-            self.string = string
+            self.utf8 = utf8
         }
     }
 }
@@ -40,21 +40,30 @@ extension HTML.AttributeEncoder
         {
             if  let text:String
             {
-                self.string.append(" ")
-                self.string.append(name.rawValue)
-                self.string.append("='")
-                for character:Character in text
+                self.utf8.append(0x20) // ' '
+                self.utf8 += name.rawValue.utf8
+
+                if  text.isEmpty
                 {
-                    if  character == "'"
+                    return 
+                }
+
+                self.utf8.append(0x3D) // '='
+                self.utf8.append(0x27) // '''
+
+                for byte:UInt8 in text.utf8
+                {
+                    if  byte == 0x27
                     {
-                        self.string.append("&#39;")
+                        self.utf8 += "&#39;".utf8
                     }
                     else
                     {
-                        self.string.append(character)
+                        self.utf8.append(byte)
                     }
                 }
-                self.string.append("'")
+
+                self.utf8.append(0x27) // '''
             }
         }
     }
