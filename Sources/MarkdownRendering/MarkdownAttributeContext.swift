@@ -20,9 +20,9 @@ extension MarkdownAttributeContext
     }
 
     mutating
-    func append(class:some RawRepresentable<String>)
+    func append(class enumerated:some RawRepresentable<String>)
     {
-        self.complete.append((.class, `class`.rawValue))
+        self.complete.append((.class, enumerated.rawValue))
     }
 }
 extension MarkdownAttributeContext
@@ -35,6 +35,8 @@ extension MarkdownAttributeContext
         {
         case .language: self.complete.append((.class, "language-\(value)"))
 
+        case .checkbox: self.complete.append((.type, "checkbox"))
+
         case .center:   self.complete.append((.align, "center"))
         case .left:     self.complete.append((.align, "left"))
         case .right:    self.complete.append((.align, "right"))
@@ -46,7 +48,6 @@ extension MarkdownAttributeContext
         case .href:     self.complete.append((.href, value))
         case .src:      self.complete.append((.src, value))
         case .title:    self.complete.append((.title, value))
-        case .type:     self.complete.append((.type, value))
         }
     }
     mutating
@@ -85,7 +86,9 @@ extension MarkdownAttributeContext
                 html[name] = value
             }
         }
-
-        html[.class] = classes.joined(separator: " ")
+        if !classes.isEmpty
+        {
+            html[.class] = classes.joined(separator: " ")
+        }
     }
 }
