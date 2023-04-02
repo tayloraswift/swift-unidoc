@@ -18,7 +18,7 @@ extension MarkdownTree
         public override
         func emit(into binary:inout MarkdownBinary)
         {
-            binary[.transparent] { $0.write(text: self.text) }
+            binary[.transparent] = self.text
         }
     }
 }

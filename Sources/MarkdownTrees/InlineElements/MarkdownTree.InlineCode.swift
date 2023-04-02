@@ -23,6 +23,6 @@ extension MarkdownTree.InlineCode:MarkdownBinaryConvertibleElement
     public
     func emit(into binary:inout MarkdownBinary)
     {
-        binary[.code] { $0.write(text: self.text) }
+        binary[.code] = self.text
     }
 }

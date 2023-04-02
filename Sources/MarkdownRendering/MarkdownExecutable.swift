@@ -1,26 +1,47 @@
-import HTMLRendering
+import HTML
 
 @rethrows public
 protocol MarkdownExecutable
 {
-    func fill(html:inout HTML, with reference:UInt32) rethrows
-
     var bytecode:MarkdownBytecode { get }
+
+    func fill(html:inout HTML, with reference:UInt32) throws
 }
-extension MarkdownExecutable where Self:RenderableAsHTML
+extension MarkdownExecutable
 {
+    /// Renders a placeholder `code` element describing the reference.
     public
-    func render(to html:inout HTML) throws
+    func fill(html:inout HTML, with reference:UInt32)
+    {
+        html[.code] = "<reference = \(reference)>"
+    }
+}
+extension MarkdownExecutable
+{
+    /// Runs this markdown executable and renders its output to the HTML argument.
+    /// If an error occurs, stops execution and returns the error, otherwise
+    /// returns nil if successful. This function always closes any HTML elements
+    /// it creates, even on error.
+    public
+    func render(to html:inout HTML) rethrows -> MarkdownExecutionError?
     {
         var attributes:MarkdownAttributeContext = .init()
         var stack:[MarkdownElementContext] = []
+
+        defer
+        {
+            for context:MarkdownElementContext in stack.reversed()
+            {
+                html.close(context: context)
+            }
+        }
 
         for instruction:MarkdownInstruction in self.bytecode
         {
             switch instruction
             {
             case .invalid:
-                throw MarkdownExecutionError.invalid
+                return .invalid
             
             case .attribute(let attribute):
                 attributes.flush()
@@ -43,30 +64,29 @@ extension MarkdownExecutable where Self:RenderableAsHTML
                 attributes.clear()
             
             case .pop:
-                guard let element:MarkdownElementContext = stack.popLast()
+                if let context:MarkdownElementContext = stack.popLast()
+                {
+                    html.close(context: context)
+                }
                 else
                 {
-                    throw MarkdownExecutionError.illegal
+                    return .illegal
                 }
 
-                if case nil = attributes.current
-                {
-                    html.close(context: element)
-                }
+                guard case nil = attributes.current
                 else
                 {
-                    throw MarkdownExecutionError.attributes(preceding: .pop)
+                    return .attributes(preceding: .pop)
                 }
             
             case .reference(let reference):
-                if case nil = attributes.current
-                {
-                    try self.fill(html: &html, with: reference)
-                }
+                guard case nil = attributes.current
                 else
                 {
-                    throw MarkdownExecutionError.attributes(preceding: .reference)
+                    return .attributes(preceding: .reference)
                 }
+
+                try self.fill(html: &html, with: reference)
             
             case .utf8(let codeunit):
                 guard case nil = attributes.current?.utf8.append(codeunit)
@@ -86,9 +106,6 @@ extension MarkdownExecutable where Self:RenderableAsHTML
 
             }
         }
-        if !stack.isEmpty
-        {
-            throw MarkdownExecutionError.incomplete
-        }
+        return stack.isEmpty ? nil : .incomplete
     }
 }

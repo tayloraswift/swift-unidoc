@@ -18,7 +18,8 @@ extension MarkdownTree.BlockItem.Checkbox:MarkdownBinaryConvertibleElement
         binary[.input]
         {
             $0[.checked] = self == .checked
-            $0[.disabled] = true 
+            $0[.checkbox] = true
+            $0[.disabled] = true
         }
     }
 }

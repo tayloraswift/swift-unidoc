@@ -10,11 +10,12 @@ extension MarkdownBytecode
         case href
         case src
         case title
-        case type
 
         /// Pseudo-attribute, expands to `class='language-<value>'`.
         case language = 0x80
 
+        /// Pseudo-attribute, expands to `type='checkbox'`. Always drops values.
+        case checkbox
         /// Pseudo-attribute, expands to `align='center'`. Always drops values.
         case center
         /// Pseudo-attribute, expands to `align='left'`. Always drops values.
