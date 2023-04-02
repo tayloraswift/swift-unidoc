@@ -13,6 +13,15 @@ struct MarkdownBinary
 extension MarkdownBinary
 {
     @inlinable public
+    init(with encode:(inout Self) throws -> ()) rethrows
+    {
+        self.init()
+        try encode(&self)
+    }
+}
+extension MarkdownBinary
+{
+    @inlinable public
     var bytes:[UInt8]
     {
         self.bytecode.bytes
@@ -78,6 +87,30 @@ extension MarkdownBinary
             self.bytecode.write(instruction: context)
             encode(&self)
             self.bytecode.write(marker: .pop)
+        }
+    }
+}
+extension MarkdownBinary
+{
+    /// Emits the UTF-8 contents of the assigned string, if non-nil, into
+    /// this binary, framed by the specified context. The setter does nothing
+    /// if the assigned value is nil; it will not create an empty context.
+    /// The getter always returns nil.
+    @inlinable public
+    subscript<String>(_ context:MarkdownBytecode.Context,
+        attributes:(inout AttributeEncoder) -> () = { _ in }) -> String?
+        where String:StringProtocol
+    {
+        get
+        {
+            nil
+        }
+        set(text)
+        {
+            if  let text:String
+            {
+                self[context, attributes] { $0.write(text: text) }
+            }
         }
     }
 }

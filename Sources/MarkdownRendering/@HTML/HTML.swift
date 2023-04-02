@@ -1,4 +1,4 @@
-import HTML
+import HTMLRendering
 
 extension HTML
 {

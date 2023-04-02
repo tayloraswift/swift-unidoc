@@ -3,6 +3,7 @@ swift --version &&
 swift build -c release &&
 swift run -c release DeclarationsTests &&
 swift run -c release MarkdownParsingTests &&
+swift run -c release MarkdownRenderingTests &&
 swift run -c release PackageManifestsTests &&
 swift run -c release PackageResolutionTests &&
 swift run -c release SemanticVersionsTests &&
