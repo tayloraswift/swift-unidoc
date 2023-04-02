@@ -171,6 +171,13 @@ let package:Package = .init(
             ],
             path: "Tests/MarkdownParsing"),
         
+        .executableTarget(name: "MarkdownRenderingTests", dependencies:
+            [
+                .target(name: "MarkdownRendering"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/MarkdownRendering"),
+        
         .executableTarget(name: "PackageManifestsTests", dependencies:
             [
                 .target(name: "PackageManifests"),
