@@ -9,8 +9,14 @@ let package:Package = .init(
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Generics", targets: ["Generics"]),
 
-        .library(name: "MarkdownTree", targets: ["MarkdownTree"]),
-        .library(name: "MarkdownParser", targets: ["MarkdownParser"]),
+        .library(name: "HTML", targets: ["HTML"]),
+        .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
+
+        .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
+        .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
+        .library(name: "MarkdownRendering", targets: ["MarkdownRendering"]),
+        .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
+        .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
         .library(name: "Packages", targets: ["Packages"]),
         .library(name: "PackageManifests", targets: ["PackageManifests"]),
@@ -42,13 +48,36 @@ let package:Package = .init(
     ],
     targets:
     [
-        .target(name: "MarkdownTree"),
+        .target(name: "HTML"),
 
-        .target(name: "MarkdownParser", dependencies:
+        .target(name: "HTMLRendering", dependencies:
             [
-                .target(name: "MarkdownTree"),
+                .target(name: "HTML"),
+            ]),
+        
+        .target(name: "MarkdownABI"),
+
+        .target(name: "MarkdownRendering", dependencies:
+            [
+                .target(name: "HTMLRendering"),
+                .target(name: "MarkdownABI"),
+            ]),
+
+        .target(name: "MarkdownTrees", dependencies:
+            [
+                .target(name: "MarkdownABI")
+            ]),
+
+        .target(name: "MarkdownParsing", dependencies:
+            [
+                .target(name: "MarkdownTrees"),
                 //  TODO: this links Foundation. Need to find a replacement.
                 .product(name: "Markdown", package: "swift-markdown"),
+            ]),
+
+        .target(name: "MarkdownSemantics", dependencies:
+            [
+                .target(name: "MarkdownTrees"),
             ]),
 
         .target(name: "Declarations"),
@@ -135,12 +164,12 @@ let package:Package = .init(
             ],
             path: "Tests/Declarations"),
         
-        .executableTarget(name: "MarkdownParserTests", dependencies:
+        .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
-                .target(name: "MarkdownParser"),
+                .target(name: "MarkdownParsing"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/MarkdownParser"),
+            path: "Tests/MarkdownParsing"),
         
         .executableTarget(name: "PackageManifestsTests", dependencies:
             [
