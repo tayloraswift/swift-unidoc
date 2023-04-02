@@ -1,46 +1,41 @@
-extension MarkdownInstruction
+extension MarkdownBinary
 {
     /// An instruction that delegates a document encoding task to some
     /// external encoding implementation.
-    @frozen public
+    @frozen @usableFromInline internal
     struct Reference:Equatable, Hashable, Sendable
     {
-        public
+        @usableFromInline internal
         let id:UInt32
 
-        @inlinable public
+        @inlinable internal
         init(id:UInt32)
         {
             self.id = id
         }
     }
 }
-extension MarkdownInstruction.Reference:Comparable
+extension MarkdownBinary.Reference:Comparable
 {
-    @inlinable public static
+    @inlinable internal static
     func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.id < rhs.id
     }
 }
-extension MarkdownInstruction.Reference:RawRepresentable
+extension MarkdownBinary.Reference:RawRepresentable
 {
     /// The little-endian raw value of this reference instruction.
-    @inlinable public
+    @inlinable internal
     var rawValue:UInt32
     {
         self.id.littleEndian
     }
 
     /// Loads a reference instruction from a little-endian raw value.
-    @inlinable public
+    @inlinable internal
     init(rawValue:UInt32)
     {
         self.init(id: .init(littleEndian: rawValue))
     }
-}
-extension MarkdownInstruction.Reference:MarkdownInstructionType
-{
-    @inlinable public static
-    var marker:MarkdownBytecode.Marker { .reference }
 }

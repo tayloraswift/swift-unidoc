@@ -3,11 +3,20 @@ protocol RenderableAsHTML
 {
     func render(to html:inout HTML)
 }
-extension String:RenderableAsHTML
+extension RenderableAsHTML where Self:StringProtocol
 {
     @inlinable public
     func render(to html:inout HTML)
     {
-        html.utf8.append(contentsOf: self.utf8)
+        for codeunit:UInt8 in self.utf8
+        {
+            html.append(unescaped: codeunit)
+        }
     }
+}
+extension String:RenderableAsHTML
+{
+}
+extension Substring:RenderableAsHTML
+{
 }

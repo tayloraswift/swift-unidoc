@@ -5,35 +5,42 @@ extension MarkdownTree
     @frozen public
     enum InlineBlock
     {
-        case referenceLink(String)
-        case inlineLink(InlineLink)
-
         case container(InlineContainer<Self>)
         
-        case code(String)
-        case html(String)
+        case code(InlineCode, symbol:Bool = false)
+        case html(InlineHTML)
         case image(Image)
+        case link(Link)
+
+        case reference(UInt32)
+
         case text(String)
     }
 }
 extension MarkdownTree.InlineBlock:MarkdownBinaryConvertibleElement
 {
     @inlinable public
-    func serialize(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinary)
     {
-        let element:MarkdownBinary.ContainerType
-        let text:String
-
         switch self
         {
         case .container(let container):
-            container.serialize(into: &binary)
+            container.emit(into: &binary)
         
-        case .code(let code):
-            binary[.code] { $0.write(text: code) }
+        case .code(let code, symbol: _):
+            code.emit(into: &binary)
         
-        case .html(let escaped):
-            binary[.none] { $0.write(text: escaped) }
+        case .html(let html):
+            html.emit(into: &binary)
+        
+        case .image(let image):
+            image.emit(into: &binary)
+        
+        case .link(let link):
+            link.emit(into: &binary)
+        
+        case .reference(let reference):
+            binary.write(reference: reference)
 
         case .text(let unescaped):
             binary.write(text: unescaped)
@@ -50,10 +57,10 @@ extension MarkdownTree.InlineBlock:MarkdownTextConvertibleElement
         case .container(let container):
             return container.text
         
-        case .code(let text), .symbol(let text), .text(let text):
-            return text
+        case .code(let code, symbol: _):
+            return code.text
         
-        case .html:
+        case .html, .reference:
             return ""
         
         case .image(let image):
@@ -61,6 +68,9 @@ extension MarkdownTree.InlineBlock:MarkdownTextConvertibleElement
         
         case .link(let link):
             return link.text
+        
+        case .text(let text):
+            return text
         }
     }
 }

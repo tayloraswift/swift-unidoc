@@ -13,19 +13,6 @@ struct HTML
 extension HTML
 {
     @inlinable public
-    var utf8:[UInt8]
-    {
-        _read
-        {
-            yield  self.encoder.utf8
-        }
-        _modify
-        {
-            yield &self.encoder.utf8
-        }
-    }
-
-    @inlinable public
     init(with encode:(inout Self) throws -> ()) rethrows
     {
         self.init()
@@ -37,7 +24,7 @@ extension HTML:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        .init(decoding: self.utf8, as: Unicode.UTF8.self)
+        .init(decoding: self.encoder.utf8, as: Unicode.UTF8.self)
     }
 }
 extension HTML
@@ -45,26 +32,47 @@ extension HTML
     @inlinable internal mutating
     func emit(_ tag:some RawRepresentable<String>, with yield:(inout AttributeEncoder) -> ())
     {
-        self.utf8.append(0x3C) // '<'
-        self.utf8.append(contentsOf: tag.rawValue.utf8)
+        self.encoder.utf8.append(0x3C) // '<'
+        self.encoder.utf8.append(contentsOf: tag.rawValue.utf8)
         yield(&self.encoder)
-        self.utf8.append(0x3E) // '>'
+        self.encoder.utf8.append(0x3E) // '>'
     }
 }
 extension HTML
 {
     @inlinable public mutating
-    func close(_ tag:ContainerElement)
-    {
-        self.utf8.append(0x3C) // '<'
-        self.utf8.append(0x2F) // '/'
-        self.utf8.append(contentsOf: tag.rawValue.utf8)
-        self.utf8.append(0x3E) // '>'
-    }
-    @inlinable public mutating
     func open(_ tag:ContainerElement, with yield:(inout AttributeEncoder) -> () = { _ in })
     {
         self.emit(tag, with: yield)
+    }
+    @inlinable public mutating
+    func append(escaped codeunit:UInt8)
+    {
+        self.encoder.utf8.append(codeunit)
+    }
+    @inlinable public mutating
+    func append(unescaped codeunit:UInt8)
+    {
+        switch codeunit
+        {
+        case 0x26: // '&'
+            self.encoder.utf8 += "&amp;".utf8
+        case 0x3C: // '<'
+            self.encoder.utf8 += "&lt;".utf8
+        case 0x3E: // '>'
+            self.encoder.utf8 += "&gt;".utf8
+        
+        case let literal:
+            self.encoder.utf8.append(literal)
+        }
+    }
+    @inlinable public mutating
+    func close(_ tag:ContainerElement)
+    {
+        self.encoder.utf8.append(0x3C) // '<'
+        self.encoder.utf8.append(0x2F) // '/'
+        self.encoder.utf8.append(contentsOf: tag.rawValue.utf8)
+        self.encoder.utf8.append(0x3E) // '>'
     }
 }
 extension HTML

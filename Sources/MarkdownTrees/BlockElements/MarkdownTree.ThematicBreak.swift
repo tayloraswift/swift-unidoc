@@ -5,5 +5,11 @@ extension MarkdownTree
     public final
     class ThematicBreak:Block
     {
+        /// Emits an `hr` element.
+        public override
+        func emit(into binary:inout MarkdownBinary)
+        {
+            binary[.hr]
+        }
     }
 }

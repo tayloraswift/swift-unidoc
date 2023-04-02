@@ -17,9 +17,9 @@ extension MarkdownTree
             self.text = text
         }
 
-        /// Serializes a `<pre>` element with a `<code>` element inside of it.
+        /// Emits a `pre` element with a `code` element inside of it.
         public override
-        func serialize(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinary)
         {
             binary[.pre]
             {

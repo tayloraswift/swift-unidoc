@@ -18,7 +18,7 @@ extension MarkdownBinary.AttributeEncoder
     /// Serializes an empty attribute, if the assigned boolean is true.
     /// Does nothing if it is false. The getter always returns false.
     @inlinable public
-    subscript(attribute:MarkdownInstruction.Attribute) -> Bool
+    subscript(attribute:MarkdownBytecode.Attribute) -> Bool
     {
         get
         {
@@ -30,7 +30,7 @@ extension MarkdownBinary.AttributeEncoder
         }
     }
     @inlinable public
-    subscript(attribute:MarkdownInstruction.Attribute) -> String?
+    subscript(attribute:MarkdownBytecode.Attribute) -> String?
     {
         get
         {

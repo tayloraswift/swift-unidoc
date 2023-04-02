@@ -39,45 +39,45 @@ extension MarkdownBinary
         self.bytecode.write(text: text)
     }
     @inlinable public mutating
-    func write(reference:MarkdownInstruction.Reference)
+    func write(reference:UInt32)
     {
-        self.bytecode.write(instruction: reference)
+        self.bytecode.write(reference: .init(id: reference))
     }
 }
 extension MarkdownBinary
 {
     @inlinable public
-    subscript(_ element:MarkdownInstruction.Emit,
+    subscript(_ emission:MarkdownBytecode.Emission,
         attributes:(inout AttributeEncoder) -> () = { _ in }) -> Void
     {
         mutating get
         {
             attributes(&self.encoder)
-            self.bytecode.write(instruction: element)
+            self.bytecode.write(instruction: emission)
         }
     }
     @inlinable public
-    subscript(_ element:MarkdownInstruction.Push,
+    subscript(_ context:MarkdownBytecode.Context,
         attributes:(inout AttributeEncoder) -> (),
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
         {
             attributes(&self.encoder)
-            self.bytecode.write(instruction: element)
+            self.bytecode.write(instruction: context)
             encode(&self)
-            self.bytecode.write(instruction: .pop)
+            self.bytecode.write(marker: .pop)
         }
     }
     @inlinable public
-    subscript(_ element:MarkdownInstruction.Push,
+    subscript(_ context:MarkdownBytecode.Context,
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
         {
-            self.bytecode.write(instruction: element)
+            self.bytecode.write(instruction: context)
             encode(&self)
-            self.bytecode.write(instruction: .pop)
+            self.bytecode.write(marker: .pop)
         }
     }
 }

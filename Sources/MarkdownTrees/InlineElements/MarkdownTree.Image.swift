@@ -21,19 +21,6 @@ extension MarkdownTree
         }
     }
 }
-extension MarkdownTree.Image:MarkdownBinaryConvertibleElement
-{
-    @inlinable public
-    func serialize(into binary:inout MarkdownBinary)
-    {
-        binary[.img]
-        {
-            $0[.alt] = self.alt
-            $0[.src] = self.target
-            $0[.title] = self.title
-        }
-    }
-}
 extension MarkdownTree.Image:MarkdownTextConvertibleElement
 {
     /// Returns ``text`` if it is not empty.
@@ -47,5 +34,18 @@ extension MarkdownTree.Image:MarkdownTextConvertibleElement
     var text:String
     {
         self.elements.lazy.map(\.text).joined()
+    }
+}
+extension MarkdownTree.Image:MarkdownBinaryConvertibleElement
+{
+    public
+    func emit(into binary:inout MarkdownBinary)
+    {
+        binary[.img]
+        {
+            $0[.alt] = self.alt
+            $0[.src] = self.target
+            $0[.title] = self.title
+        }
     }
 }

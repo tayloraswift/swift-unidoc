@@ -15,13 +15,14 @@ extension MarkdownTree
             super.init(elements)
         }
 
+        /// Emits an `li` element.
         public override
-        func serialize(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinary)
         {
             binary[.li]
             {
-                self.checkbox?.serialize(into: &$0)
-                super.serialize(into: &$0)
+                self.checkbox?.emit(into: &$0)
+                super.emit(into: &$0)
             }
         }
     }

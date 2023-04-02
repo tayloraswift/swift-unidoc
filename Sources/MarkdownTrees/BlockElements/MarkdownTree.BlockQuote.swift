@@ -5,12 +5,13 @@ extension MarkdownTree
     public final
     class BlockQuote:BlockContainer<Block>
     {
+        /// Emits a `blockquote` element.
         public override
-        func serialize(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinary)
         {
             binary[.blockquote]
             {
-                super.serialize(into: &$0)
+                super.emit(into: &$0)
             }
         }
     }

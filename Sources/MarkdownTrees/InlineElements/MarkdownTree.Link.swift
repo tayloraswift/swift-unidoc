@@ -3,7 +3,7 @@ import MarkdownABI
 extension MarkdownTree
 {
     @frozen public
-    struct InlineLink
+    struct Link
     {
         public
         var elements:[Inline]
@@ -18,25 +18,25 @@ extension MarkdownTree
         }
     }
 }
-extension MarkdownTree.InlineLink:MarkdownBinaryConvertibleElement
-{
-    @inlinable public
-    func serialize(into binary:inout MarkdownBinary)
-    {
-        binary[.a, { $0[.href] = self.target }]
-        {
-            for element:MarkdownTree.Inline in self.elements
-            {
-                element.serialize(into: &$0)
-            }
-        }
-    }
-}
-extension MarkdownTree.InlineLink:MarkdownTextConvertibleElement
+extension MarkdownTree.Link:MarkdownTextConvertibleElement
 {
     @inlinable public
     var text:String
     {
         self.elements.lazy.map(\.text).joined()
+    }
+}
+extension MarkdownTree.Link:MarkdownBinaryConvertibleElement
+{
+    public
+    func emit(into binary:inout MarkdownBinary)
+    {
+        binary[.a, { $0[.href] = self.target }]
+        {
+            for element:MarkdownTree.Inline in self.elements
+            {
+                element.emit(into: &$0)
+            }
+        }
     }
 }

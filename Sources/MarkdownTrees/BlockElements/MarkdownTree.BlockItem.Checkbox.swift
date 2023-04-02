@@ -11,8 +11,9 @@ extension MarkdownTree.BlockItem
 }
 extension MarkdownTree.BlockItem.Checkbox:MarkdownBinaryConvertibleElement
 {
+    /// Emits an `input` element.
     public
-    func serialize(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinary)
     {
         binary[.input]
         {

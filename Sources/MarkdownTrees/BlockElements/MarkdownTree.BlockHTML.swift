@@ -14,11 +14,11 @@ extension MarkdownTree
             self.text = text
         }
 
-        /// Serializes the raw text content of this element.
+        /// Emits the raw text content of this element in a transparent instruction context.
         public override
-        func serialize(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinary)
         {
-            binary[.none] { $0.write(text: self.text) }
+            binary[.transparent] { $0.write(text: self.text) }
         }
     }
 }

@@ -1,15 +1,18 @@
-extension MarkdownInstruction
+extension MarkdownBytecode
 {
     /// An instruction that pushes a container element onto the document stack.
     @frozen public
-    enum Push:UInt8, RawRepresentable, Equatable, Hashable, Sendable
+    enum Context:UInt8, RawRepresentable, Equatable, Hashable, Sendable
     {
-        case none = 0x00
+        case transparent = 0x00
 
         //  HTML elements.
         case a = 0x01
         case blockquote
         case code
+        case dd
+        case dl
+        case dt
         case em
         case li
         case h1
@@ -42,11 +45,13 @@ extension MarkdownInstruction
         case type
         case `typealias`
 
-        //  Parameters section
+        //  Section elements.
         case parameters = 0x30
+        case returns
+        case `throws`
 
-        //  Aside blocks.
-        case attention = 0x31
+        //  Signage elements.
+        case attention = 0x40
         case author
         case authors
         case bug
@@ -63,21 +68,35 @@ extension MarkdownInstruction
         case precondition
         case remark
         case requires
-        case returns
         case seealso
         case since
-        case `throws`
         case tip
         case todo
         case version
         case warning
     }
 }
-extension MarkdownInstruction.Push:MarkdownInstructionType
+extension MarkdownBytecode.Context
 {
-    public
-    typealias RawValue = UInt8
-    
+    /// Returns a heading context, clamping the given heading `level`. If
+    /// `level` is less than 1, this function returns ``h1``. If `level`
+    /// is greater than 6, this function returns ``h6``.
+    @inlinable public static
+    func h(_ level:Int) -> Self
+    {
+        switch level
+        {
+        case ...1:      return .h1
+        case    2:      return .h2
+        case    3:      return .h3
+        case    4:      return .h4
+        case    5:      return .h5
+        case    6, _:   return .h6
+        }
+    }
+}
+extension MarkdownBytecode.Context:MarkdownBytecodeInstruction
+{
     @inlinable public static
     var marker:MarkdownBytecode.Marker { .push }
 }
