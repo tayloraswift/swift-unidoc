@@ -18,28 +18,6 @@ extension MarkdownTree
         }
     }
 }
-extension MarkdownTree.InlineContainer:MarkdownBinaryConvertibleElement
-    where Element:MarkdownBinaryConvertibleElement
-{
-    @inlinable public
-    func serialize(into binary:inout MarkdownBinary)
-    {
-        let type:MarkdownBinary.ContainerType
-        switch self.type
-        {
-        case .em:       type = .em
-        case .s:        type = .s
-        case .strong:   type = .strong
-        }
-        binary[type]
-        {
-            for element:Element in self.elements
-            {
-                element.serialize(into: &$0)
-            }
-        }
-    }
-}
 extension MarkdownTree.InlineContainer:MarkdownTextConvertibleElement 
     where Element:MarkdownTextConvertibleElement
 {
@@ -47,5 +25,27 @@ extension MarkdownTree.InlineContainer:MarkdownTextConvertibleElement
     var text:String
     {
         self.elements.lazy.map(\.text).joined()
+    }
+}
+extension MarkdownTree.InlineContainer:MarkdownBinaryConvertibleElement
+    where Element:MarkdownBinaryConvertibleElement
+{
+    public
+    func emit(into binary:inout MarkdownBinary)
+    {
+        let context:MarkdownBytecode.Context
+        switch self.type
+        {
+        case .em:       context = .em
+        case .s:        context = .s
+        case .strong:   context = .strong
+        }
+        binary[context]
+        {
+            for element:Element in self.elements
+            {
+                element.emit(into: &$0)
+            }
+        }
     }
 }

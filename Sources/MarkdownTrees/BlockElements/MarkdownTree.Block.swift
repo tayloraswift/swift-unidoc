@@ -10,9 +10,9 @@ extension MarkdownTree
         {
         }
 
-        /// Serializes nothing.
+        /// Emits nothing.
         public
-        func serialize(into _:inout MarkdownBinary)
+        func emit(into _:inout MarkdownBinary)
         {
         }
     }

@@ -13,13 +13,13 @@ extension MarkdownTree
         {
             self.elements = elements
         }
-        /// Serializes the elements in this container, with no framing.
+        /// Emits the elements in this container, with no framing.
         public override
-        func serialize(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinary)
         {
             for element:Element in self.elements
             {
-                element.serialize(into: &binary)
+                element.emit(into: &binary)
             }
         }
     }

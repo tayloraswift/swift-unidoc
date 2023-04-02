@@ -1,22 +1,19 @@
-extension MarkdownBytecode
+@frozen public
+struct MarkdownInstructionIterator
 {
-    @frozen public
-    struct Iterator
-    {
-        @usableFromInline
-        let bytes:[UInt8]
-        @usableFromInline
-        var index:Int
+    @usableFromInline
+    let bytes:[UInt8]
+    @usableFromInline
+    var index:Int
 
-        @inlinable internal
-        init(bytes:[UInt8])
-        {
-            self.bytes = bytes
-            self.index = bytes.startIndex
-        }
+    @inlinable internal
+    init(bytes:[UInt8])
+    {
+        self.bytes = bytes
+        self.index = bytes.startIndex
     }
 }
-extension MarkdownBytecode.Iterator
+extension MarkdownInstructionIterator
 {
     @inlinable internal mutating
     func read() -> UInt8?
@@ -34,12 +31,12 @@ extension MarkdownBytecode.Iterator
     }
     @inlinable internal mutating
     func read<Instruction>(as _:Instruction.Type = Instruction.self) -> Instruction?
-        where Instruction:RawRepresentable<UInt8>
+        where Instruction:MarkdownBytecodeInstruction
     {
         self.read().flatMap(Instruction.init(rawValue:))
     }
 }
-extension MarkdownBytecode.Iterator:IteratorProtocol
+extension MarkdownInstructionIterator:IteratorProtocol
 {
     @inlinable public mutating
     func next() -> MarkdownInstruction?
@@ -62,19 +59,19 @@ extension MarkdownBytecode.Iterator:IteratorProtocol
         switch marker
         {
         case .attribute:
-            if  let instruction:MarkdownInstruction.Attribute = self.read()
+            if  let attribute:MarkdownBytecode.Attribute = self.read()
             {
-                return .attribute(instruction)
+                return .attribute(attribute)
             }
         
         case .emit:
-            if  let instruction:MarkdownInstruction.Emit = self.read()
+            if  let instruction:MarkdownBytecode.Emission = self.read()
             {
                 return .emit(instruction)
             }
         
         case .push:
-            if  let instruction:MarkdownInstruction.Push = self.read()
+            if  let instruction:MarkdownBytecode.Context = self.read()
             {
                 return .push(instruction)
             }
@@ -90,12 +87,13 @@ extension MarkdownBytecode.Iterator:IteratorProtocol
                 {
                     self.index = after
                 }
-                return self.bytes.withUnsafeBytes
+                let reference:MarkdownBinary.Reference = self.bytes.withUnsafeBytes
                 {
-                    .reference(.init(rawValue: $0.loadUnaligned(
+                    .init(rawValue: $0.loadUnaligned(
                         fromByteOffset: self.index,
-                        as: UInt32.self)))
+                        as: UInt32.self))
                 }
+                return .reference(reference.id)
             }
         
         case .reserved:

@@ -6,30 +6,9 @@ extension MarkdownTree
     enum Inline
     {
         case container(InlineContainer<Self>)
-        case code(String)
-        case html(String)
+        case code(InlineCode)
+        case html(InlineHTML)
         case text(String)
-    }
-}
-extension MarkdownTree.Inline:MarkdownBinaryConvertibleElement
-{
-    @inlinable public
-    func serialize(into binary:inout MarkdownBinary)
-    {
-        switch self
-        {
-        case .container(let container):
-            container.serialize(into: &binary)
-        
-        case .code(let code):
-            binary[.code] { $0.write(text: code) }
-        
-        case .html(let escaped):
-            binary[.none] { $0.write(text: escaped) }
-
-        case .text(let unescaped):
-            binary.write(text: unescaped)
-        }
     }
 }
 extension MarkdownTree.Inline:MarkdownTextConvertibleElement
@@ -39,14 +18,31 @@ extension MarkdownTree.Inline:MarkdownTextConvertibleElement
     {
         switch self
         {
+        case .container(let container): return container.text
+        case .code(let code):           return code.text
+        case .html:                     return ""
+        case .text(let text):           return text
+        }
+    }
+}
+extension MarkdownTree.Inline:MarkdownBinaryConvertibleElement
+{
+    @inlinable public
+    func emit(into binary:inout MarkdownBinary)
+    {
+        switch self
+        {
         case .container(let container):
-            return container.text
+            container.emit(into: &binary)
         
-        case .code(let text), .text(let text):
-            return text
+        case .code(let code):
+            code.emit(into: &binary)
         
-        case .html:
-            return ""
+        case .html(let html):
+            html.emit(into: &binary)
+
+        case .text(let unescaped):
+            binary.write(text: unescaped)
         }
     }
 }

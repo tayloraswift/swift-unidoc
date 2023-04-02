@@ -18,30 +18,25 @@ extension MarkdownBytecode
         self.bytes.append(marker.rawValue)
     }
 
-    @inlinable public mutating
-    func write(instruction:MarkdownInstruction.Pop)
+    @inlinable internal mutating
+    func write(reference:MarkdownBinary.Reference)
     {
-        self.write(marker: MarkdownInstruction.Pop.marker)
-    }
-    @inlinable public mutating
-    func write<Instruction>(instruction:Instruction)
-        where Instruction:MarkdownInstructionType<UInt8>
-    {
-        self.write(marker: Instruction.marker)
-        self.bytes.append(instruction.rawValue)
-    }
-    @inlinable public mutating
-    func write(instruction:MarkdownInstruction.Reference)
-    {
-        self.write(marker: MarkdownInstruction.Reference.marker)
+        self.write(marker: .reference)
 
-        withUnsafeBytes(of: instruction.rawValue)
+        withUnsafeBytes(of: reference.rawValue)
         {
             self.bytes.append(contentsOf: $0)
         }
     }
+    @inlinable internal mutating
+    func write<Instruction>(instruction:Instruction)
+        where Instruction:MarkdownBytecodeInstruction
+    {
+        self.write(marker: Instruction.marker)
+        self.bytes.append(instruction.rawValue)
+    }
 
-    @inlinable public mutating
+    @inlinable internal mutating
     func write(text:some StringProtocol)
     {
         self.bytes.append(contentsOf: text.utf8)
@@ -50,7 +45,7 @@ extension MarkdownBytecode
 extension MarkdownBytecode:Sequence
 {
     @inlinable public
-    func makeIterator() -> Iterator
+    func makeIterator() -> MarkdownInstructionIterator
     {
         .init(bytes: self.bytes)
     }

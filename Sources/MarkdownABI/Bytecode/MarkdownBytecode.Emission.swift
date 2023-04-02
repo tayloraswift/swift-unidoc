@@ -1,8 +1,8 @@
-extension MarkdownInstruction
+extension MarkdownBytecode
 {
     /// An instruction that emits a void element.
     @frozen public
-    enum Emit:UInt8, RawRepresentable, Equatable, Hashable, Sendable
+    enum Emission:UInt8, RawRepresentable, Equatable, Hashable, Sendable
     {
         case br = 0x00
         case hr
@@ -11,11 +11,8 @@ extension MarkdownInstruction
         case wbr
     }
 }
-extension MarkdownInstruction.Emit:MarkdownInstructionType
+extension MarkdownBytecode.Emission:MarkdownBytecodeInstruction
 {
-    public
-    typealias RawValue = UInt8
-    
     @inlinable public static
     var marker:MarkdownBytecode.Marker { .emit }
 }

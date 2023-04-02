@@ -1,10 +1,12 @@
 public
-protocol MarkdownKeywordPattern:MarkdownPrefixPattern, LosslessStringConvertible
+protocol MarkdownKeywordPattern:MarkdownPrefixPattern
 {
     /// The maximum number of space- or hyphen-separated words that any
     /// keyword of this type can be written with.
     static
     var words:Int { get }
+
+    init?(_ description:String)
 }
 extension MarkdownKeywordPattern
 {
