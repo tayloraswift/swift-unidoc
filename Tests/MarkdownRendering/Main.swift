@@ -238,5 +238,87 @@ enum Main:SyncTests
                 }
             }
         }
+        if  let tests:TestGroup = tests / "references"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <p><code>&lt;reference = 12345&gt;</code></p>
+                """)
+            {
+                $0[.p] { $0.write(reference: 12345) }
+            }
+        }
+        if  let tests:TestGroup = tests / "references" / "success"
+        {
+            struct Executable:MarkdownExecutable
+            {
+                let binary:MarkdownBinary = .init
+                {
+                    $0[.p]
+                    {
+                        $0.write(text: "before")
+                        $0.write(reference: 0xAA_BB_CC_DD)
+                        $0.write(text: "after")
+                    }
+                }
+
+                var bytecode:MarkdownBytecode
+                {
+                    self.binary.bytecode
+                }
+
+                func fill(html:inout HTML, with reference:UInt32)
+                {
+                    html[.a, { $0[.href] = "swiftinit.org" }] = String.init(reference,
+                        radix: 16)
+                }
+            }
+
+            let executable:Executable = .init()
+            let html:HTML = .init { _ = executable.render(to: &$0) }
+
+            tests.expect(html.description ==?
+                "<p>before<a href='swiftinit.org'>aabbccdd</a>after</p>")
+        }
+        if  let tests:TestGroup = tests / "references" / "failure"
+        {
+            struct Executable:MarkdownExecutable
+            {
+                enum ExpectedError:Equatable, Error
+                {
+                    case reference(UInt32)
+                }
+
+                let binary:MarkdownBinary = .init
+                {
+                    $0[.p]
+                    {
+                        $0.write(text: "before")
+                        $0.write(reference: 0xAA_BB_CC_DD)
+                        $0.write(text: "after")
+                    }
+                }
+
+                var bytecode:MarkdownBytecode
+                {
+                    self.binary.bytecode
+                }
+
+                func fill(html _:inout HTML, with reference:UInt32) throws
+                {
+                    throw ExpectedError.reference(reference)
+                }
+            }
+
+            let executable:Executable = .init()
+            var html:HTML = .init()
+
+            tests.do(catching: Executable.ExpectedError.reference(0xAA_BB_CC_DD))
+            {
+                _ = try executable.render(to: &html)
+            }
+
+            tests.expect(html.description ==? "<p>before</p>")
+        }
     }
 }
