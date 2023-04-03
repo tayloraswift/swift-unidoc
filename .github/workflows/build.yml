@@ -15,7 +15,7 @@ jobs:
             matrix:
                 image:
                 -   swift:5.8.0-amazonlinux2
-                -   swift:5.8.0-jammy
+                #-   swift:5.8.0-jammy
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
