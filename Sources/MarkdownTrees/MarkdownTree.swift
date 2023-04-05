@@ -5,7 +5,7 @@ struct MarkdownTree
     var blocks:[Block]
 
     @inlinable public
-    init(_ blocks:[Block])
+    init(blocks:[Block] = [])
     {
         self.blocks = blocks
     }

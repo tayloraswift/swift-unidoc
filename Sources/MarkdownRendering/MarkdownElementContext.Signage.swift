@@ -2,6 +2,12 @@ import HTML
 
 extension MarkdownElementContext
 {
+    /// A signage context, which typically renders as an `aside` HTML element.
+    /// Most markdown “asides” are signage contexts, but we prefer the term
+    /// “signage” in our markdown ABI, because semantic processing is supposed
+    /// to leave them where they appear in the source document, like a sign post.
+    /// (Semantic processing reorders some asides, like `returns`, to the top of
+    /// the document.)
     enum Signage:String, Equatable, Hashable, Sendable
     {
         case attention

@@ -226,10 +226,10 @@ enum Main:SyncTests
         {
             self.run(tests: tests,
                 expecting: """
-                <blockquote class='warning'>\
+                <aside class='warning'>\
                 <h3>Warning</h3>\
                 <p>don’t use this!</p>\
-                </blockquote>
+                </aside>
                 """)
             {
                 $0[.warning]
