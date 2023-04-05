@@ -10,7 +10,7 @@ enum MarkdownElementContext
     /// A section context, which generates a `section` element, with
     /// a synthesized `h2` heading.
     case section(Section)
-    /// A signage context, which generates a `blockquote` aside, with
+    /// A signage context, which generates an `aside` element, with
     /// a synthesized `h3` heading.
     case signage(Signage)
     /// The transparent context, which ignores attributes, and renders

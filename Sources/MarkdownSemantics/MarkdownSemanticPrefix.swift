@@ -1,21 +1,26 @@
-@rethrows public
-protocol MarkdownPrefixPattern
-{
-    init?(from spans:__shared [MarkdownTree.InlineBlock]) rethrows
+import MarkdownTrees
 
-    /// The maximum number of top-level spans ``extract(from:)`` will
+@rethrows public
+protocol MarkdownSemanticPrefix
+{
+    /// The maximum number of top-level elements ``extract(from:)`` will
     /// inspect for prefix patterns, including the span containing the
     /// `:` separator. This must be at least 2 if the conforming type
     /// accepts formatted prefixes, since the `:` separator can only
     /// appear in unformatted text.
     static
-    var range:Int { get }
+    var radius:Int { get }
+
+    /// Detects an instance of this pattern type from the given array of
+    /// inline block content. The array contains inline content up to, but
+    /// not including, an unformatted `:` character.
+    init?(from elements:__shared [MarkdownTree.InlineBlock]) rethrows
 }
-extension MarkdownPrefixPattern
+extension MarkdownSemanticPrefix
 {
-    /// Extracts a prefix pattern from the given array of block elements, if
-    /// one matches. This function only mutates the array if it returns a
-    /// non-nil pattern.
+    /// Extracts a prefix pattern from the given array of block elements,
+    /// if one matches. This function only mutates the array if it returns
+    /// a non-nil pattern.
     static
     func extract(from blocks:inout [MarkdownTree.Block]) rethrows -> Self?
     {
@@ -37,18 +42,19 @@ extension MarkdownPrefixPattern
 
         return pattern
     }
-    /// Extracts a prefix pattern from the given array of spans, if one matches.
-    /// This function only mutates the array if it returns a non-nil pattern.
+    /// Extracts a prefix pattern from the given array of inline content,
+    /// if one matches. This function only mutates the array if it returns
+    /// a non-nil pattern.
     private static
-    func extract(from spans:inout [MarkdownTree.InlineBlock]) rethrows -> Self?
+    func extract(from elements:inout [MarkdownTree.InlineBlock]) rethrows -> Self?
     {
         for (index, span):(Int, MarkdownTree.InlineBlock)
-            in zip(spans.indices, spans.prefix(Self.range))
+            in zip(elements.indices, elements.prefix(Self.radius))
         {
             if  case .text(let text) = span,
                 let colon:String.Index = text.firstIndex(of: ":")
             {
-                var outer:[MarkdownTree.InlineBlock] = .init(spans[..<index])
+                var outer:[MarkdownTree.InlineBlock] = .init(elements[..<index])
                 let inner:Substring = text[..<colon]
                 //  If the text before the `:` contains non-whitespace characters,
                 //  add them to the list of elements.
@@ -69,12 +75,12 @@ extension MarkdownPrefixPattern
                     while: \.isWhitespace)
                 if  suffix.isEmpty
                 {
-                    spans[...index] = []
+                    elements[...index] = []
                 }
                 else
                 {
-                    spans[   index] = .text(.init(suffix))
-                    spans[..<index] = []
+                    elements[   index] = .text(.init(suffix))
+                    elements[..<index] = []
                 }
 
                 return pattern

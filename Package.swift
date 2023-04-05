@@ -12,6 +12,8 @@ let package:Package = .init(
         .library(name: "HTML", targets: ["HTML"]),
         .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
 
+        .library(name: "Lexemes", targets: ["Lexemes"]),
+
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
         .library(name: "MarkdownRendering", targets: ["MarkdownRendering"]),
@@ -77,12 +79,15 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics", dependencies:
             [
+                .target(name: "Lexemes"),
                 .target(name: "MarkdownTrees"),
             ]),
 
         .target(name: "Declarations"),
 
         .target(name: "Generics"),
+
+        .target(name: "Lexemes"),
 
         .target(name: "Packages", dependencies:
             [

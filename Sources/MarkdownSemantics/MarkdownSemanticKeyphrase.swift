@@ -1,36 +1,38 @@
+import MarkdownTrees
+
 public
-protocol MarkdownKeywordPattern:MarkdownPrefixPattern
+protocol MarkdownSemanticKeyphrase:MarkdownSemanticPrefix
 {
     /// The maximum number of space- or hyphen-separated words that any
     /// keyword of this type can be written with.
     static
     var words:Int { get }
 
-    init?(_ description:String)
+    /// Detects an instance of this pattern type from the given string.
+    /// The string is all-lowercased and devoid of whitespace.
+    init?(lowercased:String)
 }
-extension MarkdownKeywordPattern
+extension MarkdownSemanticKeyphrase
 {
     /// If a keyword pattern uses formatting, the formatting must apply
     /// to the entire pattern.
     public static
-    var range:Int { 2 }
+    var radius:Int { 2 }
 
     public
-    init?(from spans:__shared [MarkdownTree.InlineBlock])
+    init?(from elements:__shared [MarkdownTree.InlineBlock])
     {
-        if spans.count == 1
+        if  elements.count == 1
         {
-            self.init(spans[0].text)
+            self.init(elements[0].text)
         }
         else
         {
             return nil
         }
     }
-}
-extension MarkdownKeywordPattern where Self:RawRepresentable<String>
-{
-    public
+
+    private
     init?(_ description:String)
     {
         var lowercased:String = ""
@@ -54,6 +56,6 @@ extension MarkdownKeywordPattern where Self:RawRepresentable<String>
                 return nil
             }
         }
-        self.init(rawValue: lowercased)
+        self.init(lowercased: lowercased)
     }
 }

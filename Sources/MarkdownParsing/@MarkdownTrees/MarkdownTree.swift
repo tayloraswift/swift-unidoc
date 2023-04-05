@@ -16,7 +16,7 @@ extension MarkdownTree
     public
     init(from document:Document)
     {
-        self.init(document.blockChildren.map(Block.create(from:)))
+        self.init(blocks: document.blockChildren.map(Block.create(from:)))
     }
 }
 extension MarkdownTree:ExpressibleByStringLiteral

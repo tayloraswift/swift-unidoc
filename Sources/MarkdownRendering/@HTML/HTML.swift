@@ -42,7 +42,7 @@ extension HTML
             self[.h2] = section.description
 
         case .signage(let signage):
-            self.open(.blockquote, with: attributes)
+            self.open(.aside, with: attributes)
             self[.h3] = signage.description
         
         //  Ignores all attributes!
@@ -65,7 +65,7 @@ extension HTML
             self.close(.section)
 
         case .signage:
-            self.close(.blockquote)
+            self.close(.aside)
         
         //  Ignores all attributes!
         case .transparent:
