@@ -17,6 +17,26 @@ extension MarkdownTree
         case text(String)
     }
 }
+extension MarkdownTree.InlineBlock
+{
+    @inlinable public mutating
+    func outline(into register:(_ symbol:String) throws -> UInt32) rethrows
+    {
+        switch self
+        {
+        case .container(var container):
+            self = .text("")
+            defer { self = .container(container) }
+            try container.outline(into: register)
+        
+        case .code(let link, symbol: true):
+            self = .reference(try register(link.text))
+        
+        case .code(_, symbol: false), .html, .image, .link, .reference, .text:
+            return
+        }
+    }
+}
 extension MarkdownTree.InlineBlock:MarkdownBinaryConvertibleElement
 {
     @inlinable public

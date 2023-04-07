@@ -387,7 +387,7 @@ enum Main:SyncTests
             }
             if  let tests:TestGroup = tests / "literal" / "colon"
             {
-                //  TODO: why is swift-markdown turning the apostrophe into a curly apostrophe?
+                //  Apostrophe will become a curly quote, due to cmark-gfm smart punctuation.
                 Self.run(tests: tests,
                     markdown:
                     """
