@@ -18,15 +18,7 @@ extension MarkdownTree
         }
     }
 }
-extension MarkdownTree.Link:MarkdownTextConvertibleElement
-{
-    @inlinable public
-    var text:String
-    {
-        self.elements.lazy.map(\.text).joined()
-    }
-}
-extension MarkdownTree.Link:MarkdownBinaryConvertibleElement
+extension MarkdownTree.Link:MarkdownElement
 {
     public
     func emit(into binary:inout MarkdownBinary)
@@ -38,5 +30,13 @@ extension MarkdownTree.Link:MarkdownBinaryConvertibleElement
                 element.emit(into: &$0)
             }
         }
+    }
+}
+extension MarkdownTree.Link:MarkdownText
+{
+    @inlinable public
+    var text:String
+    {
+        self.elements.lazy.map(\.text).joined()
     }
 }

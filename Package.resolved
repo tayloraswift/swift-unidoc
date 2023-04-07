@@ -30,7 +30,7 @@
     {
       "identity" : "swift-grammar",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kelvin13/swift-grammar",
+      "location" : "https://github.com/tayloraswift/swift-grammar",
       "state" : {
         "revision" : "3ed94966b1fd8145c2624a5955a9f0d17663280b",
         "version" : "0.3.2"
@@ -48,7 +48,7 @@
     {
       "identity" : "swift-json",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kelvin13/swift-json",
+      "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
         "revision" : "36ef4bf1e6ae38f881ed253d5656839a046456f1",
         "version" : "0.4.5"
@@ -66,7 +66,7 @@
     {
       "identity" : "swift-mongodb",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kelvin13/swift-mongodb",
+      "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
         "revision" : "ef04ddddad112010ce7c0eb1a6bbbcf7648057eb",
         "version" : "0.1.13"

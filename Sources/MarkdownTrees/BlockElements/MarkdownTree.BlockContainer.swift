@@ -3,7 +3,7 @@ import MarkdownABI
 extension MarkdownTree
 {
     public
-    class BlockContainer<Element>:Block where Element:MarkdownBinaryConvertibleElement
+    class BlockContainer<Element>:Block where Element:MarkdownElement
     {
         public final
         var elements:[Element]
@@ -12,6 +12,17 @@ extension MarkdownTree
         init(_ elements:[Element])
         {
             self.elements = elements
+        }
+
+        /// Recursively calls ``MarkdownElement outline(by:)`` for each element
+        /// in this container.
+        public final override
+        func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+        {
+            for index:Int in self.elements.indices
+            {
+                try self.elements[index].outline(by: register)
+            }
         }
         /// Emits the elements in this container, with no framing.
         public override

@@ -35,11 +35,11 @@ let package:Package = .init(
     ],
     dependencies: 
     [
-        .package(url: "https://github.com/kelvin13/swift-json", .upToNextMinor(
+        .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "0.4.5")),
-        .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(
+        .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
-        .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.1.13")),
         
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(

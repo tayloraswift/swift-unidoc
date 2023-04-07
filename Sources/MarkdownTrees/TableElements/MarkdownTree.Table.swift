@@ -16,7 +16,16 @@ extension MarkdownTree
             self.head = .init(alignments: columns, cells: head)
             self.body = body
         }
-
+        /// Recursively calls ``Block outline(by:)`` for each cell in this table.
+        public override
+        func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+        {
+            try self.head.outline(by: register)
+            for row:Row<BodyCell> in self
+            {
+                try row.outline(by: register)
+            }
+        }
         /// Emits a `table` element.
         public override
         func emit(into binary:inout MarkdownBinary)
