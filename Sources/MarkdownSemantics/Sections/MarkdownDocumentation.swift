@@ -22,8 +22,7 @@ struct MarkdownDocumentation
         self.article = article
     }
 }
-
-extension MarkdownDocumentation:MarkdownBinaryConvertibleElement
+extension MarkdownDocumentation
 {
     public
     func emit(into binary:inout MarkdownBinary)
@@ -70,7 +69,7 @@ extension MarkdownDocumentation
                 var items:[MarkdownTree.BlockItem] = []
                 for item:MarkdownTree.BlockItem in list.elements
                 {
-                    guard let prefix:MarkdownBlockItemPrefix = .extract(from: &item.elements)
+                    guard let prefix:MarkdownBlockPrefix = .extract(from: &item.elements)
                     else
                     {
                         items.append(item)
@@ -78,7 +77,11 @@ extension MarkdownDocumentation
                     }
                     switch prefix
                     {
-                    case .parameters:
+                    case .parameter(let parameter):
+                        parameters.list.append(.init(identifier: parameter.identifier,
+                            elements: item.elements))
+
+                    case .keywords(.parameters):
                         for block:MarkdownTree.Block in item.elements
                         {
                             switch block
@@ -86,7 +89,7 @@ extension MarkdownDocumentation
                             case let list as MarkdownTree.UnorderedList:
                                 for item:MarkdownTree.BlockItem in list.elements
                                 {
-                                    let name:MarkdownParameterName? = .extract(
+                                    let name:MarkdownParameterNamePrefix? = .extract(
                                         from: &item.elements)
                                     parameters.list.append(.init(
                                         identifier: name?.identifier ?? .underscore,
@@ -98,23 +101,24 @@ extension MarkdownDocumentation
                             }
                         }
 
-                    case .parameter(let parameter):
-                       parameters.list.append(.init(identifier: parameter.identifier,
-                            elements: item.elements))
-
-                    case .aside(.returns):
+                    case .keywords(.returns):
                         returns += item.elements
                     
-                    case .aside(.throws):
+                    case .keywords(.throws):
                         `throws` += item.elements
 
-                    case .aside(let aside):
+                    case .keywords(let aside):
                         article.append(.semantic(aside, item.elements))
                     }
                 }
+                if !items.isEmpty
+                {
+                    list.elements = items
+                    article.append(.regular(list))
+                }
             
             case let quote as MarkdownTree.BlockQuote:
-                guard let prefix:MarkdownBlockQuotePrefix = .extract(from: &quote.elements)
+                guard let prefix:MarkdownBlockPrefix = .extract(from: &quote.elements)
                 else
                 {
                     article.append(.regular(quote))
@@ -126,14 +130,17 @@ extension MarkdownDocumentation
                     parameters.list.append(.init(identifier: parameter.identifier,
                         elements: quote.elements))
 
-                case .aside(.returns):
+                case .keywords(.parameters):
+                    parameters.discussion += quote.elements
+
+                case .keywords(.returns):
                     returns += quote.elements
                 
-                case .aside(.throws):
+                case .keywords(.throws):
                     `throws` += quote.elements
 
-                case .aside(let aside):
-                    article.append(.semantic(aside, quote.elements))
+                case .keywords(let keywords):
+                    article.append(.semantic(keywords, quote.elements))
                 }
             
             case let block:

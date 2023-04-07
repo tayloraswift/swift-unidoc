@@ -40,7 +40,7 @@ let package:Package = .init(
         .package(url: "https://github.com/kelvin13/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/kelvin13/swift-mongodb", .upToNextMinor(
-            from: "0.1.12")),
+            from: "0.1.13")),
         
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
             from: "0.50700.0")),
@@ -182,6 +182,15 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/MarkdownRendering"),
+        
+        .executableTarget(name: "MarkdownSemanticsTests", dependencies:
+            [
+                .target(name: "MarkdownParsing"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "MarkdownSemantics"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/MarkdownSemantics"),
         
         .executableTarget(name: "PackageManifestsTests", dependencies:
             [

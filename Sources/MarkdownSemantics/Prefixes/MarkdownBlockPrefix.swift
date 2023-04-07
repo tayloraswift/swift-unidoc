@@ -1,11 +1,11 @@
 import MarkdownTrees
 
-enum MarkdownBlockQuotePrefix:Equatable, Hashable, Sendable
+enum MarkdownBlockPrefix:Equatable, Hashable, Sendable
 {
     case parameter(MarkdownParameterPrefix)
-    case aside(MarkdownAsidePrefix)
+    case keywords(MarkdownKeywordPrefix)
 }
-extension MarkdownBlockQuotePrefix:MarkdownSemanticPrefix
+extension MarkdownBlockPrefix:MarkdownSemanticPrefix
 {
     static
     var radius:Int { 4 }
@@ -16,9 +16,9 @@ extension MarkdownBlockQuotePrefix:MarkdownSemanticPrefix
         {
             self = .parameter(parameter)
         }
-        else if let aside:MarkdownAsidePrefix = .init(from: elements)
+        else if let keywords:MarkdownKeywordPrefix = .init(from: elements)
         {
-            self = .aside(aside)
+            self = .keywords(keywords)
         }
         else
         {

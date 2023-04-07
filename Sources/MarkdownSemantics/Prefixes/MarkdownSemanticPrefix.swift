@@ -1,6 +1,6 @@
 import MarkdownTrees
 
-@rethrows public
+@rethrows
 protocol MarkdownSemanticPrefix
 {
     /// The maximum number of top-level elements ``extract(from:)`` will
@@ -69,13 +69,31 @@ extension MarkdownSemanticPrefix
                 }
                 //  If the text after the `:` contains non-whitespace characters,
                 //  use them to replace the current text, and delete the elements
-                //  before the current span. If there is no such suffix, delete
-                //  the current span too.
+                //  before the current span.
                 let suffix:Substring = text.suffix(from: text.index(after: colon)).drop(
                     while: \.isWhitespace)
                 if  suffix.isEmpty
                 {
-                    elements[...index] = []
+                    //  If there is no such suffix, delete the current span too.
+                    //  Then keep erasing whitespace until we reach a formatted
+                    //  element, or the end of the block.
+                    var index:Int = elements.index(after: index)
+                    while   index < elements.endIndex,
+                            case .text(let text) = elements[index]
+                    {
+                        let suffix:Substring = text.drop(while: \.isWhitespace)
+                        if  suffix.isEmpty
+                        {
+                            index = elements.index(after: index)
+                        }
+                        else
+                        {
+                            elements[index] = .text(.init(suffix))
+                            break
+                        }
+                    }
+                    
+                    elements[..<index] = []
                 }
                 else
                 {

@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics.git",
       "state" : {
-        "revision" : "ff3d2212b6b093db7f177d0855adbc4ef9c5f036",
-        "version" : "1.0.3"
+        "revision" : "6c89474e62719ddcc1e9614989fff2f68208fe10",
+        "version" : "1.1.0"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kelvin13/swift-mongodb",
       "state" : {
-        "revision" : "477f33af403b480158f4d4a4ec6fa1a548f6350c",
-        "version" : "0.1.12"
+        "revision" : "ef04ddddad112010ce7c0eb1a6bbbcf7648057eb",
+        "version" : "0.1.13"
       }
     },
     {
