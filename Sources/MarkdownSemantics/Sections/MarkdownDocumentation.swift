@@ -25,35 +25,6 @@ struct MarkdownDocumentation
 extension MarkdownDocumentation
 {
     public
-    func emit(into binary:inout MarkdownBinary)
-    {
-        let discussion:ArraySlice<Block>
-
-        if  case .regular(let paragraph as MarkdownTree.Paragraph)? = self.article.first
-        {
-            paragraph.emit(into: &binary)
-            discussion = self.article.dropFirst()
-        }
-        else
-        {
-            discussion = self.article[...]
-        }
-
-        binary.write(reference: 0)
-
-        self.parameters?.emit(into: &binary)
-        self.returns?.emit(into: &binary)
-        self.throws?.emit(into: &binary)
-
-        for block:Block in discussion
-        {
-            block.emit(into: &binary)
-        }
-    }
-}
-extension MarkdownDocumentation
-{
-    public
     init(from tree:__shared MarkdownTree)
     {
         var parameters:(discussion:[MarkdownTree.Block], list:[Parameter]) = ([], [])
@@ -153,5 +124,34 @@ extension MarkdownDocumentation
             returns: .init(returns),
             throws: .init(`throws`),
             article: article)
+    }
+}
+extension MarkdownDocumentation
+{
+    public
+    func emit(into binary:inout MarkdownBinary)
+    {
+        let discussion:ArraySlice<Block>
+
+        if  case .regular(let paragraph as MarkdownTree.Paragraph)? = self.article.first
+        {
+            paragraph.emit(into: &binary)
+            discussion = self.article.dropFirst()
+        }
+        else
+        {
+            discussion = self.article[...]
+        }
+
+        binary.write(reference: 0)
+
+        self.parameters?.emit(into: &binary)
+        self.returns?.emit(into: &binary)
+        self.throws?.emit(into: &binary)
+
+        for block:Block in discussion
+        {
+            block.emit(into: &binary)
+        }
     }
 }

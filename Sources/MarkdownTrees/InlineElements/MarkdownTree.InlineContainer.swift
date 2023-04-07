@@ -18,6 +18,17 @@ extension MarkdownTree
         }
     }
 }
+extension MarkdownTree.InlineContainer<MarkdownTree.InlineBlock>
+{
+    @inlinable public mutating
+    func outline(into register:(_ symbol:String) throws -> UInt32) rethrows
+    {
+        for index:Int in self.elements.indices
+        {
+            try self.elements[index].outline(into: register)
+        }
+    }
+}
 extension MarkdownTree.InlineContainer:MarkdownTextConvertibleElement 
     where Element:MarkdownTextConvertibleElement
 {
