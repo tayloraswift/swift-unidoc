@@ -15,7 +15,7 @@ extension MarkdownBinary
 
     subscript<Value>(_ context:MarkdownBytecode.Context,
         attributes:(inout AttributeEncoder) -> () = { _ in }) -> Value?
-        where Value:MarkdownBinaryConvertibleElement
+        where Value:MarkdownElement
     {
         get
         {

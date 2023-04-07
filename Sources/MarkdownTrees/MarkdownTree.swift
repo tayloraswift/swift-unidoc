@@ -27,13 +27,7 @@ extension MarkdownTree
     {
         for block:Block in self.blocks
         {
-            if case let block as BlockContainer<InlineBlock> = block
-            {
-                for index:Int in block.elements.indices
-                {
-                    try block.elements[index].outline(by: register)
-                }
-            }
+            try block.outline(by: register)
         }
     }
 }

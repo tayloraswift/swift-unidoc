@@ -1,5 +1,5 @@
 public
-protocol MarkdownTextConvertibleElement
+protocol MarkdownText:MarkdownElement
 {
     /// Returns the plain text content of this element.
     var text:String { get }

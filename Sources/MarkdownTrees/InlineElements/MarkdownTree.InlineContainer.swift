@@ -3,7 +3,7 @@ import MarkdownABI
 extension MarkdownTree
 {
     @frozen public
-    struct InlineContainer<Element>
+    struct InlineContainer<Element> where Element:MarkdownText
     {
         public
         var elements:[Element]
@@ -18,7 +18,7 @@ extension MarkdownTree
         }
     }
 }
-extension MarkdownTree.InlineContainer<MarkdownTree.InlineBlock>
+extension MarkdownTree.InlineContainer:MarkdownElement
 {
     @inlinable public mutating
     func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
@@ -28,19 +28,6 @@ extension MarkdownTree.InlineContainer<MarkdownTree.InlineBlock>
             try self.elements[index].outline(by: register)
         }
     }
-}
-extension MarkdownTree.InlineContainer:MarkdownTextConvertibleElement 
-    where Element:MarkdownTextConvertibleElement
-{
-    @inlinable public
-    var text:String
-    {
-        self.elements.lazy.map(\.text).joined()
-    }
-}
-extension MarkdownTree.InlineContainer:MarkdownBinaryConvertibleElement
-    where Element:MarkdownBinaryConvertibleElement
-{
     public
     func emit(into binary:inout MarkdownBinary)
     {
@@ -58,5 +45,13 @@ extension MarkdownTree.InlineContainer:MarkdownBinaryConvertibleElement
                 element.emit(into: &$0)
             }
         }
+    }
+}
+extension MarkdownTree.InlineContainer:MarkdownText
+{
+    @inlinable public
+    var text:String
+    {
+        self.elements.lazy.map(\.text).joined()
     }
 }

@@ -9,10 +9,9 @@ extension MarkdownTree.BlockItem
         case unchecked
     }
 }
-extension MarkdownTree.BlockItem.Checkbox:MarkdownBinaryConvertibleElement
+extension MarkdownTree.BlockItem.Checkbox
 {
     /// Emits an `input` element.
-    public
     func emit(into binary:inout MarkdownBinary)
     {
         binary[.input]

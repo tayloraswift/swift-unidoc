@@ -38,8 +38,16 @@ extension MarkdownTree.Table.Row:RandomAccessCollection
             cell: self.cells[index])
     }
 }
-extension MarkdownTree.Table.Row:MarkdownBinaryConvertibleElement
+extension MarkdownTree.Table.Row:MarkdownElement
 {
+    @inlinable public
+    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+    {
+        for element:Element in self
+        {
+            try element.outline(by: register)
+        }
+    }
     public
     func emit(into binary:inout MarkdownBinary)
     {

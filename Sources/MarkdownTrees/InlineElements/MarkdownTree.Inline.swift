@@ -11,21 +11,7 @@ extension MarkdownTree
         case text(String)
     }
 }
-extension MarkdownTree.Inline:MarkdownTextConvertibleElement
-{
-    @inlinable public
-    var text:String
-    {
-        switch self
-        {
-        case .container(let container): return container.text
-        case .code(let code):           return code.text
-        case .html:                     return ""
-        case .text(let text):           return text
-        }
-    }
-}
-extension MarkdownTree.Inline:MarkdownBinaryConvertibleElement
+extension MarkdownTree.Inline:MarkdownElement
 {
     @inlinable public
     func emit(into binary:inout MarkdownBinary)
@@ -43,6 +29,20 @@ extension MarkdownTree.Inline:MarkdownBinaryConvertibleElement
 
         case .text(let unescaped):
             binary.write(text: unescaped)
+        }
+    }
+}
+extension MarkdownTree.Inline:MarkdownText
+{
+    @inlinable public
+    var text:String
+    {
+        switch self
+        {
+        case .container(let container): return container.text
+        case .code(let code):           return code.text
+        case .html:                     return ""
+        case .text(let text):           return text
         }
     }
 }

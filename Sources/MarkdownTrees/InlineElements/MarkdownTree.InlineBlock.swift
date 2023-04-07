@@ -17,7 +17,7 @@ extension MarkdownTree
         case text(String)
     }
 }
-extension MarkdownTree.InlineBlock
+extension MarkdownTree.InlineBlock:MarkdownElement
 {
     @inlinable public mutating
     func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
@@ -36,9 +36,7 @@ extension MarkdownTree.InlineBlock
             return
         }
     }
-}
-extension MarkdownTree.InlineBlock:MarkdownBinaryConvertibleElement
-{
+
     @inlinable public
     func emit(into binary:inout MarkdownBinary)
     {
@@ -67,7 +65,7 @@ extension MarkdownTree.InlineBlock:MarkdownBinaryConvertibleElement
         }
     }
 }
-extension MarkdownTree.InlineBlock:MarkdownTextConvertibleElement
+extension MarkdownTree.InlineBlock:MarkdownText
 {
     @inlinable public
     var text:String
