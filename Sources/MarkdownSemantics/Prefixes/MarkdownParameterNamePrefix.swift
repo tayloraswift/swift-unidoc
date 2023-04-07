@@ -1,7 +1,7 @@
 import Lexemes
 import MarkdownTrees
 
-struct MarkdownParameterName
+struct MarkdownParameterNamePrefix
 {
     let identifier:IdentifierLexeme
 
@@ -10,7 +10,7 @@ struct MarkdownParameterName
         self.identifier = identifier
     }
 }
-extension MarkdownParameterName:MarkdownSemanticPrefix
+extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
 {
     /// If a parameter name uses formatting, the formatting must apply
     /// to the entire pattern.

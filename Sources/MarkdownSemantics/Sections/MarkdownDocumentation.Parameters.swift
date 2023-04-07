@@ -34,11 +34,14 @@ extension MarkdownDocumentation.Parameters
             {
                 block.emit(into: &$0)
             }
-            $0[.dl]
+            if !self.list.isEmpty
             {
-                for parameter:MarkdownDocumentation.Parameter in self.list
+                $0[.dl]
                 {
-                    parameter.emit(into: &$0)
+                    for parameter:MarkdownDocumentation.Parameter in self.list
+                    {
+                        parameter.emit(into: &$0)
+                    }
                 }
             }
         }
