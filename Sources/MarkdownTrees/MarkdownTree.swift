@@ -31,7 +31,7 @@ extension MarkdownTree
             {
                 for index:Int in block.elements.indices
                 {
-                    try block.elements[index].outline(into: register)
+                    try block.elements[index].outline(by: register)
                 }
             }
         }

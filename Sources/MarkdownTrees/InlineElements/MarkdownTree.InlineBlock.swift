@@ -20,14 +20,14 @@ extension MarkdownTree
 extension MarkdownTree.InlineBlock
 {
     @inlinable public mutating
-    func outline(into register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
     {
         switch self
         {
         case .container(var container):
             self = .text("")
             defer { self = .container(container) }
-            try container.outline(into: register)
+            try container.outline(by: register)
         
         case .code(let link, symbol: true):
             self = .reference(try register(link.text))

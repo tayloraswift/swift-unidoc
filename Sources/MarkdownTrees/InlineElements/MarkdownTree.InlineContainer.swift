@@ -21,11 +21,11 @@ extension MarkdownTree
 extension MarkdownTree.InlineContainer<MarkdownTree.InlineBlock>
 {
     @inlinable public mutating
-    func outline(into register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
     {
         for index:Int in self.elements.indices
         {
-            try self.elements[index].outline(into: register)
+            try self.elements[index].outline(by: register)
         }
     }
 }
