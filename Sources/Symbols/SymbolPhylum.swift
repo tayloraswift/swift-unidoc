@@ -1,5 +1,5 @@
 @frozen public 
-enum SymbolPhylum:Hashable, Comparable, Sendable
+enum SymbolPhylum:Hashable, Sendable
 {
     case  actor
     case `associatedtype`
@@ -8,19 +8,13 @@ enum SymbolPhylum:Hashable, Comparable, Sendable
     case  deinitializer
     case `enum`
     case `extension`
-    case `func`
+    case `func`(Objectivity?)
     case  initializer
-    case  instanceMethod
-    case  instanceProperty
-    case  instanceSubscript
     case  macro
     case `operator`
     case `protocol`
     case `struct`
+    case `subscript`(Objectivity)
     case `typealias`
-    case  typeMethod
-    case  typeOperator
-    case  typeProperty
-    case  typeSubscript
-    case `var`
+    case `var`(Objectivity?)
 }

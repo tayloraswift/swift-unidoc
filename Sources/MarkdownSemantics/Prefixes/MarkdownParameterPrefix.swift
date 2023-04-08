@@ -1,11 +1,11 @@
-import Lexemes
+import Codelinks
 import MarkdownTrees
 
 struct MarkdownParameterPrefix:Equatable, Hashable, Sendable
 {
-    let identifier:IdentifierLexeme
+    let identifier:Codelink.Identifier
 
-    init(identifier:IdentifierLexeme)
+    init(identifier:Codelink.Identifier)
     {
         self.identifier = identifier
     }
@@ -26,7 +26,7 @@ extension MarkdownParameterPrefix:MarkdownSemanticPrefix
         
         if  words.count == 2,
             words[0].lowercased() == "parameter",
-            let identifier:IdentifierLexeme = .init(.init(words[1]))
+            let identifier:Codelink.Identifier = .init(words[1])
         {
             self.init(identifier: identifier)
         }

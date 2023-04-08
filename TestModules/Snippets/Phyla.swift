@@ -55,12 +55,12 @@ struct Struct
     }
 
     public static
-    func typeMethod()
+    func staticMethod()
     {
     }
     
     public static
-    var typeProperty:Void { return }
+    var staticProperty:Void { return }
 
     public static
     subscript(_:Never) -> Void
@@ -90,6 +90,20 @@ class Class
     init()
     {
     }
+
+    public class
+    subscript(_:Never) -> Void
+    {
+        return
+    }
+
+    public class
+    func classMethod()
+    {
+    }
+
+    public class
+    var classProperty:Void { return }
 
     deinit
     {

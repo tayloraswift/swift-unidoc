@@ -63,6 +63,33 @@ extension Compiler
 extension Compiler
 {
     final
+    class ClassFunc:LatticeScalar
+    {
+        override class
+        var phylum:SymbolPhylum { .func(.class) }
+    }
+}
+extension Compiler
+{
+    final
+    class ClassVar:LatticeScalar
+    {
+        override class
+        var phylum:SymbolPhylum { .var(.class) }
+    }
+}
+extension Compiler
+{
+    final
+    class ClassSubscript:LatticeScalar
+    {
+        override class
+        var phylum:SymbolPhylum { .subscript(.class) }
+    }
+}
+extension Compiler
+{
+    final
     class Actor:LatticeScalar
     {
         override class
@@ -72,19 +99,19 @@ extension Compiler
 extension Compiler
 {
     final
-    class InstanceMethod:LatticeScalar
+    class InstanceFunc:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .instanceMethod }
+        var phylum:SymbolPhylum { .func(.instance) }
     }
 }
 extension Compiler
 {
     final
-    class InstanceProperty:LatticeScalar
+    class InstanceVar:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .instanceProperty }
+        var phylum:SymbolPhylum { .var(.instance) }
     }
 }
 extension Compiler
@@ -93,25 +120,25 @@ extension Compiler
     class InstanceSubscript:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .instanceSubscript }
+        var phylum:SymbolPhylum { .subscript(.instance) }
     }
 }
 extension Compiler
 {
     final
-    class StaticMethod:LatticeScalar
+    class StaticFunc:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .typeMethod }
+        var phylum:SymbolPhylum { .func(.static) }
     }
 }
 extension Compiler
 {
     final
-    class StaticProperty:LatticeScalar
+    class StaticVar:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .typeProperty }
+        var phylum:SymbolPhylum { .var(.static) }
     }
 }
 extension Compiler
@@ -120,16 +147,7 @@ extension Compiler
     class StaticSubscript:LatticeScalar
     {
         override class
-        var phylum:SymbolPhylum { .typeSubscript }
-    }
-}
-extension Compiler
-{
-    final
-    class StaticOperator:LatticeScalar
-    {
-        override class
-        var phylum:SymbolPhylum { .typeOperator }
+        var phylum:SymbolPhylum { .subscript(.static) }
     }
 }
 
@@ -149,7 +167,7 @@ extension Compiler
     class GlobalFunc:Scalar
     {
         override class
-        var phylum:SymbolPhylum { .func }
+        var phylum:SymbolPhylum { .func(nil) }
     }
 }
 extension Compiler
@@ -158,13 +176,13 @@ extension Compiler
     class GlobalVar:Scalar
     {
         override class
-        var phylum:SymbolPhylum { .var }
+        var phylum:SymbolPhylum { .var(nil) }
     }
 }
 extension Compiler
 {
     final
-    class GlobalOperator:Scalar
+    class Operator:Scalar
     {
         override class
         var phylum:SymbolPhylum { .operator }

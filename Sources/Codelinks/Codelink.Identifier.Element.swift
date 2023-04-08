@@ -1,4 +1,4 @@
-extension IdentifierLexeme
+extension Codelink.Identifier
 {
     @frozen public
     struct Element:Equatable, Hashable, Sendable
@@ -13,10 +13,10 @@ extension IdentifierLexeme
         }
     }
 }
-extension IdentifierLexeme.Element
+extension Codelink.Identifier.Element
 {
     @inlinable public
-    init(_ first:IdentifierLexeme.First)
+    init(_ first:Codelink.Identifier.Head)
     {
         self.codepoint = first.codepoint
     }
@@ -33,13 +33,14 @@ extension IdentifierLexeme.Element
             self.init(codepoint: codepoint)
         
         default:
-            guard let first:IdentifierLexeme.First = .init(codepoint)
+            if let first:Codelink.Identifier.Head = .init(codepoint)
+            {
+                self.init(first)
+            }
             else
             {
                 return nil
             }
-
-            self.init(first)
         }
     }
 }

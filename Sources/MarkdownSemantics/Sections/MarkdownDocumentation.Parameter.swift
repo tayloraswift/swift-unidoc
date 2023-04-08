@@ -1,4 +1,4 @@
-import Lexemes
+import Codelinks
 import MarkdownABI
 import MarkdownTrees
 
@@ -8,12 +8,12 @@ extension MarkdownDocumentation
     struct Parameter
     {
         public
-        let identifier:IdentifierLexeme
+        let identifier:Codelink.Identifier
         public
         var elements:[MarkdownTree.Block]
 
         @inlinable public
-        init(identifier:IdentifierLexeme, elements:[MarkdownTree.Block])
+        init(identifier:Codelink.Identifier, elements:[MarkdownTree.Block])
         {
             self.identifier = identifier
             self.elements = elements
