@@ -36,7 +36,11 @@ extension Codelink.Operator:LosslessStringConvertible
     {
         self.characters
     }
-
+    /// Creates a swift operator name by validating the given string.
+    /// This initializer checks for unconditionally invalid operator
+    /// tokens (`.`, `=`, `->`, `//`, `/*`, `*/`), but it doesn’t
+    /// check for conditionally invalid prefix, infix, or postfix
+    /// tokens.
     public
     init?(_ description:String)
     {
@@ -55,6 +59,9 @@ extension Codelink.Operator
             return nil
         }
     }
+    /// Consumes text from the input string until encountering an
+    /// invalid operator character. If this initializer returns nil,
+    /// then it didn’t consume any text.
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
         guard   let head:Unicode.Scalar = codepoints.first,
@@ -64,14 +71,15 @@ extension Codelink.Operator
             return nil
         }
 
-        codepoints.removeFirst()
         self.init(head: head)
 
-        while   let next:Unicode.Scalar = codepoints.first,
+        var remaining:Substring.UnicodeScalarView = codepoints.dropFirst()
+
+        while   let next:Unicode.Scalar = remaining.first,
                 let next:Element = .init(next),
                 head.codepoint == "." || next.codepoint != "."
         {
-            codepoints.removeFirst()
+            remaining.removeFirst()
             self.append(next)
         }
 
@@ -80,7 +88,7 @@ extension Codelink.Operator
         case ".", "=", "->", "//", "/*", "*/":
             return nil
         default:
-            return
+            codepoints = remaining
         }
     }
 }
