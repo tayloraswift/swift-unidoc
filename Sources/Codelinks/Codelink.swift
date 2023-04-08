@@ -3,18 +3,8 @@ import Symbols
 public
 struct Codelink
 {
-
 }
 
-
-extension Codelink
-{
-    enum Word
-    {
-        case path(Substring)
-        case type(Substring)
-    }
-}
 extension Codelink
 {
     init?(parsing string:String)
@@ -29,6 +19,7 @@ extension Codelink
 
         var prefix:ArraySlice<Substring> = words.dropLast()
 
+        //  TODO: no way to specify subscript, init, deinit
         let phylum:SymbolPhylum.Filter?
         if  let keyword:Substring = prefix.first,
             let keyword:SymbolPhylum.Keyword = .init(rawValue: .init(keyword))
@@ -52,20 +43,22 @@ extension Codelink
             phylum = nil
         }
 
-        if prefix.count < 2
+        if  prefix.count < 2,
+            let path:Path = .init(last)
         {
-            self.init(phylum: phylum, scope: prefix.first, last: last)
+            self.init(phylum: phylum,
+                scope: prefix.first?.split(separator: ".",
+                    omittingEmptySubsequences: false) ?? [],
+                path: path)
         }
         else
         {
             return nil
         }
-
     }
 
     private
-    init?(phylum:SymbolPhylum.Filter?, scope:Substring?, last:Substring)
+    init?(phylum:SymbolPhylum.Filter?, scope:[Substring], path:Path)
     {
-
     }
 }

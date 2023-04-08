@@ -20,7 +20,7 @@ extension MarkdownParameterPrefix:MarkdownSemanticPrefix
     /// not including, an unformatted `:` character.
     init?(from elements:__shared [MarkdownTree.InlineBlock])
     {
-        let words:[Substring] = elements.lazy.map(\.text).joined().split(maxSplits: 2,
+        let words:[Substring] = elements.lazy.map(\.text).joined().split(maxSplits: 1,
             omittingEmptySubsequences: true,
             whereSeparator: \.isWhitespace)
         

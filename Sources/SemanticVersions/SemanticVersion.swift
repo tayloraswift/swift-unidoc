@@ -30,7 +30,7 @@ extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
     @inlinable public
     init?(_ string:String)
     {
-        let components:[Substring] = string.split(separator: ".", maxSplits: 3,
+        let components:[Substring] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
         if  components.count == 3,
             let major:UInt16 = .init(components[0]),

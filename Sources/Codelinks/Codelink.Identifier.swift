@@ -39,7 +39,7 @@ extension Codelink.Identifier:LosslessStringConvertible
     {
         self.characters
     }
-
+    /// Creates a swift identifier by validating the given string.
     public
     init?(_ description:String)
     {
@@ -59,6 +59,9 @@ extension Codelink.Identifier
         }
     }
 
+    /// Consumes text from the input string until encountering an
+    /// invalid identifier character. If this initializer returns nil,
+    /// then it didn’t consume any text.
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
         guard   let head:Unicode.Scalar = codepoints.first,
