@@ -94,35 +94,39 @@ extension Compiler.Scalar
             return Compiler.Deinit.init(from: description, as: resolution)
         case .enum:
             return Compiler.Enum.init(from: description, as: resolution)
-        case .func:
+        case .func(nil):
             return Compiler.GlobalFunc.init(from: description, as: resolution)
+        case .func(.static):
+            return Compiler.StaticFunc.init(from: description, as: resolution)
+        case .func(.class):
+            return Compiler.ClassFunc.init(from: description, as: resolution)
+        case .func(.instance):
+            return Compiler.InstanceFunc.init(from: description, as: resolution)
         case .initializer:
             return Compiler.Init.init(from: description, as: resolution)
-        case .instanceMethod:
-            return Compiler.InstanceMethod.init(from: description, as: resolution)
-        case .instanceProperty:
-            return Compiler.InstanceProperty.init(from: description, as: resolution)
-        case .instanceSubscript:
+        case .subscript(.static):
+            return Compiler.StaticSubscript.init(from: description, as: resolution)
+        case .subscript(.class):
+            return Compiler.ClassSubscript.init(from: description, as: resolution)
+        case .subscript(.instance):
             return Compiler.InstanceSubscript.init(from: description, as: resolution)
         case .operator:
-            return Compiler.GlobalOperator.init(from: description, as: resolution)
+            return Compiler.Operator.init(from: description, as: resolution)
         case .protocol:
             return Compiler.ProtocolScalar.init(from: description, as: resolution)
         case .struct:
             return Compiler.Struct.init(from: description, as: resolution)
         case .typealias:
             return Compiler.Typealias.init(from: description, as: resolution)
-        case .typeMethod:
-            return Compiler.StaticMethod.init(from: description, as: resolution)
-        case .typeOperator:
-            return Compiler.StaticOperator.init(from: description, as: resolution)
-        case .typeProperty:
-            return Compiler.StaticProperty.init(from: description, as: resolution)
-        case .typeSubscript:
-            return Compiler.StaticSubscript.init(from: description, as: resolution)
-        case .var:
+        case .var(nil):
             return Compiler.GlobalVar.init(from: description, as: resolution)
-        
+        case .var(.static):
+            return Compiler.StaticVar.init(from: description, as: resolution)
+        case .var(.class):
+            return Compiler.ClassVar.init(from: description, as: resolution)
+        case .var(.instance):
+            return Compiler.InstanceVar.init(from: description, as: resolution)
+
         case .extension:
             throw Compiler.ScalarPhylumError.unsupported(.extension)
         case .macro:

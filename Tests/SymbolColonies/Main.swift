@@ -22,7 +22,7 @@ enum Main:SyncTests
                 ("Protocol" / "AssociatedType", .associatedtype),
                 ("Struct", .struct),
                 ("Typealias", .typealias),
-                ("Var", .var),
+                ("Var", .var(nil)),
 
             ]
             {
@@ -34,23 +34,28 @@ enum Main:SyncTests
             }
             for (symbol, phylum, name):(SymbolPath, SymbolPhylum, String) in
             [
-                ("Func",                        .func,              "global-func"),
-                ("Struct" / "typeMethod",       .typeMethod,        "type-method"),
-                ("Struct" / "instanceMethod",   .instanceMethod,    "instance-method"),
+                ("Func",                        .func(nil),             "global-func"),
+                ("Struct" / "instanceMethod",   .func(.instance),       "instance-func"),
+                ("Struct" / "staticMethod",     .func(.static),         "static-func"),
+
+                ("Struct" / "instanceProperty", .var(.instance),        "instance-var"),
+                ("Struct" / "staticProperty",   .var(.static),          "static-var"),
                 
-                ("Struct" / "subscript(_:)",    .typeSubscript,     "type-subscript"),
-                ("Struct" / "subscript",        .instanceSubscript, "instance-subscript"),
+                ("Struct" / "subscript",        .subscript(.instance),  "instance-subscript"),
+                ("Struct" / "subscript(_:)",    .subscript(.static),    "static-subscript"),
 
-                ("Class" / "init",              .initializer,       "class-init"),
-                ("Actor" / "init",              .initializer,       "actor-init"),
+                ("Class" / "classMethod",       .func(.class),          "class-func"),
+                ("Class" / "classProperty",     .var(.class),           "class-var"),
+                ("Class" / "init",              .initializer,           "class-init"),
+                ("Actor" / "init",              .initializer,           "actor-init"),
 
-                ("?/(_:)",                      .operator,          "global-operator-prefix"),
-                ("<-(_:_:)",                    .operator,          "global-operator-infix"),
-                ("/?(_:)",                      .operator,          "global-operator-suffix"),
+                ("?/(_:)",                      .operator,              "operator-prefix"),
+                ("<-(_:_:)",                    .operator,              "operator-infix"),
+                ("/?(_:)",                      .operator,              "operator-suffix"),
 
-                ("Struct" / "?/(_:)",           .typeOperator,      "type-operator-prefix"),
-                ("Struct" / "<-(_:_:)",         .typeOperator,      "type-operator-infix"),
-                ("Struct" / "/?(_:)",           .typeOperator,      "type-operator-suffix"),
+                ("Struct" / "?/(_:)",           .operator,              "type-operator-prefix"),
+                ("Struct" / "<-(_:_:)",         .operator,              "type-operator-infix"),
+                ("Struct" / "/?(_:)",           .operator,              "type-operator-suffix"),
             ]
             {
                 if  let tests:TestGroup = tests / name,

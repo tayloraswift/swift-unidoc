@@ -74,10 +74,60 @@ extension SymbolDescription
         path:SymbolPath,
         usr:UnifiedSymbolResolution)
     {
+        var phylum:SymbolPhylum
+        switch type
+        {
+        case .associatedtype:       phylum = .associatedtype
+        case .enum:                 phylum = .enum
+        case .extension:            phylum = .extension
+        case .case:                 phylum = .case
+        case .class:                phylum = .class
+        case .deinitializer:        phylum = .deinitializer
+        case .globalFunction:       phylum = .func(nil)
+        case .globalVariable:       phylum = .var(nil)
+        case .initializer:          phylum = .initializer
+        case .instanceFunction:     phylum = .func(.instance)
+        case .instanceSubscript:    phylum = .subscript(.instance)
+        case .instanceVariable:     phylum = .var(.instance)
+        case .protocol:             phylum = .protocol
+        case .macro:                phylum = .macro
+        case .operator:             phylum = .operator
+        case .struct:               phylum = .struct
+        case .typealias:            phylum = .typealias
+        case .typeFunction:         phylum = .func(.static)
+        case .typeSubscript:        phylum = .subscript(.static)
+        case .typeVariable:         phylum = .var(.static)
+        }
+        
+        fragments:
+        for fragment:DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>
+            in expanded where fragment.color == .keyword
+        {
+            switch fragment.spelling
+            {
+            //  Heuristic for inferring actor types
+            case "actor":
+                phylum = .actor
+        
+            //  Heuristic for inferring class members
+            case "class":
+                switch phylum
+                {
+                case .func(.static):        phylum = .func(.class)
+                case .subscript(.static):   phylum = .subscript(.class)
+                case .var(.static):         phylum = .var(.class)
+                default:                    break
+                }
+            
+            default:
+                continue
+            }
+
+            break
+        }
+        
         let fragments:Declaration<ScalarSymbolResolution>
-        let phylum:SymbolPhylum
-        //  Heuristic for inferring actor types
-        if  case "actor"? = expanded.first(where: { $0.color == .keyword })?.spelling
+        if  case .actor = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature
@@ -93,39 +143,10 @@ extension SymbolDescription
                     return $0
                 }
             })
-
-            phylum = .actor
         }
         else
         {
             fragments = .init(expanded: expanded, abridged: abridged)
-
-            switch type
-            {
-            case .associatedtype:       phylum = .associatedtype
-            case .enum:                 phylum = .enum
-            case .extension:            phylum = .extension
-            case .case:                 phylum = .case
-            case .class:                phylum = .class
-            case .deinitializer:        phylum = .deinitializer
-            case .func:                 phylum = .func
-            case .initializer:          phylum = .initializer
-            case .instanceMethod:       phylum = .instanceMethod
-            case .instanceProperty:     phylum = .instanceProperty
-            case .instanceSubscript:    phylum = .instanceSubscript
-            case .protocol:             phylum = .protocol
-            case .macro:                phylum = .macro
-            case .struct:               phylum = .struct
-            case .typealias:            phylum = .typealias
-            case .typeMethod:           phylum = .typeMethod
-            case .typeProperty:         phylum = .typeProperty
-            case .typeSubscript:        phylum = .typeSubscript
-
-            case .operator:             phylum = path.prefix.isEmpty ?
-                .operator : .typeOperator
-            
-            case .var:                  phylum = .var
-            }
         }
 
         //  strip empty parentheses from last path component

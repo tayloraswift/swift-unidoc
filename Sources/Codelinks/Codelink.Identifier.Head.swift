@@ -1,7 +1,7 @@
-extension IdentifierLexeme
+extension Codelink.Identifier
 {
     @frozen public
-    struct First:Equatable, Hashable, Sendable
+    struct Head:Equatable, Hashable, Sendable
     {
         public
         let codepoint:Unicode.Scalar
@@ -13,7 +13,7 @@ extension IdentifierLexeme
         }
     }
 }
-extension IdentifierLexeme.First
+extension Codelink.Identifier.Head
 {
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)

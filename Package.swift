@@ -6,13 +6,13 @@ let package:Package = .init(
     platforms: [.macOS(.v11)],
     products:
     [
+        .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
         .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
 
-        .library(name: "Lexemes", targets: ["Lexemes"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
@@ -79,15 +79,18 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics", dependencies:
             [
-                .target(name: "Lexemes"),
+                .target(name: "Codelinks"),
                 .target(name: "MarkdownTrees"),
+            ]),
+
+        .target(name: "Codelinks", dependencies:
+            [
+                .target(name: "Symbols"),
             ]),
 
         .target(name: "Declarations"),
 
         .target(name: "Generics"),
-
-        .target(name: "Lexemes"),
 
         .target(name: "Packages", dependencies:
             [
@@ -161,6 +164,14 @@ let package:Package = .init(
             [
                 .product(name: "SystemPackage", package: "swift-system"),
             ]),
+        
+        
+        .executableTarget(name: "CodelinksTests", dependencies:
+            [
+                .target(name: "Codelinks"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/Codelinks"),
         
         .executableTarget(name: "DeclarationsTests", dependencies:
             [

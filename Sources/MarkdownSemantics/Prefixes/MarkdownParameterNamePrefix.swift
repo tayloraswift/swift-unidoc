@@ -1,11 +1,11 @@
-import Lexemes
+import Codelinks
 import MarkdownTrees
 
 struct MarkdownParameterNamePrefix
 {
-    let identifier:IdentifierLexeme
+    let identifier:Codelink.Identifier
 
-    init(identifier:IdentifierLexeme)
+    init(identifier:Codelink.Identifier)
     {
         self.identifier = identifier
     }
@@ -20,7 +20,7 @@ extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
     init?(from elements:__shared [MarkdownTree.InlineBlock])
     {
         if  elements.count == 1,
-            let identifier:IdentifierLexeme = .init(.init(elements[0].text))
+            let identifier:Codelink.Identifier = .init(elements[0].text)
         {
             self.init(identifier: identifier)
         }
