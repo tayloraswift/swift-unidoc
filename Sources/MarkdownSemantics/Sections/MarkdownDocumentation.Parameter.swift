@@ -8,15 +8,15 @@ extension MarkdownDocumentation
     struct Parameter
     {
         public
-        let identifier:Codelink.Identifier
-        public
         var elements:[MarkdownTree.Block]
+        public
+        let name:String
 
         @inlinable public
-        init(identifier:Codelink.Identifier, elements:[MarkdownTree.Block])
+        init(elements:[MarkdownTree.Block], name:String)
         {
-            self.identifier = identifier
             self.elements = elements
+            self.name = name
         }
     }
 }
@@ -25,7 +25,7 @@ extension MarkdownDocumentation.Parameter
     public
     func emit(into binary:inout MarkdownBinary)
     {
-        binary[.dt] = self.identifier.description
+        binary[.dt] = self.name
         binary[.dd]
         {
             for block:MarkdownTree.Block in self.elements

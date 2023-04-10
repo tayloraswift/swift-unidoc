@@ -21,39 +21,6 @@ extension SymbolPhylum
 }
 extension SymbolPhylum.Filter
 {
-    @inlinable public
-    init?(_ keyword:SymbolPhylum.Keyword, _ next:Substring)
-    {
-        switch (keyword, next)
-        {
-        case (.static, "func"):         self = .func(.static)
-        case (.static, "var"):          self = .var(.static)
-        case (.class, "func"):          self = .func(.class)
-        case (.class, "var"):           self = .var(.class)
-        default:                        return nil
-        }
-    }
-    @inlinable public
-    init?(_ keyword:SymbolPhylum.Keyword)
-    {
-        //  Not possible to use keywords to specify a subscript, init, or deinit
-        //  filter.
-        switch keyword
-        {
-        case .actor:            self = .actor
-        case .associatedtype:   self = .associatedtype
-        case .case:             self = .case
-        case .class:            self = .class
-        case .enum:             self = .enum
-        case .func:             self = .func(.default)
-        case .macro:            self = .macro
-        case .protocol:         self = .protocol
-        case .static:           return nil
-        case .struct:           self = .struct
-        case .typealias:        self = .typealias
-        case .var:              self = .var(.default)
-        }
-    }
     public
     init?(suffix:Substring)
     {
