@@ -2,11 +2,24 @@ import Symbols
 
 extension Codelink.Path
 {
-    @frozen public
     enum Suffix
     {
-        case fnv(hash:UInt32)
-        case phylum(filter:SymbolPhylum.Filter)
+        case filter(SymbolPhylum.Filter)
+        case hash(Codelink.Hash)
+    }
+}
+extension Codelink.Path.Suffix
+{
+    var hash:Codelink.Hash?
+    {
+        if case .hash(let hash) = self
+        {
+            return hash
+        }
+        else
+        {
+            return nil
+        }
     }
 }
 extension Codelink.Path.Suffix
@@ -14,9 +27,9 @@ extension Codelink.Path.Suffix
     init?(_ description:String)
     {
         //  https://github.com/apple/swift-docc/blob/main/Sources/SwiftDocC/Utility/FoundationExtensions/String+Hashing.swift
-        if let hash:UInt32 = .init(description, radix: 36)
+        if let fnv1:UInt32 = .init(description, radix: 36)
         {
-            self = .fnv(hash: hash)
+            self = .hash(.init(value: fnv1))
             return
         }
 
@@ -26,7 +39,7 @@ extension Codelink.Path.Suffix
             components[0] == "swift",
             let filter:SymbolPhylum.Filter = .init(suffix: components[1])
         {
-            self = .phylum(filter: filter)
+            self = .filter(filter)
         }
         else
         {

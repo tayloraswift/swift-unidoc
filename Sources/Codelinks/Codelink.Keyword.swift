@@ -1,7 +1,6 @@
-extension SymbolPhylum
+extension Codelink
 {
-    @frozen public
-    enum Keyword:String
+    enum Keyword
     {
         case  actor
         case `associatedtype`

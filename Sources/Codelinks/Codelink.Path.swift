@@ -1,85 +1,76 @@
 extension Codelink
 {
     @frozen public
-    struct Path
+    struct Path:Equatable, Hashable, Sendable
     {
         public
-        var components:[String]
+        var components:PathComponents<Component>
         public
         var collation:Collation?
-        public
-        var suffix:Suffix?
 
         private
-        init()
+        init(components:PathComponents<Component>, collation:Collation? = nil)
         {
-            self.components = []
-            self.collation = nil
-            self.suffix = nil
+            self.components = components
+            self.collation = collation
         }
     }
 }
 extension Codelink.Path
 {
-    init?(_ description:Substring)
+    init?(_ description:Substring, suffix:inout Suffix?)
     {
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
-        self.init(parsing: &codepoints)
-        if !codepoints.isEmpty
+
+        if  let first:Component = .init(parsing: &codepoints)
+        {
+            self.init(components: .init([], first))
+        }
+        else
         {
             return nil
         }
-    }
-    private
-    init?(parsing codepoints:inout Substring.UnicodeScalarView)
-    {
-        self.init()
 
-        while true
+        while let separator:Unicode.Scalar = codepoints.popFirst()
         {
-            let component:String
+            switch (self.components.last, separator, suffix)
+            {
+            case (_,                "-", nil):
+                self.collation = .legacy
+                suffix = .init(.init(codepoints))
+                if case nil = suffix
+                {
+                    return nil
+                }
+                else
+                {
+                    //  we know we already consumed all remaining input
+                    return
+                }
 
-            if      let identifier:Codelink.Identifier = .init(parsing: &codepoints)
-            {
-                component = identifier.description
-            }
-            else if let `operator`:Codelink.Operator = .init(parsing: &codepoints)
-            {
-                component = `operator`.description
-            }
-            else
-            {
-                return nil
-            }
-
-            let labels:Codelink.ArgumentLabels? = .init(parsing: &codepoints)
-
-            switch (labels, codepoints.first)
-            {
-            case (nil, "/"?):
+            case (.nominal(_, nil), "/", nil):
                 self.collation = .legacy
                 fallthrough
             
-            case (nil, "."?):
-                codepoints.removeFirst()
-
-                self.components.append(component)
-                continue
+            case (.nominal(_, nil), ".", _):
+                if  let next:Component = .init(parsing: &codepoints)
+                {
+                    self.components.append(next)
+                    continue
+                }
+                else
+                {
+                    return nil
+                }
             
-            case (_, "-"?):
-                codepoints.removeFirst()
-
-                self.collation = .legacy
-                self.suffix = .init(.init(codepoints))
-                fallthrough
-            
-            case (_, nil):
-                self.components.append(component + (labels?.description ?? ""))
-                return
-            
-            case (_, _?):
+            default:
                 return nil
             }
+        }
+
+        if !codepoints.isEmpty
+        {
+            return nil
         }
     }
 }

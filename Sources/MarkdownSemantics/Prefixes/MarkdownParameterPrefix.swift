@@ -3,11 +3,11 @@ import MarkdownTrees
 
 struct MarkdownParameterPrefix:Equatable, Hashable, Sendable
 {
-    let identifier:Codelink.Identifier
+    let name:String
 
-    init(identifier:Codelink.Identifier)
+    init(name:String)
     {
-        self.identifier = identifier
+        self.name = name
     }
 }
 extension MarkdownParameterPrefix:MarkdownSemanticPrefix
@@ -28,7 +28,7 @@ extension MarkdownParameterPrefix:MarkdownSemanticPrefix
             words[0].lowercased() == "parameter",
             let identifier:Codelink.Identifier = .init(words[1])
         {
-            self.init(identifier: identifier)
+            self.init(name: identifier.unencased)
         }
         else
         {

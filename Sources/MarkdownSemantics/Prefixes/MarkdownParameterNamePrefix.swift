@@ -3,11 +3,11 @@ import MarkdownTrees
 
 struct MarkdownParameterNamePrefix
 {
-    let identifier:Codelink.Identifier
+    let name:String
 
-    init(identifier:Codelink.Identifier)
+    init(name:String)
     {
-        self.identifier = identifier
+        self.name = name
     }
 }
 extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
@@ -22,7 +22,7 @@ extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
         if  elements.count == 1,
             let identifier:Codelink.Identifier = .init(elements[0].text)
         {
-            self.init(identifier: identifier)
+            self.init(name: identifier.unencased)
         }
         else
         {

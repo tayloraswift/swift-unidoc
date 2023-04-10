@@ -5,11 +5,15 @@ extension Codelink
     {
         @usableFromInline internal
         var characters:String
+        /// Indicates if this identifier is encased in backticks.
+        public
+        var encased:Bool
 
         @inlinable public
-        init(head:Head)
+        init(head:Head, encased:Bool = false)
         {
             self.characters = .init(head.codepoint)
+            self.encased = encased
         }
     }
 }
@@ -17,6 +21,13 @@ extension Codelink.Identifier
 {
     @inlinable public static
     var underscore:Self { .init(head: .init(codepoint: "_")) }
+
+    /// Returns the characters of this identifier, without any encasing backticks.
+    @inlinable public
+    var unencased:String
+    {
+        self.characters
+    }
 
     @inlinable public mutating
     func append(_ next:Element)
@@ -37,7 +48,7 @@ extension Codelink.Identifier:LosslessStringConvertible
     @inlinable public
     var description:String
     {
-        self.characters
+        self.encased ? "`\(self.characters)`" : self.characters
     }
     /// Creates a swift identifier by validating the given string.
     public
@@ -64,21 +75,43 @@ extension Codelink.Identifier
     /// then it didn’t consume any text.
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
-        guard   let head:Unicode.Scalar = codepoints.first,
+        var remaining:Substring.UnicodeScalarView = codepoints
+
+        let encased:Bool
+        let head:Unicode.Scalar?
+
+        switch remaining.popFirst()
+        {
+        case "`"?:
+            encased = true
+            head = remaining.popFirst()
+        
+        case let codepoint:
+            encased = false
+            head = codepoint
+        }
+
+        guard   let head:Unicode.Scalar,
                 let head:Head = .init(head)
         else
         {
             return nil
         }
 
-        codepoints.removeFirst()
-        self.init(head: head)
+        self.init(head: head, encased: encased)
 
-        while   let next:Unicode.Scalar = codepoints.first,
+        while   let next:Unicode.Scalar = remaining.first,
                 let next:Element = .init(next)
         {
-            codepoints.removeFirst()
+            remaining.removeFirst()
             self.append(next)
         }
+
+        if  encased, remaining.popFirst() != "`"
+        {
+            return nil
+        }
+        
+        codepoints = remaining
     }
 }

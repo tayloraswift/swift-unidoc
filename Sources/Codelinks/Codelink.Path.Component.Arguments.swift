@@ -1,7 +1,9 @@
-extension Codelink
+extension Codelink.Path.Component
 {
-    struct ArgumentLabels:Equatable, Hashable, Sendable
+    @frozen public
+    struct Arguments:Equatable, Hashable, Sendable
     {
+        @usableFromInline internal
         var characters:String
 
         private
@@ -11,14 +13,15 @@ extension Codelink
         }
     }
 }
-extension Codelink.ArgumentLabels
+extension Codelink.Path.Component.Arguments
 {
+    @inlinable public
     var description:String
     {
         self.characters.isEmpty ? "" : "(\(self.characters))"
     }
 }
-extension Codelink.ArgumentLabels
+extension Codelink.Path.Component.Arguments
 {
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {

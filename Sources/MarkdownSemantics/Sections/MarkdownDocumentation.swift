@@ -49,8 +49,8 @@ extension MarkdownDocumentation
                     switch prefix
                     {
                     case .parameter(let parameter):
-                        parameters.list.append(.init(identifier: parameter.identifier,
-                            elements: item.elements))
+                        parameters.list.append(.init(elements: item.elements,
+                            name: parameter.name))
 
                     case .keywords(.parameters):
                         for block:MarkdownTree.Block in item.elements
@@ -60,11 +60,10 @@ extension MarkdownDocumentation
                             case let list as MarkdownTree.UnorderedList:
                                 for item:MarkdownTree.BlockItem in list.elements
                                 {
-                                    let name:MarkdownParameterNamePrefix? = .extract(
+                                    let parameter:MarkdownParameterNamePrefix? = .extract(
                                         from: &item.elements)
-                                    parameters.list.append(.init(
-                                        identifier: name?.identifier ?? .underscore,
-                                        elements: item.elements))
+                                    parameters.list.append(.init(elements: item.elements,
+                                        name: parameter?.name ?? "_"))
                                 }
                             
                             case let block:
@@ -98,8 +97,8 @@ extension MarkdownDocumentation
                 switch prefix
                 {
                 case .parameter(let parameter):
-                    parameters.list.append(.init(identifier: parameter.identifier,
-                        elements: quote.elements))
+                    parameters.list.append(.init(elements: quote.elements,
+                        name: parameter.name))
 
                 case .keywords(.parameters):
                     parameters.discussion += quote.elements
