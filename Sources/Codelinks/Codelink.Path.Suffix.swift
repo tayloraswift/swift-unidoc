@@ -4,7 +4,7 @@ extension Codelink.Path
 {
     enum Suffix
     {
-        case filter(SymbolPhylum.Filter)
+        case filter(Codelink.Filter?)
         case hash(Codelink.Hash)
     }
 }
@@ -24,7 +24,7 @@ extension Codelink.Path.Suffix
 }
 extension Codelink.Path.Suffix
 {
-    init?(_ description:String)
+    init(_ description:Substring)
     {
         //  https://github.com/apple/swift-docc/blob/main/Sources/SwiftDocC/Utility/FoundationExtensions/String+Hashing.swift
         if let fnv1:UInt32 = .init(description, radix: 36)
@@ -32,18 +32,9 @@ extension Codelink.Path.Suffix
             self = .hash(.init(value: fnv1))
             return
         }
-
-        let components:[Substring] = description.split(separator: ".", maxSplits: 1)
-
-        if  components.count == 2,
-            components[0] == "swift",
-            let filter:SymbolPhylum.Filter = .init(suffix: components[1])
-        {
-            self = .filter(filter)
-        }
         else
         {
-            return nil
+            self = .filter(.init(suffix: description))
         }
     }
 }

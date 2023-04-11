@@ -4,7 +4,7 @@ import Symbols
 struct Codelink:Equatable, Hashable, Sendable
 {
     public
-    let filter:SymbolPhylum.Filter?
+    let filter:Filter?
     public
     let scope:Scope?
     public
@@ -13,7 +13,7 @@ struct Codelink:Equatable, Hashable, Sendable
     let hash:Hash?
 
     @inlinable public
-    init(filter:SymbolPhylum.Filter? = nil, scope:Scope? = nil, path:Path, hash:Hash? = nil)
+    init(filter:Filter? = nil, scope:Scope? = nil, path:Path, hash:Hash? = nil)
     {
         self.filter = filter
         self.scope = scope
@@ -61,37 +61,37 @@ extension Codelink
         var keywords:(first:Keyword, second:Keyword?)? = nil
         var scope:Scope? = nil
 
-        outer:
-        while let word:Substring = words.popFirst()
+        while   let word:Substring = words.popFirst(),
+                let word:Scope = .init(word)
         {
-            switch (keywords, word)
+            switch (keywords, Keyword.init(word))
             {
-            case (nil, "actor"):                keywords = (.actor, nil)
-            case (nil, "associatedtype"):       keywords = (.associatedtype, nil)
-            case (nil, "case"):                 keywords = (.case, nil)
-            case (nil, "class"):                keywords = (.class, nil)
-            case (nil, "enum"):                 keywords = (.enum, nil)
-            case (nil, "func"):                 keywords = (.func, nil)
-            case (nil, "macro"):                keywords = (.macro, nil)
-            case (nil, "protocol"):             keywords = (.protocol, nil)
-            case (nil, "static"):               keywords = (.static, nil)
-            case (nil, "struct"):               keywords = (.struct, nil)
-            case (nil, "typealias"):            keywords = (.typealias, nil)
-            case (nil, "var"):                  keywords = (.var, nil)
+            case (nil, let first?):
+                keywords = (first, nil)
+                continue
 
-            case ((let first, nil)?, "func"):   keywords = (first, .func)
-            case ((let first, nil)?, "var"):    keywords = (first, .var)
+            case ((let first, nil)?, .func?):
+                keywords = (first, .func)
+                continue
+            case ((let first, nil)?, .var?):
+                keywords = (first, .var)
+                continue
 
-            case (_, let word):
-                if  words.isEmpty
-                {
-                    scope = .init(word)
-                    break outer
-                }
-                else
-                {
-                    return nil
-                }
+            case ((_, _)?, _?):
+                return nil
+
+            default:
+                break
+            }
+
+            if  words.isEmpty
+            {
+                scope = word
+                break
+            }
+            else
+            {
+                return nil
             }
         }
 
@@ -104,49 +104,96 @@ extension Codelink
         path:Path,
         suffix:Path.Suffix?)
     {
-        let filter:SymbolPhylum.Filter?
+        let filter:Filter?
 
-        if  let keywords:(first:Keyword, second:Keyword?)
+        switch path.collation
         {
+        case nil:
             switch (keywords, path.components.last)
             {
-            case ((.actor, nil),            .nominal(_, nil)):  filter = .actor
-            case ((.associatedtype, nil),   .nominal(_, nil)):  filter = .associatedtype
-            case ((.case, nil),             .nominal):          filter = .case
-            case ((.class, nil),            .nominal(_, nil)):  filter = .class
-            case ((.class, nil),            .subscript):        filter = .subscript(.class)
-            case ((.class, .func),          .nominal):          filter = .func(.class)
-            case ((.class, .var),           .nominal(_, nil)):  filter = .var(.class)
-            case ((.enum, nil),             .nominal(_, nil)):  filter = .enum
-            case ((.func, nil),             .nominal):          filter = .func(.default)
-            case ((.macro, nil),            .nominal(_, nil)):  filter = .macro
-            case ((.protocol, nil),         .nominal(_, nil)):  filter = .protocol
-            case ((.static, nil),           .subscript):        filter = .subscript(.static)
-            case ((.static, .func),         .nominal):          filter = .func(.static)
-            case ((.static, .var),          .nominal(_, nil)):  filter = .var(.static)
-            case ((.struct, nil),           .nominal(_, nil)):  filter = .struct
-            case ((.typealias, nil),        .nominal(_, nil)):  filter = .typealias
-            case ((.var, nil),              .nominal(_, nil)):  filter = .var(.default)
-            default:                                            return nil
-            }
-        }
-        else
-        {
-            switch (suffix, path.components.last)
-            {
-            ///  cannot use legacy DocC suffixes with anonymous symbols
-            case    (.filter?,              .`init`),
-                    (.filter?,              .deinit),
-                    (.filter?,              .subscript):        return nil
-            case    (.filter(let legacy)?,  .nominal):          filter = legacy
+            case ((.actor, nil)?,           .nominal(_, nil)):  filter = .actor
+            case ((.associatedtype, nil)?,  .nominal(_, nil)):  filter = .associatedtype
+            case ((.case, nil)?,            .nominal):          filter = .case
+            case ((.class, nil)?,           .nominal(_, nil)):  filter = .class
+            case ((.class, nil)?,           .subscript):        filter = .subscript(.class)
+            case ((.class, .func)?,         .nominal):          filter = .func(.class)
+            case ((.class, .var)?,          .nominal(_, nil)):  filter = .var(.class)
+            case ((.enum, nil)?,            .nominal(_, nil)):  filter = .enum
+            case ((.func, nil)?,            .nominal):          filter = .func(.default)
+            case ((.macro, nil)?,           .nominal(_, nil)):  filter = .macro
+            case ((.protocol, nil)?,        .nominal(_, nil)):  filter = .protocol
+            case ((.static, nil)?,          .subscript):        filter = .subscript(.static)
+            case ((.static, .func)?,        .nominal):          filter = .func(.static)
+            case ((.static, .var)?,         .nominal(_, nil)):  filter = .var(.static)
+            case ((.struct, nil)?,          .nominal(_, nil)):  filter = .struct
+            case ((.typealias, nil)?,       .nominal(_, nil)):  filter = .typealias
+            case ((.var, nil)?,             .nominal(_, nil)):  filter = .var(.default)
 
-            case    (_,                     .`init`):           filter = .initializer
-            case    (_,                     .deinit):           filter = .deinitializer
-            case    (_,                     .subscript):        filter = .subscript(.instance)
-            case    (_,                     .nominal):          filter = nil
+            case ((_, _)?, _):
+                return nil
+            
+            case (nil, .subscript):
+                filter = .subscript(.instance)
+            
+            case (nil, _):
+                filter = nil
+            }
+        
+        case .legacy?:
+            if case .filter(let legacy)? = suffix
+            {
+                filter = legacy
+            }
+            else
+            {
+                filter = nil
             }
         }
 
         self.init(filter: filter, scope: scope, path: path, hash: suffix?.hash)
+    }
+}
+extension Codelink:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        switch self.path.collation
+        {
+        case nil:
+            var words:[String] = []
+
+            switch self.filter?.keywords
+            {
+            case nil:
+                break
+            
+            case (let first, nil)?:
+                words = [first.rawValue]
+            
+            case (let first, let second?)?:
+                words = [first.rawValue, second.rawValue]
+            }
+
+            if let scope:Scope = self.scope
+            {
+                words.append(scope.description)
+            }
+
+            words.append(self.path.components.joined(separator: "."))
+
+            if let hash:Hash = self.hash
+            {
+                words.append("[\(hash.description)]")
+            }
+
+            return words.joined(separator: " ")
+
+        case .legacy?:
+            return """
+            \(self.path.components.joined(separator: "/"))-\
+            \(self.hash?.description ?? self.filter?.suffix ?? "")
+            """
+        }
     }
 }

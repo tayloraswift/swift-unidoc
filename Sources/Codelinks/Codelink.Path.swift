@@ -4,12 +4,12 @@ extension Codelink
     struct Path:Equatable, Hashable, Sendable
     {
         public
-        var components:PathComponents<Component>
+        var components:LexicalComponents<Component>
         public
         var collation:Collation?
 
         private
-        init(components:PathComponents<Component>, collation:Collation? = nil)
+        init(components:LexicalComponents<Component>, collation:Collation? = nil)
         {
             self.components = components
             self.collation = collation
@@ -38,15 +38,8 @@ extension Codelink.Path
             case (_,                "-", nil):
                 self.collation = .legacy
                 suffix = .init(.init(codepoints))
-                if case nil = suffix
-                {
-                    return nil
-                }
-                else
-                {
-                    //  we know we already consumed all remaining input
-                    return
-                }
+                //  we know we already consumed all remaining input
+                return
 
             case (.nominal(_, nil), "/", nil):
                 self.collation = .legacy

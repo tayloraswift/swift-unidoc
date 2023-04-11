@@ -23,7 +23,7 @@ extension SymbolPath
         {
             return nil 
         }
-        self.last = last 
+        self.last = last
         self.prefix = .init(components.dropLast())
     }
 

@@ -48,3 +48,11 @@ extension Codelink.Hash
         }
     }
 }
+extension Codelink.Hash:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        .init(self.value, radix: 36, uppercase: true)
+    }
+}

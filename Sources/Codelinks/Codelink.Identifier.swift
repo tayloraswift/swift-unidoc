@@ -22,13 +22,6 @@ extension Codelink.Identifier
     @inlinable public static
     var underscore:Self { .init(head: .init(codepoint: "_")) }
 
-    /// Returns the characters of this identifier, without any encasing backticks.
-    @inlinable public
-    var unencased:String
-    {
-        self.characters
-    }
-
     @inlinable public mutating
     func append(_ next:Element)
     {
@@ -43,13 +36,24 @@ extension Codelink.Identifier:Comparable
         lhs.characters < rhs.characters
     }
 }
-extension Codelink.Identifier:LosslessStringConvertible
+extension Codelink.Identifier:CustomStringConvertible, LexicalContinuation
 {
+    /// Returns the characters of this identifier, with encasing backticks if it
+    /// has any.
     @inlinable public
     var description:String
     {
         self.encased ? "`\(self.characters)`" : self.characters
     }
+    /// Returns the characters of this identifier, without any encasing backticks.
+    @inlinable public
+    var unencased:String
+    {
+        self.characters
+    }
+}
+extension Codelink.Identifier:LosslessStringConvertible
+{
     /// Creates a swift identifier by validating the given string.
     public
     init?(_ description:String)
