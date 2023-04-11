@@ -1,7 +1,7 @@
-extension SymbolPhylum
+extension Codelink.Filter
 {
     @frozen public
-    enum ObjectivityFilter:Equatable, Hashable, Sendable
+    enum Objectivity:Equatable, Hashable, Sendable
     {
         /// Matches global symbols and instance members.
         case `default`

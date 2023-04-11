@@ -18,7 +18,7 @@ extension Codelink.Path.Component.Arguments
     @inlinable public
     var description:String
     {
-        self.characters.isEmpty ? "" : "(\(self.characters))"
+        "(\(self.characters))"
     }
 }
 extension Codelink.Path.Component.Arguments
@@ -54,6 +54,12 @@ extension Codelink.Path.Component.Arguments
             codepoints = remaining
         }
         else
+        {
+            return nil
+        }
+
+        //  normalize
+        if self.characters.isEmpty
         {
             return nil
         }

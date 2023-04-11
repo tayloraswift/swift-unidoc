@@ -4,10 +4,10 @@ extension Codelink
     struct Scope:Equatable, Hashable, Sendable
     {
         public
-        var components:PathComponents<String>
+        var components:LexicalComponents<Identifier>
 
         private
-        init(first:String)
+        init(first:Identifier)
         {
             self.components = .init([], first)
         }
@@ -21,7 +21,7 @@ extension Codelink.Scope
 
         if  let first:Codelink.Identifier = .init(parsing: &codepoints)
         {
-            self.init(first: first.characters)
+            self.init(first: first)
         }
         else
         {
@@ -33,7 +33,7 @@ extension Codelink.Scope
             if  separator == ".",
                 let next:Codelink.Identifier = .init(parsing: &codepoints)
             {
-                self.components.append(next.characters)
+                self.components.append(next)
             }
             else
             {
@@ -44,6 +44,21 @@ extension Codelink.Scope
         if !codepoints.isEmpty
         {
             return nil
+        }
+    }
+}
+extension Codelink.Scope:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        if  let keyword:Codelink.Keyword = .init(self)
+        {
+            return keyword.encased
+        }
+        else
+        {
+            return self.components.joined(separator: ".")
         }
     }
 }

@@ -3,14 +3,18 @@ extension Codelink.Path
     @frozen public
     enum Component:Equatable, Hashable, Sendable
     {
+        /// An initializer, which is an anonymous path component.
         case `init`(Arguments?)
+        /// A deinitializer, which is an anonymous path component.
         case `deinit`
+        /// A subscript, which is an anonymous path component.
         case `subscript`(Arguments?)
 
-        case  nominal(String, Arguments?)
+        /// A nominal path component.
+        case  nominal(Basename, Arguments?)
     }
 }
-extension Codelink.Path.Component:CustomStringConvertible
+extension Codelink.Path.Component:LexicalContinuation
 {
     @inlinable public
     var description:String
@@ -23,8 +27,29 @@ extension Codelink.Path.Component:CustomStringConvertible
         case .subscript(nil):               return "subscript"
         case .subscript(let arguments?):    return "subscript" + arguments.description
 
-        case .nominal(let name, nil):               return name
-        case .nominal(let name, let arguments?):    return name + arguments.description
+        case .nominal(let name, nil):
+            return name.description
+
+        case .nominal(let name, let arguments?):
+            return name.description + arguments.description
+        }
+    }
+    @inlinable public
+    var unencased:String
+    {
+        switch self
+        {
+        case .`init`(nil):                  return "init"
+        case .`init`(let arguments?):       return "init" + arguments.description
+        case .deinit:                       return "deinit"
+        case .subscript(nil):               return "subscript"
+        case .subscript(let arguments?):    return "subscript" + arguments.description
+
+        case .nominal(let name, nil):
+            return name.unencased
+
+        case .nominal(let name, let arguments?):
+            return name.unencased + arguments.description
         }
     }
 }
@@ -46,7 +71,7 @@ extension Codelink.Path.Component
                 self = .subscript(.init(parsing: &codepoints))
             
             case (_, let characters):
-                self = .nominal(characters, .init(parsing: &codepoints))
+                self = .nominal(.init(unencased: characters), .init(parsing: &codepoints))
             }
 
             return
@@ -58,7 +83,7 @@ extension Codelink.Path.Component
         if  let identifier:Codelink.Operator = .init(parsing: &remaining),
             let arguments:Arguments = .init(parsing: &remaining)
         {
-            self = .nominal(identifier.characters, arguments)
+            self = .nominal(.init(unencased: identifier.characters), arguments)
             codepoints = remaining
         }
         else
