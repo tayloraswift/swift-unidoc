@@ -18,6 +18,19 @@ extension Codelink
 }
 extension Codelink.Path
 {
+    private mutating
+    func normalize()
+    {
+        if case .legacy? = self.collation
+        {
+            for index:Int in self.components.prefix.indices
+            {
+                self.components.prefix[index] = self.components.prefix[index].lowercased()
+            }
+            self.components.last = self.components.last.lowercased()
+        }
+    }
+
     init?(_ description:Substring, suffix:inout Suffix?)
     {
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
@@ -29,6 +42,11 @@ extension Codelink.Path
         else
         {
             return nil
+        }
+
+        defer
+        {
+            self.normalize()
         }
 
         while let separator:Unicode.Scalar = codepoints.popFirst()

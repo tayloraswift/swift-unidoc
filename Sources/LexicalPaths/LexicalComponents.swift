@@ -1,5 +1,5 @@
 @frozen public
-struct LexicalComponents<Last> where Last:LexicalContinuation
+struct LexicalComponents<Last> where Last:CustomStringConvertible
 {
     public
     var prefix:[String]
@@ -14,12 +14,21 @@ struct LexicalComponents<Last> where Last:LexicalContinuation
     }
 }
 
-extension LexicalComponents
+extension LexicalComponents where Last:LexicalContinuation
 {
-    mutating
+    @inlinable public mutating
     func append(_ component:Last)
     {
-        self.prefix.append(last.unencased)
+        self.prefix.append(self.last.unencased)
+        self.last = component
+    }
+}
+extension LexicalComponents<String>
+{
+    @inlinable public mutating
+    func append(_ component:String)
+    {
+        self.prefix.append(self.last)
         self.last = component
     }
 }

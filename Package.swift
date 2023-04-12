@@ -13,6 +13,7 @@ let package:Package = .init(
         .library(name: "HTML", targets: ["HTML"]),
         .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
 
+        .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
@@ -50,6 +51,15 @@ let package:Package = .init(
     ],
     targets:
     [
+        .target(name: "Codelinks", dependencies:
+            [
+                .target(name: "LexicalPaths"),
+            ]),
+        
+        .target(name: "Declarations"),
+
+        .target(name: "Generics"),
+
         .target(name: "HTML"),
 
         .target(name: "HTMLRendering", dependencies:
@@ -57,6 +67,8 @@ let package:Package = .init(
                 .target(name: "HTML"),
             ]),
         
+        .target(name: "LexicalPaths"),
+
         .target(name: "MarkdownABI"),
 
         .target(name: "MarkdownRendering", dependencies:
@@ -82,15 +94,6 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "MarkdownTrees"),
             ]),
-
-        .target(name: "Codelinks", dependencies:
-            [
-                .target(name: "Symbols"),
-            ]),
-
-        .target(name: "Declarations"),
-
-        .target(name: "Generics"),
 
         .target(name: "Packages", dependencies:
             [
@@ -129,6 +132,7 @@ let package:Package = .init(
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
+                .target(name: "LexicalPaths"),
                 .target(name: "SymbolAvailability"),
                 .target(name: "SymbolResolution"),
             ]),

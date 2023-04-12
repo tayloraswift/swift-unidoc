@@ -55,6 +55,26 @@ extension Codelink.Path.Component:LexicalContinuation
 }
 extension Codelink.Path.Component
 {
+    func lowercased() -> Self
+    {
+        switch self
+        {
+        case .`init`(let arguments):
+            return .`init`(arguments?.lowercased())
+        
+        case .deinit:
+            return .deinit
+        
+        case .subscript(let arguments):
+            return .subscript(arguments?.lowercased())
+
+        case .nominal(let name, let arguments):
+            return .nominal(name.lowercased(), arguments?.lowercased())
+        }
+    }
+}
+extension Codelink.Path.Component
+{
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
         if  let identifier:Codelink.Identifier = .init(parsing: &codepoints)

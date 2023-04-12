@@ -17,7 +17,7 @@ extension MarkdownTree
         }
         /// Does nothing.
         public
-        func outline(by _:(_ symbol:String) throws -> UInt32) rethrows
+        func outline(by _:(_ symbol:String) throws -> UInt32?) rethrows
         {
         }
         /// Emits nothing.

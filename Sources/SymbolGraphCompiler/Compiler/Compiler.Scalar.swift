@@ -26,7 +26,7 @@ extension Compiler
         final
         let location:SourceLocation<String>?
         final
-        let path:SymbolPath
+        let path:LexicalPath
 
         /// The type this scalar is a member of. Membership is unique and
         /// intrinsic.
@@ -49,7 +49,7 @@ extension Compiler
             availability:SymbolAvailability,
             generics:GenericSignature<ScalarSymbolResolution>,
             location:SourceLocation<String>?,
-            path:SymbolPath)
+            path:LexicalPath)
         {
             self.resolution = resolution
             self.conditions = conditions
@@ -78,6 +78,7 @@ extension Compiler.Scalar
     }
     static
     func infer(from description:SymbolDescription,
+        in culture:ModuleIdentifier,
         as resolution:ScalarSymbolResolution) throws -> Compiler.Scalar
     {
         switch description.phylum

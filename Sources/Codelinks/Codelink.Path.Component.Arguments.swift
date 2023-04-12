@@ -7,18 +7,25 @@ extension Codelink.Path.Component
         var characters:String
 
         private
-        init()
+        init(characters:String = "")
         {
-            self.characters = ""
+            self.characters = characters
         }
     }
 }
-extension Codelink.Path.Component.Arguments
+extension Codelink.Path.Component.Arguments:CustomStringConvertible
 {
     @inlinable public
     var description:String
     {
         "(\(self.characters))"
+    }
+}
+extension Codelink.Path.Component.Arguments
+{
+    func lowercased() -> Self
+    {
+        .init(characters: self.characters.lowercased())
     }
 }
 extension Codelink.Path.Component.Arguments

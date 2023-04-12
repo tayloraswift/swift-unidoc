@@ -1,7 +1,7 @@
 import JSONDecoding
 import JSONEncoding
 
-extension SymbolPath:JSONDecodable, JSONEncodable
+extension LexicalPath:JSONDecodable, JSONEncodable
 {
     public
     init(json:JSON) throws
@@ -11,7 +11,7 @@ extension SymbolPath:JSONDecodable, JSONEncodable
 
         let last:Int = json.index(before: json.endIndex)
         self.init(
-            prefix: try json[..<last].map { try $0.decode() },
-            last: try json[last].decode())
+            try json[..<last].map { try $0.decode() },
+            try json[last].decode())
     }
 }

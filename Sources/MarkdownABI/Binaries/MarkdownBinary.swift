@@ -52,6 +52,11 @@ extension MarkdownBinary
     {
         self.bytecode.write(reference: .init(id: reference))
     }
+    @inlinable public mutating
+    func fold()
+    {
+        self.bytecode.write(marker: .fold)
+    }
 }
 extension MarkdownBinary
 {

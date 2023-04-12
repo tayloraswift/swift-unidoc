@@ -24,7 +24,7 @@ struct SymbolDescription:Equatable, Sendable
     public
     let phylum:SymbolPhylum
     public
-    let path:SymbolPath
+    let path:LexicalPath
     public
     let usr:UnifiedSymbolResolution
 
@@ -38,7 +38,7 @@ struct SymbolDescription:Equatable, Sendable
         generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
         phylum:SymbolPhylum,
-        path:SymbolPath,
+        path:LexicalPath,
         usr:UnifiedSymbolResolution)
     {
         self.documentation = documentation
@@ -71,7 +71,7 @@ extension SymbolDescription
         generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
         type:SymbolDescriptionType,
-        path:SymbolPath,
+        path:LexicalPath,
         usr:UnifiedSymbolResolution)
     {
         var phylum:SymbolPhylum
@@ -150,13 +150,13 @@ extension SymbolDescription
         }
 
         //  strip empty parentheses from last path component
-        let simplified:SymbolPath
+        let simplified:LexicalPath
         if  let index:String.Index = path.last.index(path.last.endIndex,
                 offsetBy: -2,
                 limitedBy: path.last.startIndex),
             path.last[index...] == "()"
         {
-            simplified = .init(prefix: path.prefix, last: .init(path.last[..<index]))
+            simplified = .init(path.prefix, .init(path.last[..<index]))
         }
         else
         {

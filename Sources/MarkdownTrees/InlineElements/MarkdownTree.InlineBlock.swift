@@ -20,7 +20,7 @@ extension MarkdownTree
 extension MarkdownTree.InlineBlock:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
     {
         switch self
         {
@@ -30,7 +30,10 @@ extension MarkdownTree.InlineBlock:MarkdownElement
             try container.outline(by: register)
         
         case .code(let link, symbol: true):
-            self = .reference(try register(link.text))
+            if  let reference:UInt32 = try register(link.text)
+            {
+                self = .reference(reference)
+            }
         
         case .code(_, symbol: false), .html, .image, .link, .reference, .text:
             return

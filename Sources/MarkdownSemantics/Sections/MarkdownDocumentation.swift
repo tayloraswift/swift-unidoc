@@ -1,3 +1,4 @@
+import Codelinks
 import MarkdownABI
 import MarkdownTrees
 
@@ -27,6 +28,25 @@ extension MarkdownDocumentation
     public
     init(from tree:__shared MarkdownTree)
     {
+        var references:[Codelink: UInt32] = [:]
+        var codelinks:[Codelink] = []
+        tree.outline
+        {
+            guard let codelink:Codelink = .init(parsing: $0)
+            else
+            {
+                return nil
+            }
+            let next:UInt32 = .init(codelinks.endIndex)
+            let reference:UInt32 = { $0 }(&references[codelink, default: next])
+            if  reference == next
+            {
+                codelinks.append(codelink)
+            }
+
+            return reference
+        }
+
         var parameters:(discussion:[MarkdownTree.Block], list:[Parameter]) = ([], [])
         var returns:[MarkdownTree.Block] = []
         var `throws`:[MarkdownTree.Block] = []
@@ -142,7 +162,7 @@ extension MarkdownDocumentation
             discussion = self.article[...]
         }
 
-        binary.write(reference: 0)
+        binary.fold()
 
         self.parameters?.emit(into: &binary)
         self.returns?.emit(into: &binary)

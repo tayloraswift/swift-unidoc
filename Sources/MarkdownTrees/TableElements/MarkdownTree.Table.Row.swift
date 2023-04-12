@@ -41,7 +41,7 @@ extension MarkdownTree.Table.Row:RandomAccessCollection
 extension MarkdownTree.Table.Row:MarkdownElement
 {
     @inlinable public
-    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
     {
         for element:Element in self
         {
