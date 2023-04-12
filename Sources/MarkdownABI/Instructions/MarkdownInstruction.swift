@@ -5,6 +5,7 @@ enum MarkdownInstruction:Equatable, Hashable, Sendable
 
     case attribute(MarkdownBytecode.Attribute)
     case emit(MarkdownBytecode.Emission)
+    case fold
     case push(MarkdownBytecode.Context)
     case pop
     case reference(UInt32)

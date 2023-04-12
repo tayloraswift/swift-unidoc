@@ -1,5 +1,3 @@
-import Symbols
-
 @frozen public
 struct Codelink:Equatable, Hashable, Sendable
 {
@@ -190,10 +188,15 @@ extension Codelink:CustomStringConvertible
             return words.joined(separator: " ")
 
         case .legacy?:
-            return """
-            \(self.path.components.joined(separator: "/"))-\
-            \(self.hash?.description ?? self.filter?.suffix ?? "")
-            """
+            let path:String = self.path.components.joined(separator: "/")
+            if  let suffix:String = self.hash?.description ?? self.filter?.suffix
+            {
+                return "\(path)-\(suffix)"
+            }
+            else
+            {
+                return path
+            }
         }
     }
 }

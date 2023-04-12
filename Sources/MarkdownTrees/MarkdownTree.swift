@@ -23,7 +23,7 @@ extension MarkdownTree
     /// Replaces symbolic codelinks in this markdown tree’s inline content
     /// with references.
     public
-    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
     {
         for block:Block in self.blocks
         {

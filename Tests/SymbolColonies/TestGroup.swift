@@ -5,18 +5,17 @@ import Testing
 
 extension TestGroup
 {
-    func expect(symbol path:SymbolPath, in colony:SymbolColony) -> SymbolDescription?
+    func expect(symbol path:[String], in colony:SymbolColony) -> SymbolDescription?
     {
         self.expect(value: colony.symbols.first
         {
             switch $0.usr
             {
             case .compound: return false
-            default:        return $0.path == path
+            default:        return $0.path.elementsEqual(path)
             }
         })
     }
-
     func load(colony filepath:FilePath) -> SymbolColony?
     {
         self.do

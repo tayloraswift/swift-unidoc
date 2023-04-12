@@ -43,7 +43,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <p>Details details details</p>
                     """)
             }
@@ -60,7 +60,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <p>Details details details</p>
                     """)
             }
@@ -78,7 +78,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -105,7 +105,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -135,7 +135,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -161,7 +161,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -193,7 +193,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -226,7 +226,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <p>Discussion about parameters in general</p>\
@@ -259,7 +259,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <p>Discussion about parameters in general</p>\
@@ -292,7 +292,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <p>Discussion about parameters in general</p>\
@@ -323,7 +323,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='attention'>\
                     <h3>Attention</h3>\
                     <p>i am very pretty.</p>\
@@ -349,7 +349,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='attention'>\
                     <h3>Attention</h3>\
                     <p>i am very pretty.</p>\
@@ -378,7 +378,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <blockquote>\
                     <p>equality implies substitutability and u r irreplaceable 💝 — barbie</p>\
                     </blockquote>\
@@ -399,7 +399,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <blockquote>\
                     <p>Miranda: Don’t be ridiculous, Andrea. Everybody wants this.</p>\
                     </blockquote>\
@@ -430,7 +430,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='important'>\
                     <h3>Important</h3>\
                     <p>A barbie princess is not the same thing as a princess barbie.</p>\
@@ -464,7 +464,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='important'>\
                     <h3>Important</h3>\
                     <p>A barbie princess is not the same thing as a princess barbie.</p>\
@@ -486,7 +486,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='important'>\
                     <h3>Important</h3>\
                     <p>i am an important businessman. A VERY IMPORTANT BUSINESSMAN</p>\
@@ -513,7 +513,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='nonmutatingvariant'>\
                     <h3>Non-mutating Variant</h3>\
                     <p>Humans on top!</p>\
@@ -546,7 +546,7 @@ enum Main:SyncTests
                     """,
                     expected:
                     """
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <aside class='important'>\
                     <h3>Important</h3>\
                     <p>A barbie princess is not the same thing as a princess barbie.</p>\
@@ -568,7 +568,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <p>Discussion about parameters in general.</p>\
@@ -590,7 +590,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -620,7 +620,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -648,7 +648,7 @@ enum Main:SyncTests
                     expected:
                     """
                     <p>Overview overview overview</p>\
-                    <code>&lt;reference = 0&gt;</code>\
+
                     <section class='parameters'>\
                     <h2>Parameters</h2>\
                     <dl>\
@@ -665,7 +665,7 @@ enum Main:SyncTests
             let html:String =
             """
             <p>Overview overview overview</p>\
-            <code>&lt;reference = 0&gt;</code>\
+
             <section class='parameters'>\
             <h2>Parameters</h2>\
             <p>Discussion about parameters in general.</p>\

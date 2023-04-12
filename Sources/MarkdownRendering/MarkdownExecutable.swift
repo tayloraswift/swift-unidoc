@@ -5,10 +5,17 @@ protocol MarkdownExecutable
 {
     var bytecode:MarkdownBytecode { get }
 
+    func fold(html:inout HTML) throws
     func fill(html:inout HTML, with reference:UInt32) throws
 }
 extension MarkdownExecutable
 {
+    /// Inserts a newline.
+    public
+    func fold(html:inout HTML)
+    {
+        html.append(escaped: 0x0A)
+    }
     /// Renders a placeholder `code` element describing the reference.
     public
     func fill(html:inout HTML, with reference:UInt32)
@@ -51,6 +58,9 @@ extension MarkdownExecutable
                 attributes.flush()
                 html.emit(element: element, with: attributes)
                 attributes.clear()
+            
+            case .fold:
+                try self.fold(html: &html)
             
             case .push(let element):
                 attributes.flush()
@@ -103,7 +113,6 @@ extension MarkdownExecutable
                 {
                     html.append(unescaped: codeunit)
                 }
-
             }
         }
         return stack.isEmpty ? nil : .incomplete

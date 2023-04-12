@@ -21,9 +21,12 @@ extension Compiler.Scalars
         try self.recognize(scalar: scalar, as: .excluded)
     }
     mutating
-    func include(scalar:ScalarSymbolResolution, with description:SymbolDescription) throws
+    func include(scalar:ScalarSymbolResolution,
+        with description:SymbolDescription,
+        in culture:ModuleIdentifier) throws
     {
         try self.recognize(scalar: scalar, as: .included(.infer(from: description,
+            in: culture,
             as: scalar)))
     }
     private mutating

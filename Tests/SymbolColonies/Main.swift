@@ -12,50 +12,50 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/Phyla.symbols.json")
         {
-            for (symbol, phylum):(SymbolPath, SymbolPhylum) in
+            for (symbol, phylum):([String], SymbolPhylum) in
             [
-                ("Actor", .actor),
-                ("Class", .class),
-                ("Enum", .enum),
-                ("Enum" / "case", .case),
-                ("Protocol", .protocol),
-                ("Protocol" / "AssociatedType", .associatedtype),
-                ("Struct", .struct),
-                ("Typealias", .typealias),
-                ("Var", .var(nil)),
-
+                (["Actor"],                         .actor),
+                (["Class"],                         .class),
+                (["Enum"],                          .enum),
+                (["Enum", "case"],                  .case),
+                (["Protocol"],                      .protocol),
+                (["Protocol", "AssociatedType"],    .associatedtype),
+                (["Struct"],                        .struct),
+                (["Typealias"],                     .typealias),
+                (["Var"],                           .var(nil)),
             ]
             {
-                if  let tests:TestGroup = tests / symbol.last.lowercased(),
+                if  let name:String = symbol.last?.lowercased(),
+                    let tests:TestGroup = tests / name,
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.phylum ==? phylum)
                 }
             }
-            for (symbol, phylum, name):(SymbolPath, SymbolPhylum, String) in
+            for (symbol, phylum, name):([String], SymbolPhylum, String) in
             [
-                ("Func",                        .func(nil),             "global-func"),
-                ("Struct" / "instanceMethod",   .func(.instance),       "instance-func"),
-                ("Struct" / "staticMethod",     .func(.static),         "static-func"),
+                (["Func"],                      .func(nil),             "global-func"),
+                (["Struct", "instanceMethod"],  .func(.instance),       "instance-func"),
+                (["Struct", "staticMethod"],    .func(.static),         "static-func"),
 
-                ("Struct" / "instanceProperty", .var(.instance),        "instance-var"),
-                ("Struct" / "staticProperty",   .var(.static),          "static-var"),
+                (["Struct", "instanceProperty"],.var(.instance),        "instance-var"),
+                (["Struct", "staticProperty"],  .var(.static),          "static-var"),
                 
-                ("Struct" / "subscript",        .subscript(.instance),  "instance-subscript"),
-                ("Struct" / "subscript(_:)",    .subscript(.static),    "static-subscript"),
+                (["Struct", "subscript"],       .subscript(.instance),  "instance-subscript"),
+                (["Struct", "subscript(_:)"],   .subscript(.static),    "static-subscript"),
 
-                ("Class" / "classMethod",       .func(.class),          "class-func"),
-                ("Class" / "classProperty",     .var(.class),           "class-var"),
-                ("Class" / "init",              .initializer,           "class-init"),
-                ("Actor" / "init",              .initializer,           "actor-init"),
+                (["Class", "classMethod"],      .func(.class),          "class-func"),
+                (["Class", "classProperty"],    .var(.class),           "class-var"),
+                (["Class", "init"],             .initializer,           "class-init"),
+                (["Actor", "init"],             .initializer,           "actor-init"),
 
-                ("?/(_:)",                      .operator,              "operator-prefix"),
-                ("<-(_:_:)",                    .operator,              "operator-infix"),
-                ("/?(_:)",                      .operator,              "operator-suffix"),
+                (["?/(_:)"],                    .operator,              "operator-prefix"),
+                (["<-(_:_:)"],                  .operator,              "operator-infix"),
+                (["/?(_:)"],                    .operator,              "operator-suffix"),
 
-                ("Struct" / "?/(_:)",           .operator,              "type-operator-prefix"),
-                ("Struct" / "<-(_:_:)",         .operator,              "type-operator-infix"),
-                ("Struct" / "/?(_:)",           .operator,              "type-operator-suffix"),
+                (["Struct", "?/(_:)"],          .operator,              "type-operator-prefix"),
+                (["Struct", "<-(_:_:)"],        .operator,              "type-operator-infix"),
+                (["Struct", "/?(_:)"],          .operator,              "type-operator-suffix"),
             ]
             {
                 if  let tests:TestGroup = tests / name,
@@ -74,10 +74,10 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
         {
-            for (symbol, phylum):(SymbolPath, SymbolPhylum) in
+            for (symbol, phylum):([String], SymbolPhylum) in
             [
-                ("Int", .extension),
-                ("Int" / "AssociatedType", .typealias),
+                (["Int"], .extension),
+                (["Int", "AssociatedType"], .typealias),
             ]
             {
                 if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
@@ -90,10 +90,10 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/SPI.symbols.json")
         {
-            for (symbol, interfaces):(SymbolPath, SymbolInterfaces?) in
+            for (symbol, interfaces):([String], SymbolInterfaces?) in
             [
-                ("NoSPI", nil),
-                ("SPI", .init()),
+                (["NoSPI"], nil),
+                (["SPI"], .init()),
             ]
             {
                 if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
@@ -106,103 +106,103 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/DocumentationInheritance.symbols.json")
         {
-            for (symbol, culture, text):(SymbolPath, ModuleIdentifier?, String?) in
+            for (symbol, culture, text):([String], ModuleIdentifier?, String?) in
             [
                 (
-                    "Protocol" / "everywhere" as SymbolPath,
+                    ["Protocol", "everywhere"],
                     "DocumentationInheritance",
                     "This comment is from the root protocol."
                 ),
                 (
-                    "Protocol" / "protocol" as SymbolPath,
+                    ["Protocol", "protocol"],
                     "DocumentationInheritance",
                     "This comment is from the root protocol."
                 ),
                 (
-                    "Protocol" / "refinement" as SymbolPath,
+                    ["Protocol", "refinement"],
                     nil,
                     nil
                 ),
                 (
-                    "Protocol" / "conformer" as SymbolPath,
+                    ["Protocol", "conformer"],
                     nil,
                     nil
                 ),
                 (
-                    "Protocol" / "nowhere" as SymbolPath,
+                    ["Protocol", "nowhere"],
                     nil,
                     nil
                 ),
 
                 (
-                    "Refinement" / "everywhere" as SymbolPath,
+                    ["Refinement", "everywhere"],
                     "DocumentationInheritance",
                     "This comment is from the refined protocol."
                 ),
                 (
-                    "Refinement" / "protocol" as SymbolPath,
+                    ["Refinement", "protocol"],
                     nil,
                     nil
                 ),
                 (
-                    "Refinement" / "refinement" as SymbolPath,
+                    ["Refinement", "refinement"],
                     "DocumentationInheritance",
                     "This comment is from the refined protocol."
                 ),
                 (
-                    "Refinement" / "conformer" as SymbolPath,
+                    ["Refinement", "conformer"],
                     nil,
                     nil
                 ),
                 (
-                    "Refinement" / "nowhere" as SymbolPath,
+                    ["Refinement", "nowhere"],
                     nil,
                     nil
                 ),
 
                 (
-                    "OtherRefinement" / "everywhere" as SymbolPath,
+                    ["OtherRefinement", "everywhere"],
                     "DocumentationInheritance",
                     "This is a default implementation provided by a refined protocol."
                 ),
                 (
-                    "OtherRefinement" / "protocol" as SymbolPath,
+                    ["OtherRefinement", "protocol"],
                     nil,
                     nil
                 ),
 
                 (
-                    "Conformer" / "everywhere" as SymbolPath,
+                    ["Conformer", "everywhere"],
                     "DocumentationInheritance",
                     "This comment is from the conforming type."
                 ),
                 //  This would inherit (from Protocol) if the colony
                 //  were generated without `-skip-inherited-docs`.
                 (
-                    "Conformer" / "protocol" as SymbolPath,
+                    ["Conformer", "protocol"],
                     nil,
                     nil
                 ),
                 //  This would inherit (from Refinement) if the colony
                 //  were generated without `-skip-inherited-docs`.
                 (
-                    "Conformer" / "refinement" as SymbolPath,
+                    ["Conformer", "refinement"],
                     nil,
                     nil
                 ),
                 (
-                    "Conformer" / "conformer" as SymbolPath,
+                    ["Conformer", "conformer"],
                     "DocumentationInheritance",
                     "This comment is from the conforming type."
                 ),
                 (
-                    "Conformer" / "nowhere" as SymbolPath,
+                    ["Conformer", "nowhere"],
                     nil,
                     nil
                 ),
             ]
             {
-                if  let tests:TestGroup = tests / symbol[0].lowercased() / symbol.last,
+                if  let tests:TestGroup = tests / symbol.joined(separator: "-").lowercased(),
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.documentation?.culture ==? culture)
@@ -275,15 +275,15 @@ enum Main:SyncTests
                 TestModules/Symbolgraphs/DocumentationInheritanceFromSwift.symbols.json
                 """)
         {
-            for (symbol, culture, text):(SymbolPath, ModuleIdentifier?, String?) in
+            for (symbol, culture, text):([String], ModuleIdentifier?, String?) in
             [
                 (
-                    "Documented" / "id" as SymbolPath,
+                    ["Documented", "id"],
                     "DocumentationInheritanceFromSwift",
                     "A documented id property."
                 ),
                 (
-                    "Undocumented" / "id" as SymbolPath,
+                    ["Undocumented", "id"],
                     nil,
                     nil
                 ),
@@ -347,18 +347,17 @@ enum Main:SyncTests
                 TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):(SymbolPath, [GenericConstraint<ScalarSymbolResolution>])
-                in
+            for (symbol, conditions):([String], [GenericConstraint<ScalarSymbolResolution>]) in
             [
                 (
-                    "Struct" / "internal(_:)",
+                    ["Struct", "internal(_:)"],
                     [
                         .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                         .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
-                    "Protocol" / "internal(_:)",
+                    ["Protocol", "internal(_:)"],
                     [
                         .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]
@@ -378,31 +377,30 @@ enum Main:SyncTests
                 ExtendableTypesWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):(SymbolPath, [GenericConstraint<ScalarSymbolResolution>])
-                in
+            for (symbol, conditions):([String], [GenericConstraint<ScalarSymbolResolution>]) in
             [
                 (
-                    "Struct",
+                    ["Struct"],
                     [
                         .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                         .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
-                    "Struct" / "external(_:)",
+                    ["Struct", "external(_:)"],
                     [
                         .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                         .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
                     ]
                 ),
                 (
-                    "Protocol",
+                    ["Protocol"],
                     [
                         .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]
                 ),
                 (
-                    "Protocol" / "external(_:)",
+                    ["Protocol", "external(_:)"],
                     [
                         .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
                     ]

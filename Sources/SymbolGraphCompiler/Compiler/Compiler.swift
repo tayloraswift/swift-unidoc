@@ -53,7 +53,7 @@ extension Compiler
                     do
                     {
                         included ?
-                        try self.scalars.include(scalar: scalar, with: symbol) :
+                        try self.scalars.include(scalar: scalar, with: symbol, in: culture) :
                         try self.scalars.exclude(scalar: scalar)
                     }
                     catch let error

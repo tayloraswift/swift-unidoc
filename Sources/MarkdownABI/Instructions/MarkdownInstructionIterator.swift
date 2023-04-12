@@ -70,6 +70,9 @@ extension MarkdownInstructionIterator:IteratorProtocol
                 return .emit(instruction)
             }
         
+        case .fold:
+            return .fold
+        
         case .push:
             if  let instruction:MarkdownBytecode.Context = self.read()
             {

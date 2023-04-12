@@ -310,6 +310,15 @@ enum Main:SyncTests
                 tests.expect(scope.components ..? ["Foo", "Bar", "Baz"])
                 tests.expect(codelink.path.components ..? ["Sloth", "Color"])
             }
+            if  let tests:TestGroup = tests / "overencased",
+                let codelink:Codelink = tests.parse(
+                    codelink: "`Foo`.`Bar`.`Baz` `Sloth`.`Color`"),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
+            {
+                tests.expect(nil: codelink.filter)
+                tests.expect(scope.components ..? ["Foo", "Bar", "Baz"])
+                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+            }
         }
         if  let tests:TestGroup = tests / "codelinks" / "hashes",
             let codelink:Codelink = tests.parse(
@@ -330,7 +339,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
                 tests.expect(codelink.path.collation ==? .legacy)
-                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+                tests.expect(codelink.path.components ..? ["sloth", "color"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "filter",
@@ -340,7 +349,7 @@ enum Main:SyncTests
                 tests.expect(codelink.filter ==? .enum)
                 tests.expect(nil: codelink.scope)
                 tests.expect(codelink.path.collation ==? .legacy)
-                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+                tests.expect(codelink.path.components ..? ["sloth", "color"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "hash",
@@ -350,7 +359,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
                 tests.expect(codelink.path.collation ==? .legacy)
-                tests.expect(codelink.path.components ..? ["Sloth", "update(_:)"])
+                tests.expect(codelink.path.components ..? ["sloth", "update(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4ko57", radix: 36))
             }
             if  let tests:TestGroup = tests / "hash" / "minus",
@@ -360,7 +369,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
                 tests.expect(codelink.path.collation ==? .legacy)
-                tests.expect(codelink.path.components ..? ["Sloth", "-(_:)"])
+                tests.expect(codelink.path.components ..? ["sloth", "-(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4ko57", radix: 36))
             }
             if  let tests:TestGroup = tests / "hash" / "slinging" / "slasher",
@@ -370,7 +379,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
                 tests.expect(codelink.path.collation ==? .legacy)
-                tests.expect(codelink.path.components ..? ["Sloth", "/(_:)"])
+                tests.expect(codelink.path.components ..? ["sloth", "/(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4ko57", radix: 36))
             }
         }

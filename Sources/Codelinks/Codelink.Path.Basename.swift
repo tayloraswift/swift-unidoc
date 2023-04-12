@@ -29,3 +29,10 @@ extension Codelink.Path.Basename:LexicalContinuation
         }
     }
 }
+extension Codelink.Path.Basename
+{
+    func lowercased() -> Self
+    {
+        .init(unencased: self.unencased.lowercased())
+    }
+}

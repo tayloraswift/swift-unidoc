@@ -15,6 +15,19 @@ extension Codelink
 }
 extension Codelink.Scope
 {
+    /// Removes backticks from the last scope component, if they are unnecessary.
+    private mutating
+    func normalize()
+    {
+        guard   self.components.prefix.isEmpty,
+                let _:Codelink.Keyword = .init(rawValue: self.components.last.characters)
+        else
+        {
+            self.components.last.encased = false
+            return
+        }
+    }
+
     init?(_ description:Substring)
     {
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
@@ -26,6 +39,11 @@ extension Codelink.Scope
         else
         {
             return nil
+        }
+
+        defer
+        {
+            self.normalize()
         }
 
         while let separator:Unicode.Scalar = codepoints.popFirst()

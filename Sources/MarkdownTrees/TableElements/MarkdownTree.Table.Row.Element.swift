@@ -21,7 +21,7 @@ extension MarkdownTree.Table.Row
 extension MarkdownTree.Table.Row.Element:MarkdownElement
 {
     @inlinable public
-    func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
     {
         try self.cell.outline(by: register)
     }

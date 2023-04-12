@@ -1,5 +1,3 @@
-import Symbols
-
 extension Codelink.Path
 {
     enum Suffix

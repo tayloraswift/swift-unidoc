@@ -17,7 +17,7 @@ extension MarkdownTree
         /// Recursively calls ``MarkdownElement outline(by:)`` for each element
         /// in this container.
         public final override
-        func outline(by register:(_ symbol:String) throws -> UInt32) rethrows
+        func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
         {
             for index:Int in self.elements.indices
             {
