@@ -22,7 +22,7 @@ struct SymbolDescription:Equatable, Sendable
     public
     let location:SourceLocation<String>?
     public
-    let phylum:SymbolPhylum
+    let phylum:Phylum
     public
     let path:LexicalPath
     public
@@ -37,7 +37,7 @@ struct SymbolDescription:Equatable, Sendable
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
-        phylum:SymbolPhylum,
+        phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
     {
@@ -70,35 +70,12 @@ extension SymbolDescription
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
         location:SourceLocation<String>?,
-        type:SymbolDescriptionType,
+        phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
     {
-        var phylum:SymbolPhylum
-        switch type
-        {
-        case .associatedtype:       phylum = .associatedtype
-        case .enum:                 phylum = .enum
-        case .extension:            phylum = .extension
-        case .case:                 phylum = .case
-        case .class:                phylum = .class
-        case .deinitializer:        phylum = .deinitializer
-        case .globalFunction:       phylum = .func(nil)
-        case .globalVariable:       phylum = .var(nil)
-        case .initializer:          phylum = .initializer
-        case .instanceFunction:     phylum = .func(.instance)
-        case .instanceSubscript:    phylum = .subscript(.instance)
-        case .instanceVariable:     phylum = .var(.instance)
-        case .protocol:             phylum = .protocol
-        case .macro:                phylum = .macro
-        case .operator:             phylum = .operator
-        case .struct:               phylum = .struct
-        case .typealias:            phylum = .typealias
-        case .typeFunction:         phylum = .func(.static)
-        case .typeSubscript:        phylum = .subscript(.static)
-        case .typeVariable:         phylum = .var(.static)
-        }
-        
+        var phylum:Phylum = phylum
+
         fragments:
         for fragment:DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>
             in expanded where fragment.color == .keyword
@@ -164,7 +141,7 @@ extension SymbolDescription
         }
 
         self.init(
-            documentation: documentation.flatMap { $0.text.isEmpty ? nil : $0 },
+            documentation: documentation.flatMap { $0.comment.isEmpty ? nil : $0 },
             availability: availability,
             interfaces: interfaces,
             visibility: visibility,
@@ -250,7 +227,7 @@ extension SymbolDescription:JSONObjectDecodable
                         try $0[.column].decode())
                 }
             },
-            type: try json[.kind].decode(using: CodingKeys.Kind.self)
+            phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
             {
                 try $0[.identifier].decode()
             },

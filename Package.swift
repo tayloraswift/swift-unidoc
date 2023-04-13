@@ -37,7 +37,7 @@ let package:Package = .init(
     dependencies: 
     [
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "0.4.5")),
+            from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(

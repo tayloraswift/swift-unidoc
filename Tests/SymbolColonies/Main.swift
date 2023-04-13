@@ -12,7 +12,7 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/Phyla.symbols.json")
         {
-            for (symbol, phylum):([String], SymbolPhylum) in
+            for (symbol, phylum):([String], SymbolDescription.Phylum) in
             [
                 (["Actor"],                         .actor),
                 (["Class"],                         .class),
@@ -32,7 +32,7 @@ enum Main:SyncTests
                     tests.expect(symbol.phylum ==? phylum)
                 }
             }
-            for (symbol, phylum, name):([String], SymbolPhylum, String) in
+            for (symbol, phylum, name):([String], SymbolDescription.Phylum, String) in
             [
                 (["Func"],                      .func(nil),             "global-func"),
                 (["Struct", "instanceMethod"],  .func(.instance),       "instance-func"),
@@ -74,7 +74,7 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
         {
-            for (symbol, phylum):([String], SymbolPhylum) in
+            for (symbol, phylum):([String], SymbolDescription.Phylum) in
             [
                 (["Int"], .extension),
                 (["Int", "AssociatedType"], .typealias),
@@ -106,7 +106,7 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/DocumentationInheritance.symbols.json")
         {
-            for (symbol, culture, text):([String], ModuleIdentifier?, String?) in
+            for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
             [
                 (
                     ["Protocol", "everywhere"],
@@ -206,7 +206,7 @@ enum Main:SyncTests
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.documentation?.culture ==? culture)
-                    tests.expect(symbol.documentation?.text ==? text)
+                    tests.expect(symbol.documentation?.comment ==? comment)
                 }
             }
 
@@ -234,39 +234,39 @@ enum Main:SyncTests
                 [
                     .defaultImplementation(.init(.init(
                         "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!,
-                        of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!),
+                        of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!,
                         origin: .init(.init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!)),
+                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
                     
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP7nowhereytvp")!)),
+                            "s:24DocumentationInheritance10RefinementP7nowhereytvp")!))),
                     
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP10refinementytvp")!)),
+                            "s:24DocumentationInheritance10RefinementP10refinementytvp")!))),
                     
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP9conformerytvp")!)),
+                            "s:24DocumentationInheritance10RefinementP9conformerytvp")!))),
                     
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP10everywhereytvp")!)),
+                            "s:24DocumentationInheritance10RefinementP10everywhereytvp")!))),
     
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!)),
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!)),
+                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
                 ])
             }
         }
@@ -275,7 +275,7 @@ enum Main:SyncTests
                 TestModules/Symbolgraphs/DocumentationInheritanceFromSwift.symbols.json
                 """)
         {
-            for (symbol, culture, text):([String], ModuleIdentifier?, String?) in
+            for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
             [
                 (
                     ["Documented", "id"],
@@ -293,7 +293,7 @@ enum Main:SyncTests
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: colony)
                 {
                     tests.expect(symbol.documentation?.culture ==? culture)
-                    tests.expect(symbol.documentation?.text ==? text)
+                    tests.expect(symbol.documentation?.comment ==? comment)
                 }
             }
 
@@ -315,8 +315,9 @@ enum Main:SyncTests
                 /// had no documentation of their own, and successfully inherited some.
                 tests.expect(colony.relationships.filter
                 {
-                    if  case .membership(let membership, origin: _?) = $0,
-                        case .scalar = membership.source
+                    if  case .membership(let membership) = $0,
+                        case .scalar = membership.source,
+                        case _? = membership.origin
                     {
                         return true
                     }
@@ -330,14 +331,14 @@ enum Main:SyncTests
                     .membership(.init(of: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp")!),
                         in: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift12UndocumentedV")!)),
-                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!)),
+                        "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
+                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
                     
                     .membership(.init(of: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp")!),
                         in: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift10DocumentedV")!)),
-                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!)),
+                        "s:33DocumentationInheritanceFromSwift10DocumentedV")!),
+                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
                 ])
             }
         }

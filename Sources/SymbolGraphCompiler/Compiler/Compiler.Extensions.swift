@@ -31,13 +31,13 @@ extension Compiler.Extensions
         guard case .extension = description.phylum
         else
         {
-            throw Compiler.ExtensionPhylumError.unsupported(description.phylum)
+            throw Compiler.PhylumError.unsupported(description.phylum)
         }
 
         let object:Compiler.Extension = self[type, where: description.extension.conditions]
 
         if  let description:Compiler.ExtensionBlock = .init(location: description.location,
-                text: description.documentation?.text)
+                comment: description.documentation?.comment)
         {
             object.blocks.append(description)
         }

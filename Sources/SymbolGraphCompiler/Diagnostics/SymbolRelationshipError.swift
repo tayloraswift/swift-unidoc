@@ -1,7 +1,7 @@
 import TraceableErrors
 
 public
-struct SymbolRelationshipError<HalfEdge>:Error where HalfEdge:Equatable & Sendable
+struct SymbolRelationshipError<HalfEdge>:Error, Sendable where HalfEdge:Sendable
 {
     public
     let underlying:any Error
@@ -15,7 +15,7 @@ struct SymbolRelationshipError<HalfEdge>:Error where HalfEdge:Equatable & Sendab
         self.edge = edge
     }
 }
-extension SymbolRelationshipError:Equatable
+extension SymbolRelationshipError:Equatable where HalfEdge:Equatable
 {
     public static
     func == (lhs:Self, rhs:Self) -> Bool

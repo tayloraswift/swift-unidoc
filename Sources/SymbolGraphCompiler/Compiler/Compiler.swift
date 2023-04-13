@@ -91,89 +91,28 @@ extension Compiler
             {
                 switch relationship
                 {
-                case .conformance(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(conformance: edge)
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<SymbolRelationship.Conformance>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
-                
                 case .extension:
                     //  Already handled these.
                     continue
                 
-                case .defaultImplementation(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(superform: edge, as: LatticeSuperform.implements(_:))
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<
-                            SymbolRelationship.DefaultImplementation>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
+                case .conformance(let conformance):
+                    try self.add(conformance)
 
-                case .inheritance(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(superform: edge, as: LatticeSuperform.inherits(_:))
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<SymbolRelationship.Inheritance>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
+                case .membership(let membership):
+                    try self.add(membership)
+                
+                case .requirement(let requirement):
+                    try self.add(requirement)
 
+                case .defaultImplementation(let relationship):
+                    try self.add(relationship, as: LatticeSuperform.implements(_:))
 
-                case .membership(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(membership: edge)
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<SymbolRelationship.Membership>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
+                case .inheritance(let relationship):
+                    try self.add(relationship, as: LatticeSuperform.inherits(_:))
 
-                case .override(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(superform: edge, as: LatticeSuperform.overrides(_:))
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<SymbolRelationship.Override>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
+                case .override(let relationship):
+                    try self.add(relationship, as: LatticeSuperform.overrides(_:))
 
-                case .requirement(let edge, origin: let origin):
-                    do
-                    {
-                        try self.add(requirement: edge)
-                        try self.add(origin: origin)
-                    }
-                    catch let error
-                    {
-                        throw SymbolRelationshipError<SymbolRelationship.Requirement>.init(
-                            underlying: error,
-                            edge: edge)
-                    }
                 }
             }
         }
@@ -181,12 +120,76 @@ extension Compiler
 }
 extension Compiler
 {
+
+}
+extension Compiler
+{
+
+}
+extension Compiler
+{
     private mutating
-    func add(origin:SymbolOrigin?) throws
+    func add(_ conformance:SymbolRelationship.Conformance) throws
     {
+        do
+        {
+            try self.assign(relationship: conformance)
+        }
+        catch let error
+        {
+            throw SymbolRelationshipError<SymbolRelationship.Conformance>.init(
+                underlying: error,
+                edge: conformance)
+        }
     }
     private mutating
-    func add(conformance:SymbolRelationship.Conformance) throws
+    func add(_ membership:SymbolRelationship.Membership) throws
+    {
+        do
+        {
+            try self.assign(relationship: membership)
+        }
+        catch let error
+        {
+            throw SymbolRelationshipError<SymbolRelationship.Membership>.init(
+                underlying: error,
+                edge: membership)
+        }
+    }
+    private mutating
+    func add(_ requirement:SymbolRelationship.Requirement) throws
+    {
+        do
+        {
+            try self.assign(relationship: requirement)
+        }
+        catch let error
+        {
+            throw SymbolRelationshipError<SymbolRelationship.Requirement>.init(
+                underlying: error,
+                edge: requirement)
+        }
+    }
+    private mutating
+    func add<Relationship>(_ superform:Relationship,
+        as type:(ScalarSymbolResolution) -> LatticeSuperform) throws
+        where Relationship:SuperformRelationship
+    {
+        do
+        {
+            try self.assign(relationship: superform, as: type)
+        }
+        catch let error
+        {
+            throw SymbolRelationshipError<Relationship>.init(underlying: error,
+                edge: superform)
+        }
+    }
+}
+extension Compiler
+{
+    private mutating
+    func assign(relationship conformance:SymbolRelationship.Conformance) throws
     {
         guard let `protocol`:ScalarSymbolResolution = self.scalars[conformance.target]
         else
@@ -210,7 +213,10 @@ extension Compiler
             {
                 return // Type is hidden.
             }
-
+            if let origin:ScalarSymbolResolution = conformance.origin
+            {
+                try type.assign(origin: origin)
+            }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
             `extension` = self.extensions[type.resolution, where: conformance.conditions]
@@ -229,7 +235,7 @@ extension Compiler
         `extension`.conformances.insert(`protocol`)
     }
     private mutating
-    func add(membership relationship:SymbolRelationship.Membership) throws
+    func assign(relationship:SymbolRelationship.Membership) throws
     {
         switch relationship.source
         {
@@ -299,7 +305,8 @@ extension Compiler
                 //  We should never see an external type reference here either.
                 if  let type:Scalar = try self.scalars(internal: type)
                 {
-                    try member.assign(membership: .member(of: type.resolution))
+                    try member.assign(membership: .member(of: type.resolution),
+                        origin: relationship.origin)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
                     self.extensions[type.resolution, where: member.conditions].members.insert(
@@ -310,7 +317,8 @@ extension Compiler
                 let named:Extension = try self.extensions.named(block)
                 if  named.conditions == member.conditions
                 {
-                    try member.assign(membership: .member(of: named.type))
+                    try member.assign(membership: .member(of: named.type),
+                        origin: relationship.origin)
                     named.members.insert(member.resolution)
                 }
                 else
@@ -328,7 +336,7 @@ extension Compiler
         }
     }
     private mutating
-    func add(requirement relationship:SymbolRelationship.Requirement) throws
+    func assign(relationship:SymbolRelationship.Requirement) throws
     {
         /// Protocol must always be from the same module.
         guard let `protocol`:Scalar = try self.scalars(internal: relationship.target)
@@ -339,12 +347,13 @@ extension Compiler
         if  let requirement:Scalar = try self.scalars(internal: relationship.source)
         {
             try requirement.assign(membership: .requirement(of: `protocol`.resolution,
-                optional: relationship.optional))
+                    optional: relationship.optional),
+                origin: relationship.origin)
         }
     }
     private mutating
-    func add(superform relationship:some SuperformRelationship,
-        as edge:(ScalarSymbolResolution) -> LatticeSuperform) throws
+    func assign(relationship:some SuperformRelationship,
+        as type:(ScalarSymbolResolution) -> LatticeSuperform) throws
     {
         guard let superform:ScalarSymbolResolution = self.scalars[relationship.target]
         else
@@ -355,7 +364,7 @@ extension Compiler
         /// internal symbols.
         if let subform:Scalar = try self.scalars(internal: relationship.source)
         {
-            try subform.assign(superform: edge(superform))
+            try subform.assign(superform: type(superform), origin: relationship.origin)
         }
     }
 }
