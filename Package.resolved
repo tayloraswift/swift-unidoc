@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "36ef4bf1e6ae38f881ed253d5656839a046456f1",
-        "version" : "0.4.5"
+        "revision" : "fe4be534cd76444f3100619b261e69b42374f243",
+        "version" : "0.5.0"
       }
     },
     {

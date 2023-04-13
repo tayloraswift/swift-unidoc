@@ -9,15 +9,19 @@ extension SymbolRelationship
         let source:UnifiedSymbolResolution
         public
         let target:ScalarSymbolResolution
+        public
+        let origin:ScalarSymbolResolution?
 
         @inlinable public
         init(of source:UnifiedSymbolResolution,
             to target:ScalarSymbolResolution,
-            where conditions:[GenericConstraint<ScalarSymbolResolution>]?)
+            where conditions:[GenericConstraint<ScalarSymbolResolution>]?,
+            origin:ScalarSymbolResolution? = nil)
         {
             self.conditions = conditions ?? []
             self.source = source
             self.target = target
+            self.origin = origin
         }
     }
 }

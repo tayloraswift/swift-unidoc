@@ -3,18 +3,18 @@ extension Compiler
     struct ExtensionBlock
     {
         let location:SourceLocation<String>?
-        let text:String?
+        let comment:String?
 
-        init?(location:SourceLocation<String>?, text:String?)
+        init?(location:SourceLocation<String>?, comment:String?)
         {
-            if case (nil, nil) = (location, text)
+            if case (nil, nil) = (location, comment)
             {
                 return nil
             }
             else
             {            
                 self.location = location
-                self.text = text
+                self.comment = comment
             }
         }
     }

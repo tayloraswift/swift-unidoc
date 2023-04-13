@@ -8,13 +8,13 @@ extension SymbolDescription
         public
         let culture:ModuleIdentifier?
         public
-        let text:String
+        let comment:String
 
         public
-        init(culture:ModuleIdentifier?, text:String)
+        init(culture:ModuleIdentifier?, comment:String)
         {
             self.culture = culture
-            self.text = text
+            self.comment = comment
         }
     }
 }
@@ -36,7 +36,7 @@ extension SymbolDescription.Documentation:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(culture: try json[.culture]?.decode(),
-            text: try json[.lines].decode(as: JSON.Array.self)
+            comment: try json[.lines].decode(as: JSON.Array.self)
             {
                 try $0.lazy.map
                 {

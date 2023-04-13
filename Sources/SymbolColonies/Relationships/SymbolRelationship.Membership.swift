@@ -7,13 +7,17 @@ extension SymbolRelationship
         let source:UnifiedSymbolResolution
         public
         let target:UnifiedSymbolResolution
+        public
+        let origin:ScalarSymbolResolution?
 
         @inlinable public
         init(of source:UnifiedSymbolResolution,
-            in target:UnifiedSymbolResolution)
+            in target:UnifiedSymbolResolution,
+            origin:ScalarSymbolResolution? = nil)
         {
             self.source = source
             self.target = target
+            self.origin = origin
         }
     }
 }

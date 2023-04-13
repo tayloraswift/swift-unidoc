@@ -16,23 +16,24 @@ extension Compiler
 extension Compiler.Scalars
 {
     mutating
-    func exclude(scalar:ScalarSymbolResolution) throws
+    func exclude(scalar resolution:ScalarSymbolResolution) throws
     {
-        try self.recognize(scalar: scalar, as: .excluded)
+        try self.recognize(scalar: resolution, as: .excluded)
     }
     mutating
-    func include(scalar:ScalarSymbolResolution,
+    func include(scalar resolution:ScalarSymbolResolution,
         with description:SymbolDescription,
         in culture:ModuleIdentifier) throws
     {
-        try self.recognize(scalar: scalar, as: .included(.infer(from: description,
-            in: culture,
-            as: scalar)))
+        try self.recognize(scalar: resolution, as: .included(.init(from: description,
+            as: resolution,
+            in: culture)))
     }
     private mutating
-    func recognize(scalar:ScalarSymbolResolution, as recognition:Recognition) throws
+    func recognize(scalar resolution:ScalarSymbolResolution,
+        as recognition:Recognition) throws
     {
-        switch self.recognized.updateValue(recognition, forKey: scalar)
+        switch self.recognized.updateValue(recognition, forKey: resolution)
         {
         case nil, .excluded?:
             return
@@ -56,7 +57,6 @@ extension Compiler.Scalars
             return resolution
         }
     }
-
     func callAsFunction(internal resolution:ScalarSymbolResolution) throws -> Compiler.Scalar?
     {
         switch self.recognized[resolution]

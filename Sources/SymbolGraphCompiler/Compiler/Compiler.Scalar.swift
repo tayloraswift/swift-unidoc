@@ -8,10 +8,11 @@ extension Compiler
     /// things about the existence or knowledge of a scalar, and then
     /// separately write updates to the scalar without looking it up
     /// again.
+    final
     class Scalar:Identifiable
     {
-        class
-        var phylum:SymbolPhylum { .typealias }
+        final
+        let phylum:ScalarPhylum
 
         //  Validation parameters, will not be encoded.
         final
@@ -32,8 +33,8 @@ extension Compiler
         /// intrinsic.
         final private(set)
         var membership:LatticeMembership?
-        /// The type this scalar inherits from. Inheritance is unique and
-        /// intrinsic.
+        /// The scalar that this scalar implements, overrides, or inherits
+        /// from. Superforms are unique and intrinsic.
         ///
         /// Only protocols can inherit from other protocols. (All other
         /// phyla can only conform to protocols.) Any class can inherit
@@ -43,14 +44,23 @@ extension Compiler
         final private(set)
         var superform:LatticeSuperform?
 
+        final private(set)
+        var comment:String
+
+        final private(set)
+        var origin:ScalarSymbolResolution?
+
         private
-        init(resolution:ScalarSymbolResolution,
+        init(phylum:ScalarPhylum,
+            resolution:ScalarSymbolResolution,
             conditions:[GenericConstraint<ScalarSymbolResolution>],
             availability:SymbolAvailability,
             generics:GenericSignature<ScalarSymbolResolution>,
             location:SourceLocation<String>?,
             path:LexicalPath)
         {
+            self.phylum = phylum
+
             self.resolution = resolution
             self.conditions = conditions
 
@@ -58,87 +68,54 @@ extension Compiler
             self.generics = generics
             self.location = location
             self.path = path
-            
+
             self.membership = nil
             self.superform = nil
+
+            self.comment = ""
+            self.origin = nil
         }
     }
 }
 extension Compiler.Scalar
 {
-    private convenience
-    init(from description:SymbolDescription, as resolution:ScalarSymbolResolution)
+    convenience
+    init(from description:SymbolDescription,
+        as resolution:ScalarSymbolResolution,
+        in culture:ModuleIdentifier) throws
     {
-        self.init(resolution: resolution,
+        guard let phylum:Compiler.ScalarPhylum = .init(description.phylum)
+        else
+        {
+            throw Compiler.PhylumError.unsupported(description.phylum)
+        }
+
+        self.init(phylum: phylum,
+            resolution: resolution,
             conditions: description.extension.conditions,
             availability: description.availability,
             generics: description.generics,
             location: description.location,
             path: description.path)
-    }
-    static
-    func infer(from description:SymbolDescription,
-        in culture:ModuleIdentifier,
-        as resolution:ScalarSymbolResolution) throws -> Compiler.Scalar
-    {
-        switch description.phylum
+        
+        if  let documentation:SymbolDescription.Documentation = description.documentation
         {
-        case .actor:
-            return Compiler.Actor.init(from: description, as: resolution)
-        case .associatedtype:
-            return Compiler.AssociatedType.init(from: description, as: resolution)
-        case .case:
-            return Compiler.EnumCase.init(from: description, as: resolution)
-        case .class:
-            return Compiler.Class.init(from: description, as: resolution)
-        case .deinitializer:
-            return Compiler.Deinit.init(from: description, as: resolution)
-        case .enum:
-            return Compiler.Enum.init(from: description, as: resolution)
-        case .func(nil):
-            return Compiler.GlobalFunc.init(from: description, as: resolution)
-        case .func(.static):
-            return Compiler.StaticFunc.init(from: description, as: resolution)
-        case .func(.class):
-            return Compiler.ClassFunc.init(from: description, as: resolution)
-        case .func(.instance):
-            return Compiler.InstanceFunc.init(from: description, as: resolution)
-        case .initializer:
-            return Compiler.Init.init(from: description, as: resolution)
-        case .subscript(.static):
-            return Compiler.StaticSubscript.init(from: description, as: resolution)
-        case .subscript(.class):
-            return Compiler.ClassSubscript.init(from: description, as: resolution)
-        case .subscript(.instance):
-            return Compiler.InstanceSubscript.init(from: description, as: resolution)
-        case .operator:
-            return Compiler.Operator.init(from: description, as: resolution)
-        case .protocol:
-            return Compiler.ProtocolScalar.init(from: description, as: resolution)
-        case .struct:
-            return Compiler.Struct.init(from: description, as: resolution)
-        case .typealias:
-            return Compiler.Typealias.init(from: description, as: resolution)
-        case .var(nil):
-            return Compiler.GlobalVar.init(from: description, as: resolution)
-        case .var(.static):
-            return Compiler.StaticVar.init(from: description, as: resolution)
-        case .var(.class):
-            return Compiler.ClassVar.init(from: description, as: resolution)
-        case .var(.instance):
-            return Compiler.InstanceVar.init(from: description, as: resolution)
-
-        case .extension:
-            throw Compiler.ScalarPhylumError.unsupported(.extension)
-        case .macro:
-            throw Compiler.ScalarPhylumError.unsupported(.macro)
+            switch documentation.culture
+            {
+            case nil, culture?:
+                self.comment = documentation.comment
+            
+            default:
+                break
+            }
         }
     }
 }
 extension Compiler.Scalar
 {
     final
-    func assign(membership:Compiler.LatticeMembership) throws
+    func assign(membership:Compiler.LatticeMembership,
+        origin:ScalarSymbolResolution? = nil) throws
     {
         switch self.membership
         {
@@ -149,10 +126,14 @@ extension Compiler.Scalar
             throw Compiler.LatticeConflictError<Compiler.LatticeMembership>.init(
                 existing: other)
         }
+        if let origin:ScalarSymbolResolution
+        {
+            try self.assign(origin: origin)
+        }
     }
-    
     final
-    func assign(superform:Compiler.LatticeSuperform) throws
+    func assign(superform:Compiler.LatticeSuperform,
+        origin:ScalarSymbolResolution? = nil) throws
     {
         switch self.superform
         {
@@ -162,6 +143,22 @@ extension Compiler.Scalar
         case let other?:
             throw Compiler.LatticeConflictError<Compiler.LatticeSuperform>.init(
                 existing: other)
+        }
+        if let origin:ScalarSymbolResolution
+        {
+            try self.assign(origin: origin)
+        }
+    }
+    final
+    func assign(origin:ScalarSymbolResolution) throws
+    {
+        switch self.origin
+        {
+        case nil, origin?:
+            self.origin = origin
+        
+        case let other?:
+            throw Compiler.OriginConflictError.init(existing: other)
         }
     }
 }
