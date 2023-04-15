@@ -1,17 +1,17 @@
 import SymbolColonies
 
-extension Compiler
+extension Compiler.Extension
 {
     public
-    struct ExtensionSignatureError:Equatable, Error
+    struct SignatureError:Equatable, Error
     {
         public
-        let expected:ExtensionSignature
+        let expected:Signature
         public
         let declared:[GenericConstraint<ScalarSymbolResolution>]?
 
         public
-        init(expected:ExtensionSignature,
+        init(expected:Signature,
             declared:[GenericConstraint<ScalarSymbolResolution>]? = nil)
         {
             self.expected = expected
@@ -19,7 +19,7 @@ extension Compiler
         }
     }
 }
-extension Compiler.ExtensionSignatureError:CustomStringConvertible
+extension Compiler.Extension.SignatureError:CustomStringConvertible
 {
     public
     var description:String
