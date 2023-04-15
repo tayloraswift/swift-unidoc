@@ -1,0 +1,83 @@
+import SymbolColonies
+
+extension Compiler
+{
+    public
+    struct Extensions
+    {
+        private
+        var groups:[Extension.Signature: ExtensionReference]
+        /// Extensions with symbol names. Each extension may have many
+        /// names they can be referred to as.
+        private
+        var named:[BlockSymbolResolution: ExtensionReference]
+
+        init()
+        {
+            self.groups = [:]
+            self.named = [:]
+        }
+    }
+}
+extension Compiler.Extensions
+{
+    public
+    func load() -> [Compiler.Extension]
+    {
+        self.groups.values.map(\.value)
+    }
+}
+extension Compiler.Extensions
+{
+    mutating
+    func include(extended type:ScalarSymbolResolution,
+        with description:SymbolDescription,
+        by block:__owned BlockSymbolResolution) throws
+    {
+        guard case .extension = description.phylum
+        else
+        {
+            throw Compiler.PhylumError.unsupported(description.phylum)
+        }
+
+        let group:Compiler.ExtensionReference = self[type,
+            where: description.extension.conditions]
+
+        if  let block:Compiler.Extension.Block = .init(location: description.location,
+                comment: description.documentation?.comment)
+        {
+            group.append(block: block)
+        }
+
+        self.named[block] = group
+    }
+}
+
+extension Compiler.Extensions
+{
+    func named(_ block:BlockSymbolResolution) throws -> Compiler.ExtensionReference
+    {
+        if let named:Compiler.ExtensionReference = self.named[block]
+        {
+            return named
+        }
+        else
+        {
+            throw Compiler.UndefinedBlockError.init(undefined: block)
+        }
+    }
+}
+extension Compiler.Extensions
+{
+    subscript(extended:ScalarSymbolResolution,
+        where conditions:[GenericConstraint<ScalarSymbolResolution>]?)
+        -> Compiler.ExtensionReference
+    {
+        mutating get
+        {
+            let signature:Compiler.Extension.Signature = .init(extended, where: conditions)
+            return { $0 }(&self.groups[signature, default: .init(value: .init(
+                signature: signature))])
+        }
+    }
+}

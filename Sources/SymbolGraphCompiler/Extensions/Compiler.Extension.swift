@@ -1,26 +1,27 @@
 extension Compiler
 {
-    class UnqualifiedExtension
+    @frozen public
+    struct Extension
     {
-        final
+        public
         var conformances:Set<ScalarSymbolResolution>
-        final
+        public
         var features:Set<ScalarSymbolResolution>
-        final
+        public
         var members:Set<ScalarSymbolResolution>
-        final
-        var blocks:[ExtensionBlock]
+        public
+        var blocks:[Block]
 
-        final
-        let type:ScalarSymbolResolution
+        public
+        let signature:Signature
 
-        init(extending type:ScalarSymbolResolution,
+        init(signature:Signature,
             conformances:Set<ScalarSymbolResolution> = [],
             features:Set<ScalarSymbolResolution> = [],
             members:Set<ScalarSymbolResolution> = [],
-            blocks:[ExtensionBlock] = [])
+            blocks:[Block] = [])
         {
-            self.type = type
+            self.signature = signature
 
             self.conformances = conformances
             self.features = features

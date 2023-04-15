@@ -3,35 +3,30 @@ import SymbolColonies
 extension Compiler
 {
     /// A scalar is the smallest “unit” a symbol can be broken down into.
-    ///
-    /// This is a reference type, because we want to be able to query
-    /// things about the existence or knowledge of a scalar, and then
-    /// separately write updates to the scalar without looking it up
-    /// again.
-    final
-    class Scalar:Identifiable
+    @frozen public
+    struct Scalar
     {
-        final
+        public
         let phylum:ScalarPhylum
 
         //  Validation parameters, will not be encoded.
-        final
+        public
         let resolution:ScalarSymbolResolution
-        final
+        public
         let conditions:[GenericConstraint<ScalarSymbolResolution>]
 
-        final
+        public
         let availability:SymbolAvailability
-        final
+        public
         let generics:GenericSignature<ScalarSymbolResolution>
-        final
+        public
         let location:SourceLocation<String>?
-        final
+        public
         let path:LexicalPath
 
         /// The type this scalar is a member of. Membership is unique and
         /// intrinsic.
-        final private(set)
+        public
         var membership:LatticeMembership?
         /// The scalar that this scalar implements, overrides, or inherits
         /// from. Superforms are unique and intrinsic.
@@ -41,13 +36,13 @@ extension Compiler
         /// from another class.
         ///
         /// The compiler does not check for inheritance cycles.
-        final private(set)
+        public
         var superform:LatticeSuperform?
 
-        final private(set)
+        public
         var comment:String
 
-        final private(set)
+        public
         var origin:ScalarSymbolResolution?
 
         private
@@ -79,10 +74,9 @@ extension Compiler
 }
 extension Compiler.Scalar
 {
-    convenience
-    init(from description:SymbolDescription,
+    init(from description:__shared SymbolDescription,
         as resolution:ScalarSymbolResolution,
-        in culture:ModuleIdentifier) throws
+        in culture:__shared ModuleIdentifier) throws
     {
         guard let phylum:Compiler.ScalarPhylum = .init(description.phylum)
         else
@@ -108,57 +102,6 @@ extension Compiler.Scalar
             default:
                 break
             }
-        }
-    }
-}
-extension Compiler.Scalar
-{
-    final
-    func assign(membership:Compiler.LatticeMembership,
-        origin:ScalarSymbolResolution? = nil) throws
-    {
-        switch self.membership
-        {
-        case nil, membership?:
-            self.membership = membership
-        
-        case let other?:
-            throw Compiler.LatticeConflictError<Compiler.LatticeMembership>.init(
-                existing: other)
-        }
-        if let origin:ScalarSymbolResolution
-        {
-            try self.assign(origin: origin)
-        }
-    }
-    final
-    func assign(superform:Compiler.LatticeSuperform,
-        origin:ScalarSymbolResolution? = nil) throws
-    {
-        switch self.superform
-        {
-        case nil, superform?:
-            self.superform = superform
-        
-        case let other?:
-            throw Compiler.LatticeConflictError<Compiler.LatticeSuperform>.init(
-                existing: other)
-        }
-        if let origin:ScalarSymbolResolution
-        {
-            try self.assign(origin: origin)
-        }
-    }
-    final
-    func assign(origin:ScalarSymbolResolution) throws
-    {
-        switch self.origin
-        {
-        case nil, origin?:
-            self.origin = origin
-        
-        case let other?:
-            throw Compiler.OriginConflictError.init(existing: other)
         }
     }
 }

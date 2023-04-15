@@ -1,5 +1,6 @@
 extension Compiler
 {
+    @frozen public
     enum LatticeSuperform:Equatable, Hashable, Sendable
     {
         /// The protocol requirement this protocol leaf member is a

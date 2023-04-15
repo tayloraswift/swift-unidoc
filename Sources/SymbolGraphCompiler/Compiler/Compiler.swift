@@ -3,11 +3,12 @@ import SymbolColonies
 public
 struct Compiler
 {
+    private
     let threshold:SymbolVisibility
 
-    private
+    public private(set)
     var extensions:Extensions
-    private
+    public private(set)
     var scalars:Scalars
 
     public
@@ -197,7 +198,7 @@ extension Compiler
             return // Protocol is hidden.
         }
 
-        let `extension`:Extension
+        let group:ExtensionReference
 
         switch conformance.source
         {
@@ -208,7 +209,7 @@ extension Compiler
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let type:Scalar = try self.scalars(internal: type)
+            guard let type:ScalarReference = try self.scalars(internal: type)
             else
             {
                 return // Type is hidden.
@@ -219,20 +220,20 @@ extension Compiler
             }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
-            `extension` = self.extensions[type.resolution, where: conformance.conditions]
+            group = self.extensions[type.resolution, where: conformance.conditions]
         
         case .block(let block):
             //  Look up the extension associated with this block name.
-            `extension` = try self.extensions.named(block)
+            group = try self.extensions.named(block)
 
-            guard conformance.conditions == `extension`.signature.conditions
+            guard case conformance.conditions? = group.conditions
             else
             {
-                throw ExtensionSignatureError.init(expected: `extension`.signature)
+                throw Extension.SignatureError.init(expected: group.signature)
             }
         }
 
-        `extension`.conformances.insert(`protocol`)
+        group.insert(conformance: `protocol`)
     }
     private mutating
     func assign(relationship:SymbolRelationship.Membership) throws
@@ -254,7 +255,7 @@ extension Compiler
             case .scalar(let type):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
                 //  we should never see an external type reference here.
-                guard let type:Scalar = try self.scalars(internal: type)
+                guard let type:ScalarReference = try self.scalars(internal: type)
                 else
                 {
                     return // Feature is hidden.
@@ -266,7 +267,7 @@ extension Compiler
                     //  We don’t know what extension the feature should go in, because
                     //  it may come from a protocol extension we do not know about. So
                     //  we put it in the “unknown” extension.
-                    self.extensions[type.resolution, where: nil].features.insert(feature)
+                    self.extensions[type.resolution, where: nil].insert(feature: feature)
                 }
                 else
                 {
@@ -275,21 +276,21 @@ extension Compiler
             
             case .block(let block):
                 //  Look up the extension associated with this block name.
-                let named:Extension = try self.extensions.named(block)
-                if  named.type == selftype
+                let group:ExtensionReference = try self.extensions.named(block)
+                if  group.extendee == selftype
                 {
-                    named.features.insert(feature)
+                    group.insert(feature: feature)
                 }
                 else
                 {
-                    throw FeatureMembershipError.init(invalid: named.type)
+                    throw FeatureMembershipError.init(invalid: group.extendee)
                 }
             }
         
         case .scalar(let member):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let member:Scalar = try self.scalars(internal: member)
+            guard let member:ScalarReference = try self.scalars(internal: member)
             else
             {
                 return // Member is hidden.
@@ -303,29 +304,29 @@ extension Compiler
             
             case .scalar(let type):
                 //  We should never see an external type reference here either.
-                if  let type:Scalar = try self.scalars(internal: type)
+                if  let type:ScalarReference = try self.scalars(internal: type)
                 {
                     try member.assign(membership: .member(of: type.resolution),
                         origin: relationship.origin)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
-                    self.extensions[type.resolution, where: member.conditions].members.insert(
-                        member.resolution)
+                    self.extensions[type.resolution, where: member.conditions].insert(
+                        member: member.resolution)
                 }
 
             case .block(let block):
-                let named:Extension = try self.extensions.named(block)
-                if  named.conditions == member.conditions
+                let group:ExtensionReference = try self.extensions.named(block)
+                if case member.conditions? = group.conditions
                 {
-                    try member.assign(membership: .member(of: named.type),
+                    try member.assign(membership: .member(of: group.extendee),
                         origin: relationship.origin)
-                    named.members.insert(member.resolution)
+                    group.insert(member: member.resolution)
                 }
                 else
                 {
                     //  The member’s extension constraints don’t match the extension
                     //  object’s signature!
-                    throw ExtensionSignatureError.init(expected: named.signature,
+                    throw Extension.SignatureError.init(expected: group.signature,
                         declared: member.conditions)
                 }
             }
@@ -339,12 +340,12 @@ extension Compiler
     func assign(relationship:SymbolRelationship.Requirement) throws
     {
         /// Protocol must always be from the same module.
-        guard let `protocol`:Scalar = try self.scalars(internal: relationship.target)
+        guard let `protocol`:ScalarReference = try self.scalars(internal: relationship.target)
         else
         {
             return // Protocol is hidden.
         }
-        if  let requirement:Scalar = try self.scalars(internal: relationship.source)
+        if  let requirement:ScalarReference = try self.scalars(internal: relationship.source)
         {
             try requirement.assign(membership: .requirement(of: `protocol`.resolution,
                     optional: relationship.optional),
@@ -362,7 +363,7 @@ extension Compiler
         }
         /// Superform relationships are intrinsic. They must always originate from
         /// internal symbols.
-        if let subform:Scalar = try self.scalars(internal: relationship.source)
+        if let subform:ScalarReference = try self.scalars(internal: relationship.source)
         {
             try subform.assign(superform: type(superform), origin: relationship.origin)
         }

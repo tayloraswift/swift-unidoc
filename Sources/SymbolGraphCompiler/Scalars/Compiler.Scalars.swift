@@ -2,6 +2,7 @@ import SymbolColonies
 
 extension Compiler
 {
+    public
     struct Scalars
     {
         private
@@ -10,6 +11,24 @@ extension Compiler
         init()
         {
             self.recognized = [:]
+        }
+    }
+}
+extension Compiler.Scalars
+{
+    public
+    func load() -> [Compiler.Scalar]
+    {
+        self.recognized.values.compactMap
+        {
+            if case .included(let reference) = $0
+            {
+                return reference.value
+            }
+            else
+            {
+                return nil
+            }
         }
     }
 }
@@ -25,9 +44,10 @@ extension Compiler.Scalars
         with description:SymbolDescription,
         in culture:ModuleIdentifier) throws
     {
-        try self.recognize(scalar: resolution, as: .included(.init(from: description,
+        try self.recognize(scalar: resolution, as: .included(.init(value: .init(
+            from: description,
             as: resolution,
-            in: culture)))
+            in: culture))))
     }
     private mutating
     func recognize(scalar resolution:ScalarSymbolResolution,
@@ -57,7 +77,8 @@ extension Compiler.Scalars
             return resolution
         }
     }
-    func callAsFunction(internal resolution:ScalarSymbolResolution) throws -> Compiler.Scalar?
+    func callAsFunction(
+        internal resolution:ScalarSymbolResolution) throws -> Compiler.ScalarReference?
     {
         switch self.recognized[resolution]
         {

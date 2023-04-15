@@ -1,8 +1,11 @@
-extension Compiler
+extension Compiler.Extension
 {
-    struct ExtensionBlock
+    @frozen public
+    struct Block
     {
+        public
         let location:SourceLocation<String>?
+        public
         let comment:String?
 
         init?(location:SourceLocation<String>?, comment:String?)
