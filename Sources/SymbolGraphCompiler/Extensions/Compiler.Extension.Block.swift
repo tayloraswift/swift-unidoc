@@ -1,14 +1,16 @@
+import SymbolColonies
+
 extension Compiler.Extension
 {
     @frozen public
     struct Block
     {
         public
-        let location:SourceLocation<String>?
+        let location:SymbolDescription.Location?
         public
         let comment:String?
 
-        init?(location:SourceLocation<String>?, comment:String?)
+        init?(location:SymbolDescription.Location?, comment:String?)
         {
             if case (nil, nil) = (location, comment)
             {

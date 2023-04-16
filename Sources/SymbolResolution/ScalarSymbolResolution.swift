@@ -6,7 +6,7 @@ import Symbols
 /// and a symbol identifier is a symbol resolution contains a colon after
 /// its language prefix, like `s:s17FloatingPointSignO`.
 @frozen public
-struct ScalarSymbolResolution
+struct ScalarSymbolResolution:Equatable, Hashable
 {
     public
     let id:SymbolIdentifier
@@ -17,8 +17,13 @@ struct ScalarSymbolResolution
         self.id = id
     }
 }
-extension ScalarSymbolResolution:Hashable, Equatable
+extension ScalarSymbolResolution:Comparable
 {
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool 
+    {
+        lhs.id < rhs.id
+    }
 }
 extension ScalarSymbolResolution:LosslessStringConvertible, CustomStringConvertible
 {

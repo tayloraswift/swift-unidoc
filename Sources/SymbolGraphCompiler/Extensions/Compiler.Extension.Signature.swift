@@ -21,3 +21,30 @@ extension Compiler.Extension
         }
     }
 }
+extension Compiler.Extension.Signature:Comparable
+{
+    public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        if      lhs.type < rhs.type
+        {
+            return true
+        }
+        else if lhs.type > rhs.type
+        {
+            return false
+        }
+
+        switch (lhs.conditions, rhs.conditions)
+        {
+        case (_, nil):
+            return false
+        
+        case (nil, _?):
+            return true
+        
+        case (let lhs?, let rhs?):
+            return lhs.lexicographicallyPrecedes(rhs)
+        }
+    }
+}

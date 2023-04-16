@@ -24,7 +24,7 @@ extension Compiler.Extensions
     public
     func load() -> [Compiler.Extension]
     {
-        self.groups.values.map(\.value)
+        self.groups.values.map(\.value).sorted { $0.signature < $1.signature }
     }
 }
 extension Compiler.Extensions

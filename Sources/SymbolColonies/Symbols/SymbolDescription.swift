@@ -8,9 +8,9 @@ struct SymbolDescription:Equatable, Sendable
     public
     let availability:SymbolAvailability
     public
-    let interfaces:SymbolInterfaces?
+    let interfaces:Interfaces?
     public
-    let visibility:SymbolVisibility
+    let visibility:Visibility
     public
     let fragments:Declaration<ScalarSymbolResolution>
 
@@ -20,7 +20,7 @@ struct SymbolDescription:Equatable, Sendable
     let generics:GenericSignature<ScalarSymbolResolution>
 
     public
-    let location:SourceLocation<String>?
+    let location:Location?
     public
     let phylum:Phylum
     public
@@ -31,12 +31,12 @@ struct SymbolDescription:Equatable, Sendable
     private
     init(documentation:Documentation?,
         availability:SymbolAvailability,
-        interfaces:SymbolInterfaces?,
-        visibility:SymbolVisibility,
+        interfaces:Interfaces?,
+        visibility:Visibility,
         fragments:Declaration<ScalarSymbolResolution>,
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
-        location:SourceLocation<String>?,
+        location:Location?,
         phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
@@ -61,15 +61,15 @@ extension SymbolDescription
     private
     init(documentation:Documentation?,
         availability:SymbolAvailability,
-        interfaces:SymbolInterfaces?,
-        visibility:SymbolVisibility,
+        interfaces:Interfaces?,
+        visibility:Visibility,
         expanded:
         __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
         abridged:
         __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
-        location:SourceLocation<String>?,
+        location:Location?,
         phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
@@ -188,17 +188,6 @@ extension SymbolDescription:JSONObjectDecodable
         }
 
         case location
-        enum Location:String
-        {
-            case uri
-            case position
-            enum Position:String
-            {
-                case line
-                case column = "character"
-            }
-        }
-
         case visibility = "accessLevel"
     }
 
@@ -217,16 +206,7 @@ extension SymbolDescription:JSONObjectDecodable
             },
             extension: try json[.extension]?.decode() ?? .init(),
             generics: try json[.generics]?.decode() ?? .init(),
-            location: try json[.location]?.decode(using: CodingKeys.Location.self)
-            {
-                let file:String = try $0[.uri].decode()
-                return try $0[.position].decode(using: CodingKeys.Location.Position.self)
-                {
-                    .init(file: file,
-                        try $0[.line].decode(),
-                        try $0[.column].decode())
-                }
-            },
+            location: try json[.location]?.decode(),
             phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
             {
                 try $0[.identifier].decode()

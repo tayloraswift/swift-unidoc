@@ -1,16 +1,22 @@
-@frozen public
-enum SymbolVisibility:Hashable, Comparable, Sendable
+import JSONDecoding
+import JSONEncoding
+
+extension SymbolDescription
 {
-    case `private`
-    case `fileprivate`
-    case `internal`
-    case `public`
-    case open
+    @frozen public
+    enum Visibility:Hashable, Comparable, Sendable
+    {
+        case `private`
+        case `fileprivate`
+        case `internal`
+        case `public`
+        case open
+    }
 }
 //  Manual conformance needed, because a raw type would inhibit
 //  the synthesized ``Comparable`` conformance. And implementing
 //  this manually is easier than implementing `<`.
-extension SymbolVisibility:RawRepresentable
+extension SymbolDescription.Visibility:RawRepresentable
 {
     @inlinable public
     init?(rawValue:String)
@@ -37,4 +43,7 @@ extension SymbolVisibility:RawRepresentable
         case .open:         return "open"
         }
     }
+}
+extension SymbolDescription.Visibility:JSONDecodable, JSONEncodable
+{
 }

@@ -7,7 +7,7 @@ extension Compiler
     struct Scalar
     {
         public
-        let phylum:ScalarPhylum
+        let phylum:SymbolGraph.Scalar.Phylum
 
         //  Validation parameters, will not be encoded.
         public
@@ -19,8 +19,9 @@ extension Compiler
         let availability:SymbolAvailability
         public
         let generics:GenericSignature<ScalarSymbolResolution>
+        //  TODO: trim file path prefixes
         public
-        let location:SourceLocation<String>?
+        let location:SymbolDescription.Location?
         public
         let path:LexicalPath
 
@@ -46,12 +47,12 @@ extension Compiler
         var origin:ScalarSymbolResolution?
 
         private
-        init(phylum:ScalarPhylum,
+        init(phylum:SymbolGraph.Scalar.Phylum,
             resolution:ScalarSymbolResolution,
             conditions:[GenericConstraint<ScalarSymbolResolution>],
             availability:SymbolAvailability,
             generics:GenericSignature<ScalarSymbolResolution>,
-            location:SourceLocation<String>?,
+            location:SymbolDescription.Location?,
             path:LexicalPath)
         {
             self.phylum = phylum
@@ -78,9 +79,24 @@ extension Compiler.Scalar
         as resolution:ScalarSymbolResolution,
         in culture:__shared ModuleIdentifier) throws
     {
-        guard let phylum:Compiler.ScalarPhylum = .init(description.phylum)
-        else
+        let phylum:SymbolGraph.Scalar.Phylum
+        switch description.phylum
         {
+        case .actor:                        phylum = .actor
+        case .associatedtype:               phylum = .associatedtype
+        case .case:                         phylum = .case
+        case .class:                        phylum = .class
+        case .deinitializer:                phylum = .deinitializer
+        case .enum:                         phylum = .enum
+        case .func(let objectivity):        phylum = .func(objectivity)
+        case .initializer:                  phylum = .initializer
+        case .protocol:                     phylum = .protocol
+        case .subscript(let objectivity):   phylum = .subscript(objectivity)
+        case .operator:                     phylum = .operator
+        case .struct:                       phylum = .struct
+        case .typealias:                    phylum = .typealias
+        case .var(let objectivity):         phylum = .var(objectivity)
+        case .extension, .macro:
             throw Compiler.PhylumError.unsupported(description.phylum)
         }
 
