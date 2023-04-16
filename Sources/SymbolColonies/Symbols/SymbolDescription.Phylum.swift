@@ -13,15 +13,15 @@ extension SymbolDescription
         case  deinitializer
         case `enum`
         case `extension`
-        case `func`(SymbolObjectivity?)
+        case `func`(SymbolGraph.Scalar.Objectivity?)
         case  initializer
         case  macro
         case `operator`
         case `protocol`
         case `struct`
-        case `subscript`(SymbolObjectivity)
+        case `subscript`(SymbolGraph.Scalar.Objectivity)
         case `typealias`
-        case `var`(SymbolObjectivity?)
+        case `var`(SymbolGraph.Scalar.Objectivity?)
     }
 }
 extension SymbolDescription.Phylum:JSONDecodable, JSONStringDecodable

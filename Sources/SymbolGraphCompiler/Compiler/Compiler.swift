@@ -4,7 +4,7 @@ public
 struct Compiler
 {
     private
-    let threshold:SymbolVisibility
+    let threshold:SymbolDescription.Visibility
 
     public private(set)
     var extensions:Extensions
@@ -12,7 +12,7 @@ struct Compiler
     var scalars:Scalars
 
     public
-    init(threshold:SymbolVisibility = .public)
+    init(threshold:SymbolDescription.Visibility = .public)
     {
         self.threshold = threshold
 

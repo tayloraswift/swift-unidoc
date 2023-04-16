@@ -29,6 +29,7 @@ let package:Package = .init(
 
         .library(name: "SymbolAvailability", targets: ["SymbolAvailability"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
+        .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
         .library(name: "SymbolColonies", targets: ["SymbolColonies"]),
         .library(name: "SymbolResolution", targets: ["SymbolResolution"]),
@@ -130,10 +131,7 @@ let package:Package = .init(
 
         .target(name: "SymbolColonies", dependencies:
             [
-                .target(name: "Declarations"),
-                .target(name: "Generics"),
-                .target(name: "LexicalPaths"),
-                .target(name: "SymbolAvailability"),
+                .target(name: "SymbolGraphs"),
                 .target(name: "SymbolResolution"),
             ]),
         
@@ -149,19 +147,24 @@ let package:Package = .init(
             [
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
+                .target(name: "LexicalPaths"),
                 .target(name: "Packages"),
                 .target(name: "SymbolAvailability"),
                 .target(name: "Symbols"),
             ]),
-        
+
         .target(name: "SymbolGraphCompiler", dependencies:
+            [
+                .target(name: "SymbolColonies"),
+                .product(name: "TraceableErrors", package: "swift-grammar"),
+            ]),
+        
+        .target(name: "SymbolGraphLinker", dependencies:
             [
                 .target(name: "PackageManifests"),
                 .target(name: "PackageResolution"),
-                .target(name: "SymbolColonies"),
+                .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
-
-                .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
         
         .target(name: "System", dependencies:
@@ -249,6 +252,7 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
             [
                 .target(name: "SymbolGraphCompiler"),
+                .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolGraphCompiler",

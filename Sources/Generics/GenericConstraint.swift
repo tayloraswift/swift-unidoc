@@ -13,6 +13,14 @@ struct GenericConstraint<TypeReference>:Equatable, Hashable where TypeReference:
         self.is = type
     }
 }
+extension GenericConstraint:Comparable where TypeReference:Comparable
+{
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        (lhs.name, lhs.is) < (rhs.name, rhs.is)
+    }
+}
 extension GenericConstraint:Sendable where TypeReference:Sendable
 {
 }

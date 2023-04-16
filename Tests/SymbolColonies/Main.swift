@@ -90,7 +90,7 @@ enum Main:SyncTests
             let colony:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/SPI.symbols.json")
         {
-            for (symbol, interfaces):([String], SymbolInterfaces?) in
+            for (symbol, interfaces):([String], SymbolDescription.Interfaces?) in
             [
                 (["NoSPI"], nil),
                 (["SPI"], .init()),

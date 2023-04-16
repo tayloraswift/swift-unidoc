@@ -29,6 +29,9 @@ extension Compiler.Scalars
             {
                 return nil
             }
+        }.sorted
+        {
+            $0.resolution < $1.resolution
         }
     }
 }

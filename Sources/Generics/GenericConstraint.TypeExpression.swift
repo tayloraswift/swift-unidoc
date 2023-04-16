@@ -7,6 +7,9 @@ extension GenericConstraint
         case complex(String)
     }
 }
+extension GenericConstraint.TypeExpression:Comparable where TypeReference:Comparable
+{
+}
 extension GenericConstraint.TypeExpression:Sendable where TypeReference:Sendable
 {
 }

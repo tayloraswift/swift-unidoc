@@ -8,6 +8,9 @@ extension GenericConstraint
         case type(TypeExpression)
     }
 }
+extension GenericConstraint.TypeRelation:Comparable where TypeReference:Comparable
+{
+}
 extension GenericConstraint.TypeRelation:Sendable where TypeReference:Sendable
 {
 }
