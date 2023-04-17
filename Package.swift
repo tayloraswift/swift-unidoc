@@ -28,24 +28,24 @@ let package:Package = .init(
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
         .library(name: "SymbolAvailability", targets: ["SymbolAvailability"]),
+        .library(name: "SymbolDescriptions", targets: ["SymbolDescriptions"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
-        .library(name: "SymbolColonies", targets: ["SymbolColonies"]),
         .library(name: "SymbolResolution", targets: ["SymbolResolution"]),
         .library(name: "Symbols", targets: ["Symbols"]),
     ],
     dependencies: 
     [
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "0.5.0")),
+            from: "0.5.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.1.13")),
         
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
-            from: "0.50700.0")),
+            from: "0.50800.0")),
 
         .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(
             from: "1.2.1")),
@@ -129,7 +129,7 @@ let package:Package = .init(
                 .target(name: "SemanticVersions"),
             ]),
 
-        .target(name: "SymbolColonies", dependencies:
+        .target(name: "SymbolDescriptions", dependencies:
             [
                 .target(name: "SymbolGraphs"),
                 .target(name: "SymbolResolution"),
@@ -155,7 +155,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphCompiler", dependencies:
             [
-                .target(name: "SymbolColonies"),
+                .target(name: "SymbolDescriptions"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
         
@@ -240,13 +240,13 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolResolution"),
         
-        .executableTarget(name: "SymbolColoniesTests", dependencies:
+        .executableTarget(name: "SymbolDescriptionsTests", dependencies:
             [
-                .target(name: "SymbolColonies"),
+                .target(name: "SymbolDescriptions"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolColonies",
+            path: "Tests/SymbolDescriptions",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
         
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:

@@ -1,10 +1,10 @@
-extension SymbolGraph
+extension SymbolGraph.Location
 {
     /// A grid position within a source file. This type can represent
     /// positions in files up to one million lines long, and 4096
     /// characters wide.
     @frozen public
-    struct SourcePosition
+    struct Position:Equatable, Hashable, Sendable
     {
         /// Contains the line number in the upper 20 bits, and
         /// the column index in the lower 12 bits.
@@ -18,18 +18,28 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.SourcePosition
+extension SymbolGraph.Location.Position:Comparable
 {
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+extension SymbolGraph.Location.Position
+{
+    @inlinable public
     var line:Int
     {
         .init(self.rawValue >> 12)
     }
+    @inlinable public
     var column:Int
     {
         .init(self.rawValue & 0x0000_0fff)
     }
 }
-extension SymbolGraph.SourcePosition
+extension SymbolGraph.Location.Position
 {
     /// Creates a source position encoding the specified line number
     /// and column index. This initializer returns nil if the line

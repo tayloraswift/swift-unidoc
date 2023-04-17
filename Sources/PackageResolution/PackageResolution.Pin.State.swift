@@ -5,11 +5,11 @@ extension PackageResolution.Pin
 {
     struct State
     {
-        let reference:GitReference
-        let revision:GitRevision
+        let reference:Repository.Reference
+        let revision:Repository.Revision
 
         private
-        init(reference:GitReference, revision:GitRevision)
+        init(reference:Repository.Reference, revision:Repository.Revision)
         {
             self.reference = reference
             self.revision = revision
@@ -26,7 +26,7 @@ extension PackageResolution.Pin.State:JSONObjectDecodable
     }
     init(json:JSON.ObjectDecoder<CodingKeys>) throws 
     {
-        let reference:GitReference
+        let reference:Repository.Reference
         if  let version:SemanticVersion = try json[.version]?.decode(
                 as: JSON.StringRepresentation<SemanticVersion>.self,
                 with: \.value)

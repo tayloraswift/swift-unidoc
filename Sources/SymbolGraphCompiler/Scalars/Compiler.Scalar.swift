@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 
 extension Compiler
 {
@@ -21,7 +21,7 @@ extension Compiler
         let generics:GenericSignature<ScalarSymbolResolution>
         //  TODO: trim file path prefixes
         public
-        let location:SymbolDescription.Location?
+        let location:Location?
         public
         let path:LexicalPath
 
@@ -52,7 +52,7 @@ extension Compiler
             conditions:[GenericConstraint<ScalarSymbolResolution>],
             availability:SymbolAvailability,
             generics:GenericSignature<ScalarSymbolResolution>,
-            location:SymbolDescription.Location?,
+            location:Location?,
             path:LexicalPath)
         {
             self.phylum = phylum
@@ -77,7 +77,7 @@ extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
         as resolution:ScalarSymbolResolution,
-        in culture:__shared ModuleIdentifier) throws
+        in context:__shared Compiler.Context) throws
     {
         let phylum:SymbolGraph.Scalar.Phylum
         switch description.phylum
@@ -105,19 +105,13 @@ extension Compiler.Scalar
             conditions: description.extension.conditions,
             availability: description.availability,
             generics: description.generics,
-            location: description.location,
+            location: description.location.flatMap(context.resolve(location:)),
             path: description.path)
         
-        if  let documentation:SymbolDescription.Documentation = description.documentation
+        if  let documentation:SymbolDescription.Documentation = description.documentation,
+            let comment:String = context.filter(documentation: documentation)
         {
-            switch documentation.culture
-            {
-            case nil, culture?:
-                self.comment = documentation.comment
-            
-            default:
-                break
-            }
+            self.comment = comment
         }
     }
 }

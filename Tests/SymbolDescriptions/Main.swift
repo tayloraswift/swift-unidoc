@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 import System
 import Testing
 

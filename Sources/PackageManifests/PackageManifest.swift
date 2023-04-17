@@ -7,11 +7,11 @@ struct PackageManifest:Identifiable, Equatable, Sendable
     public
     let id:PackageIdentifier
     public
-    let root:PackageRoot
+    let root:Repository.Root
     public
     let requirements:[PlatformRequirement]
     public
-    let dependencies:[PackageDependency]
+    let dependencies:[Repository.Dependency]
     public
     let products:[Product]
     public
@@ -19,9 +19,9 @@ struct PackageManifest:Identifiable, Equatable, Sendable
 
     @inlinable public
     init(id:PackageIdentifier,
-        root:PackageRoot,
+        root:Repository.Root,
         requirements:[PlatformRequirement] = [],
-        dependencies:[PackageDependency] = [],
+        dependencies:[Repository.Dependency] = [],
         products:[Product] = [],
         targets:[Target] = [])
     {
@@ -57,7 +57,8 @@ extension PackageManifest:JSONObjectDecodable
         self.init(id: try json[.id].decode(),
             root: try json[.root].decode(as: JSON.ObjectDecoder<CodingKeys.Root>.self)
             {
-                try $0[.root].decode(as: JSON.SingleElementRepresentation<PackageRoot>.self,
+                try $0[.root].decode(
+                    as: JSON.SingleElementRepresentation<Repository.Root>.self,
                     with: \.value)
             },
             requirements: try json[.requirements].decode(),

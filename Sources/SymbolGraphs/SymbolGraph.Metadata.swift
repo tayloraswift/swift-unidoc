@@ -7,7 +7,7 @@ extension SymbolGraph
         public
         let package:PackageIdentifier
         public
-        let version:GitReference?
+        let version:Repository.Reference?
         public
         let format:SemanticVersion
 
@@ -20,7 +20,7 @@ extension SymbolGraph
 
         public
         init(package:PackageIdentifier,
-            version:GitReference?,
+            version:Repository.Reference?,
             format:SemanticVersion,
             requirements:[PlatformRequirement],
             products:[Product],

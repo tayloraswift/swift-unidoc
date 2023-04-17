@@ -8,17 +8,17 @@ extension PackageResolution
         public 
         let id:PackageIdentifier
         public
-        let reference:GitReference
+        let reference:Repository.Reference
         public 
-        let revision:GitRevision
+        let revision:Repository.Revision
         public
-        let location:PackageRepository
+        let location:Repository
 
         @inlinable public 
         init(id:PackageIdentifier,
-            reference:GitReference,
-            revision:GitRevision,
-            location:PackageRepository)
+            reference:Repository.Reference,
+            revision:Repository.Revision,
+            location:Repository)
         {
             self.id = id 
             self.reference = reference
@@ -50,11 +50,11 @@ extension PackageResolution.Pin:JSONObjectDecodable
     {
         let state:State = try json[.state].decode()
 
-        let location:PackageRepository
+        let location:Repository
         switch try json[.type].decode(to: DependencyType.self)
         {
         case .localSourceControl:
-            location = .local(file: try json[.location].decode())
+            location = .local(root: try json[.location].decode())
         
         case .remoteSourceControl:
             location = .remote(url: try json[.location].decode())

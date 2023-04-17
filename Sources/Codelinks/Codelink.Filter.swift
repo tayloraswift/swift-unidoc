@@ -22,7 +22,7 @@ extension Codelink.Filter
     public
     init?(suffix:Substring)
     {
-        //  Very similar to the `SymbolDescriptionType` enum in `SymbolColonies`,
+        //  Very similar to the `SymbolDescriptionType` enum in `SymbolDescriptions`,
         //  except no extensions.
         switch suffix
         {

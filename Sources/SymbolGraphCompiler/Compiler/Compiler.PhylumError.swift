@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 
 extension Compiler
 {

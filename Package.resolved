@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SDGGiesbrecht/swift-cmark.git",
       "state" : {
-        "revision" : "ba5e03be521f621fcfd29e63be2cf475b97efd5a",
-        "version" : "0.50700.1"
+        "revision" : "29d9c97e6310b87c4799268eaa2fc76164b2dbd8",
+        "version" : "0.50800.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "fe4be534cd76444f3100619b261e69b42374f243",
-        "version" : "0.5.0"
+        "revision" : "4d81388a78e82b571f7095eb7f419ccb137cb340",
+        "version" : "0.5.1"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SDGGiesbrecht/swift-markdown",
       "state" : {
-        "revision" : "02a366ea32348b57e3f26d741640d742e416a544",
-        "version" : "0.50700.0"
+        "revision" : "f02c1d1e44fb3280b1df5cd57f0f3bd994354525",
+        "version" : "0.50800.0"
       }
     },
     {
