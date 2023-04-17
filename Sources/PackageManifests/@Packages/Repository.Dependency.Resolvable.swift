@@ -1,27 +1,6 @@
 import JSONDecoding
 
-extension PackageDependency
-{
-    @frozen public
-    struct Resolvable:Equatable, Sendable
-    {
-        public
-        let id:PackageIdentifier
-        public
-        let requirement:PackageRequirement
-        public
-        let location:PackageRepository
-
-        @inlinable public
-        init(id:PackageIdentifier, requirement:PackageRequirement, location:PackageRepository)
-        {
-            self.id = id
-            self.requirement = requirement
-            self.location = location
-        }
-    }
-}
-extension PackageDependency.Resolvable:JSONObjectDecodable
+extension Repository.Dependency.Resolvable:JSONObjectDecodable
 {
     public
     enum CodingKeys:String
@@ -87,7 +66,7 @@ extension PackageDependency.Resolvable:JSONObjectDecodable
                 
                 case .revision:
                     return .revision(try json.decode(
-                        as: JSON.SingleElementRepresentation<GitRevision>.self,
+                        as: JSON.SingleElementRepresentation<Repository.Revision>.self,
                         with: \.value))
                 }
             },
@@ -97,8 +76,8 @@ extension PackageDependency.Resolvable:JSONObjectDecodable
                 switch json.key
                 {
                 case .local:
-                    return .local(file: try json.decode(
-                        as: JSON.SingleElementRepresentation<PackageRoot>.self,
+                    return .local(root: try json.decode(
+                        as: JSON.SingleElementRepresentation<Repository.Root>.self,
                         with: \.value))
                 
                 case .remote:

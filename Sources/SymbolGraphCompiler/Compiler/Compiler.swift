@@ -1,10 +1,12 @@
-import SymbolColonies
+import SymbolDescriptions
 
 public
 struct Compiler
 {
     private
     let threshold:SymbolDescription.Visibility
+    private
+    let root:Repository.Root
 
     public private(set)
     var extensions:Extensions
@@ -12,9 +14,10 @@ struct Compiler
     var scalars:Scalars
 
     public
-    init(threshold:SymbolDescription.Visibility = .public)
+    init(root:Repository.Root, threshold:SymbolDescription.Visibility = .public)
     {
         self.threshold = threshold
+        self.root = root
 
         self.extensions = .init()
         self.scalars = .init()
@@ -36,6 +39,7 @@ extension Compiler
     private mutating
     func compile(culture:ModuleIdentifier, colonies:[SymbolColony]) throws
     {
+        let context:Context = .init(culture: culture, root: self.root)
         for colony:SymbolColony in colonies
         {
             //  Map extension block names to extended type identifiers.
@@ -54,7 +58,7 @@ extension Compiler
                     do
                     {
                         included ?
-                        try self.scalars.include(scalar: scalar, with: symbol, in: culture) :
+                        try self.scalars.include(scalar: scalar, with: symbol, in: context) :
                         try self.scalars.exclude(scalar: scalar)
                     }
                     catch let error
@@ -67,10 +71,10 @@ extension Compiler
                 case (.block(let block), included: true):
                     do
                     {
-                        try self.extensions.include(
-                            extended: try extensions.extendee(of: block),
+                        try self.extensions.include(block: block,
+                            extending: try extensions.extendee(of: block),
                             with: symbol,
-                            by: block)
+                            in: context)
                     }
                     catch let error
                     {
@@ -118,14 +122,6 @@ extension Compiler
             }
         }
     }
-}
-extension Compiler
-{
-
-}
-extension Compiler
-{
-
 }
 extension Compiler
 {

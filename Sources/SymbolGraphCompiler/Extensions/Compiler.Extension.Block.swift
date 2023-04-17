@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 
 extension Compiler.Extension
 {
@@ -6,11 +6,11 @@ extension Compiler.Extension
     struct Block
     {
         public
-        let location:SymbolDescription.Location?
+        let location:Compiler.Location?
         public
         let comment:String?
 
-        init?(location:SymbolDescription.Location?, comment:String?)
+        init?(location:Compiler.Location?, comment:String?)
         {
             if case (nil, nil) = (location, comment)
             {

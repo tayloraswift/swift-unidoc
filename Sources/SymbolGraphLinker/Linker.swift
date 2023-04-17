@@ -1,5 +1,5 @@
 import SymbolGraphCompiler
-import SymbolColonies
+import SymbolDescriptions
 
 public
 enum Linker
@@ -12,7 +12,7 @@ extension Linker
     func link(scalars:[Compiler.Scalar], extensions:[Compiler.Extension]) throws
     {
         var addresses:AddressTable<SymbolIdentifier> = .init()
-        var files:AddressTable<String> = .init()
+        var files:AddressTable<FileIdentifier> = .init()
 
         for scalar:Compiler.Scalar in scalars
         {
@@ -20,12 +20,10 @@ extension Linker
         }
         for scalar:Compiler.Scalar in scalars
         {
-            if  let location:SymbolDescription.Location = scalar.location,
-                let position:SymbolGraph.SourcePosition = .init(line: location.line,
-                    column: location.column)
+            if  let location:Compiler.Location = scalar.location
             {
                 let file:UInt32 = try files.address(location.file)
-                let _:SymbolGraph.SourceLocation = .init(position: position, file: file)
+                let _:SymbolGraph.Location = .init(position: location.position, file: file)
             }
         }
         for `extension`:Compiler.Extension in extensions

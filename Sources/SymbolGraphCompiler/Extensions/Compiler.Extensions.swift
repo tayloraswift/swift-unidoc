@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 
 extension Compiler
 {
@@ -30,9 +30,10 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func include(extended type:ScalarSymbolResolution,
+    func include(block:__owned BlockSymbolResolution,
+        extending type:ScalarSymbolResolution,
         with description:SymbolDescription,
-        by block:__owned BlockSymbolResolution) throws
+        in context:Compiler.Context) throws
     {
         guard case .extension = description.phylum
         else
@@ -40,11 +41,12 @@ extension Compiler.Extensions
             throw Compiler.PhylumError.unsupported(description.phylum)
         }
 
-        let group:Compiler.ExtensionReference = self[type,
-            where: description.extension.conditions]
-
-        if  let block:Compiler.Extension.Block = .init(location: description.location,
-                comment: description.documentation?.comment)
+        let group:Compiler.ExtensionReference =
+            self[type, where: description.extension.conditions]
+        
+        if  let block:Compiler.Extension.Block = .init(
+                location: description.location.flatMap(context.resolve(location:)),
+                comment: description.documentation.flatMap(context.filter(documentation:)))
         {
             group.append(block: block)
         }

@@ -6,16 +6,16 @@ extension SymbolGraph
         public
         let id:PackageIdentifier
         public
-        let reference:GitReference
+        let reference:Repository.Reference
         public
-        let revision:GitRevision
+        let revision:Repository.Revision
         public
         let range:Range<SemanticVersion>?
 
         @inlinable public
         init(id:PackageIdentifier,
-            reference:GitReference,
-            revision:GitRevision,
+            reference:Repository.Reference,
+            revision:Repository.Revision,
             range:Range<SemanticVersion>?)
         {
             self.id = id

@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 
 extension Compiler
 {
@@ -45,12 +45,12 @@ extension Compiler.Scalars
     mutating
     func include(scalar resolution:ScalarSymbolResolution,
         with description:SymbolDescription,
-        in culture:ModuleIdentifier) throws
+        in context:Compiler.Context) throws
     {
         try self.recognize(scalar: resolution, as: .included(.init(value: .init(
             from: description,
             as: resolution,
-            in: culture))))
+            in: context))))
     }
     private mutating
     func recognize(scalar resolution:ScalarSymbolResolution,

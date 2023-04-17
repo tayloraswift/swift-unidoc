@@ -5,17 +5,18 @@ extension SymbolDescription
     @frozen public
     struct Location:Equatable, Hashable, Sendable
     {
+        /// The absolute path to the relevant source file. Includes a `file://` prefix.
         public
-        let file:String
+        let uri:String
         public
         let line:Int 
         public
         let column:Int
 
         @inlinable public
-        init(file:String, line:Int, column:Int)
+        init(uri:String, line:Int, column:Int)
         {
-            self.file = file
+            self.uri = uri
             self.line = line
             self.column = column
         }
@@ -43,6 +44,6 @@ extension SymbolDescription.Location:JSONObjectDecodable
         {
             (try $0[.line].decode(), try $0[.column].decode())
         }
-        self.init(file: try json[.uri].decode(), line: line, column: column)
+        self.init(uri: try json[.uri].decode(), line: line, column: column)
     }
 }

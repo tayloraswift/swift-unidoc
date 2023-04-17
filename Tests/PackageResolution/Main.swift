@@ -36,7 +36,7 @@ enum Main:SyncTests
                     .init(id: "swift-json",
                         reference: .version(.v(0, 4, 5)),
                         revision: .init("36ef4bf1e6ae38f881ed253d5656839a046456f1"),
-                        location: .local(file: "/swift/swift-json")),
+                        location: .local(root: "/swift/swift-json")),
                 ]
                 tests.expect(try .init(json: json) ==? expected)
             }

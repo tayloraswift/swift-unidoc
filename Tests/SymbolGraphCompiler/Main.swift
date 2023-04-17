@@ -1,4 +1,4 @@
-import SymbolColonies
+import SymbolDescriptions
 import SymbolGraphCompiler
 import System
 import Testing
@@ -22,12 +22,24 @@ enum Main:SyncTests
             ]
             tests.do
             {
-                var compiler:Compiler = .init()
+                var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
                 try compiler.compile(colonies: tests.load(colonies:
                     filenames.map 
                     {
                         ("TestModules/Symbolgraphs" as FilePath).appending("\($0).symbols.json")
                     }))
+                
+                if  let tests:TestGroup = tests / "locations"
+                {
+                    for scalar:Compiler.Scalar in compiler.scalars.load()
+                    {
+                        if  let location:Compiler.Location = tests.expect(
+                                value: scalar.location)
+                        {
+                            tests.expect(true: location.file.path.starts(with: "Snippets/"))
+                        }
+                    }
+                }
             }
         }
     }

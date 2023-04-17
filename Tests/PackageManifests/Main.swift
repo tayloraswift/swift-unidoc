@@ -219,7 +219,7 @@ enum Main:SyncTests
                             .resolvable(.init(id: "swift-mongodb",
                                 requirement: .range(.v(0, 4, 5) ..< .v(0, 5, 0)),
                                 location: .local(
-                                    file: "/swift/swift-mongodb"))),
+                                    root: "/swift/swift-mongodb"))),
                             
                             .resolvable(.init(id: "swift-system",
                                 requirement: .reference(.version(.v(0, 4, 5))),
