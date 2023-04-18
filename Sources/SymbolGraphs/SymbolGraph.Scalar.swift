@@ -9,6 +9,6 @@ extension SymbolGraph
         public
         let generics:GenericSignature<UInt32>
         public
-        let location:Location?
+        let location:SourceLocation<UInt32>?
     }
 }

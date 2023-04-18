@@ -33,7 +33,7 @@ enum Main:SyncTests
                 {
                     for scalar:Compiler.Scalar in compiler.scalars.load()
                     {
-                        if  let location:Compiler.Location = tests.expect(
+                        if  let location:SourceLocation<FileIdentifier> = tests.expect(
                                 value: scalar.location)
                         {
                             tests.expect(true: location.file.path.starts(with: "Snippets/"))

@@ -20,3 +20,12 @@ struct GenericSignature<TypeReference>:Equatable, Hashable where TypeReference:H
 extension GenericSignature:Sendable where TypeReference:Sendable
 {
 }
+extension GenericSignature
+{
+    @inlinable public
+    func map<T>(_ transform:(TypeReference) throws -> T) rethrows -> GenericSignature<T>
+    {
+        .init(constraints: try self.constraints.map { try $0.map(transform) },
+            parameters: self.parameters)
+    }
+}

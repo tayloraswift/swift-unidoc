@@ -16,34 +16,31 @@ extension Compiler
 }
 extension Compiler.Context
 {
-    func resolve(location:SymbolDescription.Location) -> Compiler.Location?
+    func resolve(uri:String) throws -> FileIdentifier
     {
-        guard   let position:SymbolGraph.Location.Position = .init(line: location.line,
-            column: location.column),
-        var start:String.Index = location.uri.index(location.uri.startIndex,
-            offsetBy: 7,
-            limitedBy: location.uri.endIndex),
-        location.uri[..<start] == "file://"
+        guard   var start:String.Index = uri.index(uri.startIndex,
+                    offsetBy: 7,
+                    limitedBy: uri.endIndex),
+                uri[..<start] == "file://"
         else
         {
-            return nil
+            throw Compiler.FileIdentifierError.init(invalid: uri)
         }
         for character:Character in self.root.path
         {
-            if  start < location.uri.endIndex, location.uri[start] == character
+            if  start < uri.endIndex, uri[start] == character
             {
-                start = location.uri.index(after: start)
+                start = uri.index(after: start)
             }
             else
             {
-                return nil
+                throw Compiler.FileIdentifierError.init(invalid: uri)
             }
         }
-        let relative:Substring = location.uri[start...].drop { $0 == "/" }
-
-        return .init(position: position, file: .init(.init(relative)))
+        
+        return .init(.init(uri[start...].drop { $0 == "/" }))
     }
-    
+
     func filter(documentation:SymbolDescription.Documentation) -> String?
     {
         switch documentation.culture

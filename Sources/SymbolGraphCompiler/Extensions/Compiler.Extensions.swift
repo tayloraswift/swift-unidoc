@@ -45,7 +45,7 @@ extension Compiler.Extensions
             self[type, where: description.extension.conditions]
         
         if  let block:Compiler.Extension.Block = .init(
-                location: description.location.flatMap(context.resolve(location:)),
+                location: try description.location?.map(context.resolve(uri:)),
                 comment: description.documentation.flatMap(context.filter(documentation:)))
         {
             group.append(block: block)

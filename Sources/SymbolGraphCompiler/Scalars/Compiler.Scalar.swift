@@ -18,10 +18,12 @@ extension Compiler
         public
         let availability:SymbolAvailability
         public
+        let fragments:Declaration<ScalarSymbolResolution>
+        public
         let generics:GenericSignature<ScalarSymbolResolution>
         //  TODO: trim file path prefixes
         public
-        let location:Location?
+        let location:SourceLocation<FileIdentifier>?
         public
         let path:LexicalPath
 
@@ -51,8 +53,9 @@ extension Compiler
             resolution:ScalarSymbolResolution,
             conditions:[GenericConstraint<ScalarSymbolResolution>],
             availability:SymbolAvailability,
+            fragments:Declaration<ScalarSymbolResolution>,
             generics:GenericSignature<ScalarSymbolResolution>,
-            location:Location?,
+            location:SourceLocation<FileIdentifier>?,
             path:LexicalPath)
         {
             self.phylum = phylum
@@ -61,6 +64,7 @@ extension Compiler
             self.conditions = conditions
 
             self.availability = availability
+            self.fragments = fragments
             self.generics = generics
             self.location = location
             self.path = path
@@ -104,8 +108,9 @@ extension Compiler.Scalar
             resolution: resolution,
             conditions: description.extension.conditions,
             availability: description.availability,
+            fragments: description.fragments,
             generics: description.generics,
-            location: description.location.flatMap(context.resolve(location:)),
+            location: try description.location?.map(context.resolve(uri:)),
             path: description.path)
         
         if  let documentation:SymbolDescription.Documentation = description.documentation,
