@@ -63,7 +63,7 @@ extension Compiler
                     }
                     catch let error
                     {
-                        throw SymbolDescriptionError<ScalarSymbolResolution>.init(
+                        throw VertexError<ScalarSymbolResolution>.init(
                             underlying: error,
                             in: scalar)
                     }
@@ -78,7 +78,7 @@ extension Compiler
                     }
                     catch let error
                     {
-                        throw SymbolDescriptionError<BlockSymbolResolution>.init(
+                        throw VertexError<BlockSymbolResolution>.init(
                             underlying: error,
                             in: block)
                     }
@@ -134,9 +134,8 @@ extension Compiler
         }
         catch let error
         {
-            throw SymbolRelationshipError<SymbolRelationship.Conformance>.init(
-                underlying: error,
-                edge: conformance)
+            throw EdgeError<SymbolRelationship.Conformance>.init(underlying: error,
+                in: conformance)
         }
     }
     private mutating
@@ -148,9 +147,8 @@ extension Compiler
         }
         catch let error
         {
-            throw SymbolRelationshipError<SymbolRelationship.Membership>.init(
-                underlying: error,
-                edge: membership)
+            throw EdgeError<SymbolRelationship.Membership>.init(underlying: error,
+                in: membership)
         }
     }
     private mutating
@@ -162,9 +160,8 @@ extension Compiler
         }
         catch let error
         {
-            throw SymbolRelationshipError<SymbolRelationship.Requirement>.init(
-                underlying: error,
-                edge: requirement)
+            throw EdgeError<SymbolRelationship.Requirement>.init(underlying: error,
+                in: requirement)
         }
     }
     private mutating
@@ -178,8 +175,7 @@ extension Compiler
         }
         catch let error
         {
-            throw SymbolRelationshipError<Relationship>.init(underlying: error,
-                edge: superform)
+            throw EdgeError<Relationship>.init(underlying: error, in: superform)
         }
     }
 }
@@ -200,7 +196,7 @@ extension Compiler
         {
         case .compound:
             //  Compounds cannot conform to things.
-            throw SymbolReferenceError.source
+            throw ResolutionError.init(invalid: conformance.source)
         
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -246,7 +242,7 @@ extension Compiler
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
-                throw SymbolReferenceError.target
+                throw ResolutionError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -296,7 +292,7 @@ extension Compiler
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
-                throw SymbolReferenceError.target
+                throw ResolutionError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  We should never see an external type reference here either.
@@ -329,7 +325,7 @@ extension Compiler
         
         case .block:
             //  Extension blocks cannot be members of things.
-            throw SymbolReferenceError.source
+            throw ResolutionError.init(invalid: relationship.source)
         }
     }
     private mutating

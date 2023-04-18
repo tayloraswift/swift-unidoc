@@ -6,11 +6,11 @@ extension Compiler.Extension
     struct Block
     {
         public
-        let location:Compiler.Location?
+        let location:SourceLocation<FileIdentifier>?
         public
         let comment:String?
 
-        init?(location:Compiler.Location?, comment:String?)
+        init?(location:SourceLocation<FileIdentifier>?, comment:String?)
         {
             if case (nil, nil) = (location, comment)
             {

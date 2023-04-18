@@ -19,8 +19,10 @@ struct SymbolDescription:Equatable, Sendable
     public
     let generics:GenericSignature<ScalarSymbolResolution>
 
+    /// The source location of this symbol, if known. The file string is the
+    /// absolute path to the relevant source file, and starts with `file://`.
     public
-    let location:Location?
+    let location:SourceLocation<String>?
     public
     let phylum:Phylum
     public
@@ -36,7 +38,7 @@ struct SymbolDescription:Equatable, Sendable
         fragments:Declaration<ScalarSymbolResolution>,
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
-        location:Location?,
+        location:SourceLocation<String>?,
         phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
@@ -69,7 +71,7 @@ extension SymbolDescription
         __shared [DeclarationFragment<ScalarSymbolResolution, DeclarationFragmentClass?>],
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbolResolution>,
-        location:Location?,
+        location:SourceLocation<String>?,
         phylum:Phylum,
         path:LexicalPath,
         usr:UnifiedSymbolResolution)
@@ -188,6 +190,17 @@ extension SymbolDescription:JSONObjectDecodable
         }
 
         case location
+        enum Location:String
+        {
+            case file = "uri"
+            case position
+            enum Position:String
+            {
+                case line
+                case column = "character"
+            }
+        }
+
         case visibility = "accessLevel"
     }
 
@@ -206,7 +219,23 @@ extension SymbolDescription:JSONObjectDecodable
             },
             extension: try json[.extension]?.decode() ?? .init(),
             generics: try json[.generics]?.decode() ?? .init(),
-            location: try json[.location]?.decode(),
+            location: try json[.location]?.decode(using: CodingKeys.Location.self)
+            {
+                let (line, column):(Int, Int) = try $0[.position].decode(
+                    using: CodingKeys.Location.Position.self)
+                {
+                    (try $0[.line].decode(), try $0[.column].decode())
+                }
+                if  let position:SourcePosition = .init(line: line, column: column)
+                {
+                    return .init(position: position, file: try $0[.file].decode())
+                }
+                else
+                {
+                    //  integer overflow.
+                    return nil
+                }
+            },
             phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
             {
                 try $0[.identifier].decode()

@@ -20,10 +20,15 @@ extension Linker
         }
         for scalar:Compiler.Scalar in scalars
         {
-            if  let location:Compiler.Location = scalar.location
+            if  let location:SourceLocation<FileIdentifier> = scalar.location
             {
                 let file:UInt32 = try files.address(location.file)
-                let _:SymbolGraph.Location = .init(position: location.position, file: file)
+                let _:SourceLocation<UInt32> = .init(position: location.position,
+                    file: file)
+            }
+            let _:GenericSignature<UInt32> = try scalar.generics.map
+            {
+                try addresses.address($0.id)
             }
         }
         for `extension`:Compiler.Extension in extensions
