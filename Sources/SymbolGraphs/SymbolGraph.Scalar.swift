@@ -5,6 +5,8 @@ extension SymbolGraph
     {
         public
         let phylum:Phylum
+        public
+        let path:LexicalPath
 
         public
         let generics:GenericSignature<UInt32>

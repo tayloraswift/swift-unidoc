@@ -6,6 +6,7 @@ enum Linker
 {
 }
 
+
 extension Linker
 {
     static
@@ -20,11 +21,9 @@ extension Linker
         }
         for scalar:Compiler.Scalar in scalars
         {
-            if  let location:SourceLocation<FileIdentifier> = scalar.location
+            let _:SourceLocation<UInt32>? = try scalar.location?.map
             {
-                let file:UInt32 = try files.address(location.file)
-                let _:SourceLocation<UInt32> = .init(position: location.position,
-                    file: file)
+                try files.address($0)
             }
             let _:GenericSignature<UInt32> = try scalar.generics.map
             {

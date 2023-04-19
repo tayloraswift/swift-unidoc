@@ -7,6 +7,7 @@ let package:Package = .init(
     products:
     [
         .library(name: "Codelinks", targets: ["Codelinks"]),
+        .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Generics", targets: ["Generics"]),
 
@@ -55,6 +56,12 @@ let package:Package = .init(
         .target(name: "Codelinks", dependencies:
             [
                 .target(name: "LexicalPaths"),
+            ]),
+
+        .target(name: "CodelinkResolution", dependencies:
+            [
+                .target(name: "Codelinks"),
+                .target(name: "SymbolGraphs"),
             ]),
         
         .target(name: "Declarations"),
