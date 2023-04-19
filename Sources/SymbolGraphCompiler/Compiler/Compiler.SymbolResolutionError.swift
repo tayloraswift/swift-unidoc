@@ -1,7 +1,7 @@
 extension Compiler
 {
     public
-    struct ResolutionError:Equatable, Error, Sendable
+    struct SymbolResolutionError:Equatable, Error, Sendable
     {
         public
         let resolution:UnifiedSymbolResolution

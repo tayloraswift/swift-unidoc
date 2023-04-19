@@ -196,7 +196,7 @@ extension Compiler
         {
         case .compound:
             //  Compounds cannot conform to things.
-            throw ResolutionError.init(invalid: conformance.source)
+            throw SymbolResolutionError.init(invalid: conformance.source)
         
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -242,7 +242,7 @@ extension Compiler
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
-                throw ResolutionError.init(invalid: relationship.target)
+                throw SymbolResolutionError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -292,7 +292,7 @@ extension Compiler
             {
             case .compound:
                 //  Nothing can be a member of a compound symbol.
-                throw ResolutionError.init(invalid: relationship.target)
+                throw SymbolResolutionError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  We should never see an external type reference here either.
@@ -325,7 +325,7 @@ extension Compiler
         
         case .block:
             //  Extension blocks cannot be members of things.
-            throw ResolutionError.init(invalid: relationship.source)
+            throw SymbolResolutionError.init(invalid: relationship.source)
         }
     }
     private mutating
