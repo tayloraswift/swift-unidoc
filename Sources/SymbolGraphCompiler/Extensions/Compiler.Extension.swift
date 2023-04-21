@@ -3,12 +3,20 @@ extension Compiler
     @frozen public
     struct Extension
     {
+        /// Protocols the extended type conforms to.
         public
         var conformances:Set<ScalarSymbolResolution>
+        /// Members the extended type inherits from other types via subclassing,
+        /// protocol conformances, etc.
         public
         var features:Set<ScalarSymbolResolution>
+        /// Declarations directly nested in the extended type. Everything that
+        /// is lexically-scoped to the extended type, and was not inherited from
+        /// another type goes in this set.
         public
-        var members:Set<ScalarSymbolResolution>
+        var nested:Set<ScalarSymbolResolution>
+        /// Documentation comments and source locations for the various extension
+        /// blocks that make up this extension.
         public
         var blocks:[Block]
 
@@ -18,14 +26,14 @@ extension Compiler
         init(signature:Signature,
             conformances:Set<ScalarSymbolResolution> = [],
             features:Set<ScalarSymbolResolution> = [],
-            members:Set<ScalarSymbolResolution> = [],
+            nested:Set<ScalarSymbolResolution> = [],
             blocks:[Block] = [])
         {
             self.signature = signature
 
             self.conformances = conformances
             self.features = features
-            self.members = members
+            self.nested = nested
             self.blocks = blocks
         }
     }

@@ -33,7 +33,7 @@ extension Compiler.Extensions
     func include(block:__owned BlockSymbolResolution,
         extending type:ScalarSymbolResolution,
         with description:SymbolDescription,
-        in context:Compiler.Context) throws
+        in context:Compiler.SourceContext) throws
     {
         guard case .extension = description.phylum
         else

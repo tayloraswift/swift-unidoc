@@ -9,7 +9,7 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "main"
+        if  let tests:TestGroup = tests / "extensions"
         {
             let filenames:[String] =
             [
@@ -42,5 +42,16 @@ enum Main:SyncTests
                 }
             }
         }
+        #if !DEBUG
+        if  let tests:TestGroup = tests / "standard-library"
+        {
+            tests.do
+            {
+                var compiler:Compiler = .init(root: "/")
+                try compiler.compile(colonies: tests.load(
+                    colonies: ["TestModules/Symbolgraphs/Swift.symbols.json"]))
+            }
+        }
+        #endif
     }
 }

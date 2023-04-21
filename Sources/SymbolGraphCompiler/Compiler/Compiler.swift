@@ -39,7 +39,9 @@ extension Compiler
     private mutating
     func compile(culture:ModuleIdentifier, colonies:[SymbolColony]) throws
     {
-        let context:Context = .init(culture: culture, root: self.root)
+        let context:SourceContext = .init(culture: culture, root: self.root)
+
+        //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for colony:SymbolColony in colonies
         {
             //  Map extension block names to extended type identifiers.
@@ -90,6 +92,7 @@ extension Compiler
                 }
             }
         }
+        //  Pass II. Scan for nesting relationships.
         for colony:SymbolColony in colonies
         {
             for relationship:SymbolRelationship in colony.relationships
@@ -97,27 +100,39 @@ extension Compiler
                 switch relationship
                 {
                 case .extension:
-                    //  Already handled these.
-                    continue
+                    continue // Already handled these.
+                
+                case .requirement(let requirement):
+                    try self.add(requirement)
+                
+                case .membership(let membership):
+                    try self.add(membership)
+
+                case .conformance, .defaultImplementation, .inheritance, .override:
+                    continue // Next pass.
+                }
+            }
+        }
+        for colony:SymbolColony in colonies
+        {
+            for relationship:SymbolRelationship in colony.relationships
+            {
+                switch relationship
+                {
+                case .extension, .requirement, .membership:
+                    continue // Already handled these.
                 
                 case .conformance(let conformance):
                     try self.add(conformance)
 
-                case .membership(let membership):
-                    try self.add(membership)
-                
-                case .requirement(let requirement):
-                    try self.add(requirement)
-
                 case .defaultImplementation(let relationship):
-                    try self.add(relationship, as: LatticeSuperform.implements(_:))
+                    try self.add(relationship)
 
                 case .inheritance(let relationship):
-                    try self.add(relationship, as: LatticeSuperform.inherits(_:))
+                    try self.add(relationship)
 
                 case .override(let relationship):
-                    try self.add(relationship, as: LatticeSuperform.overrides(_:))
-
+                    try self.add(relationship)
                 }
             }
         }
@@ -126,16 +141,16 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func add(_ conformance:SymbolRelationship.Conformance) throws
+    func add(_ requirement:SymbolRelationship.Requirement) throws
     {
         do
         {
-            try self.assign(relationship: conformance)
+            try self.assign(relationship: requirement)
         }
         catch let error
         {
-            throw EdgeError<SymbolRelationship.Conformance>.init(underlying: error,
-                in: conformance)
+            throw EdgeError<SymbolRelationship.Requirement>.init(underlying: error,
+                in: requirement)
         }
     }
     private mutating
@@ -152,30 +167,150 @@ extension Compiler
         }
     }
     private mutating
-    func add(_ requirement:SymbolRelationship.Requirement) throws
+    func add(_ conformance:SymbolRelationship.Conformance) throws
     {
         do
         {
-            try self.assign(relationship: requirement)
+            try self.assign(relationship: conformance)
         }
         catch let error
         {
-            throw EdgeError<SymbolRelationship.Requirement>.init(underlying: error,
-                in: requirement)
+            throw EdgeError<SymbolRelationship.Conformance>.init(underlying: error,
+                in: conformance)
         }
     }
     private mutating
-    func add<Relationship>(_ superform:Relationship,
-        as type:(ScalarSymbolResolution) -> LatticeSuperform) throws
+    func add<Relationship>(_ superform:Relationship) throws
         where Relationship:SuperformRelationship
     {
         do
         {
-            try self.assign(relationship: superform, as: type)
+            try self.assign(relationship: superform)
         }
         catch let error
         {
             throw EdgeError<Relationship>.init(underlying: error, in: superform)
+        }
+    }
+}
+extension Compiler
+{
+    private mutating
+    func assign(relationship:SymbolRelationship.Requirement) throws
+    {
+        /// Protocol must always be from the same module.
+        guard let `protocol`:ScalarReference = try self.scalars(internal: relationship.target)
+        else
+        {
+            return // Protocol is hidden.
+        }
+        if  let requirement:ScalarReference = try self.scalars(internal: relationship.source)
+        {
+            try requirement.assign(nesting: relationship)
+            
+            //  Generate an implicit, internal extension for this requirement,
+            //  if one does not already exist.
+            self.extensions[`protocol`.resolution, where: []].insert(
+                nested: requirement.resolution)
+        }
+    }
+    private mutating
+    func assign(relationship:SymbolRelationship.Membership) throws
+    {
+        switch relationship.source
+        {
+        case .compound(let feature, self: let selftype):
+            guard let feature:ScalarSymbolResolution = self.scalars[feature]
+            else
+            {
+                return // Feature is hidden.
+            }
+            switch relationship.target
+            {
+            case .compound:
+                //  Nothing can be a member of a compound symbol.
+                throw SymbolResolutionError.init(invalid: relationship.target)
+            
+            case .scalar(let type):
+                //  If the colonial graph was generated with '-emit-extension-symbols',
+                //  we should never see an external type reference here.
+                guard let type:ScalarReference = try self.scalars(internal: type)
+                else
+                {
+                    return // Feature is hidden.
+                }
+                //  If the membership target is a scalar resolution, the self type
+                //  should match the target type.
+                if  type.resolution == selftype
+                {
+                    //  We don’t know what extension the feature should go in, because
+                    //  it may come from a protocol extension we do not know about. So
+                    //  we put it in the “unknown” extension.
+                    self.extensions[type.resolution, where: nil].insert(feature: feature)
+                }
+                else
+                {
+                    throw FeatureError.init(invalid: type.resolution)
+                }
+            
+            case .block(let block):
+                //  Look up the extension associated with this block name.
+                let group:ExtensionReference = try self.extensions.named(block)
+                if  group.extendee == selftype
+                {
+                    group.insert(feature: feature)
+                }
+                else
+                {
+                    throw FeatureError.init(invalid: group.extendee)
+                }
+            }
+        
+        case .scalar(let member):
+            //  If the colonial graph was generated with '-emit-extension-symbols',
+            //  we should never see an external type reference here.
+            guard let member:ScalarReference = try self.scalars(internal: member)
+            else
+            {
+                return // Member is hidden.
+            }
+
+            switch relationship.target
+            {
+            case .compound:
+                //  Nothing can be a member of a compound symbol.
+                throw SymbolResolutionError.init(invalid: relationship.target)
+            
+            case .scalar(let type):
+                //  We should never see an external type reference here either.
+                if  let type:ScalarReference = try self.scalars(internal: type)
+                {
+                    try member.assign(nesting: relationship)
+                    //  Generate an implicit, internal extension for this membership,
+                    //  if one does not already exist.
+                    self.extensions[type.resolution, where: member.conditions].insert(
+                        nested: member.resolution)
+                }
+
+            case .block(let block):
+                let group:ExtensionReference = try self.extensions.named(block)
+                if case member.conditions? = group.conditions
+                {
+                    try member.assign(nesting: relationship)
+                    group.insert(nested: member.resolution)
+                }
+                else
+                {
+                    //  The member’s extension constraints don’t match the extension
+                    //  object’s signature!
+                    throw Extension.SignatureError.init(expected: group.signature,
+                        declared: member.conditions)
+                }
+            }
+        
+        case .block:
+            //  Extension blocks cannot be members of things.
+            throw SymbolResolutionError.init(invalid: relationship.source)
         }
     }
 }
@@ -228,136 +363,17 @@ extension Compiler
         group.insert(conformance: `protocol`)
     }
     private mutating
-    func assign(relationship:SymbolRelationship.Membership) throws
+    func assign(relationship:some SuperformRelationship) throws
     {
-        switch relationship.source
-        {
-        case .compound(let feature, self: let selftype):
-            guard let feature:ScalarSymbolResolution = self.scalars[feature]
-            else
-            {
-                return // Feature is hidden.
-            }
-            switch relationship.target
-            {
-            case .compound:
-                //  Nothing can be a member of a compound symbol.
-                throw SymbolResolutionError.init(invalid: relationship.target)
-            
-            case .scalar(let type):
-                //  If the colonial graph was generated with '-emit-extension-symbols',
-                //  we should never see an external type reference here.
-                guard let type:ScalarReference = try self.scalars(internal: type)
-                else
-                {
-                    return // Feature is hidden.
-                }
-                //  If the membership target is a scalar resolution, the self type
-                //  should match the target type.
-                if  type.resolution == selftype
-                {
-                    //  We don’t know what extension the feature should go in, because
-                    //  it may come from a protocol extension we do not know about. So
-                    //  we put it in the “unknown” extension.
-                    self.extensions[type.resolution, where: nil].insert(feature: feature)
-                }
-                else
-                {
-                    throw FeatureMembershipError.init(invalid: type.resolution)
-                }
-            
-            case .block(let block):
-                //  Look up the extension associated with this block name.
-                let group:ExtensionReference = try self.extensions.named(block)
-                if  group.extendee == selftype
-                {
-                    group.insert(feature: feature)
-                }
-                else
-                {
-                    throw FeatureMembershipError.init(invalid: group.extendee)
-                }
-            }
-        
-        case .scalar(let member):
-            //  If the colonial graph was generated with '-emit-extension-symbols',
-            //  we should never see an external type reference here.
-            guard let member:ScalarReference = try self.scalars(internal: member)
-            else
-            {
-                return // Member is hidden.
-            }
-
-            switch relationship.target
-            {
-            case .compound:
-                //  Nothing can be a member of a compound symbol.
-                throw SymbolResolutionError.init(invalid: relationship.target)
-            
-            case .scalar(let type):
-                //  We should never see an external type reference here either.
-                if  let type:ScalarReference = try self.scalars(internal: type)
-                {
-                    try member.assign(membership: .member(of: type.resolution),
-                        origin: relationship.origin)
-                    //  Generate an implicit, internal extension for this membership,
-                    //  if one does not already exist.
-                    self.extensions[type.resolution, where: member.conditions].insert(
-                        member: member.resolution)
-                }
-
-            case .block(let block):
-                let group:ExtensionReference = try self.extensions.named(block)
-                if case member.conditions? = group.conditions
-                {
-                    try member.assign(membership: .member(of: group.extendee),
-                        origin: relationship.origin)
-                    group.insert(member: member.resolution)
-                }
-                else
-                {
-                    //  The member’s extension constraints don’t match the extension
-                    //  object’s signature!
-                    throw Extension.SignatureError.init(expected: group.signature,
-                        declared: member.conditions)
-                }
-            }
-        
-        case .block:
-            //  Extension blocks cannot be members of things.
-            throw SymbolResolutionError.init(invalid: relationship.source)
-        }
-    }
-    private mutating
-    func assign(relationship:SymbolRelationship.Requirement) throws
-    {
-        /// Protocol must always be from the same module.
-        guard let `protocol`:ScalarReference = try self.scalars(internal: relationship.target)
-        else
-        {
-            return // Protocol is hidden.
-        }
-        if  let requirement:ScalarReference = try self.scalars(internal: relationship.source)
-        {
-            try requirement.assign(membership: .requirement(of: `protocol`.resolution,
-                    optional: relationship.optional),
-                origin: relationship.origin)
-        }
-    }
-    private mutating
-    func assign(relationship:some SuperformRelationship,
-        as type:(ScalarSymbolResolution) -> LatticeSuperform) throws
-    {
-        guard let superform:ScalarSymbolResolution = self.scalars[relationship.target]
-        else
+        if case nil = self.scalars[relationship.target]
         {
             return // Superform is hidden.
         }
         /// Superform relationships are intrinsic. They must always originate from
         /// internal symbols.
-        if let subform:ScalarReference = try self.scalars(internal: relationship.source)
+        if  let subform:ScalarReference = try self.scalars(internal: relationship.source)
         {
-            try subform.assign(superform: type(superform), origin: relationship.origin)
+            try subform.append(superform: relationship)
         }
     }
 }

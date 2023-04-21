@@ -1,3 +1,5 @@
+import SymbolDescriptions
+
 extension Compiler
 {
     /// A shareable reference to a scalar value.
@@ -8,11 +10,25 @@ extension Compiler
     final
     class ScalarReference
     {
-        final private(set)
+        let conditions:[GenericConstraint<ScalarSymbolResolution>]
+
+        /// The type of the superforms tracked by ``\.value.superforms``.
+        var superforms:(any SuperformRelationship.Type)?
+        /// The symbol this scalar is lexically-nested in. This may
+        /// be an extension block symbol.
+        var scope:UnifiedSymbolResolution?
+
+        private(set)
         var value:Scalar
 
-        init(value:Scalar)
+        init(conditions:[GenericConstraint<ScalarSymbolResolution>],
+            value:Scalar)
         {
+            self.conditions = conditions
+
+            self.superforms = nil
+            self.scope = nil
+
             self.value = value
         }
     }
@@ -23,46 +39,56 @@ extension Compiler.ScalarReference
     {
         self.value.resolution
     }
-
-    var conditions:[GenericConstraint<ScalarSymbolResolution>]
-    {
-        self.value.conditions
-    }
 }
 extension Compiler.ScalarReference
 {
     final
-    func assign(membership:Compiler.LatticeMembership,
-        origin:ScalarSymbolResolution? = nil) throws
+    func assign(nesting:some NestingRelationship) throws
     {
-        switch self.value.membership
+        guard nesting.validate(source: self.value.phylum)
+        else
         {
-        case nil, membership?:
-            self.value.membership = membership
-        
-        case let other?:
-            throw Compiler.LatticeConflictError<Compiler.LatticeMembership>.init(
-                existing: other)
+            throw Compiler.NestingError.phylum(self.value.phylum)
         }
-        if let origin:ScalarSymbolResolution
+
+        if  let scope:UnifiedSymbolResolution = self.scope
+        {
+            throw Compiler.NestingError.conflict(with: scope)
+        }
+        else
+        {
+            self.scope = nesting.scope
+        }
+
+        if  let virtuality:SymbolGraph.Scalar.Virtuality = nesting.virtuality
+        {
+            self.value.virtuality = virtuality
+        }
+        if  let origin:ScalarSymbolResolution = nesting.origin
         {
             try self.assign(origin: origin)
         }
     }
     final
-    func assign(superform:Compiler.LatticeSuperform,
-        origin:ScalarSymbolResolution? = nil) throws
+    func append<Superform>(superform:Superform) throws
+        where Superform:SuperformRelationship
     {
-        switch self.value.superform
+        guard superform.validate(source: self.value.phylum)
+        else
         {
-        case nil, superform?:
-            self.value.superform = superform
-        
-        case let other?:
-            throw Compiler.LatticeConflictError<Compiler.LatticeSuperform>.init(
-                existing: other)
+            throw Compiler.SuperformError.phylum(self.value.phylum)
         }
-        if let origin:ScalarSymbolResolution
+
+        switch self.superforms
+        {
+        case nil, (is Superform.Type)?:
+            self.value.superforms.append(superform.target)
+            self.superforms = Superform.self
+        
+        case let type?:
+            throw Compiler.SuperformError.conflict(with: type)
+        }
+        if  let origin:ScalarSymbolResolution = superform.origin
         {
             try self.assign(origin: origin)
         }
@@ -76,7 +102,7 @@ extension Compiler.ScalarReference
             self.value.origin = origin
         
         case let other?:
-            throw Compiler.OriginConflictError.init(existing: other)
+            throw Compiler.OriginError.conflict(with: other)
         }
     }
 }

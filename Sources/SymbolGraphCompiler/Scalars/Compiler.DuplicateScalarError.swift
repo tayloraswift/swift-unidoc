@@ -9,3 +9,11 @@ extension Compiler
         }
     }
 }
+extension Compiler.DuplicateScalarError:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        "Duplicate scalar resolution."
+    }
+}

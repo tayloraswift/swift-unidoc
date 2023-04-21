@@ -3,14 +3,22 @@ extension Codelink
     @frozen public
     struct Hash:Equatable, Hashable, Sendable
     {
-        public
-        let value:UInt32
+        @usableFromInline internal
+        let bits:UInt32
 
         @inlinable public
-        init(value:UInt32)
+        init(bits:UInt32)
         {
-            self.value = value
+            self.bits = bits
         }
+    }
+}
+extension Codelink.Hash
+{
+    @inlinable public
+    var value:UInt32
+    {
+        self.bits
     }
 }
 extension Codelink.Hash
@@ -40,7 +48,7 @@ extension Codelink.Hash
             let fnv1:UInt32 = .init(string[string.index(after: index) ..< end], radix: 36)
         {
             string = string.prefix(upTo: index)
-            self.init(value: fnv1)
+            self.init(bits: fnv1)
         }
         else
         {
@@ -53,6 +61,6 @@ extension Codelink.Hash:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        .init(self.value, radix: 36, uppercase: true)
+        .init(self.bits, radix: 36, uppercase: true)
     }
 }

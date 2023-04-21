@@ -4,6 +4,8 @@ extension SymbolGraph
     struct Scalar
     {
         public
+        let virtuality:Virtuality?
+        public
         let phylum:Phylum
         public
         let path:LexicalPath

@@ -6,14 +6,24 @@ extension Compiler
     @frozen public
     struct Scalar
     {
-        public
-        let phylum:SymbolGraph.Scalar.Phylum
+        public internal(set)
+        var virtuality:SymbolGraph.Scalar.Virtuality?
+        /// The scalars that this scalar implements, overrides, or inherits
+        /// from. Superforms are intrinsic but there can be more than one
+        /// per scalar.
+        ///
+        /// Only protocols can inherit from other protocols. (All other
+        /// phyla can only conform to protocols.) Any class can inherit
+        /// from another class.
+        ///
+        /// The compiler does not check for inheritance cycles.
+        public internal(set)
+        var superforms:[ScalarSymbolResolution]
+        public internal(set)
+        var origin:ScalarSymbolResolution?
 
-        //  Validation parameters, will not be encoded.
-        public
-        let resolution:ScalarSymbolResolution
-        public
-        let conditions:[GenericConstraint<ScalarSymbolResolution>]
+        public internal(set)
+        var comment:String
 
         public
         let availability:SymbolAvailability
@@ -26,62 +36,42 @@ extension Compiler
         let location:SourceLocation<FileIdentifier>?
         public
         let path:LexicalPath
-
-        /// The type this scalar is a member of. Membership is unique and
-        /// intrinsic.
         public
-        var membership:LatticeMembership?
-        /// The scalar that this scalar implements, overrides, or inherits
-        /// from. Superforms are unique and intrinsic.
-        ///
-        /// Only protocols can inherit from other protocols. (All other
-        /// phyla can only conform to protocols.) Any class can inherit
-        /// from another class.
-        ///
-        /// The compiler does not check for inheritance cycles.
+        let phylum:SymbolGraph.Scalar.Phylum
         public
-        var superform:LatticeSuperform?
-
-        public
-        var comment:String
-
-        public
-        var origin:ScalarSymbolResolution?
+        let resolution:ScalarSymbolResolution
 
         private
-        init(phylum:SymbolGraph.Scalar.Phylum,
-            resolution:ScalarSymbolResolution,
-            conditions:[GenericConstraint<ScalarSymbolResolution>],
+        init(resolution:ScalarSymbolResolution,
             availability:SymbolAvailability,
+            visibility:SymbolDescription.Visibility,
             fragments:Declaration<ScalarSymbolResolution>,
             generics:GenericSignature<ScalarSymbolResolution>,
             location:SourceLocation<FileIdentifier>?,
-            path:LexicalPath)
+            path:LexicalPath,
+            phylum:SymbolGraph.Scalar.Phylum)
         {
-            self.phylum = phylum
+            self.virtuality = visibility == .open ? .open : nil
+            self.superforms = []
+            self.origin = nil
 
-            self.resolution = resolution
-            self.conditions = conditions
+            self.comment = ""
 
             self.availability = availability
             self.fragments = fragments
             self.generics = generics
             self.location = location
             self.path = path
-
-            self.membership = nil
-            self.superform = nil
-
-            self.comment = ""
-            self.origin = nil
+            self.phylum = phylum
+            self.resolution = resolution
         }
     }
 }
 extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
-        as resolution:ScalarSymbolResolution,
-        in context:__shared Compiler.Context) throws
+        as resolution:__owned ScalarSymbolResolution,
+        in context:__shared Compiler.SourceContext) throws
     {
         let phylum:SymbolGraph.Scalar.Phylum
         switch description.phylum
@@ -104,14 +94,14 @@ extension Compiler.Scalar
             throw Compiler.PhylumError.unsupported(description.phylum)
         }
 
-        self.init(phylum: phylum,
-            resolution: resolution,
-            conditions: description.extension.conditions,
+        self.init(resolution: resolution,
             availability: description.availability,
+            visibility: description.visibility,
             fragments: description.fragments,
             generics: description.generics,
             location: try description.location?.map(context.resolve(uri:)),
-            path: description.path)
+            path: description.path,
+            phylum: phylum)
         
         if  let documentation:SymbolDescription.Documentation = description.documentation,
             let comment:String = context.filter(documentation: documentation)

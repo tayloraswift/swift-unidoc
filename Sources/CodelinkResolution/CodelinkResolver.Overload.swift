@@ -31,8 +31,8 @@ extension CodelinkResolver.Overload
         //  https://github.com/apple/swift-docc/blob/main/Sources/SwiftDocC/Utility/FoundationExtensions/String+Hashing.swift
 
         let full:UInt32 = id.utf8.reduce(2166136261) { ($0 &* 16777619) ^ .init($1) }
-        let hash:UInt32 = (full >> 24) ^ (full & 0x00_ff_ff_ff)
+        let bits:UInt32 = (full >> 24) ^ (full & 0x00_ff_ff_ff)
 
-        self.init(target: target, phylum: phylum, hash: .init(value: hash))
+        self.init(target: target, phylum: phylum, hash: .init(bits: bits))
     }
 }

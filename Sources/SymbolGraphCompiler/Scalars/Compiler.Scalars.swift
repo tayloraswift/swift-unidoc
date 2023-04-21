@@ -45,12 +45,13 @@ extension Compiler.Scalars
     mutating
     func include(scalar resolution:ScalarSymbolResolution,
         with description:SymbolDescription,
-        in context:Compiler.Context) throws
+        in context:Compiler.SourceContext) throws
     {
-        try self.recognize(scalar: resolution, as: .included(.init(value: .init(
-            from: description,
-            as: resolution,
-            in: context))))
+        try self.recognize(scalar: resolution, as: .included(.init(
+            conditions: description.extension.conditions,
+            value: .init(from: description,
+                as: resolution,
+                in: context))))
     }
     private mutating
     func recognize(scalar resolution:ScalarSymbolResolution,
@@ -90,7 +91,7 @@ extension Compiler.Scalars
         case .excluded?:
             return nil
         case nil:
-            throw Compiler.ScalarReferenceError.external(resolution)
+            throw Compiler.UndefinedScalarError.init(undefined: resolution)
         }
     }
 }
