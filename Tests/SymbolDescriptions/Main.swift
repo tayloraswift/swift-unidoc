@@ -421,7 +421,7 @@ enum Main:SyncTests
         {
         }
         #if !DEBUG
-        if  let tests:TestGroup = tests / "stdlib",
+        if  let tests:TestGroup = tests / "standard-library",
             let _:SymbolColony = tests.load(
                 colony: "TestModules/Symbolgraphs/Swift.symbols.json")
         {

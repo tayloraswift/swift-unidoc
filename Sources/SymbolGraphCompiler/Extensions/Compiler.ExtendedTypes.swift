@@ -36,9 +36,16 @@ extension Compiler.ExtendedTypes
 
         for relationship:SymbolRelationship in colony.relationships
         {
-            if case .extension(let relationship) = relationship
+            guard case .extension(let relationship) = relationship
+            else
             {
-                self.extendees[relationship.source] = relationship.target
+                continue
+            }
+            guard case nil = self.extendees.updateValue(relationship.target,
+                    forKey: relationship.source)
+            else
+            {
+                throw Compiler.DuplicateBlockError.init()
             }
         }
     }

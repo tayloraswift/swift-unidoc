@@ -27,7 +27,7 @@ extension Codelink.Path.Suffix
         //  https://github.com/apple/swift-docc/blob/main/Sources/SwiftDocC/Utility/FoundationExtensions/String+Hashing.swift
         if let fnv1:UInt32 = .init(description, radix: 36)
         {
-            self = .hash(.init(value: fnv1))
+            self = .hash(.init(bits: fnv1))
             return
         }
         else

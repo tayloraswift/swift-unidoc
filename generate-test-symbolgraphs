@@ -11,6 +11,7 @@ do
         -output-dir TestModules/Symbolgraphs \
         -skip-inherited-docs \
         -emit-extension-block-symbols \
+        -include-spi-symbols \
         -pretty-print \
         -module-name $TARGET
 done

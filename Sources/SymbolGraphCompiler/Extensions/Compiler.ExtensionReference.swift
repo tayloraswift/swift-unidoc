@@ -34,9 +34,9 @@ extension Compiler.ExtensionReference
     {
         self.value.features.insert(feature)
     }
-    func insert(member:ScalarSymbolResolution)
+    func insert(nested:ScalarSymbolResolution)
     {
-        self.value.members.insert(member)
+        self.value.nested.insert(nested)
     }
 
     func append(block:Compiler.Extension.Block)

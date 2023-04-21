@@ -13,3 +13,11 @@ extension Compiler
         }
     }
 }
+extension Compiler.SymbolResolutionError:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        "Invalid symbol resolution '\(self.resolution)'."
+    }
+}

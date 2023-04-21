@@ -2,7 +2,7 @@ import SymbolDescriptions
 
 extension Compiler
 {
-    struct Context
+    struct SourceContext
     {
         let culture:ModuleIdentifier
         let root:Repository.Root
@@ -14,7 +14,7 @@ extension Compiler
         }
     }
 }
-extension Compiler.Context
+extension Compiler.SourceContext
 {
     func resolve(uri:String) throws -> FileIdentifier
     {
@@ -24,7 +24,7 @@ extension Compiler.Context
                 uri[..<start] == "file://"
         else
         {
-            throw Compiler.FileIdentifierError.init(invalid: uri)
+            throw Compiler.SourceFileError.init(invalid: uri)
         }
         for character:Character in self.root.path
         {
@@ -34,7 +34,7 @@ extension Compiler.Context
             }
             else
             {
-                throw Compiler.FileIdentifierError.init(invalid: uri)
+                throw Compiler.SourceFileError.init(invalid: uri)
             }
         }
         
