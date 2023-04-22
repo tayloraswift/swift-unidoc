@@ -5,16 +5,16 @@ extension Compiler
     {
         /// Protocols the extended type conforms to.
         public
-        var conformances:Set<ScalarSymbolResolution>
+        var conformances:Set<Symbol.Scalar>
         /// Members the extended type inherits from other types via subclassing,
         /// protocol conformances, etc.
         public
-        var features:Set<ScalarSymbolResolution>
+        var features:Set<Symbol.Scalar>
         /// Declarations directly nested in the extended type. Everything that
         /// is lexically-scoped to the extended type, and was not inherited from
         /// another type goes in this set.
         public
-        var nested:Set<ScalarSymbolResolution>
+        var nested:Set<Symbol.Scalar>
         /// Documentation comments and source locations for the various extension
         /// blocks that make up this extension.
         public
@@ -24,9 +24,9 @@ extension Compiler
         let signature:Signature
 
         init(signature:Signature,
-            conformances:Set<ScalarSymbolResolution> = [],
-            features:Set<ScalarSymbolResolution> = [],
-            nested:Set<ScalarSymbolResolution> = [],
+            conformances:Set<Symbol.Scalar> = [],
+            features:Set<Symbol.Scalar> = [],
+            nested:Set<Symbol.Scalar> = [],
             blocks:[Block] = [])
         {
             self.signature = signature

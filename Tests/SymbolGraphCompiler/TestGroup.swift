@@ -1,11 +1,11 @@
 import JSON
-import SymbolDescriptions
+import SymbolGraphParts
 import System
 import Testing
 
 extension TestGroup
 {
-    func load(colonies filepaths:[FilePath]) -> [SymbolColony]
+    func load(parts filepaths:[FilePath]) -> [SymbolGraphPart]
     {
         self.do
         {
@@ -14,11 +14,11 @@ extension TestGroup
                 let file:[UInt8] = try $0.read()
 
                 let json:JSON.Object = try .init(parsing: file)
-                let colony:SymbolColony = try .init(json: json)
+                let part:SymbolGraphPart = try .init(json: json)
 
-                self.expect(colony.metadata.version ==? .v(0, 6, 0))
+                self.expect(part.metadata.version ==? .v(0, 6, 0))
 
-                return colony
+                return part
             }
         } ?? []
     }

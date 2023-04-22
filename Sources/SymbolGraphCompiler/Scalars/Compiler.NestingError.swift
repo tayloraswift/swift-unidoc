@@ -3,8 +3,8 @@ extension Compiler
     public
     enum NestingError:Equatable, Error, Sendable
     {
-        case conflict(with:UnifiedSymbolResolution)
-        case phylum(SymbolGraph.Scalar.Phylum)
+        case conflict(with:Symbol)
+        case phylum(ScalarPhylum)
     }
 }
 extension Compiler.NestingError:CustomStringConvertible

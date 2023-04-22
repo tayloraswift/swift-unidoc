@@ -1,4 +1,9 @@
-import SymbolDescriptions
+import Availability
+import Declarations
+import Generics
+import LexicalPaths
+import SourceMaps
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -7,7 +12,7 @@ extension Compiler
     struct Scalar
     {
         public internal(set)
-        var virtuality:SymbolGraph.Scalar.Virtuality?
+        var virtuality:ScalarPhylum.Virtuality?
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.
@@ -18,38 +23,38 @@ extension Compiler
         ///
         /// The compiler does not check for inheritance cycles.
         public internal(set)
-        var superforms:[ScalarSymbolResolution]
+        var superforms:[Symbol.Scalar]
         public internal(set)
-        var origin:ScalarSymbolResolution?
+        var origin:Symbol.Scalar?
 
         public internal(set)
         var comment:String
 
         public
-        let availability:SymbolAvailability
+        let availability:Availability
         public
-        let fragments:Declaration<ScalarSymbolResolution>
+        let fragments:Declaration<Symbol.Scalar>
         public
-        let generics:GenericSignature<ScalarSymbolResolution>
+        let generics:GenericSignature<Symbol.Scalar>
         //  TODO: trim file path prefixes
         public
         let location:SourceLocation<FileIdentifier>?
         public
         let path:LexicalPath
         public
-        let phylum:SymbolGraph.Scalar.Phylum
+        let phylum:ScalarPhylum
         public
-        let resolution:ScalarSymbolResolution
+        let resolution:Symbol.Scalar
 
         private
-        init(resolution:ScalarSymbolResolution,
-            availability:SymbolAvailability,
+        init(resolution:Symbol.Scalar,
+            availability:Availability,
             visibility:SymbolDescription.Visibility,
-            fragments:Declaration<ScalarSymbolResolution>,
-            generics:GenericSignature<ScalarSymbolResolution>,
+            fragments:Declaration<Symbol.Scalar>,
+            generics:GenericSignature<Symbol.Scalar>,
             location:SourceLocation<FileIdentifier>?,
             path:LexicalPath,
-            phylum:SymbolGraph.Scalar.Phylum)
+            phylum:ScalarPhylum)
         {
             self.virtuality = visibility == .open ? .open : nil
             self.superforms = []
@@ -70,10 +75,10 @@ extension Compiler
 extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
-        as resolution:__owned ScalarSymbolResolution,
+        as resolution:__owned Symbol.Scalar,
         in context:__shared Compiler.SourceContext) throws
     {
-        let phylum:SymbolGraph.Scalar.Phylum
+        let phylum:ScalarPhylum
         switch description.phylum
         {
         case .actor:                        phylum = .actor

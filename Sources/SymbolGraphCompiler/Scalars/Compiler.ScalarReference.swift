@@ -1,4 +1,5 @@
-import SymbolDescriptions
+import Generics
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -10,18 +11,18 @@ extension Compiler
     final
     class ScalarReference
     {
-        let conditions:[GenericConstraint<ScalarSymbolResolution>]
+        let conditions:[GenericConstraint<Symbol.Scalar>]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
         /// The symbol this scalar is lexically-nested in. This may
         /// be an extension block symbol.
-        var scope:UnifiedSymbolResolution?
+        var scope:Symbol?
 
         private(set)
         var value:Scalar
 
-        init(conditions:[GenericConstraint<ScalarSymbolResolution>],
+        init(conditions:[GenericConstraint<Symbol.Scalar>],
             value:Scalar)
         {
             self.conditions = conditions
@@ -35,7 +36,7 @@ extension Compiler
 }
 extension Compiler.ScalarReference
 {
-    var resolution:ScalarSymbolResolution
+    var resolution:Symbol.Scalar
     {
         self.value.resolution
     }
@@ -51,7 +52,7 @@ extension Compiler.ScalarReference
             throw Compiler.NestingError.phylum(self.value.phylum)
         }
 
-        if  let scope:UnifiedSymbolResolution = self.scope
+        if  let scope:Symbol = self.scope
         {
             throw Compiler.NestingError.conflict(with: scope)
         }
@@ -60,11 +61,11 @@ extension Compiler.ScalarReference
             self.scope = nesting.scope
         }
 
-        if  let virtuality:SymbolGraph.Scalar.Virtuality = nesting.virtuality
+        if  let virtuality:ScalarPhylum.Virtuality = nesting.virtuality
         {
             self.value.virtuality = virtuality
         }
-        if  let origin:ScalarSymbolResolution = nesting.origin
+        if  let origin:Symbol.Scalar = nesting.origin
         {
             try self.assign(origin: origin)
         }
@@ -88,13 +89,13 @@ extension Compiler.ScalarReference
         case let type?:
             throw Compiler.SuperformError.conflict(with: type)
         }
-        if  let origin:ScalarSymbolResolution = superform.origin
+        if  let origin:Symbol.Scalar = superform.origin
         {
             try self.assign(origin: origin)
         }
     }
     final
-    func assign(origin:ScalarSymbolResolution) throws
+    func assign(origin:Symbol.Scalar) throws
     {
         switch self.value.origin
         {

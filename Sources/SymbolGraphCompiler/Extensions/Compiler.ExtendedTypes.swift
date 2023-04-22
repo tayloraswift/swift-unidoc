@@ -1,14 +1,14 @@
-import SymbolDescriptions
+import SymbolGraphParts
 
 extension Compiler
 {
     struct ExtendedTypes
     {
         private
-        var extendees:[BlockSymbolResolution: ScalarSymbolResolution]
+        var extendees:[Symbol.Block: Symbol.Scalar]
 
         private 
-        init(extendees:[BlockSymbolResolution: ScalarSymbolResolution] = [:])
+        init(extendees:[Symbol.Block: Symbol.Scalar] = [:])
         {
             self.extendees = extendees
         }
@@ -16,9 +16,9 @@ extension Compiler
 }
 extension Compiler.ExtendedTypes
 {
-    func extendee(of block:BlockSymbolResolution) throws -> ScalarSymbolResolution
+    func extendee(of block:Symbol.Block) throws -> Symbol.Scalar
     {
-        if let type:ScalarSymbolResolution = extendees[block]
+        if let type:Symbol.Scalar = extendees[block]
         {
             return type
         }
@@ -30,7 +30,7 @@ extension Compiler.ExtendedTypes
 }
 extension Compiler.ExtendedTypes
 {
-    init(indexing colony:__shared SymbolColony) throws
+    init(indexing colony:__shared SymbolGraphPart) throws
     {
         self.init()
 

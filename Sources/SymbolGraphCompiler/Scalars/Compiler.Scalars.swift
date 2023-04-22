@@ -1,4 +1,4 @@
-import SymbolDescriptions
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -6,7 +6,7 @@ extension Compiler
     struct Scalars
     {
         private
-        var recognized:[ScalarSymbolResolution: Recognition]
+        var recognized:[Symbol.Scalar: Recognition]
 
         init()
         {
@@ -38,12 +38,7 @@ extension Compiler.Scalars
 extension Compiler.Scalars
 {
     mutating
-    func exclude(scalar resolution:ScalarSymbolResolution) throws
-    {
-        try self.recognize(scalar: resolution, as: .excluded)
-    }
-    mutating
-    func include(scalar resolution:ScalarSymbolResolution,
+    func include(scalar resolution:Symbol.Scalar,
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
@@ -53,13 +48,23 @@ extension Compiler.Scalars
                 as: resolution,
                 in: context))))
     }
+    mutating
+    func exclude(scalar resolution:Symbol.Scalar) throws
+    {
+        try self.recognize(scalar: resolution, as: .excluded)
+    }
+    mutating
+    func record(scalar resolution:Symbol.Scalar, named name:String) throws
+    {
+        try self.recognize(scalar: resolution, as: .recorded(name))
+    }
     private mutating
-    func recognize(scalar resolution:ScalarSymbolResolution,
+    func recognize(scalar resolution:Symbol.Scalar,
         as recognition:Recognition) throws
     {
         switch self.recognized.updateValue(recognition, forKey: resolution)
         {
-        case nil, .excluded?:
+        case nil, .excluded?, .recorded?:
             return
         
         case .included:
@@ -69,7 +74,7 @@ extension Compiler.Scalars
 }
 extension Compiler.Scalars
 {
-    subscript(resolution:ScalarSymbolResolution) -> ScalarSymbolResolution?
+    subscript(resolution:Symbol.Scalar) -> Symbol.Scalar?
     {
         switch self.recognized[resolution]
         {
@@ -77,12 +82,12 @@ extension Compiler.Scalars
             return scalar.resolution
         case .excluded?:
             return nil
-        case nil:
+        case .recorded?, nil:
             return resolution
         }
     }
     func callAsFunction(
-        internal resolution:ScalarSymbolResolution) throws -> Compiler.ScalarReference?
+        internal resolution:Symbol.Scalar) throws -> Compiler.ScalarReference?
     {
         switch self.recognized[resolution]
         {
@@ -90,7 +95,7 @@ extension Compiler.Scalars
             return scalar
         case .excluded?:
             return nil
-        case nil:
+        case .recorded?, nil:
             throw Compiler.UndefinedScalarError.init(undefined: resolution)
         }
     }

@@ -8,11 +8,11 @@ extension CodelinkResolver
         public
         let target:Target
 
-        let phylum:SymbolGraph.Scalar.Phylum
+        let phylum:ScalarPhylum
         let hash:Codelink.Hash
 
         private
-        init(target:Target, phylum:SymbolGraph.Scalar.Phylum, hash:Codelink.Hash)
+        init(target:Target, phylum:ScalarPhylum, hash:Codelink.Hash)
         {
             self.target = target
             self.phylum = phylum
@@ -24,7 +24,7 @@ extension CodelinkResolver.Overload
 {
     public
     init(target:CodelinkResolver.Target,
-        phylum:SymbolGraph.Scalar.Phylum,
+        phylum:ScalarPhylum,
         id:__shared String)
     {
         //  compute the id hash

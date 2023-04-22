@@ -1,4 +1,5 @@
-import SymbolDescriptions
+import SourceMaps
+import SymbolGraphParts
 
 extension Compiler.Extension
 {

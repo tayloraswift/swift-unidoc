@@ -4,15 +4,15 @@ extension Linker.AddressTable
     struct CollisionError:Error, Equatable
     {
         public
-        let identity:Identity
+        let identity:Address.Identity
 
         public
-        init(identity:Identity)
+        init(identity:Address.Identity)
         {
             self.identity = identity
         }
     }
 }
-extension Linker.AddressTable.CollisionError:Sendable where Identity:Sendable
+extension Linker.AddressTable.CollisionError:Sendable where Address.Identity:Sendable
 {
 }

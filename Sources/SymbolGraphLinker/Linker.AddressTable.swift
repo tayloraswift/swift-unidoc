@@ -1,11 +1,11 @@
 extension Linker
 {
-    struct AddressTable<Identity> where Identity:Hashable
+    struct AddressTable<Address> where Address:SymbolAddress
     {
         private
-        var identities:[Identity]
+        var identities:[Address.Identity]
         private
-        var addresses:[Identity: UInt32]
+        var addresses:[Address.Identity: Address]
 
         init()
         {
@@ -14,16 +14,30 @@ extension Linker
         }
     }
 }
-extension Linker.AddressTable:Sendable where Identity:Sendable
+extension Linker.AddressTable:Sendable where Address.Identity:Sendable
 {
 }
 extension Linker.AddressTable
 {
-    @discardableResult
-    mutating
-    func append(_ identity:Identity) throws -> UInt32
+    private
+    var next:Address?
     {
-        guard let address:UInt32 = .init(exactly: self.identities.count)
+        if  let uint32:UInt32 = .init(exactly: self.identities.count)
+        {
+            return .init(exactly: uint32)
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
+extension Linker.AddressTable
+{
+    mutating
+    func append(_ identity:Address.Identity) throws -> Address
+    {
+        guard let address:Address = self.next
         else
         {
             throw OverflowError.init()
@@ -38,9 +52,9 @@ extension Linker.AddressTable
         return address
     }
     mutating
-    func address(_ identity:Identity) throws -> UInt32
+    func address(_ identity:Address.Identity) throws -> Address
     {
-        guard let address:UInt32 = .init(exactly: self.identities.count)
+        guard let address:Address = self.next
         else
         {
             throw OverflowError.init()

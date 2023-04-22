@@ -6,9 +6,8 @@ swift run -c release DeclarationsTests &&
 swift run -c release MarkdownParsingTests &&
 swift run -c release MarkdownRenderingTests &&
 swift run -c release MarkdownSemanticsTests &&
-swift run -c release PackageManifestsTests &&
-swift run -c release PackageResolutionTests &&
+swift run -c release PackageDescriptionsTests &&
 swift run -c release SemanticVersionsTests &&
-swift run -c release SymbolResolutionTests &&
-swift run -c release SymbolDescriptionsTests &&
+swift run -c release SymbolsTests &&
+swift run -c release SymbolGraphPartsTests &&
 swift run -c release SymbolGraphCompilerTests

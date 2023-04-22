@@ -1,4 +1,6 @@
-import SymbolDescriptions
+import Repositories
+import SourceMaps
+import SymbolGraphParts
 
 extension Compiler
 {

@@ -1,3 +1,5 @@
+import Generics
+
 extension Compiler
 {
     class ExtensionReference
@@ -17,24 +19,24 @@ extension Compiler.ExtensionReference
     {
         self.value.signature
     }
-    var extendee:ScalarSymbolResolution
+    var extendee:Symbol.Scalar
     {
         self.value.signature.type
     }
-    var conditions:[GenericConstraint<ScalarSymbolResolution>]?
+    var conditions:[GenericConstraint<Symbol.Scalar>]?
     {
         self.value.signature.conditions
     }
 
-    func insert(conformance:ScalarSymbolResolution)
+    func insert(conformance:Symbol.Scalar)
     {
         self.value.conformances.insert(conformance)
     }
-    func insert(feature:ScalarSymbolResolution)
+    func insert(feature:Symbol.Scalar)
     {
         self.value.features.insert(feature)
     }
-    func insert(nested:ScalarSymbolResolution)
+    func insert(nested:Symbol.Scalar)
     {
         self.value.nested.insert(nested)
     }

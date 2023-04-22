@@ -1,3 +1,5 @@
+import Repositories
+
 extension SymbolGraph
 {
     @frozen public

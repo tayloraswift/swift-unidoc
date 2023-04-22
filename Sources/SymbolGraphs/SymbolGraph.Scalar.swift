@@ -1,18 +1,22 @@
+import Generics
+import LexicalPaths
+import SourceMaps
+
 extension SymbolGraph
 {
     @frozen public
     struct Scalar
     {
         public
-        let virtuality:Virtuality?
+        let virtuality:ScalarPhylum.Virtuality?
         public
-        let phylum:Phylum
+        let phylum:ScalarPhylum
         public
         let path:LexicalPath
 
         public
-        let generics:GenericSignature<UInt32>
+        let generics:GenericSignature<ScalarAddress>
         public
-        let location:SourceLocation<UInt32>?
+        let location:SourceLocation<FileAddress>?
     }
 }

@@ -1,4 +1,5 @@
-import SymbolDescriptions
+import SymbolGraphParts
+import Repositories
 
 public
 struct Compiler
@@ -26,34 +27,40 @@ struct Compiler
 extension Compiler
 {
     public mutating
-    func compile(colonies:some Sequence<SymbolColony>) throws
+    func compile(parts:some Sequence<SymbolGraphPart>) throws
     {
-        let cultures:[ModuleIdentifier: [SymbolColony]] = .init(grouping: colonies,
+        let cultures:[ModuleIdentifier: [SymbolGraphPart]] = .init(grouping: parts,
             by: \.culture)
         
-        for (culture, colonies):(ModuleIdentifier, [SymbolColony]) in cultures
+        for (culture, parts):(ModuleIdentifier, [SymbolGraphPart]) in cultures
         {
-            try self.compile(culture: culture, colonies: colonies)
+            try self.compile(culture: culture, parts: parts)
         }
     }
     private mutating
-    func compile(culture:ModuleIdentifier, colonies:[SymbolColony]) throws
+    func compile(culture:ModuleIdentifier, parts:[SymbolGraphPart]) throws
     {
         let context:SourceContext = .init(culture: culture, root: self.root)
 
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
-        for colony:SymbolColony in colonies
+        for part:SymbolGraphPart in parts
         {
             //  Map extension block names to extended type identifiers.
-            let extensions:ExtendedTypes = try .init(indexing: colony)
-            for symbol:SymbolDescription in colony.symbols
+            let extensions:ExtendedTypes = try .init(indexing: part)
+            for symbol:SymbolDescription in part.symbols
             {
                 switch (symbol.usr, included: self.threshold <= symbol.visibility)
                 {
-                case (.compound, _):
-                    //  Compound symbol descriptions are completely and utterly
-                    //  useless. They do not even tell us anything useful about
-                    //  their generic/extension contexts.
+                case (.vector, included: false):
+                    //  We do not care about vectors materialized for internal
+                    //  types, or vectors materialized from internal scalars.
+                    continue
+                
+                case (.vector, included: true):
+                    //  Compound symbol descriptions are mostly useless. (They do
+                    //  not tell us anything useful their generic/extension contexts.)
+                    //  But we need to remember their names to perform codelink
+                    //  resolution.
                     continue
                 
                 case (.scalar(let scalar), included: let included):
@@ -65,7 +72,7 @@ extension Compiler
                     }
                     catch let error
                     {
-                        throw VertexError<ScalarSymbolResolution>.init(
+                        throw VertexError<Symbol.Scalar>.init(
                             underlying: error,
                             in: scalar)
                     }
@@ -80,7 +87,7 @@ extension Compiler
                     }
                     catch let error
                     {
-                        throw VertexError<BlockSymbolResolution>.init(
+                        throw VertexError<Symbol.Block>.init(
                             underlying: error,
                             in: block)
                     }
@@ -93,9 +100,9 @@ extension Compiler
             }
         }
         //  Pass II. Scan for nesting relationships.
-        for colony:SymbolColony in colonies
+        for part:SymbolGraphPart in parts
         {
-            for relationship:SymbolRelationship in colony.relationships
+            for relationship:SymbolRelationship in part.relationships
             {
                 switch relationship
                 {
@@ -113,9 +120,9 @@ extension Compiler
                 }
             }
         }
-        for colony:SymbolColony in colonies
+        for part:SymbolGraphPart in parts
         {
-            for relationship:SymbolRelationship in colony.relationships
+            for relationship:SymbolRelationship in part.relationships
             {
                 switch relationship
                 {
@@ -219,17 +226,17 @@ extension Compiler
     {
         switch relationship.source
         {
-        case .compound(let feature, self: let selftype):
-            guard let feature:ScalarSymbolResolution = self.scalars[feature]
+        case .vector(let vector):
+            guard let feature:Symbol.Scalar = self.scalars[vector.feature]
             else
             {
                 return // Feature is hidden.
             }
             switch relationship.target
             {
-            case .compound:
-                //  Nothing can be a member of a compound symbol.
-                throw SymbolResolutionError.init(invalid: relationship.target)
+            case .vector:
+                //  Nothing can be a member of a vector symbol.
+                throw SymbolError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -241,7 +248,7 @@ extension Compiler
                 }
                 //  If the membership target is a scalar resolution, the self type
                 //  should match the target type.
-                if  type.resolution == selftype
+                if  type.resolution == vector.heir
                 {
                     //  We don’t know what extension the feature should go in, because
                     //  it may come from a protocol extension we do not know about. So
@@ -256,7 +263,7 @@ extension Compiler
             case .block(let block):
                 //  Look up the extension associated with this block name.
                 let group:ExtensionReference = try self.extensions.named(block)
-                if  group.extendee == selftype
+                if  group.extendee == vector.heir
                 {
                     group.insert(feature: feature)
                 }
@@ -277,9 +284,9 @@ extension Compiler
 
             switch relationship.target
             {
-            case .compound:
-                //  Nothing can be a member of a compound symbol.
-                throw SymbolResolutionError.init(invalid: relationship.target)
+            case .vector:
+                //  Nothing can be a member of a vector symbol.
+                throw SymbolError.init(invalid: relationship.target)
             
             case .scalar(let type):
                 //  We should never see an external type reference here either.
@@ -310,7 +317,7 @@ extension Compiler
         
         case .block:
             //  Extension blocks cannot be members of things.
-            throw SymbolResolutionError.init(invalid: relationship.source)
+            throw SymbolError.init(invalid: relationship.source)
         }
     }
 }
@@ -319,7 +326,7 @@ extension Compiler
     private mutating
     func assign(relationship conformance:SymbolRelationship.Conformance) throws
     {
-        guard let `protocol`:ScalarSymbolResolution = self.scalars[conformance.target]
+        guard let `protocol`:Symbol.Scalar = self.scalars[conformance.target]
         else
         {
             return // Protocol is hidden.
@@ -329,9 +336,9 @@ extension Compiler
 
         switch conformance.source
         {
-        case .compound:
+        case .vector:
             //  Compounds cannot conform to things.
-            throw SymbolResolutionError.init(invalid: conformance.source)
+            throw SymbolError.init(invalid: conformance.source)
         
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -341,7 +348,7 @@ extension Compiler
             {
                 return // Type is hidden.
             }
-            if let origin:ScalarSymbolResolution = conformance.origin
+            if let origin:Symbol.Scalar = conformance.origin
             {
                 try type.assign(origin: origin)
             }

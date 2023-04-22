@@ -4,10 +4,10 @@ extension Compiler
     struct UndefinedScalarError:Equatable, Error
     {
         public
-        let resolution:ScalarSymbolResolution
+        let resolution:Symbol.Scalar
 
         public
-        init(undefined resolution:ScalarSymbolResolution)
+        init(undefined resolution:Symbol.Scalar)
         {
             self.resolution = resolution
         }

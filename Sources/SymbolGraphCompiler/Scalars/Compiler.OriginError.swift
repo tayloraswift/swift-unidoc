@@ -3,7 +3,7 @@ extension Compiler
     public
     enum OriginError:Equatable, Error, Sendable
     {
-        case conflict(with:ScalarSymbolResolution)
+        case conflict(with:Symbol.Scalar)
     }
 }
 extension Compiler.OriginError:CustomStringConvertible
