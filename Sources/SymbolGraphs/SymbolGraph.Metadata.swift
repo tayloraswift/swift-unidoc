@@ -1,3 +1,6 @@
+import Repositories
+import SemanticVersions
+
 extension SymbolGraph
 {
     public

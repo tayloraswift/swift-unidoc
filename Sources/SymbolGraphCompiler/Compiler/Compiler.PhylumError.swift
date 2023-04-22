@@ -1,4 +1,4 @@
-import SymbolDescriptions
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -6,7 +6,6 @@ extension Compiler
     enum PhylumError:Equatable, Error
     {
         case unsupported(SymbolDescription.Phylum)
-        //case invalid(SymbolDescription.Phylum, of:ScalarSymbolResolution)
     }
 }
 extension Compiler.PhylumError:CustomStringConvertible
@@ -18,8 +17,6 @@ extension Compiler.PhylumError:CustomStringConvertible
         {
         case .unsupported(let phylum):
             return "Unsupported phylum '\(phylum)'."
-        //case .invalid(let phylum, of: let resolution):
-        //    return "Invalid phylum '\(phylum)' (of scalar '\(resolution)')."
         }
     }
 }

@@ -1,4 +1,5 @@
-import SymbolDescriptions
+import Generics
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -10,7 +11,7 @@ extension Compiler
         /// Extensions with symbol names. Each extension may have many
         /// names they can be referred to as.
         private
-        var named:[BlockSymbolResolution: ExtensionReference]
+        var named:[Symbol.Block: ExtensionReference]
 
         init()
         {
@@ -30,8 +31,8 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func include(block:__owned BlockSymbolResolution,
-        extending type:ScalarSymbolResolution,
+    func include(block:__owned Symbol.Block,
+        extending type:Symbol.Scalar,
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
@@ -57,7 +58,7 @@ extension Compiler.Extensions
 
 extension Compiler.Extensions
 {
-    func named(_ block:BlockSymbolResolution) throws -> Compiler.ExtensionReference
+    func named(_ block:Symbol.Block) throws -> Compiler.ExtensionReference
     {
         if let named:Compiler.ExtensionReference = self.named[block]
         {
@@ -71,9 +72,8 @@ extension Compiler.Extensions
 }
 extension Compiler.Extensions
 {
-    subscript(extended:ScalarSymbolResolution,
-        where conditions:[GenericConstraint<ScalarSymbolResolution>]?)
-        -> Compiler.ExtensionReference
+    subscript(extended:Symbol.Scalar,
+        where conditions:[GenericConstraint<Symbol.Scalar>]?) -> Compiler.ExtensionReference
     {
         mutating get
         {

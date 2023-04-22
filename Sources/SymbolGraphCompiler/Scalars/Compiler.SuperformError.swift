@@ -1,4 +1,4 @@
-import SymbolDescriptions
+import SymbolGraphParts
 
 extension Compiler
 {
@@ -6,7 +6,7 @@ extension Compiler
     enum SuperformError:Error, Sendable
     {
         case conflict(with:any SuperformRelationship.Type)
-        case phylum(SymbolGraph.Scalar.Phylum)
+        case phylum(ScalarPhylum)
     }
 }
 extension Compiler.SuperformError:CustomStringConvertible

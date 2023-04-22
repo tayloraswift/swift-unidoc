@@ -6,6 +6,7 @@ let package:Package = .init(
     platforms: [.macOS(.v11)],
     products:
     [
+        .library(name: "Availability", targets: ["Availability"]),
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
@@ -22,19 +23,17 @@ let package:Package = .init(
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
-        .library(name: "Packages", targets: ["Packages"]),
-        .library(name: "PackageManifests", targets: ["PackageManifests"]),
-        .library(name: "PackageResolution", targets: ["PackageResolution"]),
+        .library(name: "Repositories", targets: ["Repositories"]),
+        .library(name: "PackageDescriptions", targets: ["PackageDescriptions"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
-        .library(name: "SymbolAvailability", targets: ["SymbolAvailability"]),
-        .library(name: "SymbolDescriptions", targets: ["SymbolDescriptions"]),
+        .library(name: "Symbolics", targets: ["Symbolics"]),
+        .library(name: "Symbols", targets: ["Symbols"]),
+        .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
-        .library(name: "SymbolResolution", targets: ["SymbolResolution"]),
-        .library(name: "Symbols", targets: ["Symbols"]),
     ],
     dependencies: 
     [
@@ -53,6 +52,11 @@ let package:Package = .init(
     ],
     targets:
     [
+        .target(name: "Availability", dependencies:
+            [
+                .target(name: "SemanticVersions"),
+            ]),
+
         .target(name: "Codelinks", dependencies:
             [
                 .target(name: "LexicalPaths"),
@@ -103,73 +107,65 @@ let package:Package = .init(
                 .target(name: "MarkdownTrees"),
             ]),
 
-        .target(name: "Packages", dependencies:
+        .target(name: "Repositories", dependencies:
             [
                 .target(name: "SemanticVersions"),
-                .target(name: "Symbols"),
+                .target(name: "StringIdentifiers"),
             ]),
 
-        .target(name: "PackageManifests", dependencies:
+        .target(name: "PackageDescriptions", dependencies:
             [
-                .target(name: "PackageMetadata"),
-            ]),
-
-        .target(name: "PackageMetadata", dependencies:
-            [
-                .target(name: "Packages"),
+                .target(name: "Repositories"),
 
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
-            ]),
-
-        .target(name: "PackageResolution", dependencies:
-            [
-                .target(name: "PackageMetadata"),
             ]),
 
         .target(name: "SemanticVersions"),
 
-        .target(name: "Symbols"),
-
-        .target(name: "SymbolAvailability", dependencies:
+        .target(name: "SourceMaps", dependencies:
             [
-                .target(name: "SemanticVersions"),
+                .target(name: "StringIdentifiers"),
             ]),
 
-        .target(name: "SymbolDescriptions", dependencies:
+        .target(name: "StringIdentifiers"),
+
+        .target(name: "Symbolics"),
+
+        .target(name: "Symbols", dependencies:
             [
-                .target(name: "SymbolGraphs"),
-                .target(name: "SymbolResolution"),
+                .target(name: "Symbolics"),
             ]),
-        
-        .target(name: "SymbolResolution", dependencies:
+
+        .target(name: "SymbolGraphParts", dependencies:
             [
                 .target(name: "Symbols"),
-
+                .target(name: "SymbolGraphs"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
-
+        
         .target(name: "SymbolGraphs", dependencies:
             [
+                .target(name: "Availability"),
                 .target(name: "Declarations"),
                 .target(name: "Generics"),
                 .target(name: "LexicalPaths"),
-                .target(name: "Packages"),
-                .target(name: "SymbolAvailability"),
-                .target(name: "Symbols"),
+                .target(name: "Repositories"),
+                .target(name: "SourceMaps"),
+                .target(name: "Symbolics"),
             ]),
 
         .target(name: "SymbolGraphCompiler", dependencies:
             [
-                .target(name: "SymbolDescriptions"),
+                .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
         
         .target(name: "SymbolGraphLinker", dependencies:
             [
-                .target(name: "PackageManifests"),
-                .target(name: "PackageResolution"),
+                .target(name: "CodelinkResolution"),
+                .target(name: "PackageDescriptions"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
             ]),
@@ -217,21 +213,13 @@ let package:Package = .init(
             ],
             path: "Tests/MarkdownSemantics"),
         
-        .executableTarget(name: "PackageManifestsTests", dependencies:
+        .executableTarget(name: "PackageDescriptionsTests", dependencies:
             [
-                .target(name: "PackageManifests"),
+                .target(name: "PackageDescriptions"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/PackageManifests"),
-
-        .executableTarget(name: "PackageResolutionTests", dependencies:
-            [
-                .target(name: "PackageResolution"),
-                .target(name: "System"),
-                .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/PackageResolution"),
+            path: "Tests/PackageDescriptions"),
         
         .executableTarget(name: "SemanticVersionsTests", dependencies:
             [
@@ -240,20 +228,20 @@ let package:Package = .init(
             ],
             path: "Tests/SemanticVersions"),
         
-        .executableTarget(name: "SymbolResolutionTests", dependencies:
+        .executableTarget(name: "SymbolsTests", dependencies:
             [
-                .target(name: "SymbolResolution"),
+                .target(name: "Symbols"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolResolution"),
+            path: "Tests/Symbols"),
         
-        .executableTarget(name: "SymbolDescriptionsTests", dependencies:
+        .executableTarget(name: "SymbolGraphPartsTests", dependencies:
             [
-                .target(name: "SymbolDescriptions"),
+                .target(name: "SymbolGraphParts"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolDescriptions",
+            path: "Tests/SymbolGraphParts",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
         
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:

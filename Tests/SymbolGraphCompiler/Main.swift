@@ -1,5 +1,6 @@
-import SymbolDescriptions
+import SourceMaps
 import SymbolGraphCompiler
+import SymbolGraphParts
 import System
 import Testing
 
@@ -23,7 +24,7 @@ enum Main:SyncTests
             tests.do
             {
                 var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
-                try compiler.compile(colonies: tests.load(colonies:
+                try compiler.compile(parts: tests.load(parts:
                     filenames.map 
                     {
                         ("TestModules/Symbolgraphs" as FilePath).appending("\($0).symbols.json")
@@ -48,8 +49,8 @@ enum Main:SyncTests
             tests.do
             {
                 var compiler:Compiler = .init(root: "/")
-                try compiler.compile(colonies: tests.load(
-                    colonies: ["TestModules/Symbolgraphs/Swift.symbols.json"]))
+                try compiler.compile(parts: tests.load(
+                    parts: ["TestModules/Symbolgraphs/Swift.symbols.json"]))
             }
         }
         #endif

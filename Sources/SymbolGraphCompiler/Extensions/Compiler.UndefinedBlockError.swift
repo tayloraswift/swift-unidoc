@@ -4,10 +4,10 @@ extension Compiler
     struct UndefinedBlockError:Equatable, Error
     {
         public
-        let resolution:BlockSymbolResolution
+        let resolution:Symbol.Block
 
         public
-        init(undefined resolution:BlockSymbolResolution)
+        init(undefined resolution:Symbol.Block)
         {
             self.resolution = resolution
         }
