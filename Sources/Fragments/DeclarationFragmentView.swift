@@ -1,5 +1,5 @@
 public
-protocol DeclarationView:Sequence
+protocol DeclarationFragmentView:Sequence
 {
     associatedtype Symbol:Hashable
     associatedtype Color:Hashable
@@ -7,12 +7,12 @@ protocol DeclarationView:Sequence
     static
     subscript(_ overlay:DeclarationOverlay) -> Color? { get }
 
-    var base:Declaration<Symbol> { get }
+    var base:DeclarationFragments<Symbol> { get }
 }
-extension DeclarationView
+extension DeclarationFragmentView
 {
     @inlinable public
-    func makeIterator() -> Declaration<Symbol>.FragmentIterator<Self>
+    func makeIterator() -> DeclarationFragments<Symbol>.FilteringIterator<Self>
     {
         .init(base: self.base.fragments.makeIterator())
     }

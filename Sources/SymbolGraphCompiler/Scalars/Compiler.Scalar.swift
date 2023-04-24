@@ -1,5 +1,6 @@
 import Availability
 import Declarations
+import Fragments
 import Generics
 import LexicalPaths
 import SourceMaps
@@ -11,6 +12,18 @@ extension Compiler
     @frozen public
     struct Scalar
     {
+        public
+        let declaration:Declaration<Symbol.Scalar>
+        public
+        let resolution:Symbol.Scalar
+        public
+        let location:SourceLocation<FileIdentifier>?
+
+        public
+        let phylum:ScalarPhylum
+        public
+        let path:LexicalPath
+
         public internal(set)
         var virtuality:ScalarPhylum.Virtuality?
         /// The scalars that this scalar implements, overrides, or inherits
@@ -30,46 +43,34 @@ extension Compiler
         public internal(set)
         var comment:String
 
-        public
-        let availability:Availability
-        public
-        let fragments:Declaration<Symbol.Scalar>
-        public
-        let generics:GenericSignature<Symbol.Scalar>
-        //  TODO: trim file path prefixes
-        public
-        let location:SourceLocation<FileIdentifier>?
-        public
-        let path:LexicalPath
-        public
-        let phylum:ScalarPhylum
-        public
-        let resolution:Symbol.Scalar
-
         private
-        init(resolution:Symbol.Scalar,
-            availability:Availability,
+        init(declaration:Declaration<Symbol.Scalar>,
+            resolution:Symbol.Scalar,
             visibility:SymbolDescription.Visibility,
-            fragments:Declaration<Symbol.Scalar>,
-            generics:GenericSignature<Symbol.Scalar>,
             location:SourceLocation<FileIdentifier>?,
-            path:LexicalPath,
-            phylum:ScalarPhylum)
+            phylum:ScalarPhylum,
+            path:LexicalPath)
         {
+            self.declaration = declaration
+            self.resolution = resolution
+            self.location = location
+            self.phylum = phylum
+            self.path = path
+
             self.virtuality = visibility == .open ? .open : nil
             self.superforms = []
             self.origin = nil
 
             self.comment = ""
-
-            self.availability = availability
-            self.fragments = fragments
-            self.generics = generics
-            self.location = location
-            self.path = path
-            self.phylum = phylum
-            self.resolution = resolution
         }
+    }
+}
+extension Compiler.Scalar:Identifiable
+{
+    @inlinable public
+    var id:ScalarIdentifier
+    {
+        self.resolution.id
     }
 }
 extension Compiler.Scalar
@@ -99,14 +100,12 @@ extension Compiler.Scalar
             throw Compiler.PhylumError.unsupported(description.phylum)
         }
 
-        self.init(resolution: resolution,
-            availability: description.availability,
+        self.init(declaration: description.declaration,
+            resolution: resolution,
             visibility: description.visibility,
-            fragments: description.fragments,
-            generics: description.generics,
             location: try description.location?.map(context.resolve(uri:)),
-            path: description.path,
-            phylum: phylum)
+            phylum: phylum,
+            path: description.path)
         
         if  let documentation:SymbolDescription.Documentation = description.documentation,
             let comment:String = context.filter(documentation: documentation)

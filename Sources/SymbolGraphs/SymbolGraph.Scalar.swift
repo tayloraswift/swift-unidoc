@@ -1,4 +1,6 @@
-import Generics
+import Availability
+import Codelinks
+import Declarations
 import LexicalPaths
 import SourceMaps
 
@@ -15,8 +17,27 @@ extension SymbolGraph
         let path:LexicalPath
 
         public
-        let generics:GenericSignature<ScalarAddress>
+        var declaration:Declaration<ScalarAddress>
         public
-        let location:SourceLocation<FileAddress>?
+        var location:SourceLocation<FileAddress>?
+
+        public
+        var bytecode:[UInt8]
+        public
+        var links:[Codelink]
+
+        @inlinable public
+        init(virtuality:ScalarPhylum.Virtuality?, phylum:ScalarPhylum, path:LexicalPath)
+        {
+            self.virtuality = virtuality
+            self.phylum = phylum
+            self.path = path
+
+            self.declaration = .init()
+
+            self.location = nil
+            self.bytecode = []
+            self.links = []
+        }
     }
 }

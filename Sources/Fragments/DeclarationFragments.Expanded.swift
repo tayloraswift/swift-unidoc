@@ -1,22 +1,22 @@
-extension Declaration
+extension DeclarationFragments
 {
     @frozen public
     struct Expanded
     {
         public
-        let base:Declaration<Symbol>
+        let base:DeclarationFragments<Symbol>
 
         @inlinable internal
-        init(_ base:Declaration<Symbol>)
+        init(_ base:DeclarationFragments<Symbol>)
         {
             self.base = base
         }
     }
 }
-extension Declaration.Expanded:Sendable where Symbol:Sendable
+extension DeclarationFragments.Expanded:Sendable where Symbol:Sendable
 {
 }
-extension Declaration.Expanded:DeclarationView
+extension DeclarationFragments.Expanded:DeclarationFragmentView
 {
     @inlinable public static
     subscript(_ overlay:DeclarationOverlay) -> DeclarationFragmentClass??

@@ -1,4 +1,4 @@
-import Declarations
+import Fragments
 import JSONDecoding
 
 extension DeclarationFragment:JSONObjectDecodable, JSONDecodable

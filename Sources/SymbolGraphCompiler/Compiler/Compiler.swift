@@ -49,53 +49,42 @@ extension Compiler
             let extensions:ExtendedTypes = try .init(indexing: part)
             for symbol:SymbolDescription in part.symbols
             {
-                switch (symbol.usr, included: self.threshold <= symbol.visibility)
+                do
                 {
-                case (.vector, included: false):
-                    //  We do not care about vectors materialized for internal
-                    //  types, or vectors materialized from internal scalars.
-                    continue
-                
-                case (.vector, included: true):
-                    //  Compound symbol descriptions are mostly useless. (They do
-                    //  not tell us anything useful their generic/extension contexts.)
-                    //  But we need to remember their names to perform codelink
-                    //  resolution.
-                    continue
-                
-                case (.scalar(let scalar), included: let included):
-                    do
+                    switch (symbol.usr, included: self.threshold <= symbol.visibility)
                     {
+                    case (.vector, included: false):
+                        //  We do not care about vectors materialized for internal
+                        //  types, or vectors materialized from internal scalars.
+                        continue
+                    
+                    case (.vector(let vector), included: true):
+                        //  Compound symbol descriptions are mostly useless. (They do
+                        //  not tell us anything useful their generic/extension contexts.)
+                        //  But we need to remember their names to perform codelink
+                        //  resolution.
+                        try self.scalars.include(vector: vector, with: symbol.path)
+                    
+                    case (.scalar(let scalar), included: let included):
                         included ?
                         try self.scalars.include(scalar: scalar, with: symbol, in: context) :
                         try self.scalars.exclude(scalar: scalar)
-                    }
-                    catch let error
-                    {
-                        throw VertexError<Symbol.Scalar>.init(
-                            underlying: error,
-                            in: scalar)
-                    }
-                
-                case (.block(let block), included: true):
-                    do
-                    {
+                    
+                    case (.block(let block), included: true):
                         try self.extensions.include(block: block,
                             extending: try extensions.extendee(of: block),
                             with: symbol,
                             in: context)
+
+                    case (.block, included: false):
+                        //  We do not care about extension blocks that only contain
+                        //  internal/private members.
+                        continue
                     }
-                    catch let error
-                    {
-                        throw VertexError<Symbol.Block>.init(
-                            underlying: error,
-                            in: block)
-                    }
-                
-                case (.block, included: false):
-                    //  We do not care about extension blocks that only contain
-                    //  internal/private members.
-                    continue
+                }
+                catch let error
+                {
+                    throw VertexError.init(underlying: error, in: symbol.usr)
                 }
             }
         }
@@ -104,19 +93,26 @@ extension Compiler
         {
             for relationship:SymbolRelationship in part.relationships
             {
-                switch relationship
+                do
                 {
-                case .extension:
-                    continue // Already handled these.
-                
-                case .requirement(let requirement):
-                    try self.add(requirement)
-                
-                case .membership(let membership):
-                    try self.add(membership)
+                    switch relationship
+                    {
+                    case .extension:
+                        continue // Already handled these.
+                    
+                    case .requirement(let requirement):
+                        try self.assign(requirement)
+                    
+                    case .membership(let membership):
+                        try self.assign(membership)
 
-                case .conformance, .defaultImplementation, .inheritance, .override:
-                    continue // Next pass.
+                    case .conformance, .defaultImplementation, .inheritance, .override:
+                        continue // Next pass.
+                    }
+                }
+                catch let error
+                {
+                    throw EdgeError.init(underlying: error, in: relationship)
                 }
             }
         }
@@ -124,22 +120,29 @@ extension Compiler
         {
             for relationship:SymbolRelationship in part.relationships
             {
-                switch relationship
+                do
                 {
-                case .extension, .requirement, .membership:
-                    continue // Already handled these.
-                
-                case .conformance(let conformance):
-                    try self.add(conformance)
+                    switch relationship
+                    {
+                    case .extension, .requirement, .membership:
+                        continue // Already handled these.
+                    
+                    case .conformance(let conformance):
+                        try self.insert(conformance)
 
-                case .defaultImplementation(let relationship):
-                    try self.add(relationship)
+                    case .defaultImplementation(let relationship):
+                        try self.insert(relationship)
 
-                case .inheritance(let relationship):
-                    try self.add(relationship)
+                    case .inheritance(let relationship):
+                        try self.insert(relationship)
 
-                case .override(let relationship):
-                    try self.add(relationship)
+                    case .override(let relationship):
+                        try self.insert(relationship)
+                    }
+                }
+                catch let error
+                {
+                    throw EdgeError.init(underlying: error, in: relationship)
                 }
             }
         }
@@ -148,62 +151,7 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func add(_ requirement:SymbolRelationship.Requirement) throws
-    {
-        do
-        {
-            try self.assign(relationship: requirement)
-        }
-        catch let error
-        {
-            throw EdgeError<SymbolRelationship.Requirement>.init(underlying: error,
-                in: requirement)
-        }
-    }
-    private mutating
-    func add(_ membership:SymbolRelationship.Membership) throws
-    {
-        do
-        {
-            try self.assign(relationship: membership)
-        }
-        catch let error
-        {
-            throw EdgeError<SymbolRelationship.Membership>.init(underlying: error,
-                in: membership)
-        }
-    }
-    private mutating
-    func add(_ conformance:SymbolRelationship.Conformance) throws
-    {
-        do
-        {
-            try self.assign(relationship: conformance)
-        }
-        catch let error
-        {
-            throw EdgeError<SymbolRelationship.Conformance>.init(underlying: error,
-                in: conformance)
-        }
-    }
-    private mutating
-    func add<Relationship>(_ superform:Relationship) throws
-        where Relationship:SuperformRelationship
-    {
-        do
-        {
-            try self.assign(relationship: superform)
-        }
-        catch let error
-        {
-            throw EdgeError<Relationship>.init(underlying: error, in: superform)
-        }
-    }
-}
-extension Compiler
-{
-    private mutating
-    func assign(relationship:SymbolRelationship.Requirement) throws
+    func assign(_ relationship:SymbolRelationship.Requirement) throws
     {
         /// Protocol must always be from the same module.
         guard let `protocol`:ScalarReference = try self.scalars(internal: relationship.target)
@@ -222,7 +170,7 @@ extension Compiler
         }
     }
     private mutating
-    func assign(relationship:SymbolRelationship.Membership) throws
+    func assign(_ relationship:SymbolRelationship.Membership) throws
     {
         switch relationship.source
         {
@@ -324,7 +272,7 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func assign(relationship conformance:SymbolRelationship.Conformance) throws
+    func insert(_ conformance:SymbolRelationship.Conformance) throws
     {
         guard let `protocol`:Symbol.Scalar = self.scalars[conformance.target]
         else
@@ -370,7 +318,7 @@ extension Compiler
         group.insert(conformance: `protocol`)
     }
     private mutating
-    func assign(relationship:some SuperformRelationship) throws
+    func insert(_ relationship:some SuperformRelationship) throws
     {
         if case nil = self.scalars[relationship.target]
         {

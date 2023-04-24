@@ -1,3 +1,4 @@
+import LexicalPaths
 import SymbolGraphParts
 
 extension Compiler
@@ -6,43 +7,54 @@ extension Compiler
     struct Scalars
     {
         private
-        var recognized:[Symbol.Scalar: Recognition]
+        var entries:[Symbol.Scalar: Entry]
 
         init()
         {
-            self.recognized = [:]
+            self.entries = [:]
         }
     }
 }
 extension Compiler.Scalars
 {
     public
-    func load() -> [Compiler.Scalar]
+    func load() -> (local:[Compiler.Scalar], external:External)
     {
-        self.recognized.values.compactMap
+        var included:[Compiler.Scalar] = []
+        let external:[Symbol.Scalar: Compiler.ScalarNomination] =
+            self.entries.compactMapValues
         {
-            if case .included(let reference) = $0
+            switch $0
             {
-                return reference.value
-            }
-            else
-            {
+            case .included(let reference):
+                included.append(reference.value)
                 return nil
+            
+            case .excluded:
+                return nil
+            
+            case .nominated(let nomination):
+                return nomination
             }
-        }.sorted
-        {
-            $0.resolution < $1.resolution
         }
+
+        return (included.sorted { $0.resolution < $1.resolution }, .init(external))
     }
 }
 extension Compiler.Scalars
 {
     mutating
+    func include(vector resolution:Symbol.Vector, with path:__owned LexicalPath) throws
+    {
+        ({ _ in })(&self.entries[resolution.heir,    default: .nominated(.heir(path.prefix))])
+        ({ _ in })(&self.entries[resolution.feature, default: .nominated(.feature(path.last))])
+    }
+    mutating
     func include(scalar resolution:Symbol.Scalar,
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
-        try self.recognize(scalar: resolution, as: .included(.init(
+        try self.update(resolution, with: .included(.init(
             conditions: description.extension.conditions,
             value: .init(from: description,
                 as: resolution,
@@ -51,51 +63,46 @@ extension Compiler.Scalars
     mutating
     func exclude(scalar resolution:Symbol.Scalar) throws
     {
-        try self.recognize(scalar: resolution, as: .excluded)
+        try self.update(resolution, with: .excluded)
     }
-    mutating
-    func record(scalar resolution:Symbol.Scalar, named name:String) throws
-    {
-        try self.recognize(scalar: resolution, as: .recorded(name))
-    }
+
     private mutating
-    func recognize(scalar resolution:Symbol.Scalar,
-        as recognition:Recognition) throws
+    func update(_ resolution:Symbol.Scalar, with entry:Entry) throws
     {
-        switch self.recognized.updateValue(recognition, forKey: resolution)
+        try
         {
-        case nil, .excluded?, .recorded?:
-            return
-        
-        case .included:
-            throw Compiler.DuplicateScalarError.init()
-        }
+            switch $0
+            {
+            case       nil, .nominated?: $0 = entry
+            case .included?, .excluded?: throw Compiler.DuplicateScalarError.init()
+            }
+        } (&self.entries[resolution])
     }
 }
 extension Compiler.Scalars
 {
     subscript(resolution:Symbol.Scalar) -> Symbol.Scalar?
     {
-        switch self.recognized[resolution]
+        switch self.entries[resolution]
         {
         case .included(let scalar)?:
             return scalar.resolution
         case .excluded?:
             return nil
-        case .recorded?, nil:
+        case .nominated?, nil:
             return resolution
         }
     }
     func callAsFunction(
         internal resolution:Symbol.Scalar) throws -> Compiler.ScalarReference?
     {
-        switch self.recognized[resolution]
+        switch self.entries[resolution]
         {
         case .included(let scalar)?:
             return scalar
         case .excluded?:
             return nil
-        case .recorded?, nil:
+        case .nominated?, nil:
             throw Compiler.UndefinedScalarError.init(undefined: resolution)
         }
     }
