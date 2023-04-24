@@ -1,4 +1,4 @@
-import Declarations
+import Fragments
 import Testing
 
 @main
@@ -9,7 +9,7 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "empty"
         {
-            let declaration:Declaration<Never> = .init(expanded: [],
+            let declaration:DeclarationFragments<Never> = .init(expanded: [],
                 abridged: [])
             
             tests.expect(declaration.identifiers ..? [])
@@ -30,7 +30,7 @@ enum Main:SyncTests
                 .init("Int", color: .typeIdentifier),
                 .init(")", color: nil),
             ]
-            let declaration:Declaration<Never> = .init(expanded: expanded,
+            let declaration:DeclarationFragments<Never> = .init(expanded: expanded,
                 abridged:
                 [
                     .init("init", color: .keyword),
@@ -68,7 +68,7 @@ enum Main:SyncTests
                 .init("(", color: nil),
                 .init(")", color: nil),
             ]
-            let declaration:Declaration<Never> = .init(expanded: expanded,
+            let declaration:DeclarationFragments<Never> = .init(expanded: expanded,
                 abridged:
                 [
                     .init("init", color: .keyword),
@@ -100,7 +100,7 @@ enum Main:SyncTests
                 .init("Int", color: .typeIdentifier),
                 .init(") ", color: nil),
             ]
-            let declaration:Declaration<Never> = .init(expanded: expanded,
+            let declaration:DeclarationFragments<Never> = .init(expanded: expanded,
                 abridged:
                 [
                     .init("init", color: .keyword),
@@ -143,7 +143,7 @@ enum Main:SyncTests
                 .init(":", color: nil),
                 .init("AnyObject", color: .keyword),
             ]
-            let declaration:Declaration<Never> = .init(expanded: expanded,
+            let declaration:DeclarationFragments<Never> = .init(expanded: expanded,
                 abridged:
                 [
                     .init("init", color: .keyword),

@@ -10,6 +10,7 @@ let package:Package = .init(
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
+        .library(name: "Fragments", targets: ["Fragments"]),
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
@@ -67,8 +68,15 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "SymbolGraphs"),
             ]),
+
+        .target(name: "Declarations", dependencies:
+            [
+                .target(name: "Availability"),
+                .target(name: "Fragments"),
+                .target(name: "Generics"),
+            ]),
         
-        .target(name: "Declarations"),
+        .target(name: "Fragments"),
 
         .target(name: "Generics"),
 
@@ -139,17 +147,19 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphParts", dependencies:
             [
+                .target(name: "Declarations"),
+                .target(name: "LexicalPaths"),
+                .target(name: "Repositories"),
+                .target(name: "SourceMaps"),
                 .target(name: "Symbols"),
-                .target(name: "SymbolGraphs"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
         
         .target(name: "SymbolGraphs", dependencies:
             [
-                .target(name: "Availability"),
+                .target(name: "Codelinks"),
                 .target(name: "Declarations"),
-                .target(name: "Generics"),
                 .target(name: "LexicalPaths"),
                 .target(name: "Repositories"),
                 .target(name: "SourceMaps"),
@@ -183,12 +193,12 @@ let package:Package = .init(
             ],
             path: "Tests/Codelinks"),
         
-        .executableTarget(name: "DeclarationsTests", dependencies:
+        .executableTarget(name: "FragmentsTests", dependencies:
             [
-                .target(name: "Declarations"),
+                .target(name: "Fragments"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/Declarations"),
+            path: "Tests/Fragments"),
         
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [

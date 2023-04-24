@@ -32,7 +32,7 @@ enum Main:SyncTests
                 
                 if  let tests:TestGroup = tests / "locations"
                 {
-                    for scalar:Compiler.Scalar in compiler.scalars.load()
+                    for scalar:Compiler.Scalar in compiler.scalars.load().local
                     {
                         if  let location:SourceLocation<FileIdentifier> = tests.expect(
                                 value: scalar.location)

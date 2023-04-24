@@ -3,7 +3,7 @@ import TraceableErrors
 extension Compiler
 {
     public
-    struct VertexError<Symbol>:Error where Symbol:Equatable & Sendable
+    struct VertexError:Error, Sendable
     {
         public
         let underlying:any Error

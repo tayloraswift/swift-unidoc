@@ -70,3 +70,10 @@ extension Linker.AddressTable
         }
     }
 }
+extension Linker.AddressTable
+{
+    subscript(identity:Address.Identity) -> Address?
+    {
+        self.addresses[identity]
+    }
+}

@@ -1,7 +1,7 @@
-extension Declaration
+extension DeclarationFragments
 {
     @frozen public
-    struct FragmentIterator<View> where View:DeclarationView
+    struct FilteringIterator<View> where View:DeclarationFragmentView
     {
         @usableFromInline internal
         var base:IndexingIterator<[DeclarationFragment<Symbol, DeclarationOverlay>]>
@@ -13,7 +13,7 @@ extension Declaration
         }
     }
 }
-extension Declaration.FragmentIterator:IteratorProtocol
+extension DeclarationFragments.FilteringIterator:IteratorProtocol
 {
     @inlinable public mutating
     func next() -> DeclarationFragment<Symbol, View.Color>?

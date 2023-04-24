@@ -1,24 +1,25 @@
+import SymbolGraphParts
 import TraceableErrors
 
 extension Compiler
 {
     public
-    struct EdgeError<Relationship>:Error, Sendable where Relationship:Sendable
+    struct EdgeError:Error, Sendable
     {
         public
-        let relationship:Relationship
+        let relationship:SymbolRelationship
         public
         let underlying:any Error
 
         public
-        init(underlying:any Error, in relationship:Relationship)
+        init(underlying:any Error, in relationship:SymbolRelationship)
         {
             self.underlying = underlying
             self.relationship = relationship
         }
     }
 }
-extension Compiler.EdgeError:Equatable where Relationship:Equatable
+extension Compiler.EdgeError:Equatable
 {
     public static
     func == (lhs:Self, rhs:Self) -> Bool

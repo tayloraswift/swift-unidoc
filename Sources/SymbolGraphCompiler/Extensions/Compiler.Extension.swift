@@ -1,3 +1,5 @@
+import LexicalPaths
+
 extension Compiler
 {
     @frozen public
@@ -23,18 +25,14 @@ extension Compiler
         public
         let signature:Signature
 
-        init(signature:Signature,
-            conformances:Set<Symbol.Scalar> = [],
-            features:Set<Symbol.Scalar> = [],
-            nested:Set<Symbol.Scalar> = [],
-            blocks:[Block] = [])
+        init(signature:Signature)
         {
             self.signature = signature
 
-            self.conformances = conformances
-            self.features = features
-            self.nested = nested
-            self.blocks = blocks
+            self.conformances = []
+            self.features = []
+            self.nested = []
+            self.blocks = []
         }
     }
 }

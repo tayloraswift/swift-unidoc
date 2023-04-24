@@ -1,5 +1,6 @@
 import Availability
 import Declarations
+import Fragments
 import Generics
 import JSONDecoding
 import LexicalPaths
@@ -12,18 +13,13 @@ struct SymbolDescription:Equatable, Sendable
     public
     let documentation:Documentation?
     public
-    let availability:Availability
+    let declaration:Declaration<Symbol.Scalar>
     public
     let interfaces:Interfaces?
     public
     let visibility:Visibility
     public
-    let fragments:Declaration<Symbol.Scalar>
-
-    public
     let `extension`:ExtensionContext
-    public
-    let generics:GenericSignature<Symbol.Scalar>
 
     /// The source location of this symbol, if known. The file string is the
     /// absolute path to the relevant source file, and starts with `file://`.
@@ -38,25 +34,21 @@ struct SymbolDescription:Equatable, Sendable
 
     private
     init(documentation:Documentation?,
-        availability:Availability,
+        declaration:Declaration<Symbol.Scalar>,
         interfaces:Interfaces?,
         visibility:Visibility,
-        fragments:Declaration<Symbol.Scalar>,
         extension:ExtensionContext,
-        generics:GenericSignature<Symbol.Scalar>,
         location:SourceLocation<String>?,
         phylum:Phylum,
         path:LexicalPath,
         usr:Symbol)
     {
         self.documentation = documentation
-        self.availability = availability
+        self.declaration = declaration
         self.interfaces = interfaces
         self.visibility = visibility
-        self.fragments = fragments
 
         self.extension = `extension`
-        self.generics = generics
 
         self.location = location
         self.phylum = phylum
@@ -111,7 +103,7 @@ extension SymbolDescription
             break
         }
         
-        let fragments:Declaration<Symbol.Scalar>
+        let fragments:DeclarationFragments<Symbol.Scalar>
         if  case .actor = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
@@ -150,12 +142,12 @@ extension SymbolDescription
 
         self.init(
             documentation: documentation.flatMap { $0.comment.isEmpty ? nil : $0 },
-            availability: availability,
+            declaration: .init(availability: availability,
+                fragments: fragments,
+                generics: generics),
             interfaces: interfaces,
             visibility: visibility,
-            fragments: fragments,
             extension: `extension`,
-            generics: generics,
             location: location,
             phylum: phylum,
             path: simplified,

@@ -1,22 +1,22 @@
-extension Declaration
+extension DeclarationFragments
 {
     @frozen public
     struct Abridged
     {
         public
-        let base:Declaration<Symbol>
+        let base:DeclarationFragments<Symbol>
 
         @inlinable internal
-        init(_ base:Declaration<Symbol>)
+        init(_ base:DeclarationFragments<Symbol>)
         {
             self.base = base
         }
     }
 }
-extension Declaration.Abridged:Sendable where Symbol:Sendable
+extension DeclarationFragments.Abridged:Sendable where Symbol:Sendable
 {
 }
-extension Declaration.Abridged:DeclarationView
+extension DeclarationFragments.Abridged:DeclarationFragmentView
 {
     @inlinable public static
     subscript(_ overlay:DeclarationOverlay) -> Bool?
