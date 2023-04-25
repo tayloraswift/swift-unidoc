@@ -1,3 +1,4 @@
+import SymbolGraphParts
 import TraceableErrors
 
 extension Compiler
@@ -9,13 +10,23 @@ extension Compiler
         let underlying:any Error
         public
         let symbol:Symbol
+        public
+        let phylum:SymbolPhylum
 
         public
-        init(underlying:any Error, in symbol:Symbol)
+        init(underlying:any Error, symbol:Symbol, phylum:SymbolPhylum)
         {
             self.underlying = underlying
             self.symbol = symbol
+            self.phylum = phylum
         }
+    }
+}
+extension Compiler.VertexError
+{
+    init(underlying:any Error, in description:SymbolDescription)
+    {
+        self.init(underlying: underlying, symbol: description.usr, phylum: description.phylum)
     }
 }
 extension Compiler.VertexError:Equatable
@@ -31,6 +42,6 @@ extension Compiler.VertexError:TraceableError
     public
     var notes:[String]
     {
-        ["While validating symbol \(self.symbol)"]
+        ["While validating symbol \(self.symbol) of phylum '\(self.phylum)'"]
     }
 }

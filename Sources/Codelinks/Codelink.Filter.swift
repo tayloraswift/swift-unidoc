@@ -22,30 +22,29 @@ extension Codelink.Filter
     public
     init?(suffix:Substring)
     {
-        //  Very similar to the `SymbolDescriptionType` enum in `SymbolDescriptions`,
-        //  except no extensions.
+        //  Very similar to the `SymbolPhylum` type, except no extensions.
         switch suffix
         {
-        case "swift.associatedtype":  self = .associatedtype
-        case "swift.enum":            self = .enum
-        case "swift.enum.case":       self = .case
-        case "swift.class":           self = .class
-        case "swift.func":            self = .func(.global)
-        case "swift.func.op":         self = .func(.default)
-        case "swift.var":             self = .var(.global)
-        case "swift.deinit":          return nil
-        case "swift.init":            return nil
-        case "swift.method":          self = .func(.instance)
-        case "swift.property":        self = .var(.instance)
-        case "swift.subscript":       self = .subscript(.instance)
-        case "swift.macro":           self = .macro
-        case "swift.protocol":        self = .protocol
-        case "swift.struct":          self = .struct
-        case "swift.typealias":       self = .typealias
-        case "swift.type.method":     self = .func(.type)
-        case "swift.type.property":   self = .var(.type)
-        case "swift.type.subscript":  self = .subscript(.type)
-        default:                return nil
+        case "swift.associatedtype":    self = .associatedtype
+        case "swift.enum":              self = .enum
+        case "swift.enum.case":         self = .case
+        case "swift.class":             self = .class
+        case "swift.func":              self = .func(.global)
+        case "swift.func.op":           self = .func(.default)
+        case "swift.var":               self = .var(.global)
+        case "swift.deinit":            return nil
+        case "swift.init":              return nil
+        case "swift.method":            self = .func(.instance)
+        case "swift.property":          self = .var(.instance)
+        case "swift.subscript":         self = .subscript(.instance)
+        case "swift.macro":             self = .macro
+        case "swift.protocol":          self = .protocol
+        case "swift.struct":            self = .struct
+        case "swift.typealias":         self = .typealias
+        case "swift.type.method":       self = .func(.type)
+        case "swift.type.property":     self = .var(.type)
+        case "swift.type.subscript":    self = .subscript(.type)
+        default:                        return nil
         }
     }
 }

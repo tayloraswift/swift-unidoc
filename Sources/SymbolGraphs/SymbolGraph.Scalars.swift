@@ -3,27 +3,32 @@ extension SymbolGraph
     @frozen public
     struct Scalars
     {
+        public
+        var symbols:SymbolTable<ScalarAddress>
+
         @usableFromInline internal
         var nodes:[ScalarNode]
 
-        init(nodes:[ScalarNode] = [])
+        init(symbols:SymbolTable<ScalarAddress> = .init(), nodes:[ScalarNode] = [])
         {
+            self.symbols = symbols
             self.nodes = nodes
         }
     }
 }
-extension SymbolGraph
+extension SymbolGraph.Scalars
 {
-    @frozen public
-    struct ScalarNode
+    @inlinable public mutating
+    func push(_ scalar:SymbolGraph.Scalar?, id:ScalarIdentifier) throws -> ScalarAddress
     {
-        var local:Scalar?
-        var extensions:[Extension]
+        self.nodes.append(.init(scalar))
+        return try self.symbols(id)
     }
 }
 extension SymbolGraph.Scalars
 {
-    subscript(local address:ScalarAddress) -> SymbolGraph.ScalarNode
+    @inlinable public
+    subscript(address:ScalarAddress) -> SymbolGraph.ScalarNode
     {
         _read
         {

@@ -1,3 +1,5 @@
+import SymbolGraphParts
+
 extension Compiler
 {
     public
@@ -18,6 +20,6 @@ extension Compiler.SymbolError:CustomStringConvertible
     public
     var description:String
     {
-        "Invalid symbol resolution '\(self.usr)'."
+        return "Invalid symbol resolution '\(self.usr)'."
     }
 }

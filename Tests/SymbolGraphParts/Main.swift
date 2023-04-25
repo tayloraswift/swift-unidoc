@@ -1,6 +1,7 @@
 import Generics
 import Repositories
 import SymbolGraphParts
+import Symbolics
 import Symbols
 import System
 import Testing
@@ -15,7 +16,7 @@ enum Main:SyncTests
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/Symbolgraphs/Phyla.symbols.json")
         {
-            for (symbol, phylum):([String], SymbolDescription.Phylum) in
+            for (symbol, phylum):([String], ScalarPhylum) in
             [
                 (["Actor"],                         .actor),
                 (["Class"],                         .class),
@@ -32,10 +33,10 @@ enum Main:SyncTests
                     let tests:TestGroup = tests / name,
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
                 {
-                    tests.expect(symbol.phylum ==? phylum)
+                    tests.expect(symbol.phylum ==? .scalar(phylum))
                 }
             }
-            for (symbol, phylum, name):([String], SymbolDescription.Phylum, String) in
+            for (symbol, phylum, name):([String], ScalarPhylum, String) in
             [
                 (["Func"],                      .func(nil),             "global-func"),
                 (["Struct", "instanceMethod"],  .func(.instance),       "instance-func"),
@@ -64,23 +65,23 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / name,
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
                 {
-                    tests.expect(symbol.phylum ==? phylum)
+                    tests.expect(symbol.phylum ==? .scalar(phylum))
                 }
             }
 
             if  let tests:TestGroup = tests / "deinit"
             {
-                tests.expect(nil: part.symbols.first { $0.phylum == .deinitializer })
+                tests.expect(nil: part.symbols.first { $0.phylum == .scalar(.deinitializer) })
             }
         }
         if  let tests:TestGroup = tests / "phyla" / "extension",
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
         {
-            for (symbol, phylum):([String], SymbolDescription.Phylum) in
+            for (symbol, phylum):([String], SymbolPhylum) in
             [
-                (["Int"], .extension),
-                (["Int", "AssociatedType"], .typealias),
+                (["Int"], .block),
+                (["Int", "AssociatedType"], .scalar(.typealias)),
             ]
             {
                 if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
