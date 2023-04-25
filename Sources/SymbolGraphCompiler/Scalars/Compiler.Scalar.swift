@@ -79,25 +79,10 @@ extension Compiler.Scalar
         as resolution:__owned Symbol.Scalar,
         in context:__shared Compiler.SourceContext) throws
     {
-        let phylum:ScalarPhylum
-        switch description.phylum
+        guard case .scalar(let phylum) = description.phylum
+        else
         {
-        case .actor:                        phylum = .actor
-        case .associatedtype:               phylum = .associatedtype
-        case .case:                         phylum = .case
-        case .class:                        phylum = .class
-        case .deinitializer:                phylum = .deinitializer
-        case .enum:                         phylum = .enum
-        case .func(let objectivity):        phylum = .func(objectivity)
-        case .initializer:                  phylum = .initializer
-        case .protocol:                     phylum = .protocol
-        case .subscript(let objectivity):   phylum = .subscript(objectivity)
-        case .operator:                     phylum = .operator
-        case .struct:                       phylum = .struct
-        case .typealias:                    phylum = .typealias
-        case .var(let objectivity):         phylum = .var(objectivity)
-        case .extension, .macro:
-            throw Compiler.PhylumError.unsupported(description.phylum)
+            throw Compiler.SymbolError.init(invalid: .scalar(resolution))
         }
 
         self.init(declaration: description.declaration,

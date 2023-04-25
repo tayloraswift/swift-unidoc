@@ -3,13 +3,17 @@ struct SymbolGraph:Sendable
 {
     public
     let metadata:Metadata
+
     public
     var scalars:Scalars
+    public
+    var files:Files
 
     public
     init(metadata:Metadata)
     {
         self.metadata = metadata
         self.scalars = .init()
+        self.files = .init()
     }
 }

@@ -11,6 +11,11 @@ import Symbols
 struct SymbolDescription:Equatable, Sendable
 {
     public
+    let usr:Symbol
+    public
+    let phylum:SymbolPhylum
+
+    public
     let documentation:Documentation?
     public
     let declaration:Declaration<Symbol.Scalar>
@@ -26,22 +31,18 @@ struct SymbolDescription:Equatable, Sendable
     public
     let location:SourceLocation<String>?
     public
-    let phylum:Phylum
-    public
     let path:LexicalPath
-    public
-    let usr:Symbol
 
     private
-    init(documentation:Documentation?,
+    init(_ usr:Symbol,
+        phylum:SymbolPhylum,
+        documentation:Documentation?,
         declaration:Declaration<Symbol.Scalar>,
         interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
         location:SourceLocation<String>?,
-        phylum:Phylum,
-        path:LexicalPath,
-        usr:Symbol)
+        path:LexicalPath)
     {
         self.documentation = documentation
         self.declaration = declaration
@@ -59,7 +60,9 @@ struct SymbolDescription:Equatable, Sendable
 extension SymbolDescription
 {
     private
-    init(documentation:Documentation?,
+    init(_ usr:Symbol,
+        phylum:SymbolPhylum,
+        documentation:Documentation?,
         availability:Availability,
         interfaces:Interfaces?,
         visibility:Visibility,
@@ -70,11 +73,9 @@ extension SymbolDescription
         extension:ExtensionContext,
         generics:GenericSignature<Symbol.Scalar>,
         location:SourceLocation<String>?,
-        phylum:Phylum,
-        path:LexicalPath,
-        usr:Symbol)
+        path:LexicalPath)
     {
-        var phylum:Phylum = phylum
+        var phylum:SymbolPhylum = phylum
 
         fragments:
         for fragment:DeclarationFragment<Symbol.Scalar, DeclarationFragmentClass?>
@@ -84,16 +85,16 @@ extension SymbolDescription
             {
             //  Heuristic for inferring actor types
             case "actor":
-                phylum = .actor
+                phylum = .scalar(.actor)
         
             //  Heuristic for inferring class members
             case "class":
                 switch phylum
                 {
-                case .func(.static):        phylum = .func(.class)
-                case .subscript(.static):   phylum = .subscript(.class)
-                case .var(.static):         phylum = .var(.class)
-                default:                    break
+                case .scalar(.func(.static)):       phylum = .scalar(.func(.class))
+                case .scalar(.subscript(.static)):  phylum = .scalar(.subscript(.class))
+                case .scalar(.var(.static)):        phylum = .scalar(.var(.class))
+                default:                            break
                 }
             
             default:
@@ -104,7 +105,7 @@ extension SymbolDescription
         }
         
         let fragments:DeclarationFragments<Symbol.Scalar>
-        if  case .actor = phylum
+        if  case .scalar(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature
@@ -140,7 +141,8 @@ extension SymbolDescription
             simplified = path
         }
 
-        self.init(
+        self.init(usr,
+            phylum: phylum,
             documentation: documentation.flatMap { $0.comment.isEmpty ? nil : $0 },
             declaration: .init(availability: availability,
                 fragments: fragments,
@@ -149,9 +151,7 @@ extension SymbolDescription
             visibility: visibility,
             extension: `extension`,
             location: location,
-            phylum: phylum,
-            path: simplified,
-            usr: usr)
+            path: simplified)
     }
 }
 extension SymbolDescription:JSONObjectDecodable
@@ -205,7 +205,14 @@ extension SymbolDescription:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        self.init(
+        self.init(try json[.identifier].decode(using: CodingKeys.Identifier.self)
+            {
+                try $0[.precise].decode()
+            },
+            phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
+            {
+                try $0[.identifier].decode()
+            },
             documentation: try json[.documentation]?.decode(),
             availability: try json[.availability]?.decode() ?? [:],
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
@@ -234,14 +241,6 @@ extension SymbolDescription:JSONObjectDecodable
                     return nil
                 }
             },
-            phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
-            {
-                try $0[.identifier].decode()
-            },
-            path: try json[.path].decode(),
-            usr: try json[.identifier].decode(using: CodingKeys.Identifier.self)
-            {
-                try $0[.precise].decode()
-            })
+            path: try json[.path].decode())
     }
 }

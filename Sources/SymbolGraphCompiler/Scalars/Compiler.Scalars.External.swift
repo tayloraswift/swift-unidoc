@@ -15,12 +15,12 @@ extension Compiler.Scalars
 extension Compiler.Scalars.External
 {
     @inlinable public
-    subscript(feature scalar:Symbol.Scalar) -> String?
+    subscript(feature scalar:Symbol.Scalar) -> (name:String, phylum:ScalarPhylum)?
     {
         switch self.nominations[scalar]
         {
-        case .feature(let name)?:   return name
-        case .heir?, nil:           return nil
+        case .feature(let name, let phylum)?:   return (name, phylum)
+        case .heir?, nil:                       return nil
         }
     }
     @inlinable public
@@ -28,8 +28,8 @@ extension Compiler.Scalars.External
     {
         switch self.nominations[scalar]
         {
-        case .feature?, nil:        return nil
-        case .heir(let path)?:      return path
+        case .feature?, nil:    return nil
+        case .heir(let path)?:  return path
         }
     }
 }

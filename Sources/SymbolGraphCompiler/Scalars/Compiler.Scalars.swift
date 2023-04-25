@@ -44,10 +44,19 @@ extension Compiler.Scalars
 extension Compiler.Scalars
 {
     mutating
-    func include(vector resolution:Symbol.Vector, with path:__owned LexicalPath) throws
+    func include(vector resolution:Symbol.Vector, with description:SymbolDescription) throws
     {
-        ({ _ in })(&self.entries[resolution.heir,    default: .nominated(.heir(path.prefix))])
-        ({ _ in })(&self.entries[resolution.feature, default: .nominated(.feature(path.last))])
+        guard case .scalar(let phylum) = description.phylum
+        else
+        {
+            throw Compiler.SymbolError.init(invalid: .vector(resolution))
+        }
+
+        ({ _ in })(&self.entries[resolution.heir,
+            default: .nominated(.heir(description.path.prefix))])
+        
+        ({ _ in })(&self.entries[resolution.feature,
+            default: .nominated(.feature(description.path.last, phylum))])
     }
     mutating
     func include(scalar resolution:Symbol.Scalar,

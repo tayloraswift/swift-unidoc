@@ -36,10 +36,13 @@ extension Compiler.Extensions
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
-        guard case .extension = description.phylum
+        guard case .block = description.phylum
         else
         {
-            throw Compiler.PhylumError.unsupported(description.phylum)
+            //  One way of looking at this is the symbol has the wrong phylum.
+            //  But since we use the USR to infer symbol phylum, another
+            /// explanation is that the symbol has a wrong USR.
+            throw Compiler.SymbolError.init(invalid: .block(block))
         }
 
         let group:Compiler.ExtensionReference =

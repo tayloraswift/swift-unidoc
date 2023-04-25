@@ -63,7 +63,7 @@ extension Compiler
                         //  not tell us anything useful their generic/extension contexts.)
                         //  But we need to remember their names to perform codelink
                         //  resolution.
-                        try self.scalars.include(vector: vector, with: symbol.path)
+                        try self.scalars.include(vector: vector, with: symbol)
                     
                     case (.scalar(let scalar), included: let included):
                         included ?
@@ -84,7 +84,7 @@ extension Compiler
                 }
                 catch let error
                 {
-                    throw VertexError.init(underlying: error, in: symbol.usr)
+                    throw VertexError.init(underlying: error, in: symbol)
                 }
             }
         }
