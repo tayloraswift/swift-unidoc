@@ -8,15 +8,13 @@ extension Compiler.Extension
         /// The type extended by the relevant extension group.
         public
         let type:Symbol.Scalar
-        /// The generic constraints of the relevant this extension group.
-        /// An empty array indicates an unconstrained extension, while
-        /// nil indicates an unknown or inapplicable generic context.
+        /// The generic constraints of the relevant extension group.
+        /// An empty array represents an unconstrained extension.
         public
-        let conditions:[GenericConstraint<Symbol.Scalar>]?
+        let conditions:[GenericConstraint<Symbol.Scalar>]
 
         public
-        init(_ type:Symbol.Scalar,
-            where conditions:[GenericConstraint<Symbol.Scalar>]?)
+        init(_ type:Symbol.Scalar, where conditions:[GenericConstraint<Symbol.Scalar>])
         {
             self.type = type
             self.conditions = conditions
@@ -36,17 +34,9 @@ extension Compiler.Extension.Signature:Comparable
         {
             return false
         }
-
-        switch (lhs.conditions, rhs.conditions)
+        else
         {
-        case (_, nil):
-            return false
-        
-        case (nil, _?):
-            return true
-        
-        case (let lhs?, let rhs?):
-            return lhs.lexicographicallyPrecedes(rhs)
+            return lhs.conditions.lexicographicallyPrecedes(rhs.conditions)
         }
     }
 }

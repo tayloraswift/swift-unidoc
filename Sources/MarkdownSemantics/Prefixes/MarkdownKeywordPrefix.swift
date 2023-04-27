@@ -33,36 +33,36 @@ enum MarkdownKeywordPrefix:String, Equatable, Hashable, Sendable
 }
 extension MarkdownKeywordPrefix
 {
-    var context:MarkdownBytecode.Context
+    func callAsFunction(_ discussion:__owned [MarkdownTree.Block]) -> MarkdownTree.Block
     {
         switch self
         {
-        case .attention:        return .attention
-        case .author:           return .author
-        case .authors:          return .authors
-        case .bug:              return .bug
-        case .complexity:       return .complexity
-        case .copyright:        return .copyright
-        case .date:             return .date
-        case .experiment:       return .experiment
-        case .important:        return .important
-        case .invariant:        return .invariant
-        case .mutating:         return .mutating
-        case .nonmutating:      return .nonmutating
-        case .note:             return .note
-        case .parameters:       return .parameters
-        case .postcondition:    return .postcondition
-        case .precondition:     return .precondition
-        case .remark:           return .remark
-        case .requires:         return .requires
-        case .returns:          return .returns
-        case .seealso:          return .seealso
-        case .since:            return .since
-        case .throws:           return .throws
-        case .tip:              return .tip
-        case .todo:             return .todo
-        case .version:          return .version
-        case .warning:          return .warning
+        case .attention:        return MarkdownDocumentation.Attention.init(discussion)
+        case .author:           return MarkdownDocumentation.Author.init(discussion)
+        case .authors:          return MarkdownDocumentation.Authors.init(discussion)
+        case .bug:              return MarkdownDocumentation.Bug.init(discussion)
+        case .complexity:       return MarkdownDocumentation.Complexity.init(discussion)
+        case .copyright:        return MarkdownDocumentation.Copyright.init(discussion)
+        case .date:             return MarkdownDocumentation.Date.init(discussion)
+        case .experiment:       return MarkdownDocumentation.Experiment.init(discussion)
+        case .important:        return MarkdownDocumentation.Important.init(discussion)
+        case .invariant:        return MarkdownDocumentation.Invariant.init(discussion)
+        case .mutating:         return MarkdownDocumentation.Mutating.init(discussion)
+        case .nonmutating:      return MarkdownDocumentation.Nonmutating.init(discussion)
+        case .note:             return MarkdownDocumentation.Note.init(discussion)
+        case .parameters:       return MarkdownDocumentation.Parameters.init(discussion)
+        case .postcondition:    return MarkdownDocumentation.Postcondition.init(discussion)
+        case .precondition:     return MarkdownDocumentation.Precondition.init(discussion)
+        case .remark:           return MarkdownDocumentation.Remark.init(discussion)
+        case .requires:         return MarkdownDocumentation.Requires.init(discussion)
+        case .returns:          return MarkdownDocumentation.Returns.init(discussion)
+        case .seealso:          return MarkdownDocumentation.SeeAlso.init(discussion)
+        case .since:            return MarkdownDocumentation.Since.init(discussion)
+        case .throws:           return MarkdownDocumentation.Throws.init(discussion)
+        case .tip:              return MarkdownDocumentation.Tip.init(discussion)
+        case .todo:             return MarkdownDocumentation.ToDo.init(discussion)
+        case .version:          return MarkdownDocumentation.Version.init(discussion)
+        case .warning:          return MarkdownDocumentation.Warning.init(discussion)
         }
     }
 }

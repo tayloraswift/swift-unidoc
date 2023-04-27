@@ -12,10 +12,10 @@ struct MarkdownDocumentation
     public
     var `throws`:Throws?
     public
-    var article:[Block]
+    var article:[MarkdownTree.Block]
 
     public
-    init(parameters:Parameters?, returns:Returns?, throws:Throws?, article:[Block])
+    init(parameters:Parameters?, returns:Returns?, throws:Throws?, article:[MarkdownTree.Block])
     {
         self.parameters = parameters
         self.returns = returns
@@ -26,7 +26,16 @@ struct MarkdownDocumentation
 extension MarkdownDocumentation
 {
     public
-    init(from tree:__shared MarkdownTree)
+    init(parsing string:String, as flavor:(some MarkdownFlavor).Type)
+    {
+        self.init(tree: .init(parsing: string, as: flavor))
+    }
+    /// This is private, because instances of this type still hold references
+    /// to blocks in the tree after the init returns. So we should encourage
+    /// callers to construct instances of this type such that instances of this
+    /// type own the tree nodes.
+    private
+    init(tree:__shared MarkdownTree)
     {
         var references:[Codelink: UInt32] = [:]
         var codelinks:[Codelink] = []
@@ -50,7 +59,7 @@ extension MarkdownDocumentation
         var parameters:(discussion:[MarkdownTree.Block], list:[Parameter]) = ([], [])
         var returns:[MarkdownTree.Block] = []
         var `throws`:[MarkdownTree.Block] = []
-        var article:[Block] = []
+        var article:[MarkdownTree.Block] = []
 
         for block:MarkdownTree.Block in tree.blocks
         {
@@ -98,20 +107,20 @@ extension MarkdownDocumentation
                         `throws` += item.elements
 
                     case .keywords(let aside):
-                        article.append(.semantic(aside, item.elements))
+                        article.append(aside(item.elements))
                     }
                 }
                 if !items.isEmpty
                 {
                     list.elements = items
-                    article.append(.regular(list))
+                    article.append(list)
                 }
             
             case let quote as MarkdownTree.BlockQuote:
                 guard let prefix:MarkdownBlockPrefix = .extract(from: &quote.elements)
                 else
                 {
-                    article.append(.regular(quote))
+                    article.append(quote)
                     continue
                 }
                 switch prefix
@@ -129,19 +138,20 @@ extension MarkdownDocumentation
                 case .keywords(.throws):
                     `throws` += quote.elements
 
-                case .keywords(let keywords):
-                    article.append(.semantic(keywords, quote.elements))
+                case .keywords(let aside):
+                    article.append(aside(quote.elements))
                 }
             
             case let block:
-                article.append(.regular(block))
+                article.append(block)
             }
         }
     
         self.init(
-            parameters: .init(discussion: parameters.discussion, list: parameters.list),
-            returns: .init(returns),
-            throws: .init(`throws`),
+            parameters: parameters.discussion.isEmpty && parameters.list.isEmpty ?
+                nil : .init(parameters.discussion, list: parameters.list),
+            returns: returns.isEmpty ? nil : .init(returns),
+            throws: `throws`.isEmpty ? nil : .init(`throws`),
             article: article)
     }
 }
@@ -150,9 +160,9 @@ extension MarkdownDocumentation
     public
     func emit(into binary:inout MarkdownBinary)
     {
-        let discussion:ArraySlice<Block>
+        let discussion:ArraySlice<MarkdownTree.Block>
 
-        if  case .regular(let paragraph as MarkdownTree.Paragraph)? = self.article.first
+        if  case (let paragraph as MarkdownTree.Paragraph)? = self.article.first
         {
             paragraph.emit(into: &binary)
             discussion = self.article.dropFirst()
@@ -168,7 +178,7 @@ extension MarkdownDocumentation
         self.returns?.emit(into: &binary)
         self.throws?.emit(into: &binary)
 
-        for block:Block in discussion
+        for block:MarkdownTree.Block in discussion
         {
             block.emit(into: &binary)
         }

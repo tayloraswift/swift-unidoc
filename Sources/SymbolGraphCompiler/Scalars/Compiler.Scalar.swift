@@ -36,7 +36,14 @@ extension Compiler
         ///
         /// The compiler does not check for inheritance cycles.
         public internal(set)
-        var superforms:[Symbol.Scalar]
+        var superforms:Set<Symbol.Scalar>
+        /// The *unqualified* features inherited by this scalar. Avoid adding
+        /// features here; if the feature’s extension constraints are known,
+        /// add them to an appropriate ``ExtensionReference`` instead.
+        ///
+        /// This field only exists because of an upstream bug in SymbolGraphGen.
+        public internal(set)
+        var features:Set<Symbol.Scalar>
         public internal(set)
         var origin:Symbol.Scalar?
 
@@ -59,6 +66,7 @@ extension Compiler
 
             self.virtuality = visibility == .open ? .open : nil
             self.superforms = []
+            self.features = []
             self.origin = nil
 
             self.comment = ""

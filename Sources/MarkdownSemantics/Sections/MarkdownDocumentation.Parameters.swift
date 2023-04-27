@@ -3,44 +3,53 @@ import MarkdownTrees
 
 extension MarkdownDocumentation
 {
-    @frozen public
-    struct Parameters
+    public final
+    class Parameters:MarkdownTree.Block
     {
         public
         let discussion:[MarkdownTree.Block]
         public
-        let list:[Parameter]
+        let list:[MarkdownDocumentation.Parameter]
 
         @inlinable public
-        init?(discussion:[MarkdownTree.Block], list:[Parameter])
+        init(_ discussion:[MarkdownTree.Block], list:[MarkdownDocumentation.Parameter] = [])
         {
-            if  discussion.isEmpty, list.isEmpty
-            {
-                return nil
-            }
             self.discussion = discussion
             self.list = list
         }
-    }
-}
-extension MarkdownDocumentation.Parameters
-{
-    public
-    func emit(into binary:inout MarkdownBinary)
-    {
-        binary[.parameters]
+
+        /// Recursively calls ``MarkdownTree.outline(by:)`` for each block
+        /// in this parameter list’s discussion, and each constituent
+        /// parameter.
+        public override
+        func outline(by register:(String) throws -> UInt32?) rethrows
         {
             for block:MarkdownTree.Block in self.discussion
             {
-                block.emit(into: &$0)
+                try block.outline(by: register)
             }
-            if !self.list.isEmpty
+            for parameter:Parameter in self.list
             {
-                $0[.dl]
+                try parameter.outline(by: register)
+            }
+        }
+        public override
+        func emit(into binary:inout MarkdownBinary)
+        {
+            binary[.parameters]
+            {
+                for block:MarkdownTree.Block in self.discussion
                 {
-                    for parameter:MarkdownDocumentation.Parameter in self.list
+                    block.emit(into: &$0)
+                }
+                if !self.list.isEmpty
+                {
+                    $0[.dl]
                     {
-                        parameter.emit(into: &$0)
+                        for parameter:MarkdownDocumentation.Parameter in self.list
+                        {
+                            parameter.emit(into: &$0)
+                        }
                     }
                 }
             }

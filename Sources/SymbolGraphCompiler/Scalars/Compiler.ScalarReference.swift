@@ -43,7 +43,19 @@ extension Compiler.ScalarReference
 }
 extension Compiler.ScalarReference
 {
-    final
+    /// Assigns an origin to this scalar object.
+    func assign(origin:Symbol.Scalar) throws
+    {
+        switch self.value.origin
+        {
+        case nil, origin?:
+            self.value.origin = origin
+        
+        case let other?:
+            throw Compiler.OriginError.conflict(with: other)
+        }
+    }
+    /// Assigns a lexical scope to this scalar object.
     func assign(nesting:some NestingRelationship) throws
     {
         guard nesting.validate(source: self.value.phylum)
@@ -70,8 +82,14 @@ extension Compiler.ScalarReference
             try self.assign(origin: origin)
         }
     }
-    final
-    func append<Superform>(superform:Superform) throws
+    /// Adds a superform to this scalar object.
+    ///
+    /// Each scalar can only accept a single type of superform. For example, if
+    /// a scalar is the source of a ``SymbolRelationship DefaultImplementation``
+    /// relationship, it can receive additional superforms of that type, but it
+    /// cannot receive a ``SymbolRelationship Override``, because a scalar cannot
+    /// be a default implementation and a protocol requirement at the same time.
+    func add<Superform>(superform:Superform) throws
         where Superform:SuperformRelationship
     {
         guard superform.validate(source: self.value.phylum)
@@ -83,7 +101,7 @@ extension Compiler.ScalarReference
         switch self.superforms
         {
         case nil, (is Superform.Type)?:
-            self.value.superforms.append(superform.target)
+            self.value.superforms.insert(superform.target)
             self.superforms = Superform.self
         
         case let type?:
@@ -94,16 +112,12 @@ extension Compiler.ScalarReference
             try self.assign(origin: origin)
         }
     }
-    final
-    func assign(origin:Symbol.Scalar) throws
+    /// Adds an *unqualified* feature to this scalar object.
+    ///
+    /// If you know the feature’s extension constraints, add it
+    /// to an appropriate ``ExtensionReference`` instead.
+    func add(feature:Symbol.Scalar, where unknown:Never?)
     {
-        switch self.value.origin
-        {
-        case nil, origin?:
-            self.value.origin = origin
-        
-        case let other?:
-            throw Compiler.OriginError.conflict(with: other)
-        }
+        self.value.features.insert(feature)
     }
 }

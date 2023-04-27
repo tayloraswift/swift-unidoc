@@ -165,7 +165,7 @@ extension Compiler
             
             //  Generate an implicit, internal extension for this requirement,
             //  if one does not already exist.
-            self.extensions[`protocol`.resolution, where: []].insert(
+            self.extensions[`protocol`.resolution, where: []].add(
                 nested: requirement.resolution)
         }
     }
@@ -186,26 +186,27 @@ extension Compiler
                 //  Nothing can be a member of a vector symbol.
                 throw SymbolError.init(invalid: relationship.target)
             
-            case .scalar(let type):
+            case .scalar(let heir):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
                 //  we should never see an external type reference here.
-                guard let type:ScalarReference = try self.scalars(internal: type)
+                guard let heir:ScalarReference = try self.scalars(internal: heir)
                 else
                 {
                     return // Feature is hidden.
                 }
                 //  If the membership target is a scalar resolution, the self type
                 //  should match the target type.
-                if  type.resolution == vector.heir
+                if  heir.resolution == vector.heir
                 {
                     //  We don’t know what extension the feature should go in, because
-                    //  it may come from a protocol extension we do not know about. So
-                    //  we put it in the “unknown” extension.
-                    self.extensions[type.resolution, where: nil].insert(feature: feature)
+                    //  we would need to know the protocol it is a member of, and look
+                    //  up the generic constraints of the inheriting type’s conformance
+                    //  to that protocol. We can do the second thing, but not the first.
+                    heir.add(feature: feature, where: nil)
                 }
                 else
                 {
-                    throw FeatureError.init(invalid: type.resolution)
+                    throw FeatureError.init(invalid: heir.resolution)
                 }
             
             case .block(let block):
@@ -213,7 +214,7 @@ extension Compiler
                 let group:ExtensionReference = try self.extensions.named(block)
                 if  group.extendee == vector.heir
                 {
-                    group.insert(feature: feature)
+                    group.add(feature: feature)
                 }
                 else
                 {
@@ -243,16 +244,16 @@ extension Compiler
                     try member.assign(nesting: relationship)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
-                    self.extensions[type.resolution, where: member.conditions].insert(
+                    self.extensions[type.resolution, where: member.conditions].add(
                         nested: member.resolution)
                 }
 
             case .block(let block):
                 let group:ExtensionReference = try self.extensions.named(block)
-                if case member.conditions? = group.conditions
+                if  group.conditions == member.conditions
                 {
                     try member.assign(nesting: relationship)
-                    group.insert(nested: member.resolution)
+                    group.add(nested: member.resolution)
                 }
                 else
                 {
@@ -308,14 +309,14 @@ extension Compiler
             //  Look up the extension associated with this block name.
             group = try self.extensions.named(block)
 
-            guard case conformance.conditions? = group.conditions
+            guard group.conditions == conformance.conditions
             else
             {
                 throw Extension.SignatureError.init(expected: group.signature)
             }
         }
 
-        group.insert(conformance: `protocol`)
+        group.add(conformance: `protocol`)
     }
     private mutating
     func insert(_ relationship:some SuperformRelationship) throws
@@ -328,7 +329,7 @@ extension Compiler
         /// internal symbols.
         if  let subform:ScalarReference = try self.scalars(internal: relationship.source)
         {
-            try subform.append(superform: relationship)
+            try subform.add(superform: relationship)
         }
     }
 }

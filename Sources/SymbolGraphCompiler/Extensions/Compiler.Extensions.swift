@@ -6,10 +6,12 @@ extension Compiler
     public
     struct Extensions
     {
+        /// Extensions indexed by signature.
         private
         var groups:[Extension.Signature: ExtensionReference]
-        /// Extensions with symbol names. Each extension may have many
-        /// names they can be referred to as.
+        /// Extensions indexed by block symbol. Extensions are made up of
+        /// many constituent extension blocks, so multiple block symbols can
+        /// point to the same extension.
         private
         var named:[Symbol.Block: ExtensionReference]
 
@@ -76,7 +78,7 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     subscript(extended:Symbol.Scalar,
-        where conditions:[GenericConstraint<Symbol.Scalar>]?) -> Compiler.ExtensionReference
+        where conditions:[GenericConstraint<Symbol.Scalar>]) -> Compiler.ExtensionReference
     {
         mutating get
         {

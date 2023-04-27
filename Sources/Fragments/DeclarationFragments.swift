@@ -13,7 +13,14 @@ struct DeclarationFragments<Symbol>:Hashable, Equatable where Symbol:Hashable
 extension DeclarationFragments:Sendable where Symbol:Sendable
 {
 }
-
+extension DeclarationFragments
+{
+    @inlinable public
+    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> DeclarationFragments<T>
+    {
+        .init(fragments: try self.fragments.map { try $0.map(transform) })
+    }
+}
 extension DeclarationFragments
 {
     @inlinable public

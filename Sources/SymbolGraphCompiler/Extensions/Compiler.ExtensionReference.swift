@@ -21,22 +21,22 @@ extension Compiler.ExtensionReference
     }
     var extendee:Symbol.Scalar
     {
-        self.value.signature.type
+        self.value.extendee
     }
-    var conditions:[GenericConstraint<Symbol.Scalar>]?
+    var conditions:[GenericConstraint<Symbol.Scalar>]
     {
-        self.value.signature.conditions
+        self.value.conditions
     }
 
-    func insert(conformance:Symbol.Scalar)
+    func add(conformance:Symbol.Scalar)
     {
         self.value.conformances.insert(conformance)
     }
-    func insert(feature:Symbol.Scalar)
+    func add(feature:Symbol.Scalar)
     {
         self.value.features.insert(feature)
     }
-    func insert(nested:Symbol.Scalar)
+    func add(nested:Symbol.Scalar)
     {
         self.value.nested.insert(nested)
     }

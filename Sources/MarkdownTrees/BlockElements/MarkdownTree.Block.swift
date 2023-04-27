@@ -8,7 +8,7 @@ extension MarkdownTree
     /// This base class refines the requirements of `MarkdownElements`
     /// with non-mutating signatures, which is useful for structural
     /// markdown algorithms.
-    public
+    open
     class Block:MarkdownElement
     {
         @inlinable public
@@ -16,12 +16,12 @@ extension MarkdownTree
         {
         }
         /// Does nothing.
-        public
+        open
         func outline(by _:(_ symbol:String) throws -> UInt32?) rethrows
         {
         }
         /// Emits nothing.
-        public
+        open
         func emit(into _:inout MarkdownBinary)
         {
         }

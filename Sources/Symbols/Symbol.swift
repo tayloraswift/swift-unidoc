@@ -55,4 +55,3 @@ extension Symbol:LosslessStringConvertible
         }
     }
 }
-
