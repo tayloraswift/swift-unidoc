@@ -2,7 +2,7 @@ import MarkdownABI
 
 extension MarkdownTree
 {
-    public
+    open
     class BlockContainer<Element>:Block where Element:MarkdownElement
     {
         public final
@@ -25,7 +25,7 @@ extension MarkdownTree
             }
         }
         /// Emits the elements in this container, with no framing.
-        public override
+        open override
         func emit(into binary:inout MarkdownBinary)
         {
             for element:Element in self.elements

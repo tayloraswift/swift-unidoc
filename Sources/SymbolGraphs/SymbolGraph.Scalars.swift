@@ -7,9 +7,9 @@ extension SymbolGraph
         var symbols:SymbolTable<ScalarAddress>
 
         @usableFromInline internal
-        var nodes:[ScalarNode]
+        var nodes:[Node]
 
-        init(symbols:SymbolTable<ScalarAddress> = .init(), nodes:[ScalarNode] = [])
+        init(symbols:SymbolTable<ScalarAddress> = .init(), nodes:[Node] = [])
         {
             self.symbols = symbols
             self.nodes = nodes
@@ -28,7 +28,7 @@ extension SymbolGraph.Scalars
 extension SymbolGraph.Scalars
 {
     @inlinable public
-    subscript(address:ScalarAddress) -> SymbolGraph.ScalarNode
+    subscript(address:ScalarAddress) -> Node
     {
         _read
         {
@@ -37,6 +37,30 @@ extension SymbolGraph.Scalars
         _modify
         {
             yield &self.nodes[.init(address.value)]
+        }
+    }
+    @inlinable public
+    subscript(address:ScalarAddress) -> SymbolGraph.Scalar?
+    {
+        _read
+        {
+            yield  self[address].local
+        }
+        _modify
+        {
+            yield &self[address].local
+        }
+    }
+    @inlinable public
+    subscript(address:ScalarAddress, extension:Int) -> SymbolGraph.Extension
+    {
+        _read
+        {
+            yield  self[address].extensions[`extension`]
+        }
+        _modify
+        {
+            yield &self[address].extensions[`extension`]
         }
     }
 }

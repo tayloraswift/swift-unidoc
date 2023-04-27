@@ -8,11 +8,12 @@ import Testing
 enum Main:SyncTests
 {
     private static
-    func run(tests:TestGroup, markdown:MarkdownTree, expected:String)
+    func run(tests:TestGroup, markdown:String, expected:String)
     {
         tests.do
         {
-            let documentation:MarkdownDocumentation = .init(from: markdown)
+            let documentation:MarkdownDocumentation = .init(parsing: markdown,
+                as: SwiftFlavoredMarkdown.self)
             let binary:MarkdownBinary = .init(from: documentation)
             let html:HTML = try .init
             {

@@ -1,3 +1,4 @@
+import Generics
 import LexicalPaths
 
 extension Compiler
@@ -34,5 +35,18 @@ extension Compiler
             self.nested = []
             self.blocks = []
         }
+    }
+}
+extension Compiler.Extension
+{
+    @inlinable public
+    var extendee:Symbol.Scalar
+    {
+        self.signature.type
+    }
+    @inlinable public
+    var conditions:[GenericConstraint<Symbol.Scalar>]
+    {
+        self.signature.conditions
     }
 }

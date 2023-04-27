@@ -4,34 +4,29 @@ import MarkdownTrees
 
 extension MarkdownDocumentation
 {
-    @frozen public
-    struct Parameter
+    public final
+    class Parameter:MarkdownTree.BlockContainer<MarkdownTree.Block>
     {
-        public
-        var elements:[MarkdownTree.Block]
         public
         let name:String
 
         @inlinable public
         init(elements:[MarkdownTree.Block], name:String)
         {
-            self.elements = elements
             self.name = name
+            super.init(elements)
+        }
+        public override
+        func emit(into binary:inout MarkdownBinary)
+        {
+            binary[.dt] = self.name
+            binary[.dd]
+            {
+                super.emit(into: &$0)
+            }
         }
     }
 }
 extension MarkdownDocumentation.Parameter
 {
-    public
-    func emit(into binary:inout MarkdownBinary)
-    {
-        binary[.dt] = self.name
-        binary[.dd]
-        {
-            for block:MarkdownTree.Block in self.elements
-            {
-                block.emit(into: &$0)
-            }
-        }
-    }
 }

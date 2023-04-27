@@ -175,6 +175,8 @@ let package:Package = .init(
         .target(name: "SymbolGraphLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
+                .target(name: "MarkdownParsing"),
+                .target(name: "MarkdownSemantics"),
                 .target(name: "PackageDescriptions"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),

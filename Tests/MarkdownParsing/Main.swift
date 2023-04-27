@@ -10,7 +10,7 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "parameters-list"
         {
-            for (shape, tree):(String, MarkdownTree) in
+            for (shape, string):(String, String) in
             [
                 (
                     "tight",
@@ -50,6 +50,7 @@ enum Main:SyncTests
                 ),
             ]
             {
+                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
                 if  let tests:TestGroup = tests / shape,
 
                     tests.expect(tree.blocks.count ==? 1),

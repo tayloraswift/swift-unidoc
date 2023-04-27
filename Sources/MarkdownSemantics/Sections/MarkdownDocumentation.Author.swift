@@ -4,9 +4,9 @@ import MarkdownTrees
 extension MarkdownDocumentation
 {
     public final
-    class Throws:MarkdownTree.BlockAside
+    class Author:MarkdownTree.BlockAside
     {
         public class override
-        var context:MarkdownBytecode.Context { .throws }
+        var context:MarkdownBytecode.Context { .author }
     }
 }

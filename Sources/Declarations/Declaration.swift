@@ -25,3 +25,13 @@ struct Declaration<Symbol>:Equatable where Symbol:Hashable
 extension Declaration:Sendable where Symbol:Sendable
 {
 }
+extension Declaration
+{
+    @inlinable public
+    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>
+    {
+        .init(availability: self.availability,
+            fragments: try self.fragments.map(transform),
+            generics: try self.generics.map(transform))
+    }
+}

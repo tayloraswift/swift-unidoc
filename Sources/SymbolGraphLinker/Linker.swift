@@ -1,5 +1,8 @@
 import CodelinkResolution
+import Declarations
 import Generics
+import MarkdownParsing
+import MarkdownSemantics
 import SourceMaps
 import SymbolGraphCompiler
 import SymbolGraphParts
@@ -35,9 +38,15 @@ struct Linker
     }
 }
 
-
 extension Linker
 {
+    /// Indexes the given scalar and appends it to the symbol graph.
+    ///
+    /// This function only populates basic information about the scalar,
+    /// the rest should only be added after completing a full pass over
+    /// all the scalars and extensions.
+    ///
+    /// This function doesn’t check for duplicates.
     private mutating
     func index(scalar:Compiler.Scalar) throws -> ScalarAddress
     {
@@ -50,10 +59,13 @@ extension Linker
         self.scalars[scalar.id] = address
         return address
     }
+    /// Indexes the scalar extended by the given extension and appends
+    /// the (empty) scalar to the symbol graph, if it has not already
+    /// been indexed. (This function checks for duplicates.)
     private mutating
     func index(extension:Compiler.Extension) throws -> ScalarAddress
     {
-        let scalar:ScalarIdentifier = `extension`.signature.type.id
+        let scalar:ScalarIdentifier = `extension`.extendee.id
         return try
         {
             switch $0
@@ -71,23 +83,8 @@ extension Linker
 }
 extension Linker
 {
-    private mutating
-    func address(of scalar:ScalarIdentifier) throws -> ScalarAddress
-    {
-        try
-        {
-            switch $0
-            {
-            case nil:
-                let address:ScalarAddress = try self.graph.scalars.symbols(scalar)
-                $0 = address
-                return address
-            
-            case let address?:
-                return address
-            }
-        } (&self.scalars[scalar])
-    }
+    /// Returns the address of the file with the given identifier,
+    /// registering it in the symbol table if needed.
     private mutating
     func address(of file:FileIdentifier) throws -> FileAddress
     {
@@ -105,58 +102,169 @@ extension Linker
             }
         } (&self.files[file])
     }
+    /// Returns the address of the scalar with the given identifier,
+    /// registering it in the symbol table if needed. You should never
+    /// call ``index(scalar:)`` or ``index(extension:)`` after calling
+    /// this function.
+    private mutating
+    func address(of scalar:ScalarIdentifier) throws -> ScalarAddress
+    {
+        try
+        {
+            switch $0
+            {
+            case nil:
+                let address:ScalarAddress = try self.graph.scalars.symbols(scalar)
+                $0 = address
+                return address
+            
+            case let address?:
+                return address
+            }
+        } (&self.scalars[scalar])
+    }
 }
 
 extension Linker
 {
     private mutating
-    func index(scalars:[Compiler.Scalar], extensions:[Compiler.Extension]) throws
+    func addresses(of scalars:[Symbol.Scalar]) throws -> [ScalarAddress]
     {
-        let included:[ScalarAddress] = try scalars.map
+        try scalars.map
         {
-            try self.index(scalar: $0)
+            try self.address(of: $0.id)
         }
-        let extended:[ScalarAddress] = try extensions.map
+    }
+    private mutating
+    func addresses(exposing features:[Symbol.Scalar],
+        of extended:Symbol.Scalar,
+        at address:ScalarAddress) throws -> [ScalarAddress]
+    {
+        if  let prefix:[String] =
+            self.graph.scalars[address]?.path.map({ $0 }) ??
+            self.external[heir: extended]
+        {
+            return try features.map
+            {
+                let feature:ScalarAddress = try self.address(of: $0.id)
+                if  let (last, phylum):(String, ScalarPhylum) =
+                    self.graph.scalars[feature].map({ ($0.path.last, $0.phylum) }) ??
+                    self.external[feature: $0]
+                {
+                    let vector:Symbol.Vector = .init($0, self: extended)
+                    self.resolver.overload(.init(prefix, last), with: .init(
+                        target: .vector(feature, self: address),
+                        phylum: phylum,
+                        id: vector))
+                }
+                return feature
+            }
+        }
+        else
+        {
+            return try self.addresses(of: features)
+        }
+    }
+}
+extension Linker
+{
+    private mutating
+    func register(scalars:[Compiler.Scalar]) throws -> [ScalarAddress]
+    {
+        try scalars.map
+        {
+            let address:ScalarAddress = try self.index(scalar: $0)
+            //  Make the scalars visible to codelink resolution.
+            self.resolver.overload($0.path, with: .init(
+                target: .scalar(address),
+                phylum: $0.phylum,
+                id: $0.resolution))
+            return address
+        }
+    }
+    private mutating
+    func register(extensions:[Compiler.Extension]) throws -> [(ScalarAddress, Int)]
+    {
+        let addresses:[ScalarAddress] = try extensions.map
         {
             try self.index(extension: $0)
         }
+        return try zip(addresses, extensions).map
+        {
+            //  Sort *then* address, since we want deterministic addresses too.
+            let conformances:[ScalarAddress] = try self.addresses(
+                of: $0.1.conformances.sorted())
+            let features:[ScalarAddress] = try self.addresses(
+                exposing: $0.1.features.sorted(),
+                of: $0.1.extendee,
+                at: $0.0)
+            let nested:[ScalarAddress] = try self.addresses(
+                of: $0.1.nested.sorted())
 
-        for (included, scalar):(ScalarAddress, Compiler.Scalar)
-            in zip(included, scalars)
-        {
-            // let _:SourceLocation<FileAddress>? = try scalar.location?.map
-            // {
-            //     try self.address(of: $0)
-            // }
-            self.resolver.overload(scalar.path, with: .init(
-                target: .scalar(included),
-                phylum: scalar.phylum,
-                id: scalar.resolution))
-        }
-        for (extended, `extension`):(ScalarAddress, Compiler.Extension)
-            in zip(extended, extensions)
-        {
-            if  let prefix:[String] =
-                self.graph.scalars[extended].local?.path.map({ $0 }) ??
-                self.external[heir: `extension`.signature.type]
-            {
-                for feature:Symbol.Scalar in `extension`.features
+            let index:Int = self.graph.scalars[$0.0].push(.init(
+                conformances: conformances,
+                features: features,
+                nested: nested,
+                where: try $0.1.conditions.map
                 {
-                    let address:ScalarAddress = try self.address(of: feature.id)
-                    if  let (last, phylum):(String, ScalarPhylum) =
-                        self.graph.scalars[address].local.map({ ($0.path.last, $0.phylum) }) ??
-                        self.external[feature: feature]
+                    try $0.map
                     {
-                        let resolution:Symbol.Vector = .init(feature,
-                            self: `extension`.signature.type)
-                        self.resolver.overload(.init(prefix, last), with: .init(
-                            target: .vector(address, self: extended),
-                            phylum: phylum,
-                            id: resolution))
+                        try self.address(of: $0.id)
                     }
-                }
+                }))
+            return ($0.0, index)
+        }
+    }
+
+    init(metadata:SymbolGraph.Metadata,
+        context:Compiler.Scalars.External,
+        scalars:[Compiler.Scalar],
+        extensions:[Compiler.Extension]) throws
+    {
+        self.init(metadata: metadata, context: context)
+
+        let scalarAddresses:[ScalarAddress] = try self.register(
+            scalars: scalars)
+        let extensionAddresses:[(ScalarAddress, Int)] = try self.register(
+            extensions: extensions)
+
+        try self.link(scalars: scalars, at: scalarAddresses)
+        try self.link(extensions: extensions, at: extensionAddresses)
+    }
+}
+extension Linker
+{
+    mutating
+    func link(scalars:[Compiler.Scalar], at addresses:[ScalarAddress]) throws
+    {
+        for (address, scalar):(ScalarAddress, Compiler.Scalar) in zip(addresses, scalars)
+        {
+            let declaration:Declaration<ScalarAddress> = try scalar.declaration.map
+            {
+                try self.address(of: $0.id)
             }
-            //self.graph.scalars[local: address].extensions.append(.init())
+            let location:SourceLocation<FileAddress>? = try scalar.location?.map
+            {
+                try self.address(of: $0)
+            }
+
+            if !scalar.comment.isEmpty
+            {
+                let _:MarkdownDocumentation = .init(parsing: scalar.comment,
+                    as: SwiftFlavoredMarkdown.self)
+            }
+
+            self.graph.scalars[address]?.declaration = declaration
+            self.graph.scalars[address]?.location = location
+        }
+    }
+    mutating
+    func link(extensions:[Compiler.Extension], at addresses:[(ScalarAddress, Int)]) throws
+    {
+        for ((address, index), _):((ScalarAddress, Int), Compiler.Extension)
+            in zip(addresses, extensions)
+        {
+            { _ in }(&self.graph.scalars[address, index])
         }
     }
 }
