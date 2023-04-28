@@ -23,45 +23,42 @@ struct MarkdownDocumentation
         self.article = article
     }
 }
-extension MarkdownDocumentation
+extension MarkdownDocumentation:MarkdownModel
 {
     public
-    init(parsing string:String, as flavor:(some MarkdownFlavor).Type)
+    func visit(_ yield:(MarkdownTree.Block) throws -> ()) rethrows
     {
-        self.init(tree: .init(parsing: string, as: flavor))
-    }
-    /// This is private, because instances of this type still hold references
-    /// to blocks in the tree after the init returns. So we should encourage
-    /// callers to construct instances of this type such that instances of this
-    /// type own the tree nodes.
-    private
-    init(tree:__shared MarkdownTree)
-    {
-        var references:[Codelink: UInt32] = [:]
-        var codelinks:[Codelink] = []
-        tree.outline
-        {
-            guard let codelink:Codelink = .init(parsing: $0)
-            else
-            {
-                return nil
-            }
-            let next:UInt32 = .init(codelinks.endIndex)
-            let reference:UInt32 = { $0 }(&references[codelink, default: next])
-            if  reference == next
-            {
-                codelinks.append(codelink)
-            }
+        let discussion:ArraySlice<MarkdownTree.Block>
 
-            return reference
+        if case (let paragraph as MarkdownTree.Paragraph)? = self.article.first
+        {
+            try yield(paragraph)
+
+            discussion = self.article.dropFirst()
+        }
+        else
+        {
+            discussion = self.article[...]
         }
 
+        try yield(Fold.init())
+
+        try self.parameters.map(yield)
+        try self.returns.map(yield)
+        try self.throws.map(yield)
+
+        try discussion.forEach(yield)
+    }
+    
+    public
+    init(attaching blocks:[MarkdownTree.Block])
+    {
         var parameters:(discussion:[MarkdownTree.Block], list:[Parameter]) = ([], [])
         var returns:[MarkdownTree.Block] = []
         var `throws`:[MarkdownTree.Block] = []
         var article:[MarkdownTree.Block] = []
 
-        for block:MarkdownTree.Block in tree.blocks
+        for block:MarkdownTree.Block in blocks
         {
             switch block
             {
@@ -153,34 +150,5 @@ extension MarkdownDocumentation
             returns: returns.isEmpty ? nil : .init(returns),
             throws: `throws`.isEmpty ? nil : .init(`throws`),
             article: article)
-    }
-}
-extension MarkdownDocumentation
-{
-    public
-    func emit(into binary:inout MarkdownBinary)
-    {
-        let discussion:ArraySlice<MarkdownTree.Block>
-
-        if  case (let paragraph as MarkdownTree.Paragraph)? = self.article.first
-        {
-            paragraph.emit(into: &binary)
-            discussion = self.article.dropFirst()
-        }
-        else
-        {
-            discussion = self.article[...]
-        }
-
-        binary.fold()
-
-        self.parameters?.emit(into: &binary)
-        self.returns?.emit(into: &binary)
-        self.throws?.emit(into: &binary)
-
-        for block:MarkdownTree.Block in discussion
-        {
-            block.emit(into: &binary)
-        }
     }
 }

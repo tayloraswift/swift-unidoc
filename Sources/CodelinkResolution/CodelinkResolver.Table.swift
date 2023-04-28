@@ -13,7 +13,7 @@ extension CodelinkResolver
 }
 extension CodelinkResolver.Table
 {
-    subscript(path:LexicalPath) -> CodelinkResolver.Overloads?
+    subscript(path:some BidirectionalCollection<String>) -> CodelinkResolver.Overloads?
     {
         _read
         {

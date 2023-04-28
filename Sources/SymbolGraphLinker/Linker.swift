@@ -1,6 +1,7 @@
 import CodelinkResolution
 import Declarations
 import Generics
+import MarkdownABI
 import MarkdownParsing
 import MarkdownSemantics
 import SourceMaps
@@ -248,14 +249,13 @@ extension Linker
                 try self.address(of: $0)
             }
 
-            if !scalar.comment.isEmpty
-            {
-                let _:MarkdownDocumentation = .init(parsing: scalar.comment,
-                    as: SwiftFlavoredMarkdown.self)
-            }
+            let article:SymbolGraph.Article<SymbolGraph.Referent>? = self.link(
+                comment: scalar.comment,
+                for: address)
 
             self.graph.scalars[address]?.declaration = declaration
             self.graph.scalars[address]?.location = location
+            self.graph.scalars[address]?.article = article
         }
     }
     mutating
@@ -266,5 +266,111 @@ extension Linker
         {
             { _ in }(&self.graph.scalars[address, index])
         }
+    }
+}
+extension Linker
+{
+    private
+    func link(comment:String,
+        for address:ScalarAddress) -> SymbolGraph.Article<SymbolGraph.Referent>?
+    {
+        if  comment.isEmpty
+        {
+            return nil
+        }
+
+        //  If the comment is attached to an extension of an external type,
+        //  it can only use “absolute” codelinks.
+        let scope:[String] = self.graph.scalars[address].map
+        {
+            switch $0.phylum
+            {
+            case    .actor,
+                    .class,
+                    .enum,
+                    .protocol,
+                    .struct:
+                return $0.path.map { $0 }
+            
+            case    .associatedtype,
+                    .case,
+                    .deinitializer,
+                    .func,
+                    .initializer,
+                    .operator,
+                    .subscript,
+                    .typealias,
+                    .var:
+                return $0.path.prefix
+            }
+        } ?? []
+
+        let documentation:MarkdownDocumentation = .init(parsing: comment,
+            as: SwiftFlavoredMarkdown.self)
+
+        var references:[Codelink: UInt32] = [:]
+        var referents:[SymbolGraph.Referent] = []
+        var fold:Int = referents.endIndex
+        
+        documentation.visit
+        {
+            if  $0 is MarkdownDocumentation.Fold
+            {
+                fold = referents.endIndex
+                return
+            }
+
+            $0.outline
+            {
+                (expression:String) -> UInt32? in
+
+                guard let codelink:Codelink = .init(parsing: expression)
+                else
+                {
+                    print("invalid codelink '\(expression)'")
+                    return nil
+                }
+
+                let reference:UInt32? =
+                {
+                    if  let reference:UInt32 = $0
+                    {
+                        return reference
+                    }
+
+                    let referent:SymbolGraph.Referent
+                    switch self.resolver.query(ascending: scope, link: codelink)
+                    {
+                    case nil:
+                        referent = .unresolved(codelink)
+                    
+                    case .one(let overload)?:
+                        switch overload.target
+                        {
+                        case .scalar(let address):
+                            referent = .scalar(address)
+                        
+                        case .vector(let address, self: let heir):
+                            referent = .vector(address, self: heir)
+                        }
+                    
+                    case .many?:
+                        print("ambiguous codelink '\(codelink)'")
+                        return nil
+                    }
+
+                    let next:UInt32 = .init(referents.endIndex)
+                    referents.append(referent)
+                    $0 = next
+                    return next
+
+                } (&references[codelink])
+
+                return reference
+            }
+        }
+
+        let binary:MarkdownBinary = .init(from: documentation)
+        return .init(markdown: binary.bytes, links: referents, fold: fold)
     }
 }
