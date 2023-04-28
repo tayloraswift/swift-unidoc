@@ -8,7 +8,7 @@ extension CodelinkResolver
 extension CodelinkResolver.Exact:CodelinkCollation
 {
     static
-    func collate(_ path:LexicalPath) -> String
+    func collate(_ path:some BidirectionalCollection<String>) -> String
     {
         path.joined(separator: ".")
     }

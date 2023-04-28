@@ -1,5 +1,4 @@
 import Availability
-import Codelinks
 import Declarations
 import LexicalPaths
 import SourceMaps
@@ -22,9 +21,7 @@ extension SymbolGraph
         var location:SourceLocation<FileAddress>?
 
         public
-        var bytecode:[UInt8]
-        public
-        var links:[Codelink]
+        var article:Article<Referent>?
 
         @inlinable public
         init(virtuality:ScalarPhylum.Virtuality?, phylum:ScalarPhylum, path:LexicalPath)
@@ -36,8 +33,7 @@ extension SymbolGraph
             self.declaration = .init()
 
             self.location = nil
-            self.bytecode = []
-            self.links = []
+            self.article = nil
         }
     }
 }

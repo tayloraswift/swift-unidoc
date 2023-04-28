@@ -11,17 +11,9 @@ struct MarkdownTree
     let blocks:[Block]
 
     @inlinable public
-    init(blocks:[Block] = [])
+    init(attaching blocks:[Block] = [])
     {
         self.blocks = blocks
-    }
-}
-extension MarkdownTree
-{
-    public
-    init(parsing string:String, as flavor:(some MarkdownFlavor).Type)
-    {
-        self.init(blocks: flavor.parse(string))
     }
 }
 extension MarkdownTree:MarkdownModel

@@ -8,7 +8,7 @@ extension CodelinkResolver
 extension CodelinkResolver.LegacyDocC:CodelinkCollation
 {
     static
-    func collate(_ path:LexicalPath) -> String
+    func collate(_ path:some BidirectionalCollection<String>) -> String
     {
         path.lazy.map { $0.lowercased() } .joined(separator: "/")
     }
