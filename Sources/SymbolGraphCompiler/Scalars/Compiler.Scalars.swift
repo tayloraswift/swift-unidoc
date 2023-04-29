@@ -18,7 +18,7 @@ extension Compiler
 extension Compiler.Scalars
 {
     public
-    func load() -> (local:[Compiler.Scalar], external:External)
+    func load() -> (local:[Compiler.Scalar], external:Compiler.ScalarNominations)
     {
         var included:[Compiler.Scalar] = []
         let external:[Symbol.Scalar: Compiler.ScalarNomination] =
@@ -46,17 +46,15 @@ extension Compiler.Scalars
     mutating
     func include(vector resolution:Symbol.Vector, with description:SymbolDescription) throws
     {
-        guard case .scalar(let phylum) = description.phylum
+        if case .scalar(let phylum) = description.phylum
+        {
+            { _ in }(&self.entries[resolution.feature,
+                default: .nominated(.init(description.path.last, phylum: phylum))])
+        }
         else
         {
             throw Compiler.SymbolError.init(invalid: .vector(resolution))
         }
-
-        ({ _ in })(&self.entries[resolution.heir,
-            default: .nominated(.heir(description.path.prefix))])
-        
-        ({ _ in })(&self.entries[resolution.feature,
-            default: .nominated(.feature(description.path.last, phylum))])
     }
     mutating
     func include(scalar resolution:Symbol.Scalar,

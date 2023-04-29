@@ -12,7 +12,7 @@ public
 struct Linker
 {
     private
-    let external:Compiler.Scalars.External
+    let external:Compiler.ScalarNominations
 
     private
     var resolver:CodelinkResolver
@@ -25,9 +25,8 @@ struct Linker
     public private(set)
     var graph:SymbolGraph
 
-    private
-    init(metadata:SymbolGraph.Metadata,
-        context external:Compiler.Scalars.External)
+    public
+    init(metadata:SymbolGraph.Metadata, context external:Compiler.ScalarNominations)
     {
         self.external = external
 
@@ -38,7 +37,27 @@ struct Linker
         self.graph = .init(metadata: metadata)
     }
 }
+extension Linker
+{
+    static
+    func _link(metadata:SymbolGraph.Metadata,
+        context:Compiler.ScalarNominations,
+        scalars:[Compiler.Scalar],
+        extensions:[Compiler.Extension]) throws -> SymbolGraph
+    {
+        var linker:Self = .init(metadata: metadata, context: context)
 
+        let scalarAddresses:[ScalarAddress] = try linker.register(
+            scalars: scalars)
+        let extensionAddresses:[(ScalarAddress, Int)] = try linker.register(
+            extensions: extensions)
+
+        try linker.link(scalars: scalars, at: scalarAddresses)
+        try linker.link(extensions: extensions, at: extensionAddresses)
+
+        return linker.graph
+    }
+}
 extension Linker
 {
     /// Indexes the given scalar and appends it to the symbol graph.
@@ -138,38 +157,30 @@ extension Linker
     }
     private mutating
     func addresses(exposing features:[Symbol.Scalar],
+        prefixed prefix:[String],
         of extended:Symbol.Scalar,
         at address:ScalarAddress) throws -> [ScalarAddress]
     {
-        if  let prefix:[String] =
-            self.graph.scalars[address]?.path.map({ $0 }) ??
-            self.external[heir: extended]
+        try features.map
         {
-            return try features.map
+            let feature:ScalarAddress = try self.address(of: $0.id)
+            if  let (last, phylum):(String, ScalarPhylum) =
+                self.graph.scalars[feature].map({ ($0.path.last, $0.phylum) }) ??
+                self.external[feature: $0]
             {
-                let feature:ScalarAddress = try self.address(of: $0.id)
-                if  let (last, phylum):(String, ScalarPhylum) =
-                    self.graph.scalars[feature].map({ ($0.path.last, $0.phylum) }) ??
-                    self.external[feature: $0]
-                {
-                    let vector:Symbol.Vector = .init($0, self: extended)
-                    self.resolver.overload(.init(prefix, last), with: .init(
-                        target: .vector(feature, self: address),
-                        phylum: phylum,
-                        id: vector))
-                }
-                return feature
+                let vector:Symbol.Vector = .init($0, self: extended)
+                self.resolver.overload(.init(prefix, last), with: .init(
+                    target: .vector(feature, self: address),
+                    phylum: phylum,
+                    id: vector))
             }
-        }
-        else
-        {
-            return try self.addresses(of: features)
+            return feature
         }
     }
 }
 extension Linker
 {
-    private mutating
+    public mutating
     func register(scalars:[Compiler.Scalar]) throws -> [ScalarAddress]
     {
         try scalars.map
@@ -183,7 +194,7 @@ extension Linker
             return address
         }
     }
-    private mutating
+    public mutating
     func register(extensions:[Compiler.Extension]) throws -> [(ScalarAddress, Int)]
     {
         let addresses:[ScalarAddress] = try extensions.map
@@ -197,6 +208,7 @@ extension Linker
                 of: $0.1.conformances.sorted())
             let features:[ScalarAddress] = try self.addresses(
                 exposing: $0.1.features.sorted(),
+                prefixed: $0.1.path,
                 of: $0.1.extendee,
                 at: $0.0)
             let nested:[ScalarAddress] = try self.addresses(
@@ -216,26 +228,10 @@ extension Linker
             return ($0.0, index)
         }
     }
-
-    init(metadata:SymbolGraph.Metadata,
-        context:Compiler.Scalars.External,
-        scalars:[Compiler.Scalar],
-        extensions:[Compiler.Extension]) throws
-    {
-        self.init(metadata: metadata, context: context)
-
-        let scalarAddresses:[ScalarAddress] = try self.register(
-            scalars: scalars)
-        let extensionAddresses:[(ScalarAddress, Int)] = try self.register(
-            extensions: extensions)
-
-        try self.link(scalars: scalars, at: scalarAddresses)
-        try self.link(extensions: extensions, at: extensionAddresses)
-    }
 }
 extension Linker
 {
-    mutating
+    public mutating
     func link(scalars:[Compiler.Scalar], at addresses:[ScalarAddress]) throws
     {
         for (address, scalar):(ScalarAddress, Compiler.Scalar) in zip(addresses, scalars)
@@ -249,70 +245,72 @@ extension Linker
                 try self.address(of: $0)
             }
 
-            let article:SymbolGraph.Article<SymbolGraph.Referent>? = self.link(
-                comment: scalar.comment,
-                for: address)
+            let article:SymbolGraph.Article<SymbolGraph.Referent>? =
+                scalar.documentation.map(self.link(documentation:))
 
             self.graph.scalars[address]?.declaration = declaration
             self.graph.scalars[address]?.location = location
             self.graph.scalars[address]?.article = article
         }
     }
-    mutating
+    public mutating
     func link(extensions:[Compiler.Extension], at addresses:[(ScalarAddress, Int)]) throws
     {
-        for ((address, index), _):((ScalarAddress, Int), Compiler.Extension)
+        for ((address, index), `extension`):((ScalarAddress, Int), Compiler.Extension)
             in zip(addresses, extensions)
         {
-            { _ in }(&self.graph.scalars[address, index])
+            //  Extensions can have many constituent extension blocks, each potentially
+            //  with its own doccomment. It’s not clear to me how to combine them,
+            //  so for now, we just keep the longest doccomment and discard all the others,
+            //  like DocC does. (Except DocC does this across all extensions with the
+            //  same extended type.)
+            //  https://github.com/apple/swift-docc/pull/369
+            var comment:Compiler.Documentation.Comment? = nil
+            var longest:Int = 0
+            for block:Compiler.Extension.Block in `extension`.blocks
+            {
+                if  let current:Compiler.Documentation.Comment = block.comment
+                {
+                    //  This is really, really stupid, but we need a way to break
+                    //  ties, and we can’t use source location for this, as it is
+                    //  not always available.
+                    let length:Int = current.text.count
+                    if (longest, comment?.text ?? "") < (length, current.text)
+                    {
+                        longest = length
+                        comment = current
+                    }
+                }
+            }
+            if let comment
+            {
+                self.graph.scalars[address, index].article = self.link(comment: comment,
+                    scope: `extension`.path)
+            }
         }
     }
 }
 extension Linker
 {
     private
-    func link(comment:String,
-        for address:ScalarAddress) -> SymbolGraph.Article<SymbolGraph.Referent>?
+    func link(
+        documentation:Compiler.Documentation) -> SymbolGraph.Article<SymbolGraph.Referent>
     {
-        if  comment.isEmpty
-        {
-            return nil
-        }
-
-        //  If the comment is attached to an extension of an external type,
-        //  it can only use “absolute” codelinks.
-        let scope:[String] = self.graph.scalars[address].map
-        {
-            switch $0.phylum
-            {
-            case    .actor,
-                    .class,
-                    .enum,
-                    .protocol,
-                    .struct:
-                return $0.path.map { $0 }
-            
-            case    .associatedtype,
-                    .case,
-                    .deinitializer,
-                    .func,
-                    .initializer,
-                    .operator,
-                    .subscript,
-                    .typealias,
-                    .var:
-                return $0.path.prefix
-            }
-        } ?? []
-
-        let documentation:MarkdownDocumentation = .init(parsing: comment,
+        self.link(comment: documentation.comment, scope: documentation.scope)
+    }
+    private
+    func link(
+        comment:Compiler.Documentation.Comment,
+        scope:[String]) -> SymbolGraph.Article<SymbolGraph.Referent>
+    {
+        let markdown:MarkdownDocumentation = .init(parsing: comment.text,
             as: SwiftFlavoredMarkdown.self)
 
         var references:[Codelink: UInt32] = [:]
         var referents:[SymbolGraph.Referent] = []
         var fold:Int = referents.endIndex
         
-        documentation.visit
+        markdown.visit
         {
             if  $0 is MarkdownDocumentation.Fold
             {
@@ -370,7 +368,7 @@ extension Linker
             }
         }
 
-        let binary:MarkdownBinary = .init(from: documentation)
+        let binary:MarkdownBinary = .init(from: markdown)
         return .init(markdown: binary.bytes, links: referents, fold: fold)
     }
 }

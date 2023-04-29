@@ -1,11 +1,17 @@
 import Generics
-import LexicalPaths
 
 extension Compiler
 {
     @frozen public
     struct Extension
     {
+        public
+        let signature:Signature
+        /// The full name of the extended type. This is provided as an array instead
+        /// of a ``LexicalPath`` for convenience only; the array is always non-empty
+        public
+        let path:[String]
+
         /// Protocols the extended type conforms to.
         public
         var conformances:Set<Symbol.Scalar>
@@ -20,15 +26,13 @@ extension Compiler
         var nested:Set<Symbol.Scalar>
         /// Documentation comments and source locations for the various extension
         /// blocks that make up this extension.
-        public
+        public internal(set)
         var blocks:[Block]
 
-        public
-        let signature:Signature
-
-        init(signature:Signature)
+        init(signature:Signature, path:[String])
         {
             self.signature = signature
+            self.path = path
 
             self.conformances = []
             self.features = []

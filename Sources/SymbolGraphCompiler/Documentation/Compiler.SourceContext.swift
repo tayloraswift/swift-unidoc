@@ -43,11 +43,11 @@ extension Compiler.SourceContext
         return .init(.init(uri[start...].drop { $0 == "/" }))
     }
 
-    func filter(documentation:SymbolDescription.Documentation) -> String?
+    func filter(doccomment:SymbolDescription.Doccomment) -> Compiler.Documentation.Comment?
     {
-        switch documentation.culture
+        switch doccomment.culture
         {
-        case nil, self.culture?:    return documentation.comment
+        case nil, self.culture?:    return .init(doccomment.text, at: doccomment.start)
         default:                    return nil
         }
     }

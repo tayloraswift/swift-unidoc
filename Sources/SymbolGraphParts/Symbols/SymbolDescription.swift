@@ -16,9 +16,9 @@ struct SymbolDescription:Equatable, Sendable
     let phylum:SymbolPhylum
 
     public
-    let documentation:Documentation?
-    public
     let declaration:Declaration<Symbol.Scalar>
+    public
+    let doccomment:Doccomment?
     public
     let interfaces:Interfaces?
     public
@@ -36,16 +36,16 @@ struct SymbolDescription:Equatable, Sendable
     private
     init(_ usr:Symbol,
         phylum:SymbolPhylum,
-        documentation:Documentation?,
         declaration:Declaration<Symbol.Scalar>,
+        doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
         location:SourceLocation<String>?,
         path:LexicalPath)
     {
-        self.documentation = documentation
         self.declaration = declaration
+        self.doccomment = doccomment
         self.interfaces = interfaces
         self.visibility = visibility
 
@@ -62,8 +62,8 @@ extension SymbolDescription
     private
     init(_ usr:Symbol,
         phylum:SymbolPhylum,
-        documentation:Documentation?,
         availability:Availability,
+        doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
         expanded:
@@ -143,10 +143,10 @@ extension SymbolDescription
 
         self.init(usr,
             phylum: phylum,
-            documentation: documentation.flatMap { $0.comment.isEmpty ? nil : $0 },
             declaration: .init(availability: availability,
                 fragments: fragments,
                 generics: generics),
+            doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             interfaces: interfaces,
             visibility: visibility,
             extension: `extension`,
@@ -162,7 +162,7 @@ extension SymbolDescription:JSONObjectDecodable
         case availability
 
         case declaration = "declarationFragments"
-        case documentation = "docComment"
+        case doccomment = "docComment"
 
         case `extension` = "swiftExtension"
         case generics = "swiftGenerics"
@@ -213,8 +213,8 @@ extension SymbolDescription:JSONObjectDecodable
             {
                 try $0[.identifier].decode()
             },
-            documentation: try json[.documentation]?.decode(),
             availability: try json[.availability]?.decode() ?? [:],
+            doccomment: try json[.doccomment]?.decode(),
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
             visibility: try json[.visibility].decode(),
             expanded: try json[.declaration].decode(),

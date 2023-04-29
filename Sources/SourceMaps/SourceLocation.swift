@@ -22,6 +22,14 @@ extension SourceLocation:Hashable where File:Hashable
 extension SourceLocation:Sendable where File:Sendable
 {
 }
+// extension SourceLocation:Comparable where File:Comparable
+// {
+//     @inlinable public static
+//     func < (lhs:Self, rhs:Self) -> Bool
+//     {
+//         (lhs.file, lhs.position) < (rhs.file, rhs.position)
+//     }
+// }
 extension SourceLocation
 {
     @inlinable public
