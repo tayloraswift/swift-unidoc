@@ -172,6 +172,13 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
         
+        .target(name: "SymbolGraphFormat", dependencies:
+            [
+                .target(name: "SymbolGraphs"),
+                .product(name: "BSONDecoding", package: "swift-mongodb"),
+                .product(name: "BSONEncoding", package: "swift-mongodb"),
+            ]),
+
         .target(name: "SymbolGraphLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
