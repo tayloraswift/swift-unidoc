@@ -1,9 +1,17 @@
 extension Compiler
 {
     @usableFromInline @frozen internal
-    enum ScalarNomination:Equatable, Hashable, Sendable
+    struct ScalarNomination:Equatable, Hashable, Sendable
     {
-        case feature(String, ScalarPhylum)
-        case heir([String])
+        @usableFromInline internal
+        let name:String
+        @usableFromInline internal
+        let phylum:ScalarPhylum
+
+        init(_ name:String, phylum:ScalarPhylum)
+        {
+            self.name = name
+            self.phylum = phylum
+        }
     }
 }

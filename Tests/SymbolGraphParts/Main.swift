@@ -209,8 +209,8 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / symbol.joined(separator: "-").lowercased(),
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
                 {
-                    tests.expect(symbol.documentation?.culture ==? culture)
-                    tests.expect(symbol.documentation?.comment ==? comment)
+                    tests.expect(symbol.doccomment?.culture ==? culture)
+                    tests.expect(symbol.doccomment?.text ==? comment)
                 }
             }
 
@@ -296,8 +296,8 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / symbol[0].lowercased(),
                     let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
                 {
-                    tests.expect(symbol.documentation?.culture ==? culture)
-                    tests.expect(symbol.documentation?.comment ==? comment)
+                    tests.expect(symbol.doccomment?.culture ==? culture)
+                    tests.expect(symbol.doccomment?.text ==? comment)
                 }
             }
 

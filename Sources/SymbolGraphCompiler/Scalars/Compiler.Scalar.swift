@@ -10,7 +10,7 @@ extension Compiler
 {
     /// A scalar is the smallest “unit” a symbol can be broken down into.
     @frozen public
-    struct Scalar
+    struct Scalar:Sendable
     {
         public
         let declaration:Declaration<Symbol.Scalar>
@@ -47,8 +47,8 @@ extension Compiler
         public internal(set)
         var origin:Symbol.Scalar?
 
-        public internal(set)
-        var comment:String
+        private
+        var comment:Documentation.Comment?
 
         private
         init(declaration:Declaration<Symbol.Scalar>,
@@ -69,7 +69,7 @@ extension Compiler
             self.features = []
             self.origin = nil
 
-            self.comment = ""
+            self.comment = nil
         }
     }
 }
@@ -79,6 +79,37 @@ extension Compiler.Scalar:Identifiable
     var id:ScalarIdentifier
     {
         self.resolution.id
+    }
+
+    public
+    var documentation:Compiler.Documentation?
+    {
+        self.comment.map
+        {
+            let scope:[String]
+            switch self.phylum
+            {
+            case    .actor,
+                    .class,
+                    .enum,
+                    .protocol,
+                    .struct:
+                scope = self.path.map { $0 }
+            
+            case    .associatedtype,
+                    .case,
+                    .deinitializer,
+                    .func,
+                    .initializer,
+                    .operator,
+                    .subscript,
+                    .typealias,
+                    .var:
+                scope = self.path.prefix
+            }
+
+            return .init(comment: $0, scope: scope)
+        }
     }
 }
 extension Compiler.Scalar
@@ -100,10 +131,9 @@ extension Compiler.Scalar
             phylum: phylum,
             path: description.path)
         
-        if  let documentation:SymbolDescription.Documentation = description.documentation,
-            let comment:String = context.filter(documentation: documentation)
+        if  let doccomment:SymbolDescription.Doccomment = description.doccomment
         {
-            self.comment = comment
+            self.comment = context.filter(doccomment: doccomment)
         }
     }
 }

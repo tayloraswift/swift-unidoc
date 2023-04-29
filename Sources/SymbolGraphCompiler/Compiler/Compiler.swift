@@ -165,8 +165,7 @@ extension Compiler
             
             //  Generate an implicit, internal extension for this requirement,
             //  if one does not already exist.
-            self.extensions[`protocol`.resolution, where: []].add(
-                nested: requirement.resolution)
+            self.extensions(`protocol`, where: []).add(nested: requirement.resolution)
         }
     }
     private mutating
@@ -244,7 +243,7 @@ extension Compiler
                     try member.assign(nesting: relationship)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
-                    self.extensions[type.resolution, where: member.conditions].add(
+                    self.extensions(type, where: member.conditions).add(
                         nested: member.resolution)
                 }
 
@@ -303,7 +302,7 @@ extension Compiler
             }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
-            group = self.extensions[type.resolution, where: conformance.conditions]
+            group = self.extensions(type, where: conformance.conditions)
         
         case .block(let block):
             //  Look up the extension associated with this block name.

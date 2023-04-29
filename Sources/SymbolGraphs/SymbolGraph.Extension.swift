@@ -22,9 +22,7 @@ extension SymbolGraph
         var nested:[ScalarAddress]
 
         public
-        var bytecode:[UInt8]
-        public
-        var links:[Codelink]
+        var article:Article<Referent>?
 
         @inlinable public
         init(conformances:[ScalarAddress] = [],
@@ -38,8 +36,7 @@ extension SymbolGraph
             self.features = features
             self.nested = nested
 
-            self.bytecode = []
-            self.links = []
+            self.article = nil
         }
     }
 }

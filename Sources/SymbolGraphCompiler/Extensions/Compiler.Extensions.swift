@@ -1,4 +1,5 @@
 import Generics
+import LexicalPaths
 import SymbolGraphParts
 
 extension Compiler
@@ -47,17 +48,18 @@ extension Compiler.Extensions
             throw Compiler.SymbolError.init(invalid: .block(block))
         }
 
-        let group:Compiler.ExtensionReference =
-            self[type, where: description.extension.conditions]
+        let `extension`:Compiler.ExtensionReference = self(type,
+            where: description.extension.conditions,
+            path: description.path)
         
         if  let block:Compiler.Extension.Block = .init(
                 location: try description.location?.map(context.resolve(uri:)),
-                comment: description.documentation.flatMap(context.filter(documentation:)))
+                comment: description.doccomment.flatMap(context.filter(doccomment:)))
         {
-            group.append(block: block)
+            `extension`.append(block: block)
         }
 
-        self.named[block] = group
+        self.named[block] = `extension`
     }
 }
 
@@ -77,14 +79,20 @@ extension Compiler.Extensions
 }
 extension Compiler.Extensions
 {
-    subscript(extended:Symbol.Scalar,
+    mutating
+    func callAsFunction(_ extended:Compiler.ScalarReference,
         where conditions:[GenericConstraint<Symbol.Scalar>]) -> Compiler.ExtensionReference
     {
-        mutating get
-        {
-            let signature:Compiler.Extension.Signature = .init(extended, where: conditions)
-            return { $0 }(&self.groups[signature, default: .init(value: .init(
-                signature: signature))])
-        }
+        self(extended.resolution, where: conditions, path: extended.value.path)
+    }
+    private mutating
+    func callAsFunction(_ extended:Symbol.Scalar,
+        where conditions:[GenericConstraint<Symbol.Scalar>],
+        path:LexicalPath) -> Compiler.ExtensionReference
+    {
+        let signature:Compiler.Extension.Signature = .init(extended, where: conditions)
+        return { $0 }(&self.groups[signature, default: .init(value: .init(
+            signature: signature,
+            path: .init(path)))])
     }
 }

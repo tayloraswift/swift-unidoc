@@ -9,9 +9,9 @@ extension Compiler.Extension
         public
         let location:SourceLocation<FileIdentifier>?
         public
-        let comment:String?
+        let comment:Compiler.Documentation.Comment?
 
-        init?(location:SourceLocation<FileIdentifier>?, comment:String?)
+        init?(location:SourceLocation<FileIdentifier>?, comment:Compiler.Documentation.Comment?)
         {
             if case (nil, nil) = (location, comment)
             {
