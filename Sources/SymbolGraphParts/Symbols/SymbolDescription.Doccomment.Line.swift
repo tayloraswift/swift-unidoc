@@ -40,7 +40,7 @@ extension SymbolDescription.Doccomment.Line:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(try json[.text].decode(),
-            at: try json[.range].decode(using: CodingKeys.Range.self)
+            at: try json[.range]?.decode(using: CodingKeys.Range.self)
             {
                 try $0[.start].decode(using: CodingKeys.Range.Start.self)
                 {
