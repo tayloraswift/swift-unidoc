@@ -37,7 +37,7 @@ extension Availability:JSONDecodable
                 //  The compiler will allow you to omit a version number from
                 //  agnostic availabilities, but this makes it meaningless, so
                 //  we ignore it unless there is a version number.
-                self[domain] = .init(
+                self.agnostic[domain] = .init(
                     deprecated: try json[.deprecated]?.decode(),
                     introduced: try json[.introduced]?.decode(),
                     obsoleted: try json[.obsoleted]?.decode(),
@@ -45,7 +45,7 @@ extension Availability:JSONDecodable
                     message: message)
             
             case .platform(let domain):
-                self[domain] = .init(
+                self.platforms[domain] = .init(
                     unavailable: try json[.isUnconditionallyUnavailable]?.decode(
                         as: Bool.self)
                     {
