@@ -1,3 +1,5 @@
+import BSONDecoding
+import BSONEncoding
 import Codelinks
 import Generics
 
@@ -38,5 +40,25 @@ extension SymbolGraph
 
             self.article = nil
         }
+    }
+}
+extension SymbolGraph.Extension
+{
+    @frozen public
+    enum CodingKeys:String
+    {
+        case conditions = "S"
+        case conformances = "C"
+        case features = "F"
+        case nested = "N"
+        case article = "A"
+    }
+}
+extension SymbolGraph.Extension:BSONDocumentEncodable, BSONEncodable, BSONFieldEncodable
+{
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    {
+        fatalError("unimplemented")
     }
 }
