@@ -1,28 +1,20 @@
-import SemanticVersions
-
 @frozen public 
 struct Availability:Equatable, Sendable
 {
+    public
+    var universal:Clauses<UniversalDomain>?
+    
     @usableFromInline
-    var platforms:
-    [
-        Platform: Domain<Unavailable, DeprecatedMask, SemanticVersionMask>
-    ]
+    var platforms:[PlatformDomain: Clauses<PlatformDomain>]
     @usableFromInline
-    var agnostics:
-    [
-        Agnostic: Domain<Never, SemanticVersionMask, SemanticVersionMask>
-    ]
-
-    @usableFromInline
-    var all:Domain<Never, Deprecated, Never>?
+    var agnostics:[AgnosticDomain: Clauses<AgnosticDomain>]
     
     @inlinable public
-    init(_ all:Domain<Never, Deprecated, Never>?,
-        agnostics:[Agnostic: Domain<Never, SemanticVersionMask, SemanticVersionMask>] = [:],
-        platforms:[Platform: Domain<Unavailable, DeprecatedMask, SemanticVersionMask>] = [:])
+    init(_ universal:Clauses<UniversalDomain>?,
+        agnostics:[AgnosticDomain: Clauses<AgnosticDomain>] = [:],
+        platforms:[PlatformDomain: Clauses<PlatformDomain>] = [:])
     {
-        self.all = all
+        self.universal = universal
         self.agnostics = agnostics
         self.platforms = platforms
     }
@@ -40,13 +32,13 @@ extension Availability
     @inlinable public
     var isEmpty:Bool 
     {
-        self.all == nil &&
+        self.universal == nil &&
         self.agnostics.isEmpty &&
         self.platforms.isEmpty
     }
 
     @inlinable public
-    subscript(domain:Platform) -> Domain<Unavailable, DeprecatedMask, SemanticVersionMask>?
+    subscript(domain:PlatformDomain) -> Clauses<PlatformDomain>?
     {
         _read
         {
@@ -58,7 +50,7 @@ extension Availability
         }
     }
     @inlinable public
-    subscript(domain:Agnostic) -> Domain<Never, SemanticVersionMask, SemanticVersionMask>?
+    subscript(domain:AgnosticDomain) -> Clauses<AgnosticDomain>?
     {
         _read
         {
@@ -69,24 +61,13 @@ extension Availability
             yield &self.agnostics[domain]
         }
     }
-    @inlinable public
-    subscript(_:Never?) -> Domain<Never, Deprecated, Never>?
-    {
-        _read
-        {
-            yield  self.all
-        }
-        _modify
-        {
-            yield &self.all
-        }
-    }
 }
 extension Availability
 {
     @inlinable public
-    var isGenerallyUsable:Bool 
+    var isGenerallyRecommended:Bool 
     {
-        self[nil]?.isGenerallyUsable ?? true && self[.swift]?.isGenerallyUsable ?? true
+        self.universal?.isGenerallyRecommended ?? true &&
+        self[.swift]?.isGenerallyRecommended ?? true
     }
 }

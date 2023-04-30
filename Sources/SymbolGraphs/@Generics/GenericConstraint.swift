@@ -4,6 +4,21 @@ import Generics
 
 extension GenericConstraint
 {
+    /// Single-letter coding keys for compact generic constraint
+    /// representations in BSON.
+    ///
+    /// The BSON coding schema looks roughly like one of
+    ///
+    /// `{ G: "0GenericParameterName.AssociatedType", N: 0x1234_5678 }`
+    ///
+    /// or
+    ///
+    /// `{ G: "0GenericParameterName.AssociatedType", C: "Array<Int>" }` .
+    ///
+    /// The nominal (`N`) field is usually integer-typed, but its BSON
+    /// representation is up to the generic ``TypeReference`` parameter.
+    ///
+    /// The complex (`C`) field is always a string.
     @frozen public
     enum CodingKeys:String
     {

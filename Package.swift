@@ -6,6 +6,7 @@ let package:Package = .init(
     platforms: [.macOS(.v11)],
     products:
     [
+        .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
@@ -53,8 +54,11 @@ let package:Package = .init(
     ],
     targets:
     [
+        .target(name: "AvailabilityDomain"),
+        
         .target(name: "Availability", dependencies:
             [
+                .target(name: "AvailabilityDomain"),
                 .target(name: "SemanticVersions"),
             ]),
 
