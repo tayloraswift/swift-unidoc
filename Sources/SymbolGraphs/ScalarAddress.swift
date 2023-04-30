@@ -1,3 +1,6 @@
+import BSONDecoding
+import BSONEncoding
+
 /// A ``UInt32`` that is statically known to be representable
 /// as a 24-bit unsigned integer.
 @frozen public
@@ -21,6 +24,9 @@ extension ScalarAddress:SymbolAddress
 {
     public
     typealias Identity = ScalarIdentifier
+}
+extension ScalarAddress:BSONDecodable, BSONEncodable
+{
 }
 extension ScalarAddress:CustomStringConvertible
 {

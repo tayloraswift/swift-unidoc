@@ -43,7 +43,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.1.13")),
+            from: "0.1.14")),
         
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
             from: "0.50800.0")),
@@ -164,19 +164,15 @@ let package:Package = .init(
                 .target(name: "Repositories"),
                 .target(name: "SourceMaps"),
                 .target(name: "Symbolics"),
+
+                .product(name: "BSONDecoding", package: "swift-mongodb"),
+                .product(name: "BSONEncoding", package: "swift-mongodb"),
             ]),
 
         .target(name: "SymbolGraphCompiler", dependencies:
             [
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
-            ]),
-        
-        .target(name: "SymbolGraphFormat", dependencies:
-            [
-                .target(name: "SymbolGraphs"),
-                .product(name: "BSONDecoding", package: "swift-mongodb"),
-                .product(name: "BSONEncoding", package: "swift-mongodb"),
             ]),
 
         .target(name: "SymbolGraphLinker", dependencies:

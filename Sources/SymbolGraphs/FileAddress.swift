@@ -1,3 +1,5 @@
+import BSONDecoding
+import BSONEncoding
 import SourceMaps
 
 @frozen public
@@ -22,6 +24,9 @@ extension FileAddress:SymbolAddress
     {
         self.init(value: uint32)
     }
+}
+extension FileAddress:BSONDecodable, BSONEncodable
+{
 }
 extension FileAddress:CustomStringConvertible
 {
