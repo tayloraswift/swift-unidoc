@@ -2,7 +2,7 @@ extension Availability
 {
     // https://github.com/apple/swift/blob/main/lib/SymbolGraphGen/AvailabilityMixin.cpp
     @frozen public 
-    enum AnyDomain:Hashable, Equatable
+    enum AnyDomain:Hashable, Equatable, Sendable
     {
         case agnostic(AgnosticDomain)
         case platform(PlatformDomain)
@@ -12,7 +12,7 @@ extension Availability
 extension Availability.AnyDomain:CustomStringConvertible
 {
     @inlinable public 
-    var description:String 
+    var description:String
     {
         switch self 
         {
