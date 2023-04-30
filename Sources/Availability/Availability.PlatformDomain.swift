@@ -1,7 +1,9 @@
+import SemanticVersions
+
 extension Availability
 {
     @frozen public 
-    enum Platform:String, CaseIterable, Hashable, Sendable 
+    enum PlatformDomain:String, CaseIterable, Hashable, Sendable 
     {
         case iOS 
         case macOS
@@ -17,4 +19,13 @@ extension Availability
         case tvOSApplicationExtension
         case watchOSApplicationExtension
     }
+}
+extension Availability.PlatformDomain:AvailabilityDomain
+{
+    public
+    typealias Bound = SemanticVersionMask
+    public
+    typealias Deprecation = Availability.Range<SemanticVersionMask>
+    public
+    typealias Unavailability = Availability.Range<Never>
 }
