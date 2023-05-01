@@ -7,13 +7,15 @@ extension Availability.Range:BSONDecodable where Bound:BSONDecodable
     @inlinable public
     init<Bytes>(bson:BSON.AnyValue<Bytes>) throws
     {
-        if  let bound:Bound = try .init(bson: bson)
+        //  Use ``BSON.min`` instead of ``BSON.null``, decoding explicit nulls
+        //  with sugared syntax is a footgun.
+        if  case .min = bson
         {
-            self = .since(bound)
+            self = .unconditionally
         }
         else
         {
-            self = .unconditionally
+            self = .since(try .init(bson: bson))
         }
     }
 }
@@ -22,12 +24,10 @@ extension Availability.Range:BSONEncodable, BSONFieldEncodable where Bound:BSONE
     public
     func encode(to field:inout BSON.Field)
     {
-        let representation:Bound?
         switch self
         {
-        case .unconditionally:  representation = nil
-        case .since(let bound): representation = bound
+        case .unconditionally:  BSON.Min.init().encode(to: &field)
+        case .since(let bound): bound.encode(to: &field)
         }
-        representation.encode(to: &field)
     }
 }

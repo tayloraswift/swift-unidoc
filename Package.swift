@@ -6,8 +6,8 @@ let package:Package = .init(
     platforms: [.macOS(.v11)],
     products:
     [
-        .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "Availability", targets: ["Availability"]),
+        .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
@@ -25,10 +25,12 @@ let package:Package = .init(
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
-        .library(name: "Repositories", targets: ["Repositories"]),
         .library(name: "PackageDescriptions", targets: ["PackageDescriptions"]),
+        .library(name: "Repositories", targets: ["Repositories"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
+
+        .library(name: "SourceMaps", targets: ["SourceMaps"]),
 
         .library(name: "Symbolics", targets: ["Symbolics"]),
         .library(name: "Symbols", targets: ["Symbols"]),
@@ -253,6 +255,15 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/Symbols"),
+        
+        .executableTarget(name: "SymbolGraphsTests", dependencies:
+            [
+                .target(name: "SymbolGraphs"),
+                //.target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/SymbolGraphs",
+            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
         
         .executableTarget(name: "SymbolGraphPartsTests", dependencies:
             [

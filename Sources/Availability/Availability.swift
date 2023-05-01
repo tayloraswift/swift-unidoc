@@ -10,21 +10,13 @@ struct Availability:Equatable, Sendable
     var agnostic:[AgnosticDomain: Clauses<AgnosticDomain>]
     
     @inlinable public
-    init(_ universal:Clauses<UniversalDomain>?,
+    init(_ universal:Clauses<UniversalDomain>? = nil,
         platforms:[PlatformDomain: Clauses<PlatformDomain>] = [:],
         agnostic:[AgnosticDomain: Clauses<AgnosticDomain>] = [:])
     {
         self.universal = universal
         self.platforms = platforms
         self.agnostic = agnostic
-    }
-}
-extension Availability:ExpressibleByDictionaryLiteral
-{
-    @inlinable public
-    init(dictionaryLiteral:(Never, Never)...)
-    {
-        self.init(nil)
     }
 }
 extension Availability

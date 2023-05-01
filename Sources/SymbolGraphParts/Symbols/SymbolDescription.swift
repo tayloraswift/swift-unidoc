@@ -213,7 +213,7 @@ extension SymbolDescription:JSONObjectDecodable
             {
                 try $0[.identifier].decode()
             },
-            availability: try json[.availability]?.decode() ?? [:],
+            availability: try json[.availability]?.decode() ?? .init(),
             doccomment: try json[.doccomment]?.decode(),
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
             visibility: try json[.visibility].decode(),
