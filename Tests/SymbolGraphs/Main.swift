@@ -8,5 +8,6 @@ enum Main:SyncTests
     func run(tests:Tests)
     {
         TestAvailability(tests / "availability")
+        TestGenerics(tests / "generics")
     }
 }

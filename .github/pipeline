@@ -9,6 +9,6 @@ swift run -c release MarkdownSemanticsTests &&
 swift run -c release PackageDescriptionsTests &&
 swift run -c release SemanticVersionsTests &&
 swift run -c release SymbolsTests &&
-swift run -c release SymbolGraphTests &&
+swift run -c release SymbolGraphsTests &&
 swift run -c release SymbolGraphPartsTests &&
 swift run -c release SymbolGraphCompilerTests
