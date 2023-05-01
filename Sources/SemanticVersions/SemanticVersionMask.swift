@@ -33,7 +33,23 @@ extension SemanticVersionMask
         }
     }
 }
-extension SemanticVersionMask:LosslessStringConvertible, CustomStringConvertible 
+extension SemanticVersionMask:CustomStringConvertible
+{
+    @inlinable public 
+    var description:String
+    {
+        switch self 
+        {
+        case .major(let major): 
+            return "\(major)"
+        case .minor(let major, let minor):
+            return "\(major).\(minor)"
+        case .patch(let major, let minor, let patch):
+            return "\(major).\(minor).\(patch)"
+        }
+    }
+}
+extension SemanticVersionMask:LosslessStringConvertible
 {
     @inlinable public
     init?(_ string:String)
@@ -69,18 +85,5 @@ extension SemanticVersionMask:LosslessStringConvertible, CustomStringConvertible
             return nil
         }
         self = .patch(major, minor, patch)
-    }
-    @inlinable public 
-    var description:String
-    {
-        switch self 
-        {
-        case .major(let major): 
-            return "\(major)"
-        case .minor(let major, let minor):
-            return "\(major).\(minor)"
-        case .patch(let major, let minor, let patch):
-            return "\(major).\(minor).\(patch)"
-        }
     }
 }
