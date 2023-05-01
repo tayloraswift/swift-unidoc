@@ -1,6 +1,7 @@
+import Availability
 import BSONDecoding
 import BSONEncoding
-import Availability
+import Testing
 
 func TestAvailability(_ tests:TestGroup?)
 {
