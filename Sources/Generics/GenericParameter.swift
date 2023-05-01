@@ -4,10 +4,10 @@ struct GenericParameter:Hashable, Equatable, Sendable
     public
     let name:String
     public
-    let depth:Int
+    let depth:UInt
 
     @inlinable
-    public init(name:String, depth:Int)
+    public init(name:String, depth:UInt)
     {
         self.name = name
         self.depth = depth
