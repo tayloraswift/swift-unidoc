@@ -1,6 +1,5 @@
 import Availability
 import Declarations
-import Fragments
 import Generics
 import JSONDecoding
 import LexicalPaths
@@ -66,10 +65,8 @@ extension SymbolDescription
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
-        expanded:
-        __shared [DeclarationFragment<Symbol.Scalar, DeclarationFragmentClass?>],
-        abridged:
-        __shared [DeclarationFragment<Symbol.Scalar, DeclarationFragmentClass?>],
+        expanded:__shared [DeclarationFragment],
+        abridged:__shared [DeclarationFragment],
         extension:ExtensionContext,
         generics:GenericSignature<Symbol.Scalar>,
         location:SourceLocation<String>?,
@@ -78,7 +75,7 @@ extension SymbolDescription
         var phylum:SymbolPhylum = phylum
 
         fragments:
-        for fragment:DeclarationFragment<Symbol.Scalar, DeclarationFragmentClass?>
+        for fragment:DeclarationFragment
             in expanded where fragment.color == .keyword
         {
             switch fragment.spelling
@@ -104,27 +101,28 @@ extension SymbolDescription
             break
         }
         
-        let fragments:DeclarationFragments<Symbol.Scalar>
+        let fragments:Declaration<Symbol.Scalar>.Fragments
         if  case .scalar(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature
-            fragments = .init(expanded: expanded, abridged: abridged.map
-            {
-                if  case .keyword? = $0.color,
-                    case "class" = $0.spelling
+            fragments = .init(abridged: .init(abridged.lazy.map
                 {
-                    return $0.spelled("actor")
-                }
-                else
-                {
-                    return $0
-                }
-            })
+                    if  case .keyword = $0.color,
+                        case "class" = $0.spelling
+                    {
+                        return $0.spelled("actor")
+                    }
+                    else
+                    {
+                        return $0
+                    }
+                }),
+                all: .init(expanded))
         }
         else
         {
-            fragments = .init(expanded: expanded, abridged: abridged)
+            fragments = .init(abridged: .init(abridged), all: .init(expanded))
         }
 
         //  strip empty parentheses from last path component

@@ -17,16 +17,15 @@ protocol MarkdownExecutable
 extension MarkdownExecutable
 {
     /// Returns nil.
-    public
+    @inlinable public
     func load(_ reference:UInt32) -> String?
     {
         nil
     }
-    /// Renders a placeholder `code` element describing the reference.
-    public
+    /// Does nothing.
+    @inlinable public
     func load(_ reference:UInt32, into html:inout HTML)
     {
-        html[.code] = "<reference = \(reference)>"
     }
 }
 extension MarkdownExecutable

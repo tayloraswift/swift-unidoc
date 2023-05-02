@@ -2,6 +2,7 @@
 enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
 {
     case comment        = "syntax-comment"
+    case binding        = "syntax-binding"
     case identifier     = "syntax-identifier"
     case keyword        = "syntax-keyword"
     case literal        = "syntax-literal"

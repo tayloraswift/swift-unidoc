@@ -5,7 +5,7 @@ struct MarkdownBytecode:Equatable, Sendable
     var bytes:[UInt8]
 
     @inlinable public
-    init(bytes:[UInt8] = [])
+    init(bytes:[UInt8])
     {
         self.bytes = bytes
     }
@@ -18,6 +18,14 @@ extension MarkdownBytecode
         var encoder:MarkdownBinaryEncoder = .init()
         try encode(&encoder)
         self = encoder.bytecode
+    }
+}
+extension MarkdownBytecode:ExpressibleByArrayLiteral
+{
+    @inlinable public
+    init(arrayLiteral:UInt8...)
+    {
+        self.init(bytes: arrayLiteral)
     }
 }
 extension MarkdownBytecode

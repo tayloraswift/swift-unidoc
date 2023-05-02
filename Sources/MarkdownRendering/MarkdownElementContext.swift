@@ -78,8 +78,11 @@ extension MarkdownElementContext
         case .tr:           self = .container(.tr)
         case .ul:           self = .container(.ul)
 
+        case .attribute:    self = .highlight(.keyword,     attributes: &attributes)
+        case .binding:      self = .highlight(.binding,     attributes: &attributes)
         case .comment:      self = .highlight(.comment,     attributes: &attributes)
         case .identifier:   self = .highlight(.identifier,  attributes: &attributes)
+        case .interpolation:self = .highlight(.magic,       attributes: &attributes)
         case .keyword:      self = .highlight(.keyword,     attributes: &attributes)
         case .literal:      self = .highlight(.literal,     attributes: &attributes)
         case .magic:        self = .highlight(.magic,       attributes: &attributes)
