@@ -1,3 +1,5 @@
+import HTML
+
 public
 protocol RenderableAsHTML
 {

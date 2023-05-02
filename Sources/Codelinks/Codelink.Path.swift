@@ -1,3 +1,5 @@
+import LexicalPaths
+
 extension Codelink
 {
     @frozen public

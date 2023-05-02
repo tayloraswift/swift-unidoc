@@ -1,3 +1,5 @@
+import HTML
+
 extension HTML
 {
     @inlinable public
