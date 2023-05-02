@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 
 @rethrows public
 protocol MarkdownExecutable

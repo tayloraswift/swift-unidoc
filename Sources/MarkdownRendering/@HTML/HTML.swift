@@ -1,4 +1,5 @@
 import HTMLRendering
+import MarkdownABI
 
 extension HTML
 {
