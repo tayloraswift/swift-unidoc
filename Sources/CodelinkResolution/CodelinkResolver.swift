@@ -1,3 +1,6 @@
+import Codelinks
+import LexicalPaths
+
 public
 struct CodelinkResolver
 {

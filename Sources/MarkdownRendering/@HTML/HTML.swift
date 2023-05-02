@@ -1,3 +1,4 @@
+import HTML
 import HTMLRendering
 import MarkdownABI
 
