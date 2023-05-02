@@ -1,9 +1,9 @@
 import MarkdownABI
 
-extension Declaration.Fragments
+extension Declaration
 {
     @frozen public
-    struct All:Equatable
+    struct Expanded:Equatable
     {
         public
         let bytecode:MarkdownBytecode
@@ -18,13 +18,13 @@ extension Declaration.Fragments
         }
     }
 }
-extension Declaration.Fragments.All:Sendable where Symbol:Sendable
+extension Declaration.Expanded:Sendable where Symbol:Sendable
 {
 }
-extension Declaration.Fragments.All
+extension Declaration.Expanded
 {
     @inlinable public
-    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>.Fragments.All
+    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>.Expanded
     {
         .init(bytecode: self.bytecode, links: try self.links.map(transform))
     }

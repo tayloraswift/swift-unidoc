@@ -74,7 +74,6 @@ extension SymbolDescription
     {
         var phylum:SymbolPhylum = phylum
 
-        fragments:
         for fragment:DeclarationFragment
             in expanded where fragment.color == .keyword
         {
@@ -101,12 +100,13 @@ extension SymbolDescription
             break
         }
         
-        let fragments:Declaration<Symbol.Scalar>.Fragments
+        let declaration:Declaration<Symbol.Scalar>
         if  case .scalar(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature
-            fragments = .init(abridged: .init(abridged.lazy.map
+            declaration = .init(availability: availability,
+                abridged: .init(abridged.lazy.map
                 {
                     if  case .keyword = $0.color,
                         case "class" = $0.spelling
@@ -118,11 +118,15 @@ extension SymbolDescription
                         return $0
                     }
                 }),
-                all: .init(expanded))
+                expanded: .init(expanded),
+                generics: generics)
         }
         else
         {
-            fragments = .init(abridged: .init(abridged), all: .init(expanded))
+            declaration = .init(availability: availability,
+                abridged: .init(abridged),
+                expanded: .init(expanded),
+                generics: generics)
         }
 
         //  strip empty parentheses from last path component
@@ -141,9 +145,7 @@ extension SymbolDescription
 
         self.init(usr,
             phylum: phylum,
-            declaration: .init(availability: availability,
-                fragments: fragments,
-                generics: generics),
+            declaration: declaration,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             interfaces: interfaces,
             visibility: visibility,
