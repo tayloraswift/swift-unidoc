@@ -80,8 +80,9 @@ let package:Package = .init(
                 .target(name: "Availability"),
                 .target(name: "Fragments"),
                 .target(name: "Generics"),
+                .target(name: "MarkdownABI")
             ]),
-        
+
         .target(name: "Fragments"),
 
         .target(name: "Generics"),

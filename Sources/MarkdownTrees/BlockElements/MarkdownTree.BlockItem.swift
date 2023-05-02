@@ -17,7 +17,7 @@ extension MarkdownTree
 
         /// Emits an `li` element.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.li]
             {

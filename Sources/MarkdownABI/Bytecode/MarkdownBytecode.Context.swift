@@ -95,8 +95,3 @@ extension MarkdownBytecode.Context
         }
     }
 }
-extension MarkdownBytecode.Context:MarkdownBytecodeInstruction
-{
-    @inlinable public static
-    var marker:MarkdownBytecode.Marker { .push }
-}

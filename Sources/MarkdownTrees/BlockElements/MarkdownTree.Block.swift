@@ -22,7 +22,7 @@ extension MarkdownTree
         }
         /// Emits nothing.
         open
-        func emit(into _:inout MarkdownBinary)
+        func emit(into _:inout MarkdownBinaryEncoder)
         {
         }
     }

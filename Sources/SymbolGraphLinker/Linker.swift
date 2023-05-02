@@ -241,9 +241,11 @@ extension Linker
             {
                 try self.address(of: $0)
             }
-
-            let article:SymbolGraph.Article<SymbolGraph.Referent>? =
-                scalar.documentation.map(self.resolver.link(documentation:))
+            let article:SymbolGraph.Article<SymbolGraph.Referent>? = scalar.documentation.map
+            {
+                var outliner:Outliner = .init(resolver: self.resolver, scope: $0.scope)
+                return outliner.link(comment: $0.comment)
+            }
 
             self.graph.scalars[address]?.declaration = declaration
             self.graph.scalars[address]?.location = location
@@ -279,11 +281,10 @@ extension Linker
                     }
                 }
             }
-            if let comment
+            if  let comment
             {
-                self.graph.scalars[address, index].article = self.resolver.link(
-                    comment: comment,
-                    scope: `extension`.path)
+                var outliner:Outliner = .init(resolver: self.resolver, scope: `extension`.path)
+                self.graph.scalars[address, index].article = outliner.link(comment: comment)
             }
         }
     }

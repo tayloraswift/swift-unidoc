@@ -27,7 +27,7 @@ extension MarkdownTree.Table.Row.Element:MarkdownElement
     }
 
     public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         self.cell.emit(into: &binary, alignment: self.alignment)
     }

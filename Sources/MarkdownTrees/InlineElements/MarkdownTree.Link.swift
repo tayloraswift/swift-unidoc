@@ -21,7 +21,7 @@ extension MarkdownTree
 extension MarkdownTree.Link:MarkdownElement
 {
     public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         binary[.a, { $0[.href] = self.target }]
         {

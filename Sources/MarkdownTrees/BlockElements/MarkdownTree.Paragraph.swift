@@ -7,7 +7,7 @@ extension MarkdownTree
     {
         /// Emits a `p` element.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.p] { super.emit(into: &$0) }
         }

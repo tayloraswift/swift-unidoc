@@ -1,26 +1,18 @@
-import Codelinks
-import MarkdownABI
 import MarkdownTrees
 
 @frozen public
 struct MarkdownDocumentation
 {
     public
-    var parameters:Parameters?
+    var overview:MarkdownTree.Paragraph?
     public
-    var returns:Returns?
-    public
-    var `throws`:Throws?
-    public
-    var article:[MarkdownTree.Block]
+    var details:Details
 
     public
-    init(parameters:Parameters?, returns:Returns?, throws:Throws?, article:[MarkdownTree.Block])
+    init(overview:MarkdownTree.Paragraph?, details:Details)
     {
-        self.parameters = parameters
-        self.returns = returns
-        self.throws = `throws`
-        self.article = article
+        self.overview = overview
+        self.details = details
     }
 }
 extension MarkdownDocumentation:MarkdownModel
@@ -28,28 +20,10 @@ extension MarkdownDocumentation:MarkdownModel
     public
     func visit(_ yield:(MarkdownTree.Block) throws -> ()) rethrows
     {
-        let discussion:ArraySlice<MarkdownTree.Block>
-
-        if case (let paragraph as MarkdownTree.Paragraph)? = self.article.first
-        {
-            try yield(paragraph)
-
-            discussion = self.article.dropFirst()
-        }
-        else
-        {
-            discussion = self.article[...]
-        }
-
-        try yield(Fold.init())
-
-        try self.parameters.map(yield)
-        try self.returns.map(yield)
-        try self.throws.map(yield)
-
-        try discussion.forEach(yield)
+        try self.overview.map(yield)
+        try self.details.visit(yield)
     }
-    
+
     public
     init(attaching blocks:[MarkdownTree.Block])
     {
@@ -143,12 +117,23 @@ extension MarkdownDocumentation:MarkdownModel
                 article.append(block)
             }
         }
+
+        let overview:MarkdownTree.Paragraph?
+        switch article.first
+        {
+        case (let paragraph as MarkdownTree.Paragraph)?:
+            overview = paragraph
+            article.removeFirst()
+        
+        default:
+            overview = nil
+        }
     
-        self.init(
+        self.init(overview: overview, details: .init(
             parameters: parameters.discussion.isEmpty && parameters.list.isEmpty ?
                 nil : .init(parameters.discussion, list: parameters.list),
             returns: returns.isEmpty ? nil : .init(returns),
             throws: `throws`.isEmpty ? nil : .init(`throws`),
-            article: article)
+            article: article))
     }
 }

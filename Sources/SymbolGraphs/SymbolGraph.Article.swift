@@ -1,4 +1,5 @@
 import Codelinks
+import MarkdownABI
 
 extension SymbolGraph
 {
@@ -6,16 +7,19 @@ extension SymbolGraph
     struct Article<Link>:Equatable, Sendable where Link:Equatable & Sendable
     {
         public
-        let markdown:[UInt8]
+        let overview:MarkdownBytecode
+        public
+        let details:MarkdownBytecode
         public
         let links:[Link]
         public
         let fold:Int
 
         @inlinable public
-        init(markdown:[UInt8], links:[Link], fold:Int)
+        init(overview:MarkdownBytecode, details:MarkdownBytecode, links:[Link], fold:Int)
         {
-            self.markdown = markdown
+            self.overview = overview
+            self.details = details
             self.links = links
             self.fold = fold
         }

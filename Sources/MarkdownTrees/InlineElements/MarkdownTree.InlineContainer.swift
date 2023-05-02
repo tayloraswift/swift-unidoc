@@ -29,7 +29,7 @@ extension MarkdownTree.InlineContainer:MarkdownElement
         }
     }
     public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         let context:MarkdownBytecode.Context
         switch self.type

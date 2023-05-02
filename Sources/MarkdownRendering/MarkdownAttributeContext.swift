@@ -24,13 +24,9 @@ extension MarkdownAttributeContext
     {
         self.complete.append((.class, enumerated.rawValue))
     }
-}
-extension MarkdownAttributeContext
-{
-    private mutating
-    func append(attribute instruction:MarkdownBytecode.Attribute, utf8:[UInt8])
+    mutating
+    func append(value:String, as instruction:MarkdownBytecode.Attribute)
     {
-        let value:String = .init(decoding: utf8, as: Unicode.UTF8.self)
         switch instruction
         {
         case .language: self.complete.append((.class, "language-\(value)"))
@@ -50,8 +46,20 @@ extension MarkdownAttributeContext
         case .title:    self.complete.append((.title, value))
         }
     }
+}
+extension MarkdownAttributeContext
+{
+    /// Remove all attributes from the attribute context.
     mutating
-    func flush()
+    func clear()
+    {
+        self.complete.removeAll()
+        self.current = nil
+    }
+    /// Closes the current attribute (if any), and appends it to the list of
+    /// complete attributes, making it available for encoding.
+    mutating
+    func commit()
     {
         defer
         {
@@ -59,14 +67,8 @@ extension MarkdownAttributeContext
         }
         if  let (instruction, utf8):(MarkdownBytecode.Attribute, [UInt8]) = self.current
         {
-            self.append(attribute: instruction, utf8: utf8)
+            self.append(value: .init(decoding: utf8, as: Unicode.UTF8.self), as: instruction)
         }
-    }
-    mutating
-    func clear()
-    {
-        self.complete.removeAll()
-        self.current = nil
     }
 }
 extension MarkdownAttributeContext

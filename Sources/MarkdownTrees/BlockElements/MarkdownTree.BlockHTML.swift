@@ -16,7 +16,7 @@ extension MarkdownTree
 
         /// Emits the raw text content of this element in a transparent instruction context.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.transparent] = self.text
         }

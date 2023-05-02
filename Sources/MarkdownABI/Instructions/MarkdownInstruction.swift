@@ -3,11 +3,10 @@ enum MarkdownInstruction:Equatable, Hashable, Sendable
 {
     case invalid
 
-    case attribute(MarkdownBytecode.Attribute)
+    case attribute(MarkdownBytecode.Attribute, UInt32? = nil)
     case emit(MarkdownBytecode.Emission)
-    case fold
+    case load(UInt32)
     case push(MarkdownBytecode.Context)
     case pop
-    case reference(UInt32)
     case utf8(UInt8)
 }

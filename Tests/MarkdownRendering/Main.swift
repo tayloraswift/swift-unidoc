@@ -9,11 +9,11 @@ enum Main:SyncTests
     private static
     func run(tests:TestGroup,
         expecting expected:String,
-        from markdown:(inout MarkdownBinary) -> ())
+        from markdown:(inout MarkdownBinaryEncoder) -> ())
     {
         tests.do
         {
-            let binary:MarkdownBinary = .init(with: markdown)
+            let binary:MarkdownBinary = .init(bytecode: .init(with: markdown))
             let html:HTML = try .init
             {
                 if let error:MarkdownExecutionError = binary.render(to: &$0)
@@ -247,12 +247,33 @@ enum Main:SyncTests
             {
                 $0[.p] { $0.write(reference: 12345) }
             }
+
+            for (name, reference):(String, UInt32) in
+            [
+                ("uint8",    255),
+                ("uint16", 65535),
+                ("uint32",  .max),
+            ]
+            {
+                guard let tests:TestGroup = tests / name
+                else
+                {
+                    continue
+                }
+                self.run(tests: tests,
+                    expecting: """
+                    <p><code>&lt;reference = \(reference)&gt;</code></p>
+                    """)
+                {
+                    $0[.p] { $0.write(reference: reference) }
+                }
+            }
         }
         if  let tests:TestGroup = tests / "references" / "success"
         {
             struct Executable:MarkdownExecutable
             {
-                let binary:MarkdownBinary = .init
+                let bytecode:MarkdownBytecode = .init
                 {
                     $0[.p]
                     {
@@ -262,12 +283,7 @@ enum Main:SyncTests
                     }
                 }
 
-                var bytecode:MarkdownBytecode
-                {
-                    self.binary.bytecode
-                }
-
-                func fill(html:inout HTML, with reference:UInt32)
+                func load(_ reference:UInt32, into html:inout HTML)
                 {
                     html[.a, { $0[.href] = "swiftinit.org" }] = String.init(reference,
                         radix: 16)
@@ -289,7 +305,7 @@ enum Main:SyncTests
                     case reference(UInt32)
                 }
 
-                let binary:MarkdownBinary = .init
+                let bytecode:MarkdownBytecode = .init
                 {
                     $0[.p]
                     {
@@ -299,12 +315,7 @@ enum Main:SyncTests
                     }
                 }
 
-                var bytecode:MarkdownBytecode
-                {
-                    self.binary.bytecode
-                }
-
-                func fill(html _:inout HTML, with reference:UInt32) throws
+                func load(_ reference:UInt32, into html:inout HTML) throws
                 {
                     throw ExpectedError.reference(reference)
                 }
@@ -319,6 +330,75 @@ enum Main:SyncTests
             }
 
             tests.expect(html.description ==? "<p>before</p>")
+        }
+        if  let tests:TestGroup = tests / "reference-attributes"
+        {
+            struct Executable:MarkdownExecutable
+            {
+                let bytecode:MarkdownBytecode
+
+                init(reference:UInt32)
+                {
+                    self.bytecode = .init
+                    {
+                        $0[.pre]
+                        {
+                            $0[.code]
+                            {
+                                $0[.keyword] = "let"
+                                $0.write(text: " ")
+                                $0[.identifier] = "x"
+                                $0.write(text: ":")
+                                $0[.type, { $0[.href] = reference }] = "Int"
+                            }
+                        }
+                    }
+                }
+
+                func load(_ reference:UInt32) -> String?
+                {
+                    reference & 1 == 0 ? nil : "swiftinit.org"
+                }
+            }
+
+            for (name, reference):(String, UInt32) in
+            [
+                ("uint8",    255),
+                ("uint16", 65535),
+                ("uint32",  .max),
+            ]
+            {
+                guard let tests:TestGroup = tests / name
+                else
+                {
+                    continue
+                }
+
+                let executable:Executable = .init(reference: reference)
+                let html:HTML = .init { _ = executable.render(to: &$0) }
+
+                tests.expect(html.description ==? """
+                    <pre><code>\
+                    <span class='syntax-keyword'>let</span> \
+                    <span class='syntax-identifier'>x</span>:\
+                    <a href='swiftinit.org' class='syntax-type'>Int</a>\
+                    </code></pre>
+                    """)
+            }
+
+            if  let tests:TestGroup = tests / "failure"
+            {
+                let executable:Executable = .init(reference: 2)
+                let html:HTML = .init { _ = executable.render(to: &$0) }
+
+                tests.expect(html.description ==? """
+                    <pre><code>\
+                    <span class='syntax-keyword'>let</span> \
+                    <span class='syntax-identifier'>x</span>:\
+                    <span class='syntax-type'>Int</span>\
+                    </code></pre>
+                    """)
+            }
         }
     }
 }

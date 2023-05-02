@@ -1,4 +1,3 @@
-import Codelinks
 import MarkdownABI
 import MarkdownTrees
 
@@ -17,7 +16,7 @@ extension MarkdownDocumentation
             super.init(elements)
         }
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.dt] = self.name
             binary[.dd]
