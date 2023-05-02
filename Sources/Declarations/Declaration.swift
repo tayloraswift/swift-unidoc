@@ -7,17 +7,21 @@ struct Declaration<Symbol>:Equatable where Symbol:Hashable
     public
     let availability:Availability
     public
-    var fragments:Fragments
+    var abridged:Abridged
+    public
+    var expanded:Expanded
     public
     var generics:GenericSignature<Symbol>
 
     @inlinable public
     init(availability:Availability = .init(),
-        fragments:Fragments = .init(),
+        abridged:Abridged = .init(),
+        expanded:Expanded = .init(),
         generics:GenericSignature<Symbol> = .init())
     {
         self.availability = availability
-        self.fragments = fragments
+        self.expanded = expanded
+        self.abridged = abridged
         self.generics = generics
     }
 }
@@ -30,7 +34,8 @@ extension Declaration
     func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>
     {
         .init(availability: self.availability,
-            fragments: try self.fragments.map(transform),
+            abridged: .init(bytecode: self.abridged.bytecode),
+            expanded: try self.expanded.map(transform),
             generics: try self.generics.map(transform))
     }
 }

@@ -1,6 +1,6 @@
 import MarkdownABI
 
-extension Declaration.Fragments
+extension Declaration
 {
     @frozen public
     struct Abridged:Equatable, Sendable
