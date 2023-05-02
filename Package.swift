@@ -11,7 +11,6 @@ let package:Package = .init(
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
-        .library(name: "Fragments", targets: ["Fragments"]),
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
@@ -78,12 +77,9 @@ let package:Package = .init(
         .target(name: "Declarations", dependencies:
             [
                 .target(name: "Availability"),
-                .target(name: "Fragments"),
                 .target(name: "Generics"),
                 .target(name: "MarkdownABI")
             ]),
-
-        .target(name: "Fragments"),
 
         .target(name: "Generics"),
 
@@ -204,14 +200,7 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/Codelinks"),
-        
-        .executableTarget(name: "FragmentsTests", dependencies:
-            [
-                .target(name: "Fragments"),
-                .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/Fragments"),
-        
+
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),

@@ -5,7 +5,7 @@ struct MarkdownAttributeEncoder
     var bytecode:MarkdownBytecode
 
     @inlinable internal
-    init(bytecode:MarkdownBytecode = .init())
+    init(bytecode:MarkdownBytecode)
     {
         self.bytecode = bytecode
     }

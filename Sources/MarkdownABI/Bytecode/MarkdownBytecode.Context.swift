@@ -35,8 +35,11 @@ extension MarkdownBytecode
         case ul
 
         //  Syntax highlights.
-        case comment = 0x20
+        case attribute = 0x20
+        case binding
+        case comment
         case identifier
+        case interpolation
         case keyword
         case literal
         case magic

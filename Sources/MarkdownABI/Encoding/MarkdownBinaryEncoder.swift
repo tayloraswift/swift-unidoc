@@ -5,9 +5,9 @@ struct MarkdownBinaryEncoder
     var encoder:MarkdownAttributeEncoder
 
     @inlinable internal
-    init(bytes:[UInt8] = [])
+    init()
     {
-        self.encoder = .init(bytecode: .init(bytes: bytes))
+        self.encoder = .init(bytecode: [])
     }
 }
 extension MarkdownBinaryEncoder
