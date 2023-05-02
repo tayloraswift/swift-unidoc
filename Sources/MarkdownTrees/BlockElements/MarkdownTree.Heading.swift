@@ -17,7 +17,7 @@ extension MarkdownTree
 
         /// Emits a heading element.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.h(self.level)] { super.emit(into: &$0) }
         }

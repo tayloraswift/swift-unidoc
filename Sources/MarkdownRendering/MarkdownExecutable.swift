@@ -5,20 +5,25 @@ protocol MarkdownExecutable
 {
     var bytecode:MarkdownBytecode { get }
 
-    func fold(html:inout HTML) throws
-    func fill(html:inout HTML, with reference:UInt32) throws
+    /// Returns the value for an attribute identified by the given reference.
+    /// If the witness returns nil, the renderer will omit the attribute.
+    func load(_ reference:UInt32) throws -> String?
+
+    /// Writes arbitrary content to the provided HTML output, identified by
+    /// the given reference.
+    func load(_ reference:UInt32, into html:inout HTML) throws
 }
 extension MarkdownExecutable
 {
-    /// Inserts a newline.
+    /// Returns nil.
     public
-    func fold(html:inout HTML)
+    func load(_ reference:UInt32) -> String?
     {
-        html.append(escaped: 0x0A)
+        nil
     }
     /// Renders a placeholder `code` element describing the reference.
     public
-    func fill(html:inout HTML, with reference:UInt32)
+    func load(_ reference:UInt32, into html:inout HTML)
     {
         html[.code] = "<reference = \(reference)>"
     }
@@ -50,30 +55,42 @@ extension MarkdownExecutable
             case .invalid:
                 return .invalid
             
-            case .attribute(let attribute):
-                attributes.flush()
+            case .attribute(let attribute, nil):
+                attributes.commit()
                 attributes.current = (attribute, [])
             
+            
+            case .attribute(let attribute, let reference?):
+                attributes.commit()
+
+                if  let value:String = try self.load(reference)
+                {
+                    attributes.append(value: value, as: attribute)
+                }
+            
             case .emit(let element):
-                attributes.flush()
+                attributes.commit()
                 html.emit(element: element, with: attributes)
                 attributes.clear()
             
-            case .fold:
-                try self.fold(html: &html)
+            case .load(let reference):
+                attributes.clear()
+                try self.load(reference, into: &html)
             
             case .push(let element):
-                attributes.flush()
+                attributes.commit()
 
                 let context:MarkdownElementContext = .init(from: element,
                     attributes: &attributes)
                 
                 html.open(context: context, with: attributes)
 
-                stack.append(context)
                 attributes.clear()
+                stack.append(context)
             
             case .pop:
+                attributes.clear()
+
                 if let context:MarkdownElementContext = stack.popLast()
                 {
                     html.close(context: context)
@@ -82,21 +99,6 @@ extension MarkdownExecutable
                 {
                     return .illegal
                 }
-
-                guard case nil = attributes.current
-                else
-                {
-                    return .attributes(preceding: .pop)
-                }
-            
-            case .reference(let reference):
-                guard case nil = attributes.current
-                else
-                {
-                    return .attributes(preceding: .reference)
-                }
-
-                try self.fill(html: &html, with: reference)
             
             case .utf8(let codeunit):
                 guard case nil = attributes.current?.utf8.append(codeunit)

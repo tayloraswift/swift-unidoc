@@ -19,7 +19,7 @@ extension MarkdownTree
 
         /// Emits a `pre` element with a `code` element inside of it.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.pre]
             {

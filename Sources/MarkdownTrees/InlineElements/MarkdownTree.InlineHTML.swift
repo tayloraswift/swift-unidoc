@@ -19,7 +19,7 @@ extension MarkdownTree.InlineHTML:MarkdownElement
 {
     /// Emits the raw text content of this element in a transparent instruction context.
     public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         binary[.transparent] = self.text
     }

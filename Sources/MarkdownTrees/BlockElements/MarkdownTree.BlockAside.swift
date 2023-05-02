@@ -11,7 +11,7 @@ extension MarkdownTree
         /// Emits the child block elements in this container, wrapped
         /// in this class’s element ``context``.
         public final override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[Self.context]
             {

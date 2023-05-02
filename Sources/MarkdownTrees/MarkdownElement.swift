@@ -9,7 +9,7 @@ protocol MarkdownElement
     mutating
     func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
 
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
 }
 extension MarkdownElement
 {

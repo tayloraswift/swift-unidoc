@@ -14,10 +14,29 @@ enum Main:SyncTests
         {
             let documentation:MarkdownDocumentation = .init(parsing: markdown,
                 as: SwiftFlavoredMarkdown.self)
-            let binary:MarkdownBinary = .init(from: documentation)
+            let overview:MarkdownBinary? = documentation.overview.map
+            {
+                .init(bytecode: .init(with: $0.emit(into:)))
+            }
+            let details:MarkdownBinary = .init(bytecode: .init
+            {
+                (encoder:inout MarkdownBinaryEncoder)in 
+
+                documentation.details.visit
+                {
+                    $0.emit(into: &encoder)
+                }
+            })
             let html:HTML = try .init
             {
-                if let error:MarkdownExecutionError = binary.render(to: &$0)
+                if let error:MarkdownExecutionError = overview?.render(to: &$0)
+                {
+                    throw error
+                }
+
+                $0.append(escaped: 0x0A) // '\n'
+
+                if let error:MarkdownExecutionError = details.render(to: &$0)
                 {
                     throw error
                 }

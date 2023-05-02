@@ -11,8 +11,3 @@ extension MarkdownBytecode
         case wbr
     }
 }
-extension MarkdownBytecode.Emission:MarkdownBytecodeInstruction
-{
-    @inlinable public static
-    var marker:MarkdownBytecode.Marker { .emit }
-}

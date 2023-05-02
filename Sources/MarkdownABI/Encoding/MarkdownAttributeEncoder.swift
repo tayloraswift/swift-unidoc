@@ -1,19 +1,16 @@
-extension MarkdownBinary
+@frozen public
+struct MarkdownAttributeEncoder
 {
-    @frozen public
-    struct AttributeEncoder
-    {
-        @usableFromInline internal
-        var bytecode:MarkdownBytecode
+    @usableFromInline internal
+    var bytecode:MarkdownBytecode
 
-        @inlinable internal
-        init(bytecode:MarkdownBytecode = .init())
-        {
-            self.bytecode = bytecode
-        }
+    @inlinable internal
+    init(bytecode:MarkdownBytecode = .init())
+    {
+        self.bytecode = bytecode
     }
 }
-extension MarkdownBinary.AttributeEncoder
+extension MarkdownAttributeEncoder
 {
     /// Serializes an empty attribute, if the assigned boolean is true.
     /// Does nothing if it is false. The getter always returns false.
@@ -40,8 +37,23 @@ extension MarkdownBinary.AttributeEncoder
         {
             if let text:String
             {
-                self.bytecode.write(instruction: attribute)
+                self.bytecode.write(attribute)
                 self.bytecode.write(text: text)
+            }
+        }
+    }
+    @inlinable public
+    subscript(attribute:MarkdownBytecode.Attribute) -> UInt32?
+    {
+        get
+        {
+            nil
+        }
+        set(reference)
+        {
+            if let reference:UInt32
+            {
+                self.bytecode.write(attribute, reference: reference)
             }
         }
     }

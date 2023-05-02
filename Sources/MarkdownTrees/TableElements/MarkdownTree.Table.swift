@@ -28,7 +28,7 @@ extension MarkdownTree
         }
         /// Emits a `table` element.
         public override
-        func emit(into binary:inout MarkdownBinary)
+        func emit(into binary:inout MarkdownBinaryEncoder)
         {
             binary[.table]
             {

@@ -12,7 +12,7 @@ extension MarkdownTree.BlockItem
 extension MarkdownTree.BlockItem.Checkbox
 {
     /// Emits an `input` element.
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         binary[.input]
         {

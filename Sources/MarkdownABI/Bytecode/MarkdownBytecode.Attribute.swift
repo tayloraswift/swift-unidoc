@@ -24,8 +24,3 @@ extension MarkdownBytecode
         case right
     }
 }
-extension MarkdownBytecode.Attribute:MarkdownBytecodeInstruction
-{   
-    @inlinable public static
-    var marker:MarkdownBytecode.Marker { .attribute }
-}

@@ -49,7 +49,7 @@ extension MarkdownTree.Table.Row:MarkdownElement
         }
     }
     public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         binary[.tr]
         {

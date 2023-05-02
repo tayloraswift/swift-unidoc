@@ -41,7 +41,7 @@ extension MarkdownTree.InlineBlock:MarkdownElement
     }
 
     @inlinable public
-    func emit(into binary:inout MarkdownBinary)
+    func emit(into binary:inout MarkdownBinaryEncoder)
     {
         switch self
         {

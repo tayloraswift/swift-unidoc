@@ -1,3 +1,0 @@
-extension MarkdownBinary:MarkdownExecutable
-{
-}

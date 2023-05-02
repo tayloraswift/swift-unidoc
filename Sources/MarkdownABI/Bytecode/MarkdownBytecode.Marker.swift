@@ -3,32 +3,35 @@ extension MarkdownBytecode
     @frozen public
     enum Marker:UInt8, Equatable, Hashable, Sendable
     {
-        /// A byte followed by an attribute.
-        case attribute = 0xC0
-        /// A byte followed by a four-byte reference.
-        case reference = 0xC1
-
-        /// Reserved.
-        case reserved = 0xF5
-
-        /// A no-op, can be used to partition bytecode into sections.
-        case fold = 0xFC
-        /// A byte followed by an element code.
-        case emit = 0xFD
         /// A byte followed by an element code, arbitrary content, and
         /// eventually a complementary ``pop`` byte. Conceptually this
         /// opens a new markdown context on the stack. Pushes and pops
         /// should always balance.
-        case push = 0xFE
+        case push = 0xC0
         /// Closes the current markdown context.
-        case pop = 0xFF
-    }
-}
-extension MarkdownBytecode.Marker
-{
-    @inlinable public
-    init(_ value:UInt8)
-    {
-        self = .init(rawValue: value) ?? .reserved
+        case pop = 0xC1
+
+        /// A byte followed by an element code.
+        case emit = 0xF8
+
+        /// A byte followed by an 8-bit reference.
+        case uint8 = 0xF9
+        /// A byte followed by a 16-bit little-endian reference.
+        case uint16 = 0xFA
+        /// A byte followed by a 32-bit little-endian reference.
+        case uint32 = 0xFB
+
+        /// A byte followed by an attribute. The value of the attribute,
+        /// if any, is literal UTF-8 text.
+        case attribute = 0xFC
+        /// A byte followed by an attribute. The value of the attribute
+        /// is an 8-bit reference.
+        case attribute8 = 0xFD
+        /// A byte followed by an attribute. The value of the attribute
+        /// is a 16-bit little-endian reference.
+        case attribute16 = 0xFE
+        /// A byte followed by an attribute. The value of the attribute
+        /// is a 32-bit little-endian reference.
+        case attribute32 = 0xFF
     }
 }
