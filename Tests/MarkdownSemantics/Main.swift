@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 import MarkdownParsing
 import MarkdownRendering
 import MarkdownSemantics

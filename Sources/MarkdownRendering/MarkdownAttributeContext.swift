@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 
 struct MarkdownAttributeContext
 {
