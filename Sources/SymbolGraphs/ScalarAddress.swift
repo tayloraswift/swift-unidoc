@@ -14,10 +14,12 @@ struct ScalarAddress
     {
         if  0 ... 0x00_ff_ff_ff ~= int32
         {
+            self.value = int32
+        }
+        else
+        {
             return nil
         }
-
-        self.value = int32
     }
 }
 extension ScalarAddress:SymbolAddress
