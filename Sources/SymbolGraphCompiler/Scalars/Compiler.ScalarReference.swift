@@ -73,9 +73,9 @@ extension Compiler.ScalarReference
             self.scope = nesting.scope
         }
 
-        if  let virtuality:ScalarVirtuality = nesting.virtuality
+        if  let aperture:ScalarAperture = nesting.aperture
         {
-            self.value.virtuality = virtuality
+            self.value.aperture = aperture
         }
         if  let origin:Symbol.Scalar = nesting.origin
         {
