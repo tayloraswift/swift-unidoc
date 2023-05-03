@@ -30,7 +30,7 @@ extension SymbolRelationship
 extension SymbolRelationship.Requirement:NestingRelationship
 {
     @inlinable public
-    var virtuality:ScalarPhylum.Virtuality?
+    var virtuality:ScalarVirtuality?
     {
         self.optional ? .optional : .required
     }

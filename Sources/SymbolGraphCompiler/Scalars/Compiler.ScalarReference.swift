@@ -73,7 +73,7 @@ extension Compiler.ScalarReference
             self.scope = nesting.scope
         }
 
-        if  let virtuality:ScalarPhylum.Virtuality = nesting.virtuality
+        if  let virtuality:ScalarVirtuality = nesting.virtuality
         {
             self.value.virtuality = virtuality
         }

@@ -25,7 +25,7 @@ extension SymbolRelationship
 extension SymbolRelationship.Membership:NestingRelationship
 {
     @inlinable public
-    var virtuality:ScalarPhylum.Virtuality? { nil }
+    var virtuality:ScalarVirtuality? { nil }
 
     @inlinable public
     var scope:Symbol? { self.target }

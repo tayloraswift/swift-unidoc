@@ -24,7 +24,7 @@ extension Compiler
         let path:LexicalPath
 
         public internal(set)
-        var virtuality:ScalarPhylum.Virtuality?
+        var virtuality:ScalarVirtuality?
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.

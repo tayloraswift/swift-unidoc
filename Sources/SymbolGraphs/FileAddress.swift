@@ -25,6 +25,17 @@ extension FileAddress:SymbolAddress
         self.init(value: int32)
     }
 }
+extension FileAddress
+{
+    /// Concatenates the bits of the two scalar addresses into a 64-bit integer,
+    /// storing the bits of the first operand in the most-significant bits of
+    /// the result.
+    static
+    func | (high:Self, low:SourcePosition) -> Int64
+    {
+        .init(high.value) << 32 | .init(low.rawValue)
+    }
+}
 extension FileAddress:BSONDecodable, BSONEncodable
 {
 }
