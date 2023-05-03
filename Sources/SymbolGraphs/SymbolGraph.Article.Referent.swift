@@ -55,7 +55,7 @@ extension SymbolGraph.Article.Referent:BSONDecodable
             
             case .int64(let int64):
                 if  let heir:ScalarAddress = .init(exactly: .init(int64 >> 32)),
-                    let address:ScalarAddress = .init(exactly: .init(int64 & 0xff_ff_ff_ff))
+                    let address:ScalarAddress = .init(exactly: .init(int64 & 0x00_ff_ff_ff))
                 {
                     return .vector(address, self: heir)
                 }
