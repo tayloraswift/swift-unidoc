@@ -13,9 +13,9 @@ extension SymbolTable
     private
     var next:Address?
     {
-        if  let uint32:UInt32 = .init(exactly: self.identities.count)
+        if  let int32:Int32 = .init(exactly: self.identities.count)
         {
-            return .init(exactly: uint32)
+            return .init(exactly: int32)
         }
         else
         {

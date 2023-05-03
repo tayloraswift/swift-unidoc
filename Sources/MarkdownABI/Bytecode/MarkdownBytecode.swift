@@ -13,6 +13,14 @@ struct MarkdownBytecode:Equatable, Sendable
 extension MarkdownBytecode
 {
     @inlinable public
+    var isEmpty:Bool
+    {
+        self.bytes.isEmpty
+    }
+}
+extension MarkdownBytecode
+{
+    @inlinable public
     init(with encode:(inout MarkdownBinaryEncoder) throws -> ()) rethrows
     {
         var encoder:MarkdownBinaryEncoder = .init()

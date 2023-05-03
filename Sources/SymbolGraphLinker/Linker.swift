@@ -241,7 +241,7 @@ extension Linker
             {
                 try self.address(of: $0)
             }
-            let article:SymbolGraph.Article<SymbolGraph.Referent>? = scalar.documentation.map
+            let article:SymbolGraph.Article? = scalar.documentation.map
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: $0.scope)
                 return outliner.link(comment: $0.comment)

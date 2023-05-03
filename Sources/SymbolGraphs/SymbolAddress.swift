@@ -6,9 +6,9 @@ protocol SymbolAddress:Equatable, Hashable, Comparable, Sendable
 {
     associatedtype Identity:Equatable, Hashable, Sendable
 
-    init?(exactly:UInt32)
+    init?(exactly:Int32)
 
-    var value:UInt32 { get }
+    var value:Int32 { get }
 }
 extension SymbolAddress
 {
@@ -23,7 +23,7 @@ extension SymbolAddress where Self:BSONEncodable
     public
     func encode(to field:inout BSON.Field)
     {
-        Int32.init(bitPattern: self.value).encode(to: &field)
+        self.value.encode(to: &field)
     }
 }
 extension SymbolAddress where Self:BSONDecodable
@@ -35,7 +35,7 @@ extension SymbolAddress where Self:BSONDecodable
         {
             if case .int32(let int32) = $0
             {
-                return .init(exactly: .init(bitPattern: int32))
+                return .init(exactly: int32)
             }
             else
             {

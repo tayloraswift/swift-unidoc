@@ -21,7 +21,7 @@ extension SymbolGraph
         var location:SourceLocation<FileAddress>?
 
         public
-        var article:Article<Referent>?
+        var article:Article?
 
         @inlinable public
         init(virtuality:ScalarPhylum.Virtuality?, phylum:ScalarPhylum, path:LexicalPath)

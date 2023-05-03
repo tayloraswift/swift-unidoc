@@ -6,10 +6,10 @@ import SourceMaps
 struct FileAddress
 {
     public
-    let value:UInt32
+    let value:Int32
 
     @inlinable public
-    init(value:UInt32)
+    init(value:Int32)
     {
         self.value = value
     }
@@ -20,9 +20,9 @@ extension FileAddress:SymbolAddress
     typealias Identity = FileIdentifier
 
     @inlinable public
-    init(exactly uint32:UInt32)
+    init(exactly int32:Int32)
     {
-        self.init(value: uint32)
+        self.init(value: int32)
     }
 }
 extension FileAddress:BSONDecodable, BSONEncodable
@@ -33,7 +33,7 @@ extension FileAddress:CustomStringConvertible
     public
     var description:String
     {
-        let hex:String = .init(self.value, radix: 16)
+        let hex:String = .init(UInt32.init(bitPattern: self.value), radix: 16)
         return "0x\(String.init(repeating: "0", count: 8 - hex.count))"
     }
 }

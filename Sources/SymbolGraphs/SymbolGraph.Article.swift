@@ -1,27 +1,65 @@
-import Codelinks
+import BSONDecoding
+import BSONEncoding
 import MarkdownABI
 
 extension SymbolGraph
 {
     @frozen public
-    struct Article<Link>:Equatable, Sendable where Link:Equatable & Sendable
+    struct Article:Equatable, Sendable
     {
+        public
+        let referents:[Referent]
         public
         let overview:MarkdownBytecode
         public
         let details:MarkdownBytecode
-        public
-        let links:[Link]
+        /// The number of referents used by the overview paragraph alone.
         public
         let fold:Int
 
         @inlinable public
-        init(overview:MarkdownBytecode, details:MarkdownBytecode, links:[Link], fold:Int)
+        init(referents:[Referent],
+            overview:MarkdownBytecode,
+            details:MarkdownBytecode,
+            fold:Int?)
         {
+            self.referents = referents
             self.overview = overview
             self.details = details
-            self.links = links
-            self.fold = fold
+            self.fold = fold ?? self.referents.endIndex
         }
+    }
+}
+extension SymbolGraph.Article
+{
+    public
+    enum CodingKeys:String
+    {
+        case referents = "R"
+        case overview = "O"
+        case details = "D"
+        case fold = "F"
+    }
+}
+extension SymbolGraph.Article:BSONDocumentEncodable
+{
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    {
+        bson[.referents] = self.referents.isEmpty ? nil : self.referents
+        bson[.overview] = self.overview.isEmpty ? nil : self.overview
+        bson[.details] = self.details.isEmpty ? nil : self.details
+        bson[.fold] = self.fold == self.referents.endIndex ? nil : self.fold
+    }
+}
+extension SymbolGraph.Article:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    {
+        self.init(referents: try bson[.referents]?.decode() ?? [],
+            overview: try bson[.overview]?.decode() ?? [],
+            details: try bson[.details]?.decode() ?? [],
+            fold: try bson[.fold]?.decode())
     }
 }

@@ -1,29 +1,40 @@
 import BSONDecoding
 import BSONEncoding
 
-/// A ``UInt32`` that is statically known to be representable
+/// An ``Int32`` that is statically known to be representable
 /// as a 24-bit unsigned integer.
 @frozen public
 struct ScalarAddress
 {
     public
-    let value:UInt32
+    let value:Int32
 
     @inlinable public
-    init?(exactly uint32:UInt32)
+    init?(exactly int32:Int32)
     {
-        if uint32 & 0xff_00_00_00 != 0
+        if  0 ... 0x00_ff_ff_ff ~= int32
         {
             return nil
         }
 
-        self.value = uint32
+        self.value = int32
     }
 }
 extension ScalarAddress:SymbolAddress
 {
     public
     typealias Identity = ScalarIdentifier
+}
+extension ScalarAddress
+{
+    /// Concatenates the bits of the two scalar addresses into a 64-bit integer,
+    /// storing the bits of the first operand in the most-significant bits of
+    /// the result.
+    static
+    func | (high:Self, low:Self) -> Int64
+    {
+        .init(high.value) << 32 | .init(low.value)
+    }
 }
 extension ScalarAddress:BSONDecodable, BSONEncodable
 {
