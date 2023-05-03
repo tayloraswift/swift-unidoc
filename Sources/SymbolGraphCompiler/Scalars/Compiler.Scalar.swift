@@ -24,7 +24,7 @@ extension Compiler
         let path:LexicalPath
 
         public internal(set)
-        var virtuality:ScalarVirtuality?
+        var aperture:ScalarAperture
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.
@@ -63,7 +63,8 @@ extension Compiler
             self.phylum = phylum
             self.path = path
 
-            self.virtuality = visibility == .open ? .open : nil
+            self.aperture = visibility == .open ? .open : .closed
+
             self.superforms = []
             self.features = []
             self.origin = nil

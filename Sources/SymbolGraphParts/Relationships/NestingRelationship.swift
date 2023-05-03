@@ -7,7 +7,7 @@ protocol NestingRelationship
     var origin:Symbol.Scalar? { get }
     var scope:Symbol? { get }
 
-    var virtuality:ScalarVirtuality? { get }
+    var aperture:ScalarAperture? { get }
 
     func validate(source phylum:ScalarPhylum) -> Bool
 }

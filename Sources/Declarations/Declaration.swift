@@ -5,7 +5,7 @@ import Generics
 struct Declaration<Symbol>:Equatable where Symbol:Hashable
 {
     public
-    let availability:Availability
+    var availability:Availability
     public
     var abridged:Abridged
     public

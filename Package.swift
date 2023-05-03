@@ -44,8 +44,9 @@ let package:Package = .init(
             from: "0.5.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
-        .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.1.15")),
+        //.package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
+        //    from: "0.1.15")),
+        .package(path: "../swift-mongodb"),
         
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
             from: "0.50800.0")),

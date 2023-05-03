@@ -30,9 +30,9 @@ extension SymbolRelationship
 extension SymbolRelationship.Requirement:NestingRelationship
 {
     @inlinable public
-    var virtuality:ScalarVirtuality?
+    var aperture:ScalarAperture?
     {
-        self.optional ? .optional : .required
+        self.optional ? .requiredOptionally : .required
     }
 
     @inlinable public

@@ -42,7 +42,7 @@ extension LexicalPath
     @inlinable public
     init?(_ components:some BidirectionalCollection<String>) 
     {
-        if let last:String = components.last
+        if  let last:String = components.last
         {
             self.init(.init(components.dropLast()), last)
         }
@@ -108,7 +108,7 @@ extension LexicalPath:RandomAccessCollection
 extension LexicalPath:CustomStringConvertible
 {
     @inlinable public
-    var description:String 
+    var description:String
     {
         self.joined(separator: ".")
     }

@@ -68,8 +68,7 @@ extension Linker
     func index(scalar:Compiler.Scalar) throws -> ScalarAddress
     {
         let address:ScalarAddress = try self.graph.scalars.push(.init(
-                virtuality: scalar.virtuality,
-                phylum: scalar.phylum,
+                flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
                 path: scalar.path),
             id: scalar.id)
         

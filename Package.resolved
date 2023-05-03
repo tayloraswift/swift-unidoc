@@ -64,21 +64,12 @@
       }
     },
     {
-      "identity" : "swift-mongodb",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tayloraswift/swift-mongodb",
-      "state" : {
-        "revision" : "70ac35eb04c4e257445b67b1c513a7126072d90b",
-        "version" : "0.1.15"
-      }
-    },
-    {
       "identity" : "swift-nio",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "f7c46552983b06b0958a1a4c8bc5199406ae4c8a",
-        "version" : "2.51.0"
+        "revision" : "d1690f85419fdac8d54e350fb6d2ab9fd95afd75",
+        "version" : "2.51.1"
       }
     },
     {

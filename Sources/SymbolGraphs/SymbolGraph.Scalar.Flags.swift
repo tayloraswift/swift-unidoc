@@ -1,27 +1,45 @@
+import BSONDecoding
+import BSONEncoding
+
 extension SymbolGraph.Scalar
 {
-    struct Flags:RawRepresentable
+    @frozen public
+    struct Flags
     {
-        let rawValue:Int32
+        public
+        let aperture:ScalarAperture
+        public
+        let phylum:ScalarPhylum
 
-        init(rawValue:Int32)
+        @inlinable public
+        init(aperture:ScalarAperture, phylum:ScalarPhylum)
         {
-            self.rawValue = rawValue
+            self.aperture = aperture
+            self.phylum = phylum
         }
     }
 }
-extension SymbolGraph.Scalar.Flags
+extension SymbolGraph.Scalar.Flags:RawRepresentable
 {
-    init(virtuality:ScalarVirtuality?, phylum:ScalarPhylum)
+    @inlinable public
+    var rawValue:Int32
     {
-        self.init(rawValue: .init(phylum.rawValue) << 8 | .init(virtuality?.rawValue ?? 0))
+        .init(self.phylum.rawValue) << 8 | .init(self.aperture.rawValue)
     }
-    var virtuality:ScalarVirtuality?
+    @inlinable public
+    init?(rawValue:Int32)
     {
-        .init(rawValue: .init(truncatingIfNeeded: self.rawValue))
+        if  let aperture:ScalarAperture = .init(rawValue: .init(truncatingIfNeeded: rawValue)),
+            let phylum:ScalarPhylum = .init(rawValue: .init(truncatingIfNeeded: rawValue >> 8))
+        {
+            self.init(aperture: aperture, phylum: phylum)
+        }
+        else
+        {
+            return nil
+        }
     }
-    var phylum:ScalarPhylum?
-    {
-        .init(rawValue: .init(truncatingIfNeeded: self.rawValue >> 8))
-    }
+}
+extension SymbolGraph.Scalar.Flags:BSONDecodable, BSONEncodable
+{
 }
