@@ -24,7 +24,7 @@ extension SymbolGraph
         var nested:[ScalarAddress]
 
         public
-        var article:Article<Referent>?
+        var article:Article?
 
         @inlinable public
         init(conformances:[ScalarAddress] = [],
@@ -59,6 +59,24 @@ extension SymbolGraph.Extension:BSONDocumentEncodable, BSONEncodable, BSONFieldE
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        fatalError("unimplemented")
+        bson[.conformances] = self.conformances.isEmpty ? nil : self.conformances
+        bson[.features] = self.features.isEmpty ? nil : self.features
+        bson[.nested] = self.nested.isEmpty ? nil : self.nested
+
+        bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
+        bson[.article] = self.article
+    }
+}
+extension SymbolGraph.Extension:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    {
+        self.init(conformances: try bson[.conformances]?.decode() ?? [],
+            features: try bson[.features]?.decode() ?? [],
+            nested: try bson[.nested]?.decode() ?? [],
+            where: try bson[.conditions]?.decode() ?? [])
+        
+        self.article = try bson[.article]?.decode()
     }
 }
