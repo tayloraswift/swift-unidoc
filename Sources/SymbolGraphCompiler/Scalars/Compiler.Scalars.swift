@@ -7,7 +7,7 @@ extension Compiler
     struct Scalars
     {
         private
-        var entries:[Symbol.Scalar: Entry]
+        var entries:[ScalarSymbol: Entry]
 
         init()
         {
@@ -21,7 +21,7 @@ extension Compiler.Scalars
     func load() -> (local:[Compiler.Scalar], external:Compiler.ScalarNominations)
     {
         var included:[Compiler.Scalar] = []
-        let external:[Symbol.Scalar: Compiler.ScalarNomination] =
+        let external:[ScalarSymbol: Compiler.ScalarNomination] =
             self.entries.compactMapValues
         {
             switch $0
@@ -44,7 +44,7 @@ extension Compiler.Scalars
 extension Compiler.Scalars
 {
     mutating
-    func include(vector resolution:Symbol.Vector, with description:SymbolDescription) throws
+    func include(vector resolution:VectorSymbol, with description:SymbolDescription) throws
     {
         if case .scalar(let phylum) = description.phylum
         {
@@ -57,7 +57,7 @@ extension Compiler.Scalars
         }
     }
     mutating
-    func include(scalar resolution:Symbol.Scalar,
+    func include(scalar resolution:ScalarSymbol,
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
@@ -68,13 +68,13 @@ extension Compiler.Scalars
                 in: context))))
     }
     mutating
-    func exclude(scalar resolution:Symbol.Scalar) throws
+    func exclude(scalar resolution:ScalarSymbol) throws
     {
         try self.update(resolution, with: .excluded)
     }
 
     private mutating
-    func update(_ resolution:Symbol.Scalar, with entry:Entry) throws
+    func update(_ resolution:ScalarSymbol, with entry:Entry) throws
     {
         try
         {
@@ -88,7 +88,7 @@ extension Compiler.Scalars
 }
 extension Compiler.Scalars
 {
-    subscript(resolution:Symbol.Scalar) -> Symbol.Scalar?
+    subscript(resolution:ScalarSymbol) -> ScalarSymbol?
     {
         switch self.entries[resolution]
         {
@@ -101,7 +101,7 @@ extension Compiler.Scalars
         }
     }
     func callAsFunction(
-        internal resolution:Symbol.Scalar) throws -> Compiler.ScalarReference?
+        internal resolution:ScalarSymbol) throws -> Compiler.ScalarReference?
     {
         switch self.entries[resolution]
         {

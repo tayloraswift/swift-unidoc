@@ -144,7 +144,7 @@ extension Linker
 extension Linker
 {
     private mutating
-    func address(of scalar:Symbol.Scalar?) throws -> ScalarAddress?
+    func address(of scalar:ScalarSymbol?) throws -> ScalarAddress?
     {
         try scalar.map
         {
@@ -162,7 +162,7 @@ extension Linker
     /// it more efficient to expose scalars while performing a different
     /// pass.
     private mutating
-    func addresses(of scalars:[Symbol.Scalar]) throws -> [ScalarAddress]
+    func addresses(of scalars:[ScalarSymbol]) throws -> [ScalarAddress]
     {
         try scalars.map
         {
@@ -188,9 +188,9 @@ extension Linker
     /// codelink resolver, because it’s more efficient to combine these
     /// two passes.
     private mutating
-    func addresses(exposing features:[Symbol.Scalar],
+    func addresses(exposing features:[ScalarSymbol],
         prefixed prefix:[String],
-        of extended:Symbol.Scalar,
+        of extended:ScalarSymbol,
         at address:ScalarAddress) throws -> [ScalarAddress]
     {
         try features.map
@@ -200,7 +200,7 @@ extension Linker
                 self.graph.nodes[feature].map({ ($0.path.last, $0.phylum) }) ??
                 self.external[feature: $0]
             {
-                let vector:Symbol.Vector = .init($0, self: extended)
+                let vector:VectorSymbol = .init($0, self: extended)
                 self.resolver.overload(.init(prefix, last), with: .init(
                     target: .vector(feature, self: address),
                     phylum: phylum,

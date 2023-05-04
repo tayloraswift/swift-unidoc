@@ -7,12 +7,12 @@ struct DeclarationFragment:Equatable, Hashable, Sendable
     public
     let spelling:String
     public
-    let referent:Symbol.Scalar?
+    let referent:ScalarSymbol?
     public
     let color:Color
 
     @inlinable public
-    init(_ spelling:String, referent:Symbol.Scalar? = nil, color:Color)
+    init(_ spelling:String, referent:ScalarSymbol? = nil, color:Color)
     {
         self.spelling = spelling
         self.referent = referent

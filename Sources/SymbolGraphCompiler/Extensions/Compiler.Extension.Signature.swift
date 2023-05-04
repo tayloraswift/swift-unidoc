@@ -7,14 +7,14 @@ extension Compiler.Extension
     {
         /// The type extended by the relevant extension group.
         public
-        let type:Symbol.Scalar
+        let type:ScalarSymbol
         /// The generic constraints of the relevant extension group.
         /// An empty array represents an unconstrained extension.
         public
-        let conditions:[GenericConstraint<Symbol.Scalar>]
+        let conditions:[GenericConstraint<ScalarSymbol>]
 
         public
-        init(_ type:Symbol.Scalar, where conditions:[GenericConstraint<Symbol.Scalar>])
+        init(_ type:ScalarSymbol, where conditions:[GenericConstraint<ScalarSymbol>])
         {
             self.type = type
             self.conditions = conditions

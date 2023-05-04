@@ -78,7 +78,7 @@ enum Main:SyncTests
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
         {
-            for (symbol, phylum):([String], SymbolPhylum) in
+            for (symbol, phylum):([String], UnifiedPhylum) in
             [
                 (["Int"], .block),
                 (["Int", "AssociatedType"], .scalar(.typealias)),
@@ -352,7 +352,7 @@ enum Main:SyncTests
                 TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):([String], [GenericConstraint<Symbol.Scalar>]) in
+            for (symbol, conditions):([String], [GenericConstraint<ScalarSymbol>]) in
             [
                 (
                     ["Struct", "internal(_:)"],
@@ -382,7 +382,7 @@ enum Main:SyncTests
                 ExtendableTypesWithConstraints.symbols.json
                 """)
         {
-            for (symbol, conditions):([String], [GenericConstraint<Symbol.Scalar>]) in
+            for (symbol, conditions):([String], [GenericConstraint<ScalarSymbol>]) in
             [
                 (
                     ["Struct"],

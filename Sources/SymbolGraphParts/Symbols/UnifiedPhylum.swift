@@ -3,13 +3,13 @@ import JSONEncoding
 import Symbolics
 
 @frozen public 
-enum SymbolPhylum:Hashable, Equatable, Sendable
+enum UnifiedPhylum:Hashable, Equatable, Sendable
 {
     case block
     case macro
     case scalar(ScalarPhylum)
 }
-extension SymbolPhylum:JSONDecodable, JSONStringDecodable
+extension UnifiedPhylum:JSONDecodable, JSONStringDecodable
 {
     public
     init?(_ description:String)

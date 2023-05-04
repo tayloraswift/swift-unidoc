@@ -1,24 +1,21 @@
 import Symbolics
 
-extension Symbol
+/// A scalar symbol resolution. The only difference between a resolution
+/// and a ``ScalarIdentifier`` is a symbol resolution contains a colon
+/// after its language prefix, like `s:s17FloatingPointSignO`.
+@frozen public
+struct ScalarSymbol:Equatable, Hashable, Sendable
 {
-    /// A scalar symbol resolution. The only difference between a resolution
-    /// and a ``ScalarIdentifier`` is a symbol resolution contains a colon
-    /// after its language prefix, like `s:s17FloatingPointSignO`.
-    @frozen public
-    struct Scalar:Equatable, Hashable, Sendable
-    {
-        public
-        let id:ScalarIdentifier
+    public
+    let id:ScalarIdentifier
 
-        @inlinable public
-        init(_ id:ScalarIdentifier)
-        {
-            self.id = id
-        }
+    @inlinable public
+    init(_ id:ScalarIdentifier)
+    {
+        self.id = id
     }
 }
-extension Symbol.Scalar:Comparable
+extension ScalarSymbol:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -26,7 +23,7 @@ extension Symbol.Scalar:Comparable
         lhs.id < rhs.id
     }
 }
-extension Symbol.Scalar:CustomStringConvertible
+extension ScalarSymbol:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -34,7 +31,7 @@ extension Symbol.Scalar:CustomStringConvertible
         "\(self.id.language):\(self.id.suffix)"
     }
 }
-extension Symbol.Scalar:LosslessStringConvertible
+extension ScalarSymbol:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:__shared String)

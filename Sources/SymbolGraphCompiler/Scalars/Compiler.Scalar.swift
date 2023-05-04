@@ -12,9 +12,9 @@ extension Compiler
     struct Scalar:Sendable
     {
         public
-        let declaration:Declaration<Symbol.Scalar>
+        let declaration:Declaration<ScalarSymbol>
         public
-        let resolution:Symbol.Scalar
+        let resolution:ScalarSymbol
         public
         let location:SourceLocation<FileIdentifier>?
 
@@ -35,25 +35,25 @@ extension Compiler
         ///
         /// The compiler does not check for inheritance cycles.
         public internal(set)
-        var superforms:Set<Symbol.Scalar>
+        var superforms:Set<ScalarSymbol>
         /// The *unqualified* features inherited by this scalar. Avoid adding
         /// features here; if the feature’s extension constraints are known,
         /// add them to an appropriate ``ExtensionReference`` instead.
         ///
         /// This field only exists because of an upstream bug in SymbolGraphGen.
         public internal(set)
-        var features:Set<Symbol.Scalar>
+        var features:Set<ScalarSymbol>
         /// A scalar that has documentation that is relevant, but less specific
         /// to this scalar.
         public internal(set)
-        var origin:Symbol.Scalar?
+        var origin:ScalarSymbol?
 
         private
         var comment:Documentation.Comment?
 
         private
-        init(declaration:Declaration<Symbol.Scalar>,
-            resolution:Symbol.Scalar,
+        init(declaration:Declaration<ScalarSymbol>,
+            resolution:ScalarSymbol,
             visibility:SymbolDescription.Visibility,
             location:SourceLocation<FileIdentifier>?,
             phylum:ScalarPhylum,
@@ -117,7 +117,7 @@ extension Compiler.Scalar:Identifiable
 extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
-        as resolution:__owned Symbol.Scalar,
+        as resolution:__owned ScalarSymbol,
         in context:__shared Compiler.SourceContext) throws
     {
         guard case .scalar(let phylum) = description.phylum

@@ -21,7 +21,7 @@ extension SymbolGraph.Nodes
     @inlinable public mutating
     func push(_ scalar:SymbolGraph.Scalar?, id:ScalarIdentifier) throws -> ScalarAddress
     {
-        self.nodes.append(.init(scalar))
+        self.nodes.append(.init(scalar: scalar))
         return try self.symbols(id)
     }
 }
@@ -44,11 +44,11 @@ extension SymbolGraph.Nodes
     {
         _read
         {
-            yield  self[address].local
+            yield  self[address].scalar
         }
         _modify
         {
-            yield &self[address].local
+            yield &self[address].scalar
         }
     }
     @inlinable public

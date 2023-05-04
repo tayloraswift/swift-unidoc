@@ -5,9 +5,9 @@ extension Compiler
     struct ScalarNominations:Sendable
     {
         @usableFromInline internal
-        let nominations:[Symbol.Scalar: Compiler.ScalarNomination]
+        let nominations:[ScalarSymbol: Compiler.ScalarNomination]
 
-        init(_ nominations:[Symbol.Scalar: Compiler.ScalarNomination])
+        init(_ nominations:[ScalarSymbol: Compiler.ScalarNomination])
         {
             self.nominations = nominations
         }
@@ -16,7 +16,7 @@ extension Compiler
 extension Compiler.ScalarNominations
 {
     @inlinable public
-    subscript(feature scalar:Symbol.Scalar) -> (name:String, phylum:ScalarPhylum)?
+    subscript(feature scalar:ScalarSymbol) -> (name:String, phylum:ScalarPhylum)?
     {
         self.nominations[scalar].map { ($0.name, $0.phylum) }
     }

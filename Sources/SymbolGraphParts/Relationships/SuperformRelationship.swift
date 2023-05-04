@@ -4,9 +4,9 @@ import Symbols
 public
 protocol SuperformRelationship
 {
-    var source:Symbol.Scalar { get }
-    var target:Symbol.Scalar { get }
-    var origin:Symbol.Scalar? { get }
+    var source:ScalarSymbol { get }
+    var target:ScalarSymbol { get }
+    var origin:ScalarSymbol? { get }
 
     func validate(source phylum:ScalarPhylum) -> Bool
 }

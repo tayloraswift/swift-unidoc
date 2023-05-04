@@ -174,7 +174,7 @@ extension Compiler
         switch relationship.source
         {
         case .vector(let vector):
-            guard let feature:Symbol.Scalar = self.scalars[vector.feature]
+            guard let feature:ScalarSymbol = self.scalars[vector.feature]
             else
             {
                 return // Feature is hidden.
@@ -274,7 +274,7 @@ extension Compiler
     private mutating
     func insert(_ conformance:SymbolRelationship.Conformance) throws
     {
-        guard let `protocol`:Symbol.Scalar = self.scalars[conformance.target]
+        guard let `protocol`:ScalarSymbol = self.scalars[conformance.target]
         else
         {
             return // Protocol is hidden.
@@ -296,7 +296,7 @@ extension Compiler
             {
                 return // Type is hidden.
             }
-            if let origin:Symbol.Scalar = conformance.origin
+            if let origin:ScalarSymbol = conformance.origin
             {
                 try type.assign(origin: origin)
             }

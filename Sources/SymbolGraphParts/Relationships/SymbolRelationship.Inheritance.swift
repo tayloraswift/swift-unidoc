@@ -7,14 +7,14 @@ extension SymbolRelationship
     struct Inheritance:SuperformRelationship, Equatable, Hashable, Sendable
     {
         public
-        let source:Symbol.Scalar
+        let source:ScalarSymbol
         public
-        let target:Symbol.Scalar
+        let target:ScalarSymbol
         public
-        let origin:Symbol.Scalar?
+        let origin:ScalarSymbol?
 
         @inlinable public
-        init(by source:Symbol.Scalar, of target:Symbol.Scalar, origin:Symbol.Scalar? = nil)
+        init(by source:ScalarSymbol, of target:ScalarSymbol, origin:ScalarSymbol? = nil)
         {
             self.source = source
             self.target = target

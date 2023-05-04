@@ -11,10 +11,10 @@ extension SymbolRelationship
         public
         let target:Symbol
         public
-        let origin:Symbol.Scalar?
+        let origin:ScalarSymbol?
 
         @inlinable public
-        init(of source:Symbol, in target:Symbol, origin:Symbol.Scalar? = nil)
+        init(of source:Symbol, in target:Symbol, origin:ScalarSymbol? = nil)
         {
             self.source = source
             self.target = target

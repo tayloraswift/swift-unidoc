@@ -5,9 +5,9 @@ extension SymbolRelationship
 {
     struct SourceOrigin:Equatable, Hashable, Sendable
     {
-        let resolution:Symbol.Scalar
+        let resolution:ScalarSymbol
 
-        init(_ resolution:Symbol.Scalar)
+        init(_ resolution:ScalarSymbol)
         {
             self.resolution = resolution
         }
