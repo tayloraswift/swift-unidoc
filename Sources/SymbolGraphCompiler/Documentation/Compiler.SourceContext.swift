@@ -1,5 +1,5 @@
 import Repositories
-import SourceMaps
+import Symbols
 import SymbolGraphParts
 
 extension Compiler
@@ -18,7 +18,7 @@ extension Compiler
 }
 extension Compiler.SourceContext
 {
-    func resolve(uri:String) throws -> FileIdentifier
+    func resolve(uri:String) throws -> FileSymbol
     {
         guard   var start:String.Index = uri.index(uri.startIndex,
                     offsetBy: 7,

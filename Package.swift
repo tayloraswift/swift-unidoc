@@ -29,8 +29,6 @@ let package:Package = .init(
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
-        .library(name: "SourceMaps", targets: ["SourceMaps"]),
-
         .library(name: "Symbols", targets: ["Symbols"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
@@ -133,11 +131,6 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
-        .target(name: "SourceMaps", dependencies:
-            [
-                .target(name: "StringIdentifiers"),
-            ]),
-
         .target(name: "StringIdentifiers"),
 
         .target(name: "Symbols"),
@@ -147,7 +140,6 @@ let package:Package = .init(
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
                 .target(name: "Repositories"),
-                .target(name: "SourceMaps"),
                 .target(name: "Symbols"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -159,7 +151,6 @@ let package:Package = .init(
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
                 .target(name: "Repositories"),
-                .target(name: "SourceMaps"),
                 .target(name: "Symbols"),
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),

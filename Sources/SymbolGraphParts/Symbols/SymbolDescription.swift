@@ -3,7 +3,6 @@ import Declarations
 import Generics
 import JSONDecoding
 import LexicalPaths
-import SourceMaps
 import Symbols
 
 @frozen public

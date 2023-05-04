@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import SourceMaps
+import Symbols
 
 extension SourceLocation<FileAddress>:BSONEncodable, BSONFieldEncodable
 {

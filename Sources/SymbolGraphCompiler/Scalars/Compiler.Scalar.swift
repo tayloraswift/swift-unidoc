@@ -2,7 +2,7 @@ import Availability
 import Declarations
 import Generics
 import LexicalPaths
-import SourceMaps
+import Symbols
 import SymbolGraphParts
 
 extension Compiler
@@ -17,7 +17,7 @@ extension Compiler
         public
         let declaration:Declaration<ScalarSymbol>
         public
-        let location:SourceLocation<FileIdentifier>?
+        let location:SourceLocation<FileSymbol>?
 
         public
         let phylum:ScalarPhylum
@@ -56,7 +56,7 @@ extension Compiler
         init(_ id:ScalarSymbol,
             declaration:Declaration<ScalarSymbol>,
             visibility:SymbolDescription.Visibility,
-            location:SourceLocation<FileIdentifier>?,
+            location:SourceLocation<FileSymbol>?,
             phylum:ScalarPhylum,
             path:LexicalPath)
         {
