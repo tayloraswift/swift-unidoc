@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import SourceMaps
+import Symbols
 
 @frozen public
 struct FileAddress
@@ -17,7 +17,7 @@ struct FileAddress
 extension FileAddress:SymbolAddress
 {
     public
-    typealias Identity = FileIdentifier
+    typealias Identity = FileSymbol
 
     @inlinable public
     init(exactly int32:Int32)

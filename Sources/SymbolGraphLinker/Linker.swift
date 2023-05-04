@@ -1,7 +1,7 @@
 import CodelinkResolution
 import Declarations
 import Generics
-import SourceMaps
+import Symbols
 import SymbolGraphCompiler
 import SymbolGraphParts
 
@@ -17,7 +17,7 @@ struct Linker
     private
     var scalars:[ScalarSymbol: ScalarAddress]
     private
-    var files:[FileIdentifier: FileAddress]
+    var files:[FileSymbol: FileAddress]
 
     public private(set)
     var graph:SymbolGraph
@@ -102,7 +102,7 @@ extension Linker
     /// Returns the address of the file with the given identifier,
     /// registering it in the symbol table if needed.
     private mutating
-    func intern(_ id:FileIdentifier) throws -> FileAddress
+    func intern(_ id:FileSymbol) throws -> FileAddress
     {
         try
         {

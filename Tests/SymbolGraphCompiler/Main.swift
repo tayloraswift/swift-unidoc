@@ -1,4 +1,4 @@
-import SourceMaps
+import Symbols
 import SymbolGraphCompiler
 import SymbolGraphParts
 import System
@@ -34,7 +34,7 @@ enum Main:SyncTests
                 {
                     for scalar:Compiler.Scalar in compiler.scalars.load().local
                     {
-                        if  let location:SourceLocation<FileIdentifier> = tests.expect(
+                        if  let location:SourceLocation<FileSymbol> = tests.expect(
                                 value: scalar.location)
                         {
                             tests.expect(true: location.file.path.starts(with: "Snippets/"))

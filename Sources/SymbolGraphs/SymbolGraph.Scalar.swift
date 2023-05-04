@@ -4,7 +4,7 @@ import BSONEncoding
 import Declarations
 import Generics
 import LexicalPaths
-import SourceMaps
+import Symbols
 
 extension SymbolGraph
 {

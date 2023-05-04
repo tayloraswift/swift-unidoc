@@ -1,4 +1,4 @@
-import SourceMaps
+import Symbols
 
 extension Compiler.Documentation
 {

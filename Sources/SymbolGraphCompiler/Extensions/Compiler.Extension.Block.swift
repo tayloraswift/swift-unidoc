@@ -1,4 +1,4 @@
-import SourceMaps
+import Symbols
 import SymbolGraphParts
 
 extension Compiler.Extension
@@ -7,11 +7,11 @@ extension Compiler.Extension
     struct Block
     {
         public
-        let location:SourceLocation<FileIdentifier>?
+        let location:SourceLocation<FileSymbol>?
         public
         let comment:Compiler.Documentation.Comment?
 
-        init?(location:SourceLocation<FileIdentifier>?, comment:Compiler.Documentation.Comment?)
+        init?(location:SourceLocation<FileSymbol>?, comment:Compiler.Documentation.Comment?)
         {
             if case (nil, nil) = (location, comment)
             {

@@ -1,6 +1,6 @@
 import JSONDecoding
 import Repositories
-import SourceMaps
+import Symbols
 
 extension SymbolDescription
 {
