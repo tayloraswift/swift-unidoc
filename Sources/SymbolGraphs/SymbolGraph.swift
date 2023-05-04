@@ -6,15 +6,15 @@ struct SymbolGraph:Sendable
     let metadata:Metadata?
 
     public
-    var scalars:Scalars
-    public
     var files:Files
+    public
+    var nodes:Nodes
 
     public
     init(metadata:Metadata?)
     {
         self.metadata = metadata
-        self.scalars = .init()
         self.files = .init()
+        self.nodes = .init()
     }
 }

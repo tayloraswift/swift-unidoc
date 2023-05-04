@@ -1,7 +1,7 @@
 extension SymbolGraph
 {
     @frozen public
-    struct Scalars
+    struct Nodes
     {
         public
         var symbols:SymbolTable<ScalarAddress>
@@ -16,7 +16,7 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.Scalars
+extension SymbolGraph.Nodes
 {
     @inlinable public mutating
     func push(_ scalar:SymbolGraph.Scalar?, id:ScalarIdentifier) throws -> ScalarAddress
@@ -25,10 +25,10 @@ extension SymbolGraph.Scalars
         return try self.symbols(id)
     }
 }
-extension SymbolGraph.Scalars
+extension SymbolGraph.Nodes
 {
     @inlinable public
-    subscript(address:ScalarAddress) -> Node
+    subscript(address:ScalarAddress) -> SymbolGraph.Node
     {
         _read
         {
