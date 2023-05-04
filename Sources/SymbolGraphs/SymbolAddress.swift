@@ -4,7 +4,7 @@ import BSONEncoding
 public
 protocol SymbolAddress:Equatable, Hashable, Comparable, Sendable
 {
-    associatedtype Identity:Equatable, Hashable, Sendable
+    associatedtype Symbol:Equatable, Hashable, Sendable
 
     init?(exactly:Int32)
 

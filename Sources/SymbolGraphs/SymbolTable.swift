@@ -1,9 +1,9 @@
 @frozen public
 struct SymbolTable<Address> where Address:SymbolAddress
 {
-    var identities:[Address.Identity]
+    var identities:[Address.Symbol]
 
-    init(identities:[Address.Identity] = [])
+    init(identities:[Address.Symbol] = [])
     {
         self.identities = identities
     }
@@ -24,7 +24,7 @@ extension SymbolTable
     }
 
     public mutating
-    func callAsFunction(_ identity:Address.Identity) throws -> Address
+    func callAsFunction(_ identity:Address.Symbol) throws -> Address
     {
         if  let address:Address = self.next
         {
