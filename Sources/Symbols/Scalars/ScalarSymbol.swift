@@ -11,6 +11,9 @@ struct ScalarSymbol:Sendable
     {
         self.rawValue = rawValue
     }
+}
+extension ScalarSymbol:RawRepresentable
+{
     @inlinable public 
     init?(rawValue:String)
     {
@@ -22,13 +25,6 @@ struct ScalarSymbol:Sendable
         {
             return nil
         }
-    }
-
-    @available(*, deprecated)
-    @inlinable public
-    init(_ _self:Self)
-    {
-        self = _self
     }
 }
 extension ScalarSymbol

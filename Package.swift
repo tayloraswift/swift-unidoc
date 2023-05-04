@@ -32,6 +32,7 @@ let package:Package = .init(
         .library(name: "Symbols", targets: ["Symbols"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
+        .library(name: "SymbolGraphDriver", targets: ["SymbolGraphDriver"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
     ],
@@ -164,6 +165,13 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
+        .target(name: "SymbolGraphDriver", dependencies:
+            [
+                .target(name: "SymbolGraphCompiler"),
+                .target(name: "SymbolGraphLinker"),
+                .target(name: "System"),
+            ]),
+
         .target(name: "SymbolGraphLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
@@ -171,7 +179,6 @@ let package:Package = .init(
                 .target(name: "MarkdownSemantics"),
                 .target(name: "PackageDescriptions"),
                 .target(name: "SymbolGraphCompiler"),
-                .target(name: "System"),
             ]),
 
         .target(name: "System", dependencies:

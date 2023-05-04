@@ -12,6 +12,22 @@ struct FileSymbol:Equatable, Hashable, Sendable
         self.path = path
     }
 }
+extension FileSymbol:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { self.path }
+}
+extension FileSymbol:RawRepresentable
+{
+    @inlinable public
+    var rawValue:String { self.path }
+
+    @inlinable public
+    init(rawValue:String)
+    {
+        self.init(rawValue)
+    }
+}
 extension FileSymbol:Comparable
 {
     @inlinable public static
