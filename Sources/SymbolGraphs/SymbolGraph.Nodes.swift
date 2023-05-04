@@ -7,12 +7,13 @@ extension SymbolGraph
         var symbols:SymbolTable<ScalarAddress>
 
         @usableFromInline internal
-        var nodes:[Node]
+        var elements:[Node]
 
-        init(symbols:SymbolTable<ScalarAddress> = .init(), nodes:[Node] = [])
+        @inlinable internal
+        init(symbols:SymbolTable<ScalarAddress> = .init(), elements:[Node] = [])
         {
             self.symbols = symbols
-            self.nodes = nodes
+            self.elements = elements
         }
     }
 }
@@ -21,7 +22,7 @@ extension SymbolGraph.Nodes
     @inlinable public mutating
     func push(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) throws -> ScalarAddress
     {
-        self.nodes.append(.init(scalar: scalar))
+        self.elements.append(.init(scalar: scalar))
         return try self.symbols(id)
     }
 }
@@ -32,11 +33,11 @@ extension SymbolGraph.Nodes
     {
         _read
         {
-            yield  self.nodes[.init(address.value)]
+            yield  self.elements[.init(address.value)]
         }
         _modify
         {
-            yield &self.nodes[.init(address.value)]
+            yield &self.elements[.init(address.value)]
         }
     }
     @inlinable public

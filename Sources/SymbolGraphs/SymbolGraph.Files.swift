@@ -6,7 +6,8 @@ extension SymbolGraph
         public
         var symbols:SymbolTable<FileAddress>
 
-        init()
+        @inlinable internal
+        init(symbols:SymbolTable<FileAddress> = .init())
         {
             self.symbols = .init()
         }
