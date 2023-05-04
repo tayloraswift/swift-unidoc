@@ -45,7 +45,7 @@ extension Compiler.Extensions
             //  One way of looking at this is the symbol has the wrong phylum.
             //  But since we use the USR to infer symbol phylum, another
             /// explanation is that the symbol has a wrong USR.
-            throw Compiler.SymbolError.init(invalid: .block(block))
+            throw Compiler.UnexpectedSymbolError.block(block)
         }
 
         let `extension`:Compiler.ExtensionReference = self(type,
@@ -73,7 +73,7 @@ extension Compiler.Extensions
         }
         else
         {
-            throw Compiler.UndefinedBlockError.init(undefined: block)
+            throw Compiler.UndefinedSymbolError.block(block)
         }
     }
 }

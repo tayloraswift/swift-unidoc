@@ -7,7 +7,7 @@ struct Compiler
     private
     let threshold:SymbolDescription.Visibility
     private
-    let root:Repository.Root
+    let root:Repository.Root?
 
     public private(set)
     var extensions:Extensions
@@ -15,7 +15,7 @@ struct Compiler
     var scalars:Scalars
 
     public
-    init(root:Repository.Root, threshold:SymbolDescription.Visibility = .public)
+    init(root:Repository.Root?, threshold:SymbolDescription.Visibility = .public)
     {
         self.threshold = threshold
         self.root = root
@@ -181,9 +181,9 @@ extension Compiler
             }
             switch relationship.target
             {
-            case .vector:
+            case .vector(let symbol):
                 //  Nothing can be a member of a vector symbol.
-                throw SymbolError.init(invalid: relationship.target)
+                throw UnexpectedSymbolError.vector(symbol)
             
             case .scalar(let heir):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
@@ -232,9 +232,9 @@ extension Compiler
 
             switch relationship.target
             {
-            case .vector:
+            case .vector(let symbol):
                 //  Nothing can be a member of a vector symbol.
-                throw SymbolError.init(invalid: relationship.target)
+                throw UnexpectedSymbolError.vector(symbol)
             
             case .scalar(let type):
                 //  We should never see an external type reference here either.
@@ -262,9 +262,9 @@ extension Compiler
                 }
             }
         
-        case .block:
+        case .block(let symbol):
             //  Extension blocks cannot be members of things.
-            throw SymbolError.init(invalid: relationship.source)
+            throw UnexpectedSymbolError.block(symbol)
         }
     }
 }
@@ -283,9 +283,9 @@ extension Compiler
 
         switch conformance.source
         {
-        case .vector:
+        case .vector(let symbol):
             //  Compounds cannot conform to things.
-            throw SymbolError.init(invalid: conformance.source)
+            throw UnexpectedSymbolError.vector(symbol)
         
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',

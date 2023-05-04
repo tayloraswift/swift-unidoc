@@ -2,6 +2,7 @@ import Generics
 
 extension Compiler
 {
+    @_eagerMove
     @frozen public
     struct Extension
     {

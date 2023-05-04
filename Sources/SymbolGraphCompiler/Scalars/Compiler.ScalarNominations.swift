@@ -1,6 +1,7 @@
 extension Compiler
 {
     /// A thin wrapper around a dictionary of ``ScalarNomination``s.
+    @_eagerMove
     @frozen public
     struct ScalarNominations:Sendable
     {

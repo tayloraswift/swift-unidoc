@@ -53,7 +53,7 @@ extension Compiler.Scalars
         }
         else
         {
-            throw Compiler.SymbolError.init(invalid: .vector(resolution))
+            throw Compiler.UnexpectedSymbolError.vector(resolution)
         }
     }
     mutating
@@ -81,7 +81,7 @@ extension Compiler.Scalars
             switch $0
             {
             case       nil, .nominated?: $0 = entry
-            case .included?, .excluded?: throw Compiler.DuplicateScalarError.init()
+            case .included?, .excluded?: throw Compiler.DuplicateSymbolError.scalar(resolution)
             }
         } (&self.entries[resolution])
     }
@@ -110,7 +110,7 @@ extension Compiler.Scalars
         case .excluded?:
             return nil
         case .nominated?, nil:
-            throw Compiler.UndefinedScalarError.init(undefined: resolution)
+            throw Compiler.UndefinedSymbolError.scalar(resolution)
         }
     }
 }

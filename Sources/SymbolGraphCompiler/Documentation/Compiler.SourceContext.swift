@@ -7,9 +7,9 @@ extension Compiler
     struct SourceContext
     {
         let culture:ModuleIdentifier
-        let root:Repository.Root
+        let root:Repository.Root?
 
-        init(culture:ModuleIdentifier, root:Repository.Root)
+        init(culture:ModuleIdentifier, root:Repository.Root?)
         {
             self.culture = culture
             self.root = root
@@ -20,15 +20,20 @@ extension Compiler.SourceContext
 {
     func resolve(uri:String) throws -> FileSymbol
     {
+        guard   let root:Repository.Root = self.root
+        else
+        {
+            throw Compiler.UnexpectedSymbolError.file(uri: uri)
+        }
         guard   var start:String.Index = uri.index(uri.startIndex,
                     offsetBy: 7,
                     limitedBy: uri.endIndex),
                 uri[..<start] == "file://"
         else
         {
-            throw Compiler.SourceFileError.init(invalid: uri)
+            throw Compiler.InvalidSymbolError.file(uri: uri)
         }
-        for character:Character in self.root.path
+        for character:Character in root.path
         {
             if  start < uri.endIndex, uri[start] == character
             {
@@ -36,7 +41,7 @@ extension Compiler.SourceContext
             }
             else
             {
-                throw Compiler.SourceFileError.init(invalid: uri)
+                throw Compiler.InvalidSymbolError.file(uri: uri)
             }
         }
         
