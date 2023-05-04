@@ -1,20 +1,23 @@
+public
+typealias Symbol = UnifiedSymbol
+
 /// A unified symbol resolution (USR).
 @frozen public
-enum Symbol:Hashable, Equatable, Sendable
+enum UnifiedSymbol:Hashable, Equatable, Sendable
 {
     /// A declaration vector. The compiler calls these synthesized
     /// value-declarations.
-    case vector(Vector)
+    case vector(VectorSymbol)
 
     /// A declaration scalar. The compiler calls these value-declarations.
-    case scalar(Scalar)
+    case scalar(ScalarSymbol)
 
     /// An extension block. The payload is everything after the
     /// `s:e:` prefix, including any colons and special characters.
     /// The compiler calls these extension-declarations.
-    case block(Block)
+    case block(BlockSymbol)
 }
-extension Symbol:CustomStringConvertible
+extension UnifiedSymbol:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -27,12 +30,12 @@ extension Symbol:CustomStringConvertible
         }
     }
 }
-extension Symbol:LosslessStringConvertible
+extension UnifiedSymbol:LosslessStringConvertible
 {
     public
     init?(_ description:String)
     {
-        if  let block:Block = .init(description)
+        if  let block:BlockSymbol = .init(description)
         {
             self = .block(block)
             return
@@ -41,11 +44,11 @@ extension Symbol:LosslessStringConvertible
         let fragments:[Substring] = description.split(separator: ":",
             omittingEmptySubsequences: true)
         
-        if      let scalar:Scalar = .init(fragments: fragments)
+        if      let scalar:ScalarSymbol = .init(fragments: fragments)
         {
             self = .scalar(scalar)
         }
-        else if let vector:Vector = .init(fragments: fragments)
+        else if let vector:VectorSymbol = .init(fragments: fragments)
         {
             self = .vector(vector)
         }

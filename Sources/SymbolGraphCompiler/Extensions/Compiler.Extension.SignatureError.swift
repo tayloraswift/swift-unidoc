@@ -9,11 +9,11 @@ extension Compiler.Extension
         public
         let expected:Signature
         public
-        let declared:[GenericConstraint<Symbol.Scalar>]?
+        let declared:[GenericConstraint<ScalarSymbol>]?
 
         public
         init(expected:Signature,
-            declared:[GenericConstraint<Symbol.Scalar>]? = nil)
+            declared:[GenericConstraint<ScalarSymbol>]? = nil)
         {
             self.expected = expected
             self.declared = declared
@@ -25,7 +25,7 @@ extension Compiler.Extension.SignatureError:CustomStringConvertible
     public
     var description:String
     {
-        if  let _:[GenericConstraint<Symbol.Scalar>] = self.declared
+        if  let _:[GenericConstraint<ScalarSymbol>] = self.declared
         {
             return """
             Cannot declare an extension (of \(self.expected.type)) containing a \

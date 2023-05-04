@@ -12,10 +12,10 @@ struct SymbolDescription:Equatable, Sendable
     public
     let usr:Symbol
     public
-    let phylum:SymbolPhylum
+    let phylum:UnifiedPhylum
 
     public
-    let declaration:Declaration<Symbol.Scalar>
+    let declaration:Declaration<ScalarSymbol>
     public
     let doccomment:Doccomment?
     public
@@ -34,8 +34,8 @@ struct SymbolDescription:Equatable, Sendable
 
     private
     init(_ usr:Symbol,
-        phylum:SymbolPhylum,
-        declaration:Declaration<Symbol.Scalar>,
+        phylum:UnifiedPhylum,
+        declaration:Declaration<ScalarSymbol>,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
@@ -60,7 +60,7 @@ extension SymbolDescription
 {
     private
     init(_ usr:Symbol,
-        phylum:SymbolPhylum,
+        phylum:UnifiedPhylum,
         availability:Availability,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
@@ -68,11 +68,11 @@ extension SymbolDescription
         expanded:__shared [DeclarationFragment],
         abridged:__shared [DeclarationFragment],
         extension:ExtensionContext,
-        generics:GenericSignature<Symbol.Scalar>,
+        generics:GenericSignature<ScalarSymbol>,
         location:SourceLocation<String>?,
         path:LexicalPath)
     {
-        var phylum:SymbolPhylum = phylum
+        var phylum:UnifiedPhylum = phylum
 
         for fragment:DeclarationFragment
             in expanded where fragment.color == .keyword
@@ -100,7 +100,7 @@ extension SymbolDescription
             break
         }
         
-        let declaration:Declaration<Symbol.Scalar>
+        let declaration:Declaration<ScalarSymbol>
         if  case .scalar(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in

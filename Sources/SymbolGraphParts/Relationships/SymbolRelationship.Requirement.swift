@@ -7,17 +7,17 @@ extension SymbolRelationship
     struct Requirement:Equatable, Hashable, Sendable
     {
         public
-        let source:Symbol.Scalar
+        let source:ScalarSymbol
         public
-        let target:Symbol.Scalar
+        let target:ScalarSymbol
         public
-        let origin:Symbol.Scalar?
+        let origin:ScalarSymbol?
         public
         let optional:Bool
 
-        init(_ source:Symbol.Scalar,
-            of target:Symbol.Scalar,
-            origin:Symbol.Scalar? = nil,
+        init(_ source:ScalarSymbol,
+            of target:ScalarSymbol,
+            origin:ScalarSymbol? = nil,
             optional:Bool = false)
         {
             self.source = source

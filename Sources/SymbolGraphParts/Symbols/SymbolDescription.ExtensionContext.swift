@@ -12,10 +12,10 @@ extension SymbolDescription
         /// constraints, and can be used to group members by
         /// generic constraints.
         public
-        let conditions:[GenericConstraint<Symbol.Scalar>]
+        let conditions:[GenericConstraint<ScalarSymbol>]
 
         @inlinable public
-        init(conditions:[GenericConstraint<Symbol.Scalar>] = [])
+        init(conditions:[GenericConstraint<ScalarSymbol>] = [])
         {
             self.conditions = conditions
         }

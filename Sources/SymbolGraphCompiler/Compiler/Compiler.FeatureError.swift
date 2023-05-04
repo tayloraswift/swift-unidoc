@@ -4,10 +4,10 @@ extension Compiler
     struct FeatureError:Equatable, Error, Sendable
     {
         public
-        let selftype:Symbol.Scalar
+        let selftype:ScalarSymbol
 
         public
-        init(invalid selftype:Symbol.Scalar)
+        init(invalid selftype:ScalarSymbol)
         {
             self.selftype = selftype
         }

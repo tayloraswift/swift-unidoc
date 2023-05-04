@@ -1,25 +1,22 @@
 import Symbolics
 
-extension Symbol
+/// A vector symbol resolution.
+@frozen public
+struct VectorSymbol:Equatable, Hashable
 {
-    /// A vector symbol resolution.
-    @frozen public
-    struct Vector:Equatable, Hashable
-    {
-        public
-        let feature:Scalar
-        public
-        let heir:Scalar
+    public
+    let feature:ScalarSymbol
+    public
+    let heir:ScalarSymbol
 
-        @inlinable public
-        init(_ feature:Scalar, self heir:Scalar)
-        {
-            self.feature = feature
-            self.heir = heir
-        }
+    @inlinable public
+    init(_ feature:ScalarSymbol, self heir:ScalarSymbol)
+    {
+        self.feature = feature
+        self.heir = heir
     }
 }
-extension Symbol.Vector:CustomStringConvertible
+extension VectorSymbol:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -27,7 +24,7 @@ extension Symbol.Vector:CustomStringConvertible
         "\(self.feature.description)::SYNTHESIZED::\(self.heir.description)"
     }
 }
-extension Symbol.Vector:LosslessStringConvertible
+extension VectorSymbol:LosslessStringConvertible
 {
     public
     init?(_ description:__shared String)

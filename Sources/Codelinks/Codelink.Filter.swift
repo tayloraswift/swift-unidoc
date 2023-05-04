@@ -22,7 +22,7 @@ extension Codelink.Filter
     public
     init?(suffix:Substring)
     {
-        //  Very similar to the `SymbolPhylum` type, except no extensions.
+        //  Very similar to the `UnifiedPhylum` type, except no extensions.
         switch suffix
         {
         case "swift.associatedtype":    self = .associatedtype

@@ -7,15 +7,15 @@ extension SymbolGraph
     struct Node
     {
         @usableFromInline internal
-        var local:Scalar?
-        @usableFromInline internal
         var extensions:[Extension]
+        @usableFromInline internal
+        var scalar:Scalar?
 
         @inlinable public
-        init(_ local:Scalar? = nil, extensions:[Extension] = [])
+        init(extensions:[Extension] = [], scalar:Scalar? = nil)
         {
-            self.local = local
             self.extensions = extensions
+            self.scalar = scalar
         }
     }
 }
@@ -26,5 +26,33 @@ extension SymbolGraph.Node
     {
         defer { self.extensions.append(`extension`) }
         return self.extensions.endIndex
+    }
+}
+extension SymbolGraph.Node
+{
+    @frozen public
+    enum CodingKeys:String
+    {
+        case extensions = "E"
+        case scalar = "V"
+    }
+}
+extension SymbolGraph.Node:BSONDocumentEncodable
+{
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    {
+        bson[.scalar] = self.scalar
+        bson[.extensions] = self.extensions.isEmpty ? nil : self.extensions
+    }
+}
+extension SymbolGraph.Node:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    {
+        self.init(
+            extensions: try bson[.extensions]?.decode() ?? [],
+            scalar: try bson[.scalar]?.decode())
     }
 }

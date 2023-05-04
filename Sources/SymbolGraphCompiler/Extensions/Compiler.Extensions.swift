@@ -14,7 +14,7 @@ extension Compiler
         /// many constituent extension blocks, so multiple block symbols can
         /// point to the same extension.
         private
-        var named:[Symbol.Block: ExtensionReference]
+        var named:[BlockSymbol: ExtensionReference]
 
         init()
         {
@@ -34,8 +34,8 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func include(block:__owned Symbol.Block,
-        extending type:Symbol.Scalar,
+    func include(block:__owned BlockSymbol,
+        extending type:ScalarSymbol,
         with description:SymbolDescription,
         in context:Compiler.SourceContext) throws
     {
@@ -65,7 +65,7 @@ extension Compiler.Extensions
 
 extension Compiler.Extensions
 {
-    func named(_ block:Symbol.Block) throws -> Compiler.ExtensionReference
+    func named(_ block:BlockSymbol) throws -> Compiler.ExtensionReference
     {
         if let named:Compiler.ExtensionReference = self.named[block]
         {
@@ -81,13 +81,13 @@ extension Compiler.Extensions
 {
     mutating
     func callAsFunction(_ extended:Compiler.ScalarReference,
-        where conditions:[GenericConstraint<Symbol.Scalar>]) -> Compiler.ExtensionReference
+        where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionReference
     {
         self(extended.resolution, where: conditions, path: extended.value.path)
     }
     private mutating
-    func callAsFunction(_ extended:Symbol.Scalar,
-        where conditions:[GenericConstraint<Symbol.Scalar>],
+    func callAsFunction(_ extended:ScalarSymbol,
+        where conditions:[GenericConstraint<ScalarSymbol>],
         path:LexicalPath) -> Compiler.ExtensionReference
     {
         let signature:Compiler.Extension.Signature = .init(extended, where: conditions)

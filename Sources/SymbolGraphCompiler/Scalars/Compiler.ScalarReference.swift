@@ -11,7 +11,7 @@ extension Compiler
     final
     class ScalarReference
     {
-        let conditions:[GenericConstraint<Symbol.Scalar>]
+        let conditions:[GenericConstraint<ScalarSymbol>]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
@@ -22,7 +22,7 @@ extension Compiler
         private(set)
         var value:Scalar
 
-        init(conditions:[GenericConstraint<Symbol.Scalar>],
+        init(conditions:[GenericConstraint<ScalarSymbol>],
             value:Scalar)
         {
             self.conditions = conditions
@@ -36,7 +36,7 @@ extension Compiler
 }
 extension Compiler.ScalarReference
 {
-    var resolution:Symbol.Scalar
+    var resolution:ScalarSymbol
     {
         self.value.resolution
     }
@@ -44,7 +44,7 @@ extension Compiler.ScalarReference
 extension Compiler.ScalarReference
 {
     /// Assigns an origin to this scalar object.
-    func assign(origin:Symbol.Scalar) throws
+    func assign(origin:ScalarSymbol) throws
     {
         switch self.value.origin
         {
@@ -77,7 +77,7 @@ extension Compiler.ScalarReference
         {
             self.value.aperture = aperture
         }
-        if  let origin:Symbol.Scalar = nesting.origin
+        if  let origin:ScalarSymbol = nesting.origin
         {
             try self.assign(origin: origin)
         }
@@ -107,7 +107,7 @@ extension Compiler.ScalarReference
         case let type?:
             throw Compiler.SuperformError.conflict(with: type)
         }
-        if  let origin:Symbol.Scalar = superform.origin
+        if  let origin:ScalarSymbol = superform.origin
         {
             try self.assign(origin: origin)
         }
@@ -116,7 +116,7 @@ extension Compiler.ScalarReference
     ///
     /// If you know the feature’s extension constraints, add it
     /// to an appropriate ``ExtensionReference`` instead.
-    func add(feature:Symbol.Scalar, where unknown:Never?)
+    func add(feature:ScalarSymbol, where unknown:Never?)
     {
         self.value.features.insert(feature)
     }

@@ -4,10 +4,10 @@ extension Compiler
     struct UnclaimedBlockError:Equatable, Error
     {
         public
-        let block:Symbol.Block
+        let block:BlockSymbol
 
         public
-        init(unclaimed block:Symbol.Block)
+        init(unclaimed block:BlockSymbol)
         {
             self.block = block
         }
