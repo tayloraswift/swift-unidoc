@@ -1,6 +1,3 @@
-public
-typealias Symbol = UnifiedSymbol
-
 /// A unified symbol resolution (USR).
 @frozen public
 enum UnifiedSymbol:Hashable, Equatable, Sendable

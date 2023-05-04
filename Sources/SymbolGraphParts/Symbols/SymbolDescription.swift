@@ -10,7 +10,7 @@ import Symbols
 struct SymbolDescription:Equatable, Sendable
 {
     public
-    let usr:Symbol
+    let usr:UnifiedSymbol
     public
     let phylum:UnifiedPhylum
 
@@ -33,7 +33,7 @@ struct SymbolDescription:Equatable, Sendable
     let path:LexicalPath
 
     private
-    init(_ usr:Symbol,
+    init(_ usr:UnifiedSymbol,
         phylum:UnifiedPhylum,
         declaration:Declaration<ScalarSymbol>,
         doccomment:Doccomment?,
@@ -59,7 +59,7 @@ struct SymbolDescription:Equatable, Sendable
 extension SymbolDescription
 {
     private
-    init(_ usr:Symbol,
+    init(_ usr:UnifiedSymbol,
         phylum:UnifiedPhylum,
         availability:Availability,
         doccomment:Doccomment?,

@@ -3,7 +3,7 @@ extension Compiler
     public
     enum NestingError:Equatable, Error, Sendable
     {
-        case conflict(with:Symbol)
+        case conflict(with:UnifiedSymbol)
         case phylum(ScalarPhylum)
     }
 }

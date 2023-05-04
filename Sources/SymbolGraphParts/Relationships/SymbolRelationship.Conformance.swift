@@ -9,14 +9,14 @@ extension SymbolRelationship
         public
         let conditions:[GenericConstraint<ScalarSymbol>]
         public
-        let source:Symbol
+        let source:UnifiedSymbol
         public
         let target:ScalarSymbol
         public
         let origin:ScalarSymbol?
 
         @inlinable public
-        init(of source:Symbol,
+        init(of source:UnifiedSymbol,
             to target:ScalarSymbol,
             where conditions:[GenericConstraint<ScalarSymbol>]?,
             origin:ScalarSymbol? = nil)

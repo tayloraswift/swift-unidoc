@@ -2,6 +2,6 @@ import JSONDecoding
 import JSONEncoding
 import Symbols
 
-extension Symbol:JSONStringDecodable, JSONStringEncodable
+extension UnifiedSymbol:JSONStringDecodable, JSONStringEncodable
 {
 }
