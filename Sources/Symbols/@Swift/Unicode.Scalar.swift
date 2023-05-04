@@ -3,10 +3,10 @@ extension Unicode.Scalar
     @inlinable internal
     init?(_ string:Substring)
     {
-        if  let rawValue:Unicode.Scalar = string.unicodeScalars.first,
+        if  let codepoint:Unicode.Scalar = string.unicodeScalars.first,
                 string.unicodeScalars.count == 1
         {
-            self = rawValue
+            self = codepoint
         }
         else
         {

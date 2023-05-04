@@ -1,6 +1,6 @@
 import JSONDecoding
 import JSONEncoding
-import Symbolics
+import Symbols
 
 @frozen public 
 enum UnifiedPhylum:Hashable, Equatable, Sendable

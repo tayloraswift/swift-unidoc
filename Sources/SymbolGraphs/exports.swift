@@ -1,1 +1,1 @@
-@_exported import Symbolics
+@_exported import Symbols

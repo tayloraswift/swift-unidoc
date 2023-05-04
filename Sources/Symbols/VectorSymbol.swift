@@ -1,5 +1,3 @@
-import Symbolics
-
 /// A vector symbol resolution.
 @frozen public
 struct VectorSymbol:Equatable, Hashable
@@ -36,12 +34,12 @@ extension VectorSymbol:LosslessStringConvertible
     {
         if  fragments.count == 5,
             let language:Unicode.Scalar = .init(fragments[0]),
-            let member:ScalarIdentifier = .init(language, fragments[1]),
+            let member:ScalarSymbol = .init(language, fragments[1]),
             fragments[2] == "SYNTHESIZED",
             let language:Unicode.Scalar = .init(fragments[3]),
-            let heir:ScalarIdentifier = .init(language, fragments[4])
+            let heir:ScalarSymbol = .init(language, fragments[4])
         {
-            self.init(.init(member), self: .init(heir))
+            self.init(member, self: heir)
         }
         else
         {

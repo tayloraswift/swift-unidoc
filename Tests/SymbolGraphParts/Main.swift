@@ -1,7 +1,6 @@
 import Generics
 import Repositories
 import SymbolGraphParts
-import Symbolics
 import Symbols
 import System
 import Testing

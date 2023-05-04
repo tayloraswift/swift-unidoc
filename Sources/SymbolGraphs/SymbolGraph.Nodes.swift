@@ -19,7 +19,7 @@ extension SymbolGraph
 extension SymbolGraph.Nodes
 {
     @inlinable public mutating
-    func push(_ scalar:SymbolGraph.Scalar?, id:ScalarIdentifier) throws -> ScalarAddress
+    func push(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) throws -> ScalarAddress
     {
         self.nodes.append(.init(scalar: scalar))
         return try self.symbols(id)

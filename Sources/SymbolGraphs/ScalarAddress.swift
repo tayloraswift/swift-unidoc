@@ -25,7 +25,7 @@ struct ScalarAddress
 extension ScalarAddress:SymbolAddress
 {
     public
-    typealias Identity = ScalarIdentifier
+    typealias Identity = ScalarSymbol
 }
 extension ScalarAddress
 {
