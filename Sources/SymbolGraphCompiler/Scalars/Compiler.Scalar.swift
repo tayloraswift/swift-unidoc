@@ -43,6 +43,8 @@ extension Compiler
         /// This field only exists because of an upstream bug in SymbolGraphGen.
         public internal(set)
         var features:Set<Symbol.Scalar>
+        /// A scalar that has documentation that is relevant, but less specific
+        /// to this scalar.
         public internal(set)
         var origin:Symbol.Scalar?
 
