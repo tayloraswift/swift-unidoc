@@ -17,7 +17,7 @@ extension Compiler
         var superforms:(any SuperformRelationship.Type)?
         /// The symbol this scalar is lexically-nested in. This may
         /// be an extension block symbol.
-        var scope:Symbol?
+        var scope:UnifiedSymbol?
 
         private(set)
         var value:Scalar
@@ -64,7 +64,7 @@ extension Compiler.ScalarReference
             throw Compiler.NestingError.phylum(self.value.phylum)
         }
 
-        if  let scope:Symbol = self.scope
+        if  let scope:UnifiedSymbol = self.scope
         {
             throw Compiler.NestingError.conflict(with: scope)
         }

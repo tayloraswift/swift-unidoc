@@ -6,10 +6,10 @@ extension Compiler
     struct SymbolError:Equatable, Error, Sendable
     {
         public
-        let usr:Symbol
+        let usr:UnifiedSymbol
 
         public
-        init(invalid usr:Symbol)
+        init(invalid usr:UnifiedSymbol)
         {
             self.usr = usr
         }

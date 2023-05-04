@@ -9,12 +9,12 @@ extension Compiler
         public
         let underlying:any Error
         public
-        let symbol:Symbol
+        let symbol:UnifiedSymbol
         public
         let phylum:UnifiedPhylum
 
         public
-        init(underlying:any Error, symbol:Symbol, phylum:UnifiedPhylum)
+        init(underlying:any Error, symbol:UnifiedSymbol, phylum:UnifiedPhylum)
         {
             self.underlying = underlying
             self.symbol = symbol

@@ -7,14 +7,14 @@ extension SymbolRelationship
     struct Membership:Equatable, Hashable, Sendable
     {
         public
-        let source:Symbol
+        let source:UnifiedSymbol
         public
-        let target:Symbol
+        let target:UnifiedSymbol
         public
         let origin:ScalarSymbol?
 
         @inlinable public
-        init(of source:Symbol, in target:Symbol, origin:ScalarSymbol? = nil)
+        init(of source:UnifiedSymbol, in target:UnifiedSymbol, origin:ScalarSymbol? = nil)
         {
             self.source = source
             self.target = target
@@ -28,7 +28,7 @@ extension SymbolRelationship.Membership:NestingRelationship
     var aperture:ScalarAperture? { nil }
 
     @inlinable public
-    var scope:Symbol? { self.target }
+    var scope:UnifiedSymbol? { self.target }
 
     public
     func validate(source phylum:ScalarPhylum) -> Bool
