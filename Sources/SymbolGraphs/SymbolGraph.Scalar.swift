@@ -16,11 +16,37 @@ extension SymbolGraph
         public
         let path:LexicalPath
 
+        /// This scalar’s declaration, which consists of its availability,
+        /// syntax fragments, and generic signature.
         public
         var declaration:Declaration<ScalarAddress>
+
+        /// The addresses of the scalars that this scalar implements,
+        /// overrides, or inherits from. Superforms are intrinsic but there
+        /// can be more than one per scalar.
+        ///
+        /// All of the superforms in this array have the same relationship
+        /// to this scalar; the relationship type is a function of
+        /// ``aperture`` and ``phylum``.
+        public
+        var superforms:[ScalarAddress]
+        /// The addresses of the *unqualified* features inherited by this
+        /// scalar. Unqualified features are protocol extension members that
+        /// were inherited by a concrete type, but for which we are missing
+        /// their extension constraints.
+        ///
+        /// This field only exists because of an upstream bug in SymbolGraphGen.
+        public
+        var features:[ScalarAddress]
+        /// The address of a scalar that has documentation that is relevant,
+        /// but less specific to this scalar.
+        public
+        var origin:ScalarAddress?
+
+        /// The location of this scalar’s declaration, if known.
         public
         var location:SourceLocation<FileAddress>?
-
+        /// This scalar’s binary markdown documentation, if it has any.
         public
         var article:Article?
 
@@ -31,6 +57,10 @@ extension SymbolGraph
             self.path = path
 
             self.declaration = .init()
+
+            self.superforms = []
+            self.features = []
+            self.origin = nil
 
             self.location = nil
             self.article = nil

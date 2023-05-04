@@ -1,8 +1,9 @@
 @frozen public
 struct SymbolGraph:Sendable
 {
+    //  TODO: this should be non-optional
     public
-    let metadata:Metadata
+    let metadata:Metadata?
 
     public
     var scalars:Scalars
@@ -10,7 +11,7 @@ struct SymbolGraph:Sendable
     var files:Files
 
     public
-    init(metadata:Metadata)
+    init(metadata:Metadata?)
     {
         self.metadata = metadata
         self.scalars = .init()
