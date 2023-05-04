@@ -15,7 +15,7 @@ struct Linker
     var resolver:CodelinkResolver
 
     private
-    var scalars:[ScalarIdentifier: ScalarAddress]
+    var scalars:[ScalarSymbol: ScalarAddress]
     private
     var files:[FileIdentifier: FileAddress]
 
@@ -81,7 +81,7 @@ extension Linker
     private mutating
     func allocate(extension:Compiler.Extension) throws -> ScalarAddress
     {
-        let scalar:ScalarIdentifier = `extension`.extendee.id
+        let scalar:ScalarSymbol = `extension`.extendee
         return try
         {
             switch $0
@@ -123,7 +123,7 @@ extension Linker
     /// call ``allocate(scalar:)`` or ``allocate(extension:)`` after
     /// calling this function.
     private mutating
-    func intern(_ id:ScalarIdentifier) throws -> ScalarAddress
+    func intern(_ id:ScalarSymbol) throws -> ScalarAddress
     {
         try
         {
@@ -148,7 +148,7 @@ extension Linker
     {
         try scalar.map
         {
-            try self.intern($0.id)
+            try self.intern($0)
         }
     }
     /// Returns an array of addresses for an array of scalar symbols.
@@ -166,7 +166,7 @@ extension Linker
     {
         try scalars.map
         {
-            try self.intern($0.id)
+            try self.intern($0)
         }
     }
     /// Returns an array of addresses for an array of vector features,
@@ -195,7 +195,7 @@ extension Linker
     {
         try features.map
         {
-            let feature:ScalarAddress = try self.intern($0.id)
+            let feature:ScalarAddress = try self.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
                 self.graph.nodes[feature].map({ ($0.path.last, $0.phylum) }) ??
                 self.external[feature: $0]
@@ -227,7 +227,7 @@ extension Linker
             self.resolver.overload($0.path, with: .init(
                 target: .scalar(address),
                 phylum: $0.phylum,
-                id: $0.resolution))
+                id: $0.id))
             return address
         }
     }
@@ -268,7 +268,7 @@ extension Linker
                 {
                     try $0.map
                     {
-                        try self.intern($0.id)
+                        try self.intern($0)
                     }
                 }))
             return ($0.0, index)
@@ -284,7 +284,7 @@ extension Linker
         {
             let declaration:Declaration<ScalarAddress> = try scalar.declaration.map
             {
-                try self.intern($0.id)
+                try self.intern($0)
             }
 
             //  Sort for deterministic addresses.

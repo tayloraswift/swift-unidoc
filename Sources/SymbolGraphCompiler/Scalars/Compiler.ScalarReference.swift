@@ -36,9 +36,9 @@ extension Compiler
 }
 extension Compiler.ScalarReference
 {
-    var resolution:ScalarSymbol
+    var id:ScalarSymbol
     {
-        self.value.resolution
+        self.value.id
     }
 }
 extension Compiler.ScalarReference

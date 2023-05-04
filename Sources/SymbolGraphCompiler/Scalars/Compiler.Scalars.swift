@@ -38,7 +38,7 @@ extension Compiler.Scalars
             }
         }
 
-        return (included.sorted { $0.resolution < $1.resolution }, .init(external))
+        return (included.sorted { $0.id < $1.id }, .init(external))
     }
 }
 extension Compiler.Scalars
@@ -93,7 +93,7 @@ extension Compiler.Scalars
         switch self.entries[resolution]
         {
         case .included(let scalar)?:
-            return scalar.resolution
+            return scalar.id
         case .excluded?:
             return nil
         case .nominated?, nil:

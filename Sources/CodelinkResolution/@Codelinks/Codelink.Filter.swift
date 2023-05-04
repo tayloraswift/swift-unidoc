@@ -1,5 +1,5 @@
 import Codelinks
-import Symbolics
+import Symbols
 
 extension Codelink.Filter
 {

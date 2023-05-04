@@ -1,4 +1,3 @@
-import Symbolics
 import Symbols
 
 extension SymbolRelationship

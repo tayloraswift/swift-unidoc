@@ -165,7 +165,7 @@ extension Compiler
             
             //  Generate an implicit, internal extension for this requirement,
             //  if one does not already exist.
-            self.extensions(`protocol`, where: []).add(nested: requirement.resolution)
+            self.extensions(`protocol`, where: []).add(nested: requirement.id)
         }
     }
     private mutating
@@ -195,7 +195,7 @@ extension Compiler
                 }
                 //  If the membership target is a scalar resolution, the self type
                 //  should match the target type.
-                if  heir.resolution == vector.heir
+                if  heir.id == vector.heir
                 {
                     //  We don’t know what extension the feature should go in, because
                     //  we would need to know the protocol it is a member of, and look
@@ -205,7 +205,7 @@ extension Compiler
                 }
                 else
                 {
-                    throw FeatureError.init(invalid: heir.resolution)
+                    throw FeatureError.init(invalid: heir.id)
                 }
             
             case .block(let block):
@@ -243,8 +243,7 @@ extension Compiler
                     try member.assign(nesting: relationship)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
-                    self.extensions(type, where: member.conditions).add(
-                        nested: member.resolution)
+                    self.extensions(type, where: member.conditions).add(nested: member.id)
                 }
 
             case .block(let block):
@@ -252,7 +251,7 @@ extension Compiler
                 if  group.conditions == member.conditions
                 {
                     try member.assign(nesting: relationship)
-                    group.add(nested: member.resolution)
+                    group.add(nested: member.id)
                 }
                 else
                 {

@@ -83,7 +83,7 @@ extension Compiler.Extensions
     func callAsFunction(_ extended:Compiler.ScalarReference,
         where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionReference
     {
-        self(extended.resolution, where: conditions, path: extended.value.path)
+        self(extended.id, where: conditions, path: extended.value.path)
     }
     private mutating
     func callAsFunction(_ extended:ScalarSymbol,

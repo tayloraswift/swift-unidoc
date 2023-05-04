@@ -31,7 +31,6 @@ let package:Package = .init(
 
         .library(name: "SourceMaps", targets: ["SourceMaps"]),
 
-        .library(name: "Symbolics", targets: ["Symbolics"]),
         .library(name: "Symbols", targets: ["Symbols"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
@@ -141,12 +140,7 @@ let package:Package = .init(
 
         .target(name: "StringIdentifiers"),
 
-        .target(name: "Symbolics"),
-
-        .target(name: "Symbols", dependencies:
-            [
-                .target(name: "Symbolics"),
-            ]),
+        .target(name: "Symbols"),
 
         .target(name: "SymbolGraphParts", dependencies:
             [
@@ -166,7 +160,7 @@ let package:Package = .init(
                 .target(name: "LexicalPaths"),
                 .target(name: "Repositories"),
                 .target(name: "SourceMaps"),
-                .target(name: "Symbolics"),
+                .target(name: "Symbols"),
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),
                 .product(name: "BSONEncoding", package: "swift-mongodb"),
@@ -174,6 +168,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphCompiler", dependencies:
             [
+                .target(name: "SymbolGraphs"),
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
@@ -187,7 +182,7 @@ let package:Package = .init(
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
             ]),
-        
+
         .target(name: "System", dependencies:
             [
                 .product(name: "SystemPackage", package: "swift-system"),

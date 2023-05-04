@@ -12,9 +12,10 @@ extension Compiler
     struct Scalar:Sendable
     {
         public
-        let declaration:Declaration<ScalarSymbol>
+        let id:ScalarSymbol
+
         public
-        let resolution:ScalarSymbol
+        let declaration:Declaration<ScalarSymbol>
         public
         let location:SourceLocation<FileIdentifier>?
 
@@ -52,15 +53,16 @@ extension Compiler
         var comment:Documentation.Comment?
 
         private
-        init(declaration:Declaration<ScalarSymbol>,
-            resolution:ScalarSymbol,
+        init(_ id:ScalarSymbol,
+            declaration:Declaration<ScalarSymbol>,
             visibility:SymbolDescription.Visibility,
             location:SourceLocation<FileIdentifier>?,
             phylum:ScalarPhylum,
             path:LexicalPath)
         {
+            self.id = id
+
             self.declaration = declaration
-            self.resolution = resolution
             self.location = location
             self.phylum = phylum
             self.path = path
@@ -77,12 +79,6 @@ extension Compiler
 }
 extension Compiler.Scalar:Identifiable
 {
-    @inlinable public
-    var id:ScalarIdentifier
-    {
-        self.resolution.id
-    }
-
     public
     var documentation:Compiler.Documentation?
     {
@@ -126,8 +122,8 @@ extension Compiler.Scalar
             throw Compiler.SymbolError.init(invalid: .scalar(resolution))
         }
 
-        self.init(declaration: description.declaration,
-            resolution: resolution,
+        self.init(resolution,
+            declaration: description.declaration,
             visibility: description.visibility,
             location: try description.location?.map(context.resolve(uri:)),
             phylum: phylum,
