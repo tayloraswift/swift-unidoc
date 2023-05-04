@@ -8,6 +8,7 @@ import SymbolGraphParts
 extension Compiler
 {
     /// A scalar is the smallest “unit” a symbol can be broken down into.
+    @_eagerMove
     @frozen public
     struct Scalar:Sendable
     {
@@ -119,7 +120,7 @@ extension Compiler.Scalar
         guard case .scalar(let phylum) = description.phylum
         else
         {
-            throw Compiler.SymbolError.init(invalid: .scalar(resolution))
+            throw Compiler.UnexpectedSymbolError.scalar(resolution)
         }
 
         self.init(resolution,

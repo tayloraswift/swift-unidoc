@@ -23,18 +23,26 @@ extension SymbolGraph
 
         public
         init(package:PackageIdentifier,
-            version:Repository.Reference?,
-            format:SemanticVersion,
-            requirements:[PlatformRequirement],
-            products:[Product],
-            pins:[Pin])
+            at ref:Repository.Reference?,
+            format:SemanticVersion = .v(0, 1, 0),
+            requirements:[PlatformRequirement] = [],
+            products:[Product] = [],
+            pins:[Pin] = [])
         {
             self.package = package
-            self.version = version
+            self.version = ref
             self.format = format
             self.requirements = requirements
             self.products = products
             self.pins = pins
         }
+    }
+}
+extension SymbolGraph.Metadata
+{
+    public static
+    func swift(at ref:Repository.Reference) -> Self
+    {
+        .init(package: .swift, at: ref)
     }
 }

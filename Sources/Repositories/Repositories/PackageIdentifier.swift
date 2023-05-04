@@ -1,5 +1,5 @@
 @frozen public 
-struct PackageIdentifier:Hashable, Equatable, Sendable
+struct PackageIdentifier:Equatable, Hashable, Sendable
 {
     public
     let canonical:String

@@ -167,6 +167,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphDriver", dependencies:
             [
+                .target(name: "PackageDescriptions"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),
                 .target(name: "System"),

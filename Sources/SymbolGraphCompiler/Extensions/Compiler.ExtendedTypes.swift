@@ -45,7 +45,7 @@ extension Compiler.ExtendedTypes
                     forKey: relationship.source)
             else
             {
-                throw Compiler.DuplicateBlockError.init()
+                throw Compiler.DuplicateSymbolError.block(relationship.source)
             }
         }
     }

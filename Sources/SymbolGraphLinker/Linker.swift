@@ -5,6 +5,7 @@ import Symbols
 import SymbolGraphCompiler
 import SymbolGraphParts
 
+@_eagerMove
 public
 struct Linker
 {
@@ -32,27 +33,6 @@ struct Linker
         self.files = .init()
 
         self.graph = .init(metadata: metadata)
-    }
-}
-extension Linker
-{
-    static
-    func _link(metadata:SymbolGraph.Metadata,
-        context:Compiler.ScalarNominations,
-        scalars:[Compiler.Scalar],
-        extensions:[Compiler.Extension]) throws -> SymbolGraph
-    {
-        var linker:Self = .init(metadata: metadata, context: context)
-
-        let scalarAddresses:[ScalarAddress] = try linker.allocate(
-            scalars: scalars)
-        let extensionAddresses:[(ScalarAddress, Int)] = try linker.allocate(
-            extensions: extensions)
-
-        try linker.link(scalars: scalars, at: scalarAddresses)
-        try linker.link(extensions: extensions, at: extensionAddresses)
-
-        return linker.graph
     }
 }
 extension Linker
