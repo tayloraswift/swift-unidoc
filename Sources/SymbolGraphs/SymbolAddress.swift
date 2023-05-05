@@ -2,20 +2,40 @@ import BSONDecoding
 import BSONEncoding
 
 public
-protocol SymbolAddress:Equatable, Hashable, Comparable, Sendable
+protocol SymbolAddress:Equatable, Hashable, Comparable, Strideable, Sendable
 {
     associatedtype Symbol:Equatable, Hashable, Sendable
 
-    init?(exactly:Int32)
-
+    init(value:Int32)
     var value:Int32 { get }
 }
-extension SymbolAddress
+extension SymbolAddress where Self:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.value < rhs.value
+    }
+}
+extension SymbolAddress where Self:Strideable
+{
+    @inlinable public
+    func advanced(by stride:Int) -> Self
+    {
+        .init(value: self.value.advanced(by: stride))
+    }
+    @inlinable public
+    func distance(to other:Self) -> Int
+    {
+        self.value.distance(to: other.value)
+    }
+}
+extension SymbolAddress where Self:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        return "0x\(String.init(self.value, radix: 16, uppercase: true))"
     }
 }
 extension SymbolAddress where Self:BSONEncodable
@@ -35,7 +55,7 @@ extension SymbolAddress where Self:BSONDecodable
         {
             if case .int32(let int32) = $0
             {
-                return .init(exactly: int32)
+                return .init(value: int32)
             }
             else
             {

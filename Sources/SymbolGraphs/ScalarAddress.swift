@@ -1,8 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 
-/// An ``Int32`` that is statically known to be representable
-/// as a 24-bit unsigned integer.
 @frozen public
 struct ScalarAddress
 {
@@ -10,16 +8,9 @@ struct ScalarAddress
     let value:Int32
 
     @inlinable public
-    init?(exactly int32:Int32)
+    init(value:Int32)
     {
-        if  0 ... 0x00_ff_ff_ff ~= int32
-        {
-            self.value = int32
-        }
-        else
-        {
-            return nil
-        }
+        self.value = value
     }
 }
 extension ScalarAddress:SymbolAddress
@@ -43,10 +34,4 @@ extension ScalarAddress:BSONDecodable, BSONEncodable
 }
 extension ScalarAddress:CustomStringConvertible
 {
-    public
-    var description:String
-    {
-        let hex:String = .init(self.value, radix: 16)
-        return "0x\(String.init(repeating: "0", count: 6 - hex.count))"
-    }
 }

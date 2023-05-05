@@ -9,7 +9,7 @@ import Symbols
 extension SymbolGraph
 {
     @frozen public
-    struct Scalar
+    struct Scalar:Equatable, Sendable
     {
         public
         let flags:Flags
@@ -79,9 +79,8 @@ extension SymbolGraph.Scalar
     @frozen public
     enum CodingKeys:String
     {
-        case flags = "F"
+        case flags = "X"
         case path = "P"
-        case location = "L"
 
         case declaration_availability = "V"
         case declaration_abridged_bytecode = "B"
@@ -91,6 +90,10 @@ extension SymbolGraph.Scalar
         case declaration_generics_parameters = "G"
 
         case superforms = "S"
+        case features = "F"
+        case origin = "O"
+
+        case location = "L"
         case article = "A"
     }
 }
@@ -121,6 +124,16 @@ extension SymbolGraph.Scalar:BSONDocumentEncodable
             self.declaration.generics.parameters.isEmpty ? nil :
             self.declaration.generics.parameters
         
+        bson[.superforms] =
+            self.superforms.isEmpty ? nil :
+            self.superforms
+        
+        bson[.features] =
+            self.features.isEmpty ? nil :
+            self.features
+        
+        bson[.origin] = self.origin
+        
         bson[.location] = self.location
         bson[.article] = self.article
     }
@@ -136,11 +149,18 @@ extension SymbolGraph.Scalar:BSONDocumentDecodable
 
         self.declaration = .init(
             availability: try bson[.declaration_availability]?.decode() ?? .init(),
-            abridged: .init(bytecode: try bson[.declaration_abridged_bytecode].decode()),
-            expanded: .init(bytecode: try bson[.declaration_expanded_bytecode].decode()),
+            abridged: .init(
+                bytecode: try bson[.declaration_abridged_bytecode].decode()),
+            expanded: .init(
+                bytecode: try bson[.declaration_expanded_bytecode].decode(),
+                links: try bson[.declaration_expanded_links]?.decode() ?? []),
             generics: .init(
                 constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
                 parameters: try bson[.declaration_generics_parameters]?.decode() ?? []))
+
+        self.superforms = try bson[.superforms]?.decode() ?? []
+        self.features = try bson[.features]?.decode() ?? []
+        self.origin = try bson[.origin]?.decode()
 
         self.location = try bson[.location]?.decode()
         self.article = try bson[.article]?.decode()

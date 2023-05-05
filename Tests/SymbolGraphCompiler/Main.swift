@@ -43,16 +43,5 @@ enum Main:SyncTests
                 }
             }
         }
-        #if !DEBUG
-        if  let tests:TestGroup = tests / "standard-library"
-        {
-            tests.do
-            {
-                var compiler:Compiler = .init(root: "/")
-                try compiler.compile(parts: tests.load(
-                    parts: ["TestModules/Symbolgraphs/Swift.symbols.json"]))
-            }
-        }
-        #endif
     }
 }

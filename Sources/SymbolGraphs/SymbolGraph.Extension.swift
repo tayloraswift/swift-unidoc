@@ -6,7 +6,7 @@ import Generics
 extension SymbolGraph
 {
     @frozen public
-    struct Extension
+    struct Extension:Equatable, Sendable
     {
         public
         let conditions:[GenericConstraint<ScalarAddress>]

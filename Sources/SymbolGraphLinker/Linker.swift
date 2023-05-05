@@ -5,7 +5,6 @@ import Symbols
 import SymbolGraphCompiler
 import SymbolGraphParts
 
-@_eagerMove
 public
 struct Linker
 {
@@ -177,7 +176,7 @@ extension Linker
         {
             let feature:ScalarAddress = try self.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
-                self.graph.nodes[feature].map({ ($0.path.last, $0.phylum) }) ??
+                self.graph[feature].map({ ($0.path.last, $0.phylum) }) ??
                 self.external[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
@@ -282,14 +281,14 @@ extension Linker
                 return outliner.link(comment: $0.comment)
             }
 
-            self.graph.nodes[address]?.declaration = declaration
+            self.graph[address]?.declaration = declaration
             
-            self.graph.nodes[address]?.superforms = superforms
-            self.graph.nodes[address]?.features = features
-            self.graph.nodes[address]?.origin = origin
+            self.graph[address]?.superforms = superforms
+            self.graph[address]?.features = features
+            self.graph[address]?.origin = origin
 
-            self.graph.nodes[address]?.location = location
-            self.graph.nodes[address]?.article = article
+            self.graph[address]?.location = location
+            self.graph[address]?.article = article
         }
     }
     public mutating
@@ -324,7 +323,7 @@ extension Linker
             if  let comment
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: `extension`.path)
-                self.graph.nodes[address, index].article = outliner.link(comment: comment)
+                self.graph[address, index].article = outliner.link(comment: comment)
             }
         }
     }

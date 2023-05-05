@@ -48,17 +48,11 @@ extension SymbolGraph.Article.Referent:BSONDecodable
                 }
             
             case .int32(let int32):
-                if  let address:ScalarAddress = .init(exactly: int32)
-                {
-                    return .scalar(address)
-                }
+                return .scalar(.init(value: int32))
             
             case .int64(let int64):
-                if  let heir:ScalarAddress = .init(exactly: .init(int64 >> 32)),
-                    let address:ScalarAddress = .init(exactly: .init(int64 & 0x00_ff_ff_ff))
-                {
-                    return .vector(address, self: heir)
-                }
+                return .vector(.init(value: .init(int64 & 0xff_ff_ff_ff)),
+                    self: .init(value: .init(int64 >> 32)))
             
             default:
                 break
