@@ -1,19 +1,19 @@
 extension SymbolGraph
 {
     @frozen public
-    struct Nodes
+    struct Nodes:Equatable, Sendable
     {
         public
         var symbols:SymbolTable<ScalarAddress>
 
         @usableFromInline internal
-        var elements:[Node]
+        var values:[Node]
 
         @inlinable internal
-        init(symbols:SymbolTable<ScalarAddress> = .init(), elements:[Node] = [])
+        init(symbols:SymbolTable<ScalarAddress> = .init(), values:[Node] = [])
         {
             self.symbols = symbols
-            self.elements = elements
+            self.values = values
         }
     }
 }
@@ -22,46 +22,32 @@ extension SymbolGraph.Nodes
     @inlinable public mutating
     func push(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) throws -> ScalarAddress
     {
-        self.elements.append(.init(scalar: scalar))
+        self.values.append(.init(scalar: scalar))
         return try self.symbols(id)
     }
 }
-extension SymbolGraph.Nodes
+extension SymbolGraph.Nodes:RandomAccessCollection
 {
+    @inlinable public
+    var startIndex:ScalarAddress
+    {
+        .init(value: .init(self.values.startIndex))
+    }
+    @inlinable public
+    var endIndex:ScalarAddress
+    {
+        .init(value: .init(self.values.endIndex))
+    }
     @inlinable public
     subscript(address:ScalarAddress) -> SymbolGraph.Node
     {
         _read
         {
-            yield  self.elements[.init(address.value)]
+            yield  self.values[.init(address.value)]
         }
         _modify
         {
-            yield &self.elements[.init(address.value)]
-        }
-    }
-    @inlinable public
-    subscript(address:ScalarAddress) -> SymbolGraph.Scalar?
-    {
-        _read
-        {
-            yield  self[address].scalar
-        }
-        _modify
-        {
-            yield &self[address].scalar
-        }
-    }
-    @inlinable public
-    subscript(address:ScalarAddress, extension:Int) -> SymbolGraph.Extension
-    {
-        _read
-        {
-            yield  self[address].extensions[`extension`]
-        }
-        _modify
-        {
-            yield &self[address].extensions[`extension`]
+            yield &self.values[.init(address.value)]
         }
     }
 }

@@ -4,7 +4,7 @@ import BSONEncoding
 extension SymbolGraph.Scalar
 {
     @frozen public
-    struct Flags
+    struct Flags:Equatable, Sendable
     {
         public
         let aperture:ScalarAperture

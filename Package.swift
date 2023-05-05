@@ -246,8 +246,7 @@ let package:Package = .init(
                 //.target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphs",
-            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
+            path: "Tests/SymbolGraphs"),
         
         .executableTarget(name: "SymbolGraphPartsTests", dependencies:
             [
@@ -255,8 +254,7 @@ let package:Package = .init(
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphParts",
-            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
+            path: "Tests/SymbolGraphParts"),
         
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
             [
@@ -264,6 +262,13 @@ let package:Package = .init(
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphCompiler",
+            path: "Tests/SymbolGraphCompiler"),
+        
+        .executableTarget(name: "SymbolGraphDriverTests", dependencies:
+            [
+                .target(name: "SymbolGraphDriver"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/SymbolGraphDriver",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
     ])

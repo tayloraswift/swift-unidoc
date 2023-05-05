@@ -41,10 +41,4 @@ extension FileAddress:BSONDecodable, BSONEncodable
 }
 extension FileAddress:CustomStringConvertible
 {
-    public
-    var description:String
-    {
-        let hex:String = .init(UInt32.init(bitPattern: self.value), radix: 16)
-        return "0x\(String.init(repeating: "0", count: 8 - hex.count))"
-    }
 }

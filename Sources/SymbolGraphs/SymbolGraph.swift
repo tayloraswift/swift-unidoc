@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 
 @frozen public
-struct SymbolGraph:Sendable
+struct SymbolGraph:Equatable, Sendable
 {
     //  TODO: this should be non-optional
     public
@@ -23,12 +23,39 @@ struct SymbolGraph:Sendable
 }
 extension SymbolGraph
 {
+    @inlinable public
+    subscript(address:ScalarAddress) -> SymbolGraph.Scalar?
+    {
+        _read
+        {
+            yield  self.nodes[address].scalar
+        }
+        _modify
+        {
+            yield &self.nodes[address].scalar
+        }
+    }
+    @inlinable public
+    subscript(address:ScalarAddress, extension:Int) -> SymbolGraph.Extension
+    {
+        _read
+        {
+            yield  self.nodes[address].extensions[`extension`]
+        }
+        _modify
+        {
+            yield &self.nodes[address].extensions[`extension`]
+        }
+    }
+}
+extension SymbolGraph
+{
     public
     enum CodingKeys:String
     {
         case files_symbols
         case nodes_symbols
-        case nodes_elements
+        case nodes_values
     }
 }
 extension SymbolGraph:BSONDocumentEncodable
@@ -38,7 +65,7 @@ extension SymbolGraph:BSONDocumentEncodable
     {
         bson[.files_symbols] = self.files.symbols
         bson[.nodes_symbols] = self.nodes.symbols
-        bson[.nodes_elements] = self.nodes.elements
+        bson[.nodes_values] = self.nodes.values
     }
 }
 extension SymbolGraph:BSONDocumentDecodable
@@ -49,6 +76,6 @@ extension SymbolGraph:BSONDocumentDecodable
         self.init(metadata: nil)
         self.files = .init(symbols: try bson[.files_symbols].decode())
         self.nodes = .init(symbols: try bson[.nodes_symbols].decode(),
-            elements: try bson[.nodes_elements].decode())
+            values: try bson[.nodes_values].decode())
     }
 }

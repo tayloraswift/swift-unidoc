@@ -1,7 +1,7 @@
 extension SymbolGraph
 {
     @frozen public
-    struct Files:Sendable
+    struct Files:Equatable, Sendable
     {
         public
         var symbols:SymbolTable<FileAddress>

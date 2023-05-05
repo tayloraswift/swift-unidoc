@@ -29,7 +29,7 @@ func TestGenerics(_ tests:TestGroup?)
     {
         for (name, expression):(String, GenericConstraint<ScalarAddress>.TypeExpression) in
         [
-            ("nominal", .nominal(.init(exactly: 13)!)),
+            ("nominal", .nominal(.init(value: 13))),
             ("complex", .complex("Dictionary<Int, String>.Index"))
         ]
         {

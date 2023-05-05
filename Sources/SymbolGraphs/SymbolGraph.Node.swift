@@ -4,11 +4,11 @@ import BSONEncoding
 extension SymbolGraph
 {
     @frozen public
-    struct Node
+    struct Node:Equatable, Sendable
     {
-        @usableFromInline internal
+        public
         var extensions:[Extension]
-        @usableFromInline internal
+        public
         var scalar:Scalar?
 
         @inlinable public

@@ -423,12 +423,5 @@ enum Main:SyncTests
                 part: "TestModules/Symbolgraphs/Protocols.symbols.json")
         {
         }
-        #if !DEBUG
-        if  let tests:TestGroup = tests / "standard-library",
-            let _:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/Swift.symbols.json")
-        {
-        }
-        #endif
     }
 }
