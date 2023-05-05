@@ -1,14 +1,14 @@
-public 
-enum FileError:Error, CustomStringConvertible 
+public
+enum FileError:Error, CustomStringConvertible
 {
     case isDirectory                       (path:FilePath)
     case system               (error:Error, path:FilePath)
     case incompleteRead (bytes:Int, of:Int, path:FilePath)
     case incompleteWrite(bytes:Int, of:Int, path:FilePath)
-    
-    var path:FilePath 
+
+    var path:FilePath
     {
-        switch self 
+        switch self
         {
         case    .isDirectory(                     path: let path),
                 .system(error: _,                 path: let path),
@@ -17,11 +17,11 @@ enum FileError:Error, CustomStringConvertible
             return path
         }
     }
-    
-    public 
-    var description:String 
+
+    public
+    var description:String
     {
-        switch self 
+        switch self
         {
         case .isDirectory                                          (path: let path):
             return "file '\(path)' is a directory"

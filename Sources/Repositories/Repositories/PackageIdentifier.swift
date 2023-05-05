@@ -1,4 +1,4 @@
-@frozen public 
+@frozen public
 struct PackageIdentifier:Equatable, Hashable, Sendable
 {
     public
@@ -41,8 +41,8 @@ extension PackageIdentifier:Comparable
 }
 extension PackageIdentifier:CustomStringConvertible
 {
-    @inlinable public 
-    var description:String 
+    @inlinable public
+    var description:String
     {
         self.canonical
     }
@@ -52,18 +52,18 @@ extension PackageIdentifier:LosslessStringConvertible
     @inlinable public
     init(_ string:some StringProtocol)
     {
-        switch string.lowercased() 
+        switch string.lowercased()
         {
         case    "swift-standard-library",
                 "standard-library",
                 "swift-stdlib",
                 "stdlib":
             self = .swift
-        
-        case    "swift-core-libraries", 
+
+        case    "swift-core-libraries",
                 "corelibs":
             self = .corelibs
-        
+
         case let name:
             self.init(canonical: name)
         }
@@ -71,7 +71,7 @@ extension PackageIdentifier:LosslessStringConvertible
 }
 extension PackageIdentifier:ExpressibleByStringLiteral
 {
-    @inlinable public 
+    @inlinable public
     init(stringLiteral:String)
     {
         self.init(stringLiteral)

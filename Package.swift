@@ -36,7 +36,7 @@ let package:Package = .init(
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
     ],
-    dependencies: 
+    dependencies:
     [
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "0.5.1")),
@@ -44,7 +44,7 @@ let package:Package = .init(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
            from: "0.1.16")),
-        
+
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
             from: "0.50800.0")),
 
@@ -54,7 +54,7 @@ let package:Package = .init(
     targets:
     [
         .target(name: "AvailabilityDomain"),
-        
+
         .target(name: "Availability", dependencies:
             [
                 .target(name: "AvailabilityDomain"),
@@ -87,7 +87,7 @@ let package:Package = .init(
             [
                 .target(name: "HTML"),
             ]),
-        
+
         .target(name: "LexicalPaths"),
 
         .target(name: "MarkdownABI"),
@@ -145,7 +145,7 @@ let package:Package = .init(
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
-        
+
         .target(name: "SymbolGraphs", dependencies:
             [
                 .target(name: "Codelinks"),
@@ -186,14 +186,14 @@ let package:Package = .init(
             [
                 .product(name: "SystemPackage", package: "swift-system"),
             ]),
-        
-        
+
+
         .executableTarget(name: "Unidoc", dependencies:
             [
                 .target(name: "SymbolGraphDriver"),
             ]),
 
-        
+
         .executableTarget(name: "CodelinksTests", dependencies:
             [
                 .target(name: "Codelinks"),
@@ -207,14 +207,14 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/MarkdownParsing"),
-        
+
         .executableTarget(name: "MarkdownRenderingTests", dependencies:
             [
                 .target(name: "MarkdownRendering"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/MarkdownRendering"),
-        
+
         .executableTarget(name: "MarkdownSemanticsTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),
@@ -223,7 +223,7 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/MarkdownSemantics"),
-        
+
         .executableTarget(name: "PackageDescriptionsTests", dependencies:
             [
                 .target(name: "PackageDescriptions"),
@@ -231,21 +231,21 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/PackageDescriptions"),
-        
+
         .executableTarget(name: "SemanticVersionsTests", dependencies:
             [
                 .target(name: "SemanticVersions"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SemanticVersions"),
-        
+
         .executableTarget(name: "SymbolsTests", dependencies:
             [
                 .target(name: "Symbols"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/Symbols"),
-        
+
         .executableTarget(name: "SymbolGraphsTests", dependencies:
             [
                 .target(name: "SymbolGraphs"),
@@ -253,7 +253,7 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolGraphs"),
-        
+
         .executableTarget(name: "SymbolGraphPartsTests", dependencies:
             [
                 .target(name: "SymbolGraphParts"),
@@ -261,7 +261,7 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolGraphParts"),
-        
+
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
             [
                 .target(name: "SymbolGraphCompiler"),
@@ -269,7 +269,7 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolGraphCompiler"),
-        
+
         .executableTarget(name: "SymbolGraphDriverTests", dependencies:
             [
                 .target(name: "SymbolGraphDriver"),

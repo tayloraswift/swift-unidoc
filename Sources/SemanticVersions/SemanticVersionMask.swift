@@ -1,4 +1,4 @@
-@frozen public 
+@frozen public
 enum SemanticVersionMask:Equatable, Hashable, Sendable
 {
     case major(UInt16)
@@ -35,12 +35,12 @@ extension SemanticVersionMask
 }
 extension SemanticVersionMask:CustomStringConvertible
 {
-    @inlinable public 
+    @inlinable public
     var description:String
     {
-        switch self 
+        switch self
         {
-        case .major(let major): 
+        case .major(let major):
             return "\(major)"
         case .minor(let major, let minor):
             return "\(major).\(minor)"
@@ -56,7 +56,7 @@ extension SemanticVersionMask:LosslessStringConvertible
     {
         let components:[Substring] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
-        
+
         guard components.count > 0, let major:UInt16 = .init(components[0])
         else
         {
