@@ -188,6 +188,12 @@ let package:Package = .init(
             ]),
         
         
+        .executableTarget(name: "Unidoc", dependencies:
+            [
+                .target(name: "SymbolGraphDriver"),
+            ]),
+
+        
         .executableTarget(name: "CodelinksTests", dependencies:
             [
                 .target(name: "Codelinks"),
