@@ -1,14 +1,14 @@
-@frozen public 
+@frozen public
 struct Availability:Equatable, Sendable
 {
     public
     var universal:Clauses<UniversalDomain>?
-    
+
     public
     var platforms:[PlatformDomain: Clauses<PlatformDomain>]
     public
     var agnostic:[AgnosticDomain: Clauses<AgnosticDomain>]
-    
+
     @inlinable public
     init(_ universal:Clauses<UniversalDomain>? = nil,
         platforms:[PlatformDomain: Clauses<PlatformDomain>] = [:],
@@ -22,7 +22,7 @@ struct Availability:Equatable, Sendable
 extension Availability
 {
     @inlinable public
-    var isEmpty:Bool 
+    var isEmpty:Bool
     {
         self.universal == nil &&
         self.platforms.isEmpty &&
@@ -32,7 +32,7 @@ extension Availability
 extension Availability
 {
     @inlinable public
-    var isGenerallyRecommended:Bool 
+    var isGenerallyRecommended:Bool
     {
         self.universal?.isGenerallyRecommended ?? true &&
         self.agnostic[.swift]?.isGenerallyRecommended ?? true

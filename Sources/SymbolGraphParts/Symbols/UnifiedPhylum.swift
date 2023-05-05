@@ -2,7 +2,7 @@ import JSONDecoding
 import JSONEncoding
 import Symbols
 
-@frozen public 
+@frozen public
 enum UnifiedPhylum:Hashable, Equatable, Sendable
 {
     case block

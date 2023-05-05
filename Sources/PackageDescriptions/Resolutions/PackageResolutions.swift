@@ -1,6 +1,6 @@
 import JSONDecoding
 
-@frozen public 
+@frozen public
 struct PackageResolutions:Equatable, Sendable
 {
     public
@@ -28,14 +28,14 @@ extension PackageResolutions:JSONObjectDecodable
         case version
         case pins
     }
-    public 
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws 
+    public
+    init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         switch try json[.version].decode(to: UInt.self)
         {
         case 2:
             self.init(pins: try json[.pins].decode())
-        
+
         case let unsupported:
             throw FormatVersionError.init(unsupported: unsupported)
         }

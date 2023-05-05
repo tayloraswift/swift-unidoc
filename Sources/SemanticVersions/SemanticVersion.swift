@@ -1,19 +1,19 @@
-@frozen public 
-struct SemanticVersion:Equatable, Hashable, Sendable 
+@frozen public
+struct SemanticVersion:Equatable, Hashable, Sendable
 {
-    public 
-    var major:UInt16 
-    public 
-    var minor:UInt16 
-    public 
-    var patch:UInt16 
+    public
+    var major:UInt16
+    public
+    var minor:UInt16
+    public
+    var patch:UInt16
 
     @inlinable internal
     init(major:UInt16, minor:UInt16, patch:UInt16)
     {
-        self.major = major 
-        self.minor = minor 
-        self.patch = patch 
+        self.major = major
+        self.minor = minor
+        self.patch = patch
     }
 }
 extension SemanticVersion
@@ -53,8 +53,8 @@ extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
 }
 extension SemanticVersion:Comparable
 {
-    @inlinable public static 
-    func < (lhs:Self, rhs:Self) -> Bool 
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
     {
         (lhs.major, lhs.minor, lhs.patch) < (rhs.major, rhs.minor, rhs.patch)
     }

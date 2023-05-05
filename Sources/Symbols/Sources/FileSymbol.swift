@@ -31,12 +31,12 @@ extension FileSymbol:RawRepresentable
 extension FileSymbol:Comparable
 {
     @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool 
+    func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.path < rhs.path
     }
 }
-extension FileSymbol:ExpressibleByStringLiteral 
+extension FileSymbol:ExpressibleByStringLiteral
 {
     @inlinable public
     init(stringLiteral:String)

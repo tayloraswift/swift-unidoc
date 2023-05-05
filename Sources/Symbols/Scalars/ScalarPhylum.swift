@@ -1,4 +1,4 @@
-@frozen public 
+@frozen public
 enum ScalarPhylum:Hashable, Sendable
 {
     case  actor
