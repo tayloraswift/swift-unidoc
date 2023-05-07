@@ -24,7 +24,7 @@ let package:Package = .init(
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
-        .library(name: "PackageDescriptions", targets: ["PackageDescriptions"]),
+        .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
         .library(name: "Repositories", targets: ["Repositories"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
@@ -47,6 +47,8 @@ let package:Package = .init(
 
         .package(url: "https://github.com/SDGGiesbrecht/swift-markdown", .upToNextMinor(
             from: "0.50800.0")),
+
+        .package(url: "https://github.com/apple/swift-syntax", exact: "508.0.0"),
 
         .package(url: "https://github.com/apple/swift-system.git", .upToNextMinor(
             from: "1.2.1")),
@@ -122,7 +124,7 @@ let package:Package = .init(
                 .target(name: "StringIdentifiers"),
             ]),
 
-        .target(name: "PackageDescriptions", dependencies:
+        .target(name: "PackageMetadata", dependencies:
             [
                 .target(name: "Repositories"),
 
@@ -167,7 +169,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphDriver", dependencies:
             [
-                .target(name: "PackageDescriptions"),
+                .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),
                 .target(name: "System"),
@@ -178,17 +180,19 @@ let package:Package = .init(
                 .target(name: "CodelinkResolution"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
-                .target(name: "PackageDescriptions"),
+                .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
             ]),
 
         .target(name: "System", dependencies:
             [
                 .product(name: "SystemPackage", package: "swift-system"),
+                .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
 
-        .executableTarget(name: "Unidoc", dependencies:
+        .executableTarget(name: "Unidoc",
+            dependencies:
             [
                 .target(name: "SymbolGraphDriver"),
             ]),
@@ -224,13 +228,13 @@ let package:Package = .init(
             ],
             path: "Tests/MarkdownSemantics"),
 
-        .executableTarget(name: "PackageDescriptionsTests", dependencies:
+        .executableTarget(name: "PackageMetadataTests", dependencies:
             [
-                .target(name: "PackageDescriptions"),
+                .target(name: "PackageMetadata"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/PackageDescriptions"),
+            path: "Tests/PackageMetadata"),
 
         .executableTarget(name: "SemanticVersionsTests", dependencies:
             [

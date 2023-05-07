@@ -77,8 +77,7 @@ extension SystemProcess
         case 0:
             self.init(invocation: invocation, id: pid)
         case let status:
-            throw SystemCommandError.init(.launch(status, .posix_spawnp),
-                invocation: invocation)
+            throw SystemProcessError.spawn(status, invocation)
         }
     }
 
@@ -91,8 +90,7 @@ extension SystemProcess
         case self.id:
             return status
         case let status:
-            throw SystemCommandError.init(.launch(status, .waitpid),
-                invocation: self.invocation)
+            throw SystemProcessError.wait(status, self.invocation)
         }
     }
 
@@ -104,7 +102,7 @@ extension SystemProcess
         case 0:
             return
         case let status:
-            throw SystemCommandError.init(.exit(status), invocation: self.invocation)
+            throw SystemProcessError.exit(status, self.invocation)
         }
     }
 }
