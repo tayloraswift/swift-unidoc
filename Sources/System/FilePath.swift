@@ -5,6 +5,14 @@ extension FilePath:@unchecked Sendable
 }
 extension FilePath
 {
+    @inlinable public static
+    func / (lhs:Self, rhs:Component) -> Self
+    {
+        lhs.appending(rhs)
+    }
+}
+extension FilePath
+{
     @inlinable public
     func open<T>(_ mode:FileDescriptor.AccessMode,
         permissions:
@@ -18,17 +26,45 @@ extension FilePath
     {
         do
         {
-            let permissions:FilePermissions? = permissions.map
-            {
-                .init(rawValue:
-                    ($0.owner?.rawValue ?? 0) << 6 |
-                    ($0.group?.rawValue ?? 0) << 3 |
-                    ($0.other?.rawValue ?? 0))
-            }
             let file:FileDescriptor = try .open(self, mode,
                 options: options,
-                permissions: permissions)
+                permissions: permissions.map(FilePermissions.init(_:)))
             return try file.closeAfter { try body(file) }
+        }
+        catch let error
+        {
+            throw FileError.init(underlying: error, path: self)
+        }
+    }
+    @inlinable public
+    func open<T>(_ mode:FileDescriptor.AccessMode,
+        permissions:
+        (
+            owner:FilePermissions.Component?,
+            group:FilePermissions.Component?,
+            other:FilePermissions.Component?
+        )? = nil,
+        options:FileDescriptor.OpenOptions = [],
+        with body:(FileDescriptor) async throws -> T) async throws -> T
+    {
+        do
+        {
+            let file:FileDescriptor = try .open(self, mode,
+                options: options,
+                permissions: permissions.map(FilePermissions.init(_:)))
+
+            let success:T
+            do
+            {
+                success = try await body(file)
+            }
+            catch let error
+            {
+                try? file.close()
+                throw error
+            }
+            try file.close()
+            return success
         }
         catch let error
         {

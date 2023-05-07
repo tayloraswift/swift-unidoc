@@ -1,4 +1,3 @@
-@_exported import struct SystemPackage.FilePermissions
 extension FilePermissions
 {
     @frozen public
