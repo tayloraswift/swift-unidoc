@@ -1,36 +1,33 @@
-public
-enum FileError:Error, CustomStringConvertible
-{
-    case isDirectory                       (path:FilePath)
-    case system               (error:Error, path:FilePath)
-    case incompleteRead (bytes:Int, of:Int, path:FilePath)
-    case incompleteWrite(bytes:Int, of:Int, path:FilePath)
+import TraceableErrors
 
-    var path:FilePath
-    {
-        switch self
-        {
-        case    .isDirectory(                     path: let path),
-                .system(error: _,                 path: let path),
-                .incompleteRead (bytes: _, of: _, path: let path),
-                .incompleteWrite(bytes: _, of: _, path: let path):
-            return path
-        }
-    }
+public
+struct FileError:Error, Sendable
+{
+    public
+    let underlying:any Error
+    public
+    let path:FilePath
 
     public
-    var description:String
+    init(underlying:any Error, path:FilePath)
     {
-        switch self
-        {
-        case .isDirectory                                          (path: let path):
-            return "file '\(path)' is a directory"
-        case .system                    (error: let error,          path: let path):
-            return "system error '\(error)' while reading file '\(path)'"
-        case .incompleteRead (bytes: let read,    of: let expected, path: let path):
-            return "could only read \(read) of \(expected) bytes from file '\(path)'"
-        case .incompleteWrite(bytes: let written, of: let expected, path: let path):
-            return "could only write \(written) of \(expected) bytes to file '\(path)'"
-        }
+        self.underlying = underlying
+        self.path = path
+    }
+}
+extension FileError:Equatable
+{
+    public static
+    func == (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.path == rhs.path && lhs.underlying == rhs.underlying
+    }
+}
+extension FileError:TraceableError
+{
+    public
+    var notes:[String]
+    {
+        ["In file '\(self.path)'"]
     }
 }
