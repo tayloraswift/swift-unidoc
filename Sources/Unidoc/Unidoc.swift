@@ -1,4 +1,5 @@
 import PackageMetadata
+import Repositories
 import System
 
 @main
@@ -7,21 +8,19 @@ enum Unidoc
     public static
     func main() async throws
     {
-        let workspace:FilePath = ".unidoc"
+        let workspace:Workspace = try await .create(at: ".unidoc")
 
-        try await SystemProcess.init(command: "mkdir", arguments: ["-p", workspace.string])()
+        let checkout:Workspace.Checkout = try await workspace.checkout(
+            url: "https://github.com/apple/swift-syntax.git",
+            at: "508.0.0")
 
-        let context:RepositoryContext = try await .setup(
-            cloning: "https://github.com/apple/swift-syntax",
-            into: "swift-syntax",
-            in: workspace)
+        try await checkout.build()
 
-        try await context.build()
+        let _:PackageResolutions = try checkout.loadResolutions()
+        let manifest:PackageManifest = try await checkout.loadManifest()
 
-        let manifest:PackageManifest = try await context.loadManifest()
-        let resolutions:PackageResolutions = try context.loadResolutions()
-
-        print(manifest)
-        print(resolutions)
+        print("name:", manifest.name)
+        print("root:", manifest.root)
+        print("products:", manifest.products)
     }
 }

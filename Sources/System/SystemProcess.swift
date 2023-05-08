@@ -23,8 +23,15 @@ struct SystemProcess:Identifiable
 extension SystemProcess
 {
     public
-    init(command:String,
-        arguments:[String],
+    init(command:String, _ arguments:String...,
+        stdout:FileDescriptor? = nil,
+        stderr:FileDescriptor? = nil) throws
+    {
+        try self.init(command: command, arguments: arguments, stdout: stdout, stderr: stderr)
+    }
+
+    public
+    init(command:String, arguments:[String],
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil) throws
     {

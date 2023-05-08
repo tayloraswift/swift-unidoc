@@ -10,6 +10,11 @@ extension FilePath
     {
         lhs.appending(rhs)
     }
+    @inlinable public static
+    func / (lhs:Self, rhs:String) -> Self
+    {
+        lhs.appending(rhs)
+    }
 }
 extension FilePath
 {
