@@ -25,10 +25,24 @@ extension SemanticVersion
         self.init(major: major, minor: minor, patch: patch)
     }
 }
-extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
+extension SemanticVersion
 {
+    /// Attempts to parse a semantic version from a tag string, such as `1.2.3` or `v1.2.3`.
     @inlinable public
-    init?(_ string:String)
+    init?(tag:String)
+    {
+        if  case "v"? = tag.first
+        {
+            self.init(tag.dropFirst())
+        }
+        else
+        {
+            self.init(tag)
+        }
+    }
+
+    @inlinable internal
+    init?(_ string:Substring)
     {
         let components:[Substring] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
@@ -44,11 +58,24 @@ extension SemanticVersion:LosslessStringConvertible, CustomStringConvertible
             return nil
         }
     }
-
+}
+extension SemanticVersion:CustomStringConvertible
+{
     @inlinable public
     var description:String
     {
         "\(self.major).\(self.minor).\(self.patch)"
+    }
+}
+extension SemanticVersion:LosslessStringConvertible
+{
+    /// Attempts to parse a semantic version from a dot-separated triple, such as `1.2.3`.
+    /// This initializer does not accept `v`-prefixed strings; use ``init(tag:)`` to accept
+    /// an optional `v` prefix.
+    @inlinable public
+    init?(_ string:String)
+    {
+        self.init(string[...])
     }
 }
 extension SemanticVersion:Comparable
