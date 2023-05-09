@@ -14,14 +14,22 @@ struct Workspace
 }
 extension Workspace
 {
+}
+extension Workspace
+{
     static
     func create(at path:FilePath) async throws -> Self
     {
-        try await SystemProcess.init(command: "mkdir", arguments: ["-p", path.string])()
+        try await SystemProcess.init(command: "mkdir", "-p", "\(path)")()
         return .init(path: path)
     }
 
-    func checkout(url:String, at reference:String) async throws -> Checkout
+    func clean() async throws
+    {
+        try await SystemProcess.init(command: "rm", "\(self.path.appending("*"))")()
+    }
+
+    func checkout(url:String, at reference:String, clean:Bool = false) async throws -> Checkout
     {
         guard let package:PackageIdentifier = .infer(from: url)
         else
@@ -29,7 +37,7 @@ extension Workspace
             fatalError("unimplemented")
         }
 
-        let root:FilePath = self.path / package.description
+        let root:FilePath = self.path / "\(package)"
         do
         {
             try await SystemProcess.init(command: "git", "-C", root.string, "fetch")()
@@ -39,6 +47,9 @@ extension Workspace
             try await SystemProcess.init(command: "git", "-C", self.path.string,
                 "clone", url, package.description)()
         }
+
+        let workspace:Self = try await .create(at: self.path / "\(package).doc")
+        if  clean { try await workspace.clean() }
 
         try await SystemProcess.init(command: "git", "-C", root.string,
             "checkout", reference)()
@@ -71,9 +82,11 @@ extension Workspace
         let reference:Repository.Reference = SemanticVersion.init(tag: reference).map(
             Repository.Reference.version(_:)) ?? .branch(reference)
 
-        return .init(root: root, pin: .init(id: package,
-            reference: reference,
-            revision: revision,
-            location: .remote(url: url)))
+        return .init(workspace: workspace,
+            root: root,
+            pin: .init(id: package,
+                reference: reference,
+                revision: revision,
+                location: .remote(url: url)))
     }
 }

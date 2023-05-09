@@ -6,11 +6,13 @@ extension Workspace
 {
     struct Checkout
     {
+        let workspace:Workspace
         let root:FilePath
         let pin:Repository.Pin
 
-        init(root:FilePath, pin:Repository.Pin)
+        init(workspace:Workspace, root:FilePath, pin:Repository.Pin)
         {
+            self.workspace = workspace
             self.root = root
             self.pin = pin
         }
@@ -25,12 +27,12 @@ extension Workspace.Checkout
         try await build()
     }
 
-    func loadResolutions() throws -> PackageResolutions
+    func loadPackageResolved() throws -> PackageResolutions
     {
         try .init(parsing: try (self.root / "Package.resolved").read())
     }
 
-    func loadManifest() async throws -> PackageManifest
+    func dumpManifest() async throws -> PackageManifest
     {
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we
@@ -47,5 +49,22 @@ extension Workspace.Checkout
             return try $0.readAll()
         }
         return try .init(parsing: json)
+    }
+
+    func dumpSymbols(_ modules:[ModuleIdentifier]) async throws
+    {
+        for module:ModuleIdentifier in modules
+        {
+            try await SystemProcess.init(command: "swift", "symbolgraph-extract",
+                "-I", "\(self.root)/.build/debug",
+                "-target", "x86_64-unknown-linux-gnu",
+                "-minimum-access-level", "internal",
+                "-output-dir", "\(self.workspace.path)",
+                "-skip-inherited-docs",
+                "-emit-extension-block-symbols",
+                "-include-spi-symbols",
+                "-pretty-print",
+                "-module-name", "\(module)")()
+        }
     }
 }
