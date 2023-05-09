@@ -35,7 +35,6 @@ struct PackageManifest:Equatable, Sendable
         self.targets = targets
     }
 }
-
 extension PackageManifest
 {
     /// Returns all targets in the manifest that are included, directly or indirectly,
@@ -43,26 +42,28 @@ extension PackageManifest
     public
     func libraries() throws -> [Target]
     {
-        let targets:[TargetIdentifier: Target] = try .init(
-            self.targets.lazy.map { ($0.id, $0) })
+        let targets:Targets = try .init(indexing: self.targets)
+
+        /// Targets that have been discovered, but not explored through.
+        /// Targets that have been fully explored. Once ``explorable`` becomes
+        /// empty again, this will contain every target that is included
+        /// in at least one library product.
+        var explored:[TargetIdentifier: Target] = [:]
+        var queued:[Target] = []
+
+        func explore(target id:TargetIdentifier) throws
         {
-            throw TargetError.duplicate($1.id)
+            try
+            {
+                if  case nil = $0
+                {
+                    let target:Target = try targets(id)
+                    queued.append(target)
+                    $0 = target
+                }
+            } (&explored[id])
         }
 
-        func target(_ id:TargetIdentifier) throws -> Target
-        {
-            if  let target:Target = targets[id]
-            {
-                return target
-            }
-            else
-            {
-                throw TargetError.undefined(id)
-            }
-        }
-
-        var explorable:[[TargetDependency]] = []
-        var explored:Set<TargetIdentifier> = []
         for product:Product in self.products
         {
             guard case .library = product.type
@@ -72,24 +73,77 @@ extension PackageManifest
             }
             for id:TargetIdentifier in product.targets
             {
-                if  case nil = explored.update(with: id)
-                {
-                    explorable.append(try target(id).dependencies)
-                }
+                try explore(target: id)
             }
         }
-        while let dependencies:[TargetDependency] = explorable.popLast()
+        /// The list of targets that *directly* depend on each (explored) target.
+        var consumers:[TargetIdentifier: [Target]] = [:]
+        while let target:Target = queued.popLast()
         {
-            for dependency:TargetDependency in dependencies
+            // need to sort dependency set to make topological sort deterministic
+            for id:TargetIdentifier in target.dependencies.targets.map(\.id).sorted()
             {
-                if  case .target(let dependency) = dependency,
-                    case nil = explored.update(with: dependency.id)
-                {
-                    explorable.append(try target(dependency.id).dependencies)
-                }
+                consumers[id, default: []].append(target)
+                try explore(target: id)
             }
         }
-        return self.targets.filter { explored.contains($0.id) }
+
+        if  let targets:[Target] = Self.order(topologically: explored, consumers: &consumers)
+        {
+            return targets
+        }
+        else
+        {
+            throw PackageManifestError.dependencyCycle
+        }
+    }
+
+    private static
+    func order(topologically targets:[TargetIdentifier: Target],
+        consumers:inout [TargetIdentifier: [Target]]) -> [Target]?
+    {
+        var sources:[Target] = []
+        var dependencies:[TargetIdentifier: Set<TargetIdentifier>] = targets.compactMapValues
+        {
+            if $0.dependencies.targets.isEmpty
+            {
+                sources.append($0)
+                return nil
+            }
+            else
+            {
+                return .init($0.dependencies.targets.lazy.map(\.id))
+            }
+        }
+
+        //  Note: polarity reversed
+        sources.sort { $1.id < $0.id }
+
+        var ordered:[Target] = [] ; ordered.reserveCapacity(targets.count)
+
+        while let source:Target = sources.popLast()
+        {
+            ordered.append(source)
+
+            guard let next:[Target] = consumers.removeValue(forKey: source.id)
+            else
+            {
+                continue
+            }
+            for next:Target in next
+            {
+                {
+                    if  case _? = $0?.remove(source.id),
+                        case true? = $0?.isEmpty
+                    {
+                        sources.append(next)
+                        $0 = nil
+                    }
+                } (&dependencies[next.id])
+            }
+        }
+
+        return dependencies.isEmpty && consumers.isEmpty ? ordered : nil
     }
 }
 extension PackageManifest
