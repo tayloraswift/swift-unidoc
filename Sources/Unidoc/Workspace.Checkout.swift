@@ -34,6 +34,10 @@ extension Workspace.Checkout
 
     func dumpManifest() async throws -> PackageManifest
     {
+        print("""
+            Dumping manifest for package '\(self.pin.id)' \
+            at \(self.pin.reference) (\(self.pin.revision))
+            """)
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we
         //  tell the subprocess to write it to a file, and read back the file afterwards.
@@ -55,6 +59,8 @@ extension Workspace.Checkout
     {
         for module:ModuleIdentifier in modules
         {
+            print("Dumping symbols for module '\(module)'")
+
             try await SystemProcess.init(command: "swift", "symbolgraph-extract",
                 "-I", "\(self.root)/.build/debug",
                 "-target", "x86_64-unknown-linux-gnu",

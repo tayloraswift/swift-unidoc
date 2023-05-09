@@ -9,7 +9,7 @@ extension PackageManifest
         public
         let id:TargetIdentifier
         public
-        let dependencies:[TargetDependency]
+        let dependencies:Dependencies
         /// The path to the target’s source directory, relative to the
         /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
         public
@@ -19,7 +19,7 @@ extension PackageManifest
 
         @inlinable public
         init(id:TargetIdentifier,
-            dependencies:[TargetDependency] = [],
+            dependencies:Dependencies = .init(),
             path:String? = nil,
             type:TargetType = .library)
         {

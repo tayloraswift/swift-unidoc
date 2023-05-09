@@ -1,6 +1,15 @@
 @frozen public
-enum TargetDependency:Equatable, Sendable
+struct TargetDependency:Identifiable, Equatable, Sendable
 {
-    case product(Product)
-    case target(Target)
+    public
+    let id:TargetIdentifier
+    public
+    let platforms:[PlatformIdentifier]
+
+    @inlinable public
+    init(id:TargetIdentifier, platforms:[PlatformIdentifier] = [])
+    {
+        self.id = id
+        self.platforms = platforms
+    }
 }
