@@ -16,11 +16,14 @@ enum Unidoc
 
         try await checkout.build()
 
-        let _:PackageResolutions = try checkout.loadResolutions()
-        let manifest:PackageManifest = try await checkout.loadManifest()
+        let _:PackageResolutions = try checkout.loadPackageResolved()
+
+        let manifest:PackageManifest = try await checkout.dumpManifest()
 
         print("name:", manifest.name)
         print("root:", manifest.root)
-        print("products:", manifest.products)
+
+        let targets:[PackageManifest.Target] = try manifest.libraries()
+        try await checkout.dumpSymbols(targets.map(\.id.mangled))
     }
 }

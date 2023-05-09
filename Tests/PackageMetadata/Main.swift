@@ -38,11 +38,11 @@ enum Main:SyncTests
                     [
                         .init(id: "swift-json",
                             reference: .version(.v(0, 4, 5)),
-                            revision: .init("36ef4bf1e6ae38f881ed253d5656839a046456f1"),
+                            revision: 0x36ef4bf1e6ae38f881ed253d5656839a046456f1,
                             location: .local(root: "/swift/swift-json")),
                     ]
                     tests.expect(resolutions.version ==? .v2)
-                    tests.expect(resolutions.pins ==? expected)
+                    tests.expect(resolutions.pins ..? expected)
                 }
             }
             if  let tests:TestGroup = tests / "remote"
@@ -80,17 +80,17 @@ enum Main:SyncTests
                     [
                         .init(id: "swift-atomics",
                             reference: .version(.v(1, 0, 3)),
-                            revision: .init("ff3d2212b6b093db7f177d0855adbc4ef9c5f036"),
+                            revision: 0xff3d2212b6b093db7f177d0855adbc4ef9c5f036,
                             location: .remote(
                                 url: "https://github.com/apple/swift-atomics.git")),
                         .init(id: "swift-grammar",
                             reference: .version(.v(0, 3, 1)),
-                            revision: .init("69613825b2ad1d0538c59d72e548867ce7568cc2"),
+                            revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
                             location: .remote(
                                 url: "https://github.com/kelvin13/swift-grammar")),
                     ]
                     tests.expect(resolutions.version ==? .v2)
-                    tests.expect(resolutions.pins ==? expected)
+                    tests.expect(resolutions.pins ..? expected)
                 }
             }
             if  let tests:TestGroup = tests / "dogfood"
@@ -132,12 +132,12 @@ enum Main:SyncTests
                     [
                         .init(id: "swift-argument-parser",
                             reference: .version(.v(1, 2, 2)),
-                            revision: .init("fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a"),
+                            revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
                             location: .remote(
                                 url: "https://github.com/apple/swift-argument-parser.git")),
                     ]
                     tests.expect(resolutions.version ==? .v1)
-                    tests.expect(resolutions.pins ==? expected)
+                    tests.expect(resolutions.pins ..? expected)
                 }
             }
         }
@@ -344,8 +344,8 @@ enum Main:SyncTests
                                         url: "https://github.com/kelvin13/swift-grammar"))),
 
                                 .resolvable(.init(id: "swift-hash",
-                                    requirement: .revision(.init(
-                                        "36ef4bf1e6ae38f881ed253d5656839a046456f1")),
+                                    requirement: .revision(
+                                        0x36ef4bf1e6ae38f881ed253d5656839a046456f1),
                                     location: .remote(
                                         url: "https://github.com/kelvin13/swift-hash"))),
 

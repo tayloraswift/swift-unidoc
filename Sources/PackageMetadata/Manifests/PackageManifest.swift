@@ -35,6 +35,63 @@ struct PackageManifest:Equatable, Sendable
         self.targets = targets
     }
 }
+
+extension PackageManifest
+{
+    /// Returns all targets in the manifest that are included, directly or indirectly,
+    /// by at least one library product.
+    public
+    func libraries() throws -> [Target]
+    {
+        let targets:[TargetIdentifier: Target] = try .init(
+            self.targets.lazy.map { ($0.id, $0) })
+        {
+            throw TargetError.duplicate($1.id)
+        }
+
+        func target(_ id:TargetIdentifier) throws -> Target
+        {
+            if  let target:Target = targets[id]
+            {
+                return target
+            }
+            else
+            {
+                throw TargetError.undefined(id)
+            }
+        }
+
+        var explorable:[[TargetDependency]] = []
+        var explored:Set<TargetIdentifier> = []
+        for product:Product in self.products
+        {
+            guard case .library = product.type
+            else
+            {
+                continue
+            }
+            for id:TargetIdentifier in product.targets
+            {
+                if  case nil = explored.update(with: id)
+                {
+                    explorable.append(try target(id).dependencies)
+                }
+            }
+        }
+        while let dependencies:[TargetDependency] = explorable.popLast()
+        {
+            for dependency:TargetDependency in dependencies
+            {
+                if  case .target(let dependency) = dependency,
+                    case nil = explored.update(with: dependency.id)
+                {
+                    explorable.append(try target(dependency.id).dependencies)
+                }
+            }
+        }
+        return self.targets.filter { explored.contains($0.id) }
+    }
+}
 extension PackageManifest
 {
     public
