@@ -1,15 +1,64 @@
 extension Repository
 {
     @frozen public
-    struct Revision:Hashable, Equatable, Sendable
+    struct Revision:Sendable
     {
-        public
-        let hash:UInt8x20
+        @usableFromInline internal
+        typealias Storage = (UInt32, UInt32, UInt32, UInt32, UInt32)
 
-        @inlinable public
-        init(hash:UInt8x20)
+        @usableFromInline internal
+        var storage:Storage
+
+        @inlinable internal
+        init(storage:Storage = (0, 0, 0, 0, 0))
         {
-            self.hash = hash
+            self.storage = storage
+        }
+    }
+}
+extension Repository.Revision:RandomAccessCollection
+{
+    @inlinable public
+    var startIndex:Int
+    {
+        0
+    }
+    @inlinable public
+    var endIndex:Int
+    {
+        MemoryLayout<Storage>.size
+    }
+    @inlinable public
+    subscript(index:Int) -> UInt8
+    {
+        get
+        {
+            precondition(self.indices ~= index, "index out of range")
+            return withUnsafeBytes(of: self.storage) { $0[index] }
+        }
+        set(value)
+        {
+            precondition(self.indices ~= index, "index out of range")
+            withUnsafeMutableBytes(of: &self.storage) { $0[index] = value }
+        }
+    }
+}
+extension Repository.Revision:Equatable
+{
+    @inlinable public static
+    func == (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.storage == rhs.storage
+    }
+}
+extension Repository.Revision:Hashable
+{
+    @inlinable public
+    func hash(into hasher:inout Hasher)
+    {
+        for byte:UInt8 in self
+        {
+            byte.hash(into: &hasher)
         }
     }
 }
@@ -23,19 +72,19 @@ extension Repository.Revision:ExpressibleByIntegerLiteral
         precondition(integerLiteral.bitWidth <= 161, // +1 bit for “sign” bit
             "revision literal overflows UInt8x20 (bit width: \(integerLiteral.bitWidth))")
 
-        var hash:UInt8x20 = .init()
-        var byte:Int = hash.endIndex
+        self.init()
+        var byte:Int = self.endIndex
         var word:Int = 0
-        while byte != hash.startIndex
+        while byte != self.startIndex
         {
             withUnsafeBytes(of: integerLiteral[word].bigEndian)
             {
                 for value:UInt8 in $0.reversed()
                 {
-                    byte = hash.index(before: byte)
-                    hash[byte] = value
+                    byte = self.index(before: byte)
+                    self[byte] = value
 
-                    if  byte == hash.startIndex
+                    if  byte == self.startIndex
                     {
                         break
                     }
@@ -43,7 +92,6 @@ extension Repository.Revision:ExpressibleByIntegerLiteral
             }
             word += 1
         }
-        self.init(hash: hash)
     }
 }
 extension Repository.Revision:CustomStringConvertible
@@ -57,7 +105,7 @@ extension Repository.Revision:CustomStringConvertible
             {
                 (remainder < 10 ? 0x30 : 0x61 - 10) &+ remainder
             }
-            for (index, byte):(Int, UInt8) in zip($0.indices, self.hash)
+            for (index, byte):(Int, UInt8) in zip($0.indices, self)
             {
                 $0[2 * index    ] = digit(remainder: byte >> 4)
                 $0[2 * index + 1] = digit(remainder: byte & 0x0f)
@@ -76,9 +124,9 @@ extension Repository.Revision:LosslessStringConvertible
     public
     init?(_ description:Substring)
     {
-        let hash:UInt8x20? = withUnsafeTemporaryAllocation(
-            byteCount: MemoryLayout<UInt8x20.Storage>.size,
-            alignment: MemoryLayout<UInt8x20.Storage>.alignment)
+        let storage:Storage? = withUnsafeTemporaryAllocation(
+            byteCount: MemoryLayout<Storage>.size,
+            alignment: MemoryLayout<Storage>.alignment)
         {
             var input:IndexingIterator<Substring> = description.makeIterator()
             for index:Int in $0.indices
@@ -95,16 +143,16 @@ extension Repository.Revision:LosslessStringConvertible
             }
             if  case nil = input.next()
             {
-                return .init(storage: $0.load(as: UInt8x20.Storage.self))
+                return $0.load(as: Storage.self)
             }
             else
             {
                 return nil
             }
         }
-        if  let hash:UInt8x20
+        if  let storage:Storage
         {
-            self.init(hash: hash)
+            self.init(storage: storage)
         }
         else
         {
