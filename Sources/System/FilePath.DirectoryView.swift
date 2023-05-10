@@ -10,90 +10,106 @@ import Glibc
 #error("unsupported platform")
 #endif
 
+extension FilePath.DirectoryView
+{
+    #if canImport(Darwin)
+    public
+    typealias StreamPointer = UnsafeMutablePointer<DIR>
+    #elseif canImport(Glibc)
+    public
+    typealias StreamPointer = OpaquePointer
+    #endif
+}
 extension FilePath
 {
-    @inlinable public
-    var children:DirectoryView
+    /// `DirectoryView` provides an iteratable sequence of the contents of a directory
+    /// identified by a ``FilePath``
+    public final
+    class DirectoryView
     {
-        .init(self)
-    }
+        @usableFromInline internal
+        var stream:Result<StreamPointer?, Errno>
 
-    @inlinable public
-    func walk(from current:Self = .init(root: nil), _ body:(Self) throws -> ()) rethrows
-    {
-        let absolute:Self  = current.isAbsolute ? current : self.appending(current.components)
-        // minimize the amount of file descriptors we have open
-        var explore:[Self] = []
-        for next:Component in absolute.children
-        {
-            let current:Self = current.appending(next)
-            try body(current)
-            explore.append(current)
-        }
-        for current:Self in explore
-        {
-            try self.walk(from: current, body)
-        }
-    }
-    /// `DirectoryView` provides an iteratable sequence of the contents of a directory referenced by a `FilePath`
-    @frozen public
-    struct DirectoryView:IteratorProtocol, Sequence
-    {
-        #if canImport(Darwin)
-        public
-        typealias StreamPointer = UnsafeMutablePointer<DIR>
-        #elseif canImport(Glibc)
-        public
-        typealias StreamPointer = OpaquePointer
-        #endif
-
-        public
-        var stream:StreamPointer?
-
-        /// - Parameter path: The file system path to provide directory entries for, should reference a directory
-        public
+        /// - Parameter path: The file system path to provide directory entries for.
+        @inlinable internal
         init(_ path:FilePath)
         {
-            self.stream = path.withPlatformString(opendir(_:))
+            self.stream = path.withPlatformString
+            {
+                if  let pointer:StreamPointer = opendir($0)
+                {
+                    return .success(pointer)
+                }
+                else
+                {
+                    return .failure(.init(rawValue: errno))
+                }
+            }
         }
 
-        mutating public
-        func next() -> Component?
+        deinit
         {
-            guard let stream:StreamPointer = self.stream
-            else
+            if  case .success(let stream?) = self.stream
             {
-                return nil
+                closedir(stream)
             }
-            guard let offset:Int = MemoryLayout<dirent>.offset(of: \.d_name)
-            else
-            {
-                fatalError("invalid `dirent` layout")
-            }
-            while let entry:UnsafeMutablePointer<dirent> = readdir(stream)
-            {
-                // `entry` is likely statically-allocated, and has variable-length layout.
-                //  attemping to unbind or rebind memory would be meaningless, as we must
-                //  rely on the kernel to protect us from buffer overreads.
-                let base:UnsafeMutableRawPointer = .init(entry) + offset
-                guard let component:Component = .init(platformString:
-                    base.assumingMemoryBound(to: CInterop.PlatformChar.self))
-                else
-                {
-                    fatalError("could not read platform string from `dirent.d_name`")
-                }
-                // ignore `.` and `..`
-                guard case .regular = component.kind
-                else
-                {
-                    continue
-                }
-                return component
-            }
+        }
+    }
+}
+extension FilePath.DirectoryView:AsyncSequence
+{
+    @inlinable public
+    func makeAsyncIterator() -> FilePath.DirectoryView
+    {
+        self
+    }
+}
+extension FilePath.DirectoryView:AsyncIteratorProtocol
+{
+    public
+    typealias Element = FilePath.Component
 
-            closedir(stream)
-            self.stream = nil
+    public
+    func next() async throws -> FilePath.Component?
+    {
+        guard let stream:StreamPointer = try self.stream.get()
+        else
+        {
             return nil
         }
+
+        guard let offset:Int = MemoryLayout<dirent>.offset(of: \.d_name)
+        else
+        {
+            fatalError("invalid `dirent` layout")
+        }
+        while let entry:UnsafeMutablePointer<dirent> = readdir(stream)
+        {
+            // `entry` is likely statically-allocated, and has variable-length layout.
+            //  attemping to unbind or rebind memory would be meaningless, as we must
+            //  rely on the kernel to protect us from buffer overreads.
+            let field:UnsafeMutableRawPointer = .init(entry) + offset
+            let name:UnsafeMutablePointer<CInterop.PlatformChar> = field.assumingMemoryBound(
+                to: CInterop.PlatformChar.self)
+
+            guard let component:FilePath.Component = .init(platformString: name)
+            else
+            {
+                fatalError("could not read platform string from `dirent.d_name`")
+            }
+            // ignore `.` and `..`
+            if  case .regular = component.kind
+            {
+                return component
+            }
+            else
+            {
+                continue
+            }
+        }
+
+        closedir(stream)
+        self.stream = .success(nil)
+        return nil
     }
 }

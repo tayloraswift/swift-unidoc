@@ -117,11 +117,22 @@ extension FilePath
     //         throw FileError.system(error: error, path: self)
     //     }
     // }
-    // @inlinable public
-    // func write(_ array:[UInt8]) throws
-    // {
-    //     try array.withUnsafeBufferPointer { try self.write($0) }
-    // }
+    @inlinable public
+    func overwrite(with array:[UInt8],
+        permissions:
+        (
+            owner:FilePermissions.Component?,
+            group:FilePermissions.Component?,
+            other:FilePermissions.Component?
+        ) = (.rw, .rw, .r)) async throws
+    {
+        let _:Int = try self.open(.writeOnly,
+            permissions: permissions,
+            options: [.create, .truncate])
+        {
+            try $0.writeAll(array)
+        }
+    }
     // @inlinable public
     // func write(_ string:String) throws
     // {
@@ -134,4 +145,30 @@ extension FilePath
     // {
     //     try string.withUTF8 { try self.write($0) }
     // }
+}
+extension FilePath
+{
+    @inlinable public
+    var directory:DirectoryView
+    {
+        .init(self)
+    }
+
+    @inlinable public
+    func walk(from current:Self = .init(root: nil), _ body:(Self) throws -> ()) async throws
+    {
+        let absolute:Self = current.isAbsolute ? current : self.appending(current.components)
+        //  minimize the amount of file descriptors we have open
+        var explore:[Self] = []
+        for try await next:Component in absolute.directory
+        {
+            let current:Self = current.appending(next)
+            try body(current)
+            explore.append(current)
+        }
+        for current:Self in explore
+        {
+            try await self.walk(from: current, body)
+        }
+    }
 }

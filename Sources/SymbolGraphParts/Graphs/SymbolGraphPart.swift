@@ -24,6 +24,19 @@ struct SymbolGraphPart:Equatable, Sendable
         self.relationships = relationships
     }
 }
+extension SymbolGraphPart
+{
+    public
+    init(parsing string:String) throws
+    {
+        try self.init(json: try JSON.Object.init(parsing: string))
+    }
+    public
+    init(parsing utf8:[UInt8]) throws
+    {
+        try self.init(json: try JSON.Object.init(parsing: utf8))
+    }
+}
 extension SymbolGraphPart:JSONObjectDecodable
 {
     public
