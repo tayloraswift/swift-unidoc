@@ -10,69 +10,48 @@ import Glibc
 #error("unsupported platform")
 #endif
 
-extension FilePath.DirectoryView
+extension FilePath.DirectoryIterator
 {
-    #if canImport(Darwin)
-    public
-    typealias StreamPointer = UnsafeMutablePointer<DIR>
-    #elseif canImport(Glibc)
-    public
-    typealias StreamPointer = OpaquePointer
-    #endif
-}
-extension FilePath
-{
-    /// `DirectoryView` provides an iteratable sequence of the contents of a directory
-    /// identified by a ``FilePath``
-    public final
-    class DirectoryView
+    /// An unsafe interface for iterating directory entries from a directory pointer.
+    @usableFromInline @frozen internal
+    enum Stream
     {
-        @usableFromInline internal
-        var stream:Result<StreamPointer?, Errno>
-
-        /// - Parameter path: The file system path to provide directory entries for.
-        @inlinable internal
-        init(_ path:FilePath)
+        case unopened(FilePath)
+        case opened(FilePath.DirectoryPointer?)
+    }
+}
+extension FilePath.DirectoryIterator.Stream
+{
+    @SystemActor
+    private mutating
+    func open() throws -> FilePath.DirectoryPointer?
+    {
+        switch self
         {
-            self.stream = path.withPlatformString
+        case .unopened(let path):
+            let pointer:FilePath.DirectoryPointer = try path.withPlatformString
             {
-                if  let pointer:StreamPointer = opendir($0)
+                if  let pointer:FilePath.DirectoryPointer = opendir($0)
                 {
-                    return .success(pointer)
+                    return pointer
                 }
                 else
                 {
-                    return .failure(.init(rawValue: errno))
+                    throw Errno.init(rawValue: errno)
                 }
             }
-        }
+            self = .opened(pointer)
+            return pointer
 
-        deinit
-        {
-            if  case .success(let stream?) = self.stream
-            {
-                closedir(stream)
-            }
+        case .opened(let pointer):
+            return pointer
         }
     }
-}
-extension FilePath.DirectoryView:AsyncSequence
-{
-    @inlinable public
-    func makeAsyncIterator() -> FilePath.DirectoryView
+    @SystemActor
+    mutating
+    func next() throws -> FilePath.Component?
     {
-        self
-    }
-}
-extension FilePath.DirectoryView:AsyncIteratorProtocol
-{
-    public
-    typealias Element = FilePath.Component
-
-    public
-    func next() async throws -> FilePath.Component?
-    {
-        guard let stream:StreamPointer = try self.stream.get()
+        guard let stream:FilePath.DirectoryPointer = try self.open()
         else
         {
             return nil
@@ -109,7 +88,19 @@ extension FilePath.DirectoryView:AsyncIteratorProtocol
         }
 
         closedir(stream)
-        self.stream = .success(nil)
+        self = .opened(nil)
         return nil
+    }
+    mutating
+    func close()
+    {
+        guard case .opened(let stream?) = self
+        else
+        {
+            return
+        }
+
+        closedir(stream)
+        self = .opened(nil)
     }
 }
