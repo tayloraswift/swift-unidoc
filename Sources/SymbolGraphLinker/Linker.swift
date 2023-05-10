@@ -50,7 +50,7 @@ extension Linker
                 flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
                 path: scalar.path),
             id: scalar.id)
-        
+
         self.scalars[scalar.id] = address
         return address
     }
@@ -69,7 +69,7 @@ extension Linker
                 let address:ScalarAddress = try self.graph.nodes.push(nil, id: scalar)
                 $0 = address
                 return address
-            
+
             case let address?:
                 return address
             }
@@ -91,7 +91,7 @@ extension Linker
                 let address:FileAddress = try self.graph.files.symbols(id)
                 $0 = address
                 return address
-            
+
             case let address?:
                 return address
             }
@@ -112,7 +112,7 @@ extension Linker
                 let address:ScalarAddress = try self.graph.nodes.symbols(id)
                 $0 = address
                 return address
-            
+
             case let address?:
                 return address
             }
@@ -176,7 +176,7 @@ extension Linker
         {
             let feature:ScalarAddress = try self.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
-                self.graph[feature].map({ ($0.path.last, $0.phylum) }) ??
+                self.graph.nodes[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
                 self.external[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
@@ -239,7 +239,7 @@ extension Linker
             let nested:[ScalarAddress] = try self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.graph.nodes[$0.0].push(.init(
+            let index:Int = self.graph.nodes[allocated: $0.0].push(.init(
                 conformances: conformances,
                 features: features,
                 nested: nested,
@@ -281,14 +281,16 @@ extension Linker
                 return outliner.link(comment: $0.comment)
             }
 
-            self.graph[address]?.declaration = declaration
-            
-            self.graph[address]?.superforms = superforms
-            self.graph[address]?.features = features
-            self.graph[address]?.origin = origin
+            {
+                $0?.declaration = declaration
 
-            self.graph[address]?.location = location
-            self.graph[address]?.article = article
+                $0?.superforms = superforms
+                $0?.features = features
+                $0?.origin = origin
+
+                $0?.location = location
+                $0?.article = article
+            } (&self.graph.nodes[allocated: address].scalar)
         }
     }
     public mutating
@@ -323,7 +325,8 @@ extension Linker
             if  let comment
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: `extension`.path)
-                self.graph[address, index].article = outliner.link(comment: comment)
+                self.graph.nodes[allocated: address].extensions[index].article =
+                    outliner.link(comment: comment)
             }
         }
     }

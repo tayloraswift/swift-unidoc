@@ -26,20 +26,24 @@ extension SymbolGraph.Nodes
         return try self.symbols(id)
     }
 }
-extension SymbolGraph.Nodes:RandomAccessCollection
+extension SymbolGraph.Nodes
 {
+    @_semantics("array.check_subscript")
     @inlinable public
-    var startIndex:ScalarAddress
+    func contains(address:ScalarAddress) -> Bool
     {
-        .init(value: .init(self.values.startIndex))
+        self.values.indices ~= .init(address.value)
     }
     @inlinable public
-    var endIndex:ScalarAddress
+    subscript(address:ScalarAddress) -> SymbolGraph.Node?
     {
-        .init(value: .init(self.values.endIndex))
+        self.contains(address: address) ? self[allocated: address] : nil
     }
+    /// Accesses the node at the specified address. This subscript traps if
+    /// the address has not been allocated.
+    @_semantics("array.subscript")
     @inlinable public
-    subscript(address:ScalarAddress) -> SymbolGraph.Node
+    subscript(allocated address:ScalarAddress) -> SymbolGraph.Node
     {
         _read
         {
@@ -49,5 +53,24 @@ extension SymbolGraph.Nodes:RandomAccessCollection
         {
             yield &self.values[.init(address.value)]
         }
+    }
+}
+extension SymbolGraph.Nodes:Sequence
+{
+    @inlinable public
+    func withContiguousStorageIfAvailable<Success>(
+        _ body:(UnsafeBufferPointer<SymbolGraph.Node>) throws -> Success) rethrows -> Success?
+    {
+        try self.values.withContiguousStorageIfAvailable(body)
+    }
+    @inlinable public
+    func makeIterator() -> IndexingIterator<[SymbolGraph.Node]>
+    {
+        self.values.makeIterator()
+    }
+    @inlinable public
+    var underestimatedCount:Int
+    {
+        self.values.count
     }
 }

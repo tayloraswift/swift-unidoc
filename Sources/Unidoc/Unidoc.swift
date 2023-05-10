@@ -22,7 +22,7 @@ enum Unidoc
         print("Linked symbolgraph (\(bson.bytes.count >> 10) KB)")
 
         let output:FilePath = workspace.path /
-            "\(checkout.pin.id)@\(checkout.pin.revision).bssg"
+            "\(checkout.pin.id)@\(checkout.pin.revision).bsda"
 
         try await output.overwrite(with: bson.bytes)
 

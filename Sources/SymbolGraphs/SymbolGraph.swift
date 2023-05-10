@@ -23,33 +23,6 @@ struct SymbolGraph:Equatable, Sendable
 }
 extension SymbolGraph
 {
-    @inlinable public
-    subscript(address:ScalarAddress) -> SymbolGraph.Scalar?
-    {
-        _read
-        {
-            yield  self.nodes[address].scalar
-        }
-        _modify
-        {
-            yield &self.nodes[address].scalar
-        }
-    }
-    @inlinable public
-    subscript(address:ScalarAddress, extension:Int) -> SymbolGraph.Extension
-    {
-        _read
-        {
-            yield  self.nodes[address].extensions[`extension`]
-        }
-        _modify
-        {
-            yield &self.nodes[address].extensions[`extension`]
-        }
-    }
-}
-extension SymbolGraph
-{
     public
     enum CodingKeys:String
     {
