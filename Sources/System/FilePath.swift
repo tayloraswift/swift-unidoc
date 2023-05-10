@@ -117,6 +117,7 @@ extension FilePath
     //         throw FileError.system(error: error, path: self)
     //     }
     // }
+    @SystemActor
     @inlinable public
     func overwrite(with array:[UInt8],
         permissions:
@@ -124,7 +125,7 @@ extension FilePath
             owner:FilePermissions.Component?,
             group:FilePermissions.Component?,
             other:FilePermissions.Component?
-        ) = (.rw, .rw, .r)) async throws
+        ) = (.rw, .rw, .r)) throws
     {
         let _:Int = try self.open(.writeOnly,
             permissions: permissions,
@@ -149,7 +150,7 @@ extension FilePath
 extension FilePath
 {
     @inlinable public
-    var directory:DirectoryView
+    var directory:Directory
     {
         .init(self)
     }
