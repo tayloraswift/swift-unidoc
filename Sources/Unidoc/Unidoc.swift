@@ -1,7 +1,7 @@
 import BSONEncoding
-import SymbolGraphDriver
 import SymbolGraphs
 import System
+import UnidocDriver
 
 @main
 enum Unidoc

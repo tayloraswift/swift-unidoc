@@ -31,9 +31,9 @@ let package:Package = .init(
 
         .library(name: "Symbols", targets: ["Symbols"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
-        .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
-        .library(name: "SymbolGraphDriver", targets: ["SymbolGraphDriver"]),
-        .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
+        .library(name: "UnidocCompiler", targets: ["UnidocCompiler"]),
+        .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
+        .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
     ],
     dependencies:
@@ -160,28 +160,29 @@ let package:Package = .init(
                 .product(name: "BSONEncoding", package: "swift-mongodb"),
             ]),
 
-        .target(name: "SymbolGraphCompiler", dependencies:
+        .target(name: "UnidocCompiler", dependencies:
             [
-                .target(name: "SymbolGraphs"),
+                .target(name: "Symbols"),
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
-        .target(name: "SymbolGraphDriver", dependencies:
+        .target(name: "UnidocDriver", dependencies:
             [
                 .target(name: "PackageMetadata"),
-                .target(name: "SymbolGraphCompiler"),
-                .target(name: "SymbolGraphLinker"),
                 .target(name: "System"),
+                .target(name: "UnidocCompiler"),
+                .target(name: "UnidocLinker"),
             ]),
 
-        .target(name: "SymbolGraphLinker", dependencies:
+        .target(name: "UnidocLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "PackageMetadata"),
-                .target(name: "SymbolGraphCompiler"),
+                .target(name: "SymbolGraphs"),
+                .target(name: "UnidocCompiler"),
             ]),
 
         .target(name: "System", dependencies:
@@ -194,7 +195,7 @@ let package:Package = .init(
         .executableTarget(name: "Unidoc",
             dependencies:
             [
-                .target(name: "SymbolGraphDriver"),
+                .target(name: "UnidocDriver"),
             ]),
 
 
@@ -266,19 +267,19 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolGraphParts"),
 
-        .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
+        .executableTarget(name: "UnidocCompilerTests", dependencies:
             [
-                .target(name: "SymbolGraphCompiler"),
+                .target(name: "UnidocCompiler"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphCompiler"),
+            path: "Tests/UnidocCompiler"),
 
-        .executableTarget(name: "SymbolGraphDriverTests", dependencies:
+        .executableTarget(name: "UnidocDriverTests", dependencies:
             [
-                .target(name: "SymbolGraphDriver"),
+                .target(name: "UnidocDriver"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/SymbolGraphDriver",
+            path: "Tests/UnidocDriver",
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
     ])
