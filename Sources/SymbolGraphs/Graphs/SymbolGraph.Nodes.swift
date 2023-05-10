@@ -1,3 +1,5 @@
+import Symbols
+
 extension SymbolGraph
 {
     @frozen public

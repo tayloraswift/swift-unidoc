@@ -1,5 +1,6 @@
 import BSONDecoding
 import BSONEncoding
+import Symbols
 
 @frozen public
 struct ScalarAddress
