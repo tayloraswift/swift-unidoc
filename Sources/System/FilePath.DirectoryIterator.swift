@@ -22,10 +22,9 @@ extension FilePath
 }
 extension FilePath.DirectoryIterator:AsyncIteratorProtocol
 {
-    @SystemActor
     public
-    func next() throws -> FilePath.Component?
+    func next() async throws -> FilePath.Component?
     {
-        try self.stream.next()
+        try await self.stream.next()
     }
 }
