@@ -5,21 +5,26 @@ import System
 import Testing
 
 @main
-enum Main:SyncTests
+enum Main:AsyncTests
 {
     static
-    func run(tests:Tests)
+    func run(tests:Tests) async
     {
         // #if !DEBUG
         if  let tests:TestGroup = tests / "standard-library",
-            let graph:SymbolGraph = (tests.do
+            let graph:SymbolGraph = (await tests.do
             {
-                try Driver.build(
+                let artifacts:Driver.Artifacts = .init(
                     metadata: .swift(at: .version(.v(5, 8, 0))),
-                    parts:
+                    cultures:
                     [
-                        "TestModules/Symbolgraphs/Swift.symbols.json",
+                        try .init(module: "Swift",
+                            parts:
+                            [
+                                "TestModules/Symbolgraphs/Swift.symbols.json",
+                            ]),
                     ])
+                return try await artifacts.buildSymbolGraph()
             })
         {
             let bson:BSON.Document = .init(encoding: graph)

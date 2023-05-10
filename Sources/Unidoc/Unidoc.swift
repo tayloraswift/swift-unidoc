@@ -1,5 +1,6 @@
-import PackageMetadata
-import Repositories
+import BSONEncoding
+import SymbolGraphDriver
+import SymbolGraphs
 import System
 
 @main
@@ -8,22 +9,23 @@ enum Unidoc
     public static
     func main() async throws
     {
-        let workspace:Workspace = try await .create(at: ".unidoc")
-
-        let checkout:Workspace.Checkout = try await workspace.checkout(
+        let workspace:Driver.Workspace = try await .create(at: ".unidoc")
+        let checkout:Driver.Checkout = try await workspace.checkout(
             url: "https://github.com/apple/swift-syntax.git",
             at: "508.0.0")
 
-        try await checkout.build()
+        let artifacts:Driver.Artifacts = try await checkout.buildPackage()
+        let graph:SymbolGraph = try await artifacts.buildSymbolGraph()
 
-        let _:PackageResolutions = try checkout.loadPackageResolved()
+        let bson:BSON.Document = .init(encoding: graph)
 
-        let manifest:PackageManifest = try await checkout.dumpManifest()
+        print("Linked symbolgraph (\(bson.bytes.count >> 10) KB)")
 
-        print("name:", manifest.name)
-        print("root:", manifest.root)
+        let output:FilePath = workspace.path /
+            "\(checkout.pin.id)@\(checkout.pin.revision).bssg"
 
-        let targets:[PackageManifest.Target] = try manifest.libraries()
-        try await checkout.dumpSymbols(targets.map(\.id.mangled))
+        try await output.overwrite(with: bson.bytes)
+
+        print("Symbolgraph saved to: \(output)")
     }
 }

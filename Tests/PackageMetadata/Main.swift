@@ -407,12 +407,12 @@ enum Main:SyncTests
                     {
                         let json:JSON.Object = try .init(parsing: json)
                         let expected:PackageManifest.Target = .init(id: "SwiftSyntax",
-                            dependencies:
+                            dependencies: .init(targets:
                             [
-                                .target(.init(id: "SwiftBasicFormat")),
-                                .target(.init(id: "SwiftSyntax")),
-                                .target(.init(id: "SwiftSyntaxBuilder")),
-                            ])
+                                .init(id: "SwiftBasicFormat"),
+                                .init(id: "SwiftSyntax"),
+                                .init(id: "SwiftSyntaxBuilder"),
+                            ]))
                         tests.expect(try .init(json: json) ==? expected)
                     }
                 }
@@ -456,11 +456,11 @@ enum Main:SyncTests
                     {
                         let json:JSON.Object = try .init(parsing: json)
                         let expected:PackageManifest.Target = .init(id: "SymbolAvailability",
-                            dependencies:
+                            dependencies: .init(targets:
                             [
-                                .target(.init(id: "SemanticVersions", platforms: [.linux])),
-                                .target(.init(id: "Symbols")),
-                            ])
+                                .init(id: "SemanticVersions", platforms: [.linux]),
+                                .init(id: "Symbols"),
+                            ]))
                         tests.expect(try .init(json: json) ==? expected)
                     }
                 }
@@ -516,17 +516,20 @@ enum Main:SyncTests
                     {
                         let json:JSON.Object = try .init(parsing: json)
                         let expected:PackageManifest.Target = .init(id: "SymbolResolution",
-                            dependencies:
-                            [
-                                .target(.init(id: "Symbols")),
+                            dependencies: .init(
+                                products:
+                                [
+                                    .init(id: "JSONDecoding",
+                                        package: "swift-json"),
 
-                                .product(.init(id: "JSONDecoding",
-                                    package: "swift-json")),
-
-                                .product(.init(id: "JSONEncoding",
-                                    package: "swift-json",
-                                    platforms: [.linux])),
-                            ])
+                                    .init(id: "JSONEncoding",
+                                        package: "swift-json",
+                                        platforms: [.linux]),
+                                ],
+                                targets:
+                                [
+                                    .init(id: "Symbols"),
+                                ]))
                         tests.expect(try .init(json: json) ==? expected)
                     }
                 }

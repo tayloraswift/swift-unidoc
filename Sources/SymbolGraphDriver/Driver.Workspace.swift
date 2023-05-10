@@ -2,34 +2,40 @@ import Repositories
 import SemanticVersions
 import System
 
-struct Workspace
+extension Driver
 {
-    let path:FilePath
-
-    private
-    init(path:FilePath)
+    @frozen public
+    struct Workspace:Equatable
     {
-        self.path = path
+        public
+        let path:FilePath
+
+        @inlinable public
+        init(path:FilePath)
+        {
+            self.path = path
+        }
     }
 }
-extension Workspace
+extension Driver.Workspace
 {
-}
-extension Workspace
-{
-    static
+    public static
     func create(at path:FilePath) async throws -> Self
     {
         try await SystemProcess.init(command: "mkdir", "-p", "\(path)")()
         return .init(path: path)
     }
 
+    public
     func clean() async throws
     {
         try await SystemProcess.init(command: "rm", "\(self.path.appending("*"))")()
     }
 
-    func checkout(url:String, at reference:String, clean:Bool = false) async throws -> Checkout
+    public
+    func checkout(url:String,
+        at reference:String,
+        clean:Bool = false) async throws -> Driver.Checkout
     {
         guard let package:PackageIdentifier = .infer(from: url)
         else
