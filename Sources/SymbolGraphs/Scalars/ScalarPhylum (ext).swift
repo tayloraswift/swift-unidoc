@@ -1,3 +1,5 @@
+import Symbols
+
 extension ScalarPhylum:RawRepresentable
 {
     @inlinable public
