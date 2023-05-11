@@ -24,7 +24,7 @@ enum Main:SyncTests
             tests.do
             {
                 var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
-                try compiler.compile(parts: tests.load(parts:
+                try compiler.compile(culture: tests.load(parts:
                     filenames.map
                     {
                         ("TestModules/Symbolgraphs" as FilePath).appending("\($0).symbols.json")

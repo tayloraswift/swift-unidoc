@@ -20,10 +20,8 @@ extension TestGroup
     {
         self.do
         {
-            let file:[UInt8] = try filepath.read()
-
-            let json:JSON.Object = try .init(parsing: file)
-            let part:SymbolGraphPart = try .init(json: json)
+            let part:SymbolGraphPart = try .init(parsing: try filepath.read([UInt8].self),
+                id: filepath.components.last?.stem)
 
             self.expect(part.metadata.version ==? .v(0, 6, 0))
 

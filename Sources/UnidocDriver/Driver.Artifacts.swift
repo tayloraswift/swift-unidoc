@@ -42,7 +42,7 @@ extension Driver.Artifacts
 
             for culture:Driver.Culture in self.cultures
             {
-                try compiler.compile(parts: try culture.parts.map
+                try compiler.compile(culture: try culture.parts.map
                 {
                     try .init(parsing: try $0.read([UInt8].self))
                 })
