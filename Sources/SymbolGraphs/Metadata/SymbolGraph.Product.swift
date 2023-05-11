@@ -9,15 +9,15 @@ extension SymbolGraph
         let id:ProductIdentifier
 
         public
-        let cultures:[ModuleIdentifier]
+        let modules:[ModuleIdentifier]
         public
         let type:ProductType
 
         @inlinable public
-        init(id:ProductIdentifier, cultures:[ModuleIdentifier], type:ProductType)
+        init(id:ProductIdentifier, modules:[ModuleIdentifier], type:ProductType)
         {
             self.id = id
-            self.cultures = cultures
+            self.modules = modules
             self.type = type
         }
     }

@@ -14,6 +14,8 @@ struct Compiler
     var extensions:Extensions
     public private(set)
     var scalars:Scalars
+    public private(set)
+    var modules:[ModuleIdentifier]
 
     public
     init(root:Repository.Root?, threshold:SymbolDescription.Visibility = .public)
@@ -23,19 +25,41 @@ struct Compiler
 
         self.extensions = .init()
         self.scalars = .init()
+        self.modules = []
     }
 }
 extension Compiler
 {
     public mutating
-    func compile(parts:some Sequence<SymbolGraphPart>) throws
+    func compile(culture parts:[SymbolGraphPart]) throws
     {
-        let cultures:[ModuleIdentifier: [SymbolGraphPart]] = .init(grouping: parts,
-            by: \.culture)
-
-        for (culture, parts):(ModuleIdentifier, [SymbolGraphPart]) in cultures
+        var culture:ModuleIdentifier? = nil
+        for part:SymbolGraphPart in parts
         {
-            try self.compile(culture: culture, parts: parts)
+            switch culture
+            {
+            case nil:
+                culture = part.culture
+
+            case part.culture?:
+                continue
+
+            case let expected?:
+                throw CultureError.init(
+                    underlying: ModuleError.init(unexpected: part.culture),
+                    culture: expected)
+            }
+        }
+        if  let culture:ModuleIdentifier
+        {
+            do
+            {
+                try self.compile(culture: culture, parts: parts)
+            }
+            catch let error
+            {
+                throw CultureError.init(underlying: error, culture: culture)
+            }
         }
     }
     private mutating

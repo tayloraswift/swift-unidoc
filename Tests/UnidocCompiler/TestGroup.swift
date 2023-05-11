@@ -11,10 +11,8 @@ extension TestGroup
         {
             try filepaths.map
             {
-                let file:[UInt8] = try $0.read()
-
-                let json:JSON.Object = try .init(parsing: file)
-                let part:SymbolGraphPart = try .init(json: json)
+                let part:SymbolGraphPart = try .init(parsing: try $0.read([UInt8].self),
+                    id: $0.components.last?.stem)
 
                 self.expect(part.metadata.version ==? .v(0, 6, 0))
 

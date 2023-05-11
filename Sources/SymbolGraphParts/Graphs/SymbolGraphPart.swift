@@ -13,7 +13,11 @@ struct SymbolGraphPart:Equatable, Sendable
     public
     let relationships:[SymbolRelationship]
 
-    init(metadata:Metadata,
+    public
+    var id:String?
+
+    init(id:String? = nil,
+        metadata:Metadata,
         culture:ModuleIdentifier,
         symbols:[SymbolDescription],
         relationships:[SymbolRelationship])
@@ -22,19 +26,23 @@ struct SymbolGraphPart:Equatable, Sendable
         self.culture = culture
         self.symbols = symbols
         self.relationships = relationships
+
+        self.id = id
     }
 }
 extension SymbolGraphPart
 {
     public
-    init(parsing string:String) throws
+    init(parsing string:String, id:String? = nil) throws
     {
         try self.init(json: try JSON.Object.init(parsing: string))
+        self.id = id
     }
     public
-    init(parsing utf8:[UInt8]) throws
+    init(parsing utf8:[UInt8], id:String? = nil) throws
     {
         try self.init(json: try JSON.Object.init(parsing: utf8))
+        self.id = id
     }
 }
 extension SymbolGraphPart:JSONObjectDecodable
