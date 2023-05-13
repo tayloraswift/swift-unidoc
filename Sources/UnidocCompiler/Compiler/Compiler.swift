@@ -1,72 +1,53 @@
 import SymbolGraphParts
 import Symbols
-import Repositories
+import PackageGraphs
 
 public
 struct Compiler
 {
     private
     let threshold:SymbolDescription.Visibility
-    private
-    let root:Repository.Root?
 
     public private(set)
     var extensions:Extensions
     public private(set)
     var scalars:Scalars
-    public private(set)
-    var modules:[ModuleIdentifier]
 
     public
     init(root:Repository.Root?, threshold:SymbolDescription.Visibility = .public)
     {
         self.threshold = threshold
-        self.root = root
 
         self.extensions = .init()
-        self.scalars = .init()
-        self.modules = []
+        self.scalars = .init(root: root)
     }
 }
 extension Compiler
 {
     public mutating
-    func compile(culture parts:[SymbolGraphPart]) throws
+    func compile(culture:ModuleIdentifier, parts:[SymbolGraphPart]) throws
     {
-        var culture:ModuleIdentifier? = nil
-        for part:SymbolGraphPart in parts
+        for part:SymbolGraphPart in parts where part.culture != culture
         {
-            switch culture
-            {
-            case nil:
-                culture = part.culture
-
-            case part.culture?:
-                continue
-
-            case let expected?:
-                throw CultureError.init(
-                    underlying: ModuleError.init(unexpected: part.culture),
-                    culture: expected)
-            }
+            throw CultureError.init(
+                underlying: ModuleError.init(unexpected: part.culture, part: part.id),
+                culture: culture)
         }
-        if  let culture:ModuleIdentifier
+
+        let context:Context = self.scalars.include(culture: culture)
+
+        do
         {
-            do
-            {
-                try self.compile(culture: culture, parts: parts)
-            }
-            catch let error
-            {
-                throw CultureError.init(underlying: error, culture: culture)
-            }
+            try self.compile(parts: parts, in: context)
+        }
+        catch let error
+        {
+            throw CultureError.init(underlying: error, culture: culture)
         }
     }
     private mutating
-    func compile(culture:ModuleIdentifier, parts:[SymbolGraphPart]) throws
+    func compile(parts:[SymbolGraphPart], in context:Context) throws
     {
-        let context:SourceContext = .init(culture: culture, root: self.root)
-
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SymbolGraphPart in parts
         {
@@ -126,10 +107,10 @@ extension Compiler
                         continue // Already handled these.
 
                     case .requirement(let requirement):
-                        try self.assign(requirement)
+                        try self.assign(requirement, by: context.culture.index)
 
                     case .membership(let membership):
-                        try self.assign(membership)
+                        try self.assign(membership, by: context.culture.index)
 
                     case .conformance, .defaultImplementation, .inheritance, .override:
                         continue // Next pass.
@@ -153,7 +134,7 @@ extension Compiler
                         continue // Already handled these.
 
                     case .conformance(let conformance):
-                        try self.insert(conformance)
+                        try self.insert(conformance, by: context.culture.index)
 
                     case .defaultImplementation(let relationship):
                         try self.insert(relationship)
@@ -176,25 +157,25 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func assign(_ relationship:SymbolRelationship.Requirement) throws
+    func assign(_ relationship:SymbolRelationship.Requirement, by culture:Int) throws
     {
         /// Protocol must always be from the same module.
-        guard let `protocol`:ScalarReference = try self.scalars(internal: relationship.target)
+        guard let `protocol`:ScalarObject = try self.scalars(internal: relationship.target)
         else
         {
             return // Protocol is hidden.
         }
-        if  let requirement:ScalarReference = try self.scalars(internal: relationship.source)
+        if  let requirement:ScalarObject = try self.scalars(internal: relationship.source)
         {
             try requirement.assign(nesting: relationship)
 
             //  Generate an implicit, internal extension for this requirement,
             //  if one does not already exist.
-            self.extensions(`protocol`, where: []).add(nested: requirement.id)
+            self.extensions(culture, `protocol`, where: []).add(nested: requirement.id)
         }
     }
     private mutating
-    func assign(_ relationship:SymbolRelationship.Membership) throws
+    func assign(_ relationship:SymbolRelationship.Membership, by culture:Int) throws
     {
         switch relationship.source
         {
@@ -213,7 +194,7 @@ extension Compiler
             case .scalar(let heir):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
                 //  we should never see an external type reference here.
-                guard let heir:ScalarReference = try self.scalars(internal: heir)
+                guard let heir:ScalarObject = try self.scalars(internal: heir)
                 else
                 {
                     return // Feature is hidden.
@@ -235,7 +216,7 @@ extension Compiler
 
             case .block(let block):
                 //  Look up the extension associated with this block name.
-                let group:ExtensionReference = try self.extensions.named(block)
+                let group:ExtensionObject = try self.extensions.named(block)
                 if  group.extendee == vector.heir
                 {
                     group.add(feature: feature)
@@ -249,7 +230,7 @@ extension Compiler
         case .scalar(let member):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let member:ScalarReference = try self.scalars(internal: member)
+            guard let member:ScalarObject = try self.scalars(internal: member)
             else
             {
                 return // Member is hidden.
@@ -263,16 +244,17 @@ extension Compiler
 
             case .scalar(let type):
                 //  We should never see an external type reference here either.
-                if  let type:ScalarReference = try self.scalars(internal: type)
+                if  let type:ScalarObject = try self.scalars(internal: type)
                 {
                     try member.assign(nesting: relationship)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
-                    self.extensions(type, where: member.conditions).add(nested: member.id)
+                    self.extensions(culture, type, where: member.conditions).add(
+                        nested: member.id)
                 }
 
             case .block(let block):
-                let group:ExtensionReference = try self.extensions.named(block)
+                let group:ExtensionObject = try self.extensions.named(block)
                 if  group.conditions == member.conditions
                 {
                     try member.assign(nesting: relationship)
@@ -296,7 +278,7 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func insert(_ conformance:SymbolRelationship.Conformance) throws
+    func insert(_ conformance:SymbolRelationship.Conformance, by culture:Int) throws
     {
         guard let `protocol`:ScalarSymbol = self.scalars[conformance.target]
         else
@@ -304,7 +286,7 @@ extension Compiler
             return // Protocol is hidden.
         }
 
-        let group:ExtensionReference
+        let `extension`:ExtensionObject
 
         switch conformance.source
         {
@@ -315,7 +297,7 @@ extension Compiler
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let type:ScalarReference = try self.scalars(internal: type)
+            guard let type:ScalarObject = try self.scalars(internal: type)
             else
             {
                 return // Type is hidden.
@@ -326,20 +308,20 @@ extension Compiler
             }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
-            group = self.extensions(type, where: conformance.conditions)
+            `extension` = self.extensions(culture, type, where: conformance.conditions)
 
         case .block(let block):
             //  Look up the extension associated with this block name.
-            group = try self.extensions.named(block)
+            `extension` = try self.extensions.named(block)
 
-            guard group.conditions == conformance.conditions
+            guard `extension`.conditions == conformance.conditions
             else
             {
-                throw Extension.SignatureError.init(expected: group.signature)
+                throw Extension.SignatureError.init(expected: `extension`.signature)
             }
         }
 
-        group.add(conformance: `protocol`)
+        `extension`.add(conformance: `protocol`)
     }
     private mutating
     func insert(_ relationship:some SuperformRelationship) throws
@@ -350,7 +332,7 @@ extension Compiler
         }
         /// Superform relationships are intrinsic. They must always originate from
         /// internal symbols.
-        if  let subform:ScalarReference = try self.scalars(internal: relationship.source)
+        if  let subform:ScalarObject = try self.scalars(internal: relationship.source)
         {
             try subform.add(superform: relationship)
         }

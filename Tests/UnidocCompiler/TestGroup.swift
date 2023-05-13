@@ -12,7 +12,7 @@ extension TestGroup
             try filepaths.map
             {
                 let part:SymbolGraphPart = try .init(parsing: try $0.read([UInt8].self),
-                    id: $0.components.last?.stem)
+                    id: $0.components.last?.string)
 
                 self.expect(part.metadata.version ==? .v(0, 6, 0))
 

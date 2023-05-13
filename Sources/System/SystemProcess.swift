@@ -23,11 +23,13 @@ struct SystemProcess:Identifiable
 extension SystemProcess
 {
     public
-    init(command:String, _ arguments:String...,
+    init(command:String, _ arguments:String?...,
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil) throws
     {
-        try self.init(command: command, arguments: arguments, stdout: stdout, stderr: stderr)
+        try self.init(command: command, arguments: arguments.compactMap { $0 },
+            stdout: stdout,
+            stderr: stderr)
     }
 
     public

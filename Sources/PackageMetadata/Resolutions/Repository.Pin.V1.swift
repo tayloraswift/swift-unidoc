@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 extension Repository.Pin
 {
@@ -27,13 +27,11 @@ extension Repository.Pin.V1:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        let state:Repository.Pin.State = try json[.state].decode()
         let location:String = try json[.location].decode()
         self.init(value: .init(id: try json[.id].decode(),
-            reference: state.reference,
-            revision: state.revision,
             location: location.first == "/" ?
                 .local(root: .init(location)) :
-                .remote(url: location)))
+                .remote(url: location),
+            state: try json[.state].decode()))
     }
 }

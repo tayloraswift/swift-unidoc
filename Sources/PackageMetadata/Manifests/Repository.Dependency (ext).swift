@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 extension Repository.Dependency:JSONObjectDecodable
 {

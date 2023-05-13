@@ -1,6 +1,6 @@
 import JSON
 import PackageMetadata
-import Repositories
+import PackageGraphs
 import System
 import Testing
 
@@ -37,9 +37,9 @@ enum Main:SyncTests
                     let expected:[Repository.Pin] =
                     [
                         .init(id: "swift-json",
-                            reference: .version(.v(0, 4, 5)),
+                            location: .local(root: "/swift/swift-json"),
                             revision: 0x36ef4bf1e6ae38f881ed253d5656839a046456f1,
-                            location: .local(root: "/swift/swift-json")),
+                            ref: .version(.v(0, 4, 5))),
                     ]
                     tests.expect(resolutions.version ==? .v2)
                     tests.expect(resolutions.pins ..? expected)
@@ -79,15 +79,15 @@ enum Main:SyncTests
                     let expected:[Repository.Pin] =
                     [
                         .init(id: "swift-atomics",
-                            reference: .version(.v(1, 0, 3)),
+                            location: .remote(
+                                url: "https://github.com/apple/swift-atomics.git"),
                             revision: 0xff3d2212b6b093db7f177d0855adbc4ef9c5f036,
-                            location: .remote(
-                                url: "https://github.com/apple/swift-atomics.git")),
+                            ref: .version(.v(1, 0, 3))),
                         .init(id: "swift-grammar",
-                            reference: .version(.v(0, 3, 1)),
-                            revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-grammar")),
+                                url: "https://github.com/kelvin13/swift-grammar"),
+                            revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
+                            ref: .version(.v(0, 3, 1))),
                     ]
                     tests.expect(resolutions.version ==? .v2)
                     tests.expect(resolutions.pins ..? expected)
@@ -131,10 +131,10 @@ enum Main:SyncTests
                     let expected:[Repository.Pin] =
                     [
                         .init(id: "swift-argument-parser",
-                            reference: .version(.v(1, 2, 2)),
-                            revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
                             location: .remote(
-                                url: "https://github.com/apple/swift-argument-parser.git")),
+                                url: "https://github.com/apple/swift-argument-parser.git"),
+                            revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
+                            ref: .version(.v(1, 2, 2))),
                     ]
                     tests.expect(resolutions.version ==? .v1)
                     tests.expect(resolutions.pins ..? expected)
@@ -334,7 +334,7 @@ enum Main:SyncTests
                             dependencies:
                             [
                                 .resolvable(.init(id: "swift-json",
-                                    requirement: .reference(.branch("master")),
+                                    requirement: .ref(.branch("master")),
                                     location: .remote(
                                         url: "https://github.com/kelvin13/swift-json"))),
 
@@ -355,7 +355,7 @@ enum Main:SyncTests
                                         root: "/swift/swift-mongodb"))),
 
                                 .resolvable(.init(id: "swift-system",
-                                    requirement: .reference(.version(.v(0, 4, 5))),
+                                    requirement: .ref(.version(.v(0, 4, 5))),
                                     location: .remote(
                                         url: "https://github.com/apple/swift-system"))),
                             ])
@@ -406,7 +406,7 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(id: "SwiftSyntax",
+                        let expected:PackageManifest.Target = .init(name: "SwiftSyntax",
                             dependencies: .init(targets:
                             [
                                 .init(id: "SwiftBasicFormat"),
@@ -455,7 +455,7 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(id: "SymbolAvailability",
+                        let expected:PackageManifest.Target = .init(name: "SymbolAvailability",
                             dependencies: .init(targets:
                             [
                                 .init(id: "SemanticVersions", platforms: [.linux]),
@@ -479,7 +479,7 @@ enum Main:SyncTests
                         {
                         "product" : [
                             "JSONDecoding",
-                            "swift-json",
+                            "json",
                             null,
                             null
                         ]
@@ -487,7 +487,7 @@ enum Main:SyncTests
                         {
                         "product" : [
                             "JSONEncoding",
-                            "swift-json",
+                            "json",
                             {
                             "_Foo" : "_Bar"
                             },
@@ -515,15 +515,13 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(id: "SymbolResolution",
+                        let expected:PackageManifest.Target = .init(name: "SymbolResolution",
                             dependencies: .init(
                                 products:
                                 [
-                                    .init(id: "JSONDecoding",
-                                        package: "swift-json"),
+                                    .init(id: .init(name: "JSONDecoding", package: "json")),
 
-                                    .init(id: "JSONEncoding",
-                                        package: "swift-json",
+                                    .init(id: .init(name: "JSONEncoding", package: "json"),
                                         platforms: [.linux]),
                                 ],
                                 targets:

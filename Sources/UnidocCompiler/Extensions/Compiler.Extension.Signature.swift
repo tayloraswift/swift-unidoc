@@ -6,19 +6,23 @@ extension Compiler.Extension
     @frozen public
     struct Signature:Equatable, Hashable, Sendable
     {
-        /// The type extended by the relevant extension group.
-        public
-        let type:ScalarSymbol
         /// The generic constraints of the relevant extension group.
         /// An empty array represents an unconstrained extension.
         public
         let conditions:[GenericConstraint<ScalarSymbol>]
+        public
+        let culture:Int
+        /// The type extended by the relevant extension group.
+        public
+        let type:ScalarSymbol
 
         public
-        init(_ type:ScalarSymbol, where conditions:[GenericConstraint<ScalarSymbol>])
+        init(_ culture:Int, _ type:ScalarSymbol,
+            where conditions:[GenericConstraint<ScalarSymbol>])
         {
-            self.type = type
             self.conditions = conditions
+            self.culture = culture
+            self.type = type
         }
     }
 }
@@ -27,11 +31,11 @@ extension Compiler.Extension.Signature:Comparable
     public static
     func < (lhs:Self, rhs:Self) -> Bool
     {
-        if      lhs.type < rhs.type
+        if      (lhs.culture, lhs.type) < (rhs.culture, rhs.type)
         {
             return true
         }
-        else if lhs.type > rhs.type
+        else if (lhs.culture, lhs.type) > (rhs.culture, rhs.type)
         {
             return false
         }

@@ -1,32 +1,31 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 extension PackageManifest
 {
     @frozen public
-    struct Target:Identifiable, Equatable, Sendable
+    struct Target:Equatable, Sendable
     {
         public
-        let id:TargetIdentifier
+        let name:String
+        public
+        let type:TargetType
         public
         let dependencies:Dependencies
         /// The path to the target’s source directory, relative to the
         /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
         public
         let path:String?
-        public
-        let type:TargetType
 
         @inlinable public
-        init(id:TargetIdentifier,
+        init(name:String, type:TargetType = .library,
             dependencies:Dependencies = .init(),
-            path:String? = nil,
-            type:TargetType = .library)
+            path:String? = nil)
         {
-            self.id = id
+            self.name = name
+            self.type = type
             self.dependencies = dependencies
             self.path = path
-            self.type = type
         }
     }
 }
@@ -35,7 +34,7 @@ extension PackageManifest.Target:JSONObjectDecodable
     public
     enum CodingKeys:String
     {
-        case id = "name"
+        case name
         case dependencies
         case path
         case type
@@ -43,9 +42,10 @@ extension PackageManifest.Target:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        self.init(id: try json[.id].decode(),
+        self.init(
+            name: try json[.name].decode(),
+            type: try json[.type].decode(as: Keyword.self, with: \.type),
             dependencies: try json[.dependencies].decode(),
-            path: try json[.path]?.decode(),
-            type: try json[.type].decode(as: Keyword.self, with: \.type))
+            path: try json[.path]?.decode())
     }
 }

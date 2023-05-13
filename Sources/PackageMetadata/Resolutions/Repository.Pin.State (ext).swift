@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 import SemanticVersions
 
 extension Repository.Pin.State:JSONObjectDecodable
@@ -14,17 +14,17 @@ extension Repository.Pin.State:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        let reference:Repository.Reference
+        let ref:Repository.Ref
         if  let version:SemanticVersion = try json[.version]?.decode(
                 as: JSON.StringRepresentation<SemanticVersion>.self,
                 with: \.value)
         {
-            reference = .version(version)
+            ref = .version(version)
         }
         else
         {
-            reference = .branch(try json[.branch].decode())
+            ref = .branch(try json[.branch].decode())
         }
-        self.init(reference: reference, revision: try json[.revision].decode())
+        self.init(revision: try json[.revision].decode(), ref: ref)
     }
 }

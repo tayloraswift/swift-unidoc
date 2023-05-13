@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 extension PackageManifest.Target
 {
@@ -7,16 +7,31 @@ extension PackageManifest.Target
     struct Dependencies:Equatable, Sendable
     {
         public
-        var products:[ProductDependency]
+        var products:[Dependency<ProductIdentifier>]
         public
-        var targets:[TargetDependency]
+        var targets:[Dependency<String>]
 
         @inlinable public
-        init(products:[ProductDependency] = [], targets:[TargetDependency] = [])
+        init(
+            products:[Dependency<ProductIdentifier>] = [],
+            targets:[Dependency<String>] = [])
         {
             self.products = products
             self.targets = targets
         }
+    }
+}
+extension PackageManifest.Target.Dependencies
+{
+    func products(on platform:PlatformIdentifier)
+        -> PackageManifest.Target.DependencyView<ProductIdentifier>
+    {
+        .init(platform: platform, base: self.products)
+    }
+    func targets(on platform:PlatformIdentifier)
+        -> PackageManifest.Target.DependencyView<String>
+    {
+        .init(platform: platform, base: self.targets)
     }
 }
 extension PackageManifest.Target.Dependencies:JSONDecodable
@@ -62,8 +77,8 @@ extension PackageManifest.Target.Dependencies:JSONDecodable
                     self.products.append(try json.decode(as: JSON.Array.self)
                     {
                         try $0.shape.expect(count: 4)
-                        return .init(id: try $0[0].decode(),
-                            package: try $0[1].decode(),
+                        return .init(id: .init(name: try $0[0].decode(),
+                                package: try $0[1].decode()),
                             platforms: try $0[3].decode(as: JSON.ObjectDecoder<Platforms>?.self)
                             {
                                 try $0?[.names].decode() ?? []

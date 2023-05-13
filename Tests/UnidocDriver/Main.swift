@@ -15,10 +15,11 @@ enum Main:AsyncTests
             let graph:SymbolGraph = (await tests.do
             {
                 let artifacts:Driver.Artifacts = .init(
-                    metadata: .swift(at: .version(.v(5, 8, 0))),
+                    metadata: .swift(triple: .init("x86_64", "unknown", "linux", "gnu"),
+                        ref: .version(.v(5, 8, 0))),
                     cultures:
                     [
-                        try .init(module: "Swift",
+                        try .init(id: "Swift",
                             parts:
                             [
                                 "TestModules/Symbolgraphs/Swift.symbols.json",

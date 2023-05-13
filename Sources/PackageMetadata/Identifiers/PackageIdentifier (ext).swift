@@ -1,6 +1,6 @@
 import JSONDecoding
 import JSONEncoding
-import Repositories
+import PackageGraphs
 
 extension PackageIdentifier:JSONStringDecodable, JSONStringEncodable
 {

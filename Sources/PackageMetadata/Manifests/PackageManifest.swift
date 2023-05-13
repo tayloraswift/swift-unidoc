@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 public
 struct PackageManifest:Equatable, Sendable
@@ -37,73 +37,64 @@ struct PackageManifest:Equatable, Sendable
 }
 extension PackageManifest
 {
-    /// Returns all targets in the manifest that are included, directly or indirectly,
-    /// by at least one library product.
     public
-    func libraries() throws -> [Target]
+    func graph(platform:PlatformIdentifier,
+        where predicate:(ProductType) throws -> Bool) throws ->
+    (
+        products:[ProductNode],
+        targets:[TargetNode]
+    )
     {
+        let products:[Product] = try self.products.filter { try predicate($0.type) }
         let targets:Targets = try .init(indexing: self.targets)
 
-        /// Targets that have been discovered, but not explored through.
-        /// Targets that have been fully explored. Once ``explorable`` becomes
-        /// empty again, this will contain every target that is included
-        /// in at least one library product.
-        var explored:[TargetIdentifier: Target] = [:]
-        var queued:[Target] = []
-
-        func explore(target id:TargetIdentifier) throws
+        let targetOrdering:[Target] = try targets.included(by: products, on: platform)
+        let targetNodes:[TargetNode] = try targetOrdering.map
         {
-            try
+            let constituents:Set<String> = try targets.included(by: $0, on: platform)
+
+            var (modules, dependencies):([Int], Set<ProductIdentifier>) = ([], [])
+            for (index, constituent):(Int, Target) in targetOrdering.enumerated()
+                where constituents.contains(constituent.name)
             {
-                if  case nil = $0
+                dependencies.formUnion(constituent.dependencies.products(on: platform))
+                //  don’t include the target’s own index
+                if  constituent.name != $0.name
                 {
-                    let target:Target = try targets(id)
-                    queued.append(target)
-                    $0 = target
+                    modules.append(index)
                 }
-            } (&explored[id])
+            }
+
+            return .init(name: $0.name, type: $0.type, dependencies: .init(
+                    products: dependencies.sorted(),
+                    modules: modules),
+                path: $0.path)
+        }
+        let productNodes:[ProductNode] = try products.map
+        {
+            let constituents:Set<String> = try targets.included(by: $0, on: platform)
+
+            var (modules, dependencies):([Int], Set<ProductIdentifier>) = ([], [])
+            for (index, constituent):(Int, Target) in targetOrdering.enumerated()
+                where constituents.contains(constituent.name)
+            {
+                dependencies.formUnion(constituent.dependencies.products(on: platform))
+                modules.append(index)
+            }
+            return .init(name: $0.name, type: $0.type, dependencies: .init(
+                products: dependencies.sorted(),
+                modules: modules))
         }
 
-        for product:Product in self.products
-        {
-            guard case .library = product.type
-            else
-            {
-                continue
-            }
-            for id:TargetIdentifier in product.targets
-            {
-                try explore(target: id)
-            }
-        }
-        /// The list of targets that *directly* depend on each (explored) target.
-        var consumers:[TargetIdentifier: [Target]] = [:]
-        while let target:Target = queued.popLast()
-        {
-            // need to sort dependency set to make topological sort deterministic
-            for id:TargetIdentifier in target.dependencies.targets.map(\.id).sorted()
-            {
-                consumers[id, default: []].append(target)
-                try explore(target: id)
-            }
-        }
-
-        if  let targets:[Target] = Self.order(topologically: explored, consumers: &consumers)
-        {
-            return targets
-        }
-        else
-        {
-            throw PackageManifestError.dependencyCycle
-        }
+        return (productNodes, targetNodes)
     }
 
-    private static
-    func order(topologically targets:[TargetIdentifier: Target],
-        consumers:inout [TargetIdentifier: [Target]]) -> [Target]?
+    static
+    func order(topologically targets:[String: Target],
+        consumers:inout [String: [Target]]) -> [Target]?
     {
         var sources:[Target] = []
-        var dependencies:[TargetIdentifier: Set<TargetIdentifier>] = targets.compactMapValues
+        var dependencies:[String: Set<String>] = targets.compactMapValues
         {
             if $0.dependencies.targets.isEmpty
             {
@@ -117,7 +108,7 @@ extension PackageManifest
         }
 
         //  Note: polarity reversed
-        sources.sort { $1.id < $0.id }
+        sources.sort { $1.name < $0.name }
 
         var ordered:[Target] = [] ; ordered.reserveCapacity(targets.count)
 
@@ -125,7 +116,7 @@ extension PackageManifest
         {
             ordered.append(source)
 
-            guard let next:[Target] = consumers.removeValue(forKey: source.id)
+            guard let next:[Target] = consumers.removeValue(forKey: source.name)
             else
             {
                 continue
@@ -133,13 +124,13 @@ extension PackageManifest
             for next:Target in next
             {
                 {
-                    if  case _? = $0?.remove(source.id),
+                    if  case _? = $0?.remove(source.name),
                         case true? = $0?.isEmpty
                     {
                         sources.append(next)
                         $0 = nil
                     }
-                } (&dependencies[next.id])
+                } (&dependencies[next.name])
             }
         }
 

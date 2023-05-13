@@ -1,4 +1,5 @@
 import LexicalPaths
+import PackageGraphs
 import Symbols
 import SymbolGraphParts
 
@@ -9,26 +10,34 @@ extension Compiler
     {
         private
         var entries:[ScalarSymbol: Entry]
+        private
+        var modules:[ModuleIdentifier]
 
-        init()
+        private
+        let root:Repository.Root?
+
+        init(root:Repository.Root?)
         {
             self.entries = [:]
+            self.modules = []
+
+            self.root = root
         }
     }
 }
 extension Compiler.Scalars
 {
     public
-    func load() -> (local:[Compiler.Scalar], external:Compiler.ScalarNominations)
+    func load() -> (local:[Compiler.Culture], external:Compiler.Nominations)
     {
-        var included:[Compiler.Scalar] = []
-        let external:[ScalarSymbol: Compiler.ScalarNomination] =
+        var included:[Compiler.Culture] = self.modules.map(Compiler.Culture.init(id:))
+        let external:[ScalarSymbol: Compiler.Nomination] =
             self.entries.compactMapValues
         {
             switch $0
             {
             case .included(let reference):
-                included.append(reference.value)
+                included[reference.culture].scalars.append(reference.value)
                 return nil
 
             case .excluded:
@@ -38,12 +47,27 @@ extension Compiler.Scalars
                 return nomination
             }
         }
+        //  sort scalars by mangled name. do not re-order the cultures themselves;
+        //  their ordering is significant.
+        for culture:Int in included.indices
+        {
+            included[culture].scalars.sort { $0.id < $1.id }
+        }
 
-        return (included.sorted { $0.id < $1.id }, .init(external))
+        return (included, .init(external))
     }
 }
 extension Compiler.Scalars
 {
+    mutating
+    func include(culture:ModuleIdentifier) -> Compiler.Context
+    {
+        defer
+        {
+            self.modules.append(culture)
+        }
+        return .init(culture: (id: culture, index: self.modules.endIndex), root: self.root)
+    }
     mutating
     func include(vector resolution:VectorSymbol, with description:SymbolDescription) throws
     {
@@ -60,10 +84,11 @@ extension Compiler.Scalars
     mutating
     func include(scalar resolution:ScalarSymbol,
         with description:SymbolDescription,
-        in context:Compiler.SourceContext) throws
+        in context:Compiler.Context) throws
     {
         try self.update(resolution, with: .included(.init(
             conditions: description.extension.conditions,
+            culture: context.culture.index,
             value: .init(from: description,
                 as: resolution,
                 in: context))))
@@ -102,7 +127,7 @@ extension Compiler.Scalars
         }
     }
     func callAsFunction(
-        internal resolution:ScalarSymbol) throws -> Compiler.ScalarReference?
+        internal resolution:ScalarSymbol) throws -> Compiler.ScalarObject?
     {
         switch self.entries[resolution]
         {

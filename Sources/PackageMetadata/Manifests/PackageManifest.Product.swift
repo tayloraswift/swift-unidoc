@@ -1,24 +1,24 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 extension PackageManifest
 {
     @frozen public
-    struct Product:Identifiable, Equatable, Sendable
+    struct Product:Equatable, Sendable
     {
         public
-        let id:ProductIdentifier
-        public
-        let targets:[TargetIdentifier]
+        let name:String
         public
         let type:ProductType
+        public
+        let targets:[String]
 
         @inlinable public
-        init(id:ProductIdentifier, targets:[TargetIdentifier], type:ProductType)
+        init(name:String, type:ProductType, targets:[String])
         {
-            self.id = id
-            self.targets = targets
+            self.name = name
             self.type = type
+            self.targets = targets
         }
     }
 }
@@ -27,15 +27,14 @@ extension PackageManifest.Product:JSONObjectDecodable
     public
     enum CodingKeys:String
     {
-        case id = "name"
-        case targets
+        case name
         case type
+        case targets
     }
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        self.init(id: try json[.id].decode(),
-            targets: try json[.targets].decode(),
-            type: try json[.type].decode())
+        self.init(name: try json[.name].decode(), type: try json[.type].decode(),
+            targets: try json[.targets].decode())
     }
 }

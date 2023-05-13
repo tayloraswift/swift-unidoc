@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 import SemanticVersions
 
 extension Repository.Dependency.Resolvable:JSONObjectDecodable
@@ -43,12 +43,12 @@ extension Repository.Dependency.Resolvable:JSONObjectDecodable
                 switch json.key
                 {
                 case .branch:
-                    return .reference(.branch(try json.decode(
+                    return .ref(.branch(try json.decode(
                         as: JSON.SingleElementRepresentation<String>.self,
                         with: \.value)))
 
                 case .exact:
-                    return .reference(.version(try json.decode(
+                    return .ref(.version(try json.decode(
                         as: JSON.SingleElementRepresentation<
                             JSON.StringRepresentation<SemanticVersion>>.self,
                         with: \.value.value)))
