@@ -1,5 +1,5 @@
 import Generics
-import Repositories
+import PackageGraphs
 import SymbolGraphParts
 import Symbols
 import System
@@ -43,7 +43,7 @@ enum Main:SyncTests
 
                 (["Struct", "instanceProperty"],.var(.instance),        "instance-var"),
                 (["Struct", "staticProperty"],  .var(.static),          "static-var"),
-                
+
                 (["Struct", "subscript"],       .subscript(.instance),  "instance-subscript"),
                 (["Struct", "subscript(_:)"],   .subscript(.static),    "static-subscript"),
 
@@ -240,31 +240,31 @@ enum Main:SyncTests
                         of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!,
                         origin: .init(.init(
                             "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
-                    
+
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP7nowhereytvp")!))),
-                    
+
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP10refinementytvp")!))),
-                    
+
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP9conformerytvp")!))),
-                    
+
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP10everywhereytvp")!))),
-    
+
                     .membership(.init(of: .scalar(.init(
                         "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
@@ -336,7 +336,7 @@ enum Main:SyncTests
                         in: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
                         origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
-                    
+
                     .membership(.init(of: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp")!),
                         in: .scalar(.init(
@@ -345,7 +345,7 @@ enum Main:SyncTests
                 ])
             }
         }
-        
+
         if  let tests:TestGroup = tests / "internal-extension-constraints",
             let part:SymbolGraphPart = tests.load(part: """
                 TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json

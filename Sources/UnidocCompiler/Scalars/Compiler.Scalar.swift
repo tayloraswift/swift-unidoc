@@ -40,7 +40,7 @@ extension Compiler
         var superforms:Set<ScalarSymbol>
         /// The *unqualified* features inherited by this scalar. Avoid adding
         /// features here; if the feature’s extension constraints are known,
-        /// add them to an appropriate ``ExtensionReference`` instead.
+        /// add them to an appropriate ``ExtensionObject`` instead.
         ///
         /// This field only exists because of an upstream bug in SymbolGraphGen.
         public internal(set)
@@ -94,7 +94,7 @@ extension Compiler.Scalar:Identifiable
                     .protocol,
                     .struct:
                 scope = self.path.map { $0 }
-            
+
             case    .associatedtype,
                     .case,
                     .deinitializer,
@@ -115,7 +115,7 @@ extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
         as resolution:__owned ScalarSymbol,
-        in context:__shared Compiler.SourceContext) throws
+        in context:__shared Compiler.Context) throws
     {
         guard case .scalar(let phylum) = description.phylum
         else
@@ -129,7 +129,7 @@ extension Compiler.Scalar
             location: try description.location?.map(context.resolve(uri:)),
             phylum: phylum,
             path: description.path)
-        
+
         if  let doccomment:SymbolDescription.Doccomment = description.doccomment
         {
             self.comment = context.filter(doccomment: doccomment)

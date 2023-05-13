@@ -1,4 +1,4 @@
-import Repositories
+import PackageGraphs
 import SemanticVersions
 
 extension SymbolGraph
@@ -10,39 +10,49 @@ extension SymbolGraph
         public
         let package:PackageIdentifier
         public
-        let version:Repository.Reference?
+        let triple:Triple
         public
         let format:SemanticVersion
 
         public
-        let requirements:[PlatformRequirement]
+        let revision:Repository.Revision?
         public
-        let products:[Product]
-        public
-        let pins:[Pin]
+        let ref:Repository.Ref?
 
         public
-        init(package:PackageIdentifier,
-            at ref:Repository.Reference?,
+        let requirements:[PlatformRequirement]
+        public
+        let dependencies:[Dependency]
+        public
+        let products:[ProductNode]
+
+        public
+        init(package:PackageIdentifier, triple:Triple,
             format:SemanticVersion = .v(0, 1, 0),
+            revision:Repository.Revision? = nil,
+            ref:Repository.Ref? = nil,
             requirements:[PlatformRequirement] = [],
-            products:[Product] = [],
-            pins:[Pin] = [])
+            dependencies:[Dependency] = [],
+            products:[ProductNode] = [])
         {
             self.package = package
-            self.version = ref
+            self.triple = triple
             self.format = format
+
+            self.revision = revision
+            self.ref = ref
+
             self.requirements = requirements
+            self.dependencies = dependencies
             self.products = products
-            self.pins = pins
         }
     }
 }
 extension SymbolGraph.Metadata
 {
     public static
-    func swift(at ref:Repository.Reference) -> Self
+    func swift(triple:Triple, ref:Repository.Ref? = nil) -> Self
     {
-        .init(package: .swift, at: ref)
+        .init(package: .swift, triple: triple, ref: ref)
     }
 }

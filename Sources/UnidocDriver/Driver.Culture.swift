@@ -1,20 +1,20 @@
-import Repositories
+import PackageGraphs
 import System
 
 extension Driver
 {
     @frozen public
-    struct Culture:Equatable
+    struct Culture:Identifiable, Equatable
     {
         public
-        let module:ModuleIdentifier
+        let id:ModuleIdentifier
         public
         let parts:[FilePath]
 
         @inlinable internal
-        init(module:ModuleIdentifier, nonempty:[FilePath])
+        init(id module:ModuleIdentifier, nonempty:[FilePath])
         {
-            self.module = module
+            self.id = module
             self.parts = nonempty
         }
     }
@@ -22,7 +22,7 @@ extension Driver
 extension Driver.Culture
 {
     @inlinable public
-    init(module:ModuleIdentifier, parts:[FilePath]) throws
+    init(id module:ModuleIdentifier, parts:[FilePath]) throws
     {
         if  parts.isEmpty
         {
@@ -30,7 +30,7 @@ extension Driver.Culture
         }
         else
         {
-            self.init(module: module, nonempty: parts)
+            self.init(id: module, nonempty: parts)
         }
     }
 }

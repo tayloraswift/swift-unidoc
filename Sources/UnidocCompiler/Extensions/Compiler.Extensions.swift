@@ -10,12 +10,12 @@ extension Compiler
     {
         /// Extensions indexed by signature.
         private
-        var groups:[Extension.Signature: ExtensionReference]
+        var groups:[Extension.Signature: ExtensionObject]
         /// Extensions indexed by block symbol. Extensions are made up of
         /// many constituent extension blocks, so multiple block symbols can
         /// point to the same extension.
         private
-        var named:[BlockSymbol: ExtensionReference]
+        var named:[BlockSymbol: ExtensionObject]
 
         init()
         {
@@ -38,7 +38,7 @@ extension Compiler.Extensions
     func include(block:__owned BlockSymbol,
         extending type:ScalarSymbol,
         with description:SymbolDescription,
-        in context:Compiler.SourceContext) throws
+        in context:Compiler.Context) throws
     {
         guard case .block = description.phylum
         else
@@ -49,7 +49,7 @@ extension Compiler.Extensions
             throw Compiler.UnexpectedSymbolError.block(block)
         }
 
-        let `extension`:Compiler.ExtensionReference = self(type,
+        let `extension`:Compiler.ExtensionObject = self(context.culture.index, type,
             where: description.extension.conditions,
             path: description.path)
 
@@ -66,9 +66,9 @@ extension Compiler.Extensions
 
 extension Compiler.Extensions
 {
-    func named(_ block:BlockSymbol) throws -> Compiler.ExtensionReference
+    func named(_ block:BlockSymbol) throws -> Compiler.ExtensionObject
     {
-        if let named:Compiler.ExtensionReference = self.named[block]
+        if let named:Compiler.ExtensionObject = self.named[block]
         {
             return named
         }
@@ -81,17 +81,17 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func callAsFunction(_ extended:Compiler.ScalarReference,
-        where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionReference
+    func callAsFunction(_ culture:Int, _ extended:Compiler.ScalarObject,
+        where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionObject
     {
-        self(extended.id, where: conditions, path: extended.value.path)
+        self(culture, extended.id, where: conditions, path: extended.value.path)
     }
     private mutating
-    func callAsFunction(_ extended:ScalarSymbol,
+    func callAsFunction(_ culture:Int, _ extended:ScalarSymbol,
         where conditions:[GenericConstraint<ScalarSymbol>],
-        path:LexicalPath) -> Compiler.ExtensionReference
+        path:LexicalPath) -> Compiler.ExtensionObject
     {
-        let signature:Compiler.Extension.Signature = .init(extended, where: conditions)
+        let signature:Compiler.Extension.Signature = .init(culture, extended, where: conditions)
         return { $0 }(&self.groups[signature, default: .init(value: .init(
             signature: signature,
             path: .init(path)))])

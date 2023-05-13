@@ -6,9 +6,9 @@ extension Compiler.Scalars
         /// an excluded scalar will be pruned.
         case excluded
         /// Scalar will be included in the symbol graph.
-        case included(Compiler.ScalarReference)
+        case included(Compiler.ScalarObject)
         /// Scalar *may* be included in the symbol graph. This is a terminal
         /// state if the scalar is from a foreign module.
-        case nominated(Compiler.ScalarNomination)
+        case nominated(Compiler.Nomination)
     }
 }

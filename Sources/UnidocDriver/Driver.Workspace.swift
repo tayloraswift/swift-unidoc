@@ -1,4 +1,4 @@
-import Repositories
+import PackageGraphs
 import SemanticVersions
 import System
 
@@ -34,7 +34,7 @@ extension Driver.Workspace
 
     public
     func checkout(url:String,
-        at reference:String,
+        at ref:String,
         clean:Bool = false) async throws -> Driver.Checkout
     {
         guard let package:PackageIdentifier = .infer(from: url)
@@ -57,8 +57,7 @@ extension Driver.Workspace
         let workspace:Self = try await .create(at: self.path / "\(package).doc")
         if  clean { try await workspace.clean() }
 
-        try await SystemProcess.init(command: "git", "-C", root.string,
-            "checkout", reference)()
+        try await SystemProcess.init(command: "git", "-C", root.string, "checkout", ref)()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
             try FileDescriptor.pipe()
@@ -70,7 +69,7 @@ extension Driver.Workspace
         }
 
         try await SystemProcess.init(command: "git", "-C", root.string,
-            "rev-list", "-n", "1", reference,
+            "rev-list", "-n", "1", ref,
             stdout: writable)()
 
         //  Note: output contains trailing newline
@@ -85,14 +84,14 @@ extension Driver.Workspace
             fatalError("unimplemented")
         }
 
-        let reference:Repository.Reference = SemanticVersion.init(tag: reference).map(
-            Repository.Reference.version(_:)) ?? .branch(reference)
+        let ref:Repository.Ref = SemanticVersion.init(tag: ref).map(
+            Repository.Ref.version(_:)) ?? .branch(ref)
 
         return .init(workspace: workspace,
             root: root,
             pin: .init(id: package,
-                reference: reference,
+                location: .remote(url: url),
                 revision: revision,
-                location: .remote(url: url)))
+                ref: ref))
     }
 }

@@ -1,5 +1,5 @@
 import JSONDecoding
-import Repositories
+import PackageGraphs
 
 @frozen public
 struct SymbolGraphPart:Equatable, Sendable

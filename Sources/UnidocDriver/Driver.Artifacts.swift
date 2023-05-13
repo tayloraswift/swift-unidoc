@@ -1,6 +1,6 @@
 import JSONDecoding
 import PackageMetadata
-import Repositories
+import PackageGraphs
 import UnidocCompiler
 import UnidocLinker
 import SymbolGraphs
@@ -31,10 +31,8 @@ extension Driver.Artifacts
     public
     func buildSymbolGraph() async throws -> SymbolGraph
     {
-        let extensions:[Compiler.Extension]
-
-        let scalars:[Compiler.Scalar]
-        let context:Compiler.ScalarNominations
+        let (scalars, nominations):([Compiler.Culture], Compiler.Nominations)
+        let (extensions):[Compiler.Extension]
 
         do
         {
@@ -42,20 +40,21 @@ extension Driver.Artifacts
 
             for culture:Driver.Culture in self.cultures
             {
-                try compiler.compile(culture: try culture.parts.map
+                try compiler.compile(culture: culture.id,
+                    parts: try culture.parts.map
                 {
                     try .init(parsing: try $0.read([UInt8].self))
                 })
             }
 
+            (scalars, nominations) = compiler.scalars.load()
             (extensions) = compiler.extensions.load()
-            (scalars, context) = compiler.scalars.load()
         }
         do
         {
-            var linker:Linker = .init(metadata: self.metadata, context: context)
+            var linker:Linker = .init(nominations: nominations, metadata: self.metadata)
 
-            let scalarAddresses:[ScalarAddress] = try linker.allocate(
+            let scalarAddresses:[[ScalarAddress]] = try linker.allocate(
                 scalars: scalars)
             let extensionAddresses:[(ScalarAddress, Int)] = try linker.allocate(
                 extensions: extensions)

@@ -12,27 +12,38 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "extensions"
         {
-            let filenames:[String] =
-            [
-                "ExternalExtensionsWithConformances",
-                "ExternalExtensionsWithConformances@ExtendableTypesWithConstraints",
-                "ExternalExtensionsWithConstraints",
-                "ExternalExtensionsWithConstraints@ExtendableTypesWithConstraints",
-                "InternalExtensionsWithConformances",
-                "InternalExtensionsWithConstraints",
-            ]
             tests.do
             {
                 var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
-                try compiler.compile(culture: tests.load(parts:
-                    filenames.map
-                    {
-                        ("TestModules/Symbolgraphs" as FilePath).appending("\($0).symbols.json")
-                    }))
+
+                let directory:FilePath = "TestModules/Symbolgraphs"
+                for culture:[FilePath] in
+                [
+                    [
+                        "ExternalExtensionsWithConformances",
+                        "ExternalExtensionsWithConformances@ExtendableTypesWithConstraints",
+                    ],
+                    [
+                        "ExternalExtensionsWithConstraints",
+                        "ExternalExtensionsWithConstraints@ExtendableTypesWithConstraints",
+                    ],
+                    [
+                        "InternalExtensionsWithConformances",
+                    ],
+                    [
+                        "InternalExtensionsWithConstraints",
+                    ],
+                ]
+                {
+                    let parts:[SymbolGraphPart] = tests.load(
+                        parts: culture.map { directory / "\($0).symbols.json" })
+                    try compiler.compile(culture: parts[0].culture, parts: parts)
+                }
 
                 if  let tests:TestGroup = tests / "locations"
                 {
-                    for scalar:Compiler.Scalar in compiler.scalars.load().local
+                    for scalar:Compiler.Scalar
+                        in compiler.scalars.load().local.lazy.map(\.scalars).joined()
                     {
                         if  let location:SourceLocation<FileSymbol> = tests.expect(
                                 value: scalar.location)

@@ -25,7 +25,7 @@ let package:Package = .init(
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
-        .library(name: "Repositories", targets: ["Repositories"]),
+        .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
@@ -118,15 +118,14 @@ let package:Package = .init(
                 .target(name: "MarkdownTrees"),
             ]),
 
-        .target(name: "Repositories", dependencies:
+        .target(name: "PackageGraphs", dependencies:
             [
                 .target(name: "SemanticVersions"),
-                .target(name: "StringIdentifiers"),
             ]),
 
         .target(name: "PackageMetadata", dependencies:
             [
-                .target(name: "Repositories"),
+                .target(name: "PackageGraphs"),
 
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -134,15 +133,13 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
-        .target(name: "StringIdentifiers"),
-
         .target(name: "Symbols"),
 
         .target(name: "SymbolGraphParts", dependencies:
             [
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
-                .target(name: "Repositories"),
+                .target(name: "PackageGraphs"),
                 .target(name: "Symbols"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -153,7 +150,7 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
-                .target(name: "Repositories"),
+                .target(name: "PackageGraphs"),
                 .target(name: "Symbols"),
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),
