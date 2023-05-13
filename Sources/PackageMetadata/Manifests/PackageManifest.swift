@@ -1,5 +1,6 @@
 import JSONDecoding
 import PackageGraphs
+import SemanticVersions
 
 public
 struct PackageManifest:Equatable, Sendable
@@ -18,6 +19,9 @@ struct PackageManifest:Equatable, Sendable
     let products:[Product]
     public
     let targets:[Target]
+    /// The `swift-tools-version` format of this manifest.
+    public
+    let format:SemanticVersion
 
     @inlinable public
     init(name:String,
@@ -25,7 +29,8 @@ struct PackageManifest:Equatable, Sendable
         requirements:[PlatformRequirement] = [],
         dependencies:[Repository.Dependency] = [],
         products:[Product] = [],
-        targets:[Target] = [])
+        targets:[Target] = [],
+        format:SemanticVersion)
     {
         self.name = name
         self.root = root
@@ -33,6 +38,7 @@ struct PackageManifest:Equatable, Sendable
         self.dependencies = dependencies
         self.products = products
         self.targets = targets
+        self.format = format
     }
 }
 extension PackageManifest
@@ -162,6 +168,12 @@ extension PackageManifest:JSONObjectDecodable
 
         case requirements = "platforms"
         case targets
+
+        case format = "toolsVersion"
+        enum Format:String
+        {
+            case version = "_version"
+        }
     }
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
@@ -177,6 +189,11 @@ extension PackageManifest:JSONObjectDecodable
             requirements: try json[.requirements].decode(),
             dependencies: try json[.dependencies].decode(),
             products: try json[.products].decode(),
-            targets: try json[.targets].decode())
+            targets: try json[.targets].decode(),
+            format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKeys.Format>.self)
+            {
+                try $0[.version].decode(as: JSON.StringRepresentation<SemanticVersion>.self,
+                    with: \.value)
+            })
     }
 }
