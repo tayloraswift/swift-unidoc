@@ -201,7 +201,8 @@ enum Main:SyncTests
                             [
                                 .filesystem(.init(id: "swift-json",
                                     location: "/swift/swift-json")),
-                            ])
+                            ],
+                            format: .v(5, 7, 0))
                         tests.expect(try .init(parsing: json) ==? expected)
                     }
                 }
@@ -358,7 +359,8 @@ enum Main:SyncTests
                                     requirement: .ref(.version(.v(0, 4, 5))),
                                     location: .remote(
                                         url: "https://github.com/apple/swift-system"))),
-                            ])
+                            ],
+                            format: .v(5, 7, 0))
                         tests.expect(try .init(parsing: json) ==? expected)
                     }
                 }

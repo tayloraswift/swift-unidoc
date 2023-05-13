@@ -37,9 +37,10 @@ extension Driver.Checkout
         let resolutions:PackageResolutions = try .init(
             parsing: try (self.root / "Package.resolved").read())
 
-        let manifest:PackageManifest = try await self.dumpManifest()
         let toolchain:Driver.Toolchain = try await self.dumpToolchainInfo()
+        let manifest:PackageManifest = try await self.dumpManifest()
 
+        print("Note: using spm tools version \(manifest.format)")
         print("Note: using toolchain version \(toolchain.version?.description ?? "<unstable>")")
         print("Note: using toolchain triple '\(toolchain.triple)'")
 
