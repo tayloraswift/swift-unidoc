@@ -84,14 +84,11 @@ extension Driver.Workspace
             fatalError("unimplemented")
         }
 
-        let ref:Repository.Ref = SemanticVersion.init(tag: ref).map(
-            Repository.Ref.version(_:)) ?? .branch(ref)
-
         return .init(workspace: workspace,
             root: root,
             pin: .init(id: package,
                 location: .remote(url: url),
                 revision: revision,
-                ref: ref))
+                ref: .infer(from: ref)))
     }
 }

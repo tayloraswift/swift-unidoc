@@ -1,7 +1,7 @@
 @frozen public
-struct LexicalPath:Hashable, Sendable
+struct UnqualifiedPath:Hashable, Sendable
 {
-    @usableFromInline internal 
+    @usableFromInline internal
     var components:LexicalComponents<String>
 
     @inlinable public
@@ -10,7 +10,7 @@ struct LexicalPath:Hashable, Sendable
         self.components = .init(prefix, last)
     }
 }
-extension LexicalPath
+extension UnqualifiedPath
 {
     @inlinable public
     var prefix:[String]
@@ -37,28 +37,28 @@ extension LexicalPath
         }
     }
 }
-extension LexicalPath
+extension UnqualifiedPath
 {
     @inlinable public
-    init?(_ components:some BidirectionalCollection<String>) 
+    init?(_ components:some BidirectionalCollection<String>)
     {
         if  let last:String = components.last
         {
             self.init(.init(components.dropLast()), last)
         }
-        else 
+        else
         {
-            return nil 
+            return nil
         }
     }
 
-    @inlinable public mutating 
+    @inlinable public mutating
     func append(_ component:String)
     {
         self.components.append(component)
     }
 }
-extension LexicalPath:Comparable
+extension UnqualifiedPath:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -66,46 +66,46 @@ extension LexicalPath:Comparable
         lhs.lexicographicallyPrecedes(rhs)
     }
 }
-extension LexicalPath:RandomAccessCollection
+extension UnqualifiedPath:RandomAccessCollection
 {
     @inlinable public
-    var startIndex:Int 
+    var startIndex:Int
     {
         self.components.prefix.startIndex
     }
     @inlinable public
-    var endIndex:Int 
+    var endIndex:Int
     {
         self.components.prefix.endIndex + 1
     }
     @inlinable public
     subscript(index:Int) -> String
     {
-        _read 
+        _read
         {
-            if index < self.components.prefix.endIndex 
+            if index < self.components.prefix.endIndex
             {
                 yield self.components.prefix[index]
             }
-            else 
+            else
             {
-                yield self.components.last 
+                yield self.components.last
             }
         }
-        _modify 
+        _modify
         {
-            if index < self.components.prefix.endIndex 
+            if index < self.components.prefix.endIndex
             {
                 yield &self.components.prefix[index]
             }
-            else 
+            else
             {
-                yield &self.components.last 
+                yield &self.components.last
             }
         }
     }
 }
-extension LexicalPath:CustomStringConvertible
+extension UnqualifiedPath:CustomStringConvertible
 {
     @inlinable public
     var description:String

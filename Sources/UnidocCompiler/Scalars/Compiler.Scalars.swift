@@ -10,8 +10,9 @@ extension Compiler
     {
         private
         var entries:[ScalarSymbol: Entry]
+        /// The total number of modules compiled so far.
         private
-        var modules:[ModuleIdentifier]
+        var modules:Int
 
         private
         let root:Repository.Root?
@@ -19,7 +20,7 @@ extension Compiler
         init(root:Repository.Root?)
         {
             self.entries = [:]
-            self.modules = []
+            self.modules = 0
 
             self.root = root
         }
@@ -27,17 +28,23 @@ extension Compiler
 }
 extension Compiler.Scalars
 {
+    /// Loads all the scalars compiled to far, grouped by culture. This function returns
+    /// one `[Compiler.Scalar]` array in the `local` tuple component for each time that
+    /// ``Compiler.compile(culture:parts:)`` was called, *in the order those calls were
+    /// originally made*. Within each array, the scalars are sorted alphabetically by
+    /// mangled name. The `external` tuple component contains information about foreign
+    /// symbols mentioned by the compiled scalars.
     public
-    func load() -> (local:[Compiler.Culture], external:Compiler.Nominations)
+    func load() -> (local:[[Compiler.Scalar]], external:Compiler.Nominations)
     {
-        var included:[Compiler.Culture] = self.modules.map(Compiler.Culture.init(id:))
+        var included:[[Compiler.Scalar]] = .init(repeating: [], count: self.modules)
         let external:[ScalarSymbol: Compiler.Nomination] =
             self.entries.compactMapValues
         {
             switch $0
             {
             case .included(let reference):
-                included[reference.culture].scalars.append(reference.value)
+                included[reference.culture].append(reference.value)
                 return nil
 
             case .excluded:
@@ -51,7 +58,7 @@ extension Compiler.Scalars
         //  their ordering is significant.
         for culture:Int in included.indices
         {
-            included[culture].scalars.sort { $0.id < $1.id }
+            included[culture].sort { $0.id < $1.id }
         }
 
         return (included, .init(external))
@@ -62,11 +69,8 @@ extension Compiler.Scalars
     mutating
     func include(culture:ModuleIdentifier) -> Compiler.Context
     {
-        defer
-        {
-            self.modules.append(culture)
-        }
-        return .init(culture: (id: culture, index: self.modules.endIndex), root: self.root)
+        defer { self.modules += 1 }
+        return .init(culture: (id: culture, index: self.modules), root: self.root)
     }
     mutating
     func include(vector resolution:VectorSymbol, with description:SymbolDescription) throws

@@ -17,13 +17,10 @@ extension FilePath
         }
     }
 }
-extension FilePath.Directory:AsyncSequence
+extension FilePath.Directory:Sequence
 {
-    public
-    typealias Element = FilePath.Component
-
     @inlinable public
-    func makeAsyncIterator() -> FilePath.DirectoryIterator
+    func makeIterator() -> FilePath.DirectoryIterator
     {
         .init(self.path)
     }

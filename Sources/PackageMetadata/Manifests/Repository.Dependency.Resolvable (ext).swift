@@ -43,15 +43,15 @@ extension Repository.Dependency.Resolvable:JSONObjectDecodable
                 switch json.key
                 {
                 case .branch:
-                    return .ref(.branch(try json.decode(
+                    return .refname(try json.decode(
                         as: JSON.SingleElementRepresentation<String>.self,
-                        with: \.value)))
+                        with: \.value))
 
                 case .exact:
-                    return .ref(.version(try json.decode(
+                    return .exact(try json.decode(
                         as: JSON.SingleElementRepresentation<
                             JSON.StringRepresentation<SemanticVersion>>.self,
-                        with: \.value.value)))
+                        with: \.value.value))
 
                 case .range:
                     return .range(try json.decode(

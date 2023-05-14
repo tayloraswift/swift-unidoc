@@ -29,3 +29,19 @@ extension ProductIdentifier:CustomStringConvertible
         "\(self.package):\(self.name)"
     }
 }
+extension ProductIdentifier:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:String)
+    {
+        if  let colon:String.Index = description.firstIndex(of: ":")
+        {
+            self.init(name: .init(description[description.index(after: colon)...]),
+                package: .init(description[..<colon]))
+        }
+        else
+        {
+            return nil
+        }
+    }
+}

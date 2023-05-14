@@ -19,13 +19,11 @@ enum Main:AsyncTests
                         ref: .version(.v(5, 8, 0))),
                     cultures:
                     [
-                        try .init(id: "Swift",
-                            parts:
-                            [
-                                "TestModules/Symbolgraphs/Swift.symbols.json",
-                            ]),
+                        try .init(
+                            parts: ["TestModules/Symbolgraphs/Swift.symbols.json"],
+                            node: .init(name: "Swift")),
                     ])
-                return try await artifacts.buildSymbolGraph()
+                return try await artifacts.buildDocumentation()
             })
         {
             let bson:BSON.Document = .init(encoding: graph)

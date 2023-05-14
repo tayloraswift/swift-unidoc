@@ -5,8 +5,9 @@ extension Repository.Dependency
     @frozen public
     enum Requirement:Hashable, Equatable, Sendable
     {
+        case exact            (SemanticVersion)
         case range      (Range<SemanticVersion>)
-        case ref        (Repository.Ref)
+        case refname    (String)
         case revision   (Repository.Revision)
     }
 }

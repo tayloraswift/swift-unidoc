@@ -89,7 +89,7 @@ extension Compiler.Extensions
     private mutating
     func callAsFunction(_ culture:Int, _ extended:ScalarSymbol,
         where conditions:[GenericConstraint<ScalarSymbol>],
-        path:LexicalPath) -> Compiler.ExtensionObject
+        path:UnqualifiedPath) -> Compiler.ExtensionObject
     {
         let signature:Compiler.Extension.Signature = .init(culture, extended, where: conditions)
         return { $0 }(&self.groups[signature, default: .init(value: .init(

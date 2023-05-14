@@ -19,7 +19,7 @@ struct CodelinkResolver
 extension CodelinkResolver
 {
     public mutating
-    func overload(_ path:LexicalPath, with overload:__owned CodelinkResolver.Overload)
+    func overload(_ path:QualifiedPath, with overload:__owned CodelinkResolver.Overload)
     {
         self.legacy[path].append(overload)
         self.exact[path].append(overload)
@@ -47,10 +47,10 @@ extension CodelinkResolver
         {
         case nil:
             return nil
-        
+
         case .one(let overload):
             return .one(overload)
-        
+
         case .many(let overloads):
             var filtered:Overloads? = nil
 

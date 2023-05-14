@@ -2,23 +2,10 @@ import BSONDecoding
 import BSONEncoding
 import SemanticVersions
 
-extension SemanticVersionMask
-{
-    /// The precision tag used by this type’s BSON ABI. It inhabits the
-    /// least-significant bits of a ``UInt64``, and starts counting from
-    /// `1` to prevent generating an all-zero bit pattern.
-    @frozen public
-    enum Precision:UInt64
-    {
-        case major = 1
-        case minor = 2
-        case patch = 3
-    }
-}
 extension SemanticVersionMask:RawRepresentable
 {
     @inlinable public
-    var rawValue:UInt64
+    var rawValue:Int64
     {
         switch self
         {
@@ -39,7 +26,7 @@ extension SemanticVersionMask:RawRepresentable
         }
     }
     @inlinable public
-    init?(rawValue:UInt64)
+    init?(rawValue:Int64)
     {
         let major:UInt16 = .init(truncatingIfNeeded: rawValue >> 48)
         let minor:UInt16 = .init(truncatingIfNeeded: rawValue >> 32)

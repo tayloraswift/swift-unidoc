@@ -43,6 +43,28 @@ extension Repository.Revision:RandomAccessCollection
         }
     }
 }
+extension Repository.Revision
+{
+    /// Create a revision hash from binary data. Returns nil if the input does
+    /// not contain exactly 20 bytes.
+    @inlinable public
+    init?(bytes:some RandomAccessCollection<UInt8>)
+    {
+        guard bytes.count == 20
+        else
+        {
+            return nil
+        }
+        let storage:Storage = withUnsafeTemporaryAllocation(
+            byteCount: MemoryLayout<Storage>.size,
+            alignment: MemoryLayout<Storage>.alignment)
+        {
+            $0.copyBytes(from: bytes)
+            return $0.load(as: Storage.self)
+        }
+        self.init(storage: storage)
+    }
+}
 extension Repository.Revision:Equatable
 {
     @inlinable public static

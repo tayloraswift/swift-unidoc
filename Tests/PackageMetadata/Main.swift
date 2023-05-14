@@ -335,7 +335,7 @@ enum Main:SyncTests
                             dependencies:
                             [
                                 .resolvable(.init(id: "swift-json",
-                                    requirement: .ref(.branch("master")),
+                                    requirement: .refname("master"),
                                     location: .remote(
                                         url: "https://github.com/kelvin13/swift-json"))),
 
@@ -356,7 +356,7 @@ enum Main:SyncTests
                                         root: "/swift/swift-mongodb"))),
 
                                 .resolvable(.init(id: "swift-system",
-                                    requirement: .ref(.version(.v(0, 4, 5))),
+                                    requirement: .exact(.v(0, 4, 5)),
                                     location: .remote(
                                         url: "https://github.com/apple/swift-system"))),
                             ],

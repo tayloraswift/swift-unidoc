@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import LexicalPaths
 
-extension LexicalPath:RawRepresentable
+extension UnqualifiedPath:RawRepresentable
 {
     @inlinable public
     var rawValue:String
@@ -15,6 +15,6 @@ extension LexicalPath:RawRepresentable
         self.init(rawValue.split(separator: " ").map(String.init(_:)))
     }
 }
-extension LexicalPath:BSONDecodable, BSONEncodable
+extension UnqualifiedPath:BSONDecodable, BSONEncodable
 {
 }

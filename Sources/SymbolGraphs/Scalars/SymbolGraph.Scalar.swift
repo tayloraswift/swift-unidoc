@@ -14,7 +14,7 @@ extension SymbolGraph
         public
         let flags:Flags
         public
-        let path:LexicalPath
+        let path:UnqualifiedPath
 
         /// This scalar’s declaration, which consists of its availability,
         /// syntax fragments, and generic signature.
@@ -51,7 +51,7 @@ extension SymbolGraph
         var article:Article?
 
         @inlinable public
-        init(flags:Flags, path:LexicalPath)
+        init(flags:Flags, path:UnqualifiedPath)
         {
             self.flags = flags
             self.path = path
@@ -108,14 +108,14 @@ extension SymbolGraph.Scalar:BSONDocumentEncodable
         bson[.declaration_availability] =
             self.declaration.availability.isEmpty ? nil :
             self.declaration.availability
-        
+
         bson[.declaration_abridged_bytecode] = self.declaration.abridged.bytecode
         bson[.declaration_expanded_bytecode] = self.declaration.expanded.bytecode
         //  TODO: optimize
         bson[.declaration_expanded_links] =
             self.declaration.expanded.links.isEmpty ? nil :
             self.declaration.expanded.links
-        
+
         bson[.declaration_generics_constraints] =
             self.declaration.generics.constraints.isEmpty ? nil :
             self.declaration.generics.constraints
@@ -123,17 +123,17 @@ extension SymbolGraph.Scalar:BSONDocumentEncodable
         bson[.declaration_generics_parameters] =
             self.declaration.generics.parameters.isEmpty ? nil :
             self.declaration.generics.parameters
-        
+
         bson[.superforms] =
             self.superforms.isEmpty ? nil :
             self.superforms
-        
+
         bson[.features] =
             self.features.isEmpty ? nil :
             self.features
-        
+
         bson[.origin] = self.origin
-        
+
         bson[.location] = self.location
         bson[.article] = self.article
     }

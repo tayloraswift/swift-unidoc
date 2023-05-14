@@ -22,7 +22,6 @@ extension FilePath.DirectoryIterator
 }
 extension FilePath.DirectoryIterator.Stream
 {
-    @SystemActor
     private mutating
     func open() throws -> FilePath.DirectoryPointer?
     {
@@ -47,7 +46,6 @@ extension FilePath.DirectoryIterator.Stream
             return pointer
         }
     }
-    @SystemActor
     mutating
     func next() throws -> FilePath.Component?
     {

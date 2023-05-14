@@ -1,9 +1,9 @@
 @frozen public
-enum TargetType:Hashable, Equatable, Sendable
+enum TargetType:String, Hashable, Equatable, Sendable
 {
     case binary
     case executable
-    case library
+    case regular
     case macro
     case plugin
 
@@ -13,4 +13,20 @@ enum TargetType:Hashable, Equatable, Sendable
 
     case system
     case test
+}
+extension TargetType:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        self.rawValue
+    }
+}
+extension TargetType:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:String)
+    {
+        self.init(rawValue: description)
+    }
 }
