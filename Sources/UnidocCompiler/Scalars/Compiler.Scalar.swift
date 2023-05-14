@@ -23,7 +23,7 @@ extension Compiler
         public
         let phylum:ScalarPhylum
         public
-        let path:LexicalPath
+        let path:UnqualifiedPath
 
         public internal(set)
         var aperture:ScalarAperture
@@ -59,7 +59,7 @@ extension Compiler
             visibility:SymbolDescription.Visibility,
             location:SourceLocation<FileSymbol>?,
             phylum:ScalarPhylum,
-            path:LexicalPath)
+            path:UnqualifiedPath)
         {
             self.id = id
 

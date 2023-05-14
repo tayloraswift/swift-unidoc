@@ -10,7 +10,7 @@ extension Compiler
         public
         let signature:Signature
         /// The full name of the extended type. This is provided as an array instead
-        /// of a ``LexicalPath`` for convenience only; the array is always non-empty
+        /// of a ``UnqualifiedPath`` for convenience only; the array is always non-empty.
         public
         let path:[String]
 

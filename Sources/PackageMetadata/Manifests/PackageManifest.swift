@@ -74,7 +74,7 @@ extension PackageManifest
             return .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: dependencies.sorted(),
                     modules: modules),
-                path: $0.path)
+                location: $0.path)
         }
         let productNodes:[ProductNode] = try products.map
         {

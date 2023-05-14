@@ -18,7 +18,7 @@ extension PackageManifest
         let path:String?
 
         @inlinable public
-        init(name:String, type:TargetType = .library,
+        init(name:String, type:TargetType = .regular,
             dependencies:Dependencies = .init(),
             path:String? = nil)
         {
@@ -44,7 +44,7 @@ extension PackageManifest.Target:JSONObjectDecodable
     {
         self.init(
             name: try json[.name].decode(),
-            type: try json[.type].decode(as: Keyword.self, with: \.type),
+            type: try json[.type].decode(),
             dependencies: try json[.dependencies].decode(),
             path: try json[.path]?.decode())
     }

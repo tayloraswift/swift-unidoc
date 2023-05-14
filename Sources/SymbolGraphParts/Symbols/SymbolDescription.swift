@@ -29,7 +29,7 @@ struct SymbolDescription:Equatable, Sendable
     public
     let location:SourceLocation<String>?
     public
-    let path:LexicalPath
+    let path:UnqualifiedPath
 
     private
     init(_ usr:UnifiedSymbol,
@@ -40,7 +40,7 @@ struct SymbolDescription:Equatable, Sendable
         visibility:Visibility,
         extension:ExtensionContext,
         location:SourceLocation<String>?,
-        path:LexicalPath)
+        path:UnqualifiedPath)
     {
         self.declaration = declaration
         self.doccomment = doccomment
@@ -69,7 +69,7 @@ extension SymbolDescription
         extension:ExtensionContext,
         generics:GenericSignature<ScalarSymbol>,
         location:SourceLocation<String>?,
-        path:LexicalPath)
+        path:UnqualifiedPath)
     {
         var phylum:UnifiedPhylum = phylum
 
@@ -81,7 +81,7 @@ extension SymbolDescription
             //  Heuristic for inferring actor types
             case "actor":
                 phylum = .scalar(.actor)
-        
+
             //  Heuristic for inferring class members
             case "class":
                 switch phylum
@@ -91,14 +91,14 @@ extension SymbolDescription
                 case .scalar(.var(.static)):        phylum = .scalar(.var(.class))
                 default:                            break
                 }
-            
+
             default:
                 continue
             }
 
             break
         }
-        
+
         let declaration:Declaration<ScalarSymbol>
         if  case .scalar(.actor) = phylum
         {
@@ -129,7 +129,7 @@ extension SymbolDescription
         }
 
         //  strip empty parentheses from last path component
-        let simplified:LexicalPath
+        let simplified:UnqualifiedPath
         if  let index:String.Index = path.last.index(path.last.endIndex,
                 offsetBy: -2,
                 limitedBy: path.last.startIndex),

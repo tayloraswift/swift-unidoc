@@ -117,7 +117,6 @@ extension FilePath
     //         throw FileError.system(error: error, path: self)
     //     }
     // }
-    @SystemActor
     @inlinable public
     func overwrite(with array:[UInt8],
         permissions:
@@ -156,20 +155,20 @@ extension FilePath
     }
 
     @inlinable public
-    func walk(from current:Self = .init(root: nil), _ body:(Self) throws -> ()) async throws
+    func walk(from current:Self = .init(root: nil), _ body:(Self) throws -> ()) throws
     {
         let absolute:Self = current.isAbsolute ? current : self.appending(current.components)
         //  minimize the amount of file descriptors we have open
         var explore:[Self] = []
-        for try await next:Component in absolute.directory
+        for next:Result<Component, any Error> in absolute.directory
         {
-            let current:Self = current.appending(next)
+            let current:Self = current.appending(try next.get())
             try body(current)
             explore.append(current)
         }
         for current:Self in explore
         {
-            try await self.walk(from: current, body)
+            try self.walk(from: current, body)
         }
     }
 }

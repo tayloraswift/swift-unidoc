@@ -4,33 +4,41 @@ import System
 extension Driver
 {
     @frozen public
-    struct Culture:Identifiable, Equatable
+    struct Culture
     {
         public
-        let id:ModuleIdentifier
-        public
         let parts:[FilePath]
+        public
+        let node:TargetNode
 
         @inlinable internal
-        init(id module:ModuleIdentifier, nonempty:[FilePath])
+        init(nonempty:[FilePath], node:TargetNode)
         {
-            self.id = module
             self.parts = nonempty
+            self.node = node
         }
+    }
+}
+extension Driver.Culture:Identifiable
+{
+    @inlinable public
+    var id:ModuleIdentifier
+    {
+        self.node.id
     }
 }
 extension Driver.Culture
 {
     @inlinable public
-    init(id module:ModuleIdentifier, parts:[FilePath]) throws
+    init(parts:[FilePath], node:TargetNode) throws
     {
         if  parts.isEmpty
         {
-            throw Driver.CultureError.empty(module)
+            throw Driver.CultureError.empty(node.id)
         }
         else
         {
-            self.init(id: module, nonempty: parts)
+            self.init(nonempty: parts, node: node)
         }
     }
 }

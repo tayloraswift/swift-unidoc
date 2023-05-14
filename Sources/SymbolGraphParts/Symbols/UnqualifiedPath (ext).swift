@@ -2,7 +2,7 @@ import LexicalPaths
 import JSONDecoding
 import JSONEncoding
 
-extension LexicalPath:JSONDecodable
+extension UnqualifiedPath:JSONDecodable
 {
     public
     init(json:JSON) throws

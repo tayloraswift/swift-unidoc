@@ -7,7 +7,7 @@ struct ModuleDependencies:Equatable, Hashable, Sendable
     var modules:[Int]
 
     @inlinable public
-    init(products:[ProductIdentifier] = [], modules:[Int])
+    init(products:[ProductIdentifier] = [], modules:[Int] = [])
     {
         self.products = products
         self.modules = modules

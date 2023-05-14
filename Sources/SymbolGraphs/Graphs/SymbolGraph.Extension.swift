@@ -10,6 +10,8 @@ extension SymbolGraph
     {
         public
         let conditions:[GenericConstraint<ScalarAddress>]
+        public
+        let culture:Int
 
         public
         var conformances:[ScalarAddress]
@@ -27,11 +29,12 @@ extension SymbolGraph
         var article:Article?
 
         @inlinable public
-        init(conformances:[ScalarAddress] = [],
+        init(conditions:[GenericConstraint<ScalarAddress>], culture:Int,
+            conformances:[ScalarAddress] = [],
             features:[ScalarAddress] = [],
-            nested:[ScalarAddress] = [],
-            where conditions:[GenericConstraint<ScalarAddress>] = [])
+            nested:[ScalarAddress] = [])
         {
+            self.culture = culture
             self.conditions = conditions
 
             self.conformances = conformances
@@ -48,7 +51,8 @@ extension SymbolGraph.Extension
     enum CodingKeys:String
     {
         case conditions = "S"
-        case conformances = "C"
+        case culture = "C"
+        case conformances = "P"
         case features = "F"
         case nested = "N"
         case article = "A"
@@ -59,11 +63,13 @@ extension SymbolGraph.Extension:BSONDocumentEncodable, BSONEncodable, BSONFieldE
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
+        bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
+        bson[.culture] = self.culture
+
         bson[.conformances] = self.conformances.isEmpty ? nil : self.conformances
         bson[.features] = self.features.isEmpty ? nil : self.features
         bson[.nested] = self.nested.isEmpty ? nil : self.nested
 
-        bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
         bson[.article] = self.article
     }
 }
@@ -72,11 +78,12 @@ extension SymbolGraph.Extension:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(conformances: try bson[.conformances]?.decode() ?? [],
+        self.init(conditions: try bson[.conditions]?.decode() ?? [],
+            culture: try bson[.culture].decode(),
+            conformances: try bson[.conformances]?.decode() ?? [],
             features: try bson[.features]?.decode() ?? [],
-            nested: try bson[.nested]?.decode() ?? [],
-            where: try bson[.conditions]?.decode() ?? [])
-        
+            nested: try bson[.nested]?.decode() ?? [])
+
         self.article = try bson[.article]?.decode()
     }
 }

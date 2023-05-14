@@ -14,7 +14,7 @@ extension Repository.Pin.State:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        let ref:Repository.Ref
+        let ref:SemanticRef
         if  let version:SemanticVersion = try json[.version]?.decode(
                 as: JSON.StringRepresentation<SemanticVersion>.self,
                 with: \.value)
@@ -23,7 +23,7 @@ extension Repository.Pin.State:JSONObjectDecodable
         }
         else
         {
-            ref = .branch(try json[.branch].decode())
+            ref = .unstable(try json[.branch].decode())
         }
         self.init(revision: try json[.revision].decode(), ref: ref)
     }

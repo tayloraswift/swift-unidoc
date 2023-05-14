@@ -1,3 +1,5 @@
+import SemanticVersions
+
 extension Repository
 {
     @frozen public
@@ -10,10 +12,10 @@ extension Repository
         public
         let revision:Revision
         public
-        let ref:Ref
+        let ref:SemanticRef
 
         @inlinable public
-        init(id:PackageIdentifier, location:Repository, revision:Revision, ref:Ref)
+        init(id:PackageIdentifier, location:Repository, revision:Revision, ref:SemanticRef)
         {
             self.id = id
             self.location = location

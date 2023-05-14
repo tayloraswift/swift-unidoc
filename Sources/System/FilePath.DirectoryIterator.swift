@@ -20,11 +20,24 @@ extension FilePath
         }
     }
 }
-extension FilePath.DirectoryIterator:AsyncIteratorProtocol
+extension FilePath.DirectoryIterator:IteratorProtocol
 {
     public
-    func next() async throws -> FilePath.Component?
+    func next() -> Result<FilePath.Component, any Error>?
     {
-        try await self.stream.next()
+        do
+        {
+            guard let component:FilePath.Component = try self.stream.next()
+            else
+            {
+                return nil
+            }
+
+            return .success(component)
+        }
+        catch let error
+        {
+            return .failure(error)
+        }
     }
 }

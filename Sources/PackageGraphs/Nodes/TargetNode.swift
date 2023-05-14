@@ -10,18 +10,18 @@ struct TargetNode:Equatable, Hashable, Sendable
     /// The path to the module’s source directory, relative to the
     /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
     public
-    let path:String?
+    let location:String?
 
     @inlinable public
     init(name:String,
-        type:TargetType,
-        dependencies:ModuleDependencies,
-        path:String?)
+        type:TargetType = .regular,
+        dependencies:ModuleDependencies = .init(),
+        location:String? = nil)
     {
         self.name = name
         self.type = type
         self.dependencies = dependencies
-        self.path = path
+        self.location = location
     }
 }
 extension TargetNode:Identifiable

@@ -43,7 +43,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-           from: "0.1.16")),
+           from: "0.1.17")),
 
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),

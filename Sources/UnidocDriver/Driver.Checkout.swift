@@ -84,7 +84,7 @@ extension Driver.Checkout
             }
         }
 
-        let cultures:[Driver.Culture] = try await self.dumpSymbols(package.targets.map(\.id),
+        let cultures:[Driver.Culture] = try await self.dumpSymbols(package.targets,
             triple: toolchain.triple)
 
         let metadata:SymbolGraph.Metadata = .init(package: self.pin.id,
@@ -133,10 +133,7 @@ extension Driver.Checkout
     public
     func dumpManifest() async throws -> PackageManifest
     {
-        print("""
-            Dumping manifest for package '\(self.pin.id)' \
-            at \(self.pin.ref) (\(self.pin.revision))
-            """)
+        print("Dumping manifest for package '\(self.pin.id)' at \(self.pin.state)")
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we
         //  tell the subprocess to write it to a file, and read back the file afterwards.
@@ -155,13 +152,13 @@ extension Driver.Checkout
     }
 
     public
-    func dumpSymbols(_ modules:[ModuleIdentifier],
+    func dumpSymbols(_ targets:[TargetNode],
         triple:Triple,
         pretty:Bool = false) async throws -> [Driver.Culture]
     {
-        for module:ModuleIdentifier in modules
+        for target:TargetNode in targets
         {
-            print("Dumping symbols for module '\(module)'")
+            print("Dumping symbols for module '\(target.id)'")
 
             try await SystemProcess.init(command: "swift", "symbolgraph-extract",
                 "-I", "\(self.root)/.build/debug",
@@ -172,12 +169,13 @@ extension Driver.Checkout
                 "-emit-extension-block-symbols",
                 "-include-spi-symbols",
                 pretty ? "-pretty-print" : nil,
-                "-module-name", "\(module)")()
+                "-module-name", "\(target.id)")()
         }
 
         var parts:[ModuleIdentifier: [FilePath.Component]] = [:]
-        for try await part:FilePath.Component in self.workspace.path.directory
+        for part:Result<FilePath.Component, any Error> in self.workspace.path.directory
         {
+            let part:FilePath.Component = try part.get()
             let names:[Substring] = part.string.split(separator: ".")
             //  We don’t want to *parse* the JSON yet to discover the culture,
             //  because the JSON can be very large, and parsing JSON is very
@@ -192,12 +190,11 @@ extension Driver.Checkout
             }
         }
 
-        return try modules.map
+        return try targets.map
         {
-            try .init(id: $0, parts: parts[$0, default: []].map
-            {
-                self.workspace.path / $0
-            })
+            try .init(
+                parts: parts[$0.id, default: []].map { self.workspace.path / $0 },
+                node: $0)
         }
     }
 }
