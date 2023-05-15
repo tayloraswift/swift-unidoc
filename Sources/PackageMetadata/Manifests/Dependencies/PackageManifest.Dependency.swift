@@ -1,7 +1,15 @@
 import JSONDecoding
-import PackageGraphs
 
-extension Repository.Dependency:JSONObjectDecodable
+extension PackageManifest
+{
+    @frozen public
+    enum Dependency:Equatable, Sendable
+    {
+        case filesystem(Filesystem)
+        case resolvable(Resolvable)
+    }
+}
+extension PackageManifest.Dependency:JSONObjectDecodable
 {
     public
     enum CodingKeys:String

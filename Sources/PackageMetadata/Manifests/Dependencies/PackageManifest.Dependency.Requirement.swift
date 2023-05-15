@@ -1,6 +1,7 @@
+import PackageGraphs
 import SemanticVersions
 
-extension Repository.Dependency
+extension PackageManifest.Dependency
 {
     @frozen public
     enum Requirement:Hashable, Equatable, Sendable

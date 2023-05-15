@@ -14,7 +14,7 @@ struct PackageManifest:Equatable, Sendable
     public
     let requirements:[PlatformRequirement]
     public
-    let dependencies:[Repository.Dependency]
+    let dependencies:[Dependency]
     public
     let products:[Product]
     public
@@ -27,7 +27,7 @@ struct PackageManifest:Equatable, Sendable
     init(name:String,
         root:Repository.Root,
         requirements:[PlatformRequirement] = [],
-        dependencies:[Repository.Dependency] = [],
+        dependencies:[Dependency] = [],
         products:[Product] = [],
         targets:[Target] = [],
         format:SemanticVersion)
