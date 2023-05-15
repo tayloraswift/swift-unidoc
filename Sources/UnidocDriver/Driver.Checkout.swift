@@ -44,38 +44,8 @@ extension Driver.Checkout
         print("Note: using toolchain version \(toolchain.version?.description ?? "<unstable>")")
         print("Note: using toolchain triple '\(toolchain.triple)'")
 
-        let os:PlatformIdentifier
-        if      toolchain.triple.os.starts(with: "linux")
-        {
-            os = .linux
-        }
-        else if toolchain.triple.os.starts(with: "ios")
-        {
-            os = .iOS
-        }
-        else if toolchain.triple.os.starts(with: "macos")
-        {
-            os = .macOS
-        }
-        else if toolchain.triple.os.starts(with: "tvos")
-        {
-            os = .tvOS
-        }
-        else if toolchain.triple.os.starts(with: "watchos")
-        {
-            os = .watchOS
-        }
-        else if toolchain.triple.os.starts(with: "windows")
-        {
-            os = .windows
-        }
-        else
-        {
-            fatalError("unsupported os '\(toolchain.triple.os)'")
-        }
-
         let package:(products:[ProductNode], targets:[TargetNode]) = try manifest.graph(
-            platform: os)
+            platform: try toolchain.platform())
         {
             switch $0
             {
@@ -87,6 +57,16 @@ extension Driver.Checkout
         let cultures:[Driver.Culture] = try await self.dumpSymbols(package.targets,
             triple: toolchain.triple)
 
+        //  Index repository dependencies
+        var dependencies:[PackageIdentifier: Repository.Requirement] = [:]
+        for dependency:PackageManifest.Dependency in manifest.dependencies
+        {
+            if  case .resolvable(let dependency) = dependency,
+                case .stable(let requirement) = dependency.requirement
+            {
+                dependencies[dependency.id] = requirement
+            }
+        }
         let metadata:SymbolGraph.Metadata = .init(package: self.pin.id,
             triple: toolchain.triple,
             revision: self.pin.revision,
@@ -94,8 +74,10 @@ extension Driver.Checkout
             requirements: manifest.requirements,
             dependencies: resolutions.pins.map
             {
-                //  TODO: populate requirement
-                .init(package: $0.id, requirement: nil, revision: $0.revision, ref: $0.ref)
+                .init(package: $0.id,
+                    requirement: dependencies[$0.id],
+                    revision: $0.revision,
+                    ref: $0.ref)
             },
             products: package.products)
 
@@ -119,15 +101,7 @@ extension Driver.Checkout
         }
 
         try await SystemProcess.init(command: "swift", "--version", stdout: writable)()
-
-        if  let toolchain:Driver.Toolchain = .init(parsing: try readable.read(buffering: 1024))
-        {
-            return toolchain
-        }
-        else
-        {
-            fatalError("failed to parse `swift --version` output")
-        }
+        return try .init(parsing: try readable.read(buffering: 1024))
     }
 
     public

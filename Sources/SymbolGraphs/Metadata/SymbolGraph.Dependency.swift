@@ -11,7 +11,7 @@ extension SymbolGraph
         public
         let package:PackageIdentifier
         public
-        let requirement:Range<SemanticVersion>?
+        let requirement:Repository.Requirement?
         public
         let revision:Repository.Revision
         public
@@ -19,7 +19,7 @@ extension SymbolGraph
 
         @inlinable public
         init(package:PackageIdentifier,
-            requirement:Range<SemanticVersion>?,
+            requirement:Repository.Requirement?,
             revision:Repository.Revision,
             ref:SemanticRef)
         {
@@ -49,10 +49,17 @@ extension SymbolGraph.Dependency:BSONDocumentEncodable
     {
         bson[.package] = self.package
 
-        if  let requirement:Range<SemanticVersion> = self.requirement
+        switch self.requirement
         {
-            bson[.requirement_lower] = requirement.lowerBound
-            bson[.requirement_upper] = requirement.upperBound
+        case nil:
+            break
+
+        case .exact(let version):
+            bson[.requirement_lower] = version
+
+        case .range(let versions):
+            bson[.requirement_lower] = versions.lowerBound
+            bson[.requirement_upper] = versions.upperBound
         }
 
         bson[.revision] = self.revision
@@ -64,14 +71,21 @@ extension SymbolGraph.Dependency:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
-        let requirement:Range<SemanticVersion>?
-        if  let lower:SemanticVersion = try bson[.requirement_lower]?.decode()
+        let requirement:Repository.Requirement?
+        switch
+        (
+            try bson[.requirement_lower]?.decode(to: SemanticVersion.self),
+            try bson[.requirement_upper]?.decode(to: SemanticVersion.self)
+        )
         {
-            requirement = try lower ..< bson[.requirement_upper].decode()
-        }
-        else
-        {
+        case (nil, _):
             requirement = nil
+
+        case (let lower?, nil):
+            requirement = .exact(lower)
+
+        case (let lower?, let upper?):
+            requirement = upper < lower ? nil : .range(lower ..< upper)
         }
 
         self.init(package: try bson[.package].decode(),
