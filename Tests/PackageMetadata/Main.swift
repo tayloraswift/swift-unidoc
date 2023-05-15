@@ -340,7 +340,7 @@ enum Main:SyncTests
                                         url: "https://github.com/kelvin13/swift-json"))),
 
                                 .resolvable(.init(id: "swift-grammar",
-                                    requirement: .range(.v(0, 3, 1) ..< .v(0, 4, 0)),
+                                    requirement: .stable(.range(.v(0, 3, 1) ..< .v(0, 4, 0))),
                                     location: .remote(
                                         url: "https://github.com/kelvin13/swift-grammar"))),
 
@@ -351,12 +351,12 @@ enum Main:SyncTests
                                         url: "https://github.com/kelvin13/swift-hash"))),
 
                                 .resolvable(.init(id: "swift-mongodb",
-                                    requirement: .range(.v(0, 4, 5) ..< .v(0, 5, 0)),
+                                    requirement: .stable(.range(.v(0, 4, 5) ..< .v(0, 5, 0))),
                                     location: .local(
                                         root: "/swift/swift-mongodb"))),
 
                                 .resolvable(.init(id: "swift-system",
-                                    requirement: .exact(.v(0, 4, 5)),
+                                    requirement: .stable(.exact(.v(0, 4, 5))),
                                     location: .remote(
                                         url: "https://github.com/apple/swift-system"))),
                             ],

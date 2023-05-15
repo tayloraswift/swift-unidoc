@@ -41,6 +41,7 @@ extension SymbolGraph:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
+        bson[.metadata] = self.metadata
         bson[.modules] = self.modules
         bson[.files_symbols] = self.files.symbols
         bson[.nodes_symbols] = self.nodes.symbols

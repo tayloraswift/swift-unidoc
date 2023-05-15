@@ -21,7 +21,7 @@ extension Driver
 }
 extension Driver.Toolchain
 {
-    init?(parsing splash:String)
+    init(parsing splash:String) throws
     {
         //  Splash should consist of two complete lines of the form
         //
@@ -32,7 +32,7 @@ extension Driver.Toolchain
         guard lines.count == 3
         else
         {
-            return nil
+            throw Driver.ToolchainError.malformedSplash
         }
 
         let toolchain:[Substring] = lines[0].split(separator: " ")
@@ -44,7 +44,7 @@ extension Driver.Toolchain
                 triple[0] == "Target:"
         else
         {
-            return nil
+            throw Driver.ToolchainError.malformedSplash
         }
 
         if  let triple:Triple = .init(triple[1])
@@ -53,7 +53,41 @@ extension Driver.Toolchain
         }
         else
         {
-            return nil
+            throw Driver.ToolchainError.malformedTriple
+        }
+    }
+}
+extension Driver.Toolchain
+{
+    func platform() throws -> PlatformIdentifier
+    {
+        if      self.triple.os.starts(with: "linux")
+        {
+            return .linux
+        }
+        else if self.triple.os.starts(with: "ios")
+        {
+            return .iOS
+        }
+        else if self.triple.os.starts(with: "macos")
+        {
+            return .macOS
+        }
+        else if self.triple.os.starts(with: "tvos")
+        {
+            return .tvOS
+        }
+        else if self.triple.os.starts(with: "watchos")
+        {
+            return .watchOS
+        }
+        else if self.triple.os.starts(with: "windows")
+        {
+            return .windows
+        }
+        else
+        {
+            throw Driver.ToolchainError.unsupportedTriple(self.triple)
         }
     }
 }
