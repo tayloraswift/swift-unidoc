@@ -37,5 +37,3 @@ $ swift symbolgraph-extract -pretty-print \
     -I .build/debug \
     -module-name <module name>
 ```
-
-

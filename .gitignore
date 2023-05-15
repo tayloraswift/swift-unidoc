@@ -2,6 +2,8 @@
 .unidoc
 .vscode
 
+TestDeployment/data/
+
 *.profdata
 *.profraw
 

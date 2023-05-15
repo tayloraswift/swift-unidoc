@@ -195,6 +195,13 @@ let package:Package = .init(
             ]),
 
 
+        .executableTarget(name: "UnidocServer",
+            dependencies:
+            [
+                .product(name: "MongoDB", package: "swift-mongodb"),
+            ]),
+
+
         .executableTarget(name: "CodelinksTests", dependencies:
             [
                 .target(name: "Codelinks"),
