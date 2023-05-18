@@ -45,10 +45,14 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
            from: "0.1.17")),
 
-        .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
-            from: "1.2.1")),
+        .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
+            from: "2.51.0")),
+        .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
+            from: "2.24.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.2.0")),
+        .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
+            from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
             exact: "508.0.0"),
     ],
@@ -89,6 +93,15 @@ let package:Package = .init(
                 .target(name: "HTML"),
             ]),
 
+        .target(name: "HTTPServer",
+            dependencies:
+            [
+                .target(name: "Media"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "TraceableErrors", package: "swift-grammar"),
+            ]),
+
         .target(name: "LexicalPaths"),
 
         .target(name: "MarkdownABI"),
@@ -116,6 +129,8 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "MarkdownTrees"),
             ]),
+
+        .target(name: "Media"),
 
         .target(name: "PackageGraphs", dependencies:
             [
@@ -198,6 +213,7 @@ let package:Package = .init(
         .executableTarget(name: "UnidocServer",
             dependencies:
             [
+                .target(name: "HTTPServer"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
