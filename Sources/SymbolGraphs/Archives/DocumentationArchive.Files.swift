@@ -1,4 +1,4 @@
-extension SymbolGraph
+extension DocumentationArchive
 {
     @frozen public
     struct Files:Equatable, Sendable

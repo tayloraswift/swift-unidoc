@@ -1,16 +1,13 @@
 import PackageGraphs
 
-extension Driver
+public
+enum ToolchainError:Error, Equatable, Sendable
 {
-    public
-    enum ToolchainError:Error, Equatable, Sendable
-    {
-        case malformedSplash
-        case malformedTriple
-        case unsupportedTriple(Triple)
-    }
+    case malformedSplash
+    case malformedTriple
+    case unsupportedTriple(Triple)
 }
-extension Driver.ToolchainError:CustomStringConvertible
+extension ToolchainError:CustomStringConvertible
 {
     public
     var description:String

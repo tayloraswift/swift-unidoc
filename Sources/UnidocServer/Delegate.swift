@@ -100,9 +100,9 @@ extension Delegate
             if  item.header.name == "documentation-binary"
             {
                 print(item.filename ?? "<unavailable>", item.value.count)
-                let graph:SymbolGraph = try .init(bson: item.value)
-                print(graph.metadata)
-                print(graph.modules)
+                let archive:DocumentationArchive = try .init(bson: item.value)
+                print(archive.metadata)
+                print(archive.modules)
             }
         }
         return .init(location: request.uri,

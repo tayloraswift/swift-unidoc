@@ -26,7 +26,7 @@ extension SymbolGraph
         var nested:[ScalarAddress]
 
         public
-        var article:Article?
+        var article:MarkdownArticle?
 
         @inlinable public
         init(conditions:[GenericConstraint<ScalarAddress>], culture:Int,

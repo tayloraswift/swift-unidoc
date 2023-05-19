@@ -7,29 +7,26 @@ import SymbolGraphs
 import SymbolGraphParts
 import System
 
-extension Driver
-{
-    @frozen public
-    struct Artifacts
-    {
-        public
-        let metadata:SymbolGraph.Metadata
-        let cultures:[Culture]
-        let root:Repository.Root?
-
-        public
-        init(metadata:SymbolGraph.Metadata, cultures:[Culture], root:Repository.Root? = nil)
-        {
-            self.metadata = metadata
-            self.cultures = cultures
-            self.root = root
-        }
-    }
-}
-extension Driver.Artifacts
+@frozen public
+struct DocumentationArtifacts
 {
     public
-    func buildDocumentation() async throws -> SymbolGraph
+    let metadata:DocumentationMetadata
+    let cultures:[Culture]
+    let root:Repository.Root?
+
+    public
+    init(metadata:DocumentationMetadata, cultures:[Culture], root:Repository.Root? = nil)
+    {
+        self.metadata = metadata
+        self.cultures = cultures
+        self.root = root
+    }
+}
+extension DocumentationArtifacts
+{
+    public
+    func build() async throws -> DocumentationArchive
     {
         let (scalars, nominations):([[Compiler.Scalar]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
@@ -43,7 +40,7 @@ extension Driver.Artifacts
 
             var compiler:Compiler = .init(root: self.root)
 
-            for culture:Driver.Culture in self.cultures
+            for culture:Culture in self.cultures
             {
                 let parts:[SymbolGraphPart] = try culture.parts.map
                 {
@@ -79,7 +76,7 @@ extension Driver.Artifacts
 
             print("Linked documentation in \(time.linking)")
 
-            return linker.graph
+            return linker.archive
         }
     }
 }

@@ -16,7 +16,7 @@ struct Outliner
     private(set)
     var references:[Codelink: UInt32]
     private(set)
-    var referents:[SymbolGraph.Article.Referent]
+    var referents:[MarkdownArticle.Referent]
 
     init(resolver:CodelinkResolver, scope:[String])
     {
@@ -46,7 +46,7 @@ extension Outliner
                 return reference
             }
 
-            let referent:SymbolGraph.Article.Referent
+            let referent:MarkdownArticle.Referent
             switch self.resolver.query(ascending: self.scope, link: codelink)
             {
             case nil:
@@ -81,7 +81,7 @@ extension Outliner
 {
     mutating
     func link(
-        comment:Compiler.Documentation.Comment) -> SymbolGraph.Article
+        comment:Compiler.Documentation.Comment) -> MarkdownArticle
     {
         let documentation:MarkdownDocumentation = .init(parsing: comment.text,
             as: SwiftFlavoredMarkdown.self)

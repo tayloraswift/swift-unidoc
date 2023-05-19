@@ -1,6 +1,6 @@
 import PackageGraphs
 
-extension Driver
+extension DocumentationArtifacts
 {
     public
     enum CultureError:Error, Equatable, Sendable
@@ -8,7 +8,7 @@ extension Driver
         case empty(ModuleIdentifier)
     }
 }
-extension Driver.CultureError:CustomStringConvertible
+extension DocumentationArtifacts.CultureError:CustomStringConvertible
 {
     public
     var description:String

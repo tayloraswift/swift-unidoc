@@ -2,35 +2,32 @@ import BSONDecoding
 import BSONEncoding
 import MarkdownABI
 
-extension SymbolGraph
+@frozen public
+struct MarkdownArticle:Equatable, Sendable
 {
-    @frozen public
-    struct Article:Equatable, Sendable
-    {
-        public
-        let referents:[Referent]
-        public
-        let overview:MarkdownBytecode
-        public
-        let details:MarkdownBytecode
-        /// The number of referents used by the overview paragraph alone.
-        public
-        let fold:Int
+    public
+    let referents:[Referent]
+    public
+    let overview:MarkdownBytecode
+    public
+    let details:MarkdownBytecode
+    /// The number of referents used by the overview paragraph alone.
+    public
+    let fold:Int
 
-        @inlinable public
-        init(referents:[Referent],
-            overview:MarkdownBytecode,
-            details:MarkdownBytecode,
-            fold:Int?)
-        {
-            self.referents = referents
-            self.overview = overview
-            self.details = details
-            self.fold = fold ?? self.referents.endIndex
-        }
+    @inlinable public
+    init(referents:[Referent],
+        overview:MarkdownBytecode,
+        details:MarkdownBytecode,
+        fold:Int?)
+    {
+        self.referents = referents
+        self.overview = overview
+        self.details = details
+        self.fold = fold ?? self.referents.endIndex
     }
 }
-extension SymbolGraph.Article
+extension MarkdownArticle
 {
     public
     enum CodingKeys:String
@@ -41,7 +38,7 @@ extension SymbolGraph.Article
         case fold = "F"
     }
 }
-extension SymbolGraph.Article:BSONDocumentEncodable
+extension MarkdownArticle:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -52,7 +49,7 @@ extension SymbolGraph.Article:BSONDocumentEncodable
         bson[.fold] = self.fold == self.referents.endIndex ? nil : self.fold
     }
 }
-extension SymbolGraph.Article:BSONDocumentDecodable
+extension MarkdownArticle:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

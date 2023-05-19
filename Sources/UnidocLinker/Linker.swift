@@ -10,7 +10,7 @@ public
 struct Linker
 {
     public private(set)
-    var graph:SymbolGraph
+    var archive:DocumentationArchive
 
     private
     let nominations:Compiler.Nominations
@@ -25,11 +25,11 @@ struct Linker
 
     public
     init(nominations:Compiler.Nominations,
-        metadata:SymbolGraph.Metadata,
+        metadata:DocumentationMetadata,
         targets:[TargetNode])
     {
-        self.graph = .init(metadata: metadata)
-        self.graph.modules = targets.map(SymbolGraph.Module.init(target:))
+        self.archive = .init(metadata: metadata)
+        self.archive.modules = targets.map(DocumentationArchive.Module.init(target:))
 
         self.nominations = nominations
 
@@ -50,7 +50,7 @@ extension Linker
     private mutating
     func allocate(scalar:Compiler.Scalar) throws -> ScalarAddress
     {
-        let address:ScalarAddress = try self.graph.nodes.push(.init(
+        let address:ScalarAddress = try self.archive.graph.push(.init(
                 flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
                 path: scalar.path),
             id: scalar.id)
@@ -70,7 +70,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:ScalarAddress = try self.graph.nodes.push(nil, id: scalar)
+                let address:ScalarAddress = try self.archive.graph.push(nil, id: scalar)
                 $0 = address
                 return address
 
@@ -92,7 +92,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:FileAddress = try self.graph.files.symbols(id)
+                let address:FileAddress = try self.archive.files.symbols(id)
                 $0 = address
                 return address
 
@@ -113,7 +113,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:ScalarAddress = try self.graph.nodes.symbols(id)
+                let address:ScalarAddress = try self.archive.graph.symbols(id)
                 $0 = address
                 return address
 
@@ -180,7 +180,7 @@ extension Linker
         {
             let feature:ScalarAddress = try self.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
-                self.graph.nodes[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
+                self.archive.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
@@ -206,7 +206,7 @@ extension Linker
         try scalars.enumerated().map
         {
             //  TODO: allocate module
-            let module:ModuleIdentifier = self.graph.modules[$0.0].id
+            let module:ModuleIdentifier = self.archive.modules[$0.0].id
             return try $0.1.map
             {
                 let address:ScalarAddress = try self.allocate(scalar: $0)
@@ -237,7 +237,7 @@ extension Linker
         }
         return try zip(addresses, extensions).map
         {
-            let culture:ModuleIdentifier = self.graph.modules[$0.1.signature.culture].id
+            let culture:ModuleIdentifier = self.archive.modules[$0.1.signature.culture].id
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[ScalarAddress] = try self.addresses(
                 of: $0.1.conformances.sorted())
@@ -249,7 +249,7 @@ extension Linker
             let nested:[ScalarAddress] = try self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.graph.nodes[allocated: $0.0].push(.init(
+            let index:Int = self.archive.graph[allocated: $0.0].push(.init(
                 conditions: try $0.1.conditions.map
                 {
                     try $0.map
@@ -294,7 +294,7 @@ extension Linker
             {
                 try self.intern($0)
             }
-            let article:SymbolGraph.Article? = scalar.documentation.map
+            let article:MarkdownArticle? = scalar.documentation.map
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: $0.scope)
                 return outliner.link(comment: $0.comment)
@@ -309,7 +309,7 @@ extension Linker
 
                 $0?.location = location
                 $0?.article = article
-            } (&self.graph.nodes[allocated: address].scalar)
+            } (&self.archive.graph[allocated: address].scalar)
         }
     }
     public mutating
@@ -344,7 +344,7 @@ extension Linker
             if  let comment
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: `extension`.path)
-                self.graph.nodes[allocated: address].extensions[index].article =
+                self.archive.graph[allocated: address].extensions[index].article =
                     outliner.link(comment: comment)
             }
         }
