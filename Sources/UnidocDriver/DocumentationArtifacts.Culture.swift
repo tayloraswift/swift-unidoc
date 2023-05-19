@@ -1,7 +1,7 @@
 import PackageGraphs
 import System
 
-extension Driver
+extension DocumentationArtifacts
 {
     @frozen public
     struct Culture
@@ -19,7 +19,7 @@ extension Driver
         }
     }
 }
-extension Driver.Culture:Identifiable
+extension DocumentationArtifacts.Culture:Identifiable
 {
     @inlinable public
     var id:ModuleIdentifier
@@ -27,14 +27,14 @@ extension Driver.Culture:Identifiable
         self.node.id
     }
 }
-extension Driver.Culture
+extension DocumentationArtifacts.Culture
 {
     @inlinable public
     init(parts:[FilePath], node:TargetNode) throws
     {
         if  parts.isEmpty
         {
-            throw Driver.CultureError.empty(node.id)
+            throw DocumentationArtifacts.CultureError.empty(node.id)
         }
         else
         {

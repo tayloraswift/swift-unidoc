@@ -1,69 +1,76 @@
-import BSONDecoding
-import BSONEncoding
+import Symbols
 
 @frozen public
 struct SymbolGraph:Equatable, Sendable
 {
     public
-    let metadata:Metadata
+    var symbols:SymbolTable<ScalarAddress>
 
-    public
-    var modules:[Module]
+    @usableFromInline internal
+    var nodes:[Node]
 
-    public
-    var files:Files
-    public
-    var nodes:Nodes
-
-    public
-    init(metadata:Metadata)
+    @inlinable internal
+    init(symbols:SymbolTable<ScalarAddress> = .init(),
+        nodes:[Node] = [])
     {
-        self.metadata = metadata
-        self.modules = []
-        self.files = .init()
-        self.nodes = .init()
+        self.symbols = symbols
+        self.nodes = nodes
     }
 }
 extension SymbolGraph
 {
-    public
-    enum CodingKeys:String
+    @inlinable public mutating
+    func push(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) throws -> ScalarAddress
     {
-        case metadata
-        case modules
-        case files_symbols
-        case nodes_symbols
-        case nodes_values
+        self.nodes.append(.init(scalar: scalar))
+        return try self.symbols(id)
     }
 }
-extension SymbolGraph:BSONDocumentEncodable
+extension SymbolGraph
 {
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    @_semantics("array.check_subscript")
+    @inlinable public
+    func contains(address:ScalarAddress) -> Bool
     {
-        bson[.metadata] = self.metadata
-        bson[.modules] = self.modules
-        bson[.files_symbols] = self.files.symbols
-        bson[.nodes_symbols] = self.nodes.symbols
-        bson[.nodes_values] = self.nodes.values
+        self.nodes.indices ~= .init(address.value)
+    }
+    @inlinable public
+    subscript(address:ScalarAddress) -> SymbolGraph.Node?
+    {
+        self.contains(address: address) ? self[allocated: address] : nil
+    }
+    /// Accesses the node at the specified address. This subscript traps if
+    /// the address has not been allocated.
+    @_semantics("array.subscript")
+    @inlinable public
+    subscript(allocated address:ScalarAddress) -> SymbolGraph.Node
+    {
+        _read
+        {
+            yield  self.nodes[.init(address.value)]
+        }
+        _modify
+        {
+            yield &self.nodes[.init(address.value)]
+        }
     }
 }
-extension SymbolGraph:BSONDocumentDecodable
+extension SymbolGraph:Sequence
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    func withContiguousStorageIfAvailable<Success>(
+        _ body:(UnsafeBufferPointer<SymbolGraph.Node>) throws -> Success) rethrows -> Success?
     {
-        self.init(metadata: try bson[.metadata].decode())
-
-        self.modules = try bson[.modules].decode()
-        self.files = .init(symbols: try bson[.files_symbols].decode())
-        self.nodes = .init(symbols: try bson[.nodes_symbols].decode(),
-            values: try bson[.nodes_values].decode())
+        try self.nodes.withContiguousStorageIfAvailable(body)
     }
-
-    public
-    init(bson:ArraySlice<UInt8>) throws
+    @inlinable public
+    func makeIterator() -> IndexingIterator<[SymbolGraph.Node]>
     {
-        try self.init(bson: BSON.DocumentView<ArraySlice<UInt8>>.init(slice: bson))
+        self.nodes.makeIterator()
+    }
+    @inlinable public
+    var underestimatedCount:Int
+    {
+        self.nodes.count
     }
 }

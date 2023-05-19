@@ -9,15 +9,21 @@ enum Unidoc
     public static
     func main() async throws
     {
-        let workspace:Driver.Workspace = try await .create(at: ".unidoc")
-        let checkout:Driver.Checkout = try await workspace.checkout(
+        let toolchain:Toolchain = try await .detect()
+
+        print("Note: using toolchain version \(toolchain.version?.description ?? "<unstable>")")
+        print("Note: using toolchain triple '\(toolchain.triple)'")
+
+        let workspace:Workspace = try await .create(at: ".unidoc")
+        let checkout:RepositoryCheckout = try await workspace.checkout(
             url: "https://github.com/apple/swift-syntax.git",
             at: "508.0.0")
 
-        let artifacts:Driver.Artifacts = try await checkout.buildPackage()
-        let graph:SymbolGraph = try await artifacts.buildDocumentation()
+        let artifacts:DocumentationArtifacts = try await toolchain.generateArtifactsForPackage(
+            in: checkout)
+        let archive:DocumentationArchive = try await artifacts.build()
 
-        let bson:BSON.Document = .init(encoding: graph)
+        let bson:BSON.Document = .init(encoding: archive)
 
         print("Built documentation (\(bson.bytes.count >> 10) KB)")
 

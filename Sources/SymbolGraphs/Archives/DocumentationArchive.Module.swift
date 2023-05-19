@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import PackageGraphs
 
-extension SymbolGraph
+extension DocumentationArchive
 {
     @frozen public
     struct Module:Equatable, Sendable
@@ -13,7 +13,7 @@ extension SymbolGraph
 
         /// This module’s binary markdown documentation, if it has any.
         public
-        var article:Article?
+        var article:MarkdownArticle?
 
         @inlinable public
         init(target:TargetNode)
@@ -23,7 +23,7 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.Module:Identifiable
+extension DocumentationArchive.Module:Identifiable
 {
     @inlinable public
     var id:ModuleIdentifier
@@ -31,7 +31,7 @@ extension SymbolGraph.Module:Identifiable
         self.target.id
     }
 }
-extension SymbolGraph.Module
+extension DocumentationArchive.Module
 {
     @frozen public
     enum CodingKeys:String
@@ -40,7 +40,7 @@ extension SymbolGraph.Module
         case target = "T"
     }
 }
-extension SymbolGraph.Module:BSONDocumentEncodable
+extension DocumentationArchive.Module:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -49,7 +49,7 @@ extension SymbolGraph.Module:BSONDocumentEncodable
         bson[.article] = self.article
     }
 }
-extension SymbolGraph.Module:BSONDocumentDecodable
+extension DocumentationArchive.Module:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

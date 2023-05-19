@@ -12,9 +12,9 @@ enum Main:AsyncTests
     {
         // #if !DEBUG
         if  let tests:TestGroup = tests / "standard-library",
-            let graph:SymbolGraph = (await tests.do
+            let archive:DocumentationArchive = (await tests.do
             {
-                let artifacts:Driver.Artifacts = .init(
+                let artifacts:DocumentationArtifacts = .init(
                     metadata: .swift(triple: .init("x86_64", "unknown", "linux", "gnu"),
                         ref: .version(.v(5, 8, 0))),
                     cultures:
@@ -23,20 +23,20 @@ enum Main:AsyncTests
                             parts: ["TestModules/Symbolgraphs/Swift.symbols.json"],
                             node: .init(name: "Swift")),
                     ])
-                return try await artifacts.buildDocumentation()
+                return try await artifacts.build()
             })
         {
-            let bson:BSON.Document = .init(encoding: graph)
+            let bson:BSON.Document = .init(encoding: archive)
 
             if  let tests:TestGroup = tests / "roundtripping"
             {
                 tests.do
                 {
                     //  Check that we can round-trip the symbolgraphs.
-                    let decoded:SymbolGraph = try .init(bson: .init(bson))
+                    let decoded:DocumentationArchive = try .init(bson: .init(bson))
                     //tests.expect(decoded.metadata ==? graph.metadata)
-                    tests.expect(decoded.files ==? graph.files)
-                    tests.expect(decoded.nodes ==? graph.nodes)
+                    tests.expect(decoded.files ==? archive.files)
+                    tests.expect(decoded.graph ==? archive.graph)
                 }
             }
 

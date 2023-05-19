@@ -3,55 +3,52 @@ import BSONEncoding
 import PackageGraphs
 import SemanticVersions
 
-extension SymbolGraph
+public
+struct DocumentationMetadata:Equatable, Sendable
 {
+    /// The package this symbolgraph is for.
     public
-    struct Metadata:Equatable, Sendable
+    let package:PackageIdentifier
+    public
+    let triple:Triple
+
+    public
+    let format:SemanticVersion
+
+    public
+    let revision:Repository.Revision?
+    public
+    let ref:SemanticRef?
+
+    public
+    let requirements:[PlatformRequirement]
+    public
+    let dependencies:[Dependency]
+    public
+    let products:[ProductNode]
+
+    public
+    init(package:PackageIdentifier, triple:Triple,
+        format:SemanticVersion = .v(0, 1, 0),
+        revision:Repository.Revision? = nil,
+        ref:SemanticRef? = nil,
+        requirements:[PlatformRequirement] = [],
+        dependencies:[Dependency] = [],
+        products:[ProductNode] = [])
     {
-        /// The package this symbolgraph is for.
-        public
-        let package:PackageIdentifier
-        public
-        let triple:Triple
+        self.package = package
+        self.triple = triple
+        self.format = format
 
-        public
-        let format:SemanticVersion
+        self.revision = revision
+        self.ref = ref
 
-        public
-        let revision:Repository.Revision?
-        public
-        let ref:SemanticRef?
-
-        public
-        let requirements:[PlatformRequirement]
-        public
-        let dependencies:[Dependency]
-        public
-        let products:[ProductNode]
-
-        public
-        init(package:PackageIdentifier, triple:Triple,
-            format:SemanticVersion = .v(0, 1, 0),
-            revision:Repository.Revision? = nil,
-            ref:SemanticRef? = nil,
-            requirements:[PlatformRequirement] = [],
-            dependencies:[Dependency] = [],
-            products:[ProductNode] = [])
-        {
-            self.package = package
-            self.triple = triple
-            self.format = format
-
-            self.revision = revision
-            self.ref = ref
-
-            self.requirements = requirements
-            self.dependencies = dependencies
-            self.products = products
-        }
+        self.requirements = requirements
+        self.dependencies = dependencies
+        self.products = products
     }
 }
-extension SymbolGraph.Metadata
+extension DocumentationMetadata
 {
     public static
     func swift(triple:Triple, ref:SemanticRef? = nil) -> Self
@@ -59,7 +56,7 @@ extension SymbolGraph.Metadata
         .init(package: .swift, triple: triple, ref: ref)
     }
 }
-extension SymbolGraph.Metadata
+extension DocumentationMetadata
 {
     @frozen public
     enum CodingKeys:String
@@ -74,7 +71,7 @@ extension SymbolGraph.Metadata
         case products
     }
 }
-extension SymbolGraph.Metadata:BSONDocumentEncodable
+extension DocumentationMetadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -89,7 +86,7 @@ extension SymbolGraph.Metadata:BSONDocumentEncodable
         bson[.products] = self.products
     }
 }
-extension SymbolGraph.Metadata:BSONDocumentDecodable
+extension DocumentationMetadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
