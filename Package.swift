@@ -221,6 +221,7 @@ let package:Package = .init(
             [
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
+                .target(name: "SymbolGraphs"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 

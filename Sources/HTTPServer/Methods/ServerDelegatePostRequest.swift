@@ -7,7 +7,7 @@ protocol ServerDelegatePostRequest:Sendable
     init?(_ uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        body:[ByteBuffer],
+        body:[UInt8],
         with promise:() -> EventLoopPromise<ServerResource>)
 }
 extension ServerDelegatePostRequest where Self == Never
@@ -16,7 +16,7 @@ extension ServerDelegatePostRequest where Self == Never
     init?(_ uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        body:[ByteBuffer],
+        body:[UInt8],
         with _:() -> EventLoopPromise<ServerResource>)
     {
         nil

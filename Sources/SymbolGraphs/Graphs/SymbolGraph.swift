@@ -60,4 +60,10 @@ extension SymbolGraph:BSONDocumentDecodable
         self.nodes = .init(symbols: try bson[.nodes_symbols].decode(),
             values: try bson[.nodes_values].decode())
     }
+
+    public
+    init(bson:ArraySlice<UInt8>) throws
+    {
+        try self.init(bson: BSON.DocumentView<ArraySlice<UInt8>>.init(slice: bson))
+    }
 }

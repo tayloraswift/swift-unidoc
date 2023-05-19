@@ -7,7 +7,7 @@ class ServerInterfaceHandler<Authority, Delegate>
     where Authority:ServerAuthority, Delegate:ServerDelegate
 {
     private
-    var request:(head:HTTPRequestHead, stream:[ByteBuffer])?,
+    var request:(head:HTTPRequestHead, stream:[UInt8])?,
         responding:Bool,
         receiving:Bool
     private
@@ -81,7 +81,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                 }
 
             case .POST:
-                self.request = (head, [])
+                self.request = (head, .init())
 
             case _:
                 self.send(message: .init(status: .methodNotAllowed), context: context)
@@ -91,7 +91,12 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
             if case (let head, var body)? = self.request
             {
                 self.request = nil
-                body.append(buffer)
+                //  is this slower than accumulating into another ByteBuffer, and then
+                //  doing an explicit copy into a `[UInt8]`?
+                //
+                //  alternatively, can consumers adopt the neutral ABI provided by
+                //  ``ByteBufferView.withUnsafeReadableBytesWithStorageManagement(_:)``?
+                body.append(contentsOf: buffer.readableBytesView)
                 self.request = (head, body)
             }
 
