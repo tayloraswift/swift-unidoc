@@ -1,8 +1,10 @@
+import HTTPServer
 import MongoDB
+import Multiparts
 import NIOCore
 import NIOPosix
 import NIOHTTP1
-import HTTPServer
+import SymbolGraphs
 
 final
 actor Delegate
@@ -79,10 +81,7 @@ extension Delegate
                     <body>
                     <form action="/upload" method="post" enctype="multipart/form-data">
                     <p><input type="text" name="text1" value="text default"></p>
-                    <p><input type="text" name="text2" value="a&#x03C9;b"></p>
-                    <p><input type="file" name="file1"></p>
-                    <p><input type="file" name="file2"></p>
-                    <p><input type="file" name="file3"></p>
+                    <p><input type="file" name="documentation-binary"></p>
                     <p><button type="submit">Submit</button></p>
                     </form>
                     </body>
@@ -96,6 +95,16 @@ extension Delegate
     private
     func respond(to request:PostRequest) async throws -> ServerResource
     {
+        for item:MultipartForm.Item in request.form
+        {
+            if  item.header.name == "documentation-binary"
+            {
+                print(item.filename ?? "<unavailable>", item.value.count)
+                let graph:SymbolGraph = try .init(bson: item.value)
+                print(graph.metadata)
+                print(graph.modules)
+            }
+        }
         return .init(location: request.uri,
                 response: .content(.init(.text("success!"),
                     type: .text(.plain, charset: .utf8))),
