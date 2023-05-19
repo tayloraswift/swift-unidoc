@@ -132,6 +132,12 @@ let package:Package = .init(
 
         .target(name: "Media"),
 
+        .target(name: "Multiparts", dependencies:
+            [
+                .target(name: "Media"),
+                .product(name: "Grammar", package: "swift-grammar"),
+            ]),
+
         .target(name: "PackageGraphs", dependencies:
             [
                 .target(name: "SemanticVersions"),
@@ -214,6 +220,7 @@ let package:Package = .init(
             dependencies:
             [
                 .target(name: "HTTPServer"),
+                .target(name: "Multiparts"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 

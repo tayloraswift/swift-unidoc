@@ -1,4 +1,4 @@
-extension MediaContent
+extension ServerResource.Content
 {
     @frozen public
     enum Payload:Equatable, Sendable

@@ -1,15 +1,13 @@
 @frozen public
 enum MediaType:Equatable, Hashable, Sendable
 {
-    case multipart  (MultipartType, boundary:String)
-
-    case application(MediaSubtype, charset:MediaEncoding? = nil)
-    case audio      (MediaSubtype, charset:MediaEncoding? = nil)
-    case font       (MediaSubtype, charset:MediaEncoding? = nil)
-    case image      (MediaSubtype, charset:MediaEncoding? = nil)
-    case model      (MediaSubtype, charset:MediaEncoding? = nil)
-    case text       (MediaSubtype, charset:MediaEncoding? = nil)
-    case video      (MediaSubtype, charset:MediaEncoding? = nil)
+    case application(MediaSubtype, charset:Charset? = nil)
+    case audio      (MediaSubtype, charset:Charset? = nil)
+    case font       (MediaSubtype, charset:Charset? = nil)
+    case image      (MediaSubtype, charset:Charset? = nil)
+    case model      (MediaSubtype, charset:Charset? = nil)
+    case text       (MediaSubtype, charset:Charset? = nil)
+    case video      (MediaSubtype, charset:Charset? = nil)
 }
 extension MediaType:CustomStringConvertible
 {
@@ -18,9 +16,6 @@ extension MediaType:CustomStringConvertible
     {
         switch self
         {
-        case .multipart  (let subtype, boundary: let boundary):
-            return "multipart/\(subtype); boundary=\(boundary)"
-
         case .application(let subtype, charset: nil):
             return "application/\(subtype)"
 
@@ -62,7 +57,6 @@ extension MediaType:CustomStringConvertible
 
         case .video      (let subtype, charset: let encoding?):
             return "video/\(subtype); charset=\(encoding)"
-
         }
     }
 }

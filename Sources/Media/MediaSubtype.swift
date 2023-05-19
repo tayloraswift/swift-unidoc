@@ -40,6 +40,12 @@ extension MediaSubtype:LosslessStringConvertible
     @inlinable public
     init?(_ description:String)
     {
+        self.init(lowercased: description.lowercased())
+    }
+
+    @inlinable public
+    init?(lowercased description:String)
+    {
         if  let value:Self = .init(rawValue: description)
         {
             self = value

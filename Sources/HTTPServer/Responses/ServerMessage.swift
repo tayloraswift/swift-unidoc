@@ -21,7 +21,7 @@ extension ServerMessage
 {
     init(location:__shared String,
         canonical:__shared String,
-        redirect:__shared ServerRedirect)
+        redirect:__shared ServerResource.Redirect)
     {
         var headers:HTTPHeaders = .init()
 
@@ -48,7 +48,7 @@ extension ServerMessage
             using: allocator)
     }
 
-    init(content:__shared MediaContent,
+    init(content:__shared ServerResource.Content,
         results:__shared ServerResource.Results,
         using allocator:__shared ByteBufferAllocator,
         etag:__shared SHA256? = nil)

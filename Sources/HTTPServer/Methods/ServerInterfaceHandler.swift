@@ -63,7 +63,6 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
             switch head.method
             {
             case .GET:
-                print("GET", head.uri)
                 self.request = nil
 
                 let request:Delegate.GetRequest? = .init(head.uri,
@@ -146,7 +145,7 @@ extension ServerInterfaceHandler
                             redirect: permanence),
                         context: context)
 
-                case .media(let content):
+                case .content(let content):
                     self.send(message: .init(content: content,
                             results: resource.results,
                             using: context.channel.allocator,
