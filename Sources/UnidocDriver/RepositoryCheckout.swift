@@ -45,7 +45,7 @@ extension RepositoryCheckout
         triple:Triple,
         pretty:Bool = false) async throws -> [DocumentationArtifacts.Culture]
     {
-        try await self.workspace.dumpSymbols(targets,
+        try await self.workspace.dumpSymbols(targets: targets,
             include: self.root / ".build" / "debug",
             triple: triple,
             pretty: pretty)

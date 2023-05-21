@@ -13,11 +13,6 @@ struct PackageIdentifier:Equatable, Hashable, Sendable
 extension PackageIdentifier
 {
     @inlinable public static
-    var corelibs:Self
-    {
-        .init(canonical: "corelibs")
-    }
-    @inlinable public static
     var swift:Self
     {
         .init(canonical: "swift")
@@ -59,10 +54,6 @@ extension PackageIdentifier:LosslessStringConvertible
                 "swift-stdlib",
                 "stdlib":
             self = .swift
-
-        case    "swift-core-libraries",
-                "corelibs":
-            self = .corelibs
 
         case let name:
             self.init(canonical: name)

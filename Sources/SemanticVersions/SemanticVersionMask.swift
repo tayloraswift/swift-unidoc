@@ -54,6 +54,11 @@ extension SemanticVersionMask:LosslessStringConvertible
     @inlinable public
     init?(_ string:String)
     {
+        self.init(string[...])
+    }
+    @inlinable public
+    init?(_ string:Substring)
+    {
         let components:[Substring] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
 

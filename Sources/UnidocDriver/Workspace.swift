@@ -26,11 +26,20 @@ extension Workspace
     public
     func clean() async throws
     {
-        try await SystemProcess.init(command: "rm", "\(self.path.appending("*"))")()
+        try await SystemProcess.init(command: "rm", "-f", "\(self.path.appending("*"))")()
     }
 }
 extension Workspace
 {
+    /// Creates a nested workspace directory within this one.
+    public
+    func create(_ name:String, clean:Bool = false) async throws -> Self
+    {
+        let workspace:Self = try await .create(at: self.path / name)
+        if  clean { try await workspace.clean() }
+        return workspace
+    }
+
     public
     func checkout(url:String,
         at ref:String,
@@ -53,8 +62,7 @@ extension Workspace
                 "clone", url, package.description)()
         }
 
-        let workspace:Self = try await .create(at: self.path / "\(package).doc")
-        if  clean { try await workspace.clean() }
+        let workspace:Self = try await self.create("\(package).doc", clean: clean)
 
         try await SystemProcess.init(command: "git", "-C", root.string, "checkout", ref)()
 
@@ -95,8 +103,8 @@ extension Workspace
 {
     /// Dumps the symbols for the given targets, using this workspace as the
     /// output directory.
-    func dumpSymbols(_ targets:[TargetNode],
-        include:FilePath? = nil,
+    func dumpSymbols(targets:[TargetNode],
+        include buildDirectory:FilePath? = nil,
         triple:Triple,
         pretty:Bool = false) async throws -> [DocumentationArtifacts.Culture]
     {
@@ -120,14 +128,34 @@ extension Workspace
             {
                 arguments.append("-pretty-print")
             }
-            if  let include:FilePath
+            if  let buildDirectory:FilePath
             {
                 arguments.append("-I")
-                arguments.append("\(include)")
+                arguments.append("\(buildDirectory)")
             }
 
             try await SystemProcess.init(command: "swift", arguments: arguments)()
         }
+
+        let blacklisted:Set<ModuleIdentifier> =
+        [
+            "CDispatch",                    // too low-level
+            "CFURLSessionInterface",        // too low-level
+            "CFXMLInterface",               // too low-level
+            "CoreFoundation",               // too low-level
+            "Glibc",                        // linux-gnu specific
+            "SwiftGlibc",                   // linux-gnu specific
+            "SwiftOnoneSupport",            // contains no symbols
+            "SwiftOverlayShims",            // too low-level
+            "SwiftShims",                   // contains no symbols
+            "XCTest",                       // site policy
+            "_Builtin_intrinsics",          // contains only one symbol, free(_:)
+            "_Builtin_stddef_max_align_t",  // contains only two symbols
+            "_InternalStaticMirror",        // unbuildable
+            "_InternalSwiftScan",           // unbuildable
+            "_SwiftConcurrencyShims",       // contains only two symbols
+            "std",                          // unbuildable
+        ]
 
         var parts:[ModuleIdentifier: [FilePath.Component]] = [:]
         for part:Result<FilePath.Component, any Error> in self.path.directory
@@ -140,9 +168,21 @@ extension Workspace
             //  file name is correct and indicates what is contained within the
             //  file.
             if  names.count == 3,
-                names[1 ... 2] == ["symbols", "json"],
-                let culture:Substring = names[0].split(separator: "@", maxSplits: 1).first
+                names[1 ... 2] == ["symbols", "json"]
             {
+                let components:[Substring] = names[0].split(separator: "@", maxSplits: 1)
+                if  components.count == 2,
+                    blacklisted.contains(.init(String.init(components[1])))
+                {
+                    continue
+                }
+                guard let culture:Substring = components.first
+                else
+                {
+                    continue
+                }
+
+                print("Note: including artifact '\(part)'")
                 parts[.init(String.init(culture)), default: []].append(part)
             }
         }

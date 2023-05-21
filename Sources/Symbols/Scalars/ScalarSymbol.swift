@@ -4,9 +4,9 @@ struct ScalarSymbol:Sendable
 {
     /// The symbol’s string, without an interior colon.
     public
-    let rawValue:String 
-    
-    @inlinable internal 
+    let rawValue:String
+
+    @inlinable internal
     init(unchecked rawValue:String)
     {
         self.rawValue = rawValue
@@ -14,7 +14,7 @@ struct ScalarSymbol:Sendable
 }
 extension ScalarSymbol:RawRepresentable
 {
-    @inlinable public 
+    @inlinable public
     init?(rawValue:String)
     {
         if !rawValue.isEmpty
@@ -31,7 +31,7 @@ extension ScalarSymbol
 {
     /// Creates a symbol identifier from the given language prefix and
     /// mangled suffix. This initializer does not validate the suffix.
-    @inlinable public 
+    @inlinable public
     init(_ language:Unicode.Scalar, ascii suffix:some StringProtocol)
     {
         self.init(unchecked: "\(language)\(suffix)")
@@ -40,7 +40,7 @@ extension ScalarSymbol
     /// mangled suffix, returning nil if the suffix contains characters
     /// that are not allowed to appear in a symbol identifier.
     ///
-    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, and `@`.
+    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '.', '-', and `@`.
     @inlinable public
     init?(_ language:Unicode.Scalar, _ suffix:some StringProtocol)
     {
@@ -48,16 +48,16 @@ extension ScalarSymbol
         {
             switch ascii
             {
-            //    '_'   'A' ... 'Z'    'a' ... 'z'    '0' ... '9',   '@'
-            case 0x5f, 0x41 ... 0x5a, 0x61 ... 0x7a, 0x30 ... 0x39, 0x40:
+            //    '-'   '.'   '_'   'A' ... 'Z'    'a' ... 'z'    '0' ... '9',   '@'
+            case 0x2d, 0x2e, 0x5f, 0x41 ... 0x5a, 0x61 ... 0x7a, 0x30 ... 0x39, 0x40:
                 continue
-            default: 
+            default:
                 return nil
             }
         }
         self.init(language, ascii: suffix)
     }
-    
+
     @inlinable public
     var language:Unicode.Scalar
     {
@@ -74,15 +74,15 @@ extension ScalarSymbol
 extension ScalarSymbol:Equatable
 {
     @inlinable public static
-    func == (lhs:Self, rhs:Self) -> Bool 
+    func == (lhs:Self, rhs:Self) -> Bool
     {
         lhs.rawValue.utf8.elementsEqual(rhs.rawValue.utf8)
     }
 }
-extension ScalarSymbol:Hashable 
+extension ScalarSymbol:Hashable
 {
-    @inlinable public 
-    func hash(into hasher:inout Hasher) 
+    @inlinable public
+    func hash(into hasher:inout Hasher)
     {
         for byte:UInt8 in self.rawValue.utf8
         {
@@ -93,7 +93,7 @@ extension ScalarSymbol:Hashable
 extension ScalarSymbol:Comparable
 {
     @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool 
+    func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.rawValue.utf8.lexicographicallyPrecedes(rhs.rawValue.utf8)
     }

@@ -23,7 +23,7 @@ extension Repository.Pin.State:CustomStringConvertible
     /// A *human-readable* description of this semantic ref name. This isn’t the
     /// same as its actual name (which is lost on parsing), and cannot be used to
     /// checkout a snapshot of the associated repository.
-    @inlinable public
+    public
     var description:String
     {
         switch self.ref

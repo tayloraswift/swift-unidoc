@@ -42,10 +42,8 @@ extension DocumentationArtifacts
 
             for culture:Culture in self.cultures
             {
-                let parts:[SymbolGraphPart] = try culture.parts.map
-                {
-                    try .init(parsing: try $0.read([UInt8].self))
-                }
+                let parts:[SymbolGraphPart] = try culture.load()
+
                 time.compiling += try clock.measure
                 {
                     try compiler.compile(culture: culture.id, parts: parts)
@@ -55,7 +53,12 @@ extension DocumentationArtifacts
             (scalars, nominations) = compiler.scalars.load()
             (extensions) = compiler.extensions.load()
 
-            print("Compiled documentation in \(time.compiling)")
+            print("""
+                Compiled documentation in \(time.compiling) \
+                (\(scalars.count) culture(s), containing \
+                \(scalars.reduce(0) { $0 + $1.count }) declaration(s) and \
+                \(extensions.count) extension(s))
+                """)
         }
         do
         {
