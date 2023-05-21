@@ -182,8 +182,14 @@ extension Workspace
                     continue
                 }
 
-                print("Note: including artifact '\(part)'")
                 parts[.init(String.init(culture)), default: []].append(part)
+            }
+        }
+        for parts:[FilePath.Component] in parts.sorted(by: { $0.key < $1.key }).map(\.value)
+        {
+            for artifact:String in parts.map(\.string).sorted()
+            {
+                print("Note: including artifact '\(artifact)'")
             }
         }
 
