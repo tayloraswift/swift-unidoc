@@ -2,17 +2,17 @@ import SemanticVersions
 
 extension Availability
 {
-    @frozen public 
-    enum PlatformDomain:String, CaseIterable, Hashable, Sendable 
+    @frozen public
+    enum PlatformDomain:String, CaseIterable, Hashable, Sendable
     {
-        case iOS 
+        case iOS
         case macOS
         case macCatalyst
         case tvOS
         case watchOS
         case windows    = "Windows"
         case openBSD    = "OpenBSD"
-        
+
         case iOSApplicationExtension
         case macOSApplicationExtension
         case macCatalystApplicationExtension
@@ -25,7 +25,7 @@ extension Availability.PlatformDomain:AvailabilityDomain
     public
     typealias Bound = SemanticVersionMask
     public
-    typealias Deprecation = Availability.Range<SemanticVersionMask>
+    typealias Deprecation = Availability.AnyRange
     public
-    typealias Unavailability = Availability.Range<Never>
+    typealias Unavailability = Availability.EternalRange
 }

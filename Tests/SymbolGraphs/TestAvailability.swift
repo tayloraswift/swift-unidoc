@@ -11,7 +11,7 @@ func TestAvailability(_ tests:TestGroup?)
             deprecated: .unconditionally,
             renamed: "Renamed",
             message: "Message"))
-        
+
         tests.do
         {
             let bson:BSON.Document = .init(encoding: availability)
@@ -26,11 +26,11 @@ func TestAvailability(_ tests:TestGroup?)
         let availability:Availability = .init(agnostic:
             [
                 .swift: .init(
-                    deprecated: .minor(5, 8),
+                    deprecated: .since(.minor(5, 8)),
                     renamed: "Renamed",
                     message: "Message"),
             ])
-        
+
         tests.do
         {
             let bson:BSON.Document = .init(encoding: availability)
@@ -51,7 +51,7 @@ func TestAvailability(_ tests:TestGroup?)
                     renamed: "Renamed",
                     message: "Message"),
             ])
-        
+
         tests.do
         {
             let bson:BSON.Document = .init(encoding: availability)

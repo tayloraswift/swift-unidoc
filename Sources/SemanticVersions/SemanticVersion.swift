@@ -24,20 +24,46 @@ extension SemanticVersion
     {
         self.init(major: major, minor: minor, patch: patch)
     }
+
+    @inlinable public
+    init(padding mask:SemanticVersionMask, with fill:UInt16 = 0)
+    {
+        switch mask
+        {
+        case .major(let major):
+            self = .v(major, fill, fill)
+        case .minor(let major, let minor):
+            self = .v(major, minor, fill)
+        case .patch(let major, let minor, let patch):
+            self = .v(major, minor, patch)
+        }
+    }
 }
 extension SemanticVersion
 {
     /// Attempts to parse a semantic version from a tag string, such as `1.2.3` or `v1.2.3`.
+    /// If the tag string has at least one, but fewer than three component, the semantic
+    /// version is zero-extended.
     @inlinable public
     init?(tag:String)
     {
-        if  case "v"? = tag.first
+        self.init(tag: tag[...])
+    }
+    @inlinable public
+    init?(tag:Substring)
+    {
+        if      case "v"? = tag.first,
+                let components:SemanticVersionMask = .init(tag.dropFirst())
         {
-            self.init(tag.dropFirst())
+            self.init(padding: components)
+        }
+        else if let components:SemanticVersionMask = .init(tag)
+        {
+            self.init(padding: components)
         }
         else
         {
-            self.init(tag)
+            return nil
         }
     }
 

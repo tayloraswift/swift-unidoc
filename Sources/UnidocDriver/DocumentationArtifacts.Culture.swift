@@ -1,4 +1,5 @@
 import PackageGraphs
+import SymbolGraphParts
 import System
 
 extension DocumentationArtifacts
@@ -39,6 +40,23 @@ extension DocumentationArtifacts.Culture
         else
         {
             self.init(nonempty: parts, node: node)
+        }
+    }
+}
+extension DocumentationArtifacts.Culture
+{
+    func load() throws -> [SymbolGraphPart]
+    {
+        try self.parts.map
+        {
+            do
+            {
+                return try .init(parsing: try $0.read([UInt8].self))
+            }
+            catch let error
+            {
+                throw DocumentationArtifactError.init(underlying: error, path: $0)
+            }
         }
     }
 }

@@ -43,25 +43,26 @@ extension Availability:JSONDecodable
                     obsoleted: try json[.obsoleted]?.decode(),
                     renamed: renamed,
                     message: message)
-            
+
             case .platform(let domain):
+                let deprecated:Availability.AnyRange? = try json[.isUnconditionallyDeprecated]?.decode(
+                        as: Bool.self)
+                    {
+                        $0 ? .unconditionally : nil
+                    } ?? json[.deprecated]?.decode(as: Availability.VersionRange.self,
+                        with: Availability.AnyRange.init(_:))
                 self.platforms[domain] = .init(
                     unavailable: try json[.isUnconditionallyUnavailable]?.decode(
                         as: Bool.self)
                     {
                         $0 ? .unconditionally : nil
                     },
-                    deprecated: try json[.isUnconditionallyDeprecated]?.decode(
-                        as: Bool.self)
-                    {
-                        $0 ? .unconditionally : nil
-                    } ?? json[.deprecated]?.decode(as: SemanticVersionMask.self,
-                        with: Availability.Range.since(_:)),
+                    deprecated: deprecated,
                     introduced: try json[.introduced]?.decode(),
                     obsoleted: try json[.obsoleted]?.decode(),
                     renamed: renamed,
                     message: message)
-            
+
             case .universal:
                 self.universal = .init(
                     deprecated: try json[.isUnconditionallyDeprecated]?.decode(

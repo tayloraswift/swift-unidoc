@@ -14,5 +14,5 @@ extension Availability.AgnosticDomain:AvailabilityDomain
     public
     typealias Bound = SemanticVersionMask
     public
-    typealias Deprecation = SemanticVersionMask
+    typealias Deprecation = Availability.VersionRange
 }

@@ -9,7 +9,7 @@ extension DocumentationArchive
         @inlinable internal
         init(symbols:SymbolTable<FileAddress> = .init())
         {
-            self.symbols = .init()
+            self.symbols = symbols
         }
     }
 }

@@ -8,12 +8,12 @@ import System
 struct Toolchain
 {
     public
-    let version:SemanticVersionMask?
+    let version:SemanticRef
     public
     let triple:Triple
 
     @inlinable public
-    init(version:SemanticVersionMask?, triple:Triple)
+    init(version:SemanticRef, triple:Triple)
     {
         self.version = version
         self.triple = triple
@@ -55,7 +55,7 @@ extension Toolchain
         let toolchain:[Substring] = lines[0].split(separator: " ")
         let triple:[Substring] = lines[1].split(separator: " ")
 
-        guard   toolchain.count == 4,
+        guard   toolchain.count >= 4,
                 toolchain[0 ... 1] == ["Swift", "version"],
                 triple.count == 2,
                 triple[0] == "Target:"
@@ -66,7 +66,7 @@ extension Toolchain
 
         if  let triple:Triple = .init(triple[1])
         {
-            self.init(version: .init(String.init(toolchain[2])), triple: triple)
+            self.init(version: .infer(from: toolchain[2]), triple: triple)
         }
         else
         {
@@ -77,13 +77,85 @@ extension Toolchain
 extension Toolchain
 {
     public
-    func generateArtifactsForStandardLibrary() async throws -> DocumentationArtifacts
+    func generateArtifactsForStandardLibrary(
+        in workspace:Workspace,
+        pretty:Bool = false) async throws -> DocumentationArtifacts
     {
-        fatalError("unimplemented")
+        //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
+        let cultures:[DocumentationArtifacts.Culture] = try await workspace.dumpSymbols(
+            targets:
+            [
+                //  0:
+                .init(name: "Swift", type: .binary,
+                    dependencies: .init()),
+                //  1:
+                .init(name: "_Concurrency", type: .binary,
+                    dependencies: .init(modules: [0])),
+                //  2:
+                .init(name: "Distributed", type: .binary,
+                    dependencies: .init(modules: [0, 1])),
+
+                //  3:
+                .init(name: "_Differentiation", type: .binary,
+                    dependencies: .init(modules: [0])),
+
+                //  4:
+                .init(name: "_RegexParser", type: .binary,
+                    dependencies: .init(modules: [0])),
+                //  5:
+                .init(name: "_StringProcessing", type: .binary,
+                    dependencies: .init(modules: [0, 4])),
+                //  6:
+                .init(name: "RegexBuilder", type: .binary,
+                    dependencies: .init(modules: [0, 4, 5])),
+
+                //  7:
+                .init(name: "Cxx", type: .binary,
+                    dependencies: .init(modules: [0])),
+
+                //  8:
+                .init(name: "Dispatch", type: .binary,
+                    dependencies: .init(modules: [0])),
+                //  9:
+                .init(name: "DispatchIntrospection", type: .binary,
+                    dependencies: .init(modules: [0])),
+                // 10:
+                .init(name: "Foundation", type: .binary,
+                    dependencies: .init(modules: [0, 8])),
+                // 11:
+                .init(name: "FoundationNetworking", type: .binary,
+                    dependencies: .init(modules: [0, 8, 10])),
+                // 12:
+                .init(name: "FoundationXML", type: .binary,
+                    dependencies: .init(modules: [0, 8, 10])),
+            ],
+            triple: self.triple,
+            pretty: pretty)
+
+        let products:[ProductNode] =
+        [
+            .init(name: "__stdlib__",
+                type: .library(.automatic),
+                dependencies: .init(modules: [Int].init(0 ... 7))),
+            .init(name: "__corelibs__",
+                type: .library(.automatic),
+                dependencies: .init(modules: [Int].init(cultures.indices))),
+        ]
+
+        let metadata:DocumentationMetadata = .init(package: .swift,
+            triple: self.triple,
+            revision: nil,
+            ref: self.version,
+            requirements: [],
+            dependencies: [],
+            products: products)
+
+        return .init(metadata: metadata, cultures: cultures)
     }
     public
     func generateArtifactsForPackage(
-        in checkout:RepositoryCheckout) async throws -> DocumentationArtifacts
+        in checkout:RepositoryCheckout,
+        pretty:Bool = false) async throws -> DocumentationArtifacts
     {
         print("Building package in: \(checkout.root)")
 
@@ -110,7 +182,8 @@ extension Toolchain
 
         let cultures:[DocumentationArtifacts.Culture] = try await checkout.dumpSymbols(
             targets: package.targets,
-            triple: self.triple)
+            triple: self.triple,
+            pretty: pretty)
 
         //  Index repository dependencies
         var dependencies:[PackageIdentifier: Repository.Requirement] = [:]
