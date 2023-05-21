@@ -40,7 +40,7 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "scalar" / "invalid-characters"
         {
             tests.expect(nil: UnifiedSymbol.init(
-                    "s:s12Identifi-ableP"))
+                    "s:s12Identifi+ableP"))
         }
 
         if  let tests:TestGroup = tests / "compound"
@@ -48,7 +48,7 @@ enum Main:SyncTests
             if  let usr:UnifiedSymbol = tests.expect(value: .init(
                     "s:s12IdentifiablePsRlzCrlE2idSOvp::SYNTHESIZED::s:Sq"))
             {
-                tests.expect(usr ==? 
+                tests.expect(usr ==?
                     .vector(.init(.init("s", ascii: "s12IdentifiablePsRlzCrlE2idSOvp"),
                         self: .init("s", ascii: "Sq"))))
             }
