@@ -6,54 +6,122 @@ import SemanticVersions
 public
 struct DocumentationMetadata:Equatable, Sendable
 {
-    /// The package this symbolgraph is for.
+    /// A package name.
+    /// This is part of a documentation object’s identity.
     public
     let package:PackageIdentifier
+    /// A swift target triple.
+    /// This is part of a documentation object’s identity.
     public
     let triple:Triple
-
-    public
-    let format:SemanticVersion
-
-    public
-    let revision:Repository.Revision?
+    /// A semantic ref, either a semantic version or an unstable identitifer.
+    /// This is part of a documentation object’s identity, if non-nil.
+    /// If this field is nil, other documentation objects will **not** be able
+    /// to link against the relevant documentation.
     public
     let ref:SemanticRef?
 
-    public
-    let requirements:[PlatformRequirement]
+
+    /// All other packages (and their pins) that the relevant package is aware of.
+    /// This list is used to select other documentation objects to link against.
     public
     let dependencies:[Dependency]
+    /// The swift toolchain the relevant documentation was generated with,
+    /// which is used to select a version of the standard library to link
+    /// against. This is nil if the documentation *is* the toolchain
+    /// documentation.
+    public
+    let toolchain:SemanticRef?
+    /// The package products contained within the relevant documentation.
+    /// The products in this list contain references to packages named in
+    /// ``dependencies``. This list is used to filter other documentation objects
+    /// to link against.
     public
     let products:[ProductNode]
 
+
+    /// The platform requirements of the relevant package. This field is
+    /// informative only.
     public
-    init(package:PackageIdentifier, triple:Triple,
-        format:SemanticVersion = .v(0, 1, 0),
-        revision:Repository.Revision? = nil,
-        ref:SemanticRef? = nil,
+    let requirements:[PlatformRequirement]
+    /// The commit hash of the relevant documentation. It is a more specific
+    /// notion of version than ``ref``, but it is used for validation only.
+    public
+    let revision:Repository.Revision?
+
+    public
+    init(package:PackageIdentifier,
+        triple:Triple,
+        ref:SemanticRef?,
+        dependencies:[Dependency],
+        toolchain:SemanticRef?,
+        products:[ProductNode],
         requirements:[PlatformRequirement] = [],
-        dependencies:[Dependency] = [],
-        products:[ProductNode] = [])
+        revision:Repository.Revision? = nil)
     {
         self.package = package
         self.triple = triple
-        self.format = format
-
-        self.revision = revision
         self.ref = ref
 
-        self.requirements = requirements
         self.dependencies = dependencies
+        self.toolchain = toolchain
         self.products = products
+
+        self.requirements = requirements
+        self.revision = revision
     }
 }
 extension DocumentationMetadata
 {
     public static
-    func swift(triple:Triple, ref:SemanticRef? = nil) -> Self
+    func swift(triple:Triple, version:SemanticRef?, products:[ProductNode]) -> Self
     {
-        .init(package: .swift, triple: triple, ref: ref)
+        .init(package: .swift, triple: triple, ref: version,
+            dependencies: [],
+            toolchain: nil,
+            products: products)
+    }
+}
+extension DocumentationMetadata
+{
+    /// Returns the relevant documentation object’s identity string, if it has one.
+    public
+    var id:String?
+    {
+        self.ref.map { self.pin(self.package, $0) }
+    }
+
+    /// Returns all the relevant documentation object’s dependencies’ identity strings,
+    /// including the one for its toolchain dependency.
+    public
+    func pins() -> [String]
+    {
+        var pins:[String] = []
+        if  let ref:SemanticRef = self.toolchain
+        {
+            pins.reserveCapacity(self.dependencies.count + 1)
+            pins.append(self.pin(.swift, ref))
+        }
+        for dependency:Dependency in self.dependencies
+        {
+            pins.append(self.pin(dependency.package, dependency.ref))
+        }
+        return pins
+    }
+
+    private
+    func pin(_ package:PackageIdentifier, _ ref:SemanticRef) -> String
+    {
+        switch ref
+        {
+        case .version(let version):
+            //  swift-syntax v5.8.0 x86_64-unknown-linux-gnu
+            return "\(package) v\(version) \(self.triple)"
+
+        case .unstable(let name):
+            //  swift-syntax @5.9-dev x86_64-unknown-linux-gnu
+            return "\(package) @\(name) \(self.triple)"
+        }
     }
 }
 extension DocumentationMetadata
@@ -68,6 +136,7 @@ extension DocumentationMetadata
         case ref
         case requirements
         case dependencies
+        case toolchain
         case products
     }
 }
@@ -78,12 +147,14 @@ extension DocumentationMetadata:BSONDocumentEncodable
     {
         bson[.package] = self.package
         bson[.triple] = self.triple
-        bson[.format] = self.format
-        bson[.revision] = self.revision
         bson[.ref] = self.ref
-        bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
+
         bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
+        bson[.toolchain] = self.toolchain
         bson[.products] = self.products
+
+        bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
+        bson[.revision] = self.revision
     }
 }
 extension DocumentationMetadata:BSONDocumentDecodable
@@ -93,11 +164,11 @@ extension DocumentationMetadata:BSONDocumentDecodable
     {
         self.init(package: try bson[.package].decode(),
             triple: try bson[.triple].decode(),
-            format: try bson[.format].decode(),
-            revision: try bson[.revision]?.decode(),
             ref: try bson[.ref]?.decode(),
-            requirements: try bson[.requirements]?.decode() ?? [],
             dependencies: try bson[.dependencies]?.decode() ?? [],
-            products: try bson[.products].decode())
+            toolchain: try bson[.toolchain]?.decode(),
+            products: try bson[.products].decode(),
+            requirements: try bson[.requirements]?.decode() ?? [],
+            revision: try bson[.revision]?.decode())
     }
 }

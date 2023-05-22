@@ -15,8 +15,8 @@ func TestRoundtripping(_ tests:TestGroup,
     }
     await tests.do
     {
-        let archive:DocumentationArchive = try await artifacts.build()
-        let bson:BSON.Document = .init(encoding: archive)
+        let object:DocumentationObject = try await artifacts.build()
+        let bson:BSON.Document = .init(encoding: object)
 
         print("Built documentation (\(bson.bytes.count >> 10) KB)")
 
@@ -24,12 +24,11 @@ func TestRoundtripping(_ tests:TestGroup,
 
         print("Documentation saved to: \(output)")
 
-        let decoded:DocumentationArchive = try .init(bson: .init(bson))
+        let decoded:DocumentationObject = try .init(buffer: bson.bytes)
 
-        tests.expect(decoded.metadata ==? archive.metadata)
-        tests.expect(decoded.modules ==? archive.modules)
+        tests.expect(decoded.metadata ==? object.metadata)
 
         //  We don’t want to dump the entire archive to the terminal!
-        tests.expect(true: decoded == archive)
+        tests.expect(true: decoded == object)
     }
 }
