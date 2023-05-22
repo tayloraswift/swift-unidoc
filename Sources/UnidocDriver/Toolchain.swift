@@ -142,12 +142,7 @@ extension Toolchain
                 dependencies: .init(modules: [Int].init(cultures.indices))),
         ]
 
-        let metadata:DocumentationMetadata = .init(package: .swift,
-            triple: self.triple,
-            revision: nil,
-            ref: self.version,
-            requirements: [],
-            dependencies: [],
+        let metadata:DocumentationMetadata = .swift(triple: self.triple, version: self.version,
             products: products)
 
         return .init(metadata: metadata, cultures: cultures)
@@ -197,9 +192,7 @@ extension Toolchain
         }
         let metadata:DocumentationMetadata = .init(package: checkout.pin.id,
             triple: self.triple,
-            revision: checkout.pin.revision,
             ref: checkout.pin.ref,
-            requirements: manifest.requirements,
             dependencies: resolutions.pins.map
             {
                 .init(package: $0.id,
@@ -207,7 +200,10 @@ extension Toolchain
                     revision: $0.revision,
                     ref: $0.ref)
             },
-            products: package.products)
+            toolchain: self.version,
+            products: package.products,
+            requirements: manifest.requirements,
+            revision: checkout.pin.revision)
 
         //  Note: the manifest root is the root we want.
         //  (`self.root` may be a relative path.)

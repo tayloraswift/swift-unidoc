@@ -26,7 +26,7 @@ struct DocumentationArtifacts
 extension DocumentationArtifacts
 {
     public
-    func build() async throws -> DocumentationArchive
+    func build() async throws -> DocumentationObject
     {
         let (scalars, nominations):([[Compiler.Scalar]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
@@ -63,7 +63,6 @@ extension DocumentationArtifacts
         do
         {
             var linker:Linker = .init(nominations: nominations,
-                metadata: self.metadata,
                 targets: self.cultures.map(\.node))
 
             time.linking = try clock.measure
@@ -79,7 +78,7 @@ extension DocumentationArtifacts
 
             print("Linked documentation in \(time.linking)")
 
-            return linker.archive
+            return .init(metadata: metadata, archive: linker.archive)
         }
     }
 }

@@ -42,9 +42,9 @@ enum Unidoc
         }
 
 
-        let archive:DocumentationArchive = try await artifacts.build()
+        let object:DocumentationObject = try await artifacts.build()
 
-        let bson:BSON.Document = .init(encoding: archive)
+        let bson:BSON.Document = .init(encoding: object)
 
         print("Built documentation (\(bson.bytes.count >> 10) KB)")
 
