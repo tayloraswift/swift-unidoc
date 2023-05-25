@@ -1,4 +1,4 @@
-import PackageGraphs
+import ModuleGraphs
 
 @available(*, deprecated, renamed: "PackageNode")
 public

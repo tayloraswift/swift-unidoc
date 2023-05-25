@@ -1,5 +1,5 @@
 import JSONDecoding
-import PackageGraphs
+import ModuleGraphs
 
 @frozen public
 struct PackageResolutions:Equatable, Sendable

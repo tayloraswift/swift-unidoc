@@ -1,6 +1,6 @@
 import SymbolGraphParts
 import Symbols
-import PackageGraphs
+import ModuleGraphs
 
 public
 struct Compiler

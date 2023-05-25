@@ -1,5 +1,5 @@
 import Generics
-import PackageGraphs
+import ModuleGraphs
 import SymbolGraphParts
 import Symbols
 import System

@@ -1,7 +1,7 @@
 import CodelinkResolution
 import Declarations
 import Generics
-import PackageGraphs
+import ModuleGraphs
 import Symbols
 import SymbolGraphs
 import UnidocCompiler

@@ -25,7 +25,7 @@ let package:Package = .init(
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
-        .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
+        .library(name: "ModuleGraphs", targets: ["ModuleGraphs"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
@@ -138,14 +138,14 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "PackageGraphs", dependencies:
+        .target(name: "ModuleGraphs", dependencies:
             [
                 .target(name: "SemanticVersions"),
             ]),
 
         .target(name: "PackageMetadata", dependencies:
             [
-                .target(name: "PackageGraphs"),
+                .target(name: "ModuleGraphs"),
 
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -159,7 +159,7 @@ let package:Package = .init(
             [
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
-                .target(name: "PackageGraphs"),
+                .target(name: "ModuleGraphs"),
                 .target(name: "Symbols"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
@@ -170,7 +170,7 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
-                .target(name: "PackageGraphs"),
+                .target(name: "ModuleGraphs"),
                 .target(name: "Symbols"),
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),

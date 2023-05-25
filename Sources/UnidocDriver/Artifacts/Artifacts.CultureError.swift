@@ -1,4 +1,4 @@
-import PackageGraphs
+import ModuleGraphs
 
 extension Artifacts
 {

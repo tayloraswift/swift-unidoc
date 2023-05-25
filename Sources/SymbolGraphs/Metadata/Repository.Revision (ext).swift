@@ -1,7 +1,7 @@
 
 import BSONDecoding
 import BSONEncoding
-import PackageGraphs
+import ModuleGraphs
 
 extension Repository.Revision:BSONEncodable
 {

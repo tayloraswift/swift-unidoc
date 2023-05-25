@@ -1,5 +1,5 @@
 import JSONDecoding
-import PackageGraphs
+import ModuleGraphs
 import Symbols
 
 extension SymbolDescription

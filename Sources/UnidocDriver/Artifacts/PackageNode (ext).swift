@@ -1,5 +1,5 @@
 import PackageMetadata
-import PackageGraphs
+import ModuleGraphs
 import System
 
 extension PackageNode

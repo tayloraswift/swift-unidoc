@@ -1,4 +1,4 @@
-import PackageGraphs
+import ModuleGraphs
 import Symbols
 import SymbolGraphParts
 
