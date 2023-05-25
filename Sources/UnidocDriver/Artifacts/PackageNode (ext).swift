@@ -2,7 +2,7 @@ import PackageMetadata
 import PackageGraphs
 import System
 
-extension PackageMap
+extension PackageNode
 {
     func scan() throws -> [Artifacts.Sources]
     {

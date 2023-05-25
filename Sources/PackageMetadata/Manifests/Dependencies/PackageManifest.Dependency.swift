@@ -1,4 +1,5 @@
 import JSONDecoding
+import PackageGraphs
 
 extension PackageManifest
 {
@@ -7,6 +8,18 @@ extension PackageManifest
     {
         case filesystem(Filesystem)
         case resolvable(Resolvable)
+    }
+}
+extension PackageManifest.Dependency:Identifiable
+{
+    @inlinable public
+    var id:PackageIdentifier
+    {
+        switch self
+        {
+        case .filesystem(let dependency): return dependency.id
+        case .resolvable(let dependency): return dependency.id
+        }
     }
 }
 extension PackageManifest.Dependency:JSONObjectDecodable

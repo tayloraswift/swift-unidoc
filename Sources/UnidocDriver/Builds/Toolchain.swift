@@ -177,7 +177,9 @@ extension Toolchain
         print("Note: using spm tools version \(manifest.format)")
 
         let platform:PlatformIdentifier = try self.platform()
-        let package:PackageMap = try .libraries(from: manifest, platform: platform)
+        let package:PackageNode = try .libraries(as: checkout.pin.id,
+            flattening: manifest,
+            platform: platform)
 
         var include:Artifacts.IncludePaths = .init(root: package.root,
             configuration: configuration)
@@ -188,7 +190,9 @@ extension Toolchain
                 pin: pin)
 
             let manifest:PackageManifest = try await .dump(from: checkout)
-            let package:PackageMap = try .libraries(from: manifest, platform: platform)
+            let package:PackageNode = try .libraries(as: pin.id,
+                flattening: manifest,
+                platform: platform)
 
             include.add(from: try package.scan())
         }
