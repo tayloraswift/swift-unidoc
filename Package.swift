@@ -294,6 +294,13 @@ let package:Package = .init(
             ],
             path: "Tests/SymbolGraphParts"),
 
+        .executableTarget(name: "SystemTests", dependencies:
+            [
+                .target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ],
+            path: "Tests/System"),
+
         .executableTarget(name: "UnidocCompilerTests", dependencies:
             [
                 .target(name: "UnidocCompiler"),

@@ -153,22 +153,4 @@ extension FilePath
     {
         .init(self)
     }
-
-    @inlinable public
-    func walk(from current:Self = .init(root: nil), _ body:(Self) throws -> ()) throws
-    {
-        let absolute:Self = current.isAbsolute ? current : self.appending(current.components)
-        //  minimize the amount of file descriptors we have open
-        var explore:[Self] = []
-        for next:Result<Component, any Error> in absolute.directory
-        {
-            let current:Self = current.appending(try next.get())
-            try body(current)
-            explore.append(current)
-        }
-        for current:Self in explore
-        {
-            try self.walk(from: current, body)
-        }
-    }
 }

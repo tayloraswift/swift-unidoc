@@ -1,21 +1,21 @@
 import PackageGraphs
 
-extension PackageManifest
+extension PackageMap
 {
     /// An index of package targets.
     struct Targets:Sendable
     {
         private
-        let index:[String: Target]
+        let index:[String: PackageManifest.Target]
 
         private
-        init(index:[String: Target])
+        init(index:[String: PackageManifest.Target])
         {
             self.index = index
         }
     }
 }
-extension PackageManifest.Targets
+extension PackageMap.Targets
 {
     init(indexing targets:[PackageManifest.Target]) throws
     {
@@ -37,14 +37,14 @@ extension PackageManifest.Targets
         }
     }
 }
-extension PackageManifest.Targets
+extension PackageMap.Targets
 {
     /// Returns *all* targets in the index that are included, directly or indirectly,
     /// by the given target.
     func included(by target:PackageManifest.Target,
         on platform:PlatformIdentifier) throws -> Set<String>
     {
-        var explorer:PackageManifest.TargetExplorer = .init(targets: self)
+        var explorer:PackageMap.TargetExplorer = .init(targets: self)
             explorer.explore(target: target)
         let included:[String: PackageManifest.Target] = try explorer.conquer
         {
@@ -60,7 +60,7 @@ extension PackageManifest.Targets
     func included(by product:PackageManifest.Product,
         on platform:PlatformIdentifier) throws -> Set<String>
     {
-        var explorer:PackageManifest.TargetExplorer = .init(targets: self)
+        var explorer:PackageMap.TargetExplorer = .init(targets: self)
         for name:String in product.targets
         {
             try explorer.explore(target: name)
@@ -81,7 +81,7 @@ extension PackageManifest.Targets
     func included(by products:[PackageManifest.Product],
         on platform:PlatformIdentifier) throws -> [PackageManifest.Target]
     {
-        var explorer:PackageManifest.TargetExplorer = .init(targets: self)
+        var explorer:PackageMap.TargetExplorer = .init(targets: self)
 
         for product:PackageManifest.Product in products
         {

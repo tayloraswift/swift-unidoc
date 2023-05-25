@@ -28,15 +28,19 @@ extension FilePath.DirectoryIterator.Stream
         switch self
         {
         case .unopened(let path):
-            let pointer:FilePath.DirectoryPointer = try path.withPlatformString
+            let pointer:FilePath.DirectoryPointer? = try path.withPlatformString
             {
                 if  let pointer:FilePath.DirectoryPointer = opendir($0)
                 {
                     return pointer
                 }
-                else
+                switch Errno.init(rawValue: errno)
                 {
-                    throw Errno.init(rawValue: errno)
+                case .notDirectory:
+                    return nil
+
+                case let error:
+                    throw error
                 }
             }
             self = .opened(pointer)

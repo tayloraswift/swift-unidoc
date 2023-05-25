@@ -68,7 +68,10 @@ extension Compiler.ScalarObject
             throw Compiler.NestingError.phylum(self.value.phylum)
         }
 
-        if  let scope:UnifiedSymbol = self.scope
+        //  Allowed to restate the exact same nesting relationship multiple times.
+        //  This sometimes happens when compiling C modules.
+        if  let scope:UnifiedSymbol = self.scope,
+                scope != nesting.scope
         {
             throw Compiler.NestingError.conflict(with: scope)
         }

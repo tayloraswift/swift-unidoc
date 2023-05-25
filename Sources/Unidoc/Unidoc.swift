@@ -16,7 +16,7 @@ enum Unidoc
 
         let workspace:Workspace = try await .create(at: ".unidoc")
 
-        let artifacts:DocumentationArtifacts
+        let documentation:DocumentationObject
         let output:FilePath
 
         switch CommandLine.arguments.dropFirst().first
@@ -25,7 +25,8 @@ enum Unidoc
             let directory:Workspace = try await workspace.create("swift.doc",
                 clean: true)
 
-            artifacts = try await toolchain.generateArtifactsForStandardLibrary(in: directory)
+            documentation = try await toolchain.generateDocumentationForStandardLibrary(
+                in: directory)
             output = workspace.path / "swift@\(toolchain.version.name).bsda"
 
         case nil:
@@ -34,17 +35,15 @@ enum Unidoc
                 at: "508.0.0",
                 clean: true)
 
-            artifacts = try await toolchain.generateArtifactsForPackage(in: checkout)
+            documentation = try await toolchain.generateDocumentationForPackage(
+                in: checkout)
             output = workspace.path / "\(checkout.pin.id)@\(checkout.pin.revision).bsda"
 
         case let command?:
             fatalError("unrecognized command '\(command)'")
         }
 
-
-        let object:DocumentationObject = try await artifacts.build()
-
-        let bson:BSON.Document = .init(encoding: object)
+        let bson:BSON.Document = .init(encoding: documentation)
 
         print("Built documentation (\(bson.bytes.count >> 10) KB)")
 

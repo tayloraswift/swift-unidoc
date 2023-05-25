@@ -88,9 +88,21 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
             }
 
         case .body(let buffer):
-            if case (let head, var body)? = self.request
+            guard case (let head, var body)? = self.request
+            else
             {
-                self.request = nil
+                break
+            }
+
+            self.request = nil
+
+            //  16 MB size limit
+            if  1 << 24 < body.count + buffer.readableBytes
+            {
+                self.send(message: .init(status: .payloadTooLarge), context: context)
+            }
+            else
+            {
                 //  is this slower than accumulating into another ByteBuffer, and then
                 //  doing an explicit copy into a `[UInt8]`?
                 //

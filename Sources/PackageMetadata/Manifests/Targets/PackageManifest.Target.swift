@@ -12,6 +12,9 @@ extension PackageManifest
         let type:TargetType
         public
         let dependencies:Dependencies
+        /// Paths of excluded files, relative to the target source directory.
+        public
+        let exclude:[String]
         /// The path to the target’s source directory, relative to the
         /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
         public
@@ -20,11 +23,13 @@ extension PackageManifest
         @inlinable public
         init(name:String, type:TargetType = .regular,
             dependencies:Dependencies = .init(),
+            exclude:[String] = [],
             path:String? = nil)
         {
             self.name = name
             self.type = type
             self.dependencies = dependencies
+            self.exclude = exclude
             self.path = path
         }
     }
@@ -35,9 +40,10 @@ extension PackageManifest.Target:JSONObjectDecodable
     enum CodingKeys:String
     {
         case name
-        case dependencies
-        case path
         case type
+        case dependencies
+        case exclude
+        case path
     }
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
@@ -46,6 +52,7 @@ extension PackageManifest.Target:JSONObjectDecodable
             name: try json[.name].decode(),
             type: try json[.type].decode(),
             dependencies: try json[.dependencies].decode(),
+            exclude: try json[.exclude].decode(),
             path: try json[.path]?.decode())
     }
 }

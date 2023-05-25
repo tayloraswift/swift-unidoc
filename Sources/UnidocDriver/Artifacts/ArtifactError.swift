@@ -2,7 +2,7 @@ import TraceableErrors
 import System
 
 public
-struct DocumentationArtifactError:Error, Sendable
+struct ArtifactError:Error, Sendable
 {
     public
     let underlying:any Error
@@ -16,7 +16,7 @@ struct DocumentationArtifactError:Error, Sendable
         self.path = path
     }
 }
-extension DocumentationArtifactError:Equatable
+extension ArtifactError:Equatable
 {
     public static
     func == (lhs:Self, rhs:Self) -> Bool
@@ -24,7 +24,7 @@ extension DocumentationArtifactError:Equatable
         lhs.path == rhs.path && lhs.underlying == rhs.underlying
     }
 }
-extension DocumentationArtifactError:TraceableError
+extension ArtifactError:TraceableError
 {
     public
     var notes:[String]

@@ -1,32 +1,12 @@
-import JSONDecoding
-import PackageMetadata
-import PackageGraphs
-import UnidocCompiler
-import UnidocLinker
 import SymbolGraphs
 import SymbolGraphParts
-import System
+import UnidocCompiler
+import UnidocLinker
 
-@frozen public
-struct DocumentationArtifacts
+extension DocumentationArchive
 {
-    public
-    let metadata:DocumentationMetadata
-    let cultures:[Culture]
-    let root:Repository.Root?
-
-    public
-    init(metadata:DocumentationMetadata, cultures:[Culture], root:Repository.Root? = nil)
-    {
-        self.metadata = metadata
-        self.cultures = cultures
-        self.root = root
-    }
-}
-extension DocumentationArtifacts
-{
-    public
-    func build() async throws -> DocumentationObject
+    public static
+    func build(from artifacts:Artifacts) async throws -> Self
     {
         let (scalars, nominations):([[Compiler.Scalar]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
@@ -38,10 +18,17 @@ extension DocumentationArtifacts
         {
             time.compiling = .zero
 
-            var compiler:Compiler = .init(root: self.root)
+            var compiler:Compiler = .init(root: artifacts.root)
 
-            for culture:Culture in self.cultures
+            for culture:Artifacts.Culture in artifacts.cultures
             {
+                for artifact:String in
+                    culture.articles.map(\.string).sorted() +
+                    culture.parts.map(\.string).sorted()
+                {
+                    print("Loading artifact: \(artifact)")
+                }
+
                 let parts:[SymbolGraphPart] = try culture.load()
 
                 time.compiling += try clock.measure
@@ -63,7 +50,7 @@ extension DocumentationArtifacts
         do
         {
             var linker:Linker = .init(nominations: nominations,
-                targets: self.cultures.map(\.node))
+                targets: artifacts.cultures.map(\.node))
 
             time.linking = try clock.measure
             {
@@ -78,7 +65,7 @@ extension DocumentationArtifacts
 
             print("Linked documentation in \(time.linking)")
 
-            return .init(metadata: metadata, archive: linker.archive)
+            return linker.archive
         }
     }
 }

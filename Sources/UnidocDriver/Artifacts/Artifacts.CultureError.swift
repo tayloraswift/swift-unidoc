@@ -1,6 +1,6 @@
 import PackageGraphs
 
-extension DocumentationArtifacts
+extension Artifacts
 {
     public
     enum CultureError:Error, Equatable, Sendable
@@ -8,7 +8,7 @@ extension DocumentationArtifacts
         case empty(ModuleIdentifier)
     }
 }
-extension DocumentationArtifacts.CultureError:CustomStringConvertible
+extension Artifacts.CultureError:CustomStringConvertible
 {
     public
     var description:String

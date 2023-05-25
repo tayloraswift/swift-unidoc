@@ -12,8 +12,8 @@ actor Delegate
     private nonisolated
     let requests:(in:AsyncStream<AnyRequest>.Continuation, out:AsyncStream<AnyRequest>)
 
-    private
-    var mongodb:Mongo.SessionPool
+    private nonisolated
+    let mongodb:Mongo.SessionPool
 
     init(mongodb:Mongo.SessionPool)
     {
@@ -96,14 +96,9 @@ extension Delegate
     func respond(to request:PostRequest) async throws -> ServerResource
     {
         for item:MultipartForm.Item in request.form
+            where item.header.name == "documentation-binary"
         {
-            if  item.header.name == "documentation-binary"
-            {
-                print(item.filename ?? "<unavailable>", item.value.count)
-                let object:DocumentationObject = try .init(buffer: item.value)
-                print(object.metadata)
-                print(object.archive.modules)
-            }
+            try await self.ingest(uploaded: try .init(buffer: item.value))
         }
         return .init(location: request.uri,
                 response: .content(.init(.text("success!"),
@@ -112,6 +107,39 @@ extension Delegate
     }
 }
 
+public
+enum _DocumentationObjectIdentificationError:Error, Sendable
+{
+    case unidentified
+}
+
+import SemanticVersions
+
+extension Delegate
+{
+    private
+    func ingest(uploaded object:DocumentationObject) async throws
+    {
+        guard let id:String = object.metadata.id
+        else
+        {
+            throw _DocumentationObjectIdentificationError.unidentified
+        }
+
+        if  let toolchain:SemanticRef = object.metadata.toolchain
+        {
+            //  swift package.
+            for dependency:DocumentationMetadata.Dependency in object.metadata.dependencies
+            {
+                print(dependency)
+            }
+        }
+        else
+        {
+            //  swift standard library.
+        }
+    }
+}
 extension Delegate:ServerDelegate
 {
     nonisolated

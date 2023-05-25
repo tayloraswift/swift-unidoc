@@ -1,6 +1,6 @@
 import PackageGraphs
 
-extension PackageManifest
+extension PackageMap
 {
     /// Context for a breadth-first traversal of a target graph.
     struct TargetExplorer
@@ -25,7 +25,7 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.TargetExplorer
+extension PackageMap.TargetExplorer
 {
     /// Enqueues the given target if it has not already been visited.
     mutating
