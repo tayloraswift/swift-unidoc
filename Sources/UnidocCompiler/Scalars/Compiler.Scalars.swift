@@ -1,5 +1,5 @@
 import LexicalPaths
-import PackageGraphs
+import ModuleGraphs
 import Symbols
 import SymbolGraphParts
 

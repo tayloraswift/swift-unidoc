@@ -1,6 +1,6 @@
 import JSONDecoding
 import JSONEncoding
-import PackageGraphs
+import ModuleGraphs
 
 extension TargetType:JSONDecodable, JSONEncodable
 {

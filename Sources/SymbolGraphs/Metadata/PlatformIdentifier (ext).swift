@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import PackageGraphs
+import ModuleGraphs
 
 extension PlatformIdentifier:BSONStringDecodable, BSONStringEncodable
 {

@@ -1,6 +1,6 @@
 import JSON
 import PackageMetadata
-import PackageGraphs
+import ModuleGraphs
 import System
 import Testing
 
