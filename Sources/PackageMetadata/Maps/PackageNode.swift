@@ -1,8 +1,25 @@
 import PackageGraphs
 
+@available(*, deprecated, renamed: "PackageNode")
+public
+typealias PackageMap = PackageNode
+
+/// A package node is a flattened representation of a package manifest.
+/// Creating one involves assigning an identity to a package manifest
+/// and flattening all intra-package target dependency chains.
 @frozen public
-struct PackageMap
+struct PackageNode:Identifiable
 {
+    public
+    let id:PackageIdentifier
+    public
+    let predecessors:[PackageManifest.Dependency]
+    /// Nodes representing the products included from the relevant package.
+    /// Each node contains all targets included in the associated product,
+    /// either through direct inclusion, or inclusion through target
+    /// dependencies. It also includes upstream products depended upon by
+    /// any of those targets. (But it does not include any products that
+    /// those products themselves may depend on.)
     public
     let products:[ProductNode]
     public
@@ -14,25 +31,32 @@ struct PackageMap
     let root:Repository.Root
 
     private
-    init(products:[ProductNode],
+    init(id:PackageIdentifier,
+        predecessors:[PackageManifest.Dependency],
+        products:[ProductNode],
         targets:[TargetNode],
         exclude:[[String]],
         root:Repository.Root)
     {
+        self.id = id
+        self.predecessors = predecessors
         self.products = products
         self.targets = targets
         self.exclude = exclude
         self.root = root
     }
 }
-extension PackageMap
+extension PackageNode:DigraphNode
+{
+}
+extension PackageNode
 {
     public static
-    func libraries(
-        from manifest:__shared PackageManifest,
+    func libraries(as id:__owned PackageIdentifier,
+        flattening manifest:__shared PackageManifest,
         platform:__shared PlatformIdentifier) throws -> Self
     {
-        try .init(from: manifest, platform: platform)
+        try .init(as: id, flattening: manifest, platform: platform)
         {
             switch $0
             {
@@ -42,17 +66,22 @@ extension PackageMap
         }
     }
     public
-    init(from manifest:__shared PackageManifest,
+    init(as id:__owned PackageIdentifier,
+        flattening manifest:__shared PackageManifest,
         platform:__shared PlatformIdentifier,
-        where predicate:(ProductType) throws -> Bool) throws
+        filter predicate:(ProductType) throws -> Bool) throws
     {
-        try self.init(platform: platform,
+        try self.init(id: id,
+            predecessors: manifest.dependencies,
+            platform: platform,
             products: try manifest.products.filter { try predicate($0.type) },
             targets: try .init(indexing: manifest.targets),
             root: manifest.root)
     }
     private
-    init(platform:__shared PlatformIdentifier,
+    init(id:__owned PackageIdentifier,
+        predecessors:__owned [PackageManifest.Dependency],
+        platform:__shared PlatformIdentifier,
         products:__shared [PackageManifest.Product],
         targets:__shared Targets,
         root:Repository.Root) throws
@@ -60,7 +89,8 @@ extension PackageMap
         let ordering:[PackageManifest.Target] = try targets.included(by: products,
             on: platform)
 
-        self.init(
+        self.init(id: id,
+            predecessors: predecessors,
             products: try products.map
             {
                 let constituents:Set<String> = try targets.included(by: $0, on: platform)

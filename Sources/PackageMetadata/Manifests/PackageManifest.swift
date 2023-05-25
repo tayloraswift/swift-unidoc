@@ -43,56 +43,6 @@ struct PackageManifest:Equatable, Sendable
 }
 extension PackageManifest
 {
-    static
-    func order(topologically targets:[String: Target],
-        consumers:inout [String: [Target]]) -> [Target]?
-    {
-        var sources:[Target] = []
-        var dependencies:[String: Set<String>] = targets.compactMapValues
-        {
-            if $0.dependencies.targets.isEmpty
-            {
-                sources.append($0)
-                return nil
-            }
-            else
-            {
-                return .init($0.dependencies.targets.lazy.map(\.id))
-            }
-        }
-
-        //  Note: polarity reversed
-        sources.sort { $1.name < $0.name }
-
-        var ordered:[Target] = [] ; ordered.reserveCapacity(targets.count)
-
-        while let source:Target = sources.popLast()
-        {
-            ordered.append(source)
-
-            guard let next:[Target] = consumers.removeValue(forKey: source.name)
-            else
-            {
-                continue
-            }
-            for next:Target in next
-            {
-                {
-                    if  case _? = $0?.remove(source.name),
-                        case true? = $0?.isEmpty
-                    {
-                        sources.append(next)
-                        $0 = nil
-                    }
-                } (&dependencies[next.name])
-            }
-        }
-
-        return dependencies.isEmpty && consumers.isEmpty ? ordered : nil
-    }
-}
-extension PackageManifest
-{
     public
     init(parsing json:String) throws
     {

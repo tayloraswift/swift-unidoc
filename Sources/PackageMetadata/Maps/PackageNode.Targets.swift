@@ -1,6 +1,6 @@
 import PackageGraphs
 
-extension PackageMap
+extension PackageNode
 {
     /// An index of package targets.
     struct Targets:Sendable
@@ -15,7 +15,7 @@ extension PackageMap
         }
     }
 }
-extension PackageMap.Targets
+extension PackageNode.Targets
 {
     init(indexing targets:[PackageManifest.Target]) throws
     {
@@ -37,14 +37,14 @@ extension PackageMap.Targets
         }
     }
 }
-extension PackageMap.Targets
+extension PackageNode.Targets
 {
     /// Returns *all* targets in the index that are included, directly or indirectly,
     /// by the given target.
     func included(by target:PackageManifest.Target,
         on platform:PlatformIdentifier) throws -> Set<String>
     {
-        var explorer:PackageMap.TargetExplorer = .init(targets: self)
+        var explorer:PackageNode.TargetExplorer = .init(targets: self)
             explorer.explore(target: target)
         let included:[String: PackageManifest.Target] = try explorer.conquer
         {
@@ -60,7 +60,7 @@ extension PackageMap.Targets
     func included(by product:PackageManifest.Product,
         on platform:PlatformIdentifier) throws -> Set<String>
     {
-        var explorer:PackageMap.TargetExplorer = .init(targets: self)
+        var explorer:PackageNode.TargetExplorer = .init(targets: self)
         for name:String in product.targets
         {
             try explorer.explore(target: name)
@@ -81,7 +81,7 @@ extension PackageMap.Targets
     func included(by products:[PackageManifest.Product],
         on platform:PlatformIdentifier) throws -> [PackageManifest.Target]
     {
-        var explorer:PackageMap.TargetExplorer = .init(targets: self)
+        var explorer:PackageNode.TargetExplorer = .init(targets: self)
 
         for product:PackageManifest.Product in products
         {
@@ -101,7 +101,7 @@ extension PackageMap.Targets
                 try $0.explore(target: name)
             }
         }
-        if  let targets:[PackageManifest.Target] = PackageManifest.order(
+        if  let targets:[PackageManifest.Target] = PackageManifest.Target.order(
                 topologically: included,
                 consumers: &consumers)
         {

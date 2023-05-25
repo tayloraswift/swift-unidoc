@@ -34,6 +34,18 @@ extension PackageManifest
         }
     }
 }
+extension PackageManifest.Target:Identifiable
+{
+    /// Same as ``name``.
+    @inlinable public
+    var id:String { self.name }
+}
+extension PackageManifest.Target:DigraphNode
+{
+    /// Same as `dependencies.targets`.
+    @inlinable public
+    var predecessors:[Dependency<String>] { self.dependencies.targets }
+}
 extension PackageManifest.Target:JSONObjectDecodable
 {
     public

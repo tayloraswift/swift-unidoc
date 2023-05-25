@@ -33,7 +33,7 @@ extension Artifacts
     /// Dumps the symbols for the given package, using this workspace as the
     /// output directory.
     public static
-    func dump(from package:PackageMap,
+    func dump(from package:PackageNode,
         include:IncludePaths = [],
         output:Workspace,
         triple:Triple,
