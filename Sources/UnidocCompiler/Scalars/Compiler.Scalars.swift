@@ -110,8 +110,20 @@ extension Compiler.Scalars
         {
             switch $0
             {
-            case       nil, .nominated?: $0 = entry
-            case .included?, .excluded?: throw Compiler.DuplicateSymbolError.scalar(resolution)
+            case       nil, .nominated?:
+                $0 = entry
+
+            case .included?, .excluded?:
+                //  if both symbols are C symbols, they are allowed to duplicate
+                if  resolution.language == "c" ||
+                    resolution.suffix.starts(with: "So")
+                {
+                    return
+                }
+                else
+                {
+                    throw Compiler.DuplicateSymbolError.scalar(resolution)
+                }
             }
         } (&self.entries[resolution])
     }

@@ -8,7 +8,7 @@ struct TargetNode:Equatable, Hashable, Sendable
     public
     let dependencies:ModuleDependencies
     /// The path to the module’s source directory, relative to the
-    /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
+    /// package root. If nil, the path is just [`"Sources/\(self.name)"`]().
     public
     let location:String?
 

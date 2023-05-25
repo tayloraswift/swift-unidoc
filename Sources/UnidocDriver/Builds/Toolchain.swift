@@ -77,12 +77,11 @@ extension Toolchain
 extension Toolchain
 {
     public
-    func generateArtifactsForStandardLibrary(
-        in workspace:Workspace,
-        pretty:Bool = false) async throws -> DocumentationArtifacts
+    func generateDocumentationForStandardLibrary(in workspace:Workspace,
+        pretty:Bool = false) async throws -> DocumentationObject
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let cultures:[DocumentationArtifacts.Culture] = try await workspace.dumpSymbols(
+        let artifacts:Artifacts = try await .dump(
             targets:
             [
                 //  0:
@@ -129,6 +128,7 @@ extension Toolchain
                 .init(name: "FoundationXML", type: .binary,
                     dependencies: .init(modules: [0, 8, 10])),
             ],
+            output: workspace,
             triple: self.triple,
             pretty: pretty)
 
@@ -139,44 +139,63 @@ extension Toolchain
                 dependencies: .init(modules: [Int].init(0 ... 7))),
             .init(name: "__corelibs__",
                 type: .library(.automatic),
-                dependencies: .init(modules: [Int].init(cultures.indices))),
+                dependencies: .init(modules: [Int].init(artifacts.cultures.indices))),
         ]
 
         let metadata:DocumentationMetadata = .swift(triple: self.triple, version: self.version,
             products: products)
 
-        return .init(metadata: metadata, cultures: cultures)
+        return .init(metadata: metadata, archive: try await .build(from: artifacts))
     }
     public
-    func generateArtifactsForPackage(
-        in checkout:RepositoryCheckout,
-        pretty:Bool = false) async throws -> DocumentationArtifacts
+    func generateDocumentationForPackage(in checkout:RepositoryCheckout,
+        configuration:BuildConfiguration = .debug,
+        pretty:Bool = false) async throws -> DocumentationObject
     {
         print("Building package in: \(checkout.root)")
 
-        let build:SystemProcess = try .init(command: "swift",
-            arguments: ["build", "--package-path", checkout.root.string])
+        let build:SystemProcess = try .init(command: "swift", arguments:
+            [
+                "build",
+                "--package-path", checkout.root.string,
+                "-c", "\(configuration)"
+            ])
         try await build()
 
-        let resolutions:PackageResolutions = try .init(
-            parsing: try (checkout.root / "Package.resolved").read())
+        let resolutions:PackageResolutions?
+        do
+        {
+            resolutions = try .init(parsing: try (checkout.root / "Package.resolved").read())
+        }
+        catch is FileError
+        {
+            resolutions = nil
+        }
 
-        let manifest:PackageManifest = try await checkout.dumpManifest()
+        let manifest:PackageManifest = try await .dump(from: checkout)
 
         print("Note: using spm tools version \(manifest.format)")
 
-        let package:(products:[ProductNode], targets:[TargetNode]) = try manifest.graph(
-            platform: try self.platform())
+        let platform:PlatformIdentifier = try self.platform()
+        let package:PackageMap = try .libraries(from: manifest, platform: platform)
+
+        var include:Artifacts.IncludePaths = .init(root: package.root,
+            configuration: configuration)
+        for pin:Repository.Pin in resolutions?.pins ?? []
         {
-            switch $0
-            {
-            case .library:  return true
-            case _:         return false
-            }
+            let checkout:RepositoryCheckout = .init(workspace: checkout.workspace,
+                root: checkout.root / ".build" / "checkouts" / "\(pin.id)",
+                pin: pin)
+
+            let manifest:PackageManifest = try await .dump(from: checkout)
+            let package:PackageMap = try .libraries(from: manifest, platform: platform)
+
+            include.add(from: try package.scan())
         }
 
-        let cultures:[DocumentationArtifacts.Culture] = try await checkout.dumpSymbols(
-            targets: package.targets,
+        let artifacts:Artifacts = try await .dump(from: package,
+            include: include,
+            output: checkout.workspace,
             triple: self.triple,
             pretty: pretty)
 
@@ -193,23 +212,23 @@ extension Toolchain
         let metadata:DocumentationMetadata = .init(package: checkout.pin.id,
             triple: self.triple,
             ref: checkout.pin.ref,
-            dependencies: resolutions.pins.map
+            dependencies: resolutions?.pins.map
             {
                 .init(package: $0.id,
                     requirement: dependencies[$0.id],
                     revision: $0.revision,
                     ref: $0.ref)
-            },
+            } ?? [],
             toolchain: self.version,
             products: package.products,
             requirements: manifest.requirements,
             revision: checkout.pin.revision)
 
-        //  Note: the manifest root is the root we want.
-        //  (`self.root` may be a relative path.)
-        return .init(metadata: metadata, cultures: cultures, root: manifest.root)
+        return .init(metadata: metadata, archive: try await .build(from: artifacts))
     }
-
+}
+extension Toolchain
+{
     private
     func platform() throws -> PlatformIdentifier
     {

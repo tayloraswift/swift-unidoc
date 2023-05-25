@@ -43,58 +43,6 @@ struct PackageManifest:Equatable, Sendable
 }
 extension PackageManifest
 {
-    public
-    func graph(platform:PlatformIdentifier,
-        where predicate:(ProductType) throws -> Bool) throws ->
-    (
-        products:[ProductNode],
-        targets:[TargetNode]
-    )
-    {
-        let products:[Product] = try self.products.filter { try predicate($0.type) }
-        let targets:Targets = try .init(indexing: self.targets)
-
-        let targetOrdering:[Target] = try targets.included(by: products, on: platform)
-        let targetNodes:[TargetNode] = try targetOrdering.map
-        {
-            let constituents:Set<String> = try targets.included(by: $0, on: platform)
-
-            var (modules, dependencies):([Int], Set<ProductIdentifier>) = ([], [])
-            for (index, constituent):(Int, Target) in targetOrdering.enumerated()
-                where constituents.contains(constituent.name)
-            {
-                dependencies.formUnion(constituent.dependencies.products(on: platform))
-                //  don’t include the target’s own index
-                if  constituent.name != $0.name
-                {
-                    modules.append(index)
-                }
-            }
-
-            return .init(name: $0.name, type: $0.type, dependencies: .init(
-                    products: dependencies.sorted(),
-                    modules: modules),
-                location: $0.path)
-        }
-        let productNodes:[ProductNode] = try products.map
-        {
-            let constituents:Set<String> = try targets.included(by: $0, on: platform)
-
-            var (modules, dependencies):([Int], Set<ProductIdentifier>) = ([], [])
-            for (index, constituent):(Int, Target) in targetOrdering.enumerated()
-                where constituents.contains(constituent.name)
-            {
-                dependencies.formUnion(constituent.dependencies.products(on: platform))
-                modules.append(index)
-            }
-            return .init(name: $0.name, type: $0.type, dependencies: .init(
-                products: dependencies.sorted(),
-                modules: modules))
-        }
-
-        return (productNodes, targetNodes)
-    }
-
     static
     func order(topologically targets:[String: Target],
         consumers:inout [String: [Target]]) -> [Target]?
