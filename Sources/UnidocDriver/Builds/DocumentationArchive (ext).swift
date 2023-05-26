@@ -50,7 +50,7 @@ extension DocumentationArchive
         do
         {
             var linker:Linker = .init(nominations: nominations,
-                targets: artifacts.cultures.map(\.node))
+                modules: artifacts.cultures.map(\.module))
 
             time.linking = try clock.measure
             {

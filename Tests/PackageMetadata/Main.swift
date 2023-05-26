@@ -1,5 +1,6 @@
 import JSON
 import PackageMetadata
+import PackageGraphs
 import ModuleGraphs
 import System
 import Testing
@@ -408,7 +409,7 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(name: "SwiftSyntax",
+                        let expected:TargetNode = .init(name: "SwiftSyntax",
                             dependencies: .init(targets:
                             [
                                 .init(id: "SwiftBasicFormat"),
@@ -457,7 +458,7 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(name: "SymbolAvailability",
+                        let expected:TargetNode = .init(name: "SymbolAvailability",
                             dependencies: .init(targets:
                             [
                                 .init(id: "SemanticVersions", platforms: [.linux]),
@@ -517,7 +518,7 @@ enum Main:SyncTests
                     tests.do
                     {
                         let json:JSON.Object = try .init(parsing: json)
-                        let expected:PackageManifest.Target = .init(name: "SymbolResolution",
+                        let expected:TargetNode = .init(name: "SymbolResolution",
                             dependencies: .init(
                                 products:
                                 [

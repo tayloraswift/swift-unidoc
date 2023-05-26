@@ -21,6 +21,12 @@ extension ProductIdentifier:Comparable
         (lhs.package, lhs.name) < (rhs.package, rhs.name)
     }
 }
+extension ProductIdentifier:Identifiable
+{
+    /// Returns `self`.
+    @inlinable public
+    var id:Self { self }
+}
 extension ProductIdentifier:CustomStringConvertible
 {
     public

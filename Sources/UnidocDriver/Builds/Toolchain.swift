@@ -1,4 +1,5 @@
 import ModuleGraphs
+import PackageGraphs
 import PackageMetadata
 import SemanticVersions
 import SymbolGraphs
@@ -82,7 +83,7 @@ extension Toolchain
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let artifacts:Artifacts = try await .dump(
-            targets:
+            modules:
             [
                 //  0:
                 .init(name: "Swift", type: .binary,
@@ -132,7 +133,7 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let products:[ProductNode] =
+        let products:[ProductStack] =
         [
             .init(name: "__stdlib__",
                 type: .library(.automatic),
@@ -162,14 +163,16 @@ extension Toolchain
             ])
         try await build()
 
-        let resolutions:PackageResolutions?
+        let pins:[Repository.Pin]
         do
         {
-            resolutions = try .init(parsing: try (checkout.root / "Package.resolved").read())
+            let resolutions:PackageResolutions = try .init(
+                parsing: try (checkout.root / "Package.resolved").read())
+            pins = resolutions.pins
         }
         catch is FileError
         {
-            resolutions = nil
+            pins = []
         }
 
         let manifest:PackageManifest = try await .dump(from: checkout)
@@ -177,52 +180,39 @@ extension Toolchain
         print("Note: using spm tools version \(manifest.format)")
 
         let platform:PlatformIdentifier = try self.platform()
-        let package:PackageNode = try .libraries(as: checkout.pin.id,
+        let sink:PackageNode = try .libraries(as: checkout.pin.id,
             flattening: manifest,
             platform: platform)
 
-        var include:Artifacts.IncludePaths = .init(root: package.root,
+        var dependencies:[PackageNode] = []
+        var include:Artifacts.IncludePaths = .init(root: manifest.root,
             configuration: configuration)
-        for pin:Repository.Pin in resolutions?.pins ?? []
+        for pin:Repository.Pin in pins
         {
             let checkout:RepositoryCheckout = .init(workspace: checkout.workspace,
                 root: checkout.root / ".build" / "checkouts" / "\(pin.id)",
                 pin: pin)
 
             let manifest:PackageManifest = try await .dump(from: checkout)
-            let package:PackageNode = try .libraries(as: pin.id,
+            let upstream:PackageNode = try .libraries(as: pin.id,
                 flattening: manifest,
                 platform: platform)
 
-            include.add(from: try package.scan())
+            include.add(from: try upstream.scan())
+            dependencies.append(upstream)
         }
 
+        let package:PackageNode = try sink.flattened(dependencies: dependencies)
         let artifacts:Artifacts = try await .dump(from: package,
             include: include,
             output: checkout.workspace,
             triple: self.triple,
             pretty: pretty)
 
-        //  Index repository dependencies
-        var dependencies:[PackageIdentifier: Repository.Requirement] = [:]
-        for dependency:PackageManifest.Dependency in manifest.dependencies
-        {
-            if  case .resolvable(let dependency) = dependency,
-                case .stable(let requirement) = dependency.requirement
-            {
-                dependencies[dependency.id] = requirement
-            }
-        }
         let metadata:DocumentationMetadata = .init(package: checkout.pin.id,
             triple: self.triple,
             ref: checkout.pin.ref,
-            dependencies: resolutions?.pins.map
-            {
-                .init(package: $0.id,
-                    requirement: dependencies[$0.id],
-                    revision: $0.revision,
-                    ref: $0.ref)
-            } ?? [],
+            dependencies: try package.pinnedDependencies(using: pins),
             toolchain: self.version,
             products: package.products,
             requirements: manifest.requirements,
