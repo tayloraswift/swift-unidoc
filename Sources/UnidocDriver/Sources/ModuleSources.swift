@@ -69,27 +69,27 @@ extension ModuleSources
                 return
             }
 
-            switch (file.extension, self.language, excluded: exclude.contains(file.path))
+            switch (file.extension, excluded: exclude.contains(file.path))
             {
-            case    ("md", _,       excluded: _):
+            case    ("md",  excluded: _):
                 //  It’s common to list markdown files under exclude paths.
                 self.articles.append(file.path)
 
-            case    ("h", .swift,   excluded: false):
+            case    ("h",   excluded: false):
                 include.update(with: $0)
                 fallthrough
 
-            case    ("c", .swift,   excluded: false):
-                self.language = .c
+            case    ("c",   excluded: false):
+                self.language |= .c
 
-            case    ("hpp", _,      excluded: false),
-                    ("hxx", _,      excluded: false):
+            case    ("hpp", excluded: false),
+                    ("hxx", excluded: false):
                 include.update(with: $0)
                 fallthrough
 
-            case    ("cpp", _,      excluded: false),
-                    ("cxx", _,      excluded: false):
-                self.language = .cpp
+            case    ("cpp", excluded: false),
+                    ("cxx", excluded: false):
+                self.language |= .cpp
 
             case _:
                 break
