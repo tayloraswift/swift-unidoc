@@ -132,20 +132,25 @@ let package:Package = .init(
 
         .target(name: "Media"),
 
+        .target(name: "ModuleGraphs", dependencies:
+            [
+                .target(name: "SemanticVersions"),
+            ]),
+
         .target(name: "Multiparts", dependencies:
             [
                 .target(name: "Media"),
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "ModuleGraphs", dependencies:
+        .target(name: "PackageGraphs", dependencies:
             [
-                .target(name: "SemanticVersions"),
+                .target(name: "ModuleGraphs"),
             ]),
 
         .target(name: "PackageMetadata", dependencies:
             [
-                .target(name: "ModuleGraphs"),
+                .target(name: "PackageGraphs"),
 
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),

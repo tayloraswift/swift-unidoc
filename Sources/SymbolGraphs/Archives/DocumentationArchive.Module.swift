@@ -7,18 +7,17 @@ extension DocumentationArchive
     @frozen public
     struct Module:Equatable, Sendable
     {
-        /// Information about the target associated with this module.
         public
-        let target:TargetNode
+        let stacked:ModuleStack
 
         /// This module’s binary markdown documentation, if it has any.
         public
         var article:MarkdownArticle?
 
         @inlinable public
-        init(target:TargetNode)
+        init(stacked:ModuleStack)
         {
-            self.target = target
+            self.stacked = stacked
             self.article = nil
         }
     }
@@ -28,7 +27,7 @@ extension DocumentationArchive.Module:Identifiable
     @inlinable public
     var id:ModuleIdentifier
     {
-        self.target.id
+        self.stacked.id
     }
 }
 extension DocumentationArchive.Module
@@ -37,7 +36,7 @@ extension DocumentationArchive.Module
     enum CodingKeys:String
     {
         case article = "A"
-        case target = "T"
+        case stacked = "M"
     }
 }
 extension DocumentationArchive.Module:BSONDocumentEncodable
@@ -45,7 +44,7 @@ extension DocumentationArchive.Module:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.target] = self.target
+        bson[.stacked] = self.stacked
         bson[.article] = self.article
     }
 }
@@ -54,7 +53,7 @@ extension DocumentationArchive.Module:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(target: try bson[.target].decode())
+        self.init(stacked: try bson[.stacked].decode())
         self.article = try bson[.article]?.decode()
     }
 }

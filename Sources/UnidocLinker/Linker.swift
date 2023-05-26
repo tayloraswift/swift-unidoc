@@ -25,9 +25,9 @@ struct Linker
 
     public
     init(nominations:Compiler.Nominations,
-        targets:[TargetNode])
+        modules:[ModuleStack])
     {
-        self.archive = .init(modules: targets.map(DocumentationArchive.Module.init(target:)))
+        self.archive = .init(modules: modules.map(DocumentationArchive.Module.init(stacked:)))
 
         self.nominations = nominations
 

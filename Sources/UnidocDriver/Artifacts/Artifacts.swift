@@ -1,5 +1,6 @@
-import PackageMetadata
 import ModuleGraphs
+import PackageGraphs
+import PackageMetadata
 import System
 
 public
@@ -20,12 +21,12 @@ extension Artifacts
     /// Dumps the symbols for the given targets, using this workspace as the
     /// output directory.
     public static
-    func dump(targets:[TargetNode],
+    func dump(modules:[ModuleStack],
         output:Workspace,
         triple:Triple,
         pretty:Bool = false) async throws -> Self
     {
-        .init(cultures: try await Self.dump(from: targets.map { .init($0) },
+        .init(cultures: try await Self.dump(from: modules.map { .init($0) },
                 output: output,
                 triple: triple,
                 pretty: pretty))
@@ -66,19 +67,19 @@ extension Artifacts
             switch sources.language
             {
             case .swift:
-                label = "swift module, \(sources.node.type)"
+                label = "swift module, \(sources.module.type)"
 
             case let language:
                 label = "\(language) module"
             }
 
-            print("Dumping symbols for module '\(sources.node.id)' (\(label))")
+            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
 
             var arguments:[String] =
             [
                 "symbolgraph-extract",
 
-                "-module-name",                     "\(sources.node.id)",
+                "-module-name",                     "\(sources.module.id)",
                 "-target",                          "\(triple)",
                 "-minimum-access-level",            "internal",
                 "-output-dir",                      "\(output.path)",
@@ -151,7 +152,7 @@ extension Artifacts
         return try sources.map
         {
             try .init(sources: $0,
-                parts: parts[$0.node.id, default: []].map { output.path / $0 })
+                parts: parts[$0.module.id, default: []].map { output.path / $0 })
         }
     }
 }

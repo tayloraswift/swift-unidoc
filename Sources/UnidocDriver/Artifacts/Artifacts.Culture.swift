@@ -7,18 +7,19 @@ extension Artifacts
     struct Culture
     {
         public
+        let module:ModuleStack
+
+        public
         let articles:[FilePath]
         public
         let parts:[FilePath]
-        public
-        let node:TargetNode
 
         @inlinable public
-        init(_ node:TargetNode, articles:[FilePath], parts:[FilePath])
+        init(_ module:ModuleStack, articles:[FilePath], parts:[FilePath])
         {
             self.articles = articles
             self.parts = parts
-            self.node = node
+            self.module = module
         }
     }
 }
@@ -26,7 +27,7 @@ extension Artifacts.Culture:Identifiable
 {
     var id:ModuleIdentifier
     {
-        self.node.id
+        self.module.id
     }
 }
 extension Artifacts.Culture
@@ -36,11 +37,11 @@ extension Artifacts.Culture
         if  parts.isEmpty,
             case .swift = sources.language
         {
-            throw Artifacts.CultureError.empty(sources.node.id)
+            throw Artifacts.CultureError.empty(sources.module.id)
         }
         else
         {
-            self.init(sources.node, articles: sources.articles, parts: parts)
+            self.init(sources.module, articles: sources.articles, parts: parts)
         }
     }
 }

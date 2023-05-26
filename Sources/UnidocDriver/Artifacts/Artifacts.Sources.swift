@@ -5,7 +5,7 @@ extension Artifacts
 {
     struct Sources
     {
-        let node:TargetNode
+        let module:ModuleStack
         let path:FilePath?
 
         /// Paths to all (non-excluded) markdown articles discovered in the
@@ -16,9 +16,9 @@ extension Artifacts
         /// `.cpp`, `.hpp` file.
         var language:Language
 
-        init(_ node:TargetNode, path:FilePath? = nil)
+        init(_ module:ModuleStack, path:FilePath? = nil)
         {
-            self.node = node
+            self.module = module
             self.path = path
 
             self.articles = []
@@ -28,9 +28,9 @@ extension Artifacts
 }
 extension Artifacts.Sources
 {
-    init(_ node:TargetNode, root:__shared FilePath)
+    init(_ module:ModuleStack, root:__shared FilePath)
     {
-        self.init(node,
-            path: node.location.map { root / $0 } ?? root / "Sources" / "\(node.name)")
+        self.init(module,
+            path: module.location.map { root / $0 } ?? root / "Sources" / "\(module.name)")
     }
 }
