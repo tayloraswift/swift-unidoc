@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 
-extension ModuleStack
+extension ProductInfo
 {
     @frozen public
     enum CodingKeys:String
@@ -11,10 +11,9 @@ extension ModuleStack
         case type = "T"
         case dependencies_products = "P"
         case dependencies_modules = "D"
-        case location = "L"
     }
 }
-extension ModuleStack:BSONDocumentEncodable
+extension ProductInfo:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -24,13 +23,10 @@ extension ModuleStack:BSONDocumentEncodable
         bson[.dependencies_products] =
             self.dependencies.products.isEmpty ? nil :
             self.dependencies.products
-        bson[.dependencies_modules] =
-            self.dependencies.modules.isEmpty ? nil :
-            self.dependencies.modules
-        bson[.location] = self.location
+        bson[.dependencies_modules] = self.dependencies.modules
     }
 }
-extension ModuleStack:BSONDocumentDecodable
+extension ProductInfo:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
@@ -40,7 +36,6 @@ extension ModuleStack:BSONDocumentDecodable
             type: try bson[.type].decode(),
             dependencies: .init(
                 products: try bson[.dependencies_products]?.decode() ?? [],
-                modules: try bson[.dependencies_modules]?.decode() ?? []),
-            location: try bson[.location]?.decode())
+                modules: try bson[.dependencies_modules].decode()))
     }
 }

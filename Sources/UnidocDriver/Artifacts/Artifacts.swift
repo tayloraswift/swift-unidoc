@@ -18,50 +18,52 @@ struct Artifacts
 }
 extension Artifacts
 {
-    /// Dumps the symbols for the given targets, using this workspace as the
-    /// output directory.
-    public static
-    func dump(modules:[ModuleStack],
-        output:Workspace,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Self
-    {
-        .init(cultures: try await Self.dump(from: modules.map { .init($0) },
-                output: output,
-                triple: triple,
-                pretty: pretty))
-    }
     /// Dumps the symbols for the given package, using this workspace as the
     /// output directory.
     public static
     func dump(from package:PackageNode,
-        include:IncludePaths = [],
+        include:inout [FilePath],
         output:Workspace,
         triple:Triple,
         pretty:Bool = false) async throws -> Self
     {
         //  Note: the manifest root is the root we want; the repository root may
         //  be a relative path.
-        let sources:[Sources] = try package.scan()
-        var include:IncludePaths = include
-            include.add(from: sources)
-        return .init(cultures: try await Self.dump(from: sources,
-                include: include,
+        let sources:PackageSources = try .init(scanning: package)
+        return .init(cultures: try await Self.dump(modules: sources.modules,
+                include: &include,
                 output: output,
                 triple: triple,
                 pretty: pretty),
             root: package.root)
     }
+    /// Dumps the symbols for the given targets, using this workspace as the
+    /// output directory.
+    public static
+    func dump(modules:[ModuleInfo],
+        output:Workspace,
+        triple:Triple,
+        pretty:Bool = false) async throws -> Self
+    {
+        var include:[FilePath] = []
+        return .init(cultures: try await Self.dump(modules: modules.map { .init($0) },
+                include: &include,
+                output: output,
+                triple: triple,
+                pretty: pretty))
+    }
 
     private static
-    func dump(from sources:[Sources],
-        include:IncludePaths? = nil,
+    func dump(modules:[ModuleSources],
+        include:inout [FilePath],
         output:Workspace,
         triple:Triple,
         pretty:Bool) async throws -> [Culture]
     {
-        for sources:Sources in sources
+        for sources:ModuleSources in modules
         {
+            include += sources.include
+
             let label:String
 
             switch sources.language
@@ -91,7 +93,7 @@ extension Artifacts
             {
                 arguments.append("-pretty-print")
             }
-            for include:FilePath in include?.paths ?? []
+            for include:FilePath in include
             {
                 arguments.append("-I")
                 arguments.append("\(include)")
@@ -149,7 +151,7 @@ extension Artifacts
             }
         }
 
-        return try sources.map
+        return try modules.map
         {
             try .init(sources: $0,
                 parts: parts[$0.module.id, default: []].map { output.path / $0 })

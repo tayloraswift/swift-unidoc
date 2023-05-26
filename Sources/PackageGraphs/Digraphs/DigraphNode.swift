@@ -40,7 +40,12 @@ extension DigraphNode
         var sources:[Self] = []
         var dependencies:[ID: Set<ID>] = nodes.compactMapValues
         {
-            let predecessors:[Predecessor] = $0.predecessors
+            //  If `Self` is ``PackageNode``, it is expected for edges to sometimes point
+            //  to non-existent nodes.
+            let predecessors:[Predecessor] = $0.predecessors.filter
+            {
+                nodes.keys.contains($0.id)
+            }
             if  predecessors.isEmpty
             {
                 sources.append($0)
@@ -79,6 +84,14 @@ extension DigraphNode
             }
         }
 
-        return dependencies.isEmpty && consumers.isEmpty ? ordered : nil
+        //  Nodes may depend on packages we did not clone. This is completely
+        //  normal and expected when packages have things like SPM plugins that
+        //  don’t get built by default.
+        for id:ID in consumers.keys where nodes.keys.contains(id)
+        {
+            return nil
+        }
+
+        return dependencies.isEmpty ? ordered : nil
     }
 }
