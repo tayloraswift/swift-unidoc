@@ -37,7 +37,7 @@ struct DocumentationMetadata:Equatable, Sendable
     /// ``dependencies``. This list is used to filter other documentation objects
     /// to link against.
     public
-    let products:[ProductStack]
+    let products:[ProductInfo]
 
 
     /// The platform requirements of the relevant package. This field is
@@ -55,7 +55,7 @@ struct DocumentationMetadata:Equatable, Sendable
         ref:SemanticRef?,
         dependencies:[Dependency],
         toolchain:SemanticRef?,
-        products:[ProductStack],
+        products:[ProductInfo],
         requirements:[PlatformRequirement] = [],
         revision:Repository.Revision? = nil)
     {
@@ -74,7 +74,7 @@ struct DocumentationMetadata:Equatable, Sendable
 extension DocumentationMetadata
 {
     public static
-    func swift(triple:Triple, version:SemanticRef?, products:[ProductStack]) -> Self
+    func swift(triple:Triple, version:SemanticRef?, products:[ProductInfo]) -> Self
     {
         .init(package: .swift, triple: triple, ref: version,
             dependencies: [],

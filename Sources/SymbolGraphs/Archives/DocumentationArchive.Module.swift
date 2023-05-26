@@ -8,14 +8,14 @@ extension DocumentationArchive
     struct Module:Equatable, Sendable
     {
         public
-        let stacked:ModuleStack
+        let stacked:ModuleInfo
 
         /// This module’s binary markdown documentation, if it has any.
         public
         var article:MarkdownArticle?
 
         @inlinable public
-        init(stacked:ModuleStack)
+        init(stacked:ModuleInfo)
         {
             self.stacked = stacked
             self.article = nil

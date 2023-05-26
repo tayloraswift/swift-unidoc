@@ -1,4 +1,4 @@
-extension Artifacts
+extension ModuleSources
 {
     enum Language
     {
@@ -7,7 +7,7 @@ extension Artifacts
         case swift
     }
 }
-extension Artifacts.Language:CustomStringConvertible
+extension ModuleSources.Language:CustomStringConvertible
 {
     var description:String
     {

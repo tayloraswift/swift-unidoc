@@ -133,7 +133,7 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let products:[ProductStack] =
+        let products:[ProductInfo] =
         [
             .init(name: "__stdlib__",
                 type: .library(.automatic),
@@ -185,8 +185,7 @@ extension Toolchain
             platform: platform)
 
         var dependencies:[PackageNode] = []
-        var include:Artifacts.IncludePaths = .init(root: manifest.root,
-            configuration: configuration)
+        var include:[FilePath] = [.init(manifest.root.path) / ".build" / "\(configuration)"]
         for pin:Repository.Pin in pins
         {
             let checkout:RepositoryCheckout = .init(workspace: checkout.workspace,
@@ -197,14 +196,15 @@ extension Toolchain
             let upstream:PackageNode = try .libraries(as: pin.id,
                 flattening: manifest,
                 platform: platform)
+            let sources:PackageSources = try .init(scanning: upstream)
 
-            include.add(from: try upstream.scan())
+            sources.yield(include: &include)
             dependencies.append(upstream)
         }
 
         let package:PackageNode = try sink.flattened(dependencies: dependencies)
         let artifacts:Artifacts = try await .dump(from: package,
-            include: include,
+            include: &include,
             output: checkout.workspace,
             triple: self.triple,
             pretty: pretty)

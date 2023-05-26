@@ -12,9 +12,9 @@ struct PackageNode:Identifiable
     let dependencies:[Dependency]
 
     public
-    let products:[ProductStack]
+    let products:[ProductInfo]
     public
-    let modules:[ModuleStack]
+    let modules:[ModuleInfo]
     /// Lists of excluded sources, one per target node.
     public
     let exclude:[[String]]
@@ -24,8 +24,8 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:PackageIdentifier,
         dependencies:[Dependency],
-        products:[ProductStack],
-        modules:[ModuleStack],
+        products:[ProductInfo],
+        modules:[ModuleInfo],
         exclude:[[String]],
         root:Repository.Root)
     {
@@ -50,7 +50,7 @@ extension PackageNode
         var nodes:DigraphExplorer<ProductNode>.Nodes = .init()
         for package:PackageNode in dependencies
         {
-            for product:ProductStack in package.products
+            for product:ProductInfo in package.products
             {
                 try nodes.index(.init(id: .init(name: product.name, package: package.id),
                     predecessors: product.dependencies.products))
@@ -59,14 +59,14 @@ extension PackageNode
 
         var cache:[ProductIdentifier: [ProductIdentifier]] = [:]
 
-        let products:[ProductStack] = try self.products.map
+        let products:[ProductInfo] = try self.products.map
         {
             .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: try nodes.included(by: $0.dependencies.products,
                         cache: &cache),
                     modules: $0.dependencies.modules))
         }
-        let modules:[ModuleStack] = try self.modules.map
+        let modules:[ModuleInfo] = try self.modules.map
         {
             .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: try nodes.included(by: $0.dependencies.products,
@@ -75,14 +75,12 @@ extension PackageNode
                 location: $0.location)
         }
 
+        let dependencies:[Dependency] = try self.order(dependencies: dependencies)
         //  Lint unused dependencies
         let used:Set<PackageIdentifier> = .init(cache.values.joined().lazy.map(\.package))
 
         return .init(id: self.id,
-            dependencies: try self.order(dependencies: dependencies.filter
-            {
-                used.contains($0.id)
-            }),
+            dependencies: dependencies.filter { used.contains($0.id) },
             products: products,
             modules: modules,
             exclude: self.exclude,

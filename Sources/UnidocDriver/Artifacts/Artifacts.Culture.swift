@@ -7,7 +7,7 @@ extension Artifacts
     struct Culture
     {
         public
-        let module:ModuleStack
+        let module:ModuleInfo
 
         public
         let articles:[FilePath]
@@ -15,7 +15,7 @@ extension Artifacts
         let parts:[FilePath]
 
         @inlinable public
-        init(_ module:ModuleStack, articles:[FilePath], parts:[FilePath])
+        init(_ module:ModuleInfo, articles:[FilePath], parts:[FilePath])
         {
             self.articles = articles
             self.parts = parts
@@ -32,7 +32,7 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    init(sources:Artifacts.Sources, parts:[FilePath]) throws
+    init(sources:ModuleSources, parts:[FilePath]) throws
     {
         if  parts.isEmpty,
             case .swift = sources.language

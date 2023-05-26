@@ -33,13 +33,18 @@ extension FilePath.Directory
     @inlinable public
     func walk(with body:(FilePath) throws -> ()) throws
     {
+        try self.walk { try body($0 / $1) }
+    }
+    @inlinable public
+    func walk(with body:(FilePath, FilePath.Component) throws -> ()) throws
+    {
         //  minimize the amount of file descriptors we have open
         var explore:[FilePath] = []
         for next:Result<FilePath.Component, any Error> in self
         {
-            let current:FilePath = self.path / (try next.get())
-            try body(current)
-            explore.append(current)
+            let next:FilePath.Component = try next.get()
+            try body(self.path, next)
+            explore.append(self.path / next)
         }
         for current:FilePath in explore
         {

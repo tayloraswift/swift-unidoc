@@ -1,5 +1,5 @@
 @frozen public
-struct ModuleStack:Equatable, Hashable, Sendable
+struct ModuleInfo:Equatable, Hashable, Sendable
 {
     /// The *unmangled* name of the module. (Not the module’s ``id``!)
     public
@@ -26,7 +26,7 @@ struct ModuleStack:Equatable, Hashable, Sendable
         self.location = location
     }
 }
-extension ModuleStack:Identifiable
+extension ModuleInfo:Identifiable
 {
     /// The mangled name of the module.
     @inlinable public
