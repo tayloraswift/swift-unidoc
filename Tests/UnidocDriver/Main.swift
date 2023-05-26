@@ -76,9 +76,17 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
+            //  the swift-docc-plugin dependency should have been linted.
+            tests.expect(documentation.metadata.dependencies.map(\.package) **?
+            [
+                "swift-collections",
+                "swift-atomics",
+            ])
+
             TestRoundtripping(tests,
                 documentation: documentation,
                 output: workspace.path / "swift-nio.bsdo")
+
         }
 
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
@@ -96,6 +104,13 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
+            tests.expect(documentation.metadata.dependencies.map(\.package) **?
+            [
+                "swift-collections",
+                "swift-atomics",
+                "swift-nio",
+            ])
+
             TestRoundtripping(tests,
                 documentation: documentation,
                 output: workspace.path / "swift-nio-ssl.bsdo")
@@ -116,6 +131,9 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
+            //  the swift-argument-parser dependency should have been linted.
+            tests.expect(documentation.metadata.dependencies.map(\.package) **? [])
+
             TestRoundtripping(tests,
                 documentation: documentation,
                 output: workspace.path / "swift-syntax.bsdo")

@@ -1,10 +1,23 @@
 extension ModuleSources
 {
-    enum Language
+    enum Language:Comparable
     {
+        case swift
         case c
         case cpp
-        case swift
+    }
+}
+extension ModuleSources.Language
+{
+    static
+    func | (lhs:Self, rhs:Self) -> Self
+    {
+        max(lhs, rhs)
+    }
+    static
+    func |= (lhs:inout Self, rhs:Self)
+    {
+        lhs = lhs | rhs
     }
 }
 extension ModuleSources.Language:CustomStringConvertible
