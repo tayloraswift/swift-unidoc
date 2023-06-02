@@ -15,6 +15,7 @@ actor Delegate
     private nonisolated
     let mongodb:Mongo.SessionPool
 
+    private
     init(mongodb:Mongo.SessionPool)
     {
         var continuation:AsyncStream<AnyRequest>.Continuation? = nil
@@ -25,6 +26,14 @@ actor Delegate
         self.requests.in = continuation!
 
         self.mongodb = mongodb
+    }
+}
+extension Delegate
+{
+    static
+    func setup(mongodb:__owned Mongo.SessionPool) -> Self
+    {
+        return .init(mongodb: mongodb)
     }
 }
 extension Delegate
@@ -115,23 +124,39 @@ enum _DocumentationObjectIdentificationError:Error, Sendable
 
 import SemanticVersions
 
+
 extension Delegate
 {
-    private
-    func ingest(uploaded object:DocumentationObject) async throws
+    private nonisolated
+    func ingest(uploaded archive:DocumentationArchive) async throws
     {
-        guard let id:String = object.metadata.id
+        guard let id:String = archive.metadata.id
         else
         {
             throw _DocumentationObjectIdentificationError.unidentified
         }
 
-        if  let toolchain:SemanticRef = object.metadata.toolchain
+        let session:Mongo.Session = try await .init(from: self.mongodb)
+
+        if  let _:SemanticRef = archive.metadata.toolchain
         {
             //  swift package.
-            for dependency:DocumentationMetadata.Dependency in object.metadata.dependencies
+            let pins:[String] = archive.metadata.pins()
+            print("pins:", pins)
+
+            try await session.run(
+                command: Mongo.Find<Mongo.Cursor<DocumentationArchive>>.init("doc_objects",
+                    stride: 32),
+                against: "master",
+                on: .primary)
             {
-                print(dependency)
+                for try await batch:[DocumentationArchive] in $0
+                {
+                    for archive:DocumentationArchive in batch
+                    {
+                        print(archive.metadata.id as Any)
+                    }
+                }
             }
         }
         else
@@ -181,7 +206,7 @@ extension Delegate
 
         try await mongodb.withSessionPool
         {
-            let delegate:Self = .init(mongodb: $0)
+            let delegate:Self = .setup(mongodb: $0)
 
             try await withThrowingTaskGroup(of: Void.self)
             {

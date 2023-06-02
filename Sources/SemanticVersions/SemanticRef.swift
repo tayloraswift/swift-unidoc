@@ -29,7 +29,7 @@ extension SemanticRef
     /// -   `.unstable("0.1.2")` → `0.1.2`
     /// -   `.unstable("v0.1.2.3")` → `v0.1.2.3`
     @inlinable public
-    var name:String
+    var canonical:String
     {
         switch self
         {

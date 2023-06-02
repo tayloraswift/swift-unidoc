@@ -1,6 +1,6 @@
 .build
 .unidoc
-.unidoc-driver-testing
+.unidoc-testing
 .vscode
 
 TestDeployment/data/

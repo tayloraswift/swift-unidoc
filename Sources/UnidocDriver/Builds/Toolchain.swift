@@ -78,8 +78,8 @@ extension Toolchain
 extension Toolchain
 {
     public
-    func generateDocumentationForStandardLibrary(in workspace:Workspace,
-        pretty:Bool = false) async throws -> DocumentationObject
+    func generateDocsForStandardLibrary(in workspace:Workspace,
+        pretty:Bool = false) async throws -> DocumentationArchive
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let artifacts:Artifacts = try await .dump(
@@ -146,12 +146,12 @@ extension Toolchain
         let metadata:DocumentationMetadata = .swift(triple: self.triple, version: self.version,
             products: products)
 
-        return .init(metadata: metadata, archive: try await .build(from: artifacts))
+        return .init(metadata: metadata, docs: try await .build(from: artifacts))
     }
     public
-    func generateDocumentationForPackage(in checkout:RepositoryCheckout,
+    func generateDocsForPackage(in checkout:RepositoryCheckout,
         configuration:BuildConfiguration = .debug,
-        pretty:Bool = false) async throws -> DocumentationObject
+        pretty:Bool = false) async throws -> DocumentationArchive
     {
         print("Building package in: \(checkout.root)")
 
@@ -218,7 +218,19 @@ extension Toolchain
             requirements: manifest.requirements,
             revision: checkout.pin.revision)
 
-        return .init(metadata: metadata, archive: try await .build(from: artifacts))
+        return .init(metadata: metadata, docs: try await .build(from: artifacts))
+    }
+    public
+    func generateDocs(cloning url:String,
+        at refname:String,
+        in workspace:Workspace,
+        pretty:Bool = false,
+        clean:Bool = false) async throws -> DocumentationArchive
+    {
+        try await self.generateDocsForPackage(in: try await workspace.checkout(url: url,
+                at: refname,
+                clean: clean),
+            pretty: pretty)
     }
 }
 extension Toolchain

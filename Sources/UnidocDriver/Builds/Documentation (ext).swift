@@ -3,7 +3,7 @@ import SymbolGraphParts
 import UnidocCompiler
 import UnidocLinker
 
-extension DocumentationArchive
+extension Documentation
 {
     public static
     func build(from artifacts:Artifacts) async throws -> Self
@@ -65,7 +65,7 @@ extension DocumentationArchive
 
             print("Linked documentation in \(time.linking)")
 
-            return linker.archive
+            return linker.docs
         }
     }
 }

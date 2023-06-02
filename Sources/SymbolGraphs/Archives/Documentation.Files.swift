@@ -1,4 +1,4 @@
-extension DocumentationArchive
+extension Documentation
 {
     @frozen public
     struct Files:Equatable, Sendable

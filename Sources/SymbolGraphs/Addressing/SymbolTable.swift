@@ -68,7 +68,7 @@ extension SymbolTable:RandomAccessCollection
         }
     }
 }
-extension SymbolTable:BSONEncodable, BSONFieldEncodable where Address.Symbol:BSONEncodable
+extension SymbolTable:BSONEncodable, BSONWeakEncodable where Address.Symbol:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)

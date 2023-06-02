@@ -11,7 +11,7 @@ extension Availability.EternalRange:BSONDecodable
         self = .unconditionally
     }
 }
-extension Availability.EternalRange:BSONEncodable, BSONFieldEncodable
+extension Availability.EternalRange:BSONEncodable, BSONWeakEncodable
 {
     public
     func encode(to field:inout BSON.Field)

@@ -58,7 +58,7 @@ extension SymbolGraph.Extension
         case article = "A"
     }
 }
-extension SymbolGraph.Extension:BSONDocumentEncodable, BSONEncodable, BSONFieldEncodable
+extension SymbolGraph.Extension:BSONDocumentEncodable, BSONEncodable, BSONWeakEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)

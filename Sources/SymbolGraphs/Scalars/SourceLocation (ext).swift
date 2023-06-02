@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import Symbols
 
-extension SourceLocation<FileAddress>:BSONEncodable, BSONFieldEncodable
+extension SourceLocation<FileAddress>:BSONEncodable, BSONWeakEncodable
 {
     public
     func encode(to field:inout BSON.Field)
