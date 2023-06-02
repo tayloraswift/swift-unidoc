@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 
-extension DocumentationArchive
+extension Documentation
 {
     @frozen public
     struct Module:Equatable, Sendable
@@ -22,7 +22,7 @@ extension DocumentationArchive
         }
     }
 }
-extension DocumentationArchive.Module:Identifiable
+extension Documentation.Module:Identifiable
 {
     @inlinable public
     var id:ModuleIdentifier
@@ -30,7 +30,7 @@ extension DocumentationArchive.Module:Identifiable
         self.stacked.id
     }
 }
-extension DocumentationArchive.Module
+extension Documentation.Module
 {
     @frozen public
     enum CodingKeys:String
@@ -39,7 +39,7 @@ extension DocumentationArchive.Module
         case stacked = "M"
     }
 }
-extension DocumentationArchive.Module:BSONDocumentEncodable
+extension Documentation.Module:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -48,7 +48,7 @@ extension DocumentationArchive.Module:BSONDocumentEncodable
         bson[.article] = self.article
     }
 }
-extension DocumentationArchive.Module:BSONDocumentDecodable
+extension Documentation.Module:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

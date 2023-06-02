@@ -16,7 +16,7 @@ enum Unidoc
 
         let workspace:Workspace = try await .create(at: ".unidoc")
 
-        let documentation:DocumentationObject
+        let documentation:DocumentationArchive
         let output:FilePath
 
         switch CommandLine.arguments.dropFirst().first
@@ -25,9 +25,9 @@ enum Unidoc
             let directory:Workspace = try await workspace.create("swift.doc",
                 clean: true)
 
-            documentation = try await toolchain.generateDocumentationForStandardLibrary(
+            documentation = try await toolchain.generateDocsForStandardLibrary(
                 in: directory)
-            output = workspace.path / "swift@\(toolchain.version.name).bsda"
+            output = workspace.path / "swift@\(toolchain.version.canonical).bsda"
 
         case nil:
             let checkout:RepositoryCheckout = try await workspace.checkout(
@@ -35,7 +35,7 @@ enum Unidoc
                 at: "508.0.0",
                 clean: true)
 
-            documentation = try await toolchain.generateDocumentationForPackage(
+            documentation = try await toolchain.generateDocsForPackage(
                 in: checkout)
             output = workspace.path / "\(checkout.pin.id)@\(checkout.pin.revision).bsda"
 

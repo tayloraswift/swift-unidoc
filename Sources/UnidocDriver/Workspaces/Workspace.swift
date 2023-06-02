@@ -1,4 +1,5 @@
 import ModuleGraphs
+import SemanticVersions
 import System
 
 @frozen public
@@ -41,7 +42,7 @@ extension Workspace
 
     public
     func checkout(url:String,
-        at ref:String,
+        at refname:String,
         clean:Bool = false) async throws -> RepositoryCheckout
     {
         guard let package:PackageIdentifier = .infer(from: url)
@@ -50,20 +51,23 @@ extension Workspace
             fatalError("unimplemented")
         }
 
-        let root:FilePath = self.path / "\(package)"
+        let ref:SemanticRef = .infer(from: refname)
+
+        let workspace:Self = try await self.create("\(package)@\(ref.canonical)", clean: clean)
+        let root:FilePath = workspace.path / "\(package)"
+
         do
         {
             try await SystemProcess.init(command: "git", "-C", root.string, "fetch")()
         }
         catch SystemProcessError.exit
         {
-            try await SystemProcess.init(command: "git", "-C", self.path.string,
+            try await SystemProcess.init(command: "git", "-C", workspace.path.string,
                 "clone", url, package.description)()
         }
 
-        let workspace:Self = try await self.create("\(package).doc", clean: clean)
 
-        try await SystemProcess.init(command: "git", "-C", root.string, "checkout", ref)()
+        try await SystemProcess.init(command: "git", "-C", root.string, "checkout", refname)()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
             try FileDescriptor.pipe()
@@ -75,7 +79,7 @@ extension Workspace
         }
 
         try await SystemProcess.init(command: "git", "-C", root.string,
-            "rev-list", "-n", "1", ref,
+            "rev-list", "-n", "1", refname,
             stdout: writable)()
 
         //  Note: output contains trailing newline
@@ -95,6 +99,6 @@ extension Workspace
             pin: .init(id: package,
                 location: .remote(url: url),
                 revision: revision,
-                ref: .infer(from: ref)))
+                ref: ref))
     }
 }

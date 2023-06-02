@@ -17,7 +17,7 @@ extension Availability.VersionRange:BSONDecodable
         }
     }
 }
-extension Availability.VersionRange:BSONEncodable, BSONFieldEncodable
+extension Availability.VersionRange:BSONEncodable, BSONWeakEncodable
 {
     public
     func encode(to field:inout BSON.Field)

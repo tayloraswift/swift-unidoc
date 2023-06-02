@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.8
 import PackageDescription
 
 let package:Package = .init(
@@ -16,6 +16,8 @@ let package:Package = .init(
         .library(name: "HTML", targets: ["HTML"]),
         .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
 
+        .library(name: "HTTPServer", targets: ["HTTPServer"]),
+
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
@@ -24,17 +26,25 @@ let package:Package = .init(
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
         .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
 
-        .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
+        .library(name: "Media", targets: ["Media"]),
+
         .library(name: "ModuleGraphs", targets: ["ModuleGraphs"]),
+
+        .library(name: "Multiparts", targets: ["Multiparts"]),
+
+        .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
+        .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
 
-        .library(name: "Symbols", targets: ["Symbols"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
+        .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
+        .library(name: "Symbols", targets: ["Symbols"]),
+
         .library(name: "UnidocCompiler", targets: ["UnidocCompiler"]),
+        .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
-        .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
     ],
     dependencies:
     [
@@ -43,10 +53,10 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-           from: "0.1.17")),
+            from: "0.2.3")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
-            from: "2.51.0")),
+            from: "2.54.0")),
         .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
             from: "2.24.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
@@ -189,6 +199,13 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
+        .target(name: "UnidocDatabase",
+            dependencies:
+            [
+                .target(name: "SymbolGraphs"),
+                .product(name: "MongoDB", package: "swift-mongodb"),
+            ]),
+
         .target(name: "UnidocDriver", dependencies:
             [
                 .target(name: "PackageMetadata"),
@@ -286,7 +303,6 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphsTests", dependencies:
             [
                 .target(name: "SymbolGraphs"),
-                //.target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
             path: "Tests/SymbolGraphs"),
@@ -304,7 +320,11 @@ let package:Package = .init(
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/System"),
+            path: "Tests/System",
+            exclude:
+            [
+                "directories",
+            ]),
 
         .executableTarget(name: "UnidocCompilerTests", dependencies:
             [
@@ -314,11 +334,34 @@ let package:Package = .init(
             ],
             path: "Tests/UnidocCompiler"),
 
+        .executableTarget(name: "UnidocDatabaseTests", dependencies:
+            [
+                .target(name: "UnidocDatabase"),
+                .target(name: "UnidocDriver"),
+                .product(name: "MongoTesting", package: "swift-mongodb"),
+            ],
+            path: "Tests/UnidocDatabase"),
+
         .executableTarget(name: "UnidocDriverTests", dependencies:
             [
                 .target(name: "UnidocDriver"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/UnidocDriver",
-            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]),
+            path: "Tests/UnidocDriver"),
     ])
+
+for target:PackageDescription.Target in package.targets
+{
+    {
+        var settings:[PackageDescription.SwiftSetting] = $0 ?? []
+
+        settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
+        settings.append(.enableUpcomingFeature("ConciseMagicFile"))
+        settings.append(.enableUpcomingFeature("ExistentialAny"))
+        settings.append(.enableUpcomingFeature("StrictConcurrency"))
+
+        settings.append(.define("DEBUG", .when(configuration: .debug)))
+
+        $0 = settings
+    } (&target.swiftSettings)
+}

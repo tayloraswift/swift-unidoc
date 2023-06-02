@@ -22,7 +22,7 @@ enum Main:AsyncTests
 
         let workspace:Workspace? = await (tests ! "setup").do
         {
-            try await .create(at: ".unidoc-driver-testing")
+            try await .create(at: ".unidoc-testing")
         }
         let toolchain:Toolchain? = await (tests ! "toolchain").do
         {
@@ -32,30 +32,30 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "standard-library",
-            let documentation:DocumentationObject = (await tests.do
+            let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocumentationForStandardLibrary(
-                    in: try await workspace.create("swift.doc",
+                try await toolchain.generateDocsForStandardLibrary(
+                    in: try await workspace.create("swift@\(toolchain.version.canonical)",
                         clean: true),
                     pretty: true)
             })
         {
             TestRoundtripping(tests,
                 documentation: documentation,
-                output: workspace.path / "swift@\(toolchain.version.name).bsdo")
+                output: workspace.path / "swift.bsdo")
         }
 
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-atomics",
-            let documentation:DocumentationObject = (await tests.do
+            let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocumentationForPackage(
-                    in: try await workspace.checkout(
-                        url: "https://github.com/apple/swift-atomics.git",
-                        at: "1.1.0",
-                        clean: true),
-                    pretty: true)
+                try await toolchain.generateDocs(
+                    cloning: "https://github.com/apple/swift-atomics.git",
+                    at: "1.1.0",
+                    in: workspace,
+                    pretty: true,
+                    clean: true)
             })
         {
             TestRoundtripping(tests,
@@ -66,14 +66,14 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-nio",
-            let documentation:DocumentationObject = (await tests.do
+            let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocumentationForPackage(
-                    in: try await workspace.checkout(
-                        url: "https://github.com/apple/swift-nio.git",
-                        at: "2.53.0",
-                        clean: true),
-                    pretty: true)
+                try await toolchain.generateDocs(
+                    cloning: "https://github.com/apple/swift-nio.git",
+                    at: "2.53.0",
+                    in: workspace,
+                    pretty: true,
+                    clean: true)
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
@@ -94,14 +94,14 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-nio-ssl",
-            let documentation:DocumentationObject = (await tests.do
+            let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocumentationForPackage(
-                    in: try await workspace.checkout(
-                        url: "https://github.com/apple/swift-nio-ssl.git",
-                        at: "2.24.0",
-                        clean: true),
-                    pretty: true)
+                try await toolchain.generateDocs(
+                    cloning: "https://github.com/apple/swift-nio-ssl.git",
+                    at: "2.24.0",
+                    in: workspace,
+                    pretty: true,
+                    clean: true)
             })
         {
             tests.expect(documentation.metadata.dependencies.map(\.package) **?
@@ -121,14 +121,14 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-syntax",
-            let documentation:DocumentationObject = (await tests.do
+            let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocumentationForPackage(
-                    in: try await workspace.checkout(
-                        url: "https://github.com/apple/swift-syntax.git",
-                        at: "508.0.0",
-                        clean: true),
-                    pretty: true)
+                try await toolchain.generateDocs(
+                    cloning: "https://github.com/apple/swift-syntax.git",
+                    at: "508.0.0",
+                    in: workspace,
+                    pretty: true,
+                    clean: true)
             })
         {
             //  the swift-argument-parser dependency should have been linted.
