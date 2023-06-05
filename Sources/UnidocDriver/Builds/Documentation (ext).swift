@@ -49,7 +49,7 @@ extension Documentation
         }
         do
         {
-            var linker:Linker = .init(nominations: nominations,
+            var linker:StaticLinker = .init(nominations: nominations,
                 modules: artifacts.cultures.map(\.module))
 
             time.linking = try clock.measure

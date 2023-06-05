@@ -37,3 +37,11 @@ extension GlobalAddress:BSONRepresentable
 extension GlobalAddress:BSONDecodable, BSONEncodable
 {
 }
+extension GlobalAddress:Comparable
+{
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.bson < rhs.bson
+    }
+}

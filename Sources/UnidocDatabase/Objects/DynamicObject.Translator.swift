@@ -1,6 +1,6 @@
 import SymbolGraphs
 
-extension DocumentationObject
+extension DynamicObject
 {
     struct Translator
     {
@@ -20,7 +20,7 @@ extension DocumentationObject
         }
     }
 }
-extension DocumentationObject.Translator
+extension DynamicObject.Translator
 {
     init(policies _:__shared DocumentationDatabase.Policies,
         package:Int32,
@@ -31,7 +31,7 @@ extension DocumentationObject.Translator
         self.init(package: package, version: version, modules: .init(docs.modules.count))
     }
     init(policies:__shared DocumentationDatabase.Policies,
-        object:__shared DocumentationObject) throws
+        object:__shared DynamicObject) throws
     {
         try self.init(policies: policies,
             package: object.package,
@@ -41,7 +41,7 @@ extension DocumentationObject.Translator
 }
 //  These APIs don’t check for integer overflow; we should enforce
 //  population limits during an earlier validation stage.
-extension DocumentationObject.Translator
+extension DynamicObject.Translator
 {
     subscript(scalar scalar:Int) -> GlobalAddress
     {
@@ -65,7 +65,7 @@ extension DocumentationObject.Translator
             citizen: 0x8000_0000 + .init(article))
     }
 }
-extension DocumentationObject.Translator
+extension DynamicObject.Translator
 {
     subscript(address:GlobalAddress) -> LocalAddress
     {

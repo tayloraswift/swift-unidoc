@@ -6,28 +6,31 @@ import MarkdownSemantics
 import SymbolGraphs
 import UnidocCompiler
 
-struct Outliner
+extension StaticLinker
 {
-    private
-    let resolver:CodelinkResolver
-    private
-    let scope:[String]
-
-    private(set)
-    var references:[Codelink: UInt32]
-    private(set)
-    var referents:[MarkdownArticle.Referent]
-
-    init(resolver:CodelinkResolver, scope:[String])
+    struct Outliner
     {
-        self.resolver = resolver
-        self.scope = scope
+        private
+        let resolver:CodelinkResolver
+        private
+        let scope:[String]
 
-        self.references = [:]
-        self.referents = []
+        private(set)
+        var references:[Codelink: UInt32]
+        private(set)
+        var referents:[MarkdownArticle.Referent]
+
+        init(resolver:CodelinkResolver, scope:[String])
+        {
+            self.resolver = resolver
+            self.scope = scope
+
+            self.references = [:]
+            self.referents = []
+        }
     }
 }
-extension Outliner
+extension StaticLinker.Outliner
 {
     mutating
     func outline(expression:String) -> UInt32?
@@ -77,7 +80,7 @@ extension Outliner
         return reference
     }
 }
-extension Outliner
+extension StaticLinker.Outliner
 {
     mutating
     func link(

@@ -76,25 +76,30 @@ extension DocumentationDatabase
     func publish(projecting archive:__owned DocumentationArchive,
         with session:__shared Mongo.Session) async throws
     {
-        let context:GlobalContext = try await self.context(publishing: archive, with: session)
-        let _:[ScalarProjection] = context.project()
+        var linker:DynamicLinker = .init(context: try await self.context(
+            publishing: archive,
+            with: session))
+        let _:[ScalarProjection] = linker.project()
     }
     private
     func context(publishing archive:__owned DocumentationArchive,
         with session:__shared Mongo.Session) async throws -> GlobalContext
     {
-        let dependencies:[DocumentationObject] = try await self.objects.load(
+        let dependencies:[DynamicObject] = try await self.objects.load(
             archive.metadata.pins(),
             with: session)
 
-        let translators:[DocumentationObject.Translator] = try dependencies.map
+        let translators:[DynamicObject.Translator] = try dependencies.map
         {
             try .init(policies: self.policies, object: $0)
         }
 
+        /// Combined mapping of symbols to global addresses across all upstream dependencies.
+        /// Within a build tree, we assume module names are unique, which implies that symbol
+        /// manglings should never collide.
         var upstream:[ScalarSymbol: GlobalAddress] = [:]
 
-        for (translator, object):(DocumentationObject.Translator, DocumentationObject) in
+        for (translator, object):(DynamicObject.Translator, DynamicObject) in
             zip(translators, dependencies)
         {
             for (offset, symbol):(Int, ScalarSymbol) in object.docs.graph.citizens
@@ -102,7 +107,7 @@ extension DocumentationDatabase
                 upstream[symbol] = translator[scalar: offset]
             }
         }
-
+        //  Populate the context with the current package’s docs.
         var context:GlobalContext = .init(current: .init(projector: try .init(
                 policies: self.policies,
                 upstream: upstream,
@@ -110,7 +115,8 @@ extension DocumentationDatabase
                 docs: archive.docs),
             docs: archive.docs))
 
-        for (translator, object):(DocumentationObject.Translator, DocumentationObject) in
+        //  Populate the context with the docs of all the package’s upstream dependencies.
+        for (translator, object):(DynamicObject.Translator, DynamicObject) in
             zip(translators, dependencies)
         {
             context.upstream[object.package] = .init(projector: .init(
