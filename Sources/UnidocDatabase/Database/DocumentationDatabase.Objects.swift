@@ -35,12 +35,12 @@ extension DocumentationDatabase.Objects
                         $0[.name] =
                         """
                         \(Self.name)\
-                        (\(DocumentationObject[.package]), \(DocumentationObject[.version]))
+                        (\(DynamicObject[.package]), \(DynamicObject[.version]))
                         """
                         $0[.key] = .init
                         {
-                            $0[DocumentationObject[.package]] = (-)
-                            $0[DocumentationObject[.version]] = (-)
+                            $0[DynamicObject[.package]] = (-)
+                            $0[DynamicObject[.version]] = (-)
                         }
                     },
                 ]),
@@ -68,26 +68,26 @@ extension DocumentationDatabase.Objects
         as id:String,
         with transaction:Mongo.Transaction) async throws -> (version:Int32, overwritten:Bool)
     {
-        let predecessors:[DocumentationObject.Shell] = try await transaction.run(
-            command: Mongo.Find<Mongo.SingleBatch<DocumentationObject.Shell>>.init(Self.name,
+        let predecessors:[DynamicObject.Shell] = try await transaction.run(
+            command: Mongo.Find<Mongo.SingleBatch<DynamicObject.Shell>>.init(Self.name,
                 limit: 1)
             {
                 $0[.filter] = .init
                 {
-                    $0[DocumentationObject[.package]] = package
+                    $0[DynamicObject[.package]] = package
                 }
                 $0[.sort] = .init
                 {
-                    $0[DocumentationObject[.version]] = (-)
+                    $0[DynamicObject[.version]] = (-)
                 }
                 $0[.hint] = .init
                 {
-                    $0[DocumentationObject[.package]] = (-)
-                    $0[DocumentationObject[.version]] = (-)
+                    $0[DynamicObject[.package]] = (-)
+                    $0[DynamicObject[.version]] = (-)
                 }
                 $0[.projection] = .init
                 {
-                    $0[DocumentationObject[.version]] = true
+                    $0[DynamicObject[.version]] = true
                 }
             },
             against: self.database)
@@ -98,7 +98,7 @@ extension DocumentationDatabase.Objects
             fatalError("unimplemented")
         }
 
-        let object:DocumentationObject = .init(id: id,
+        let object:DynamicObject = .init(id: id,
             package: package,
             version: predecessor + 1,
             metadata: archive.metadata,
@@ -112,7 +112,7 @@ extension DocumentationDatabase.Objects
                         $0[.upsert] = true
                         $0[.q] = .init
                         {
-                            $0[DocumentationObject[.id]] = object.id
+                            $0[DynamicObject[.id]] = object.id
                         }
                         $0[.u] = object
                     },
@@ -124,17 +124,17 @@ extension DocumentationDatabase.Objects
 }
 extension DocumentationDatabase.Objects
 {
-    func load(_ pins:[String], with session:Mongo.Session) async throws -> [DocumentationObject]
+    func load(_ pins:[String], with session:Mongo.Session) async throws -> [DynamicObject]
     {
         try await session.run(
-            command: Mongo.Find<Mongo.Cursor<DocumentationObject>>.init(Self.name,
+            command: Mongo.Find<Mongo.Cursor<DynamicObject>>.init(Self.name,
                 stride: 16,
                 limit: 32)
             {
                 $0[.filter] = .init
                 {
-                    $0[DocumentationObject[.stable]] = true
-                    $0[DocumentationObject[.id]] = .init
+                    $0[DynamicObject[.stable]] = true
+                    $0[DynamicObject[.id]] = .init
                     {
                         $0[.in] = pins
                     }

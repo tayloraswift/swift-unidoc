@@ -1,29 +1,26 @@
 import SymbolGraphs
 
-extension DocumentationObject
+struct LocalContext
 {
-    struct Context
-    {
-        /// Maps nested declarations to scopes. Scopes might be non-local.
-        private
-        let hierarchy:[ScalarAddress: GlobalAddress]
-        let projector:Projector
-        let docs:Documentation
+    /// Maps nested declarations to scopes. Scopes might be non-local.
+    private
+    let hierarchy:[ScalarAddress: GlobalAddress]
+    let projector:DynamicObject.Projector
+    let docs:Documentation
 
-        private
-        init(hierarchy:[ScalarAddress: GlobalAddress],
-            projector:Projector,
-            docs:Documentation)
-        {
-            self.hierarchy = hierarchy
-            self.projector = projector
-            self.docs = docs
-        }
+    private
+    init(hierarchy:[ScalarAddress: GlobalAddress],
+        projector:DynamicObject.Projector,
+        docs:Documentation)
+    {
+        self.hierarchy = hierarchy
+        self.projector = projector
+        self.docs = docs
     }
 }
-extension DocumentationObject.Context
+extension LocalContext
 {
-    init(projector:DocumentationObject.Projector, docs:Documentation)
+    init(projector:DynamicObject.Projector, docs:Documentation)
     {
         var hierarchy:[ScalarAddress: GlobalAddress] = [:]
             hierarchy.reserveCapacity(docs.graph.count)
@@ -43,7 +40,7 @@ extension DocumentationObject.Context
         self.init(hierarchy: hierarchy, projector: projector, docs: docs)
     }
 }
-extension DocumentationObject.Context
+extension LocalContext
 {
     subscript(address:GlobalAddress) -> SymbolGraph.Node?
     {
@@ -68,12 +65,12 @@ extension DocumentationObject.Context
         self.hierarchy[citizen]
     }
 
-    var translator:DocumentationObject.Translator
+    var translator:DynamicObject.Translator
     {
         self.projector.translator
     }
 }
-extension DocumentationObject.Context:Identifiable
+extension LocalContext:Identifiable
 {
     var id:Int32
     {
@@ -81,7 +78,7 @@ extension DocumentationObject.Context:Identifiable
     }
 }
 
-extension DocumentationObject.Context
+extension LocalContext
 {
     func project(extension:SymbolGraph.Extension, of scope:GlobalAddress) -> ExtensionProjection
     {

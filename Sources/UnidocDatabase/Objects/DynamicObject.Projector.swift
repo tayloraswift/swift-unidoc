@@ -1,7 +1,7 @@
 import SymbolGraphs
 import Symbols
 
-extension DocumentationObject
+extension DynamicObject
 {
     struct Projector
     {
@@ -18,9 +18,9 @@ extension DocumentationObject
         }
     }
 }
-extension DocumentationObject.Projector
+extension DynamicObject.Projector
 {
-    init(translator:DocumentationObject.Translator,
+    init(translator:DynamicObject.Translator,
         upstream:__owned [ScalarSymbol: GlobalAddress],
         docs:__shared Documentation)
     {
@@ -47,7 +47,7 @@ extension DocumentationObject.Projector
             docs: docs)
     }
 }
-extension DocumentationObject.Projector
+extension DynamicObject.Projector
 {
     static
     func * (address:ScalarAddress, self:Self) -> GlobalAddress?

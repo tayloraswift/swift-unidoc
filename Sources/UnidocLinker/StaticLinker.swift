@@ -7,7 +7,7 @@ import SymbolGraphs
 import UnidocCompiler
 
 public
-struct Linker
+struct StaticLinker
 {
     public private(set)
     var docs:Documentation
@@ -36,7 +36,7 @@ struct Linker
         self.files = .init()
     }
 }
-extension Linker
+extension StaticLinker
 {
     /// Indexes the given scalar and appends it to the symbol graph.
     ///
@@ -78,7 +78,7 @@ extension Linker
         } (&self.scalars[scalar])
     }
 }
-extension Linker
+extension StaticLinker
 {
     /// Returns the address of the file with the given identifier,
     /// registering it in the symbol table if needed.
@@ -122,7 +122,7 @@ extension Linker
     }
 }
 
-extension Linker
+extension StaticLinker
 {
     private mutating
     func address(of scalar:ScalarSymbol?) throws -> ScalarAddress?
@@ -191,7 +191,7 @@ extension Linker
         }
     }
 }
-extension Linker
+extension StaticLinker
 {
     private mutating
     func allocate(scalars:[Compiler.Scalar]) throws -> ClosedRange<ScalarAddress>?
@@ -286,7 +286,7 @@ extension Linker
         }
     }
 }
-extension Linker
+extension StaticLinker
 {
     public mutating
     func link(scalars:[[Compiler.Scalar]], at addresses:[ClosedRange<ScalarAddress>?]) throws
