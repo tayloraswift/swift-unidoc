@@ -12,9 +12,9 @@ struct PackageNode:Identifiable
     let dependencies:[Dependency]
 
     public
-    let products:[ProductInfo]
+    let products:[ProductDetails]
     public
-    let modules:[ModuleInfo]
+    let modules:[ModuleDetails]
     /// Lists of excluded sources, one per target node.
     public
     let exclude:[[String]]
@@ -24,8 +24,8 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:PackageIdentifier,
         dependencies:[Dependency],
-        products:[ProductInfo],
-        modules:[ModuleInfo],
+        products:[ProductDetails],
+        modules:[ModuleDetails],
         exclude:[[String]],
         root:Repository.Root)
     {
@@ -50,7 +50,7 @@ extension PackageNode
         var nodes:DigraphExplorer<ProductNode>.Nodes = .init()
         for package:PackageNode in dependencies
         {
-            for product:ProductInfo in package.products
+            for product:ProductDetails in package.products
             {
                 try nodes.index(.init(id: .init(name: product.name, package: package.id),
                     predecessors: product.dependencies.products))
@@ -59,14 +59,14 @@ extension PackageNode
 
         var cache:[ProductIdentifier: [ProductIdentifier]] = [:]
 
-        let products:[ProductInfo] = try self.products.map
+        let products:[ProductDetails] = try self.products.map
         {
             .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: try nodes.included(by: $0.dependencies.products,
                         cache: &cache),
                     modules: $0.dependencies.modules))
         }
-        let modules:[ModuleInfo] = try self.modules.map
+        let modules:[ModuleDetails] = try self.modules.map
         {
             .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: try nodes.included(by: $0.dependencies.products,

@@ -1,5 +1,6 @@
-import SymbolGraphs
 import MongoDB
+import SymbolGraphs
+import Symbols
 
 @frozen public
 struct DocumentationDatabase
@@ -18,6 +19,8 @@ struct DocumentationDatabase
 }
 extension DocumentationDatabase
 {
+    var policies:Policies { .init() }
+
     @inlinable public
     var packages:Packages { .init(database: self.name) }
     @inlinable public
@@ -65,5 +68,57 @@ extension DocumentationDatabase
         case (let version, overwritten: let overwritten):
             return .init(overwritten: overwritten, package: package, version: version)
         }
+    }
+}
+extension DocumentationDatabase
+{
+    public
+    func publish(projecting archive:__owned DocumentationArchive,
+        with session:__shared Mongo.Session) async throws
+    {
+        let context:GlobalContext = try await self.context(publishing: archive, with: session)
+        let _:[ScalarProjection] = context.project()
+    }
+    private
+    func context(publishing archive:__owned DocumentationArchive,
+        with session:__shared Mongo.Session) async throws -> GlobalContext
+    {
+        let dependencies:[DocumentationObject] = try await self.objects.load(
+            archive.metadata.pins(),
+            with: session)
+
+        let translators:[DocumentationObject.Translator] = try dependencies.map
+        {
+            try .init(policies: self.policies, object: $0)
+        }
+
+        var upstream:[ScalarSymbol: GlobalAddress] = [:]
+
+        for (translator, object):(DocumentationObject.Translator, DocumentationObject) in
+            zip(translators, dependencies)
+        {
+            for (offset, symbol):(Int, ScalarSymbol) in object.docs.graph.citizens
+            {
+                upstream[symbol] = translator[scalar: offset]
+            }
+        }
+
+        var context:GlobalContext = .init(current: .init(projector: try .init(
+                policies: self.policies,
+                upstream: upstream,
+                receipt: try await self.push(archive: archive, with: session),
+                docs: archive.docs),
+            docs: archive.docs))
+
+        for (translator, object):(DocumentationObject.Translator, DocumentationObject) in
+            zip(translators, dependencies)
+        {
+            context.upstream[object.package] = .init(projector: .init(
+                    translator: translator,
+                    upstream: upstream,
+                    docs: object.docs),
+                docs: object.docs)
+        }
+        return context
     }
 }

@@ -27,6 +27,17 @@ struct DocumentationObject:Equatable, Sendable
 }
 extension DocumentationObject
 {
+    var stable:Bool
+    {
+        switch self.metadata.ref
+        {
+        case .version?:         return true
+        case .unstable?, nil:   return false
+        }
+    }
+}
+extension DocumentationObject
+{
     enum CodingKeys:String
     {
         case id = "_id"
@@ -34,6 +45,9 @@ extension DocumentationObject
         case version = "V"
         case metadata = "M"
         case docs = "D"
+
+        //  Computed field, outlined for MongoDB’s convenience.
+        case stable = "S"
     }
 
     static
@@ -47,10 +61,13 @@ extension DocumentationObject:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
         bson[.id] = self.id
+
         bson[.package] = self.package
         bson[.version] = self.version
         bson[.metadata] = self.metadata
         bson[.docs] = self.docs
+
+        bson[.stable] = self.stable
     }
 }
 extension DocumentationObject:BSONDocumentDecodable

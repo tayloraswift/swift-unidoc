@@ -2,12 +2,15 @@ import BSONDecoding
 import BSONEncoding
 
 public
-protocol SymbolAddress:Equatable, Hashable, Comparable, Strideable, Sendable
+protocol SymbolAddress:Equatable, Hashable, Comparable, Strideable<Int>, Sendable
 {
-    associatedtype Symbol:Equatable, Hashable, Sendable
-
     init(value:Int32)
     var value:Int32 { get }
+}
+extension SymbolAddress
+{
+    @inlinable public
+    var offset:Int { .init(self.value) }
 }
 extension SymbolAddress where Self:Comparable
 {

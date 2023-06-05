@@ -3,7 +3,7 @@ import BSONEncoding
 import Symbols
 
 @frozen public
-struct ScalarAddress
+struct ScalarAddress:SymbolAddress
 {
     public
     let value:Int32
@@ -13,11 +13,6 @@ struct ScalarAddress
     {
         self.value = value
     }
-}
-extension ScalarAddress:SymbolAddress
-{
-    public
-    typealias Symbol = ScalarSymbol
 }
 extension ScalarAddress
 {

@@ -40,7 +40,7 @@ extension Artifacts
     /// Dumps the symbols for the given targets, using this workspace as the
     /// output directory.
     public static
-    func dump(modules:[ModuleInfo],
+    func dump(modules:[ModuleDetails],
         output:Workspace,
         triple:Triple,
         pretty:Bool = false) async throws -> Self

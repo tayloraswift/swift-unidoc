@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 
-extension ModuleInfo
+extension ModuleDetails
 {
     @frozen public
     enum CodingKeys:String
@@ -14,7 +14,7 @@ extension ModuleInfo
         case location = "L"
     }
 }
-extension ModuleInfo:BSONDocumentEncodable
+extension ModuleDetails:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -30,7 +30,7 @@ extension ModuleInfo:BSONDocumentEncodable
         bson[.location] = self.location
     }
 }
-extension ModuleInfo:BSONDocumentDecodable
+extension ModuleDetails:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

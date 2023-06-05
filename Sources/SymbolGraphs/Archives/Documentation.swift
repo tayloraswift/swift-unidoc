@@ -1,11 +1,12 @@
 import BSONDecoding
 import BSONEncoding
+import Symbols
 
 @frozen public
 struct Documentation:Equatable, Sendable
 {
     public
-    let modules:[Module]
+    var modules:[Module]
     public
     var files:Files
     public

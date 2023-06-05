@@ -122,3 +122,27 @@ extension DocumentationDatabase.Objects
         return (object.version, overwritten: response.upserted.isEmpty)
     }
 }
+extension DocumentationDatabase.Objects
+{
+    func load(_ pins:[String], with session:Mongo.Session) async throws -> [DocumentationObject]
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.Cursor<DocumentationObject>>.init(Self.name,
+                stride: 16,
+                limit: 32)
+            {
+                $0[.filter] = .init
+                {
+                    $0[DocumentationObject[.stable]] = true
+                    $0[DocumentationObject[.id]] = .init
+                    {
+                        $0[.in] = pins
+                    }
+                }
+            },
+            against: self.database)
+        {
+            try await $0.reduce(into: [], +=)
+        }
+    }
+}
