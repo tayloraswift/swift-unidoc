@@ -133,7 +133,7 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let products:[ProductInfo] =
+        let products:[ProductDetails] =
         [
             .init(name: "__stdlib__",
                 type: .library(.automatic),

@@ -1,5 +1,5 @@
 @frozen public
-struct ProductInfo:Equatable, Hashable, Sendable
+struct ProductDetails:Equatable, Hashable, Sendable
 {
     public
     let name:String

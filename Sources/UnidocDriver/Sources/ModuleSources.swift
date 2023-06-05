@@ -4,7 +4,7 @@ import System
 /// Stores information about the source files for a module.
 struct ModuleSources
 {
-    let module:ModuleInfo
+    let module:ModuleDetails
     let path:FilePath?
 
     /// Indicates if the relevant target contains `.swift` sources only.
@@ -21,7 +21,7 @@ struct ModuleSources
     private(set)
     var include:[FilePath]
 
-    init(_ module:ModuleInfo, path:FilePath? = nil)
+    init(_ module:ModuleDetails, path:FilePath? = nil)
     {
         self.module = module
         self.path = path
@@ -33,7 +33,7 @@ struct ModuleSources
 }
 extension ModuleSources
 {
-    init(scanning module:__owned ModuleInfo,
+    init(scanning module:__owned ModuleDetails,
         exclude:__shared [String],
         root:__shared FilePath) throws
     {
@@ -41,7 +41,7 @@ extension ModuleSources
             path: module.location.map { root / $0 } ?? root / "Sources" / "\(module.name)")
     }
     private
-    init(scanning module:__owned ModuleInfo,
+    init(scanning module:__owned ModuleDetails,
         exclude:__shared [String],
         path:__owned FilePath) throws
     {

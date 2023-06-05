@@ -2,13 +2,14 @@ import BSONDecoding
 import BSONEncoding
 
 @frozen public
-struct SymbolTable<Address>:Equatable, Sendable where Address:SymbolAddress
+struct SymbolTable<Address, Symbol>:Equatable, Sendable
+    where Address:SymbolAddress, Symbol:Equatable & Hashable & Sendable
 {
     @usableFromInline internal
-    var elements:[Address.Symbol]
+    var elements:[Symbol]
 
     @inlinable internal
-    init(elements:[Address.Symbol] = [])
+    init(elements:[Symbol] = [])
     {
         self.elements = elements
     }
@@ -30,11 +31,11 @@ extension SymbolTable
     }
 
     public mutating
-    func callAsFunction(_ identity:Address.Symbol) throws -> Address
+    func append(_ symbol:Symbol) throws -> Address
     {
         if  let address:Address = self.next
         {
-            self.elements.append(identity)
+            self.elements.append(symbol)
             return address
         }
         else
@@ -43,32 +44,41 @@ extension SymbolTable
         }
     }
 }
+extension SymbolTable
+{
+    @inlinable public
+    subscript(address:Address) -> Symbol?
+    {
+        let index:Int = address.offset
+        return self.elements.indices.contains(index) ? self.elements[index] : nil
+    }
+}
 extension SymbolTable:RandomAccessCollection
 {
     @inlinable public
-    var startIndex:ScalarAddress
+    var startIndex:Int
     {
-        .init(value: .init(self.elements.startIndex))
+        self.elements.startIndex
     }
     @inlinable public
-    var endIndex:ScalarAddress
+    var endIndex:Int
     {
-        .init(value: .init(self.elements.endIndex))
+        self.elements.endIndex
     }
     @inlinable public
-    subscript(address:ScalarAddress) -> Address.Symbol
+    subscript(index:Int) -> Symbol
     {
         _read
         {
-            yield  self.elements[.init(address.value)]
+            yield  self.elements[index]
         }
         _modify
         {
-            yield &self.elements[.init(address.value)]
+            yield &self.elements[index]
         }
     }
 }
-extension SymbolTable:BSONEncodable, BSONWeakEncodable where Address.Symbol:BSONEncodable
+extension SymbolTable:BSONEncodable, BSONWeakEncodable where Symbol:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)
@@ -76,7 +86,7 @@ extension SymbolTable:BSONEncodable, BSONWeakEncodable where Address.Symbol:BSON
         self.elements.encode(to: &field)
     }
 }
-extension SymbolTable:BSONDecodable where Address.Symbol:BSONDecodable
+extension SymbolTable:BSONDecodable where Symbol:BSONDecodable
 {
     @inlinable public
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws

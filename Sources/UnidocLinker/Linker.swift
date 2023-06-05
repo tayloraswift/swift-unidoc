@@ -25,9 +25,9 @@ struct Linker
 
     public
     init(nominations:Compiler.Nominations,
-        modules:[ModuleInfo])
+        modules:[ModuleDetails])
     {
-        self.docs = .init(modules: modules.map(Documentation.Module.init(stacked:)))
+        self.docs = .init(modules: modules.map(Documentation.Module.init(details:)))
 
         self.nominations = nominations
 
@@ -48,7 +48,7 @@ extension Linker
     private mutating
     func allocate(scalar:Compiler.Scalar) throws -> ScalarAddress
     {
-        let address:ScalarAddress = try self.docs.graph.push(.init(
+        let address:ScalarAddress = try self.docs.graph.append(.init(
                 flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
                 path: scalar.path),
             id: scalar.id)
@@ -68,7 +68,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:ScalarAddress = try self.docs.graph.push(nil, id: scalar)
+                let address:ScalarAddress = try self.docs.graph.append(nil, id: scalar)
                 $0 = address
                 return address
 
@@ -90,7 +90,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:FileAddress = try self.docs.files.symbols(id)
+                let address:FileAddress = try self.docs.files.symbols.append(id)
                 $0 = address
                 return address
 
@@ -111,7 +111,7 @@ extension Linker
             switch $0
             {
             case nil:
-                let address:ScalarAddress = try self.docs.graph.symbols(id)
+                let address:ScalarAddress = try self.docs.graph.symbols.append(id)
                 $0 = address
                 return address
 
@@ -193,29 +193,52 @@ extension Linker
 }
 extension Linker
 {
+    private mutating
+    func allocate(scalars:[Compiler.Scalar]) throws -> ClosedRange<ScalarAddress>?
+    {
+        var addresses:(first:ScalarAddress, last:ScalarAddress)? = nil
+        for scalar:Compiler.Scalar in scalars
+        {
+            let address:ScalarAddress = try self.allocate(scalar: scalar)
+            switch addresses
+            {
+            case  nil:              addresses = (address, address)
+            case (let first, _)?:   addresses = (first,   address)
+            }
+        }
+        return addresses.map { $0.first ... $0.last }
+    }
     /// Allocates and binds addresses for the given array of compiled scalars.
     /// (Binding consists of populating the aperture and phylum of a scalar.)
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
     public mutating
-    func allocate(scalars:[[Compiler.Scalar]]) throws -> [[ScalarAddress]]
+    func allocate(scalars:[[Compiler.Scalar]]) throws -> [ClosedRange<ScalarAddress>?]
     {
-        try scalars.enumerated().map
+        let addresses:[ClosedRange<ScalarAddress>?] = try scalars.map
         {
-            //  TODO: allocate module
-            let module:ModuleIdentifier = self.docs.modules[$0.0].id
-            return try $0.1.map
+            try self.allocate(scalars: $0)
+        }
+        for case (let module, (let addresses?, let scalars))
+            in zip(addresses.indices, zip(addresses, scalars))
+        {
+            let module:ModuleIdentifier =
             {
-                let address:ScalarAddress = try self.allocate(scalar: $0)
-                //  Make the scalars visible to codelink resolution.
-                self.resolver.overload("\(module)" / $0.path, with: .init(
+                $0.range = addresses
+                return $0.id
+            } (&self.docs.modules[module])
+
+            for (address, scalar) in zip(addresses, scalars)
+            {
+                //  Make the scalar visible to codelink resolution.
+                self.resolver.overload("\(module)" / scalar.path, with: .init(
                     target: .scalar(address),
-                    phylum: $0.phylum,
-                    id: $0.id))
-                return address
+                    phylum: scalar.phylum,
+                    id: scalar.id))
             }
         }
+        return addresses
     }
     /// Allocates addresses for the given array of compiled extensions.
     ///
@@ -266,15 +289,15 @@ extension Linker
 extension Linker
 {
     public mutating
-    func link(scalars:[[Compiler.Scalar]], at addresses:[[ScalarAddress]]) throws
+    func link(scalars:[[Compiler.Scalar]], at addresses:[ClosedRange<ScalarAddress>?]) throws
     {
-        for (addresses, scalars):([ScalarAddress], [Compiler.Scalar]) in zip(addresses, scalars)
+        for case (let addresses?, let scalars) in zip(addresses, scalars)
         {
             try self.link(scalars: scalars, at: addresses)
         }
     }
     public mutating
-    func link(scalars:[Compiler.Scalar], at addresses:[ScalarAddress]) throws
+    func link(scalars:[Compiler.Scalar], at addresses:ClosedRange<ScalarAddress>) throws
     {
         for (address, scalar):(ScalarAddress, Compiler.Scalar) in zip(addresses, scalars)
         {

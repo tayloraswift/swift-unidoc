@@ -147,14 +147,16 @@ extension SymbolGraph.Scalar:BSONDocumentDecodable
             flags: try bson[.flags].decode(),
             path: try bson[.path].decode())
 
+        //  Adding the type names here *massively* improves compilation times, for
+        //  some reason...
         self.declaration = .init(
             availability: try bson[.declaration_availability]?.decode() ?? .init(),
-            abridged: .init(
+            abridged: Declaration<ScalarAddress>.Abridged.init(
                 bytecode: try bson[.declaration_abridged_bytecode].decode()),
-            expanded: .init(
+            expanded: Declaration<ScalarAddress>.Expanded.init(
                 bytecode: try bson[.declaration_expanded_bytecode].decode(),
                 links: try bson[.declaration_expanded_links]?.decode() ?? []),
-            generics: .init(
+            generics: GenericSignature<ScalarAddress>.init(
                 constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
                 parameters: try bson[.declaration_generics_parameters]?.decode() ?? []))
 

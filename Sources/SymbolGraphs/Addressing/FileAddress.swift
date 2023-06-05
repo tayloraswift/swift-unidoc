@@ -16,9 +16,6 @@ struct FileAddress
 }
 extension FileAddress:SymbolAddress
 {
-    public
-    typealias Symbol = FileSymbol
-
     @inlinable public
     init(exactly int32:Int32)
     {

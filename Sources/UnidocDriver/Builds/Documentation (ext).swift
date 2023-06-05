@@ -54,7 +54,7 @@ extension Documentation
 
             time.linking = try clock.measure
             {
-                let scalarAddresses:[[ScalarAddress]] = try linker.allocate(
+                let scalarAddresses:[ClosedRange<ScalarAddress>?] = try linker.allocate(
                     scalars: scalars)
                 let extensionAddresses:[(ScalarAddress, Int)] = try linker.allocate(
                     extensions: extensions)

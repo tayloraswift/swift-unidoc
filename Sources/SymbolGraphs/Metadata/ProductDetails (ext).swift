@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 
-extension ProductInfo
+extension ProductDetails
 {
     @frozen public
     enum CodingKeys:String
@@ -13,7 +13,7 @@ extension ProductInfo
         case dependencies_modules = "D"
     }
 }
-extension ProductInfo:BSONDocumentEncodable
+extension ProductDetails:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -26,7 +26,7 @@ extension ProductInfo:BSONDocumentEncodable
         bson[.dependencies_modules] = self.dependencies.modules
     }
 }
-extension ProductInfo:BSONDocumentDecodable
+extension ProductDetails:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

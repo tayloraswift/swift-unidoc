@@ -7,7 +7,7 @@ extension Artifacts
     struct Culture
     {
         public
-        let module:ModuleInfo
+        let module:ModuleDetails
 
         public
         let articles:[FilePath]
@@ -15,7 +15,7 @@ extension Artifacts
         let parts:[FilePath]
 
         @inlinable public
-        init(_ module:ModuleInfo, articles:[FilePath], parts:[FilePath])
+        init(_ module:ModuleDetails, articles:[FilePath], parts:[FilePath])
         {
             self.articles = articles
             self.parts = parts
