@@ -84,6 +84,7 @@ let package:Package = .init(
         .target(name: "CodelinkResolution", dependencies:
             [
                 .target(name: "Codelinks"),
+                .target(name: "ModuleGraphs"),
                 .target(name: "SymbolGraphs"),
             ]),
 
@@ -231,13 +232,6 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "Unidoc",
-            dependencies:
-            [
-                .target(name: "UnidocDriver"),
-            ]),
-
-
         .executableTarget(name: "UnidocServer",
             dependencies:
             [
@@ -340,7 +334,11 @@ let package:Package = .init(
                 .target(name: "UnidocDriver"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ],
-            path: "Tests/UnidocDatabase"),
+            path: "Tests/UnidocDatabase",
+            exclude:
+            [
+                "swift-crosslinks",
+            ]),
 
         .executableTarget(name: "UnidocDriverTests", dependencies:
             [

@@ -1,3 +1,5 @@
+import SymbolGraphs
+
 extension DynamicLinker
 {
     struct Conformances

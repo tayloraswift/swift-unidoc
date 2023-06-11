@@ -47,6 +47,19 @@ extension QualifiedPath
             return nil
         }
     }
+
+    @inlinable internal __consuming
+    func appending(_ component:String) -> Self
+    {
+        var path:Self = self
+        path.suffix.append(component)
+        return path
+    }
+    @inlinable public static
+    func / (self:Self, component:String) -> Self
+    {
+        self.appending(component)
+    }
 }
 extension QualifiedPath:Comparable
 {

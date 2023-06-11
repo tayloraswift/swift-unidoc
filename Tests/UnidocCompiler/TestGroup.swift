@@ -7,17 +7,25 @@ extension TestGroup
 {
     func load(parts filepaths:[FilePath]) -> [SymbolGraphPart]
     {
-        self.do
+        filepaths.compactMap
         {
-            try filepaths.map
+            (path:FilePath) in
+
+            guard   let id:FilePath.Component = self.expect(value: path.lastComponent),
+                    let id:SymbolGraphPart.ID = .init(id.string)
+            else
             {
-                let part:SymbolGraphPart = try .init(parsing: try $0.read([UInt8].self),
-                    id: $0.components.last?.string)
+                return nil
+            }
+            return self.do
+            {
+                let part:SymbolGraphPart = try .init(parsing: try path.read([UInt8].self),
+                    id: id)
 
                 self.expect(part.metadata.version ==? .v(0, 6, 0))
 
                 return part
             }
-        } ?? []
+        }
     }
 }

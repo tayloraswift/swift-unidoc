@@ -46,9 +46,9 @@ extension Compiler
 extension Compiler.Extension
 {
     @inlinable public
-    var extendee:ScalarSymbol
+    var extended:Compiler.ExtendedType
     {
-        self.signature.type
+        self.signature.extended
     }
     @inlinable public
     var conditions:[GenericConstraint<ScalarSymbol>]

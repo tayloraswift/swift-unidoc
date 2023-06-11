@@ -16,17 +16,23 @@ struct Objects:MongoTestBattery
         let repository:String = "https://github.com/apple/swift-nio"
         let archive:(DocumentationArchive, DocumentationArchive, DocumentationArchive)
 
-        archive.0 = try await toolchain.generateDocs(cloning: repository,
+        archive.0 = try await toolchain.generateDocs(for: try await .remote(
+            package: "swift-nio",
+            from: repository,
             at: "2.53.0",
-            in: workspace)
+            in: workspace))
 
-        archive.1 = try await toolchain.generateDocs(cloning: repository,
+        archive.1 = try await toolchain.generateDocs(for: try await .remote(
+            package: "swift-nio",
+            from: repository,
             at: "2.54.0",
-            in: workspace)
+            in: workspace))
 
-        archive.2 = try await toolchain.generateDocs(cloning: repository,
+        archive.2 = try await toolchain.generateDocs(for: try await .remote(
+            package: "swift-nio",
+            from: repository,
             at: "main",
-            in: workspace)
+            in: workspace))
 
         let session:Mongo.Session = try await .init(from: pool)
 

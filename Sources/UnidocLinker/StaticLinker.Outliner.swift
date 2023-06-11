@@ -11,7 +11,7 @@ extension StaticLinker
     struct Outliner
     {
         private
-        let resolver:CodelinkResolver
+        let resolver:StaticResolver
         private
         let scope:[String]
 
@@ -20,7 +20,7 @@ extension StaticLinker
         private(set)
         var referents:[MarkdownArticle.Referent]
 
-        init(resolver:CodelinkResolver, scope:[String])
+        init(resolver:StaticResolver, scope:[String])
         {
             self.resolver = resolver
             self.scope = scope

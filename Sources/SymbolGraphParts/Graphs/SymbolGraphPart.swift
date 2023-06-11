@@ -9,69 +9,80 @@ struct SymbolGraphPart:Equatable, Sendable
     public
     let culture:ModuleIdentifier
     public
+    let colony:ModuleIdentifier?
+    public
     let symbols:[SymbolDescription]
     public
     let relationships:[SymbolRelationship]
 
-    public
-    var id:String?
-
-    init(id:String? = nil,
-        metadata:Metadata,
+    private
+    init(metadata:Metadata,
         culture:ModuleIdentifier,
+        colony:ModuleIdentifier?,
         symbols:[SymbolDescription],
         relationships:[SymbolRelationship])
     {
         self.metadata = metadata
         self.culture = culture
+        self.colony = colony
         self.symbols = symbols
         self.relationships = relationships
-
-        self.id = id
+    }
+}
+extension SymbolGraphPart:Identifiable
+{
+    @inlinable public
+    var id:ID
+    {
+        .init(culture: self.culture, colony: self.colony)
     }
 }
 extension SymbolGraphPart
 {
     public
-    init(parsing string:String, id:String? = nil) throws
+    init(parsing string:String, id:ID) throws
     {
-        try self.init(json: try JSON.Object.init(parsing: string))
-        self.id = id
+        try self.init(json: try JSON.Object.init(parsing: string), id: id)
     }
     public
-    init(parsing utf8:[UInt8], id:String? = nil) throws
+    init(parsing utf8:[UInt8], id:ID) throws
     {
-        try self.init(json: try JSON.Object.init(parsing: utf8))
-        self.id = id
+        try self.init(json: try JSON.Object.init(parsing: utf8), id: id)
     }
 }
-extension SymbolGraphPart:JSONObjectDecodable
+extension SymbolGraphPart
 {
-    public
-    enum CodingKeys:String
+    private
+    init(json:JSON.Object, id:ID) throws
     {
-        case metadata
-
-        case module
-        enum Module:String
+        enum CodingKeys:String
         {
-            case name
+            case metadata
+
+            case module
+            enum Module:String
+            {
+                case name
+            }
+
+            case symbols
+            case relationships
         }
 
-        case symbols
-        case relationships
-    }
-
-    public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
-    {
+        let json:JSON.ObjectDecoder<CodingKeys> = try .init(indexing: json)
         self.init(
             metadata: try json[.metadata].decode(),
             culture: try json[.module].decode(using: CodingKeys.Module.self)
             {
                 try $0[.name].decode()
             },
+            colony: id.colony,
             symbols: try json[.symbols].decode(),
             relationships: try json[.relationships].decode())
+
+        if  self.culture != id.culture
+        {
+            throw IdentificationError.culture(id, expected: self.culture)
+        }
     }
 }

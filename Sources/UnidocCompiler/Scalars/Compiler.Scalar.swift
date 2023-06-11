@@ -115,7 +115,7 @@ extension Compiler.Scalar
 {
     init(from description:__shared SymbolDescription,
         as resolution:__owned ScalarSymbol,
-        in context:__shared Compiler.Context) throws
+        in culture:__shared Compiler.Culture) throws
     {
         guard case .scalar(let phylum) = description.phylum
         else
@@ -126,13 +126,13 @@ extension Compiler.Scalar
         self.init(resolution,
             declaration: description.declaration,
             visibility: description.visibility,
-            location: try description.location?.map(context.resolve(uri:)),
+            location: try description.location?.map(culture.resolve(uri:)),
             phylum: phylum,
             path: description.path)
 
         if  let doccomment:SymbolDescription.Doccomment = description.doccomment
         {
-            self.comment = context.filter(doccomment: doccomment)
+            self.comment = culture.filter(doccomment: doccomment)
         }
     }
 }

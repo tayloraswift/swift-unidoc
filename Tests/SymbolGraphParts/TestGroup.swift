@@ -16,12 +16,18 @@ extension TestGroup
             }
         })
     }
-    func load(part filepath:FilePath) -> SymbolGraphPart?
+    func load(part path:FilePath) -> SymbolGraphPart?
     {
-        self.do
+        guard   let id:FilePath.Component = self.expect(value: path.lastComponent),
+                let id:SymbolGraphPart.ID = .init(id.string)
+        else
         {
-            let part:SymbolGraphPart = try .init(parsing: try filepath.read([UInt8].self),
-                id: filepath.components.last?.stem)
+            return nil
+        }
+        return self.do
+        {
+            let part:SymbolGraphPart = try .init(parsing: try path.read([UInt8].self),
+                id: id)
 
             self.expect(part.metadata.version ==? .v(0, 6, 0))
 

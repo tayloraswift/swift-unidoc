@@ -36,9 +36,10 @@ extension Compiler.Extensions
 {
     mutating
     func include(block:__owned BlockSymbol,
-        extending type:ScalarSymbol,
+        extending type:__owned ScalarSymbol,
+        namespace:__owned Compiler.Namespace.ID,
         with description:SymbolDescription,
-        in context:Compiler.Context) throws
+        in culture:Compiler.Culture) throws
     {
         guard case .block = description.phylum
         else
@@ -49,13 +50,15 @@ extension Compiler.Extensions
             throw Compiler.UnexpectedSymbolError.block(block)
         }
 
-        let `extension`:Compiler.ExtensionObject = self(context.culture.index, type,
+        let `extension`:Compiler.ExtensionObject = self(culture.index, .init(
+                namespace: namespace,
+                type: type),
             where: description.extension.conditions,
             path: description.path)
 
         if  let block:Compiler.Extension.Block = .init(
-                location: try description.location?.map(context.resolve(uri:)),
-                comment: description.doccomment.flatMap(context.filter(doccomment:)))
+                location: try description.location?.map(culture.resolve(uri:)),
+                comment: description.doccomment.flatMap(culture.filter(doccomment:)))
         {
             `extension`.append(block: block)
         }
@@ -84,10 +87,12 @@ extension Compiler.Extensions
     func callAsFunction(_ culture:Int, _ extended:Compiler.ScalarObject,
         where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionObject
     {
-        self(culture, extended.id, where: conditions, path: extended.value.path)
+        self(culture, .init(namespace: extended.namespace, type: extended.id),
+            where: conditions,
+            path: extended.value.path)
     }
     private mutating
-    func callAsFunction(_ culture:Int, _ extended:ScalarSymbol,
+    func callAsFunction(_ culture:Int, _ extended:Compiler.ExtendedType,
         where conditions:[GenericConstraint<ScalarSymbol>],
         path:UnqualifiedPath) -> Compiler.ExtensionObject
     {

@@ -25,9 +25,9 @@ extension LocalContext
         var hierarchy:[ScalarAddress: GlobalAddress] = [:]
             hierarchy.reserveCapacity(docs.graph.count)
 
-        for scope:ScalarAddress in docs.graph.allocated
+        for (scope, node):(ScalarAddress, SymbolGraph.Node) in docs.graph
         {
-            for `extension`:SymbolGraph.Extension in docs.graph[allocated: scope].extensions
+            for `extension`:SymbolGraph.Extension in node.extensions
             {
                 for nested:ScalarAddress in `extension`.nested
                     where docs.graph.citizens.contains(nested)
@@ -46,19 +46,12 @@ extension LocalContext
     {
         //  Can use ``subscript(allocated:)`` because global addresses only
         //  reference citizen symbols.
-        (address / self.projector).map { self.docs.graph[allocated: $0] }
+        (address / self.projector).map { self.docs.graph.nodes[$0] }
     }
 
     func scope(of address:GlobalAddress) -> GlobalAddress?
     {
-        if  let address:ScalarAddress = address / self.projector
-        {
-            return self.scope(of: address)
-        }
-        else
-        {
-            return nil
-        }
+        (address / self.projector).map(self.scope(of:)) ?? nil
     }
     func scope(of citizen:ScalarAddress) -> GlobalAddress?
     {

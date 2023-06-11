@@ -9,42 +9,46 @@ extension Compiler
     struct Scalars
     {
         private
-        var entries:[ScalarSymbol: Entry]
-        /// The total number of modules compiled so far.
+        var cultures:[ModuleIdentifier: Int]
         private
-        var modules:Int
-
+        var entries:[ScalarSymbol: Entry]
         private
         let root:Repository.Root?
 
         init(root:Repository.Root?)
         {
+            self.cultures = [:]
             self.entries = [:]
-            self.modules = 0
-
             self.root = root
         }
     }
 }
 extension Compiler.Scalars
 {
-    /// Loads all the scalars compiled to far, grouped by culture. This function returns
-    /// one `[Compiler.Scalar]` array in the `local` tuple component for each time that
-    /// ``Compiler.compile(culture:parts:)`` was called, *in the order those calls were
-    /// originally made*. Within each array, the scalars are sorted alphabetically by
-    /// mangled name. The `external` tuple component contains information about foreign
-    /// symbols mentioned by the compiled scalars.
+    /// Loads all the scalars compiled to far, grouped by culture.
+    ///
+    /// This function returns one `[Compiler.Namespace]` array in the `local` tuple
+    /// component for each time that ``Compiler.compile(culture:parts:)`` was called,
+    /// *in the order those calls were originally made*. Within each namespace, the
+    /// scalars are sorted alphabetically by mangled name. The namespaces will always
+    /// contain at least one scalar.
+    ///
+    /// The `external` tuple component contains information about foreign symbols
+    /// mentioned by the compiled scalars.
     public
-    func load() -> (local:[[Compiler.Scalar]], external:Compiler.Nominations)
+    func load() -> (namespaces:[[Compiler.Namespace]], external:Compiler.Nominations)
     {
-        var included:[[Compiler.Scalar]] = .init(repeating: [], count: self.modules)
+        var included:[[Compiler.Namespace.ID: [Compiler.Scalar]]] = .init(repeating: [:],
+            count: self.cultures.count)
+
         let external:[ScalarSymbol: Compiler.Nomination] =
             self.entries.compactMapValues
         {
             switch $0
             {
             case .included(let reference):
-                included[reference.culture].append(reference.value)
+                included[reference.culture][reference.namespace, default: []].append(
+                    reference.value)
                 return nil
 
             case .excluded:
@@ -54,28 +58,50 @@ extension Compiler.Scalars
                 return nomination
             }
         }
-        //  sort scalars by mangled name. do not re-order the cultures themselves;
-        //  their ordering is significant.
-        for culture:Int in included.indices
+        let namespaces:[[Compiler.Namespace]] = included.map
         {
-            included[culture].sort { $0.id < $1.id }
+            //  sort scalars by mangled name, and namespaces by id.
+            //  do not re-order the cultures themselves; their ordering is significant.
+            $0.sorted
+            {
+                $0.key < $1.key
+            }
+            .map
+            {
+                .init(scalars: $0.value.sorted { $0.id < $1.id }, id: $0.key)
+            }
         }
-
-        return (included, .init(external))
+        return (namespaces, .init(external))
     }
 }
 extension Compiler.Scalars
 {
     mutating
-    func include(culture:ModuleIdentifier) -> Compiler.Context
+    func include(culture:ModuleIdentifier) throws -> Compiler.Culture
     {
-        defer { self.modules += 1 }
-        return .init(culture: (id: culture, index: self.modules), root: self.root)
+        let next:Int = self.cultures.count
+
+        try
+        {
+            if case nil = $0
+            {
+                $0 = next
+            }
+            else
+            {
+                throw Compiler.DuplicateModuleError.culture(culture)
+            }
+        }(&self.cultures[culture])
+
+        return .init(id: culture, index: next, root: self.root)
     }
+}
+extension Compiler.Scalars
+{
     mutating
     func include(vector resolution:VectorSymbol, with description:SymbolDescription) throws
     {
-        if case .scalar(let phylum) = description.phylum
+        if  case .scalar(let phylum) = description.phylum
         {
             { _ in }(&self.entries[resolution.feature,
                 default: .nominated(.init(description.path.last, phylum: phylum))])
@@ -87,15 +113,17 @@ extension Compiler.Scalars
     }
     mutating
     func include(scalar resolution:ScalarSymbol,
+        namespace:__owned Compiler.Namespace.ID,
         with description:SymbolDescription,
-        in context:Compiler.Context) throws
+        in culture:Compiler.Culture) throws
     {
         try self.update(resolution, with: .included(.init(
             conditions: description.extension.conditions,
-            culture: context.culture.index,
+            namespace: namespace,
+            culture: culture.index,
             value: .init(from: description,
                 as: resolution,
-                in: context))))
+                in: culture))))
     }
     mutating
     func exclude(scalar resolution:ScalarSymbol) throws
@@ -130,6 +158,11 @@ extension Compiler.Scalars
 }
 extension Compiler.Scalars
 {
+    subscript(namespace namespace:ModuleIdentifier) -> Compiler.Namespace.ID
+    {
+        self.cultures[namespace].map(Compiler.Namespace.ID.index(_:)) ?? .nominated(namespace)
+    }
+
     subscript(resolution:ScalarSymbol) -> ScalarSymbol?
     {
         switch self.entries[resolution]

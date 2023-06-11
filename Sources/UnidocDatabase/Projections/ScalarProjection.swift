@@ -1,4 +1,5 @@
 import Declarations
+import SymbolGraphs
 
 @frozen public
 struct ScalarProjection:Equatable, Sendable

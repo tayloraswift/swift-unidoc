@@ -34,8 +34,8 @@ enum Main:AsyncTests
             let tests:TestGroup = tests / "standard-library",
             let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocsForStandardLibrary(
-                    in: try await workspace.create("swift@\(toolchain.version.canonical)",
+                try await toolchain.generateDocs(for: try await .swift(
+                        in: workspace,
                         clean: true),
                     pretty: true)
             })
@@ -50,12 +50,13 @@ enum Main:AsyncTests
             let tests:TestGroup = tests / "swift-atomics",
             let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocs(
-                    cloning: "https://github.com/apple/swift-atomics.git",
-                    at: "1.1.0",
-                    in: workspace,
-                    pretty: true,
-                    clean: true)
+                try await toolchain.generateDocs(for: try await .remote(
+                        package: "swift-atomics",
+                        from: "https://github.com/apple/swift-atomics.git",
+                        at: "1.1.0",
+                        in: workspace,
+                        clean: true),
+                    pretty: true)
             })
         {
             TestRoundtripping(tests,
@@ -68,12 +69,13 @@ enum Main:AsyncTests
             let tests:TestGroup = tests / "swift-nio",
             let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocs(
-                    cloning: "https://github.com/apple/swift-nio.git",
-                    at: "2.53.0",
-                    in: workspace,
-                    pretty: true,
-                    clean: true)
+                try await toolchain.generateDocs(for: try await .remote(
+                        package: "swift-nio",
+                        from: "https://github.com/apple/swift-nio.git",
+                        at: "2.53.0",
+                        in: workspace,
+                        clean: true),
+                    pretty: true)
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
@@ -96,12 +98,13 @@ enum Main:AsyncTests
             let tests:TestGroup = tests / "swift-nio-ssl",
             let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocs(
-                    cloning: "https://github.com/apple/swift-nio-ssl.git",
-                    at: "2.24.0",
-                    in: workspace,
-                    pretty: true,
-                    clean: true)
+                try await toolchain.generateDocs(for: try await .remote(
+                        package: "swift-nio-ssl",
+                        from: "https://github.com/apple/swift-nio-ssl.git",
+                        at: "2.24.0",
+                        in: workspace,
+                        clean: true),
+                    pretty: true)
             })
         {
             tests.expect(documentation.metadata.dependencies.map(\.package) **?
@@ -123,12 +126,13 @@ enum Main:AsyncTests
             let tests:TestGroup = tests / "swift-syntax",
             let documentation:DocumentationArchive = (await tests.do
             {
-                try await toolchain.generateDocs(
-                    cloning: "https://github.com/apple/swift-syntax.git",
-                    at: "508.0.0",
-                    in: workspace,
-                    pretty: true,
-                    clean: true)
+                try await toolchain.generateDocs(for: try await .remote(
+                        package: "swift-syntax",
+                        from: "https://github.com/apple/swift-syntax.git",
+                        at: "508.0.0",
+                        in: workspace,
+                        clean: true),
+                    pretty: true)
             })
         {
             //  the swift-argument-parser dependency should have been linted.

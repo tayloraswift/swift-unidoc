@@ -16,8 +16,12 @@ struct StaticLinker
     let nominations:Compiler.Nominations
 
     private
-    var resolver:CodelinkResolver
+    var resolver:StaticResolver
 
+    /// Interned module names. This only contains modules that
+    /// are not included in the symbol graph being linked.
+    private
+    var modules:[ModuleIdentifier: Int]
     private
     var scalars:[ScalarSymbol: ScalarAddress]
     private
@@ -27,13 +31,15 @@ struct StaticLinker
     init(nominations:Compiler.Nominations,
         modules:[ModuleDetails])
     {
-        self.docs = .init(modules: modules.map(Documentation.Module.init(details:)))
+        self.docs = .init(modules: modules)
 
         self.nominations = nominations
 
         self.resolver = .init()
-        self.scalars = .init()
-        self.files = .init()
+
+        self.modules = [:]
+        self.scalars = [:]
+        self.files = [:]
     }
 }
 extension StaticLinker
@@ -62,7 +68,7 @@ extension StaticLinker
     private mutating
     func allocate(extension:Compiler.Extension) throws -> ScalarAddress
     {
-        let scalar:ScalarSymbol = `extension`.extendee
+        let scalar:ScalarSymbol = `extension`.extended.type
         return try
         {
             switch $0
@@ -119,6 +125,32 @@ extension StaticLinker
                 return address
             }
         } (&self.scalars[id])
+    }
+
+    private mutating
+    func intern(_ id:ModuleIdentifier) -> Int
+    {
+        {
+            switch $0
+            {
+            case nil:
+                let index:Int = self.docs.graph.append(id)
+                $0 = index
+                return index
+
+            case let index?:
+                return index
+            }
+        } (&self.modules[id])
+    }
+    private mutating
+    func intern(_ id:Compiler.Namespace.ID) -> Int
+    {
+        switch id
+        {
+        case .index(let culture):   return culture
+        case .nominated(let id):    return self.intern(id)
+        }
     }
 }
 
@@ -182,7 +214,7 @@ extension StaticLinker
                 self.nominations[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
-                self.resolver.overload("\(prefix.0)" / .init(prefix.1, last), with: .init(
+                self.resolver.overload(prefix.0 / .init(prefix.1, last), with: .init(
                     target: .vector(feature, self: address),
                     phylum: phylum,
                     id: vector))
@@ -194,7 +226,7 @@ extension StaticLinker
 extension StaticLinker
 {
     private mutating
-    func allocate(scalars:[Compiler.Scalar]) throws -> ClosedRange<ScalarAddress>?
+    func allocate(scalars:[Compiler.Scalar]) throws -> ClosedRange<ScalarAddress>
     {
         var addresses:(first:ScalarAddress, last:ScalarAddress)? = nil
         for scalar:Compiler.Scalar in scalars
@@ -206,41 +238,62 @@ extension StaticLinker
             case (let first, _)?:   addresses = (first,   address)
             }
         }
-        return addresses.map { $0.first ... $0.last }
+        if  case (let first, let last)? = addresses
+        {
+            return first ... last
+        }
+        else
+        {
+            fatalError("cannot allocate empty scalar array")
+        }
     }
-    /// Allocates and binds addresses for the given array of compiled scalars.
-    /// (Binding consists of populating the aperture and phylum of a scalar.)
+    /// Allocates and binds addresses for the scalars stored in the given array
+    /// of compiled namespaces. (Binding consists of populating the aperture and
+    /// phylum of a scalar.) This function also exposes each of the scalars for
+    /// codelink resolution.
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
     public mutating
-    func allocate(scalars:[[Compiler.Scalar]]) throws -> [ClosedRange<ScalarAddress>?]
+    func allocate(namespaces:[[Compiler.Namespace]]) throws -> [[ClosedRange<ScalarAddress>]]
     {
-        let addresses:[ClosedRange<ScalarAddress>?] = try scalars.map
+        let ranges:[[ClosedRange<ScalarAddress>]] = try namespaces.map
         {
-            try self.allocate(scalars: $0)
+            try $0.map { try self.allocate(scalars: $0.scalars) }
         }
-        for case (let module, (let addresses?, let scalars))
-            in zip(addresses.indices, zip(addresses, scalars))
+        for ((culture, ranges), sources):
+            (
+                (Int, [ClosedRange<ScalarAddress>]),
+                [Compiler.Namespace]
+            )
+            in zip(zip(ranges.indices, ranges), namespaces)
         {
-            let module:ModuleIdentifier =
+            let namespaces:[SymbolGraph.Namespace] = zip(ranges, sources).map
             {
-                $0.range = addresses
-                return $0.id
-            } (&self.docs.modules[module])
+                .init(range: $0.0, index: self.intern($0.1.id))
+            }
+            //  Record address ranges
+            self.docs.graph.cultures[culture].namespaces = namespaces
 
-            for (address, scalar) in zip(addresses, scalars)
+            for (namespace, source):(SymbolGraph.Namespace, Compiler.Namespace)
+                in zip(namespaces, sources)
             {
-                //  Make the scalar visible to codelink resolution.
-                self.resolver.overload("\(module)" / scalar.path, with: .init(
-                    target: .scalar(address),
-                    phylum: scalar.phylum,
-                    id: scalar.id))
+                let qualifier:ModuleIdentifier = self.docs.graph.namespaces[namespace.index]
+                for (address, scalar) in zip(namespace.range, source.scalars)
+                {
+                    //  Make the scalar visible to codelink resolution.
+                    self.resolver.overload(qualifier / scalar.path, with: .init(
+                        target: .scalar(address),
+                        phylum: scalar.phylum,
+                        id: scalar.id))
+                }
             }
         }
-        return addresses
+        return ranges
     }
     /// Allocates addresses for the given array of compiled extensions.
+    /// This function also exposes any features conceived by the extensions for
+    /// codelink resolution.
     ///
     /// -   Returns:
     ///     An (address, index) tuple for each compiled extension. If the
@@ -258,19 +311,21 @@ extension StaticLinker
         }
         return try zip(addresses, extensions).map
         {
-            let culture:ModuleIdentifier = self.docs.modules[$0.1.signature.culture].id
+            let namespace:Int = self.intern($0.1.signature.extended.namespace)
+            let qualifier:ModuleIdentifier = self.docs.graph.namespaces[namespace]
+
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[ScalarAddress] = try self.addresses(
                 of: $0.1.conformances.sorted())
             let features:[ScalarAddress] = try self.addresses(
                 exposing: $0.1.features.sorted(),
-                prefixed: (culture, $0.1.path),
-                of: $0.1.extendee,
+                prefixed: (qualifier, $0.1.path),
+                of: $0.1.extended.type,
                 at: $0.0)
             let nested:[ScalarAddress] = try self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.docs.graph[allocated: $0.0].push(.init(
+            let index:Int = self.docs.graph.nodes[$0.0].push(.init(
                 conditions: try $0.1.conditions.map
                 {
                     try $0.map
@@ -278,6 +333,7 @@ extension StaticLinker
                         try self.intern($0)
                     }
                 },
+                namespace: namespace,
                 culture: $0.1.signature.culture,
                 conformances: conformances,
                 features: features,
@@ -289,11 +345,16 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func link(scalars:[[Compiler.Scalar]], at addresses:[ClosedRange<ScalarAddress>?]) throws
+    func link(namespaces:[[Compiler.Namespace]],
+        at addresses:[[ClosedRange<ScalarAddress>]]) throws
     {
-        for case (let addresses?, let scalars) in zip(addresses, scalars)
+        for (namespaces, addresses):([Compiler.Namespace], [ClosedRange<ScalarAddress>])
+            in zip(namespaces, addresses)
         {
-            try self.link(scalars: scalars, at: addresses)
+            for (namespace, addresses) in zip(namespaces, addresses)
+            {
+                try self.link(scalars: namespace.scalars, at: addresses)
+            }
         }
     }
     public mutating
@@ -330,7 +391,7 @@ extension StaticLinker
 
                 $0?.location = location
                 $0?.article = article
-            } (&self.docs.graph[allocated: address].scalar)
+            } (&self.docs.graph.nodes[address].scalar)
         }
     }
     public mutating
@@ -365,7 +426,7 @@ extension StaticLinker
             if  let comment
             {
                 var outliner:Outliner = .init(resolver: self.resolver, scope: `extension`.path)
-                self.docs.graph[allocated: address].extensions[index].article =
+                self.docs.graph.nodes[address].extensions[index].article =
                     outliner.link(comment: comment)
             }
         }

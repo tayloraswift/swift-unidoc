@@ -13,6 +13,7 @@ extension Compiler
     class ScalarObject
     {
         let conditions:[GenericConstraint<ScalarSymbol>]
+        let namespace:Namespace.ID
         let culture:Int
 
         /// The type of the superforms tracked by ``\.value.superforms``.
@@ -25,10 +26,12 @@ extension Compiler
         var value:Scalar
 
         init(conditions:[GenericConstraint<ScalarSymbol>],
+            namespace:Namespace.ID,
             culture:Int,
             value:Scalar)
         {
             self.conditions = conditions
+            self.namespace = namespace
             self.culture = culture
 
             self.superforms = nil

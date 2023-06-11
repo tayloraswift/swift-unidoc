@@ -1,6 +1,7 @@
 import ModuleGraphs
 import PackageGraphs
 import PackageMetadata
+import SymbolGraphParts
 import System
 
 public
@@ -122,39 +123,36 @@ extension Artifacts
             "std",                          // unbuildable
         ]
 
-        var parts:[ModuleIdentifier: [FilePath.Component]] = [:]
+        var parts:[ModuleIdentifier: [SymbolGraphPart.ID]] = [:]
         for part:Result<FilePath.Component, any Error> in output.path.directory
         {
-            let part:FilePath.Component = try part.get()
-            let names:[Substring] = part.string.split(separator: ".")
             //  We don’t want to *parse* the JSON yet to discover the culture,
             //  because the JSON can be very large, and parsing JSON is very
             //  expensive (compared to parsing BSON). So we trust that the
             //  file name is correct and indicates what is contained within the
             //  file.
-            if  names.count == 3,
-                names[1 ... 2] == ["symbols", "json"]
+            if  let id:SymbolGraphPart.ID = .init("\(try part.get())"),
+                !blacklisted.contains(id.namespace)
             {
-                let components:[Substring] = names[0].split(separator: "@", maxSplits: 1)
-                if  components.count == 2,
-                    blacklisted.contains(.init(String.init(components[1])))
-                {
-                    continue
-                }
-                guard let culture:Substring = components.first
-                else
-                {
-                    continue
-                }
-
-                parts[.init(String.init(culture)), default: []].append(part)
+                parts[id.culture, default: []].append(id)
             }
         }
 
         return try modules.map
         {
-            try .init(sources: $0,
-                parts: parts[$0.module.id, default: []].map { output.path / $0 })
+            let parts:[SymbolGraphPart.ID]? = parts[$0.module.id]
+            if  case .swift = $0.language,
+                case nil = parts
+            {
+                throw Artifacts.CultureError.empty($0.module.id)
+            }
+            else
+            {
+                return .init($0.module,
+                    articles: $0.articles,
+                    artifacts: output.path,
+                    parts: parts ?? [])
+            }
         }
     }
 }

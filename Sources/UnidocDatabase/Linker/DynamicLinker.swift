@@ -1,3 +1,60 @@
+import CodelinkResolution
+import LexicalPaths
+import ModuleGraphs
+
+extension DynamicResolver
+{
+    init(context:__shared GlobalContext)
+    {
+        self.init()
+
+        for upstream:LocalContext in context.upstream.values
+        {
+            self.expose(upstream: upstream, context: context)
+        }
+    }
+
+    private mutating
+    func expose(upstream:LocalContext, context:GlobalContext)
+    {
+        for (scope, node):(ScalarAddress, SymbolGraph.Node) in upstream.docs.graph
+            where !node.extensions.isEmpty
+        {
+            let symbol:ScalarSymbol = upstream.docs.graph.symbols[scope]
+
+            //  Extension may extend a scalar from a different package.
+            guard   let scope:GlobalAddress = scope * upstream.projector,
+                    let nationality:LocalContext = context[scope.package],
+                    let outer:SymbolGraph.Scalar = nationality[scope]?.scalar
+            else
+            {
+                continue
+            }
+
+            for `extension`:SymbolGraph.Extension in node.extensions
+                where !`extension`.features.isEmpty
+            {
+                let qualifier:ModuleIdentifier =
+                    upstream.docs.graph.namespaces[`extension`.namespace]
+                for feature:ScalarAddress in `extension`.features
+                {
+                    let symbol:VectorSymbol = .init(upstream.docs.graph.symbols[feature],
+                        self: symbol)
+
+                    if  let feature:GlobalAddress = feature * upstream.projector,
+                        let inner:SymbolGraph.Scalar = context[feature]
+                    {
+                        self.overload(qualifier / outer.path / inner.path.last,
+                            with: .init(target: .vector(feature, self: scope),
+                                phylum: inner.phylum,
+                                id: symbol))
+                    }
+                }
+            }
+        }
+    }
+}
+
 import SymbolGraphs
 import Symbols
 
@@ -24,8 +81,43 @@ extension DynamicLinker
 {
     init(context:GlobalContext)
     {
-        var extensions:Extensions = .init()
-        let conformances:[Conformances] = extensions.conformances(in: context.current)
+        var extensions:Extensions = [:]
+        let conformances:[Conformances] = context.current.docs.graph.map
+        {
+            if  $0.node.extensions.isEmpty
+            {
+                return [:]
+            }
+            guard let scope:GlobalAddress = $0.address * context.current.projector
+            else
+            {
+                return [:]
+            }
+
+            var conformances:DynamicLinker.Conformances = [:]
+            for `extension`:SymbolGraph.Extension in $0.node.extensions
+            {
+                let projected:ExtensionProjection = context.current.project(
+                    extension: `extension`,
+                    of: scope)
+
+                //  we only need the conformances if the scalar has unqualified features
+                if case false? = $0.node.scalar?.features.isEmpty
+                {
+                    for `protocol`:GlobalAddress in projected.conformances
+                    {
+                        conformances[to: `protocol`].append(projected.signature)
+                    }
+                }
+
+                //  It’s possible for two locally-disjoint extensions to coalesce
+                //  into a single global extension due to constraint dropping...
+                extensions[projected.signature].merge(with: projected)
+            }
+
+            return conformances
+        }
+
         self.init(context: context, extensions: extensions, conformances: conformances)
     }
 }
@@ -40,63 +132,62 @@ extension DynamicLinker
     {
         var scalars:[ScalarProjection] = []
 
-        for (culture, module):(Int, Documentation.Module)
-            in self.current.docs.modules.enumerated()
+        for (index, culture):(Int, SymbolGraph.Culture)
+            in self.current.docs.graph.cultures.enumerated()
         {
-            guard let range:ClosedRange<ScalarAddress> = module.range
-            else
+            let culture:(address:GlobalAddress, value:SymbolGraph.Culture) =
+            (
+                self.current.translator[culture: index],
+                culture
+            )
+            for namespace:SymbolGraph.Namespace in culture.value.namespaces
             {
-                continue
-            }
-
-            let cultureID:GlobalAddress = self.current.translator[culture: culture]
-            for citizen:ScalarAddress in range
-            {
-                let node:SymbolGraph.Node = self.current.docs.graph[allocated: citizen]
-
-                guard   let scalar:SymbolGraph.Scalar = node.scalar,
-                        let citizenID:GlobalAddress = citizen * self.current.projector
-                else
+                for citizen:ScalarAddress in namespace.range
                 {
-                    continue
-                }
+                    let conformances:Conformances = self.conformances[citizen.offset]
+                    let scope:GlobalAddress? = self.current.scope(of: citizen)
+                    let node:SymbolGraph.Node = self.current.docs.graph.nodes[citizen]
 
-                for feature:ScalarAddress in scalar.features
-                {
-                    if  let featureID:GlobalAddress = feature * self.current.projector,
-                        let `protocol`:GlobalAddress = self.current.scope(of: feature)
+                    //  Ceremonial unwraps, should always succeed since we are only iterating
+                    //  over module ranges.
+                    guard   let citizen:GlobalAddress = citizen * self.current.projector,
+                            let scalar:SymbolGraph.Scalar = node.scalar
+                    else
                     {
-                        //  now that we know the address of the feature’s original protocol,
-                        //  we can look up the constraints for the conformance(s) that
-                        //  conceived it.
-                        for conformance:GlobalSignature in self.conformances[citizen.offset][
-                            to: `protocol`]
+                        continue
+                    }
+
+                    for feature:ScalarAddress in scalar.features
+                    {
+                        if  let `protocol`:GlobalAddress = self.current.scope(of: feature),
+                            let feature:GlobalAddress = feature * self.current.projector
                         {
-                            self.extensions[conformance].features.append(featureID)
+                            //  now that we know the address of the feature’s original protocol,
+                            //  we can look up the constraints for the conformance(s) that
+                            //  conceived it.
+                            for conformance:GlobalSignature in conformances[to: `protocol`]
+                            {
+                                self.extensions[conformance].features.append(feature)
+                            }
                         }
                     }
-                }
-                for superform:ScalarAddress in scalar.superforms
-                {
-                    if  let superformID:GlobalAddress = superform * self.current.projector
+                    for superform:ScalarAddress in scalar.superforms
                     {
-                        let implicit:GlobalSignature = .init(conditions: [],
-                            culture: cultureID,
-                            scope: superformID)
+                        if  let superform:GlobalAddress = superform * self.current.projector
+                        {
+                            let implicit:GlobalSignature = .init(conditions: [],
+                                culture: culture.address,
+                                scope: superform)
 
-                        self.extensions[implicit].subforms.append(citizenID)
+                            self.extensions[implicit].subforms.append(citizen)
+                        }
                     }
-                }
 
-                let scope:[GlobalAddress]? = self.current.scope(of: citizen).map
-                {
-                    self.context.expand($0)
+                    scalars.append(.init(id: citizen,
+                        culture: culture.address,
+                        scope: scope.map(self.context.expand),
+                        declaration: scalar.declaration.map { $0 * self.current.projector }))
                 }
-
-                scalars.append(.init(id: citizenID,
-                    culture: cultureID,
-                    scope: scope,
-                    declaration: scalar.declaration.map { $0 * self.current.projector }))
             }
         }
 

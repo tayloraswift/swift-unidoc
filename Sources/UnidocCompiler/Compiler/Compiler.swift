@@ -30,59 +30,66 @@ extension Compiler
         for part:SymbolGraphPart in parts where part.culture != culture
         {
             throw CultureError.init(
-                underlying: ModuleError.init(unexpected: part.culture, part: part.id),
+                underlying: UnexpectedModuleError.culture(part.culture, in: part.id),
                 culture: culture)
         }
 
-        let context:Context = self.scalars.include(culture: culture)
+        let culture:Culture = try self.scalars.include(culture: culture)
 
         do
         {
-            try self.compile(parts: parts, in: context)
+            try self.compile(parts: parts, in: culture)
         }
         catch let error
         {
-            throw CultureError.init(underlying: error, culture: culture)
+            throw CultureError.init(underlying: error, culture: culture.id)
         }
     }
     private mutating
-    func compile(parts:[SymbolGraphPart], in context:Context) throws
+    func compile(parts:[SymbolGraphPart], in culture:Culture) throws
     {
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SymbolGraphPart in parts
         {
+            let namespace:Namespace.ID = part.colony.map { self.scalars[namespace: $0] }
+                ?? .index(culture.index)
+
             //  Map extension block names to extended type identifiers.
             let extensions:ExtendedTypes = try .init(indexing: part)
             for symbol:SymbolDescription in part.symbols
             {
                 do
                 {
-                    switch (symbol.usr, included: self.threshold <= symbol.visibility)
+                    switch (symbol.usr, excluded: symbol.visibility < self.threshold)
                     {
-                    case (.vector, included: false):
+                    case (.vector, excluded: true):
                         //  We do not care about vectors materialized for internal
                         //  types, or vectors materialized from internal scalars.
                         continue
 
-                    case (.vector(let vector), included: true):
+                    case (.vector(let vector), excluded: false):
                         //  Compound symbol descriptions are mostly useless. (They do
                         //  not tell us anything useful their generic/extension contexts.)
                         //  But we need to remember their names to perform codelink
                         //  resolution.
                         try self.scalars.include(vector: vector, with: symbol)
 
-                    case (.scalar(let scalar), included: let included):
-                        included ?
-                        try self.scalars.include(scalar: scalar, with: symbol, in: context) :
-                        try self.scalars.exclude(scalar: scalar)
+                    case (.scalar(let scalar), excluded: let excluded):
+                        excluded ?
+                        try self.scalars.exclude(scalar: scalar) :
+                        try self.scalars.include(scalar: scalar,
+                            namespace: namespace,
+                            with: symbol,
+                            in: culture)
 
-                    case (.block(let block), included: true):
+                    case (.block(let block), excluded: false):
                         try self.extensions.include(block: block,
                             extending: try extensions.extendee(of: block),
+                            namespace: namespace,
                             with: symbol,
-                            in: context)
+                            in: culture)
 
-                    case (.block, included: false):
+                    case (.block, excluded: true):
                         //  We do not care about extension blocks that only contain
                         //  internal/private members.
                         continue
@@ -107,10 +114,10 @@ extension Compiler
                         continue // Already handled these.
 
                     case .requirement(let requirement):
-                        try self.assign(requirement, by: context.culture.index)
+                        try self.assign(requirement, by: culture.index)
 
                     case .membership(let membership):
-                        try self.assign(membership, by: context.culture.index)
+                        try self.assign(membership, by: culture.index)
 
                     case .conformance, .defaultImplementation, .inheritance, .override:
                         continue // Next pass.
@@ -134,7 +141,7 @@ extension Compiler
                         continue // Already handled these.
 
                     case .conformance(let conformance):
-                        try self.insert(conformance, by: context.culture.index)
+                        try self.insert(conformance, by: culture.index)
 
                     case .defaultImplementation(let relationship):
                         try self.insert(relationship)
@@ -217,13 +224,13 @@ extension Compiler
             case .block(let block):
                 //  Look up the extension associated with this block name.
                 let group:ExtensionObject = try self.extensions.named(block)
-                if  group.extendee == vector.heir
+                if  group.extended.type == vector.heir
                 {
                     group.add(feature: feature)
                 }
                 else
                 {
-                    throw FeatureError.init(invalid: group.extendee)
+                    throw FeatureError.init(invalid: group.extended.type)
                 }
             }
 
