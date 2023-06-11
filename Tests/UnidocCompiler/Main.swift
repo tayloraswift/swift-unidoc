@@ -42,13 +42,16 @@ enum Main:SyncTests
 
                 if  let tests:TestGroup = tests / "locations"
                 {
-                    for scalar:Compiler.Scalar
-                        in compiler.scalars.load().local.joined()
+                    for namespace:Compiler.Namespace
+                        in compiler.scalars.load().namespaces.joined()
                     {
-                        if  let location:SourceLocation<FileSymbol> = tests.expect(
-                                value: scalar.location)
+                        for scalar:Compiler.Scalar in namespace.scalars
                         {
-                            tests.expect(true: location.file.path.starts(with: "Snippets/"))
+                            if  let location:SourceLocation<FileSymbol> = tests.expect(
+                                    value: scalar.location)
+                            {
+                                tests.expect(true: location.file.path.starts(with: "Snippets/"))
+                            }
                         }
                     }
                 }

@@ -417,11 +417,5 @@ enum Main:SyncTests
                 }
             }
         }
-
-        if  let tests:TestGroup = tests / "protocols",
-            let _:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/Protocols.symbols.json")
-        {
-        }
     }
 }

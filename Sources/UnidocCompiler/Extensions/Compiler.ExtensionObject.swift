@@ -21,9 +21,9 @@ extension Compiler.ExtensionObject
     {
         self.value.signature
     }
-    var extendee:ScalarSymbol
+    var extended:Compiler.ExtendedType
     {
-        self.value.extendee
+        self.value.extended
     }
     var conditions:[GenericConstraint<ScalarSymbol>]
     {

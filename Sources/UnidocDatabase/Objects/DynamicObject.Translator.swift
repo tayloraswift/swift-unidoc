@@ -28,7 +28,7 @@ extension DynamicObject.Translator
         docs:__shared Documentation) throws
     {
         //  TODO: enforce population limits
-        self.init(package: package, version: version, modules: .init(docs.modules.count))
+        self.init(package: package, version: version, modules: .init(docs.graph.cultures.count))
     }
     init(policies:__shared DocumentationDatabase.Policies,
         object:__shared DynamicObject) throws

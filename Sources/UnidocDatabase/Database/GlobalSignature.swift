@@ -1,4 +1,5 @@
 import Generics
+import SymbolGraphs
 
 struct GlobalSignature:Equatable, Hashable, Sendable
 {

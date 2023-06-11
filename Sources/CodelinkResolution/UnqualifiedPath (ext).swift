@@ -4,8 +4,8 @@ import LexicalPaths
 extension UnqualifiedPath
 {
     @inlinable public static
-    func / (lhs:String, rhs:UnqualifiedPath) -> QualifiedPath
+    func / (lhs:ModuleIdentifier, rhs:UnqualifiedPath) -> QualifiedPath
     {
-        .init(lhs, rhs)
+        .init("\(lhs)", rhs)
     }
 }

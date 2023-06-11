@@ -78,7 +78,7 @@ extension Toolchain
 extension Toolchain
 {
     public
-    func generateDocsForStandardLibrary(in workspace:Workspace,
+    func generateDocs(for build:ToolchainBuild,
         pretty:Bool = false) async throws -> DocumentationArchive
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
@@ -129,7 +129,7 @@ extension Toolchain
                 .init(name: "FoundationXML", type: .binary,
                     dependencies: .init(modules: [0, 8, 10])),
             ],
-            output: workspace,
+            output: build.output,
             triple: self.triple,
             pretty: pretty)
 
@@ -149,25 +149,21 @@ extension Toolchain
         return .init(metadata: metadata, docs: try await .build(from: artifacts))
     }
     public
-    func generateDocsForPackage(in checkout:RepositoryCheckout,
-        configuration:BuildConfiguration = .debug,
+    func generateDocs(for build:PackageBuild,
         pretty:Bool = false) async throws -> DocumentationArchive
     {
-        print("Building package in: \(checkout.root)")
+        print("Building package in: \(build.root)")
 
-        let build:SystemProcess = try .init(command: "swift", arguments:
-            [
-                "build",
-                "--package-path", checkout.root.string,
-                "-c", "\(configuration)"
-            ])
-        try await build()
+        try await SystemProcess.init(command: "swift",
+            "build",
+            "--configuration", "\(build.configuration)",
+            "--package-path", "\(build.root)")()
 
         let pins:[Repository.Pin]
         do
         {
             let resolutions:PackageResolutions = try .init(
-                parsing: try (checkout.root / "Package.resolved").read())
+                parsing: try (build.root / "Package.resolved").read())
             pins = resolutions.pins
         }
         catch is FileError
@@ -175,24 +171,27 @@ extension Toolchain
             pins = []
         }
 
-        let manifest:PackageManifest = try await .dump(from: checkout)
+        let manifest:PackageManifest = try await .dump(from: build)
 
         print("Note: using spm tools version \(manifest.format)")
 
         let platform:PlatformIdentifier = try self.platform()
-        let sink:PackageNode = try .libraries(as: checkout.pin.id,
+        let sink:PackageNode = try .libraries(as: build.id,
             flattening: manifest,
             platform: platform)
 
         var dependencies:[PackageNode] = []
-        var include:[FilePath] = [.init(manifest.root.path) / ".build" / "\(configuration)"]
+        var include:[FilePath] =
+        [
+            .init(manifest.root.path) / ".build" / "\(build.configuration)"
+        ]
         for pin:Repository.Pin in pins
         {
-            let checkout:RepositoryCheckout = .init(workspace: checkout.workspace,
-                root: checkout.root / ".build" / "checkouts" / "\(pin.id)",
-                pin: pin)
+            let manifest:PackageManifest = try await .dump(from: .init(
+                identity: .versioned(pin),
+                output: build.output,
+                root: build.root / ".build" / "checkouts" / "\(pin.id)"))
 
-            let manifest:PackageManifest = try await .dump(from: checkout)
             let upstream:PackageNode = try .libraries(as: pin.id,
                 flattening: manifest,
                 platform: platform)
@@ -205,32 +204,20 @@ extension Toolchain
         let package:PackageNode = try sink.flattened(dependencies: dependencies)
         let artifacts:Artifacts = try await .dump(from: package,
             include: &include,
-            output: checkout.workspace,
+            output: build.output,
             triple: self.triple,
             pretty: pretty)
 
-        let metadata:DocumentationMetadata = .init(package: checkout.pin.id,
+        let metadata:DocumentationMetadata = .init(package: build.id,
             triple: self.triple,
-            ref: checkout.pin.ref,
+            ref: build.pin?.ref,
             dependencies: try package.pinnedDependencies(using: pins),
             toolchain: self.version,
             products: package.products,
             requirements: manifest.requirements,
-            revision: checkout.pin.revision)
+            revision: build.pin?.revision)
 
         return .init(metadata: metadata, docs: try await .build(from: artifacts))
-    }
-    public
-    func generateDocs(cloning url:String,
-        at refname:String,
-        in workspace:Workspace,
-        pretty:Bool = false,
-        clean:Bool = false) async throws -> DocumentationArchive
-    {
-        try await self.generateDocsForPackage(in: try await workspace.checkout(url: url,
-                at: refname,
-                clean: clean),
-            pretty: pretty)
     }
 }
 extension Toolchain

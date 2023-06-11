@@ -29,15 +29,15 @@ extension Compiler.Extension.SignatureError:CustomStringConvertible
         if  let _:[GenericConstraint<ScalarSymbol>] = self.declared
         {
             return """
-            Cannot declare an extension (of \(self.expected.type)) containing a \
-            symbol with different extension constraints than its extension block.
+            Cannot declare an extension (of \(self.expected.extended.type)) containing \
+            a symbol with different extension constraints than its extension block.
             """
         }
         else
         {
             return """
-            Cannot declare an extension (of \(self.expected.type)) containing a \
-            relationship with different extension constraints than its extension \
+            Cannot declare an extension (of \(self.expected.extended.type)) containing \
+            a relationship with different extension constraints than its extension \
             block.
             """
         }

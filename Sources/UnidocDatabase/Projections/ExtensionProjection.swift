@@ -1,4 +1,5 @@
 import Generics
+import SymbolGraphs
 
 @frozen public
 struct ExtensionProjection:Equatable, Sendable
