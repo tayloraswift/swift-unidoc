@@ -8,13 +8,13 @@ extension SymbolGraph
     {
         /// A range of addresses containing scalars that share this namespace.
         public
-        let range:ClosedRange<ScalarAddress>
+        let range:ClosedRange<Int32>
         /// The index of the namespace module.
         public
         let index:Int
 
         @inlinable public
-        init(range:ClosedRange<ScalarAddress>, index:Int)
+        init(range:ClosedRange<Int32>, index:Int)
         {
             self.range = range
             self.index = index

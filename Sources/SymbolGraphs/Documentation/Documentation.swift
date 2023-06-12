@@ -9,10 +9,10 @@ struct Documentation:Equatable, Sendable
     public
     var graph:SymbolGraph
     public
-    var files:Files
+    var files:SymbolGraph.Table<FileSymbol>
 
     @inlinable internal
-    init(graph:SymbolGraph, files:Files)
+    init(graph:SymbolGraph, files:SymbolGraph.Table<FileSymbol>)
     {
         self.graph = graph
         self.files = files
@@ -26,7 +26,7 @@ extension Documentation
         self.init(
             graph: .init(namespaces: modules.map(\.id),
                 cultures: modules.map(SymbolGraph.Culture.init(module:))),
-            files: .init())
+            files: [])
     }
 }
 extension Documentation
@@ -34,7 +34,7 @@ extension Documentation
     public
     enum CodingKeys:String
     {
-        case files_symbols
+        case files
 
         case graph_namespaces
         case graph_cultures
@@ -47,7 +47,7 @@ extension Documentation:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.files_symbols] = self.files.symbols
+        bson[.files] = self.files
 
         bson[.graph_namespaces] = self.graph.namespaces
         bson[.graph_cultures] = self.graph.cultures
@@ -66,7 +66,6 @@ extension Documentation:BSONDocumentDecodable
                 cultures: try bson[.graph_cultures].decode(),
                 symbols: try bson[.graph_symbols].decode(),
                 nodes: .init(elements: try bson[.graph_nodes].decode())),
-            files: .init(
-                symbols: try bson[.files_symbols].decode()))
+            files: try bson[.files].decode())
     }
 }

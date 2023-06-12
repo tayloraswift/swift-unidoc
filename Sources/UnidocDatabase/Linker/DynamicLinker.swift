@@ -17,7 +17,9 @@ extension DynamicResolver
     private mutating
     func expose(upstream:LocalContext, context:GlobalContext)
     {
-        for (scope, node):(ScalarAddress, SymbolGraph.Node) in upstream.docs.graph
+        for (scope, node):(Int32, SymbolGraph.Node) in zip(
+            upstream.docs.graph.nodes.indices,
+            upstream.docs.graph.nodes)
             where !node.extensions.isEmpty
         {
             let symbol:ScalarSymbol = upstream.docs.graph.symbols[scope]
@@ -36,7 +38,7 @@ extension DynamicResolver
             {
                 let qualifier:ModuleIdentifier =
                     upstream.docs.graph.namespaces[`extension`.namespace]
-                for feature:ScalarAddress in `extension`.features
+                for feature:Int32 in `extension`.features
                 {
                     let symbol:VectorSymbol = .init(upstream.docs.graph.symbols[feature],
                         self: symbol)
@@ -66,10 +68,12 @@ struct DynamicLinker
     private
     var extensions:Extensions
     private
-    let conformances:[Conformances]
+    let conformances:SymbolGraph.Table<Conformances>
 
     private
-    init(context:GlobalContext, extensions:Extensions, conformances:[Conformances])
+    init(context:GlobalContext,
+        extensions:Extensions,
+        conformances:SymbolGraph.Table<Conformances>)
     {
         self.context = context
 
@@ -82,27 +86,27 @@ extension DynamicLinker
     init(context:GlobalContext)
     {
         var extensions:Extensions = [:]
-        let conformances:[Conformances] = context.current.docs.graph.map
+        let conformances:SymbolGraph.Table<Conformances> = context.current.docs.graph.nodes.map
         {
-            if  $0.node.extensions.isEmpty
+            if  $1.extensions.isEmpty
             {
                 return [:]
             }
-            guard let scope:GlobalAddress = $0.address * context.current.projector
+            guard let scope:GlobalAddress = $0 * context.current.projector
             else
             {
                 return [:]
             }
 
             var conformances:DynamicLinker.Conformances = [:]
-            for `extension`:SymbolGraph.Extension in $0.node.extensions
+            for `extension`:SymbolGraph.Extension in $1.extensions
             {
                 let projected:ExtensionProjection = context.current.project(
                     extension: `extension`,
                     of: scope)
 
                 //  we only need the conformances if the scalar has unqualified features
-                if case false? = $0.node.scalar?.features.isEmpty
+                if case false? = $1.scalar?.features.isEmpty
                 {
                     for `protocol`:GlobalAddress in projected.conformances
                     {
@@ -132,8 +136,8 @@ extension DynamicLinker
     {
         var scalars:[ScalarProjection] = []
 
-        for (index, culture):(Int, SymbolGraph.Culture)
-            in self.current.docs.graph.cultures.enumerated()
+        for (index, culture):(Int, SymbolGraph.Culture) in
+            self.current.docs.graph.cultures.enumerated()
         {
             let culture:(address:GlobalAddress, value:SymbolGraph.Culture) =
             (
@@ -142,9 +146,9 @@ extension DynamicLinker
             )
             for namespace:SymbolGraph.Namespace in culture.value.namespaces
             {
-                for citizen:ScalarAddress in namespace.range
+                for citizen:Int32 in namespace.range
                 {
-                    let conformances:Conformances = self.conformances[citizen.offset]
+                    let conformances:Conformances = self.conformances[citizen]
                     let scope:GlobalAddress? = self.current.scope(of: citizen)
                     let node:SymbolGraph.Node = self.current.docs.graph.nodes[citizen]
 
@@ -157,7 +161,7 @@ extension DynamicLinker
                         continue
                     }
 
-                    for feature:ScalarAddress in scalar.features
+                    for feature:Int32 in scalar.features
                     {
                         if  let `protocol`:GlobalAddress = self.current.scope(of: feature),
                             let feature:GlobalAddress = feature * self.current.projector
@@ -171,7 +175,7 @@ extension DynamicLinker
                             }
                         }
                     }
-                    for superform:ScalarAddress in scalar.superforms
+                    for superform:Int32 in scalar.superforms
                     {
                         if  let superform:GlobalAddress = superform * self.current.projector
                         {

@@ -1,6 +1,5 @@
 import BSONDecoding
 import BSONEncoding
-import Codelinks
 import Generics
 
 extension SymbolGraph
@@ -9,34 +8,34 @@ extension SymbolGraph
     struct Extension:Equatable, Sendable
     {
         public
-        let conditions:[GenericConstraint<ScalarAddress>]
+        let conditions:[GenericConstraint<Int32>]
         public
         let namespace:Int
         public
         let culture:Int
 
         public
-        var conformances:[ScalarAddress]
+        var conformances:[Int32]
         /// Members the extended type inherits from other types via subclassing,
         /// protocol conformances, etc.
         public
-        var features:[ScalarAddress]
+        var features:[Int32]
         /// Declarations directly nested in the extended type. Everything that
         /// is lexically-scoped to the extended type, and was not inherited from
         /// another type goes in this set.
         public
-        var nested:[ScalarAddress]
+        var nested:[Int32]
 
         public
         var article:MarkdownArticle?
 
         @inlinable public
-        init(conditions:[GenericConstraint<ScalarAddress>],
+        init(conditions:[GenericConstraint<Int32>],
             namespace:Int,
             culture:Int,
-            conformances:[ScalarAddress] = [],
-            features:[ScalarAddress] = [],
-            nested:[ScalarAddress] = [])
+            conformances:[Int32] = [],
+            features:[Int32] = [],
+            nested:[Int32] = [])
         {
             self.conditions = conditions
             self.namespace = namespace

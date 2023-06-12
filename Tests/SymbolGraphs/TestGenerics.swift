@@ -27,9 +27,9 @@ func TestGenerics(_ tests:TestGroup?)
     }
     if  let tests:TestGroup = tests / "constraints"
     {
-        for (name, expression):(String, GenericConstraint<ScalarAddress>.TypeExpression) in
+        for (name, expression):(String, GenericConstraint<Int32>.TypeExpression) in
         [
-            ("nominal", .nominal(.init(value: 13))),
+            ("nominal", .nominal(13)),
             ("complex", .complex("Dictionary<Int, String>.Index"))
         ]
         {
@@ -39,7 +39,7 @@ func TestGenerics(_ tests:TestGroup?)
                 continue
             }
 
-            for (name, relation):(String, GenericConstraint<ScalarAddress>.TypeRelation) in
+            for (name, relation):(String, GenericConstraint<Int32>.TypeRelation) in
             [
                 ("conformer", .conformer(of: expression)),
                 ("subclass", .subclass(of: expression)),
@@ -52,14 +52,14 @@ func TestGenerics(_ tests:TestGroup?)
                     continue
                 }
 
-                let constraint:GenericConstraint<ScalarAddress> = .init("T.RawValue",
+                let constraint:GenericConstraint<Int32> = .init("T.RawValue",
                     is: relation)
-                
+
                 tests.do
                 {
                     let bson:BSON.Document = .init(encoding: constraint)
 
-                    let decoded:GenericConstraint<ScalarAddress> = try .init(bson: .init(bson))
+                    let decoded:GenericConstraint<Int32> = try .init(bson: .init(bson))
 
                     tests.expect(constraint ==? decoded)
                 }

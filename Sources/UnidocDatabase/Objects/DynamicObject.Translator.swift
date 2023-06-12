@@ -43,13 +43,17 @@ extension DynamicObject.Translator
 //  population limits during an earlier validation stage.
 extension DynamicObject.Translator
 {
-    subscript(scalar scalar:Int) -> GlobalAddress
+    /// Shifts the passed scalar address into a global address. This
+    /// transformation is only valid if the scalar is a citizen of ``package``.
+    subscript(scalar address:Int32) -> GlobalAddress
     {
         .init(
             package: self.package,
             version: self.version,
-            citizen: self.modules + .init(scalar))
+            citizen: self.modules + .init(address))
     }
+    /// Shifts the passed module index into a global address. This
+    /// transformation is only valid if the module is a culture of ``package``.
     subscript(culture culture:Int) -> GlobalAddress
     {
         .init(
@@ -78,7 +82,7 @@ extension DynamicObject.Translator
         }
         else if address.citizen < 0x8000_0000
         {
-            return .scalar(.init(value: .init(bitPattern: address.citizen - self.modules)))
+            return .scalar(.init(bitPattern: address.citizen - self.modules))
         }
         else
         {

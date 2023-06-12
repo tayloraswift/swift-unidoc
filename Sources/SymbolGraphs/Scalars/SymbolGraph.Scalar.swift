@@ -19,7 +19,7 @@ extension SymbolGraph
         /// This scalar’s declaration, which consists of its availability,
         /// syntax fragments, and generic signature.
         public
-        var declaration:Declaration<ScalarAddress>
+        var declaration:Declaration<Int32>
 
         /// The addresses of the scalars that this scalar implements,
         /// overrides, or inherits from. Superforms are intrinsic but there
@@ -29,7 +29,7 @@ extension SymbolGraph
         /// to this scalar; the relationship type is a function of
         /// ``aperture`` and ``phylum``.
         public
-        var superforms:[ScalarAddress]
+        var superforms:[Int32]
         /// The addresses of the *unqualified* features inherited by this
         /// scalar. Unqualified features are protocol extension members that
         /// were inherited by a concrete type, but for which we are missing
@@ -37,15 +37,15 @@ extension SymbolGraph
         ///
         /// This field only exists because of an upstream bug in SymbolGraphGen.
         public
-        var features:[ScalarAddress]
+        var features:[Int32]
         /// The address of a scalar that has documentation that is relevant,
         /// but less specific to this scalar.
         public
-        var origin:ScalarAddress?
+        var origin:Int32?
 
         /// The location of this scalar’s declaration, if known.
         public
-        var location:SourceLocation<FileAddress>?
+        var location:SourceLocation<Int32>?
         /// This scalar’s binary markdown documentation, if it has any.
         public
         var article:MarkdownArticle?
@@ -151,12 +151,12 @@ extension SymbolGraph.Scalar:BSONDocumentDecodable
         //  some reason...
         self.declaration = .init(
             availability: try bson[.declaration_availability]?.decode() ?? .init(),
-            abridged: Declaration<ScalarAddress>.Abridged.init(
+            abridged: Declaration<Int32>.Abridged.init(
                 bytecode: try bson[.declaration_abridged_bytecode].decode()),
-            expanded: Declaration<ScalarAddress>.Expanded.init(
+            expanded: Declaration<Int32>.Expanded.init(
                 bytecode: try bson[.declaration_expanded_bytecode].decode(),
                 links: try bson[.declaration_expanded_links]?.decode() ?? []),
-            generics: GenericSignature<ScalarAddress>.init(
+            generics: GenericSignature<Int32>.init(
                 constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
                 parameters: try bson[.declaration_generics_parameters]?.decode() ?? []))
 

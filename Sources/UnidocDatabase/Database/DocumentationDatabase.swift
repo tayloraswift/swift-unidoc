@@ -102,9 +102,9 @@ extension DocumentationDatabase
         for (translator, object):(DynamicObject.Translator, DynamicObject) in
             zip(translators, dependencies)
         {
-            for (offset, symbol):(Int, ScalarSymbol) in object.docs.graph.citizens
+            for (address, symbol):(Int32, ScalarSymbol) in object.docs.graph.citizens
             {
-                upstream[symbol] = translator[scalar: offset]
+                upstream[symbol] = translator[scalar: address]
             }
         }
         //  Populate the context with the current package’s docs.

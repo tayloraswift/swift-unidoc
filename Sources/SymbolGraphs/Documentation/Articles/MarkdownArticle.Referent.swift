@@ -9,8 +9,8 @@ extension MarkdownArticle
     {
         case unresolved(Codelink)
 
-        case scalar(ScalarAddress)
-        case vector(ScalarAddress, self:ScalarAddress)
+        case scalar(Int32)
+        case vector(Int32, self:Int32)
     }
 }
 extension MarkdownArticle.Referent:BSONEncodable
@@ -24,11 +24,11 @@ extension MarkdownArticle.Referent:BSONEncodable
             codelink.description.encode(to: &field)
 
         case .scalar(let address):
-            address.value.encode(to: &field)
+            address.encode(to: &field)
 
         case .vector(let address, self: let heir):
             //  use ``Int64``, it roundtrips everywhere, and we do not sort on it.
-            (heir | address).encode(to: &field)
+            (heir .. address).encode(to: &field)
         }
     }
 }
@@ -48,11 +48,10 @@ extension MarkdownArticle.Referent:BSONDecodable
                 }
 
             case .int32(let int32):
-                return .scalar(.init(value: int32))
+                return .scalar(int32)
 
             case .int64(let int64):
-                return .vector(.init(value: .init(int64 & 0xff_ff_ff_ff)),
-                    self: .init(value: .init(int64 >> 32)))
+                return .vector(.init(int64 & 0xff_ff_ff_ff), self: .init(int64 >> 32))
 
             default:
                 break

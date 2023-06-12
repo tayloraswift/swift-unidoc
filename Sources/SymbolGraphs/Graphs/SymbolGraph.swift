@@ -13,15 +13,15 @@ struct SymbolGraph:Equatable, Sendable
     var cultures:[Culture]
 
     public
-    var symbols:SymbolTable<ScalarAddress, ScalarSymbol>
+    var symbols:Table<ScalarSymbol>
     public
-    var nodes:Nodes
+    var nodes:Table<Node>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
-        symbols:SymbolTable<ScalarAddress, ScalarSymbol> = .init(),
-        nodes:Nodes = [])
+        symbols:Table<ScalarSymbol> = [],
+        nodes:Table<Node> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
@@ -34,10 +34,12 @@ extension SymbolGraph
     /// Appends a new node to the symbol graph, and its associated symbol to the
     /// symbol. This function doesn’t check for duplicates.
     @inlinable public mutating
-    func append(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) throws -> ScalarAddress
+    func append(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) -> Int32
     {
-        self.nodes.append(scalar: scalar)
-        return try self.symbols.append(id)
+        let symbol:Int32 = self.symbols.append(id)
+        let node:Int32 = self.nodes.append(.init(scalar: scalar))
+        assert(symbol == node)
+        return node
     }
 
     /// Appends a new namespace to the symbol graph. This function doesn’t check
@@ -50,48 +52,30 @@ extension SymbolGraph
         return self.namespaces.endIndex
     }
 }
-extension SymbolGraph:RandomAccessCollection
-{
-    @inlinable public
-    var startIndex:Int
-    {
-        self.nodes.elements.startIndex
-    }
-    @inlinable public
-    var endIndex:Int
-    {
-        self.nodes.elements.endIndex
-    }
-    @inlinable public
-    subscript(index:Int) -> (address:ScalarAddress, node:Node)
-    {
-        return (.init(value: .init(index)), self.nodes.elements[index])
-    }
-}
 extension SymbolGraph
 {
     @inlinable public
-    subscript(address:ScalarAddress) -> SymbolGraph.Node?
+    subscript(address:Int32) -> SymbolGraph.Node?
     {
-        self.nodes.contains(address) ? self.nodes[address] : nil
+        self.nodes.indices.contains(address) ? self.nodes[address] : nil
     }
 
     @inlinable public
     var citizens:Citizens
     {
-        .init(symbols: self.symbols, nodes: self.nodes.elements)
+        .init(symbols: self.symbols, nodes: self.nodes)
     }
 }
 extension SymbolGraph
 {
     @inlinable public
     func link<T>(
-        static transform:(Int) throws -> T,
-        dynamic:(ScalarSymbol) throws -> T) rethrows -> SymbolTable<ScalarAddress, T>
+        static transform:(Int32) throws -> T,
+        dynamic:(ScalarSymbol) throws -> T) rethrows -> Table<T>
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.symbols.count)
 
-        for index:Int in self.symbols.indices
+        for index:Int32 in self.symbols.indices
         {
             elements.append(self.citizens.contains(index) ? try transform(index) :
                 try dynamic(self.symbols[index]))

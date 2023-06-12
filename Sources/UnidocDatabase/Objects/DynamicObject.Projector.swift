@@ -8,10 +8,10 @@ extension DynamicObject
         let translator:Translator
 
         private
-        let addresses:SymbolTable<ScalarAddress, GlobalAddress?>
+        let addresses:SymbolGraph.Table<GlobalAddress?>
 
         private
-        init(translator:Translator, addresses:SymbolTable<ScalarAddress, GlobalAddress?>)
+        init(translator:Translator, addresses:SymbolGraph.Table<GlobalAddress?>)
         {
             self.translator = translator
             self.addresses = addresses
@@ -50,12 +50,12 @@ extension DynamicObject.Projector
 extension DynamicObject.Projector
 {
     static
-    func * (address:ScalarAddress, self:Self) -> GlobalAddress?
+    func * (address:Int32, self:Self) -> GlobalAddress?
     {
         self.addresses[address] ?? nil
     }
     static
-    func / (address:GlobalAddress, self:Self) -> ScalarAddress?
+    func / (address:GlobalAddress, self:Self) -> Int32?
     {
         self.translator[address].scalar
     }
