@@ -9,12 +9,12 @@ extension SymbolGraph
     struct Citizens
     {
         @usableFromInline internal
-        let symbols:SymbolTable<ScalarAddress, ScalarSymbol>
+        let symbols:Table<ScalarSymbol>
         @usableFromInline internal
-        let nodes:[Node]
+        let nodes:Table<Node>
 
         @inlinable internal
-        init(symbols:SymbolTable<ScalarAddress, ScalarSymbol>, nodes:[Node])
+        init(symbols:Table<ScalarSymbol>, nodes:Table<Node>)
         {
             self.symbols = symbols
             self.nodes = nodes
@@ -24,15 +24,10 @@ extension SymbolGraph
 extension SymbolGraph.Citizens
 {
     @inlinable public
-    func contains(_ address:ScalarAddress) -> Bool
+    func contains(_ address:Int32) -> Bool
     {
-        self.contains(address.offset)
-    }
-    @inlinable internal
-    func contains(_ offset:Int) -> Bool
-    {
-        self.nodes.indices.contains(offset) &&
-        self.nodes[offset].scalar != nil
+        self.nodes.indices.contains(address) &&
+        self.nodes[address].scalar != nil
     }
 }
 extension SymbolGraph.Citizens:Sequence

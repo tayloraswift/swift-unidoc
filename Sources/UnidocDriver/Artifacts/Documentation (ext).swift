@@ -53,15 +53,15 @@ extension Documentation
             var linker:StaticLinker = .init(nominations: nominations,
                 modules: artifacts.cultures.map(\.module))
 
-            time.linking = try clock.measure
+            time.linking = clock.measure
             {
-                let scalarAddresses:[[ClosedRange<ScalarAddress>]] = try linker.allocate(
+                let scalarAddresses:[[ClosedRange<Int32>]] = linker.allocate(
                     namespaces: namespaces)
-                let extensionAddresses:[(ScalarAddress, Int)] = try linker.allocate(
+                let extensionAddresses:[(Int32, Int)] = linker.allocate(
                     extensions: extensions)
 
-                try linker.link(namespaces: namespaces, at: scalarAddresses)
-                try linker.link(extensions: extensions, at: extensionAddresses)
+                linker.link(namespaces: namespaces, at: scalarAddresses)
+                linker.link(extensions: extensions, at: extensionAddresses)
             }
 
             print("Linked documentation in \(time.linking)")

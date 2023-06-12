@@ -1,10 +1,8 @@
-import SymbolGraphs
-
 enum LocalAddress
 {
     case article(Int)
     case culture(Int)
-    case scalar(ScalarAddress)
+    case scalar(Int32)
 }
 extension LocalAddress
 {
@@ -26,7 +24,7 @@ extension LocalAddress
         case .scalar:               return nil
         }
     }
-    var scalar:ScalarAddress?
+    var scalar:Int32?
     {
         switch self
         {

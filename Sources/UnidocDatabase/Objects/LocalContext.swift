@@ -4,12 +4,12 @@ struct LocalContext
 {
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
-    let hierarchy:[ScalarAddress: GlobalAddress]
+    let hierarchy:[Int32: GlobalAddress]
     let projector:DynamicObject.Projector
     let docs:Documentation
 
     private
-    init(hierarchy:[ScalarAddress: GlobalAddress],
+    init(hierarchy:[Int32: GlobalAddress],
         projector:DynamicObject.Projector,
         docs:Documentation)
     {
@@ -22,14 +22,16 @@ extension LocalContext
 {
     init(projector:DynamicObject.Projector, docs:Documentation)
     {
-        var hierarchy:[ScalarAddress: GlobalAddress] = [:]
-            hierarchy.reserveCapacity(docs.graph.count)
+        var hierarchy:[Int32: GlobalAddress] = [:]
+            hierarchy.reserveCapacity(docs.graph.nodes.count)
 
-        for (scope, node):(ScalarAddress, SymbolGraph.Node) in docs.graph
+        for (scope, node):(Int32, SymbolGraph.Node) in zip(
+            docs.graph.nodes.indices,
+            docs.graph.nodes)
         {
             for `extension`:SymbolGraph.Extension in node.extensions
             {
-                for nested:ScalarAddress in `extension`.nested
+                for nested:Int32 in `extension`.nested
                     where docs.graph.citizens.contains(nested)
                 {
                     hierarchy[nested] = scope * projector
@@ -53,7 +55,7 @@ extension LocalContext
     {
         (address / self.projector).map(self.scope(of:)) ?? nil
     }
-    func scope(of citizen:ScalarAddress) -> GlobalAddress?
+    func scope(of citizen:Int32) -> GlobalAddress?
     {
         self.hierarchy[citizen]
     }

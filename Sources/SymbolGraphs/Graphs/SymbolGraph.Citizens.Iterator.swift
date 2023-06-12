@@ -8,7 +8,7 @@ extension SymbolGraph.Citizens
         @usableFromInline internal
         let base:SymbolGraph.Citizens
         @usableFromInline internal
-        var index:Int
+        var index:Int32
 
         @inlinable internal
         init(_ base:SymbolGraph.Citizens)
@@ -21,7 +21,7 @@ extension SymbolGraph.Citizens
 extension SymbolGraph.Citizens.Iterator:IteratorProtocol
 {
     @inlinable public mutating
-    func next() -> (offset:Int, symbol:ScalarSymbol)?
+    func next() -> (index:Int32, symbol:ScalarSymbol)?
     {
         while self.index < self.base.nodes.endIndex
         {
