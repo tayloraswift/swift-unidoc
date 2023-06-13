@@ -5,50 +5,46 @@ struct LocalContext
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
     let hierarchy:[Int32: GlobalAddress]
-    let projector:DynamicObject.Projector
-    let docs:Documentation
+    let projector:LocalProjector
+    let graph:SymbolGraph
 
     private
     init(hierarchy:[Int32: GlobalAddress],
-        projector:DynamicObject.Projector,
-        docs:Documentation)
+        projector:LocalProjector,
+        graph:SymbolGraph)
     {
-        self.hierarchy = hierarchy
         self.projector = projector
-        self.docs = docs
+        self.hierarchy = hierarchy
+        self.graph = graph
     }
 }
 extension LocalContext
 {
-    init(projector:DynamicObject.Projector, docs:Documentation)
+    init(projector:LocalProjector, graph:SymbolGraph)
     {
         var hierarchy:[Int32: GlobalAddress] = [:]
-            hierarchy.reserveCapacity(docs.graph.nodes.count)
+            hierarchy.reserveCapacity(graph.nodes.count)
 
-        for (scope, node):(Int32, SymbolGraph.Node) in zip(
-            docs.graph.nodes.indices,
-            docs.graph.nodes)
+        for (scope, node):(Int32, SymbolGraph.Node) in zip(graph.nodes.indices, graph.nodes)
         {
             for `extension`:SymbolGraph.Extension in node.extensions
             {
                 for nested:Int32 in `extension`.nested
-                    where docs.graph.citizens.contains(nested)
+                    where graph.citizens.contains(nested)
                 {
                     hierarchy[nested] = scope * projector
                 }
             }
         }
 
-        self.init(hierarchy: hierarchy, projector: projector, docs: docs)
+        self.init(hierarchy: hierarchy, projector: projector, graph: graph)
     }
 }
 extension LocalContext
 {
-    subscript(address:GlobalAddress) -> SymbolGraph.Node?
+    subscript(scalar address:GlobalAddress) -> SymbolGraph.Node?
     {
-        //  Can use ``subscript(allocated:)`` because global addresses only
-        //  reference citizen symbols.
-        (address / self.projector).map { self.docs.graph.nodes[$0] }
+        (address / self.projector).map { self.graph.nodes[$0 as Int32] }
     }
 
     func scope(of address:GlobalAddress) -> GlobalAddress?

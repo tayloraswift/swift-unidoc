@@ -27,6 +27,8 @@ struct DynamicObject:Equatable, Sendable
 }
 extension DynamicObject
 {
+    var graph:SymbolGraph { self.docs.graph }
+
     var stable:Bool
     {
         switch self.metadata.ref

@@ -1,62 +1,4 @@
 import CodelinkResolution
-import LexicalPaths
-import ModuleGraphs
-
-extension DynamicResolver
-{
-    init(context:__shared GlobalContext)
-    {
-        self.init()
-
-        for upstream:LocalContext in context.upstream.values
-        {
-            self.expose(upstream: upstream, context: context)
-        }
-    }
-
-    private mutating
-    func expose(upstream:LocalContext, context:GlobalContext)
-    {
-        for (scope, node):(Int32, SymbolGraph.Node) in zip(
-            upstream.docs.graph.nodes.indices,
-            upstream.docs.graph.nodes)
-            where !node.extensions.isEmpty
-        {
-            let symbol:ScalarSymbol = upstream.docs.graph.symbols[scope]
-
-            //  Extension may extend a scalar from a different package.
-            guard   let scope:GlobalAddress = scope * upstream.projector,
-                    let nationality:LocalContext = context[scope.package],
-                    let outer:SymbolGraph.Scalar = nationality[scope]?.scalar
-            else
-            {
-                continue
-            }
-
-            for `extension`:SymbolGraph.Extension in node.extensions
-                where !`extension`.features.isEmpty
-            {
-                let qualifier:ModuleIdentifier =
-                    upstream.docs.graph.namespaces[`extension`.namespace]
-                for feature:Int32 in `extension`.features
-                {
-                    let symbol:VectorSymbol = .init(upstream.docs.graph.symbols[feature],
-                        self: symbol)
-
-                    if  let feature:GlobalAddress = feature * upstream.projector,
-                        let inner:SymbolGraph.Scalar = context[feature]
-                    {
-                        self.overload(qualifier / outer.path / inner.path.last,
-                            with: .init(target: .vector(feature, self: scope),
-                                phylum: inner.phylum,
-                                id: symbol))
-                    }
-                }
-            }
-        }
-    }
-}
-
 import SymbolGraphs
 import Symbols
 
@@ -64,6 +6,8 @@ struct DynamicLinker
 {
     private
     let context:GlobalContext
+    private
+    let resolver:DynamicResolver
 
     private
     var extensions:Extensions
@@ -72,10 +16,12 @@ struct DynamicLinker
 
     private
     init(context:GlobalContext,
+        resolver:DynamicResolver,
         extensions:Extensions,
         conformances:SymbolGraph.Table<Conformances>)
     {
         self.context = context
+        self.resolver = resolver
 
         self.extensions = extensions
         self.conformances = conformances
@@ -83,10 +29,25 @@ struct DynamicLinker
 }
 extension DynamicLinker
 {
+    private
+    init(context:GlobalContext,
+        extensions:Extensions,
+        conformances:SymbolGraph.Table<Conformances>)
+    {
+        var resolver:DynamicResolver = .init()
+        for dependency:LocalContext in context.upstream.values
+        {
+            resolver.expose(upstream: dependency, in: context)
+        }
+        self.init(context: context,
+            resolver: resolver,
+            extensions: extensions,
+            conformances: conformances)
+    }
     init(context:GlobalContext)
     {
         var extensions:Extensions = [:]
-        let conformances:SymbolGraph.Table<Conformances> = context.current.docs.graph.nodes.map
+        let conformances:SymbolGraph.Table<Conformances> = context.current.graph.nodes.map
         {
             if  $1.extensions.isEmpty
             {
@@ -137,7 +98,7 @@ extension DynamicLinker
         var scalars:[ScalarProjection] = []
 
         for (index, culture):(Int, SymbolGraph.Culture) in
-            self.current.docs.graph.cultures.enumerated()
+            self.current.graph.cultures.enumerated()
         {
             let culture:(address:GlobalAddress, value:SymbolGraph.Culture) =
             (
@@ -150,7 +111,7 @@ extension DynamicLinker
                 {
                     let conformances:Conformances = self.conformances[citizen]
                     let scope:GlobalAddress? = self.current.scope(of: citizen)
-                    let node:SymbolGraph.Node = self.current.docs.graph.nodes[citizen]
+                    let node:SymbolGraph.Node = self.current.graph.nodes[citizen]
 
                     //  Ceremonial unwraps, should always succeed since we are only iterating
                     //  over module ranges.

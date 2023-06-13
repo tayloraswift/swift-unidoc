@@ -1,4 +1,5 @@
 import MongoDB
+import ModuleGraphs
 import SymbolGraphs
 import Symbols
 
@@ -54,11 +55,12 @@ extension DocumentationDatabase
     func push(archive:DocumentationArchive,
         with session:Mongo.Session) async throws -> ObjectReceipt
     {
-        guard let id:String = archive.metadata.id
-        else
-        {
-            throw DocumentationIdentificationError.init()
-        }
+        let id:String = archive.metadata.id ?? "$anonymous"
+        // guard let id:String = archive.metadata.id
+        // else
+        // {
+        //     throw DocumentationIdentificationError.init()
+        // }
 
         let package:Int32 = try await self.packages.register(archive.metadata.package,
             with: session)
@@ -94,17 +96,20 @@ extension DocumentationDatabase
             try .init(policies: self.policies, object: $0)
         }
 
-        /// Combined mapping of symbols to global addresses across all upstream dependencies.
-        /// Within a build tree, we assume module names are unique, which implies that symbol
-        /// manglings should never collide.
-        var upstream:[ScalarSymbol: GlobalAddress] = [:]
+        var upstream:UpstreamSymbols = .init()
 
         for (translator, object):(DynamicObject.Translator, DynamicObject) in
             zip(translators, dependencies)
         {
-            for (address, symbol):(Int32, ScalarSymbol) in object.docs.graph.citizens
+            for (address, symbol):(Int32, ScalarSymbol) in object.graph.citizens
             {
-                upstream[symbol] = translator[scalar: address]
+                upstream.scalars[symbol] = translator[scalar: address]
+            }
+            for (culture, symbol):(Int, ModuleIdentifier) in zip(
+                object.graph.cultures.indices,
+                object.graph.namespaces)
+            {
+                upstream.modules[symbol] = translator[culture: culture]
             }
         }
         //  Populate the context with the current package’s docs.
@@ -112,8 +117,8 @@ extension DocumentationDatabase
                 policies: self.policies,
                 upstream: upstream,
                 receipt: try await self.push(archive: archive, with: session),
-                docs: archive.docs),
-            docs: archive.docs))
+                graph: archive.docs.graph),
+            graph: archive.docs.graph))
 
         //  Populate the context with the docs of all the package’s upstream dependencies.
         for (translator, object):(DynamicObject.Translator, DynamicObject) in
@@ -122,8 +127,8 @@ extension DocumentationDatabase
             context.upstream[object.package] = .init(projector: .init(
                     translator: translator,
                     upstream: upstream,
-                    docs: object.docs),
-                docs: object.docs)
+                    graph: object.graph),
+                graph: object.graph)
         }
         return context
     }

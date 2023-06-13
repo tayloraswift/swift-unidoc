@@ -18,9 +18,9 @@ extension GlobalContext
     {
         self.current.id == package ? self.current : self.upstream[package]
     }
-    subscript(address:GlobalAddress) -> SymbolGraph.Scalar?
+    subscript(scalar address:GlobalAddress) -> SymbolGraph.Scalar?
     {
-        self[address.package]?[address]?.scalar
+        self[address.package]?[scalar: address]?.scalar
     }
 
     func expand(_ address:GlobalAddress) -> [GlobalAddress]

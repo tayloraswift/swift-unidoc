@@ -12,4 +12,5 @@ swift run -c release SymbolGraphsTests &&
 swift run -c release SymbolGraphPartsTests &&
 swift run -c release SystemTests &&
 swift run -c release UnidocCompilerTests &&
-swift run -c release UnidocDriverTests
+swift run -c release UnidocDriverTests &&
+swift run -c release UnidocDatabaseTests
