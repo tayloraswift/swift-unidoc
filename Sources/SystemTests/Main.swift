@@ -15,7 +15,7 @@ enum Main:SyncTests
                 {
                     var files:[FilePath] = []
 
-                    let path:FilePath = "Tests/System/directories/flat"
+                    let path:FilePath = "Sources/SystemTests/directories/flat"
                     try path.directory.walk
                     {
                         files.append($0)
@@ -32,7 +32,7 @@ enum Main:SyncTests
                 {
                     var files:[FilePath] = []
 
-                    let path:FilePath = "Tests/System/directories/complex"
+                    let path:FilePath = "Sources/SystemTests/directories/complex"
                     try path.directory.walk
                     {
                         files.append($0)

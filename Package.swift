@@ -41,6 +41,8 @@ let package:Package = .init(
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
         .library(name: "Symbols", targets: ["Symbols"]),
 
+        .library(name: "System", targets: ["System"]),
+
         .library(name: "UnidocCompiler", targets: ["UnidocCompiler"]),
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
@@ -242,26 +244,23 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "CodelinksTests", dependencies:
+        .executableTarget(name: "CodelinkTests", dependencies:
             [
                 .target(name: "Codelinks"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/Codelinks"),
+            ]),
 
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/MarkdownParsing"),
+            ]),
 
         .executableTarget(name: "MarkdownRenderingTests", dependencies:
             [
                 .target(name: "MarkdownRendering"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/MarkdownRendering"),
+            ]),
 
         .executableTarget(name: "MarkdownSemanticsTests", dependencies:
             [
@@ -269,52 +268,45 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
                 .target(name: "MarkdownSemantics"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/MarkdownSemantics"),
+            ]),
 
         .executableTarget(name: "PackageMetadataTests", dependencies:
             [
                 .target(name: "PackageMetadata"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/PackageMetadata"),
+            ]),
 
-        .executableTarget(name: "SemanticVersionsTests", dependencies:
+        .executableTarget(name: "SemanticVersionTests", dependencies:
             [
                 .target(name: "SemanticVersions"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/SemanticVersions"),
+            ]),
 
-        .executableTarget(name: "SymbolsTests", dependencies:
+        .executableTarget(name: "SymbolTests", dependencies:
             [
                 .target(name: "Symbols"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/Symbols"),
+            ]),
 
-        .executableTarget(name: "SymbolGraphsTests", dependencies:
+        .executableTarget(name: "SymbolGraphTests", dependencies:
             [
                 .target(name: "SymbolGraphs"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/SymbolGraphs"),
+            ]),
 
-        .executableTarget(name: "SymbolGraphPartsTests", dependencies:
+        .executableTarget(name: "SymbolGraphPartTests", dependencies:
             [
                 .target(name: "SymbolGraphParts"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/SymbolGraphParts"),
+            ]),
 
         .executableTarget(name: "SystemTests", dependencies:
             [
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
-            path: "Tests/System",
             exclude:
             [
                 "directories",
@@ -325,8 +317,7 @@ let package:Package = .init(
                 .target(name: "UnidocCompiler"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/UnidocCompiler"),
+            ]),
 
         .executableTarget(name: "UnidocDatabaseTests", dependencies:
             [
@@ -334,7 +325,6 @@ let package:Package = .init(
                 .target(name: "UnidocDriver"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ],
-            path: "Tests/UnidocDatabase",
             exclude:
             [
                 "swift-crosslinks",
@@ -344,8 +334,7 @@ let package:Package = .init(
             [
                 .target(name: "UnidocDriver"),
                 .product(name: "Testing", package: "swift-grammar"),
-            ],
-            path: "Tests/UnidocDriver"),
+            ]),
     ])
 
 for target:PackageDescription.Target in package.targets

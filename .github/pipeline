@@ -1,16 +1,8 @@
-swift --version &&
-./generate-test-symbolgraphs &&
-swift build -c release &&
-swift run -c release CodelinksTests &&
-swift run -c release MarkdownParsingTests &&
-swift run -c release MarkdownRenderingTests &&
-swift run -c release MarkdownSemanticsTests &&
-swift run -c release PackageMetadataTests &&
-swift run -c release SemanticVersionsTests &&
-swift run -c release SymbolsTests &&
-swift run -c release SymbolGraphsTests &&
-swift run -c release SymbolGraphPartsTests &&
-swift run -c release SystemTests &&
-swift run -c release UnidocCompilerTests &&
-swift run -c release UnidocDriverTests &&
-swift run -c release UnidocDatabaseTests
+#!/bin/bash
+set -e
+swift --version
+swift build -c release
+./generate-test-symbolgraphs
+for f in .build/release/*Tests; do
+  $f
+done
