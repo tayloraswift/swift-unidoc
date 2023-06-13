@@ -128,9 +128,8 @@ extension Artifacts
         {
             //  We don’t want to *parse* the JSON yet to discover the culture,
             //  because the JSON can be very large, and parsing JSON is very
-            //  expensive (compared to parsing BSON). So we trust that the
-            //  file name is correct and indicates what is contained within the
-            //  file.
+            //  expensive (compared to parsing BSON). So we trust that the file
+            //  name is correct and indicates what is contained within the file.
             if  let id:SymbolGraphPart.ID = .init("\(try part.get())"),
                 !blacklisted.contains(id.namespace)
             {

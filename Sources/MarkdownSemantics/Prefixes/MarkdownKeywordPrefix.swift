@@ -33,36 +33,36 @@ enum MarkdownKeywordPrefix:String, Equatable, Hashable, Sendable
 }
 extension MarkdownKeywordPrefix
 {
-    func callAsFunction(_ discussion:__owned [MarkdownTree.Block]) -> MarkdownTree.Block
+    func callAsFunction(_ discussion:__owned [MarkdownBlock]) -> MarkdownBlock
     {
         switch self
         {
-        case .attention:        return MarkdownDocumentation.Attention.init(discussion)
-        case .author:           return MarkdownDocumentation.Author.init(discussion)
-        case .authors:          return MarkdownDocumentation.Authors.init(discussion)
-        case .bug:              return MarkdownDocumentation.Bug.init(discussion)
-        case .complexity:       return MarkdownDocumentation.Complexity.init(discussion)
-        case .copyright:        return MarkdownDocumentation.Copyright.init(discussion)
-        case .date:             return MarkdownDocumentation.Date.init(discussion)
-        case .experiment:       return MarkdownDocumentation.Experiment.init(discussion)
-        case .important:        return MarkdownDocumentation.Important.init(discussion)
-        case .invariant:        return MarkdownDocumentation.Invariant.init(discussion)
-        case .mutating:         return MarkdownDocumentation.Mutating.init(discussion)
-        case .nonmutating:      return MarkdownDocumentation.Nonmutating.init(discussion)
-        case .note:             return MarkdownDocumentation.Note.init(discussion)
-        case .parameters:       return MarkdownDocumentation.Parameters.init(discussion)
-        case .postcondition:    return MarkdownDocumentation.Postcondition.init(discussion)
-        case .precondition:     return MarkdownDocumentation.Precondition.init(discussion)
-        case .remark:           return MarkdownDocumentation.Remark.init(discussion)
-        case .requires:         return MarkdownDocumentation.Requires.init(discussion)
-        case .returns:          return MarkdownDocumentation.Returns.init(discussion)
-        case .seealso:          return MarkdownDocumentation.SeeAlso.init(discussion)
-        case .since:            return MarkdownDocumentation.Since.init(discussion)
-        case .throws:           return MarkdownDocumentation.Throws.init(discussion)
-        case .tip:              return MarkdownDocumentation.Tip.init(discussion)
-        case .todo:             return MarkdownDocumentation.ToDo.init(discussion)
-        case .version:          return MarkdownDocumentation.Version.init(discussion)
-        case .warning:          return MarkdownDocumentation.Warning.init(discussion)
+        case .attention:        return MarkdownBlock.Aside.Attention.init(discussion)
+        case .author:           return MarkdownBlock.Aside.Author.init(discussion)
+        case .authors:          return MarkdownBlock.Aside.Authors.init(discussion)
+        case .bug:              return MarkdownBlock.Aside.Bug.init(discussion)
+        case .complexity:       return MarkdownBlock.Aside.Complexity.init(discussion)
+        case .copyright:        return MarkdownBlock.Aside.Copyright.init(discussion)
+        case .date:             return MarkdownBlock.Aside.Date.init(discussion)
+        case .experiment:       return MarkdownBlock.Aside.Experiment.init(discussion)
+        case .important:        return MarkdownBlock.Aside.Important.init(discussion)
+        case .invariant:        return MarkdownBlock.Aside.Invariant.init(discussion)
+        case .mutating:         return MarkdownBlock.Aside.Mutating.init(discussion)
+        case .nonmutating:      return MarkdownBlock.Aside.Nonmutating.init(discussion)
+        case .note:             return MarkdownBlock.Aside.Note.init(discussion)
+        case .parameters:       return MarkdownBlock.Parameters.init(discussion)
+        case .postcondition:    return MarkdownBlock.Aside.Postcondition.init(discussion)
+        case .precondition:     return MarkdownBlock.Aside.Precondition.init(discussion)
+        case .remark:           return MarkdownBlock.Aside.Remark.init(discussion)
+        case .requires:         return MarkdownBlock.Aside.Requires.init(discussion)
+        case .returns:          return MarkdownBlock.Aside.Returns.init(discussion)
+        case .seealso:          return MarkdownBlock.Aside.SeeAlso.init(discussion)
+        case .since:            return MarkdownBlock.Aside.Since.init(discussion)
+        case .throws:           return MarkdownBlock.Aside.Throws.init(discussion)
+        case .tip:              return MarkdownBlock.Aside.Tip.init(discussion)
+        case .todo:             return MarkdownBlock.Aside.ToDo.init(discussion)
+        case .version:          return MarkdownBlock.Aside.Version.init(discussion)
+        case .warning:          return MarkdownBlock.Aside.Warning.init(discussion)
         }
     }
 }
@@ -73,7 +73,7 @@ extension MarkdownKeywordPrefix:MarkdownSemanticPrefix
     static
     var radius:Int { 2 }
 
-    init?(from elements:__shared [MarkdownTree.InlineBlock])
+    init?(from elements:__shared [MarkdownInline.Block])
     {
         if  elements.count == 1
         {
@@ -99,7 +99,7 @@ extension MarkdownKeywordPrefix:MarkdownSemanticPrefix
             }
             //  Limit to 3 words, because the ``nonmutating`` keyphrase
             //  can be written as 'Non-mutating variant'.
-            else if character == " " || 
+            else if character == " " ||
                     character == "-",
                     words < 3
             {

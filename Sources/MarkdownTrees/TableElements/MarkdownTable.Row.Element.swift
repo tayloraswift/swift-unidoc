@@ -1,0 +1,34 @@
+import MarkdownABI
+
+extension MarkdownTable.Row
+{
+    @frozen public
+    struct Element
+    {
+        public
+        let alignment:MarkdownTable.Alignment?
+        public
+        let cell:Cell
+
+        @inlinable public
+        init(alignment:MarkdownTable.Alignment?, cell:Cell)
+        {
+            self.alignment = alignment
+            self.cell = cell
+        }
+    }
+}
+extension MarkdownTable.Row.Element:MarkdownElement
+{
+    @inlinable public
+    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
+    {
+        try self.cell.outline(by: register)
+    }
+
+    public
+    func emit(into binary:inout MarkdownBinaryEncoder)
+    {
+        self.cell.emit(into: &binary, alignment: self.alignment)
+    }
+}

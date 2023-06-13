@@ -1,3 +1,6 @@
+import MarkdownABI
+import MarkdownParsing
+import MarkdownSemantics
 import ModuleGraphs
 import SymbolGraphParts
 import System
@@ -34,7 +37,15 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    func load() throws -> [SymbolGraphPart]
+    func loadArticles() throws
+    {
+        _ = try self.articles.map
+        {
+            let documentation:MarkdownDocumentation = .init(parsing: try $0.read(),
+                as: SwiftFlavoredMarkdown.self)
+        }
+    }
+    func loadSymbols() throws -> [SymbolGraphPart]
     {
         try self.parts.map
         {

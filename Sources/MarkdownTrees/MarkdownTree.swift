@@ -8,10 +8,10 @@
 struct MarkdownTree
 {
     public
-    let blocks:[Block]
+    let blocks:[MarkdownBlock]
 
     @inlinable public
-    init(attaching blocks:[Block] = [])
+    init(attaching blocks:[MarkdownBlock] = [])
     {
         self.blocks = blocks
     }
@@ -19,9 +19,9 @@ struct MarkdownTree
 extension MarkdownTree:MarkdownModel
 {
     public
-    func visit(_ yield:(Block) throws -> ()) rethrows
+    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
     {
-        for block:Block in self.blocks
+        for block:MarkdownBlock in self.blocks
         {
             try yield(block)
         }

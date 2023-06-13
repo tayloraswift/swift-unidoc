@@ -17,7 +17,7 @@ extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
     static
     var radius:Int { 2 }
 
-    init?(from elements:__shared [MarkdownTree.InlineBlock])
+    init?(from elements:__shared [MarkdownInline.Block])
     {
         if  elements.count == 1,
             let identifier:Codelink.Identifier = .init(elements[0].text)
