@@ -55,21 +55,21 @@ enum Main:SyncTests
 
                     tests.expect(tree.blocks.count ==? 1),
 
-                    let list:MarkdownTree.UnorderedList = tests.expect(
-                        value: tree.blocks.first as? MarkdownTree.UnorderedList),
+                    let list:MarkdownBlock.UnorderedList = tests.expect(
+                        value: tree.blocks.first as? MarkdownBlock.UnorderedList),
 
                     tests.expect(list.elements.count ==? 1),
-                    
-                    let item:MarkdownTree.BlockItem = tests.expect(
+
+                    let item:MarkdownBlock.Item = tests.expect(
                         value: list.elements.first),
-                    
+
                     tests.expect(item.elements.count ==? 2),
 
-                    tests.expect(true: item.elements[0] is MarkdownTree.Paragraph),
-                    
-                    let parameters:MarkdownTree.UnorderedList = tests.expect(
-                        value: item.elements[1] as? MarkdownTree.UnorderedList),
-                    
+                    tests.expect(true: item.elements[0] is MarkdownBlock.Paragraph),
+
+                    let parameters:MarkdownBlock.UnorderedList = tests.expect(
+                        value: item.elements[1] as? MarkdownBlock.UnorderedList),
+
                     tests.expect(parameters.elements.count ==? 3)
                 {
                 }

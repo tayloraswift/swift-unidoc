@@ -29,7 +29,7 @@ extension Documentation
                     print("Loading artifact: \(artifact)")
                 }
 
-                let parts:[SymbolGraphPart] = try culture.load()
+                let parts:[SymbolGraphPart] = try culture.loadSymbols()
 
                 time.compiling += try clock.measure
                 {

@@ -1,0 +1,12 @@
+import MarkdownABI
+import MarkdownTrees
+
+extension MarkdownBlock.Aside
+{
+    public final
+    class Nonmutating:MarkdownBlock.Aside
+    {
+        public class override
+        var context:MarkdownBytecode.Context { .nonmutating }
+    }
+}

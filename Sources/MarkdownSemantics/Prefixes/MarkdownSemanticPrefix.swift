@@ -14,7 +14,7 @@ protocol MarkdownSemanticPrefix
     /// Detects an instance of this pattern type from the given array of
     /// inline block content. The array contains inline content up to, but
     /// not including, an unformatted `:` character.
-    init?(from elements:__shared [MarkdownTree.InlineBlock]) rethrows
+    init?(from elements:__shared [MarkdownInline.Block]) rethrows
 }
 extension MarkdownSemanticPrefix
 {
@@ -22,9 +22,9 @@ extension MarkdownSemanticPrefix
     /// if one matches. This function only mutates the array if it returns
     /// a non-nil pattern.
     static
-    func extract(from blocks:inout [MarkdownTree.Block]) rethrows -> Self?
+    func extract(from blocks:inout [MarkdownBlock]) rethrows -> Self?
     {
-        guard let paragraph:MarkdownTree.Paragraph = blocks.first as? MarkdownTree.Paragraph
+        guard let paragraph:MarkdownBlock.Paragraph = blocks.first as? MarkdownBlock.Paragraph
         else
         {
             return nil
@@ -46,15 +46,15 @@ extension MarkdownSemanticPrefix
     /// if one matches. This function only mutates the array if it returns
     /// a non-nil pattern.
     private static
-    func extract(from elements:inout [MarkdownTree.InlineBlock]) rethrows -> Self?
+    func extract(from elements:inout [MarkdownInline.Block]) rethrows -> Self?
     {
-        for (index, span):(Int, MarkdownTree.InlineBlock)
+        for (index, span):(Int, MarkdownInline.Block)
             in zip(elements.indices, elements.prefix(Self.radius))
         {
             if  case .text(let text) = span,
                 let colon:String.Index = text.firstIndex(of: ":")
             {
-                var outer:[MarkdownTree.InlineBlock] = .init(elements[..<index])
+                var outer:[MarkdownInline.Block] = .init(elements[..<index])
                 let inner:Substring = text[..<colon]
                 //  If the text before the `:` contains non-whitespace characters,
                 //  add them to the list of elements.
@@ -92,7 +92,7 @@ extension MarkdownSemanticPrefix
                             break
                         }
                     }
-                    
+
                     elements[..<index] = []
                 }
                 else

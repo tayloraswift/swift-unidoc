@@ -87,7 +87,7 @@ extension StaticLinker.Outliner
         comment:Compiler.Documentation.Comment) -> MarkdownArticle
     {
         let documentation:MarkdownDocumentation = .init(parsing: comment.text,
-            as: SwiftFlavoredMarkdown.self)
+            as: SwiftFlavoredMarkdownComment.self)
 
         let overview:MarkdownBytecode = .init
         {

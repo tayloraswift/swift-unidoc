@@ -3,9 +3,9 @@ import MarkdownABI
 public
 protocol MarkdownModel
 {
-    init(attaching blocks:[MarkdownTree.Block])
+    init(attaching blocks:[MarkdownBlock])
 
-    func visit(_ yield:(MarkdownTree.Block) throws -> ()) rethrows
+    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
 }
 extension MarkdownModel
 {
