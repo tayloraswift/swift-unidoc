@@ -32,7 +32,7 @@ jobs:
             -   name: build and test
                 run: |
                     docker run -t --rm \
-                        --network=mongonet \
+                        --network=unidoc-test \
                         --name swift-environment \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
