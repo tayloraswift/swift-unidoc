@@ -19,10 +19,20 @@ jobs:
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
-            
+
+            -   name: set up mock deployments
+                run: |
+                    docker compose -f TestDeployment/docker-compose.yml up -d
+
+            -   name: initialize replica set
+                run: |
+                    timeout 60s bash -c \
+                    'until docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js; do sleep 1; done'
+
             -   name: build and test
                 run: |
                     docker run -t --rm \
+                        --network=mongonet \
                         --name swift-environment \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
