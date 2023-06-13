@@ -25,10 +25,10 @@ extension DynamicObject.Translator
     init(policies _:__shared DocumentationDatabase.Policies,
         package:Int32,
         version:Int32,
-        docs:__shared Documentation) throws
+        graph:__shared SymbolGraph) throws
     {
         //  TODO: enforce population limits
-        self.init(package: package, version: version, modules: .init(docs.graph.cultures.count))
+        self.init(package: package, version: version, modules: .init(graph.cultures.count))
     }
     init(policies:__shared DocumentationDatabase.Policies,
         object:__shared DynamicObject) throws
@@ -36,7 +36,7 @@ extension DynamicObject.Translator
         try self.init(policies: policies,
             package: object.package,
             version: object.version,
-            docs: object.docs)
+            graph: object.graph)
     }
 }
 //  These APIs don’t check for integer overflow; we should enforce

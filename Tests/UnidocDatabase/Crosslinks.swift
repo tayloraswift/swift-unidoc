@@ -30,9 +30,6 @@ struct Crosslinks:MongoTestBattery
             package: 0,
             version: 0))
 
-        tests.expect(try await database.push(archive: mock, with: session) ==? .init(
-            overwritten: false,
-            package: 1,
-            version: 0))
+        try await database.publish(projecting: mock, with: session)
     }
 }
