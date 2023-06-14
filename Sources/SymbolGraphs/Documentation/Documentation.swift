@@ -36,6 +36,7 @@ extension Documentation
     {
         case files
 
+        case graph_articles
         case graph_namespaces
         case graph_cultures
         case graph_symbols
@@ -51,6 +52,7 @@ extension Documentation:BSONDocumentEncodable
 
         bson[.graph_namespaces] = self.graph.namespaces
         bson[.graph_cultures] = self.graph.cultures
+        bson[.graph_articles] = self.graph.articles
         bson[.graph_symbols] = self.graph.symbols
         bson[.graph_nodes] = self.graph.nodes.elements
     }
@@ -64,8 +66,9 @@ extension Documentation:BSONDocumentDecodable
             graph: .init(
                 namespaces: try bson[.graph_namespaces].decode(),
                 cultures: try bson[.graph_cultures].decode(),
+                articles: try bson[.graph_articles].decode(),
                 symbols: try bson[.graph_symbols].decode(),
-                nodes: .init(elements: try bson[.graph_nodes].decode())),
+                nodes: try bson[.graph_nodes].decode()),
             files: try bson[.files].decode())
     }
 }

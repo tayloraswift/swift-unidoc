@@ -27,7 +27,7 @@ extension SymbolGraph
         var nested:[Int32]
 
         public
-        var article:MarkdownArticle?
+        var article:Article<Never>?
 
         @inlinable public
         init(conditions:[GenericConstraint<Int32>],

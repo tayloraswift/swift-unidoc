@@ -1,3 +1,4 @@
+import MarkdownABI
 import ModuleGraphs
 import Symbols
 
@@ -13,6 +14,8 @@ struct SymbolGraph:Equatable, Sendable
     var cultures:[Culture]
 
     public
+    var articles:Articles
+    public
     var symbols:Table<ScalarSymbol>
     public
     var nodes:Table<Node>
@@ -20,11 +23,13 @@ struct SymbolGraph:Equatable, Sendable
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
+        articles:Articles = .init(),
         symbols:Table<ScalarSymbol> = [],
         nodes:Table<Node> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
+        self.articles = articles
         self.symbols = symbols
         self.nodes = nodes
     }
@@ -42,11 +47,28 @@ extension SymbolGraph
         return node
     }
 
+    /// Appends a standalone article with the given name to the symbol graph.
+    /// This function doesn’t check for duplicates.
+    @inlinable public mutating
+    func append(article id:String) -> Int32
+    {
+        defer
+        {
+            self.articles.append(.init(
+                referents: [],
+                overview: [],
+                details: [],
+                fold: nil,
+                id: id))
+        }
+        return self.articles.endIndex
+    }
+
     /// Appends a new namespace to the symbol graph. This function doesn’t check
     /// for duplicates, and it doesn’t check if the module name is already associated
     /// with a culture.
     @inlinable public mutating
-    func append(_ namespace:ModuleIdentifier) -> Int
+    func append(namespace:ModuleIdentifier) -> Int
     {
         defer { self.namespaces.append(namespace) }
         return self.namespaces.endIndex

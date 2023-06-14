@@ -18,7 +18,7 @@ extension StaticLinker
         private(set)
         var references:[Codelink: UInt32]
         private(set)
-        var referents:[MarkdownArticle.Referent]
+        var referents:[SymbolGraph.Referent]
 
         init(resolver:StaticResolver, scope:[String])
         {
@@ -49,7 +49,7 @@ extension StaticLinker.Outliner
                 return reference
             }
 
-            let referent:MarkdownArticle.Referent
+            let referent:SymbolGraph.Referent
             switch self.resolver.query(ascending: self.scope, link: codelink)
             {
             case nil:
@@ -66,7 +66,7 @@ extension StaticLinker.Outliner
                 }
 
             case .many?:
-                print("ambiguous codelink '\(codelink)'")
+                print("Codelink '\(codelink)' is ambiguous.")
                 return nil
             }
 
@@ -84,8 +84,10 @@ extension StaticLinker.Outliner
 {
     mutating
     func link(
-        comment:Compiler.Documentation.Comment) -> MarkdownArticle
+        comment:Compiler.Documentation.Comment,
+        adding extra:[MarkdownDocumentationSupplement]? = nil) -> SymbolGraph.Article<Never>
     {
+        //  TODO: use supplements
         let documentation:MarkdownDocumentation = .init(parsing: comment.text,
             as: SwiftFlavoredMarkdownComment.self)
 

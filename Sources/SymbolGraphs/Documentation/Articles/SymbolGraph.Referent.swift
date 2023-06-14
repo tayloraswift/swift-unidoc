@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import Codelinks
 
-extension MarkdownArticle
+extension SymbolGraph
 {
     @frozen public
     enum Referent:Equatable, Hashable, Sendable
@@ -13,7 +13,7 @@ extension MarkdownArticle
         case vector(Int32, self:Int32)
     }
 }
-extension MarkdownArticle.Referent:BSONEncodable
+extension SymbolGraph.Referent:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)
@@ -32,7 +32,7 @@ extension MarkdownArticle.Referent:BSONEncodable
         }
     }
 }
-extension MarkdownArticle.Referent:BSONDecodable
+extension SymbolGraph.Referent:BSONDecodable
 {
     @inlinable public
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
