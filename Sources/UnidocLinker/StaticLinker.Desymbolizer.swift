@@ -1,0 +1,140 @@
+import ModuleGraphs
+import SymbolGraphs
+import Symbols
+import UnidocCompiler
+
+extension StaticLinker
+{
+    struct Desymbolizer
+    {
+        /// Interned module names. This only contains modules that
+        /// are not included in the symbol graph being linked.
+        private
+        var modules:[ModuleIdentifier: Int]
+        private
+        var scalars:[ScalarSymbol: Int32]
+        private
+        var files:[FileSymbol: Int32]
+
+        var docs:Documentation
+
+        init(modules:[ModuleDetails])
+        {
+            self.modules = [:]
+            self.scalars = [:]
+            self.files = [:]
+
+            self.docs = .init(modules: modules)
+        }
+    }
+}
+extension StaticLinker.Desymbolizer
+{
+    /// Indexes the given scalar and appends it to the symbol graph.
+    ///
+    /// This function only populates basic information (flags and path)
+    /// about the scalar, the rest should only be added after completing
+    /// a full pass over all the scalars and extensions.
+    ///
+    /// This function doesn’t check for duplicates.
+    mutating
+    func allocate(scalar:Compiler.Scalar) -> Int32
+    {
+        let address:Int32 = self.docs.graph.append(.init(
+                flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
+                path: scalar.path),
+            id: scalar.id)
+
+        self.scalars[scalar.id] = address
+        return address
+    }
+    /// Indexes the scalar extended by the given extension and appends
+    /// the (empty) scalar to the symbol graph, if it has not already
+    /// been indexed. (This function checks for duplicates.)
+    mutating
+    func allocate(extension:Compiler.Extension) -> Int32
+    {
+        let scalar:ScalarSymbol = `extension`.extended.type
+        let address:Int32 =
+        {
+            switch $0
+            {
+            case nil:
+                let address:Int32 = self.docs.graph.append(nil, id: scalar)
+                $0 = address
+                return address
+
+            case let address?:
+                return address
+            }
+        } (&self.scalars[scalar])
+        return address
+    }
+}
+extension StaticLinker.Desymbolizer
+{
+    /// Returns the address of the file with the given identifier,
+    /// registering it in the symbol table if needed.
+    mutating
+    func intern(_ id:FileSymbol) -> Int32
+    {
+        {
+            switch $0
+            {
+            case nil:
+                let address:Int32 = self.docs.files.append(id)
+                $0 = address
+                return address
+
+            case let address?:
+                return address
+            }
+        } (&self.files[id])
+    }
+    /// Returns the address of the scalar with the given identifier,
+    /// registering it in the symbol table if needed. You should never
+    /// call ``allocate(scalar:)`` or ``allocate(extension:)`` after
+    /// calling this function.
+    mutating
+    func intern(_ id:ScalarSymbol) -> Int32
+    {
+        {
+            switch $0
+            {
+            case nil:
+                let address:Int32 = self.docs.graph.symbols.append(id)
+                $0 = address
+                return address
+
+            case let address?:
+                return address
+            }
+        } (&self.scalars[id])
+    }
+
+    mutating
+    func intern(_ id:ModuleIdentifier) -> Int
+    {
+        {
+            switch $0
+            {
+            case nil:
+                let index:Int = self.docs.graph.append(namespace: id)
+                $0 = index
+                return index
+
+            case let index?:
+                return index
+            }
+        } (&self.modules[id])
+    }
+    mutating
+    func intern(_ id:Compiler.Namespace.ID) -> Int
+    {
+        switch id
+        {
+        case .index(let culture):   return culture
+        case .nominated(let id):    return self.intern(id)
+        }
+    }
+}

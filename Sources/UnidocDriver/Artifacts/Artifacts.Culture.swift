@@ -37,17 +37,24 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    func loadArticles() throws
+    func loadArticles() throws -> [(name:String, text:String)]
     {
-        _ = try self.articles.map
+        try self.articles.sorted
         {
-            let documentation:MarkdownDocumentation = .init(parsing: try $0.read(),
-                as: SwiftFlavoredMarkdown.self)
+            $0.string < $1.string
+        }
+        .map
+        {
+            (name: $0.stem ?? "", text: try $0.read())
         }
     }
     func loadSymbols() throws -> [SymbolGraphPart]
     {
-        try self.parts.map
+        try self.parts.sorted
+        {
+            $0.basename < $1.basename
+        }
+        .map
         {
             let path:FilePath = self.artifacts / "\($0)"
             do

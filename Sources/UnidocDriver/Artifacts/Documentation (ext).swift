@@ -22,14 +22,11 @@ extension Documentation
 
             for culture:Artifacts.Culture in artifacts.cultures
             {
-                for artifact:String in
-                    culture.articles.map(\.string).sorted() +
-                    culture.parts.map(\.description).sorted()
-                {
-                    print("Loading artifact: \(artifact)")
-                }
-
                 let parts:[SymbolGraphPart] = try culture.loadSymbols()
+                for part:SymbolGraphPart in parts
+                {
+                    print("Loaded artifact: \(part.id)")
+                }
 
                 time.compiling += try clock.measure
                 {
@@ -53,15 +50,26 @@ extension Documentation
             var linker:StaticLinker = .init(nominations: nominations,
                 modules: artifacts.cultures.map(\.module))
 
+            let supplements:[[(name:String, text:String)]] = try artifacts.cultures.map
+            {
+                try $0.loadArticles()
+            }
+            for (name, _):(String, String) in supplements.joined()
+            {
+                print("Loaded artifact: \(name)")
+            }
+
             time.linking = clock.measure
             {
-                let scalarAddresses:[[ClosedRange<Int32>]] = linker.allocate(
+                let scalarPositions:[[SymbolGraph.Namespace]] = linker.allocate(
                     namespaces: namespaces)
-                let extensionAddresses:[(Int32, Int)] = linker.allocate(
+                let extensionPositions:[(Int32, Int)] = linker.allocate(
                     extensions: extensions)
 
-                linker.link(namespaces: namespaces, at: scalarAddresses)
-                linker.link(extensions: extensions, at: extensionAddresses)
+                linker.attach(supplements: supplements)
+
+                linker.link(namespaces: namespaces, at: scalarPositions)
+                linker.link(extensions: extensions, at: extensionPositions)
             }
 
             print("Linked documentation in \(time.linking)")

@@ -48,7 +48,7 @@ extension SymbolGraph
         var location:SourceLocation<Int32>?
         /// This scalar’s binary markdown documentation, if it has any.
         public
-        var article:MarkdownArticle?
+        var article:Article<Never>?
 
         @inlinable public
         init(flags:Flags, path:UnqualifiedPath)
