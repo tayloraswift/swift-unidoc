@@ -324,10 +324,6 @@ let package:Package = .init(
                 .target(name: "UnidocDatabase"),
                 .target(name: "UnidocDriver"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
-            ],
-            exclude:
-            [
-                "swift-crosslinks",
             ]),
 
         .executableTarget(name: "UnidocDriverTests", dependencies:

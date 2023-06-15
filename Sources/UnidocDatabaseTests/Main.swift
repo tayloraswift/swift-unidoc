@@ -20,7 +20,7 @@ enum Main:AsyncTests
             try? executors.syncShutdownGracefully()
         }
 
-        await mongodb.run(tests ! "main",
+        await mongodb.run(tests ! "Main",
             DatabaseSetup.init(),
             Registrations.init(),
             Objects.init(),

@@ -5,32 +5,15 @@ import MarkdownTrees
 struct MarkdownDocumentationSupplement
 {
     public
-    let headline:MarkdownBlock.Heading?
+    let binding:Codelink?
     public
     var article:MarkdownDocumentation
 
     public
-    init(headline:MarkdownBlock.Heading?, article:MarkdownDocumentation)
+    init(binding:Codelink?, article:MarkdownDocumentation)
     {
-        self.headline = headline
+        self.binding = binding
         self.article = article
-    }
-}
-extension MarkdownDocumentationSupplement
-{
-    public
-    var binding:Codelink?
-    {
-        if  let headline:MarkdownBlock.Heading = self.headline,
-                headline.elements.count == 1,
-            case .code(let expression, symbol: true) = headline.elements[0]
-        {
-            return .init(parsing: expression.text)
-        }
-        else
-        {
-            return nil
-        }
     }
 }
 extension MarkdownDocumentationSupplement:MarkdownModel
@@ -38,20 +21,23 @@ extension MarkdownDocumentationSupplement:MarkdownModel
     public
     func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
     {
-        try self.headline.map(yield)
         try self.article.visit(yield)
     }
 
     public
     init(attaching blocks:[MarkdownBlock])
     {
-        if  case (let headline as MarkdownBlock.Heading)? = blocks.first, headline.level == 1
+        if  case (let headline as MarkdownBlock.Heading)? = blocks.first,
+            headline.level == 1,
+            headline.elements.count == 1,
+            case .code(let expression, symbol: true) = headline.elements[0],
+            let binding:Codelink = .init(parsing: expression.text)
         {
-            self.init(headline: headline, article: .init(attaching: blocks.dropFirst()))
+            self.init(binding: binding, article: .init(attaching: blocks.dropFirst()))
         }
         else
         {
-            self.init(headline: nil, article: .init(attaching: blocks))
+            self.init(binding: nil, article: .init(attaching: blocks))
         }
     }
 }

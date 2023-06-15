@@ -79,7 +79,7 @@ extension Toolchain
 {
     public
     func generateDocs(for build:ToolchainBuild,
-        pretty:Bool = false) async throws -> DocumentationArchive
+        pretty:Bool = false) async throws -> Documentation
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let artifacts:Artifacts = try await .dump(
@@ -143,14 +143,15 @@ extension Toolchain
                 dependencies: .init(modules: [Int].init(artifacts.cultures.indices))),
         ]
 
-        let metadata:DocumentationMetadata = .swift(triple: self.triple, version: self.version,
+        let metadata:Documentation.Metadata = .swift(triple: self.triple,
+            version: self.version,
             products: products)
 
-        return .init(metadata: metadata, docs: try await .build(from: artifacts))
+        return .init(metadata: metadata, graph: try await .build(from: artifacts))
     }
     public
     func generateDocs(for build:PackageBuild,
-        pretty:Bool = false) async throws -> DocumentationArchive
+        pretty:Bool = false) async throws -> Documentation
     {
         print("Building package in: \(build.root)")
 
@@ -208,7 +209,7 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let metadata:DocumentationMetadata = .init(package: build.id,
+        let metadata:Documentation.Metadata = .init(package: build.id,
             triple: self.triple,
             ref: build.pin?.ref,
             dependencies: try package.pinnedDependencies(using: pins),
@@ -217,7 +218,7 @@ extension Toolchain
             requirements: manifest.requirements,
             revision: build.pin?.revision)
 
-        return .init(metadata: metadata, docs: try await .build(from: artifacts))
+        return .init(metadata: metadata, graph: try await .build(from: artifacts))
     }
 }
 extension Toolchain

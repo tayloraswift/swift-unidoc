@@ -47,24 +47,24 @@ extension DocumentationDatabase
 extension DocumentationDatabase
 {
     public
-    func push(archive:DocumentationArchive) async throws -> ObjectReceipt
+    func push(docs:Documentation) async throws -> ObjectReceipt
     {
-        try await self.push(archive: archive, with: try await .init(from: self.pool))
+        try await self.push(docs: docs, with: try await .init(from: self.pool))
     }
     public
-    func push(archive:DocumentationArchive,
+    func push(docs:Documentation,
         with session:Mongo.Session) async throws -> ObjectReceipt
     {
-        let id:String = archive.metadata.id ?? "$anonymous"
-        // guard let id:String = archive.metadata.id
+        let id:String = docs.metadata.id ?? "$anonymous"
+        // guard let id:String = docs.metadata.id
         // else
         // {
         //     throw DocumentationIdentificationError.init()
         // }
 
-        let package:Int32 = try await self.packages.register(archive.metadata.package,
+        let package:Int32 = try await self.packages.register(docs.metadata.package,
             with: session)
-        switch try await self.objects.push(archive, for: package, as: id,
+        switch try await self.objects.push(docs, for: package, as: id,
             with: session)
         {
         case (let version, overwritten: let overwritten):
@@ -75,20 +75,19 @@ extension DocumentationDatabase
 extension DocumentationDatabase
 {
     public
-    func publish(projecting archive:__owned DocumentationArchive,
+    func publish(projecting docs:__owned Documentation,
         with session:__shared Mongo.Session) async throws
     {
         var linker:DynamicLinker = .init(context: try await self.context(
-            publishing: archive,
+            publishing: docs,
             with: session))
         let _:[ScalarProjection] = linker.project()
     }
     private
-    func context(publishing archive:__owned DocumentationArchive,
+    func context(publishing docs:__owned Documentation,
         with session:__shared Mongo.Session) async throws -> GlobalContext
     {
-        let dependencies:[DynamicObject] = try await self.objects.load(
-            archive.metadata.pins(),
+        let dependencies:[DynamicObject] = try await self.objects.load(docs.metadata.pins(),
             with: session)
 
         let translators:[DynamicObject.Translator] = try dependencies.map
@@ -116,9 +115,9 @@ extension DocumentationDatabase
         var context:GlobalContext = .init(current: .init(projector: try .init(
                 policies: self.policies,
                 upstream: upstream,
-                receipt: try await self.push(archive: archive, with: session),
-                graph: archive.docs.graph),
-            graph: archive.docs.graph))
+                receipt: try await self.push(docs: docs, with: session),
+                graph: docs.graph),
+            graph: docs.graph))
 
         //  Populate the context with the docs of all the package’s upstream dependencies.
         for (translator, object):(DynamicObject.Translator, DynamicObject) in

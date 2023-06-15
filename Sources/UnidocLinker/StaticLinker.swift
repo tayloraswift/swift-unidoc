@@ -18,6 +18,8 @@ struct StaticLinker
     private
     var desymbolizer:Desymbolizer
     private
+    var articles:ArticleResolver
+    private
     var resolver:StaticResolver
 
     private
@@ -31,24 +33,15 @@ struct StaticLinker
 
         self.desymbolizer = .init(modules: modules)
         self.resolver = .init()
+        self.articles = .init()
 
         self.supplements = [:]
     }
 }
 extension StaticLinker
 {
-    public private(set)
-    var docs:Documentation
-    {
-        _read
-        {
-            yield  self.desymbolizer.docs
-        }
-        _modify
-        {
-            yield &self.desymbolizer.docs
-        }
-    }
+    public
+    var graph:SymbolGraph { self.desymbolizer.graph }
 }
 extension StaticLinker
 {
@@ -100,7 +93,7 @@ extension StaticLinker
         {
             let feature:Int32 = self.desymbolizer.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
-                self.docs.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
+                self.desymbolizer.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
@@ -162,12 +155,13 @@ extension StaticLinker
             destinations)
         {
             //  Record address ranges
-            self.docs.graph.cultures[culture].namespaces = destinations
+            self.desymbolizer.graph.cultures[culture].namespaces = destinations
 
             for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in
                 zip(sources, destinations)
             {
-                let qualifier:ModuleIdentifier = self.docs.graph.namespaces[destination.index]
+                let qualifier:ModuleIdentifier =
+                    self.desymbolizer.graph.namespaces[destination.index]
                 for (address, scalar) in zip(destination.range, source.scalars)
                 {
                     //  Make the scalar visible to codelink resolution.
@@ -201,7 +195,7 @@ extension StaticLinker
         return zip(addresses, extensions).map
         {
             let namespace:Int = self.desymbolizer.intern($0.1.signature.extended.namespace)
-            let qualifier:ModuleIdentifier = self.docs.graph.namespaces[namespace]
+            let qualifier:ModuleIdentifier = self.desymbolizer.graph.namespaces[namespace]
 
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[Int32] = self.addresses(
@@ -214,7 +208,7 @@ extension StaticLinker
             let nested:[Int32] = self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.docs.graph.nodes[$0.0].push(.init(
+            let index:Int = self.desymbolizer.graph.nodes[$0.0].push(.init(
                 conditions: $0.1.conditions.map
                 {
                     $0.map { self.desymbolizer.intern($0) }
@@ -229,40 +223,59 @@ extension StaticLinker
     }
 }
 
-struct StandaloneArticle
-{
-    let markdown:MarkdownDocumentationSupplement
-    let address:Int32
-
-    init(markdown:MarkdownDocumentationSupplement, address:Int32)
-    {
-        self.markdown = markdown
-        self.address = address
-    }
-}
-
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[(name:String, text:String)]])
+    func attach(supplements:[[(name:String, text:String)]]) throws
     {
-        var articles:[StandaloneArticle] = []
-
-        for (namespace, supplements):(ModuleIdentifier, [(name:String, text:String)]) in zip(
-            self.docs.graph.namespaces,
-            supplements)
+        let standalone:[[StandaloneArticle]] = try zip(supplements.indices, supplements).map
         {
-            for supplement:(name:String, text:String) in supplements
+            let namespace:ModuleIdentifier =  self.desymbolizer.graph.namespaces[$0.0]
+
+            var addresses:(first:Int32, last:Int32)? = nil
+            var articles:[StandaloneArticle] = []
+
+            for supplement:(name:String, text:String) in $0.1
             {
-                if  let standalone:StandaloneArticle = self.attach(supplement: supplement,
+                if  let article:StandaloneArticle =  try self.attach(supplement: supplement,
                         in: namespace)
                 {
-                    articles.append(standalone)
+                    articles.append(article)
+
+                    switch addresses
+                    {
+                    case  nil:              addresses = (article.address, article.address)
+                    case (let first, _)?:   addresses = (first,           article.address)
+                    }
                 }
             }
-        }
 
-        //  TODO: expose and link articles
+            self.desymbolizer.graph.cultures[$0.0].articles = addresses.map
+            {
+                $0.first ... $0.last
+            }
+
+            return articles
+        }
+        //  Now that standalone articles have all been exposed for doclink resolution,
+        //  we can link them.
+        for (culture, standalone):(Int, [StandaloneArticle]) in zip(
+            standalone.indices,
+            standalone)
+        {
+            let culture:ModuleIdentifier = self.desymbolizer.graph.namespaces[culture]
+            for standalone:StandaloneArticle in standalone
+            {
+                var outliner:Outliner = .init(
+                    articles: self.articles,
+                    resolver: self.resolver,
+                    culture: culture,
+                    scope: ["\(culture)"])
+
+                self.desymbolizer.graph.articles[standalone.address].value = outliner.link(
+                    documentation: standalone.markdown.article)
+            }
+        }
     }
     /// Parses and stores the given supplemental documentation if it has a binding
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
@@ -270,15 +283,26 @@ extension StaticLinker
     private mutating
     func attach(
         supplement:(name:String, text:String),
-        in namespace:ModuleIdentifier) -> StandaloneArticle?
+        in namespace:ModuleIdentifier) throws -> StandaloneArticle?
     {
         let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
             as: SwiftFlavoredMarkdown.self)
         if  case nil = markdown.binding
         {
-            //  TODO: expose article name for doclink resolution
-            return .init(markdown: markdown, address: self.docs.graph.append(
-                article: supplement.name))
+            return .init(markdown: markdown, address: try
+            {
+                switch $0
+                {
+                case nil:
+                    let address:Int32 = self.desymbolizer.graph.append(
+                        article: supplement.name)
+                    $0 = address
+                    return address
+
+                case  _?:
+                    throw DuplicateSymbolError.article(supplement.name)
+                }
+            } (&self.articles[namespace, supplement.name]))
         }
         if  let binding:Int32 = self.binding(of: markdown, in: namespace)
         {
@@ -334,20 +358,25 @@ extension StaticLinker
     func link(namespaces sources:[[Compiler.Namespace]],
         at destinations:[[SymbolGraph.Namespace]])
     {
-        for (sources, destinations):([Compiler.Namespace], [SymbolGraph.Namespace]) in
-            zip(sources, destinations)
+        for ((sources, destinations), culture):
+            (([Compiler.Namespace], [SymbolGraph.Namespace]), ModuleIdentifier) in zip(zip(
+                sources,
+                destinations),
+            self.desymbolizer.graph.namespaces)
         {
             for (source, destination) in zip(sources, destinations)
             {
                 self.link(scalars: source.scalars,
                     at: destination.range,
-                    in: self.docs.graph.namespaces[destination.index])
+                    of: culture,
+                    in: self.desymbolizer.graph.namespaces[destination.index])
             }
         }
     }
     public mutating
     func link(scalars:[Compiler.Scalar],
         at addresses:ClosedRange<Int32>,
+        of culture:ModuleIdentifier,
         in namespace:ModuleIdentifier)
     {
         for (address, scalar):(Int32, Compiler.Scalar) in zip(addresses, scalars)
@@ -368,8 +397,12 @@ extension StaticLinker
             }
             let article:SymbolGraph.Article<Never>? = scalar.documentation.map
             {
-                var outliner:Outliner = .init(resolver: self.resolver,
+                var outliner:Outliner = .init(
+                    articles: self.articles,
+                    resolver: self.resolver,
+                    culture: culture,
                     scope: ["\(namespace)"] + $0.scope)
+
                 return outliner.link(comment: $0.comment,
                     adding: self.supplements.removeValue(forKey: address))
             }
@@ -383,15 +416,17 @@ extension StaticLinker
 
                 $0?.location = location
                 $0?.article = article
-            } (&self.docs.graph.nodes[address].scalar)
+            } (&self.desymbolizer.graph.nodes[address].scalar)
         }
     }
 
     public mutating
-    func link(extensions:[Compiler.Extension], at addresses:[(Int32, Int)])
+    func link(extensions:[Compiler.Extension],
+        at addresses:[(Int32, Int)])
     {
-        for ((address, index), `extension`):((Int32, Int), Compiler.Extension)
-            in zip(addresses, extensions)
+        for ((address, index), `extension`):((Int32, Int), Compiler.Extension) in zip(
+            addresses,
+            extensions)
         {
             //  Extensions can have many constituent extension blocks, each potentially
             //  with its own doccomment. It’s not clear to me how to combine them,
@@ -418,13 +453,19 @@ extension StaticLinker
             }
             if  let comment
             {
-                let namespace:Int = self.docs.graph.nodes[address].extensions[index].namespace
+                {
+                    let qualifier:ModuleIdentifier =
+                        self.desymbolizer.graph.namespaces[$0.namespace]
 
-                var outliner:Outliner = .init(resolver: self.resolver,
-                    scope: ["\(self.docs.graph.namespaces[namespace])"] + `extension`.path)
+                    var outliner:Outliner = .init(
+                        articles: self.articles,
+                        resolver: self.resolver,
+                        culture: self.desymbolizer.graph.namespaces[$0.culture],
+                        scope: ["\(qualifier)"] + `extension`.path)
 
-                self.docs.graph.nodes[address].extensions[index].article = outliner.link(
-                    comment: comment)
+                    $0.article = outliner.link(comment: comment)
+
+                } (&self.desymbolizer.graph.nodes[address].extensions[index])
             }
         }
     }

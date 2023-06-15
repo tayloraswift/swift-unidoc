@@ -50,7 +50,7 @@ extension DocumentationDatabase.Objects
     }
 
     public
-    func push(_ archive:DocumentationArchive,
+    func push(_ docs:Documentation,
         for package:Int32,
         as id:String,
         with session:Mongo.Session) async throws -> (version:Int32, overwritten:Bool)
@@ -58,12 +58,12 @@ extension DocumentationDatabase.Objects
         let result:Mongo.TransactionResult = await session.withSnapshotTransaction(
             writeConcern: .majority)
         {
-            try await self.push(archive, for: package, as: id, with: $0)
+            try await self.push(docs, for: package, as: id, with: $0)
         }
         return try result()
     }
 
-    func push(_ archive:DocumentationArchive,
+    func push(_ docs:Documentation,
         for package:Int32,
         as id:String,
         with transaction:Mongo.Transaction) async throws -> (version:Int32, overwritten:Bool)
@@ -101,8 +101,8 @@ extension DocumentationDatabase.Objects
         let object:DynamicObject = .init(id: id,
             package: package,
             version: predecessor + 1,
-            metadata: archive.metadata,
-            docs: archive.docs)
+            metadata: docs.metadata,
+            graph: docs.graph)
 
         let response:Mongo.UpdateResponse<String> = try await transaction.run(
             command: Mongo.Update<Mongo.One, String>.init(Self.name,

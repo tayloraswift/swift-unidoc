@@ -3,75 +3,78 @@ import BSONEncoding
 import ModuleGraphs
 import SemanticVersions
 
-public
-struct DocumentationMetadata:Equatable, Sendable
+extension Documentation
 {
-    /// A package name.
-    /// This is part of a documentation object’s identity.
-    public
-    let package:PackageIdentifier
-    /// A swift target triple.
-    /// This is part of a documentation object’s identity.
-    public
-    let triple:Triple
-    /// A semantic ref, either a semantic version or an unstable identitifer.
-    /// This is part of a documentation object’s identity, if non-nil.
-    /// If this field is nil, other documentation objects will **not** be able
-    /// to link against the relevant documentation.
-    public
-    let ref:SemanticRef?
-
-
-    /// All other packages (and their pins) that the relevant package is aware of.
-    /// This list is used to select other documentation objects to link against.
-    public
-    let dependencies:[Dependency]
-    /// The swift toolchain the relevant documentation was generated with,
-    /// which is used to select a version of the standard library to link
-    /// against. This is nil if the documentation *is* the toolchain
-    /// documentation.
-    public
-    let toolchain:SemanticRef?
-    /// The package products contained within the relevant documentation.
-    /// The products in this list contain references to packages named in
-    /// ``dependencies``. This list is used to filter other documentation objects
-    /// to link against.
-    public
-    let products:[ProductDetails]
-
-
-    /// The platform requirements of the relevant package. This field is
-    /// informative only.
-    public
-    let requirements:[PlatformRequirement]
-    /// The commit hash of the relevant documentation. It is a more specific
-    /// notion of version than ``ref``, but it is used for validation only.
-    public
-    let revision:Repository.Revision?
-
-    public
-    init(package:PackageIdentifier,
-        triple:Triple,
-        ref:SemanticRef?,
-        dependencies:[Dependency],
-        toolchain:SemanticRef?,
-        products:[ProductDetails],
-        requirements:[PlatformRequirement] = [],
-        revision:Repository.Revision? = nil)
+    @frozen public
+    struct Metadata:Equatable, Sendable
     {
-        self.package = package
-        self.triple = triple
-        self.ref = ref
+        /// A package name.
+        /// This is part of a documentation object’s identity.
+        public
+        let package:PackageIdentifier
+        /// A swift target triple.
+        /// This is part of a documentation object’s identity.
+        public
+        let triple:Triple
+        /// A semantic ref, either a semantic version or an unstable identitifer.
+        /// This is part of a documentation object’s identity, if non-nil.
+        /// If this field is nil, other documentation objects will **not** be able
+        /// to link against the relevant documentation.
+        public
+        let ref:SemanticRef?
 
-        self.dependencies = dependencies
-        self.toolchain = toolchain
-        self.products = products
 
-        self.requirements = requirements
-        self.revision = revision
+        /// All other packages (and their pins) that the relevant package is aware of.
+        /// This list is used to select other documentation objects to link against.
+        public
+        let dependencies:[Dependency]
+        /// The swift toolchain the relevant documentation was generated with,
+        /// which is used to select a version of the standard library to link
+        /// against. This is nil if the documentation *is* the toolchain
+        /// documentation.
+        public
+        let toolchain:SemanticRef?
+        /// The package products contained within the relevant documentation.
+        /// The products in this list contain references to packages named in
+        /// ``dependencies``. This list is used to filter other documentation objects
+        /// to link against.
+        public
+        let products:[ProductDetails]
+
+
+        /// The platform requirements of the relevant package. This field is
+        /// informative only.
+        public
+        let requirements:[PlatformRequirement]
+        /// The commit hash of the relevant documentation. It is a more specific
+        /// notion of version than ``ref``, but it is used for validation only.
+        public
+        let revision:Repository.Revision?
+
+        public
+        init(package:PackageIdentifier,
+            triple:Triple,
+            ref:SemanticRef?,
+            dependencies:[Dependency],
+            toolchain:SemanticRef?,
+            products:[ProductDetails],
+            requirements:[PlatformRequirement] = [],
+            revision:Repository.Revision? = nil)
+        {
+            self.package = package
+            self.triple = triple
+            self.ref = ref
+
+            self.dependencies = dependencies
+            self.toolchain = toolchain
+            self.products = products
+
+            self.requirements = requirements
+            self.revision = revision
+        }
     }
 }
-extension DocumentationMetadata
+extension Documentation.Metadata
 {
     public static
     func swift(triple:Triple, version:SemanticRef?, products:[ProductDetails]) -> Self
@@ -82,7 +85,7 @@ extension DocumentationMetadata
             products: products)
     }
 }
-extension DocumentationMetadata
+extension Documentation.Metadata
 {
     /// Returns the relevant documentation object’s identity string, if it has one.
     public
@@ -124,7 +127,7 @@ extension DocumentationMetadata
         }
     }
 }
-extension DocumentationMetadata
+extension Documentation.Metadata
 {
     @frozen public
     enum CodingKeys:String
@@ -140,7 +143,7 @@ extension DocumentationMetadata
         case products
     }
 }
-extension DocumentationMetadata:BSONDocumentEncodable
+extension Documentation.Metadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -157,7 +160,7 @@ extension DocumentationMetadata:BSONDocumentEncodable
         bson[.revision] = self.revision
     }
 }
-extension DocumentationMetadata:BSONDocumentDecodable
+extension Documentation.Metadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

@@ -9,26 +9,24 @@ struct DynamicObject:Equatable, Sendable
     let package:Int32
     let version:Int32
 
-    let metadata:DocumentationMetadata
-    let docs:Documentation
+    let metadata:Documentation.Metadata
+    let graph:SymbolGraph
 
     init(id:String,
         package:Int32,
         version:Int32,
-        metadata:DocumentationMetadata,
-        docs:Documentation)
+        metadata:Documentation.Metadata,
+        graph:SymbolGraph)
     {
         self.id = id
         self.package = package
         self.version = version
         self.metadata = metadata
-        self.docs = docs
+        self.graph = graph
     }
 }
 extension DynamicObject
 {
-    var graph:SymbolGraph { self.docs.graph }
-
     var stable:Bool
     {
         switch self.metadata.ref
@@ -46,7 +44,7 @@ extension DynamicObject
         case package = "P"
         case version = "V"
         case metadata = "M"
-        case docs = "D"
+        case graph = "D"
 
         //  Computed field, outlined for MongoDB’s convenience.
         case stable = "S"
@@ -67,7 +65,7 @@ extension DynamicObject:BSONDocumentEncodable
         bson[.package] = self.package
         bson[.version] = self.version
         bson[.metadata] = self.metadata
-        bson[.docs] = self.docs
+        bson[.graph] = self.graph
 
         bson[.stable] = self.stable
     }
@@ -80,6 +78,6 @@ extension DynamicObject:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             metadata: try bson[.metadata].decode(),
-            docs: try bson[.docs].decode())
+            graph: try bson[.graph].decode())
     }
 }

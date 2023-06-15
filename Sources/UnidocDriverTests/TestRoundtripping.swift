@@ -5,7 +5,7 @@ import Testing
 import UnidocDriver
 
 func TestRoundtripping(_ tests:TestGroup,
-    documentation:DocumentationArchive,
+    documentation:Documentation,
     output:FilePath)
 {
     if  let tests:TestGroup = tests / "roundtripping"
@@ -20,7 +20,7 @@ func TestRoundtripping(_ tests:TestGroup,
 
             print("Documentation saved to: \(output)")
 
-            let decoded:DocumentationArchive = try .init(buffer: bson.bytes)
+            let decoded:Documentation = try .init(buffer: bson.bytes)
 
             tests.expect(decoded.metadata ==? documentation.metadata)
 
