@@ -13,10 +13,10 @@ struct Crosslinks:MongoTestBattery
         let workspace:Workspace = try await .create(at: ".unidoc-testing")
         let toolchain:Toolchain = try await .detect()
 
-        let swift:DocumentationArchive = try await toolchain.generateDocs(
+        let swift:Documentation = try await toolchain.generateDocs(
             for: try await .swift(in: workspace, clean: true))
 
-        let mock:DocumentationArchive = try await toolchain.generateDocs(
+        let mock:Documentation = try await toolchain.generateDocs(
             for: try await .local(package: "swift-crosslinks",
                 from: "TestPackages",
                 in: workspace,
@@ -25,7 +25,7 @@ struct Crosslinks:MongoTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.push(archive: swift, with: session) ==? .init(
+        tests.expect(try await database.push(docs: swift, with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 0))

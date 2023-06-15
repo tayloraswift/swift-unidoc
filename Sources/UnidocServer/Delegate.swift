@@ -128,7 +128,7 @@ import SemanticVersions
 extension Delegate
 {
     private nonisolated
-    func ingest(uploaded archive:DocumentationArchive) async throws
+    func ingest(uploaded archive:Documentation) async throws
     {
         guard let id:String = archive.metadata.id
         else
@@ -145,14 +145,14 @@ extension Delegate
             print("pins:", pins)
 
             try await session.run(
-                command: Mongo.Find<Mongo.Cursor<DocumentationArchive>>.init("doc_objects",
+                command: Mongo.Find<Mongo.Cursor<Documentation>>.init("doc_objects",
                     stride: 32),
                 against: "master",
                 on: .primary)
             {
-                for try await batch:[DocumentationArchive] in $0
+                for try await batch:[Documentation] in $0
                 {
-                    for archive:DocumentationArchive in batch
+                    for archive:Documentation in batch
                     {
                         print(archive.metadata.id as Any)
                     }

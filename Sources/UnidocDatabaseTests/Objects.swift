@@ -14,7 +14,7 @@ struct Objects:MongoTestBattery
         let toolchain:Toolchain = try await .detect()
 
         let repository:String = "https://github.com/apple/swift-nio"
-        let archive:(DocumentationArchive, DocumentationArchive, DocumentationArchive)
+        let archive:(Documentation, Documentation, Documentation)
 
         archive.0 = try await toolchain.generateDocs(for: try await .remote(
             package: "swift-nio",
@@ -36,22 +36,22 @@ struct Objects:MongoTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.push(archive: archive.0, with: session) ==? .init(
+        tests.expect(try await database.push(docs: archive.0, with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 0))
 
-        tests.expect(try await database.push(archive: archive.1, with: session) ==? .init(
+        tests.expect(try await database.push(docs: archive.1, with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 1))
 
-        tests.expect(try await database.push(archive: archive.2, with: session) ==? .init(
+        tests.expect(try await database.push(docs: archive.2, with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 2))
 
-        tests.expect(try await database.push(archive: archive.2, with: session) ==? .init(
+        tests.expect(try await database.push(docs: archive.2, with: session) ==? .init(
             overwritten: true,
             package: 0,
             version: 3))

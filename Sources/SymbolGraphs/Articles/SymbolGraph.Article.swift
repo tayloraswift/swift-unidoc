@@ -38,6 +38,27 @@ extension SymbolGraph
 }
 extension SymbolGraph.Article
 {
+    @inlinable public
+    var value:SymbolGraph.Article<Never>
+    {
+        get
+        {
+            .init(referents: self.referents,
+                overview: self.overview,
+                details: self.details,
+                fold: self.fold)
+        }
+        set(value)
+        {
+            self.referents = value.referents
+            self.overview = value.overview
+            self.details = value.details
+            self.fold = value.fold
+        }
+    }
+}
+extension SymbolGraph.Article
+{
     public
     enum CodingKeys:String
     {

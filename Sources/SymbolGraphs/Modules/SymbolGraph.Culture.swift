@@ -13,7 +13,10 @@ extension SymbolGraph
         /// The namespaces that contain this module’s scalars, if it declares any.
         public
         var namespaces:[SymbolGraph.Namespace]
-        /// This module’s binary markdown documentation, if it has any.
+        /// This module’s standalone articles, if it has any.
+        public
+        var articles:ClosedRange<Int32>?
+        /// This module’s primary article, if it has one.
         public
         var article:Article<Never>?
 
@@ -23,6 +26,7 @@ extension SymbolGraph
             self.module = module
 
             self.namespaces = []
+            self.articles = nil
             self.article = nil
         }
     }

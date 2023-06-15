@@ -3,6 +3,7 @@ import CodelinkResolution
 import MarkdownABI
 import MarkdownParsing
 import MarkdownSemantics
+import ModuleGraphs
 import SymbolGraphs
 import UnidocCompiler
 
@@ -11,7 +12,13 @@ extension StaticLinker
     struct Outliner
     {
         private
+        let articles:ArticleResolver
+        private
         let resolver:StaticResolver
+        /// The implicit scope that will be used to resolve doclinks.
+        private
+        let culture:ModuleIdentifier
+        /// The implicit scope that will be used to resolve codelinks.
         private
         let scope:[String]
 
@@ -20,9 +27,14 @@ extension StaticLinker
         private(set)
         var referents:[SymbolGraph.Referent]
 
-        init(resolver:StaticResolver, scope:[String])
+        init(articles:ArticleResolver,
+            resolver:StaticResolver,
+            culture:ModuleIdentifier,
+            scope:[String])
         {
+            self.articles = articles
             self.resolver = resolver
+            self.culture = culture
             self.scope = scope
 
             self.references = [:]
@@ -32,7 +44,7 @@ extension StaticLinker
 }
 extension StaticLinker.Outliner
 {
-    mutating
+    private mutating
     func outline(expression:String) -> UInt32?
     {
         guard let codelink:Codelink = .init(parsing: expression)
@@ -83,14 +95,16 @@ extension StaticLinker.Outliner
 extension StaticLinker.Outliner
 {
     mutating
-    func link(
-        comment:Compiler.Documentation.Comment,
+    func link(comment:Compiler.Documentation.Comment,
         adding extra:[MarkdownDocumentationSupplement]? = nil) -> SymbolGraph.Article<Never>
     {
         //  TODO: use supplements
-        let documentation:MarkdownDocumentation = .init(parsing: comment.text,
-            as: SwiftFlavoredMarkdownComment.self)
-
+        self.link(documentation: .init(parsing: comment.text,
+            as: SwiftFlavoredMarkdownComment.self))
+    }
+    mutating
+    func link(documentation:MarkdownDocumentation) -> SymbolGraph.Article<Never>
+    {
         let overview:MarkdownBytecode = .init
         {
             (binary:inout MarkdownBinaryEncoder) in

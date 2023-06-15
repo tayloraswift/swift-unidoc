@@ -32,7 +32,7 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "standard-library",
-            let documentation:DocumentationArchive = (await tests.do
+            let documentation:Documentation = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .swift(
                         in: workspace,
@@ -48,7 +48,7 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-atomics",
-            let documentation:DocumentationArchive = (await tests.do
+            let documentation:Documentation = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-atomics",
@@ -67,7 +67,7 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-nio",
-            let documentation:DocumentationArchive = (await tests.do
+            let documentation:Documentation = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio",
@@ -96,7 +96,7 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-nio-ssl",
-            let documentation:DocumentationArchive = (await tests.do
+            let documentation:Documentation = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio-ssl",
@@ -124,7 +124,7 @@ enum Main:AsyncTests
         if  let workspace:Workspace,
             let toolchain:Toolchain,
             let tests:TestGroup = tests / "swift-syntax",
-            let documentation:DocumentationArchive = (await tests.do
+            let documentation:Documentation = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-syntax",

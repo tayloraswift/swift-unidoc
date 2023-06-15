@@ -1,3 +1,5 @@
+import BSONDecoding
+import BSONEncoding
 import MarkdownABI
 import ModuleGraphs
 import Symbols
@@ -15,23 +17,41 @@ struct SymbolGraph:Equatable, Sendable
 
     public
     var articles:Articles
+
     public
     var symbols:Table<ScalarSymbol>
     public
     var nodes:Table<Node>
+
+    public
+    var files:Table<FileSymbol>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
         articles:Articles = .init(),
         symbols:Table<ScalarSymbol> = [],
-        nodes:Table<Node> = [])
+        nodes:Table<Node> = [],
+        files:Table<FileSymbol> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
+
         self.articles = articles
+
         self.symbols = symbols
         self.nodes = nodes
+
+        self.files = files
+    }
+}
+extension SymbolGraph
+{
+    public
+    init(modules:[ModuleDetails])
+    {
+        self.init(namespaces: modules.map(\.id),
+            cultures: modules.map(SymbolGraph.Culture.init(module:)))
     }
 }
 extension SymbolGraph
@@ -104,5 +124,45 @@ extension SymbolGraph
         }
 
         return .init(elements: elements)
+    }
+}
+extension SymbolGraph
+{
+    public
+    enum CodingKeys:String
+    {
+        case articles
+        case namespaces
+        case cultures
+        case symbols
+        case nodes
+        case files
+    }
+}
+extension SymbolGraph:BSONDocumentEncodable
+{
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    {
+        bson[.namespaces] = self.namespaces
+        bson[.cultures] = self.cultures
+        bson[.articles] = self.articles
+        bson[.symbols] = self.symbols
+        bson[.nodes] = self.nodes.elements
+        bson[.files] = self.files
+    }
+}
+extension SymbolGraph:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    {
+        self.init(
+            namespaces: try bson[.namespaces].decode(),
+            cultures: try bson[.cultures].decode(),
+            articles: try bson[.articles].decode(),
+            symbols: try bson[.symbols].decode(),
+            nodes: try bson[.nodes].decode(),
+            files: try bson[.files].decode())
     }
 }

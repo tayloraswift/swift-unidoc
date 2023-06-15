@@ -3,7 +3,7 @@ import SymbolGraphParts
 import UnidocCompiler
 import UnidocLinker
 
-extension Documentation
+extension SymbolGraph
 {
     public static
     func build(from artifacts:Artifacts) async throws -> Self
@@ -59,14 +59,14 @@ extension Documentation
                 print("Loaded artifact: \(name)")
             }
 
-            time.linking = clock.measure
+            time.linking = try clock.measure
             {
                 let scalarPositions:[[SymbolGraph.Namespace]] = linker.allocate(
                     namespaces: namespaces)
                 let extensionPositions:[(Int32, Int)] = linker.allocate(
                     extensions: extensions)
 
-                linker.attach(supplements: supplements)
+                try linker.attach(supplements: supplements)
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
@@ -74,7 +74,7 @@ extension Documentation
 
             print("Linked documentation in \(time.linking)")
 
-            return linker.docs
+            return linker.graph
         }
     }
 }

@@ -16,7 +16,7 @@ extension StaticLinker
         private
         var files:[FileSymbol: Int32]
 
-        var docs:Documentation
+        var graph:SymbolGraph
 
         init(modules:[ModuleDetails])
         {
@@ -24,7 +24,7 @@ extension StaticLinker
             self.scalars = [:]
             self.files = [:]
 
-            self.docs = .init(modules: modules)
+            self.graph = .init(modules: modules)
         }
     }
 }
@@ -40,7 +40,7 @@ extension StaticLinker.Desymbolizer
     mutating
     func allocate(scalar:Compiler.Scalar) -> Int32
     {
-        let address:Int32 = self.docs.graph.append(.init(
+        let address:Int32 = self.graph.append(.init(
                 flags: .init(aperture: scalar.aperture, phylum: scalar.phylum),
                 path: scalar.path),
             id: scalar.id)
@@ -60,7 +60,7 @@ extension StaticLinker.Desymbolizer
             switch $0
             {
             case nil:
-                let address:Int32 = self.docs.graph.append(nil, id: scalar)
+                let address:Int32 = self.graph.append(nil, id: scalar)
                 $0 = address
                 return address
 
@@ -82,7 +82,7 @@ extension StaticLinker.Desymbolizer
             switch $0
             {
             case nil:
-                let address:Int32 = self.docs.files.append(id)
+                let address:Int32 = self.graph.files.append(id)
                 $0 = address
                 return address
 
@@ -102,7 +102,7 @@ extension StaticLinker.Desymbolizer
             switch $0
             {
             case nil:
-                let address:Int32 = self.docs.graph.symbols.append(id)
+                let address:Int32 = self.graph.symbols.append(id)
                 $0 = address
                 return address
 
@@ -119,7 +119,7 @@ extension StaticLinker.Desymbolizer
             switch $0
             {
             case nil:
-                let index:Int = self.docs.graph.append(namespace: id)
+                let index:Int = self.graph.append(namespace: id)
                 $0 = index
                 return index
 
