@@ -153,12 +153,22 @@ extension Toolchain
     func generateDocs(for build:PackageBuild,
         pretty:Bool = false) async throws -> Documentation
     {
-        print("Building package in: \(build.root)")
+        let manifest:PackageManifest = try await .dump(from: build)
 
-        try await SystemProcess.init(command: "swift",
-            "build",
-            "--configuration", "\(build.configuration)",
-            "--package-path", "\(build.root)")()
+        print("Building package: '\(build.id)' (swift-tools-version: \(manifest.format))")
+
+        //  Don’t parrot the `swift build` output to the terminal
+        let log:FilePath = build.output.path / "build.log"
+        try await log.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            try await SystemProcess.init(command: "swift",
+                "build",
+                "--configuration", "\(build.configuration)",
+                "--package-path", "\(build.root)",
+                stdout: $0)()
+        }
 
         let pins:[Repository.Pin]
         do
@@ -171,10 +181,6 @@ extension Toolchain
         {
             pins = []
         }
-
-        let manifest:PackageManifest = try await .dump(from: build)
-
-        print("Note: using spm tools version \(manifest.format)")
 
         let platform:PlatformIdentifier = try self.platform()
         let sink:PackageNode = try .libraries(as: build.id,

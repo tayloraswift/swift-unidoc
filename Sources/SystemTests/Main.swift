@@ -7,9 +7,33 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "directories"
+        if  let tests:TestGroup = tests / "Directories"
         {
-            if  let tests:TestGroup = tests / "flat"
+            if  let tests:TestGroup = tests / "Exists" / "DoesNotExist"
+            {
+                tests.do
+                {
+                    let path:FilePath = "Sources/SystemTests/TheLimit"
+                    tests.expect(false: path.directory.exists())
+                }
+            }
+            if  let tests:TestGroup = tests / "Exists" / "DoesExist"
+            {
+                tests.do
+                {
+                    let path:FilePath = "Sources/SystemTests/directories/flat"
+                    tests.expect(true: path.directory.exists())
+                }
+            }
+            if  let tests:TestGroup = tests / "Exists" / "IsNotDirectory"
+            {
+                tests.do
+                {
+                    let path:FilePath = "Sources/SystemTests/directories/flat/a.txt"
+                    tests.expect(false: path.directory.exists())
+                }
+            }
+            if  let tests:TestGroup = tests / "Flat"
             {
                 let discovered:[FilePath.Component] = tests.do
                 {
@@ -26,7 +50,7 @@ enum Main:SyncTests
                 tests.expect(discovered **? ["a.txt", "b.txt", "c.txt"])
             }
 
-            if  let tests:TestGroup = tests / "complex"
+            if  let tests:TestGroup = tests / "Complex"
             {
                 let discovered:[FilePath.Component] = tests.do
                 {
