@@ -96,18 +96,21 @@ extension PackageBuild
         let artifacts:Workspace = try await container.create("artifacts")
         let cloned:FilePath = checkouts.path / "\(package)"
 
-        do
+        print("Pulling repository from remote: \(remote)")
+
+        if  cloned.directory.exists()
         {
             try await SystemProcess.init(command: "git", "-C", "\(cloned)", "fetch")()
         }
-        catch SystemProcessError.exit
+        else
         {
             try await SystemProcess.init(command: "git", "-C", "\(checkouts)",
-                "clone", remote, "\(package)")()
+                "clone", remote, "\(package)", "--quiet")()
         }
 
-
-        try await SystemProcess.init(command: "git", "-C", "\(cloned)", "checkout", refname)()
+        try await SystemProcess.init(command: "git", "-C", "\(cloned)",
+            "-c", "advice.detachedHead=false",
+            "checkout", refname)()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
             try FileDescriptor.pipe()

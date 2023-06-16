@@ -17,6 +17,23 @@ extension FilePath
         }
     }
 }
+extension FilePath.Directory
+{
+    /// Returns true if a directory exists at ``path``, returns false if
+    /// the file does not exist or is not a directory.
+    public
+    func exists() -> Bool
+    {
+        if  let status:FileStatus = try? .status(of: self.path)
+        {
+            return status.is(.directory)
+        }
+        else
+        {
+            return false
+        }
+    }
+}
 extension FilePath.Directory:Sequence
 {
     @inlinable public
