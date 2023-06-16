@@ -1,3 +1,4 @@
+import Sources
 import Symbols
 
 extension Compiler.Documentation
@@ -16,7 +17,7 @@ extension Compiler.Documentation
             {
                 return nil
             }
-            
+
             self.start = start
             self.text = text
         }

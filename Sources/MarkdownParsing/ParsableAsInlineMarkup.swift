@@ -2,5 +2,5 @@ import Markdown
 
 protocol ParsableAsInlineMarkup
 {
-    init(from markup:any InlineMarkup)
+    init(from markup:any InlineMarkup, in id:Int)
 }

@@ -5,7 +5,7 @@ import UnidocCompiler
 
 extension StaticLinker
 {
-    struct Desymbolizer
+    struct Symbolizer
     {
         /// Interned module names. This only contains modules that
         /// are not included in the symbol graph being linked.
@@ -28,7 +28,7 @@ extension StaticLinker
         }
     }
 }
-extension StaticLinker.Desymbolizer
+extension StaticLinker.Symbolizer
 {
     /// Indexes the given scalar and appends it to the symbol graph.
     ///
@@ -71,7 +71,7 @@ extension StaticLinker.Desymbolizer
         return address
     }
 }
-extension StaticLinker.Desymbolizer
+extension StaticLinker.Symbolizer
 {
     /// Returns the address of the file with the given identifier,
     /// registering it in the symbol table if needed.

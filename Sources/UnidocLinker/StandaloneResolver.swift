@@ -1,19 +1,16 @@
 import ModuleGraphs
 
-extension StaticLinker
+struct StandaloneResolver
 {
-    struct ArticleResolver
-    {
-        private
-        var items:[String: Int32]
+    private
+    var items:[String: Int32]
 
-        init()
-        {
-            self.items = [:]
-        }
+    init()
+    {
+        self.items = [:]
     }
 }
-extension StaticLinker.ArticleResolver
+extension StandaloneResolver
 {
     //  Note: namespace is case-sensitive, but name is not.
     subscript(namespace:ModuleIdentifier, name:String) -> Int32?

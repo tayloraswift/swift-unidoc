@@ -1,3 +1,4 @@
+import Sources
 import Symbols
 import SymbolGraphParts
 
@@ -18,7 +19,7 @@ extension Compiler.Extension
                 return nil
             }
             else
-            {            
+            {
                 self.location = location
                 self.comment = comment
             }

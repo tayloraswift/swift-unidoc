@@ -47,7 +47,7 @@ extension Artifacts
         pretty:Bool = false) async throws -> Self
     {
         var include:[FilePath] = []
-        return .init(cultures: try await Self.dump(modules: modules.map { .init($0) },
+        return .init(cultures: try await Self.dump(modules: modules.map(ModuleSources.init(_:)),
                 include: &include,
                 output: output,
                 triple: triple,

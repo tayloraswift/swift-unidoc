@@ -1,3 +1,4 @@
+import ModuleGraphs
 import SymbolGraphs
 import SymbolGraphParts
 import UnidocCompiler
@@ -23,10 +24,6 @@ extension SymbolGraph
             for culture:Artifacts.Culture in artifacts.cultures
             {
                 let parts:[SymbolGraphPart] = try culture.loadSymbols()
-                for part:SymbolGraphPart in parts
-                {
-                    print("Loaded artifact: \(part.id)")
-                }
 
                 time.compiling += try clock.measure
                 {
@@ -50,13 +47,12 @@ extension SymbolGraph
             var linker:StaticLinker = .init(nominations: nominations,
                 modules: artifacts.cultures.map(\.module))
 
-            let supplements:[[(name:String, text:String)]] = try artifacts.cultures.map
+            let supplements:[[MarkdownFile]]? = try artifacts.root.map
             {
-                try $0.loadArticles()
-            }
-            for (name, _):(String, String) in supplements.joined()
-            {
-                print("Loaded artifact: \(name)")
+                (root:Repository.Root) in try artifacts.cultures.map
+                {
+                    try $0.loadArticles(root: root)
+                }
             }
 
             time.linking = try clock.measure
@@ -66,11 +62,16 @@ extension SymbolGraph
                 let extensionPositions:[(Int32, Int)] = linker.allocate(
                     extensions: extensions)
 
-                try linker.attach(supplements: supplements)
+                if  let supplements
+                {
+                    try linker.attach(supplements: supplements)
+                }
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
             }
+
+            linker._warnings()
 
             print("Linked documentation in \(time.linking)")
 

@@ -5,6 +5,7 @@ import System
 struct ModuleSources
 {
     let module:ModuleDetails
+    /// Absolute path to the module sources directory, if known.
     let path:FilePath?
 
     /// Indicates if the relevant target contains `.swift` sources only.
@@ -12,8 +13,8 @@ struct ModuleSources
     /// `.cpp`, `.hpp` file.
     private(set)
     var language:Language
-    /// Paths to all (non-excluded) markdown articles discovered in the
-    /// relevant target’s sources directory.
+    /// Absolute paths to all (non-excluded) markdown articles discovered
+    /// in the relevant target’s sources directory.
     private(set)
     var articles:[FilePath]
     /// Directories that contain header files. Empty if this is not a C
@@ -21,7 +22,8 @@ struct ModuleSources
     private(set)
     var include:[FilePath]
 
-    init(_ module:ModuleDetails, path:FilePath? = nil)
+    private
+    init(_ module:ModuleDetails, path:FilePath?)
     {
         self.module = module
         self.path = path
@@ -33,6 +35,11 @@ struct ModuleSources
 }
 extension ModuleSources
 {
+    init(_ module:ModuleDetails)
+    {
+        self.init(module, path: nil)
+    }
+
     init(scanning module:__owned ModuleDetails,
         exclude:__shared [String],
         root:__shared FilePath) throws
@@ -40,6 +47,7 @@ extension ModuleSources
         try self.init(scanning: module, exclude: exclude,
             path: module.location.map { root / $0 } ?? root / "Sources" / "\(module.name)")
     }
+
     private
     init(scanning module:__owned ModuleDetails,
         exclude:__shared [String],

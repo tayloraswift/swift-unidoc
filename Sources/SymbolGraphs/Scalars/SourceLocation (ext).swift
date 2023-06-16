@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import Symbols
+import Sources
 
 extension SourceLocation<Int32>:BSONEncodable, BSONWeakEncodable
 {

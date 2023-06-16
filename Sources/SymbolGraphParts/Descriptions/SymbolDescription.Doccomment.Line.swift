@@ -1,5 +1,5 @@
 import JSONDecoding
-import Symbols
+import Sources
 
 extension SymbolDescription.Doccomment
 {

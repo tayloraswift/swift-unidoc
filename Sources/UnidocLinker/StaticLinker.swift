@@ -5,6 +5,7 @@ import Generics
 import MarkdownSemantics
 import MarkdownParsing
 import ModuleGraphs
+import Sources
 import Symbols
 import SymbolGraphs
 import UnidocCompiler
@@ -16,9 +17,12 @@ struct StaticLinker
     let nominations:Compiler.Nominations
 
     private
-    var desymbolizer:Desymbolizer
+    var diagnostics:[Diagnostic]
+
     private
-    var articles:ArticleResolver
+    var symbolizer:Symbolizer
+    private
+    var articles:StandaloneResolver
     private
     var resolver:StaticResolver
 
@@ -31,7 +35,9 @@ struct StaticLinker
     {
         self.nominations = nominations
 
-        self.desymbolizer = .init(modules: modules)
+        self.diagnostics = []
+
+        self.symbolizer = .init(modules: modules)
         self.resolver = .init()
         self.articles = .init()
 
@@ -41,14 +47,25 @@ struct StaticLinker
 extension StaticLinker
 {
     public
-    var graph:SymbolGraph { self.desymbolizer.graph }
+    func _warnings()
+    {
+        for diagnostic:Diagnostic in self.diagnostics
+        {
+            print(diagnostic)
+        }
+    }
+}
+extension StaticLinker
+{
+    public
+    var graph:SymbolGraph { self.symbolizer.graph }
 }
 extension StaticLinker
 {
     private mutating
     func address(of scalar:ScalarSymbol?) -> Int32?
     {
-        scalar.map { self.desymbolizer.intern($0) }
+        scalar.map { self.symbolizer.intern($0) }
     }
     /// Returns an array of addresses for an array of scalar symbols.
     /// The address assignments reflect the order of the symbols in the
@@ -63,7 +80,7 @@ extension StaticLinker
     private mutating
     func addresses(of scalars:[ScalarSymbol]) -> [Int32]
     {
-        scalars.map { self.desymbolizer.intern($0) }
+        scalars.map { self.symbolizer.intern($0) }
     }
     /// Returns an array of addresses for an array of vector features,
     /// exposing each vector for codelink resolution in the process.
@@ -91,9 +108,9 @@ extension StaticLinker
     {
         features.map
         {
-            let feature:Int32 = self.desymbolizer.intern($0)
+            let feature:Int32 = self.symbolizer.intern($0)
             if  let (last, phylum):(String, ScalarPhylum) =
-                self.desymbolizer.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
+                self.symbolizer.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
                 let vector:VectorSymbol = .init($0, self: extended)
@@ -114,7 +131,7 @@ extension StaticLinker
         var addresses:(first:Int32, last:Int32)? = nil
         for scalar:Compiler.Scalar in scalars
         {
-            let address:Int32 = self.desymbolizer.allocate(scalar: scalar)
+            let address:Int32 = self.symbolizer.allocate(scalar: scalar)
             switch addresses
             {
             case  nil:              addresses = (address, address)
@@ -145,7 +162,7 @@ extension StaticLinker
             $0.map
             {
                 .init(range: self.allocate(scalars: $0.scalars),
-                    index: self.desymbolizer.intern($0.id))
+                    index: self.symbolizer.intern($0.id))
             }
         }
         for ((culture, sources), destinations):
@@ -155,13 +172,13 @@ extension StaticLinker
             destinations)
         {
             //  Record address ranges
-            self.desymbolizer.graph.cultures[culture].namespaces = destinations
+            self.symbolizer.graph.cultures[culture].namespaces = destinations
 
             for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in
                 zip(sources, destinations)
             {
                 let qualifier:ModuleIdentifier =
-                    self.desymbolizer.graph.namespaces[destination.index]
+                    self.symbolizer.graph.namespaces[destination.index]
                 for (address, scalar) in zip(destination.range, source.scalars)
                 {
                     //  Make the scalar visible to codelink resolution.
@@ -190,12 +207,12 @@ extension StaticLinker
     {
         let addresses:[Int32] = extensions.map
         {
-            self.desymbolizer.allocate(extension: $0)
+            self.symbolizer.allocate(extension: $0)
         }
         return zip(addresses, extensions).map
         {
-            let namespace:Int = self.desymbolizer.intern($0.1.signature.extended.namespace)
-            let qualifier:ModuleIdentifier = self.desymbolizer.graph.namespaces[namespace]
+            let namespace:Int = self.symbolizer.intern($0.1.signature.extended.namespace)
+            let qualifier:ModuleIdentifier = self.symbolizer.graph.namespaces[namespace]
 
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[Int32] = self.addresses(
@@ -208,10 +225,10 @@ extension StaticLinker
             let nested:[Int32] = self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.desymbolizer.graph.nodes[$0.0].push(.init(
+            let index:Int = self.symbolizer.graph.nodes[$0.0].push(.init(
                 conditions: $0.1.conditions.map
                 {
-                    $0.map { self.desymbolizer.intern($0) }
+                    $0.map { self.symbolizer.intern($0) }
                 },
                 namespace: namespace,
                 culture: $0.1.signature.culture,
@@ -226,18 +243,18 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[(name:String, text:String)]]) throws
+    func attach(supplements:[[MarkdownFile]]) throws
     {
         let standalone:[[StandaloneArticle]] = try zip(supplements.indices, supplements).map
         {
-            let namespace:ModuleIdentifier =  self.desymbolizer.graph.namespaces[$0.0]
+            let namespace:ModuleIdentifier =  self.symbolizer.graph.namespaces[$0.0]
 
             var addresses:(first:Int32, last:Int32)? = nil
             var articles:[StandaloneArticle] = []
 
-            for supplement:(name:String, text:String) in $0.1
+            for file:MarkdownFile in $0.1
             {
-                if  let article:StandaloneArticle =  try self.attach(supplement: supplement,
+                if  let article:StandaloneArticle =  try self.attach(supplement: file,
                         in: namespace)
                 {
                     articles.append(article)
@@ -250,7 +267,7 @@ extension StaticLinker
                 }
             }
 
-            self.desymbolizer.graph.cultures[$0.0].articles = addresses.map
+            self.symbolizer.graph.cultures[$0.0].articles = addresses.map
             {
                 $0.first ... $0.last
             }
@@ -263,7 +280,7 @@ extension StaticLinker
             standalone.indices,
             standalone)
         {
-            let culture:ModuleIdentifier = self.desymbolizer.graph.namespaces[culture]
+            let culture:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
             for standalone:StandaloneArticle in standalone
             {
                 var outliner:Outliner = .init(
@@ -272,8 +289,14 @@ extension StaticLinker
                     culture: culture,
                     scope: ["\(culture)"])
 
-                self.desymbolizer.graph.articles[standalone.address].value = outliner.link(
-                    documentation: standalone.markdown.article)
+                //  We pass a single-element array as the sources list, which relies
+                //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
+                //  the source id by default.
+                self.symbolizer.graph.articles[standalone.address].value = outliner.link(
+                    documentation: standalone.markdown.article,
+                    from: [.init(from: standalone)])
+
+                self.diagnostics += outliner.diagnostics
             }
         }
     }
@@ -281,20 +304,19 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(
-        supplement:(name:String, text:String),
+    func attach(supplement:MarkdownFile,
         in namespace:ModuleIdentifier) throws -> StandaloneArticle?
     {
         let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
             as: SwiftFlavoredMarkdown.self)
         if  case nil = markdown.binding
         {
-            return .init(markdown: markdown, address: try
+            let address:Int32 = try
             {
                 switch $0
                 {
                 case nil:
-                    let address:Int32 = self.desymbolizer.graph.append(
+                    let address:Int32 = self.symbolizer.graph.append(
                         article: supplement.name)
                     $0 = address
                     return address
@@ -302,7 +324,12 @@ extension StaticLinker
                 case  _?:
                     throw DuplicateSymbolError.article(supplement.name)
                 }
-            } (&self.articles[namespace, supplement.name]))
+            } (&self.articles[namespace, supplement.name])
+
+            return .init(markdown: markdown,
+                address: address,
+                file: self.symbolizer.intern(supplement.id),
+                text: supplement.text)
         }
         if  let binding:Int32 = self.binding(of: markdown, in: namespace)
         {
@@ -362,14 +389,14 @@ extension StaticLinker
             (([Compiler.Namespace], [SymbolGraph.Namespace]), ModuleIdentifier) in zip(zip(
                 sources,
                 destinations),
-            self.desymbolizer.graph.namespaces)
+            self.symbolizer.graph.namespaces)
         {
             for (source, destination) in zip(sources, destinations)
             {
                 self.link(scalars: source.scalars,
                     at: destination.range,
                     of: culture,
-                    in: self.desymbolizer.graph.namespaces[destination.index])
+                    in: self.symbolizer.graph.namespaces[destination.index])
             }
         }
     }
@@ -383,7 +410,7 @@ extension StaticLinker
         {
             let declaration:Declaration<Int32> = scalar.declaration.map
             {
-                self.desymbolizer.intern($0)
+                self.symbolizer.intern($0)
             }
 
             //  Sort for deterministic addresses.
@@ -393,7 +420,7 @@ extension StaticLinker
 
             let location:SourceLocation<Int32>? = scalar.location?.map
             {
-                self.desymbolizer.intern($0)
+                self.symbolizer.intern($0)
             }
             let article:SymbolGraph.Article<Never>? = scalar.documentation.map
             {
@@ -403,7 +430,12 @@ extension StaticLinker
                     culture: culture,
                     scope: ["\(namespace)"] + $0.scope)
 
-                return outliner.link(comment: $0.comment,
+                defer
+                {
+                    self.diagnostics += outliner.diagnostics
+                }
+
+                return outliner.link(comment: .init(from: $0.comment, in: location?.file),
                     adding: self.supplements.removeValue(forKey: address))
             }
 
@@ -416,7 +448,7 @@ extension StaticLinker
 
                 $0?.location = location
                 $0?.article = article
-            } (&self.desymbolizer.graph.nodes[address].scalar)
+            } (&self.symbolizer.graph.nodes[address].scalar)
         }
     }
 
@@ -434,8 +466,11 @@ extension StaticLinker
             //  like DocC does. (Except DocC does this across all extensions with the
             //  same extended type.)
             //  https://github.com/apple/swift-docc/pull/369
-            var comment:Compiler.Documentation.Comment? = nil
             var longest:Int = 0
+
+            var comment:Compiler.Documentation.Comment? = nil
+            var file:FileSymbol? = nil
+
             for block:Compiler.Extension.Block in `extension`.blocks
             {
                 if  let current:Compiler.Documentation.Comment = block.comment
@@ -448,24 +483,30 @@ extension StaticLinker
                     {
                         longest = length
                         comment = current
+                        file = block.location?.file
                     }
                 }
             }
             if  let comment
             {
+                //  Only intern the file path for the extension block with the longest comment
+                let file:Int32? = file.map { self.symbolizer.intern($0) }
+
                 {
                     let qualifier:ModuleIdentifier =
-                        self.desymbolizer.graph.namespaces[$0.namespace]
+                        self.symbolizer.graph.namespaces[$0.namespace]
 
                     var outliner:Outliner = .init(
                         articles: self.articles,
                         resolver: self.resolver,
-                        culture: self.desymbolizer.graph.namespaces[$0.culture],
+                        culture: self.symbolizer.graph.namespaces[$0.culture],
                         scope: ["\(qualifier)"] + `extension`.path)
 
-                    $0.article = outliner.link(comment: comment)
+                    $0.article = outliner.link(comment: .init(from: comment, in: file))
 
-                } (&self.desymbolizer.graph.nodes[address].extensions[index])
+                    self.diagnostics += outliner.diagnostics
+
+                } (&self.symbolizer.graph.nodes[address].extensions[index])
             }
         }
     }

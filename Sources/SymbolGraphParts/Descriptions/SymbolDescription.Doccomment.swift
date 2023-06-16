@@ -1,6 +1,6 @@
 import JSONDecoding
 import ModuleGraphs
-import Symbols
+import Sources
 
 extension SymbolDescription
 {

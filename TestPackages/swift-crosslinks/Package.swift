@@ -10,7 +10,11 @@ let package:Package = .init(name: "Swift Codelinks (test package)",
     ],
     targets:
     [
-        .target(name: "BarbieCore"),
+        .target(name: "BarbieCore",
+            exclude:
+            [
+                "documentation",
+            ]),
 
         .target(name: "BarbieHousing",
             dependencies:

@@ -2,6 +2,7 @@ import Availability
 import Declarations
 import Generics
 import LexicalPaths
+import Sources
 import Symbols
 import SymbolGraphParts
 

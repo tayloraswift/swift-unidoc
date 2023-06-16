@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 /// The basic unit of block structure in a markdown document.
 ///
@@ -15,7 +16,7 @@ class MarkdownBlock:MarkdownElement
     }
     /// Does nothing.
     open
-    func outline(by _:(_ symbol:String) throws -> UInt32?) rethrows
+    func outline(by _:(String, SourceText<Int>?) throws -> UInt32?) rethrows
     {
     }
     /// Emits nothing.

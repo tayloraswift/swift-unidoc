@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 extension MarkdownInline
 {
@@ -21,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Container:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
+    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
     {
         for index:Int in self.elements.indices
         {

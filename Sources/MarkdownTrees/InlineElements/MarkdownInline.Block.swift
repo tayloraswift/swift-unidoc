@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 extension MarkdownInline
 {
@@ -7,12 +8,13 @@ extension MarkdownInline
     {
         case container(Container<Self>)
 
-        case code(Code, symbol:Bool = false)
+        case code(Code)
         case html(HTML)
         case image(Image)
         case link(Link)
 
         case reference(UInt32)
+        case symbol(Code, SourceText<Int>? = nil)
 
         case text(String)
     }
@@ -20,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Block:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
+    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
     {
         switch self
         {
@@ -29,13 +31,13 @@ extension MarkdownInline.Block:MarkdownElement
             defer { self = .container(container) }
             try container.outline(by: register)
 
-        case .code(let link, symbol: true):
-            if  let reference:UInt32 = try register(link.text)
+        case .symbol(let link, let range):
+            if  let reference:UInt32 = try register(link.text, range)
             {
                 self = .reference(reference)
             }
 
-        case .code(_, symbol: false), .html, .image, .link, .reference, .text:
+        case .code, .html, .image, .link, .reference, .text:
             return
         }
     }
@@ -48,7 +50,7 @@ extension MarkdownInline.Block:MarkdownElement
         case .container(let container):
             container.emit(into: &binary)
 
-        case .code(let code, symbol: _):
+        case .code(let code), .symbol(let code, _):
             code.emit(into: &binary)
 
         case .html(let html):
@@ -78,7 +80,7 @@ extension MarkdownInline.Block:MarkdownText
         case .container(let container):
             return container.text
 
-        case .code(let code, symbol: _):
+        case .code(let code), .symbol(let code, _):
             return code.text
 
         case .html, .reference:
