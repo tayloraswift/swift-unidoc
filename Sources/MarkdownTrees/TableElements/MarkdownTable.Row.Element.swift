@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 extension MarkdownTable.Row
 {
@@ -21,7 +22,7 @@ extension MarkdownTable.Row
 extension MarkdownTable.Row.Element:MarkdownElement
 {
     @inlinable public
-    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
+    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
     {
         try self.cell.outline(by: register)
     }

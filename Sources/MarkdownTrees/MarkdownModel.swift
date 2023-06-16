@@ -10,9 +10,9 @@ protocol MarkdownModel
 extension MarkdownModel
 {
     public
-    init(parsing string:String, as flavor:(some MarkdownFlavor).Type)
+    init(parsing string:String, from id:Int = 0, as flavor:(some MarkdownFlavor).Type)
     {
-        self.init(attaching: flavor.parse(string))
+        self.init(attaching: flavor.parse(string, id: id))
     }
 
     /// Emits this markdown tree’s ``blocks`` into the given binary.

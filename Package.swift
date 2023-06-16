@@ -36,6 +36,7 @@ let package:Package = .init(
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
+        .library(name: "Sources", targets: ["Sources"]),
 
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
@@ -127,7 +128,8 @@ let package:Package = .init(
 
         .target(name: "MarkdownTrees", dependencies:
             [
-                .target(name: "MarkdownABI")
+                .target(name: "MarkdownABI"),
+                .target(name: "Sources"),
             ]),
 
         .target(name: "MarkdownParsing", dependencies:
@@ -171,7 +173,12 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
-        .target(name: "Symbols"),
+        .target(name: "Sources"),
+
+        .target(name: "Symbols", dependencies:
+            [
+                .target(name: "Sources"),
+            ]),
 
         .target(name: "SymbolGraphParts", dependencies:
             [

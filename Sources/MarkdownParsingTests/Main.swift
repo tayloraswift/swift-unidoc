@@ -1,5 +1,6 @@
 import MarkdownParsing
 import MarkdownTrees
+import Sources
 import Testing
 
 @main
@@ -8,12 +9,12 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "parameters-list"
+        if  let tests:TestGroup = tests / "ParameterLists"
         {
             for (shape, string):(String, String) in
             [
                 (
-                    "tight",
+                    "Tight",
                     """
                     -   Parameters:
                         -   first: this is the first argument
@@ -22,7 +23,7 @@ enum Main:SyncTests
                     """
                 ),
                 (
-                    "mixed",
+                    "Mixed",
                     """
                     -   Parameters:
                         -   first: this is the first argument
@@ -34,7 +35,7 @@ enum Main:SyncTests
                     """
                 ),
                 (
-                    "complex",
+                    "Complex",
                     """
                     -   Parameters:
                         -   first:
@@ -72,6 +73,98 @@ enum Main:SyncTests
 
                     tests.expect(parameters.elements.count ==? 3)
                 {
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "Doclinks"
+        {
+            for (name, string, expected):(String, String, String) in
+            [
+                (
+                    "Basic",
+                    "<doc:GettingStarted>",
+                    "doc:GettingStarted"
+                ),
+                (
+                    "PercentEncoded",
+                    "<doc:Getting%20Started>",
+                    "doc:Getting%20Started"
+                ),
+                (
+                    "Qualified",
+                    "<doc:BarbieCore/Getting%20Started>",
+                    "doc:BarbieCore/Getting%20Started"
+                ),
+            ]
+            {
+                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
+                if  let tests:TestGroup = tests / name,
+                    let paragraph:MarkdownBlock.Paragraph = tests.expect(
+                        value: tree.blocks.first as? MarkdownBlock.Paragraph),
+                    let link:MarkdownInline.Link = tests.expect(
+                        value:
+                        {
+                            switch $0
+                            {
+                            case .link(let link):   return link
+                            case _:                 return nil
+                            }
+                        } (paragraph.elements.first)),
+                    let target:String = tests.expect(value: link.target)
+                {
+                    tests.expect(target ==? expected)
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "SourcePositions"
+        {
+            for (name, string, expected):(String, String, (line:Int, column:Int)) in
+            [
+                (
+                    "ZeroZero",
+                    """
+                    ``x``
+                    """,
+                    (0, 0)
+                ),
+                (
+                    "Prefixed",
+                    """
+                    abc ``x``
+                    """,
+                    (0, 4)
+                ),
+                (
+                    "Multiline",
+                    """
+                    abc
+                    def ``x``
+                    """,
+                    (1, 4)
+                ),
+            ]
+            {
+                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
+                if  let tests:TestGroup = tests / name,
+                    let expected:SourcePosition = tests.expect(value: .init(
+                        line: expected.line,
+                        column: expected.column)),
+                    let paragraph:MarkdownBlock.Paragraph = tests.expect(
+                        value: tree.blocks.first as? MarkdownBlock.Paragraph)
+                {
+                    var position:SourcePosition?
+                    for element:MarkdownInline.Block in paragraph.elements
+                    {
+                        if case .symbol(_, let source) = element
+                        {
+                            position = source?.range.lowerBound
+                            break
+                        }
+                    }
+                    if  let position:SourcePosition = tests.expect(value: position)
+                    {
+                        tests.expect(position ==? expected)
+                    }
                 }
             }
         }

@@ -47,6 +47,8 @@ extension SymbolGraph.Culture
         case module = "M"
 
         case namespaces = "N"
+        case articles_lower = "L"
+        case articles_upper = "U"
         case article = "A"
     }
 }
@@ -58,6 +60,8 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
         bson[.module] = self.module
 
         bson[.namespaces] = self.namespaces.isEmpty ? nil : self.namespaces
+        bson[.articles_lower] = self.articles?.lowerBound
+        bson[.articles_upper] = self.articles?.upperBound
         bson[.article] = self.article
     }
 }
@@ -67,6 +71,12 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(module: try bson[.module].decode())
+
+        if  let lower:Int32 = try bson[.articles_lower]?.decode(),
+            let upper:Int32 = try bson[.articles_upper]?.decode()
+        {
+            self.articles = upper < lower ? nil : lower ... upper
+        }
 
         self.namespaces = try bson[.namespaces]?.decode() ?? []
         self.article = try bson[.article]?.decode()

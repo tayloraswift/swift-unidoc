@@ -4,6 +4,7 @@ import MarkdownABI
 import MarkdownParsing
 import MarkdownSemantics
 import ModuleGraphs
+import Sources
 import SymbolGraphs
 import UnidocCompiler
 
@@ -12,7 +13,7 @@ extension StaticLinker
     struct Outliner
     {
         private
-        let articles:ArticleResolver
+        let articles:StandaloneResolver
         private
         let resolver:StaticResolver
         /// The implicit scope that will be used to resolve doclinks.
@@ -23,11 +24,14 @@ extension StaticLinker
         let scope:[String]
 
         private(set)
+        var diagnostics:[Diagnostic]
+
+        private(set)
         var references:[Codelink: UInt32]
         private(set)
         var referents:[SymbolGraph.Referent]
 
-        init(articles:ArticleResolver,
+        init(articles:StandaloneResolver,
             resolver:StaticResolver,
             culture:ModuleIdentifier,
             scope:[String])
@@ -37,6 +41,7 @@ extension StaticLinker
             self.culture = culture
             self.scope = scope
 
+            self.diagnostics = []
             self.references = [:]
             self.referents = []
         }
@@ -45,12 +50,15 @@ extension StaticLinker
 extension StaticLinker.Outliner
 {
     private mutating
-    func outline(expression:String) -> UInt32?
+    func outline(expression:String,
+        at source:SourceText<Int>?,
+        in sources:[MarkdownSource]) -> UInt32?
     {
         guard let codelink:Codelink = .init(parsing: expression)
         else
         {
-            print("invalid codelink '\(expression)'")
+            self.diagnostics.append(.init(.invalidCodelink(expression),
+                context: source.map { .init(of: $0, in: sources) }))
             return nil
         }
 
@@ -77,8 +85,9 @@ extension StaticLinker.Outliner
                     referent = .vector(address, self: heir)
                 }
 
-            case .many?:
-                print("Codelink '\(codelink)' is ambiguous.")
+            case .many(let overloads)?:
+                self.diagnostics.append(.init(.ambiguousCodelink(expression, overloads),
+                    context: source.map { .init(of: $0, in: sources) }))
                 return nil
             }
 
@@ -95,15 +104,19 @@ extension StaticLinker.Outliner
 extension StaticLinker.Outliner
 {
     mutating
-    func link(comment:Compiler.Documentation.Comment,
+    func link(comment:MarkdownSource,
         adding extra:[MarkdownDocumentationSupplement]? = nil) -> SymbolGraph.Article<Never>
     {
         //  TODO: use supplements
-        self.link(documentation: .init(parsing: comment.text,
-            as: SwiftFlavoredMarkdownComment.self))
+        let sources:[MarkdownSource] = [comment]
+        return self.link(documentation: .init(parsing: comment.text,
+                from: sources.startIndex,
+                as: SwiftFlavoredMarkdownComment.self),
+            from: sources)
     }
     mutating
-    func link(documentation:MarkdownDocumentation) -> SymbolGraph.Article<Never>
+    func link(documentation:MarkdownDocumentation,
+        from sources:[MarkdownSource]) -> SymbolGraph.Article<Never>
     {
         let overview:MarkdownBytecode = .init
         {
@@ -113,7 +126,7 @@ extension StaticLinker.Outliner
             {
                 $0.outline
                 {
-                    self.outline(expression: $0)
+                    self.outline(expression: $0, at: $1, in: sources)
                 }
                 $0.emit(into: &binary)
             }
@@ -129,7 +142,7 @@ extension StaticLinker.Outliner
             {
                 $0.outline
                 {
-                    self.outline(expression: $0)
+                    self.outline(expression: $0, at: $1, in: sources)
                 }
                 $0.emit(into: &binary)
             }

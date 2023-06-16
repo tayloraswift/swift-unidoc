@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 public final
 class MarkdownTable:MarkdownBlock
@@ -16,7 +17,7 @@ class MarkdownTable:MarkdownBlock
     }
     /// Recursively calls ``Block outline(by:)`` for each cell in this table.
     public override
-    func outline(by register:(_ symbol:String) throws -> UInt32?) rethrows
+    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
     {
         try self.head.outline(by: register)
         for row:Row<BodyCell> in self

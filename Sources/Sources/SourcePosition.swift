@@ -1,6 +1,6 @@
-/// A grid position within a source file. This type can represent
-/// positions in files up to one million lines long, and 4096
-/// characters wide.
+/// A zero-indexed grid position within a source file. This type
+/// can represent positions in files up to one million lines long,
+/// and 4096 characters wide.
 @frozen public
 struct SourcePosition:Equatable, Hashable, Sendable
 {
@@ -22,6 +22,11 @@ extension SourcePosition:Comparable
     {
         lhs.rawValue < rhs.rawValue
     }
+}
+extension SourcePosition
+{
+    @inlinable public static
+    var zero:Self { .init(rawValue: 0) }
 }
 extension SourcePosition
 {
@@ -58,9 +63,11 @@ extension SourcePosition
 }
 extension SourcePosition:CustomStringConvertible
 {
+    /// Prints a human-friendly description of this source position
+    /// by adding `1` to the line and column numbers.
     public
     var description:String
     {
-        "\(self.line):\(self.column)"
+        "\(self.line + 1):\(self.column + 1)"
     }
 }

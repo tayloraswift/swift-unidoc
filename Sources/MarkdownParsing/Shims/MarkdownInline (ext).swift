@@ -3,7 +3,7 @@ import MarkdownTrees
 
 extension MarkdownInline:ParsableAsInlineMarkup
 {
-    init(from markup:any InlineMarkup)
+    init(from markup:any InlineMarkup, in id:Int)
     {
         switch markup
         {
@@ -26,13 +26,13 @@ extension MarkdownInline:ParsableAsInlineMarkup
             self = .code(.init(text: span.code))
 
         case let span as Emphasis:
-            self = .container(.init(from: span, as: .em))
+            self = .container(.init(from: span, in: id, as: .em))
 
         case let span as Strikethrough:
-            self = .container(.init(from: span, as: .s))
+            self = .container(.init(from: span, in: id, as: .s))
 
         case let span as Strong:
-            self = .container(.init(from: span, as: .strong))
+            self = .container(.init(from: span, in: id, as: .strong))
 
         case let unsupported:
             self = .code(.init(text: "<unsupported markdown node '\(type(of: unsupported))'>"))
