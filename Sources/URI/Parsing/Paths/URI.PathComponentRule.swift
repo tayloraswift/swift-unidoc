@@ -3,8 +3,8 @@ import Grammar
 extension URI
 {
     /// A parsing rule that matches a URI path component, which can be empty,
-    /// a [`'.'`](), or a [`'..'`](). The dotted components will not be
-    /// considered “special” if they are percent-encoded.
+    /// a `.`, or a `..`. The dotted components are not considered “special”
+    /// if they are percent-encoded.
     enum PathComponentRule<Location>
     {
     }

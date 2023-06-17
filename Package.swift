@@ -346,6 +346,12 @@ let package:Package = .init(
                 .target(name: "UnidocDriver"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
+
+        .executableTarget(name: "URITests", dependencies:
+            [
+                .target(name: "URI"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
     ])
 
 for target:PackageDescription.Target in package.targets
