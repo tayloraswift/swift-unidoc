@@ -1,14 +1,39 @@
+import URI
+
 @frozen public
-struct Doclink
+struct Doclink:Equatable, Hashable, Sendable
 {
     public
-    let bundle:String
+    let absolute:Bool
     public
     let path:[String]
+
+    @inlinable public
+    init(absolute:Bool, path:[String])
+    {
+        self.absolute = absolute
+        self.path = path
+    }
 }
 extension Doclink
 {
     @inlinable public
+    var bundle:String?
+    {
+        self.absolute ? self.path.first : nil
+    }
+}
+extension Doclink:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        "doc:\(self.absolute ? "//" : "")\(self.path.joined(separator: "/"))"
+    }
+}
+extension Doclink:LosslessStringConvertible
+{
+    public
     init?(_ description:String)
     {
         if  let start:String.Index = description.index(description.startIndex,
@@ -23,21 +48,28 @@ extension Doclink
             return nil
         }
     }
-
+}
+extension Doclink
+{
     public
     init?(doc uri:Substring)
     {
-        let path:[Substring] = uri.split(separator: "/", omittingEmptySubsequences: false)
-        if  path.count > 2,
-            path[..<2] == ["", ""]
+        //  Count and trim the leading slashes. One leading slash is meaningless,
+        //  two or more indicates a “bundle” root.
+        var start:String.Index = uri.startIndex
+        var slashes:Int = 0
+        while start < uri.endIndex, uri[start] == "/"
         {
-
+            start = uri.index(after: start)
+            slashes += 1
+        }
+        if  let path:URI.Path = .init(relative: uri[start...])
+        {
+            self.init(absolute: slashes >= 2, path: path.normalized())
         }
         else
         {
-
+            return nil
         }
-
-        fatalError("unimplemented")
     }
 }

@@ -125,6 +125,33 @@ extension URI.Path
         }
         return normalized
     }
+
+    /// Returns the lexically-normalized components of this path as percent-decoded
+    /// strings. This function removes all special components from the path, therefore
+    /// any “special-looking” strings in the output (such as `..`) were originally
+    /// percent-encoded.
+    @inlinable public
+    func normalized() -> [String]
+    {
+        var normalized:[String] = []
+            normalized.reserveCapacity(self.count)
+
+        for component:Component in self
+        {
+            switch component
+            {
+            case .empty:
+                continue
+
+            case .push(let component):
+                normalized.append(component)
+
+            case .pop:
+                let _:String? = normalized.popLast()
+            }
+        }
+        return normalized
+    }
 }
 extension URI.Path:CustomStringConvertible
 {
