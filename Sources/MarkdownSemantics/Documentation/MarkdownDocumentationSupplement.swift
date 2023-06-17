@@ -30,8 +30,9 @@ extension MarkdownDocumentationSupplement:MarkdownModel
         if  case (let headline as MarkdownBlock.Heading)? = blocks.first,
             headline.level == 1,
             headline.elements.count == 1,
-            case .symbol(let expression, _) = headline.elements[0],
-            let binding:Codelink = .init(parsing: expression.text)
+            case .autolink(let autolink) = headline.elements[0],
+            case .codelink(let expression) = autolink.expression,
+            let binding:Codelink = .init(parsing: expression)
         {
             self.init(binding: binding, article: .init(attaching: blocks.dropFirst()))
         }

@@ -40,21 +40,28 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                 elements: image.inlineChildren.map { MarkdownInline.init(from: $0, in: id) }))
 
         case let link as Link:
-            self = .link(.init(target: link.destination,
-                elements: link.inlineChildren.map { MarkdownInline.init(from: $0, in: id) }))
-
-        case let link as SymbolLink:
-            let expression:MarkdownInline.Code = .init(text: link.destination ?? "")
-            if  let range:Range<Markdown.SourceLocation> = link.range,
-                let start:SourcePosition = .init(range.lowerBound),
-                let end:SourcePosition = .init(range.upperBound)
+            let elements:[MarkdownInline] = link.inlineChildren.map
             {
-                self = .symbol(expression, .init(range: start ..< end, file: id))
+                MarkdownInline.init(from: $0, in: id)
             }
+            guard   let destination:String = link.destination,
+                    case [.text(destination)] = elements,
+                    let start:String.Index = destination.index(destination.startIndex,
+                        offsetBy: 4,
+                        limitedBy: destination.endIndex),
+                    destination[..<start] == "doc:"
             else
             {
-                self = .symbol(expression)
+                self = .link(.init(target: link.destination, elements: elements))
+                return
             }
+
+            self = .autolink(.init(.doclink(String.init(destination[start...])),
+                source: .init(link.range, in: id)))
+
+        case let link as SymbolLink:
+            self = .autolink(.init(.codelink(link.destination ?? ""),
+                source: .init(link.range, in: id)))
 
         case let unsupported:
             self = .code(.init(text: "<unsupported markdown node '\(type(of: unsupported))'>"))

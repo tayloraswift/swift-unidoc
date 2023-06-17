@@ -11,6 +11,7 @@ let package:Package = .init(
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
+        .library(name: "Doclinks", targets: ["Doclinks"]),
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
@@ -97,6 +98,8 @@ let package:Package = .init(
                 .target(name: "Generics"),
                 .target(name: "MarkdownABI")
             ]),
+
+        .target(name: "Doclinks"),
 
         .target(name: "Generics"),
 
@@ -232,6 +235,11 @@ let package:Package = .init(
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocCompiler"),
+            ]),
+
+        .target(name: "URI", dependencies:
+            [
+                .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
         .target(name: "System", dependencies:

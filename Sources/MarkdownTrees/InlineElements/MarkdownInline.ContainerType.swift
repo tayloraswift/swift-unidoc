@@ -1,7 +1,7 @@
 extension MarkdownInline
 {
     @frozen public
-    enum ContainerType:Hashable, Equatable, Sendable
+    enum ContainerType:Equatable, Hashable, Sendable
     {
         case em
         case strong

@@ -1,20 +1,20 @@
 import MarkdownABI
-import Sources
 
 extension MarkdownInline
 {
     @frozen public
     enum Block
     {
+        case autolink(Autolink)
+
         case container(Container<Self>)
 
         case code(Code)
         case html(HTML)
-        case image(Image)
         case link(Link)
+        case image(Image)
 
         case reference(UInt32)
-        case symbol(Code, SourceText<Int>? = nil)
 
         case text(String)
     }
@@ -22,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Block:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
+    func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
     {
         switch self
         {
@@ -31,8 +31,8 @@ extension MarkdownInline.Block:MarkdownElement
             defer { self = .container(container) }
             try container.outline(by: register)
 
-        case .symbol(let link, let range):
-            if  let reference:UInt32 = try register(link.text, range)
+        case .autolink(let autolink):
+            if  let reference:UInt32 = try register(autolink)
             {
                 self = .reference(reference)
             }
@@ -47,10 +47,13 @@ extension MarkdownInline.Block:MarkdownElement
     {
         switch self
         {
+        case .autolink(let autolink):
+            autolink.expression.element.emit(into: &binary)
+
         case .container(let container):
             container.emit(into: &binary)
 
-        case .code(let code), .symbol(let code, _):
+        case .code(let code):
             code.emit(into: &binary)
 
         case .html(let html):
@@ -77,10 +80,13 @@ extension MarkdownInline.Block:MarkdownText
     {
         switch self
         {
+        case .autolink(let autolink):
+            return autolink.expression.element.text
+
         case .container(let container):
             return container.text
 
-        case .code(let code), .symbol(let code, _):
+        case .code(let code):
             return code.text
 
         case .html, .reference:

@@ -42,7 +42,7 @@ extension MarkdownTable.Row:RandomAccessCollection
 extension MarkdownTable.Row:MarkdownElement
 {
     @inlinable public
-    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
+    func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
     {
         for element:Element in self
         {

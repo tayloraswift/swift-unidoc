@@ -18,6 +18,16 @@ extension MarkdownInline
         }
     }
 }
+extension MarkdownInline.Link
+{
+    /// Creates a link element using the given URL as both the link target and the
+    /// link text.
+    @inlinable public
+    init(url:String)
+    {
+        self.init(target: url, elements: [.text(url)])
+    }
+}
 extension MarkdownInline.Link:MarkdownElement
 {
     public
