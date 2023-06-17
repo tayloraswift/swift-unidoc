@@ -48,7 +48,7 @@ extension MarkdownInline.Block:MarkdownElement
         switch self
         {
         case .autolink(let autolink):
-            autolink.expression.element.emit(into: &binary)
+            autolink.element.emit(into: &binary)
 
         case .container(let container):
             container.emit(into: &binary)
@@ -81,7 +81,7 @@ extension MarkdownInline.Block:MarkdownText
         switch self
         {
         case .autolink(let autolink):
-            return autolink.expression.element.text
+            return autolink.text
 
         case .container(let container):
             return container.text

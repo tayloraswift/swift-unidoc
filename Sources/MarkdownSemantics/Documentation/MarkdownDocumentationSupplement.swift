@@ -31,8 +31,8 @@ extension MarkdownDocumentationSupplement:MarkdownModel
             headline.level == 1,
             headline.elements.count == 1,
             case .autolink(let autolink) = headline.elements[0],
-            case .codelink(let expression) = autolink.expression,
-            let binding:Codelink = .init(parsing: expression)
+            autolink.code,
+            let binding:Codelink = .init(autolink.text)
         {
             self.init(binding: binding, article: .init(attaching: blocks.dropFirst()))
         }

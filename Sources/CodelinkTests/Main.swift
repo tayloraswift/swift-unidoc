@@ -167,8 +167,7 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "codelinks" / "filters"
         {
             if  let tests:TestGroup = tests / "case",
-                let codelink:Codelink = tests.expect(value: .init(
-                    parsing: "case `subscript`"))
+                let codelink:Codelink = tests.expect(value: .init("case `subscript`"))
             {
                 tests.expect(codelink.filter ==? .case)
                 tests.expect(nil: codelink.scope)

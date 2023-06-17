@@ -42,7 +42,7 @@ extension SymbolGraph.Referent:BSONDecodable
             switch $0
             {
             case .string(let utf8):
-                if  let codelink:Codelink = .init(parsing: utf8.description)
+                if  let codelink:Codelink = .init(utf8.description)
                 {
                     return .unresolved(codelink)
                 }

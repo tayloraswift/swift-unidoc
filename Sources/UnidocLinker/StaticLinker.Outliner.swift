@@ -53,15 +53,15 @@ extension StaticLinker.Outliner
     private mutating
     func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> UInt32?
     {
-        guard case .codelink(let expression) = autolink.expression
+        guard autolink.code
         else
         {
             return nil
         }
-        guard let codelink:Codelink = .init(parsing: expression)
+        guard let codelink:Codelink = .init(autolink.text)
         else
         {
-            self.diagnostics.append(.init(.invalidCodelink(expression),
+            self.diagnostics.append(.init(.invalidCodelink(autolink.text),
                 context: autolink.source.map { .init(of: $0, in: sources) }))
             return nil
         }
@@ -90,7 +90,7 @@ extension StaticLinker.Outliner
                 }
 
             case .many(let overloads)?:
-                self.diagnostics.append(.init(.ambiguousCodelink(expression, overloads),
+                self.diagnostics.append(.init(.ambiguousCodelink(autolink.text, overloads),
                     context: autolink.source.map { .init(of: $0, in: sources) }))
                 return nil
             }

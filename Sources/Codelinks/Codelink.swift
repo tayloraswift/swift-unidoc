@@ -19,10 +19,59 @@ struct Codelink:Equatable, Hashable, Sendable
         self.hash = hash
     }
 }
-extension Codelink
+extension Codelink:CustomStringConvertible
 {
     public
-    init?(parsing string:String)
+    var description:String
+    {
+        switch self.path.format
+        {
+        case .unidoc:
+            var words:[String] = []
+
+            switch self.filter?.keywords
+            {
+            case nil:
+                break
+
+            case (let first, nil)?:
+                words = [first.rawValue]
+
+            case (let first, let second?)?:
+                words = [first.rawValue, second.rawValue]
+            }
+
+            if let scope:Scope = self.scope
+            {
+                words.append(scope.description)
+            }
+
+            words.append(self.path.components.joined(separator: "."))
+
+            if let hash:Hash = self.hash
+            {
+                words.append("[\(hash.description)]")
+            }
+
+            return words.joined(separator: " ")
+
+        case .legacy:
+            let path:String = self.path.components.joined(separator: "/")
+            if  let suffix:String = self.hash?.description ?? self.filter?.suffix
+            {
+                return "\(path)-\(suffix)"
+            }
+            else
+            {
+                return path
+            }
+        }
+    }
+}
+extension Codelink:LosslessStringConvertible
+{
+    public
+    init?(_ string:String)
     {
         var string:Substring = string[...]
 
@@ -95,7 +144,9 @@ extension Codelink
 
         self.init(keywords: keywords, scope: scope, path: path, suffix: suffix)
     }
-
+}
+extension Codelink
+{
     private
     init?(keywords:(first:Keyword, second:Keyword?)?,
         scope:Scope?,
@@ -149,54 +200,5 @@ extension Codelink
         }
 
         self.init(filter: filter, scope: scope, path: path, hash: suffix?.hash)
-    }
-}
-extension Codelink:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self.path.format
-        {
-        case .unidoc:
-            var words:[String] = []
-
-            switch self.filter?.keywords
-            {
-            case nil:
-                break
-
-            case (let first, nil)?:
-                words = [first.rawValue]
-
-            case (let first, let second?)?:
-                words = [first.rawValue, second.rawValue]
-            }
-
-            if let scope:Scope = self.scope
-            {
-                words.append(scope.description)
-            }
-
-            words.append(self.path.components.joined(separator: "."))
-
-            if let hash:Hash = self.hash
-            {
-                words.append("[\(hash.description)]")
-            }
-
-            return words.joined(separator: " ")
-
-        case .legacy:
-            let path:String = self.path.components.joined(separator: "/")
-            if  let suffix:String = self.hash?.description ?? self.filter?.suffix
-            {
-                return "\(path)-\(suffix)"
-            }
-            else
-            {
-                return path
-            }
-        }
     }
 }
