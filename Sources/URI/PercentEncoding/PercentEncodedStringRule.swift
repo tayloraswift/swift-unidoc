@@ -3,19 +3,16 @@ import Grammar
 /// A generic parsing rule that matches sequences of percent-encoded code units
 /// and the generic parameter, which is expected to match a single un-escaped
 /// UTF-8 code unit.
-public
 enum PercentEncodedStringRule<UnencodedByte>
     where UnencodedByte:ParsingRule<UInt8>, UnencodedByte.Construction == Void
 {
 }
 extension PercentEncodedStringRule:ParsingRule
 {
-    public
     typealias Location = UnencodedByte.Location
-    public
     typealias Terminal = UnencodedByte.Terminal
 
-    @inlinable public static
+    static
     func parse<Source>(_ input:inout ParsingInput<some ParsingDiagnostics<Source>>)
         throws -> (string:String, unencoded:Bool)
         where Source:Collection<UInt8>, Source.Index == Location

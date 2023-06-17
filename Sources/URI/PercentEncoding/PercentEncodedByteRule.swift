@@ -2,16 +2,14 @@ import Grammar
 
 /// A parsing rule that matches a *single* percent-encoded UTF-8 code unit,
 /// such as `%20`. Its construction (``UInt8``) is the encoded code unit.
-public
 enum PercentEncodedByteRule<Location>
 {
 }
 extension PercentEncodedByteRule:ParsingRule
 {
-    public
     typealias Terminal = UInt8
 
-    @inlinable public static
+    static
     func parse<Source>(
         _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> UInt8
         where Source:Collection<UInt8>, Source.Index == Location

@@ -5,19 +5,16 @@ extension URI.QueryComponentRule
     /// A parsing rule that matches a UTF-8 code unit that is allowed to
     /// appear inline in the key or value of a query component.
     /// This is every code unit except for `%`, `&`, `;`, `=`, and `#`.
-    public
     enum UnencodedByte
     {
     }
 }
 extension URI.QueryComponentRule.UnencodedByte:TerminalRule
 {
-    public
     typealias Terminal = UInt8
-    public
     typealias Construction = Void
 
-    @inlinable public static
+    static
     func parse(terminal:Terminal) -> Void?
     {
         switch terminal
