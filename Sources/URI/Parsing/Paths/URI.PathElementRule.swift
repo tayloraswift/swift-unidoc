@@ -5,17 +5,15 @@ extension URI
     /// A parsing rule that matches a ``PathSeparatorRule`` followed by a
     /// ``PathComponentRule``, whose construction is the construction of the
     /// ``PathComponentRule``.
-    public
     enum PathElementRule<Location>
     {
     }
 }
 extension URI.PathElementRule:ParsingRule
 {
-    public
     typealias Terminal = UInt8
 
-    @inlinable public static
+    static
     func parse<Source>(
         _ input:inout ParsingInput<some ParsingDiagnostics<Source>>)
         throws -> URI.Path.Component

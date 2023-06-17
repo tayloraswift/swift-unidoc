@@ -5,17 +5,15 @@ extension URI
     /// A parsing rule that matches a URI path component, which can be empty,
     /// a [`'.'`](), or a [`'..'`](). The dotted components will not be
     /// considered “special” if they are percent-encoded.
-    public
     enum PathComponentRule<Location>
     {
     }
 }
 extension URI.PathComponentRule:ParsingRule
 {
-    public
     typealias Terminal = UInt8
 
-    @inlinable public static
+    static
     func parse<Source>(
         _ input:inout ParsingInput<some ParsingDiagnostics<Source>>)
         throws -> URI.Path.Component

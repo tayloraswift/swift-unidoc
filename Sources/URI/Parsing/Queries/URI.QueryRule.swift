@@ -5,17 +5,15 @@ extension URI
     /// A parsing rule that matches a leading question mark (`?`),
     /// followed by zero or more ``QueryComponentRule``s separated by
     /// ``QuerySeparatorRule``s.
-    public
     enum QueryRule<Location>
     {
     }
 }
 extension URI.QueryRule:ParsingRule
 {
-    public
     typealias Terminal = UInt8
 
-    @inlinable public static
+    static
     func parse<Source>(
         _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> [URI.Parameter]
         where Source:Collection<UInt8>, Source.Index == Location

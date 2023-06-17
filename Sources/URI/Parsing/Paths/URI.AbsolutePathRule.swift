@@ -8,17 +8,15 @@ extension URI
     ///
     /// Parsing a root expression (`/`) with this rule produces
     /// a path with a single, nil path vector.
-    public
     enum AbsolutePathRule<Location>
     {
     }
 }
 extension URI.AbsolutePathRule:ParsingRule
 {
-    public
     typealias Terminal = UInt8
 
-    @inlinable public static
+    static
     func parse<Source>(
         _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> URI.Path
         where Source:Collection<UInt8>, Source.Index == Location
