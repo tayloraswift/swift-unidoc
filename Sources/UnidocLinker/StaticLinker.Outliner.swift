@@ -1,5 +1,6 @@
 import Codelinks
 import CodelinkResolution
+import Doclinks
 import MarkdownABI
 import MarkdownTrees
 import MarkdownParsing
@@ -13,6 +14,9 @@ extension StaticLinker
 {
     struct Outliner
     {
+        private(set)
+        var diagnostics:[Diagnostic]
+
         private
         let articles:StandaloneResolver
         private
@@ -24,27 +28,22 @@ extension StaticLinker
         private
         let scope:[String]
 
-        private(set)
-        var diagnostics:[Diagnostic]
-
-        private(set)
-        var references:[Codelink: UInt32]
-        private(set)
-        var referents:[SymbolGraph.Referent]
+        private
+        var cache:Cache
 
         init(articles:StandaloneResolver,
             resolver:StaticResolver,
             culture:ModuleIdentifier,
             scope:[String])
         {
+            self.diagnostics = []
+
             self.articles = articles
             self.resolver = resolver
             self.culture = culture
             self.scope = scope
 
-            self.diagnostics = []
-            self.references = [:]
-            self.referents = []
+            self.cache = .init()
         }
     }
 }
@@ -53,56 +52,62 @@ extension StaticLinker.Outliner
     private mutating
     func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> UInt32?
     {
-        guard autolink.code
-        else
+        if !autolink.code,
+                let doclink:Doclink = .init(autolink.text)
         {
-            return nil
+            return self.outline(doclink: doclink, in: sources, at: autolink.source)
         }
-        guard let codelink:Codelink = .init(autolink.text)
+        else if let codelink:Codelink = .init(autolink.text)
+        {
+            return self.outline(codelink: codelink, in: sources, at: autolink.source)
+        }
         else
         {
-            self.diagnostics.append(.init(.invalidCodelink(autolink.text),
+            self.diagnostics.append(.init(autolink.code ?
+                    .invalidCodelink(autolink.text) :
+                    .invalidDoclink(autolink.text),
                 context: autolink.source.map { .init(of: $0, in: sources) }))
             return nil
         }
-
-        let reference:UInt32? =
+    }
+    private mutating
+    func outline(doclink:Doclink,
+        in sources:[MarkdownSource],
+        at source:SourceText<Int>?) -> UInt32?
+    {
+        self.cache(.doclink(doclink))
         {
-            if  let reference:UInt32 = $0
-            {
-                return reference
-            }
-
-            let referent:SymbolGraph.Referent
+            nil
+        }
+    }
+    private mutating
+    func outline(codelink:Codelink,
+        in sources:[MarkdownSource],
+        at source:SourceText<Int>?) -> UInt32?
+    {
+        self.cache(.codelink(codelink))
+        {
             switch self.resolver.query(ascending: self.scope, link: codelink)
             {
             case nil:
-                referent = .unresolved(codelink)
+                return .unresolved(codelink)
 
             case .one(let overload)?:
                 switch overload.target
                 {
                 case .scalar(let address):
-                    referent = .scalar(address)
+                    return .scalar(address)
 
                 case .vector(let address, self: let heir):
-                    referent = .vector(address, self: heir)
+                    return .vector(address, self: heir)
                 }
 
             case .many(let overloads)?:
-                self.diagnostics.append(.init(.ambiguousCodelink(autolink.text, overloads),
-                    context: autolink.source.map { .init(of: $0, in: sources) }))
+                self.diagnostics.append(.init(.ambiguousCodelink(codelink, overloads),
+                    context: source.map { .init(of: $0, in: sources) }))
                 return nil
             }
-
-            let next:UInt32 = .init(self.referents.endIndex)
-            self.referents.append(referent)
-            $0 = next
-            return next
-
-        } (&self.references[codelink])
-
-        return reference
+        }
     }
 }
 extension StaticLinker.Outliner
@@ -136,7 +141,7 @@ extension StaticLinker.Outliner
             }
         }
 
-        let fold:Int = self.referents.endIndex
+        let fold:Int = self.cache.referents.endIndex
 
         let details:MarkdownBytecode = .init
         {
@@ -151,7 +156,7 @@ extension StaticLinker.Outliner
                 $0.emit(into: &binary)
             }
         }
-        return .init(referents: self.referents,
+        return .init(referents: self.cache.referents,
             overview: overview,
             details: details,
             fold: fold)

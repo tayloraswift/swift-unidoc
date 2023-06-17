@@ -99,7 +99,10 @@ let package:Package = .init(
                 .target(name: "MarkdownABI")
             ]),
 
-        .target(name: "Doclinks"),
+        .target(name: "Doclinks", dependencies:
+            [
+                .target(name: "URI"),
+            ]),
 
         .target(name: "Generics"),
 
@@ -230,6 +233,7 @@ let package:Package = .init(
         .target(name: "UnidocLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
+                .target(name: "Doclinks"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "PackageMetadata"),
