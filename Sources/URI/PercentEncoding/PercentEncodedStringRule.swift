@@ -13,8 +13,12 @@ extension PercentEncodedStringRule:ParsingRule
     typealias Terminal = UnencodedByte.Terminal
 
     static
-    func parse<Source>(_ input:inout ParsingInput<some ParsingDiagnostics<Source>>)
-        throws -> (string:String, unencoded:Bool)
+    func parse<Source>(
+        _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) ->
+    (
+        string:String,
+        unencoded:Bool
+    )
         where Source:Collection<UInt8>, Source.Index == Location
     {
         let start:Location = input.index

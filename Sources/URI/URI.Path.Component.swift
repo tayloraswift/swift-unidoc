@@ -6,7 +6,7 @@ extension URI.Path
         /// A regular path component. This can be '.' or '..' if at least one
         /// of the dots was percent-encoded.
         case push(String)
-        /// '..'
+        /// `..`
         case pop
     }
 }
