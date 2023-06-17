@@ -4,15 +4,15 @@ public
 struct StaticResolver
 {
     private
-    var legacy:Overload<Int32>.Table<Codelink.LegacyDocC>
+    var paths:Overload<Int32>.Table<CaseInsensitiveCollation>
     private
-    var exact:Overload<Int32>.Table<Codelink.Exact>
+    var table:Overload<Int32>.Table<CaseSensitiveCollation>
 
     public
     init()
     {
-        self.legacy = .init()
-        self.exact = .init()
+        self.paths = .init()
+        self.table = .init()
     }
 }
 extension StaticResolver
@@ -20,20 +20,15 @@ extension StaticResolver
     public mutating
     func overload(_ path:QualifiedPath, with overload:__owned Overload<Int32>)
     {
-        self.legacy[path].append(overload)
-        self.exact[path].append(overload)
+        self.paths[path].append(overload)
+        self.table[path].append(overload)
     }
 }
 extension StaticResolver:CodelinkResolver
 {
     public
-    subscript(path:[String],
-        collation collation:Codelink.Path.Collation?) -> Overload<Int32>.Accumulator
+    subscript(path:[String]) -> Overload<Int32>.Accumulator
     {
-        switch collation
-        {
-        case nil:       return self.exact[path]
-        case .legacy?:  return self.legacy[path]
-        }
+        self.table[path]
     }
 }

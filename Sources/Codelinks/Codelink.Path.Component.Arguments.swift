@@ -23,13 +23,6 @@ extension Codelink.Path.Component.Arguments:CustomStringConvertible
 }
 extension Codelink.Path.Component.Arguments
 {
-    func lowercased() -> Self
-    {
-        .init(characters: self.characters.lowercased())
-    }
-}
-extension Codelink.Path.Component.Arguments
-{
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
         var remaining:Substring.UnicodeScalarView = codepoints

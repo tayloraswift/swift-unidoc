@@ -1,6 +1,6 @@
 extension Overload
 {
-    struct Table<Collation> where Collation:CodelinkCollation
+    struct Table<Collation> where Collation:PathCollation
     {
         private
         var entries:[String: Overload<Address>.Accumulator]
