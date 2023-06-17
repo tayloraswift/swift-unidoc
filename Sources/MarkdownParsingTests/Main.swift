@@ -83,17 +83,17 @@ enum Main:SyncTests
                 (
                     "Basic",
                     "<doc:GettingStarted>",
-                    "doc:GettingStarted"
+                    "GettingStarted"
                 ),
                 (
                     "PercentEncoded",
                     "<doc:Getting%20Started>",
-                    "doc:Getting%20Started"
+                    "Getting%20Started"
                 ),
                 (
                     "Qualified",
                     "<doc:BarbieCore/Getting%20Started>",
-                    "doc:BarbieCore/Getting%20Started"
+                    "BarbieCore/Getting%20Started"
                 ),
             ]
             {
@@ -101,18 +101,22 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / name,
                     let paragraph:MarkdownBlock.Paragraph = tests.expect(
                         value: tree.blocks.first as? MarkdownBlock.Paragraph),
-                    let link:MarkdownInline.Link = tests.expect(
+                    let expression:String = tests.expect(
                         value:
                         {
                             switch $0
                             {
-                            case .link(let link):   return link
-                            case _:                 return nil
+                            case .autolink(let autolink):
+                                switch autolink.expression
+                                {
+                                case .doclink(let uri):     return uri
+                                case _:                     return nil
+                                }
+                            case _:                         return nil
                             }
-                        } (paragraph.elements.first)),
-                    let target:String = tests.expect(value: link.target)
+                        } (paragraph.elements.first))
                 {
-                    tests.expect(target ==? expected)
+                    tests.expect(expression ==? expected)
                 }
             }
         }
@@ -155,9 +159,9 @@ enum Main:SyncTests
                     var position:SourcePosition?
                     for element:MarkdownInline.Block in paragraph.elements
                     {
-                        if case .symbol(_, let source) = element
+                        if case .autolink(let autolink) = element
                         {
-                            position = source?.range.lowerBound
+                            position = autolink.source?.range.lowerBound
                             break
                         }
                     }

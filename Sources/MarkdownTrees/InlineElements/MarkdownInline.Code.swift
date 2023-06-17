@@ -3,7 +3,7 @@ import MarkdownABI
 extension MarkdownInline
 {
     @frozen public
-    struct Code
+    struct Code:Equatable, Hashable, Sendable
     {
         public
         var text:String

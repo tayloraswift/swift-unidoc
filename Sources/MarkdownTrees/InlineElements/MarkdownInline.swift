@@ -1,7 +1,7 @@
 import MarkdownABI
 
 @frozen public
-enum MarkdownInline
+enum MarkdownInline:Equatable, Hashable, Sendable
 {
     case container(Container<Self>)
     case code(Code)

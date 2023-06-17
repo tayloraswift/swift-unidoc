@@ -23,7 +23,7 @@ extension MarkdownBlock
         /// in this parameter list’s discussion, and each constituent
         /// parameter.
         public override
-        func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
+        func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
         {
             for block:MarkdownBlock in self.discussion
             {

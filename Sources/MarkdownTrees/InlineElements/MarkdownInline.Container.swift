@@ -19,10 +19,19 @@ extension MarkdownInline
         }
     }
 }
+extension MarkdownInline.Container:Equatable where Element:Equatable
+{
+}
+extension MarkdownInline.Container:Hashable where Element:Hashable
+{
+}
+extension MarkdownInline.Container:Sendable where Element:Sendable
+{
+}
 extension MarkdownInline.Container:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(String, SourceText<Int>?) throws -> UInt32?) rethrows
+    func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
     {
         for index:Int in self.elements.indices
         {

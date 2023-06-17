@@ -3,7 +3,7 @@ import MarkdownABI
 extension MarkdownInline
 {
     @frozen public
-    struct Image
+    struct Image:Equatable, Hashable, Sendable
     {
         public
         var elements:[MarkdownInline]

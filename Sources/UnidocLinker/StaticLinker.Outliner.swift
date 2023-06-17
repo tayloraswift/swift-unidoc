@@ -1,6 +1,7 @@
 import Codelinks
 import CodelinkResolution
 import MarkdownABI
+import MarkdownTrees
 import MarkdownParsing
 import MarkdownSemantics
 import ModuleGraphs
@@ -50,15 +51,18 @@ extension StaticLinker
 extension StaticLinker.Outliner
 {
     private mutating
-    func outline(expression:String,
-        at source:SourceText<Int>?,
-        in sources:[MarkdownSource]) -> UInt32?
+    func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> UInt32?
     {
+        guard case .codelink(let expression) = autolink.expression
+        else
+        {
+            return nil
+        }
         guard let codelink:Codelink = .init(parsing: expression)
         else
         {
             self.diagnostics.append(.init(.invalidCodelink(expression),
-                context: source.map { .init(of: $0, in: sources) }))
+                context: autolink.source.map { .init(of: $0, in: sources) }))
             return nil
         }
 
@@ -87,7 +91,7 @@ extension StaticLinker.Outliner
 
             case .many(let overloads)?:
                 self.diagnostics.append(.init(.ambiguousCodelink(expression, overloads),
-                    context: source.map { .init(of: $0, in: sources) }))
+                    context: autolink.source.map { .init(of: $0, in: sources) }))
                 return nil
             }
 
@@ -126,7 +130,7 @@ extension StaticLinker.Outliner
             {
                 $0.outline
                 {
-                    self.outline(expression: $0, at: $1, in: sources)
+                    self.outline(autolink: $0, in: sources)
                 }
                 $0.emit(into: &binary)
             }
@@ -142,7 +146,7 @@ extension StaticLinker.Outliner
             {
                 $0.outline
                 {
-                    self.outline(expression: $0, at: $1, in: sources)
+                    self.outline(autolink: $0, in: sources)
                 }
                 $0.emit(into: &binary)
             }

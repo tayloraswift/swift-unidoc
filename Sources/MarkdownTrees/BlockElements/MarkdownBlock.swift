@@ -16,7 +16,7 @@ class MarkdownBlock:MarkdownElement
     }
     /// Does nothing.
     open
-    func outline(by _:(String, SourceText<Int>?) throws -> UInt32?) rethrows
+    func outline(by _:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
     {
     }
     /// Emits nothing.
