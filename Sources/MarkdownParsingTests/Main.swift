@@ -101,22 +101,18 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / name,
                     let paragraph:MarkdownBlock.Paragraph = tests.expect(
                         value: tree.blocks.first as? MarkdownBlock.Paragraph),
-                    let expression:String = tests.expect(
+                    let autolink:MarkdownInline.Autolink = tests.expect(
                         value:
                         {
                             switch $0
                             {
-                            case .autolink(let autolink):
-                                switch autolink.expression
-                                {
-                                case .doclink(let uri):     return uri
-                                case _:                     return nil
-                                }
+                            case .autolink(let autolink):   return autolink
                             case _:                         return nil
                             }
                         } (paragraph.elements.first))
                 {
-                    tests.expect(expression ==? expected)
+                    tests.expect(false: autolink.code)
+                    tests.expect(autolink.text ==? expected)
                 }
             }
         }
