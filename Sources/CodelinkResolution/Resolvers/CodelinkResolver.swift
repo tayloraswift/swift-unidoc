@@ -5,8 +5,7 @@ protocol CodelinkResolver<Address>
 {
     associatedtype Address:Equatable, Hashable, Sendable
 
-    subscript(path:[String],
-        collation collation:Codelink.Path.Collation?) -> Overload<Address>.Accumulator
+    subscript(path:[String]) -> Overload<Address>.Accumulator
     {
         get
     }
@@ -37,7 +36,6 @@ extension CodelinkResolver
             }
 
             if  let overloads:Overloads<Address> = .init(self.query(path,
-                    collation: link.path.collation,
                     filter: link.filter,
                     hash: link.hash))
             {
@@ -48,11 +46,10 @@ extension CodelinkResolver
     }
     private
     func query(_ path:[String],
-        collation:Codelink.Path.Collation?,
         filter:Codelink.Filter?,
         hash:Codelink.Hash?) -> Overload<Address>.Accumulator
     {
-        switch (self[path, collation: collation], hash, filter)
+        switch (self[path], hash, filter)
         {
         case (.many(let overloads), let hash?,  _):
             return .init(filtering: overloads) { hash == $0.hash }

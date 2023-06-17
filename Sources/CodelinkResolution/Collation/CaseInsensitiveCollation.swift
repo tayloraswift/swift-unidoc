@@ -1,13 +1,6 @@
 import Codelinks
 
-extension Codelink
-{
-    /// Resolves codelinks without case-sensitivity.
-    enum LegacyDocC
-    {
-    }
-}
-extension Codelink.LegacyDocC:CodelinkCollation
+enum CaseInsensitiveCollation:PathCollation
 {
     static
     func collate(_ path:some BidirectionalCollection<String>) -> String

@@ -5,7 +5,7 @@ public
 struct DynamicResolver
 {
     private
-    var table:Overload<GlobalAddress>.Table<Codelink.Exact>
+    var table:Overload<GlobalAddress>.Table<CaseSensitiveCollation>
 
     public
     init()
@@ -24,8 +24,7 @@ extension DynamicResolver
 extension DynamicResolver:CodelinkResolver
 {
     public
-    subscript(path:[String],
-        collation _:Codelink.Path.Collation?) -> Overload<GlobalAddress>.Accumulator
+    subscript(path:[String]) -> Overload<GlobalAddress>.Accumulator
     {
         self.table[path]
     }

@@ -44,7 +44,7 @@ extension Codelink
         //  legacy DocC links cannot use unidoc features
         if !words.isEmpty
         {
-            if case .legacy? = path.collation
+            if case .legacy = path.format
             {
                 return nil
             }
@@ -104,9 +104,9 @@ extension Codelink
     {
         let filter:Filter?
 
-        switch path.collation
+        switch path.format
         {
-        case nil:
+        case .unidoc:
             switch (keywords, path.components.last)
             {
             case ((.actor, nil)?,           .nominal(_, nil)):  filter = .actor
@@ -129,15 +129,15 @@ extension Codelink
 
             case ((_, _)?, _):
                 return nil
-            
+
             case (nil, .subscript):
                 filter = .subscript(.instance)
-            
+
             case (nil, _):
                 filter = nil
             }
-        
-        case .legacy?:
+
+        case .legacy:
             if case .filter(let legacy)? = suffix
             {
                 filter = legacy
@@ -156,19 +156,19 @@ extension Codelink:CustomStringConvertible
     public
     var description:String
     {
-        switch self.path.collation
+        switch self.path.format
         {
-        case nil:
+        case .unidoc:
             var words:[String] = []
 
             switch self.filter?.keywords
             {
             case nil:
                 break
-            
+
             case (let first, nil)?:
                 words = [first.rawValue]
-            
+
             case (let first, let second?)?:
                 words = [first.rawValue, second.rawValue]
             }
@@ -187,7 +187,7 @@ extension Codelink:CustomStringConvertible
 
             return words.joined(separator: " ")
 
-        case .legacy?:
+        case .legacy:
             let path:String = self.path.components.joined(separator: "/")
             if  let suffix:String = self.hash?.description ?? self.filter?.suffix
             {
