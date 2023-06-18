@@ -1,3 +1,4 @@
+import CodelinkResolution
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
@@ -135,6 +136,31 @@ extension StaticLinker.Symbolizer
         {
         case .index(let culture):   return culture
         case .nominated(let id):    return self.intern(id)
+        }
+    }
+}
+extension StaticLinker.Symbolizer
+{
+    func excerpt(for overload:Overload<Int32>) -> StaticLinker.Excerpt
+    {
+        let scalar:Int32
+        switch overload.target
+        {
+        case .scalar(let address):
+            scalar = address
+
+        case .vector(let address, self: _):
+            scalar = address
+        }
+
+        let symbol:ScalarSymbol = self.graph.symbols[scalar]
+        if  let scalar:SymbolGraph.Scalar = self.graph[scalar]?.scalar
+        {
+            return .init(symbol: symbol, fragments: scalar.declaration.expanded.bytecode)
+        }
+        else
+        {
+            return .init(symbol: symbol, fragments: nil)
         }
     }
 }
