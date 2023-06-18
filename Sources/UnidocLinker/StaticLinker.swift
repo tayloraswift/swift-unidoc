@@ -324,7 +324,7 @@ extension StaticLinker
                 case  _?:
                     throw DuplicateSymbolError.article(supplement.name)
                 }
-            } (&self.articles[namespace, supplement.name])
+            } (&self.articles[.documentation(namespace), supplement.name])
 
             return .init(markdown: markdown,
                 address: address,
