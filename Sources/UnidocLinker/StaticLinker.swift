@@ -4,6 +4,7 @@ import Declarations
 import Generics
 import MarkdownSemantics
 import MarkdownParsing
+import MarkdownTrees
 import ModuleGraphs
 import Sources
 import Symbols
@@ -259,10 +260,16 @@ extension StaticLinker
                 {
                     articles.append(article)
 
+                    guard let address:Int32 = article.address
+                    else
+                    {
+                        continue
+                    }
+
                     switch addresses
                     {
-                    case  nil:              addresses = (article.address, article.address)
-                    case (let first, _)?:   addresses = (first,           article.address)
+                    case  nil:              addresses = (address, address)
+                    case (let first, _)?:   addresses = (first,   address)
                     }
                 }
             }
@@ -280,21 +287,30 @@ extension StaticLinker
             standalone.indices,
             standalone)
         {
-            let culture:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
+            let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
             for standalone:StandaloneArticle in standalone
             {
                 var outliner:Outliner = .init(
                     articles: self.articles,
                     resolver: self.resolver,
-                    culture: culture,
-                    scope: ["\(culture)"])
+                    culture: namespace,
+                    scope: ["\(namespace)"])
 
                 //  We pass a single-element array as the sources list, which relies
                 //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
                 //  the source id by default.
-                self.symbolizer.graph.articles[standalone.address].value = outliner.link(
+                let article:SymbolGraph.Article<Never> = outliner.link(
                     documentation: standalone.markdown.article,
                     from: [.init(from: standalone)])
+
+                if  let address:Int32 = standalone.address
+                {
+                    self.symbolizer.graph.articles[address].value = article
+                }
+                else
+                {
+                    self.symbolizer.graph.cultures[culture].article = article
+                }
 
                 self.diagnostics += outliner.diagnostics
             }
@@ -309,8 +325,9 @@ extension StaticLinker
     {
         let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
             as: SwiftFlavoredMarkdown.self)
-        if  case nil = markdown.binding
+        switch self.binding(of: markdown, in: namespace)
         {
+        case nil:
             let address:Int32 = try
             {
                 switch $0
@@ -330,51 +347,65 @@ extension StaticLinker
                 address: address,
                 file: self.symbolizer.intern(supplement.id),
                 text: supplement.text)
-        }
-        if  let binding:Int32 = self.binding(of: markdown, in: namespace)
-        {
+
+        case .success(.module):
+            return  .init(markdown: markdown,
+                address: nil,
+                file: self.symbolizer.intern(supplement.id),
+                text: supplement.text)
+
+        case .success(.scalar(let binding)):
             self.supplements[binding, default: []].append(markdown)
             return nil
-        }
-        else
-        {
+
+        case .failure(let error):
+            //  TODO: handle this in a more organized manner
+            print(error)
             return nil
         }
     }
     private
     func binding(
         of supplement:MarkdownDocumentationSupplement,
-        in namespace:ModuleIdentifier) -> Int32?
+        in namespace:ModuleIdentifier) -> Result<Binding, BindingError>?
     {
-        guard let codelink:Codelink = supplement.binding
+        guard let expression:String = supplement.binding?.text
         else
         {
             return nil
         }
 
+        //  Special rule for article bindings: if the text of the codelink matches
+        //  the current namespace, then the article is the primary article for
+        //  that module.
+        if  expression == "\(namespace)"
+        {
+            return .success(.module)
+        }
+
+        guard let codelink:Codelink = .init(expression)
+        else
+        {
+            return .failure(.expression(expression))
+        }
+
         switch self.resolver.query(ascending: ["\(namespace)"], link: codelink)
         {
         case nil:
-            print("""
-                Article binding '\(codelink)' does not refer to a declaration \
-                in its enclosing scope (\(namespace)).
-                """)
-            return nil
+            return .failure(.resolution(expression, namespace, nil))
 
         case .one(let overload)?:
-            switch overload.target
+            if  case .scalar(let address) = overload.target
             {
-            case .scalar(let address):
-                return address
-
-            case .vector:
-                print("Article binding '\(codelink)' cannot refer to a vector symbol.")
-                return nil
+                return .success(.scalar(address))
             }
 
-        case .many?:
-            print("Article binding '\(codelink)' is ambiguous.")
-            return nil
+            return .failure(.resolution(expression, namespace, .vector(
+                self.symbolizer.excerpt(for: overload))))
+
+        case .many(let overloads)?:
+            return .failure(.resolution(expression, namespace, .ambiguous(
+                overloads.map(self.symbolizer.excerpt(for:)))))
         }
     }
 }

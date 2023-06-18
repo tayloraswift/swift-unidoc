@@ -3,12 +3,12 @@ import MarkdownSemantics
 struct StandaloneArticle
 {
     let markdown:MarkdownDocumentationSupplement
-    let address:Int32
+    let address:Int32?
     let file:Int32
     let text:String
 
     init(markdown:MarkdownDocumentationSupplement,
-        address:Int32,
+        address:Int32?,
         file:Int32,
         text:String)
     {

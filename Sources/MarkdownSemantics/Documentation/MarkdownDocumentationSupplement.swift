@@ -1,16 +1,15 @@
-import Codelinks
 import MarkdownTrees
 
 @frozen public
 struct MarkdownDocumentationSupplement
 {
     public
-    let binding:Codelink?
+    let binding:MarkdownInline.Autolink?
     public
     var article:MarkdownDocumentation
 
     public
-    init(binding:Codelink?, article:MarkdownDocumentation)
+    init(binding:MarkdownInline.Autolink?, article:MarkdownDocumentation)
     {
         self.binding = binding
         self.article = article
@@ -30,9 +29,7 @@ extension MarkdownDocumentationSupplement:MarkdownModel
         if  case (let headline as MarkdownBlock.Heading)? = blocks.first,
             headline.level == 1,
             headline.elements.count == 1,
-            case .autolink(let autolink) = headline.elements[0],
-            autolink.code,
-            let binding:Codelink = .init(autolink.text)
+            case .autolink(let binding) = headline.elements[0]
         {
             self.init(binding: binding, article: .init(attaching: blocks.dropFirst()))
         }
