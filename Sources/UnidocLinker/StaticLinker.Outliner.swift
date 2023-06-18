@@ -77,7 +77,16 @@ extension StaticLinker.Outliner
     {
         self.cache(.doclink(doclink))
         {
-            nil
+            switch self.articles.query(ascending: .documentation(self.culture), link: doclink)
+            {
+            case let address?:
+                return .scalar(address)
+
+            case nil:
+                self.diagnostics.append(.init(.unresolvedDoclink(doclink),
+                    context: source.map { .init(of: $0, in: sources) }))
+                return nil
+            }
         }
     }
     private mutating
