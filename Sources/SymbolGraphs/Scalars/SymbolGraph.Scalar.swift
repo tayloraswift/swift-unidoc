@@ -12,8 +12,9 @@ extension SymbolGraph
     @frozen public
     struct Scalar:Equatable, Sendable
     {
-        public
-        let flags:Flags
+        @usableFromInline internal
+        var flags:Flags
+
         public
         let path:UnqualifiedPath
 
@@ -51,29 +52,59 @@ extension SymbolGraph
         public
         var article:Article<Never>?
 
-        @inlinable public
-        init(flags:Flags, path:UnqualifiedPath)
+        @inlinable internal
+        init(flags:Flags,
+            path:UnqualifiedPath,
+            declaration:Declaration<Int32> = .init(),
+            superforms:[Int32] = [],
+            features:[Int32] = [],
+            origin:Int32? = nil,
+            location:SourceLocation<Int32>? = nil,
+            article:Article<Never>? = nil)
         {
             self.flags = flags
             self.path = path
 
-            self.declaration = .init()
+            self.declaration = declaration
 
-            self.superforms = []
-            self.features = []
-            self.origin = nil
+            self.superforms = superforms
+            self.features = features
+            self.origin = origin
 
-            self.location = nil
-            self.article = nil
+            self.location = location
+            self.article = article
         }
     }
 }
 extension SymbolGraph.Scalar
 {
     @inlinable public
+    init(phylum:ScalarPhylum, aperture:ScalarAperture, path:UnqualifiedPath)
+    {
+        self.init(flags: .init(phylum: phylum, aperture: aperture, route: .unhashed),
+            path: path)
+    }
+}
+extension SymbolGraph.Scalar
+{
+    @inlinable public
     var aperture:ScalarAperture { self.flags.aperture }
+
     @inlinable public
     var phylum:ScalarPhylum { self.flags.phylum }
+
+    @inlinable public
+    var route:Route
+    {
+        get
+        {
+            self.flags.route
+        }
+        set(value)
+        {
+            self.flags.route = value
+        }
+    }
 }
 extension SymbolGraph.Scalar
 {
@@ -146,26 +177,24 @@ extension SymbolGraph.Scalar:BSONDocumentDecodable
     {
         self.init(
             flags: try bson[.flags].decode(),
-            path: try bson[.path].decode())
+            path: try bson[.path].decode(),
+            //  Adding the type names here *massively* improves compilation times, for
+            //  some reason...
+            declaration: .init(
+                availability: try bson[.declaration_availability]?.decode() ?? .init(),
+                abridged: Declaration<Int32>.Abridged.init(
+                    bytecode: try bson[.declaration_abridged_bytecode].decode()),
+                expanded: Declaration<Int32>.Expanded.init(
+                    bytecode: try bson[.declaration_expanded_bytecode].decode(),
+                    links: try bson[.declaration_expanded_links]?.decode() ?? []),
+                generics: GenericSignature<Int32>.init(
+                    constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
+                    parameters: try bson[.declaration_generics_parameters]?.decode() ?? [])),
 
-        //  Adding the type names here *massively* improves compilation times, for
-        //  some reason...
-        self.declaration = .init(
-            availability: try bson[.declaration_availability]?.decode() ?? .init(),
-            abridged: Declaration<Int32>.Abridged.init(
-                bytecode: try bson[.declaration_abridged_bytecode].decode()),
-            expanded: Declaration<Int32>.Expanded.init(
-                bytecode: try bson[.declaration_expanded_bytecode].decode(),
-                links: try bson[.declaration_expanded_links]?.decode() ?? []),
-            generics: GenericSignature<Int32>.init(
-                constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
-                parameters: try bson[.declaration_generics_parameters]?.decode() ?? []))
-
-        self.superforms = try bson[.superforms]?.decode() ?? []
-        self.features = try bson[.features]?.decode() ?? []
-        self.origin = try bson[.origin]?.decode()
-
-        self.location = try bson[.location]?.decode()
-        self.article = try bson[.article]?.decode()
+            superforms: try bson[.superforms]?.decode() ?? [],
+            features: try bson[.features]?.decode() ?? [],
+            origin: try bson[.origin]?.decode(),
+            location: try bson[.location]?.decode(),
+            article: try bson[.article]?.decode())
     }
 }

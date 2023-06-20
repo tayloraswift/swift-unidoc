@@ -7,7 +7,7 @@ struct DynamicLinker
     private
     let context:GlobalContext
     private
-    let resolver:DynamicResolver
+    let resolver:CodelinkResolver<GlobalAddress>
 
     private
     var extensions:Extensions
@@ -16,7 +16,7 @@ struct DynamicLinker
 
     private
     init(context:GlobalContext,
-        resolver:DynamicResolver,
+        resolver:CodelinkResolver<GlobalAddress>,
         extensions:Extensions,
         conformances:SymbolGraph.Table<Conformances>)
     {
@@ -34,7 +34,7 @@ extension DynamicLinker
         extensions:Extensions,
         conformances:SymbolGraph.Table<Conformances>)
     {
-        var resolver:DynamicResolver = .init()
+        var resolver:CodelinkResolver<GlobalAddress> = .init()
         for dependency:LocalContext in context.upstream.values
         {
             resolver.expose(upstream: dependency, in: context)

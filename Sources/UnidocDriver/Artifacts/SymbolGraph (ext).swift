@@ -71,11 +71,11 @@ extension SymbolGraph
                 linker.link(extensions: extensions, at: extensionPositions)
             }
 
-            linker._warnings()
+            let graph:SymbolGraph = try linker.finalize()
 
             print("Linked documentation in \(time.linking)")
 
-            return linker.graph
+            return graph
         }
     }
 }

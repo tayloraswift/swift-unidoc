@@ -99,6 +99,6 @@ extension Compiler.Extensions
         let signature:Compiler.Extension.Signature = .init(culture, extended, where: conditions)
         return { $0 }(&self.groups[signature, default: .init(value: .init(
             signature: signature,
-            path: .init(path)))])
+            path: path))])
     }
 }

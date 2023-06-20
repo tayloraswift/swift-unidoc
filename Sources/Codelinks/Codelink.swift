@@ -1,3 +1,5 @@
+import FNV1
+
 @frozen public
 struct Codelink:Equatable, Hashable, Sendable
 {
@@ -8,10 +10,10 @@ struct Codelink:Equatable, Hashable, Sendable
     public
     let path:Path
     public
-    let hash:Hash?
+    let hash:FNV24?
 
     @inlinable public
-    init(filter:Filter? = nil, scope:Scope? = nil, path:Path, hash:Hash? = nil)
+    init(filter:Filter? = nil, scope:Scope? = nil, path:Path, hash:FNV24? = nil)
     {
         self.filter = filter
         self.scope = scope
@@ -48,9 +50,9 @@ extension Codelink:CustomStringConvertible
 
             words.append(self.path.components.joined(separator: "."))
 
-            if let hash:Hash = self.hash
+            if let hash:FNV24 = self.hash
             {
-                words.append("[\(hash.description)]")
+                words.append("[\(hash)]")
             }
 
             return words.joined(separator: " ")
@@ -75,11 +77,7 @@ extension Codelink:LosslessStringConvertible
     {
         var string:Substring = string[...]
 
-        var suffix:Path.Suffix? = nil
-        if  let hash:Hash = .init(parsing: &string)
-        {
-            suffix = .hash(hash)
-        }
+        var suffix:Path.Suffix? = .hash(trimming: &string)
 
         var words:ArraySlice<Substring> = string.split(separator: " ")[...]
 

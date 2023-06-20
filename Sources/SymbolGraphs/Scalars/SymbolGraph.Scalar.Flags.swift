@@ -4,36 +4,46 @@ import Symbols
 
 extension SymbolGraph.Scalar
 {
-    @frozen public
+    @frozen @usableFromInline internal
     struct Flags:Equatable, Sendable
     {
-        public
+        @usableFromInline internal
         let aperture:ScalarAperture
-        public
+        @usableFromInline internal
         let phylum:ScalarPhylum
 
-        @inlinable public
-        init(aperture:ScalarAperture, phylum:ScalarPhylum)
+        @usableFromInline internal
+        var route:Route
+
+        @inlinable internal
+        init(phylum:ScalarPhylum, aperture:ScalarAperture, route:Route)
         {
             self.aperture = aperture
             self.phylum = phylum
+            self.route = route
         }
     }
 }
 extension SymbolGraph.Scalar.Flags:RawRepresentable
 {
-    @inlinable public
+    @usableFromInline internal
     var rawValue:Int32
     {
-        .init(self.phylum.rawValue) << 8 | .init(self.aperture.rawValue)
+        .init(self.phylum.rawValue)   << 24 |
+        .init(self.aperture.rawValue) << 16 |
+        .init(self.route.rawValue)
     }
-    @inlinable public
+    @usableFromInline internal
     init?(rawValue:Int32)
     {
-        if  let aperture:ScalarAperture = .init(rawValue: .init(truncatingIfNeeded: rawValue)),
-            let phylum:ScalarPhylum = .init(rawValue: .init(truncatingIfNeeded: rawValue >> 8))
+        if  let phylum:ScalarPhylum = .init(
+                rawValue: .init(truncatingIfNeeded: rawValue >> 24)),
+            let aperture:ScalarAperture = .init(
+                rawValue: .init(truncatingIfNeeded: rawValue >> 16)),
+            let route:SymbolGraph.Scalar.Route = .init(
+                rawValue: .init(truncatingIfNeeded: rawValue))
         {
-            self.init(aperture: aperture, phylum: phylum)
+            self.init(phylum: phylum, aperture: aperture, route: route)
         }
         else
         {
