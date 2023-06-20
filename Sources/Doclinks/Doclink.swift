@@ -60,8 +60,15 @@ extension Doclink
         var slashes:Int = 0
         while start < uri.endIndex, uri[start] == "/"
         {
-            start = uri.index(after: start)
-            slashes += 1
+            if  slashes < 2
+            {
+                slashes += 1
+                start = uri.index(after: start)
+            }
+            else
+            {
+                return nil
+            }
         }
         if  let path:URI.Path = .init(relative: uri[start...])
         {
