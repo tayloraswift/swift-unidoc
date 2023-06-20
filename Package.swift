@@ -287,6 +287,12 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
+        .executableTarget(name: "DoclinkTests", dependencies:
+            [
+                .target(name: "Doclinks"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),
