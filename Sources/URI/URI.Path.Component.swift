@@ -66,17 +66,25 @@ extension URI.Path.Component:CustomStringConvertible
             {
                 switch byte
                 {
-                case    0x30 ... 0x39,  // [0-9]
-                        0x41 ... 0x5a,  // [A-Z]
-                        0x61 ... 0x7a,  // [a-z]
+                case    0x21,           // '!'
+                        0x24,           // '$'
+                        0x26,           // '&'
+                        0x27,           // '''
+                        0x28,           // '('
+                        0x29,           // ')'
+                        0x2a,           // '*'
+                        0x2b,           // '+'
+                        0x2c,           // ','
                         0x2d,           // '-'
                         0x2e,           // '.'
-                        // not technically a URL character, but browsers won’t render '%3A'
-                        // in the URL bar, and ':' is so common in Swift it is not worth
-                        // percent-encoding.
-                        // the ':' character also appears in legacy USRs.
+                        0x30 ... 0x39,  // [0-9]
                         0x3a,           // ':'
+                        0x3b,           // ';'
+                        0x3d,           // '='
+                        0x40,           // '@'
+                        0x41 ... 0x5a,  // [A-Z]
                         0x5f,           // '_'
+                        0x61 ... 0x7a,  // [a-z]
                         0x7e:           // '~'
                     encoded.append(byte)
 

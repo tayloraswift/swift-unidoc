@@ -1,4 +1,5 @@
 import Generics
+import LexicalPaths
 import Symbols
 
 extension Compiler
@@ -10,10 +11,8 @@ extension Compiler
         public
         let signature:Signature
         /// The full name of the extended type, not including the module namespace prefix.
-        /// This is provided as an array instead of a ``UnqualifiedPath`` for convenience
-        /// only; the array is always non-empty.
         public
-        let path:[String]
+        let path:UnqualifiedPath
 
         /// Protocols the extended type conforms to.
         public
@@ -32,7 +31,7 @@ extension Compiler
         public internal(set)
         var blocks:[Block]
 
-        init(signature:Signature, path:[String])
+        init(signature:Signature, path:UnqualifiedPath)
         {
             self.signature = signature
             self.path = path

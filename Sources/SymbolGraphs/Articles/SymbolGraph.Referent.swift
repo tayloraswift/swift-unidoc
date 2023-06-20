@@ -1,13 +1,12 @@
 import BSONDecoding
 import BSONEncoding
-import Codelinks
 
 extension SymbolGraph
 {
     @frozen public
     enum Referent:Equatable, Hashable, Sendable
     {
-        case unresolved(Codelink)
+        case unresolved(String)
 
         case scalar(Int32)
         case vector(Int32, self:Int32)
@@ -21,7 +20,7 @@ extension SymbolGraph.Referent:BSONEncodable
         switch self
         {
         case .unresolved(let codelink):
-            codelink.description.encode(to: &field)
+            codelink.encode(to: &field)
 
         case .scalar(let address):
             address.encode(to: &field)
@@ -42,10 +41,7 @@ extension SymbolGraph.Referent:BSONDecodable
             switch $0
             {
             case .string(let utf8):
-                if  let codelink:Codelink = .init(utf8.description)
-                {
-                    return .unresolved(codelink)
-                }
+                return .unresolved(utf8.description)
 
             case .int32(let int32):
                 return .scalar(int32)

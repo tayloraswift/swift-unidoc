@@ -12,6 +12,7 @@ let package:Package = .init(
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
         .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Doclinks", targets: ["Doclinks"]),
+        .library(name: "FNV1", targets: ["FNV1"]),
         .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
@@ -49,6 +50,7 @@ let package:Package = .init(
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
+        .library(name: "UnidocRouting", targets: ["UnidocRouting"]),
     ],
     dependencies:
     [
@@ -82,6 +84,7 @@ let package:Package = .init(
 
         .target(name: "Codelinks", dependencies:
             [
+                .target(name: "FNV1"),
                 .target(name: "LexicalPaths"),
             ]),
 
@@ -103,6 +106,13 @@ let package:Package = .init(
             [
                 .target(name: "URI"),
             ]),
+
+        .target(name: "DoclinkResolution", dependencies:
+            [
+                .target(name: "Doclinks"),
+            ]),
+
+        .target(name: "FNV1"),
 
         .target(name: "Generics"),
 
@@ -198,7 +208,6 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphs", dependencies:
             [
-                .target(name: "Codelinks"),
                 .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
@@ -218,6 +227,7 @@ let package:Package = .init(
         .target(name: "UnidocDatabase",
             dependencies:
             [
+                .target(name: "CodelinkResolution"),
                 .target(name: "SymbolGraphs"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
@@ -233,12 +243,21 @@ let package:Package = .init(
         .target(name: "UnidocLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
-                .target(name: "Doclinks"),
+                .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocCompiler"),
+                .target(name: "UnidocRouting"),
+            ]),
+
+        .target(name: "UnidocRouting", dependencies:
+            [
+                .target(name: "LexicalPaths"),
+                .target(name: "ModuleGraphs"),
+                .target(name: "Symbols"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "URI", dependencies:
@@ -261,7 +280,6 @@ let package:Package = .init(
                 .target(name: "SymbolGraphs"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
-
 
         .executableTarget(name: "CodelinkTests", dependencies:
             [
