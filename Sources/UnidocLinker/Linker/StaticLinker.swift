@@ -176,10 +176,10 @@ extension StaticLinker
                         target: .scalar(address),
                         phylum: scalar.phylum,
                         hash: hash))
-                    //  Assign the scalar a URI.
-                    self.router[qualifier, scalar.path, scalar.phylum].append(address)
-                    //  Record the scalar’s hash so we will know if it has a hash collision.
-                    self.router[hash].append(address)
+                    //  Assign the scalar a URI, and record the scalar’s hash
+                    //  so we will know if it has a hash collision.
+                    self.router[qualifier, scalar.path, scalar.phylum][hash, default: []]
+                        .append(address)
                 }
             }
         }
@@ -337,7 +337,7 @@ extension StaticLinker
             } (&self.doclinks[.documentation(namespace), supplement.name])
 
             //  Assign the standalone article a URI.
-            self.router[namespace, supplement.name].append(address)
+            self.router[namespace, supplement.name][nil, default: []].append(address)
 
             return .init(markdown: markdown,
                 address: address,
@@ -540,29 +540,36 @@ extension StaticLinker
     public mutating
     func finalize() throws -> SymbolGraph
     {
-        //  Check if any of the FNV-1 hashes collide
-        for case (let hash, .some(let collisions)) in self.router.hashes
+        for case .some(let path) in self.router.paths.values
         {
-            print("""
-                WARNING: FNV-1 hash collision detected! (hash: \(hash), \
-                symbols: \(collisions.map { self.symbolizer.graph.symbols[$0] }))
-                """)
-        }
-        for case .some(let stack) in self.router.paths.values
-        {
-            for stacked:Int32 in stack
+            for (hash, addresses):(FNV24?, InlineArray<Int32>) in path
             {
-                if  self.symbolizer.graph.nodes.indices.contains(stacked)
+                if  let hash
                 {
-                    self.symbolizer.graph.nodes[stacked].scalar?.route = .hashed
+                    for stacked:Int32 in addresses
+                    {
+                        //  If `hash` is present, then we know the scalar is a valid
+                        //  declaration node index.
+                        self.symbolizer.graph.nodes[stacked].scalar?.route = .hashed
+                    }
+                    if  case .some(let collisions) = addresses
+                    {
+                        print("""
+                            WARNING: FNV-1 hash collision detected! (hash: \(hash), \
+                            symbols: \(collisions.map { self.symbolizer.graph.symbols[$0] }))
+                            """)
+                    }
                 }
                 else
                 {
-                    print("""
-                        WARNING: Standalone article \
-                        (\(self.symbolizer.graph.articles[stacked].id ?? "<anonymous>")) \
-                        does not have a unique URL!
-                        """)
+                    for stacked:Int32 in addresses
+                    {
+                        print("""
+                            WARNING: Standalone article \
+                            (\(self.symbolizer.graph.articles[stacked].id ?? "<anonymous>")) \
+                            does not have a unique URL! (\(path))
+                            """)
+                    }
                 }
             }
         }
