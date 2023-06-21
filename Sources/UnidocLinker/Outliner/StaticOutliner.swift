@@ -19,18 +19,27 @@ struct StaticOutliner
     private
     var cache:Cache
 
-    init(codelinks:CodelinkResolver<Int32>,
-        doclinks:DoclinkResolver,
-        culture:ModuleIdentifier,
-        scope:[String])
+    init(resolver:StaticResolver)
     {
-        self.resolver = .init(
-            codelinks: codelinks,
-            doclinks: doclinks,
-            culture: culture,
-            scope: scope)
-
+        self.resolver = resolver
         self.cache = .init()
+    }
+}
+extension StaticOutliner
+{
+    init(codelinks:CodelinkResolver<Int32>.Table,
+        doclinks:DoclinkResolver.Table,
+        imports:[ModuleIdentifier],
+        namespace:ModuleIdentifier? = nil,
+        culture:ModuleIdentifier,
+        scope:[String] = [])
+    {
+        self.init(resolver: .init(
+            codelinks: .init(table: codelinks, scope: .init(
+                namespace: namespace ?? culture,
+                imports: imports,
+                path: scope)),
+            doclinks: .init(table: doclinks, scope: .documentation(culture))))
     }
 }
 extension StaticOutliner

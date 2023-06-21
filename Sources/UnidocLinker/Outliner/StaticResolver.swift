@@ -14,24 +14,12 @@ struct StaticResolver
     let codelinks:CodelinkResolver<Int32>
     private
     let doclinks:DoclinkResolver
-    /// The implicit scope that will be used to resolve doclinks.
-    private
-    let culture:ModuleIdentifier
-    /// The implicit scope that will be used to resolve codelinks.
-    private
-    let scope:[String]
 
-    init(codelinks:CodelinkResolver<Int32>,
-        doclinks:DoclinkResolver,
-        culture:ModuleIdentifier,
-        scope:[String])
+    init(codelinks:CodelinkResolver<Int32>, doclinks:DoclinkResolver)
     {
         self.diagnoses = []
-
         self.codelinks = codelinks
         self.doclinks = doclinks
-        self.culture = culture
-        self.scope = scope
     }
 }
 extension StaticResolver
@@ -42,8 +30,7 @@ extension StaticResolver
         in sources:[MarkdownSource],
         at source:SourceText<Int>?) -> SymbolGraph.Referent?
     {
-        if  let scalar:Int32 = self.doclinks.query(ascending: .documentation(self.culture),
-                link: doclink)
+        if  let scalar:Int32 = self.doclinks.resolve(doclink)
         {
             return .scalar(scalar)
         }
@@ -68,7 +55,7 @@ extension StaticResolver
         in sources:[MarkdownSource],
         at source:SourceText<Int>?) -> SymbolGraph.Referent?
     {
-        switch self.codelinks.query(ascending: self.scope, link: codelink)
+        switch self.codelinks.resolve(codelink)
         {
         case .one(let overload):
             switch overload.target
