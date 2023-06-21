@@ -7,6 +7,7 @@ import Generics
 import LexicalPaths
 import MarkdownSemantics
 import MarkdownParsing
+import MarkdownTrees
 import ModuleGraphs
 import Sources
 import Symbols
@@ -20,9 +21,6 @@ struct StaticLinker
     let nominations:Compiler.Nominations
 
     private
-    var diagnostics:[StaticDiagnostic]
-
-    private
     var symbolizer:Symbolizer
     private
     var codelinks:CodelinkResolver<Int32>
@@ -34,12 +32,14 @@ struct StaticLinker
     private
     var supplements:[Int32: [MarkdownDocumentationSupplement]]
 
+    public private(set)
+    var diagnoses:[any StaticDiagnosis]
+
     public
     init(nominations:Compiler.Nominations, modules:[ModuleDetails])
     {
         self.nominations = nominations
 
-        self.diagnostics = []
 
         self.symbolizer = .init(modules: modules)
         self.codelinks = .init()
@@ -47,6 +47,7 @@ struct StaticLinker
         self.router = .init()
 
         self.supplements = [:]
+        self.diagnoses = []
     }
 }
 extension StaticLinker
@@ -292,8 +293,8 @@ extension StaticLinker
                 //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
                 //  the source id by default.
                 let article:SymbolGraph.Article<Never> = outliner.link(
-                    documentation: standalone.markdown.article,
-                    from: [.init(from: standalone)])
+                    documentation: standalone.parsed.article,
+                    from: [standalone.source])
 
                 if  let address:Int32 = standalone.address
                 {
@@ -304,7 +305,7 @@ extension StaticLinker
                     self.symbolizer.graph.cultures[culture].article = article
                 }
 
-                self.diagnostics += outliner.diagnostics
+                self.diagnoses += outliner.diagnoses
             }
         }
     }
@@ -317,55 +318,63 @@ extension StaticLinker
     {
         let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
             as: SwiftFlavoredMarkdown.self)
-        switch self.binding(of: markdown, in: namespace)
+        //  We always intern the article’s file path, for diagnostics, even if
+        //  we end up discarding the article.
+        let source:MarkdownSource = .init(
+            location: .init(position: .zero, file: self.symbolizer.intern(supplement.id)),
+            text: supplement.text)
+        do
         {
-        case nil:
-            let address:Int32 = try
+            switch try self.binding(of: markdown, in: namespace, source: source)
             {
-                switch $0
+            case nil:
+                let address:Int32 = try
                 {
-                case nil:
-                    let address:Int32 = self.symbolizer.graph.append(
-                        article: supplement.name)
-                    $0 = address
-                    return address
+                    switch $0
+                    {
+                    case nil:
+                        let address:Int32 = self.symbolizer.graph.append(
+                            article: supplement.name)
+                        $0 = address
+                        return address
 
-                case  _?:
-                    throw DuplicateSymbolError.article(supplement.name)
-                }
-            //  Make the standalone article visible for doclink resolution.
-            } (&self.doclinks[.documentation(namespace), supplement.name])
+                    case  _?:
+                        throw DuplicateSymbolError.article(supplement.name)
+                    }
+                //  Make the standalone article visible for doclink resolution.
+                } (&self.doclinks[.documentation(namespace), supplement.name])
 
-            //  Assign the standalone article a URI.
-            self.router[namespace, supplement.name][nil, default: []].append(address)
+                //  Assign the standalone article a URI.
+                self.router[namespace, supplement.name][nil, default: []].append(address)
 
-            return .init(markdown: markdown,
-                address: address,
-                file: self.symbolizer.intern(supplement.id),
-                text: supplement.text)
+                return .init(address: address, parsed: markdown, source: source)
 
-        case .success(.module):
-            return  .init(markdown: markdown,
-                address: nil,
-                file: self.symbolizer.intern(supplement.id),
-                text: supplement.text)
+            case .module?:
+                return .init(address: nil, parsed: markdown, source: source)
 
-        case .success(.scalar(let binding)):
-            self.supplements[binding, default: []].append(markdown)
+            case .scalar(let binding)?:
+                self.supplements[binding, default: []].append(markdown)
+                return nil
+            }
+        }
+        catch let diagnosis as any StaticDiagnosis
+        {
+            self.diagnoses.append(diagnosis)
             return nil
-
-        case .failure(let error):
-            //  TODO: handle this in a more organized manner
-            print(error)
+        }
+        catch
+        {
             return nil
         }
     }
+
     private
     func binding(
         of supplement:MarkdownDocumentationSupplement,
-        in namespace:ModuleIdentifier) -> Result<Binding, BindingError>?
+        in namespace:ModuleIdentifier,
+        source:MarkdownSource) throws -> ArticleBinding?
     {
-        guard let expression:String = supplement.binding?.text
+        guard let autolink:MarkdownInline.Autolink = supplement.binding
         else
         {
             return nil
@@ -374,31 +383,48 @@ extension StaticLinker
         //  Special rule for article bindings: if the text of the codelink matches
         //  the current namespace, then the article is the primary article for
         //  that module.
-        if  expression == "\(namespace)"
+        if  autolink.text == "\(namespace)"
         {
-            return .success(.module)
+            return .module
+        }
+        var context:StaticDiagnostic.Context<Int32>?
+        {
+            autolink.source.map { .init(of: $0.range, in: source) }
         }
 
-        guard let codelink:Codelink = .init(expression)
+        guard let codelink:Codelink = .init(autolink.text)
         else
         {
-            return .failure(.expression(expression))
+            throw InvalidAutolinkError.init(autolink: autolink, context: context)
         }
 
         switch self.codelinks.query(ascending: ["\(namespace)"], link: codelink)
         {
         case .one(let overload):
-            if  case .scalar(let address) = overload.target
+            switch overload.target
             {
-                return .success(.scalar(address))
+            case .scalar(let address):
+                return .scalar(address)
+
+            case .vector(let feature, self: let heir):
+                throw InvalidArticleBindingError.init(.vector(feature, self: heir),
+                    codelink: codelink,
+                    context: context)
             }
 
-            return .failure(.resolution(expression, namespace, .vector(
-                self.symbolizer.excerpt(for: overload))))
-
         case .some(let overloads):
-            return .failure(.resolution(expression, namespace, overloads.isEmpty ?
-                nil : .ambiguous(overloads.map(self.symbolizer.excerpt(for:)))))
+            if  overloads.isEmpty
+            {
+                throw InvalidArticleBindingError.init(.none(in: namespace),
+                    codelink: codelink,
+                    context: context)
+            }
+            else
+            {
+                throw AmbiguousCodelinkError.init(overloads: overloads,
+                    codelink: codelink,
+                    context: context)
+            }
         }
     }
 }
@@ -456,7 +482,7 @@ extension StaticLinker
 
                 defer
                 {
-                    self.diagnostics += outliner.diagnostics
+                    self.diagnoses += outliner.diagnoses
                 }
 
                 return outliner.link(comment: .init(from: $0.comment, in: location?.file),
@@ -528,7 +554,7 @@ extension StaticLinker
 
                     $0.article = outliner.link(comment: .init(from: comment, in: file))
 
-                    self.diagnostics += outliner.diagnostics
+                    self.diagnoses += outliner.diagnoses
 
                 } (&self.symbolizer.graph.nodes[address].extensions[index])
             }
@@ -573,12 +599,6 @@ extension StaticLinker
                 }
             }
         }
-
-        for diagnostic:StaticDiagnostic in self.diagnostics
-        {
-            print(diagnostic)
-        }
-
         return self.symbolizer.graph
     }
 }

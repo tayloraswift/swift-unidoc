@@ -3,7 +3,11 @@ import UnidocCompiler
 
 struct MarkdownSource
 {
+    /// The absolute location of the markdown source within a larger source file,
+    /// if known. If the markdown source was a standalone markdown file, this is
+    /// ``SourceLocation zero``.
     let location:SourceLocation<Int32>?
+    /// The unparsed markdown source text.
     let text:String
 
     init(location:SourceLocation<Int32>?, text:String)
@@ -14,11 +18,6 @@ struct MarkdownSource
 }
 extension MarkdownSource
 {
-    init(from article:__shared StaticLinker.Article)
-    {
-        self.init(location: .init(position: .zero, file: article.file), text: article.text)
-    }
-
     init(from comment:__shared Compiler.Documentation.Comment, in file:Int32?)
     {
         if  let position:SourcePosition = comment.start,

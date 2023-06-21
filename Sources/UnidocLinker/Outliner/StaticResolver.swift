@@ -8,7 +8,7 @@ import SymbolGraphs
 
 struct StaticResolver
 {
-    var diagnostics:[StaticDiagnostic]
+    var diagnoses:[any StaticDiagnosis]
 
     private
     let codelinks:CodelinkResolver<Int32>
@@ -26,7 +26,7 @@ struct StaticResolver
         culture:ModuleIdentifier,
         scope:[String])
     {
-        self.diagnostics = []
+        self.diagnoses = []
 
         self.codelinks = codelinks
         self.doclinks = doclinks
@@ -88,7 +88,9 @@ extension StaticResolver
             }
             else
             {
-                self.diagnostics.append(.init(.ambiguousCodelink(codelink, overloads),
+                self.diagnoses.append(AmbiguousCodelinkError.init(
+                    overloads: overloads,
+                    codelink: codelink,
                     context: source.map { .init(of: $0, in: sources) }))
                 return nil
             }

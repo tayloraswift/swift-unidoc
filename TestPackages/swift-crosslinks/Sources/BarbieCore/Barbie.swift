@@ -2,8 +2,4 @@
 public
 enum Barbie:Sendable
 {
-    public
-    struct ID
-    {
-    }
 }
