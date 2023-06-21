@@ -1,49 +1,36 @@
 import Doclinks
-import ModuleGraphs
 
 @frozen public
 struct DoclinkResolver
 {
-    @usableFromInline internal
-    var entries:[DoclinkResolutionPath: Int32]
+    public
+    let table:Table
+    public
+    let scope:Scope
 
     @inlinable public
-    init()
+    init(table:Table, scope:Scope)
     {
-        self.entries = [:]
-    }
-}
-extension DoclinkResolver
-{
-    @inlinable public
-    subscript(scope:Scope, name:String) -> Int32?
-    {
-        _read
-        {
-            yield  self.entries[.join(scope + [name])]
-        }
-        _modify
-        {
-            yield &self.entries[.join(scope + [name])]
-        }
+        self.table = table
+        self.scope = scope
     }
 }
 extension DoclinkResolver
 {
     public
-    func query(ascending scope:Scope, link:Doclink) -> Int32?
+    func resolve(_ link:Doclink) -> Int32?
     {
         if !link.absolute
         {
-            for index:Int in scope.indices.reversed()
+            for index:Int in self.scope.indices.reversed()
             {
-                let path:DoclinkResolutionPath = .join(scope[...index] + link.path)
-                if  let address:Int32 = self.entries[path]
+                let path:DoclinkResolutionPath = .join(self.scope[...index] + link.path)
+                if  let address:Int32 = self.table.entries[path]
                 {
                     return address
                 }
             }
         }
-        return self.entries[.join(link.path)]
+        return self.table.entries[.join(link.path)]
     }
 }

@@ -23,9 +23,9 @@ struct StaticLinker
     private
     var symbolizer:Symbolizer
     private
-    var codelinks:CodelinkResolver<Int32>
+    var codelinks:CodelinkResolver<Int32>.Table
     private
-    var doclinks:DoclinkResolver
+    var doclinks:DoclinkResolver.Table
     private
     var router:StaticRouter
 
@@ -234,7 +234,13 @@ extension StaticLinker
         }
     }
 }
-
+extension StaticLinker
+{
+    var imports:[ModuleIdentifier]
+    {
+        .init(self.symbolizer.graph.namespaces[self.symbolizer.graph.cultures.indices])
+    }
+}
 extension StaticLinker
 {
     public mutating
@@ -286,9 +292,8 @@ extension StaticLinker
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
                     doclinks: self.doclinks,
-                    culture: namespace,
-                    scope: ["\(namespace)"])
-
+                    imports: self.imports,
+                    culture: namespace)
                 //  We pass a single-element array as the sources list, which relies
                 //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
                 //  the source id by default.
@@ -398,7 +403,10 @@ extension StaticLinker
             throw InvalidAutolinkError.init(autolink: autolink, context: context)
         }
 
-        switch self.codelinks.query(ascending: ["\(namespace)"], link: codelink)
+        let resolver:CodelinkResolver<Int32> = .init(table: self.codelinks, scope: .init(
+            namespace: namespace))
+
+        switch resolver.resolve(codelink)
         {
         case .one(let overload):
             switch overload.target
@@ -477,8 +485,10 @@ extension StaticLinker
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
                     doclinks: self.doclinks,
+                    imports: self.imports,
+                    namespace: namespace,
                     culture: culture,
-                    scope: ["\(namespace)"] + $0.scope)
+                    scope: $0.scope)
 
                 defer
                 {
@@ -539,18 +549,20 @@ extension StaticLinker
             }
             if  let comment
             {
+                //  Need to load this before mutating the symbol graph to avoid
+                //  overlapping access
+                let imports:[ModuleIdentifier] = self.imports
                 //  Only intern the file path for the extension block with the longest comment
                 let file:Int32? = file.map { self.symbolizer.intern($0) }
 
                 {
-                    let qualifier:ModuleIdentifier =
-                        self.symbolizer.graph.namespaces[$0.namespace]
-
                     var outliner:StaticOutliner = .init(
                         codelinks: self.codelinks,
                         doclinks: self.doclinks,
+                        imports: imports,
+                        namespace: self.symbolizer.graph.namespaces[$0.namespace],
                         culture: self.symbolizer.graph.namespaces[$0.culture],
-                        scope: ["\(qualifier)"] + `extension`.path)
+                        scope: [String].init(`extension`.path))
 
                     $0.article = outliner.link(comment: .init(from: comment, in: file))
 

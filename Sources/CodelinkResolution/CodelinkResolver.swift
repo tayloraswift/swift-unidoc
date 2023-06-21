@@ -1,5 +1,4 @@
 import Codelinks
-import FNV1
 import LexicalPaths
 import ModuleGraphs
 import SymbolGraphs
@@ -7,40 +6,16 @@ import SymbolGraphs
 @frozen public
 struct CodelinkResolver<Address> where Address:Hashable
 {
-    @usableFromInline internal
-    var entries:[CodelinkResolutionPath: Overloads]
+    public
+    let table:Table
+    public
+    let scope:Scope
 
     @inlinable public
-    init()
+    init(table:Table, scope:Scope)
     {
-        self.entries = [:]
-    }
-}
-extension CodelinkResolver
-{
-    @inlinable public
-    subscript(namespace:ModuleIdentifier, path:UnqualifiedPath) -> Overloads
-    {
-        _read
-        {
-            yield  self.entries[.join(namespace, path), default: .some([])]
-        }
-        _modify
-        {
-            yield &self.entries[.join(namespace, path), default: .some([])]
-        }
-    }
-    @inlinable public
-    subscript(namespace:ModuleIdentifier, path:UnqualifiedPath, last:String) -> Overloads
-    {
-        _read
-        {
-            yield  self.entries[.join(namespace, path, last), default: .some([])]
-        }
-        _modify
-        {
-            yield &self.entries[.join(namespace, path, last), default: .some([])]
-        }
+        self.table = table
+        self.scope = scope
     }
 }
 extension CodelinkResolver
@@ -48,55 +23,40 @@ extension CodelinkResolver
     @_specialize(where Address == Int32)
     @_specialize(where Address == GlobalAddress)
     public
-    func query(ascending scope:[String], link:Codelink) -> Overloads
+    func resolve(_ link:Codelink) -> Overloads
     {
-        for index:Int in (scope.startIndex ... scope.endIndex).reversed()
+        for index:Int in (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
         {
-            let prefix:ArraySlice = scope.prefix(upTo: index)
-            let path:[String]
-
-            switch (prefix, link.scope)
+            let prefix:[String] = ["\(self.scope.namespace)"] + self.scope.path[..<index]
+            if  let overloads:Overloads = self.table.query(link.scope.map
+                    {
+                            prefix + $0.components + link.path.components
+                    } ??    prefix                 + link.path.components,
+                    filter: link.filter,
+                    hash: link.hash)
             {
-            case ([], nil):
-                path = .init                              (link.path.components)
-
-            case ([], let scope?):
-                path = .init          (scope.components) + link.path.components
-
-            case (_ , let scope?):
-                path = .init(prefix) + scope.components  + link.path.components
-
-            case (_ , nil):
-                path = .init(prefix) +                     link.path.components
-            }
-
-            switch self.query(path, filter: link.filter, hash: link.hash)
-            {
-            case .one(let overload):
-                return .one(overload)
-
-            case .some(let overloads):
-                if !overloads.isEmpty
-                {
-                    return .some(overloads)
-                }
+                return overloads
             }
         }
-        return .some([])
-    }
-    private
-    func query(_ path:[String], filter:Codelink.Filter?, hash:FNV24?) -> Overloads
-    {
-        switch (self.entries[.join(path), default: .some([])], hash, filter)
+        for namespace:ModuleIdentifier in self.scope.imports where
+            namespace != self.scope.namespace
         {
-        case (.some(let overloads), let hash?,  _):
-            return .init(filtering: overloads) { hash == $0.hash }
-
-        case (.some(let overloads), nil,        let filter?):
-            return .init(filtering: overloads) { filter ~= $0.phylum }
-
-        case (      let overloads,  _,          _):
-            return overloads
+            if  let overloads:Overloads = self.table.query(link.scope.map
+                    {
+                            ["\(namespace)"] + $0.components + link.path.components
+                    } ??    ["\(namespace)"]                 + link.path.components,
+                    filter: link.filter,
+                    hash: link.hash)
+            {
+                return overloads
+            }
         }
+
+        return self.table.query(link.scope.map
+            {
+                [String].init($0.components) + link.path.components
+            } ??                 [String].init(link.path.components),
+            filter: link.filter,
+            hash: link.hash)
     }
 }

@@ -4,7 +4,7 @@ import ModuleGraphs
 import SymbolGraphs
 import Symbols
 
-extension CodelinkResolver<GlobalAddress>
+extension CodelinkResolver<GlobalAddress>.Table
 {
     mutating
     func expose(upstream current:LocalContext, in context:GlobalContext)
