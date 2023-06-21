@@ -41,8 +41,8 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
 
         case let link as SymbolLink:
             self = .autolink(.init(link.destination ?? "",
-                code: true,
-                source: .init(link.range, in: id)))
+                code: true, // exclude the backticks from the source range
+                source: .init(link.range, in: id, trimming: 2)))
 
         case let link as Link:
             let elements:[MarkdownInline] = link.inlineChildren.map
@@ -55,8 +55,8 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                     elements[0] == .text(destination)
             {
                 self = .autolink(.init(destination,
-                    code: false,
-                    source: .init(link.range, in: id)))
+                    code: false, // exclude the angle brackets from the source range
+                    source: .init(link.range, in: id, trimming: 1)))
             }
             else
             {

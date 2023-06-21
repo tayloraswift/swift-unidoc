@@ -4,20 +4,17 @@ extension StaticLinker
 {
     struct Article
     {
-        let markdown:MarkdownDocumentationSupplement
+        /// The address of the declaration this article is bound to, or nil if
+        /// it is bound to a module.
         let address:Int32?
-        let file:Int32
-        let text:String
+        let parsed:MarkdownDocumentationSupplement
+        let source:MarkdownSource
 
-        init(markdown:MarkdownDocumentationSupplement,
-            address:Int32?,
-            file:Int32,
-            text:String)
+        init(address:Int32?, parsed:MarkdownDocumentationSupplement, source:MarkdownSource)
         {
-            self.markdown = markdown
             self.address = address
-            self.file = file
-            self.text = text
+            self.parsed = parsed
+            self.source = source
         }
     }
 }
