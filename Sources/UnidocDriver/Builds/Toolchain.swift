@@ -135,12 +135,12 @@ extension Toolchain
 
         let products:[ProductDetails] =
         [
-            .init(name: "__stdlib__",
-                type: .library(.automatic),
-                dependencies: .init(modules: [Int].init(0 ... 7))),
-            .init(name: "__corelibs__",
-                type: .library(.automatic),
-                dependencies: .init(modules: [Int].init(artifacts.cultures.indices))),
+            .init(name: "__stdlib__", type: .library(.automatic),
+                dependencies: [],
+                cultures: [Int].init(0 ... 7)),
+            .init(name: "__corelibs__", type: .library(.automatic),
+                dependencies: [],
+                cultures: [Int].init(artifacts.cultures.indices)),
         ]
 
         let metadata:Documentation.Metadata = .swift(triple: self.triple,

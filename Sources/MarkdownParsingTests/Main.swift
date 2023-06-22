@@ -125,14 +125,14 @@ enum Main:SyncTests
                     """
                     ``x``
                     """,
-                    (0, 0)
+                    (0, 2)
                 ),
                 (
                     "Prefixed",
                     """
                     abc ``x``
                     """,
-                    (0, 4)
+                    (0, 6)
                 ),
                 (
                     "Multiline",
@@ -140,7 +140,7 @@ enum Main:SyncTests
                     abc
                     def ``x``
                     """,
-                    (1, 4)
+                    (1, 6)
                 ),
             ]
             {

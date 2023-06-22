@@ -54,9 +54,9 @@ extension PackageNode
                     dependencies.formUnion(constituent.dependencies.products(on: platform))
                     modules.append(index)
                 }
-                return .init(name: $0.name, type: $0.type, dependencies: .init(
-                    products: dependencies.sorted(),
-                    modules: modules))
+                return .init(name: $0.name, type: $0.type,
+                    dependencies: dependencies.sorted(),
+                    cultures: modules)
             },
             modules: try ordering.map
             {

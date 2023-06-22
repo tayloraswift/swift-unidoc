@@ -9,8 +9,8 @@ extension ProductDetails
     {
         case name = "N"
         case type = "T"
-        case dependencies_products = "P"
-        case dependencies_modules = "D"
+        case dependencies = "P"
+        case cultures = "C"
     }
 }
 extension ProductDetails:BSONDocumentEncodable
@@ -20,10 +20,8 @@ extension ProductDetails:BSONDocumentEncodable
     {
         bson[.name] = self.name
         bson[.type] = self.type
-        bson[.dependencies_products] =
-            self.dependencies.products.isEmpty ? nil :
-            self.dependencies.products
-        bson[.dependencies_modules] = self.dependencies.modules
+        bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
+        bson[.cultures] = self.cultures
     }
 }
 extension ProductDetails:BSONDocumentDecodable
@@ -34,8 +32,7 @@ extension ProductDetails:BSONDocumentDecodable
         self.init(
             name: try bson[.name].decode(),
             type: try bson[.type].decode(),
-            dependencies: .init(
-                products: try bson[.dependencies_products]?.decode() ?? [],
-                modules: try bson[.dependencies_modules].decode()))
+            dependencies: try bson[.dependencies]?.decode() ?? [],
+            cultures: try bson[.cultures].decode())
     }
 }

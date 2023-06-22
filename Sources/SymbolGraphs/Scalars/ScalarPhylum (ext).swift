@@ -1,3 +1,4 @@
+import LexicalPaths
 import Symbols
 
 extension ScalarPhylum:RawRepresentable
@@ -59,6 +60,35 @@ extension ScalarPhylum:RawRepresentable
         case .var(.static):         return 0xD1
         case .var(.class):          return 0xD2
         case .var(.instance):       return 0xD3
+        }
+    }
+}
+extension ScalarPhylum
+{
+    /// Returns all the components of the given path if an ``actor``, ``class``, ``enum``,
+    /// ``protocol``, or ``struct``; returns all but the last component otherwise.
+    @inlinable public
+    func scope(trimming path:UnqualifiedPath) -> [String]
+    {
+        switch self
+        {
+        case    .actor,
+                .class,
+                .enum,
+                .protocol,
+                .struct:
+            return path.map { $0 }
+
+        case    .associatedtype,
+                .case,
+                .deinitializer,
+                .func,
+                .initializer,
+                .operator,
+                .subscript,
+                .typealias,
+                .var:
+            return path.prefix
         }
     }
 }
