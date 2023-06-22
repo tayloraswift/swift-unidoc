@@ -19,6 +19,9 @@ extension CodelinkResolver
         }
     }
 }
+extension CodelinkResolver.Table:Sendable where Address:Sendable
+{
+}
 extension CodelinkResolver.Table
 {
     @inlinable public

@@ -28,7 +28,8 @@ struct Crosslinks:MongoTestBattery
         tests.expect(try await database.push(docs: swift, with: session) ==? .init(
             overwritten: false,
             package: 0,
-            version: 0))
+            version: 0,
+            id: "<anonymous>"))
 
         try await database.publish(projecting: mock, with: session)
     }

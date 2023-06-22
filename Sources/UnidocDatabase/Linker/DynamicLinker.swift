@@ -1,50 +1,32 @@
 import CodelinkResolution
+import ModuleGraphs
 import SymbolGraphs
 import Symbols
 
 struct DynamicLinker
 {
     private
-    let context:GlobalContext
+    let conformances:SymbolGraph.Table<Conformances>
     private
-    let codelinks:CodelinkResolver<GlobalAddress>.Table
+    let context:DynamicContext
 
     private
     var extensions:Extensions
-    private
-    let conformances:SymbolGraph.Table<Conformances>
 
     private
-    init(context:GlobalContext,
-        codelinks:CodelinkResolver<GlobalAddress>.Table,
-        extensions:Extensions,
-        conformances:SymbolGraph.Table<Conformances>)
+    init(conformances:SymbolGraph.Table<Conformances>,
+        context:DynamicContext,
+        extensions:Extensions)
     {
+        self.conformances = conformances
         self.context = context
-        self.codelinks = codelinks
 
         self.extensions = extensions
-        self.conformances = conformances
     }
 }
 extension DynamicLinker
 {
-    private
-    init(context:GlobalContext,
-        extensions:Extensions,
-        conformances:SymbolGraph.Table<Conformances>)
-    {
-        var codelinks:CodelinkResolver<GlobalAddress>.Table = .init()
-        for dependency:LocalContext in context.upstream.values
-        {
-            codelinks.expose(upstream: dependency, in: context)
-        }
-        self.init(context: context,
-            codelinks: codelinks,
-            extensions: extensions,
-            conformances: conformances)
-    }
-    init(context:GlobalContext)
+    init(context:DynamicContext)
     {
         var extensions:Extensions = [:]
         let conformances:SymbolGraph.Table<Conformances> = context.current.graph.nodes.map
@@ -83,12 +65,12 @@ extension DynamicLinker
             return conformances
         }
 
-        self.init(context: context, extensions: extensions, conformances: conformances)
+        self.init(conformances: conformances, context: context, extensions: extensions)
     }
 }
 extension DynamicLinker
 {
-    var current:LocalContext { self.context.current }
+    var current:SnapshotObject { self.context.current }
 }
 extension DynamicLinker
 {
@@ -97,15 +79,15 @@ extension DynamicLinker
     {
         var scalars:[ScalarProjection] = []
 
-        for (index, culture):(Int, SymbolGraph.Culture) in
-            self.current.graph.cultures.enumerated()
+        let groups:[DynamicResolutionGroup] = self.context.groups()
+        for (c, culture):(Int, SymbolGraph.Culture) in zip(
+            self.current.graph.cultures.indices,
+            self.current.graph.cultures)
         {
-            let culture:(address:GlobalAddress, value:SymbolGraph.Culture) =
-            (
-                self.current.translator[culture: index],
-                culture
-            )
-            for namespace:SymbolGraph.Namespace in culture.value.namespaces
+            let group:DynamicResolutionGroup = groups[c]
+            let c:GlobalAddress = self.current.translator[culture: c]
+
+            for namespace:SymbolGraph.Namespace in culture.namespaces
             {
                 for citizen:Int32 in namespace.range
                 {
@@ -122,34 +104,41 @@ extension DynamicLinker
                         continue
                     }
 
-                    for feature:Int32 in scalar.features
+                    for f:Int32 in scalar.features
                     {
-                        if  let `protocol`:GlobalAddress = self.current.scope(of: feature),
-                            let feature:GlobalAddress = feature * self.current.projector
+                        if  let `protocol`:GlobalAddress = self.current.scope(of: f),
+                            let f:GlobalAddress = f * self.current.projector
                         {
-                            //  now that we know the address of the feature’s original protocol,
-                            //  we can look up the constraints for the conformance(s) that
-                            //  conceived it.
+                            //  now that we know the address of the feature’s original
+                            //  protocol, we can look up the constraints for the
+                            //  conformance(s) that conceived it.
                             for conformance:GlobalSignature in conformances[to: `protocol`]
                             {
-                                self.extensions[conformance].features.append(feature)
+                                self.extensions[conformance].features.append(f)
                             }
                         }
                     }
-                    for superform:Int32 in scalar.superforms
+                    for s:Int32 in scalar.superforms
                     {
-                        if  let superform:GlobalAddress = superform * self.current.projector
+                        if  let s:GlobalAddress = s * self.current.projector
                         {
                             let implicit:GlobalSignature = .init(conditions: [],
-                                culture: culture.address,
-                                scope: superform)
+                                culture: c,
+                                scope: s)
 
                             self.extensions[implicit].subforms.append(citizen)
                         }
                     }
 
+                    if  let article:SymbolGraph.Article<Never> = scalar.article
+                    {
+                        group.link(article: article,
+                            namespace: self.current.graph.namespaces[namespace.index],
+                            scope: scalar.phylum.scope(trimming: scalar.path))
+                    }
+
                     scalars.append(.init(id: citizen,
-                        culture: culture.address,
+                        culture: c,
                         scope: scope.map(self.context.expand),
                         declaration: scalar.declaration.map { $0 * self.current.projector }))
                 }

@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import SymbolGraphs
 
-struct DynamicObject:Equatable, Sendable
+struct Snapshot:Equatable, Sendable
 {
     let id:String
 
@@ -25,7 +25,18 @@ struct DynamicObject:Equatable, Sendable
         self.graph = graph
     }
 }
-extension DynamicObject
+extension Snapshot
+{
+    init(from docs:Documentation, receipt:SnapshotReceipt)
+    {
+        self.init(id: receipt.id,
+            package: receipt.package,
+            version: receipt.version,
+            metadata: docs.metadata,
+            graph: docs.graph)
+    }
+}
+extension Snapshot
 {
     var stable:Bool
     {
@@ -36,7 +47,14 @@ extension DynamicObject
         }
     }
 }
-extension DynamicObject
+extension Snapshot
+{
+    var translator:Translator
+    {
+        .init(package: self.package, version: self.version)
+    }
+}
+extension Snapshot
 {
     enum CodingKeys:String
     {
@@ -56,7 +74,7 @@ extension DynamicObject
         key.rawValue
     }
 }
-extension DynamicObject:BSONDocumentEncodable
+extension Snapshot:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
@@ -70,7 +88,7 @@ extension DynamicObject:BSONDocumentEncodable
         bson[.stable] = self.stable
     }
 }
-extension DynamicObject:BSONDocumentDecodable
+extension Snapshot:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {

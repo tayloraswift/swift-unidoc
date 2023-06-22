@@ -1,7 +1,7 @@
 import BSONDecoding
 import BSONEncoding
 
-extension DynamicObject
+extension Snapshot
 {
     struct Shell:Equatable, Sendable
     {
@@ -13,18 +13,18 @@ extension DynamicObject
         }
     }
 }
-extension DynamicObject.Shell
+extension Snapshot.Shell
 {
-    typealias CodingKeys = DynamicObject.CodingKeys
+    typealias CodingKeys = Snapshot.CodingKeys
 }
-extension DynamicObject.Shell:BSONDocumentEncodable
+extension Snapshot.Shell:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
         bson[.version] = self.version
     }
 }
-extension DynamicObject.Shell:BSONDocumentDecodable
+extension Snapshot.Shell:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {

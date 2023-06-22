@@ -1,46 +1,61 @@
+import ModuleGraphs
 import SymbolGraphs
 
-struct LocalContext
+final
+class SnapshotObject:Sendable
 {
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
     let hierarchy:[Int32: GlobalAddress]
-    let projector:LocalProjector
-    let graph:SymbolGraph
+    let projector:Projector
 
     private
     init(hierarchy:[Int32: GlobalAddress],
-        projector:LocalProjector,
-        graph:SymbolGraph)
+        projector:Projector)
     {
-        self.projector = projector
         self.hierarchy = hierarchy
-        self.graph = graph
+        self.projector = projector
     }
 }
-extension LocalContext
+extension SnapshotObject
 {
-    init(projector:LocalProjector, graph:SymbolGraph)
+    var snapshot:Snapshot { self.projector.snapshot }
+    var graph:SymbolGraph { self.projector.graph }
+
+    var translator:Snapshot.Translator { self.snapshot.translator }
+}
+extension SnapshotObject
+{
+    private convenience
+    init(projector:__owned Projector)
     {
         var hierarchy:[Int32: GlobalAddress] = [:]
-            hierarchy.reserveCapacity(graph.nodes.count)
+            hierarchy.reserveCapacity(projector.graph.nodes.count)
 
-        for (scope, node):(Int32, SymbolGraph.Node) in zip(graph.nodes.indices, graph.nodes)
+        for (scope, node):(Int32, SymbolGraph.Node) in zip(
+            projector.graph.nodes.indices,
+            projector.graph.nodes)
         {
             for `extension`:SymbolGraph.Extension in node.extensions
             {
                 for nested:Int32 in `extension`.nested
-                    where graph.citizens.contains(nested)
+                    where projector.graph.citizens.contains(nested)
                 {
                     hierarchy[nested] = scope * projector
                 }
             }
         }
 
-        self.init(hierarchy: hierarchy, projector: projector, graph: graph)
+        self.init(hierarchy: hierarchy, projector: projector)
+    }
+
+    convenience
+    init(snapshot:__owned Snapshot, upstream:__shared UpstreamSymbols)
+    {
+        self.init(projector: .init(snapshot: snapshot, upstream: upstream))
     }
 }
-extension LocalContext
+extension SnapshotObject
 {
     subscript(scalar address:GlobalAddress) -> SymbolGraph.Node?
     {
@@ -55,21 +70,8 @@ extension LocalContext
     {
         self.hierarchy[citizen]
     }
-
-    var translator:DynamicObject.Translator
-    {
-        self.projector.translator
-    }
 }
-extension LocalContext:Identifiable
-{
-    var id:Int32
-    {
-        self.projector.translator.package
-    }
-}
-
-extension LocalContext
+extension SnapshotObject
 {
     func project(extension:SymbolGraph.Extension, of scope:GlobalAddress) -> ExtensionProjection
     {

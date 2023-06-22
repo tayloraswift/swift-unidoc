@@ -25,7 +25,7 @@ extension DocumentationDatabase
     @inlinable public
     var packages:Packages { .init(database: self.name) }
     @inlinable public
-    var objects:Objects { .init(database: self.name) }
+    var snapshots:Snapshots { .init(database: self.name) }
 }
 extension DocumentationDatabase
 {
@@ -41,35 +41,24 @@ extension DocumentationDatabase
     func setup() async throws
     {
         try await self.packages.setup(with: try await .init(from: self.pool))
-        try await self.objects.setup(with: try await .init(from: self.pool))
+        try await self.snapshots.setup(with: try await .init(from: self.pool))
     }
 }
 extension DocumentationDatabase
 {
     public
-    func push(docs:Documentation) async throws -> ObjectReceipt
+    func push(docs:Documentation) async throws -> SnapshotReceipt
     {
         try await self.push(docs: docs, with: try await .init(from: self.pool))
     }
     public
-    func push(docs:Documentation,
-        with session:Mongo.Session) async throws -> ObjectReceipt
+    func push(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
-        let id:String = docs.metadata.id ?? "$anonymous"
-        // guard let id:String = docs.metadata.id
-        // else
-        // {
-        //     throw DocumentationIdentificationError.init()
-        // }
-
-        let package:Int32 = try await self.packages.register(docs.metadata.package,
+        //  TODO: enforce population limits
+        try await self.snapshots.push(docs,
+            for: try await self.packages.register(docs.metadata.package, with: session),
+            as: docs.metadata.id ?? "$anonymous",
             with: session)
-        switch try await self.objects.push(docs, for: package, as: id,
-            with: session)
-        {
-        case (let version, overwritten: let overwritten):
-            return .init(overwritten: overwritten, package: package, version: version)
-        }
     }
 }
 extension DocumentationDatabase
@@ -85,50 +74,31 @@ extension DocumentationDatabase
     }
     private
     func context(publishing docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws -> GlobalContext
+        with session:__shared Mongo.Session) async throws -> DynamicContext
     {
-        let dependencies:[DynamicObject] = try await self.objects.load(docs.metadata.pins(),
+        let dependencies:[Snapshot] = try await self.snapshots.load(docs.metadata.pins(),
             with: session)
-
-        let translators:[DynamicObject.Translator] = try dependencies.map
-        {
-            try .init(policies: self.policies, object: $0)
-        }
 
         var upstream:UpstreamSymbols = .init()
 
-        for (translator, object):(DynamicObject.Translator, DynamicObject) in
-            zip(translators, dependencies)
+        for snapshot:Snapshot in dependencies
         {
-            for (address, symbol):(Int32, ScalarSymbol) in object.graph.citizens
+            for (address, symbol):(Int32, ScalarSymbol) in snapshot.graph.citizens
             {
-                upstream.scalars[symbol] = translator[scalar: address]
+                upstream.scalars[symbol] = snapshot.translator[address: address]
             }
             for (culture, symbol):(Int, ModuleIdentifier) in zip(
-                object.graph.cultures.indices,
-                object.graph.namespaces)
+                snapshot.graph.cultures.indices,
+                snapshot.graph.namespaces)
             {
-                upstream.modules[symbol] = translator[culture: culture]
+                upstream.modules[symbol] = snapshot.translator[culture: culture]
             }
         }
-        //  Populate the context with the current package’s docs.
-        var context:GlobalContext = .init(current: .init(projector: try .init(
-                policies: self.policies,
-                upstream: upstream,
-                receipt: try await self.push(docs: docs, with: session),
-                graph: docs.graph),
-            graph: docs.graph))
 
-        //  Populate the context with the docs of all the package’s upstream dependencies.
-        for (translator, object):(DynamicObject.Translator, DynamicObject) in
-            zip(translators, dependencies)
-        {
-            context.upstream[object.package] = .init(projector: .init(
-                    translator: translator,
-                    upstream: upstream,
-                    graph: object.graph),
-                graph: object.graph)
-        }
-        return context
+        let receipt:SnapshotReceipt = try await self.push(docs: docs, with: session)
+
+        return .init(currentSnapshot: .init(from: docs, receipt: receipt),
+            upstreamSnapshots: dependencies,
+            upstreamSymbols: upstream)
     }
 }

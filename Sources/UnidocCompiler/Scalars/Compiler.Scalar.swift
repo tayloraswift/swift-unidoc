@@ -5,6 +5,7 @@ import LexicalPaths
 import Sources
 import Symbols
 import SymbolGraphParts
+import SymbolGraphs
 
 extension Compiler
 {
@@ -86,29 +87,7 @@ extension Compiler.Scalar:Identifiable
     {
         self.comment.map
         {
-            let scope:[String]
-            switch self.phylum
-            {
-            case    .actor,
-                    .class,
-                    .enum,
-                    .protocol,
-                    .struct:
-                scope = self.path.map { $0 }
-
-            case    .associatedtype,
-                    .case,
-                    .deinitializer,
-                    .func,
-                    .initializer,
-                    .operator,
-                    .subscript,
-                    .typealias,
-                    .var:
-                scope = self.path.prefix
-            }
-
-            return .init(comment: $0, scope: scope)
+            .init(comment: $0, scope: self.phylum.scope(trimming: self.path))
         }
     }
 }

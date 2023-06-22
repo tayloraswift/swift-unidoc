@@ -220,6 +220,9 @@ let package:Package = .init(
         .target(name: "UnidocCompiler", dependencies:
             [
                 .target(name: "Symbols"),
+                //  TODO: this should not be here, it only contains an extension
+                //  on ``ScalarPhylum`` that we need.
+                .target(name: "SymbolGraphs"),
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),

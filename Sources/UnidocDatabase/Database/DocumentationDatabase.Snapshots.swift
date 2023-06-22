@@ -4,7 +4,7 @@ import MongoDB
 extension DocumentationDatabase
 {
     @frozen public
-    struct Objects
+    struct Snapshots
     {
         public
         let database:Mongo.Database
@@ -16,10 +16,10 @@ extension DocumentationDatabase
         }
     }
 }
-extension DocumentationDatabase.Objects
+extension DocumentationDatabase.Snapshots
 {
     @inlinable public static
-    var name:Mongo.Collection { "objects" }
+    var name:Mongo.Collection { "snapshots" }
 
     public
     func setup(with session:Mongo.Session) async throws
@@ -35,12 +35,12 @@ extension DocumentationDatabase.Objects
                         $0[.name] =
                         """
                         \(Self.name)\
-                        (\(DynamicObject[.package]), \(DynamicObject[.version]))
+                        (\(Snapshot[.package]), \(Snapshot[.version]))
                         """
                         $0[.key] = .init
                         {
-                            $0[DynamicObject[.package]] = (-)
-                            $0[DynamicObject[.version]] = (-)
+                            $0[Snapshot[.package]] = (-)
+                            $0[Snapshot[.version]] = (-)
                         }
                     },
                 ]),
@@ -53,7 +53,7 @@ extension DocumentationDatabase.Objects
     func push(_ docs:Documentation,
         for package:Int32,
         as id:String,
-        with session:Mongo.Session) async throws -> (version:Int32, overwritten:Bool)
+        with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         let result:Mongo.TransactionResult = await session.withSnapshotTransaction(
             writeConcern: .majority)
@@ -66,28 +66,28 @@ extension DocumentationDatabase.Objects
     func push(_ docs:Documentation,
         for package:Int32,
         as id:String,
-        with transaction:Mongo.Transaction) async throws -> (version:Int32, overwritten:Bool)
+        with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
-        let predecessors:[DynamicObject.Shell] = try await transaction.run(
-            command: Mongo.Find<Mongo.SingleBatch<DynamicObject.Shell>>.init(Self.name,
+        let predecessors:[Snapshot.Shell] = try await transaction.run(
+            command: Mongo.Find<Mongo.SingleBatch<Snapshot.Shell>>.init(Self.name,
                 limit: 1)
             {
                 $0[.filter] = .init
                 {
-                    $0[DynamicObject[.package]] = package
+                    $0[Snapshot[.package]] = package
                 }
                 $0[.sort] = .init
                 {
-                    $0[DynamicObject[.version]] = (-)
+                    $0[Snapshot[.version]] = (-)
                 }
                 $0[.hint] = .init
                 {
-                    $0[DynamicObject[.package]] = (-)
-                    $0[DynamicObject[.version]] = (-)
+                    $0[Snapshot[.package]] = (-)
+                    $0[Snapshot[.version]] = (-)
                 }
                 $0[.projection] = .init
                 {
-                    $0[DynamicObject[.version]] = true
+                    $0[Snapshot[.version]] = true
                 }
             },
             against: self.database)
@@ -98,7 +98,7 @@ extension DocumentationDatabase.Objects
             fatalError("unimplemented")
         }
 
-        let object:DynamicObject = .init(id: id,
+        let snapshot:Snapshot = .init(id: id,
             package: package,
             version: predecessor + 1,
             metadata: docs.metadata,
@@ -112,29 +112,32 @@ extension DocumentationDatabase.Objects
                         $0[.upsert] = true
                         $0[.q] = .init
                         {
-                            $0[DynamicObject[.id]] = object.id
+                            $0[Snapshot[.id]] = snapshot.id
                         }
-                        $0[.u] = object
+                        $0[.u] = snapshot
                     },
                 ]),
             against: self.database)
 
-        return (object.version, overwritten: response.upserted.isEmpty)
+        return .init(overwritten: response.upserted.isEmpty,
+            package: package,
+            version: snapshot.version,
+            id: id)
     }
 }
-extension DocumentationDatabase.Objects
+extension DocumentationDatabase.Snapshots
 {
-    func load(_ pins:[String], with session:Mongo.Session) async throws -> [DynamicObject]
+    func load(_ pins:[String], with session:Mongo.Session) async throws -> [Snapshot]
     {
         try await session.run(
-            command: Mongo.Find<Mongo.Cursor<DynamicObject>>.init(Self.name,
+            command: Mongo.Find<Mongo.Cursor<Snapshot>>.init(Self.name,
                 stride: 16,
                 limit: 32)
             {
                 $0[.filter] = .init
                 {
-                    $0[DynamicObject[.stable]] = true
-                    $0[DynamicObject[.id]] = .init
+                    $0[Snapshot[.stable]] = true
+                    $0[Snapshot[.id]] = .init
                     {
                         $0[.in] = pins
                     }

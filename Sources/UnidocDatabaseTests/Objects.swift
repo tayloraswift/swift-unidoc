@@ -39,21 +39,25 @@ struct Objects:MongoTestBattery
         tests.expect(try await database.push(docs: archive.0, with: session) ==? .init(
             overwritten: false,
             package: 0,
-            version: 0))
+            version: 0,
+            id: "swift-nio v2.53.0 x86_64-unknown-linux-gnu"))
 
         tests.expect(try await database.push(docs: archive.1, with: session) ==? .init(
             overwritten: false,
             package: 0,
-            version: 1))
+            version: 1,
+            id: "swift-nio v2.54.0 x86_64-unknown-linux-gnu"))
 
         tests.expect(try await database.push(docs: archive.2, with: session) ==? .init(
             overwritten: false,
             package: 0,
-            version: 2))
+            version: 2,
+            id: "swift-nio @main x86_64-unknown-linux-gnu"))
 
         tests.expect(try await database.push(docs: archive.2, with: session) ==? .init(
             overwritten: true,
             package: 0,
-            version: 3))
+            version: 3,
+            id: "swift-nio @main x86_64-unknown-linux-gnu"))
     }
 }

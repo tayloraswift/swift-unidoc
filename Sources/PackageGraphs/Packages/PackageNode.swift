@@ -53,7 +53,7 @@ extension PackageNode
             for product:ProductDetails in package.products
             {
                 try nodes.index(.init(id: .init(name: product.name, package: package.id),
-                    predecessors: product.dependencies.products))
+                    predecessors: product.dependencies))
             }
         }
 
@@ -61,10 +61,9 @@ extension PackageNode
 
         let products:[ProductDetails] = try self.products.map
         {
-            .init(name: $0.name, type: $0.type, dependencies: .init(
-                    products: try nodes.included(by: $0.dependencies.products,
-                        cache: &cache),
-                    modules: $0.dependencies.modules))
+            .init(name: $0.name, type: $0.type,
+                dependencies: try nodes.included(by: $0.dependencies, cache: &cache),
+                cultures: $0.cultures)
         }
         let modules:[ModuleDetails] = try self.modules.map
         {
