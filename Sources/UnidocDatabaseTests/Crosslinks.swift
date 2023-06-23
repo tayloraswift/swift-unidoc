@@ -29,7 +29,7 @@ struct Crosslinks:MongoTestBattery
             overwritten: false,
             package: 0,
             version: 0,
-            id: "<anonymous>"))
+            id: "swift v5.8.0 x86_64-unknown-linux-gnu"))
 
         try await database.publish(projecting: mock, with: session)
     }
