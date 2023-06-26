@@ -1,14 +1,14 @@
-import Declarations
 import MarkdownABI
+import Signatures
 import Symbols
 
-extension Declaration<Symbol.Decl>.Abridged
+extension Signature<Symbol.Decl>.Abridged
 {
-    init(_ fragments:__shared some Sequence<DeclarationFragment>)
+    init(_ fragments:__shared some Sequence<Signature.Fragment>)
     {
         let bytecode:MarkdownBytecode = .init
         {
-            for fragment:DeclarationFragment in fragments
+            for fragment:Signature.Fragment in fragments
             {
                 if  fragment.nominal
                 {

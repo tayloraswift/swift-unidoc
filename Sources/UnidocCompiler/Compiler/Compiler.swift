@@ -271,7 +271,7 @@ extension Compiler
                 {
                     //  The member’s extension constraints don’t match the extension
                     //  object’s signature!
-                    throw Extension.SignatureError.init(expected: group.signature,
+                    throw ExtensionSignatureError.init(expected: group.signature,
                         declared: member.conditions)
                 }
             }
@@ -324,7 +324,7 @@ extension Compiler
             guard `extension`.conditions == conformance.conditions
             else
             {
-                throw Extension.SignatureError.init(expected: `extension`.signature)
+                throw ExtensionSignatureError.init(expected: `extension`.signature)
             }
         }
 

@@ -1,7 +1,6 @@
 import Availability
-import Declarations
-import Generics
 import LexicalPaths
+import Signatures
 import Sources
 import Symbols
 import SymbolGraphParts
@@ -19,7 +18,7 @@ extension Compiler
         let id:Symbol.Decl
 
         public
-        let declaration:Declaration<Symbol.Decl>
+        let signature:Signature<Symbol.Decl>
         public
         let location:SourceLocation<Symbol.File>?
 
@@ -58,15 +57,15 @@ extension Compiler
 
         private
         init(_ id:Symbol.Decl,
-            declaration:Declaration<Symbol.Decl>,
             visibility:SymbolDescription.Visibility,
+            signature:Signature<Symbol.Decl>,
             location:SourceLocation<Symbol.File>?,
             phylum:Unidoc.Decl,
             path:UnqualifiedPath)
         {
             self.id = id
 
-            self.declaration = declaration
+            self.signature = signature
             self.location = location
             self.phylum = phylum
             self.path = path
@@ -94,8 +93,8 @@ extension Compiler.Decl
         }
 
         self.init(resolution,
-            declaration: description.declaration,
             visibility: description.visibility,
+            signature: description.signature,
             location: try description.location?.map(culture.resolve(uri:)),
             phylum: phylum,
             path: description.path)

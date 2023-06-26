@@ -8,16 +8,16 @@ extension GenericConstraint
         case type(TypeExpression)
     }
 }
-extension GenericConstraint.TypeRelation:Comparable where TypeReference:Comparable
+extension GenericConstraint.TypeRelation:Comparable where Scalar:Comparable
 {
 }
-extension GenericConstraint.TypeRelation:Sendable where TypeReference:Sendable
+extension GenericConstraint.TypeRelation:Sendable where Scalar:Sendable
 {
 }
 extension GenericConstraint.TypeRelation
 {
     @inlinable public
-    var type:GenericConstraint<TypeReference>.TypeExpression
+    var type:GenericConstraint<Scalar>.TypeExpression
     {
         switch self
         {
@@ -27,8 +27,7 @@ extension GenericConstraint.TypeRelation
         }
     }
     @inlinable public
-    func map<T>(
-        _ transform:(TypeReference) throws -> T) rethrows -> GenericConstraint<T>.TypeRelation
+    func map<T>(_ transform:(Scalar) throws -> T) rethrows -> GenericConstraint<T>.TypeRelation
     {
         switch self
         {

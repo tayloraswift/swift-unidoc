@@ -1,9 +1,8 @@
 import Availability
 import BSONDecoding
 import BSONEncoding
-import Declarations
-import Generics
 import LexicalPaths
+import Signatures
 import Sources
 import Unidoc
 
@@ -21,7 +20,13 @@ extension SymbolGraph
         /// This scalar’s declaration, which consists of its availability,
         /// syntax fragments, and generic signature.
         public
-        var declaration:Declaration<Int32>
+        var signature:Signature<Int32>
+        /// The location of this scalar’s declaration, if known.
+        public
+        var location:SourceLocation<Int32>?
+        /// This scalar’s binary markdown documentation, if it has any.
+        public
+        var article:Article<Never>?
 
         /// The addresses of the scalars that this scalar implements,
         /// overrides, or inherits from. Superforms are intrinsic but there
@@ -45,34 +50,26 @@ extension SymbolGraph
         public
         var origin:Int32?
 
-        /// The location of this scalar’s declaration, if known.
-        public
-        var location:SourceLocation<Int32>?
-        /// This scalar’s binary markdown documentation, if it has any.
-        public
-        var article:Article<Never>?
-
         @inlinable internal
         init(flags:Flags,
             path:UnqualifiedPath,
-            declaration:Declaration<Int32> = .init(),
+            signature:Signature<Int32> = .init(),
+            location:SourceLocation<Int32>? = nil,
+            article:Article<Never>? = nil,
             superforms:[Int32] = [],
             features:[Int32] = [],
-            origin:Int32? = nil,
-            location:SourceLocation<Int32>? = nil,
-            article:Article<Never>? = nil)
+            origin:Int32? = nil)
         {
             self.flags = flags
             self.path = path
 
-            self.declaration = declaration
+            self.signature = signature
+            self.location = location
+            self.article = article
 
             self.superforms = superforms
             self.features = features
             self.origin = origin
-
-            self.location = location
-            self.article = article
         }
     }
 }
@@ -114,12 +111,12 @@ extension SymbolGraph.Decl
         case flags = "X"
         case path = "P"
 
-        case declaration_availability = "V"
-        case declaration_abridged_bytecode = "B"
-        case declaration_expanded_bytecode = "E"
-        case declaration_expanded_links = "K"
-        case declaration_generics_constraints = "C"
-        case declaration_generics_parameters = "G"
+        case signature_availability = "V"
+        case signature_abridged_bytecode = "B"
+        case signature_expanded_bytecode = "E"
+        case signature_expanded_links = "K"
+        case signature_generics_constraints = "C"
+        case signature_generics_parameters = "G"
 
         case superforms = "S"
         case features = "F"
@@ -137,24 +134,24 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
         bson[.flags] = self.flags
         bson[.path] = self.path.joined(separator: " ")
 
-        bson[.declaration_availability] =
-            self.declaration.availability.isEmpty ? nil :
-            self.declaration.availability
+        bson[.signature_availability] =
+            self.signature.availability.isEmpty ? nil :
+            self.signature.availability
 
-        bson[.declaration_abridged_bytecode] = self.declaration.abridged.bytecode
-        bson[.declaration_expanded_bytecode] = self.declaration.expanded.bytecode
+        bson[.signature_abridged_bytecode] = self.signature.abridged.bytecode
+        bson[.signature_expanded_bytecode] = self.signature.expanded.bytecode
         //  TODO: optimize
-        bson[.declaration_expanded_links] =
-            self.declaration.expanded.links.isEmpty ? nil :
-            self.declaration.expanded.links
+        bson[.signature_expanded_links] =
+            self.signature.expanded.links.isEmpty ? nil :
+            self.signature.expanded.links
 
-        bson[.declaration_generics_constraints] =
-            self.declaration.generics.constraints.isEmpty ? nil :
-            self.declaration.generics.constraints
+        bson[.signature_generics_constraints] =
+            self.signature.generics.constraints.isEmpty ? nil :
+            self.signature.generics.constraints
 
-        bson[.declaration_generics_parameters] =
-            self.declaration.generics.parameters.isEmpty ? nil :
-            self.declaration.generics.parameters
+        bson[.signature_generics_parameters] =
+            self.signature.generics.parameters.isEmpty ? nil :
+            self.signature.generics.parameters
 
         bson[.superforms] =
             self.superforms.isEmpty ? nil :
@@ -180,21 +177,21 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
             path: try bson[.path].decode(),
             //  Adding the type names here *massively* improves compilation times, for
             //  some reason...
-            declaration: .init(
-                availability: try bson[.declaration_availability]?.decode() ?? .init(),
-                abridged: Declaration<Int32>.Abridged.init(
-                    bytecode: try bson[.declaration_abridged_bytecode].decode()),
-                expanded: Declaration<Int32>.Expanded.init(
-                    bytecode: try bson[.declaration_expanded_bytecode].decode(),
-                    links: try bson[.declaration_expanded_links]?.decode() ?? []),
-                generics: GenericSignature<Int32>.init(
-                    constraints: try bson[.declaration_generics_constraints]?.decode() ?? [],
-                    parameters: try bson[.declaration_generics_parameters]?.decode() ?? [])),
+            signature: .init(
+                availability: try bson[.signature_availability]?.decode() ?? .init(),
+                abridged: Signature<Int32>.Abridged.init(
+                    bytecode: try bson[.signature_abridged_bytecode].decode()),
+                expanded: Signature<Int32>.Expanded.init(
+                    bytecode: try bson[.signature_expanded_bytecode].decode(),
+                    links: try bson[.signature_expanded_links]?.decode() ?? []),
+                generics: Signature<Int32>.Generics.init(
+                    constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
+                    parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
 
+            location: try bson[.location]?.decode(),
+            article: try bson[.article]?.decode(),
             superforms: try bson[.superforms]?.decode() ?? [],
             features: try bson[.features]?.decode() ?? [],
-            origin: try bson[.origin]?.decode(),
-            location: try bson[.location]?.decode(),
-            article: try bson[.article]?.decode())
+            origin: try bson[.origin]?.decode())
     }
 }

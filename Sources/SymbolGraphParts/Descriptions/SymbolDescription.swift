@@ -1,8 +1,7 @@
 import Availability
-import Declarations
-import Generics
 import JSONDecoding
 import LexicalPaths
+import Signatures
 import Sources
 import Symbols
 import Unidoc
@@ -16,8 +15,6 @@ struct SymbolDescription:Equatable, Sendable
     let phylum:Unidoc.Phylum
 
     public
-    let declaration:Declaration<Symbol.Decl>
-    public
     let doccomment:Doccomment?
     public
     let interfaces:Interfaces?
@@ -25,6 +22,8 @@ struct SymbolDescription:Equatable, Sendable
     let visibility:Visibility
     public
     let `extension`:ExtensionContext
+    public
+    let signature:Signature<Symbol.Decl>
 
     /// The source location of this symbol, if known. The file string is the
     /// absolute path to the relevant source file, and starts with `file://`.
@@ -36,20 +35,19 @@ struct SymbolDescription:Equatable, Sendable
     private
     init(_ usr:Symbol,
         phylum:Unidoc.Phylum,
-        declaration:Declaration<Symbol.Decl>,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
+        signature:Signature<Symbol.Decl>,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
     {
-        self.declaration = declaration
         self.doccomment = doccomment
         self.interfaces = interfaces
         self.visibility = visibility
-
         self.extension = `extension`
+        self.signature = signature
 
         self.location = location
         self.phylum = phylum
@@ -66,16 +64,16 @@ extension SymbolDescription
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
-        expanded:__shared [DeclarationFragment],
-        abridged:__shared [DeclarationFragment],
         extension:ExtensionContext,
-        generics:GenericSignature<Symbol.Decl>,
+        expanded:__shared [Signature<Symbol.Decl>.Fragment],
+        abridged:__shared [Signature<Symbol.Decl>.Fragment],
+        generics:Signature<Symbol.Decl>.Generics,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
     {
         var phylum:Unidoc.Phylum = phylum
 
-        for fragment:DeclarationFragment
+        for fragment:Signature<Symbol.Decl>.Fragment
             in expanded where fragment.color == .keyword
         {
             switch fragment.spelling
@@ -101,12 +99,12 @@ extension SymbolDescription
             break
         }
 
-        let declaration:Declaration<Symbol.Decl>
+        let signature:Signature<Symbol.Decl>
         if  case .decl(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature
-            declaration = .init(availability: availability,
+            signature = .init(availability: availability,
                 abridged: .init(abridged.lazy.map
                 {
                     if  case .keyword = $0.color,
@@ -124,7 +122,7 @@ extension SymbolDescription
         }
         else
         {
-            declaration = .init(availability: availability,
+            signature = .init(availability: availability,
                 abridged: .init(abridged),
                 expanded: .init(expanded),
                 generics: generics)
@@ -146,11 +144,11 @@ extension SymbolDescription
 
         self.init(usr,
             phylum: phylum,
-            declaration: declaration,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             interfaces: interfaces,
             visibility: visibility,
             extension: `extension`,
+            signature: signature,
             location: location,
             path: simplified)
     }
@@ -218,12 +216,12 @@ extension SymbolDescription:JSONObjectDecodable
             doccomment: try json[.doccomment]?.decode(),
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
             visibility: try json[.visibility].decode(),
+            extension: try json[.extension]?.decode() ?? .init(),
             expanded: try json[.declaration].decode(),
             abridged: try json[.names].decode(using: CodingKeys.Names.self)
             {
                 try $0[.subheading].decode()
             },
-            extension: try json[.extension]?.decode() ?? .init(),
             generics: try json[.generics]?.decode() ?? .init(),
             location: try json[.location]?.decode(using: CodingKeys.Location.self)
             {

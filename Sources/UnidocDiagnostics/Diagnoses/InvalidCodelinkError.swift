@@ -1,6 +1,5 @@
 import CodelinkResolution
 import Codelinks
-import SymbolGraphs
 
 @frozen public
 struct InvalidCodelinkError<Scalar>:Error, Equatable where Scalar:Hashable

@@ -3,20 +3,20 @@ extension GenericConstraint
     @frozen public
     enum TypeExpression:Hashable, Equatable
     {
-        case nominal(TypeReference)
+        case nominal(Scalar)
         case complex(String)
     }
 }
-extension GenericConstraint.TypeExpression:Comparable where TypeReference:Comparable
+extension GenericConstraint.TypeExpression:Comparable where Scalar:Comparable
 {
 }
-extension GenericConstraint.TypeExpression:Sendable where TypeReference:Sendable
+extension GenericConstraint.TypeExpression:Sendable where Scalar:Sendable
 {
 }
 extension GenericConstraint.TypeExpression
 {
     @inlinable public
-    var nominal:TypeReference?
+    var nominal:Scalar?
     {
         switch self
         {
@@ -25,8 +25,8 @@ extension GenericConstraint.TypeExpression
         }
     }
     @inlinable public
-    func map<T>(_ transform:(TypeReference) throws -> T)
-        rethrows -> GenericConstraint<T>.TypeExpression
+    func map<T>(
+        _ transform:(Scalar) throws -> T) rethrows -> GenericConstraint<T>.TypeExpression
     {
         switch self
         {

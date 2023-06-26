@@ -1,4 +1,4 @@
-import Generics
+import Signatures
 import Symbols
 
 extension Compiler
@@ -17,7 +17,7 @@ extension Compiler
 }
 extension Compiler.ExtensionObject
 {
-    var signature:Compiler.Extension.Signature
+    var signature:Compiler.ExtensionSignature
     {
         self.value.signature
     }

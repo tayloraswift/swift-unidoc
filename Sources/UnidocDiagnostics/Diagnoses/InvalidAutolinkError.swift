@@ -1,5 +1,3 @@
-import SymbolGraphs
-
 @frozen public
 struct InvalidAutolinkError<Scalar>:Error
 {

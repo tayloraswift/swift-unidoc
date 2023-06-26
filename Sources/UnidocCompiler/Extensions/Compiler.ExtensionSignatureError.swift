@@ -1,19 +1,19 @@
-import Generics
+import Signatures
 import Symbols
 import SymbolGraphParts
 
-extension Compiler.Extension
+extension Compiler
 {
     public
-    struct SignatureError:Equatable, Error
+    struct ExtensionSignatureError:Equatable, Error
     {
         public
-        let expected:Signature
+        let expected:ExtensionSignature
         public
         let declared:[GenericConstraint<Symbol.Decl>]?
 
         public
-        init(expected:Signature,
+        init(expected:ExtensionSignature,
             declared:[GenericConstraint<Symbol.Decl>]? = nil)
         {
             self.expected = expected
@@ -21,7 +21,7 @@ extension Compiler.Extension
         }
     }
 }
-extension Compiler.Extension.SignatureError:CustomStringConvertible
+extension Compiler.ExtensionSignatureError:CustomStringConvertible
 {
     public
     var description:String

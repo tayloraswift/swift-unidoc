@@ -1,25 +1,29 @@
 import JSONDecoding
 import MarkdownABI
+import Signatures
 import Symbols
 
-struct DeclarationFragment:Equatable, Hashable, Sendable
+extension Signature<Symbol.Decl>
 {
-    public
-    let spelling:String
-    public
-    let referent:Symbol.Decl?
-    public
-    let color:Color
-
-    @inlinable public
-    init(_ spelling:String, referent:Symbol.Decl? = nil, color:Color)
+    struct Fragment:Equatable, Hashable, Sendable
     {
-        self.spelling = spelling
-        self.referent = referent
-        self.color = color
+        public
+        let spelling:String
+        public
+        let referent:Symbol.Decl?
+        public
+        let color:Color
+
+        @inlinable public
+        init(_ spelling:String, referent:Symbol.Decl? = nil, color:Color)
+        {
+            self.spelling = spelling
+            self.referent = referent
+            self.color = color
+        }
     }
 }
-extension DeclarationFragment
+extension Signature.Fragment
 {
     var nominal:Bool
     {
@@ -37,14 +41,14 @@ extension DeclarationFragment
         }
     }
 }
-extension DeclarationFragment
+extension Signature.Fragment
 {
     func spelled(_ spelling:__owned String) -> Self
     {
         .init(spelling, referent: self.referent, color: self.color)
     }
 }
-extension DeclarationFragment:JSONObjectDecodable, JSONDecodable
+extension Signature.Fragment:JSONObjectDecodable, JSONDecodable
 {
     public
     enum CodingKeys:String

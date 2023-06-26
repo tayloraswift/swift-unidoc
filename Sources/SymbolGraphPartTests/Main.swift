@@ -1,5 +1,5 @@
-import Generics
 import ModuleGraphs
+import Signatures
 import SymbolGraphParts
 import Symbols
 import System

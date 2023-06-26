@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import Generics
+import Signatures
 
 extension SymbolGraph
 {

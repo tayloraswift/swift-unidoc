@@ -1,10 +1,10 @@
-import Generics
+import Signatures
 import Symbols
 
-extension Compiler.Extension
+extension Compiler
 {
     @frozen public
-    struct Signature:Equatable, Hashable, Sendable
+    struct ExtensionSignature:Equatable, Hashable, Sendable
     {
         /// The generic constraints of the relevant extension group.
         /// An empty array represents an unconstrained extension.
@@ -12,12 +12,12 @@ extension Compiler.Extension
         let conditions:[GenericConstraint<Symbol.Decl>]
         /// The type extended by the relevant extension group.
         public
-        let extended:Compiler.ExtendedType
+        let extended:ExtendedType
         public
         let culture:Int
 
         public
-        init(_ culture:Int, _ extended:Compiler.ExtendedType,
+        init(_ culture:Int, _ extended:ExtendedType,
             where conditions:[GenericConstraint<Symbol.Decl>])
         {
             self.conditions = conditions
@@ -26,7 +26,7 @@ extension Compiler.Extension
         }
     }
 }
-extension Compiler.Extension.Signature:Comparable
+extension Compiler.ExtensionSignature:Comparable
 {
     public static
     func < (lhs:Self, rhs:Self) -> Bool

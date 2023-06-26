@@ -1,6 +1,6 @@
 import MarkdownABI
 
-extension Declaration
+extension Signature
 {
     @frozen public
     struct Abridged:Equatable, Sendable
