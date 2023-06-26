@@ -11,14 +11,6 @@ extension SymbolGraph
         public
         var decl:Decl?
 
-        @available(*, deprecated, renamed: "decl")
-        public
-        var scalar:Decl?
-        {
-            _read   { yield  self.decl }
-            _modify { yield &self.decl }
-        }
-
         @inlinable public
         init(extensions:[Extension] = [], decl:Decl? = nil)
         {

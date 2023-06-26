@@ -1,7 +1,3 @@
-@available(*, deprecated, renamed: "Symbol.File")
-public
-typealias FileSymbol = Symbol.File
-
 extension Symbol
 {
     @frozen public

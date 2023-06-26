@@ -9,10 +9,6 @@ import Unidoc
 
 extension SymbolGraph
 {
-    @available(*, deprecated, renamed: "SymbolGraph.Decl")
-    public
-    typealias Scalar = Decl
-
     @frozen public
     struct Decl:Equatable, Sendable
     {
