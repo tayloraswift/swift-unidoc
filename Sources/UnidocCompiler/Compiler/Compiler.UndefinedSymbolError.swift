@@ -5,8 +5,8 @@ extension Compiler
     public
     enum UndefinedSymbolError:Equatable, Error, Sendable
     {
-        case block(BlockSymbol)
-        case scalar(ScalarSymbol)
+        case block(Symbol.Block)
+        case scalar(Symbol.Decl)
     }
 }
 extension Compiler.UndefinedSymbolError:CustomStringConvertible

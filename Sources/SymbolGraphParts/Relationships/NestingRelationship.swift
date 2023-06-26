@@ -1,12 +1,13 @@
 import Symbols
+import Unidoc
 
 public
 protocol NestingRelationship
 {
-    var origin:ScalarSymbol? { get }
-    var scope:UnifiedSymbol? { get }
+    var origin:Symbol.Decl? { get }
+    var scope:Symbol? { get }
 
-    var aperture:ScalarAperture? { get }
+    var aperture:Unidoc.Decl.Aperture? { get }
 
-    func validate(source phylum:ScalarPhylum) -> Bool
+    func validate(source phylum:Unidoc.Decl) -> Bool
 }

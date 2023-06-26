@@ -9,17 +9,17 @@ struct Compiler
     let threshold:SymbolDescription.Visibility
 
     public private(set)
-    var extensions:Extensions
+    var declarations:Declarations
     public private(set)
-    var scalars:Scalars
+    var extensions:Extensions
 
     public
     init(root:Repository.Root?, threshold:SymbolDescription.Visibility = .public)
     {
         self.threshold = threshold
 
+        self.declarations = .init(root: root)
         self.extensions = .init()
-        self.scalars = .init(root: root)
     }
 }
 extension Compiler
@@ -34,7 +34,7 @@ extension Compiler
                 culture: culture)
         }
 
-        let culture:Culture = try self.scalars.include(culture: culture)
+        let culture:Culture = try self.declarations.include(culture: culture)
 
         do
         {
@@ -51,7 +51,7 @@ extension Compiler
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SymbolGraphPart in parts
         {
-            let namespace:Namespace.ID = part.colony.map { self.scalars[namespace: $0] }
+            let namespace:Namespace.ID = part.colony.map { self.declarations[namespace: $0] }
                 ?? .index(culture.index)
 
             //  Map extension block names to extended type identifiers.
@@ -72,12 +72,12 @@ extension Compiler
                         //  not tell us anything useful their generic/extension contexts.)
                         //  But we need to remember their names to perform codelink
                         //  resolution.
-                        try self.scalars.include(vector: vector, with: symbol)
+                        try self.declarations.include(vector: vector, with: symbol)
 
                     case (.scalar(let scalar), excluded: let excluded):
                         excluded ?
-                        try self.scalars.exclude(scalar: scalar) :
-                        try self.scalars.include(scalar: scalar,
+                        try self.declarations.exclude(scalar: scalar) :
+                        try self.declarations.include(scalar: scalar,
                             namespace: namespace,
                             with: symbol,
                             in: culture)
@@ -167,12 +167,12 @@ extension Compiler
     func assign(_ relationship:SymbolRelationship.Requirement, by culture:Int) throws
     {
         /// Protocol must always be from the same module.
-        guard let `protocol`:ScalarObject = try self.scalars(internal: relationship.target)
+        guard let `protocol`:DeclObject = try self.declarations(internal: relationship.target)
         else
         {
             return // Protocol is hidden.
         }
-        if  let requirement:ScalarObject = try self.scalars(internal: relationship.source)
+        if  let requirement:DeclObject = try self.declarations(internal: relationship.source)
         {
             try requirement.assign(nesting: relationship)
 
@@ -187,7 +187,7 @@ extension Compiler
         switch relationship.source
         {
         case .vector(let vector):
-            guard let feature:ScalarSymbol = self.scalars[vector.feature]
+            guard let feature:Symbol.Decl = self.declarations[vector.feature]
             else
             {
                 return // Feature is hidden.
@@ -201,7 +201,7 @@ extension Compiler
             case .scalar(let heir):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
                 //  we should never see an external type reference here.
-                guard let heir:ScalarObject = try self.scalars(internal: heir)
+                guard let heir:DeclObject = try self.declarations(internal: heir)
                 else
                 {
                     return // Feature is hidden.
@@ -237,7 +237,7 @@ extension Compiler
         case .scalar(let member):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let member:ScalarObject = try self.scalars(internal: member)
+            guard let member:DeclObject = try self.declarations(internal: member)
             else
             {
                 return // Member is hidden.
@@ -251,7 +251,7 @@ extension Compiler
 
             case .scalar(let type):
                 //  We should never see an external type reference here either.
-                if  let type:ScalarObject = try self.scalars(internal: type)
+                if  let type:DeclObject = try self.declarations(internal: type)
                 {
                     try member.assign(nesting: relationship)
                     //  Generate an implicit, internal extension for this membership,
@@ -287,7 +287,7 @@ extension Compiler
     private mutating
     func insert(_ conformance:SymbolRelationship.Conformance, by culture:Int) throws
     {
-        guard let `protocol`:ScalarSymbol = self.scalars[conformance.target]
+        guard let `protocol`:Symbol.Decl = self.declarations[conformance.target]
         else
         {
             return // Protocol is hidden.
@@ -304,12 +304,12 @@ extension Compiler
         case .scalar(let type):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let type:ScalarObject = try self.scalars(internal: type)
+            guard let type:DeclObject = try self.declarations(internal: type)
             else
             {
                 return // Type is hidden.
             }
-            if let origin:ScalarSymbol = conformance.origin
+            if let origin:Symbol.Decl = conformance.origin
             {
                 try type.assign(origin: origin)
             }
@@ -333,13 +333,13 @@ extension Compiler
     private mutating
     func insert(_ relationship:some SuperformRelationship) throws
     {
-        if case nil = self.scalars[relationship.target]
+        if case nil = self.declarations[relationship.target]
         {
             return // Superform is hidden.
         }
         /// Superform relationships are intrinsic. They must always originate from
         /// internal symbols.
-        if  let subform:ScalarObject = try self.scalars(internal: relationship.source)
+        if  let subform:DeclObject = try self.declarations(internal: relationship.source)
         {
             try subform.add(superform: relationship)
         }

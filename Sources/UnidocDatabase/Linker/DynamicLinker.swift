@@ -1,7 +1,7 @@
 import CodelinkResolution
 import ModuleGraphs
 import SymbolGraphs
-import Symbols
+import Unidoc
 
 struct DynamicLinker
 {
@@ -39,7 +39,7 @@ extension DynamicLinker
             {
                 return [:]
             }
-            guard let scope:Scalar96 = context.current.declarations[$0]
+            guard let scope:Unidoc.Scalar = context.current.decls[$0]
             else
             {
                 return [:]
@@ -53,9 +53,9 @@ extension DynamicLinker
                     of: scope)
 
                 //  we only need the conformances if the scalar has unqualified features
-                if case false? = $1.scalar?.features.isEmpty
+                if case false? = $1.decl?.features.isEmpty
                 {
-                    for `protocol`:Scalar96 in projected.conformances
+                    for `protocol`:Unidoc.Scalar in projected.conformances
                     {
                         conformances[to: `protocol`].append(projected.signature)
                     }
@@ -90,7 +90,7 @@ extension DynamicLinker
             self.context.groups())
         {
             let qualifier:ModuleIdentifier = self.current.graph.namespaces[c]
-            let c:Scalar96 = self.current.translator[culture: c]
+            let c:Unidoc.Scalar = self.current.translator[culture: c]
 
             for namespace:SymbolGraph.Namespace in culture.namespaces
             {
@@ -102,12 +102,12 @@ extension DynamicLinker
                     self.current.graph.nodes[namespace.range],
                     self.conformances[namespace.range]))
                 {
-                    let scope:Scalar96? = self.current.scope(of: d)
+                    let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
                     //  Ceremonial unwraps, should always succeed since we are only iterating
                     //  over module ranges.
-                    guard   let scalar:SymbolGraph.Scalar = node.scalar,
-                            let d:Scalar96 = self.current.declarations[d]
+                    guard   let scalar:SymbolGraph.Decl = node.decl,
+                            let d:Unidoc.Scalar = self.current.decls[d]
                     else
                     {
                         continue
@@ -115,8 +115,8 @@ extension DynamicLinker
 
                     for f:Int32 in scalar.features
                     {
-                        if  let `protocol`:Scalar96 = self.current.scope(of: f),
-                            let f:Scalar96 = self.current.declarations[f]
+                        if  let `protocol`:Unidoc.Scalar = self.current.scope(of: f),
+                            let f:Unidoc.Scalar = self.current.decls[f]
                         {
                             //  now that we know the address of the feature’s original
                             //  protocol, we can look up the constraints for the
@@ -129,7 +129,7 @@ extension DynamicLinker
                     }
                     for s:Int32 in scalar.superforms
                     {
-                        if  let s:Scalar96 = self.current.declarations[s]
+                        if  let s:Unidoc.Scalar = self.current.decls[s]
                         {
                             let implicit:ExtensionSignature = .init(conditions: [],
                                 culture: c,
@@ -154,10 +154,7 @@ extension DynamicLinker
                     scalars.append(.init(id: d,
                         culture: c,
                         scope: scope.map { self.context.expand($0) },
-                        declaration: scalar.declaration.map
-                        {
-                            self.current.declarations[$0]
-                        }))
+                        declaration: scalar.declaration.map { self.current.decls[$0] }))
                 }
             }
             if  let articles:ClosedRange<Int32> = culture.articles

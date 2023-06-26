@@ -4,13 +4,13 @@ extension Compiler
     struct Namespace:Identifiable, Sendable
     {
         public
-        let scalars:[Compiler.Scalar]
+        let decls:[Compiler.Decl]
         public
         let id:ID
 
-        init(scalars:[Compiler.Scalar], id:ID)
+        init(decls:[Compiler.Decl], id:ID)
         {
-            self.scalars = scalars
+            self.decls = decls
             self.id = id
         }
     }

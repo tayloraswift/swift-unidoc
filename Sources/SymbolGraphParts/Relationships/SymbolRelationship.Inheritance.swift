@@ -1,4 +1,5 @@
 import Symbols
+import Unidoc
 
 extension SymbolRelationship
 {
@@ -6,14 +7,14 @@ extension SymbolRelationship
     struct Inheritance:SuperformRelationship, Equatable, Hashable, Sendable
     {
         public
-        let source:ScalarSymbol
+        let source:Symbol.Decl
         public
-        let target:ScalarSymbol
+        let target:Symbol.Decl
         public
-        let origin:ScalarSymbol?
+        let origin:Symbol.Decl?
 
         @inlinable public
-        init(by source:ScalarSymbol, of target:ScalarSymbol, origin:ScalarSymbol? = nil)
+        init(by source:Symbol.Decl, of target:Symbol.Decl, origin:Symbol.Decl? = nil)
         {
             self.source = source
             self.target = target
@@ -24,7 +25,7 @@ extension SymbolRelationship
 extension SymbolRelationship.Inheritance
 {
     public
-    func validate(source phylum:ScalarPhylum) -> Bool
+    func validate(source phylum:Unidoc.Decl) -> Bool
     {
         switch phylum
         {

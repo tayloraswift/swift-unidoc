@@ -8,11 +8,11 @@ extension Compiler.Extension
     struct Block
     {
         public
-        let location:SourceLocation<FileSymbol>?
+        let location:SourceLocation<Symbol.File>?
         public
-        let comment:Compiler.Documentation.Comment?
+        let comment:Compiler.Doccomment?
 
-        init?(location:SourceLocation<FileSymbol>?, comment:Compiler.Documentation.Comment?)
+        init?(location:SourceLocation<Symbol.File>?, comment:Compiler.Doccomment?)
         {
             if case (nil, nil) = (location, comment)
             {

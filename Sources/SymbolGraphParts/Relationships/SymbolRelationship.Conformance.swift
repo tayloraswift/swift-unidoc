@@ -7,19 +7,19 @@ extension SymbolRelationship
     struct Conformance:Equatable, Hashable, Sendable
     {
         public
-        let conditions:[GenericConstraint<ScalarSymbol>]
+        let conditions:[GenericConstraint<Symbol.Decl>]
         public
-        let source:UnifiedSymbol
+        let source:Symbol
         public
-        let target:ScalarSymbol
+        let target:Symbol.Decl
         public
-        let origin:ScalarSymbol?
+        let origin:Symbol.Decl?
 
         @inlinable public
-        init(of source:UnifiedSymbol,
-            to target:ScalarSymbol,
-            where conditions:[GenericConstraint<ScalarSymbol>]?,
-            origin:ScalarSymbol? = nil)
+        init(of source:Symbol,
+            to target:Symbol.Decl,
+            where conditions:[GenericConstraint<Symbol.Decl>]?,
+            origin:Symbol.Decl? = nil)
         {
             self.conditions = conditions ?? []
             self.source = source

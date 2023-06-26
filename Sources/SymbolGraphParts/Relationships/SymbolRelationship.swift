@@ -15,7 +15,7 @@ enum SymbolRelationship:Equatable, Hashable, Sendable
 extension SymbolRelationship
 {
     @inlinable public
-    var origin:ScalarSymbol?
+    var origin:Symbol.Decl?
     {
         switch self
         {

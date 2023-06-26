@@ -6,10 +6,10 @@ extension Compiler
     struct ExtendedTypes
     {
         private
-        var extendees:[BlockSymbol: ScalarSymbol]
+        var extendees:[Symbol.Block: Symbol.Decl]
 
         private
-        init(extendees:[BlockSymbol: ScalarSymbol] = [:])
+        init(extendees:[Symbol.Block: Symbol.Decl] = [:])
         {
             self.extendees = extendees
         }
@@ -17,9 +17,9 @@ extension Compiler
 }
 extension Compiler.ExtendedTypes
 {
-    func extendee(of block:BlockSymbol) throws -> ScalarSymbol
+    func extendee(of block:Symbol.Block) throws -> Symbol.Decl
     {
-        if let type:ScalarSymbol = extendees[block]
+        if let type:Symbol.Decl = extendees[block]
         {
             return type
         }

@@ -1,6 +1,7 @@
 import ModuleGraphs
 import LexicalPaths
 import Symbols
+import Unidoc
 import URI
 
 @frozen public
@@ -15,7 +16,7 @@ extension StaticPath
     public static
     func declaration(_ namespace:ModuleIdentifier,
         _ path:UnqualifiedPath,
-        _ phylum:ScalarPhylum) -> Self
+        _ phylum:Unidoc.Decl) -> Self
     {
         var stem:URI.Path = [.push("\(namespace)")]
         switch phylum

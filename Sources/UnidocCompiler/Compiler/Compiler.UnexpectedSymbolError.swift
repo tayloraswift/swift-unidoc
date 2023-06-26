@@ -6,9 +6,9 @@ extension Compiler
     enum UnexpectedSymbolError:Equatable, Error, Sendable
     {
         case file(uri:String)
-        case block(BlockSymbol)
-        case scalar(ScalarSymbol)
-        case vector(VectorSymbol)
+        case block(Symbol.Block)
+        case scalar(Symbol.Decl)
+        case vector(Symbol.Decl.Vector)
     }
 }
 extension Compiler.UnexpectedSymbolError:CustomStringConvertible

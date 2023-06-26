@@ -7,16 +7,16 @@ extension CodelinkResolver
         case some([Overload])
     }
 }
-extension CodelinkResolver.Overloads:Sendable where Address:Sendable
+extension CodelinkResolver.Overloads:Sendable where Scalar:Sendable
 {
 }
 extension CodelinkResolver.Overloads
 {
-    init(filtering overloads:[CodelinkResolver<Address>.Overload],
-        where predicate:(CodelinkResolver<Address>.Overload) throws -> Bool) rethrows
+    init(filtering overloads:[CodelinkResolver<Scalar>.Overload],
+        where predicate:(CodelinkResolver<Scalar>.Overload) throws -> Bool) rethrows
     {
         self = .some([])
-        for overload:CodelinkResolver<Address>.Overload in overloads where
+        for overload:CodelinkResolver<Scalar>.Overload in overloads where
             try predicate(overload)
         {
             self.overload(with: overload)
@@ -24,7 +24,7 @@ extension CodelinkResolver.Overloads
     }
 
     @inlinable public mutating
-    func overload(with overload:CodelinkResolver<Address>.Overload)
+    func overload(with overload:CodelinkResolver<Scalar>.Overload)
     {
         switch self
         {

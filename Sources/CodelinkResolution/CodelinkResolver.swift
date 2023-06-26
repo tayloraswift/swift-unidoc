@@ -1,10 +1,10 @@
 import Codelinks
 import LexicalPaths
 import ModuleGraphs
-import SymbolGraphs
+import Unidoc
 
 @frozen public
-struct CodelinkResolver<Address> where Address:Hashable
+struct CodelinkResolver<Scalar> where Scalar:Hashable
 {
     public
     let table:Table
@@ -20,8 +20,8 @@ struct CodelinkResolver<Address> where Address:Hashable
 }
 extension CodelinkResolver
 {
-    @_specialize(where Address == Int32)
-    @_specialize(where Address == GlobalAddress)
+    @_specialize(where Scalar == Int32)
+    @_specialize(where Scalar == Unidoc.Scalar)
     public
     func resolve(_ link:Codelink) -> Overloads
     {

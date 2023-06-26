@@ -1,6 +1,6 @@
 import ModuleGraphs
-import SymbolGraphs
 import Symbols
+import Unidoc
 import UnidocDiagnostics
 
 struct DynamicSymbolicator:Sendable
@@ -23,11 +23,11 @@ struct DynamicSymbolicator:Sendable
 }
 extension DynamicSymbolicator:Symbolicator
 {
-    func loadScalarSymbol(_ scalar:Scalar96) -> ScalarSymbol?
+    func loadDeclSymbol(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
         self.context[scalar.package]?.symbols[scalar]
     }
-    func loadFileSymbol(_ scalar:Scalar96) -> FileSymbol?
+    func loadFileSymbol(_ scalar:Unidoc.Scalar) -> Symbol.File?
     {
         self.context[scalar.package]?.files[scalar]
     }

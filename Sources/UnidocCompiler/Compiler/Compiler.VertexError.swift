@@ -1,6 +1,7 @@
 import Symbols
 import SymbolGraphParts
 import TraceableErrors
+import Unidoc
 
 extension Compiler
 {
@@ -10,12 +11,12 @@ extension Compiler
         public
         let underlying:any Error
         public
-        let symbol:UnifiedSymbol
+        let symbol:Symbol
         public
-        let phylum:UnifiedPhylum
+        let phylum:Unidoc.Phylum
 
         public
-        init(underlying:any Error, symbol:UnifiedSymbol, phylum:UnifiedPhylum)
+        init(underlying:any Error, symbol:Symbol, phylum:Unidoc.Phylum)
         {
             self.underlying = underlying
             self.symbol = symbol

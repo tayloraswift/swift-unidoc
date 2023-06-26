@@ -9,13 +9,21 @@ extension SymbolGraph
         public
         var extensions:[Extension]
         public
-        var scalar:Scalar?
+        var decl:Decl?
+
+        @available(*, deprecated, renamed: "decl")
+        public
+        var scalar:Decl?
+        {
+            _read   { yield  self.decl }
+            _modify { yield &self.decl }
+        }
 
         @inlinable public
-        init(extensions:[Extension] = [], scalar:Scalar? = nil)
+        init(extensions:[Extension] = [], decl:Decl? = nil)
         {
             self.extensions = extensions
-            self.scalar = scalar
+            self.decl = decl
         }
     }
 }
@@ -34,7 +42,7 @@ extension SymbolGraph.Node
     enum CodingKeys:String
     {
         case extensions = "E"
-        case scalar = "V"
+        case decl = "V"
     }
 }
 extension SymbolGraph.Node:BSONDocumentEncodable
@@ -42,7 +50,7 @@ extension SymbolGraph.Node:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.scalar] = self.scalar
+        bson[.decl] = self.decl
         bson[.extensions] = self.extensions.isEmpty ? nil : self.extensions
     }
 }
@@ -53,6 +61,6 @@ extension SymbolGraph.Node:BSONDocumentDecodable
     {
         self.init(
             extensions: try bson[.extensions]?.decode() ?? [],
-            scalar: try bson[.scalar]?.decode())
+            decl: try bson[.decl]?.decode())
     }
 }

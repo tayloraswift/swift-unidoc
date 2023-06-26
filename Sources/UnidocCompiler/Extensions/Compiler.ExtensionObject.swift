@@ -25,20 +25,20 @@ extension Compiler.ExtensionObject
     {
         self.value.extended
     }
-    var conditions:[GenericConstraint<ScalarSymbol>]
+    var conditions:[GenericConstraint<Symbol.Decl>]
     {
         self.value.conditions
     }
 
-    func add(conformance:ScalarSymbol)
+    func add(conformance:Symbol.Decl)
     {
         self.value.conformances.insert(conformance)
     }
-    func add(feature:ScalarSymbol)
+    func add(feature:Symbol.Decl)
     {
         self.value.features.insert(feature)
     }
-    func add(nested:ScalarSymbol)
+    func add(nested:Symbol.Decl)
     {
         self.value.nested.insert(nested)
     }

@@ -1,33 +1,33 @@
 import Generics
-import SymbolGraphs
+import Unidoc
 
 @frozen public
 struct ExtensionProjection:Equatable, Sendable
 {
     public
-    let conditions:[GenericConstraint<Scalar96?>]
+    let conditions:[GenericConstraint<Unidoc.Scalar?>]
     public
-    let culture:Scalar96
+    let culture:Unidoc.Scalar
     public
-    let scope:Scalar96
+    let scope:Unidoc.Scalar
 
     public
-    var conformances:[Scalar96]
+    var conformances:[Unidoc.Scalar]
     public
-    var features:[Scalar96]
+    var features:[Unidoc.Scalar]
     public
-    var nested:[Scalar96]
+    var nested:[Unidoc.Scalar]
 
     public
-    var subforms:[Scalar96]
+    var subforms:[Unidoc.Scalar]
 
-    init(conditions:[GenericConstraint<Scalar96?>],
-        culture:Scalar96,
-        scope:Scalar96,
-        conformances:[Scalar96] = [],
-        features:[Scalar96] = [],
-        nested:[Scalar96] = [],
-        subforms:[Scalar96] = [])
+    init(conditions:[GenericConstraint<Unidoc.Scalar?>],
+        culture:Unidoc.Scalar,
+        scope:Unidoc.Scalar,
+        conformances:[Unidoc.Scalar] = [],
+        features:[Unidoc.Scalar] = [],
+        nested:[Unidoc.Scalar] = [],
+        subforms:[Unidoc.Scalar] = [])
     {
         self.conditions = conditions
         self.culture = culture
@@ -47,10 +47,10 @@ extension ExtensionProjection
     }
 
     init(signature:ExtensionSignature,
-        conformances:[Scalar96] = [],
-        features:[Scalar96] = [],
-        nested:[Scalar96] = [],
-        subforms:[Scalar96] = [])
+        conformances:[Unidoc.Scalar] = [],
+        features:[Unidoc.Scalar] = [],
+        nested:[Unidoc.Scalar] = [],
+        subforms:[Unidoc.Scalar] = [])
     {
         self.init(conditions: signature.conditions,
             culture: signature.culture,

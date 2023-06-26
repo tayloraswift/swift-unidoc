@@ -3,15 +3,16 @@ import LexicalPaths
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
+import Unidoc
 
 struct DynamicResolutionGroup:Sendable
 {
     private(set)
-    var codelinks:CodelinkResolver<Scalar96>.Table
+    var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
     private(set)
     var imports:[ModuleIdentifier]
 
-    init(codelinks:CodelinkResolver<Scalar96>.Table = .init(),
+    init(codelinks:CodelinkResolver<Unidoc.Scalar>.Table = .init(),
         imports:[ModuleIdentifier] = [])
     {
         self.codelinks = codelinks
@@ -50,15 +51,15 @@ extension DynamicResolutionGroup
         for s:Int32 in namespace.range
         {
             let node:SymbolGraph.Node = snapshot.graph.nodes[s]
-            let symbol:ScalarSymbol = snapshot.graph.symbols[s]
+            let symbol:Symbol.Decl = snapshot.graph.decls[s]
 
-            guard let s:Scalar96 = snapshot.declarations[s]
+            guard let s:Unidoc.Scalar = snapshot.decls[s]
             else
             {
                 continue
             }
 
-            if  let citizen:SymbolGraph.Scalar = node.scalar
+            if  let citizen:SymbolGraph.Decl = node.decl
             {
                 self.codelinks[qualifier, citizen.path].overload(with: .init(
                     target: .scalar(s),
@@ -70,8 +71,8 @@ extension DynamicResolutionGroup
                 continue
             }
             //  Extension may extend a scalar from a different package.
-            if  let outer:SymbolGraph.Scalar = node.scalar ??
-                    context[s.package]?.nodes[s]?.scalar
+            if  let outer:SymbolGraph.Decl = node.decl ??
+                    context[s.package]?.nodes[s]?.decl
             {
                 self.add(extensions: node.extensions,
                     extending: (s, symbol, outer.path),
@@ -85,8 +86,8 @@ extension DynamicResolutionGroup
     func add(extensions:[SymbolGraph.Extension],
         extending outer:
         (
-            scalar:Scalar96,
-            symbol:ScalarSymbol,
+            scalar:Unidoc.Scalar,
+            symbol:Symbol.Decl,
             path:UnqualifiedPath
         ),
         snapshot:SnapshotObject,
@@ -100,11 +101,11 @@ extension DynamicResolutionGroup
             let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features
             {
-                let symbol:VectorSymbol = .init(snapshot.graph.symbols[f],
+                let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls[f],
                     self: outer.symbol)
 
-                if  let f:Scalar96 = snapshot.declarations[f],
-                    let inner:SymbolGraph.Scalar = context[f.package]?.nodes[f]?.scalar
+                if  let f:Unidoc.Scalar = snapshot.decls[f],
+                    let inner:SymbolGraph.Decl = context[f.package]?.nodes[f]?.decl
                 {
                     self.codelinks[qualifier, outer.path, inner.path.last]
                         .overload(with: .init(

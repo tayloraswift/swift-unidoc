@@ -1,27 +1,27 @@
 import Declarations
-import SymbolGraphs
+import Unidoc
 
 @frozen public
 struct ScalarProjection:Equatable, Sendable
 {
     public
-    let id:Scalar96
+    let id:Unidoc.Scalar
 
     public
-    let culture:Scalar96
+    let culture:Unidoc.Scalar
     public
-    let scope:[Scalar96]?
+    let scope:[Unidoc.Scalar]?
 
     public
-    let declaration:Declaration<Scalar96?>
+    let declaration:Declaration<Unidoc.Scalar?>
 
     public
-    var superforms:[Scalar96]
+    var superforms:[Unidoc.Scalar]
 
-    init(id:Scalar96,
-        culture:Scalar96,
-        scope:[Scalar96]?,
-        declaration:Declaration<Scalar96?>)
+    init(id:Unidoc.Scalar,
+        culture:Unidoc.Scalar,
+        scope:[Unidoc.Scalar]?,
+        declaration:Declaration<Unidoc.Scalar?>)
     {
         self.id = id
 

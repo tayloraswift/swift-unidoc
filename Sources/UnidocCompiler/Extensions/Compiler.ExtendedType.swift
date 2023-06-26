@@ -8,9 +8,9 @@ extension Compiler
         public
         let namespace:Namespace.ID
         public
-        let type:ScalarSymbol
+        let type:Symbol.Decl
 
-        init(namespace:Namespace.ID, type:ScalarSymbol)
+        init(namespace:Namespace.ID, type:Symbol.Decl)
         {
             self.namespace = namespace
             self.type = type

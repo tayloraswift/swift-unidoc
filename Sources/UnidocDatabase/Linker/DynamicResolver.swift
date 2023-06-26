@@ -3,12 +3,13 @@ import Codelinks
 import Doclinks
 import ModuleGraphs
 import SymbolGraphs
+import Unidoc
 import UnidocDiagnostics
 
 enum _CodelinkExpansion
 {
     case text(String)
-    case path([Scalar96])
+    case path([Unidoc.Scalar])
 }
 
 struct DynamicResolver
@@ -17,12 +18,12 @@ struct DynamicResolver
     var diagnoses:[any DynamicDiagnosis]
 
     private
-    let codelinks:CodelinkResolver<Scalar96>
+    let codelinks:CodelinkResolver<Unidoc.Scalar>
     private
     let context:DynamicContext
 
     private
-    init(codelinks:CodelinkResolver<Scalar96>, context:DynamicContext)
+    init(codelinks:CodelinkResolver<Unidoc.Scalar>, context:DynamicContext)
     {
         self.diagnoses = []
 
@@ -60,8 +61,8 @@ extension DynamicResolver
             switch $0
             {
             case .scalar(let referent):
-                if      let _:Int = referent.scalar & .declaration,
-                        let scalar:Scalar96 = self.current.declarations[referent.scalar]
+                if      let _:Int = referent.scalar & .decl,
+                        let scalar:Unidoc.Scalar = self.current.decls[referent.scalar]
                 {
                     return .path(self.context.expand(scalar, to: referent.length))
                 }
@@ -74,7 +75,7 @@ extension DynamicResolver
                     //  TODO: implement me
                 }
                 else if let namespace:Int = referent.scalar & .module,
-                        let scalar:Scalar96 = self.current.namespaces[namespace]
+                        let scalar:Unidoc.Scalar = self.current.namespaces[namespace]
                 {
                     return .path([scalar])
                 }
@@ -82,8 +83,8 @@ extension DynamicResolver
             case .vector(let referent):
                 //  Only references to declarations can generate vectors. So we can assume
                 //  both components are declaration scalars.
-                if  let feature:Scalar96 = self.current.declarations[referent.feature],
-                    let heir:Scalar96 = self.current.declarations[referent.heir]
+                if  let feature:Unidoc.Scalar = self.current.decls[referent.feature],
+                    let heir:Unidoc.Scalar = self.current.decls[referent.heir]
                 {
                     return .path(self.context.expand((heir, feature), to: referent.length))
                 }
@@ -99,7 +100,7 @@ extension DynamicResolver
     private mutating
     func expand(_ referent:SymbolGraph.Referent.Unresolved) -> _CodelinkExpansion
     {
-        var context:Diagnostic.Context<Scalar96>
+        var context:Diagnostic.Context<Unidoc.Scalar>
         {
             .init(location: referent.location?.map { self.current.translator[citizen: $0] })
         }
@@ -118,7 +119,7 @@ extension DynamicResolver
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.diagnoses.append(InvalidAutolinkError<Scalar96>.init(
+            self.diagnoses.append(InvalidAutolinkError<Unidoc.Scalar>.init(
                 expression: referent.expression,
                 context: context))
             return .text(referent.expression)
@@ -127,7 +128,7 @@ extension DynamicResolver
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.diagnoses.append(InvalidCodelinkError<Scalar96>.init(
+            self.diagnoses.append(InvalidCodelinkError<Unidoc.Scalar>.init(
                 overloads: overloads,
                 codelink: codelink,
                 context: context))

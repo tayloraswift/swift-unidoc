@@ -1,7 +1,7 @@
 import CodelinkResolution
 import ModuleGraphs
 import SymbolGraphs
-import Symbols
+import Unidoc
 
 struct DynamicContext
 {
@@ -66,21 +66,21 @@ extension DynamicContext
 }
 extension DynamicContext
 {
-    func expand(_ vector:(self:Scalar96, Scalar96), to length:UInt32 = .max) -> [Scalar96]
+    func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:UInt32) -> [Unidoc.Scalar]
     {
         self.expand(vector.0, to: length - 1) + [vector.1]
     }
-    func expand(_ scalar:Scalar96, to length:UInt32 = .max) -> [Scalar96]
+    func expand(_ scalar:Unidoc.Scalar, to length:UInt32 = .max) -> [Unidoc.Scalar]
     {
-        var current:Scalar96 = scalar
-        var path:[Scalar96] = [current]
+        var current:Unidoc.Scalar = scalar
+        var path:[Unidoc.Scalar] = [current]
         //  This prevents us from getting stuck in an infinite loop if one of the
         //  documentation archives is malformed/malicious.
-        var seen:Set<Scalar96> = [current]
+        var seen:Set<Unidoc.Scalar> = [current]
 
         for _:UInt32 in 1 ..< max(1, length)
         {
-            if  let next:Scalar96 = self[current.package]?.scope(of: current),
+            if  let next:Unidoc.Scalar = self[current.package]?.scope(of: current),
                 case nil = seen.update(with: next)
             {
                 path.append(next)

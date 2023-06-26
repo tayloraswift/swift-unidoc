@@ -8,10 +8,10 @@ struct MarkdownFile:Identifiable, Equatable, Sendable
     public
     let name:String
     public
-    let id:FileSymbol
+    let id:Symbol.File
 
     @inlinable public
-    init(text:String, name:String, id:FileSymbol)
+    init(text:String, name:String, id:Symbol.File)
     {
         self.text = text
         self.name = name

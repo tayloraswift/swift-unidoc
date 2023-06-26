@@ -57,7 +57,7 @@ extension Artifacts.Culture
 
             let relative:FilePath = .init(root: nil,
                 $0.components.dropFirst(root.components.count))
-            let id:FileSymbol = .init("\(relative)")
+            let id:Symbol.File = .init("\(relative)")
 
             print("Loading artifact: \(id)")
 

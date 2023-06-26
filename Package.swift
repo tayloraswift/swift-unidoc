@@ -46,6 +46,7 @@ let package:Package = .init(
 
         .library(name: "System", targets: ["System"]),
 
+        .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocCompiler", targets: ["UnidocCompiler"]),
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
@@ -93,7 +94,7 @@ let package:Package = .init(
             [
                 .target(name: "Codelinks"),
                 .target(name: "ModuleGraphs"),
-                .target(name: "SymbolGraphs"),
+                .target(name: "Unidoc"),
             ]),
 
         .target(name: "Declarations", dependencies:
@@ -203,6 +204,7 @@ let package:Package = .init(
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
                 .target(name: "Symbols"),
+                .target(name: "Unidoc"),
                 .product(name: "JSONDecoding", package: "swift-json"),
                 .product(name: "JSONEncoding", package: "swift-json"),
             ]),
@@ -213,17 +215,20 @@ let package:Package = .init(
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
                 .target(name: "Symbols"),
+                .target(name: "Unidoc"),
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),
                 .product(name: "BSONEncoding", package: "swift-mongodb"),
             ]),
 
+        .target(name: "Unidoc", dependencies:
+            [
+                .target(name: "UnidocPlanes"),
+            ]),
+
         .target(name: "UnidocCompiler", dependencies:
             [
                 .target(name: "Symbols"),
-                //  TODO: this should not be here, it only contains an extension
-                //  on ``ScalarPhylum`` that we need.
-                .target(name: "SymbolGraphs"),
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
@@ -261,6 +266,8 @@ let package:Package = .init(
                 .target(name: "UnidocDiagnostics"),
                 .target(name: "UnidocRouting"),
             ]),
+
+        .target(name: "UnidocPlanes"),
 
         .target(name: "UnidocRouting", dependencies:
             [

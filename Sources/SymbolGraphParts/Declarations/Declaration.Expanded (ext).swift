@@ -2,7 +2,7 @@ import Declarations
 import MarkdownABI
 import Symbols
 
-extension Declaration<ScalarSymbol>.Expanded
+extension Declaration<Symbol.Decl>.Expanded
 {
     init(_ fragments:__shared some Sequence<DeclarationFragment>)
     {

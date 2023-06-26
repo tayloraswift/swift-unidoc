@@ -1,5 +1,5 @@
 import FNV1
-import Symbols
+import Unidoc
 
 extension CodelinkResolver
 {
@@ -10,12 +10,12 @@ extension CodelinkResolver
         let target:Target
 
         public
-        let phylum:ScalarPhylum
+        let phylum:Unidoc.Decl
         public
         let hash:FNV24
 
         @inlinable public
-        init(target:Target, phylum:ScalarPhylum, hash:FNV24)
+        init(target:Target, phylum:Unidoc.Decl, hash:FNV24)
         {
             self.target = target
             self.phylum = phylum
@@ -23,6 +23,6 @@ extension CodelinkResolver
         }
     }
 }
-extension CodelinkResolver.Overload:Sendable where Address:Sendable
+extension CodelinkResolver.Overload:Sendable where Scalar:Sendable
 {
 }

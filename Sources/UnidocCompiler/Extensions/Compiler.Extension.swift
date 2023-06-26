@@ -16,16 +16,16 @@ extension Compiler
 
         /// Protocols the extended type conforms to.
         public
-        var conformances:Set<ScalarSymbol>
+        var conformances:Set<Symbol.Decl>
         /// Members the extended type inherits from other types via subclassing,
         /// protocol conformances, etc.
         public
-        var features:Set<ScalarSymbol>
+        var features:Set<Symbol.Decl>
         /// Declarations directly nested in the extended type. Everything that
         /// is lexically-scoped to the extended type, and was not inherited from
         /// another type goes in this set.
         public
-        var nested:Set<ScalarSymbol>
+        var nested:Set<Symbol.Decl>
         /// Documentation comments and source locations for the various extension
         /// blocks that make up this extension.
         public internal(set)
@@ -51,7 +51,7 @@ extension Compiler.Extension
         self.signature.extended
     }
     @inlinable public
-    var conditions:[GenericConstraint<ScalarSymbol>]
+    var conditions:[GenericConstraint<Symbol.Decl>]
     {
         self.signature.conditions
     }

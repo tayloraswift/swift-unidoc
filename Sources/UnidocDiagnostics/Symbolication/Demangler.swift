@@ -31,7 +31,7 @@ struct Demangler:Sendable
 extension Demangler
 {
     public
-    func demangle(_ symbol:ScalarSymbol) -> String?
+    func demangle(_ symbol:Symbol.Decl) -> String?
     {
         // '$s'
         let prefixed:String = "$\(symbol.rawValue)" // not the description!
