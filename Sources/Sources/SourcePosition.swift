@@ -7,12 +7,12 @@ struct SourcePosition:Equatable, Hashable, Sendable
     /// Contains the line number in the upper 20 bits, and
     /// the column index in the lower 12 bits.
     public
-    let rawValue:UInt32
+    let bits:UInt32
 
     @inlinable public
-    init(rawValue:UInt32)
+    init(bits:UInt32)
     {
-        self.rawValue = rawValue
+        self.bits = bits
     }
 }
 extension SourcePosition:Comparable
@@ -20,25 +20,38 @@ extension SourcePosition:Comparable
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
     {
-        lhs.rawValue < rhs.rawValue
+        lhs.bits < rhs.bits
+    }
+}
+extension SourcePosition:RawRepresentable
+{
+    @inlinable public
+    var rawValue:Int32
+    {
+        .init(bitPattern: self.bits)
+    }
+    @inlinable public
+    init(rawValue:Int32)
+    {
+        self.init(bits: .init(bitPattern: rawValue))
     }
 }
 extension SourcePosition
 {
     @inlinable public static
-    var zero:Self { .init(rawValue: 0) }
+    var zero:Self { .init(bits: 0) }
 }
 extension SourcePosition
 {
     @inlinable public
     var line:Int
     {
-        .init(self.rawValue >> 12)
+        .init(0xffff_f___ & self.bits >> 12)
     }
     @inlinable public
     var column:Int
     {
-        .init(self.rawValue & 0x0000_0fff)
+        .init(0x0000_0fff & self.bits)
     }
 }
 extension SourcePosition
@@ -53,7 +66,7 @@ extension SourcePosition
         if  0 ..< 0xffff_f___ ~= line,
             0 ..< 0x0000_0fff ~= column
         {
-            self.init(rawValue: .init(line) << 12 | .init(column))
+            self.init(bits: .init(line) << 12 | .init(column))
         }
         else
         {

@@ -16,32 +16,30 @@ struct SymbolGraph:Equatable, Sendable
     var cultures:[Culture]
 
     public
-    var articles:Articles
-
-    public
     var symbols:Table<ScalarSymbol>
     public
     var nodes:Table<Node>
 
     public
-    var files:Table<FileSymbol>
+    var articles:Plane<Articles, Article<String>>
+    public
+    var files:Plane<Files, FileSymbol>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
-        articles:Articles = .init(),
         symbols:Table<ScalarSymbol> = [],
         nodes:Table<Node> = [],
-        files:Table<FileSymbol> = [])
+        articles:Plane<Articles, Article<String>> = [],
+        files:Plane<Files, FileSymbol> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
 
-        self.articles = articles
-
         self.symbols = symbols
         self.nodes = nodes
 
+        self.articles = articles
         self.files = files
     }
 }
@@ -65,23 +63,6 @@ extension SymbolGraph
         let node:Int32 = self.nodes.append(.init(scalar: scalar))
         assert(symbol == node)
         return node
-    }
-
-    /// Appends a standalone article with the given name to the symbol graph.
-    /// This function doesn’t check for duplicates.
-    @inlinable public mutating
-    func append(article id:String) -> Int32
-    {
-        defer
-        {
-            self.articles.append(.init(
-                referents: [],
-                overview: [],
-                details: [],
-                fold: nil,
-                id: id))
-        }
-        return self.articles.endIndex
     }
 
     /// Appends a new namespace to the symbol graph. This function doesn’t check
@@ -131,11 +112,11 @@ extension SymbolGraph
     public
     enum CodingKeys:String
     {
-        case articles
         case namespaces
         case cultures
         case symbols
         case nodes
+        case articles
         case files
     }
 }
@@ -146,9 +127,9 @@ extension SymbolGraph:BSONDocumentEncodable
     {
         bson[.namespaces] = self.namespaces
         bson[.cultures] = self.cultures
-        bson[.articles] = self.articles
         bson[.symbols] = self.symbols
         bson[.nodes] = self.nodes.elements
+        bson[.articles] = self.articles
         bson[.files] = self.files
     }
 }
@@ -160,9 +141,9 @@ extension SymbolGraph:BSONDocumentDecodable
         self.init(
             namespaces: try bson[.namespaces].decode(),
             cultures: try bson[.cultures].decode(),
-            articles: try bson[.articles].decode(),
             symbols: try bson[.symbols].decode(),
             nodes: try bson[.nodes].decode(),
+            articles: try bson[.articles].decode(),
             files: try bson[.files].decode())
     }
 }

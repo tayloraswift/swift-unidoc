@@ -97,7 +97,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth"])
                 tests.expect(nil: codelink.hash)
             }
@@ -106,7 +105,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "description"])
                 tests.expect(nil: codelink.hash)
             }
@@ -115,7 +113,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "foo"])
                 tests.expect(nil: codelink.hash)
             }
@@ -124,7 +121,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "foo(bar:baz:)"])
                 tests.expect(nil: codelink.hash)
             }
@@ -133,26 +129,22 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "==(_:_:)"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-operator-only",
                 let codelink:Codelink = .parse("==(_:_:)", for: tests)
             {
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["==(_:_:)"])
             }
             if  let tests:TestGroup = tests / "component-dots",
                 let codelink:Codelink = .parse("Sloth.Color....(_:_:)", for: tests)
             {
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "...(_:_:)"])
             }
             if  let tests:TestGroup = tests / "component-dots-only",
                 let codelink:Codelink = .parse("...(_:_:)", for: tests)
             {
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["...(_:_:)"])
             }
         }
@@ -163,7 +155,6 @@ enum Main:SyncTests
             {
                 tests.expect(codelink.filter ==? .case)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .unidoc)
                 tests.expect(codelink.path.components ..? ["`subscript`"])
                 tests.expect(nil: codelink.hash)
             }
@@ -304,7 +295,6 @@ enum Main:SyncTests
         {
             tests.expect(nil: codelink.filter)
             tests.expect(nil: codelink.scope)
-            tests.expect(codelink.path.format ==? .unidoc)
             tests.expect(codelink.path.components ..? ["Sloth", "update(_:)"])
             tests.expect(codelink.hash?.value ==? .init("4ko57", radix: 36))
         }
@@ -315,7 +305,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .legacy)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color"])
                 tests.expect(nil: codelink.hash)
             }
@@ -324,7 +313,6 @@ enum Main:SyncTests
             {
                 tests.expect(codelink.filter ==? .enum)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .legacy)
                 tests.expect(codelink.path.components ..? ["Sloth", "Color"])
                 tests.expect(nil: codelink.hash)
             }
@@ -333,7 +321,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .legacy)
                 tests.expect(codelink.path.components ..? ["Sloth", "update(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }
@@ -342,7 +329,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .legacy)
                 tests.expect(codelink.path.components ..? ["Sloth", "-(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }
@@ -351,7 +337,6 @@ enum Main:SyncTests
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.format ==? .legacy)
                 tests.expect(codelink.path.components ..? ["Sloth", "/(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }

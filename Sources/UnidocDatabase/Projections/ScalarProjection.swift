@@ -5,23 +5,23 @@ import SymbolGraphs
 struct ScalarProjection:Equatable, Sendable
 {
     public
-    let id:GlobalAddress
+    let id:Scalar96
 
     public
-    let culture:GlobalAddress
+    let culture:Scalar96
     public
-    let scope:[GlobalAddress]?
+    let scope:[Scalar96]?
 
     public
-    let declaration:Declaration<GlobalAddress?>
+    let declaration:Declaration<Scalar96?>
 
     public
-    var superforms:[GlobalAddress]
+    var superforms:[Scalar96]
 
-    init(id:GlobalAddress,
-        culture:GlobalAddress,
-        scope:[GlobalAddress]?,
-        declaration:Declaration<GlobalAddress?>)
+    init(id:Scalar96,
+        culture:Scalar96,
+        scope:[Scalar96]?,
+        declaration:Declaration<Scalar96?>)
     {
         self.id = id
 

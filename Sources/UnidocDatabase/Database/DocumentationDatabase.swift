@@ -67,10 +67,14 @@ extension DocumentationDatabase
     func publish(projecting docs:__owned Documentation,
         with session:__shared Mongo.Session) async throws
     {
-        var linker:DynamicLinker = .init(context: try await self.context(
+        let context:DynamicContext = try await self.context(
             publishing: docs,
-            with: session))
+            with: session)
+        var linker:DynamicLinker = .init(context: context)
         let _:[ScalarProjection] = linker.project()
+
+        let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
+            symbolicator.emit(diagnoses: linker.diagnoses, colors: .enabled)
     }
     private
     func context(publishing docs:__owned Documentation,
@@ -79,19 +83,19 @@ extension DocumentationDatabase
         let dependencies:[Snapshot] = try await self.snapshots.load(docs.metadata.pins(),
             with: session)
 
-        var upstream:UpstreamSymbols = .init()
+        var upstream:UpstreamScalars = .init()
 
         for snapshot:Snapshot in dependencies
         {
-            for (address, symbol):(Int32, ScalarSymbol) in snapshot.graph.citizens
+            for (citizen, symbol):(Int32, ScalarSymbol) in snapshot.graph.citizens
             {
-                upstream.scalars[symbol] = snapshot.translator[address: address]
+                upstream.citizens[symbol] = snapshot.translator[citizen: citizen]
             }
             for (culture, symbol):(Int, ModuleIdentifier) in zip(
                 snapshot.graph.cultures.indices,
                 snapshot.graph.namespaces)
             {
-                upstream.modules[symbol] = snapshot.translator[culture: culture]
+                upstream.cultures[symbol] = snapshot.translator[culture: culture]
             }
         }
 

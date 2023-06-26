@@ -5,6 +5,7 @@ import Doclinks
 import ModuleGraphs
 import Sources
 import SymbolGraphs
+import UnidocDiagnostics
 
 struct StaticResolver
 {
@@ -32,7 +33,7 @@ extension StaticResolver
     {
         if  let scalar:Int32 = self.doclinks.resolve(doclink)
         {
-            return .scalar(scalar)
+            return .scalar(.init(scalar, length: UInt32.init(doclink.path.count)))
         }
         //  Resolution might still succeed by reinterpreting the doclink as a codelink.
         if !doclink.absolute,
@@ -46,7 +47,8 @@ extension StaticResolver
         else
         {
             print("DEBUG: doclink '\(expression)' will be resolved dynamically")
-            return .unresolved(expression)
+            return .unresolved(.init(expression,
+                location: source?.start.translated(through: sources)))
         }
     }
     mutating
@@ -58,24 +60,26 @@ extension StaticResolver
         switch self.codelinks.resolve(codelink)
         {
         case .one(let overload):
+            let length:UInt32 = .init(codelink.path.components.count)
             switch overload.target
             {
             case .scalar(let address):
-                return .scalar(address)
+                return .scalar(.init(address, length: length))
 
             case .vector(let address, self: let heir):
-                return .vector(address, self: heir)
+                return .vector(.init(address, self: heir, length: length))
             }
 
         case .some(let overloads):
             if  overloads.isEmpty
             {
                 print("DEBUG: autolink '\(expression)' will be resolved dynamically")
-                return .unresolved(expression)
+                return .unresolved(.init(expression,
+                    location: source?.start.translated(through: sources)))
             }
             else
             {
-                self.diagnoses.append(AmbiguousCodelinkError.init(
+                self.diagnoses.append(InvalidCodelinkError<Int32>.init(
                     overloads: overloads,
                     codelink: codelink,
                     context: source.map { .init(of: $0, in: sources) }))

@@ -9,6 +9,7 @@ import MarkdownSemantics
 import ModuleGraphs
 import SymbolGraphs
 import UnidocCompiler
+import UnidocDiagnostics
 
 /// A type that can outline autolinks from markdown documentation and
 /// statically-resolve some of the autolinks with caching.
@@ -72,8 +73,8 @@ extension StaticOutliner
             }
             else
             {
-                self.resolver.diagnoses.append(InvalidAutolinkError.init(
-                    autolink: autolink,
+                self.resolver.diagnoses.append(InvalidAutolinkError<Int32>.init(
+                    expression: autolink.text,
                     context: autolink.source.map { .init(of: $0, in: sources) }))
                 return nil
             }

@@ -1,97 +1,116 @@
 import ModuleGraphs
 import SymbolGraphs
+import Symbols
 
 final
 class SnapshotObject:Sendable
 {
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
-    let hierarchy:[Int32: GlobalAddress]
-    let projector:Projector
+    let hierarchy:[Int32: Scalar96]
+
+    let declarations:SymbolGraph.Table<Scalar96?>
+    let namespaces:[Scalar96?]
+
+    let snapshot:Snapshot
 
     private
-    init(hierarchy:[Int32: GlobalAddress],
-        projector:Projector)
+    init(hierarchy:[Int32: Scalar96],
+        declarations:SymbolGraph.Table<Scalar96?>,
+        namespaces:[Scalar96?],
+        snapshot:Snapshot)
     {
         self.hierarchy = hierarchy
-        self.projector = projector
+            self.declarations = declarations
+            self.namespaces = namespaces
+            self.snapshot = snapshot
     }
 }
 extension SnapshotObject
 {
-    var snapshot:Snapshot { self.projector.snapshot }
-    var graph:SymbolGraph { self.projector.graph }
-
     var translator:Snapshot.Translator { self.snapshot.translator }
+    var graph:SymbolGraph { self.snapshot.graph }
+
+    var files:Snapshot.View<FileSymbol> { .init(self.snapshot) }
+    var symbols:Snapshot.View<ScalarSymbol> { .init(self.snapshot) }
+    var nodes:Snapshot.View<SymbolGraph.Node> { .init(self.snapshot) }
 }
 extension SnapshotObject
 {
-    private convenience
-    init(projector:__owned Projector)
+    convenience
+    init(snapshot:__owned Snapshot, upstream:__shared UpstreamScalars)
     {
-        var hierarchy:[Int32: GlobalAddress] = [:]
-            hierarchy.reserveCapacity(projector.graph.nodes.count)
+        let translator:Snapshot.Translator = snapshot.translator
 
-        for (scope, node):(Int32, SymbolGraph.Node) in zip(
-            projector.graph.nodes.indices,
-            projector.graph.nodes)
+        let declarations:SymbolGraph.Table<Scalar96?> = snapshot.graph.link
+        {
+            translator[citizen: $0]
+        }
+        dynamic:
+        {
+            upstream.citizens[$0]
+        }
+
+        let namespaces:[Scalar96?] = snapshot.graph.namespaces.map
+        {
+            upstream.cultures[$0]
+        }
+
+        var hierarchy:[Int32: Scalar96] = [:]
+            hierarchy.reserveCapacity(snapshot.graph.nodes.count)
+
+        for (n, node):(Int32, SymbolGraph.Node) in zip(
+            snapshot.graph.nodes.indices,
+            snapshot.graph.nodes)
         {
             for `extension`:SymbolGraph.Extension in node.extensions
             {
-                for nested:Int32 in `extension`.nested
-                    where projector.graph.citizens.contains(nested)
+                for nested:Int32 in `extension`.nested where
+                    snapshot.graph.citizens.contains(nested)
                 {
-                    hierarchy[nested] = scope * projector
+                    hierarchy[nested] = declarations[n]
                 }
             }
         }
 
-        self.init(hierarchy: hierarchy, projector: projector)
-    }
-
-    convenience
-    init(snapshot:__owned Snapshot, upstream:__shared UpstreamSymbols)
-    {
-        self.init(projector: .init(snapshot: snapshot, upstream: upstream))
+        self.init(hierarchy: hierarchy,
+            declarations: declarations,
+            namespaces: namespaces,
+            snapshot: snapshot)
     }
 }
 extension SnapshotObject
 {
-    subscript(scalar address:GlobalAddress) -> SymbolGraph.Node?
+    func scope(of declaration:Scalar96) -> Scalar96?
     {
-        (address / self.projector).map { self.graph.nodes[$0 as Int32] }
+        self.translator[scalar: declaration].map(self.scope(of:)) ?? nil
     }
-
-    func scope(of address:GlobalAddress) -> GlobalAddress?
+    func scope(of declaration:Int32) -> Scalar96?
     {
-        (address / self.projector).map(self.scope(of:)) ?? nil
-    }
-    func scope(of citizen:Int32) -> GlobalAddress?
-    {
-        self.hierarchy[citizen]
+        self.hierarchy[declaration]
     }
 }
 extension SnapshotObject
 {
-    func project(extension:SymbolGraph.Extension, of scope:GlobalAddress) -> ExtensionProjection
+    func project(extension:SymbolGraph.Extension, of scope:Scalar96) -> ExtensionProjection
     {
         .init(conditions: `extension`.conditions.map
             {
-                $0.map { $0 * self.projector }
+                $0.map { self.declarations[$0] }
             },
             culture: self.translator[culture: `extension`.culture],
             scope: scope,
             conformances: `extension`.conformances.compactMap
             {
-                $0 * self.projector
+                self.declarations[$0]
             },
             features: `extension`.features.compactMap
             {
-                $0 * self.projector
+                self.declarations[$0]
             },
             nested: `extension`.nested.compactMap
             {
-                $0 * self.projector
+                self.declarations[$0]
             })
     }
 }

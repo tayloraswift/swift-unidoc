@@ -74,24 +74,6 @@ extension StaticLinker.Symbolizer
 }
 extension StaticLinker.Symbolizer
 {
-    /// Returns the address of the file with the given identifier,
-    /// registering it in the symbol table if needed.
-    mutating
-    func intern(_ id:FileSymbol) -> Int32
-    {
-        {
-            switch $0
-            {
-            case nil:
-                let address:Int32 = self.graph.files.append(id)
-                $0 = address
-                return address
-
-            case let address?:
-                return address
-            }
-        } (&self.files[id])
-    }
     /// Returns the address of the scalar with the given identifier,
     /// registering it in the symbol table if needed. You should never
     /// call ``allocate(scalar:)`` or ``allocate(extension:)`` after
@@ -111,6 +93,25 @@ extension StaticLinker.Symbolizer
                 return address
             }
         } (&self.scalars[id])
+    }
+
+    /// Returns the address of the file with the given identifier,
+    /// registering it in the symbol table if needed.
+    mutating
+    func intern(_ id:FileSymbol) -> Int32
+    {
+        {
+            switch $0
+            {
+            case nil:
+                let address:Int32 = self.graph.files.append(id)
+                $0 = address
+                return address
+
+            case let address?:
+                return address
+            }
+        } (&self.files[id])
     }
 
     mutating
@@ -139,28 +140,3 @@ extension StaticLinker.Symbolizer
         }
     }
 }
-// extension StaticLinker.Symbolizer
-// {
-//     func excerpt(for overload:CodelinkResolver<Int32>.Overload) -> StaticLinker.Excerpt
-//     {
-//         let scalar:Int32
-//         switch overload.target
-//         {
-//         case .scalar(let address):
-//             scalar = address
-
-//         case .vector(let address, self: _):
-//             scalar = address
-//         }
-
-//         let symbol:ScalarSymbol = self.graph.symbols[scalar]
-//         if  let scalar:SymbolGraph.Scalar = self.graph[scalar]?.scalar
-//         {
-//             return .init(symbol: symbol, fragments: scalar.declaration.expanded.bytecode)
-//         }
-//         else
-//         {
-//             return .init(symbol: symbol, fragments: nil)
-//         }
-//     }
-// }

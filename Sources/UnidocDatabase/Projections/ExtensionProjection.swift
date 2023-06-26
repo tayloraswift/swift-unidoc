@@ -5,29 +5,29 @@ import SymbolGraphs
 struct ExtensionProjection:Equatable, Sendable
 {
     public
-    let conditions:[GenericConstraint<GlobalAddress?>]
+    let conditions:[GenericConstraint<Scalar96?>]
     public
-    let culture:GlobalAddress
+    let culture:Scalar96
     public
-    let scope:GlobalAddress
+    let scope:Scalar96
 
     public
-    var conformances:[GlobalAddress]
+    var conformances:[Scalar96]
     public
-    var features:[GlobalAddress]
+    var features:[Scalar96]
     public
-    var nested:[GlobalAddress]
+    var nested:[Scalar96]
 
     public
-    var subforms:[GlobalAddress]
+    var subforms:[Scalar96]
 
-    init(conditions:[GenericConstraint<GlobalAddress?>],
-        culture:GlobalAddress,
-        scope:GlobalAddress,
-        conformances:[GlobalAddress] = [],
-        features:[GlobalAddress] = [],
-        nested:[GlobalAddress] = [],
-        subforms:[GlobalAddress] = [])
+    init(conditions:[GenericConstraint<Scalar96?>],
+        culture:Scalar96,
+        scope:Scalar96,
+        conformances:[Scalar96] = [],
+        features:[Scalar96] = [],
+        nested:[Scalar96] = [],
+        subforms:[Scalar96] = [])
     {
         self.conditions = conditions
         self.culture = culture
@@ -41,16 +41,16 @@ struct ExtensionProjection:Equatable, Sendable
 }
 extension ExtensionProjection
 {
-    var signature:GlobalSignature
+    var signature:ExtensionSignature
     {
         .init(conditions: self.conditions, culture: self.culture, scope: self.scope)
     }
 
-    init(signature:GlobalSignature,
-        conformances:[GlobalAddress] = [],
-        features:[GlobalAddress] = [],
-        nested:[GlobalAddress] = [],
-        subforms:[GlobalAddress] = [])
+    init(signature:ExtensionSignature,
+        conformances:[Scalar96] = [],
+        features:[Scalar96] = [],
+        nested:[Scalar96] = [],
+        subforms:[Scalar96] = [])
     {
         self.init(conditions: signature.conditions,
             culture: signature.culture,

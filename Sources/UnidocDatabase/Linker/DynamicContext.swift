@@ -27,7 +27,7 @@ extension DynamicContext
 {
     init(currentSnapshot:__owned Snapshot,
         upstreamSnapshots:__owned [Snapshot],
-        upstreamSymbols:__shared UpstreamSymbols)
+        upstreamSymbols:__shared UpstreamScalars)
     {
         var byPackageIdentifier:[PackageIdentifier: SnapshotObject] = .init(
             minimumCapacity: upstreamSnapshots.count)
@@ -63,25 +63,33 @@ extension DynamicContext
         self.current.snapshot.package == package ?
         self.current : self.byPackage[package]
     }
-
-    subscript(scalar address:GlobalAddress) -> SymbolGraph.Scalar?
+}
+extension DynamicContext
+{
+    func expand(_ vector:(self:Scalar96, Scalar96), to length:UInt32 = .max) -> [Scalar96]
     {
-        self[address.package]?[scalar: address]?.scalar
+        self.expand(vector.0, to: length - 1) + [vector.1]
     }
-
-    func expand(_ address:GlobalAddress) -> [GlobalAddress]
+    func expand(_ scalar:Scalar96, to length:UInt32 = .max) -> [Scalar96]
     {
-        var current:GlobalAddress = address
-        var path:[GlobalAddress] = [current]
+        var current:Scalar96 = scalar
+        var path:[Scalar96] = [current]
         //  This prevents us from getting stuck in an infinite loop if one of the
         //  documentation archives is malformed/malicious.
-        var seen:Set<GlobalAddress> = [current]
+        var seen:Set<Scalar96> = [current]
 
-        while   let next:GlobalAddress = self[current.package]?.scope(of: current),
-                case nil = seen.update(with: next)
+        for _:UInt32 in 1 ..< max(1, length)
         {
-            path.append(next)
-            current = next
+            if  let next:Scalar96 = self[current.package]?.scope(of: current),
+                case nil = seen.update(with: next)
+            {
+                path.append(next)
+                current = next
+            }
+            else
+            {
+                break
+            }
         }
 
         return path.reversed()
@@ -111,137 +119,42 @@ extension DynamicContext
             groups[products, default: []].append(c)
         }
 
-        var buffer:[DynamicResolutionGroup?] = .init(repeating: nil,
-            count: self.current.graph.cultures.count)
-
-        for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
+        return .init(unsafeUninitializedCapacity: self.current.graph.cultures.count)
         {
-            var codelinks:CodelinkResolver<GlobalAddress>.Table = .init()
-            var imports:[ModuleIdentifier] = []
-
-            for (package, products):(PackageIdentifier, Set<String>) in
-                dependencies.sorted(by: { $0.key < $1.key })
+            for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
-                guard let object:SnapshotObject = self[package]
-                else
+                var group:DynamicResolutionGroup = .init()
+
+                if  let swift:SnapshotObject = self[.swift]
                 {
-                    continue
+                    group.add(snapshot: swift, context: self, filter: nil)
+                }
+                for (package, products):(PackageIdentifier, Set<String>) in
+                    dependencies.sorted(by: { $0.key < $1.key })
+                {
+                    guard let object:SnapshotObject = self[package]
+                    else
+                    {
+                        continue
+                    }
+
+                    var filter:Set<Int> = []
+                    for product:ProductDetails in object.snapshot.metadata.products where
+                        products.contains(product.name)
+                    {
+                        filter.formUnion(product.cultures)
+                    }
+
+                    group.add(snapshot: object, context: self, filter: filter)
                 }
 
-                var filter:Set<Int> = []
-                for product:ProductDetails in object.snapshot.metadata.products where
-                    products.contains(product.name)
+                for c:Int in cultures
                 {
-                    filter.formUnion(product.cultures)
-                }
-
-                self.populate(codelinks: &codelinks, filter: filter, from: object)
-                imports += filter.sorted().map { object.snapshot.graph.namespaces[$0] }
-            }
-
-            let group:DynamicResolutionGroup = .init(codelinks: codelinks, imports: imports)
-            for c:Int in cultures
-            {
-                buffer[c] = group
-            }
-        }
-        //  We could probably also do this with
-        // ``Array.init(unsafeUninitializedCapacity:initializingWith:)``,
-        //  but that seems unnecessary here.
-        return buffer.map { $0! }
-    }
-}
-extension DynamicContext
-{
-    private
-    func populate(
-        codelinks:inout CodelinkResolver<GlobalAddress>.Table,
-        filter:Set<Int>,
-        from snapshot:SnapshotObject)
-    {
-        for (c, culture):(Int, SymbolGraph.Culture) in zip(
-            snapshot.graph.cultures.indices,
-            snapshot.graph.cultures) where
-            filter.contains(c)
-        {
-            for namespace:SymbolGraph.Namespace in culture.namespaces
-            {
-                self.add(namespace: namespace, filter: filter, from: current, to: &codelinks)
-            }
-        }
-    }
-
-    private
-    func add(namespace:SymbolGraph.Namespace,
-        filter:Set<Int>,
-        from snapshot:SnapshotObject,
-        to codelinks:inout CodelinkResolver<GlobalAddress>.Table)
-    {
-        let qualifier:ModuleIdentifier = snapshot.graph.namespaces[namespace.index]
-        for s:Int32 in namespace.range
-        {
-            let node:SymbolGraph.Node = snapshot.graph.nodes[s]
-            let symbol:ScalarSymbol = snapshot.graph.symbols[s]
-
-            guard let s:GlobalAddress = s * snapshot.projector
-            else
-            {
-                continue
-            }
-
-            if  let citizen:SymbolGraph.Scalar = node.scalar
-            {
-                codelinks[qualifier, citizen.path].overload(with: .init(
-                    target: .scalar(s),
-                    phylum: citizen.phylum,
-                    hash: .init(hashing: "\(symbol)")))
-            }
-            if  node.extensions.isEmpty
-            {
-                continue
-            }
-            //  Extension may extend a scalar from a different package.
-            if  let outer:SymbolGraph.Scalar = node.scalar ?? self[scalar: s]
-            {
-                self.add(extensions: node.extensions,
-                    extending: (s, outer, symbol),
-                    filter: filter,
-                    from: snapshot,
-                    to: &codelinks)
-            }
-        }
-    }
-    private
-    func add(extensions:[SymbolGraph.Extension],
-        extending outer:
-        (
-            address:GlobalAddress,
-            scalar:SymbolGraph.Scalar,
-            symbol:ScalarSymbol
-        ),
-        filter:Set<Int>,
-        from snapshot:SnapshotObject,
-        to codelinks:inout CodelinkResolver<GlobalAddress>.Table)
-    {
-        for `extension`:SymbolGraph.Extension in extensions where
-            !`extension`.features.isEmpty && filter.contains(`extension`.culture)
-        {
-            //  This can be completely different from the namespace of the extended type!
-            let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
-            for f:Int32 in `extension`.features
-            {
-                let symbol:VectorSymbol = .init(snapshot.graph.symbols[f],
-                    self: outer.symbol)
-
-                if  let f:GlobalAddress = f * snapshot.projector,
-                    let inner:SymbolGraph.Scalar = self[scalar: f]
-                {
-                    codelinks[qualifier, outer.scalar.path, inner.path.last].overload(
-                        with: .init(target: .vector(f, self: outer.address),
-                            phylum: inner.phylum,
-                            hash: .init(hashing: "\(symbol)")))
+                    $0.initializeElement(at: c, to: group)
                 }
             }
+
+            $1 = $0.count
         }
     }
 }

@@ -55,6 +55,19 @@ extension Codelink.Path.Component:LexicalContinuation
         }
     }
 }
+extension Codelink.Path.Component:LosslessStringConvertible
+{
+    public
+    init?(_ string:String)
+    {
+        var codepoints:Substring.UnicodeScalarView = string[...].unicodeScalars
+        self.init(parsing: &codepoints)
+        if !codepoints.isEmpty
+        {
+            return nil
+        }
+    }
+}
 extension Codelink.Path.Component
 {
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
