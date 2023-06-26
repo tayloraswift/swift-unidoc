@@ -1,14 +1,13 @@
 import CodelinkResolution
 import Codelinks
 import DoclinkResolution
-import Declarations
 import FNV1
-import Generics
 import LexicalPaths
 import MarkdownSemantics
 import MarkdownParsing
 import MarkdownTrees
 import ModuleGraphs
+import Signatures
 import Sources
 import Symbols
 import SymbolGraphs
@@ -468,7 +467,7 @@ extension StaticLinker
     {
         for (scalar, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
         {
-            let declaration:Declaration<Int32> = decl.declaration.map
+            let signature:Signature<Int32> = decl.signature.map
             {
                 self.symbolizer.intern($0)
             }
@@ -502,14 +501,14 @@ extension StaticLinker
             }
 
             {
-                $0?.declaration = declaration
+                $0?.signature = signature
+                $0?.location = location
+                $0?.article = article
 
                 $0?.superforms = superforms
                 $0?.features = features
                 $0?.origin = origin
 
-                $0?.location = location
-                $0?.article = article
             } (&self.symbolizer.graph.nodes[scalar].decl)
         }
     }

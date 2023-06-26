@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import Generics
+import Signatures
 import SymbolGraphs
 import Testing
 

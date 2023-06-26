@@ -2,7 +2,6 @@ import Codelinks
 import FNV1
 import LexicalPaths
 import ModuleGraphs
-import SymbolGraphs
 
 extension CodelinkResolver
 {

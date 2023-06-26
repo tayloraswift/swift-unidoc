@@ -1,4 +1,4 @@
-import Generics
+import Signatures
 import Unidoc
 
 struct ExtensionSignature:Equatable, Hashable, Sendable

@@ -10,10 +10,9 @@ let package:Package = .init(
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "Codelinks", targets: ["Codelinks"]),
         .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
-        .library(name: "Declarations", targets: ["Declarations"]),
         .library(name: "Doclinks", targets: ["Doclinks"]),
+        .library(name: "DoclinkResolution", targets: ["DoclinkResolution"]),
         .library(name: "FNV1", targets: ["FNV1"]),
-        .library(name: "Generics", targets: ["Generics"]),
 
         .library(name: "HTML", targets: ["HTML"]),
         .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
@@ -38,6 +37,7 @@ let package:Package = .init(
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
+        .library(name: "Signatures", targets: ["Signatures"]),
         .library(name: "Sources", targets: ["Sources"]),
 
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
@@ -97,13 +97,6 @@ let package:Package = .init(
                 .target(name: "Unidoc"),
             ]),
 
-        .target(name: "Declarations", dependencies:
-            [
-                .target(name: "Availability"),
-                .target(name: "Generics"),
-                .target(name: "MarkdownABI")
-            ]),
-
         .target(name: "Doclinks", dependencies:
             [
                 .target(name: "URI"),
@@ -115,8 +108,6 @@ let package:Package = .init(
             ]),
 
         .target(name: "FNV1"),
-
-        .target(name: "Generics"),
 
         .target(name: "HTML"),
 
@@ -191,6 +182,12 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
+        .target(name: "Signatures", dependencies:
+            [
+                .target(name: "Availability"),
+                .target(name: "MarkdownABI")
+            ]),
+
         .target(name: "Sources"),
 
         .target(name: "Symbols", dependencies:
@@ -200,9 +197,9 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphParts", dependencies:
             [
-                .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
+                .target(name: "Signatures"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .product(name: "JSONDecoding", package: "swift-json"),
@@ -211,9 +208,9 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphs", dependencies:
             [
-                .target(name: "Declarations"),
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
+                .target(name: "Signatures"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
 

@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import Generics
+import Signatures
 
 extension GenericConstraint
 {
@@ -16,7 +16,7 @@ extension GenericConstraint
     /// `{ G: "0GenericParameterName.AssociatedType", C: "Array<Int>" }` .
     ///
     /// The nominal (`N`) field is usually integer-typed, but its BSON
-    /// representation is up to the generic ``TypeReference`` parameter.
+    /// representation is up to the generic ``Scalar`` parameter.
     ///
     /// The complex (`C`) field is always a string.
     @frozen public
@@ -28,7 +28,7 @@ extension GenericConstraint
     }
 }
 extension GenericConstraint:BSONDocumentEncodable, BSONEncodable, BSONWeakEncodable
-    where TypeReference:BSONEncodable
+    where Scalar:BSONEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -58,7 +58,7 @@ extension GenericConstraint:BSONDocumentEncodable, BSONEncodable, BSONWeakEncoda
     }
 }
 extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentViewDecodable
-    where TypeReference:BSONDecodable
+    where Scalar:BSONDecodable
 {
     @inlinable public
     init<Bytes>(bson:BSON.DocumentDecoder<CodingKeys, Bytes>) throws
@@ -80,7 +80,7 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
             return (sigil, .init(decoding: $0.slice.dropFirst(), as: Unicode.UTF8.self))
         }
         let expression:TypeExpression
-        if  let type:TypeReference = try bson[.nominal]?.decode()
+        if  let type:Scalar = try bson[.nominal]?.decode()
         {
             expression = .nominal(type)
         }

@@ -1,4 +1,4 @@
-import Generics
+import Signatures
 import Symbols
 
 extension SymbolRelationship

@@ -1,6 +1,6 @@
-import Generics
 import JSONDecoding
 import JSONEncoding
+import Signatures
 
 extension GenericConstraint
 {
@@ -13,8 +13,8 @@ extension GenericConstraint
 }
 extension GenericConstraint.Kind
 {
-    func callAsFunction(_ name:String, is type:GenericConstraint<TypeReference>.TypeExpression)
-        -> GenericConstraint<TypeReference>
+    func callAsFunction(_ name:String,
+        is type:GenericConstraint<Scalar>.TypeExpression) -> GenericConstraint<Scalar>
     {
         switch self
         {

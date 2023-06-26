@@ -1,5 +1,5 @@
-import Generics
 import JSONDecoding
+import Signatures
 import Symbols
 
 extension SymbolDescription

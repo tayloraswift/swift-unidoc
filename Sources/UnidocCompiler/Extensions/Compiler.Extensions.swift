@@ -1,5 +1,5 @@
-import Generics
 import LexicalPaths
+import Signatures
 import Symbols
 import SymbolGraphParts
 
@@ -10,7 +10,7 @@ extension Compiler
     {
         /// Extensions indexed by signature.
         private
-        var groups:[Extension.Signature: ExtensionObject]
+        var groups:[ExtensionSignature: ExtensionObject]
         /// Extensions indexed by block symbol. Extensions are made up of
         /// many constituent extension blocks, so multiple block symbols can
         /// point to the same extension.
@@ -96,7 +96,7 @@ extension Compiler.Extensions
         where conditions:[GenericConstraint<Symbol.Decl>],
         path:UnqualifiedPath) -> Compiler.ExtensionObject
     {
-        let signature:Compiler.Extension.Signature = .init(culture, extended, where: conditions)
+        let signature:Compiler.ExtensionSignature = .init(culture, extended, where: conditions)
         return { $0 }(&self.groups[signature, default: .init(value: .init(
             signature: signature,
             path: path))])

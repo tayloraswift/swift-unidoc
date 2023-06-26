@@ -1,7 +1,7 @@
-import Generics
 import JSONDecoding
+import Signatures
 
-extension GenericSignature:JSONDecodable, JSONObjectDecodable where TypeReference:JSONDecodable
+extension Signature.Generics:JSONDecodable, JSONObjectDecodable where Scalar:JSONDecodable
 {
     public
     enum CodingKeys:String
@@ -9,7 +9,7 @@ extension GenericSignature:JSONDecodable, JSONObjectDecodable where TypeReferenc
         case parameters
         case constraints
     }
-    
+
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {

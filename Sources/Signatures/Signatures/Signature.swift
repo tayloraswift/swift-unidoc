@@ -1,8 +1,7 @@
 import Availability
-import Generics
 
 @frozen public
-struct Declaration<Symbol>:Equatable where Symbol:Hashable
+struct Signature<Scalar>:Equatable where Scalar:Hashable
 {
     public
     var availability:Availability
@@ -11,13 +10,13 @@ struct Declaration<Symbol>:Equatable where Symbol:Hashable
     public
     var expanded:Expanded
     public
-    var generics:GenericSignature<Symbol>
+    var generics:Generics
 
     @inlinable public
     init(availability:Availability = .init(),
         abridged:Abridged = .init(),
         expanded:Expanded = .init(),
-        generics:GenericSignature<Symbol> = .init())
+        generics:Generics = .init())
     {
         self.availability = availability
         self.expanded = expanded
@@ -25,13 +24,13 @@ struct Declaration<Symbol>:Equatable where Symbol:Hashable
         self.generics = generics
     }
 }
-extension Declaration:Sendable where Symbol:Sendable
+extension Signature:Sendable where Scalar:Sendable
 {
 }
-extension Declaration
+extension Signature
 {
     @inlinable public
-    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>
+    func map<T>(_ transform:(Scalar) throws -> T) rethrows -> Signature<T>
     {
         .init(availability: self.availability,
             abridged: .init(bytecode: self.abridged.bytecode),

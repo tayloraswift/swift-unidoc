@@ -1,6 +1,6 @@
 import MarkdownABI
 
-extension Declaration
+extension Signature
 {
     @frozen public
     struct Expanded:Equatable
@@ -8,23 +8,23 @@ extension Declaration
         public
         let bytecode:MarkdownBytecode
         public
-        let links:[Symbol]
+        let links:[Scalar]
 
         @inlinable public
-        init(bytecode:MarkdownBytecode = [], links:[Symbol] = [])
+        init(bytecode:MarkdownBytecode = [], links:[Scalar] = [])
         {
             self.bytecode = bytecode
             self.links = links
         }
     }
 }
-extension Declaration.Expanded:Sendable where Symbol:Sendable
+extension Signature.Expanded:Sendable where Scalar:Sendable
 {
 }
-extension Declaration.Expanded
+extension Signature.Expanded
 {
     @inlinable public
-    func map<T>(_ transform:(Symbol) throws -> T) rethrows -> Declaration<T>.Expanded
+    func map<T>(_ transform:(Scalar) throws -> T) rethrows -> Signature<T>.Expanded
     {
         .init(bytecode: self.bytecode, links: try self.links.map(transform))
     }

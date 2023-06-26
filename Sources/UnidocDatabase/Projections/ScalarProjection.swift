@@ -1,4 +1,4 @@
-import Declarations
+import Signatures
 import Unidoc
 
 @frozen public
@@ -13,7 +13,7 @@ struct ScalarProjection:Equatable, Sendable
     let scope:[Unidoc.Scalar]?
 
     public
-    let declaration:Declaration<Unidoc.Scalar?>
+    let signature:Signature<Unidoc.Scalar?>
 
     public
     var superforms:[Unidoc.Scalar]
@@ -21,13 +21,13 @@ struct ScalarProjection:Equatable, Sendable
     init(id:Unidoc.Scalar,
         culture:Unidoc.Scalar,
         scope:[Unidoc.Scalar]?,
-        declaration:Declaration<Unidoc.Scalar?>)
+        signature:Signature<Unidoc.Scalar?>)
     {
         self.id = id
 
         self.culture = culture
         self.scope = scope
-        self.declaration = declaration
+        self.signature = signature
 
         self.superforms = []
     }

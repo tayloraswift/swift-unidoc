@@ -1,7 +1,8 @@
 import JSONDecoding
 import MarkdownABI
+import Signatures
 
-extension DeclarationFragment
+extension Signature.Fragment
 {
     //  https://github.com/apple/swift/blob/main/lib/SymbolGraphGen/DeclarationFragmentPrinter.cpp
     enum Color:String, Hashable, Equatable, Sendable
@@ -49,7 +50,7 @@ extension DeclarationFragment
         case string
     }
 }
-extension DeclarationFragment.Color
+extension Signature.Fragment.Color
 {
     var highlight:MarkdownBytecode.Context?
     {
@@ -68,6 +69,6 @@ extension DeclarationFragment.Color
         }
     }
 }
-extension DeclarationFragment.Color:JSONDecodable
+extension Signature.Fragment.Color:JSONDecodable
 {
 }

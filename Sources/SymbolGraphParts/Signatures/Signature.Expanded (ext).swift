@@ -1,22 +1,22 @@
-import Declarations
 import MarkdownABI
+import Signatures
 import Symbols
 
-extension Declaration<Symbol.Decl>.Expanded
+extension Signature<Symbol.Decl>.Expanded
 {
-    init(_ fragments:__shared some Sequence<DeclarationFragment>)
+    init(_ fragments:__shared some Sequence<Signature.Fragment>)
     {
-        var references:[Symbol: UInt32] = [:]
-        var referents:[Symbol] = []
+        var references:[Scalar: UInt32] = [:]
+        var referents:[Scalar] = []
         let bytecode:MarkdownBytecode = .init
         {
-            for fragment:DeclarationFragment in fragments
+            for fragment:Signature.Fragment in fragments
             {
                 if let highlight:MarkdownBytecode.Context = fragment.color.highlight
                 {
                     $0[highlight]
                     {
-                        if  let referent:Symbol = fragment.referent
+                        if  let referent:Scalar = fragment.referent
                         {
                             $0[.href] =
                             {

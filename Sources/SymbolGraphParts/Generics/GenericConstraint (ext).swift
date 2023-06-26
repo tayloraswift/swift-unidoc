@@ -1,7 +1,7 @@
-import Generics
 import JSONDecoding
+import Signatures
 
-extension GenericConstraint:JSONObjectDecodable, JSONDecodable where TypeReference:JSONDecodable
+extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSONDecodable
 {
     public
     enum CodingKeys:String
@@ -15,9 +15,9 @@ extension GenericConstraint:JSONObjectDecodable, JSONDecodable where TypeReferen
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         let type:TypeExpression
-        if  let reference:TypeReference = try json[.rhsPrecise]?.decode()
+        if  let scalar:Scalar = try json[.rhsPrecise]?.decode()
         {
-            type = .nominal(reference)
+            type = .nominal(scalar)
         }
         else
         {

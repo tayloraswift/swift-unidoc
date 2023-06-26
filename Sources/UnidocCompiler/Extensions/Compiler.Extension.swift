@@ -1,5 +1,5 @@
-import Generics
 import LexicalPaths
+import Signatures
 import Symbols
 
 extension Compiler
@@ -9,7 +9,7 @@ extension Compiler
     struct Extension
     {
         public
-        let signature:Signature
+        let signature:ExtensionSignature
         /// The full name of the extended type, not including the module namespace prefix.
         public
         let path:UnqualifiedPath
@@ -31,7 +31,7 @@ extension Compiler
         public internal(set)
         var blocks:[Block]
 
-        init(signature:Signature, path:UnqualifiedPath)
+        init(signature:ExtensionSignature, path:UnqualifiedPath)
         {
             self.signature = signature
             self.path = path

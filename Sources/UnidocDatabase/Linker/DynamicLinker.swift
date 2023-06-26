@@ -154,7 +154,7 @@ extension DynamicLinker
                     scalars.append(.init(id: d,
                         culture: c,
                         scope: scope.map { self.context.expand($0) },
-                        declaration: scalar.declaration.map { self.current.decls[$0] }))
+                        signature: scalar.signature.map { self.current.decls[$0] }))
                 }
             }
             if  let articles:ClosedRange<Int32> = culture.articles
