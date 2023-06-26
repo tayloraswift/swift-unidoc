@@ -6,32 +6,31 @@ import Glibc
 import Darwin
 #endif
 
-extension Symbolicator
+public
+struct Demangler:Sendable
 {
-    struct Demangler
+    private
+    typealias Function = @convention(c)
+    (
+        _ name:UnsafePointer<UInt8>?,
+        _ count:Int,
+        _ output:UnsafeMutablePointer<UInt8>?,
+        _ capacity:UnsafeMutablePointer<Int>?,
+        _ flags:UInt32
+    ) -> UnsafeMutablePointer<Int8>?
+
+    private
+    let function:Function
+
+    private
+    init(_ function:Function)
     {
-        private
-        typealias Function = @convention(c)
-        (
-            _ name:UnsafePointer<UInt8>?,
-            _ count:Int,
-            _ output:UnsafeMutablePointer<UInt8>?,
-            _ capacity:UnsafeMutablePointer<Int>?,
-            _ flags:UInt32
-        ) -> UnsafeMutablePointer<Int8>?
-
-        private
-        let function:Function
-
-        private
-        init(_ function:Function)
-        {
-            self.function = function
-        }
+        self.function = function
     }
 }
-extension Symbolicator.Demangler
+extension Demangler
 {
+    public
     func demangle(_ symbol:ScalarSymbol) -> String?
     {
         // '$s'
@@ -51,8 +50,9 @@ extension Symbolicator.Demangler
         }
     }
 }
-extension Symbolicator.Demangler
+extension Demangler
 {
+    public
     init?()
     {
         #if canImport(Glibc) || canImport(Darwin)

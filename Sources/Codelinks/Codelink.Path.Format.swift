@@ -1,6 +1,5 @@
 extension Codelink.Path
 {
-    @frozen public
     enum Format:Equatable, Hashable, Sendable
     {
         /// Legacy DocC format, uses slashes (`/`) as the path separator.

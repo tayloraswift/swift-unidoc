@@ -51,6 +51,10 @@ extension Documentation
         public
         let revision:Repository.Revision?
 
+        /// A prefix to append to file paths when printing diagnostics.
+        public
+        let root:Repository.Root?
+
         public
         init(package:PackageIdentifier,
             triple:Triple,
@@ -59,7 +63,8 @@ extension Documentation
             toolchain:SemanticRef?,
             products:[ProductDetails],
             requirements:[PlatformRequirement] = [],
-            revision:Repository.Revision? = nil)
+            revision:Repository.Revision? = nil,
+            root:Repository.Root? = nil)
         {
             self.package = package
             self.triple = triple
@@ -71,6 +76,7 @@ extension Documentation
 
             self.requirements = requirements
             self.revision = revision
+            self.root = root
         }
     }
 }
@@ -134,13 +140,13 @@ extension Documentation.Metadata
     {
         case package
         case triple
-        case format
-        case revision
         case ref
-        case requirements
         case dependencies
         case toolchain
         case products
+        case requirements
+        case revision
+        case root
     }
 }
 extension Documentation.Metadata:BSONDocumentEncodable
@@ -158,6 +164,7 @@ extension Documentation.Metadata:BSONDocumentEncodable
 
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.revision] = self.revision
+        bson[.root] = self.root
     }
 }
 extension Documentation.Metadata:BSONDocumentDecodable
@@ -172,6 +179,7 @@ extension Documentation.Metadata:BSONDocumentDecodable
             toolchain: try bson[.toolchain]?.decode(),
             products: try bson[.products].decode(),
             requirements: try bson[.requirements]?.decode() ?? [],
-            revision: try bson[.revision]?.decode())
+            revision: try bson[.revision]?.decode(),
+            root: try bson[.root]?.decode())
     }
 }

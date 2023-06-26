@@ -5,10 +5,10 @@ extension DynamicLinker
     struct Extensions
     {
         private
-        var projections:[GlobalSignature: ExtensionProjection]
+        var projections:[ExtensionSignature: ExtensionProjection]
 
         private
-        init(projections:[GlobalSignature: ExtensionProjection])
+        init(projections:[ExtensionSignature: ExtensionProjection])
         {
             self.projections = projections
         }
@@ -16,14 +16,14 @@ extension DynamicLinker
 }
 extension DynamicLinker.Extensions:ExpressibleByDictionaryLiteral
 {
-    init(dictionaryLiteral:(GlobalAddress, Never)...)
+    init(dictionaryLiteral:(Scalar96, Never)...)
     {
         self.init(projections: [:])
     }
 }
 extension DynamicLinker.Extensions
 {
-    subscript(signature:GlobalSignature) -> ExtensionProjection
+    subscript(signature:ExtensionSignature) -> ExtensionProjection
     {
         _read
         {

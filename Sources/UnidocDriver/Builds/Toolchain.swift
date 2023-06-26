@@ -222,7 +222,8 @@ extension Toolchain
             toolchain: self.version,
             products: package.products,
             requirements: manifest.requirements,
-            revision: build.pin?.revision)
+            revision: build.pin?.revision,
+            root: manifest.root)
 
         return .init(metadata: metadata, graph: try await .build(from: artifacts))
     }

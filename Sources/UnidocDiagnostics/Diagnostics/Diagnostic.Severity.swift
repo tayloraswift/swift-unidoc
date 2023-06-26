@@ -1,4 +1,4 @@
-extension StaticDiagnostic
+extension Diagnostic
 {
     @frozen public
     enum Severity:Equatable, Hashable, Comparable
@@ -8,7 +8,7 @@ extension StaticDiagnostic
         case error
     }
 }
-extension StaticDiagnostic.Severity:CustomStringConvertible
+extension Diagnostic.Severity:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -21,7 +21,7 @@ extension StaticDiagnostic.Severity:CustomStringConvertible
         }
     }
 }
-extension StaticDiagnostic.Severity
+extension Diagnostic.Severity
 {
     var color:TerminalColor?
     {

@@ -22,7 +22,7 @@ extension Repository.Root:ExpressibleByStringLiteral
         self.init(stringLiteral)
     }
 }
-extension Repository.Root:LosslessStringConvertible, CustomStringConvertible
+extension Repository.Root:CustomStringConvertible, LosslessStringConvertible
 {
     @inlinable public
     var description:String

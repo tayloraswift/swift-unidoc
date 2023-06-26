@@ -13,6 +13,7 @@ import Sources
 import Symbols
 import SymbolGraphs
 import UnidocCompiler
+import UnidocDiagnostics
 
 public
 struct StaticLinker
@@ -338,8 +339,8 @@ extension StaticLinker
                     switch $0
                     {
                     case nil:
-                        let address:Int32 = self.symbolizer.graph.append(
-                            article: supplement.name)
+                        let address:Int32 = self.symbolizer.graph.articles.append(.init(
+                            id: supplement.name))
                         $0 = address
                         return address
 
@@ -392,7 +393,7 @@ extension StaticLinker
         {
             return .module
         }
-        var context:StaticDiagnostic.Context<Int32>?
+        var context:Diagnostic.Context<Int32>?
         {
             autolink.source.map { .init(of: $0.range, in: source) }
         }
@@ -400,7 +401,7 @@ extension StaticLinker
         guard let codelink:Codelink = .init(autolink.text)
         else
         {
-            throw InvalidAutolinkError.init(autolink: autolink, context: context)
+            throw InvalidAutolinkError<Int32>.init(expression: autolink.text, context: context)
         }
 
         let resolver:CodelinkResolver<Int32> = .init(table: self.codelinks, scope: .init(
@@ -429,7 +430,7 @@ extension StaticLinker
             }
             else
             {
-                throw AmbiguousCodelinkError.init(overloads: overloads,
+                throw InvalidCodelinkError<Int32>.init(overloads: overloads,
                     codelink: codelink,
                     context: context)
             }

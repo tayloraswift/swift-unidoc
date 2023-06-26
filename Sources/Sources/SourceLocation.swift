@@ -30,8 +30,43 @@ extension SourceLocation:Comparable where File:Comparable
         (lhs.file, lhs.position) < (rhs.file, rhs.position)
     }
 }
+extension SourceLocation<Int32>:RawRepresentable
+{
+    @inlinable public
+    var rawValue:Int64
+    {
+        .init(self.file) << 32 | .init(self.position.bits)
+    }
+    @inlinable public
+    init(rawValue:Int64)
+    {
+        self.init(
+            position: .init(bits: .init(truncatingIfNeeded: rawValue)),
+            file: .init(truncatingIfNeeded: rawValue >> 32))
+    }
+}
 extension SourceLocation
 {
+    /// Adds the line and column components of the specified source position
+    /// to this source location, if it can be represented exactly. This is
+    /// useful for computing the absolute location of things within text
+    /// embedded within a larger document, such as a markdown comment within
+    /// a source code file.
+    @inlinable public
+    func translated(by position:SourcePosition, indent:Int = 0) -> Self?
+    {
+        if  let position:SourcePosition = .init(
+                line: self.position.line + position.line,
+                column: self.position.column + position.column + indent)
+        {
+            return .init(position: position, file: self.file)
+        }
+        else
+        {
+            return nil
+        }
+    }
+
     @inlinable public
     func map<T>(_ transform:(File) throws -> T) rethrows -> SourceLocation<T>
     {

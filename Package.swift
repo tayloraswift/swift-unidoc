@@ -48,6 +48,7 @@ let package:Package = .init(
 
         .library(name: "UnidocCompiler", targets: ["UnidocCompiler"]),
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
+        .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocRouting", targets: ["UnidocRouting"]),
@@ -230,9 +231,14 @@ let package:Package = .init(
         .target(name: "UnidocDatabase",
             dependencies:
             [
-                .target(name: "CodelinkResolution"),
                 .target(name: "SymbolGraphs"),
+                .target(name: "UnidocDiagnostics"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
+            ]),
+
+        .target(name: "UnidocDiagnostics", dependencies:
+            [
+                .target(name: "CodelinkResolution"),
             ]),
 
         .target(name: "UnidocDriver", dependencies:
@@ -252,6 +258,7 @@ let package:Package = .init(
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocCompiler"),
+                .target(name: "UnidocDiagnostics"),
                 .target(name: "UnidocRouting"),
             ]),
 

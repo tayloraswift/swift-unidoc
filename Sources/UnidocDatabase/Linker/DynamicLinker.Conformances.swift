@@ -5,10 +5,10 @@ extension DynamicLinker
     struct Conformances
     {
         private
-        var signatures:[GlobalAddress: [GlobalSignature]]
+        var signatures:[Scalar96: [ExtensionSignature]]
 
         private
-        init(signatures:[GlobalAddress: [GlobalSignature]])
+        init(signatures:[Scalar96: [ExtensionSignature]])
         {
             self.signatures = signatures
         }
@@ -16,14 +16,14 @@ extension DynamicLinker
 }
 extension DynamicLinker.Conformances:ExpressibleByDictionaryLiteral
 {
-    init(dictionaryLiteral:(GlobalAddress, Never)...)
+    init(dictionaryLiteral:(Scalar96, Never)...)
     {
         self.init(signatures: [:])
     }
 }
 extension DynamicLinker.Conformances
 {
-    subscript(to protocol:GlobalAddress) -> [GlobalSignature]
+    subscript(to protocol:Scalar96) -> [ExtensionSignature]
     {
         _read
         {

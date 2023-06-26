@@ -13,6 +13,9 @@ struct DynamicLinker
     private
     var extensions:Extensions
 
+    private(set)
+    var diagnoses:[any DynamicDiagnosis]
+
     private
     init(conformances:SymbolGraph.Table<Conformances>,
         context:DynamicContext,
@@ -22,6 +25,7 @@ struct DynamicLinker
         self.context = context
 
         self.extensions = extensions
+        self.diagnoses = []
     }
 }
 extension DynamicLinker
@@ -35,7 +39,7 @@ extension DynamicLinker
             {
                 return [:]
             }
-            guard let scope:GlobalAddress = $0 * context.current.projector
+            guard let scope:Scalar96 = context.current.declarations[$0]
             else
             {
                 return [:]
@@ -51,7 +55,7 @@ extension DynamicLinker
                 //  we only need the conformances if the scalar has unqualified features
                 if case false? = $1.scalar?.features.isEmpty
                 {
-                    for `protocol`:GlobalAddress in projected.conformances
+                    for `protocol`:Scalar96 in projected.conformances
                     {
                         conformances[to: `protocol`].append(projected.signature)
                     }
@@ -79,26 +83,31 @@ extension DynamicLinker
     {
         var scalars:[ScalarProjection] = []
 
-        let groups:[DynamicResolutionGroup] = self.context.groups()
-        for (c, culture):(Int, SymbolGraph.Culture) in zip(
-            self.current.graph.cultures.indices,
-            self.current.graph.cultures)
+        for ((c, culture), group):
+            ((Int, SymbolGraph.Culture), DynamicResolutionGroup) in zip(zip(
+                self.current.graph.cultures.indices,
+                self.current.graph.cultures),
+            self.context.groups())
         {
-            let group:DynamicResolutionGroup = groups[c]
-            let c:GlobalAddress = self.current.translator[culture: c]
+            let qualifier:ModuleIdentifier = self.current.graph.namespaces[c]
+            let c:Scalar96 = self.current.translator[culture: c]
 
             for namespace:SymbolGraph.Namespace in culture.namespaces
             {
-                for citizen:Int32 in namespace.range
+                let qualifier:ModuleIdentifier =
+                    self.current.graph.namespaces[namespace.index]
+
+                for (d, (node, conformances)):
+                    (Int32, (SymbolGraph.Node, Conformances)) in zip(namespace.range, zip(
+                    self.current.graph.nodes[namespace.range],
+                    self.conformances[namespace.range]))
                 {
-                    let conformances:Conformances = self.conformances[citizen]
-                    let scope:GlobalAddress? = self.current.scope(of: citizen)
-                    let node:SymbolGraph.Node = self.current.graph.nodes[citizen]
+                    let scope:Scalar96? = self.current.scope(of: d)
 
                     //  Ceremonial unwraps, should always succeed since we are only iterating
                     //  over module ranges.
-                    guard   let citizen:GlobalAddress = citizen * self.current.projector,
-                            let scalar:SymbolGraph.Scalar = node.scalar
+                    guard   let scalar:SymbolGraph.Scalar = node.scalar,
+                            let d:Scalar96 = self.current.declarations[d]
                     else
                     {
                         continue
@@ -106,13 +115,13 @@ extension DynamicLinker
 
                     for f:Int32 in scalar.features
                     {
-                        if  let `protocol`:GlobalAddress = self.current.scope(of: f),
-                            let f:GlobalAddress = f * self.current.projector
+                        if  let `protocol`:Scalar96 = self.current.scope(of: f),
+                            let f:Scalar96 = self.current.declarations[f]
                         {
                             //  now that we know the address of the feature’s original
                             //  protocol, we can look up the constraints for the
                             //  conformance(s) that conceived it.
-                            for conformance:GlobalSignature in conformances[to: `protocol`]
+                            for conformance:ExtensionSignature in conformances[to: `protocol`]
                             {
                                 self.extensions[conformance].features.append(f)
                             }
@@ -120,28 +129,59 @@ extension DynamicLinker
                     }
                     for s:Int32 in scalar.superforms
                     {
-                        if  let s:GlobalAddress = s * self.current.projector
+                        if  let s:Scalar96 = self.current.declarations[s]
                         {
-                            let implicit:GlobalSignature = .init(conditions: [],
+                            let implicit:ExtensionSignature = .init(conditions: [],
                                 culture: c,
                                 scope: s)
 
-                            self.extensions[implicit].subforms.append(citizen)
+                            self.extensions[implicit].subforms.append(d)
                         }
                     }
 
                     if  let article:SymbolGraph.Article<Never> = scalar.article
                     {
-                        group.link(article: article,
-                            namespace: self.current.graph.namespaces[namespace.index],
+                        var resolver:DynamicResolver = .init(context: self.context,
+                            namespace: qualifier,
+                            group: group,
                             scope: scalar.phylum.scope(trimming: scalar.path))
+
+                        resolver.link(article: article)
+
+                        self.diagnoses += resolver.diagnoses
                     }
 
-                    scalars.append(.init(id: citizen,
+                    scalars.append(.init(id: d,
                         culture: c,
-                        scope: scope.map(self.context.expand),
-                        declaration: scalar.declaration.map { $0 * self.current.projector }))
+                        scope: scope.map { self.context.expand($0) },
+                        declaration: scalar.declaration.map
+                        {
+                            self.current.declarations[$0]
+                        }))
                 }
+            }
+            if  let articles:ClosedRange<Int32> = culture.articles
+            {
+                for article:SymbolGraph.Article<String> in self.current.graph.articles[articles]
+                {
+                    var resolver:DynamicResolver = .init(context: self.context,
+                        namespace: qualifier,
+                        group: group)
+
+                    resolver.link(article: article)
+
+                    self.diagnoses += resolver.diagnoses
+                }
+            }
+            if  let article:SymbolGraph.Article<Never> = culture.article
+            {
+                var resolver:DynamicResolver = .init(context: self.context,
+                    namespace: qualifier,
+                    group: group)
+
+                resolver.link(article: article)
+
+                self.diagnoses += resolver.diagnoses
             }
         }
 

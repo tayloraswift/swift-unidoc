@@ -21,10 +21,10 @@ extension SymbolGraph
         let id:ID?
 
         @inlinable public
-        init(referents:[Referent],
-            overview:MarkdownBytecode,
-            details:MarkdownBytecode,
-            fold:Int?,
+        init(referents:[Referent] = [],
+            overview:MarkdownBytecode = [],
+            details:MarkdownBytecode = [],
+            fold:Int? = nil,
             id:ID? = nil)
         {
             self.referents = referents

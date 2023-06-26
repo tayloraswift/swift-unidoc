@@ -1,6 +1,7 @@
-extension StaticDiagnostic
+extension Diagnostic
 {
-    enum Line
+    @frozen public
+    enum Line:Equatable, Sendable
     {
         case annotation(ClosedRange<Int>)
         case source(String)

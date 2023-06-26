@@ -1,24 +1,7 @@
 import Sources
-import SymbolGraphs
-import Symbols
+import UnidocDiagnostics
 
-extension StaticDiagnostic
-{
-    struct Context<File>
-    {
-        let header:Header?
-        private(set)
-        var lines:[Line]
-
-        private
-        init(header:Header?, lines:[Line] = [])
-        {
-            self.header = header
-            self.lines = lines
-        }
-    }
-}
-extension StaticDiagnostic.Context<Int32>
+extension Diagnostic.Context<Int32>
 {
     init(of subject:SourceText<Int>, in sources:__shared [MarkdownSource])
     {
@@ -26,16 +9,7 @@ extension StaticDiagnostic.Context<Int32>
     }
     init(of range:Range<SourcePosition>, in source:__shared MarkdownSource)
     {
-        if  let origin:SourceLocation<Int32> = source.location
-        {
-            self.init(header: .init(file: origin.file,
-                line: origin.position.line + range.lowerBound.line,
-                column: origin.position.column + range.lowerBound.column))
-        }
-        else
-        {
-            self.init(header: nil)
-        }
+        self.init(location: source.location.map { $0.translated(by: range.lowerBound) } ?? nil)
 
         let source:[Substring] = source.text.split(omittingEmptySubsequences: false,
             whereSeparator: \.isNewline)
@@ -55,12 +29,5 @@ extension StaticDiagnostic.Context<Int32>
                 self.lines.append(.annotation(start ... max(start, end - 1)))
             }
         }
-    }
-
-    func symbolicated(with symbolicator:Symbolicator) -> StaticDiagnostic.Context<String>
-    {
-        .init(
-            header: self.header.map { $0.symbolicated(with: symbolicator) },
-            lines: self.lines)
     }
 }

@@ -1,14 +1,14 @@
 import FNV1
 
-extension Codelink.Path
+extension Codelink
 {
     enum Suffix
     {
-        case filter(Codelink.Filter?)
+        case filter(Filter?)
         case hash(FNV24)
     }
 }
-extension Codelink.Path.Suffix
+extension Codelink.Suffix
 {
     var hash:FNV24?
     {
@@ -22,7 +22,7 @@ extension Codelink.Path.Suffix
         }
     }
 }
-extension Codelink.Path.Suffix
+extension Codelink.Suffix
 {
     init(_ description:Substring)
     {

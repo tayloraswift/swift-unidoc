@@ -1,4 +1,5 @@
 import FNV1
+import LexicalPaths
 
 @frozen public
 struct Codelink:Equatable, Hashable, Sendable
@@ -26,48 +27,33 @@ extension Codelink:CustomStringConvertible
     public
     var description:String
     {
-        switch self.path.format
+        var words:[String] = []
+
+        switch self.filter?.keywords
         {
-        case .unidoc:
-            var words:[String] = []
+        case nil:
+            break
 
-            switch self.filter?.keywords
-            {
-            case nil:
-                break
+        case (let first, nil)?:
+            words = [first.rawValue]
 
-            case (let first, nil)?:
-                words = [first.rawValue]
-
-            case (let first, let second?)?:
-                words = [first.rawValue, second.rawValue]
-            }
-
-            if let scope:Scope = self.scope
-            {
-                words.append(scope.description)
-            }
-
-            words.append(self.path.components.joined(separator: "."))
-
-            if let hash:FNV24 = self.hash
-            {
-                words.append("[\(hash)]")
-            }
-
-            return words.joined(separator: " ")
-
-        case .legacy:
-            let path:String = self.path.components.joined(separator: "/")
-            if  let suffix:String = self.hash?.description ?? self.filter?.suffix
-            {
-                return "\(path)-\(suffix)"
-            }
-            else
-            {
-                return path
-            }
+        case (let first, let second?)?:
+            words = [first.rawValue, second.rawValue]
         }
+
+        if  let scope:Scope = self.scope
+        {
+            words.append("\(scope)")
+        }
+
+        words.append("\(self.path)")
+
+        if let hash:FNV24 = self.hash
+        {
+            words.append("[\(hash)]")
+        }
+
+        return words.joined(separator: " ")
     }
 }
 extension Codelink:LosslessStringConvertible
@@ -77,12 +63,13 @@ extension Codelink:LosslessStringConvertible
     {
         var string:Substring = string[...]
 
-        var suffix:Path.Suffix? = .hash(trimming: &string)
+        var format:Path.Format = .unidoc
+        var suffix:Suffix? = .hash(trimming: &string)
 
         var words:ArraySlice<Substring> = string.split(separator: " ")[...]
 
         guard   let path:Substring = words.popLast(),
-                let path:Path = .init(path, suffix: &suffix)
+                let path:Path = .init(path, format: &format, suffix: &suffix)
         else
         {
             return nil
@@ -91,7 +78,7 @@ extension Codelink:LosslessStringConvertible
         //  legacy DocC links cannot use unidoc features
         if !words.isEmpty
         {
-            if case .legacy = path.format
+            if case .legacy = format
             {
                 return nil
             }
@@ -140,7 +127,7 @@ extension Codelink:LosslessStringConvertible
             }
         }
 
-        self.init(keywords: keywords, scope: scope, path: path, suffix: suffix)
+        self.init(keywords: keywords, scope: scope, path: path, format: format, suffix: suffix)
     }
 }
 extension Codelink
@@ -149,11 +136,12 @@ extension Codelink
     init?(keywords:(first:Keyword, second:Keyword?)?,
         scope:Scope?,
         path:Path,
-        suffix:Path.Suffix?)
+        format:Path.Format,
+        suffix:Suffix?)
     {
         let filter:Filter?
 
-        switch path.format
+        switch format
         {
         case .unidoc:
             switch (keywords, path.components.last)

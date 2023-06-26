@@ -7,20 +7,17 @@ extension Codelink
     {
         public
         var components:LexicalComponents<Component>
-        public
-        var format:Format
 
-        private
-        init(components:LexicalComponents<Component>, format:Format = .unidoc)
+        @inlinable public
+        init(components:LexicalComponents<Component>)
         {
             self.components = components
-            self.format = format
         }
     }
 }
 extension Codelink.Path
 {
-    init?(_ description:Substring, suffix:inout Suffix?)
+    init?(_ description:Substring, format:inout Format, suffix:inout Codelink.Suffix?)
     {
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
 
@@ -38,13 +35,13 @@ extension Codelink.Path
             switch (self.components.last, separator, suffix)
             {
             case (_,                "-", nil):
-                self.format = .legacy
+                format = .legacy
                 suffix = .init(.init(codepoints))
                 //  we know we already consumed all remaining input
                 return
 
             case (.nominal(_, nil), "/", nil):
-                self.format = .legacy
+                format = .legacy
                 fallthrough
 
             case (.nominal(_, nil), ".", _):
@@ -67,5 +64,13 @@ extension Codelink.Path
         {
             return nil
         }
+    }
+}
+extension Codelink.Path:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        self.components.joined(separator: ".")
     }
 }
