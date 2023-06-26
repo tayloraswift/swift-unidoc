@@ -5,17 +5,18 @@ import JSONDecoding
 import LexicalPaths
 import Sources
 import Symbols
+import Unidoc
 
 @frozen public
 struct SymbolDescription:Equatable, Sendable
 {
     public
-    let usr:UnifiedSymbol
+    let usr:Symbol
     public
-    let phylum:UnifiedPhylum
+    let phylum:Unidoc.Phylum
 
     public
-    let declaration:Declaration<ScalarSymbol>
+    let declaration:Declaration<Symbol.Decl>
     public
     let doccomment:Doccomment?
     public
@@ -33,9 +34,9 @@ struct SymbolDescription:Equatable, Sendable
     let path:UnqualifiedPath
 
     private
-    init(_ usr:UnifiedSymbol,
-        phylum:UnifiedPhylum,
-        declaration:Declaration<ScalarSymbol>,
+    init(_ usr:Symbol,
+        phylum:Unidoc.Phylum,
+        declaration:Declaration<Symbol.Decl>,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         visibility:Visibility,
@@ -59,8 +60,8 @@ struct SymbolDescription:Equatable, Sendable
 extension SymbolDescription
 {
     private
-    init(_ usr:UnifiedSymbol,
-        phylum:UnifiedPhylum,
+    init(_ usr:Symbol,
+        phylum:Unidoc.Phylum,
         availability:Availability,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
@@ -68,11 +69,11 @@ extension SymbolDescription
         expanded:__shared [DeclarationFragment],
         abridged:__shared [DeclarationFragment],
         extension:ExtensionContext,
-        generics:GenericSignature<ScalarSymbol>,
+        generics:GenericSignature<Symbol.Decl>,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
     {
-        var phylum:UnifiedPhylum = phylum
+        var phylum:Unidoc.Phylum = phylum
 
         for fragment:DeclarationFragment
             in expanded where fragment.color == .keyword
@@ -81,15 +82,15 @@ extension SymbolDescription
             {
             //  Heuristic for inferring actor types
             case "actor":
-                phylum = .scalar(.actor)
+                phylum = .decl(.actor)
 
             //  Heuristic for inferring class members
             case "class":
                 switch phylum
                 {
-                case .scalar(.func(.static)):       phylum = .scalar(.func(.class))
-                case .scalar(.subscript(.static)):  phylum = .scalar(.subscript(.class))
-                case .scalar(.var(.static)):        phylum = .scalar(.var(.class))
+                case .decl(.func(.static)):       phylum = .decl(.func(.class))
+                case .decl(.subscript(.static)):  phylum = .decl(.subscript(.class))
+                case .decl(.var(.static)):        phylum = .decl(.var(.class))
                 default:                            break
                 }
 
@@ -100,8 +101,8 @@ extension SymbolDescription
             break
         }
 
-        let declaration:Declaration<ScalarSymbol>
-        if  case .scalar(.actor) = phylum
+        let declaration:Declaration<Symbol.Decl>
+        if  case .decl(.actor) = phylum
         {
             //  SymbolGraphGen incorrectly prints the fragment as 'class' in
             //  the abridged signature

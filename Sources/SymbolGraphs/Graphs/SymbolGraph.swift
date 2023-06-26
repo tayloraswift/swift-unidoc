@@ -15,32 +15,40 @@ struct SymbolGraph:Equatable, Sendable
     public
     var cultures:[Culture]
 
+
+    @available(*, deprecated, renamed: "decls")
     public
-    var symbols:Table<ScalarSymbol>
-    public
-    var nodes:Table<Node>
+    var symbols:Table<Symbol.Decl>
+    {
+        _read   { yield  self.decls }
+        _modify { yield &self.decls }
+    }
 
     public
     var articles:Plane<Articles, Article<String>>
     public
-    var files:Plane<Files, FileSymbol>
+    var files:Plane<Files, Symbol.File>
+    public
+    var decls:Table<Symbol.Decl>
+    public
+    var nodes:Table<Node>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
-        symbols:Table<ScalarSymbol> = [],
-        nodes:Table<Node> = [],
         articles:Plane<Articles, Article<String>> = [],
-        files:Plane<Files, FileSymbol> = [])
+        files:Plane<Files, Symbol.File> = [],
+        decls:Table<Symbol.Decl> = [],
+        nodes:Table<Node> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
 
-        self.symbols = symbols
-        self.nodes = nodes
 
         self.articles = articles
         self.files = files
+        self.decls = decls
+        self.nodes = nodes
     }
 }
 extension SymbolGraph
@@ -57,10 +65,10 @@ extension SymbolGraph
     /// Appends a new node to the symbol graph, and its associated symbol to the
     /// symbol. This function doesn’t check for duplicates.
     @inlinable public mutating
-    func append(_ scalar:SymbolGraph.Scalar?, id:ScalarSymbol) -> Int32
+    func append(_ citizen:SymbolGraph.Decl?, id:Symbol.Decl) -> Int32
     {
-        let symbol:Int32 = self.symbols.append(id)
-        let node:Int32 = self.nodes.append(.init(scalar: scalar))
+        let symbol:Int32 = self.decls.append(id)
+        let node:Int32 = self.nodes.append(.init(decl: citizen))
         assert(symbol == node)
         return node
     }
@@ -86,7 +94,7 @@ extension SymbolGraph
     @inlinable public
     var citizens:Citizens
     {
-        .init(symbols: self.symbols, nodes: self.nodes)
+        .init(symbols: self.decls, nodes: self.nodes)
     }
 }
 extension SymbolGraph
@@ -94,14 +102,14 @@ extension SymbolGraph
     @inlinable public
     func link<T>(
         static transform:(Int32) throws -> T,
-        dynamic:(ScalarSymbol) throws -> T) rethrows -> Table<T>
+        dynamic:(Symbol.Decl) throws -> T) rethrows -> Table<T>
     {
-        var elements:[T] = [] ; elements.reserveCapacity(self.symbols.count)
+        var elements:[T] = [] ; elements.reserveCapacity(self.decls.count)
 
-        for index:Int32 in self.symbols.indices
+        for index:Int32 in self.decls.indices
         {
             elements.append(self.citizens.contains(index) ? try transform(index) :
-                try dynamic(self.symbols[index]))
+                try dynamic(self.decls[index]))
         }
 
         return .init(elements: elements)
@@ -114,10 +122,10 @@ extension SymbolGraph
     {
         case namespaces
         case cultures
-        case symbols
-        case nodes
         case articles
         case files
+        case decls
+        case nodes
     }
 }
 extension SymbolGraph:BSONDocumentEncodable
@@ -127,10 +135,10 @@ extension SymbolGraph:BSONDocumentEncodable
     {
         bson[.namespaces] = self.namespaces
         bson[.cultures] = self.cultures
-        bson[.symbols] = self.symbols
-        bson[.nodes] = self.nodes.elements
         bson[.articles] = self.articles
         bson[.files] = self.files
+        bson[.decls] = self.decls
+        bson[.nodes] = self.nodes
     }
 }
 extension SymbolGraph:BSONDocumentDecodable
@@ -141,9 +149,9 @@ extension SymbolGraph:BSONDocumentDecodable
         self.init(
             namespaces: try bson[.namespaces].decode(),
             cultures: try bson[.cultures].decode(),
-            symbols: try bson[.symbols].decode(),
-            nodes: try bson[.nodes].decode(),
             articles: try bson[.articles].decode(),
-            files: try bson[.files].decode())
+            files: try bson[.files].decode(),
+            decls: try bson[.decls].decode(),
+            nodes: try bson[.nodes].decode())
     }
 }

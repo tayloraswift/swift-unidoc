@@ -13,16 +13,16 @@ extension StaticLinker
         private
         var modules:[ModuleIdentifier: Int]
         private
-        var scalars:[ScalarSymbol: Int32]
+        var decls:[Symbol.Decl: Int32]
         private
-        var files:[FileSymbol: Int32]
+        var files:[Symbol.File: Int32]
 
         var graph:SymbolGraph
 
         init(modules:[ModuleDetails])
         {
             self.modules = [:]
-            self.scalars = [:]
+            self.decls = [:]
             self.files = [:]
 
             self.graph = .init(modules: modules)
@@ -31,85 +31,85 @@ extension StaticLinker
 }
 extension StaticLinker.Symbolizer
 {
-    /// Indexes the given scalar and appends it to the symbol graph.
+    /// Indexes the given declaration and appends it to the symbol graph.
     ///
     /// This function only populates basic information (flags and path)
-    /// about the scalar, the rest should only be added after completing
-    /// a full pass over all the scalars and extensions.
+    /// about the declaration, the rest should only be added after completing
+    /// a full pass over all the declarations and extensions.
     ///
     /// This function doesn’t check for duplicates.
     mutating
-    func allocate(scalar:Compiler.Scalar) -> Int32
+    func allocate(decl:Compiler.Decl) -> Int32
     {
-        let address:Int32 = self.graph.append(.init(phylum: scalar.phylum,
-                aperture: scalar.aperture,
-                path: scalar.path),
-            id: scalar.id)
+        let scalar:Int32 = self.graph.append(.init(phylum: decl.phylum,
+                aperture: decl.aperture,
+                path: decl.path),
+            id: decl.id)
 
-        self.scalars[scalar.id] = address
-        return address
+        self.decls[decl.id] = scalar
+        return scalar
     }
-    /// Indexes the scalar extended by the given extension and appends
-    /// the (empty) scalar to the symbol graph, if it has not already
+    /// Indexes the declaration extended by the given extension and appends
+    /// the (empty) declaration to the symbol graph, if it has not already
     /// been indexed. (This function checks for duplicates.)
     mutating
     func allocate(extension:Compiler.Extension) -> Int32
     {
-        let scalar:ScalarSymbol = `extension`.extended.type
-        let address:Int32 =
+        let decl:Symbol.Decl = `extension`.extended.type
+        let scalar:Int32 =
         {
             switch $0
             {
             case nil:
-                let address:Int32 = self.graph.append(nil, id: scalar)
-                $0 = address
-                return address
+                let scalar:Int32 = self.graph.append(nil, id: decl)
+                $0 = scalar
+                return scalar
 
-            case let address?:
-                return address
+            case let scalar?:
+                return scalar
             }
-        } (&self.scalars[scalar])
-        return address
+        } (&self.decls[decl])
+        return scalar
     }
 }
 extension StaticLinker.Symbolizer
 {
-    /// Returns the address of the scalar with the given identifier,
+    /// Returns the scalar for the given declaration symbol,
     /// registering it in the symbol table if needed. You should never
-    /// call ``allocate(scalar:)`` or ``allocate(extension:)`` after
+    /// call ``allocate(decl:)`` or ``allocate(extension:)`` after
     /// calling this function.
     mutating
-    func intern(_ id:ScalarSymbol) -> Int32
+    func intern(_ id:Symbol.Decl) -> Int32
     {
         {
             switch $0
             {
             case nil:
-                let address:Int32 = self.graph.symbols.append(id)
-                $0 = address
-                return address
+                let scalar:Int32 = self.graph.decls.append(id)
+                $0 = scalar
+                return scalar
 
-            case let address?:
-                return address
+            case let scalar?:
+                return scalar
             }
-        } (&self.scalars[id])
+        } (&self.decls[id])
     }
 
-    /// Returns the address of the file with the given identifier,
+    /// Returns the scalar for the given file symbol,
     /// registering it in the symbol table if needed.
     mutating
-    func intern(_ id:FileSymbol) -> Int32
+    func intern(_ id:Symbol.File) -> Int32
     {
         {
             switch $0
             {
             case nil:
-                let address:Int32 = self.graph.files.append(id)
-                $0 = address
-                return address
+                let scalar:Int32 = self.graph.files.append(id)
+                $0 = scalar
+                return scalar
 
-            case let address?:
-                return address
+            case let scalar?:
+                return scalar
             }
         } (&self.files[id])
     }

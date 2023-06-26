@@ -1,6 +1,6 @@
-import SymbolGraphs
+import Unidoc
 import UnidocDiagnostics
 
-extension InvalidAutolinkError<Scalar96>:DynamicDiagnosis
+extension InvalidAutolinkError<Unidoc.Scalar>:DynamicDiagnosis
 {
 }

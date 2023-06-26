@@ -1,10 +1,10 @@
 import Codelinks
-import Symbols
+import Unidoc
 
 extension Codelink.Filter.Subscript
 {
     @inlinable public static
-    func ~= (lhs:Self, rhs:ScalarPhylum.Objectivity) -> Bool
+    func ~= (lhs:Self, rhs:Unidoc.Decl.Objectivity) -> Bool
     {
         switch (lhs, rhs)
         {

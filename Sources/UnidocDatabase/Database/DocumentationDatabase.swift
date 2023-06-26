@@ -87,7 +87,7 @@ extension DocumentationDatabase
 
         for snapshot:Snapshot in dependencies
         {
-            for (citizen, symbol):(Int32, ScalarSymbol) in snapshot.graph.citizens
+            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.citizens
             {
                 upstream.citizens[symbol] = snapshot.translator[citizen: citizen]
             }

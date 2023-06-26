@@ -9,7 +9,7 @@ extension Compiler.Extension
         /// The generic constraints of the relevant extension group.
         /// An empty array represents an unconstrained extension.
         public
-        let conditions:[GenericConstraint<ScalarSymbol>]
+        let conditions:[GenericConstraint<Symbol.Decl>]
         /// The type extended by the relevant extension group.
         public
         let extended:Compiler.ExtendedType
@@ -18,7 +18,7 @@ extension Compiler.Extension
 
         public
         init(_ culture:Int, _ extended:Compiler.ExtendedType,
-            where conditions:[GenericConstraint<ScalarSymbol>])
+            where conditions:[GenericConstraint<Symbol.Decl>])
         {
             self.conditions = conditions
             self.culture = culture

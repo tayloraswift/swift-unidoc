@@ -1,10 +1,10 @@
 import Codelinks
-import Symbols
+import Unidoc
 
 extension Codelink.Filter
 {
     @inlinable public static
-    func ~= (lhs:Self, rhs:ScalarPhylum) -> Bool
+    func ~= (lhs:Self, rhs:Unidoc.Decl) -> Bool
     {
         switch  (lhs, rhs)
         {
@@ -21,7 +21,7 @@ extension Codelink.Filter
                 (.typealias,            .enum),
                 (.typealias,            .struct):
             return true
-        
+
         case    (.actor,                _),
                 (.associatedtype,       _),
                 (.case,                 _),
@@ -32,14 +32,14 @@ extension Codelink.Filter
                 (.struct,               _),
                 (.typealias,            _):
             return false
-        
+
         case    (.subscript(let lhs),   .subscript(let rhs)):
             return lhs ~= rhs
 
         case    (.func(let lhs),        .func(let rhs)),
                 (.var(let lhs),         .var(let rhs)):
             return lhs ~= rhs
-        
+
         case    (.subscript, _),
                 (.func, _),
                 (.var, _):

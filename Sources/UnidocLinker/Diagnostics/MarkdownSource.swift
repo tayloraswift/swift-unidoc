@@ -18,7 +18,7 @@ struct MarkdownSource
 }
 extension MarkdownSource
 {
-    init(from comment:__shared Compiler.Documentation.Comment, in file:Int32?)
+    init(from comment:__shared Compiler.Doccomment, in file:Int32?)
     {
         if  let position:SourcePosition = comment.start,
             let file:Int32

@@ -19,14 +19,14 @@ extension CodelinkResolver
         }
     }
 }
-extension CodelinkResolver.Table:Sendable where Address:Sendable
+extension CodelinkResolver.Table:Sendable where Scalar:Sendable
 {
 }
 extension CodelinkResolver.Table
 {
     @inlinable public
     subscript(namespace:ModuleIdentifier,
-        path:UnqualifiedPath) -> CodelinkResolver<Address>.Overloads
+        path:UnqualifiedPath) -> CodelinkResolver<Scalar>.Overloads
     {
         _read
         {
@@ -40,7 +40,7 @@ extension CodelinkResolver.Table
     @inlinable public
     subscript(namespace:ModuleIdentifier,
         path:UnqualifiedPath,
-        last:String) -> CodelinkResolver<Address>.Overloads
+        last:String) -> CodelinkResolver<Scalar>.Overloads
     {
         _read
         {
@@ -56,9 +56,9 @@ extension CodelinkResolver.Table
 {
     func query(_ path:[String],
         filter:Codelink.Filter?,
-        hash:FNV24?) -> CodelinkResolver<Address>.Overloads?
+        hash:FNV24?) -> CodelinkResolver<Scalar>.Overloads?
     {
-        let overloads:CodelinkResolver<Address>.Overloads = self.query(path,
+        let overloads:CodelinkResolver<Scalar>.Overloads = self.query(path,
             filter: filter,
             hash: hash)
         if  case .some(let overloads) = overloads, overloads.isEmpty
@@ -72,7 +72,7 @@ extension CodelinkResolver.Table
     }
     func query(_ path:[String],
         filter:Codelink.Filter?,
-        hash:FNV24?) -> CodelinkResolver<Address>.Overloads
+        hash:FNV24?) -> CodelinkResolver<Scalar>.Overloads
     {
         switch (self.entries[.join(path), default: .some([])], hash, filter)
         {

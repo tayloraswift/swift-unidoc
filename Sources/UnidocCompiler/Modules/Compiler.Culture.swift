@@ -20,7 +20,7 @@ extension Compiler
 }
 extension Compiler.Culture
 {
-    func resolve(uri:String) throws -> FileSymbol
+    func resolve(uri:String) throws -> Symbol.File
     {
         guard   let root:Repository.Root = self.root
         else
@@ -50,7 +50,7 @@ extension Compiler.Culture
         return .init(.init(uri[start...].drop { $0 == "/" }))
     }
 
-    func filter(doccomment:SymbolDescription.Doccomment) -> Compiler.Documentation.Comment?
+    func filter(doccomment:SymbolDescription.Doccomment) -> Compiler.Doccomment?
     {
         switch doccomment.culture
         {

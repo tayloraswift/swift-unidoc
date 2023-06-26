@@ -6,12 +6,12 @@ extension SymbolRelationship
     struct Extension:Equatable, Hashable, Sendable
     {
         public
-        let source:BlockSymbol
+        let source:Symbol.Block
         public
-        let target:ScalarSymbol
+        let target:Symbol.Decl
 
         @inlinable public
-        init(_ source:BlockSymbol, of target:ScalarSymbol)
+        init(_ source:Symbol.Block, of target:Symbol.Decl)
         {
             self.source = source
             self.target = target

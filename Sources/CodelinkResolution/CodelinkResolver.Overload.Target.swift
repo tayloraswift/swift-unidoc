@@ -3,10 +3,10 @@ extension CodelinkResolver.Overload
     @frozen public
     enum Target:Equatable, Hashable
     {
-        case scalar(Address)
-        case vector(Address, self:Address)
+        case scalar(Scalar)
+        case vector(Scalar, self:Scalar)
     }
 }
-extension CodelinkResolver.Overload.Target:Sendable where Address:Sendable
+extension CodelinkResolver.Overload.Target:Sendable where Scalar:Sendable
 {
 }

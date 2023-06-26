@@ -14,10 +14,10 @@ extension SymbolGraphVersionError:CustomStringConvertible
         switch self
         {
         case .unsupported(let version):
-            return "Symbolgraph has unsupported format version '\(version)'."
-        
+            return "Symbol graph has unsupported format version '\(version)'."
+
         case .inconsistent(let versions):
-            return "Symbolgraph has inconsistent format versions \(versions)."
+            return "Symbol graph has inconsistent format versions \(versions)."
         }
     }
 }

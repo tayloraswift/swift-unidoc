@@ -1,29 +1,31 @@
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
+import Unidoc
 
 final
 class SnapshotObject:Sendable
 {
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
-    let hierarchy:[Int32: Scalar96]
-
-    let declarations:SymbolGraph.Table<Scalar96?>
-    let namespaces:[Scalar96?]
+    let hierarchy:[Int32: Unidoc.Scalar]
 
     let snapshot:Snapshot
 
+    let namespaces:[Unidoc.Scalar?]
+    let decls:SymbolGraph.Table<Unidoc.Scalar?>
+
+
     private
-    init(hierarchy:[Int32: Scalar96],
-        declarations:SymbolGraph.Table<Scalar96?>,
-        namespaces:[Scalar96?],
-        snapshot:Snapshot)
+    init(snapshot:Snapshot,
+        hierarchy:[Int32: Unidoc.Scalar],
+        namespaces:[Unidoc.Scalar?],
+        decls:SymbolGraph.Table<Unidoc.Scalar?>)
     {
+        self.snapshot = snapshot
         self.hierarchy = hierarchy
-            self.declarations = declarations
-            self.namespaces = namespaces
-            self.snapshot = snapshot
+        self.namespaces = namespaces
+        self.decls = decls
     }
 }
 extension SnapshotObject
@@ -31,8 +33,8 @@ extension SnapshotObject
     var translator:Snapshot.Translator { self.snapshot.translator }
     var graph:SymbolGraph { self.snapshot.graph }
 
-    var files:Snapshot.View<FileSymbol> { .init(self.snapshot) }
-    var symbols:Snapshot.View<ScalarSymbol> { .init(self.snapshot) }
+    var files:Snapshot.View<Symbol.File> { .init(self.snapshot) }
+    var symbols:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
     var nodes:Snapshot.View<SymbolGraph.Node> { .init(self.snapshot) }
 }
 extension SnapshotObject
@@ -42,7 +44,7 @@ extension SnapshotObject
     {
         let translator:Snapshot.Translator = snapshot.translator
 
-        let declarations:SymbolGraph.Table<Scalar96?> = snapshot.graph.link
+        let decls:SymbolGraph.Table<Unidoc.Scalar?> = snapshot.graph.link
         {
             translator[citizen: $0]
         }
@@ -51,12 +53,12 @@ extension SnapshotObject
             upstream.citizens[$0]
         }
 
-        let namespaces:[Scalar96?] = snapshot.graph.namespaces.map
+        let namespaces:[Unidoc.Scalar?] = snapshot.graph.namespaces.map
         {
             upstream.cultures[$0]
         }
 
-        var hierarchy:[Int32: Scalar96] = [:]
+        var hierarchy:[Int32: Unidoc.Scalar] = [:]
             hierarchy.reserveCapacity(snapshot.graph.nodes.count)
 
         for (n, node):(Int32, SymbolGraph.Node) in zip(
@@ -68,49 +70,37 @@ extension SnapshotObject
                 for nested:Int32 in `extension`.nested where
                     snapshot.graph.citizens.contains(nested)
                 {
-                    hierarchy[nested] = declarations[n]
+                    hierarchy[nested] = decls[n]
                 }
             }
         }
 
-        self.init(hierarchy: hierarchy,
-            declarations: declarations,
+        self.init(snapshot: snapshot,
+            hierarchy: hierarchy,
             namespaces: namespaces,
-            snapshot: snapshot)
+            decls: decls)
     }
 }
 extension SnapshotObject
 {
-    func scope(of declaration:Scalar96) -> Scalar96?
+    func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
     {
         self.translator[scalar: declaration].map(self.scope(of:)) ?? nil
     }
-    func scope(of declaration:Int32) -> Scalar96?
+    func scope(of declaration:Int32) -> Unidoc.Scalar?
     {
         self.hierarchy[declaration]
     }
 }
 extension SnapshotObject
 {
-    func project(extension:SymbolGraph.Extension, of scope:Scalar96) -> ExtensionProjection
+    func project(extension:SymbolGraph.Extension, of scope:Unidoc.Scalar) -> ExtensionProjection
     {
-        .init(conditions: `extension`.conditions.map
-            {
-                $0.map { self.declarations[$0] }
-            },
+        .init(conditions: `extension`.conditions.map { $0.map { self.decls[$0] } },
             culture: self.translator[culture: `extension`.culture],
             scope: scope,
-            conformances: `extension`.conformances.compactMap
-            {
-                self.declarations[$0]
-            },
-            features: `extension`.features.compactMap
-            {
-                self.declarations[$0]
-            },
-            nested: `extension`.nested.compactMap
-            {
-                self.declarations[$0]
-            })
+            conformances: `extension`.conformances.compactMap { self.decls[$0] },
+            features: `extension`.features.compactMap { self.decls[$0] },
+            nested: `extension`.nested.compactMap { self.decls[$0] })
     }
 }

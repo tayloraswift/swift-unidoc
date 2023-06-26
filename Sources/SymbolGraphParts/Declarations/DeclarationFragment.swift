@@ -7,12 +7,12 @@ struct DeclarationFragment:Equatable, Hashable, Sendable
     public
     let spelling:String
     public
-    let referent:ScalarSymbol?
+    let referent:Symbol.Decl?
     public
     let color:Color
 
     @inlinable public
-    init(_ spelling:String, referent:ScalarSymbol? = nil, color:Color)
+    init(_ spelling:String, referent:Symbol.Decl? = nil, color:Color)
     {
         self.spelling = spelling
         self.referent = referent
@@ -26,12 +26,12 @@ extension DeclarationFragment
         switch  (self.color, self.spelling)
         {
         case    (.label, _),
-                (.identifier, _), 
+                (.identifier, _),
                 (.keyword, "init"),
                 (.keyword, "deinit"),
                 (.keyword, "subscript"):
             return true
-        
+
         case _:
             return false
         }

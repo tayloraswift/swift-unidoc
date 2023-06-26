@@ -1,4 +1,5 @@
 import Symbols
+import Unidoc
 
 extension SymbolRelationship
 {
@@ -6,14 +7,14 @@ extension SymbolRelationship
     struct Membership:Equatable, Hashable, Sendable
     {
         public
-        let source:UnifiedSymbol
+        let source:Symbol
         public
-        let target:UnifiedSymbol
+        let target:Symbol
         public
-        let origin:ScalarSymbol?
+        let origin:Symbol.Decl?
 
         @inlinable public
-        init(of source:UnifiedSymbol, in target:UnifiedSymbol, origin:ScalarSymbol? = nil)
+        init(of source:Symbol, in target:Symbol, origin:Symbol.Decl? = nil)
         {
             self.source = source
             self.target = target
@@ -24,13 +25,13 @@ extension SymbolRelationship
 extension SymbolRelationship.Membership:NestingRelationship
 {
     @inlinable public
-    var aperture:ScalarAperture? { nil }
+    var aperture:Unidoc.Decl.Aperture? { nil }
 
     @inlinable public
-    var scope:UnifiedSymbol? { self.target }
+    var scope:Symbol? { self.target }
 
     public
-    func validate(source phylum:ScalarPhylum) -> Bool
+    func validate(source phylum:Unidoc.Decl) -> Bool
     {
         switch phylum
         {

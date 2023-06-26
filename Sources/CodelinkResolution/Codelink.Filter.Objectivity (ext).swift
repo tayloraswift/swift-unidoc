@@ -1,17 +1,17 @@
 import Codelinks
-import Symbols
+import Unidoc
 
 extension Codelink.Filter.Objectivity
 {
     @inlinable public static
-    func ~= (lhs:Self, rhs:ScalarPhylum.Objectivity?) -> Bool
+    func ~= (lhs:Self, rhs:Unidoc.Decl.Objectivity?) -> Bool
     {
         switch (lhs, rhs)
         {
         case (.default, .instance?):    return true
         case (.default, nil):           return true
         case (.default, _?):            return false
-        
+
         case (.instance, .instance?):   return true
         case (.instance, _):            return false
 

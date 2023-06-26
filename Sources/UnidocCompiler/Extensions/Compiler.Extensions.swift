@@ -15,7 +15,7 @@ extension Compiler
         /// many constituent extension blocks, so multiple block symbols can
         /// point to the same extension.
         private
-        var named:[BlockSymbol: ExtensionObject]
+        var named:[Symbol.Block: ExtensionObject]
 
         init()
         {
@@ -35,8 +35,8 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func include(block:__owned BlockSymbol,
-        extending type:__owned ScalarSymbol,
+    func include(block:__owned Symbol.Block,
+        extending type:__owned Symbol.Decl,
         namespace:__owned Compiler.Namespace.ID,
         with description:SymbolDescription,
         in culture:Compiler.Culture) throws
@@ -69,7 +69,7 @@ extension Compiler.Extensions
 
 extension Compiler.Extensions
 {
-    func named(_ block:BlockSymbol) throws -> Compiler.ExtensionObject
+    func named(_ block:Symbol.Block) throws -> Compiler.ExtensionObject
     {
         if let named:Compiler.ExtensionObject = self.named[block]
         {
@@ -84,8 +84,8 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func callAsFunction(_ culture:Int, _ extended:Compiler.ScalarObject,
-        where conditions:[GenericConstraint<ScalarSymbol>]) -> Compiler.ExtensionObject
+    func callAsFunction(_ culture:Int, _ extended:Compiler.DeclObject,
+        where conditions:[GenericConstraint<Symbol.Decl>]) -> Compiler.ExtensionObject
     {
         self(culture, .init(namespace: extended.namespace, type: extended.id),
             where: conditions,
@@ -93,7 +93,7 @@ extension Compiler.Extensions
     }
     private mutating
     func callAsFunction(_ culture:Int, _ extended:Compiler.ExtendedType,
-        where conditions:[GenericConstraint<ScalarSymbol>],
+        where conditions:[GenericConstraint<Symbol.Decl>],
         path:UnqualifiedPath) -> Compiler.ExtensionObject
     {
         let signature:Compiler.Extension.Signature = .init(culture, extended, where: conditions)

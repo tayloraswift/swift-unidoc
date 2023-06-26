@@ -2,6 +2,7 @@ import FNV1
 import LexicalPaths
 import ModuleGraphs
 import Symbols
+import Unidoc
 import UnidocRouting
 
 struct StaticRouter
@@ -18,7 +19,7 @@ extension StaticRouter
 {
     subscript(namespace:ModuleIdentifier,
         path:UnqualifiedPath,
-        phylum:ScalarPhylum) -> InlineDictionary<FNV24?, InlineArray<Int32>>
+        phylum:Unidoc.Decl) -> InlineDictionary<FNV24?, InlineArray<Int32>>
     {
         _read
         {

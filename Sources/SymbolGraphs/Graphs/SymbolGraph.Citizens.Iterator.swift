@@ -21,7 +21,7 @@ extension SymbolGraph.Citizens
 extension SymbolGraph.Citizens.Iterator:IteratorProtocol
 {
     @inlinable public mutating
-    func next() -> (index:Int32, symbol:ScalarSymbol)?
+    func next() -> (index:Int32, symbol:Symbol.Decl)?
     {
         while self.index < self.base.nodes.endIndex
         {

@@ -26,14 +26,14 @@ struct StaticSymbolicator:Sendable
 extension StaticSymbolicator:Symbolicator
 {
     public
-    func loadScalarSymbol(_ address:Int32) -> ScalarSymbol?
+    func loadDeclSymbol(_ scalar:Int32) -> Symbol.Decl?
     {
-        self.graph.symbols[address] as ScalarSymbol?
+        self.graph.decls[scalar] as Symbol.Decl?
     }
     public
-    func loadFileSymbol(_ address:Int32) -> FileSymbol?
+    func loadFileSymbol(_ scalar:Int32) -> Symbol.File?
     {
-        self.graph.files[address]
+        self.graph.files[scalar] as Symbol.File?
     }
 }
 extension StaticSymbolicator

@@ -1,5 +1,6 @@
 import SymbolGraphs
 import Symbols
+import Unidoc
 
 extension Snapshot
 {
@@ -25,23 +26,23 @@ extension Snapshot.View
         self.init(translator: snapshot.translator, graph: snapshot.graph)
     }
 }
-extension Snapshot.View<FileSymbol>
+extension Snapshot.View<Symbol.File>
 {
-    subscript(_ scalar:Scalar96) -> FileSymbol?
+    subscript(_ scalar:Unidoc.Scalar) -> Symbol.File?
     {
         self.translator[scalar: scalar].map { self.graph.files[$0] }
     }
 }
-extension Snapshot.View<ScalarSymbol>
+extension Snapshot.View<Symbol.Decl>
 {
-    subscript(_ scalar:Scalar96) -> ScalarSymbol?
+    subscript(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
-        self.translator[scalar: scalar].map { self.graph.symbols[$0] }
+        self.translator[scalar: scalar].map { self.graph.decls[$0] }
     }
 }
 extension Snapshot.View<SymbolGraph.Node>
 {
-    subscript(_ scalar:Scalar96) -> SymbolGraph.Node?
+    subscript(_ scalar:Unidoc.Scalar) -> SymbolGraph.Node?
     {
         self.translator[scalar: scalar].map { self.graph.nodes[$0] }
     }

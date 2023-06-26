@@ -14,6 +14,7 @@ import Symbols
 import SymbolGraphs
 import UnidocCompiler
 import UnidocDiagnostics
+import Unidoc
 
 public
 struct StaticLinker
@@ -54,59 +55,59 @@ struct StaticLinker
 extension StaticLinker
 {
     private mutating
-    func address(of scalar:ScalarSymbol?) -> Int32?
+    func address(of decl:Symbol.Decl?) -> Int32?
     {
-        scalar.map { self.symbolizer.intern($0) }
+        decl.map { self.symbolizer.intern($0) }
     }
-    /// Returns an array of addresses for an array of scalar symbols.
+    /// Returns an array of addresses for an array of declaration symbols.
     /// The address assignments reflect the order of the symbols in the
     /// array, so you should sort them if you want deterministic
     /// addressing.
     ///
-    /// This function doesn’t expose the scalars for codelink resolution,
+    /// This function doesn’t expose the declarations for codelink resolution,
     /// because it is expected that the same symbols may appear in
     /// the array arguments of multiple calls to this function, and it
-    /// it more efficient to expose scalars while performing a different
+    /// it more efficient to expose declarations while performing a different
     /// pass.
     private mutating
-    func addresses(of scalars:[ScalarSymbol]) -> [Int32]
+    func addresses(of decls:[Symbol.Decl]) -> [Int32]
     {
-        scalars.map { self.symbolizer.intern($0) }
+        decls.map { self.symbolizer.intern($0) }
     }
     /// Returns an array of addresses for an array of vector features,
     /// exposing each vector for codelink resolution in the process.
     ///
     /// -   Parameters:
     ///     -   features:
-    ///         An array of scalar symbols, assumed to be the feature
+    ///         An array of declaration symbols, assumed to be the feature
     ///         components of a collection of vector symbols with the
     ///         same heir.
     ///     -   prefix:
     ///         The lexical path of the shared heir.
     ///     -   extended:
     ///         The shared heir.
-    ///     -   address:
-    ///         The address of the shared heir.
+    ///     -   scalar:
+    ///         The scalar for the shared heir.
     ///
     /// Unlike ``addresses(of:)``, this function adds overloads to the
     /// codelink resolver, because it’s more efficient to combine these
     /// two passes.
     private mutating
-    func addresses(exposing features:[ScalarSymbol],
+    func addresses(exposing features:[Symbol.Decl],
         prefixed prefix:(ModuleIdentifier, UnqualifiedPath),
-        of extended:ScalarSymbol,
-        at address:Int32) -> [Int32]
+        of extended:Symbol.Decl,
+        at scalar:Int32) -> [Int32]
     {
         features.map
         {
             let feature:Int32 = self.symbolizer.intern($0)
-            if  let (last, phylum):(String, ScalarPhylum) =
-                self.symbolizer.graph[feature]?.scalar.map({ ($0.path.last, $0.phylum) }) ??
+            if  let (last, phylum):(String, Unidoc.Decl) =
+                self.symbolizer.graph[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
-                let vector:VectorSymbol = .init($0, self: extended)
+                let vector:Symbol.Decl.Vector = .init($0, self: extended)
                 self.codelinks[prefix.0, prefix.1, last].overload(with: .init(
-                    target: .vector(feature, self: address),
+                    target: .vector(feature, self: scalar),
                     phylum: phylum,
                     hash: .init(hashing: "\(vector)")))
             }
@@ -117,31 +118,31 @@ extension StaticLinker
 extension StaticLinker
 {
     private mutating
-    func allocate(scalars:[Compiler.Scalar]) -> ClosedRange<Int32>
+    func allocate(decls:[Compiler.Decl]) -> ClosedRange<Int32>
     {
-        var addresses:(first:Int32, last:Int32)? = nil
-        for scalar:Compiler.Scalar in scalars
+        var scalars:(first:Int32, last:Int32)? = nil
+        for decl:Compiler.Decl in decls
         {
-            let address:Int32 = self.symbolizer.allocate(scalar: scalar)
-            switch addresses
+            let scalar:Int32 = self.symbolizer.allocate(decl: decl)
+            switch scalars
             {
-            case  nil:              addresses = (address, address)
-            case (let first, _)?:   addresses = (first,   address)
+            case  nil:              scalars = (scalar, scalar)
+            case (let first, _)?:   scalars = (first,  scalar)
             }
         }
-        if  case (let first, let last)? = addresses
+        if  case (let first, let last)? = scalars
         {
             return first ... last
         }
         else
         {
-            fatalError("cannot allocate empty scalar array")
+            fatalError("cannot allocate empty declaration array")
         }
     }
-    /// Allocates and binds addresses for the scalars stored in the given array
+    /// Allocates and binds addresses for the declarations stored in the given array
     /// of compiled namespaces. (Binding consists of populating the aperture and
-    /// phylum of a scalar.) This function also exposes each of the scalars for
-    /// codelink resolution.
+    /// phylum of a declaration.) This function also exposes each of the declarations
+    /// for codelink resolution.
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
@@ -152,7 +153,7 @@ extension StaticLinker
         {
             $0.map
             {
-                .init(range: self.allocate(scalars: $0.scalars),
+                .init(range: self.allocate(decls: $0.decls),
                     index: self.symbolizer.intern($0.id))
             }
         }
@@ -162,7 +163,7 @@ extension StaticLinker
                 namespaces),
             destinations)
         {
-            //  Record address ranges
+            //  Record scalar ranges
             self.symbolizer.graph.cultures[culture].namespaces = destinations
 
             for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in
@@ -170,18 +171,18 @@ extension StaticLinker
             {
                 let qualifier:ModuleIdentifier =
                     self.symbolizer.graph.namespaces[destination.index]
-                for (address, scalar) in zip(destination.range, source.scalars)
+                for (scalar, decl) in zip(destination.range, source.decls)
                 {
-                    let hash:FNV24 = .init(hashing: "\(scalar.id)")
-                    //  Make the scalar visible to codelink resolution.
-                    self.codelinks[qualifier, scalar.path].overload(with: .init(
-                        target: .scalar(address),
-                        phylum: scalar.phylum,
+                    let hash:FNV24 = .init(hashing: "\(decl.id)")
+                    //  Make the decl visible to codelink resolution.
+                    self.codelinks[qualifier, decl.path].overload(with: .init(
+                        target: .scalar(scalar),
+                        phylum: decl.phylum,
                         hash: hash))
-                    //  Assign the scalar a URI, and record the scalar’s hash
+                    //  Assign the decl a URI, and record the decl’s hash
                     //  so we will know if it has a hash collision.
-                    self.router[qualifier, scalar.path, scalar.phylum][hash, default: []]
-                        .append(address)
+                    self.router[qualifier, decl.path, decl.phylum][hash, default: []]
+                        .append(scalar)
                 }
             }
         }
@@ -192,12 +193,12 @@ extension StaticLinker
     /// codelink resolution.
     ///
     /// -   Returns:
-    ///     An (address, index) tuple for each compiled extension. If the
+    ///     A (scalar, index) tuple for each compiled extension. If the
     ///     extension extends a symbol that has not yet been registered,
-    ///     the address is newly allocated.
+    ///     the scalar is newly allocated.
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
-    /// call this method second, after calling ``allocate(scalars:)``.
+    /// call this method second, after calling ``allocate(decls:)``.
     public mutating
     func allocate(extensions:[Compiler.Extension]) -> [(Int32, Int)]
     {
@@ -251,7 +252,7 @@ extension StaticLinker
         {
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[$0.0]
 
-            var addresses:(first:Int32, last:Int32)? = nil
+            var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
 
             for file:MarkdownFile in $0.1
@@ -260,21 +261,21 @@ extension StaticLinker
                 {
                     articles.append(article)
 
-                    guard let address:Int32 = article.address
+                    guard let scalar:Int32 = article.scalar
                     else
                     {
                         continue
                     }
 
-                    switch addresses
+                    switch scalars
                     {
-                    case  nil:              addresses = (address, address)
-                    case (let first, _)?:   addresses = (first,   address)
+                    case  nil:              scalars = (scalar, scalar)
+                    case (let first, _)?:   scalars = (first,  scalar)
                     }
                 }
             }
 
-            self.symbolizer.graph.cultures[$0.0].articles = addresses.map
+            self.symbolizer.graph.cultures[$0.0].articles = scalars.map
             {
                 $0.first ... $0.last
             }
@@ -302,9 +303,9 @@ extension StaticLinker
                     documentation: standalone.parsed.article,
                     from: [standalone.source])
 
-                if  let address:Int32 = standalone.address
+                if  let scalar:Int32 = standalone.scalar
                 {
-                    self.symbolizer.graph.articles[address].value = article
+                    self.symbolizer.graph.articles[scalar].value = article
                 }
                 else
                 {
@@ -334,15 +335,15 @@ extension StaticLinker
             switch try self.binding(of: markdown, in: namespace, source: source)
             {
             case nil:
-                let address:Int32 = try
+                let scalar:Int32 = try
                 {
                     switch $0
                     {
                     case nil:
-                        let address:Int32 = self.symbolizer.graph.articles.append(.init(
+                        let scalar:Int32 = self.symbolizer.graph.articles.append(.init(
                             id: supplement.name))
-                        $0 = address
-                        return address
+                        $0 = scalar
+                        return scalar
 
                     case  _?:
                         throw DuplicateSymbolError.article(supplement.name)
@@ -351,12 +352,12 @@ extension StaticLinker
                 } (&self.doclinks[.documentation(namespace), supplement.name])
 
                 //  Assign the standalone article a URI.
-                self.router[namespace, supplement.name][nil, default: []].append(address)
+                self.router[namespace, supplement.name][nil, default: []].append(scalar)
 
-                return .init(address: address, parsed: markdown, source: source)
+                return .init(scalar: scalar, parsed: markdown, source: source)
 
             case .module?:
-                return .init(address: nil, parsed: markdown, source: source)
+                return .init(scalar: nil, parsed: markdown, source: source)
 
             case .scalar(let binding)?:
                 self.supplements[binding, default: []].append(markdown)
@@ -412,8 +413,8 @@ extension StaticLinker
         case .one(let overload):
             switch overload.target
             {
-            case .scalar(let address):
-                return .scalar(address)
+            case .scalar(let scalar):
+                return .scalar(scalar)
 
             case .vector(let feature, self: let heir):
                 throw InvalidArticleBindingError.init(.vector(feature, self: heir),
@@ -452,7 +453,7 @@ extension StaticLinker
         {
             for (source, destination) in zip(sources, destinations)
             {
-                self.link(scalars: source.scalars,
+                self.link(decls: source.decls,
                     at: destination.range,
                     of: culture,
                     in: self.symbolizer.graph.namespaces[destination.index])
@@ -460,28 +461,28 @@ extension StaticLinker
         }
     }
     public mutating
-    func link(scalars:[Compiler.Scalar],
+    func link(decls:[Compiler.Decl],
         at addresses:ClosedRange<Int32>,
         of culture:ModuleIdentifier,
         in namespace:ModuleIdentifier)
     {
-        for (address, scalar):(Int32, Compiler.Scalar) in zip(addresses, scalars)
+        for (scalar, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
         {
-            let declaration:Declaration<Int32> = scalar.declaration.map
+            let declaration:Declaration<Int32> = decl.declaration.map
             {
                 self.symbolizer.intern($0)
             }
 
             //  Sort for deterministic addresses.
-            let superforms:[Int32] = self.addresses(of: scalar.superforms.sorted())
-            let features:[Int32] = self.addresses(of: scalar.features.sorted())
-            let origin:Int32? = self.address(of: scalar.origin)
+            let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
+            let features:[Int32] = self.addresses(of: decl.features.sorted())
+            let origin:Int32? = self.address(of: decl.origin)
 
-            let location:SourceLocation<Int32>? = scalar.location?.map
+            let location:SourceLocation<Int32>? = decl.location?.map
             {
                 self.symbolizer.intern($0)
             }
-            let article:SymbolGraph.Article<Never>? = scalar.documentation.map
+            let article:SymbolGraph.Article<Never>? = decl.comment.map
             {
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
@@ -489,15 +490,15 @@ extension StaticLinker
                     imports: self.imports,
                     namespace: namespace,
                     culture: culture,
-                    scope: $0.scope)
+                    scope: decl.phylum.scope(trimming: decl.path))
 
                 defer
                 {
                     self.diagnoses += outliner.diagnoses
                 }
 
-                return outliner.link(comment: .init(from: $0.comment, in: location?.file),
-                    adding: self.supplements.removeValue(forKey: address))
+                return outliner.link(comment: .init(from: $0, in: location?.file),
+                    adding: self.supplements.removeValue(forKey: scalar))
             }
 
             {
@@ -509,7 +510,7 @@ extension StaticLinker
 
                 $0?.location = location
                 $0?.article = article
-            } (&self.symbolizer.graph.nodes[address].scalar)
+            } (&self.symbolizer.graph.nodes[scalar].decl)
         }
     }
 
@@ -517,7 +518,7 @@ extension StaticLinker
     func link(extensions:[Compiler.Extension],
         at addresses:[(Int32, Int)])
     {
-        for ((address, index), `extension`):((Int32, Int), Compiler.Extension) in zip(
+        for ((scalar, index), `extension`):((Int32, Int), Compiler.Extension) in zip(
             addresses,
             extensions)
         {
@@ -529,12 +530,12 @@ extension StaticLinker
             //  https://github.com/apple/swift-docc/pull/369
             var longest:Int = 0
 
-            var comment:Compiler.Documentation.Comment? = nil
-            var file:FileSymbol? = nil
+            var comment:Compiler.Doccomment? = nil
+            var file:Symbol.File? = nil
 
             for block:Compiler.Extension.Block in `extension`.blocks
             {
-                if  let current:Compiler.Documentation.Comment = block.comment
+                if  let current:Compiler.Doccomment = block.comment
                 {
                     //  This is really, really stupid, but we need a way to break
                     //  ties, and we can’t use source location for this, as it is
@@ -569,7 +570,7 @@ extension StaticLinker
 
                     self.diagnoses += outliner.diagnoses
 
-                } (&self.symbolizer.graph.nodes[address].extensions[index])
+                } (&self.symbolizer.graph.nodes[scalar].extensions[index])
             }
         }
     }
@@ -587,15 +588,15 @@ extension StaticLinker
                 {
                     for stacked:Int32 in addresses
                     {
-                        //  If `hash` is present, then we know the scalar is a valid
+                        //  If `hash` is present, then we know the decl is a valid
                         //  declaration node index.
-                        self.symbolizer.graph.nodes[stacked].scalar?.route = .hashed
+                        self.symbolizer.graph.nodes[stacked].decl?.route = .hashed
                     }
                     if  case .some(let collisions) = addresses
                     {
                         print("""
                             WARNING: FNV-1 hash collision detected! (hash: \(hash), \
-                            symbols: \(collisions.map { self.symbolizer.graph.symbols[$0] }))
+                            symbols: \(collisions.map { self.symbolizer.graph.decls[$0] }))
                             """)
                     }
                 }

@@ -12,10 +12,10 @@ extension SymbolDescription
         /// constraints, and can be used to group members by
         /// generic constraints.
         public
-        let conditions:[GenericConstraint<ScalarSymbol>]
+        let conditions:[GenericConstraint<Symbol.Decl>]
 
         @inlinable public
-        init(conditions:[GenericConstraint<ScalarSymbol>] = [])
+        init(conditions:[GenericConstraint<Symbol.Decl>] = [])
         {
             self.conditions = conditions
         }
@@ -28,7 +28,7 @@ extension SymbolDescription.ExtensionContext:JSONObjectDecodable
     {
         case conditions = "constraints"
     }
-    
+
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {

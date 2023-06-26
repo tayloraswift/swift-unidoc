@@ -1,4 +1,4 @@
-import SymbolGraphs
+import Unidoc
 
 extension DynamicLinker
 {
@@ -16,7 +16,7 @@ extension DynamicLinker
 }
 extension DynamicLinker.Extensions:ExpressibleByDictionaryLiteral
 {
-    init(dictionaryLiteral:(Scalar96, Never)...)
+    init(dictionaryLiteral:(Unidoc.Scalar, Never)...)
     {
         self.init(projections: [:])
     }

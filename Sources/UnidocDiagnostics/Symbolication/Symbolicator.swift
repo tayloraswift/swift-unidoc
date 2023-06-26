@@ -2,12 +2,12 @@ import ModuleGraphs
 import Symbols
 
 public
-protocol Symbolicator<Address>
+protocol Symbolicator<Scalar>
 {
-    associatedtype Address
+    associatedtype Scalar
 
-    func loadScalarSymbol(_ address:Address) -> ScalarSymbol?
-    func loadFileSymbol(_ address:Address) -> FileSymbol?
+    func loadDeclSymbol(_ scalar:Scalar) -> Symbol.Decl?
+    func loadFileSymbol(_ scalar:Scalar) -> Symbol.File?
 
     var demangler:Demangler? { get }
     var root:Repository.Root? { get }
@@ -15,11 +15,11 @@ protocol Symbolicator<Address>
 extension Symbolicator
 {
     /// Returns the demangled signature of the scalar symbol referenced by the given
-    /// scalar address. The address must refer to a declaration and not an article.
+    /// scalar. The scalar must refer to a declaration and not an article.
     @inlinable public
-    func signature(of address:Address) -> String
+    func signature(of scalar:Scalar) -> String
     {
-        guard let symbol:ScalarSymbol = self.loadScalarSymbol(address)
+        guard let symbol:Symbol.Decl = self.loadDeclSymbol(scalar)
         else
         {
             return "<unavailable>"
@@ -34,12 +34,12 @@ extension Symbolicator
             return symbol.rawValue
         }
     }
-    /// Returns the absolute path of the file referenced by the given file address.
+    /// Returns the absolute path of the file referenced by the given file scalar.
     @inlinable public
-    func path(of address:Address) -> String?
+    func path(of scalar:Scalar) -> String?
     {
         if  let root:Repository.Root = self.root,
-            let file:FileSymbol = self.loadFileSymbol(address)
+            let file:Symbol.File = self.loadFileSymbol(scalar)
         {
             return "\(root.path)/\(file)"
         }

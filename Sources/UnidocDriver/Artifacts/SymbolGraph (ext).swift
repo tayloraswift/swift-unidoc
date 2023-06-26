@@ -31,14 +31,14 @@ extension SymbolGraph
                 }
             }
 
-            (namespaces, nominations) = compiler.scalars.load()
+            (namespaces, nominations) = compiler.declarations.load()
             (extensions) = compiler.extensions.load()
 
             print("""
                 Compiled documentation in \(time.compiling) \
                 (\(namespaces.count) culture(s), containing \
                 \(namespaces.reduce(0) { $0 + $1.count }) namespace(s),
-                \(namespaces.reduce(0) { $0 + $1.reduce(0) { $0 + $1.scalars.count } }) \
+                \(namespaces.reduce(0) { $0 + $1.reduce(0) { $0 + $1.decls.count } }) \
                 declaration(s), and \(extensions.count) extension(s))
                 """)
         }

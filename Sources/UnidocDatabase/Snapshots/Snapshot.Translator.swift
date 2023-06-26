@@ -1,4 +1,4 @@
-import SymbolGraphs
+import Unidoc
 
 extension Snapshot
 {
@@ -18,10 +18,10 @@ extension Snapshot
 }
 extension Snapshot.Translator
 {
-    func contains(_ address:Scalar96) -> Bool
+    func contains(_ scalar:Unidoc.Scalar) -> Bool
     {
-        address.package == self.package &&
-        address.version == self.version
+        scalar.package == self.package &&
+        scalar.version == self.version
     }
 }
 //  These APIs don’t check for integer overflow; we should enforce
@@ -32,25 +32,25 @@ extension Snapshot.Translator
     /// global address. This transformation is only valid if the scalar is
     /// a citizen of the relevant snapshot. The scalar address may refer to
     /// a declaration, a file, or a standalone article.
-    subscript(citizen citizen:Int32) -> Scalar96
+    subscript(citizen citizen:Int32) -> Unidoc.Scalar
     {
         .init(package: self.package, version: self.version, citizen: citizen)
     }
     /// Augments and tags the passed module index to form a global address.
     /// This transformation is only valid if the module is a culture within
     /// the relevant snapshot.
-    subscript(culture culture:Int) -> Scalar96
+    subscript(culture culture:Int) -> Unidoc.Scalar
     {
         .init(package: self.package, version: self.version, culture: culture)
     }
 }
 extension Snapshot.Translator
 {
-    subscript(scalar scalar:Scalar96) -> Int32?
+    subscript(scalar scalar:Unidoc.Scalar) -> Int32?
     {
         self.contains(scalar) ? scalar.citizen : nil
     }
-    subscript(module scalar:Scalar96) -> Int?
+    subscript(module scalar:Unidoc.Scalar) -> Int?
     {
         self.contains(scalar) ? scalar.culture : nil
     }
