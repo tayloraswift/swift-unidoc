@@ -1,7 +1,3 @@
-@available(*, deprecated, renamed: "Symbol.File")
-public
-typealias UnifiedSymbol = Symbol
-
 /// A unified symbol resolution (USR).
 @frozen public
 enum Symbol:Hashable, Equatable, Sendable

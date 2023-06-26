@@ -1,7 +1,3 @@
-@available(*, deprecated, renamed: "Symbol.Decl.Vector")
-public
-typealias VectorSymbol = Symbol.Decl.Vector
-
 extension Symbol.Decl
 {
     /// A vector symbol resolution.

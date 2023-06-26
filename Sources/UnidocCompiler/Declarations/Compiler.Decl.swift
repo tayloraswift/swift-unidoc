@@ -10,10 +10,6 @@ import Unidoc
 
 extension Compiler
 {
-    @available(*, deprecated, renamed: "Compiler.Decl")
-    public
-    typealias Scalar = Decl
-
     /// A scalar is the smallest “unit” a symbol can be broken down into.
     @_eagerMove
     @frozen public

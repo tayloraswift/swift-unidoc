@@ -1,7 +1,3 @@
-@available(*, deprecated, renamed: "Symbol.Block")
-public
-typealias BlockSymbol = Symbol.Block
-
 extension Symbol
 {
     @frozen public

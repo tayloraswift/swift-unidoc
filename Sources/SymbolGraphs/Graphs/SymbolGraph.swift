@@ -15,15 +15,6 @@ struct SymbolGraph:Equatable, Sendable
     public
     var cultures:[Culture]
 
-
-    @available(*, deprecated, renamed: "decls")
-    public
-    var symbols:Table<Symbol.Decl>
-    {
-        _read   { yield  self.decls }
-        _modify { yield &self.decls }
-    }
-
     public
     var articles:Plane<Articles, Article<String>>
     public

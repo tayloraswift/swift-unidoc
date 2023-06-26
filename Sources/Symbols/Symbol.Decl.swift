@@ -1,7 +1,3 @@
-@available(*, deprecated, renamed: "Symbol.Decl")
-public
-typealias ScalarSymbol = Symbol.Decl
-
 extension Symbol
 {
     /// A scalar declaration symbol.
