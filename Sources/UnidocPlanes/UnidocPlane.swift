@@ -1,11 +1,12 @@
 @frozen public
 enum UnidocPlane:Int32, Hashable, Equatable, Sendable
 {
-    case article    = -0x80_000000
-    case file       = -0x7F_000000
-    case module     = -0x7E_000000
+    case  article       = -0x80_000000
+    case  file          = -0x7F_000000
+    case  module        = -0x7E_000000
+    case `extension`    = -0x7D_000000
 
-    case decl       = 0
+    case  decl          =  0
 }
 extension UnidocPlane
 {
@@ -21,6 +22,13 @@ extension UnidocPlane
     func | (self:Self, significand:Int32) -> Int32
     {
         self.rawValue | significand
+    }
+
+    @inlinable public static
+    func | (self:Self, significand:Int) -> Int32
+    {
+        precondition(0 ... 0x00_ff_ff_ff ~= significand)
+        return self | Int32.init(significand)
     }
 
     @inlinable public static

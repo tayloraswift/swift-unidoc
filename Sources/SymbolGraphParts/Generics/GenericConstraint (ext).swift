@@ -14,7 +14,7 @@ extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSON
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        let type:TypeExpression
+        let type:GenericType<Scalar>
         if  let scalar:Scalar = try json[.rhsPrecise]?.decode()
         {
             type = .nominal(scalar)
@@ -24,6 +24,8 @@ extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSON
             type = .complex(try json[.rhs].decode())
         }
 
-        self = try json[.kind].decode(to: Kind.self)(try json[.lhs].decode(), is: type)
+        self = .where(try json[.lhs].decode(),
+            is: try json[.kind].decode(as: Kind.self, with: \.operator),
+            to: type)
     }
 }

@@ -27,7 +27,7 @@ extension Unidoc.Scalar
         self.init(
             package: package,
             version: version,
-            citizen: .module | Int32.init(culture))
+            citizen: .module | culture)
     }
 
     @inlinable public

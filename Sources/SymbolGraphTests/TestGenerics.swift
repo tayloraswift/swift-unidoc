@@ -27,7 +27,7 @@ func TestGenerics(_ tests:TestGroup?)
     }
     if  let tests:TestGroup = tests / "constraints"
     {
-        for (name, expression):(String, GenericConstraint<Int32>.TypeExpression) in
+        for (name, whom):(String, GenericType<Int32>) in
         [
             ("nominal", .nominal(13)),
             ("complex", .complex("Dictionary<Int, String>.Index"))
@@ -39,21 +39,17 @@ func TestGenerics(_ tests:TestGroup?)
                 continue
             }
 
-            for (name, relation):(String, GenericConstraint<Int32>.TypeRelation) in
-            [
-                ("conformer", .conformer(of: expression)),
-                ("subclass", .subclass(of: expression)),
-                ("type", .type(expression)),
-            ]
+            for what:GenericOperator in [.conformer, .subclass, .equal]
             {
-                guard let tests:TestGroup = tests / name
+                guard let tests:TestGroup = tests / "\(what)"
                 else
                 {
                     continue
                 }
 
-                let constraint:GenericConstraint<Int32> = .init("T.RawValue",
-                    is: relation)
+                let constraint:GenericConstraint<Int32> = .where("T.RawValue",
+                    is: what,
+                    to: whom)
 
                 tests.do
                 {

@@ -12,6 +12,8 @@ struct DynamicLinker
 
     private
     var extensions:Extensions
+    private
+    var decls:[Projection.Decl]
 
     private(set)
     var diagnoses:[any DynamicDiagnosis]
@@ -26,63 +28,36 @@ struct DynamicLinker
 
         self.extensions = extensions
         self.diagnoses = []
+        self.decls = []
+    }
+}
+extension DynamicLinker
+{
+    var current:SnapshotObject { self.context.current }
+
+    func projection() -> Projection
+    {
+        .init(extensions: self.extensions.sorted(), decls: self.decls)
     }
 }
 extension DynamicLinker
 {
     init(context:DynamicContext)
     {
-        var extensions:Extensions = [:]
-        let conformances:SymbolGraph.Table<Conformances> = context.current.graph.nodes.map
-        {
-            if  $1.extensions.isEmpty
-            {
-                return [:]
-            }
-            guard let scope:Unidoc.Scalar = context.current.decls[$0]
-            else
-            {
-                return [:]
-            }
-
-            var conformances:DynamicLinker.Conformances = [:]
-            for `extension`:SymbolGraph.Extension in $1.extensions
-            {
-                let projected:ExtensionProjection = context.current.project(
-                    extension: `extension`,
-                    of: scope)
-
-                //  we only need the conformances if the scalar has unqualified features
-                if case false? = $1.decl?.features.isEmpty
-                {
-                    for `protocol`:Unidoc.Scalar in projected.conformances
-                    {
-                        conformances[to: `protocol`].append(projected.signature)
-                    }
-                }
-
-                //  It’s possible for two locally-disjoint extensions to coalesce
-                //  into a single global extension due to constraint dropping...
-                extensions[projected.signature].merge(with: projected)
-            }
-
-            return conformances
-        }
+        var extensions:Extensions = .init(translator: context.current.translator)
+        let conformances:SymbolGraph.Table<Conformances> = extensions.add(
+            from: context.current)
 
         self.init(conformances: conformances, context: context, extensions: extensions)
+
+        self.project()
     }
 }
 extension DynamicLinker
 {
-    var current:SnapshotObject { self.context.current }
-}
-extension DynamicLinker
-{
-    mutating
-    func project() -> [ScalarProjection]
+    private mutating
+    func project()
     {
-        var scalars:[ScalarProjection] = []
-
         for ((c, culture), group):
             ((Int, SymbolGraph.Culture), DynamicResolutionGroup) in zip(zip(
                 self.current.graph.cultures.indices,
@@ -121,7 +96,8 @@ extension DynamicLinker
                             //  now that we know the address of the feature’s original
                             //  protocol, we can look up the constraints for the
                             //  conformance(s) that conceived it.
-                            for conformance:ExtensionSignature in conformances[to: `protocol`]
+                            for conformance:ExtensionSignature in
+                                conformances[to: `protocol`]
                             {
                                 self.extensions[conformance].features.append(f)
                             }
@@ -133,7 +109,7 @@ extension DynamicLinker
                         {
                             let implicit:ExtensionSignature = .init(conditions: [],
                                 culture: c,
-                                scope: s)
+                                extends: s)
 
                             self.extensions[implicit].subforms.append(d)
                         }
@@ -151,7 +127,7 @@ extension DynamicLinker
                         self.diagnoses += resolver.diagnoses
                     }
 
-                    scalars.append(.init(id: d,
+                    self.decls.append(.init(id: d,
                         culture: c,
                         scope: scope.map { self.context.expand($0) },
                         signature: scalar.signature.map { self.current.decls[$0] }))
@@ -181,7 +157,5 @@ extension DynamicLinker
                 self.diagnoses += resolver.diagnoses
             }
         }
-
-        return scalars
     }
 }

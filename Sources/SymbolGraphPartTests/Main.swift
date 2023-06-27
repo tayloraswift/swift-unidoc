@@ -357,14 +357,14 @@ enum Main:SyncTests
                 (
                     ["Struct", "internal(_:)"],
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
-                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
+                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
                     ]
                 ),
                 (
                     ["Protocol", "internal(_:)"],
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
                     ]
                 ),
             ]
@@ -387,27 +387,27 @@ enum Main:SyncTests
                 (
                     ["Struct"],
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
-                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
+                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
                     ]
                 ),
                 (
                     ["Struct", "external(_:)"],
                     [
-                        .init("T", is: .conformer(of: .nominal(.init("s:SQ")!))),
-                        .init("T", is: .conformer(of: .nominal(.init("s:ST")!))),
+                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
                     ]
                 ),
                 (
                     ["Protocol"],
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
                     ]
                 ),
                 (
                     ["Protocol", "external(_:)"],
                     [
-                        .init("Self.T", is: .conformer(of: .nominal(.init("s:SQ")!))),
+                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
                     ]
                 ),
             ]

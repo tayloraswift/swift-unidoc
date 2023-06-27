@@ -23,7 +23,7 @@ extension DynamicLinker.Conformances:ExpressibleByDictionaryLiteral
 }
 extension DynamicLinker.Conformances
 {
-    subscript(to protocol:Unidoc.Scalar) -> [ExtensionSignature]
+    subscript(to protocol:Unidoc.Scalar) -> [DynamicLinker.ExtensionSignature]
     {
         _read
         {

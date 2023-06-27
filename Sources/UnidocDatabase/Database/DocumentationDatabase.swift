@@ -71,8 +71,8 @@ extension DocumentationDatabase
             pushing: docs,
             with: session)
 
-        var linker:DynamicLinker = .init(context: context)
-        let _:[ScalarProjection] = linker.project()
+        let linker:DynamicLinker = .init(context: context)
+        let _:Projection = linker.projection()
 
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
             symbolicator.emit(diagnoses: linker.diagnoses, colors: .enabled)
