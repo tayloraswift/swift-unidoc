@@ -92,15 +92,3 @@ extension SnapshotObject
         self.hierarchy[declaration]
     }
 }
-extension SnapshotObject
-{
-    func project(extension:SymbolGraph.Extension, of scope:Unidoc.Scalar) -> ExtensionProjection
-    {
-        .init(conditions: `extension`.conditions.map { $0.map { self.decls[$0] } },
-            culture: self.translator[culture: `extension`.culture],
-            scope: scope,
-            conformances: `extension`.conformances.compactMap { self.decls[$0] },
-            features: `extension`.features.compactMap { self.decls[$0] },
-            nested: `extension`.nested.compactMap { self.decls[$0] })
-    }
-}

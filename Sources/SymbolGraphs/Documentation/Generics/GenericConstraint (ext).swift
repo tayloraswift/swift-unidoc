@@ -33,24 +33,17 @@ extension GenericConstraint:BSONDocumentEncodable, BSONEncodable, BSONWeakEncoda
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        let expression:TypeExpression
         let sigil:Sigil
-        switch self.is
+        switch self.what
         {
-        case .conformer(of: let rhs):
-            expression = rhs
-            sigil = .conformer
-        case .subclass(of: let rhs):
-            expression = rhs
-            sigil = .subclass
-        case .type(let rhs):
-            expression = rhs
-            sigil = .type
+        case .conformer:    sigil = .conformer
+        case .subclass:     sigil = .subclass
+        case .equal:        sigil = .equal
         }
 
-        bson[.generic] = "\(sigil.rawValue)\(self.name)"
+        bson[.generic] = "\(sigil)\(self.noun)"
 
-        switch expression
+        switch self.whom
         {
         case .nominal(let type):        bson[.nominal] = type
         case .complex(let description): bson[.complex] = description
@@ -63,7 +56,7 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
     @inlinable public
     init<Bytes>(bson:BSON.DocumentDecoder<CodingKeys, Bytes>) throws
     {
-        let (sigil, name):(Sigil, String) = try bson[.generic].decode(
+        let (sigil, noun):(Sigil, String) = try bson[.generic].decode(
             as: BSON.UTF8View<Bytes.SubSequence>.self)
         {
             guard let sigil:Unicode.Scalar = $0.slice.first.map(Unicode.Scalar.init(_:))
@@ -79,21 +72,21 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
 
             return (sigil, .init(decoding: $0.slice.dropFirst(), as: Unicode.UTF8.self))
         }
-        let expression:TypeExpression
-        if  let type:Scalar = try bson[.nominal]?.decode()
+        let type:GenericType<Scalar>
+        if  let scalar:Scalar = try bson[.nominal]?.decode()
         {
-            expression = .nominal(type)
+            type = .nominal(scalar)
         }
         else
         {
-            expression = .complex(try bson[.complex].decode())
+            type = .complex(try bson[.complex].decode())
         }
 
         switch sigil
         {
-        case .conformer:    self.init(name, is: .conformer(of: expression))
-        case .subclass:     self.init(name, is: .subclass(of: expression))
-        case .type:         self.init(name, is: .type(expression))
+        case .conformer:    self = .where(noun, is: .conformer, to: type)
+        case .subclass:     self = .where(noun, is: .subclass, to: type)
+        case .equal:        self = .where(noun, is: .equal, to: type)
         }
     }
 }
