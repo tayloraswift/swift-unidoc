@@ -4,7 +4,6 @@ import Signatures
 import Sources
 import Symbols
 import SymbolGraphParts
-import SymbolGraphs
 import Unidoc
 
 extension Compiler

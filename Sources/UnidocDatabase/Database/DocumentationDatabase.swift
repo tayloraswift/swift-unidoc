@@ -64,21 +64,24 @@ extension DocumentationDatabase
 extension DocumentationDatabase
 {
     public
-    func publish(projecting docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws
+    func publish(docs:__owned Documentation,
+        with session:__shared Mongo.Session) async throws -> SnapshotReceipt
     {
-        let context:DynamicContext = try await self.context(
-            publishing: docs,
+        let (receipt, context):(SnapshotReceipt, DynamicContext) = try await self.pull(
+            pushing: docs,
             with: session)
+
         var linker:DynamicLinker = .init(context: context)
         let _:[ScalarProjection] = linker.project()
 
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
             symbolicator.emit(diagnoses: linker.diagnoses, colors: .enabled)
+
+        return receipt
     }
     private
-    func context(publishing docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws -> DynamicContext
+    func pull(pushing docs:__owned Documentation,
+        with session:__shared Mongo.Session) async throws -> (SnapshotReceipt, DynamicContext)
     {
         let dependencies:[Snapshot] = try await self.snapshots.load(docs.metadata.pins(),
             with: session)
@@ -100,9 +103,9 @@ extension DocumentationDatabase
         }
 
         let receipt:SnapshotReceipt = try await self.push(docs: docs, with: session)
-
-        return .init(currentSnapshot: .init(from: docs, receipt: receipt),
+        let context:DynamicContext = .init(currentSnapshot: .init(from: docs, receipt: receipt),
             upstreamSnapshots: dependencies,
             upstreamSymbols: upstream)
+        return (receipt, context)
     }
 }
