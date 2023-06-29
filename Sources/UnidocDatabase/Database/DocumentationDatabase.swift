@@ -1,7 +1,9 @@
+import FNV1
 import MongoDB
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
+import Unidoc
 
 @frozen public
 struct DocumentationDatabase
@@ -26,6 +28,9 @@ extension DocumentationDatabase
     var packages:Packages { .init(database: self.name) }
     @inlinable public
     var snapshots:Snapshots { .init(database: self.name) }
+
+    @inlinable public
+    var zones:Zones { .init(database: self.name) }
 }
 extension DocumentationDatabase
 {
@@ -42,6 +47,8 @@ extension DocumentationDatabase
     {
         try await self.packages.setup(with: try await .init(from: self.pool))
         try await self.snapshots.setup(with: try await .init(from: self.pool))
+
+        try await self.zones.setup(with: try await .init(from: self.pool))
     }
 }
 extension DocumentationDatabase
@@ -72,10 +79,12 @@ extension DocumentationDatabase
             with: session)
 
         let linker:DynamicLinker = .init(context: context)
-        let _:Records = linker.projection
+        let output:Records = linker.projection
 
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
             symbolicator.emit(linker.errors, colors: .enabled)
+
+        try await self.zones.insert(output.zone, with: session)
 
         return receipt
     }
@@ -92,13 +101,13 @@ extension DocumentationDatabase
         {
             for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.citizens
             {
-                upstream.citizens[symbol] = snapshot.translator[citizen: citizen]
+                upstream.citizens[symbol] = snapshot.zone + citizen
             }
             for (culture, symbol):(Int, ModuleIdentifier) in zip(
                 snapshot.graph.cultures.indices,
                 snapshot.graph.namespaces)
             {
-                upstream.cultures[symbol] = snapshot.translator[culture: culture]
+                upstream.cultures[symbol] = snapshot.zone + culture * .module
             }
         }
 
@@ -107,5 +116,56 @@ extension DocumentationDatabase
             upstreamSnapshots: dependencies,
             upstreamSymbols: upstream)
         return (receipt, context)
+    }
+}
+extension DocumentationDatabase
+{
+    public
+    func _get(
+        package:PackageIdentifier,
+        version:Substring?,
+        stem:Substring,
+        hash:FNV24?,
+        with session:Mongo.Session) async throws
+    {
+        let zone:Record.Zone? = try await session.run(
+            command: Mongo.Aggregate<Mongo.Cursor<Record.Zone>>.init(Zones.name,
+                pipeline: .init
+                {
+                    $0.stage
+                    {
+                        $0[.match] = .init
+                        {
+                            $0[Record[.package]] = package
+                            $0[Record[.version]] = version
+                        }
+                    }
+                    $0.stage
+                    {
+                        $0[.sort] = .init
+                        {
+                            $0[Record[.recency]] = (-)
+                        }
+                    }
+                    $0.stage
+                    {
+                        $0[.limit] = 1
+                    }
+                },
+                stride: 1)
+                {
+                    $0[.hint] = .init
+                    {
+                        $0[Record[.package]] = (+)
+                        $0[Record[.version]] = (+)
+                        $0[Record[.recency]] = (-)
+                    }
+                },
+            against: self.name)
+        {
+            try await $0.reduce(into: [], +=).first
+        }
+
+        print(zone as Any)
     }
 }

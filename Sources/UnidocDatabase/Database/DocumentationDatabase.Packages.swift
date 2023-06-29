@@ -21,7 +21,6 @@ extension DocumentationDatabase.Packages
     @inlinable public static
     var name:Mongo.Collection { "packages" }
 
-    public
     func setup(with session:Mongo.Session) async throws
     {
         let response:Mongo.CreateIndexesResponse = try await session.run(

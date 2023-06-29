@@ -7,43 +7,43 @@ extension Snapshot
     struct View<T>
     {
         private
-        let translator:Translator
-        private
         let graph:SymbolGraph
+        private
+        let zone:Unidoc.Zone
 
         private
-        init(translator:Translator, graph:SymbolGraph)
+        init(graph:SymbolGraph, zone:Unidoc.Zone)
         {
-            self.translator = translator
             self.graph = graph
+            self.zone = zone
         }
     }
 }
 extension Snapshot.View
 {
-    init(_ snapshot:Snapshot)
+    init(_ snapshot:__shared Snapshot)
     {
-        self.init(translator: snapshot.translator, graph: snapshot.graph)
+        self.init(graph: snapshot.graph, zone: snapshot.zone)
     }
 }
 extension Snapshot.View<Symbol.File>
 {
     subscript(_ scalar:Unidoc.Scalar) -> Symbol.File?
     {
-        self.translator[scalar: scalar].map { self.graph.files[$0] }
+        (scalar - self.zone).map { self.graph.files[$0] }
     }
 }
 extension Snapshot.View<Symbol.Decl>
 {
     subscript(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
-        self.translator[scalar: scalar].map { self.graph.decls[$0] }
+        (scalar - self.zone).map { self.graph.decls[$0] }
     }
 }
 extension Snapshot.View<SymbolGraph.Node>
 {
     subscript(_ scalar:Unidoc.Scalar) -> SymbolGraph.Node?
     {
-        self.translator[scalar: scalar].map { self.graph.nodes[$0] }
+        (scalar - self.zone).map { self.graph.nodes[$0] }
     }
 }

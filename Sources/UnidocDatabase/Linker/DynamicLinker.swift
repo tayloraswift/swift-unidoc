@@ -28,7 +28,9 @@ struct DynamicLinker
         self.conformances = conformances
 
         self.extensions = extensions
-        self.projection = .init()
+        self.projection = .init(zone: .init(context.current.snapshot.zone,
+            package: context.current.snapshot.metadata.package,
+            ref: context.current.snapshot.metadata.ref))
         self.errors = errors
     }
 }
@@ -38,7 +40,7 @@ extension DynamicLinker
     {
         let groups:[DynamicResolutionGroup] = context.groups()
 
-        var extensions:Extensions = .init(translator: context.current.translator)
+        var extensions:Extensions = .init(zone: context.current.zone)
         var errors:[any DynamicLinkerError] = []
 
         let conformances:SymbolGraph.Table<Conformances> = context.current.graph.nodes.map
@@ -78,7 +80,7 @@ extension DynamicLinker
             groups)
         {
             let qualifier:ModuleIdentifier = self.current.graph.namespaces[c]
-            let culture:Unidoc.Scalar = self.current.translator[culture: c]
+            let culture:Unidoc.Scalar = self.current.zone + c * .module
 
             for namespace:SymbolGraph.Namespace in input.namespaces
             {
@@ -109,14 +111,14 @@ extension DynamicLinker
             self.current.graph.articles[range].indices,
             self.current.graph.articles[range])
         {
-            var linked:Record.Master.Article = .init(id: self.current.translator[citizen: a])
+            var record:Record.Master.Article = .init(id: self.current.zone + a)
             var resolver:DynamicResolver = .init(context: self.context,
                 namespace: namespace,
                 group: group)
 
-            (linked.overview, linked.details) = resolver.link(article: article)
+            (record.overview, record.details) = resolver.link(article: article)
 
-            self.projection.articles.append(linked)
+            self.projection.articles.append(record)
             self.errors += resolver.errors
         }
     }
@@ -131,11 +133,11 @@ extension DynamicLinker
             namespace: namespace,
             group: group)
 
-        var linked:Record.Master.Module = .init(id: culture)
+        var record:Record.Master.Module = .init(id: culture)
 
-        (linked.overview, linked.details) = resolver.link(article: article)
+        (record.overview, record.details) = resolver.link(article: article)
 
-        self.projection.modules.append(linked)
+        self.projection.modules.append(record)
         self.errors += resolver.errors
     }
 
@@ -194,7 +196,7 @@ extension DynamicLinker
                 }
             }
 
-            var linked:Record.Master.Decl = .init(id: d,
+            var record:Record.Master.Decl = .init(id: d,
                 symbol: symbol,
                 signature: decl.signature.map { self.current.decls[$0] },
                 superforms: superforms,
@@ -208,12 +210,12 @@ extension DynamicLinker
                     group: group,
                     scope: decl.phylum.scope(trimming: decl.path))
 
-                (linked.overview, linked.details) = resolver.link(article: article)
+                (record.overview, record.details) = resolver.link(article: article)
 
                 self.errors += resolver.errors
             }
 
-            self.projection.decls.append(linked)
+            self.projection.decls.append(record)
         }
     }
 }

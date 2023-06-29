@@ -15,7 +15,6 @@ class SnapshotObject:Sendable
     let namespaces:[Unidoc.Scalar?]
     let decls:SymbolGraph.Table<Unidoc.Scalar?>
 
-
     private
     init(snapshot:Snapshot,
         hierarchy:[Int32: Unidoc.Scalar],
@@ -30,23 +29,22 @@ class SnapshotObject:Sendable
 }
 extension SnapshotObject
 {
-    var translator:Snapshot.Translator { self.snapshot.translator }
-    var graph:SymbolGraph { self.snapshot.graph }
-
     var files:Snapshot.View<Symbol.File> { .init(self.snapshot) }
     var symbols:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
     var nodes:Snapshot.View<SymbolGraph.Node> { .init(self.snapshot) }
+
+    var graph:SymbolGraph { self.snapshot.graph }
+    var zone:Unidoc.Zone { self.snapshot.zone }
 }
 extension SnapshotObject
 {
     convenience
     init(snapshot:__owned Snapshot, upstream:__shared UpstreamScalars)
     {
-        let translator:Snapshot.Translator = snapshot.translator
-
+        let zone:Unidoc.Zone = snapshot.zone
         let decls:SymbolGraph.Table<Unidoc.Scalar?> = snapshot.graph.link
         {
-            translator[citizen: $0]
+            zone + $0
         }
         dynamic:
         {
@@ -85,7 +83,7 @@ extension SnapshotObject
 {
     func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
     {
-        self.translator[scalar: declaration].map(self.scope(of:)) ?? nil
+        (declaration - self.zone).map(self.scope(of:)) ?? nil
     }
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {

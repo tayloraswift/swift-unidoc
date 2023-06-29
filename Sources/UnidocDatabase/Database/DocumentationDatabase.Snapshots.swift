@@ -21,7 +21,6 @@ extension DocumentationDatabase.Snapshots
     @inlinable public static
     var name:Mongo.Collection { "snapshots" }
 
-    public
     func setup(with session:Mongo.Session) async throws
     {
         let response:Mongo.CreateIndexesResponse = try await session.run(
@@ -68,6 +67,7 @@ extension DocumentationDatabase.Snapshots
         as id:String,
         with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
+        //  Look up the snapshot with the highest version index in the database
         let predecessors:[Snapshot.Shell] = try await transaction.run(
             command: Mongo.Find<Mongo.SingleBatch<Snapshot.Shell>>.init(Self.name,
                 limit: 1)

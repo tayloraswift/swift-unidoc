@@ -6,18 +6,18 @@ extension DynamicLinker
 {
     struct Extensions
     {
-        /// A copy of the current snapshot’s translator. This helps us avoid overlapping
+        private
+        var table:[ExtensionSignature: Extension]
+        /// A copy of the current snapshot’s zone. This helps us avoid overlapping
         /// access when performing mutations on `self` while reading from the original
         /// snapshot context.
         private
-        let translator:Snapshot.Translator
-        private
-        var table:[ExtensionSignature: Extension]
+        let zone:Unidoc.Zone
 
-        init(translator:Snapshot.Translator, table:[ExtensionSignature: Extension] = [:])
+        init(table:[ExtensionSignature: Extension] = [:], zone:Unidoc.Zone)
         {
-            self.translator = translator
             self.table = table
+            self.zone = zone
         }
     }
 }
@@ -43,12 +43,12 @@ extension DynamicLinker.Extensions
     {
         _read
         {
-            let next:Unidoc.Scalar = self.translator[citizen: .extension | self.count]
+            let next:Unidoc.Scalar = self.zone + self.count * .extension
             yield  self.table[signature, default: .init(id: next)]
         }
         _modify
         {
-            let next:Unidoc.Scalar = self.translator[citizen: .extension | self.count]
+            let next:Unidoc.Scalar = self.zone + self.count * .extension
             yield &self.table[signature, default: .init(id: next)]
         }
     }
@@ -81,7 +81,7 @@ extension DynamicLinker.Extensions
                 {
                     $0.map { context.current.decls[$0] }
                 },
-                culture: context.current.translator[culture: `extension`.culture],
+                culture: context.current.zone + `extension`.culture * .module,
                 extends: scope)
 
             let protocols:[Unidoc.Scalar] = `extension`.conformances.compactMap
