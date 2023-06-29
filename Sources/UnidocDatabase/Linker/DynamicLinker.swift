@@ -1,6 +1,7 @@
 import CodelinkResolution
 import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import Unidoc
 
 struct DynamicLinker
@@ -81,7 +82,10 @@ extension DynamicLinker
 
             for namespace:SymbolGraph.Namespace in input.namespaces
             {
-                self.link(namespace: namespace, of: culture, in: group)
+                self.link(decls: namespace.range,
+                    under: self.current.graph.namespaces[namespace.index],
+                    of: culture,
+                    in: group)
             }
             if  let articles:ClosedRange<Int32> = input.articles
             {
@@ -97,13 +101,13 @@ extension DynamicLinker
 extension DynamicLinker
 {
     private mutating
-    func link(articles:ClosedRange<Int32>,
+    func link(articles range:ClosedRange<Int32>,
         under namespace:ModuleIdentifier,
         in group:DynamicResolutionGroup)
     {
         for (a, article):(Int32, SymbolGraph.Article<String>) in zip(
-            self.current.graph.articles[articles].indices,
-            self.current.graph.articles[articles])
+            self.current.graph.articles[range].indices,
+            self.current.graph.articles[range])
         {
             var linked:Record.Master.Article = .init(id: self.current.translator[citizen: a])
             var resolver:DynamicResolver = .init(context: self.context,
@@ -136,29 +140,29 @@ extension DynamicLinker
     }
 
     private mutating
-    func link(namespace:SymbolGraph.Namespace,
+    func link(decls range:ClosedRange<Int32>,
+        under namespace:ModuleIdentifier,
         of culture:Unidoc.Scalar,
         in group:DynamicResolutionGroup)
     {
-        let qualifier:ModuleIdentifier = self.current.graph.namespaces[namespace.index]
-
-        for (d, (node, conformances)):
-            (Int32, (SymbolGraph.Node, Conformances)) in zip(namespace.range, zip(
-            self.current.graph.nodes[namespace.range],
-            self.conformances[namespace.range]))
+        for (d, ((symbol, node), conformances)):
+            (Int32, ((Symbol.Decl, SymbolGraph.Node), Conformances)) in zip(range, zip(zip(
+                self.current.graph.decls[range],
+                self.current.graph.nodes[range]),
+            self.conformances[range]))
         {
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
             //  Ceremonial unwraps, should always succeed since we are only iterating
             //  over module ranges.
-            guard   let scalar:SymbolGraph.Decl = node.decl,
+            guard   let decl:SymbolGraph.Decl = node.decl,
                     let d:Unidoc.Scalar = self.current.decls[d]
             else
             {
                 continue
             }
 
-            for f:Int32 in scalar.features
+            for f:Int32 in decl.features
             {
                 if  let `protocol`:Unidoc.Scalar = self.current.scope(of: f),
                     let f:Unidoc.Scalar = self.current.decls[f]
@@ -173,7 +177,7 @@ extension DynamicLinker
                 }
             }
 
-            let superforms:[Unidoc.Scalar] = scalar.superforms.compactMap
+            let superforms:[Unidoc.Scalar] = decl.superforms.compactMap
             {
                 if  let s:Unidoc.Scalar = self.current.decls[$0]
                 {
@@ -191,17 +195,18 @@ extension DynamicLinker
             }
 
             var linked:Record.Master.Decl = .init(id: d,
-                signature: scalar.signature.map { self.current.decls[$0] },
+                symbol: symbol,
+                signature: decl.signature.map { self.current.decls[$0] },
                 superforms: superforms,
                 culture: culture,
                 scope: scope.map { self.context.expand($0) })
 
-            if  let article:SymbolGraph.Article<Never> = scalar.article
+            if  let article:SymbolGraph.Article<Never> = decl.article
             {
                 var resolver:DynamicResolver = .init(context: self.context,
-                    namespace: qualifier,
+                    namespace: namespace,
                     group: group,
-                    scope: scalar.phylum.scope(trimming: scalar.path))
+                    scope: decl.phylum.scope(trimming: decl.path))
 
                 (linked.overview, linked.details) = resolver.link(article: article)
 
