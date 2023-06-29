@@ -1,6 +1,7 @@
 import BSONDecoding
 import BSONEncoding
 import SymbolGraphs
+import Unidoc
 
 struct Snapshot:Equatable, Sendable
 {
@@ -49,7 +50,7 @@ extension Snapshot
 }
 extension Snapshot
 {
-    var translator:Translator
+    var zone:Unidoc.Zone
     {
         .init(package: self.package, version: self.version)
     }

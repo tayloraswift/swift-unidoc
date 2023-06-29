@@ -22,19 +22,7 @@ extension Unidoc
 extension Unidoc.Scalar
 {
     @inlinable public
-    init(package:Int32, version:Int32, culture:Int)
-    {
-        self.init(
-            package: package,
-            version: version,
-            citizen: .module | culture)
-    }
-
-    @inlinable public
-    var culture:Int?
-    {
-        self.citizen & .module
-    }
+    var zone:Unidoc.Zone { .init(package: self.package, version: self.version) }
 }
 extension Unidoc.Scalar:Comparable
 {

@@ -29,12 +29,19 @@ struct Crosslinks:MongoTestBattery
             overwritten: false,
             package: 0,
             version: 0,
-            id: "swift v5.8.0 x86_64-unknown-linux-gnu"))
+            id: "swift v5.8.1 x86_64-unknown-linux-gnu"))
 
         tests.expect(try await database.publish(docs: example, with: session) ==? .init(
             overwritten: false,
             package: 1,
             version: 0,
             id: "$anonymous"))
+
+
+        try await database._get(package: "swift-crosslinks",
+            version: nil,
+            stem: "",
+            hash: nil,
+            with: session)
     }
 }

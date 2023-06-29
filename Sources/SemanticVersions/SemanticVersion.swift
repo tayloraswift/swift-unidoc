@@ -16,6 +16,24 @@ struct SemanticVersion:Equatable, Hashable, Sendable
         self.patch = patch
     }
 }
+extension SemanticVersion:RawRepresentable
+{
+    @inlinable public
+    var rawValue:Int64
+    {
+        Int64.init(self.major) << 48 |
+        Int64.init(self.minor) << 32 |
+        Int64.init(self.patch) << 16
+    }
+    @inlinable public
+    init?(rawValue:Int64)
+    {
+        let major:UInt16 = .init(truncatingIfNeeded: rawValue >> 48)
+        let minor:UInt16 = .init(truncatingIfNeeded: rawValue >> 32)
+        let patch:UInt16 = .init(truncatingIfNeeded: rawValue >> 16)
+        self = .v(major, minor, patch)
+    }
+}
 extension SemanticVersion
 {
     /// Creates a semantic version with the given components.

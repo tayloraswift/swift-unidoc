@@ -71,20 +71,20 @@ extension DynamicResolver
         switch referent
         {
         case .scalar(let referent):
-            if      let _:Int = referent.scalar & .decl,
+            if      let _:Int = referent.scalar / .decl,
                     let scalar:Unidoc.Scalar = self.current.decls[referent.scalar]
             {
                 return .path(self.context.expand(scalar, to: referent.length))
             }
-            else if let _:Int = referent.scalar & .article
+            else if let _:Int = referent.scalar / .article
             {
-                return .path([self.current.translator[citizen: referent.scalar]])
+                return .path([self.current.zone + referent.scalar])
             }
-            else if let _:Int = referent.scalar & .file
+            else if let _:Int = referent.scalar / .file
             {
                 //  TODO: implement me
             }
-            else if let namespace:Int = referent.scalar & .module,
+            else if let namespace:Int = referent.scalar / .module,
                     let scalar:Unidoc.Scalar = self.current.namespaces[namespace]
             {
                 return .path([scalar])
@@ -111,7 +111,7 @@ extension DynamicResolver
     {
         var context:Diagnostic.Context<Unidoc.Scalar>
         {
-            .init(location: referent.location?.map { self.current.translator[citizen: $0] })
+            .init(location: referent.location?.map { self.current.zone + $0 })
         }
 
         let codelink:Codelink?
