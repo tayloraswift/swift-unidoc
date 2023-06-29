@@ -1,4 +1,6 @@
+import FNV1
 import Signatures
+import Symbols
 import Unidoc
 
 extension Record.Master
@@ -9,6 +11,8 @@ extension Record.Master
         public
         let id:Unidoc.Scalar
 
+        public
+        let symbol:Symbol.Decl
         public
         let signature:Signature<Unidoc.Scalar?>
 
@@ -25,6 +29,7 @@ extension Record.Master
         var details:Record.Passage?
 
         init(id:Unidoc.Scalar,
+            symbol:Symbol.Decl,
             signature:Signature<Unidoc.Scalar?>,
             superforms:[Unidoc.Scalar],
             culture:Unidoc.Scalar,
@@ -33,8 +38,9 @@ extension Record.Master
             details:Record.Passage? = nil)
         {
             self.id = id
-
+            self.symbol = symbol
             self.signature = signature
+
             self.superforms = superforms
             self.culture = culture
             self.scope = scope
@@ -42,5 +48,13 @@ extension Record.Master
             self.overview = overview
             self.details = details
         }
+    }
+}
+extension Record.Master.Decl
+{
+    @inlinable public
+    var hash:FNV24
+    {
+        .init(hashing: "\(self.symbol)")
     }
 }
