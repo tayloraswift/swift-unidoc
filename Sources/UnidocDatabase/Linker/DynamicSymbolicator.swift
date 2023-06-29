@@ -34,11 +34,11 @@ extension DynamicSymbolicator:Symbolicator
 }
 extension DynamicSymbolicator
 {
-    func emit(diagnoses:[any DynamicDiagnosis], colors:TerminalColors = .disabled)
+    func emit(_ errors:[any DynamicLinkerError], colors:TerminalColors = .disabled)
     {
-        for diagnosis:any DynamicDiagnosis in diagnoses
+        for error:any DynamicLinkerError in errors
         {
-            for diagnostic:Diagnostic in diagnosis.symbolicated(with: self)
+            for diagnostic:Diagnostic in error.symbolicated(with: self)
             {
                 print(diagnostic.description(colors: colors), terminator: "\n\n")
             }

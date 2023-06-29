@@ -72,10 +72,10 @@ extension DocumentationDatabase
             with: session)
 
         let linker:DynamicLinker = .init(context: context)
-        let _:Projection = linker.projection()
+        let _:Records = linker.projection
 
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
-            symbolicator.emit(diagnoses: linker.diagnoses, colors: .enabled)
+            symbolicator.emit(linker.errors, colors: .enabled)
 
         return receipt
     }

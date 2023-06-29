@@ -45,9 +45,9 @@ extension StaticOutliner
 }
 extension StaticOutliner
 {
-    var diagnoses:[any StaticDiagnosis]
+    var errors:[any StaticLinkerError]
     {
-        self.resolver.diagnoses
+        self.resolver.errors
     }
 }
 extension StaticOutliner
@@ -73,7 +73,7 @@ extension StaticOutliner
             }
             else
             {
-                self.resolver.diagnoses.append(InvalidAutolinkError<Int32>.init(
+                self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
                     expression: autolink.text,
                     context: autolink.source.map { .init(of: $0, in: sources) }))
                 return nil

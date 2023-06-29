@@ -39,11 +39,11 @@ extension StaticSymbolicator:Symbolicator
 extension StaticSymbolicator
 {
     public
-    func emit(diagnoses:[any StaticDiagnosis], colors:TerminalColors = .disabled)
+    func emit(_ errors:[any StaticLinkerError], colors:TerminalColors = .disabled)
     {
-        for diagnosis:any StaticDiagnosis in diagnoses
+        for error:any StaticLinkerError in errors
         {
-            for diagnostic:Diagnostic in diagnosis.symbolicated(with: self)
+            for diagnostic:Diagnostic in error.symbolicated(with: self)
             {
                 print(diagnostic.description(colors: colors), terminator: "\n\n")
             }

@@ -1,7 +1,7 @@
 import UnidocDiagnostics
 
 public
-protocol StaticDiagnosis
+protocol StaticLinkerError:Error
 {
     func symbolicated(with symbolicator:StaticSymbolicator) -> [Diagnostic]
 }

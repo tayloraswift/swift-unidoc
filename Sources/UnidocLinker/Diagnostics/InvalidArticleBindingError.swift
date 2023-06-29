@@ -39,7 +39,7 @@ extension InvalidArticleBindingError
         }
     }
 }
-extension InvalidArticleBindingError:StaticDiagnosis
+extension InvalidArticleBindingError:StaticLinkerError
 {
     func symbolicated(with symbolicator:StaticSymbolicator) -> [Diagnostic]
     {

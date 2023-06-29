@@ -9,18 +9,18 @@ import UnidocDiagnostics
 
 struct StaticResolver
 {
-    var diagnoses:[any StaticDiagnosis]
-
     private
     let codelinks:CodelinkResolver<Int32>
     private
     let doclinks:DoclinkResolver
 
+    var errors:[any StaticLinkerError]
+
     init(codelinks:CodelinkResolver<Int32>, doclinks:DoclinkResolver)
     {
-        self.diagnoses = []
         self.codelinks = codelinks
         self.doclinks = doclinks
+        self.errors = []
     }
 }
 extension StaticResolver
@@ -79,7 +79,7 @@ extension StaticResolver
             }
             else
             {
-                self.diagnoses.append(InvalidCodelinkError<Int32>.init(
+                self.errors.append(InvalidCodelinkError<Int32>.init(
                     overloads: overloads,
                     codelink: codelink,
                     context: source.map { .init(of: $0, in: sources) }))

@@ -76,7 +76,7 @@ extension SymbolGraph
             print("Linked documentation in \(time.linking)")
 
             let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)
-            symbolicator.emit(diagnoses: linker.diagnoses, colors: .enabled)
+            symbolicator.emit(linker.errors, colors: .enabled)
 
             return graph
         }
