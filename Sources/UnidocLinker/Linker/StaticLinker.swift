@@ -34,7 +34,7 @@ struct StaticLinker
     var supplements:[Int32: [MarkdownDocumentationSupplement]]
 
     public private(set)
-    var diagnoses:[any StaticDiagnosis]
+    var errors:[any StaticLinkerError]
 
     public
     init(nominations:Compiler.Nominations, modules:[ModuleDetails])
@@ -48,7 +48,7 @@ struct StaticLinker
         self.router = .init()
 
         self.supplements = [:]
-        self.diagnoses = []
+        self.errors = []
     }
 }
 extension StaticLinker
@@ -311,7 +311,7 @@ extension StaticLinker
                     self.symbolizer.graph.cultures[culture].article = article
                 }
 
-                self.diagnoses += outliner.diagnoses
+                self.errors += outliner.errors
             }
         }
     }
@@ -363,9 +363,9 @@ extension StaticLinker
                 return nil
             }
         }
-        catch let diagnosis as any StaticDiagnosis
+        catch let diagnosis as any StaticLinkerError
         {
-            self.diagnoses.append(diagnosis)
+            self.errors.append(diagnosis)
             return nil
         }
         catch
@@ -493,7 +493,7 @@ extension StaticLinker
 
                 defer
                 {
-                    self.diagnoses += outliner.diagnoses
+                    self.errors += outliner.errors
                 }
 
                 return outliner.link(comment: .init(from: $0, in: location?.file),
@@ -567,7 +567,7 @@ extension StaticLinker
 
                     $0.article = outliner.link(comment: .init(from: comment, in: file))
 
-                    self.diagnoses += outliner.diagnoses
+                    self.errors += outliner.errors
 
                 } (&self.symbolizer.graph.nodes[scalar].extensions[index])
             }

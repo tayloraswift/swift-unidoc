@@ -1,10 +1,10 @@
 import Signatures
 import Unidoc
 
-extension Projection
+extension Record
 {
     @frozen public
-    struct Extension:Equatable, Sendable
+    struct Extension:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -47,7 +47,7 @@ extension Projection
         }
     }
 }
-extension Projection.Extension
+extension Record.Extension
 {
     init(signature:DynamicLinker.ExtensionSignature,
         extension:DynamicLinker.Extension)

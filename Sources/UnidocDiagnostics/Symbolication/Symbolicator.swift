@@ -19,11 +19,18 @@ extension Symbolicator
     @inlinable public
     func signature(of scalar:Scalar) -> String
     {
-        guard let symbol:Symbol.Decl = self.loadDeclSymbol(scalar)
+        if  let symbol:Symbol.Decl = self.loadDeclSymbol(scalar)
+        {
+            return self.signature(of: symbol)
+        }
         else
         {
             return "<unavailable>"
         }
+    }
+    @inlinable public
+    func signature(of symbol:Symbol.Decl) -> String
+    {
         if  let demangled:String = self.demangler?.demangle(symbol)
         {
             return demangled
