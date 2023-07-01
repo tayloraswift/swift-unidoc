@@ -19,18 +19,14 @@ extension StaticPath
         _ phylum:Unidoc.Decl) -> Self
     {
         var stem:URI.Path = [.push("\(namespace)")]
-        switch phylum
+        if  case .gay = phylum.orientation,
+            let penultimate:Int = path.prefix.indices.last
         {
-        case .case, .deinitializer, .func, .initializer, .operator, .subscript, .var:
-            guard let penultimate:Int = path.prefix.indices.last
-            else
-            {
-                fallthrough
-            }
             stem += path.prefix[..<penultimate].lazy.map(URI.Path.Component.push(_:))
             stem.append("\(path.prefix[penultimate]).\(path.last)")
-
-        case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
+        }
+        else
+        {
             stem += path.lazy.map(URI.Path.Component.push(_:))
         }
 

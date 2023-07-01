@@ -19,3 +19,18 @@ extension Unidoc
         case `var`(Objectivity?)
     }
 }
+extension Unidoc.Decl
+{
+    @inlinable public
+    var orientation:Orientation
+    {
+        switch self
+        {
+        case .case, .deinitializer, .func, .initializer, .operator, .subscript, .var:
+            return .gay
+
+        case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
+            return .straight
+        }
+    }
+}

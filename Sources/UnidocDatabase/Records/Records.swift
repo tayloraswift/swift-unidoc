@@ -7,7 +7,7 @@ struct Records:Sendable
     public
     var articles:[Record.Master.Article]
     public
-    var modules:[Record.Master.Module]
+    var cultures:[Record.Master.Culture]
     public
     var decls:[Record.Master.Decl]
     public
@@ -16,14 +16,14 @@ struct Records:Sendable
     @inlinable public
     init(zone:Record.Zone,
         articles:[Record.Master.Article] = [],
-        modules:[Record.Master.Module] = [],
+        cultures:[Record.Master.Culture] = [],
         decls:[Record.Master.Decl] = [],
         extensions:[Record.Extension] = [])
     {
         self.zone = zone
 
         self.articles = articles
-        self.modules = modules
+        self.cultures = cultures
         self.decls = decls
         self.extensions = extensions
     }

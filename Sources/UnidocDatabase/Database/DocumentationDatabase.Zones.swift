@@ -34,14 +34,16 @@ extension DocumentationDatabase.Zones
                         $0[.name] =
                         """
                         \(Self.name)\
-                        (\(Record[.package]),\(Record[.version]),\(Record[.recency]))
+                        (\(Record.Zone[.package]),\
+                        \(Record.Zone[.version]),\
+                        \(Record.Zone[.recency]))
                         """
 
                         $0[.key] = .init
                         {
-                            $0[Record[.package]] = (+)
-                            $0[Record[.version]] = (+)
-                            $0[Record[.recency]] = (-)
+                            $0[Record.Zone[.package]] = (+)
+                            $0[Record.Zone[.version]] = (+)
+                            $0[Record.Zone[.recency]] = (-)
                         }
                     },
                 ]),

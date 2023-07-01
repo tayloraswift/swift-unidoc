@@ -136,15 +136,15 @@ extension DocumentationDatabase
                     {
                         $0[.match] = .init
                         {
-                            $0[Record[.package]] = package
-                            $0[Record[.version]] = version
+                            $0[Record.Zone[.package]] = package
+                            $0[Record.Zone[.version]] = version
                         }
                     }
                     $0.stage
                     {
                         $0[.sort] = .init
                         {
-                            $0[Record[.recency]] = (-)
+                            $0[Record.Zone[.recency]] = (-)
                         }
                     }
                     $0.stage
@@ -156,9 +156,9 @@ extension DocumentationDatabase
                 {
                     $0[.hint] = .init
                     {
-                        $0[Record[.package]] = (+)
-                        $0[Record[.version]] = (+)
-                        $0[Record[.recency]] = (-)
+                        $0[Record.Zone[.package]] = (+)
+                        $0[Record.Zone[.version]] = (+)
+                        $0[Record.Zone[.recency]] = (-)
                     }
                 },
             against: self.name)
