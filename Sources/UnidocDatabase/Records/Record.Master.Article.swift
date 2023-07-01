@@ -7,6 +7,8 @@ extension Record.Master
     {
         public
         let id:Unidoc.Scalar
+        public
+        let stem:Record.Stem
 
         public
         var overview:Record.Passage?
@@ -14,9 +16,13 @@ extension Record.Master
         var details:Record.Passage?
 
         @inlinable public
-        init(id:Unidoc.Scalar, overview:Record.Passage? = nil, details:Record.Passage? = nil)
+        init(id:Unidoc.Scalar,
+            stem:Record.Stem,
+            overview:Record.Passage? = nil,
+            details:Record.Passage? = nil)
         {
             self.id = id
+            self.stem = stem
             self.overview = overview
             self.details = details
         }

@@ -74,8 +74,24 @@ extension Record.Zone
 }
 extension Record.Zone
 {
-    public
-    typealias CodingKeys = Record.CodingKeys
+    @frozen public
+    enum CodingKeys:String
+    {
+        case id = "_id"
+
+        case package = "P"
+        case version = "V"
+        case recency = "S"
+
+        case min = "L"
+        case max = "U"
+    }
+
+    static
+    subscript(key:CodingKeys) -> String
+    {
+        key.rawValue
+    }
 }
 extension Record.Zone:BSONDocumentEncodable
 {

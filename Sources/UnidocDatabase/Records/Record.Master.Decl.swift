@@ -12,34 +12,39 @@ extension Record.Master
         let id:Unidoc.Scalar
 
         public
+        let signature:Signature<Unidoc.Scalar?>
+        public
         let symbol:Symbol.Decl
         public
-        let signature:Signature<Unidoc.Scalar?>
+        let stem:Record.Stem
 
         public
         let superforms:[Unidoc.Scalar]
         public
         let culture:Unidoc.Scalar
         public
-        let scope:[Unidoc.Scalar]?
+        let scope:[Unidoc.Scalar]
 
         public
         var overview:Record.Passage?
         public
         var details:Record.Passage?
 
+        @inlinable public
         init(id:Unidoc.Scalar,
-            symbol:Symbol.Decl,
             signature:Signature<Unidoc.Scalar?>,
+            symbol:Symbol.Decl,
+            stem:Record.Stem,
             superforms:[Unidoc.Scalar],
             culture:Unidoc.Scalar,
-            scope:[Unidoc.Scalar]?,
+            scope:[Unidoc.Scalar],
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil)
         {
             self.id = id
-            self.symbol = symbol
             self.signature = signature
+            self.symbol = symbol
+            self.stem = stem
 
             self.superforms = superforms
             self.culture = culture

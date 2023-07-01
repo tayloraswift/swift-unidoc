@@ -79,7 +79,7 @@ extension DynamicLinker
                 self.current.graph.cultures),
             groups)
         {
-            let qualifier:ModuleIdentifier = self.current.graph.namespaces[c]
+            let namespace:ModuleIdentifier = self.current.graph.namespaces[c]
             let culture:Unidoc.Scalar = self.current.zone + c * .module
 
             for namespace:SymbolGraph.Namespace in input.namespaces
@@ -91,12 +91,25 @@ extension DynamicLinker
             }
             if  let articles:ClosedRange<Int32> = input.articles
             {
-                self.link(articles: articles, under: qualifier, in: group)
+                self.link(articles: articles, under: namespace, in: group)
             }
+
+            var record:Record.Master.Culture = .init(id: culture,
+                module: input.module,
+                stem: namespace)
+
             if  let article:SymbolGraph.Article<Never> = input.article
             {
-                self.link(article: article, under: qualifier, for: culture, in: group)
+                var resolver:DynamicResolver = .init(context: self.context,
+                    namespace: namespace,
+                    group: group)
+
+                (record.overview, record.details) = resolver.link(article: article)
+
+                self.errors += resolver.errors
             }
+
+            self.projection.cultures.append(record)
         }
     }
 }
@@ -111,7 +124,14 @@ extension DynamicLinker
             self.current.graph.articles[range].indices,
             self.current.graph.articles[range])
         {
-            var record:Record.Master.Article = .init(id: self.current.zone + a)
+            guard let name:String = article.id
+            else
+            {
+                //  TODO: This is a package-level article.
+                continue
+            }
+            var record:Record.Master.Article = .init(id: self.current.zone + a,
+                stem: .init(namespace, name))
             var resolver:DynamicResolver = .init(context: self.context,
                 namespace: namespace,
                 group: group)
@@ -121,24 +141,6 @@ extension DynamicLinker
             self.projection.articles.append(record)
             self.errors += resolver.errors
         }
-    }
-
-    private mutating
-    func link(article:SymbolGraph.Article<Never>,
-        under namespace:ModuleIdentifier,
-        for culture:Unidoc.Scalar,
-        in group:DynamicResolutionGroup)
-    {
-        var resolver:DynamicResolver = .init(context: self.context,
-            namespace: namespace,
-            group: group)
-
-        var record:Record.Master.Module = .init(id: culture)
-
-        (record.overview, record.details) = resolver.link(article: article)
-
-        self.projection.modules.append(record)
-        self.errors += resolver.errors
     }
 
     private mutating
@@ -197,11 +199,12 @@ extension DynamicLinker
             }
 
             var record:Record.Master.Decl = .init(id: d,
-                symbol: symbol,
                 signature: decl.signature.map { self.current.decls[$0] },
+                symbol: symbol,
+                stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),
                 superforms: superforms,
                 culture: culture,
-                scope: scope.map { self.context.expand($0) })
+                scope: scope.map { self.context.expand($0) } ?? [])
 
             if  let article:SymbolGraph.Article<Never> = decl.article
             {
