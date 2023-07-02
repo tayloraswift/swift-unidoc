@@ -11,15 +11,16 @@ import Unidoc
 extension Record
 {
     @frozen public
-    enum Master
+    enum Master:Equatable, Sendable
     {
         case article(Article)
         case culture(Culture)
         case decl(Decl)
     }
 }
-extension Record.Master
+extension Record.Master:Identifiable
 {
+    @inlinable public
     var id:Unidoc.Scalar
     {
         switch self
@@ -29,6 +30,10 @@ extension Record.Master
         case .decl(let decl):       return decl.id
         }
     }
+}
+extension Record.Master
+{
+    @inlinable public
     var overview:Record.Passage?
     {
         switch self
@@ -38,6 +43,7 @@ extension Record.Master
         case .decl(let decl):       return decl.overview
         }
     }
+    @inlinable public
     var details:Record.Passage?
     {
         switch self
@@ -134,8 +140,8 @@ extension Record.Master:BSONDocumentEncodable
             bson[.module] = culture.module
             bson[.stem] = culture.stem
 
-        case .article:
-            break
+        case .article(let article):
+            bson[.stem] = article.stem
         }
 
         bson[.overview] = self.overview

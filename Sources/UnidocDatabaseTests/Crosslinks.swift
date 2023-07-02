@@ -38,10 +38,28 @@ struct Crosslinks:MongoTestBattery
             id: "$anonymous"))
 
 
-        try await database._get(package: "swift-crosslinks",
+        // try await database._get(package: "swift-crosslinks",
+        //     version: nil,
+        //     stem: "BarbieCore Barbie Dreamhouse Keys",
+        //     hash: nil,
+        //     with: session)
+
+        // try await database._get(package: "swift-crosslinks",
+        //     version: nil,
+        //     stem: "barbiecore barbie dreamhouse keys",
+        //     hash: nil,
+        //     with: session)
+
+        try await database._get(package: "swift",
             version: nil,
-            stem: "",
+            stem: "swift dictionary keys",
             hash: nil,
             with: session)
+
+        // try await database._get(package: "swift-crosslinks",
+        //     version: nil,
+        //     stem: "barbiecore barbie dreamhouse\tkeys",
+        //     hash: nil,
+        //     with: session)
     }
 }

@@ -30,6 +30,8 @@ extension DocumentationDatabase
     var snapshots:Snapshots { .init(database: self.name) }
 
     @inlinable public
+    var masters:Masters { .init(database: self.name) }
+    @inlinable public
     var zones:Zones { .init(database: self.name) }
 }
 extension DocumentationDatabase
@@ -48,6 +50,7 @@ extension DocumentationDatabase
         try await self.packages.setup(with: try await .init(from: self.pool))
         try await self.snapshots.setup(with: try await .init(from: self.pool))
 
+        try await self.masters.setup(with: try await .init(from: self.pool))
         try await self.zones.setup(with: try await .init(from: self.pool))
     }
 }
@@ -84,6 +87,7 @@ extension DocumentationDatabase
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
             symbolicator.emit(linker.errors, colors: .enabled)
 
+        try await self.masters.insert(output.masters, with: session)
         try await self.zones.insert(output.zone, with: session)
 
         return receipt
@@ -128,44 +132,32 @@ extension DocumentationDatabase
         hash:FNV24?,
         with session:Mongo.Session) async throws
     {
-        let zone:Record.Zone? = try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<Record.Zone>>.init(Zones.name,
-                pipeline: .init
-                {
-                    $0.stage
-                    {
-                        $0[.match] = .init
-                        {
-                            $0[Record.Zone[.package]] = package
-                            $0[Record.Zone[.version]] = version
-                        }
-                    }
-                    $0.stage
-                    {
-                        $0[.sort] = .init
-                        {
-                            $0[Record.Zone[.recency]] = (-)
-                        }
-                    }
-                    $0.stage
-                    {
-                        $0[.limit] = 1
-                    }
-                },
-                stride: 1)
-                {
-                    $0[.hint] = .init
-                    {
-                        $0[Record.Zone[.package]] = (+)
-                        $0[Record.Zone[.version]] = (+)
-                        $0[Record.Zone[.recency]] = (-)
-                    }
-                },
+        let query:DocumentationQuery.Master = .init(
+            package: package,
+            version: version,
+            stem: stem,
+            hash: hash)
+
+        // try await session.run(
+        //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<DocumentationPage>>>.init(
+        //         verbosity: .executionStats,
+        //         command: query.command),
+        //     against: self.name)
+
+        let page:DocumentationPage? = try await session.run(
+            command: query.command,
             against: self.name)
         {
             try await $0.reduce(into: [], +=).first
         }
 
-        print(zone as Any)
+        if  let page:DocumentationPage
+        {
+            print(page)
+        }
+        else
+        {
+            print("no results!")
+        }
     }
 }

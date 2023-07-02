@@ -11,3 +11,9 @@ extension Barbie
     {
     }
 }
+extension Barbie.Dreamhouse
+{
+    /// The keys to this dreamhouse.
+    public
+    var keys:Keys { .init() }
+}

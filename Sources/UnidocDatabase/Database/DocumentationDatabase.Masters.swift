@@ -22,5 +22,43 @@ extension DocumentationDatabase.Masters
 
     func setup(with session:Mongo.Session) async throws
     {
+        let response:Mongo.CreateIndexesResponse = try await session.run(
+            command: Mongo.CreateIndexes.init(Self.name,
+                writeConcern: .majority,
+                indexes:
+                [
+                    .init
+                    {
+                        $0[.unique] = false
+                        $0[.name] = "\(Self.name)(\(Record.Master[.stem]))"
+
+                        $0[.collation] = DocumentationQuery.Master.collation
+                        $0[.key] = .init
+                        {
+                            $0[Record.Master[.stem]] = (+)
+                        }
+                    },
+                ]),
+            against: self.database)
+
+        assert(response.indexesAfter == 2)
+    }
+
+    public
+    func insert(_ masters:Records.Masters, with session:Mongo.Session) async throws
+    {
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority,
+                encoding: masters)
+            {
+                $0[.ordered] = false
+            },
+            against: self.database)
+
+        if  response.inserted != masters.count
+        {
+            throw response.error
+        }
     }
 }
