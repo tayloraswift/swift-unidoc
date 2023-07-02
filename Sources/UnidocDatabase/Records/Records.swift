@@ -28,3 +28,11 @@ struct Records:Sendable
         self.extensions = extensions
     }
 }
+extension Records
+{
+    @inlinable public
+    var masters:Masters
+    {
+        .init(articles: self.articles, cultures: self.cultures, decls: self.decls)
+    }
+}
