@@ -1,8 +1,8 @@
 import ModuleGraphs
-import SymbolGraphs
+import SymbolGraphCompiler
+import SymbolGraphLinker
 import SymbolGraphParts
-import UnidocCompiler
-import UnidocLinker
+import SymbolGraphs
 
 extension SymbolGraph
 {

@@ -4,6 +4,7 @@ import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import UnidocRecords
 
 extension Docpage
 {

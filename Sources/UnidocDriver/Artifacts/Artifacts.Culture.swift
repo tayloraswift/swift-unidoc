@@ -2,10 +2,10 @@ import MarkdownABI
 import MarkdownParsing
 import MarkdownSemantics
 import ModuleGraphs
+import SymbolGraphLinker
 import SymbolGraphParts
 import Symbols
 import System
-import UnidocLinker
 
 extension Artifacts
 {
