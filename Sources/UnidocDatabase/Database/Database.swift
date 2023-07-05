@@ -8,18 +8,15 @@ import UnidocLinker
 import UnidocRecords
 
 @frozen public
-struct Database
+struct Database:Identifiable, Sendable
 {
-    private
-    let pool:Mongo.SessionPool
     public
-    let name:Mongo.Database
+    let id:Mongo.Database
 
     private
-    init(pool:Mongo.SessionPool, name:Mongo.Database)
+    init(id:Mongo.Database)
     {
-        self.name = name
-        self.pool = pool
+        self.id = id
     }
 }
 extension Database
@@ -27,45 +24,40 @@ extension Database
     var policies:Policies { .init() }
 
     @inlinable public
-    var packages:Packages { .init(database: self.name) }
+    var packages:Packages { .init(database: self.id) }
     @inlinable public
-    var snapshots:Snapshots { .init(database: self.name) }
+    var snapshots:Snapshots { .init(database: self.id) }
 
     @inlinable public
-    var extensions:Extensions { .init(database: self.name) }
+    var extensions:Extensions { .init(database: self.id) }
     @inlinable public
-    var masters:Masters { .init(database: self.name) }
+    var masters:Masters { .init(database: self.id) }
     @inlinable public
-    var zones:Zones { .init(database: self.name) }
+    var zones:Zones { .init(database: self.id) }
 }
 extension Database
 {
     public static
-    func setup(mongodb pool:__owned Mongo.SessionPool, name:Mongo.Database) async throws -> Self
+    func setup(_ id:Mongo.Database, in pool:__owned Mongo.SessionPool) async throws -> Self
     {
-        let database:Self = .init(pool: pool, name: name)
-        try await database.setup()
+        let database:Self = .init(id: id)
+        try await database.setup(with: try await .init(from: pool))
         return database
     }
 
     private
-    func setup() async throws
+    func setup(with session:Mongo.Session) async throws
     {
-        try await self.packages.setup(with: try await .init(from: self.pool))
-        try await self.snapshots.setup(with: try await .init(from: self.pool))
+        try await self.packages.setup(with: session)
+        try await self.snapshots.setup(with: session)
 
-        try await self.extensions.setup(with: try await .init(from: self.pool))
-        try await self.masters.setup(with: try await .init(from: self.pool))
-        try await self.zones.setup(with: try await .init(from: self.pool))
+        try await self.extensions.setup(with: session)
+        try await self.masters.setup(with: session)
+        try await self.zones.setup(with: session)
     }
 }
 extension Database
 {
-    public
-    func push(docs:Documentation) async throws -> SnapshotReceipt
-    {
-        try await self.push(docs: docs, with: try await .init(from: self.pool))
-    }
     public
     func push(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
@@ -152,7 +144,7 @@ extension Database
 
         let page:Docpage? = try await session.run(
             command: query.command,
-            against: self.name)
+            against: self.id)
         {
             try await $0.reduce(into: [], +=).first
         }
