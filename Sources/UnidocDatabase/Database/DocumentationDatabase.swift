@@ -30,6 +30,8 @@ extension DocumentationDatabase
     var snapshots:Snapshots { .init(database: self.name) }
 
     @inlinable public
+    var extensions:Extensions { .init(database: self.name) }
+    @inlinable public
     var masters:Masters { .init(database: self.name) }
     @inlinable public
     var zones:Zones { .init(database: self.name) }
@@ -50,6 +52,7 @@ extension DocumentationDatabase
         try await self.packages.setup(with: try await .init(from: self.pool))
         try await self.snapshots.setup(with: try await .init(from: self.pool))
 
+        try await self.extensions.setup(with: try await .init(from: self.pool))
         try await self.masters.setup(with: try await .init(from: self.pool))
         try await self.zones.setup(with: try await .init(from: self.pool))
     }
@@ -87,6 +90,7 @@ extension DocumentationDatabase
         let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
             symbolicator.emit(linker.errors, colors: .enabled)
 
+        try await self.extensions.insert(output.extensions, with: session)
         try await self.masters.insert(output.masters, with: session)
         try await self.zones.insert(output.zone, with: session)
 
@@ -132,26 +136,26 @@ extension DocumentationDatabase
         hash:FNV24?,
         with session:Mongo.Session) async throws
     {
-        let query:DocumentationQuery.Master = .init(
+        let query:DocpageQuery = .init(
             package: package,
             version: version,
             stem: stem,
             hash: hash)
 
         // try await session.run(
-        //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<DocumentationPage>>>.init(
+        //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<PageFacets.Direct>>>.init(
         //         verbosity: .executionStats,
         //         command: query.command),
         //     against: self.name)
 
-        let page:DocumentationPage? = try await session.run(
+        let page:Docpage? = try await session.run(
             command: query.command,
             against: self.name)
         {
             try await $0.reduce(into: [], +=).first
         }
 
-        if  let page:DocumentationPage
+        if  let page:Docpage
         {
             print(page)
         }

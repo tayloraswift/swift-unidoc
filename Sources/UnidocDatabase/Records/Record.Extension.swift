@@ -1,4 +1,8 @@
+import BSONDecoding
+import BSONEncoding
+import MarkdownABI
 import Signatures
+import SymbolGraphs
 import Unidoc
 
 extension Record
@@ -25,6 +29,7 @@ extension Record
         public
         let subforms:[Unidoc.Scalar]
 
+        @inlinable internal
         init(id:Unidoc.Scalar,
             conditions:[GenericConstraint<Unidoc.Scalar?>],
             culture:Unidoc.Scalar,
@@ -60,5 +65,57 @@ extension Record.Extension
             features: `extension`.features,
             nested: `extension`.nested,
             subforms: `extension`.subforms)
+    }
+}
+extension Record.Extension
+{
+    @frozen public
+    enum CodingKeys:String
+    {
+        case id = "_id"
+
+        case conditions = "C"
+        case culture = "X"
+        case scope = "R"
+
+        case conformances = "P"
+        case features = "F"
+        case nested = "N"
+        case subforms = "S"
+    }
+
+    static
+    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+}
+extension Record.Extension:BSONDocumentEncodable
+{
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    {
+        bson[.id] = self.id
+
+        bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
+        bson[.culture] = self.culture
+        bson[.scope] = self.scope
+
+        bson[.conformances] = self.conformances.isEmpty ? nil : self.conformances
+        bson[.features] = self.features.isEmpty ? nil : self.features
+        bson[.nested] = self.nested.isEmpty ? nil : self.nested
+        bson[.subforms] = self.subforms.isEmpty ? nil : self.subforms
+    }
+}
+extension Record.Extension:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    {
+        self.init(id: try bson[.id].decode(),
+            conditions: try bson[.conditions]?.decode() ?? [],
+            culture: try bson[.culture].decode(),
+            scope: try bson[.scope].decode(),
+            conformances: try bson[.conformances]?.decode() ?? [],
+            features: try bson[.features]?.decode() ?? [],
+            nested: try bson[.nested]?.decode() ?? [],
+            subforms: try bson[.subforms]?.decode() ?? [])
     }
 }

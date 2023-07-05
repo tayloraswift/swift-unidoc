@@ -3,7 +3,7 @@ import MongoDB
 extension DocumentationDatabase
 {
     @frozen public
-    struct Masters
+    struct Extensions
     {
         public
         let database:Mongo.Database
@@ -15,10 +15,10 @@ extension DocumentationDatabase
         }
     }
 }
-extension DocumentationDatabase.Masters
+extension DocumentationDatabase.Extensions
 {
     @inlinable public static
-    var name:Mongo.Collection { "masters" }
+    var name:Mongo.Collection { "extensions" }
 
     func setup(with session:Mongo.Session) async throws
     {
@@ -30,12 +30,10 @@ extension DocumentationDatabase.Masters
                     .init
                     {
                         $0[.unique] = false
-                        $0[.name] = "\(Self.name)(\(Record.Master[.stem]))"
-
-                        $0[.collation] = DocpageQuery.collation
+                        $0[.name] = "\(Self.name)(\(Record.Extension[.scope]))"
                         $0[.key] = .init
                         {
-                            $0[Record.Master[.stem]] = (+)
+                            $0[Record.Extension[.scope]] = (+)
                         }
                     },
                 ]),
@@ -45,18 +43,18 @@ extension DocumentationDatabase.Masters
     }
 
     public
-    func insert(_ masters:Records.Masters, with session:Mongo.Session) async throws
+    func insert(_ extensions:[Record.Extension], with session:Mongo.Session) async throws
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,
                 writeConcern: .majority,
-                encoding: masters)
+                encoding: extensions)
             {
                 $0[.ordered] = false
             },
             against: self.database)
 
-        if  response.inserted != masters.count
+        if  response.inserted != extensions.count
         {
             throw response.error
         }

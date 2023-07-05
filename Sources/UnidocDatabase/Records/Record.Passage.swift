@@ -35,7 +35,7 @@ extension Record.Passage:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.referents] = self.referents
+        bson[.referents] = self.referents.isEmpty ? nil : self.referents
         bson[.markdown] = self.markdown
     }
 }
@@ -44,7 +44,7 @@ extension Record.Passage:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(referents: try bson[.referents].decode(),
+        self.init(referents: try bson[.referents]?.decode() ?? [],
             markdown: try bson[.markdown].decode())
     }
 }

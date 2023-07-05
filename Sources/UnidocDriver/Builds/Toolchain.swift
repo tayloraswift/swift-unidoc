@@ -143,7 +143,7 @@ extension Toolchain
                 cultures: [Int].init(artifacts.cultures.indices)),
         ]
 
-        let metadata:Documentation.Metadata = .swift(triple: self.triple,
+        let metadata:SymbolGraphMetadata = .swift(triple: self.triple,
             version: self.version,
             products: products)
 
@@ -215,7 +215,7 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let metadata:Documentation.Metadata = .init(package: build.id,
+        let metadata:SymbolGraphMetadata = .init(package: build.id,
             triple: self.triple,
             ref: build.pin?.ref,
             dependencies: try package.pinnedDependencies(using: pins),
