@@ -1,5 +1,6 @@
+import Unidoc
 import UnidocDiagnostics
 
-extension InvalidAutolinkError<Int32>:StaticLinkerError
+extension InvalidAutolinkError<Unidoc.Scalar>:DynamicLinkerError
 {
 }

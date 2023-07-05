@@ -1,5 +1,6 @@
 import BSON
 import MongoExpressions
+import UnidocRecords
 
 extension DocpageQuery
 {

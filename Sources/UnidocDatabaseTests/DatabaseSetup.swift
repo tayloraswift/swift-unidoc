@@ -8,8 +8,8 @@ struct DatabaseSetup:MongoTestBattery
     {
         //  We should be able to reinitialize the database as many times as we want.
         //  (Initialization should be idempotent.)
-        let _:DocumentationDatabase = try await .setup(mongodb: pool, name: database)
-        let _:DocumentationDatabase = try await .setup(mongodb: pool, name: database)
-        let _:DocumentationDatabase = try await .setup(mongodb: pool, name: database)
+        let _:Database = try await .setup(mongodb: pool, name: database)
+        let _:Database = try await .setup(mongodb: pool, name: database)
+        let _:Database = try await .setup(mongodb: pool, name: database)
     }
 }

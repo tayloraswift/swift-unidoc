@@ -1,4 +1,5 @@
 import BSONDecoding
+import UnidocRecords
 
 @frozen public
 struct Docpage:Equatable, Sendable

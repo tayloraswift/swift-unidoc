@@ -6,7 +6,7 @@ struct Registrations:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:DocumentationDatabase = try await .setup(mongodb: pool, name: database)
+        let database:Database = try await .setup(mongodb: pool, name: database)
 
         let session:Mongo.Session = try await .init(from: pool)
 

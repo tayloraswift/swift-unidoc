@@ -2,8 +2,8 @@ import BSONEncoding
 import FNV1
 import ModuleGraphs
 import MongoDB
+import UnidocRecords
 
-public
 struct DocpageQuery
 {
     let package:PackageIdentifier
@@ -11,7 +11,6 @@ struct DocpageQuery
     let stem:Substring
     let hash:FNV24?
 
-    public
     init(package:PackageIdentifier,
         version:Substring?,
         stem:Substring,
@@ -39,7 +38,7 @@ extension DocpageQuery
     {
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
-        .init(DocumentationDatabase.Zones.name, pipeline: self.pipeline, stride: 1)
+        .init(Database.Zones.name, pipeline: self.pipeline, stride: 1)
         {
             $0[.collation] = Self.collation
             $0[.hint] = .init
@@ -92,7 +91,7 @@ extension DocpageQuery
                     let min:Mongo.UntypedVariable = "min"
                     let max:Mongo.UntypedVariable = "max"
 
-                    $0[.from] = DocumentationDatabase.Masters.name
+                    $0[.from] = Database.Masters.name
                     $0[.let] = .init
                     {
                         $0[let: min] = "$\(Record.Zone[.min])"
@@ -145,7 +144,7 @@ extension DocpageQuery
             {
                 $0[.lookup] = .init
                 {
-                    $0[.from] = DocumentationDatabase.Extensions.name
+                    $0[.from] = Database.Extensions.name
                     $0[.localField] = Docpage.Principal[.master] / Record.Master[.id]
                     $0[.foreignField] = Record.Extension[.scope]
                     $0[.as] = Docpage.Principal[.extensions]
@@ -210,7 +209,7 @@ extension DocpageQuery
                         {
                             $0[.lookup] = .init
                             {
-                                $0[.from] = DocumentationDatabase.Masters.name
+                                $0[.from] = Database.Masters.name
                                 $0[.localField] = scalars
                                 $0[.foreignField] = Record.Master[.id]
                                 $0[.as] = "masters"
