@@ -268,6 +268,8 @@ let package:Package = .init(
         .target(name: "UnidocLinker",
             dependencies:
             [
+                .target(name: "CodelinkResolution"),
+                .target(name: "DoclinkResolution"),
                 .target(name: "UnidocDiagnostics"),
                 .target(name: "UnidocRecords"),
             ]),
@@ -296,9 +298,9 @@ let package:Package = .init(
             [
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
-                .target(name: "SymbolGraphs"),
-                .product(name: "MongoDB", package: "swift-mongodb"),
+                .target(name: "UnidocDatabase"),
             ]),
+
 
         .executableTarget(name: "CodelinkTests", dependencies:
             [

@@ -5,6 +5,7 @@ import NIOCore
 import NIOPosix
 import NIOHTTP1
 import SymbolGraphs
+import UnidocDatabase
 
 final
 actor Delegate
@@ -13,10 +14,12 @@ actor Delegate
     let requests:(in:AsyncStream<AnyRequest>.Continuation, out:AsyncStream<AnyRequest>)
 
     private nonisolated
+    let database:Database
+    private nonisolated
     let mongodb:Mongo.SessionPool
 
     private
-    init(mongodb:Mongo.SessionPool)
+    init(database:Database, mongodb:Mongo.SessionPool)
     {
         var continuation:AsyncStream<AnyRequest>.Continuation? = nil
         self.requests.out = .init
@@ -25,15 +28,8 @@ actor Delegate
         }
         self.requests.in = continuation!
 
+        self.database = database
         self.mongodb = mongodb
-    }
-}
-extension Delegate
-{
-    static
-    func setup(mongodb:__owned Mongo.SessionPool) -> Self
-    {
-        return .init(mongodb: mongodb)
     }
 }
 extension Delegate
@@ -104,64 +100,32 @@ extension Delegate
     private
     func respond(to request:PostRequest) async throws -> ServerResource
     {
+        var receipts:[SnapshotReceipt] = []
         for item:MultipartForm.Item in request.form
             where item.header.name == "documentation-binary"
         {
-            try await self.ingest(uploaded: try .init(buffer: item.value))
+            receipts.append(try await self.ingest(uploaded: try .init(buffer: item.value)))
         }
         return .init(location: request.uri,
-                response: .content(.init(.text("success!"),
+                response: .content(.init(.text("success! \(receipts)"),
                     type: .text(.plain, charset: .utf8))),
                 results: .one(canonical: request.uri))
     }
 }
 
-public
-enum _DocumentationObjectIdentificationError:Error, Sendable
-{
-    case unidentified
-}
-
-import SemanticVersions
-
-
 extension Delegate
 {
     private nonisolated
-    func ingest(uploaded archive:Documentation) async throws
+    func ingest(uploaded docs:Documentation) async throws -> SnapshotReceipt
     {
-        guard let id:String = archive.metadata.id
-        else
+        if  let _:String = docs.metadata.id
         {
-            throw _DocumentationObjectIdentificationError.unidentified
-        }
-
-        let session:Mongo.Session = try await .init(from: self.mongodb)
-
-        if  let _:SemanticRef = archive.metadata.toolchain
-        {
-            //  swift package.
-            let pins:[String] = archive.metadata.pins()
-            print("pins:", pins)
-
-            try await session.run(
-                command: Mongo.Find<Mongo.Cursor<Documentation>>.init("doc_objects",
-                    stride: 32),
-                against: "master",
-                on: .primary)
-            {
-                for try await batch:[Documentation] in $0
-                {
-                    for archive:Documentation in batch
-                    {
-                        print(archive.metadata.id as Any)
-                    }
-                }
-            }
+            let session:Mongo.Session = try await .init(from: self.mongodb)
+            return try await self.database.publish(docs: docs, with: session)
         }
         else
         {
-            //  swift standard library.
+            throw DocumentationIdentificationError.init()
         }
     }
 }
@@ -206,7 +170,8 @@ extension Delegate
 
         try await mongodb.withSessionPool
         {
-            let delegate:Self = .setup(mongodb: $0)
+            let delegate:Self = .init(database: try await .setup("unidoc", in: $0),
+                mongodb: $0)
 
             try await withThrowingTaskGroup(of: Void.self)
             {
