@@ -69,7 +69,7 @@ extension SymbolGraph.Article
         case id = "I"
     }
 }
-extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable, BSONWeakEncodable
+extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable
     where ID:BSONEncodable
 {
     public

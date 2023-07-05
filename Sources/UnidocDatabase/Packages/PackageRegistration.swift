@@ -23,10 +23,7 @@ extension PackageRegistration
     }
 
     static
-    subscript(key:CodingKeys) -> String
-    {
-        key.rawValue
-    }
+    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
 }
 extension PackageRegistration:BSONDocumentEncodable
 {
@@ -43,3 +40,4 @@ extension PackageRegistration:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(), address: try bson[.address].decode())
     }
 }
+

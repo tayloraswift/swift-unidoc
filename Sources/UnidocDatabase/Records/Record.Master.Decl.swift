@@ -30,7 +30,7 @@ extension Record.Master
         public
         var details:Record.Passage?
 
-        @inlinable public
+        @inlinable internal
         init(id:Unidoc.Scalar,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,

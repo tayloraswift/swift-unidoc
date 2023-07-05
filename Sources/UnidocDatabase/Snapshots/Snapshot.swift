@@ -10,13 +10,13 @@ struct Snapshot:Equatable, Sendable
     let package:Int32
     let version:Int32
 
-    let metadata:Documentation.Metadata
+    let metadata:SymbolGraphMetadata
     let graph:SymbolGraph
 
     init(id:String,
         package:Int32,
         version:Int32,
-        metadata:Documentation.Metadata,
+        metadata:SymbolGraphMetadata,
         graph:SymbolGraph)
     {
         self.id = id
@@ -70,10 +70,7 @@ extension Snapshot
     }
 
     static
-    subscript(key:CodingKeys) -> String
-    {
-        key.rawValue
-    }
+    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
 }
 extension Snapshot:BSONDocumentEncodable
 {

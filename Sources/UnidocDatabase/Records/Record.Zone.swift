@@ -11,7 +11,7 @@ extension Record
     struct Zone:Equatable, Sendable
     {
         public
-        let id:Unidoc.Scalar
+        let id:Unidoc.Zone
 
         public
         let package:PackageIdentifier
@@ -27,7 +27,7 @@ extension Record
         let max:Unidoc.Scalar
 
         @inlinable public
-        init(id:Unidoc.Scalar,
+        init(id:Unidoc.Zone,
             package:PackageIdentifier,
             version:String,
             recency:SemanticVersion?,
@@ -64,7 +64,7 @@ extension Record.Zone
             recency = nil
         }
 
-        self.init(id: zone + nil,
+        self.init(id: zone,
             package: package,
             version: version,
             recency: recency,
@@ -88,10 +88,7 @@ extension Record.Zone
     }
 
     static
-    subscript(key:CodingKeys) -> String
-    {
-        key.rawValue
-    }
+    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
 }
 extension Record.Zone:BSONDocumentEncodable
 {

@@ -3,7 +3,7 @@ import BSONEncoding
 import ModuleGraphs
 import SemanticVersions
 
-extension Documentation.Metadata
+extension SymbolGraphMetadata
 {
     @frozen public
     struct Dependency:Equatable, Sendable
@@ -30,7 +30,7 @@ extension Documentation.Metadata
         }
     }
 }
-extension Documentation.Metadata.Dependency
+extension SymbolGraphMetadata.Dependency
 {
     @frozen public
     enum CodingKeys:String
@@ -42,7 +42,7 @@ extension Documentation.Metadata.Dependency
         case ref = "R"
     }
 }
-extension Documentation.Metadata.Dependency:BSONDocumentEncodable
+extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
@@ -66,7 +66,7 @@ extension Documentation.Metadata.Dependency:BSONDocumentEncodable
         bson[.ref] = self.ref
     }
 }
-extension Documentation.Metadata.Dependency:BSONDocumentDecodable
+extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws

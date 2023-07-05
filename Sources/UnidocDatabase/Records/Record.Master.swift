@@ -95,10 +95,7 @@ extension Record.Master
     }
 
     static
-    subscript(key:CodingKeys) -> String
-    {
-        key.rawValue
-    }
+    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
 }
 extension Record.Master:BSONDocumentEncodable
 {

@@ -135,7 +135,7 @@ extension SymbolGraph.Table
         }
     }
 }
-extension SymbolGraph.Table:BSONEncodable, BSONWeakEncodable where Element:BSONEncodable
+extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)

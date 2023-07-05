@@ -31,7 +31,7 @@ extension Availability.Clauses:BSONDocumentDecodable, BSONDocumentViewDecodable,
             message: try bson[.message]?.decode())
     }
 }
-extension Availability.Clauses:BSONDocumentEncodable, BSONEncodable, BSONWeakEncodable
+extension Availability.Clauses:BSONDocumentEncodable, BSONEncodable
     where   Domain.Unavailability:BSONEncodable,
             Domain.Deprecation:BSONEncodable,
             Domain.Bound:BSONEncodable

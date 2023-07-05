@@ -1,7 +1,7 @@
 extension Unidoc
 {
     @frozen public
-    struct Zone
+    struct Zone:Equatable, Hashable, Sendable
     {
         public
         let package:Int32

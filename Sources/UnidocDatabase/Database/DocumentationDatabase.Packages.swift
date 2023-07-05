@@ -103,7 +103,7 @@ extension DocumentationDatabase.Packages
                         $0[.replaceWith] = .init
                         {
                             $0[PackageRegistration[.id]] = package
-                            $0[PackageRegistration[.address]] = .init
+                            $0[PackageRegistration[.address]] = .expr
                             {
                                 $0[.add] = ("$\(PackageRegistration[.address])", 1)
                             }

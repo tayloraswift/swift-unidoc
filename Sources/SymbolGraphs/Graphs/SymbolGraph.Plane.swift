@@ -64,7 +64,7 @@ extension SymbolGraph.Plane:RandomAccessCollection
         }
     }
 }
-extension SymbolGraph.Plane:BSONEncodable, BSONWeakEncodable where Element:BSONEncodable
+extension SymbolGraph.Plane:BSONEncodable where Element:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)

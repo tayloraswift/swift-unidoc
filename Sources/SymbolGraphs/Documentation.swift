@@ -5,12 +5,12 @@ import BSONEncoding
 struct Documentation:Equatable, Sendable
 {
     public
-    let metadata:Metadata
+    let metadata:SymbolGraphMetadata
     public
     let graph:SymbolGraph
 
     @inlinable public
-    init(metadata:Metadata, graph:SymbolGraph)
+    init(metadata:SymbolGraphMetadata, graph:SymbolGraph)
     {
         self.metadata = metadata
         self.graph = graph

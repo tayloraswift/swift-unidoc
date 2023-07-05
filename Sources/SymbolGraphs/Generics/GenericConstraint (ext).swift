@@ -27,7 +27,7 @@ extension GenericConstraint
         case complex = "C"
     }
 }
-extension GenericConstraint:BSONDocumentEncodable, BSONEncodable, BSONWeakEncodable
+extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
     where Scalar:BSONEncodable
 {
     public
