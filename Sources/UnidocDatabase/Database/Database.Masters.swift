@@ -1,26 +1,28 @@
 import MongoDB
+import Unidoc
 import UnidocRecords
 
 extension Database
 {
-    @frozen public
     struct Masters
     {
-        public
         let database:Mongo.Database
 
-        @inlinable internal
         init(database:Mongo.Database)
         {
             self.database = database
         }
     }
 }
+extension Database.Masters:DatabaseCollection
+{
+    typealias Element = Record.Master
+
+    static
+    var name:Mongo.Collection { "masters" }
+}
 extension Database.Masters
 {
-    @inlinable public static
-    var name:Mongo.Collection { "masters" }
-
     func setup(with session:Mongo.Session) async throws
     {
         let response:Mongo.CreateIndexesResponse = try await session.run(
@@ -43,23 +45,5 @@ extension Database.Masters
             against: self.database)
 
         assert(response.indexesAfter == 2)
-    }
-
-    public
-    func insert(_ masters:Records.Masters, with session:Mongo.Session) async throws
-    {
-        let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: masters)
-            {
-                $0[.ordered] = false
-            },
-            against: self.database)
-
-        if  response.inserted != masters.count
-        {
-            throw response.error
-        }
     }
 }

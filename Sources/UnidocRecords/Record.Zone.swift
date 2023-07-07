@@ -8,7 +8,7 @@ import Unidoc
 extension Record
 {
     @frozen public
-    struct Zone:Equatable, Sendable
+    struct Zone:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Zone

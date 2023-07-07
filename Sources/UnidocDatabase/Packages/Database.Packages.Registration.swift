@@ -3,18 +3,21 @@ import SymbolGraphs
 import BSONDecoding
 import BSONEncoding
 
-struct PackageRegistration
+extension Database.Packages
 {
-    let id:PackageIdentifier
-    let address:Int32
-
-    init(id:PackageIdentifier, address:Int32)
+    struct Registration
     {
-        self.id = id
-        self.address = address
+        let id:PackageIdentifier
+        let address:Int32
+
+        init(id:PackageIdentifier, address:Int32)
+        {
+            self.id = id
+            self.address = address
+        }
     }
 }
-extension PackageRegistration
+extension Database.Packages.Registration
 {
     enum CodingKeys:String
     {
@@ -25,7 +28,7 @@ extension PackageRegistration
     static
     subscript(key:CodingKeys) -> BSON.Key { .init(key) }
 }
-extension PackageRegistration:BSONDocumentEncodable
+extension Database.Packages.Registration:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
@@ -33,7 +36,7 @@ extension PackageRegistration:BSONDocumentEncodable
         bson[.address] = self.address
     }
 }
-extension PackageRegistration:BSONDocumentDecodable
+extension Database.Packages.Registration:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {

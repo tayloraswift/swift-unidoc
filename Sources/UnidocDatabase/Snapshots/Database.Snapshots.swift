@@ -1,5 +1,6 @@
 import MongoDB
 import SymbolGraphs
+import Unidoc
 import UnidocLinker
 
 extension Database
@@ -69,8 +70,8 @@ extension Database.Snapshots
         with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
         //  Look up the snapshot with the highest version index in the database
-        let predecessors:[Shell] = try await transaction.run(
-            command: Mongo.Find<Mongo.SingleBatch<Shell>>.init(Self.name,
+        let predecessors:[MetadataView] = try await transaction.run(
+            command: Mongo.Find<Mongo.SingleBatch<MetadataView>>.init(Self.name,
                 limit: 1)
             {
                 $0[.filter] = .init
@@ -88,6 +89,7 @@ extension Database.Snapshots
                 }
                 $0[.projection] = .init
                 {
+                    $0[Snapshot[.package]] = true
                     $0[Snapshot[.version]] = true
                 }
             },
@@ -128,6 +130,34 @@ extension Database.Snapshots
 }
 extension Database.Snapshots
 {
+    func load(_ zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Snapshot
+    {
+        let snapshots:[Snapshot] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Snapshot>>.init(Self.name, limit: 1)
+            {
+                $0[.filter] = .init
+                {
+                    $0[Snapshot[.package]] = zone.package
+                    $0[Snapshot[.version]] = zone.version
+                }
+                $0[.hint] = .init
+                {
+                    $0[Snapshot[.package]] = (-)
+                    $0[Snapshot[.version]] = (-)
+                }
+            },
+            against: self.database)
+
+        if  let snapshot:Snapshot = snapshots.first
+        {
+            return snapshot
+        }
+        else
+        {
+            throw RetrievalError.init(zone: zone)
+        }
+    }
+
     func load(_ pins:[String], with session:Mongo.Session) async throws -> [Snapshot]
     {
         try await session.run(
@@ -147,6 +177,32 @@ extension Database.Snapshots
             against: self.database)
         {
             try await $0.reduce(into: [], +=)
+        }
+    }
+    /// Returns the zone tuples for all snapshots in this collection, with respect
+    /// to the read concern of the given transaction.
+    func list(with transaction:Mongo.Transaction) async throws -> [Unidoc.Zone]
+    {
+        try await transaction.run(
+            command: Mongo.Find<Mongo.Cursor<MetadataView>>.init(Self.name,
+                stride: 4096,
+                limit: .max)
+            {
+                $0[.projection] = .init
+                {
+                    $0[Snapshot[.package]] = true
+                    $0[Snapshot[.version]] = true
+                }
+            },
+            against: self.database)
+        {
+            try await $0.reduce(into: [])
+            {
+                for metadata:MetadataView in $1
+                {
+                    $0.append(metadata.zone)
+                }
+            }
         }
     }
 }

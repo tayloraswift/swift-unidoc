@@ -28,11 +28,8 @@ extension Database
     @inlinable public
     var snapshots:Snapshots { .init(database: self.id) }
 
-    @inlinable public
     var extensions:Extensions { .init(database: self.id) }
-    @inlinable public
     var masters:Masters { .init(database: self.id) }
-    @inlinable public
     var zones:Zones { .init(database: self.id) }
 }
 extension Database
@@ -59,6 +56,47 @@ extension Database
 extension Database
 {
     public
+    func publish(docs:__owned Documentation,
+        with session:__shared Mongo.Session) async throws -> SnapshotReceipt
+    {
+        let receipt:SnapshotReceipt = try await self.push(docs: docs, with: session)
+
+        try await self.pull(from: .init(id: receipt.id,
+                package: receipt.package,
+                version: receipt.version,
+                metadata: docs.metadata,
+                graph: docs.graph),
+            with: session)
+
+        return receipt
+    }
+
+    public
+    func rebuild(with session:__shared Mongo.Session) async throws
+    {
+        let result:Mongo.TransactionResult = await session.withSnapshotTransaction(
+            writeConcern: .majority)
+        {
+            let zones:[Unidoc.Zone] = try await self.snapshots.list(with: $0)
+
+            try await self.extensions.clear(with: $0)
+            try await self.masters.clear(with: $0)
+            try await self.zones.clear(with: $0)
+
+            return zones
+        }
+
+        for zone:Unidoc.Zone in try result()
+        {
+            try await self.pull(
+                from: try await self.snapshots.load(zone, with: session),
+                with: session)
+        }
+    }
+}
+extension Database
+{
+    public
     func push(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         //  TODO: enforce population limits
@@ -67,57 +105,25 @@ extension Database
             as: docs.metadata.id ?? "$anonymous",
             with: session)
     }
-}
-extension Database
-{
-    public
-    func publish(docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws -> SnapshotReceipt
+    private
+    func pull(from snapshot:__owned Snapshot,
+        with session:__shared Mongo.Session) async throws
     {
-        let (receipt, context):(SnapshotReceipt, DynamicContext) = try await self.pull(
-            pushing: docs,
-            with: session)
+        let context:DynamicContext = .init(snapshot,
+            dependencies: try await self.snapshots.load(snapshot.metadata.pins(),
+                with: session))
 
         let linker:DynamicLinker = .init(context: context)
         let output:Records = linker.projection
 
-        let symbolicator:DynamicSymbolicator = .init(context: context, root: docs.metadata.root)
-            symbolicator.emit(linker.errors, colors: .enabled)
+        let symbolicator:DynamicSymbolicator = .init(context: context,
+            root: snapshot.metadata.root)
+
+        symbolicator.emit(linker.errors, colors: .enabled)
 
         try await self.extensions.insert(output.extensions, with: session)
         try await self.masters.insert(output.masters, with: session)
         try await self.zones.insert(output.zone, with: session)
-
-        return receipt
-    }
-    private
-    func pull(pushing docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws -> (SnapshotReceipt, DynamicContext)
-    {
-        let dependencies:[Snapshot] = try await self.snapshots.load(docs.metadata.pins(),
-            with: session)
-
-        var upstream:DynamicContext.UpstreamScalars = .init()
-
-        for snapshot:Snapshot in dependencies
-        {
-            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.citizens
-            {
-                upstream.citizens[symbol] = snapshot.zone + citizen
-            }
-            for (culture, symbol):(Int, ModuleIdentifier) in zip(
-                snapshot.graph.cultures.indices,
-                snapshot.graph.namespaces)
-            {
-                upstream.cultures[symbol] = snapshot.zone + culture * .module
-            }
-        }
-
-        let receipt:SnapshotReceipt = try await self.push(docs: docs, with: session)
-        let context:DynamicContext = .init(currentSnapshot: .init(from: docs, receipt: receipt),
-            upstreamSnapshots: dependencies,
-            upstreamScalars: upstream)
-        return (receipt, context)
     }
 }
 extension Database
