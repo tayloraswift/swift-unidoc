@@ -126,16 +126,20 @@ extension Database
     func _get(
         package:PackageIdentifier,
         version:Substring?,
-        stem:Substring,
+        stem:String,
         hash:FNV24?,
         with session:Mongo.Session) async throws
     {
-        let query:DocpageQuery = .init(
-            package: package,
-            version: version,
-            stem: stem,
-            hash: hash)
-
+        _ = try await self.execute(query: .init(
+                package: package,
+                version: version,
+                stem: stem,
+                hash: hash),
+            with: session)
+    }
+    public
+    func execute(query:__owned DocpageQuery, with session:Mongo.Session) async throws -> String?
+    {
         // try await session.run(
         //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<PageFacets.Direct>>>.init(
         //         verbosity: .executionStats,
@@ -151,11 +155,14 @@ extension Database
 
         if  let page:Docpage
         {
-            print(page)
+            let _string:String = "\(page)"
+            print(_string)
+            return _string
         }
         else
         {
             print("no results!")
+            return nil
         }
     }
 }

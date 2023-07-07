@@ -6,6 +6,7 @@ import NIOPosix
 import NIOHTTP1
 import SymbolGraphs
 import UnidocDatabase
+import URI
 
 final
 actor Delegate
@@ -32,6 +33,7 @@ actor Delegate
         self.mongodb = mongodb
     }
 }
+
 extension Delegate
 {
     func respond() async throws
@@ -59,23 +61,26 @@ extension Delegate
         }
     }
 
-    private
+    private nonisolated
     func respond(to request:GetRequest) async throws -> ServerResource
     {
-        if  request.uri == "/admin"
+        let path:[String] = request.uri.path.normalized()
+        switch path
         {
+        case ["admin"]:
             let configuration:Mongo.ReplicaSetConfiguration = try await self.mongodb.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin)
 
-            return .init(location: request.uri,
+            let location:String = "\(request.uri)"
+            return .init(location: location,
                 response: .content(.init(.text("\(configuration)"),
                     type: .text(.plain, charset: .utf8))),
-                results: .one(canonical: request.uri))
-        }
-        else
-        {
-            return .init(location: request.uri,
+                results: .one(canonical: location))
+
+        case ["upload"]:
+            let location:String = "\(request.uri)"
+            return .init(location: location,
                 response: .content(.init(.text("""
                     <!DOCTYPE html>
                     <html lang="en">
@@ -93,7 +98,35 @@ extension Delegate
                     </html>
                     """),
                     type: .text(.html, charset: .utf8))),
-                results: .one(canonical: request.uri))
+                results: .one(canonical: location))
+
+        case _:
+            break
+        }
+
+        switch (path.first, path.count)
+        {
+        case ("docs"?, 2...):
+            if  let query:DocpageQuery = .init(path[1], path[2...]),
+                let _string:String = try await self.database.execute(query: query,
+                    with: try await .init(from: self.mongodb))
+            {
+                let _location:String = "\(request.uri)"
+                return .init(location: _location,
+                    response: .content(.init(.text(_string),
+                        type: .text(.html, charset: .utf8))),
+                    results: .one(canonical: _location))
+            }
+            else
+            {
+                fallthrough
+            }
+
+        case (_, _):
+            return .init(location: "\(request.uri)",
+                response: .content(.init(.text("not found"),
+                    type: .text(.plain, charset: .utf8))),
+                results: .none)
         }
     }
 
