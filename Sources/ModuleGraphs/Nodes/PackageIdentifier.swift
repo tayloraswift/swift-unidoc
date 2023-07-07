@@ -52,7 +52,8 @@ extension PackageIdentifier:LosslessStringConvertible
         case    "swift-standard-library",
                 "standard-library",
                 "swift-stdlib",
-                "stdlib":
+                "stdlib",
+                "std":
             self = .swift
 
         case let name:

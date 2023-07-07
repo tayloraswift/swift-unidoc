@@ -4,17 +4,20 @@ import ModuleGraphs
 import MongoDB
 import UnidocRecords
 
+@frozen public
 struct DocpageQuery
 {
     let package:PackageIdentifier
     let version:Substring?
-    let stem:Substring
-    let hash:FNV24?
+    private(set)
+    var stem:String
+    private(set)
+    var hash:FNV24?
 
     init(package:PackageIdentifier,
         version:Substring?,
-        stem:Substring,
-        hash:FNV24?)
+        stem:String = "",
+        hash:FNV24? = nil)
     {
         self.package = package
         self.version = version
@@ -22,6 +25,57 @@ struct DocpageQuery
         self.hash = hash
     }
 }
+extension DocpageQuery
+{
+    public
+    init?(_ trunk:String, _ tail:ArraySlice<String>)
+    {
+        if  let colon:String.Index = trunk.firstIndex(of: ":")
+        {
+            self.init(package: .init(trunk[..<colon]), version: nil)
+            self.append(component: trunk[trunk.index(after: colon)...])
+            self.append(components: tail)
+        }
+        else if
+            let next:String = tail.first,
+            let colon:String.Index = next.firstIndex(of: ":")
+        {
+            self.init(package: .init(trunk), version: next[..<colon])
+            self.append(component: next[next.index(after: colon)...])
+            self.append(components: tail.dropFirst())
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    private mutating
+    func append(components:ArraySlice<String>)
+    {
+        for component:String in components
+        {
+            self.append(component: component)
+        }
+    }
+    private mutating
+    func append(component:some StringProtocol)
+    {
+        if !self.stem.isEmpty
+        {
+            self.stem.append(" ")
+        }
+        if  let dot:String.Index = component.firstIndex(of: ".")
+        {
+            self.stem += "\(component[..<dot])\t\(component[component.index(after: dot)...])"
+        }
+        else
+        {
+            self.stem += component
+        }
+    }
+}
+
 extension DocpageQuery
 {
     static
@@ -33,7 +87,6 @@ extension DocpageQuery
             strength: .secondary) // diacritics are significant
     }
 
-    public
     var command:Mongo.Aggregate<Mongo.Cursor<Docpage>>
     {
         //  The `$facet` stage in ``pipeline`` should collect all records into a

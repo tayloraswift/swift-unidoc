@@ -54,6 +54,8 @@ let package:Package = .init(
         .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
+
+        .executable(name: "UnidocServer", targets: ["UnidocServer"]),
     ],
     dependencies:
     [
@@ -299,6 +301,7 @@ let package:Package = .init(
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
                 .target(name: "UnidocDatabase"),
+                .target(name: "URI"),
             ]),
 
 
