@@ -4,24 +4,25 @@ import UnidocRecords
 
 extension Database
 {
-    @frozen public
     struct Zones
     {
-        public
         let database:Mongo.Database
 
-        @inlinable internal
         init(database:Mongo.Database)
         {
             self.database = database
         }
     }
 }
+extension Database.Zones:DatabaseCollection
+{
+    typealias Element = Record.Zone
+
+    static
+    var name:Mongo.Collection { "zones" }
+}
 extension Database.Zones
 {
-    @inlinable public static
-    var name:Mongo.Collection { "zones" }
-
     func setup(with session:Mongo.Session) async throws
     {
         let response:Mongo.CreateIndexesResponse = try await session.run(
@@ -51,15 +52,5 @@ extension Database.Zones
             against: self.database)
 
         assert(response.indexesAfter == 2)
-    }
-
-    public
-    func insert(_ zone:Record.Zone, with session:Mongo.Session) async throws
-    {
-        let _:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: [zone]),
-            against: self.database)
     }
 }

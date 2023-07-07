@@ -7,15 +7,11 @@ import Unidoc
 /// manglings should never collide.
 extension DynamicContext
 {
-    @frozen public
     struct UpstreamScalars
     {
-        public
         var cultures:[ModuleIdentifier: Unidoc.Scalar]
-        public
         var citizens:[Symbol.Decl: Unidoc.Scalar]
 
-        @inlinable public
         init()
         {
             self.cultures = [:]

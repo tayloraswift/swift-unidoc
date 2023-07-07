@@ -1,6 +1,7 @@
 import CodelinkResolution
 import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import Unidoc
 
 @frozen public
@@ -27,19 +28,37 @@ struct DynamicContext
 extension DynamicContext
 {
     public
-    init(currentSnapshot:__owned Snapshot,
-        upstreamSnapshots:__owned [Snapshot],
-        upstreamScalars:__shared UpstreamScalars)
+    init(_ currentSnapshot:__owned Snapshot, dependencies:__owned [Snapshot])
     {
+        //  Build a combined lookup table mapping upstream symbols to scalars.
+        //  Because module names are unique within a build tree, there should
+        //  be no collisions among mangled symbols.
+        var upstream:UpstreamScalars = .init()
+
+        for snapshot:Snapshot in dependencies
+        {
+            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.citizens
+            {
+                upstream.citizens[symbol] = snapshot.zone + citizen
+            }
+            for (culture, symbol):(Int, ModuleIdentifier) in zip(
+                snapshot.graph.cultures.indices,
+                snapshot.graph.namespaces)
+            {
+                upstream.cultures[symbol] = snapshot.zone + culture * .module
+            }
+        }
+
+        //  Build two indexes for fast lookup by package identifier and package number.
         var byPackageIdentifier:[PackageIdentifier: SnapshotObject] = .init(
-            minimumCapacity: upstreamSnapshots.count)
+            minimumCapacity: dependencies.count)
 
         var byPackage:[Int32: SnapshotObject] = .init(
-            minimumCapacity: upstreamSnapshots.count)
+            minimumCapacity: dependencies.count)
 
-        for snapshot:Snapshot in upstreamSnapshots
+        for snapshot:Snapshot in dependencies
         {
-            let object:SnapshotObject = .init(snapshot: snapshot, upstream: upstreamScalars)
+            let object:SnapshotObject = .init(snapshot: snapshot, upstream: upstream)
 
             byPackageIdentifier[snapshot.metadata.package] = object
             byPackage[snapshot.package] = object
@@ -50,7 +69,7 @@ extension DynamicContext
             byPackage: byPackage,
             current: .init(
                 snapshot: currentSnapshot,
-                upstream: upstreamScalars))
+                upstream: upstream))
     }
 }
 extension DynamicContext

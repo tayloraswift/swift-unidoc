@@ -31,10 +31,10 @@ extension Database.Packages
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = "\(Self.name)(\(PackageRegistration[.address]))"
+                        $0[.name] = "\(Self.name)(\(Registration[.address]))"
                         $0[.key] = .init
                         {
-                            $0[PackageRegistration[.address]] = (-)
+                            $0[Registration[.address]] = (-)
                         }
                     },
                 ]),
@@ -67,31 +67,31 @@ extension Database.Packages
     func register(_ package:PackageIdentifier,
         with transaction:Mongo.Transaction) async throws -> Int32
     {
-        let registered:[PackageRegistration] = try await transaction.run(
-            command: Mongo.Find<Mongo.SingleBatch<PackageRegistration>>.init(Self.name,
+        let registered:[Registration] = try await transaction.run(
+            command: Mongo.Find<Mongo.SingleBatch<Registration>>.init(Self.name,
                 limit: 1)
             {
                 $0[.filter] = .init
                 {
-                    $0[PackageRegistration[.id]] = package
+                    $0[Registration[.id]] = package
                 }
             },
             against: self.database)
 
-        if  let registered:PackageRegistration = registered.first
+        if  let registered:Registration = registered.first
         {
             return registered.address
         }
 
-        let unregistered:PackageRegistration = try await transaction.run(
-            command: Mongo.Aggregate<Mongo.Cursor<PackageRegistration>>.init(Self.name,
+        let unregistered:Registration = try await transaction.run(
+            command: Mongo.Aggregate<Mongo.Cursor<Registration>>.init(Self.name,
                 pipeline: .init
                 {
                     $0.stage
                     {
                         $0[.sort] = .init
                         {
-                            $0[PackageRegistration[.address]] = (-)
+                            $0[Registration[.address]] = (-)
                         }
                     }
                     $0.stage
@@ -102,10 +102,10 @@ extension Database.Packages
                     {
                         $0[.replaceWith] = .init
                         {
-                            $0[PackageRegistration[.id]] = package
-                            $0[PackageRegistration[.address]] = .expr
+                            $0[Registration[.id]] = package
+                            $0[Registration[.address]] = .expr
                             {
-                                $0[.add] = ("$\(PackageRegistration[.address])", 1)
+                                $0[.add] = ("$\(Registration[.address])", 1)
                             }
                         }
                     }
@@ -114,7 +114,7 @@ extension Database.Packages
                 {
                     $0[.hint] = .init
                     {
-                        $0[PackageRegistration[.address]] = (-)
+                        $0[Registration[.address]] = (-)
                     }
                 },
             against: self.database)
@@ -134,7 +134,7 @@ extension Database.Packages
         }
         else
         {
-            throw PackageRegistrationError.init(id: package)
+            throw RegistrationError.init(id: package)
         }
     }
 }
