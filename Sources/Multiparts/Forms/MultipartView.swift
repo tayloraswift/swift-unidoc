@@ -9,26 +9,33 @@ struct MultipartView
     public
     init(splitting message:[UInt8], on boundary:String) throws
     {
-        let preamble:[UInt8] =              [0x2D, 0x2D] + boundary.utf8 + [0x0D, 0x0A]
+        let preamble:[UInt8] =              [0x2D, 0x2D] + boundary.utf8
         let separator:[UInt8] = [0x0D, 0x0A, 0x2D, 0x2D] + boundary.utf8
 
         self.message = message
         self.parts = []
 
-        var index:Int = self.message.startIndex
-        for byte:UInt8 in preamble
+        guard   var start:Int = self.message.index(after: self.message.startIndex,
+                    skipping: preamble)
+        else
         {
-            if  index < self.message.endIndex,
-                byte == self.message[index]
-            {
-                self.message.formIndex(after: &index)
-            }
-            else
-            {
-                throw MultipartSplitError.invalidPreamble
-            }
+            throw MultipartSplitError.invalidPreamble
         }
-        var start:Int = index
+
+        if  let index:Int = self.message.index(after: start, skipping: [0x0D, 0x0A])
+        {
+            start = index
+        }
+        else if self.message[start...].starts(with: [0x2D, 0x2D])
+        {
+            return // Empty form
+        }
+        else
+        {
+            throw MultipartSplitError.invalidPreamble
+        }
+
+        var index:Int = start
         while index < self.message.endIndex
         {
             // we cannot re-use index advancements, because a boundary can start
@@ -42,7 +49,7 @@ struct MultipartView
 
             self.parts.append(start ..< index)
 
-            if let next:Int = self.message.index(after: next, skipping: [0x0D, 0x0A])
+            if  let next:Int = self.message.index(after: next, skipping: [0x0D, 0x0A])
             {
                 start = next
                 index = next

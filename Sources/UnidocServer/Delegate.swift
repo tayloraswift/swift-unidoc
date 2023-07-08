@@ -71,14 +71,6 @@ extension Delegate
             let configuration:Mongo.ReplicaSetConfiguration = try await self.mongodb.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin)
-
-            let location:String = "\(request.uri)"
-            return .init(location: location,
-                response: .content(.init(.text("\(configuration)"),
-                    type: .text(.plain, charset: .utf8))),
-                results: .one(canonical: location))
-
-        case ["upload"]:
             let location:String = "\(request.uri)"
             return .init(location: location,
                 response: .content(.init(.text("""
@@ -89,11 +81,25 @@ extension Delegate
                     <title>upload</title>
                     </head>
                     <body>
+
                     <form action="/upload" method="post" enctype="multipart/form-data">
                     <p><input type="text" name="text1" value="text default"></p>
                     <p><input type="file" name="documentation-binary"></p>
                     <p><button type="submit">Submit</button></p>
                     </form>
+
+                    <hr>
+
+                    <form action="/rebuild" method="post" enctype="multipart/form-data">
+                    <p><button type="submit">Rebuild collections</button></p>
+                    </form>
+
+                    <hr>
+
+                    <h2>replica set configuration</h2>
+
+                    <pre><code>\(configuration)</code></pre>
+
                     </body>
                     </html>
                     """),
@@ -130,19 +136,45 @@ extension Delegate
         }
     }
 
-    private
+    private nonisolated
     func respond(to request:PostRequest) async throws -> ServerResource
     {
-        var receipts:[SnapshotReceipt] = []
-        for item:MultipartForm.Item in request.form
-            where item.header.name == "documentation-binary"
+        let display:String?
+        switch request.uri.path.normalized() as [String]
         {
-            receipts.append(try await self.ingest(uploaded: try .init(buffer: item.value)))
+        case ["rebuild"]:
+            let session:Mongo.Session = try await .init(from: self.mongodb)
+            let rebuilt:Int = try await self.database.rebuild(with: session)
+            display = "rebuilt \(rebuilt) snapshots"
+
+        case ["upload"]:
+            var receipts:[SnapshotReceipt] = []
+            for item:MultipartForm.Item in request.form
+                where item.header.name == "documentation-binary"
+            {
+                receipts.append(try await self.ingest(uploaded: try .init(buffer: item.value)))
+            }
+            display = "\(receipts)"
+
+        case _:
+            display = nil
         }
-        return .init(location: request.uri,
-                response: .content(.init(.text("success! \(receipts)"),
+
+        if  let display:String
+        {
+            let _location:String = "\(request.uri)"
+            return .init(location: _location,
+                    response: .content(.init(.text("success! \(display)"),
+                        type: .text(.plain, charset: .utf8))),
+                    results: .one(canonical: _location))
+        }
+        else
+        {
+            return .init(location: "\(request.uri)",
+                response: .content(.init(.text("not found"),
                     type: .text(.plain, charset: .utf8))),
-                results: .one(canonical: request.uri))
+                results: .none)
+        }
     }
 }
 
