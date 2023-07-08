@@ -72,8 +72,13 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
 
             return (sigil, .init(decoding: $0.slice.dropFirst(), as: Unicode.UTF8.self))
         }
+
         let type:GenericType<Scalar>
-        if  let scalar:Scalar = try bson[.nominal]?.decode()
+        //  If there is a null value (which is allowed if `Scalar` is an ``Optional`` type),
+        //  we don’t want to attempt to decode from ``CodingKeys.complex``. If we do not
+        //  specify the decoded type (`Scalar.self`), the compiler will infer it to be
+        //  `Scalar?`, which will cause us to fall through to the else block!
+        if  let scalar:Scalar = try bson[.nominal]?.decode(to: Scalar.self)
         {
             type = .nominal(scalar)
         }
