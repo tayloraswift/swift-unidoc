@@ -27,7 +27,7 @@ extension Database.Snapshots.MetadataView:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
-            package: try bson[.version].decode(),
+            package: try bson[.package].decode(),
             version: try bson[.version].decode())
     }
 }

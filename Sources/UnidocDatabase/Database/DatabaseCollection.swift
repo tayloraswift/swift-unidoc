@@ -68,14 +68,15 @@ extension DatabaseCollection
 {
     /// Deletes all records from the collection, without dropping the collection
     /// itself.
-    func clear(with transaction:Mongo.Transaction) async throws
+    func clear(with session:Mongo.Session) async throws
     {
-        let response:Mongo.DeleteResponse = try await transaction.run(
+        let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name,
                 deletes:
                 [
                     .init
                     {
+                        $0[.limit] = .unlimited
                         $0[.q] = [:]
                     },
                 ]),
@@ -92,14 +93,15 @@ extension DatabaseCollection
 extension DatabaseCollection where Element:Identifiable<Unidoc.Scalar>
 {
     /// Deletes all records from the collection within the specified zone.
-    func clear(zone:Unidoc.Zone, with transaction:Mongo.Transaction) async throws
+    func clear(zone:Unidoc.Zone, with session:Mongo.Session) async throws
     {
-        let response:Mongo.DeleteResponse = try await transaction.run(
+        let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name,
                 deletes:
                 [
                     .init
                     {
+                        $0[.limit] = .unlimited
                         $0[.q] = .init
                         {
                             $0[.and] = .init

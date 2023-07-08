@@ -72,26 +72,27 @@ extension Database
     }
 
     public
-    func rebuild(with session:__shared Mongo.Session) async throws
+    func rebuild(with session:__shared Mongo.Session) async throws -> Int
     {
-        let result:Mongo.TransactionResult = await session.withSnapshotTransaction(
-            writeConcern: .majority)
+        //  TODO: we need to implement some kind of locking mechanism to prevent
+        //  race conditions between rebuilds and pushes. This cannot be done with
+        //  MongoDB transactions because deleting a very large number of records
+        //  overflows the transaction cache.
+        let zones:[Unidoc.Zone] = try await self.snapshots.list(with: session)
+
+        try await self.extensions.clear(with: session)
+        try await self.masters.clear(with: session)
+        try await self.zones.clear(with: session)
+
+        for zone:Unidoc.Zone in zones
         {
-            let zones:[Unidoc.Zone] = try await self.snapshots.list(with: $0)
+            let snapshot:Snapshot = try await self.snapshots.load(zone, with: session)
+            try await self.pull(from: snapshot,with: session)
 
-            try await self.extensions.clear(with: $0)
-            try await self.masters.clear(with: $0)
-            try await self.zones.clear(with: $0)
-
-            return zones
+            print("regenerated records for snapshot: \(snapshot.id)")
         }
 
-        for zone:Unidoc.Zone in try result()
-        {
-            try await self.pull(
-                from: try await self.snapshots.load(zone, with: session),
-                with: session)
-        }
+        return zones.count
     }
 }
 extension Database

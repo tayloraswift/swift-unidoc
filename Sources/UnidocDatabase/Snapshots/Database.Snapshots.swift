@@ -89,6 +89,7 @@ extension Database.Snapshots
                 }
                 $0[.projection] = .init
                 {
+                    $0[Snapshot[.id]] = false
                     $0[Snapshot[.package]] = true
                     $0[Snapshot[.version]] = true
                 }
@@ -179,17 +180,18 @@ extension Database.Snapshots
             try await $0.reduce(into: [], +=)
         }
     }
-    /// Returns the zone tuples for all snapshots in this collection, with respect
-    /// to the read concern of the given transaction.
-    func list(with transaction:Mongo.Transaction) async throws -> [Unidoc.Zone]
+
+    /// Returns the zone tuples for all snapshots in this collection.
+    func list(with session:Mongo.Session) async throws -> [Unidoc.Zone]
     {
-        try await transaction.run(
+        try await session.run(
             command: Mongo.Find<Mongo.Cursor<MetadataView>>.init(Self.name,
                 stride: 4096,
                 limit: .max)
             {
                 $0[.projection] = .init
                 {
+                    $0[Snapshot[.id]] = false
                     $0[Snapshot[.package]] = true
                     $0[Snapshot[.version]] = true
                 }
