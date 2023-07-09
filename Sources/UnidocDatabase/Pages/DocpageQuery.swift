@@ -87,7 +87,7 @@ extension DocpageQuery
             strength: .secondary) // diacritics are significant
     }
 
-    var command:Mongo.Aggregate<Mongo.Cursor<Docpage>>
+    var command:Mongo.Aggregate<Mongo.Cursor<Output>>
     {
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
@@ -98,7 +98,7 @@ extension DocpageQuery
             {
                 $0[Record.Zone[.package]] = (+)
                 $0[Record.Zone[.version]] = (+)
-                $0[Record.Zone[.recency]] = (-)
+                $0[Record.Zone[.patch]] = (-)
             }
         }
     }
@@ -126,7 +126,7 @@ extension DocpageQuery
             {
                 $0[.sort] = .init
                 {
-                    $0[Record.Zone[.recency]] = (-)
+                    $0[Record.Zone[.patch]] = (-)
                 }
             }
             $0.stage
@@ -245,14 +245,14 @@ extension DocpageQuery
             {
                 $0[.facet] = .init
                 {
-                    $0[Docpage[.principal]] = .init
+                    $0[Output[.principal]] = .init
                     {
                         $0.stage
                         {
                             $0[.unset] = scalars
                         }
                     }
-                    $0[Docpage[.entourage]] = .init
+                    $0[Output[.entourage]] = .init
                     {
                         $0.stage
                         {

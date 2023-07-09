@@ -15,7 +15,7 @@ extension PlatformRequirement:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
         self.init(id: try json[.id].decode(),
-            min: try json[.min].decode(as: JSON.StringRepresentation<SemanticVersionMask>.self,
+            min: try json[.min].decode(as: JSON.StringRepresentation<NumericVersion>.self,
                 with: \.value))
     }
 }

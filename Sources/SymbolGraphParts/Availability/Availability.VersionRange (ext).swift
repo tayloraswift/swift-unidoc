@@ -5,7 +5,7 @@ import SemanticVersions
 extension Availability.VersionRange:JSONObjectDecodable
 {
     public
-    init(json:JSON.ObjectDecoder<SemanticVersion.CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<PatchVersion.CodingKeys>) throws
     {
         //  This allows us to model extremely high version numbers
         if  let major:UInt16 = .init(exactly: try json[.major].decode(to: UInt.self))

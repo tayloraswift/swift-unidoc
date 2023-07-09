@@ -15,18 +15,18 @@ extension SymbolGraphMetadata
         public
         let revision:Repository.Revision
         public
-        let ref:SemanticRef
+        let version:AnyVersion
 
         @inlinable public
         init(package:PackageIdentifier,
             requirement:Repository.Requirement?,
             revision:Repository.Revision,
-            ref:SemanticRef)
+            version:AnyVersion)
         {
             self.package = package
             self.requirement = requirement
             self.revision = revision
-            self.ref = ref
+            self.version = version
         }
     }
 }
@@ -39,7 +39,7 @@ extension SymbolGraphMetadata.Dependency
         case requirement_lower = "L"
         case requirement_upper = "U"
         case revision = "H"
-        case ref = "R"
+        case version = "V"
     }
 }
 extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
@@ -63,7 +63,7 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
         }
 
         bson[.revision] = self.revision
-        bson[.ref] = self.ref
+        bson[.version] = self.version
     }
 }
 extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
@@ -74,8 +74,8 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
         let requirement:Repository.Requirement?
         switch
         (
-            try bson[.requirement_lower]?.decode(to: SemanticVersion.self),
-            try bson[.requirement_upper]?.decode(to: SemanticVersion.self)
+            try bson[.requirement_lower]?.decode(to: PatchVersion.self),
+            try bson[.requirement_upper]?.decode(to: PatchVersion.self)
         )
         {
         case (nil, _):
@@ -91,6 +91,6 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
         self.init(package: try bson[.package].decode(),
             requirement: requirement,
             revision: try bson[.revision].decode(),
-            ref: try bson[.ref].decode())
+            version: try bson[.version].decode())
     }
 }

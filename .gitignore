@@ -1,6 +1,6 @@
 .build
+.testing
 .unidoc
-.unidoc-testing
 .vscode
 
 TestDeployment/data/

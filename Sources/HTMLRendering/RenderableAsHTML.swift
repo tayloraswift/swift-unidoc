@@ -16,9 +16,3 @@ extension RenderableAsHTML where Self:StringProtocol
         }
     }
 }
-extension String:RenderableAsHTML
-{
-}
-extension Substring:RenderableAsHTML
-{
-}

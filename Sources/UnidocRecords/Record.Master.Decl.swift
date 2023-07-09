@@ -11,6 +11,9 @@ extension Record.Master
         public
         let id:Unidoc.Scalar
 
+        @usableFromInline internal
+        let flags:Unidoc.Decl.Flags
+
         public
         let signature:Signature<Unidoc.Scalar?>
         public
@@ -30,8 +33,9 @@ extension Record.Master
         public
         var details:Record.Passage?
 
-        @inlinable public
+        @inlinable internal
         init(id:Unidoc.Scalar,
+            flags:Unidoc.Decl.Flags,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Record.Stem,
@@ -42,6 +46,7 @@ extension Record.Master
             details:Record.Passage? = nil)
         {
             self.id = id
+            self.flags = flags
             self.signature = signature
             self.symbol = symbol
             self.stem = stem
@@ -53,6 +58,30 @@ extension Record.Master
             self.overview = overview
             self.details = details
         }
+    }
+}
+extension Record.Master.Decl
+{
+    @inlinable public
+    init(id:Unidoc.Scalar,
+        phylum:Unidoc.Decl,
+        aperture:Unidoc.Decl.Aperture,
+        route:Unidoc.Decl.Route,
+        signature:Signature<Unidoc.Scalar?>,
+        symbol:Symbol.Decl,
+        stem:Record.Stem,
+        superforms:[Unidoc.Scalar],
+        culture:Unidoc.Scalar,
+        scope:[Unidoc.Scalar])
+    {
+        self.init(id: id,
+            flags: .init(phylum, aperture: aperture, route: route),
+            signature: signature,
+            symbol: symbol,
+            stem: stem,
+            superforms: superforms,
+            culture: culture,
+            scope: scope)
     }
 }
 extension Record.Master.Decl

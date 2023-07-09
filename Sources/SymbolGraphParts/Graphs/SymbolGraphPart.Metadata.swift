@@ -9,10 +9,10 @@ extension SymbolGraphPart
         public
         let generator:String
         public
-        let version:SemanticVersion
+        let version:PatchVersion
 
         public
-        init(generator:String, version:SemanticVersion)
+        init(generator:String, version:PatchVersion)
         {
             self.generator = generator
             self.version = version

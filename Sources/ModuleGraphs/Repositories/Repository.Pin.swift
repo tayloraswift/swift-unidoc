@@ -3,7 +3,7 @@ import SemanticVersions
 extension Repository
 {
     @frozen public
-    struct Pin:Identifiable, Equatable, Sendable
+    struct Pin:Identifiable, Equatable, Hashable, Sendable
     {
         public
         let id:PackageIdentifier
@@ -12,15 +12,15 @@ extension Repository
         public
         let revision:Revision
         public
-        let ref:SemanticRef
+        let version:AnyVersion
 
         @inlinable public
-        init(id:PackageIdentifier, location:Repository, revision:Revision, ref:SemanticRef)
+        init(id:PackageIdentifier, location:Repository, revision:Revision, version:AnyVersion)
         {
             self.id = id
             self.location = location
             self.revision = revision
-            self.ref = ref
+            self.version = version
         }
     }
 }
@@ -32,11 +32,11 @@ extension Repository.Pin
         self.init(id: id,
             location: location,
             revision: state.revision,
-            ref: state.ref)
+            version: state.version)
     }
     @inlinable public
     var state:State
     {
-        .init(revision: self.revision, ref: self.ref)
+        .init(revision: self.revision, version: self.version)
     }
 }

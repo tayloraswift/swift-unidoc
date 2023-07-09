@@ -13,7 +13,7 @@ extension Availability.VersionRange:BSONDecodable
         switch bson
         {
         case .max:  self = .since(nil)
-        case _:     self = .since(try SemanticVersionMask.init(bson: bson))
+        case _:     self = .since(try NumericVersion.init(bson: bson))
         }
     }
 }

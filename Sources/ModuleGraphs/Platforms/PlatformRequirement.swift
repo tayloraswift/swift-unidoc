@@ -6,10 +6,10 @@ struct PlatformRequirement:Identifiable, Equatable, Hashable, Sendable
     public
     let id:PlatformIdentifier
     public
-    let min:SemanticVersionMask
+    let min:NumericVersion
 
     @inlinable public
-    init(id:PlatformIdentifier, min:SemanticVersionMask)
+    init(id:PlatformIdentifier, min:NumericVersion)
     {
         self.id = id
         self.min = min

@@ -20,7 +20,7 @@ extension Docpage
         let version:String
 
         public
-        let recency:SemanticVersion?
+        let patch:PatchVersion?
 
         public
         let matches:[Record.Master]
@@ -34,7 +34,7 @@ extension Docpage
         init(zone:Unidoc.Zone,
             package:PackageIdentifier,
             version:String,
-            recency:SemanticVersion?,
+            patch:PatchVersion?,
             matches:[Record.Master],
             master:Record.Master?,
             extensions:[Record.Extension])
@@ -42,7 +42,7 @@ extension Docpage
             self.zone = zone
             self.package = package
             self.version = version
-            self.recency = recency
+            self.patch = patch
             self.matches = matches
             self.master = master
             self.extensions = extensions
@@ -59,7 +59,7 @@ extension Docpage.Principal
 
         case package = "P"
         case version = "V"
-        case recency = "S"
+        case patch = "S"
 
         case matches = "A"
         case master = "M"
@@ -77,7 +77,7 @@ extension Docpage.Principal:BSONDocumentDecodable
         self.init(zone: try bson[.zone].decode(),
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
-            recency: try bson[.recency]?.decode(),
+            patch: try bson[.patch]?.decode(),
             matches: try bson[.matches].decode(),
             master: try bson[.master]?.decode(),
             extensions: try bson[.extensions].decode())

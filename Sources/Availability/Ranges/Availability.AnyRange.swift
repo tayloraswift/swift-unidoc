@@ -6,7 +6,7 @@ extension Availability
     enum AnyRange:Equatable, Hashable, Sendable
     {
         case unconditionally
-        case since(SemanticVersionMask?)
+        case since(NumericVersion?)
     }
 }
 extension Availability.AnyRange

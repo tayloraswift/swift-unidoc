@@ -16,7 +16,7 @@ enum Main:SyncTests
             let binary:MarkdownBinary = .init(bytecode: .init(with: markdown))
             let html:HTML = try .init
             {
-                if let error:MarkdownExecutionError = binary.render(to: &$0)
+                if let error:MarkdownRenderingError = binary.render(to: &$0)
                 {
                     throw error
                 }
@@ -271,7 +271,7 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "references" / "success"
         {
-            struct Executable:MarkdownExecutable
+            struct Renderer:MarkdownRenderer
             {
                 let bytecode:MarkdownBytecode = .init
                 {
@@ -290,15 +290,15 @@ enum Main:SyncTests
                 }
             }
 
-            let executable:Executable = .init()
-            let html:HTML = .init { _ = executable.render(to: &$0) }
+            let renderer:Renderer = .init()
+            let html:HTML = .init { _ = renderer.render(to: &$0) }
 
             tests.expect(html.description ==?
                 "<p>before<a href='swiftinit.org'>aabbccdd</a>after</p>")
         }
         if  let tests:TestGroup = tests / "references" / "failure"
         {
-            struct Executable:MarkdownExecutable
+            struct Renderer:MarkdownRenderer
             {
                 enum ExpectedError:Equatable, Error
                 {
@@ -321,19 +321,19 @@ enum Main:SyncTests
                 }
             }
 
-            let executable:Executable = .init()
+            let renderer:Renderer = .init()
             var html:HTML = .init()
 
-            tests.do(catching: Executable.ExpectedError.reference(0xAA_BB_CC_DD))
+            tests.do(catching: Renderer.ExpectedError.reference(0xAA_BB_CC_DD))
             {
-                _ = try executable.render(to: &html)
+                _ = try renderer.render(to: &html)
             }
 
             tests.expect(html.description ==? "<p>before</p>")
         }
         if  let tests:TestGroup = tests / "reference-attributes"
         {
-            struct Executable:MarkdownExecutable
+            struct Renderer:MarkdownRenderer
             {
                 let bytecode:MarkdownBytecode
 
@@ -374,8 +374,8 @@ enum Main:SyncTests
                     continue
                 }
 
-                let executable:Executable = .init(reference: reference)
-                let html:HTML = .init { _ = executable.render(to: &$0) }
+                let renderer:Renderer = .init(reference: reference)
+                let html:HTML = .init { _ = renderer.render(to: &$0) }
 
                 tests.expect(html.description ==? """
                     <pre><code>\
@@ -388,8 +388,8 @@ enum Main:SyncTests
 
             if  let tests:TestGroup = tests / "failure"
             {
-                let executable:Executable = .init(reference: 2)
-                let html:HTML = .init { _ = executable.render(to: &$0) }
+                let renderer:Renderer = .init(reference: 2)
+                let html:HTML = .init { _ = renderer.render(to: &$0) }
 
                 tests.expect(html.description ==? """
                     <pre><code>\

@@ -14,7 +14,7 @@ extension Availability.AnyRange:BSONDecodable
         {
         case .min:  self = .unconditionally
         case .max:  self = .since(nil)
-        case _:     self = .since(try SemanticVersionMask.init(bson: bson))
+        case _:     self = .since(try NumericVersion.init(bson: bson))
         }
     }
 }

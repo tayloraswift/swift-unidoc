@@ -14,12 +14,12 @@ class MarkdownBlock:MarkdownElement
     init()
     {
     }
-    /// Does nothing.
+    /// Does nothing, unless it has been overridden.
     open
     func outline(by _:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
     {
     }
-    /// Emits nothing.
+    /// Emits nothing, unless it has been overridden.
     open
     func emit(into _:inout MarkdownBinaryEncoder)
     {

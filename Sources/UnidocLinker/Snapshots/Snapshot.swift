@@ -1,5 +1,6 @@
 import BSONDecoding
 import BSONEncoding
+import SemanticVersions
 import SymbolGraphs
 import Unidoc
 
@@ -44,11 +45,7 @@ extension Snapshot
     @inlinable public
     var stable:Bool
     {
-        switch self.metadata.ref
-        {
-        case .version?:         return true
-        case .unstable?, nil:   return false
-        }
+        self.metadata.version?.stable != nil
     }
 }
 extension Snapshot

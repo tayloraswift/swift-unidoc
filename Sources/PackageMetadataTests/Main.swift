@@ -40,7 +40,7 @@ enum Main:SyncTests
                         .init(id: "swift-json",
                             location: .local(root: "/swift/swift-json"),
                             revision: 0x36ef4bf1e6ae38f881ed253d5656839a046456f1,
-                            ref: .version(.v(0, 4, 5))),
+                            version: .stable(.release(.v(0, 4, 5)))),
                     ]
                     tests.expect(resolutions.version ==? .v2)
                     tests.expect(resolutions.pins ..? expected)
@@ -83,12 +83,12 @@ enum Main:SyncTests
                             location: .remote(
                                 url: "https://github.com/apple/swift-atomics.git"),
                             revision: 0xff3d2212b6b093db7f177d0855adbc4ef9c5f036,
-                            ref: .version(.v(1, 0, 3))),
+                            version: .stable(.release(.v(1, 0, 3)))),
                         .init(id: "swift-grammar",
                             location: .remote(
                                 url: "https://github.com/kelvin13/swift-grammar"),
                             revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
-                            ref: .version(.v(0, 3, 1))),
+                            version: .stable(.release(.v(0, 3, 1)))),
                     ]
                     tests.expect(resolutions.version ==? .v2)
                     tests.expect(resolutions.pins ..? expected)
@@ -135,7 +135,7 @@ enum Main:SyncTests
                             location: .remote(
                                 url: "https://github.com/apple/swift-argument-parser.git"),
                             revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
-                            ref: .version(.v(1, 2, 2))),
+                            version: .stable(.release(.v(1, 2, 2)))),
                     ]
                     tests.expect(resolutions.version ==? .v1)
                     tests.expect(resolutions.pins ..? expected)
@@ -196,7 +196,7 @@ enum Main:SyncTests
                             root: "/swift/swift-unidoc",
                             requirements:
                             [
-                                .init(id: .macOS, min: .minor(11, 0)),
+                                .init(id: .macOS, min: .minor(.v(11, 0))),
                             ],
                             dependencies:
                             [
