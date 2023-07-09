@@ -12,7 +12,7 @@ extension SymbolGraph
     struct Decl:Equatable, Sendable
     {
         @usableFromInline internal
-        var flags:Flags
+        var flags:Unidoc.Decl.Flags
 
         public
         let path:UnqualifiedPath
@@ -51,7 +51,7 @@ extension SymbolGraph
         var origin:Int32?
 
         @inlinable internal
-        init(flags:Flags,
+        init(flags:Unidoc.Decl.Flags,
             path:UnqualifiedPath,
             signature:Signature<Int32> = .init(),
             location:SourceLocation<Int32>? = nil,
@@ -78,7 +78,7 @@ extension SymbolGraph.Decl
     @inlinable public
     init(phylum:Unidoc.Decl, aperture:Unidoc.Decl.Aperture, path:UnqualifiedPath)
     {
-        self.init(flags: .init(phylum: phylum, aperture: aperture, route: .unhashed),
+        self.init(flags: .init(phylum, aperture: aperture, route: .unhashed),
             path: path)
     }
 }
@@ -88,10 +88,10 @@ extension SymbolGraph.Decl
     var aperture:Unidoc.Decl.Aperture { self.flags.aperture }
 
     @inlinable public
-    var phylum:Unidoc.Decl { self.flags.phylum }
+    var phylum:Unidoc.Decl { self.flags.decl }
 
     @inlinable public
-    var route:Route
+    var route:Unidoc.Decl.Route
     {
         get
         {

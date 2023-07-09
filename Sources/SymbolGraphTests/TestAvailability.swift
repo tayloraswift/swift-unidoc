@@ -26,7 +26,7 @@ func TestAvailability(_ tests:TestGroup?)
         let availability:Availability = .init(agnostic:
             [
                 .swift: .init(
-                    deprecated: .since(.minor(5, 8)),
+                    deprecated: .since(.minor(.v(5, 8))),
                     renamed: "Renamed",
                     message: "Message"),
             ])
@@ -45,9 +45,9 @@ func TestAvailability(_ tests:TestGroup?)
             [
                 .macOS: .init(
                     unavailable: .unconditionally,
-                    deprecated: .since(.patch(0, 0, 0)),
-                    introduced: .patch(5, 6, 7),
-                    obsoleted: .minor(8, 9),
+                    deprecated: .since(.patch(.v(0, 0, 0))),
+                    introduced: .patch(.v(5, 6, 7)),
+                    obsoleted: .minor(.v(8, 9)),
                     renamed: "Renamed",
                     message: "Message"),
             ])

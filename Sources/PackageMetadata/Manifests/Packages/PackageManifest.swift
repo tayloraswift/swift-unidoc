@@ -22,7 +22,7 @@ struct PackageManifest:Equatable, Sendable
     let targets:[TargetNode]
     /// The `swift-tools-version` format of this manifest.
     public
-    let format:SemanticVersion
+    let format:PatchVersion
 
     @inlinable public
     init(name:String,
@@ -31,7 +31,7 @@ struct PackageManifest:Equatable, Sendable
         dependencies:[PackageNode.Dependency] = [],
         products:[Product] = [],
         targets:[TargetNode] = [],
-        format:SemanticVersion)
+        format:PatchVersion)
     {
         self.name = name
         self.root = root
@@ -91,7 +91,7 @@ extension PackageManifest:JSONObjectDecodable
             targets: try json[.targets].decode(),
             format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKeys.Format>.self)
             {
-                try $0[.version].decode(as: JSON.StringRepresentation<SemanticVersion>.self,
+                try $0[.version].decode(as: JSON.StringRepresentation<PatchVersion>.self,
                     with: \.value)
             })
     }

@@ -19,6 +19,11 @@ extension HTML
         try encode(&self)
     }
 }
+extension HTML
+{
+    @inlinable public
+    var utf8:[UInt8] { self.encoder.utf8 }
+}
 extension HTML:CustomStringConvertible
 {
     @inlinable public
@@ -61,7 +66,7 @@ extension HTML
             self.encoder.utf8 += "&lt;".utf8
         case 0x3E: // '>'
             self.encoder.utf8 += "&gt;".utf8
-        
+
         case let literal:
             self.encoder.utf8.append(literal)
         }

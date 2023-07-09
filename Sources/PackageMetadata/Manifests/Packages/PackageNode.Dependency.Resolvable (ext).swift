@@ -51,7 +51,7 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
                 case .exact:
                     return .stable(.exact(try json.decode(
                         as: JSON.SingleElementRepresentation<
-                            JSON.StringRepresentation<SemanticVersion>>.self,
+                            JSON.StringRepresentation<PatchVersion>>.self,
                         with: \.value.value)))
 
                 case .range:
@@ -60,10 +60,10 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
                             JSON.ObjectDecoder<CodingKeys.Requirement.Range>>.self)
                     {
                         try $0.value[.lowerBound].decode(
-                            as: JSON.StringRepresentation<SemanticVersion>.self,
+                            as: JSON.StringRepresentation<PatchVersion>.self,
                             with: \.value)
                         ..< $0.value[.upperBound].decode(
-                            as: JSON.StringRepresentation<SemanticVersion>.self,
+                            as: JSON.StringRepresentation<PatchVersion>.self,
                             with: \.value)
                     }))
 

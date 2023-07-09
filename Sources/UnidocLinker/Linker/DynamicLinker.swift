@@ -32,7 +32,7 @@ struct DynamicLinker
         self.extensions = extensions
         self.projection = .init(zone: .init(context.current.snapshot.zone,
             package: context.current.snapshot.metadata.package,
-            ref: context.current.snapshot.metadata.ref))
+            version: context.current.snapshot.metadata.version))
         self.errors = errors
     }
 }
@@ -202,6 +202,9 @@ extension DynamicLinker
             }
 
             var record:Record.Master.Decl = .init(id: d,
+                phylum: decl.phylum,
+                aperture: decl.aperture,
+                route: decl.route,
                 signature: decl.signature.map { self.current.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),

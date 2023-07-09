@@ -14,17 +14,19 @@ extension Repository.Pin.State:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKeys>) throws
     {
-        let ref:SemanticRef
-        if  let version:SemanticVersion = try json[.version]?.decode(
+        let version:AnyVersion
+        if  let stable:SemanticVersion = try json[.version]?.decode(
                 as: JSON.StringRepresentation<SemanticVersion>.self,
                 with: \.value)
         {
-            ref = .version(version)
+            version = .stable(stable)
         }
         else
         {
-            ref = .unstable(try json[.branch].decode())
+            version = try json[.branch].decode(
+                as: JSON.StringRepresentation<AnyVersion>.self,
+                with: \.value)
         }
-        self.init(revision: try json[.revision].decode(), ref: ref)
+        self.init(revision: try json[.revision].decode(), version: version)
     }
 }

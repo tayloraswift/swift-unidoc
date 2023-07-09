@@ -23,7 +23,7 @@ extension Availability
 extension Availability.PlatformDomain:AvailabilityDomain
 {
     public
-    typealias Bound = SemanticVersionMask
+    typealias Bound = NumericVersion
     public
     typealias Deprecation = Availability.AnyRange
     public

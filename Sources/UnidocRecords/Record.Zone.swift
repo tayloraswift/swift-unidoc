@@ -19,7 +19,7 @@ extension Record
         let version:String
 
         public
-        let recency:SemanticVersion?
+        let patch:PatchVersion?
 
         public
         let min:Unidoc.Scalar
@@ -30,14 +30,14 @@ extension Record
         init(id:Unidoc.Zone,
             package:PackageIdentifier,
             version:String,
-            recency:SemanticVersion?,
+            patch:PatchVersion?,
             min:Unidoc.Scalar,
             max:Unidoc.Scalar)
         {
             self.id = id
             self.package = package
             self.version = version
-            self.recency = recency
+            self.patch = patch
             self.min = min
             self.max = max
         }
@@ -46,29 +46,12 @@ extension Record
 extension Record.Zone
 {
     public
-    init(_ zone:Unidoc.Zone, package:PackageIdentifier, ref:SemanticRef?)
+    init(_ zone:Unidoc.Zone, package:PackageIdentifier, version:AnyVersion?)
     {
-        let version:String
-        let recency:SemanticVersion?
-        switch ref
-        {
-        case .version(let semver)?:
-            version = "\(semver)"
-            recency = semver
-
-        case .unstable(let name)?:
-            version = name
-            recency = nil
-
-        case nil:
-            version = "$anonymous"
-            recency = nil
-        }
-
         self.init(id: zone,
             package: package,
-            version: version,
-            recency: recency,
+            version: version?.description ?? "$anonymous",
+            patch: version?.stable?.release,
             min: zone.min,
             max: zone.max)
     }
@@ -82,7 +65,7 @@ extension Record.Zone
 
         case package = "P"
         case version = "V"
-        case recency = "S"
+        case patch = "S"
 
         case min = "L"
         case max = "U"
@@ -99,7 +82,7 @@ extension Record.Zone:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.package] = self.package
         bson[.version] = self.version
-        bson[.recency] = self.recency
+        bson[.patch] = self.patch
         bson[.min] = self.min
         bson[.max] = self.max
     }
@@ -112,7 +95,7 @@ extension Record.Zone:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
-            recency: try bson[.recency]?.decode(),
+            patch: try bson[.patch]?.decode(),
             min: try bson[.min].decode(),
             max: try bson[.max].decode())
     }

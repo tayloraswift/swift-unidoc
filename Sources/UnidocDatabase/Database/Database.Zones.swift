@@ -38,14 +38,14 @@ extension Database.Zones
                         \(Self.name)\
                         (\(Record.Zone[.package]),\
                         \(Record.Zone[.version]),\
-                        \(Record.Zone[.recency]))
+                        \(Record.Zone[.patch]))
                         """
 
                         $0[.key] = .init
                         {
                             $0[Record.Zone[.package]] = (+)
                             $0[Record.Zone[.version]] = (+)
-                            $0[Record.Zone[.recency]] = (-)
+                            $0[Record.Zone[.patch]] = (-)
                         }
                     },
                 ]),

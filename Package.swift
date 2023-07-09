@@ -40,6 +40,7 @@ let package:Package = .init(
         .library(name: "Signatures", targets: ["Signatures"]),
         .library(name: "Sources", targets: ["Sources"]),
 
+        .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
         .library(name: "SymbolGraphParts", targets: ["SymbolGraphParts"]),
@@ -51,7 +52,6 @@ let package:Package = .init(
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
-        .library(name: "UnidocDriver", targets: ["UnidocDriver"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
 
@@ -198,6 +198,14 @@ let package:Package = .init(
                 .target(name: "Sources"),
             ]),
 
+        .target(name: "SymbolGraphBuilder", dependencies:
+            [
+                .target(name: "PackageMetadata"),
+                .target(name: "SymbolGraphCompiler"),
+                .target(name: "SymbolGraphLinker"),
+                .target(name: "System"),
+            ]),
+
         .target(name: "SymbolGraphCompiler", dependencies:
             [
                 .target(name: "SymbolGraphParts"),
@@ -242,6 +250,14 @@ let package:Package = .init(
                 .product(name: "BSONEncoding", package: "swift-mongodb"),
             ]),
 
+        .target(name: "SymbolGraphTesting", dependencies:
+            [
+                .target(name: "SymbolGraphs"),
+                .target(name: "System"),
+
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
         .target(name: "Unidoc", dependencies:
             [
                 .target(name: "UnidocPlanes"),
@@ -257,14 +273,6 @@ let package:Package = .init(
         .target(name: "UnidocDiagnostics", dependencies:
             [
                 .target(name: "CodelinkResolution"),
-            ]),
-
-        .target(name: "UnidocDriver", dependencies:
-            [
-                .target(name: "PackageMetadata"),
-                .target(name: "SymbolGraphCompiler"),
-                .target(name: "SymbolGraphLinker"),
-                .target(name: "System"),
             ]),
 
         .target(name: "UnidocLinker",
@@ -298,7 +306,9 @@ let package:Package = .init(
         .executableTarget(name: "UnidocServer",
             dependencies:
             [
+                .target(name: "HTMLRendering"),
                 .target(name: "HTTPServer"),
+                .target(name: "MarkdownRendering"),
                 .target(name: "Multiparts"),
                 .target(name: "UnidocDatabase"),
                 .target(name: "URI"),
@@ -350,10 +360,10 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolTests", dependencies:
+        .executableTarget(name: "SymbolGraphBuilderTests", dependencies:
             [
-                .target(name: "Symbols"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "SymbolGraphTesting"),
             ]),
 
         .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
@@ -376,6 +386,12 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
+        .executableTarget(name: "SymbolTests", dependencies:
+            [
+                .target(name: "Symbols"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
         .executableTarget(name: "SystemTests", dependencies:
             [
                 .target(name: "System"),
@@ -389,14 +405,9 @@ let package:Package = .init(
         .executableTarget(name: "UnidocDatabaseTests", dependencies:
             [
                 .target(name: "UnidocDatabase"),
-                .target(name: "UnidocDriver"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
-            ]),
-
-        .executableTarget(name: "UnidocDriverTests", dependencies:
-            [
-                .target(name: "UnidocDriver"),
-                .product(name: "Testing", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "URITests", dependencies:

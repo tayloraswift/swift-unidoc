@@ -21,7 +21,7 @@ enum Main:SyncTests
             }
             let details:MarkdownBinary = .init(bytecode: .init
             {
-                (encoder:inout MarkdownBinaryEncoder)in 
+                (encoder:inout MarkdownBinaryEncoder)in
 
                 documentation.details.visit
                 {
@@ -30,14 +30,14 @@ enum Main:SyncTests
             })
             let html:HTML = try .init
             {
-                if let error:MarkdownExecutionError = overview?.render(to: &$0)
+                if let error:MarkdownRenderingError = overview?.render(to: &$0)
                 {
                     throw error
                 }
 
                 $0.append(escaped: 0x0A) // '\n'
 
-                if let error:MarkdownExecutionError = details.render(to: &$0)
+                if let error:MarkdownRenderingError = details.render(to: &$0)
                 {
                     throw error
                 }
@@ -93,7 +93,7 @@ enum Main:SyncTests
                     Overview overview overview
                     - Parameters:
                         - first: Description for first parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -120,7 +120,7 @@ enum Main:SyncTests
                         - first: Description for first parameter
                         - second: Description for second parameter
                         - third: Description for third parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -150,7 +150,7 @@ enum Main:SyncTests
                     - **Parameters**:
                         - `first`:
                         Description for first parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -176,7 +176,7 @@ enum Main:SyncTests
                     - Parameters:
                         - first:
                         Description for first parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -204,11 +204,11 @@ enum Main:SyncTests
                             Description for first parameter
                         -   second:
                             Description for second parameter
-                        
-                        -   third    :    
+
+                        -   third    :
 
                               Description for third parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -239,9 +239,9 @@ enum Main:SyncTests
                         Discussion about parameters in general
                         - first:
                         Description for first parameter
-                    
+
                         More discussion about parameters in general
-                    
+
                     Details details details
                     """,
                     expected:
@@ -274,7 +274,7 @@ enum Main:SyncTests
                         More discussion about parameters in general
                         - second:
                         Description for second parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -307,7 +307,7 @@ enum Main:SyncTests
                         Description for first parameter
                     - Parameter second:
                         Description for second parameter
-                    
+
                     Details details details
                     """,
                     expected:
@@ -338,7 +338,7 @@ enum Main:SyncTests
                     Overview overview overview
                     - Attention: i am very pretty.
                     - Complexity: i am very complex.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -364,7 +364,7 @@ enum Main:SyncTests
                     Overview overview overview
                     - **Attention**: i am very pretty.
                     - *Complexity*: i am very complex.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -393,7 +393,7 @@ enum Main:SyncTests
                     Overview overview overview
                     > equality implies substitutability and u r irreplaceable 💝
                         — barbie
-                    
+
                     Details details details
                     """,
                     expected:
@@ -414,7 +414,7 @@ enum Main:SyncTests
                     """
                     Overview overview overview
                     > Miranda: Don't be ridiculous, Andrea. Everybody wants this.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -436,12 +436,12 @@ enum Main:SyncTests
                     > Important:
                         A barbie princess is not the same thing as a
                         princess barbie.
-                    
+
                     Details details details
                     > Tip:
                         Barbie princesses love sloths! Unless they are
                         liberal. Barbie princesses hate liberals.
-                    
+
                     Even more details
                     > Note:
                         Princess barbies never care about sloth politics.
@@ -479,7 +479,7 @@ enum Main:SyncTests
                     > **Important**:
                         A barbie princess is not the same thing as a
                         princess barbie.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -501,7 +501,7 @@ enum Main:SyncTests
                     Overview overview overview
                     > IMPORTANT: i am an important businessman.
                         A VERY IMPORTANT BUSINESSMAN
-                    
+
                     Details details details
                     """,
                     expected:
@@ -528,7 +528,7 @@ enum Main:SyncTests
                     > nonmutatingvariant: Humans on top!
 
                     > non-mutating-variant: Humans on top!
-                    
+
                     Details details details
                     """,
                     expected:
@@ -562,7 +562,7 @@ enum Main:SyncTests
                     >   Important:
                         A barbie princess is not the same thing as a
                         princess barbie.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -583,7 +583,7 @@ enum Main:SyncTests
                     Overview overview overview
                     > Parameters:
                         Discussion about parameters in general.
-                    
+
                     Details details details
                     """,
                     expected:
@@ -605,7 +605,7 @@ enum Main:SyncTests
                     Overview overview overview
                     > Parameter parameter:
                         Description for `parameter`
-                    
+
                     Details details details
                     """,
                     expected:
@@ -630,12 +630,12 @@ enum Main:SyncTests
                     Overview overview overview
                     > Parameter first:
                         Description for `first`
-                    
+
                     Details details details
 
                     > Parameter second:
                         Description for `second`
-                    
+
                     Even more details
                     """,
                     expected:
@@ -663,7 +663,7 @@ enum Main:SyncTests
                     Overview overview overview
                     > **Parameter** `parameter`:
                         Description for `parameter`
-                    
+
                     Details details details
                     """,
                     expected:
@@ -719,7 +719,7 @@ enum Main:SyncTests
                     - Warning:
                         This function is known by the state of
                         california to cause cancer!
-                    
+
                     Details details details
                     """,
                     expected: html)
@@ -738,7 +738,7 @@ enum Main:SyncTests
                         california to cause cancer!
                     - Returns:
                         Discussion about return value.
-                    
+
                     Details details details
                     """,
                     expected: html)
@@ -757,7 +757,7 @@ enum Main:SyncTests
                     - Parameters:
                         Discussion about parameters in general.
                         - first: Description for first parameter
-                    
+
                     Details details details
                     """,
                     expected: html)

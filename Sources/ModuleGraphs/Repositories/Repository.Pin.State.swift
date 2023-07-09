@@ -8,13 +8,13 @@ extension Repository.Pin
         public
         let revision:Repository.Revision
         public
-        let ref:SemanticRef
+        let version:AnyVersion
 
         @inlinable public
-        init(revision:Repository.Revision, ref:SemanticRef)
+        init(revision:Repository.Revision, version:AnyVersion)
         {
             self.revision = revision
-            self.ref = ref
+            self.version = version
         }
     }
 }
@@ -26,10 +26,16 @@ extension Repository.Pin.State:CustomStringConvertible
     public
     var description:String
     {
-        switch self.ref
+        switch self.version.canonical
         {
-        case .version(let version): return "\(version) (stable, \(self.revision))"
-        case .unstable(let name):   return "\(name) (unstable, \(self.revision))"
+        case .stable(.release(let version)):
+            return "\(version) (stable, release, \(self.revision))"
+
+        case .stable(let version):
+            return "\(version) (stable, \(self.revision))"
+
+        case .unstable(let name):
+            return "\(name) (unstable, \(self.revision))"
         }
     }
 }

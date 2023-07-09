@@ -145,7 +145,8 @@ extension Database
             with: session)
     }
     public
-    func execute(query:__owned DocpageQuery, with session:Mongo.Session) async throws -> String?
+    func execute(query:__owned DocpageQuery,
+        with session:Mongo.Session) async throws -> Docpage?
     {
         // try await session.run(
         //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<PageFacets.Direct>>>.init(
@@ -153,22 +154,19 @@ extension Database
         //         command: query.command),
         //     against: self.name)
 
-        let page:Docpage? = try await session.run(
+        let output:DocpageQuery.Output? = try await session.run(
             command: query.command,
             against: self.id)
         {
             try await $0.reduce(into: [], +=).first
         }
-
-        if  let page:Docpage
+        if  let output:DocpageQuery.Output = output,
+                output.principal.count == 1
         {
-            let _string:String = "\(page)"
-            print(_string)
-            return _string
+            return .init(principal: output.principal[0], entourage: output.entourage)
         }
         else
         {
-            print("no results!")
             return nil
         }
     }

@@ -114,9 +114,10 @@ extension Delegate
         {
         case ("docs"?, 2...):
             if  let query:DocpageQuery = .init(path[1], path[2...]),
-                let _string:String = try await self.database.execute(query: query,
+                let page:Docpage = try await self.database.execute(query: query,
                     with: try await .init(from: self.mongodb))
             {
+                let _string:String = "\(page)"
                 let _location:String = "\(request.uri)"
                 return .init(location: _location,
                     response: .content(.init(.text(_string),

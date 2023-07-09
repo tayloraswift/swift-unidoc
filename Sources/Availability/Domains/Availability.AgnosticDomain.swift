@@ -12,7 +12,7 @@ extension Availability
 extension Availability.AgnosticDomain:AvailabilityDomain
 {
     public
-    typealias Bound = SemanticVersionMask
+    typealias Bound = NumericVersion
     public
     typealias Deprecation = Availability.VersionRange
 }

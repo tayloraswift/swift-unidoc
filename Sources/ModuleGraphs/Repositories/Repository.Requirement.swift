@@ -5,7 +5,7 @@ extension Repository
     @frozen public
     enum Requirement:Equatable, Hashable, Sendable
     {
-        case exact        (SemanticVersion)
-        case range  (Range<SemanticVersion>)
+        case exact        (PatchVersion)
+        case range  (Range<PatchVersion>)
     }
 }

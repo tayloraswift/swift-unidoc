@@ -70,6 +70,8 @@ extension Record.Master
         /// Discriminator for ``Decl``.
         case symbol = "S"
         /// Only appears in ``Decl``.
+        case flags = "F"
+        /// Only appears in ``Decl``.
         case signature_availability = "V"
         /// Only appears in ``Decl``.
         case signature_abridged_bytecode = "B"
@@ -108,6 +110,8 @@ extension Record.Master:BSONDocumentEncodable
         {
         case .decl(let decl):
             bson[.symbol] = decl.symbol
+
+            bson[.flags] = decl.flags
 
             bson[.signature_availability] =
                 decl.signature.availability.isEmpty ? nil :
@@ -158,6 +162,7 @@ extension Record.Master:BSONDocumentDecodable
         if      let discriminator:Symbol.Decl = try bson[.symbol]?.decode()
         {
             self = .decl(.init(id: id,
+                flags: try bson[.flags].decode(),
                 signature: .init(
                     availability: try bson[.signature_availability]?.decode() ?? .init(),
                     abridged: Signature<Unidoc.Scalar?>.Abridged.init(

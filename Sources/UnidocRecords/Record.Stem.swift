@@ -131,3 +131,21 @@ extension Record.Stem:RawRepresentable
 extension Record.Stem:BSONDecodable, BSONEncodable
 {
 }
+
+extension Record.Stem:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        var stem:String = "\(self.namespace)"
+        for infix:String in self.infix
+        {
+            stem += ".\(infix)"
+        }
+        if  let last:Last = self.last
+        {
+            stem += ".\(last.component)"
+        }
+        return stem
+    }
+}
