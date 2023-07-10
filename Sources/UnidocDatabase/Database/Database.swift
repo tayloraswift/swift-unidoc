@@ -55,6 +55,16 @@ extension Database
 }
 extension Database
 {
+    /// Drops and reinitializes the database. This destroys *all* its data!
+    public
+    func nuke(with session:Mongo.Session) async throws
+    {
+        try await session.run(command: Mongo.DropDatabase.init(), against: self.id)
+        try await self.setup(with: session)
+    }
+}
+extension Database
+{
     public
     func publish(docs:__owned Documentation,
         with session:__shared Mongo.Session) async throws -> SnapshotReceipt

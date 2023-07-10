@@ -283,7 +283,7 @@ enum Main:SyncTests
                     }
                 }
 
-                func load(_ reference:UInt32, into html:inout HTML)
+                func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
                 {
                     html[.a, { $0[.href] = "swiftinit.org" }] = String.init(reference,
                         radix: 16)
@@ -315,7 +315,7 @@ enum Main:SyncTests
                     }
                 }
 
-                func load(_ reference:UInt32, into html:inout HTML) throws
+                func load(_ reference:UInt32, into html:inout HTML.ContentEncoder) throws
                 {
                     throw ExpectedError.reference(reference)
                 }
@@ -326,7 +326,7 @@ enum Main:SyncTests
 
             tests.do(catching: Renderer.ExpectedError.reference(0xAA_BB_CC_DD))
             {
-                _ = try renderer.render(to: &html)
+                _ = try renderer.render(to: &html.encoder)
             }
 
             tests.expect(html.description ==? "<p>before</p>")

@@ -12,7 +12,7 @@ protocol MarkdownRenderer
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
-    func load(_ reference:UInt32, into html:inout HTML) throws
+    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder) throws
 }
 extension MarkdownRenderer
 {
@@ -24,7 +24,7 @@ extension MarkdownRenderer
     }
     /// Does nothing.
     @inlinable public
-    func load(_ reference:UInt32, into html:inout HTML)
+    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
     {
     }
 }
@@ -35,7 +35,7 @@ extension MarkdownRenderer
     /// returns nil if successful. This function always closes any HTML elements
     /// it creates, even on error.
     public
-    func render(to html:inout HTML) rethrows -> MarkdownRenderingError?
+    func render(to html:inout HTML.ContentEncoder) rethrows -> MarkdownRenderingError?
     {
         var attributes:MarkdownAttributeContext = .init()
         var stack:[MarkdownElementContext] = []

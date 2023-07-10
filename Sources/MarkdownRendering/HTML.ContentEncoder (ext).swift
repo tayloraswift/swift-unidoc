@@ -2,7 +2,7 @@ import HTML
 import HTMLRendering
 import MarkdownABI
 
-extension HTML
+extension HTML.ContentEncoder
 {
     mutating
     func emit(element:MarkdownBytecode.Emission, with attributes:MarkdownAttributeContext)
@@ -21,10 +21,10 @@ extension HTML
         self[html, attributes.encode(to:)]
     }
 }
-extension HTML
+extension HTML.ContentEncoder
 {
     private mutating
-    func open(_ element:ContainerElement, with attributes:MarkdownAttributeContext)
+    func open(_ element:HTML.ContainerElement, with attributes:MarkdownAttributeContext)
     {
         self.open(element) { attributes.encode(to: &$0) }
     }
@@ -35,7 +35,7 @@ extension HTML
         {
         case .container(let element):
             self.open(element, with: attributes)
-        
+
         case .highlight(let highlight):
             self.open(highlight.container, with: attributes)
 
@@ -46,7 +46,7 @@ extension HTML
         case .signage(let signage):
             self.open(.aside, with: attributes)
             self[.h3] = signage.description
-        
+
         //  Ignores all attributes!
         case .transparent:
             return
@@ -59,7 +59,7 @@ extension HTML
         {
         case .container(let element):
             self.close(element)
-        
+
         case .highlight(let highlight):
             self.close(highlight.container)
 
@@ -68,7 +68,7 @@ extension HTML
 
         case .signage:
             self.close(.aside)
-        
+
         //  Ignores all attributes!
         case .transparent:
             return
