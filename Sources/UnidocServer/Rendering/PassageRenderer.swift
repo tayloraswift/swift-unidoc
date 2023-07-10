@@ -20,7 +20,7 @@ extension PassageRenderer:MarkdownRenderer
 {
     var bytecode:MarkdownBytecode { self.passage.markdown }
 
-    func load(_ reference:UInt32, into html:inout HTML)
+    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
     {
         guard   let index:Int = .init(exactly: reference),
                 self.passage.referents.indices.contains(index)

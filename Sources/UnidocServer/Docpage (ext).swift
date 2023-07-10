@@ -5,7 +5,7 @@ import UnidocDatabase
 extension Docpage:RenderableAsHTML
 {
     public
-    func render(to html:inout HTML)
+    func render(to html:inout HTML.ContentEncoder)
     {
         let context:RenderingContext = .init()
 
@@ -30,7 +30,7 @@ import MarkdownRendering
 
 extension Record.Passage
 {
-    func render(to html:inout HTML, with context:RenderingContext)
+    func render(to html:inout HTML.ContentEncoder, with context:RenderingContext)
     {
         let renderer:PassageRenderer = .init(passage: self, context: context)
         let _:MarkdownRenderingError? = renderer.render(to: &html)

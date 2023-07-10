@@ -68,43 +68,22 @@ extension Delegate
         switch path
         {
         case ["admin"]:
-            let configuration:Mongo.ReplicaSetConfiguration = try await self.mongodb.run(
+            let page:Page.Admin = .init(configuration: try await self.mongodb.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
-                against: .admin)
-            let location:String = "\(request.uri)"
-            return .init(location: location,
-                response: .content(.init(.text("""
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                    <meta charset="utf-8"/>
-                    <title>upload</title>
-                    </head>
-                    <body>
+                against: .admin))
 
-                    <form action="/upload" method="post" enctype="multipart/form-data">
-                    <p><input type="text" name="text1" value="text default"></p>
-                    <p><input type="file" name="documentation-binary"></p>
-                    <p><button type="submit">Submit</button></p>
-                    </form>
-
-                    <hr>
-
-                    <form action="/rebuild" method="post" enctype="multipart/form-data">
-                    <p><button type="submit">Rebuild collections</button></p>
-                    </form>
-
-                    <hr>
-
-                    <h2>replica set configuration</h2>
-
-                    <pre><code>\(configuration)</code></pre>
-
-                    </body>
-                    </html>
-                    """),
+            return .init(location: "\(request.uri)",
+                response: .content(.init(.binary(page.html.utf8),
                     type: .text(.html, charset: .utf8))),
-                results: .one(canonical: location))
+                results: .one(canonical: "/admin"))
+
+        case ["admin", "drop-database"]:
+            let page:Page.Admin.DropDatabase = .init()
+
+            return .init(location: "\(request.uri)",
+                response: .content(.init(.binary(page.html.utf8),
+                    type: .text(.html, charset: .utf8))),
+                results: .one(canonical: "/admin/drop-database"))
 
         case _:
             break
@@ -143,12 +122,12 @@ extension Delegate
         let display:String?
         switch request.uri.path.normalized() as [String]
         {
-        case ["rebuild"]:
+        case ["admin", "action", "rebuild"]:
             let session:Mongo.Session = try await .init(from: self.mongodb)
             let rebuilt:Int = try await self.database.rebuild(with: session)
-            display = "rebuilt \(rebuilt) snapshots"
+            display = "(rebuilt \(rebuilt) snapshots)"
 
-        case ["upload"]:
+        case ["admin", "action", "upload"]:
             var receipts:[SnapshotReceipt] = []
             for item:MultipartForm.Item in request.form
                 where item.header.name == "documentation-binary"
@@ -156,6 +135,11 @@ extension Delegate
                 receipts.append(try await self.ingest(uploaded: try .init(buffer: item.value)))
             }
             display = "\(receipts)"
+
+        case ["admin", "action", "drop-database"]:
+            let session:Mongo.Session = try await .init(from: self.mongodb)
+            try await self.database.nuke(with: session)
+            display = "(reinitialized database)"
 
         case _:
             display = nil
