@@ -1,0 +1,6 @@
+extension Page
+{
+    enum Docs
+    {
+    }
+}

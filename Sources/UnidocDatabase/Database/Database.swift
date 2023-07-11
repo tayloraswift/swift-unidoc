@@ -140,23 +140,8 @@ extension Database
 extension Database
 {
     public
-    func _get(
-        package:PackageIdentifier,
-        version:Substring?,
-        stem:String,
-        hash:FNV24?,
-        with session:Mongo.Session) async throws
-    {
-        _ = try await self.execute(query: .init(
-                package: package,
-                version: version,
-                stem: stem,
-                hash: hash),
-            with: session)
-    }
-    public
-    func execute(query:__owned DocpageQuery,
-        with session:Mongo.Session) async throws -> Docpage?
+    func execute(query:__owned DeepQuery,
+        with session:Mongo.Session) async throws -> [DeepQuery.Output]
     {
         // try await session.run(
         //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<PageFacets.Direct>>>.init(
@@ -164,20 +149,9 @@ extension Database
         //         command: query.command),
         //     against: self.name)
 
-        let output:DocpageQuery.Output? = try await session.run(
-            command: query.command,
-            against: self.id)
+        try await session.run(command: query.command, against: self.id)
         {
-            try await $0.reduce(into: [], +=).first
-        }
-        if  let output:DocpageQuery.Output = output,
-                output.principal.count == 1
-        {
-            return .init(principal: output.principal[0], entourage: output.entourage)
-        }
-        else
-        {
-            return nil
+            try await $0.reduce(into: [], +=)
         }
     }
 }

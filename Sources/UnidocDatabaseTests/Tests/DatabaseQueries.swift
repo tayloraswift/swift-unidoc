@@ -4,7 +4,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import UnidocDatabase
 
-struct Crosslinks:MongoTestBattery
+struct DatabaseQueries:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
@@ -20,8 +20,17 @@ struct Crosslinks:MongoTestBattery
                 clean: true),
             pretty: true)
 
-        let swift:Documentation = try await toolchain.generateDocs(
+        let swift:Documentation
+        do
+        {
+            //  Use the cached binary if available.
+            swift = try .load(package: .swift, at: toolchain.version, in: workspace.path)
+        }
+        catch
+        {
+            swift = try await toolchain.generateDocs(
             for: try await .swift(in: workspace, clean: true))
+        }
 
         let session:Mongo.Session = try await .init(from: pool)
 
@@ -50,11 +59,33 @@ struct Crosslinks:MongoTestBattery
         //     hash: nil,
         //     with: session)
 
-        try await database._get(package: "swift",
-            version: nil,
-            stem: "swift dictionary keys",
-            hash: nil,
-            with: session)
+        if  let tests:TestGroup = tests / "Dictionary" / "Keys",
+            let query:DeepQuery = tests.expect(
+                value: .init("swift:swift", ["dictionary", "keys"]))
+        {
+            await tests.do
+            {
+                let output:[DeepQuery.Output] = try await database.execute(query: query,
+                    with: session)
+
+                tests.expect(output.count ==? 1)
+            }
+        }
+
+        //  Test an ambiguous query.
+        if  let tests:TestGroup = tests / "Int" / "init",
+            let query:DeepQuery = tests.expect(
+                value: .init("swift:swift", ["int.init(_:)"]))
+        {
+            await tests.do
+            {
+                let output:[DeepQuery.Output] = try await database.execute(query: query,
+                    with: session)
+
+                tests.expect(output.count ==? 1)
+                print(output)
+            }
+        }
 
         // try await database._get(package: "swift-crosslinks",
         //     version: nil,

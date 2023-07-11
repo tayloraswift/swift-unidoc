@@ -2,7 +2,7 @@ import BSON
 import MongoExpressions
 import UnidocRecords
 
-extension DocpageQuery
+extension DeepQuery
 {
     struct ExtensionVariable:MongoExpressionVariable, ExpressibleByStringLiteral
     {
@@ -14,7 +14,7 @@ extension DocpageQuery
         }
     }
 }
-extension DocpageQuery.ExtensionVariable
+extension DeepQuery.ExtensionVariable
 {
     var scalars:MongoExpression
     {

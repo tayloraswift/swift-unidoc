@@ -4,8 +4,10 @@ import ModuleGraphs
 import MongoDB
 import UnidocRecords
 
+/// A deep query is a query for a single code-level entity,
+/// such as a declaration or a module.
 @frozen public
-struct DocpageQuery
+struct DeepQuery
 {
     let package:PackageIdentifier
     let version:Substring?
@@ -14,6 +16,7 @@ struct DocpageQuery
     private(set)
     var hash:FNV24?
 
+    private
     init(package:PackageIdentifier,
         version:Substring?,
         stem:String = "",
@@ -25,7 +28,7 @@ struct DocpageQuery
         self.hash = hash
     }
 }
-extension DocpageQuery
+extension DeepQuery
 {
     public
     init?(_ trunk:String, _ tail:ArraySlice<String>)
@@ -76,7 +79,7 @@ extension DocpageQuery
     }
 }
 
-extension DocpageQuery
+extension DeepQuery
 {
     static
     var collation:Mongo.Collation
@@ -103,7 +106,7 @@ extension DocpageQuery
         }
     }
 }
-extension DocpageQuery
+extension DeepQuery
 {
     private
     var pipeline:Mongo.Pipeline
@@ -178,16 +181,30 @@ extension DocpageQuery
                             $0[.limit] = 50
                         }
                     }
-                    $0[.as] = Docpage.Principal[.matches]
+                    $0[.as] = Output.Principal[.matches]
                 }
             }
             $0.stage
             {
                 $0[.set] = .init
                 {
-                    $0[Docpage.Principal[.master]] = .expr
+                    //  Populate this field only if exactly one master record matched.
+                    //  This allows us to skip looking up entourage records if we are
+                    //  only going to generate a disambiguation page.
+                    $0[Output.Principal[.master]] = .expr
                     {
-                        $0[.first] = "$\(Docpage.Principal[.matches])"
+                        $0[.cond] =
+                        (
+                            if: .expr
+                            {
+                                $0[.eq] =
+                                (
+                                    1, .expr { $0[.size] = "$\(Output.Principal[.matches])" }
+                                )
+                            },
+                            then: .expr { $0[.first] = "$\(Output.Principal[.matches])" },
+                            else: (nil as Never?) as Never??
+                        )
                     }
                 }
             }
@@ -198,9 +215,9 @@ extension DocpageQuery
                 $0[.lookup] = .init
                 {
                     $0[.from] = Database.Extensions.name
-                    $0[.localField] = Docpage.Principal[.master] / Record.Master[.id]
+                    $0[.localField] = Output.Principal[.master] / Record.Master[.id]
                     $0[.foreignField] = Record.Extension[.scope]
-                    $0[.as] = Docpage.Principal[.extensions]
+                    $0[.as] = Output.Principal[.extensions]
                 }
             }
 
@@ -226,7 +243,7 @@ extension DocpageQuery
 
                                         $0[.map] = .let(variable)
                                         {
-                                            $0[.input] = "$\(Docpage.Principal[.extensions])"
+                                            $0[.input] = "$\(Output.Principal[.extensions])"
                                             $0[.in] = variable.scalars
                                         }
                                     }
@@ -249,7 +266,14 @@ extension DocpageQuery
                     {
                         $0.stage
                         {
-                            $0[.unset] = scalars
+                            $0[.project] = .init
+                            {
+                                for key:Output.Principal.CodingKeys in
+                                        Output.Principal.CodingKeys.allCases
+                                {
+                                    $0[Output.Principal[key]] = true
+                                }
+                            }
                         }
                     }
                     $0[Output[.entourage]] = .init
