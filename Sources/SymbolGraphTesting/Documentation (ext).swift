@@ -1,4 +1,6 @@
 import BSON
+import ModuleGraphs
+import SemanticVersions
 import SymbolGraphs
 import System
 import Testing
@@ -8,10 +10,17 @@ extension Documentation
     private
     var filename:String
     {
-        self.metadata.version.map
-        {
-            "\(self.metadata.package)@\($0).ss"
-        } ?? "\(self.metadata.package).ss"
+        self.metadata.package.filename(version: self.metadata.version)
+    }
+}
+extension Documentation
+{
+    public static
+    func load(package:PackageIdentifier,
+        at version:AnyVersion? = nil,
+        in directory:FilePath) throws -> Self
+    {
+        try .init(buffer: try (directory / package.filename(version: version)).read())
     }
 
     @discardableResult
@@ -25,7 +34,9 @@ extension Documentation
 
         return file
     }
-
+}
+extension Documentation
+{
     public
     func roundtrip(for tests:TestGroup, in directory:FilePath)
     {
@@ -34,7 +45,7 @@ extension Documentation
             let file:FilePath = try self.save(in: directory)
 
             if  let tests:TestGroup = tests / "roundtripping",
-                let decoded:Documentation = tests.do({ try .init(buffer: file.read()) })
+                let decoded:Documentation = tests.do({ try .init(buffer: try file.read()) })
             {
                 tests.expect(decoded.metadata ==? self.metadata)
                 //  We don’t want to dump the entire symbol graph to the terminal!

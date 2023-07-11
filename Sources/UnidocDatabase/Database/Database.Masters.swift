@@ -35,7 +35,7 @@ extension Database.Masters
                         $0[.unique] = false
                         $0[.name] = "\(Self.name)(\(Record.Master[.stem]))"
 
-                        $0[.collation] = DocpageQuery.collation
+                        $0[.collation] = DeepQuery.collation
                         $0[.key] = .init
                         {
                             $0[Record.Master[.stem]] = (+)

@@ -92,21 +92,21 @@ extension Delegate
         switch (path.first, path.count)
         {
         case ("docs"?, 2...):
-            if  let query:DocpageQuery = .init(path[1], path[2...]),
-                let page:Docpage = try await self.database.execute(query: query,
-                    with: try await .init(from: self.mongodb))
-            {
-                let _string:String = "\(page)"
-                let _location:String = "\(request.uri)"
-                return .init(location: _location,
-                    response: .content(.init(.text(_string),
-                        type: .text(.html, charset: .utf8))),
-                    results: .one(canonical: _location))
-            }
+            guard   let query:DeepQuery = .init(path[1], path[2...]),
+                    let page:Page.Docs.Zone.Deep = .init(try await self.database.execute(
+                        query: query,
+                        with: try await .init(from: self.mongodb)))
             else
             {
                 fallthrough
             }
+
+            let _string:String = "\(page)"
+            let _location:String = "\(request.uri)"
+            return .init(location: _location,
+                response: .content(.init(.text(_string),
+                    type: .text(.html, charset: .utf8))),
+                results: .one(canonical: _location))
 
         case (_, _):
             return .init(location: "\(request.uri)",

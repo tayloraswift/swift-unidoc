@@ -51,7 +51,7 @@ extension Page.Admin
                         }
                         $0[.p]
                         {
-                            $0[.button] { $0[.type] = "submit" } = "Upload snapshots"
+                            $0[.button] { $0[.type] = "submit" } = "Upload Snapshots"
                         }
                     }
 
@@ -67,7 +67,7 @@ extension Page.Admin
                     {
                         $0[.p]
                         {
-                            $0[.button] { $0[.type] = "submit" } = "Rebuild collections"
+                            $0[.button] { $0[.type] = "submit" } = "Rebuild Collections"
                         }
                     }
 
