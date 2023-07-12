@@ -66,10 +66,10 @@ extension MarkdownInline.Block:MarkdownElement
             link.emit(into: &binary)
 
         case .reference(let reference):
-            binary.write(reference: reference)
+            binary &= reference
 
         case .text(let unescaped):
-            binary.write(text: unescaped)
+            binary += unescaped
         }
     }
 }

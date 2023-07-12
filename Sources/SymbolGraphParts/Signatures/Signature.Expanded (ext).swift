@@ -37,7 +37,7 @@ extension Signature<Symbol.Decl>.Expanded
                 }
                 else
                 {
-                    $0.write(text: fragment.spelling)
+                    $0 += fragment.spelling
                 }
             }
         }

@@ -16,7 +16,7 @@ extension Signature<Symbol.Decl>.Abridged
                 }
                 else
                 {
-                    $0.write(text: fragment.spelling)
+                    $0 += fragment.spelling
                 }
             }
         }

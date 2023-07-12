@@ -15,7 +15,7 @@ extension HTML.ContentEncoder
         {
             if  let value:Renderable
             {
-                self[tag, attributes, content: value.render(to:)]
+                self[tag, attributes] { $0 += value }
             }
         }
     }

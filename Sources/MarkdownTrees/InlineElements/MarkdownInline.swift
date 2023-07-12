@@ -25,7 +25,7 @@ extension MarkdownInline:MarkdownElement
             html.emit(into: &binary)
 
         case .text(let unescaped):
-            binary.write(text: unescaped)
+            binary += unescaped
         }
     }
 }

@@ -12,6 +12,6 @@ extension MarkdownCodeLanguage.PlainText.Highlighter:MarkdownCodeHighlighter
     @inlinable public
     func emit(_ text:String, into binary:inout MarkdownBinaryEncoder)
     {
-        binary.write(text: text)
+        binary += text
     }
 }

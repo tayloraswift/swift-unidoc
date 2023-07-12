@@ -1,3 +1,5 @@
+import MarkdownABI
+import MarkdownPluginSwift
 import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphLinker
@@ -45,7 +47,8 @@ extension SymbolGraph
         do
         {
             var linker:StaticLinker = .init(nominations: nominations,
-                modules: artifacts.cultures.map(\.module))
+                modules: artifacts.cultures.map(\.module),
+                plugins: [.swift])
 
             let supplements:[[MarkdownFile]]? = try artifacts.root.map
             {
