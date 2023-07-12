@@ -2,5 +2,5 @@ public
 protocol MarkdownFlavor
 {
     static
-    func parse(_ string:String, id:Int) -> [MarkdownBlock]
+    func transform(blocks:inout [MarkdownBlock])
 }

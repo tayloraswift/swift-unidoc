@@ -151,6 +151,11 @@ let package:Package = .init(
                 .product(name: "Markdown", package: "swift-markdown"),
             ]),
 
+        .target(name: "MarkdownPluginSwift", dependencies:
+            [
+                .target(name: "MarkdownABI"),
+            ]),
+
         .target(name: "MarkdownSemantics", dependencies:
             [
                 .target(name: "Codelinks"),

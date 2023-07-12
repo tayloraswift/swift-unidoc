@@ -11,19 +11,8 @@ struct MarkdownTree
     let blocks:[MarkdownBlock]
 
     @inlinable public
-    init(attaching blocks:[MarkdownBlock] = [])
+    init(parser parse:() -> [MarkdownBlock])
     {
-        self.blocks = blocks
-    }
-}
-extension MarkdownTree:MarkdownModel
-{
-    public
-    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
-    {
-        for block:MarkdownBlock in self.blocks
-        {
-            try yield(block)
-        }
+        self.blocks = parse()
     }
 }

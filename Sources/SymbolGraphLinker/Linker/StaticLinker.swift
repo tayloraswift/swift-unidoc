@@ -3,6 +3,7 @@ import Codelinks
 import DoclinkResolution
 import FNV1
 import LexicalPaths
+import MarkdownABI
 import MarkdownSemantics
 import MarkdownParsing
 import MarkdownTrees
@@ -18,6 +19,8 @@ import Unidoc
 public
 struct StaticLinker
 {
+    private
+    let markdownParser:SwiftFlavoredMarkdownParser
     private
     let nominations:Compiler.Nominations
 
@@ -37,10 +40,12 @@ struct StaticLinker
     var errors:[any StaticLinkerError]
 
     public
-    init(nominations:Compiler.Nominations, modules:[ModuleDetails])
+    init(nominations:Compiler.Nominations,
+        modules:[ModuleDetails],
+        plugins:[any MarkdownCodeLanguageType] = [])
     {
+        self.markdownParser = .init(plugins: plugins)
         self.nominations = nominations
-
 
         self.symbolizer = .init(modules: modules)
         self.codelinks = .init()
@@ -323,6 +328,7 @@ extension StaticLinker
         in namespace:ModuleIdentifier) throws -> Article?
     {
         let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
+            with: self.markdownParser,
             as: SwiftFlavoredMarkdown.self)
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
@@ -497,6 +503,7 @@ extension StaticLinker
                 }
 
                 return outliner.link(comment: .init(from: $0, in: location?.file),
+                    parser: self.markdownParser,
                     adding: self.supplements.removeValue(forKey: scalar))
             }
 
@@ -565,7 +572,9 @@ extension StaticLinker
                         culture: self.symbolizer.graph.namespaces[$0.culture],
                         scope: [String].init(`extension`.path))
 
-                    $0.article = outliner.link(comment: .init(from: comment, in: file))
+                    $0.article = outliner.link(
+                        comment: .init(from: comment, in: file),
+                        parser: self.markdownParser)
 
                     self.errors += outliner.errors
 

@@ -24,8 +24,10 @@ extension MarkdownDocumentationSupplement:MarkdownModel
     }
 
     public
-    init(attaching blocks:[MarkdownBlock])
+    init(parser parse:() -> [MarkdownBlock])
     {
+        let blocks:[MarkdownBlock] = parse()
+
         if  case (let headline as MarkdownBlock.Heading)? = blocks.first,
             headline.level == 1,
             headline.elements.count == 1,

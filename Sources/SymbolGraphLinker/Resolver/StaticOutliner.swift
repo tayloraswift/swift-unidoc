@@ -85,17 +85,20 @@ extension StaticOutliner
 {
     mutating
     func link(comment:MarkdownSource,
+        parser:SwiftFlavoredMarkdownParser,
         adding extra:[MarkdownDocumentationSupplement]? = nil) -> SymbolGraph.Article<Never>
     {
         //  TODO: use supplements
         let sources:[MarkdownSource] = [comment]
         return self.link(documentation: .init(parsing: comment.text,
                 from: sources.startIndex,
+                with: parser,
                 as: SwiftFlavoredMarkdownComment.self),
             from: sources)
     }
     mutating
-    func link(documentation:MarkdownDocumentation,
+    func link(
+        documentation:MarkdownDocumentation,
         from sources:[MarkdownSource]) -> SymbolGraph.Article<Never>
     {
         let overview:MarkdownBytecode = .init

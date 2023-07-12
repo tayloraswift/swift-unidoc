@@ -1,17 +1,51 @@
 import Markdown
+import MarkdownABI
 import MarkdownTrees
 
-extension MarkdownBlock
+@frozen public
+struct SwiftFlavoredMarkdownParser
 {
-    static
-    func create(from markup:any BlockMarkup, in id:Int) -> MarkdownBlock
+    private
+    let plugins:[String: any MarkdownCodeLanguageType]
+
+    private
+    init(plugins:[String: any MarkdownCodeLanguageType])
+    {
+        self.plugins = plugins
+    }
+}
+extension SwiftFlavoredMarkdownParser
+{
+    public
+    init(plugins:[any MarkdownCodeLanguageType] = [])
+    {
+        self.init(plugins: plugins.reduce(into: [:]) { $0[$1.name] = $1 })
+    }
+}
+extension SwiftFlavoredMarkdownParser:MarkdownParser
+{
+    public
+    func parse(_ string:String, from id:Int) -> [MarkdownBlock]
+    {
+        let document:Document = .init(parsing: string, options:
+        [
+            .parseBlockDirectives,
+            .parseSymbolLinks,
+        ])
+        return document.blockChildren.map { self.block(from: $0, in: id) }
+    }
+}
+extension SwiftFlavoredMarkdownParser
+{
+    private
+    func block(from markup:any BlockMarkup, in id:Int) -> MarkdownBlock
     {
         switch markup
         {
         case let block as Markdown.BlockQuote:
             return MarkdownBlock.Quote.init(block.blockChildren.map
                 {
-                    Self.create(from: $0, in: id)
+                    self.block(from: $0, in: id)
                 })
 
         case let block as Markdown.BlockDirective:
@@ -22,11 +56,18 @@ extension MarkdownBlock
                 },
                 elements: block.blockChildren.map
                 {
-                    Self.create(from: $0, in: id)
+                    self.block(from: $0, in: id)
                 })
 
         case let block as Markdown.CodeBlock:
-            return MarkdownBlock.Code.init(language: block.language, text: block.code)
+            if  let language:String = block.language
+            {
+                return (self.plugins[language] ?? .unsupported(language)).attach(to: block.code)
+            }
+            else
+            {
+                return MarkdownBlock.Code<MarkdownCodeLanguage.PlainText>.init(text: block.code)
+            }
 
         case let block as Markdown.Heading:
             return MarkdownBlock.Heading.init(level: block.level,
@@ -74,18 +115,18 @@ extension MarkdownBlock
                 })
 
         case let block as Markdown.ListItem:
-            return MarkdownBlock.Item.init(from: block, in: id)
+            return self.item(from: block, in: id)
 
         case let block as Markdown.OrderedList:
             return MarkdownBlock.OrderedList.init(block.listItems.map
                 {
-                    MarkdownBlock.Item.init(from: $0, in: id)
+                    self.item(from: $0, in: id)
                 })
 
         case let block as Markdown.UnorderedList:
             return MarkdownBlock.UnorderedList.init(block.listItems.map
                 {
-                    MarkdownBlock.Item.init(from: $0, in: id)
+                    self.item(from: $0, in: id)
                 })
 
         case is Markdown.ThematicBreak:
@@ -95,8 +136,16 @@ extension MarkdownBlock
             return MarkdownBlock.init()
 
         case let unsupported:
-            return MarkdownBlock.Code.init(
+            return MarkdownBlock.Code<MarkdownCodeLanguage.PlainText>.init(
                 text: "<unsupported markdown node '\(type(of: unsupported))' >")
         }
+    }
+
+    private
+    func item(from markup:ListItem, in id:Int) -> MarkdownBlock.Item
+    {
+        .init(
+            checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },
+            elements: markup.blockChildren.map { self.block(from: $0, in: id) })
     }
 }

@@ -25,14 +25,14 @@ extension MarkdownDocumentation:MarkdownModel
     }
 
     public
-    init(attaching blocks:[MarkdownBlock])
+    init(parser parse:() -> [MarkdownBlock])
     {
-        self.init(attaching: blocks[...])
+        self.init(attaching: parse())
     }
 }
 extension MarkdownDocumentation
 {
-    init(attaching blocks:ArraySlice<MarkdownBlock>)
+    init(attaching blocks:some Sequence<MarkdownBlock>)
     {
         var parameters:(discussion:[MarkdownBlock], list:[MarkdownBlock.Parameter]) = ([], [])
         var returns:[MarkdownBlock] = []
