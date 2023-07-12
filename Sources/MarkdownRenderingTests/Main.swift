@@ -355,7 +355,7 @@ enum Main:SyncTests
                     }
                 }
 
-                func load(_ reference:UInt32) -> String?
+                func load(_ reference:UInt32, for _:MarkdownBytecode.Attribute) -> String?
                 {
                     reference & 1 == 0 ? nil : "swiftinit.org"
                 }

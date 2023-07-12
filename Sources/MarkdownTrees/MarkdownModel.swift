@@ -3,16 +3,24 @@ import MarkdownABI
 public
 protocol MarkdownModel
 {
-    init(attaching blocks:[MarkdownBlock])
+    init(parser parse:() -> ([MarkdownBlock]))
 
     func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
 }
 extension MarkdownModel
 {
-    public
-    init(parsing string:String, from id:Int = 0, as flavor:(some MarkdownFlavor).Type)
+    @inlinable public
+    init(parsing string:String,
+        from id:Int = 0,
+        with parser:some MarkdownParser,
+        as flavor:(some MarkdownFlavor).Type)
     {
-        self.init(attaching: flavor.parse(string, id: id))
+        self.init
+        {
+            var blocks:[MarkdownBlock] = parser.parse(string, from: id)
+            flavor.transform(blocks: &blocks)
+            return blocks
+        }
     }
 
     /// Emits this markdown tree’s ``blocks`` into the given binary.

@@ -51,7 +51,9 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init(parsing: string,
+                    with: SwiftFlavoredMarkdownParser.init(),
+                    as: SwiftFlavoredMarkdown.self)
                 if  let tests:TestGroup = tests / shape,
 
                     tests.expect(tree.blocks.count ==? 1),
@@ -97,7 +99,9 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init(parsing: string,
+                    with: SwiftFlavoredMarkdownParser.init(),
+                    as: SwiftFlavoredMarkdown.self)
                 if  let tests:TestGroup = tests / name,
                     let paragraph:MarkdownBlock.Paragraph = tests.expect(
                         value: tree.blocks.first as? MarkdownBlock.Paragraph),
@@ -144,7 +148,9 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string, as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init(parsing: string,
+                    with: SwiftFlavoredMarkdownParser.init(),
+                    as: SwiftFlavoredMarkdown.self)
                 if  let tests:TestGroup = tests / name,
                     let expected:SourcePosition = tests.expect(value: .init(
                         line: expected.line,

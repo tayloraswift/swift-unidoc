@@ -1,17 +1,11 @@
-import Markdown
 import MarkdownTrees
 
-public
+@frozen public
 enum SwiftFlavoredMarkdown:MarkdownFlavor
 {
+    /// Does nothing.
     public static
-    func parse(_ string:String, id:Int) -> [MarkdownBlock]
+    func transform(blocks _:inout [MarkdownBlock])
     {
-        let document:Document = .init(parsing: string, options:
-        [
-            .parseBlockDirectives,
-            .parseSymbolLinks,
-        ])
-        return document.blockChildren.map { MarkdownBlock.create(from: $0, in: id) }
     }
 }

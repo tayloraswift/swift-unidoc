@@ -14,6 +14,7 @@ enum Main:SyncTests
         tests.do
         {
             let documentation:MarkdownDocumentation = .init(parsing: markdown,
+                with: SwiftFlavoredMarkdownParser.init(),
                 as: SwiftFlavoredMarkdown.self)
             let overview:MarkdownBinary? = documentation.overview.map
             {

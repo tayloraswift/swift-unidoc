@@ -8,7 +8,10 @@ protocol MarkdownRenderer
 
     /// Returns the value for an attribute identified by the given reference.
     /// If the witness returns nil, the renderer will omit the attribute.
-    func load(_ reference:UInt32) throws -> String?
+    ///
+    /// This can be used to influence the behavior of the special syntax
+    /// highlight contexts.
+    func load(_ reference:UInt32, for attribute:MarkdownBytecode.Attribute) throws -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
@@ -18,7 +21,7 @@ extension MarkdownRenderer
 {
     /// Returns nil.
     @inlinable public
-    func load(_ reference:UInt32) -> String?
+    func load(_ reference:UInt32, for attribute:MarkdownBytecode.Attribute) -> String?
     {
         nil
     }
@@ -63,7 +66,7 @@ extension MarkdownRenderer
             case .attribute(let attribute, let reference?):
                 attributes.commit()
 
-                if  let value:String = try self.load(reference)
+                if  let value:String = try self.load(reference, for: attribute)
                 {
                     attributes.append(value: value, as: attribute)
                 }
