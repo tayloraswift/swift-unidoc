@@ -121,7 +121,12 @@ extension MarkdownBytecode
     @inlinable internal mutating
     func write(text:some StringProtocol)
     {
-        self.bytes.append(contentsOf: text.utf8)
+        self.write(utf8: text.utf8)
+    }
+    @inlinable internal mutating
+    func write(utf8:some Sequence<UInt8>)
+    {
+        self.bytes.append(contentsOf: utf8)
     }
 }
 extension MarkdownBytecode:Sequence

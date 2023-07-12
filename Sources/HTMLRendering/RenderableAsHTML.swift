@@ -3,12 +3,13 @@ import HTML
 public
 protocol RenderableAsHTML
 {
-    func render(to html:inout HTML.ContentEncoder)
+    static
+    func += (html:inout HTML.ContentEncoder, self:Self)
 }
 extension RenderableAsHTML where Self:StringProtocol
 {
-    @inlinable public
-    func render(to html:inout HTML.ContentEncoder)
+    @inlinable public static
+    func += (html:inout HTML.ContentEncoder, self:Self)
     {
         for codeunit:UInt8 in self.utf8
         {

@@ -2,12 +2,12 @@
 struct MarkdownBinaryEncoder
 {
     @usableFromInline internal
-    var encoder:MarkdownAttributeEncoder
+    var attribute:MarkdownAttributeEncoder
 
     @inlinable internal
     init()
     {
-        self.encoder = .init(bytecode: [])
+        self.attribute = .init(bytecode: [])
     }
 }
 extension MarkdownBinaryEncoder
@@ -17,21 +17,57 @@ extension MarkdownBinaryEncoder
     {
         _read
         {
-            yield  self.encoder.bytecode
+            yield  self.attribute.bytecode
         }
         _modify
         {
-            yield &self.encoder.bytecode
+            yield &self.attribute.bytecode
         }
     }
 }
 extension MarkdownBinaryEncoder
 {
+    @inlinable public static
+    func += (self:inout Self, codepoint:Unicode.Scalar)
+    {
+        self.bytecode.write(utf8: codepoint.utf8)
+    }
+    @inlinable public static
+    func += (self:inout Self, character:Character)
+    {
+        self.bytecode.write(utf8: character.utf8)
+    }
+    @inlinable public static
+    func += (self:inout Self, text:some StringProtocol)
+    {
+        self.bytecode.write(text: text)
+    }
+    @inlinable public static
+    func += (self:inout Self, utf8:some Sequence<UInt8>)
+    {
+        self.bytecode.write(utf8: utf8)
+    }
+    @inlinable public static
+    func &= (self:inout Self, reference:UInt32)
+    {
+        self.bytecode.write(reference: reference)
+    }
+}
+extension MarkdownBinaryEncoder
+{
+    @available(*, deprecated)
     @inlinable public mutating
     func write(text:some StringProtocol)
     {
         self.bytecode.write(text: text)
     }
+    @available(*, deprecated)
+    @inlinable public mutating
+    func write(utf8:some Sequence<UInt8>)
+    {
+        self.bytecode.write(utf8: utf8)
+    }
+    @available(*, deprecated)
     @inlinable public mutating
     func write(reference:UInt32)
     {
@@ -46,7 +82,7 @@ extension MarkdownBinaryEncoder
     {
         mutating get
         {
-            attributes(&self.encoder)
+            attributes(&self.attribute)
             self.bytecode.write(emission)
         }
     }
@@ -57,7 +93,7 @@ extension MarkdownBinaryEncoder
     {
         mutating get
         {
-            attributes(&self.encoder)
+            attributes(&self.attribute)
             self.bytecode.write(context)
             encode(&self)
             self.bytecode.write(marker: .pop)
@@ -94,7 +130,7 @@ extension MarkdownBinaryEncoder
         {
             if  let text:String
             {
-                self[context, attributes] { $0.write(text: text) }
+                self[context, attributes] { $0 += text }
             }
         }
     }

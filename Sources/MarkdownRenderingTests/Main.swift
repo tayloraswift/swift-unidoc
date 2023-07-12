@@ -111,9 +111,9 @@ enum Main:SyncTests
                 $0[.pre, { $0[.language] = "swift" }]
                 {
                     $0[.keyword] = "let"
-                    $0.write(text: " ")
+                    $0 += " "
                     $0[.identifier] = "x"
-                    $0.write(text: " = ")
+                    $0 += " = "
                     $0[.literal] = "5"
                 }
             }
@@ -245,7 +245,7 @@ enum Main:SyncTests
                 <p><code>&lt;reference = 12345&gt;</code></p>
                 """)
             {
-                $0[.p] { $0.write(reference: 12345) }
+                $0[.p] { $0 &= 12345 }
             }
 
             for (name, reference):(String, UInt32) in
@@ -265,7 +265,7 @@ enum Main:SyncTests
                     <p><code>&lt;reference = \(reference)&gt;</code></p>
                     """)
                 {
-                    $0[.p] { $0.write(reference: reference) }
+                    $0[.p] { $0 &= reference }
                 }
             }
         }
@@ -277,9 +277,9 @@ enum Main:SyncTests
                 {
                     $0[.p]
                     {
-                        $0.write(text: "before")
-                        $0.write(reference: 0xAA_BB_CC_DD)
-                        $0.write(text: "after")
+                        $0 += "before"
+                        $0 &= 0xAA_BB_CC_DD
+                        $0 += "after"
                     }
                 }
 
@@ -309,9 +309,9 @@ enum Main:SyncTests
                 {
                     $0[.p]
                     {
-                        $0.write(text: "before")
-                        $0.write(reference: 0xAA_BB_CC_DD)
-                        $0.write(text: "after")
+                        $0 += "before"
+                        $0 &= 0xAA_BB_CC_DD
+                        $0 += "after"
                     }
                 }
 
@@ -346,9 +346,9 @@ enum Main:SyncTests
                             $0[.code]
                             {
                                 $0[.keyword] = "let"
-                                $0.write(text: " ")
+                                $0 += " "
                                 $0[.identifier] = "x"
-                                $0.write(text: ":")
+                                $0 += ":"
                                 $0[.type, { $0[.href] = reference }] = "Int"
                             }
                         }

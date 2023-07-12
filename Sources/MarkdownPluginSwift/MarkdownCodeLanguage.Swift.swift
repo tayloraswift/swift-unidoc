@@ -3,14 +3,19 @@ import MarkdownABI
 extension MarkdownCodeLanguage
 {
     @frozen public
-    enum Swift:MarkdownCodeLanguageType
+    struct Swift
     {
-        case swift
-
-        @inlinable public
-        var name:String { "swift" }
-
-        @inlinable public
-        var highlighter:Highlighter { .init() }
+        @inlinable internal
+        init()
+        {
+        }
     }
+}
+extension MarkdownCodeLanguage.Swift:MarkdownCodeLanguageType
+{
+    @inlinable public
+    var name:String { "swift" }
+
+    @inlinable public
+    var highlighter:Highlighter { .init() }
 }

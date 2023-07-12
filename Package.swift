@@ -75,7 +75,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "508.0.0"),
+            exact: "508.0.1"),
     ],
     targets:
     [
@@ -154,6 +154,8 @@ let package:Package = .init(
         .target(name: "MarkdownPluginSwift", dependencies:
             [
                 .target(name: "MarkdownABI"),
+                .product(name: "IDEUtils", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
             ]),
 
         .target(name: "MarkdownSemantics", dependencies:
@@ -205,6 +207,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphBuilder", dependencies:
             [
+                .target(name: "MarkdownPluginSwift"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),

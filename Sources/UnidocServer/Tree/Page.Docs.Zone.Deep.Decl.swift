@@ -25,8 +25,8 @@ extension Page.Docs.Zone.Deep
 }
 extension Page.Docs.Zone.Deep.Decl:RenderableAsHTML
 {
-    public
-    func render(to html:inout HTML.ContentEncoder)
+    public static
+    func += (html:inout HTML.ContentEncoder, self:Self)
     {
         let context:RenderingContext = .init()
 
