@@ -156,7 +156,7 @@ extension SymbolDescription
 extension SymbolDescription:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case availability
 
@@ -202,13 +202,13 @@ extension SymbolDescription:JSONObjectDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(try json[.identifier].decode(using: CodingKeys.Identifier.self)
+        self.init(try json[.identifier].decode(using: CodingKey.Identifier.self)
             {
                 try $0[.precise].decode()
             },
-            phylum: try json[.kind].decode(using: CodingKeys.Kind.self)
+            phylum: try json[.kind].decode(using: CodingKey.Kind.self)
             {
                 try $0[.identifier].decode()
             },
@@ -218,15 +218,15 @@ extension SymbolDescription:JSONObjectDecodable
             visibility: try json[.visibility].decode(),
             extension: try json[.extension]?.decode() ?? .init(),
             expanded: try json[.declaration].decode(),
-            abridged: try json[.names].decode(using: CodingKeys.Names.self)
+            abridged: try json[.names].decode(using: CodingKey.Names.self)
             {
                 try $0[.subheading].decode()
             },
             generics: try json[.generics]?.decode() ?? .init(),
-            location: try json[.location]?.decode(using: CodingKeys.Location.self)
+            location: try json[.location]?.decode(using: CodingKey.Location.self)
             {
                 let (line, column):(Int, Int) = try $0[.position].decode(
-                    using: CodingKeys.Location.Position.self)
+                    using: CodingKey.Location.Position.self)
                 {
                     (try $0[.line].decode(), try $0[.column].decode())
                 }

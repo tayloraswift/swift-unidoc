@@ -8,13 +8,13 @@ extension Signature
         public
         let bytecode:MarkdownBytecode
         public
-        let links:[Scalar]
+        let scalars:[Scalar]
 
         @inlinable public
-        init(bytecode:MarkdownBytecode = [], links:[Scalar] = [])
+        init(bytecode:MarkdownBytecode = [], scalars:[Scalar] = [])
         {
             self.bytecode = bytecode
-            self.links = links
+            self.scalars = scalars
         }
     }
 }
@@ -26,6 +26,6 @@ extension Signature.Expanded
     @inlinable public
     func map<T>(_ transform:(Scalar) throws -> T) rethrows -> Signature<T>.Expanded
     {
-        .init(bytecode: self.bytecode, links: try self.links.map(transform))
+        .init(bytecode: self.bytecode, scalars: try self.scalars.map(transform))
     }
 }

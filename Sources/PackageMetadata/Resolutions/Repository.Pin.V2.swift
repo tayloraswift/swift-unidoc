@@ -18,7 +18,7 @@ extension Repository.Pin
 extension Repository.Pin.V2:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "identity"
         case location
@@ -26,7 +26,7 @@ extension Repository.Pin.V2:JSONObjectDecodable
         case type = "kind"
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let location:Repository
         switch try json[.type].decode(to: DependencyType.self)

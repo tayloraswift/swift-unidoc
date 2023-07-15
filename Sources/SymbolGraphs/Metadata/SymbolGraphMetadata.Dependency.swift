@@ -33,7 +33,7 @@ extension SymbolGraphMetadata
 extension SymbolGraphMetadata.Dependency
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case package = "P"
         case requirement_lower = "L"
@@ -45,7 +45,7 @@ extension SymbolGraphMetadata.Dependency
 extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.package] = self.package
 
@@ -69,7 +69,7 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
 extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let requirement:Repository.Requirement?
         switch

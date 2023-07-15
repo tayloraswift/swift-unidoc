@@ -27,7 +27,7 @@ extension PackageResolutions
 extension PackageResolutions:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case version
 
@@ -40,14 +40,14 @@ extension PackageResolutions:JSONObjectDecodable
         case pins
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let version:FormatVersion = try json[.version].decode()
         let pins:[Repository.Pin]
         switch version
         {
         case .v1:
-            pins = try json[.object].decode(using: CodingKeys.Object.self)
+            pins = try json[.object].decode(using: CodingKey.Object.self)
             {
                 try $0[.pins].decode
                 {

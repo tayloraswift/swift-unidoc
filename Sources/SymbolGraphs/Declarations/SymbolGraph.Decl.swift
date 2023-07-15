@@ -95,7 +95,7 @@ extension SymbolGraph.Decl
 extension SymbolGraph.Decl
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case flags = "X"
         case path = "P"
@@ -103,7 +103,7 @@ extension SymbolGraph.Decl
         case signature_availability = "V"
         case signature_abridged_bytecode = "B"
         case signature_expanded_bytecode = "E"
-        case signature_expanded_links = "K"
+        case signature_expanded_scalars = "K"
         case signature_generics_constraints = "C"
         case signature_generics_parameters = "G"
 
@@ -118,7 +118,7 @@ extension SymbolGraph.Decl
 extension SymbolGraph.Decl:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.flags] = Unidoc.Decl.Flags.init(
             customization: self.customization,
@@ -134,9 +134,9 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
         bson[.signature_abridged_bytecode] = self.signature.abridged.bytecode
         bson[.signature_expanded_bytecode] = self.signature.expanded.bytecode
         //  TODO: optimize
-        bson[.signature_expanded_links] =
-            self.signature.expanded.links.isEmpty ? nil :
-            self.signature.expanded.links
+        bson[.signature_expanded_scalars] =
+            self.signature.expanded.scalars.isEmpty ? nil :
+            self.signature.expanded.scalars
 
         bson[.signature_generics_constraints] =
             self.signature.generics.constraints.isEmpty ? nil :
@@ -163,7 +163,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
 extension SymbolGraph.Decl:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
         self.init(
@@ -179,7 +179,7 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
                     bytecode: try bson[.signature_abridged_bytecode].decode()),
                 expanded: Signature<Int32>.Expanded.init(
                     bytecode: try bson[.signature_expanded_bytecode].decode(),
-                    links: try bson[.signature_expanded_links]?.decode() ?? []),
+                    scalars: try bson[.signature_expanded_scalars]?.decode() ?? []),
                 generics: Signature<Int32>.Generics.init(
                     constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
                     parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),

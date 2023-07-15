@@ -51,7 +51,7 @@ extension Signature.Fragment
 extension Signature.Fragment:JSONObjectDecodable, JSONDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case spelling
         case referent = "preciseIdentifier"
@@ -59,7 +59,7 @@ extension Signature.Fragment:JSONObjectDecodable, JSONDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(try json[.spelling].decode(),
             referent: try json[.referent]?.decode(),

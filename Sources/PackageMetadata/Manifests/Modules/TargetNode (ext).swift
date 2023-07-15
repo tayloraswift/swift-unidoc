@@ -5,7 +5,7 @@ import PackageGraphs
 extension TargetNode:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case name
         case type
@@ -14,7 +14,7 @@ extension TargetNode:JSONObjectDecodable
         case path
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(
             name: try json[.name].decode(),

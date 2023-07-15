@@ -5,7 +5,7 @@ import BSONEncoding
 extension Availability.Clauses
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case unavailable = "U"
         case deprecated = "D"
@@ -21,7 +21,7 @@ extension Availability.Clauses:BSONDocumentDecodable, BSONDocumentViewDecodable,
             Domain.Bound:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKeys, Bytes>) throws
+    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
     {
         self.init(unavailable: try bson[.unavailable]?.decode(),
             deprecated: try bson[.deprecated]?.decode(),
@@ -37,7 +37,7 @@ extension Availability.Clauses:BSONDocumentEncodable, BSONEncodable
             Domain.Bound:BSONEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.unavailable] = self.unavailable
         bson[.deprecated] = self.deprecated

@@ -38,7 +38,7 @@ extension Renderer
 {
     func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Code
     {
-        .init(self, bytecode: snippet.bytecode, links: snippet.links)
+        .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
     func prose(_ passage:Record.Passage) -> Prosaic
     {

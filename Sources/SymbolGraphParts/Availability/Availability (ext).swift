@@ -5,7 +5,7 @@ import SemanticVersions
 extension Availability:JSONDecodable
 {
     private
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case domain
 
@@ -25,8 +25,8 @@ extension Availability:JSONDecodable
     {
         self.init()
 
-        for json:JSON.ObjectDecoder<CodingKeys> in
-            try [JSON.ObjectDecoder<CodingKeys>].init(json: json)
+        for json:JSON.ObjectDecoder<CodingKey> in
+            try [JSON.ObjectDecoder<CodingKey>].init(json: json)
         {
             let message:String? = try json[.message]?.decode()
             let renamed:String? = try json[.renamed]?.decode()

@@ -4,13 +4,13 @@ import Signatures
 extension GenericParameter:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case name
         case depth
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(name: try json[.name].decode(), depth: try json[.depth].decode())
     }

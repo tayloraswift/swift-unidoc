@@ -24,7 +24,7 @@ extension SymbolGraph
 extension SymbolGraph.Outline
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case location = "L"
         case scalar = "R"
@@ -35,7 +35,7 @@ extension SymbolGraph.Outline
 extension SymbolGraph.Outline:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.text] = self.text
 
@@ -56,7 +56,7 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
 extension SymbolGraph.Outline:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let referent:SymbolGraph.Outline.Referent
 

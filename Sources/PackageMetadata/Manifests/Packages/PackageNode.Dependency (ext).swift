@@ -5,16 +5,16 @@ import PackageGraphs
 extension PackageNode.Dependency:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case filesystem = "fileSystem"
         case resolvable = "sourceControl"
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let json:JSON.ExplicitField<CodingKeys> = try json.single()
+        let json:JSON.ExplicitField<CodingKey> = try json.single()
         switch json.key
         {
         case .filesystem:

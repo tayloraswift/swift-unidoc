@@ -25,14 +25,14 @@ extension PackageManifest
 extension PackageManifest.Product:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case name
         case type
         case targets
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(name: try json[.name].decode(), type: try json[.type].decode(),
             targets: try json[.targets].decode())

@@ -4,14 +4,14 @@ import Signatures
 extension Signature.Generics:JSONDecodable, JSONObjectDecodable where Scalar:JSONDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case parameters
         case constraints
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(
             constraints: try json[.constraints]?.decode() ?? [],

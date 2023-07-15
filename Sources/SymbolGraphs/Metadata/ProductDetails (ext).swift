@@ -5,7 +5,7 @@ import ModuleGraphs
 extension ProductDetails
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case name = "N"
         case type = "T"
@@ -16,7 +16,7 @@ extension ProductDetails
 extension ProductDetails:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.name] = self.name
         bson[.type] = self.type
@@ -27,7 +27,7 @@ extension ProductDetails:BSONDocumentEncodable
 extension ProductDetails:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             name: try bson[.name].decode(),

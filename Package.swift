@@ -59,11 +59,11 @@ let package:Package = .init(
     dependencies:
     [
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "0.5.1")),
+            from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-          from: "0.3.4")),
+          from: "0.4.0")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.54.0")),

@@ -15,12 +15,12 @@ extension SymbolRelationship
 }
 extension SymbolRelationship.SourceOrigin:JSONObjectDecodable
 {
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case identifier
     }
 
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(try json[.identifier].decode())
     }

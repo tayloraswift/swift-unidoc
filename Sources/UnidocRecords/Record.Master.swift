@@ -67,7 +67,7 @@ extension Record.Master
 extension Record.Master
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         /// Always present.
         case id = "_id"
@@ -87,34 +87,38 @@ extension Record.Master
         case signature_abridged_bytecode = "B"
         /// Only appears in ``Decl``.
         case signature_expanded_bytecode = "E"
-        /// Only appears in ``Decl``.
-        case signature_expanded_links = "K"
-        /// Only appears in ``Decl``.
-        case signature_generics_constraints = "C"
+        /// Only appears in ``Decl``. The field contains scalars.
+        case signature_expanded_scalars = "k"
+        /// Only appears in ``Decl``. The field contains constraints, which
+        /// contain scalars.
+        case signature_generics_constraints = "c"
         /// Only appears in ``Decl``.
         case signature_generics_parameters = "G"
-        /// Only appears in ``Decl``.
-        case superforms = "P"
+        /// Only appears in ``Decl``. The field contains scalars.
+        case superforms = "p"
         /// Only appears in ``Decl``, and only when different from ``culture``.
-        case namespace = "N"
-        /// Only appears in ``Decl``.
-        case culture = "X"
-        /// Only appears in ``Decl``.
-        case scope = "R"
+        /// The field is a scalar.
+        case namespace = "n"
+        /// Only appears in ``Decl``. The field is a scalar.
+        case culture = "x"
+        /// Only appears in ``Decl``. The field contains scalars.
+        case scope = "r"
 
         /// Optional, but can appear in any master record.
-        case overview = "O"
+        /// The passage contains outlines, which contain scalars.
+        case overview = "o"
         /// Optional, but can appear in any master record.
-        case details = "D"
+        /// The passage contains outlines, which contain scalars.
+        case details = "d"
     }
 
     @inlinable public static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Master:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
 
@@ -135,9 +139,9 @@ extension Record.Master:BSONDocumentEncodable
             bson[.signature_abridged_bytecode] = decl.signature.abridged.bytecode
             bson[.signature_expanded_bytecode] = decl.signature.expanded.bytecode
 
-            bson[.signature_expanded_links] =
-                decl.signature.expanded.links.isEmpty ? nil :
-                decl.signature.expanded.links
+            bson[.signature_expanded_scalars] =
+                decl.signature.expanded.scalars.isEmpty ? nil :
+                decl.signature.expanded.scalars
 
             bson[.signature_generics_constraints] =
                 decl.signature.generics.constraints.isEmpty ? nil :
@@ -169,7 +173,7 @@ extension Record.Master:BSONDocumentEncodable
 extension Record.Master:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let id:Unidoc.Scalar = try bson[.id].decode()
 
@@ -190,7 +194,7 @@ extension Record.Master:BSONDocumentDecodable
                         bytecode: try bson[.signature_abridged_bytecode].decode()),
                     expanded: Signature<Unidoc.Scalar?>.Expanded.init(
                         bytecode: try bson[.signature_expanded_bytecode].decode(),
-                        links: try bson[.signature_expanded_links]?.decode() ?? []),
+                        scalars: try bson[.signature_expanded_scalars]?.decode() ?? []),
                     generics: Signature<Unidoc.Scalar?>.Generics.init(
                         constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
                         parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),

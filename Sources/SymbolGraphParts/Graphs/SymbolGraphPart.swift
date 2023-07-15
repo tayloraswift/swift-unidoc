@@ -55,7 +55,7 @@ extension SymbolGraphPart
     private
     init(json:JSON.Object, id:ID) throws
     {
-        enum CodingKeys:String
+        enum CodingKey:String
         {
             case metadata
 
@@ -69,10 +69,10 @@ extension SymbolGraphPart
             case relationships
         }
 
-        let json:JSON.ObjectDecoder<CodingKeys> = try .init(indexing: json)
+        let json:JSON.ObjectDecoder<CodingKey> = try .init(indexing: json)
         self.init(
             metadata: try json[.metadata].decode(),
-            culture: try json[.module].decode(using: CodingKeys.Module.self)
+            culture: try json[.module].decode(using: CodingKey.Module.self)
             {
                 try $0[.name].decode()
             },

@@ -32,7 +32,7 @@ extension SymbolRelationship
 extension SymbolRelationship:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case conditions = "swiftConstraints"
         case source
@@ -42,7 +42,7 @@ extension SymbolRelationship:JSONObjectDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         switch try json[.type].decode(to: SymbolRelationshipType.self)
         {

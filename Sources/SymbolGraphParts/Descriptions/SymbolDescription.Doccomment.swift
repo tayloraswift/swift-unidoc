@@ -36,14 +36,14 @@ extension SymbolDescription.Doccomment
 extension SymbolDescription.Doccomment:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case culture = "module"
         case lines
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(culture: try json[.culture]?.decode(),
             lines: try json[.lines].decode())

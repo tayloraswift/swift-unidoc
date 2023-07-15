@@ -61,7 +61,7 @@ extension SymbolGraph.Article
 extension SymbolGraph.Article
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case outlines = "L"
         case overview = "O"
@@ -74,7 +74,7 @@ extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable
     where ID:BSONEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.outlines] = self.outlines.isEmpty ? nil : self.outlines
         bson[.overview] = self.overview.isEmpty ? nil : self.overview
@@ -88,7 +88,7 @@ extension SymbolGraph.Article:BSONDocumentDecodable, BSONDocumentViewDecodable, 
     where ID:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             outlines: try bson[.outlines]?.decode() ?? [],

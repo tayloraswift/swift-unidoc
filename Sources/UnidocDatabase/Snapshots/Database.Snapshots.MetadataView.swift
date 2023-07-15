@@ -22,9 +22,9 @@ extension Database.Snapshots.MetadataView
 }
 extension Database.Snapshots.MetadataView:BSONDocumentDecodable
 {
-    typealias CodingKeys = Snapshot.CodingKeys
+    typealias CodingKey = Snapshot.CodingKey
 
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             package: try bson[.package].decode(),

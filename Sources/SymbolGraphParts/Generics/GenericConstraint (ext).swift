@@ -4,7 +4,7 @@ import Signatures
 extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSONDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case kind
         case lhs
@@ -12,7 +12,7 @@ extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSON
         case rhsPrecise
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let type:GenericType<Scalar>
         if  let scalar:Scalar = try json[.rhsPrecise]?.decode()

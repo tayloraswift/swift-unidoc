@@ -14,13 +14,13 @@ extension Renderer
         private
         let renderer:Renderer
         private
-        let links:[Unidoc.Scalar?]
+        let scalars:[Unidoc.Scalar?]
 
-        init(_ renderer:Renderer, bytecode:MarkdownBytecode, links:[Unidoc.Scalar?] = [])
+        init(_ renderer:Renderer, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?] = [])
         {
             self.renderer = renderer
             self.bytecode = bytecode
-            self.links = links
+            self.scalars = scalars
         }
     }
 }
@@ -32,8 +32,8 @@ extension Renderer.Code:HyperTextRenderableMarkdown
         {
         case .href:
             if  let index:Int = .init(exactly: reference),
-                self.links.indices.contains(index),
-                let target:Unidoc.Scalar = self.links[index],
+                self.scalars.indices.contains(index),
+                let target:Unidoc.Scalar = self.scalars[index],
                 let uri:URI = self.renderer.uri(target)
             {
                 return "\(uri)"
