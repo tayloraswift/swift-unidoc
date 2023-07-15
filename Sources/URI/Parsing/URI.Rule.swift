@@ -22,7 +22,7 @@ extension URI.Rule:ParsingRule
         where Source:Collection<UInt8>, Source.Index == Location
     {
         let path:URI.Path = try input.parse(as: URI.AbsolutePathRule<Location>.self)
-        let query:[URI.Parameter]? = input.parse(as: URI.QueryRule<Location>?.self)
+        let query:URI.Query? = input.parse(as: URI.QueryRule<Location>?.self)
         return .init(path: path, query: query)
     }
 }

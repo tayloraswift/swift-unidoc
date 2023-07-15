@@ -87,11 +87,11 @@ extension DynamicContext
 }
 extension DynamicContext
 {
-    func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:UInt32) -> [Unidoc.Scalar]
+    func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:Int) -> [Unidoc.Scalar]
     {
         self.expand(vector.0, to: length - 1) + [vector.1]
     }
-    func expand(_ scalar:Unidoc.Scalar, to length:UInt32 = .max) -> [Unidoc.Scalar]
+    func expand(_ scalar:Unidoc.Scalar, to length:Int = .max) -> [Unidoc.Scalar]
     {
         var current:Unidoc.Scalar = scalar
         var path:[Unidoc.Scalar] = [current]
@@ -99,7 +99,7 @@ extension DynamicContext
         //  documentation archives is malformed/malicious.
         var seen:Set<Unidoc.Scalar> = [current]
 
-        for _:UInt32 in 1 ..< max(1, length)
+        for _:Int in 1 ..< max(1, length)
         {
             if  let next:Unidoc.Scalar = self[current.package]?.scope(of: current),
                 case nil = seen.update(with: next)

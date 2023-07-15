@@ -14,13 +14,7 @@ enum Main:SyncTests
         tests.do
         {
             let binary:MarkdownBinary = .init(bytecode: .init(with: markdown))
-            let html:HTML = try .init
-            {
-                if let error:MarkdownRenderingError = binary.render(to: &$0)
-                {
-                    throw error
-                }
-            }
+            let html:HTML = .init { $0 += binary }
 
             tests.expect(html.description ==? expected)
         }
@@ -271,7 +265,7 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "references" / "success"
         {
-            struct Renderer:MarkdownRenderer
+            struct Renderable:HyperTextRenderableMarkdown
             {
                 let bytecode:MarkdownBytecode = .init
                 {
@@ -290,50 +284,15 @@ enum Main:SyncTests
                 }
             }
 
-            let renderer:Renderer = .init()
-            let html:HTML = .init { _ = renderer.render(to: &$0) }
+            let renderable:Renderable = .init()
+            let html:HTML = .init { $0 += renderable }
 
             tests.expect(html.description ==?
                 "<p>before<a href='swiftinit.org'>aabbccdd</a>after</p>")
         }
-        if  let tests:TestGroup = tests / "references" / "failure"
-        {
-            struct Renderer:MarkdownRenderer
-            {
-                enum ExpectedError:Equatable, Error
-                {
-                    case reference(UInt32)
-                }
-
-                let bytecode:MarkdownBytecode = .init
-                {
-                    $0[.p]
-                    {
-                        $0 += "before"
-                        $0 &= 0xAA_BB_CC_DD
-                        $0 += "after"
-                    }
-                }
-
-                func load(_ reference:UInt32, into html:inout HTML.ContentEncoder) throws
-                {
-                    throw ExpectedError.reference(reference)
-                }
-            }
-
-            let renderer:Renderer = .init()
-            var html:HTML = .init()
-
-            tests.do(catching: Renderer.ExpectedError.reference(0xAA_BB_CC_DD))
-            {
-                _ = try renderer.render(to: &html.encoder)
-            }
-
-            tests.expect(html.description ==? "<p>before</p>")
-        }
         if  let tests:TestGroup = tests / "reference-attributes"
         {
-            struct Renderer:MarkdownRenderer
+            struct Renderable:HyperTextRenderableMarkdown
             {
                 let bytecode:MarkdownBytecode
 
@@ -374,8 +333,8 @@ enum Main:SyncTests
                     continue
                 }
 
-                let renderer:Renderer = .init(reference: reference)
-                let html:HTML = .init { _ = renderer.render(to: &$0) }
+                let renderable:Renderable = .init(reference: reference)
+                let html:HTML = .init { $0 += renderable }
 
                 tests.expect(html.description ==? """
                     <pre><code>\
@@ -388,8 +347,8 @@ enum Main:SyncTests
 
             if  let tests:TestGroup = tests / "failure"
             {
-                let renderer:Renderer = .init(reference: 2)
-                let html:HTML = .init { _ = renderer.render(to: &$0) }
+                let renderable:Renderable = .init(reference: 2)
+                let html:HTML = .init { $0 += renderable }
 
                 tests.expect(html.description ==? """
                     <pre><code>\

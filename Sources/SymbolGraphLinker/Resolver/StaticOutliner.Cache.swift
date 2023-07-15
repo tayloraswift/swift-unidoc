@@ -7,12 +7,12 @@ extension StaticOutliner
         private
         var references:[String: UInt32]
         private(set)
-        var referents:[SymbolGraph.Referent]
+        var outlines:[SymbolGraph.Outline]
 
         init()
         {
             self.references = [:]
-            self.referents = []
+            self.outlines = []
         }
     }
 }
@@ -20,7 +20,7 @@ extension StaticOutliner.Cache
 {
     mutating
     func callAsFunction(_ key:String,
-        with populate:() throws -> SymbolGraph.Referent?) rethrows -> UInt32?
+        with populate:() throws -> SymbolGraph.Outline?) rethrows -> UInt32?
     {
         try
         {
@@ -28,10 +28,10 @@ extension StaticOutliner.Cache
             {
                 return reference
             }
-            else if let referent:SymbolGraph.Referent = try populate()
+            else if let outline:SymbolGraph.Outline = try populate()
             {
-                let next:UInt32 = .init(self.referents.endIndex)
-                self.referents.append(referent)
+                let next:UInt32 = .init(self.outlines.endIndex)
+                self.outlines.append(outline)
                 $0 = next
                 return next
             }

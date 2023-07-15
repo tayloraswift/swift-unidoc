@@ -12,3 +12,8 @@ enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
     case type           = "syntax-type"
     case `typealias`    = "syntax-typealias"
 }
+extension MarkdownSyntaxHighlight:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { self.rawValue }
+}

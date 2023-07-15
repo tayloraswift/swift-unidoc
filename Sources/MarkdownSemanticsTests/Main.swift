@@ -31,17 +31,11 @@ enum Main:SyncTests
             })
             let html:HTML = try .init
             {
-                if let error:MarkdownRenderingError = overview?.render(to: &$0)
-                {
-                    throw error
-                }
+                try overview?.render(to: &$0)
 
                 $0.append(escaped: 0x0A) // '\n'
 
-                if let error:MarkdownRenderingError = details.render(to: &$0)
-                {
-                    throw error
-                }
+                try details.render(to: &$0)
             }
 
             tests.expect(html.description ==? expected)

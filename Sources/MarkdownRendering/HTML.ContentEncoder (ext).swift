@@ -1,5 +1,4 @@
 import HTML
-import HTMLRendering
 import MarkdownABI
 
 extension HTML.ContentEncoder

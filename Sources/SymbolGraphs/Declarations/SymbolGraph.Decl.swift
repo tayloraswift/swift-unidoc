@@ -11,8 +11,12 @@ extension SymbolGraph
     @frozen public
     struct Decl:Equatable, Sendable
     {
-        @usableFromInline internal
-        var flags:Unidoc.Decl.Flags
+        public
+        let customization:Unidoc.Decl.Customization
+        public
+        let phylum:Unidoc.Decl
+        public
+        var route:Unidoc.Decl.Route
 
         public
         let path:UnqualifiedPath
@@ -51,7 +55,9 @@ extension SymbolGraph
         var origin:Int32?
 
         @inlinable internal
-        init(flags:Unidoc.Decl.Flags,
+        init(customization:Unidoc.Decl.Customization,
+            phylum:Unidoc.Decl,
+            route:Unidoc.Decl.Route,
             path:UnqualifiedPath,
             signature:Signature<Int32> = .init(),
             location:SourceLocation<Int32>? = nil,
@@ -60,7 +66,9 @@ extension SymbolGraph
             features:[Int32] = [],
             origin:Int32? = nil)
         {
-            self.flags = flags
+            self.customization = customization
+            self.phylum = phylum
+            self.route = route
             self.path = path
 
             self.signature = signature
@@ -76,31 +84,12 @@ extension SymbolGraph
 extension SymbolGraph.Decl
 {
     @inlinable public
-    init(phylum:Unidoc.Decl, aperture:Unidoc.Decl.Aperture, path:UnqualifiedPath)
+    init(customization:Unidoc.Decl.Customization, phylum:Unidoc.Decl, path:UnqualifiedPath)
     {
-        self.init(flags: .init(phylum, aperture: aperture, route: .unhashed),
+        self.init(customization: customization,
+            phylum: phylum,
+            route: .unhashed,
             path: path)
-    }
-}
-extension SymbolGraph.Decl
-{
-    @inlinable public
-    var aperture:Unidoc.Decl.Aperture { self.flags.aperture }
-
-    @inlinable public
-    var phylum:Unidoc.Decl { self.flags.decl }
-
-    @inlinable public
-    var route:Unidoc.Decl.Route
-    {
-        get
-        {
-            self.flags.route
-        }
-        set(value)
-        {
-            self.flags.route = value
-        }
     }
 }
 extension SymbolGraph.Decl
@@ -131,7 +120,11 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.flags] = self.flags
+        bson[.flags] = Unidoc.Decl.Flags.init(
+            customization: self.customization,
+            phylum: self.phylum,
+            route: self.route)
+
         bson[.path] = self.path.joined(separator: " ")
 
         bson[.signature_availability] =
@@ -172,8 +165,11 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
+        let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
         self.init(
-            flags: try bson[.flags].decode(),
+            customization: flags.customization,
+            phylum: flags.phylum,
+            route: flags.route,
             path: try bson[.path].decode(),
             //  Adding the type names here *massively* improves compilation times, for
             //  some reason...

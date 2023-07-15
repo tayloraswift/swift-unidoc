@@ -2,6 +2,7 @@ import CodelinkResolution
 import Codelinks
 import Doclinks
 import ModuleGraphs
+import Sources
 import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
@@ -55,84 +56,96 @@ extension DynamicResolver
         details:Record.Passage?
     )
     {
-        let referents:[Record.Passage.Referent] = article.referents.map { self.link($0) }
+        let outlines:[Record.Outline] = article.outlines.map { self.link($0) }
 
         let overview:Record.Passage? = article.overview.isEmpty ? nil : .init(
-            referents: .init(referents.prefix(article.fold)),
+            outlines: .init(outlines.prefix(article.fold)),
             markdown: article.overview)
         let details:Record.Passage? = article.details.isEmpty ? nil : .init(
-            referents: .init(referents.dropFirst(article.fold)),
+            outlines: .init(outlines.dropFirst(article.fold)),
             markdown: article.details)
         return (overview, details)
     }
 
     private mutating
-    func link(_ referent:SymbolGraph.Referent) -> Record.Passage.Referent
+    func link(_ outline:SymbolGraph.Outline) -> Record.Outline
     {
-        switch referent
+        var length:Int
         {
-        case .scalar(let referent):
-            if      let _:Int = referent.scalar / .decl,
-                    let scalar:Unidoc.Scalar = self.current.decls[referent.scalar]
+            var length:Int = 1
+            for character:Character in outline.text where character == " "
             {
-                return .path(self.context.expand(scalar, to: referent.length))
+                length += 1
             }
-            else if let _:Int = referent.scalar / .article
+            return length
+        }
+
+        switch outline.referent
+        {
+        case .scalar(let scalar):
+            if      let _:Int = scalar / .decl,
+                    let scalar:Unidoc.Scalar = self.current.decls[scalar]
             {
-                return .path([self.current.zone + referent.scalar])
+                return .path(outline.text, self.context.expand(scalar, to: length))
             }
-            else if let _:Int = referent.scalar / .file
+            else if let _:Int = scalar / .article
+            {
+                return .path(outline.text, [self.current.zone + scalar])
+            }
+            else if let _:Int = scalar / .file
             {
                 //  TODO: implement me
             }
-            else if let namespace:Int = referent.scalar / .module,
+            else if let namespace:Int = scalar / .module,
                     let scalar:Unidoc.Scalar = self.current.namespaces[namespace]
             {
-                return .path([scalar])
+                return .path(outline.text, [scalar])
             }
 
-        case .vector(let referent):
+        case .vector(let feature, self: let heir):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
-            if  let feature:Unidoc.Scalar = self.current.decls[referent.feature],
-                let heir:Unidoc.Scalar = self.current.decls[referent.heir]
+            if  let feature:Unidoc.Scalar = self.current.decls[feature],
+                let heir:Unidoc.Scalar = self.current.decls[heir]
             {
-                return .path(self.context.expand((heir, feature), to: referent.length))
+                return .path(outline.text, self.context.expand((heir, feature), to: length))
             }
 
-        case .unresolved(let referent):
-            return self.expand(referent)
+        case .unresolved(let location):
+            return self.expand(afterResolving: outline.text, at: location)
         }
 
         return .text("<unavailable>")
     }
 
     private mutating
-    func expand(_ referent:SymbolGraph.Referent.Unresolved) -> Record.Passage.Referent
+    func expand(
+        afterResolving expression:String,
+        at location:SourceLocation<Int32>?) -> Record.Outline
     {
         var context:Diagnostic.Context<Unidoc.Scalar>
         {
-            .init(location: referent.location?.map { self.current.zone + $0 })
+            .init(location: location?.map { self.current.zone + $0 })
         }
 
         let codelink:Codelink?
 
-        if  let doclink:Doclink = .init(referent.expression)
+        if  let doclink:Doclink = .init(expression)
         {
             codelink = .init(doclink.path.joined(separator: "/"))
         }
         else
         {
-            codelink = .init(referent.expression)
+            codelink = .init(expression)
         }
         guard let codelink:Codelink
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
             self.errors.append(InvalidAutolinkError<Unidoc.Scalar>.init(
-                expression: referent.expression,
+                expression: expression,
                 context: context))
-            return .text(referent.expression)
+            return .text(expression)
         }
 
         switch self.codelinks.resolve(codelink)
@@ -145,14 +158,14 @@ extension DynamicResolver
             return .text("\(codelink.path)")
 
         case .one(let overload):
-            let length:UInt32 = .init(codelink.path.components.count)
+            let length:Int = codelink.path.components.count
             switch overload.target
             {
             case .scalar(let scalar):
-                return .path(self.context.expand(scalar, to: length))
+                return .path(expression, self.context.expand(scalar, to: length))
 
             case .vector(let feature, self: let heir):
-                return .path(self.context.expand((heir, feature), to: length))
+                return .path(expression, self.context.expand((heir, feature), to: length))
             }
         }
     }

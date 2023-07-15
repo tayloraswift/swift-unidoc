@@ -1,3 +1,0 @@
-extension Substring:RenderableAsHTML
-{
-}

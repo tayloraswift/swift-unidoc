@@ -9,13 +9,16 @@ extension DeepQuery
         public
         let principal:[Principal]
         public
-        let entourage:[Record.Master]
+        let secondary:[Record.Master]
+        public
+        let zones:[Record.Zone]
 
         @inlinable public
-        init(principal:[Principal], entourage:[Record.Master])
+        init(principal:[Principal], secondary:[Record.Master], zones:[Record.Zone])
         {
             self.principal = principal
-            self.entourage = entourage
+            self.secondary = secondary
+            self.zones = zones
         }
     }
 }
@@ -25,7 +28,8 @@ extension DeepQuery.Output
     enum CodingKeys:String
     {
         case principal
-        case entourage
+        case secondary
+        case zones
     }
 
     static
@@ -38,6 +42,7 @@ extension DeepQuery.Output:BSONDocumentDecodable
     {
         self.init(
             principal: try bson[.principal].decode(),
-            entourage: try bson[.entourage].decode())
+            secondary: try bson[.secondary].decode(),
+            zones: try bson[.zones].decode())
     }
 }

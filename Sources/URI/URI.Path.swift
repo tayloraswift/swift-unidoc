@@ -40,6 +40,51 @@ extension URI.Path:MutableCollection
         try self.components.withContiguousMutableStorageIfAvailable(body)
     }
 }
+extension URI.Path
+{
+    /// Yields access to the last component of this path if it is not special,
+    /// or an empty string. If the last component of this path does not exist,
+    /// or is the special `..` component, this accessor will append the string
+    /// to the path after the coroutine returns.
+    ///
+    /// Mutating this property will always leave a component containing the
+    /// accessed string in the path, even if the coroutine left it in an empty
+    /// state, similar to the way ``Dictionary.subscript(_:default:)`` behaves.
+    ///
+    /// >   Note:
+    ///     Empty path components render as the special `.` component.
+    @inlinable public
+    var last:String
+    {
+        _read
+        {
+            if  case .push(let last)? = self.components.last
+            {
+                yield last
+            }
+            else
+            {
+                yield ""
+            }
+        }
+        _modify
+        {
+            if  let index:Int = self.components.indices.last,
+                case .push(var last) = self.components[index]
+            {
+                self.components[index] = .empty
+                defer { self.components[index] = .push(last) }
+                yield &last
+            }
+            else
+            {
+                var last:String = ""
+                defer { self.components.append(.push(last)) }
+                yield &last
+            }
+        }
+    }
+}
 extension URI.Path:RandomAccessCollection
 {
     @inlinable public
