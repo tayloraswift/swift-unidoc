@@ -31,7 +31,7 @@ extension SymbolGraph.Node
 extension SymbolGraph.Node
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case extensions = "E"
         case decl = "V"
@@ -40,7 +40,7 @@ extension SymbolGraph.Node
 extension SymbolGraph.Node:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.decl] = self.decl
         bson[.extensions] = self.extensions.isEmpty ? nil : self.extensions
@@ -49,7 +49,7 @@ extension SymbolGraph.Node:BSONDocumentEncodable
 extension SymbolGraph.Node:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             extensions: try bson[.extensions]?.decode() ?? [],

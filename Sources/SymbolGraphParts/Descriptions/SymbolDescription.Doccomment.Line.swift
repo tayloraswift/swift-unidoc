@@ -18,7 +18,7 @@ extension SymbolDescription.Doccomment
 extension SymbolDescription.Doccomment.Line:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case text
 
@@ -37,12 +37,12 @@ extension SymbolDescription.Doccomment.Line:JSONObjectDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(try json[.text].decode(),
-            at: try json[.range]?.decode(using: CodingKeys.Range.self)
+            at: try json[.range]?.decode(using: CodingKey.Range.self)
             {
-                try $0[.start].decode(using: CodingKeys.Range.Start.self)
+                try $0[.start].decode(using: CodingKey.Range.Start.self)
                 {
                     .init(line: try $0[.line].decode(), column: try $0[.column].decode())
                 }

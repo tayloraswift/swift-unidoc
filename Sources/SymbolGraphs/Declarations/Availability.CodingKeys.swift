@@ -6,7 +6,7 @@ extension Availability
     /// single-character raw value, for storage efficiency, and not intended
     /// to be human-readable.
     @frozen public
-    struct CodingKeys:Equatable, Hashable, Sendable
+    struct CodingKey:Equatable, Hashable, Sendable
     {
         public
         let domain:AnyDomain
@@ -18,7 +18,7 @@ extension Availability
         }
     }
 }
-extension Availability.CodingKeys:RawRepresentable
+extension Availability.CodingKey:RawRepresentable
 {
     @inlinable public
     init?(rawValue:String)

@@ -18,14 +18,14 @@ extension Repository.Pin
 extension Repository.Pin.V1:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "package"
         case location = "repositoryURL"
         case state
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let location:String = try json[.location].decode()
         self.init(value: .init(id: try json[.id].decode(),

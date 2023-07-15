@@ -23,14 +23,14 @@ extension SymbolGraphPart
 extension SymbolGraphPart.Metadata:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case formatVersion
         case generator
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(generator: try json[.generator].decode(),
             version: try json[.formatVersion].decode())

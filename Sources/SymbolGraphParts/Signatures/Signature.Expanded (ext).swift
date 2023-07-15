@@ -42,6 +42,6 @@ extension Signature<Symbol.Decl>.Expanded
             }
         }
 
-        self.init(bytecode: bytecode, links: referents)
+        self.init(bytecode: bytecode, scalars: referents)
     }
 }

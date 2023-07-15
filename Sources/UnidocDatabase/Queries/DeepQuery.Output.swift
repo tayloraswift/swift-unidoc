@@ -25,7 +25,7 @@ extension DeepQuery
 extension DeepQuery.Output
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case principal
         case secondary
@@ -33,12 +33,12 @@ extension DeepQuery.Output
     }
 
     static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension DeepQuery.Output:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             principal: try bson[.principal].decode(),

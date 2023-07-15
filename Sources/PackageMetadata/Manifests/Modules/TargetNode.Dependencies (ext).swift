@@ -12,16 +12,16 @@ extension TargetNode.Dependencies:JSONDecodable
         let array:JSON.Array = try .init(json: json)
         for json:JSON.ExplicitField<Int> in array
         {
-            enum CodingKeys:String
+            enum CodingKey:String
             {
                 case byName
                 case target
                 case product
             }
 
-            try json.decode(using: CodingKeys.self)
+            try json.decode(using: CodingKey.self)
             {
-                let json:JSON.ExplicitField<CodingKeys> = try $0.single()
+                let json:JSON.ExplicitField<CodingKey> = try $0.single()
 
                 enum Platforms:String
                 {

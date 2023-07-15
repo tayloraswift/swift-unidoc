@@ -5,20 +5,20 @@ import BSONEncoding
 extension Availability:BSONDocumentDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKeys, Bytes>) throws
+    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
     {
         self.init()
 
-        for field:BSON.ExplicitField<CodingKeys, Bytes.SubSequence> in bson
+        for field:BSON.ExplicitField<CodingKey, Bytes.SubSequence> in bson
         {
             switch field.key.domain
             {
             case .universal:
                 self.universal = try field.decode()
-            
+
             case .platform(let domain):
                 self.platforms[domain] = try field.decode()
-            
+
             case .agnostic(let domain):
                 self.agnostic[domain] = try field.decode()
             }
@@ -28,7 +28,7 @@ extension Availability:BSONDocumentDecodable
 extension Availability:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         for (domain, clauses):
         (

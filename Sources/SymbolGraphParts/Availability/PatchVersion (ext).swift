@@ -4,7 +4,7 @@ import SemanticVersions
 extension PatchVersion:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case major
         case minor
@@ -12,7 +12,7 @@ extension PatchVersion:JSONObjectDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self = .v(
             try json[.major].decode(),

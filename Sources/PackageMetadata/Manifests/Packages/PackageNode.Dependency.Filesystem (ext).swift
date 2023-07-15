@@ -5,14 +5,14 @@ import PackageGraphs
 extension PackageNode.Dependency.Filesystem:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "identity"
         case location = "path"
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         //  Note: location is not wrapped in a single-element array
         self.init(id: try json[.id].decode(), location: try json[.location].decode())

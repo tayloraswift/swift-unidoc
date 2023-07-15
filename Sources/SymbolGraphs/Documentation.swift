@@ -19,7 +19,7 @@ struct Documentation:Equatable, Sendable
 extension Documentation
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case metadata
         case graph
@@ -28,7 +28,7 @@ extension Documentation
 extension Documentation:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.metadata] = self.metadata
         bson[.graph] = self.graph
@@ -37,7 +37,7 @@ extension Documentation:BSONDocumentEncodable
 extension Documentation:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(metadata: try bson[.metadata].decode(), graph: try bson[.graph].decode())
     }

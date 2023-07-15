@@ -75,7 +75,7 @@ extension Record.Zone
 extension Record.Zone
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "_id"
 
@@ -89,12 +89,12 @@ extension Record.Zone
     }
 
     @inlinable public static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Zone:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
         bson[.package] = self.package
@@ -108,7 +108,7 @@ extension Record.Zone:BSONDocumentEncodable
 extension Record.Zone:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
             package: try bson[.package].decode(),

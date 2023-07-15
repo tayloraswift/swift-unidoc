@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "4d81388a78e82b571f7095eb7f419ccb137cb340",
-        "version" : "0.5.1"
+        "revision" : "08553b050558495d71c732e9d4b6f0cf1ab6e442",
+        "version" : "0.6.0"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "d292c6ef6f5f9190dba69b1b28969f583b15dca2",
-        "version" : "0.3.4"
+        "revision" : "fd77e1728ba3402eb98b22fcbdddf47dcd99ca77",
+        "version" : "0.4.0"
       }
     },
     {

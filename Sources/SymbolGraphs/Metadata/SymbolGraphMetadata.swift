@@ -144,7 +144,7 @@ extension SymbolGraphMetadata
 extension SymbolGraphMetadata
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case package
         case version
@@ -161,7 +161,7 @@ extension SymbolGraphMetadata
 extension SymbolGraphMetadata:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.package] = self.package
         bson[.version] = self.version
@@ -180,7 +180,7 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
 extension SymbolGraphMetadata:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(package: try bson[.package].decode(),
             version: try bson[.version]?.decode(),

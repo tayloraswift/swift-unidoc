@@ -6,7 +6,7 @@ import SemanticVersions
 extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "identity"
 
@@ -35,12 +35,12 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(id: try json[.id].decode(),
-            requirement: try json[.requirement].decode(using: CodingKeys.Requirement.self)
+            requirement: try json[.requirement].decode(using: CodingKey.Requirement.self)
             {
-                let json:JSON.ExplicitField<CodingKeys.Requirement> = try $0.single()
+                let json:JSON.ExplicitField<CodingKey.Requirement> = try $0.single()
                 switch json.key
                 {
                 case .branch:
@@ -57,7 +57,7 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
                 case .range:
                     return .stable(.range(try json.decode(
                         as: JSON.SingleElementRepresentation<
-                            JSON.ObjectDecoder<CodingKeys.Requirement.Range>>.self)
+                            JSON.ObjectDecoder<CodingKey.Requirement.Range>>.self)
                     {
                         try $0.value[.lowerBound].decode(
                             as: JSON.StringRepresentation<PatchVersion>.self,
@@ -73,9 +73,9 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
                         with: \.value))
                 }
             },
-            location: try json[.location].decode(using: CodingKeys.Location.self)
+            location: try json[.location].decode(using: CodingKey.Location.self)
             {
-                let json:JSON.ExplicitField<CodingKeys.Location> = try $0.single()
+                let json:JSON.ExplicitField<CodingKey.Location> = try $0.single()
                 switch json.key
                 {
                 case .local:

@@ -13,17 +13,20 @@ extension Record
 }
 extension Record.Outline
 {
-    public
-    enum CodingKeys:String
+    @frozen public
+    enum CodingKey:String
     {
         case display = "T"
-        case scalars = "S"
+        case scalars = "s"
     }
+
+    @inlinable public static
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Outline:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         switch self
         {
@@ -39,7 +42,7 @@ extension Record.Outline:BSONDocumentEncodable
 extension Record.Outline:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let display:String = try bson[.display].decode()
         switch try bson[.scalars]?.decode(to: [Unidoc.Scalar].self)

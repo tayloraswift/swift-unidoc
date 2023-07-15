@@ -37,27 +37,27 @@ extension DeepQuery.Output
 extension DeepQuery.Output.Principal
 {
     @frozen public
-    enum CodingKeys:String, CaseIterable
+    enum CodingKey:String, CaseIterable
     {
         case extensions = "E"
         case matches = "A"
         case master = "M"
 
-        //  These keys come from ``Record.Zone.CodingKeys``.
+        //  These keys come from ``Record.Zone.CodingKey``.
         //  TODO: find a way to hitch this to the actual definitions
-        //  in ``Record.Zone.CodingKeys``.
+        //  in ``Record.Zone.CodingKey``.
         case package = "P"
         case version = "V"
         case refname = "G"
     }
 
     static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension DeepQuery.Output.Principal:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             extensions: try bson[.extensions].decode(),

@@ -20,18 +20,21 @@ extension GenericConstraint
     ///
     /// The complex (`C`) field is always a string.
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case generic = "G"
         case nominal = "N"
         case complex = "C"
     }
+
+    @inlinable public static
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
     where Scalar:BSONEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         let sigil:Sigil
         switch self.what
@@ -54,7 +57,7 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
     where Scalar:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKeys, Bytes>) throws
+    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
     {
         let (sigil, noun):(Sigil, String) = try bson[.generic].decode(
             as: BSON.UTF8View<Bytes.SubSequence>.self)
@@ -75,7 +78,7 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
 
         let type:GenericType<Scalar>
         //  If there is a null value (which is allowed if `Scalar` is an ``Optional`` type),
-        //  we don’t want to attempt to decode from ``CodingKeys.complex``. If we do not
+        //  we don’t want to attempt to decode from ``CodingKey.complex``. If we do not
         //  specify the decoded type (`Scalar.self`), the compiler will infer it to be
         //  `Scalar?`, which will cause us to fall through to the else block!
         if  let scalar:Scalar = try bson[.nominal]?.decode(to: Scalar.self)

@@ -24,13 +24,13 @@ extension SymbolDescription
 extension SymbolDescription.ExtensionContext:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case conditions = "constraints"
     }
 
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(conditions: try json[.conditions]?.decode() ?? [])
     }

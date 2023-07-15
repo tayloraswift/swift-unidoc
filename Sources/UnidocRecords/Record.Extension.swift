@@ -65,7 +65,7 @@ extension Record
 extension Record.Extension
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "_id"
 
@@ -85,12 +85,12 @@ extension Record.Extension
     }
 
     @inlinable public static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Extension:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
 
@@ -142,7 +142,7 @@ extension Record.Extension:BSONDocumentEncodable
 extension Record.Extension:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
             conditions: try bson[.conditions]?.decode() ?? [],

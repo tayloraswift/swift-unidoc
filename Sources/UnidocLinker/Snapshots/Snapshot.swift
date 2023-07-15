@@ -51,7 +51,7 @@ extension Snapshot
 extension Snapshot
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case id = "_id"
         case package = "P"
@@ -64,12 +64,12 @@ extension Snapshot
     }
 
     @inlinable public static
-    subscript(key:CodingKeys) -> BSON.Key { .init(key) }
+    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Snapshot:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
 
@@ -84,7 +84,7 @@ extension Snapshot:BSONDocumentEncodable
 extension Snapshot:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
             package: try bson[.package].decode(),

@@ -4,7 +4,7 @@ import ModuleGraphs
 extension ProductType:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case executable
         case library
@@ -14,9 +14,9 @@ extension ProductType:JSONObjectDecodable
         case test
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let json:JSON.ExplicitField<CodingKeys> = try json.single()
+        let json:JSON.ExplicitField<CodingKey> = try json.single()
         switch json.key
         {
         case .library:      self = .library(try json.decode(as: JSON.Array.self)

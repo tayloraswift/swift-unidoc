@@ -2,6 +2,8 @@ import BSONEncoding
 import FNV1
 import ModuleGraphs
 import MongoDB
+import Signatures
+import SymbolGraphs
 import UnidocRecords
 
 /// A deep query is a query for a single code-level entity,
@@ -157,11 +159,11 @@ extension DeepQuery
             }
             $0.stage
             {
+                //  Populate this field only if exactly one master record matched.
+                //  This allows us to skip looking up secondary/tertiary records if
+                //  we are only going to generate a disambiguation page.
                 $0[.set] = .init
                 {
-                    //  Populate this field only if exactly one master record matched.
-                    //  This allows us to skip looking up secondary/tertiary records if
-                    //  we are only going to generate a disambiguation page.
                     $0[Output.Principal[.master]] = .expr
                     {
                         $0[.cond] =
@@ -195,18 +197,31 @@ extension DeepQuery
             //  Extract (and de-duplicate) the scalars mentioned by the extensions.
             //  Store them in this temporary field:
             let scalars:BSON.Key = "scalars"
+            //  The extensions have precomputed zone ids for MongoDB’s convenience.
             let zones:BSON.Key = "zones"
 
             $0.stage
             {
                 $0[.set] = Mongo.SetDocument.init // helps typechecking massively
                 {
-                    let variable:ExtensionVariable = "self"
+                    let extensions:ExtensionList = .init(in: Output.Principal[.extensions])
+                    let master:Master = .init(in: Output.Principal[.master])
 
-                    $0[scalars] = variable.collect(\.scalars,
-                        from: Output.Principal[.extensions])
-                    $0[zones] = variable.collect(\.zones,
-                        from: Output.Principal[.extensions])
+                    $0[zones] = .expr
+                    {
+                        $0[.setUnion] = .init
+                        {
+                            $0 += extensions.zones
+                        }
+                    }
+                    $0[scalars] = .expr
+                    {
+                        $0[.setUnion] = .init
+                        {
+                            $0 += extensions.scalars
+                            $0 += master.scalars
+                        }
+                    }
                 }
             }
             $0.stage
@@ -219,8 +234,8 @@ extension DeepQuery
                         {
                             $0[.project] = .init
                             {
-                                for key:Output.Principal.CodingKeys in
-                                        Output.Principal.CodingKeys.allCases
+                                for key:Output.Principal.CodingKey in
+                                        Output.Principal.CodingKey.allCases
                                 {
                                     $0[Output.Principal[key]] = true
                                 }
@@ -232,6 +247,13 @@ extension DeepQuery
                         $0.stage
                         {
                             $0[.unwind] = "$\(scalars)"
+                        }
+                        $0.stage
+                        {
+                            $0[.match] = .init
+                            {
+                                $0[scalars] = .init { $0[.ne] = .some(nil as Never?) }
+                            }
                         }
                         $0.stage
                         {

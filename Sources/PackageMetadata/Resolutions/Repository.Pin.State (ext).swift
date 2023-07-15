@@ -5,14 +5,14 @@ import SemanticVersions
 extension Repository.Pin.State:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case branch
         case revision
         case version
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let version:AnyVersion
         if  let stable:SemanticVersion = try json[.version]?.decode(

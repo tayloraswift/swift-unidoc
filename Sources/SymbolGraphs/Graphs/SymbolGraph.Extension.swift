@@ -52,7 +52,7 @@ extension SymbolGraph
 extension SymbolGraph.Extension
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case conditions = "S"
         case namespace = "M"
@@ -67,7 +67,7 @@ extension SymbolGraph.Extension
 extension SymbolGraph.Extension:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
         bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
@@ -83,7 +83,7 @@ extension SymbolGraph.Extension:BSONDocumentEncodable
 extension SymbolGraph.Extension:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let culture:Int = try bson[.culture].decode()
         self.init(conditions: try bson[.conditions]?.decode() ?? [],

@@ -42,7 +42,7 @@ extension SymbolGraph.Culture:Identifiable
 extension SymbolGraph.Culture
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case module = "M"
 
@@ -55,7 +55,7 @@ extension SymbolGraph.Culture
 extension SymbolGraph.Culture:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.module] = self.module
 
@@ -68,7 +68,7 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
 extension SymbolGraph.Culture:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(module: try bson[.module].decode())
 

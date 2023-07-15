@@ -24,7 +24,7 @@ extension SymbolGraph
 extension SymbolGraph.Namespace
 {
     @frozen public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case index = "I"
         case first = "F"
@@ -34,7 +34,7 @@ extension SymbolGraph.Namespace
 extension SymbolGraph.Namespace:BSONDocumentEncodable
 {
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.index] = self.index
         bson[.first] = self.range.first
@@ -44,7 +44,7 @@ extension SymbolGraph.Namespace:BSONDocumentEncodable
 extension SymbolGraph.Namespace:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
             range: try bson[.first].decode() ... bson[.last].decode(),

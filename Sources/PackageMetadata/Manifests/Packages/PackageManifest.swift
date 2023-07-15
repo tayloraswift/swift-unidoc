@@ -53,7 +53,7 @@ extension PackageManifest
 extension PackageManifest:JSONObjectDecodable
 {
     public
-    enum CodingKeys:String
+    enum CodingKey:String
     {
         case dependencies
         case name
@@ -75,11 +75,11 @@ extension PackageManifest:JSONObjectDecodable
         }
     }
     public
-    init(json:JSON.ObjectDecoder<CodingKeys>) throws
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(
             name: try json[.name].decode(),
-            root: try json[.root].decode(as: JSON.ObjectDecoder<CodingKeys.Root>.self)
+            root: try json[.root].decode(as: JSON.ObjectDecoder<CodingKey.Root>.self)
             {
                 try $0[.root].decode(
                     as: JSON.SingleElementRepresentation<Repository.Root>.self,
@@ -89,7 +89,7 @@ extension PackageManifest:JSONObjectDecodable
             dependencies: try json[.dependencies].decode(),
             products: try json[.products].decode(),
             targets: try json[.targets].decode(),
-            format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKeys.Format>.self)
+            format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKey.Format>.self)
             {
                 try $0[.version].decode(as: JSON.StringRepresentation<PatchVersion>.self,
                     with: \.value)
