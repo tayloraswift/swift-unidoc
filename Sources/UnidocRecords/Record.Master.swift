@@ -82,34 +82,41 @@ extension Record.Master
         /// Only appears in ``Decl``.
         case flags = "F"
         /// Only appears in ``Decl``.
-        case signature_availability = "V"
+        case signature_availability = "A"
         /// Only appears in ``Decl``.
         case signature_abridged_bytecode = "B"
         /// Only appears in ``Decl``.
         case signature_expanded_bytecode = "E"
-        /// Only appears in ``Decl``. The field contains scalars.
-        case signature_expanded_scalars = "k"
-        /// Only appears in ``Decl``. The field contains constraints, which
-        /// contain scalars.
-        case signature_generics_constraints = "c"
+        /// Only appears in ``Decl``. The field contains a list of scalars.
+        case signature_expanded_scalars = "e"
+        /// Only appears in ``Decl``. The field contains a list of constraints,
+        /// which contain scalars.
+        case signature_generics_constraints = "g"
         /// Only appears in ``Decl``.
         case signature_generics_parameters = "G"
-        /// Only appears in ``Decl``. The field contains scalars.
+        /// Only appears in ``Decl``. The field contains a list of scalars.
         case superforms = "p"
         /// Only appears in ``Decl``, and only when different from ``culture``.
-        /// The field is a scalar.
+        /// The field contains a scalar.
         case namespace = "n"
-        /// Only appears in ``Decl``. The field is a scalar.
-        case culture = "x"
-        /// Only appears in ``Decl``. The field contains scalars.
-        case scope = "r"
+        /// Only appears in ``Decl``. The field contains a scalar.
+        case culture = "c"
+        /// Only appears in ``Decl``. The field contains a list of scalars.
+        case scope = "x"
 
         /// Optional, but can appear in any master record.
-        /// The passage contains outlines, which contain scalars.
+        /// The field contains a passage, which contains a list of outlines,
+        /// each of which may contain a scalar.
         case overview = "o"
         /// Optional, but can appear in any master record.
-        /// The passage contains outlines, which contain scalars.
+        /// The field contains a passage, which contains a list of outlines,
+        /// each of which may contain a scalar.
         case details = "d"
+
+        /// Contains a list of precomputed zones, as MongoDB cannot easily
+        /// convert scalars to zones. This field will be computed and
+        /// encoded if non-empty, but it will never be decoded.
+        case zones = "z"
     }
 
     @inlinable public static
@@ -121,6 +128,9 @@ extension Record.Master:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+
+        //  Masters never appear outside their native zone.
+        var zones:Unidoc.ZoneSet = .init(except: self.id.zone)
 
         switch self
         {
@@ -158,6 +168,15 @@ extension Record.Master:BSONDocumentEncodable
             bson[.culture] = decl.culture
             bson[.scope] = decl.scope.isEmpty ? nil : decl.scope
 
+            zones.update(with: decl.namespace.zone)
+            zones.update(with: decl.culture.zone)
+
+            zones.update(with: decl.signature.expanded.scalars)
+            zones.update(with: decl.signature.generics.constraints)
+
+            zones.update(with: decl.superforms)
+            zones.update(with: decl.scope)
+
         case .culture(let culture):
             bson[.module] = culture.module
             bson[.stem] = culture.stem
@@ -166,8 +185,13 @@ extension Record.Master:BSONDocumentEncodable
             bson[.stem] = article.stem
         }
 
+        zones.update(with: self.overview?.outlines ?? [])
+        zones.update(with: self.details?.outlines ?? [])
+
         bson[.overview] = self.overview
         bson[.details] = self.details
+
+        bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
 extension Record.Master:BSONDocumentDecodable

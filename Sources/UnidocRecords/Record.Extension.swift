@@ -69,19 +69,31 @@ extension Record.Extension
     {
         case id = "_id"
 
-        case conditions = "C"
-        case culture = "X"
-        case scope = "R"
+        /// Contains a list of constraints, which contain scalars.
+        case conditions = "g"
+        /// Contains a scalar.
+        case culture = "c"
+        /// Contains a scalar (but usually doesn’t need a secondary lookup).
+        case scope = "X"
 
-        case conformances = "P"
-        case features = "F"
-        case nested = "N"
-        case subforms = "S"
+        /// Contains a list of scalars.
+        case conformances = "p"
+        /// Contains a list of scalars.
+        case features = "f"
+        /// Contains a list of scalars.
+        case nested = "n"
+        /// Contains a list of scalars.
+        case subforms = "d"
 
-        case prefetch = "A"
-        /// Precomputed for MongoDB’s convenience. This field will be computed
-        /// and encoded if non-empty, but it will never be decoded.
-        case zones = "Z"
+        /// Contains a list of scalars referenced by the overview passages
+        /// of the various master records referenced in this extension.
+        /// This field is a lookup optimization.
+        case prefetch = "y"
+
+        /// Contains a list of precomputed zones, as MongoDB cannot easily
+        /// convert scalars to zones. This field will be computed and
+        /// encoded if non-empty, but it will never be decoded.
+        case zones = "z"
     }
 
     @inlinable public static
@@ -94,6 +106,10 @@ extension Record.Extension:BSONDocumentEncodable
     {
         bson[.id] = self.id
 
+        //  Don’t exclude the extension’s own zone, in case we ever want it
+        //  to appear somewhere outside of that zone.
+        var zones:Unidoc.ZoneSet = .init()
+
         bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
         bson[.culture] = self.culture
         bson[.scope] = self.scope
@@ -105,38 +121,17 @@ extension Record.Extension:BSONDocumentEncodable
 
         bson[.prefetch] = self.prefetch.isEmpty ? nil : self.prefetch
 
-        bson[.zones] = self.zones()
-    }
+        zones.update(with: self.culture.zone)
 
-    private
-    func zones() -> [Unidoc.Zone]?
-    {
-        var seen:Set<Unidoc.Zone> = []
-        var zones:[Unidoc.Zone] = []
-        for scalar:Unidoc.Scalar in
-        [
-            [self.culture],
-            self.conformances,
-            self.features,
-            self.nested,
-            self.subforms,
-            self.prefetch,
-        ].joined()
-        {
-            if  case nil = seen.update(with: scalar.zone)
-            {
-                zones.append(scalar.zone)
-            }
-        }
-        for constraint:GenericConstraint<Unidoc.Scalar?> in self.conditions
-        {
-            if  case let scalar?? = constraint.whom.nominal,
-                case nil = seen.update(with: scalar.zone)
-            {
-                zones.append(scalar.zone)
-            }
-        }
-        return zones.isEmpty ? nil : zones
+        zones.update(with: self.conformances)
+        zones.update(with: self.features)
+        zones.update(with: self.nested)
+        zones.update(with: self.subforms)
+        zones.update(with: self.prefetch)
+
+        zones.update(with: self.conditions)
+
+        bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
 extension Record.Extension:BSONDocumentDecodable

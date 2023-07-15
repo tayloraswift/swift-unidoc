@@ -212,6 +212,7 @@ extension DeepQuery
                         $0[.setUnion] = .init
                         {
                             $0 += extensions.zones
+                            $0 += master.zones
                         }
                     }
                     $0[scalars] = .expr
@@ -285,6 +286,23 @@ extension DeepQuery
                         $0.stage
                         {
                             $0[.unwind] = "$\(zones)"
+                        }
+                        $0.stage
+                        {
+                            $0[.match] = .init
+                            {
+                                $0[.and] = .init
+                                {
+                                    $0.append
+                                    {
+                                        $0[zones] = .init { $0[.ne] = .some(nil as Never?) }
+                                    }
+                                    $0.append
+                                    {
+                                        $0[zones] = .init { $0[.ne] = "$\(Record.Zone[.id])" }
+                                    }
+                                }
+                            }
                         }
                         $0.stage
                         {

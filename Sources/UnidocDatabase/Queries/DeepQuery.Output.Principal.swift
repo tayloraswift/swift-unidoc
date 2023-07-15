@@ -39,9 +39,9 @@ extension DeepQuery.Output.Principal
     @frozen public
     enum CodingKey:String, CaseIterable
     {
-        case extensions = "E"
-        case matches = "A"
-        case master = "M"
+        case extensions = "e"
+        case matches = "a"
+        case master = "m"
 
         //  These keys come from ``Record.Zone.CodingKey``.
         //  TODO: find a way to hitch this to the actual definitions
