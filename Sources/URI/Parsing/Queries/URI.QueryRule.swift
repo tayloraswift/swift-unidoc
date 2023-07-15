@@ -15,12 +15,15 @@ extension URI.QueryRule:ParsingRule
 
     static
     func parse<Source>(
-        _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> [URI.Parameter]
+        _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> URI.Query
         where Source:Collection<UInt8>, Source.Index == Location
     {
         try input.parse(as: UnicodeEncoding<Location, UInt8>.Question.self)
-        return input.parse(
-            as: Pattern.Join<URI.QueryComponentRule<Location>, URI.QuerySeparatorRule<Location>,
-                [URI.Parameter]>?.self) ?? []
+        let parameters:[URI.Query.Parameter]? = input.parse(
+            as: Pattern.Join<
+                URI.QueryComponentRule<Location>,
+                URI.QuerySeparatorRule<Location>,
+                [URI.Query.Parameter]>?.self)
+        return .init(parameters ?? [])
     }
 }

@@ -11,8 +11,6 @@ extension Record.Master
 
         public
         let module:ModuleDetails
-        public
-        let stem:ModuleIdentifier
 
         public
         var overview:Record.Passage?
@@ -22,15 +20,21 @@ extension Record.Master
         @inlinable public
         init(id:Unidoc.Scalar,
             module:ModuleDetails,
-            stem:ModuleIdentifier,
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil)
         {
             self.id = id
             self.module = module
-            self.stem = stem
             self.overview = overview
             self.details = details
         }
+    }
+}
+extension Record.Master.Culture
+{
+    @inlinable public
+    var stem:Record.Stem
+    {
+        .init(self.module.id)
     }
 }

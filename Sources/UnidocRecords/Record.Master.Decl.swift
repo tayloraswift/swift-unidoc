@@ -11,8 +11,12 @@ extension Record.Master
         public
         let id:Unidoc.Scalar
 
-        @usableFromInline internal
-        let flags:Unidoc.Decl.Flags
+        public
+        let customization:Unidoc.Decl.Customization
+        public
+        let phylum:Unidoc.Decl
+        public
+        let route:Unidoc.Decl.Route
 
         public
         let signature:Signature<Unidoc.Scalar?>
@@ -24,6 +28,8 @@ extension Record.Master
         public
         let superforms:[Unidoc.Scalar]
         public
+        let namespace:Unidoc.Scalar
+        public
         let culture:Unidoc.Scalar
         public
         let scope:[Unidoc.Scalar]
@@ -33,55 +39,38 @@ extension Record.Master
         public
         var details:Record.Passage?
 
-        @inlinable internal
+        @inlinable public
         init(id:Unidoc.Scalar,
-            flags:Unidoc.Decl.Flags,
+            customization:Unidoc.Decl.Customization,
+            phylum:Unidoc.Decl,
+            route:Unidoc.Decl.Route,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Record.Stem,
             superforms:[Unidoc.Scalar],
+            namespace:Unidoc.Scalar,
             culture:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil)
         {
             self.id = id
-            self.flags = flags
+            self.customization = customization
+            self.phylum = phylum
+            self.route = route
+
             self.signature = signature
             self.symbol = symbol
             self.stem = stem
 
             self.superforms = superforms
+            self.namespace = namespace
             self.culture = culture
             self.scope = scope
 
             self.overview = overview
             self.details = details
         }
-    }
-}
-extension Record.Master.Decl
-{
-    @inlinable public
-    init(id:Unidoc.Scalar,
-        phylum:Unidoc.Decl,
-        aperture:Unidoc.Decl.Aperture,
-        route:Unidoc.Decl.Route,
-        signature:Signature<Unidoc.Scalar?>,
-        symbol:Symbol.Decl,
-        stem:Record.Stem,
-        superforms:[Unidoc.Scalar],
-        culture:Unidoc.Scalar,
-        scope:[Unidoc.Scalar])
-    {
-        self.init(id: id,
-            flags: .init(phylum, aperture: aperture, route: route),
-            signature: signature,
-            symbol: symbol,
-            stem: stem,
-            superforms: superforms,
-            culture: culture,
-            scope: scope)
     }
 }
 extension Record.Master.Decl

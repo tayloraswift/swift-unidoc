@@ -41,8 +41,9 @@ extension StaticLinker.Symbolizer
     mutating
     func allocate(decl:Compiler.Decl) -> Int32
     {
-        let scalar:Int32 = self.graph.append(.init(phylum: decl.phylum,
-                aperture: decl.aperture,
+        let scalar:Int32 = self.graph.append(.init(
+                customization: decl.customization,
+                phylum: decl.phylum,
                 path: decl.path),
             id: decl.id)
 

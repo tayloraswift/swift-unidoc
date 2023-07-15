@@ -115,7 +115,7 @@ extension StaticOutliner
             }
         }
 
-        let fold:Int = self.cache.referents.endIndex
+        let fold:Int = self.cache.outlines.endIndex
 
         let details:MarkdownBytecode = .init
         {
@@ -130,7 +130,7 @@ extension StaticOutliner
                 $0.emit(into: &binary)
             }
         }
-        return .init(referents: self.cache.referents,
+        return .init(outlines: self.cache.outlines,
             overview: overview,
             details: details,
             fold: fold)

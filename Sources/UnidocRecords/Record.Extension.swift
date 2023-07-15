@@ -29,6 +29,13 @@ extension Record
         public
         let subforms:[Unidoc.Scalar]
 
+        /// Additional scalars to prefetch when this extension is loaded.
+        /// This is used to obtain the masters for passage referents in the
+        /// overview passages of the actual declarations in this extension
+        /// without having to perform an additional lookup phase.
+        public
+        let prefetch:[Unidoc.Scalar]
+
         @inlinable public
         init(id:Unidoc.Scalar,
             conditions:[GenericConstraint<Unidoc.Scalar?>],
@@ -37,7 +44,8 @@ extension Record
             conformances:[Unidoc.Scalar] = [],
             features:[Unidoc.Scalar] = [],
             nested:[Unidoc.Scalar] = [],
-            subforms:[Unidoc.Scalar] = [])
+            subforms:[Unidoc.Scalar] = [],
+            prefetch:[Unidoc.Scalar] = [])
         {
             self.id = id
 
@@ -49,6 +57,8 @@ extension Record
             self.features = features
             self.nested = nested
             self.subforms = subforms
+
+            self.prefetch = prefetch
         }
     }
 }
@@ -67,6 +77,11 @@ extension Record.Extension
         case features = "F"
         case nested = "N"
         case subforms = "S"
+
+        case prefetch = "A"
+        /// Precomputed for MongoDB’s convenience. This field will be computed
+        /// and encoded if non-empty, but it will never be decoded.
+        case zones = "Z"
     }
 
     @inlinable public static
@@ -87,6 +102,41 @@ extension Record.Extension:BSONDocumentEncodable
         bson[.features] = self.features.isEmpty ? nil : self.features
         bson[.nested] = self.nested.isEmpty ? nil : self.nested
         bson[.subforms] = self.subforms.isEmpty ? nil : self.subforms
+
+        bson[.prefetch] = self.prefetch.isEmpty ? nil : self.prefetch
+
+        bson[.zones] = self.zones()
+    }
+
+    private
+    func zones() -> [Unidoc.Zone]?
+    {
+        var seen:Set<Unidoc.Zone> = []
+        var zones:[Unidoc.Zone] = []
+        for scalar:Unidoc.Scalar in
+        [
+            [self.culture],
+            self.conformances,
+            self.features,
+            self.nested,
+            self.subforms,
+            self.prefetch,
+        ].joined()
+        {
+            if  case nil = seen.update(with: scalar.zone)
+            {
+                zones.append(scalar.zone)
+            }
+        }
+        for constraint:GenericConstraint<Unidoc.Scalar?> in self.conditions
+        {
+            if  case let scalar?? = constraint.whom.nominal,
+                case nil = seen.update(with: scalar.zone)
+            {
+                zones.append(scalar.zone)
+            }
+        }
+        return zones.isEmpty ? nil : zones
     }
 }
 extension Record.Extension:BSONDocumentDecodable
@@ -101,6 +151,7 @@ extension Record.Extension:BSONDocumentDecodable
             conformances: try bson[.conformances]?.decode() ?? [],
             features: try bson[.features]?.decode() ?? [],
             nested: try bson[.nested]?.decode() ?? [],
-            subforms: try bson[.subforms]?.decode() ?? [])
+            subforms: try bson[.subforms]?.decode() ?? [],
+            prefetch: try bson[.prefetch]?.decode() ?? [])
     }
 }

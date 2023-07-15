@@ -25,7 +25,7 @@ extension SymbolRelationship
 extension SymbolRelationship.Membership:NestingRelationship
 {
     @inlinable public
-    var aperture:Unidoc.Decl.Aperture? { nil }
+    var customization:Unidoc.Decl.Customization? { nil }
 
     @inlinable public
     var scope:Symbol? { self.target }

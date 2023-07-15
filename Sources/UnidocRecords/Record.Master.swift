@@ -53,6 +53,16 @@ extension Record.Master
         case .decl(let decl):       return decl.details
         }
     }
+    @inlinable public
+    var stem:Record.Stem
+    {
+        switch self
+        {
+        case .article(let article): return article.stem
+        case .culture(let culture): return culture.stem
+        case .decl(let decl):       return decl.stem
+        }
+    }
 }
 extension Record.Master
 {
@@ -61,7 +71,7 @@ extension Record.Master
     {
         /// Always present.
         case id = "_id"
-        /// Always present, but may have a varying type.
+        /// Always present, but may be computed at encoding-time.
         case stem = "U"
 
         /// Discriminator for ``Module``.
@@ -85,6 +95,8 @@ extension Record.Master
         case signature_generics_parameters = "G"
         /// Only appears in ``Decl``.
         case superforms = "P"
+        /// Only appears in ``Decl``, and only when different from ``culture``.
+        case namespace = "N"
         /// Only appears in ``Decl``.
         case culture = "X"
         /// Only appears in ``Decl``.
@@ -111,7 +123,10 @@ extension Record.Master:BSONDocumentEncodable
         case .decl(let decl):
             bson[.symbol] = decl.symbol
 
-            bson[.flags] = decl.flags
+            bson[.flags] = Unidoc.Decl.Flags.init(
+                customization: decl.customization,
+                phylum: decl.phylum,
+                route: decl.route)
 
             bson[.signature_availability] =
                 decl.signature.availability.isEmpty ? nil :
@@ -133,7 +148,9 @@ extension Record.Master:BSONDocumentEncodable
                 decl.signature.generics.parameters
 
             bson[.stem] = decl.stem
+
             bson[.superforms] = decl.superforms.isEmpty ? nil : decl.superforms
+            bson[.namespace] = decl.namespace == decl.culture ? nil : decl.namespace
             bson[.culture] = decl.culture
             bson[.scope] = decl.scope.isEmpty ? nil : decl.scope
 
@@ -161,8 +178,12 @@ extension Record.Master:BSONDocumentDecodable
 
         if      let discriminator:Symbol.Decl = try bson[.symbol]?.decode()
         {
+            let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
+            let culture:Unidoc.Scalar = try bson[.culture].decode()
             self = .decl(.init(id: id,
-                flags: try bson[.flags].decode(),
+                customization: flags.customization,
+                phylum: flags.phylum,
+                route: flags.route,
                 signature: .init(
                     availability: try bson[.signature_availability]?.decode() ?? .init(),
                     abridged: Signature<Unidoc.Scalar?>.Abridged.init(
@@ -176,7 +197,8 @@ extension Record.Master:BSONDocumentDecodable
                 symbol: discriminator,
                 stem: try bson[.stem].decode(),
                 superforms: try bson[.superforms]?.decode() ?? [],
-                culture: try bson[.culture].decode(),
+                namespace: try bson[.namespace]?.decode() ?? culture,
+                culture: culture,
                 scope: try bson[.scope]?.decode() ?? [],
                 overview: overview,
                 details: details))
@@ -185,7 +207,6 @@ extension Record.Master:BSONDocumentDecodable
         {
             self = .culture(.init(id: id,
                 module: discriminator,
-                stem: try bson[.stem].decode(),
                 overview: overview,
                 details: details))
         }

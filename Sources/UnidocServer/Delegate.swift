@@ -1,3 +1,4 @@
+import HTML
 import HTTPServer
 import MongoDB
 import Multiparts
@@ -68,20 +69,23 @@ extension Delegate
         switch path
         {
         case ["admin"]:
-            let page:Page.Admin = .init(configuration: try await self.mongodb.run(
+            let page:Site.AdminPage = .init(configuration: try await self.mongodb.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin))
 
+            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+
             return .init(location: "\(request.uri)",
-                response: .content(.init(.binary(page.html.utf8),
+                response: .content(.init(.binary(html.utf8),
                     type: .text(.html, charset: .utf8))),
                 results: .one(canonical: "/admin"))
 
         case ["admin", "drop-database"]:
-            let page:Page.Admin.DropDatabase = .init()
+            let page:Site.AdminPage.DropDatabase = .init()
+            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
 
             return .init(location: "\(request.uri)",
-                response: .content(.init(.binary(page.html.utf8),
+                response: .content(.init(.binary(html.utf8),
                     type: .text(.html, charset: .utf8))),
                 results: .one(canonical: "/admin/drop-database"))
 
@@ -93,7 +97,7 @@ extension Delegate
         {
         case ("docs"?, 2...):
             guard   let query:DeepQuery = .init(path[1], path[2...]),
-                    let page:Page.Docs.Zone.Deep = .init(try await self.database.execute(
+                    let page:Site.Docs.DeepPage = .init(try await self.database.execute(
                         query: query,
                         with: try await .init(from: self.mongodb)))
             else
@@ -101,12 +105,13 @@ extension Delegate
                 fallthrough
             }
 
-            let _string:String = "\(page)"
-            let _location:String = "\(request.uri)"
-            return .init(location: _location,
-                response: .content(.init(.text(_string),
+            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+            let location:String = "\(page.location)"
+
+            return .init(location: location,
+                response: .content(.init(.binary(html.utf8),
                     type: .text(.html, charset: .utf8))),
-                results: .one(canonical: _location))
+                results: .one(canonical: location))
 
         case (_, _):
             return .init(location: "\(request.uri)",

@@ -84,9 +84,9 @@ extension Compiler.DeclObject
             self.scope = nesting.scope
         }
 
-        if  let aperture:Unidoc.Decl.Aperture = nesting.aperture
+        if  let customization:Unidoc.Decl.Customization = nesting.customization
         {
-            self.value.aperture = aperture
+            self.value.customization = customization
         }
         if  let origin:Symbol.Decl = nesting.origin
         {

@@ -3,7 +3,7 @@ import MarkdownRendering
 
 /// A thin wrapper around some ``MarkdownBytecode``, which conforms to
 /// ``MarkdownExecutable``, and can be rendered to HTML.
-struct MarkdownBinary:MarkdownRenderer, Equatable, Sendable
+struct MarkdownBinary:HyperTextRenderableMarkdown, Equatable, Sendable
 {
     let bytecode:MarkdownBytecode
 

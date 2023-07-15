@@ -1,6 +1,0 @@
-struct RenderingContext
-{
-}
-extension RenderingContext
-{
-}

@@ -4,33 +4,49 @@ import Grammar
 struct URI:Sendable
 {
     public
-    typealias Parameter = (key:String, value:String)
-
-    public
     var path:Path
-    public
-    var query:[Parameter]?
+    @usableFromInline internal
+    var parameters:[Query.Parameter]?
 
     @inlinable public
-    init(path:Path, query:[Parameter]? = nil)
+    init(path:Path, query:Query? = nil)
     {
         self.path = path
-        self.query = query
+        self.parameters = query?.parameters
     }
 }
 extension URI
 {
-    @inlinable public mutating
-    func insert(parameter:Parameter)
+    /// Non-settable, so you do not accidentally drop parameters with optional mutations.
+    @inlinable public
+    var query:Query? { self.parameters.map(Query.init(_:)) }
+
+    /// Appends a new query parameter to this URI’s parameter list, creating it
+    /// if it does not exist. The getter always returns nil.
+    @inlinable public
+    subscript(key:String) -> String?
     {
-        switch self.query
+        get
         {
-        case nil:
-            self.query = [parameter]
-        case var parameters?:
-            self.query = nil
-            parameters.append(parameter)
-            self.query = parameters
+            nil
+        }
+        set(value)
+        {
+            guard let value:String
+            else
+            {
+                return
+            }
+            switch self.parameters
+            {
+            case nil:
+                self.parameters = [(key, value)]
+
+            case var parameters?:
+                self.parameters = nil
+                parameters.append((key, value))
+                self.parameters = parameters
+            }
         }
     }
 }
@@ -64,25 +80,16 @@ extension URI:LosslessStringConvertible
 }
 extension URI:CustomStringConvertible
 {
-    public
+    @inlinable public
     var description:String
     {
-        var string:String = "\(self.path)"
-
-        if  let parameters:[Parameter] = self.query
-        {
-            // don’t bother percent-encoding the query parameters
-            string.append("?")
-            string += parameters.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
-        }
-
-        return string
+        self.query.map { "\(self.path)\($0)" } ?? "\(self.path)"
     }
 }
-extension URI
+extension URI:Equatable
 {
     @inlinable public static
-    func ~= (lhs:Self, rhs:Self) -> Bool
+    func == (lhs:Self, rhs:Self) -> Bool
     {
         guard lhs.path == rhs.path
         else
@@ -91,34 +98,9 @@ extension URI
         }
         switch (lhs.query, rhs.query)
         {
-        case (_?, nil), (nil, _?):
-            return false
-        case (nil, nil):
-            return true
-        case (let lhs?, let rhs?):
-            guard lhs.count == rhs.count
-            else
-            {
-                return false
-            }
-            var unmatched:[String: String] = .init(minimumCapacity: lhs.count)
-            for (key, value):(String, String) in lhs
-            {
-                guard case nil = unmatched.updateValue(value, forKey: key)
-                else
-                {
-                    return false
-                }
-            }
-            for (key, value):(String, String) in rhs
-            {
-                guard case value? = unmatched.removeValue(forKey: key)
-                else
-                {
-                    return false
-                }
-            }
-            return true
+        case (_?, nil), (nil, _?):  return false
+        case (let lhs?, let rhs?):  return lhs == rhs
+        case (nil, nil):            return true
         }
     }
 }

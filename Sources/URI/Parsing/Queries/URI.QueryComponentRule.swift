@@ -14,7 +14,7 @@ extension URI.QueryComponentRule:ParsingRule
 
     static
     func parse<Source>(_ input:inout ParsingInput<some ParsingDiagnostics<Source>>)
-        throws -> URI.Parameter
+        throws -> URI.Query.Parameter
         where Source:Collection<UInt8>, Source.Index == Location
     {
         let (key, _):(String, Bool) =

@@ -65,7 +65,7 @@ extension DynamicLinker
 
         self.link(groups: groups)
 
-        self.projection.extensions = self.extensions.records()
+        self.projection.extensions = self.extensions.records(context: context)
     }
 }
 extension DynamicLinker
@@ -89,7 +89,7 @@ extension DynamicLinker
             for namespace:SymbolGraph.Namespace in input.namespaces
             {
                 self.link(decls: namespace.range,
-                    under: self.current.graph.namespaces[namespace.index],
+                    under: namespace.index,
                     of: culture,
                     in: group)
             }
@@ -98,9 +98,7 @@ extension DynamicLinker
                 self.link(articles: articles, under: namespace, in: group)
             }
 
-            var record:Record.Master.Culture = .init(id: culture,
-                module: input.module,
-                stem: namespace)
+            var record:Record.Master.Culture = .init(id: culture, module: input.module)
 
             if  let article:SymbolGraph.Article<Never> = input.article
             {
@@ -149,10 +147,13 @@ extension DynamicLinker
 
     private mutating
     func link(decls range:ClosedRange<Int32>,
-        under namespace:ModuleIdentifier,
-        of culture:Unidoc.Scalar,
+        under namespace:Int,
+        of c:Unidoc.Scalar,
         in group:DynamicResolutionGroup)
     {
+        let n:Unidoc.Scalar = self.current.zone + namespace * .module
+        let namespace:ModuleIdentifier = self.current.graph.namespaces[namespace]
+
         for (d, ((symbol, node), conformances)):
             (Int32, ((Symbol.Decl, SymbolGraph.Node), Conformances)) in zip(range, zip(zip(
                 self.current.graph.decls[range],
@@ -190,7 +191,7 @@ extension DynamicLinker
                 if  let s:Unidoc.Scalar = self.current.decls[$0]
                 {
                     let implicit:ExtensionSignature = .init(conditions: [],
-                        culture: culture,
+                        culture: c,
                         extends: s)
 
                     self.extensions[implicit].subforms.append(d)
@@ -203,14 +204,15 @@ extension DynamicLinker
             }
 
             var record:Record.Master.Decl = .init(id: d,
+                customization: decl.customization,
                 phylum: decl.phylum,
-                aperture: decl.aperture,
                 route: decl.route,
                 signature: decl.signature.map { self.current.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),
                 superforms: superforms,
-                culture: culture,
+                namespace: n,
+                culture: c,
                 scope: scope.map { self.context.expand($0) } ?? [])
 
             if  let article:SymbolGraph.Article<Never> = decl.article

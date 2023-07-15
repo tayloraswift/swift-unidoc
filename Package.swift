@@ -15,7 +15,6 @@ let package:Package = .init(
         .library(name: "FNV1", targets: ["FNV1"]),
 
         .library(name: "HTML", targets: ["HTML"]),
-        .library(name: "HTMLRendering", targets: ["HTMLRendering"]),
 
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
@@ -112,11 +111,17 @@ let package:Package = .init(
 
         .target(name: "FNV1"),
 
-        .target(name: "HTML"),
-
-        .target(name: "HTMLRendering", dependencies:
+        .target(name: "HTML", dependencies:
             [
-                .target(name: "HTML"),
+                .target(name: "HTMLDOM"),
+                .target(name: "HTMLStreaming"),
+            ]),
+
+        .target(name: "HTMLDOM"),
+
+        .target(name: "HTMLStreaming", dependencies:
+            [
+                .target(name: "HTMLDOM"),
             ]),
 
         .target(name: "HTTPServer",
@@ -134,7 +139,7 @@ let package:Package = .init(
 
         .target(name: "MarkdownRendering", dependencies:
             [
-                .target(name: "HTMLRendering"),
+                .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
             ]),
 
@@ -296,7 +301,8 @@ let package:Package = .init(
 
         .target(name: "UnidocRecords", dependencies:
             [
-                .target(name: "SymbolGraphs")
+                .target(name: "SymbolGraphs"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "URI", dependencies:
@@ -314,7 +320,7 @@ let package:Package = .init(
         .executableTarget(name: "UnidocServer",
             dependencies:
             [
-                .target(name: "HTMLRendering"),
+                .target(name: "HTML"),
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Multiparts"),

@@ -7,7 +7,7 @@ protocol NestingRelationship
     var origin:Symbol.Decl? { get }
     var scope:Symbol? { get }
 
-    var aperture:Unidoc.Decl.Aperture? { get }
+    var customization:Unidoc.Decl.Customization? { get }
 
     func validate(source phylum:Unidoc.Decl) -> Bool
 }

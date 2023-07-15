@@ -1,6 +1,0 @@
-extension Page
-{
-    enum Docs
-    {
-    }
-}

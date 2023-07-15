@@ -13,7 +13,7 @@ struct MarkdownBinary:Equatable, Sendable
         self.bytecode = bytecode
     }
 }
-extension MarkdownBinary:MarkdownRenderer
+extension MarkdownBinary:HyperTextRenderableMarkdown
 {
     /// Renders a placeholder `code` element describing the reference.
     public

@@ -30,7 +30,7 @@ extension SymbolRelationship
 extension SymbolRelationship.Requirement:NestingRelationship
 {
     @inlinable public
-    var aperture:Unidoc.Decl.Aperture?
+    var customization:Unidoc.Decl.Customization?
     {
         self.optional ? .requiredOptionally : .required
     }

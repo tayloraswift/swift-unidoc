@@ -11,15 +11,14 @@ struct DeepQuery
 {
     let package:PackageIdentifier
     let version:Substring?
-    private(set)
-    var stem:String
+    let stem:Record.Stem
     private(set)
     var hash:FNV24?
 
     private
     init(package:PackageIdentifier,
         version:Substring?,
-        stem:String = "",
+        stem:Record.Stem,
         hash:FNV24? = nil)
     {
         self.package = package
@@ -35,50 +34,22 @@ extension DeepQuery
     {
         if  let colon:String.Index = trunk.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk[..<colon]), version: nil)
-            self.append(component: trunk[trunk.index(after: colon)...])
-            self.append(components: tail)
+            self.init(package: .init(trunk[..<colon]), version: nil, stem: .init(
+                uri: (trunk[trunk.index(after: colon)...], tail)))
         }
         else if
             let next:String = tail.first,
             let colon:String.Index = next.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk), version: next[..<colon])
-            self.append(component: next[next.index(after: colon)...])
-            self.append(components: tail.dropFirst())
+            self.init(package: .init(trunk), version: next[..<colon], stem: .init(
+                uri: (next[next.index(after: colon)...], tail.dropFirst())))
         }
         else
         {
             return nil
         }
     }
-
-    private mutating
-    func append(components:ArraySlice<String>)
-    {
-        for component:String in components
-        {
-            self.append(component: component)
-        }
-    }
-    private mutating
-    func append(component:some StringProtocol)
-    {
-        if !self.stem.isEmpty
-        {
-            self.stem.append(" ")
-        }
-        if  let dot:String.Index = component.firstIndex(of: ".")
-        {
-            self.stem += "\(component[..<dot])\t\(component[component.index(after: dot)...])"
-        }
-        else
-        {
-            self.stem += component
-        }
-    }
 }
-
 extension DeepQuery
 {
     static
@@ -189,8 +160,8 @@ extension DeepQuery
                 $0[.set] = .init
                 {
                     //  Populate this field only if exactly one master record matched.
-                    //  This allows us to skip looking up entourage records if we are
-                    //  only going to generate a disambiguation page.
+                    //  This allows us to skip looking up secondary/tertiary records if
+                    //  we are only going to generate a disambiguation page.
                     $0[Output.Principal[.master]] = .expr
                     {
                         $0[.cond] =
@@ -224,38 +195,18 @@ extension DeepQuery
             //  Extract (and de-duplicate) the scalars mentioned by the extensions.
             //  Store them in this temporary field:
             let scalars:BSON.Key = "scalars"
+            let zones:BSON.Key = "zones"
 
             $0.stage
             {
                 $0[.set] = Mongo.SetDocument.init // helps typechecking massively
                 {
-                    $0[scalars] = .expr
-                    {
-                        $0[.setUnion] = .init
-                        {
-                            $0.expr
-                            {
-                                $0[.reduce] = .init
-                                {
-                                    $0[.input] = .expr
-                                    {
-                                        let variable:ExtensionVariable = "self"
+                    let variable:ExtensionVariable = "self"
 
-                                        $0[.map] = .let(variable)
-                                        {
-                                            $0[.input] = "$\(Output.Principal[.extensions])"
-                                            $0[.in] = variable.scalars
-                                        }
-                                    }
-                                    $0[.initialValue] = [] as [Never]
-                                    $0[.in] = .expr
-                                    {
-                                        $0[.concatArrays] = ("$$value", "$$this")
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    $0[scalars] = variable.collect(\.scalars,
+                        from: Output.Principal[.extensions])
+                    $0[zones] = variable.collect(\.zones,
+                        from: Output.Principal[.extensions])
                 }
             }
             $0.stage
@@ -276,7 +227,7 @@ extension DeepQuery
                             }
                         }
                     }
-                    $0[Output[.entourage]] = .init
+                    $0[Output[.secondary]] = .init
                     {
                         $0.stage
                         {
@@ -289,22 +240,47 @@ extension DeepQuery
                                 $0[.from] = Database.Masters.name
                                 $0[.localField] = scalars
                                 $0[.foreignField] = Record.Master[.id]
-                                $0[.as] = "masters"
+                                $0[.as] = "results"
                             }
                         }
                         $0.stage
                         {
-                            $0[.unwind] = "$masters"
+                            $0[.unwind] = "$results"
                         }
                         $0.stage
                         {
-                            $0[.replaceWith] = "$masters"
+                            $0[.replaceWith] = "$results"
                         }
                         $0.stage
                         {
                             //  We do not need to load all the markdown for master
                             //  records in the entourage.
                             $0[.unset] = Record.Master[.details]
+                        }
+                    }
+                    $0[Output[.zones]] = .init
+                    {
+                        $0.stage
+                        {
+                            $0[.unwind] = "$\(zones)"
+                        }
+                        $0.stage
+                        {
+                            $0[.lookup] = .init
+                            {
+                                $0[.from] = Database.Zones.name
+                                $0[.localField] = zones
+                                $0[.foreignField] = Record.Zone[.id]
+                                $0[.as] = "results"
+                            }
+                        }
+                        $0.stage
+                        {
+                            $0[.unwind] = "$results"
+                        }
+                        $0.stage
+                        {
+                            $0[.replaceWith] = "$results"
                         }
                     }
                 }

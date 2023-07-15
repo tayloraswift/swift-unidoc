@@ -27,7 +27,7 @@ extension Compiler
         let path:UnqualifiedPath
 
         public internal(set)
-        var aperture:Unidoc.Decl.Aperture
+        var customization:Unidoc.Decl.Customization
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.
@@ -69,7 +69,7 @@ extension Compiler
             self.phylum = phylum
             self.path = path
 
-            self.aperture = visibility == .open ? .open : .closed
+            self.customization = visibility == .open ? .available : .unavailable
 
             self.superforms = []
             self.features = []

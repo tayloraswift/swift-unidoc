@@ -29,11 +29,11 @@ extension StaticResolver
     func outline(expression:String,
         as doclink:Doclink,
         in sources:[MarkdownSource],
-        at source:SourceText<Int>?) -> SymbolGraph.Referent?
+        at source:SourceText<Int>?) -> SymbolGraph.Outline?
     {
         if  let scalar:Int32 = self.doclinks.resolve(doclink)
         {
-            return .scalar(.init(scalar, length: UInt32.init(doclink.path.count)))
+            return .init(referent: .scalar(scalar), text: doclink.path.last ?? "")
         }
         //  Resolution might still succeed by reinterpreting the doclink as a codelink.
         if !doclink.absolute,
@@ -47,35 +47,41 @@ extension StaticResolver
         else
         {
             print("DEBUG: doclink '\(expression)' will be resolved dynamically")
-            return .unresolved(.init(expression,
-                location: source?.start.translated(through: sources)))
+            return .init(
+                referent: .unresolved(source?.start.translated(through: sources)),
+                text: expression)
         }
     }
     mutating
     func outline(expression:String,
         as codelink:Codelink,
         in sources:[MarkdownSource],
-        at source:SourceText<Int>?) -> SymbolGraph.Referent?
+        at source:SourceText<Int>?) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
         {
         case .one(let overload):
-            let length:UInt32 = .init(codelink.path.components.count)
+            let text:String = codelink.path.components.joined(separator: " ")
             switch overload.target
             {
             case .scalar(let address):
-                return .scalar(.init(address, length: length))
+                return .init(
+                    referent: .scalar(address),
+                    text: text)
 
             case .vector(let address, self: let heir):
-                return .vector(.init(address, self: heir, length: length))
+                return .init(
+                    referent: .vector(address, self: heir),
+                    text: text)
             }
 
         case .some(let overloads):
             if  overloads.isEmpty
             {
                 print("DEBUG: autolink '\(expression)' will be resolved dynamically")
-                return .unresolved(.init(expression,
-                    location: source?.start.translated(through: sources)))
+                return .init(
+                    referent: .unresolved(source?.start.translated(through: sources)),
+                    text: expression)
             }
             else
             {

@@ -8,12 +8,12 @@ extension SymbolGraph
     struct Article<ID>:Equatable, Sendable where ID:Equatable & Sendable
     {
         public
-        var referents:[Referent]
+        var outlines:[Outline]
         public
         var overview:MarkdownBytecode
         public
         var details:MarkdownBytecode
-        /// The number of referents used by the overview paragraph alone.
+        /// The number of outlines used by the overview paragraph alone.
         public
         var fold:Int
 
@@ -21,16 +21,16 @@ extension SymbolGraph
         let id:ID?
 
         @inlinable public
-        init(referents:[Referent] = [],
+        init(outlines:[Outline] = [],
             overview:MarkdownBytecode = [],
             details:MarkdownBytecode = [],
             fold:Int? = nil,
             id:ID? = nil)
         {
-            self.referents = referents
+            self.outlines = outlines
             self.overview = overview
             self.details = details
-            self.fold = fold ?? self.referents.endIndex
+            self.fold = fold ?? self.outlines.endIndex
 
             self.id = id
         }
@@ -43,14 +43,15 @@ extension SymbolGraph.Article
     {
         get
         {
-            .init(referents: self.referents,
+            .init(
+                outlines: self.outlines,
                 overview: self.overview,
                 details: self.details,
                 fold: self.fold)
         }
         set(value)
         {
-            self.referents = value.referents
+            self.outlines = value.outlines
             self.overview = value.overview
             self.details = value.details
             self.fold = value.fold
@@ -62,7 +63,7 @@ extension SymbolGraph.Article
     public
     enum CodingKeys:String
     {
-        case referents = "R"
+        case outlines = "L"
         case overview = "O"
         case details = "D"
         case fold = "F"
@@ -75,10 +76,10 @@ extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKeys>)
     {
-        bson[.referents] = self.referents.isEmpty ? nil : self.referents
+        bson[.outlines] = self.outlines.isEmpty ? nil : self.outlines
         bson[.overview] = self.overview.isEmpty ? nil : self.overview
         bson[.details] = self.details.isEmpty ? nil : self.details
-        bson[.fold] = self.fold == self.referents.endIndex ? nil : self.fold
+        bson[.fold] = self.fold == self.outlines.endIndex ? nil : self.fold
         //  This is why ``id`` is optional.
         bson[.id] = self.id
     }
@@ -89,7 +90,8 @@ extension SymbolGraph.Article:BSONDocumentDecodable, BSONDocumentViewDecodable, 
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKeys, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(referents: try bson[.referents]?.decode() ?? [],
+        self.init(
+            outlines: try bson[.outlines]?.decode() ?? [],
             overview: try bson[.overview]?.decode() ?? [],
             details: try bson[.details]?.decode() ?? [],
             fold: try bson[.fold]?.decode(),
