@@ -176,7 +176,7 @@ extension URI.Path
     /// any “special-looking” strings in the output (such as `..`) were originally
     /// percent-encoded.
     @inlinable public
-    func normalized() -> [String]
+    func normalized(lowercase:Bool = false) -> [String]
     {
         var normalized:[String] = []
             normalized.reserveCapacity(self.count)
@@ -189,7 +189,7 @@ extension URI.Path
                 continue
 
             case .push(let component):
-                normalized.append(component)
+                normalized.append(lowercase ? component.lowercased() : component)
 
             case .pop:
                 let _:String? = normalized.popLast()

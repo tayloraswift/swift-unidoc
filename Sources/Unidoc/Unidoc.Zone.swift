@@ -33,12 +33,6 @@ extension Unidoc.Zone
 extension Unidoc.Zone
 {
     @inlinable public static
-    func + (self:Self, _:Never?) -> Unidoc.Scalar
-    {
-        self + (0 * .zone)
-    }
-
-    @inlinable public static
     func + (self:Self, citizen:Int32) -> Unidoc.Scalar
     {
         .init(package: self.package, version: self.version, citizen: citizen)
