@@ -1,21 +1,24 @@
 import Unidoc
 import UnidocRecords
 
-struct MasterIndex
+extension Inliner
 {
-    let principal:Unidoc.Scalar?
-    private(set)
-    var secondary:[Unidoc.Scalar: Record.Master]
-
-    init(
-        principal:Unidoc.Scalar?,
-        secondary:[Unidoc.Scalar: Record.Master] = [:])
+    struct Masters
     {
-        self.principal = principal
-        self.secondary = secondary
+        let principal:Unidoc.Scalar?
+        private(set)
+        var secondary:[Unidoc.Scalar: Record.Master]
+
+        init(
+            principal:Unidoc.Scalar?,
+            secondary:[Unidoc.Scalar: Record.Master] = [:])
+        {
+            self.principal = principal
+            self.secondary = secondary
+        }
     }
 }
-extension MasterIndex
+extension Inliner.Masters
 {
     mutating
     func add(_ masters:[Record.Master])
@@ -27,7 +30,7 @@ extension MasterIndex
         }
     }
 }
-extension MasterIndex
+extension Inliner.Masters
 {
     subscript(_ scalar:Unidoc.Scalar) -> Record.Master?
     {

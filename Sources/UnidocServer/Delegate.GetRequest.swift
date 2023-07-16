@@ -52,7 +52,7 @@ extension Delegate.GetRequest
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin))
 
-            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+            let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
 
             return .init(location: "\(self.uri)",
                 response: .content(.init(.binary(html.utf8),
@@ -61,7 +61,7 @@ extension Delegate.GetRequest
 
         case ["admin", "drop-database"]:
             let page:Site.AdminPage.DropDatabase = .init()
-            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+            let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
 
             return .init(location: "\(self.uri)",
                 response: .content(.init(.binary(html.utf8),
@@ -114,7 +114,7 @@ extension Delegate.GetRequest
                     query: query,
                     with: session))
             {
-                let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+                let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
                 let location:String = "\(page.location)"
 
                 return .init(location: location,

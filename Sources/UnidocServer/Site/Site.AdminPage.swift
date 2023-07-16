@@ -22,7 +22,7 @@ extension Site.AdminPage:HyperTextOutputStreamable
     {
         html[.head]
         {
-            $0[.meta] { $0[.charset] = "utf-8" }
+            $0[.meta] { $0.charset = "utf-8" }
             $0[.title] = "Administrator Tools"
         }
 
@@ -30,9 +30,9 @@ extension Site.AdminPage:HyperTextOutputStreamable
         {
             $0[.form]
             {
-                $0[.enctype] = "multipart/form-data"
-                $0[.action] = "/admin/action/upload"
-                $0[.method] = "post"
+                $0.enctype = "multipart/form-data"
+                $0.action = "/admin/action/upload"
+                $0.method = "post"
             }
             content:
             {
@@ -40,14 +40,14 @@ extension Site.AdminPage:HyperTextOutputStreamable
                 {
                     $0[.input]
                     {
-                        $0[.multiple] = true
-                        $0[.name] = "documentation-binary"
-                        $0[.type] = "file"
+                        $0.multiple = true
+                        $0.name = "documentation-binary"
+                        $0.type = "file"
                     }
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0[.type] = "submit" } = "Upload Snapshots"
+                    $0[.button] { $0.type = "submit" } = "Upload Snapshots"
                 }
             }
 
@@ -55,15 +55,15 @@ extension Site.AdminPage:HyperTextOutputStreamable
 
             $0[.form]
             {
-                $0[.enctype] = "multipart/form-data"
-                $0[.action] = "/admin/action/rebuild"
-                $0[.method] = "post"
+                $0.enctype = "multipart/form-data"
+                $0.action = "/admin/action/rebuild"
+                $0.method = "post"
             }
             content:
             {
                 $0[.p]
                 {
-                    $0[.button] { $0[.type] = "submit" } = "Rebuild Collections"
+                    $0[.button] { $0.type = "submit" } = "Rebuild Collections"
                 }
             }
 
@@ -71,15 +71,15 @@ extension Site.AdminPage:HyperTextOutputStreamable
 
             $0[.form]
             {
-                $0[.enctype] = "application/x-www-form-urlencoded"
-                $0[.action] = "/admin/drop-database"
-                $0[.method] = "get"
+                $0.enctype = "application/x-www-form-urlencoded"
+                $0.action = "/admin/drop-database"
+                $0.method = "get"
             }
             content:
             {
                 $0[.p]
                 {
-                    $0[.button] { $0[.type] = "submit" } = "Drop Database"
+                    $0[.button] { $0.type = "submit" } = "Drop Database"
                 }
             }
 

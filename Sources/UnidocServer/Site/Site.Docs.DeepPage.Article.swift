@@ -11,15 +11,15 @@ extension Site.Docs.DeepPage
         let extensions:[Record.Extension]
 
         private
-        let renderer:Renderer
+        let inliner:Inliner
 
         init(_ master:Record.Master.Article,
             extensions:[Record.Extension],
-            renderer:Renderer)
+            inliner:Inliner)
         {
             self.master = master
             self.extensions = extensions
-            self.renderer = renderer
+            self.inliner = inliner
         }
     }
 }
@@ -27,7 +27,7 @@ extension Site.Docs.DeepPage.Article
 {
     var zone:Record.Zone.Names
     {
-        self.renderer.zones.principal.zone
+        self.inliner.zones.principal.zone
     }
 
     var location:URI
@@ -44,16 +44,15 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
 
         html[.body]
         {
-            $0[.section, { $0[.class] = "introduction" }]
+            $0[.section, { $0.class = "introduction" }]
             {
-                $0[.div, { $0[.class] = "eyebrows" }]
+                $0[.div, { $0.class = "eyebrows" }]
                 {
-                    $0[.span, { $0[.class] = "phylum" }] = "Article"
+                    $0[.span, { $0.class = "phylum" }] = "Article"
                 }
 
-
-                $0 ?= self.renderer.prose(self.master.overview)
-                $0 ?= self.renderer.prose(self.master.details)
+                $0 ?= self.master.overview.map(self.inliner.prose(_:))
+                $0 ?= self.master.details.map(self.inliner.prose(_:))
             }
         }
     }

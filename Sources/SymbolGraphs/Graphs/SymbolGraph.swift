@@ -3,6 +3,7 @@ import BSONEncoding
 import MarkdownABI
 import ModuleGraphs
 import Symbols
+import Unidoc
 
 @frozen public
 struct SymbolGraph:Equatable, Sendable
@@ -16,9 +17,9 @@ struct SymbolGraph:Equatable, Sendable
     var cultures:[Culture]
 
     public
-    var articles:Plane<Articles, Article<String>>
+    var articles:Plane<UnidocPlane.Article, Article<String>>
     public
-    var files:Plane<Files, Symbol.File>
+    var files:Plane<UnidocPlane.File, Symbol.File>
     public
     var decls:Table<Symbol.Decl>
     public
@@ -27,8 +28,8 @@ struct SymbolGraph:Equatable, Sendable
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
-        articles:Plane<Articles, Article<String>> = [],
-        files:Plane<Files, Symbol.File> = [],
+        articles:Plane<UnidocPlane.Article, Article<String>> = [],
+        files:Plane<UnidocPlane.File, Symbol.File> = [],
         decls:Table<Symbol.Decl> = [],
         nodes:Table<Node> = [])
     {

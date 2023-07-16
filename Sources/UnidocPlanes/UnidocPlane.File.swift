@@ -1,9 +1,7 @@
-import Unidoc
-
-extension SymbolGraph
+extension UnidocPlane
 {
     @frozen public
-    enum Files:UnidocPlaneType
+    enum File:UnidocPlaneType
     {
         @inlinable public static
         var plane:UnidocPlane { .file }

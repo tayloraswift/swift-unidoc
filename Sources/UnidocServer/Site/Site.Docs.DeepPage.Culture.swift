@@ -12,15 +12,15 @@ extension Site.Docs.DeepPage
         let extensions:[Record.Extension]
 
         private
-        let renderer:Renderer
+        let inliner:Inliner
 
         init(_ master:Record.Master.Culture,
             extensions:[Record.Extension],
-            renderer:Renderer)
+            inliner:Inliner)
         {
             self.master = master
             self.extensions = extensions
-            self.renderer = renderer
+            self.inliner = inliner
         }
     }
 }
@@ -28,7 +28,7 @@ extension Site.Docs.DeepPage.Culture
 {
     var zone:Record.Zone.Names
     {
-        self.renderer.zones.principal.zone
+        self.inliner.zones.principal.zone
     }
 
     var location:URI
@@ -48,19 +48,19 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
         }
         html[.body]
         {
-            $0[.section, { $0[.class] = "introduction" }]
+            $0[.section, { $0.class = "introduction" }]
             {
-                $0[.div, { $0[.class] = "eyebrows" }]
+                $0[.div, { $0.class = "eyebrows" }]
                 {
-                    $0[.span, { $0[.class] = "phylum" }] = "Module"
+                    $0[.span, { $0.class = "phylum" }] = "Module"
                 }
 
                 $0[.h1] = self.master.module.name
 
-                $0 ?= self.renderer.prose(self.master.overview)
+                $0 ?= self.master.overview.map(self.inliner.prose(_:))
             }
 
-            $0[.section, { $0[.class] = "declaration" }]
+            $0[.section, { $0.class = "declaration" }]
             {
                 $0[.pre]
                 {
@@ -73,7 +73,8 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
                 }
             }
 
-            $0[.section] { $0[.class] = "details" } = self.renderer.prose(self.master.details)
+            $0[.section] { $0.class = "details" } =
+                self.master.details.map(self.inliner.prose(_:))
         }
     }
 }

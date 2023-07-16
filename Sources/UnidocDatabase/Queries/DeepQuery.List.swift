@@ -1,10 +1,11 @@
 import BSONEncoding
 import MongoBuiltins
 import MongoExpressions
+import UnidocRecords
 
 extension DeepQuery
 {
-    struct ExtensionList
+    struct List<Element>
     {
         let key:BSON.Key
 
@@ -14,23 +15,24 @@ extension DeepQuery
         }
     }
 }
-extension DeepQuery.ExtensionList
+extension DeepQuery.List<Record.Extension>
 {
     var scalars:Scalars { .init(self) }
     var zones:Zones { .init(self) }
 }
-extension DeepQuery.ExtensionList
+extension DeepQuery.List
 {
-    func join(_ output:(LoopVariable) -> some BSONEncodable) -> Mongo.ReduceDocument
+    func join(
+        _ output:(DeepQuery.Variable<Element>) -> some BSONEncodable) -> Mongo.ReduceDocument
     {
         .init
         {
             $0[.input] = .expr
             {
-                let variable:LoopVariable = "self"
+                let variable:DeepQuery.Variable<Element> = "self"
                 $0[.map] = .let(variable)
                 {
-                    $0[.input] = "$\(self.key)"
+                    $0[.input] = .expr { $0[.coalesce] = ("$\(self.key)", [] as [Never]) }
                     $0[.in] = output(variable)
                 }
             }

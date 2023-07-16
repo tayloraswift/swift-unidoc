@@ -8,11 +8,11 @@ extension DeepQuery.Master
 {
     struct Zones
     {
-        let master:DeepQuery.Master
+        let key:BSON.Key
 
-        init(_ master:DeepQuery.Master)
+        init(in key:BSON.Key)
         {
-            self.master = master
+            self.key = key
         }
     }
 }
@@ -23,7 +23,7 @@ extension DeepQuery.Master.Zones
     {
         list.expr
         {
-            $0[.coalesce] = (self.master[Record.Master[.zones]], [] as [Never])
+            $0[.coalesce] = ("$\(self.key / Record.Master[.zones])", [] as [Never])
         }
     }
 }

@@ -279,7 +279,7 @@ enum Main:SyncTests
 
                 func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
                 {
-                    html[.a, { $0[.href] = "swiftinit.org" }] = String.init(reference,
+                    html[.a, { $0.href = "swiftinit.org" }] = String.init(reference,
                         radix: 16)
                 }
             }

@@ -74,7 +74,7 @@ extension MarkdownAttributeContext
 }
 extension MarkdownAttributeContext
 {
-    func encode(to html:inout HTML.AttributeEncoder)
+    func encode(to attributes:inout HTML.AttributeEncoder)
     {
         var classes:[String] = []
 
@@ -84,14 +84,14 @@ extension MarkdownAttributeContext
             {
             case .class:
                 classes.append(value)
-            
+
             default:
-                html[name] = value
+                attributes[name: name] = value
             }
         }
         if !classes.isEmpty
         {
-            html[.class] = classes.joined(separator: " ")
+            attributes.class = classes.joined(separator: " ")
         }
     }
 }

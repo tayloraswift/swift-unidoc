@@ -1,5 +1,4 @@
 import HTML
-import MarkdownRendering
 
 extension HTML.AttributeEncoder
 {
@@ -12,7 +11,7 @@ extension HTML.AttributeEncoder
         }
         set(value)
         {
-            self[.class] = value?.description
+            self.class = value?.description
         }
     }
 }
