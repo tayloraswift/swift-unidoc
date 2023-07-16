@@ -7,6 +7,7 @@ extension Site.Docs
 {
     enum DeepPage
     {
+        case article(Article)
         case culture(Culture)
         case decl(Decl)
         case disambiguation(Site.DisambiguationPage)
@@ -18,6 +19,7 @@ extension Site.Docs.DeepPage
     {
         switch self
         {
+        case .article       (let page): return page.location
         case .culture       (let page): return page.location
         case .decl          (let page): return page.location
         case .disambiguation(let page): return page.location
@@ -46,7 +48,6 @@ extension Site.Docs.DeepPage
         {
             return nil
         }
-        print(output)
 
         let principal:DeepQuery.Output.Principal = output.principal[0]
 
@@ -58,8 +59,10 @@ extension Site.Docs.DeepPage
 
             switch master
             {
-            case .article(_):
-                return nil // unimplemented
+            case .article(let master):
+                self = .article(.init(master,
+                    extensions: principal.extensions,
+                    renderer: renderer))
 
             case .culture(let master):
                 self = .culture(.init(master,
@@ -98,6 +101,7 @@ extension Site.Docs.DeepPage:HyperTextOutputStreamable
     {
         switch self
         {
+        case .article       (let content):  html += content
         case .culture       (let content):  html += content
         case .decl          (let content):  html += content
         case .disambiguation(let content):  html += content

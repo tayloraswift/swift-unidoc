@@ -143,15 +143,20 @@ extension Database
     func execute(query:__owned DeepQuery,
         with session:Mongo.Session) async throws -> [DeepQuery.Output]
     {
-        // try await session.run(
-        //     command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<PageFacets.Direct>>>.init(
-        //         verbosity: .executionStats,
-        //         command: query.command),
-        //     against: self.name)
-
         try await session.run(command: query.command, against: self.id)
         {
             try await $0.reduce(into: [], +=)
         }
+    }
+
+    public
+    func explain(query:__owned DeepQuery,
+        with session:Mongo.Session) async throws -> String
+    {
+        try await session.run(
+            command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<DeepQuery.Output>>>.init(
+                verbosity: .executionStats,
+                command: query.command),
+            against: self.id)
     }
 }

@@ -65,8 +65,7 @@ extension Delegate
     private nonisolated
     func respond(to request:GetRequest) async throws -> ServerResource
     {
-        let path:[String] = request.uri.path.normalized()
-        switch path
+        switch request.path
         {
         case ["admin"]:
             let page:Site.AdminPage = .init(configuration: try await self.mongodb.run(
@@ -93,25 +92,48 @@ extension Delegate
             break
         }
 
-        switch (path.first, path.count)
+        switch (request.path.first, request.path.count)
         {
         case ("docs"?, 2...):
-            guard   let query:DeepQuery = .init(path[1], path[2...]),
-                    let page:Site.Docs.DeepPage = .init(try await self.database.execute(
-                        query: query,
-                        with: try await .init(from: self.mongodb)))
+            guard   let query:DeepQuery = .init(request.path[1], request.path[2...],
+                        hash: request.parameters.hash)
             else
             {
                 fallthrough
             }
 
-            let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
-            let location:String = "\(page.location)"
+            let session:Mongo.Session = try await .init(from: self.mongodb)
 
-            return .init(location: location,
-                response: .content(.init(.binary(html.utf8),
-                    type: .text(.html, charset: .utf8))),
-                results: .one(canonical: location))
+            if  request.parameters.explain
+            {
+                let explanation:String = try await self.database.explain(
+                    query: query,
+                    with: session)
+
+                let location:String = "\(request.uri)"
+
+                return .init(location: location,
+                    response: .content(.init(.text(explanation),
+                        type: .text(.plain, charset: .utf8))),
+                    results: .one(canonical: location))
+            }
+            else if
+                let page:Site.Docs.DeepPage = .init(try await self.database.execute(
+                    query: query,
+                    with: session))
+            {
+                let html:HTML = .document { $0[.html] { $0[.lang] = "en" } = page }
+                let location:String = "\(page.location)"
+
+                return .init(location: location,
+                    response: .content(.init(.binary(html.utf8),
+                        type: .text(.html, charset: .utf8))),
+                    results: .one(canonical: location))
+            }
+            else
+            {
+                fallthrough
+            }
 
         case (_, _):
             return .init(location: "\(request.uri)",

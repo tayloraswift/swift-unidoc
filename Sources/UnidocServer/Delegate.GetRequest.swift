@@ -7,13 +7,20 @@ extension Delegate
 {
     struct GetRequest:Sendable
     {
-        let uri:URI
         let promise:EventLoopPromise<ServerResource>
 
-        init(uri:URI, promise:EventLoopPromise<ServerResource>)
+        let parameters:Parameters
+        let path:[String]
+
+        let uri:URI
+
+        init(promise:EventLoopPromise<ServerResource>, uri:URI)
         {
-            self.uri = uri
             self.promise = promise
+            self.uri = uri
+
+            self.parameters = .init(uri.query)
+            self.path = uri.path.normalized()
         }
     }
 }
@@ -26,7 +33,7 @@ extension Delegate.GetRequest:ServerDelegateGetRequest
     {
         if  let uri:URI = .init(uri)
         {
-            self.init(uri: uri, promise: promise())
+            self.init(promise: promise(), uri: uri)
         }
         else
         {

@@ -32,19 +32,21 @@ struct DeepQuery
 extension DeepQuery
 {
     public
-    init?(_ trunk:String, _ tail:ArraySlice<String>)
+    init?(_ trunk:String, _ tail:ArraySlice<String>, hash:FNV24? = nil)
     {
         if  let colon:String.Index = trunk.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk[..<colon]), version: nil, stem: .init(
-                uri: (trunk[trunk.index(after: colon)...], tail)))
+            self.init(package: .init(trunk[..<colon]), version: nil,
+                stem: .init(uri: (trunk[trunk.index(after: colon)...], tail)),
+                hash: hash)
         }
         else if
             let next:String = tail.first,
             let colon:String.Index = next.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk), version: next[..<colon], stem: .init(
-                uri: (next[next.index(after: colon)...], tail.dropFirst())))
+            self.init(package: .init(trunk), version: next[..<colon],
+                stem: .init(uri: (next[next.index(after: colon)...], tail.dropFirst())),
+                hash: hash)
         }
         else
         {

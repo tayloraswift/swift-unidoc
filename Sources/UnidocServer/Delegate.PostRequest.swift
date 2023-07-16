@@ -8,17 +8,15 @@ extension Delegate
 {
     struct PostRequest:Sendable
     {
-        let uri:URI
-        let form:MultipartForm
-
         let promise:EventLoopPromise<ServerResource>
+        let form:MultipartForm
+        let uri:URI
 
-        init(_ uri:URI, form:MultipartForm, promise:EventLoopPromise<ServerResource>)
+        init(promise:EventLoopPromise<ServerResource>, form:MultipartForm, uri:URI)
         {
-            self.uri = uri
-            self.form = form
-
             self.promise = promise
+            self.form = form
+            self.uri = uri
         }
     }
 }
@@ -38,7 +36,7 @@ extension Delegate.PostRequest:ServerDelegatePostRequest
             do
             {
                 let form:MultipartForm = try .init(splitting: body, on: boundary)
-                self.init(uri, form: form, promise: promise())
+                self.init(promise: promise(), form: form, uri: uri)
                 return
             }
             catch
