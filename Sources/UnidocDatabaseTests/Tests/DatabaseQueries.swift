@@ -83,7 +83,6 @@ struct DatabaseQueries:MongoTestBattery
                     with: session)
 
                 tests.expect(output.count ==? 1)
-                print(output)
             }
         }
 
