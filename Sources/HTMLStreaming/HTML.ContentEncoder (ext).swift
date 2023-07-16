@@ -31,3 +31,23 @@ extension HTML.ContentEncoder
         }
     }
 }
+extension HTML.ContentEncoder
+{
+    @inlinable public
+    subscript<Renderable>(link target:String?,
+        attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
+        where Renderable:HyperTextOutputStreamable
+    {
+        get
+        {
+            nil
+        }
+        set(display)
+        {
+            if  let display:Renderable
+            {
+                self[link: target, attributes] { $0 += display }
+            }
+        }
+    }
+}

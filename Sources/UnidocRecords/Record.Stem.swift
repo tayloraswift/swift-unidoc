@@ -22,6 +22,21 @@ extension Record
 }
 extension Record.Stem
 {
+    @inlinable public
+    var last:Substring
+    {
+        if  let separator:String.Index = self.rawValue.lastIndex(where: \.isWhitespace)
+        {
+            return self.rawValue[self.rawValue.index(after: separator)...]
+        }
+        else
+        {
+            return self.rawValue[...]
+        }
+    }
+}
+extension Record.Stem
+{
     fileprivate static
     func += (self:inout Self, characters:some StringProtocol)
     {
@@ -116,22 +131,6 @@ extension Record.Stem
             {
                 uri.append(transform(compound))
             }
-        }
-    }
-}
-extension Record.Stem
-{
-    public
-    func split() -> QualifiedPath?
-    {
-        let components:[Substring] = self.rawValue.split(whereSeparator: \.isWhitespace)
-        if  let first:Substring = components.first
-        {
-            return .init(.init(String.init(first)), components.dropFirst().map(String.init(_:)))
-        }
-        else
-        {
-            return nil
         }
     }
 }

@@ -4,23 +4,20 @@ import HTML
 import Unidoc
 import UnidocRecords
 
-extension Renderer
+struct DynamicProse
 {
-    struct Prosaic
-    {
-        private
-        let renderer:Renderer
-        private
-        let passage:Record.Passage
+    private
+    let passage:Record.Passage
+    private
+    let inliner:Inliner
 
-        init(_ renderer:Renderer, passage:Record.Passage)
-        {
-            self.renderer = renderer
-            self.passage = passage
-        }
+    init(passage:Record.Passage, inliner:Inliner)
+    {
+        self.passage = passage
+        self.inliner = inliner
     }
 }
-extension Renderer.Prosaic:HyperTextRenderableMarkdown
+extension DynamicProse:HyperTextRenderableMarkdown
 {
     var bytecode:MarkdownBytecode { self.passage.markdown }
 
@@ -39,7 +36,7 @@ extension Renderer.Prosaic:HyperTextRenderableMarkdown
             html[.code] = text
 
         case .path(let stem, let scalars):
-            html[.code] = self.renderer.link(stem.split(separator: " "), to: scalars)
+            html[.code] = self.inliner.link(stem.split(separator: " "), to: scalars)
         }
     }
 }

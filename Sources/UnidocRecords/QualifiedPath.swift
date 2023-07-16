@@ -15,6 +15,24 @@ struct QualifiedPath:Equatable, Hashable, Sendable
         self.names = names
     }
 }
+extension QualifiedPath
+{
+    public
+    init?(splitting stem:Record.Stem)
+    {
+        if  let separator:String.Index = stem.rawValue.firstIndex(where: \.isWhitespace)
+        {
+            let namespace:ModuleIdentifier = .init(String.init(stem.rawValue[..<separator]))
+            let names:Substring = stem.rawValue[stem.rawValue.index(after: separator)...]
+            self.init(namespace, names.split(
+                whereSeparator: \.isWhitespace).map(String.init(_:)))
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
 extension QualifiedPath:Comparable
 {
     @inlinable public static

@@ -14,11 +14,6 @@ extension DeepQuery
 }
 extension DeepQuery.Master
 {
-    var scalars:Scalars { .init(self) }
-    var zones:Zones { .init(self) }
-
-    subscript(keypath:BSON.Key) -> String
-    {
-        "$\(self.key / keypath)"
-    }
+    var scalars:Scalars { .init(in: self.key) }
+    var zones:Zones { .init(in: self.key) }
 }

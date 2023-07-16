@@ -113,3 +113,28 @@ extension UnqualifiedPath:CustomStringConvertible
         self.joined(separator: ".")
     }
 }
+extension UnqualifiedPath:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:String)
+    {
+        self.init(splitting: description[...]) { $0 == "." }
+    }
+}
+extension UnqualifiedPath
+{
+    @inlinable public
+    init(splitting stem:Substring, where predicate:(Character) throws -> Bool) rethrows
+    {
+        var prefix:[String] = []
+        var start:String.Index = stem.startIndex
+
+        while let end:String.Index = try stem[start...].firstIndex(where: predicate)
+        {
+            prefix.append(String.init(stem[start ..< end]))
+            start = stem.index(after: end)
+        }
+
+        self.init(prefix, String.init(stem[start...]))
+    }
+}

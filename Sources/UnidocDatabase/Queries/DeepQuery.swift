@@ -214,8 +214,10 @@ extension DeepQuery
             {
                 $0[.set] = Mongo.SetDocument.init // helps typechecking massively
                 {
-                    let extensions:ExtensionList = .init(in: Output.Principal[.extensions])
-                    let master:Master = .init(in: Output.Principal[.master])
+                    let extensions:List<Record.Extension> = .init(
+                        in: Output.Principal[.extensions])
+                    let master:Master = .init(
+                        in: Output.Principal[.master])
 
                     $0[zones] = .expr
                     {

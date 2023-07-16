@@ -1,5 +1,6 @@
 extension HTML
 {
+    @dynamicMemberLookup
     @frozen public
     struct AttributeEncoder
     {
@@ -13,12 +14,37 @@ extension HTML
         }
     }
 }
+
+extension HTML.AttributeEncoder
+{
+    @available(*, unavailable, renamed: "subscript(name:)",
+        message: """
+        Encode constant attributes through the encoder’s instance properties instead.
+        """)
+    @inlinable public
+    subscript(name:HTML.Attribute) -> Bool
+    {
+        get         { false }
+        set(bool)   { self[name: name] = bool }
+    }
+
+    @available(*, unavailable, renamed: "subscript(name:)",
+        message: """
+        Encode constant attributes through the encoder’s instance properties instead.
+        """)
+    @inlinable public
+    subscript(name:HTML.Attribute) -> String?
+    {
+        get         { nil }
+        set(text)   { self[name: name] = text }
+    }
+}
 extension HTML.AttributeEncoder
 {
     /// Serializes an empty attribute, if the assigned boolean is true.
     /// Does nothing if it is false. The getter always returns false.
     @inlinable public
-    subscript(name:HTML.Attribute) -> Bool
+    subscript(name name:HTML.Attribute) -> Bool
     {
         get
         {
@@ -26,11 +52,12 @@ extension HTML.AttributeEncoder
         }
         set(bool)
         {
-            self[name] = bool ? "" : nil
+            self[name: name] = bool ? "" : nil
         }
     }
+
     @inlinable public
-    subscript(name:HTML.Attribute) -> String?
+    subscript(name name:HTML.Attribute) -> String?
     {
         get
         {
@@ -45,7 +72,7 @@ extension HTML.AttributeEncoder
 
                 if  text.isEmpty
                 {
-                    return 
+                    return
                 }
 
                 self.utf8.append(0x3D) // '='
@@ -65,6 +92,33 @@ extension HTML.AttributeEncoder
 
                 self.utf8.append(0x27) // '''
             }
+        }
+    }
+}
+extension HTML.AttributeEncoder
+{
+    @inlinable public
+    subscript(dynamicMember path:KeyPath<HTML.Attributes, HTML.Attribute>) -> Bool
+    {
+        get
+        {
+            false
+        }
+        set(bool)
+        {
+            self[name: HTML.Attributes.`init`[keyPath: path]] = bool
+        }
+    }
+    @inlinable public
+    subscript(dynamicMember path:KeyPath<HTML.Attributes, HTML.Attribute>) -> String?
+    {
+        get
+        {
+            nil
+        }
+        set(text)
+        {
+            self[name: HTML.Attributes.`init`[keyPath: path]] = text
         }
     }
 }

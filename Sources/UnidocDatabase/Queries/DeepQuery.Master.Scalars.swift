@@ -9,11 +9,11 @@ extension DeepQuery.Master
 {
     struct Scalars
     {
-        let master:DeepQuery.Master
+        let key:BSON.Key
 
-        init(_ master:DeepQuery.Master)
+        init(in key:BSON.Key)
         {
-            self.master = master
+            self.key = key
         }
     }
 }
@@ -31,19 +31,19 @@ extension DeepQuery.Master.Scalars
         {
             list.expr
             {
-                $0[.coalesce] = (self.master[Record.Master[array]], [] as [Never])
+                $0[.coalesce] = ("$\(self.key / Record.Master[array])", [] as [Never])
             }
         }
 
         list.append
         {
-            $0.append(self.master[Record.Master[.namespace]])
-            $0.append(self.master[Record.Master[.culture]])
+            $0.append("$\(self.key / Record.Master[.namespace])")
+            $0.append("$\(self.key / Record.Master[.culture])")
         }
 
         list.expr
         {
-            let constraint:Mongo.UntypedVariable = "self"
+            let constraint:DeepQuery.Variable<GenericConstraint<Unidoc.Scalar?>> = "self"
 
             $0[.map] = .let(constraint)
             {
@@ -51,28 +51,22 @@ extension DeepQuery.Master.Scalars
                 {
                     $0[.coalesce] =
                     (
-                        self.master[Record.Master[.signature_generics_constraints]],
+                        "$\(self.key / Record.Master[.signature_generics_constraints])",
                         [] as [Never]
                     )
                 }
-                $0[.in] = constraint[GenericConstraint<Unidoc.Scalar?>[.nominal]]
+                $0[.in] = constraint.scalar
             }
         }
 
-        list.expr
+        for passage:Record.Master.CodingKey in [.overview, .details]
         {
-            let outline:Mongo.UntypedVariable = "self"
-            $0[.map] = .let(outline)
+            list.expr
             {
-                $0[.input] = .expr
-                {
-                    $0[.coalesce] =
-                    (
-                        self.master[Record.Master[.details] / Record.Passage[.outlines]],
-                        [] as [Never]
-                    )
-                }
-                $0[.in] = outline[Record.Outline[.scalars]]
+                let outlines:DeepQuery.List<Record.Outline> = .init(
+                    in: self.key / Record.Master[passage] / Record.Passage[.outlines])
+
+                $0[.reduce] = outlines.join(\.scalars)
             }
         }
     }

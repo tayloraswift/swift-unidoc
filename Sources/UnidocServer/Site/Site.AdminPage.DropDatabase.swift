@@ -16,7 +16,7 @@ extension Site.AdminPage.DropDatabase:HyperTextOutputStreamable
     {
         html[.head]
         {
-            $0[.meta] { $0[.charset] = "utf-8" }
+            $0[.meta] { $0.charset = "utf-8" }
             $0[.title] = "Drop Database?"
         }
 
@@ -24,9 +24,9 @@ extension Site.AdminPage.DropDatabase:HyperTextOutputStreamable
         {
             $0[.form]
             {
-                $0[.enctype] = "multipart/form-data"
-                $0[.action] = "/admin/action/drop-database"
-                $0[.method] = "post"
+                $0.enctype = "multipart/form-data"
+                $0.action = "/admin/action/drop-database"
+                $0.method = "post"
             }
             content:
             {
@@ -37,7 +37,7 @@ extension Site.AdminPage.DropDatabase:HyperTextOutputStreamable
 
                 $0[.p]
                 {
-                    $0[.button] { $0[.type] = "submit" } = "Drop Database"
+                    $0[.button] { $0.type = "submit" } = "Drop Database"
                 }
             }
         }

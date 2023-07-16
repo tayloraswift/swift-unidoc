@@ -12,7 +12,7 @@ extension UnqualifiedPath:RawRepresentable
     @inlinable public
     init?(rawValue:String)
     {
-        self.init(rawValue.split(separator: " ").map(String.init(_:)))
+        self.init(splitting: rawValue[...]) { $0 == " " }
     }
 }
 extension UnqualifiedPath:BSONDecodable, BSONEncodable

@@ -53,31 +53,31 @@ extension Site.Docs.DeepPage
 
         if  let master:Record.Master = principal.master
         {
-            let renderer:Renderer = .init(principal: master.id, zone: principal.zone)
-            renderer.masters.add(output.secondary)
-            renderer.zones.add(output.zones)
+            let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
+            inliner.masters.add(output.secondary)
+            inliner.zones.add(output.zones)
 
             switch master
             {
             case .article(let master):
                 self = .article(.init(master,
                     extensions: principal.extensions,
-                    renderer: renderer))
+                    inliner: inliner))
 
             case .culture(let master):
                 self = .culture(.init(master,
                     extensions: principal.extensions,
-                    renderer: renderer))
+                    inliner: inliner))
 
             case .decl(let master):
                 self = .decl(.init(master,
                     extensions: principal.extensions,
-                    renderer: renderer))
+                    inliner: inliner))
             }
         }
         else if let first:Record.Master = principal.matches.first
         {
-            let renderer:Renderer = .init(principal: first.id.zone, zone: principal.zone)
+            let inliner:Inliner = .init(principal: first.id.zone, zone: principal.zone)
             let location:URI = .init(master: first, in: principal.zone, disambiguate: false)
 
             var identity:URI.Path = []
@@ -86,7 +86,7 @@ extension Site.Docs.DeepPage
             self = .disambiguation(.init(principal.matches,
                 identity: identity,
                 location: location,
-                renderer: renderer))
+                inliner: inliner))
         }
         else
         {
