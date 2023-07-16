@@ -1,5 +1,6 @@
 import HTTPServer
 import NIOCore
+import URI
 
 extension Delegate
 {
@@ -17,6 +18,15 @@ extension Delegate.AnyRequest
         {
         case .get(let request):     return request.promise
         case .post(let request):    return request.promise
+        }
+    }
+
+    var uri:URI
+    {
+        switch self
+        {
+        case .get(let request):     return request.uri
+        case .post(let request):    return request.uri
         }
     }
 }

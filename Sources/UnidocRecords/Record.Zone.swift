@@ -28,27 +28,18 @@ extension Record
         public
         let patch:PatchVersion?
 
-        public
-        let min:Unidoc.Scalar
-        public
-        let max:Unidoc.Scalar
-
         @inlinable public
         init(id:Unidoc.Zone,
             package:PackageIdentifier,
             version:String,
             refname:String?,
-            patch:PatchVersion?,
-            min:Unidoc.Scalar,
-            max:Unidoc.Scalar)
+            patch:PatchVersion?)
         {
             self.id = id
             self.package = package
             self.version = version
             self.refname = refname
             self.patch = patch
-            self.min = min
-            self.max = max
         }
     }
 }
@@ -61,10 +52,11 @@ extension Record.Zone
             package: package,
             version: version?.description ?? "$anonymous",
             refname: refname,
-            patch: version?.stable?.release,
-            min: zone.min,
-            max: zone.max)
+            patch: version?.stable?.release)
     }
+
+    @inlinable public
+    var planes:Planes { .init(zone: self.id) }
 
     @inlinable public
     var names:Names
@@ -84,8 +76,14 @@ extension Record.Zone
         case refname = "G"
         case patch = "S"
 
-        case min = "L"
-        case max = "U"
+        case planes_min = "L"
+
+        case planes_module = "M"
+        case planes_extension = "E"
+        case planes_file = "F"
+        case planes_article = "A"
+
+        case planes_max = "U"
     }
 
     @inlinable public static
@@ -101,8 +99,15 @@ extension Record.Zone:BSONDocumentEncodable
         bson[.version] = self.version
         bson[.refname] = self.refname
         bson[.patch] = self.patch
-        bson[.min] = self.min
-        bson[.max] = self.max
+
+        bson[.planes_min] = self.planes.min
+
+        bson[.planes_module] = self.planes.module
+        bson[.planes_extension] = self.planes.extension
+        bson[.planes_file] = self.planes.file
+        bson[.planes_article] = self.planes.article
+
+        bson[.planes_max] = self.planes.max
     }
 }
 extension Record.Zone:BSONDocumentDecodable
@@ -114,8 +119,6 @@ extension Record.Zone:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             refname: try bson[.refname]?.decode(),
-            patch: try bson[.patch]?.decode(),
-            min: try bson[.min].decode(),
-            max: try bson[.max].decode())
+            patch: try bson[.patch]?.decode())
     }
 }

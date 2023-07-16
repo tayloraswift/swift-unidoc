@@ -1,7 +1,10 @@
 import HTTPServer
+import MongoDB
 import Multiparts
 import NIOCore
 import NIOHTTP1
+import SymbolGraphs
+import UnidocDatabase
 import URI
 
 extension Delegate
@@ -43,6 +46,62 @@ extension Delegate.PostRequest:ServerDelegatePostRequest
             {
                 return nil
             }
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
+extension Delegate.PostRequest
+{
+    func respond(using database:Database,
+        in pool:Mongo.SessionPool) async throws -> ServerResource?
+    {
+        let display:String?
+        switch self.uri.path.normalized() as [String]
+        {
+        case ["admin", "action", "rebuild"]:
+            let session:Mongo.Session = try await .init(from: pool)
+            let rebuilt:Int = try await database.rebuild(with: session)
+            display = "(rebuilt \(rebuilt) snapshots)"
+
+        case ["admin", "action", "upload"]:
+            let session:Mongo.Session = try await .init(from: pool)
+
+            var receipts:[SnapshotReceipt] = []
+            for item:MultipartForm.Item in self.form
+                where item.header.name == "documentation-binary"
+            {
+                let docs:Documentation = try .init(buffer: item.value)
+
+                if  let _:String = docs.metadata.id
+                {
+                    receipts.append(try await database.publish(docs: docs, with: session))
+                }
+                else
+                {
+                    throw DocumentationIdentificationError.init()
+                }
+            }
+            display = "\(receipts)"
+
+        case ["admin", "action", "drop-database"]:
+            let session:Mongo.Session = try await .init(from: pool)
+            try await database.nuke(with: session)
+            display = "(reinitialized database)"
+
+        case _:
+            display = nil
+        }
+
+        if  let display:String
+        {
+            let _location:String = "\(self.uri)"
+            return .init(location: _location,
+                    response: .content(.init(.text("success! \(display)"),
+                        type: .text(.plain, charset: .utf8))),
+                    results: .one(canonical: _location))
         }
         else
         {

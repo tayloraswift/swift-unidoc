@@ -11,6 +11,7 @@ import UnidocRecords
 @frozen public
 struct DeepQuery
 {
+    let planes:Planes
     let package:PackageIdentifier
     let version:Substring?
     let stem:Record.Stem
@@ -18,11 +19,14 @@ struct DeepQuery
     var hash:FNV24?
 
     private
-    init(package:PackageIdentifier,
+    init(_ planes:Planes,
+        package:PackageIdentifier,
         version:Substring?,
         stem:Record.Stem,
         hash:FNV24? = nil)
     {
+        self.planes = planes
+
         self.package = package
         self.version = version
         self.stem = stem
@@ -32,11 +36,13 @@ struct DeepQuery
 extension DeepQuery
 {
     public
-    init?(_ trunk:String, _ tail:ArraySlice<String>, hash:FNV24? = nil)
+    init?(_ planes:Planes, _ trunk:String, _ tail:ArraySlice<String>, hash:FNV24? = nil)
     {
         if  let colon:String.Index = trunk.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk[..<colon]), version: nil,
+            self.init(planes,
+                package: .init(trunk[..<colon]),
+                version: nil,
                 stem: .init(uri: (trunk[trunk.index(after: colon)...], tail)),
                 hash: hash)
         }
@@ -44,7 +50,9 @@ extension DeepQuery
             let next:String = tail.first,
             let colon:String.Index = next.firstIndex(of: ":")
         {
-            self.init(package: .init(trunk), version: next[..<colon],
+            self.init(planes,
+                package: .init(trunk),
+                version: next[..<colon],
                 stem: .init(uri: (next[next.index(after: colon)...], tail.dropFirst())),
                 hash: hash)
         }
@@ -125,8 +133,8 @@ extension DeepQuery
                     $0[.from] = Database.Masters.name
                     $0[.let] = .init
                     {
-                        $0[let: min] = "$\(Record.Zone[.min])"
-                        $0[let: max] = "$\(Record.Zone[.max])"
+                        $0[let: min] = "$\(Record.Zone[self.planes.range.min])"
+                        $0[let: max] = "$\(Record.Zone[self.planes.range.max])"
                     }
                     $0[.pipeline] = .init
                     {

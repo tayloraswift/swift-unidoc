@@ -1,14 +1,22 @@
 @frozen public
 enum UnidocPlane:Int32, Hashable, Equatable, Sendable
 {
-    case  article       = -0x80_000000
-    case  file          = -0x7F_000000
-    case  module        = -0x7E_000000
-    case `extension`    = -0x7D_000000
+    case  decl          =  0
+
+    case  module        = -0x80_000000
+    case `extension`    = -0x7F_000000
+    case  file          = -0x7E_000000
+    case  article       = -0x7D_000000
 
     case  zone          = -0x10_000000
-
-    case  decl          =  0
+}
+extension UnidocPlane:Comparable
+{
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.rawValue < rhs.rawValue
+    }
 }
 extension UnidocPlane
 {

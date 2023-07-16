@@ -61,7 +61,7 @@ struct DatabaseQueries:MongoTestBattery
 
         if  let tests:TestGroup = tests / "Dictionary" / "Keys",
             let query:DeepQuery = tests.expect(
-                value: .init("swift:swift", ["dictionary", "keys"]))
+                value: .init(.docs, "swift:swift", ["dictionary", "keys"]))
         {
             await tests.do
             {
@@ -75,7 +75,7 @@ struct DatabaseQueries:MongoTestBattery
         //  Test an ambiguous query.
         if  let tests:TestGroup = tests / "Int" / "init",
             let query:DeepQuery = tests.expect(
-                value: .init("swift:swift", ["int.init(_:)"]))
+                value: .init(.docs, "swift:swift", ["int.init(_:)"]))
         {
             await tests.do
             {
