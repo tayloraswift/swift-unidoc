@@ -301,6 +301,7 @@ let package:Package = .init(
 
         .target(name: "UnidocRecords", dependencies:
             [
+                .target(name: "FNV1"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "URI"),
             ]),

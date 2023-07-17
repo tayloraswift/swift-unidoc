@@ -37,11 +37,14 @@ extension SymbolGraph
             (extensions) = compiler.extensions.load()
 
             print("""
-                Compiled documentation in \(time.compiling) \
-                (\(namespaces.count) culture(s), containing \
-                \(namespaces.reduce(0) { $0 + $1.count }) namespace(s),
-                \(namespaces.reduce(0) { $0 + $1.reduce(0) { $0 + $1.decls.count } }) \
-                declaration(s), and \(extensions.count) extension(s))
+                Compiled documentation in \(time.compiling)
+                cultures        : \(namespaces.count)
+                namespaces      : \(namespaces.reduce(0) { $0 + $1.count })
+                declarations    : \(namespaces.reduce(0)
+                {
+                    $0 + $1.reduce(0) { $0 + $1.decls.count }
+                })
+                extensions      : \(extensions.count)
                 """)
         }
         do
@@ -76,7 +79,10 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try linker.finalize()
 
-            print("Linked documentation in \(time.linking)")
+            print("""
+                Linked documentation in \(time.linking)
+                symbols         : \(graph.decls.count)
+                """)
 
             let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)
             symbolicator.emit(linker.errors, colors: .enabled)

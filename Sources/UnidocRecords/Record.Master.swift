@@ -1,6 +1,7 @@
 import Availability
 import BSONDecoding
 import BSONEncoding
+import FNV1
 import MarkdownABI
 import ModuleGraphs
 import Signatures
@@ -117,6 +118,10 @@ extension Record.Master
         /// convert scalars to zones. This field will be computed and
         /// encoded if non-empty, but it will never be decoded.
         case zones = "z"
+
+        /// Optional FNV24 hash of the record’s symbol. Currently only computed
+        /// for ``Decl`` records.
+        case hash = "H"
     }
 
     @inlinable public static
@@ -176,6 +181,8 @@ extension Record.Master:BSONDocumentEncodable
 
             zones.update(with: decl.superforms)
             zones.update(with: decl.scope)
+
+            bson[.hash] = FNV24.init(hashing: "\(decl.symbol)")
 
         case .culture(let culture):
             bson[.module] = culture.module

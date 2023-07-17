@@ -10,6 +10,24 @@ struct FNV24:Equatable, Hashable, Sendable
         self.value = value
     }
 }
+extension FNV24:RawRepresentable
+{
+    @inlinable public
+    init?(rawValue:Int32)
+    {
+        if  0 ... 0x00_ff_ff_ff ~= rawValue
+        {
+            self.init(value: .init(rawValue))
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    @inlinable public
+    var rawValue:Int32 { .init(bitPattern: value) }
+}
 extension FNV24:CustomStringConvertible
 {
     @inlinable public
