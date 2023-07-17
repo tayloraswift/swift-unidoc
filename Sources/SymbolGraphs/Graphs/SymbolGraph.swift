@@ -21,17 +21,17 @@ struct SymbolGraph:Equatable, Sendable
     public
     var files:Plane<UnidocPlane.File, Symbol.File>
     public
-    var decls:Table<Symbol.Decl>
+    var decls:Plane<UnidocPlane.Decl, Symbol.Decl>
     public
-    var nodes:Table<Node>
+    var nodes:Plane<UnidocPlane.Decl, Node>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
         articles:Plane<UnidocPlane.Article, Article<String>> = [],
         files:Plane<UnidocPlane.File, Symbol.File> = [],
-        decls:Table<Symbol.Decl> = [],
-        nodes:Table<Node> = [])
+        decls:Plane<UnidocPlane.Decl, Symbol.Decl> = [],
+        nodes:Plane<UnidocPlane.Decl, Node> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
@@ -94,7 +94,7 @@ extension SymbolGraph
     @inlinable public
     func link<T>(
         static transform:(Int32) throws -> T,
-        dynamic:(Symbol.Decl) throws -> T) rethrows -> Table<T>
+        dynamic:(Symbol.Decl) throws -> T) rethrows -> Plane<UnidocPlane.Decl, T>
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.decls.count)
 
@@ -104,7 +104,7 @@ extension SymbolGraph
                 try dynamic(self.decls[index]))
         }
 
-        return .init(elements: elements)
+        return .init(table: .init(elements: elements))
     }
 }
 extension SymbolGraph

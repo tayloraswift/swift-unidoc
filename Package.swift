@@ -62,9 +62,8 @@ let package:Package = .init(
             from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
-        // .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-        //   from: "0.4.0")),
-        .package(path: "../swift-mongodb"),
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
+            from: "0.4.1")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.54.0")),

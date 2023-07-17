@@ -1,14 +1,14 @@
 @frozen public
-enum UnidocPlane:Int32, Hashable, Equatable, Sendable
+enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
 {
-    case  decl          =  0
+    case  module        = 0x00_000000
+    case  decl          = 0x01_000000
 
-    case  module        = -0x80_000000
-    case `extension`    = -0x7F_000000
-    case  file          = -0x7E_000000
-    case  article       = -0x7D_000000
+    case  article       = 0x80_000000
+    case `extension`    = 0x81_000000
+    case  file          = 0x82_000000
 
-    case  zone          = -0x10_000000
+    case  zone          = 0xFF_000000
 }
 extension UnidocPlane:Comparable
 {
@@ -23,12 +23,12 @@ extension UnidocPlane
     @inlinable internal static
     func of(_ scalar:Int32) -> Self?
     {
-        self.init(rawValue: scalar & -0x01_00000)
+        self.init(rawValue: .init(bitPattern: scalar) & 0xFF_000000)
     }
     @inlinable public static
     func | (self:Self, significand:Int32) -> Int32
     {
-        self.rawValue | significand
+        .init(bitPattern: self.rawValue) | significand
     }
 }
 extension UnidocPlane
@@ -46,5 +46,3 @@ extension UnidocPlane
         self == .of(scalar) ? Int.init(scalar & .significand) : nil
     }
 }
-
-

@@ -98,7 +98,7 @@ extension HTML.AttributeEncoder
 extension HTML.AttributeEncoder
 {
     @inlinable public
-    subscript(dynamicMember path:KeyPath<HTML.Attributes, HTML.Attribute>) -> Bool
+    subscript(dynamicMember path:KeyPath<HTML.Attribute.Factory, HTML.Attribute>) -> Bool
     {
         get
         {
@@ -106,11 +106,11 @@ extension HTML.AttributeEncoder
         }
         set(bool)
         {
-            self[name: HTML.Attributes.`init`[keyPath: path]] = bool
+            self[name: HTML.Attribute.Factory.init()[keyPath: path]] = bool
         }
     }
     @inlinable public
-    subscript(dynamicMember path:KeyPath<HTML.Attributes, HTML.Attribute>) -> String?
+    subscript(dynamicMember path:KeyPath<HTML.Attribute.Factory, HTML.Attribute>) -> String?
     {
         get
         {
@@ -118,7 +118,7 @@ extension HTML.AttributeEncoder
         }
         set(text)
         {
-            self[name: HTML.Attributes.`init`[keyPath: path]] = text
+            self[name: HTML.Attribute.Factory.init()[keyPath: path]] = text
         }
     }
 }

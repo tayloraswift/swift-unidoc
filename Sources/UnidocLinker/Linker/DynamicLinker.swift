@@ -11,7 +11,7 @@ struct DynamicLinker
     private
     let context:DynamicContext
     private
-    let conformances:SymbolGraph.Table<Conformances>
+    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances>
 
     private
     var extensions:Extensions
@@ -22,7 +22,7 @@ struct DynamicLinker
 
     private
     init(context:DynamicContext,
-        conformances:SymbolGraph.Table<Conformances>,
+        conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances>,
         extensions:Extensions,
         errors:[any DynamicLinkerError])
     {
@@ -47,7 +47,8 @@ extension DynamicLinker
         var extensions:Extensions = .init(zone: context.current.zone)
         var errors:[any DynamicLinkerError] = []
 
-        let conformances:SymbolGraph.Table<Conformances> = context.current.graph.nodes.map
+        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances> =
+            context.current.graph.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
                 //  we only need the conformances if the scalar has unqualified features

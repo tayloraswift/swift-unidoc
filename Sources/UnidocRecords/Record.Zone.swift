@@ -78,10 +78,9 @@ extension Record.Zone
 
         case planes_min = "L"
 
-        case planes_module = "M"
+        case planes_article = "A"
         case planes_extension = "E"
         case planes_file = "F"
-        case planes_article = "A"
 
         case planes_max = "U"
     }
@@ -102,10 +101,9 @@ extension Record.Zone:BSONDocumentEncodable
 
         bson[.planes_min] = self.planes.min
 
-        bson[.planes_module] = self.planes.module
+        bson[.planes_article] = self.planes.article
         bson[.planes_extension] = self.planes.extension
         bson[.planes_file] = self.planes.file
-        bson[.planes_article] = self.planes.article
 
         bson[.planes_max] = self.planes.max
     }

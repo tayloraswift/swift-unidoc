@@ -13,13 +13,13 @@ class SnapshotObject:Sendable
     let snapshot:Snapshot
 
     let namespaces:[Unidoc.Scalar?]
-    let decls:SymbolGraph.Table<Unidoc.Scalar?>
+    let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>
 
     private
     init(snapshot:Snapshot,
         hierarchy:[Int32: Unidoc.Scalar],
         namespaces:[Unidoc.Scalar?],
-        decls:SymbolGraph.Table<Unidoc.Scalar?>)
+        decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>)
     {
         self.snapshot = snapshot
         self.hierarchy = hierarchy
@@ -42,7 +42,7 @@ extension SnapshotObject
     init(snapshot:__owned Snapshot, upstream:__shared DynamicContext.UpstreamScalars)
     {
         let zone:Unidoc.Zone = snapshot.zone
-        let decls:SymbolGraph.Table<Unidoc.Scalar?> = snapshot.graph.link
+        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> = snapshot.graph.link
         {
             zone + $0
         }

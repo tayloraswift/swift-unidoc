@@ -21,13 +21,11 @@ extension Record.Zone.Planes
     var min:Unidoc.Scalar { self.zone.min }
 
     @inlinable public
-    var module:Unidoc.Scalar { self.zone + (0 * .module) }
+    var article:Unidoc.Scalar { self.zone + (0 * .article) }
     @inlinable public
     var `extension`:Unidoc.Scalar { self.zone + (0 * .extension) }
     @inlinable public
     var file:Unidoc.Scalar { self.zone + (0 * .file) }
-    @inlinable public
-    var article:Unidoc.Scalar { self.zone + (0 * .article) }
 
     @inlinable public
     var max:Unidoc.Scalar { self.zone.max }

@@ -15,8 +15,8 @@ extension DeepQuery.Planes
     {
         switch self
         {
-        case .docs:     return (.planes_min,        .planes_extension)
-        case .learn:    return (.planes_article,    .planes_max)
+        case .docs:     return (.planes_min,        .planes_article)
+        case .learn:    return (.planes_article,    .planes_extension)
         }
     }
 }
