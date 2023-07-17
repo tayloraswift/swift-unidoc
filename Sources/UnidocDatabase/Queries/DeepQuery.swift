@@ -143,6 +143,7 @@ extension DeepQuery
                             $0[.match] = .init
                             {
                                 $0[Record.Master[.stem]] = self.stem
+                                $0[Record.Master[.hash]] = self.hash
                                 $0[.expr] = .expr
                                 {
                                     $0[.and] =
