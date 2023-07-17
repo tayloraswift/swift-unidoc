@@ -146,13 +146,8 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
             self.signature.generics.parameters.isEmpty ? nil :
             self.signature.generics.parameters
 
-        bson[.superforms] =
-            self.superforms.isEmpty ? nil :
-            self.superforms
-
-        bson[.features] =
-            self.features.isEmpty ? nil :
-            self.features
+        bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
+        bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
 
         bson[.origin] = self.origin
 
@@ -186,8 +181,10 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
 
             location: try bson[.location]?.decode(),
             article: try bson[.article]?.decode(),
-            superforms: try bson[.superforms]?.decode() ?? [],
-            features: try bson[.features]?.decode() ?? [],
+            superforms: try bson[.superforms]?.decode(
+                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+            features: try bson[.features]?.decode(
+                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             origin: try bson[.origin]?.decode())
     }
 }
