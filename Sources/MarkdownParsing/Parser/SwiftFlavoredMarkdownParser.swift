@@ -7,19 +7,26 @@ struct SwiftFlavoredMarkdownParser
 {
     private
     let plugins:[String: any MarkdownCodeLanguageType]
+    private
+    let `default`:(any MarkdownCodeLanguageType)?
 
     private
-    init(plugins:[String: any MarkdownCodeLanguageType])
+    init(
+        plugins:[String: any MarkdownCodeLanguageType],
+        default:(any MarkdownCodeLanguageType)? = nil)
     {
         self.plugins = plugins
+        self.default = `default`
     }
 }
 extension SwiftFlavoredMarkdownParser
 {
     public
-    init(plugins:[any MarkdownCodeLanguageType] = [])
+    init(
+        plugins:[any MarkdownCodeLanguageType] = [],
+        default:(any MarkdownCodeLanguageType)? = nil)
     {
-        self.init(plugins: plugins.reduce(into: [:]) { $0[$1.name] = $1 })
+        self.init(plugins: plugins.reduce(into: [:]) { $0[$1.name] = $1 }, default: `default`)
     }
 }
 extension SwiftFlavoredMarkdownParser:MarkdownParser
@@ -63,6 +70,11 @@ extension SwiftFlavoredMarkdownParser
             if  let language:String = block.language
             {
                 return (self.plugins[language] ?? .unsupported(language)).attach(to: block.code)
+            }
+            else if
+                let plugin:any MarkdownCodeLanguageType = self.default
+            {
+                return plugin.attach(to: block.code)
             }
             else
             {
