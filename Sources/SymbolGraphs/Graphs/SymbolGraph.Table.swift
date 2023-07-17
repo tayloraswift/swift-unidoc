@@ -5,7 +5,7 @@ extension SymbolGraph
 {
     /// A wrapper around an array that statically guarantees that its
     /// indices are representable in 24 bits, and can be indexed with ``Int32``.
-    @frozen public
+    @frozen @usableFromInline internal
     struct Table<Element>
     {
         @usableFromInline internal
@@ -29,14 +29,14 @@ extension SymbolGraph.Table:Sendable where Element:Sendable
 }
 extension SymbolGraph.Table
 {
-    @inlinable public mutating
+    @inlinable internal mutating
     func reserveCapacity(_ capacity:Int)
     {
         self.elements.reserveCapacity(capacity)
     }
     /// Appends an element to the table. Traps if the index of the new
     /// table element cannot be represented in 24 bits.
-    @inlinable public mutating
+    @inlinable internal mutating
     func append(_ element:__owned Element) -> Int32
     {
         let next:Int = self.elements.count
@@ -53,7 +53,7 @@ extension SymbolGraph.Table
 }
 extension SymbolGraph.Table:ExpressibleByArrayLiteral
 {
-    @inlinable public
+    @inlinable internal
     init(arrayLiteral:Element...)
     {
         if  arrayLiteral.count <= 0x00_ff_ff_ff
@@ -68,13 +68,13 @@ extension SymbolGraph.Table:ExpressibleByArrayLiteral
 }
 extension SymbolGraph.Table:Sequence
 {
-    @inlinable public
+    @inlinable internal
     func withContiguousStorageIfAvailable<Success>(
         _ body:(UnsafeBufferPointer<Element>) throws -> Success) rethrows -> Success?
     {
         try self.elements.withContiguousStorageIfAvailable(body)
     }
-    @inlinable public
+    @inlinable internal
     var underestimatedCount:Int
     {
         self.elements.count
@@ -83,24 +83,24 @@ extension SymbolGraph.Table:Sequence
 extension SymbolGraph.Table:RandomAccessCollection
 {
     @_semantics("array.get_count")
-    @inlinable public
+    @inlinable internal
     var count:Int
     {
         self.elements.count
     }
 
-    @inlinable public
+    @inlinable internal
     var startIndex:Int32
     {
         .init(self.elements.startIndex)
     }
-    @inlinable public
+    @inlinable internal
     var endIndex:Int32
     {
         .init(self.elements.endIndex)
     }
     @_semantics("array.subscript")
-    @inlinable public
+    @inlinable internal
     subscript(index:Int32) -> Element
     {
         _read
@@ -115,7 +115,7 @@ extension SymbolGraph.Table:RandomAccessCollection
 }
 extension SymbolGraph.Table
 {
-    @inlinable public
+    @inlinable internal
     subscript(index:Int) -> Element
     {
         _read
@@ -130,7 +130,7 @@ extension SymbolGraph.Table
 }
 extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
 {
-    public
+    @usableFromInline internal
     func encode(to field:inout BSON.Field)
     {
         self.elements.encode(to: &field)
@@ -138,7 +138,7 @@ extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
 }
 extension SymbolGraph.Table:BSONDecodable where Element:BSONDecodable
 {
-    @inlinable public
+    @inlinable internal
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
     {
         self.init(elements: try .init(bson: bson))
