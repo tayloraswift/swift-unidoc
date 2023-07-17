@@ -20,6 +20,8 @@ public
 struct StaticLinker
 {
     private
+    let doccommentParser:SwiftFlavoredMarkdownParser
+    private
     let markdownParser:SwiftFlavoredMarkdownParser
     private
     let nominations:Compiler.Nominations
@@ -44,6 +46,10 @@ struct StaticLinker
         modules:[ModuleDetails],
         plugins:[any MarkdownCodeLanguageType] = [])
     {
+        //  If we were given a plugin that says it can highlight swift,
+        //  make it the default plugin for the doccomment parser.
+        self.doccommentParser = .init(plugins: plugins,
+            default: plugins.first { $0.name == "swift" })
         self.markdownParser = .init(plugins: plugins)
         self.nominations = nominations
 
@@ -503,7 +509,7 @@ extension StaticLinker
                 }
 
                 return outliner.link(comment: .init(from: $0, in: location?.file),
-                    parser: self.markdownParser,
+                    parser: self.doccommentParser,
                     adding: self.supplements.removeValue(forKey: scalar))
             }
 
@@ -557,8 +563,9 @@ extension StaticLinker
             }
             if  let comment
             {
-                //  Need to load this before mutating the symbol graph to avoid
+                //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
+                let parser:SwiftFlavoredMarkdownParser = self.doccommentParser
                 let imports:[ModuleIdentifier] = self.imports
                 //  Only intern the file path for the extension block with the longest comment
                 let file:Int32? = file.map { self.symbolizer.intern($0) }
@@ -574,7 +581,7 @@ extension StaticLinker
 
                     $0.article = outliner.link(
                         comment: .init(from: comment, in: file),
-                        parser: self.markdownParser)
+                        parser: parser)
 
                     self.errors += outliner.errors
 
