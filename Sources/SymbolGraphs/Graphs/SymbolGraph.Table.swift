@@ -50,13 +50,6 @@ extension SymbolGraph.Table
             fatalError("SymbolGraph.Table index overflow (\(next) elements)")
         }
     }
-
-    @inlinable public
-    func map<T>(_ transform:(_ address:Int32, _ element:Element) throws -> T)
-        rethrows -> SymbolGraph.Table<T>
-    {
-        .init(elements: try self.indices.map { try transform($0, self[$0]) })
-    }
 }
 extension SymbolGraph.Table:ExpressibleByArrayLiteral
 {

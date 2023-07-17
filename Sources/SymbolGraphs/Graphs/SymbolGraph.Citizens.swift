@@ -1,4 +1,5 @@
 import Symbols
+import Unidoc
 
 extension SymbolGraph
 {
@@ -9,12 +10,12 @@ extension SymbolGraph
     struct Citizens
     {
         @usableFromInline internal
-        let symbols:Table<Symbol.Decl>
+        let symbols:Plane<UnidocPlane.Decl, Symbol.Decl>
         @usableFromInline internal
-        let nodes:Table<Node>
+        let nodes:Plane<UnidocPlane.Decl, Node>
 
         @inlinable internal
-        init(symbols:Table<Symbol.Decl>, nodes:Table<Node>)
+        init(symbols:Plane<UnidocPlane.Decl, Symbol.Decl>, nodes:Plane<UnidocPlane.Decl, Node>)
         {
             self.symbols = symbols
             self.nodes = nodes
