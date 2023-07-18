@@ -1,4 +1,6 @@
+import NIOCore
 import NIOHTTP1
+import NIOPosix
 import TraceableErrors
 
 public
@@ -72,5 +74,39 @@ extension ServerAuthority
     func link(_ uri:String, rel:ServerResource.Relationship) -> String
     {
         "<\(Self.url(uri))>; rel=\"\(rel)\""
+    }
+}
+extension ServerAuthority
+{
+    public static
+    func redirect(from binding:(address:String, port:Int),
+        on threads:MultiThreadedEventLoopGroup) async throws
+    {
+        let bootstrap:ServerBootstrap = .init(group: threads)
+            .serverChannelOption(ChannelOptions.backlog, value: 256)
+            .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
+            .childChannelOption(ChannelOptions.allowRemoteHalfClosure, value: true)
+            .childChannelInitializer
+        {
+            (channel:any Channel) -> EventLoopFuture<Void> in
+
+            let endpoint:ServerRedirectorHandler<Self> = .init()
+
+            return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
+                .flatMap
+            {
+                channel.pipeline.addHandler(endpoint)
+            }
+        }
+
+        let channel:any Channel = try await bootstrap.bind(
+            host: binding.address,
+            port: binding.port).get()
+
+        print("bound to:", binding.address, binding.port)
+
+        try await channel.closeFuture.get()
     }
 }

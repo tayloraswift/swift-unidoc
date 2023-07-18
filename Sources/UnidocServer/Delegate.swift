@@ -102,12 +102,18 @@ extension Delegate
     public static
     func main() async throws
     {
+        let executors:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let options:Options = try .parse()
+        if  options.redirect
+        {
+            try await options.authority.type.redirect(from: ("0.0.0.0", options.port),
+                on: executors)
+            return
+        }
 
         let authority:any ServerAuthority = try options.authority.load(
             certificates: options.certificates)
 
-        let executors:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let mongodb:Mongo.DriverBootstrap = MongoDB / [options.mongo] /?
         {
             $0.executors = .shared(executors)
