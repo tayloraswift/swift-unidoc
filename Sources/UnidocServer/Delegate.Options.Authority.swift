@@ -11,6 +11,15 @@ extension Delegate.Options
 }
 extension Delegate.Options.Authority
 {
+    var type:any ServerAuthority.Type
+    {
+        switch self
+        {
+        case .localhost:    return Localhost.self
+        case .testing:      return Swiftinit.self
+        }
+    }
+
     func load(certificates:String?) throws -> any ServerAuthority
     {
         switch self

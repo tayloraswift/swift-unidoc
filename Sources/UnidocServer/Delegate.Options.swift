@@ -6,6 +6,7 @@ extension Delegate
     {
         var authority:Authority
         var certificates:String?
+        var redirect:Bool
         var mongo:String
         /// This is the port that the server binds to. It is not necessarily
         /// the port that the server is accessed through.
@@ -15,6 +16,7 @@ extension Delegate
         {
             self.authority = .localhost
             self.certificates = nil
+            self.redirect = false
             self.mongo = "unidoc-mongod"
             self.port = 8080
         }
@@ -57,6 +59,9 @@ extension Delegate.Options
                 }
 
                 options.certificates = certificates
+
+            case "-r", "--redirect":
+                options.redirect = true
 
             case "-m", "--mongo":
                 switch arguments.next()
