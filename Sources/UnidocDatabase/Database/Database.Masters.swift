@@ -16,7 +16,7 @@ extension Database
 }
 extension Database.Masters:DatabaseCollection
 {
-    typealias Element = Record.Master
+    typealias ElementID = Unidoc.Scalar
 
     static
     var name:Mongo.Collection { "masters" }

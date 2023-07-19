@@ -22,7 +22,13 @@ extension DeepQuery.Variable<GenericConstraint<Unidoc.Scalar?>>
 }
 extension DeepQuery.Variable<Record.Outline>
 {
-    var scalars:String { self[T[.scalars]] }
+    var scalars:MongoExpression
+    {
+        .expr
+        {
+            $0[.coalesce] = (self[T[.scalars]], [] as [Never])
+        }
+    }
 }
 extension DeepQuery.Variable<Record.Extension>
 {
@@ -70,6 +76,52 @@ extension DeepQuery.Variable<Record.Extension>
         .expr
         {
             $0[.coalesce] = (self[Record.Extension[.zones]], [] as [Never])
+        }
+    }
+}
+extension DeepQuery.Variable<Unidoc.Scalar>
+{
+    /// Returns a predicate that matches all extensions to the same scope as
+    /// the value of this variable, and is either from the latest version of
+    /// its home package, or has an ID between the given min and max.
+    func extensions(min:Self, max:Self) -> Mongo.PredicateDocument
+    {
+        .init
+        {
+            $0[.expr] = .expr
+            {
+                $0[.and] = .init
+                {
+                    $0.expr
+                    {
+                        $0[.eq] = ("$\(Record.Extension[.scope])", self)
+                    }
+                    $0.expr
+                    {
+                        $0[.or] = .init
+                        {
+                            $0.expr
+                            {
+                                $0[.and] = .init
+                                {
+                                    $0.expr
+                                    {
+                                        $0[.gte] = ("$\(Record.Extension[.id])", min)
+                                    }
+                                    $0.expr
+                                    {
+                                        $0[.lte] = ("$\(Record.Extension[.id])", max)
+                                    }
+                                }
+                            }
+                            $0.expr
+                            {
+                                $0[.eq] = ("$\(Record.Extension[.latest])", true)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

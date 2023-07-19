@@ -59,8 +59,8 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             {
                 $0[.div, { $0.class = "eyebrows" }]
                 {
-                    $0[.span, { $0.class = "phylum" }] = self.master.phylum.title
-
+                    $0[.span] { $0.class = "phylum" } = self.master.phylum.title
+                    $0[.span] { $0.class = "version" } = self.zone.version
                     $0[.span, { $0.class = "module" }]
                     {
                         $0 ?= self.master.namespace == self.master.culture ? nil
@@ -74,7 +74,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
 
                 $0 ?= self.master.overview.map(self.inliner.prose(_:))
 
-                $0[.span, { $0.class = "phylum" }] = self.master.customization.title
+                $0[.span] { $0.class = "phylum" } = self.master.customization.title
             }
 
             $0[.section, { $0.class = "declaration" }]

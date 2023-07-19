@@ -4,6 +4,7 @@ import ModuleGraphs
 import MongoDB
 import Signatures
 import SymbolGraphs
+import Unidoc
 import UnidocRecords
 
 /// A deep query is a query for a single code-level entity,
@@ -83,8 +84,15 @@ extension DeepQuery
             $0[.hint] = .init
             {
                 $0[Record.Zone[.package]] = (+)
-                $0[Record.Zone[.version]] = (+)
-                $0[Record.Zone[.patch]] = (-)
+
+                if  case _? = self.version
+                {
+                    $0[Record.Zone[.version]] = (+)
+                }
+                else
+                {
+                    $0[Record.Zone[.patch]] = (-)
+                }
             }
         }
     }
@@ -96,28 +104,54 @@ extension DeepQuery
     {
         .init
         {
-            //  Look up the zone to search in. If a version string was provided,
-            //  use that to filter between multiple versions of the same package.
-            //  If any snapshots with semantic versions match, pick the one with
-            //  the highest semantic version.
-            $0.stage
+            //  Look up the zone to search in.
+            if  let version:Substring = self.version
             {
-                $0[.match] = .init
+                //  If a version string was provided, use that to filter between
+                //  multiple versions of the same package.
+                //  This index is unique, so we don’t need a sort or a limit.
+                $0.stage
                 {
-                    $0[Record.Zone[.package]] = self.package
-                    $0[Record.Zone[.version]] = self.version
+                    $0[.match] = .init
+                    {
+                        $0[Record.Zone[.package]] = self.package
+                        $0[Record.Zone[.version]] = version
+                    }
                 }
             }
-            $0.stage
+            else
             {
-                $0[.sort] = .init
+                //  If no version string was provided, pick the one with
+                //  the highest semantic version. Unstable and prerelease
+                //  versions are not eligible.
+                //  This works a lot like ``Database.Zones.latest(of:with:)``,
+                //  except it queries the package by name instead of id.
+                $0.stage
                 {
-                    $0[Record.Zone[.patch]] = (-)
+                    $0[.match] = .init
+                    {
+                        $0[Record.Zone[.package]] = self.package
+                        $0[Record.Zone[.patch]] = .init
+                        {
+                            $0[.ne] = Never??.some(nil)
+                        }
+                    }
                 }
-            }
-            $0.stage
-            {
-                $0[.limit] = 1
+                //  We use the patch number instead of the latest-flag because
+                //  it is closer to the ground-truth, and the latest-flag doesn’t
+                //  have a unique (compound) index with the package name, since
+                //  it experiences rolling alignments.
+                $0.stage
+                {
+                    $0[.sort] = .init
+                    {
+                        $0[Record.Zone[.patch]] = (-)
+                    }
+                }
+                $0.stage
+                {
+                    $0[.limit] = 1
+                }
             }
 
             //  Find at least one master record that has a matching url stem,
@@ -127,8 +161,8 @@ extension DeepQuery
             {
                 $0[.lookup] = .init
                 {
-                    let min:Mongo.UntypedVariable = "min"
-                    let max:Mongo.UntypedVariable = "max"
+                    let min:Variable<Unidoc.Scalar> = "min"
+                    let max:Variable<Unidoc.Scalar> = "max"
 
                     $0[.from] = Database.Masters.name
                     $0[.let] = .init
@@ -198,9 +232,24 @@ extension DeepQuery
             {
                 $0[.lookup] = .init
                 {
+                    let id:Variable<Unidoc.Scalar> = "id"
+                    let min:Variable<Unidoc.Scalar> = "min"
+                    let max:Variable<Unidoc.Scalar> = "max"
+
                     $0[.from] = Database.Extensions.name
-                    $0[.localField] = Output.Principal[.master] / Record.Master[.id]
-                    $0[.foreignField] = Record.Extension[.scope]
+                    $0[.let] = .init
+                    {
+                        $0[let: id] = "$\(Output.Principal[.master] / Record.Master[.id])"
+                        $0[let: min] = "$\(Record.Zone[.planes_min])"
+                        $0[let: max] = "$\(Record.Zone[.planes_max])"
+                    }
+                    $0[.pipeline] = .init
+                    {
+                        $0.stage
+                        {
+                            $0[.match] = id.extensions(min: min, max: max)
+                        }
+                    }
                     $0[.as] = Output.Principal[.extensions]
                 }
             }

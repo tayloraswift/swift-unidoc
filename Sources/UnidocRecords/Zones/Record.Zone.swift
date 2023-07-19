@@ -26,6 +26,9 @@ extension Record
         let refname:String?
 
         public
+        var latest:Bool
+
+        public
         let patch:PatchVersion?
 
         @inlinable public
@@ -33,35 +36,30 @@ extension Record
             package:PackageIdentifier,
             version:String,
             refname:String?,
+            latest:Bool,
             patch:PatchVersion?)
         {
             self.id = id
             self.package = package
             self.version = version
             self.refname = refname
+            self.latest = latest
             self.patch = patch
         }
     }
 }
 extension Record.Zone
 {
-    public
-    init(_ zone:Unidoc.Zone, package:PackageIdentifier, version:AnyVersion?, refname:String?)
-    {
-        self.init(id: zone,
-            package: package,
-            version: version?.description ?? "$anonymous",
-            refname: refname,
-            patch: version?.stable?.release)
-    }
-
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
 
     @inlinable public
     var names:Names
     {
-        .init(package: self.package, version: self.version, refname: self.refname)
+        .init(package: self.package,
+            version: self.version,
+            refname: self.refname,
+            latest: self.latest)
     }
 }
 extension Record.Zone
@@ -76,13 +74,19 @@ extension Record.Zone
         case refname = "G"
         case patch = "S"
 
-        case planes_min = "L"
+        case planes_min = "C"
 
         case planes_article = "A"
         case planes_extension = "E"
         case planes_file = "F"
 
-        case planes_max = "U"
+        case planes_max = "Z"
+
+        /// Indicates if this zone contains records from the latest release
+        /// version of its package. This flag is non-authoritative and only
+        /// exists as a query optimization. It is computed and aligned within
+        /// the database according to the value of the ``patch`` field.
+        case latest = "L"
     }
 
     @inlinable public static
@@ -97,6 +101,7 @@ extension Record.Zone:BSONDocumentEncodable
         bson[.package] = self.package
         bson[.version] = self.version
         bson[.refname] = self.refname
+        bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
 
         bson[.planes_min] = self.planes.min
@@ -117,6 +122,7 @@ extension Record.Zone:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             refname: try bson[.refname]?.decode(),
+            latest: try bson[.latest]?.decode() ?? false,
             patch: try bson[.patch]?.decode())
     }
 }

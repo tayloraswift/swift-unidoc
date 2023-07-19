@@ -1,6 +1,7 @@
 import FNV1
 import MongoDB
 import ModuleGraphs
+import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -48,9 +49,20 @@ extension Database
         try await self.packages.setup(with: session)
         try await self.snapshots.setup(with: session)
 
-        try await self.extensions.setup(with: session)
-        try await self.masters.setup(with: session)
-        try await self.zones.setup(with: session)
+        do
+        {
+            try await self.extensions.setup(with: session)
+            try await self.masters.setup(with: session)
+            try await self.zones.setup(with: session)
+        }
+        catch let error
+        {
+            print("""
+                warning: some indexes are no longer valid. \
+                the database likely needs to be rebuilt.
+                """)
+            print(error)
+        }
     }
 }
 extension Database
@@ -66,22 +78,6 @@ extension Database
 extension Database
 {
     public
-    func publish(docs:__owned Documentation,
-        with session:__shared Mongo.Session) async throws -> SnapshotReceipt
-    {
-        let receipt:SnapshotReceipt = try await self.push(docs: docs, with: session)
-
-        try await self.pull(from: .init(id: receipt.id,
-                package: receipt.package,
-                version: receipt.version,
-                metadata: docs.metadata,
-                graph: docs.graph),
-            with: session)
-
-        return receipt
-    }
-
-    public
     func rebuild(with session:__shared Mongo.Session) async throws -> Int
     {
         //  TODO: we need to implement some kind of locking mechanism to prevent
@@ -90,25 +86,43 @@ extension Database
         //  overflows the transaction cache.
         let zones:[Unidoc.Zone] = try await self.snapshots.list(with: session)
 
-        try await self.extensions.clear(with: session)
-        try await self.masters.clear(with: session)
-        try await self.zones.clear(with: session)
+        try await self.extensions.replace(with: session)
+        try await self.masters.replace(with: session)
+        try await self.zones.replace(with: session)
 
         for zone:Unidoc.Zone in zones
         {
             let snapshot:Snapshot = try await self.snapshots.load(zone, with: session)
-            try await self.pull(from: snapshot,with: session)
+            let records:Records = try await self.pull(from: snapshot, with: session)
+
+            try await self.push(records, with: session)
 
             print("regenerated records for snapshot: \(snapshot.id)")
         }
 
         return zones.count
     }
+
+    public
+    func publish(docs:__owned Documentation,
+        with session:__shared Mongo.Session) async throws -> SnapshotReceipt
+    {
+        let receipt:SnapshotReceipt = try await self.store(docs: docs, with: session)
+        let records:Records = try await self.pull(from: .init(id: receipt.id,
+                package: receipt.package,
+                version: receipt.version,
+                metadata: docs.metadata,
+                graph: docs.graph),
+            with: session)
+
+        try await self.push(records, with: session)
+        return receipt
+    }
 }
 extension Database
 {
     public
-    func push(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
+    func store(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         //  TODO: enforce population limits
         try await self.snapshots.push(docs,
@@ -118,23 +132,54 @@ extension Database
     }
     private
     func pull(from snapshot:__owned Snapshot,
-        with session:__shared Mongo.Session) async throws
+        with session:__shared Mongo.Session) async throws -> Records
     {
         let context:DynamicContext = .init(snapshot,
             dependencies: try await self.snapshots.load(snapshot.metadata.pins(),
                 with: session))
 
-        let linker:DynamicLinker = .init(context: context)
-        let output:Records = linker.projection
-
         let symbolicator:DynamicSymbolicator = .init(context: context,
             root: snapshot.metadata.root)
+        let linker:DynamicLinker = .init(context: context)
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        try await self.extensions.insert(output.extensions, with: session)
-        try await self.masters.insert(output.masters, with: session)
-        try await self.zones.insert(output.zone, with: session)
+        var output:Records = linker.projection
+
+        if  let latest:Zones.PatchView = try await self.zones.latest(of: snapshot.cell,
+                with: session)
+        {
+            guard let current:PatchVersion = output.zone.patch, latest.patch < current
+            else
+            {
+                output.latest = latest.id
+                output.zone.latest = false
+                return output
+            }
+        }
+
+        return output
+    }
+    private
+    func push(_ records:__owned Records,
+        with session:__shared Mongo.Session) async throws
+    {
+        try await self.zones.insert(records.zone, with: session)
+        try await self.masters.insert(records.masters, with: session)
+
+        if  records.zone.latest
+        {
+            try await self.extensions.insert(records.extensions(latest: true), with: session)
+        }
+        else
+        {
+            try await self.extensions.insert(records.extensions, with: session)
+        }
+        if  let latest:Unidoc.Zone = records.latest
+        {
+            try await self.extensions.align(latest: latest, with: session)
+            try await self.zones.align(latest: latest, with: session)
+        }
     }
 }
 extension Database

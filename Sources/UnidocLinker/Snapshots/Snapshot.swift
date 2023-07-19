@@ -37,6 +37,12 @@ struct Snapshot:Equatable, Sendable
 extension Snapshot
 {
     @inlinable public
+    var cell:Unidoc.Cell
+    {
+        .init(package: self.package)
+    }
+
+    @inlinable public
     var zone:Unidoc.Zone
     {
         .init(package: self.package, version: self.version)
