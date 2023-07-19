@@ -8,13 +8,19 @@ import Unidoc
 struct DynamicResolutionGroup:Sendable
 {
     private(set)
+    var optimizer:Optimizer
+
+    private(set)
     var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
     private(set)
     var imports:[ModuleIdentifier]
 
-    init(codelinks:CodelinkResolver<Unidoc.Scalar>.Table = .init(),
+    init(
+        optimizer:Optimizer = .init(),
+        codelinks:CodelinkResolver<Unidoc.Scalar>.Table = .init(),
         imports:[ModuleIdentifier] = [])
     {
+        self.optimizer = optimizer
         self.codelinks = codelinks
         self.imports = imports
     }
@@ -95,8 +101,16 @@ extension DynamicResolutionGroup
         filter:Set<Int>?)
     {
         for `extension`:SymbolGraph.Extension in extensions where
-            !`extension`.features.isEmpty && filter?.contains(`extension`.culture) ?? true
+            // !`extension`.features.isEmpty &&
+            filter?.contains(`extension`.culture) ?? true
         {
+            let signature:DynamicLinker.ExtensionSignature = .init(
+                conditions: `extension`.conditions.map  { $0.map { snapshot.decls[$0] } },
+                culture: snapshot.zone + `extension`.culture * .module,
+                extends: outer.scalar)
+
+            self.optimizer.extensions[signature].update(with: `extension`, by: snapshot.decls)
+
             //  This can be completely different from the namespace of the extended type!
             let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features

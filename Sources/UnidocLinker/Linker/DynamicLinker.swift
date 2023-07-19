@@ -180,7 +180,8 @@ extension DynamicLinker
                     //  now that we know the address of the feature’s original
                     //  protocol, we can look up the constraints for the
                     //  conformance(s) that conceived it.
-                    for conformance:ExtensionSignature in conformances[to: `protocol`]
+                    for conformance:ExtensionSignature in conformances[to: `protocol`] where
+                        !group.optimizer.extensions[conformance].features.contains(f)
                     {
                         self.extensions[conformance].features.append(f)
                     }
