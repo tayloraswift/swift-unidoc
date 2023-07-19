@@ -74,6 +74,12 @@ extension DynamicContext
 }
 extension DynamicContext
 {
+    private
+    subscript(dynamic package:PackageIdentifier) -> SnapshotObject?
+    {
+        self.current.snapshot.metadata.package == package ?
+        nil : self.byPackageIdentifier[package]
+    }
     subscript(package:PackageIdentifier) -> SnapshotObject?
     {
         self.current.snapshot.metadata.package == package ?
@@ -131,12 +137,14 @@ extension DynamicContext
         {
             print("\(culture.module.id): \(culture.module.dependencies)")
 
+            //  This dictionary is a dictionary key itself!
+            //  In the end in wonderland...
             var products:[PackageIdentifier: Set<String>] = [:]
             for product:ProductIdentifier in culture.module.dependencies.products
             {
                 products[product.package, default: []].update(with: product.name)
             }
-
+            //  If we had `n` cultures, we could have fewer than `n` groups.
             groups[products, default: []].append(c)
         }
 
@@ -145,15 +153,15 @@ extension DynamicContext
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
                 var group:DynamicResolutionGroup = .init()
-
-                if  let swift:SnapshotObject = self[.swift]
+                //  We already
+                if  let swift:SnapshotObject = self[dynamic: .swift]
                 {
                     group.add(snapshot: swift, context: self, filter: nil)
                 }
                 for (package, products):(PackageIdentifier, Set<String>) in
                     dependencies.sorted(by: { $0.key < $1.key })
                 {
-                    guard let object:SnapshotObject = self[package]
+                    guard let object:SnapshotObject = self[dynamic: package]
                     else
                     {
                         continue

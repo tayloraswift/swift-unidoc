@@ -104,9 +104,8 @@ extension DynamicResolutionGroup
             // !`extension`.features.isEmpty &&
             filter?.contains(`extension`.culture) ?? true
         {
-            let signature:DynamicLinker.ExtensionSignature = .init(
+            let signature:Optimizer.ExtensionSignature = .init(
                 conditions: `extension`.conditions.map  { $0.map { snapshot.decls[$0] } },
-                culture: snapshot.zone + `extension`.culture * .module,
                 extends: outer.scalar)
 
             self.optimizer.extensions[signature].update(with: `extension`, by: snapshot.decls)

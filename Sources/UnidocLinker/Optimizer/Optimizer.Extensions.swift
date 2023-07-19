@@ -3,9 +3,9 @@ extension Optimizer
     struct Extensions
     {
         private
-        var table:[DynamicLinker.ExtensionSignature: Extension]
+        var table:[ExtensionSignature: Extension]
 
-        init(table:[DynamicLinker.ExtensionSignature: Extension] = [:])
+        init(table:[ExtensionSignature: Extension] = [:])
         {
             self.table = table
         }
@@ -13,7 +13,7 @@ extension Optimizer
 }
 extension Optimizer.Extensions
 {
-    subscript(signature:DynamicLinker.ExtensionSignature) -> Optimizer.Extension
+    subscript(signature:Optimizer.ExtensionSignature) -> Optimizer.Extension
     {
         _read
         {
