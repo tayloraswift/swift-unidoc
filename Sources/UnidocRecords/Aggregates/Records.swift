@@ -1,8 +1,13 @@
+import BSONEncoding
+import Unidoc
+
 @frozen public
 struct Records:Sendable
 {
     public
-    let zone:Record.Zone
+    var latest:Unidoc.Zone?
+    public
+    var zone:Record.Zone
 
     public
     var articles:[Record.Master.Article]
@@ -22,6 +27,15 @@ struct Records:Sendable
     {
         self.zone = zone
 
+        if  case _? = self.zone.patch
+        {
+            self.latest = self.zone.id
+        }
+        else
+        {
+            self.latest = nil
+        }
+
         self.articles = articles
         self.cultures = cultures
         self.decls = decls
@@ -34,5 +48,11 @@ extension Records
     var masters:Masters
     {
         .init(articles: self.articles, cultures: self.cultures, decls: self.decls)
+    }
+
+    @inlinable public
+    func extensions(latest:Bool) -> Extensions<Bool>
+    {
+        .init(self.extensions, latest: latest)
     }
 }

@@ -94,6 +94,15 @@ extension Record.Extension
         /// convert scalars to zones. This field will be computed and
         /// encoded if non-empty, but it will never be decoded.
         case zones = "z"
+
+        /// A database-internal flag indicating if this extension originates
+        /// from the latest release version of its package. Practically, this
+        /// determines if the extension is visible outside of its native zone.
+        ///
+        /// ``Record.Extension`` doesn’t encode this directly, the
+        /// ``Records.Extensions.Element`` view abstraction adds it after
+        /// delegating to ``Record.Extension``’s ``encode(to:)`` witness.
+        case latest = "L"
     }
 
     @inlinable public static
@@ -105,7 +114,6 @@ extension Record.Extension:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-
         //  Don’t exclude the extension’s own zone, in case we ever want it
         //  to appear somewhere outside of that zone.
         var zones:Unidoc.ZoneSet = .init()

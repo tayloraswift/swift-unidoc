@@ -48,7 +48,8 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
             {
                 $0[.div, { $0.class = "eyebrows" }]
                 {
-                    $0[.span, { $0.class = "phylum" }] = "Article"
+                    $0[.span] { $0.class = "phylum" } = "Article"
+                    $0[.span] { $0.class = "version" } = self.zone.version
                 }
 
                 $0 ?= self.master.overview.map(self.inliner.prose(_:))

@@ -3,94 +3,31 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-protocol DatabaseCollection<Element>
+protocol DatabaseCollection<ElementID>
 {
-    associatedtype Element:BSONDocumentEncodable & Identifiable
-
-    var database:Mongo.Database { get }
+    associatedtype ElementID
 
     static
     var name:Mongo.Collection { get }
-}
-extension DatabaseCollection<Record.Master>
-{
-    func insert(_ elements:Records.Masters, with session:Mongo.Session) async throws
-    {
-        try await self.insert(count: elements.count, elements, with: session)
-    }
+
+    var database:Mongo.Database { get }
+
+    /// Creates any necessary indexes for this collection. The witness for this
+    /// requirement must not assume the collection is empty.
+    func setup(with session:Mongo.Session) async throws
 }
 extension DatabaseCollection
 {
-    func insert(
-        _ elements:__owned some Collection<Element>,
-        with session:Mongo.Session) async throws
+    /// Drops the collection and reinitializes it by calling ``setup(with:)``.
+    func replace(with session:Mongo.Session) async throws
     {
-        try await self.insert(count: elements.count, elements, with: session)
-    }
-
-    private
-    func insert(count:Int,
-        _ elements:__owned some Sequence<Element>,
-        with session:Mongo.Session) async throws
-    {
-        let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: elements)
-            {
-                $0[.ordered] = false
-            },
+        try await session.run(
+            command: Mongo.Drop.init(Self.name),
             against: self.database)
-
-        if  response.inserted != count
-        {
-            throw response.error
-        }
+        try await self.setup(with: session)
     }
 }
-extension DatabaseCollection
-{
-    func insert(_ element:__owned Element, with session:Mongo.Session) async throws
-    {
-        let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: [element]),
-            against: self.database)
-
-        if  response.inserted != 1
-        {
-            throw response.error
-        }
-    }
-}
-extension DatabaseCollection
-{
-    /// Deletes all records from the collection, without dropping the collection
-    /// itself.
-    func clear(with session:Mongo.Session) async throws
-    {
-        let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.Many>.init(Self.name,
-                deletes:
-                [
-                    .init
-                    {
-                        $0[.limit] = .unlimited
-                        $0[.q] = [:]
-                    },
-                ]),
-            against: self.database)
-
-        if  let error:any Error =
-                response.writeConcernError ??
-                response.writeErrors.first
-        {
-            throw error
-        }
-    }
-}
-extension DatabaseCollection where Element:Identifiable<Unidoc.Scalar>
+extension DatabaseCollection<Unidoc.Scalar>
 {
     /// Deletes all records from the collection within the specified zone.
     func clear(zone:Unidoc.Zone, with session:Mongo.Session) async throws
@@ -131,6 +68,59 @@ extension DatabaseCollection where Element:Identifiable<Unidoc.Scalar>
                 response.writeErrors.first
         {
             throw error
+        }
+    }
+}
+extension DatabaseCollection<Unidoc.Scalar>
+{
+    func insert(_ elements:Records.Masters, with session:Mongo.Session) async throws
+    {
+        try await self.insert(count: elements.count, elements, with: session)
+    }
+}
+extension DatabaseCollection
+{
+    func insert(
+        _ elements:__owned some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        with session:Mongo.Session) async throws
+    {
+        try await self.insert(count: elements.count, elements, with: session)
+    }
+
+    private
+    func insert(count:Int,
+        _ elements:__owned some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        with session:Mongo.Session) async throws
+    {
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority,
+                encoding: elements)
+            {
+                $0[.ordered] = false
+            },
+            against: self.database)
+
+        if  response.inserted != count
+        {
+            throw response.error
+        }
+    }
+}
+extension DatabaseCollection
+{
+    func insert(_ element:__owned some BSONDocumentEncodable & Identifiable<ElementID>,
+        with session:Mongo.Session) async throws
+    {
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority,
+                encoding: [element]),
+            against: self.database)
+
+        if  response.inserted != 1
+        {
+            throw response.error
         }
     }
 }

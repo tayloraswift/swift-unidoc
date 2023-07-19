@@ -24,6 +24,9 @@ extension Unidoc.Zone
     var max:Unidoc.Scalar { self + Int32.init(bitPattern: .max) }
 
     @inlinable public
+    var cell:Unidoc.Cell { .init(package: self.package) }
+
+    @inlinable public
     func contains(_ scalar:Unidoc.Scalar) -> Bool
     {
         scalar.package == self.package &&
