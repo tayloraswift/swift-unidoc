@@ -87,7 +87,7 @@ extension DynamicLinker.Extensions
 
             let group:DynamicResolutionGroup = groups[`extension`.culture]
 
-            let optimizer:Optimizer.Extension = group.optimizer.extensions[signature]
+            let optimizer:Optimizer.Extension = group.optimizer.extensions[signature.globalized]
             let protocols:[Unidoc.Scalar] = `extension`.conformances.compactMap
             {
                 context.current.decls[$0]
@@ -110,9 +110,13 @@ extension DynamicLinker.Extensions
                 }
                 $0.nested += `extension`.nested.compactMap
                 {
-                    if  let scalar:Unidoc.Scalar = context.current.decls[$0],
-                        !optimizer.nested.contains(scalar)
+                    if  let scalar:Unidoc.Scalar = context.current.decls[$0]
                     {
+                        if  optimizer.nested.contains(scalar)
+                        {
+                            print("\(scalar) is already nested in \(signature). this is impossible!")
+                            fatalError()
+                        }
                         return scalar
                     }
                     else
