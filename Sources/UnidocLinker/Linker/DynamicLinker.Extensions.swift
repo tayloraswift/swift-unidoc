@@ -85,6 +85,9 @@ extension DynamicLinker.Extensions
                 culture: context.current.zone + `extension`.culture * .module,
                 extends: scope)
 
+            let group:DynamicResolutionGroup = groups[`extension`.culture]
+
+            let optimizer:Optimizer.Extension = group.optimizer.extensions[signature]
             let protocols:[Unidoc.Scalar] = `extension`.conformances.compactMap
             {
                 context.current.decls[$0]
@@ -92,14 +95,30 @@ extension DynamicLinker.Extensions
             //  It’s possible for two locally-disjoint extensions to coalesce
             //  into a single global extension due to constraint dropping...
             {
-                $0.conformances += protocols
+                $0.conformances += protocols.filter { !optimizer.conformances.contains($0) }
                 $0.features += `extension`.features.compactMap
                 {
-                    context.current.decls[$0]
+                    if  let scalar:Unidoc.Scalar = context.current.decls[$0],
+                        !optimizer.features.contains(scalar)
+                    {
+                        return scalar
+                    }
+                    else
+                    {
+                        return nil
+                    }
                 }
                 $0.nested += `extension`.nested.compactMap
                 {
-                    context.current.decls[$0]
+                    if  let scalar:Unidoc.Scalar = context.current.decls[$0],
+                        !optimizer.nested.contains(scalar)
+                    {
+                        return scalar
+                    }
+                    else
+                    {
+                        return nil
+                    }
                 }
 
                 guard   let article:SymbolGraph.Article<Never> = `extension`.article
