@@ -69,15 +69,14 @@ extension StaticLinker
     {
         decl.map { self.symbolizer.intern($0) }
     }
-    /// Returns an array of addresses for an array of declaration symbols.
-    /// The address assignments reflect the order of the symbols in the
-    /// array, so you should sort them if you want deterministic
-    /// addressing.
+    /// Returns an array of local scalars for an array of declaration symbols.
+    /// The scalar assignments reflect the order of the symbols in the array,
+    /// so you should sort them if you want deterministic addressing.
     ///
     /// This function doesn’t expose the declarations for codelink resolution,
     /// because it is expected that the same symbols may appear in
     /// the array arguments of multiple calls to this function, and it
-    /// it more efficient to expose declarations while performing a different
+    /// is more efficient to expose declarations while performing a different
     /// pass.
     private mutating
     func addresses(of decls:[Symbol.Decl]) -> [Int32]
@@ -127,31 +126,9 @@ extension StaticLinker
 }
 extension StaticLinker
 {
-    private mutating
-    func allocate(decls:[Compiler.Decl]) -> ClosedRange<Int32>
-    {
-        var scalars:(first:Int32, last:Int32)? = nil
-        for decl:Compiler.Decl in decls
-        {
-            let scalar:Int32 = self.symbolizer.allocate(decl: decl)
-            switch scalars
-            {
-            case  nil:              scalars = (scalar, scalar)
-            case (let first, _)?:   scalars = (first,  scalar)
-            }
-        }
-        if  case (let first, let last)? = scalars
-        {
-            return first ... last
-        }
-        else
-        {
-            fatalError("cannot allocate empty declaration array")
-        }
-    }
     /// Allocates and binds addresses for the declarations stored in the given array
-    /// of compiled namespaces. (Binding consists of populating the aperture and
-    /// phylum of a declaration.) This function also exposes each of the declarations
+    /// of compiled namespaces. Binding consists of populating the aperture and
+    /// phylum of a declaration. This function also exposes each of the declarations
     /// for codelink resolution.
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
@@ -198,6 +175,31 @@ extension StaticLinker
         }
         return destinations
     }
+    private mutating
+    func allocate(decls:[Compiler.Decl]) -> ClosedRange<Int32>
+    {
+        var scalars:(first:Int32, last:Int32)? = nil
+        for decl:Compiler.Decl in decls
+        {
+            let scalar:Int32 = self.symbolizer.allocate(decl: decl)
+            switch scalars
+            {
+            case  nil:              scalars = (scalar, scalar)
+            case (let first, _)?:   scalars = (first,  scalar)
+            }
+        }
+        if  case (let first, let last)? = scalars
+        {
+            return first ... last
+        }
+        else
+        {
+            fatalError("cannot allocate empty declaration array")
+        }
+    }
+}
+extension StaticLinker
+{
     /// Allocates addresses for the given array of compiled extensions.
     /// This function also exposes any features conceived by the extensions for
     /// codelink resolution.
@@ -525,7 +527,9 @@ extension StaticLinker
             } (&self.symbolizer.graph.nodes[scalar].decl)
         }
     }
-
+}
+extension StaticLinker
+{
     public mutating
     func link(extensions:[Compiler.Extension],
         at addresses:[(Int32, Int)])
