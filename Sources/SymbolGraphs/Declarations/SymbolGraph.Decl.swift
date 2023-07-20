@@ -37,7 +37,7 @@ extension SymbolGraph
         /// can be more than one per scalar.
         ///
         /// All of the superforms in this array have the same relationship
-        /// to this scalar; the relationship type is a function of
+        /// to this declaration; the relationship type is a function of
         /// ``aperture`` and ``phylum``.
         public
         var superforms:[Int32]

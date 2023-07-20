@@ -11,7 +11,7 @@ struct DynamicLinker
     private
     let context:DynamicContext
     private
-    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances>
+    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances>
 
     private
     var extensions:Extensions
@@ -22,7 +22,7 @@ struct DynamicLinker
 
     private
     init(context:DynamicContext,
-        conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances>,
+        conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances>,
         extensions:Extensions,
         errors:[any DynamicLinkerError])
     {
@@ -47,12 +47,10 @@ extension DynamicLinker
         var extensions:Extensions = .init(zone: context.current.zone)
         var errors:[any DynamicLinkerError] = []
 
-        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Conformances> =
+        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances> =
             context.current.graph.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
-                //  we only need the conformances if the scalar has unqualified features
-                indexingConformances: !($1.decl?.features.isEmpty ?? true),
                 extending: $0,
                 context: context,
                 groups: groups,
@@ -156,9 +154,10 @@ extension DynamicLinker
         let namespace:ModuleIdentifier = self.current.graph.namespaces[namespace]
 
         for (d, ((symbol, node), conformances)):
-            (Int32, ((Symbol.Decl, SymbolGraph.Node), Conformances)) in zip(range, zip(zip(
-                self.current.graph.decls[range],
-                self.current.graph.nodes[range]),
+            (Int32, ((Symbol.Decl, SymbolGraph.Node), Optimizer.Conformances)) in zip(range,
+                zip(zip(
+                    self.current.graph.decls[range],
+                    self.current.graph.nodes[range]),
             self.conformances[range]))
         {
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
@@ -166,7 +165,7 @@ extension DynamicLinker
             //  Ceremonial unwraps, should always succeed since we are only iterating
             //  over module ranges.
             guard   let decl:SymbolGraph.Decl = node.decl,
-                    let d:Unidoc.Scalar = self.current.decls[d]
+                    let d:Unidoc.Scalar = self.current.scalars[d]
             else
             {
                 continue
@@ -175,22 +174,28 @@ extension DynamicLinker
             for f:Int32 in decl.features
             {
                 if  let `protocol`:Unidoc.Scalar = self.current.scope(of: f),
-                    let f:Unidoc.Scalar = self.current.decls[f]
+                    let f:Unidoc.Scalar = self.current.scalars[f]
                 {
                     //  now that we know the address of the feature’s original
                     //  protocol, we can look up the constraints for the
                     //  conformance(s) that conceived it.
-                    for conformance:ExtensionSignature in conformances[to: `protocol`] where
-                        !group.optimizer.extensions[conformance.globalized].features.contains(f)
+                    for signature:Optimizer.ConformanceSignature in conformances[to: `protocol`]
                     {
-                        self.extensions[conformance].features.append(f)
+                        let signature:ExtensionSignature = .init(
+                            conditions: signature.conditions,
+                            culture: signature.culture,
+                            extends: d)
+                        if !group.optimizer.extensions[signature.global].features.contains(f)
+                        {
+                            self.extensions[signature].features.append(f)
+                        }
                     }
                 }
             }
 
             let superforms:[Unidoc.Scalar] = decl.superforms.compactMap
             {
-                if  let s:Unidoc.Scalar = self.current.decls[$0]
+                if  let s:Unidoc.Scalar = self.current.scalars[$0]
                 {
                     let implicit:ExtensionSignature = .init(conditions: [],
                         culture: c,
@@ -209,7 +214,7 @@ extension DynamicLinker
                 customization: decl.customization,
                 phylum: decl.phylum,
                 route: decl.route,
-                signature: decl.signature.map { self.current.decls[$0] },
+                signature: decl.signature.map { self.current.scalars[$0] },
                 symbol: symbol,
                 stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),
                 superforms: superforms,

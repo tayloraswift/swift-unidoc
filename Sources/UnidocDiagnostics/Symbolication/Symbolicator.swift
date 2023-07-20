@@ -1,4 +1,5 @@
 import ModuleGraphs
+import Signatures
 import Symbols
 
 public
@@ -54,5 +55,38 @@ extension Symbolicator
         {
             return nil
         }
+    }
+}
+extension Symbolicator where Scalar:Hashable
+{
+    @inlinable public
+    func constraints(_ constraints:[GenericConstraint<Scalar?>]) -> String
+    {
+        constraints.map
+        {
+            switch $0
+            {
+            case    .where(let parameter, is: .equal, to: .nominal(let type?)):
+                return "\(parameter) == \(self.signature(of: type))"
+
+            case    .where(let parameter, is: .equal, to: .nominal(nil)):
+                return "\(parameter) == <unavailable>"
+
+            case    .where(let parameter, is: .equal, to: .complex(let text)):
+                return "\(parameter) == \(text)"
+
+            case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
+                    .where(let parameter, is: .conformer, to: .nominal(let type?)):
+                return "\(parameter):\(self.signature(of: type))"
+
+            case    .where(let parameter, is: .subclass, to: .nominal(nil)),
+                    .where(let parameter, is: .conformer, to: .nominal(nil)):
+                return "\(parameter):<unavailable>"
+
+            case    .where(let parameter, is: .subclass, to: .complex(let text)),
+                    .where(let parameter, is: .conformer, to: .complex(let text)):
+                return "\(parameter):\(text)"
+            }
+        }.joined(separator: ", ")
     }
 }

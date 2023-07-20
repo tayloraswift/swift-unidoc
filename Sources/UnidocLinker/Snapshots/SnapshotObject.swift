@@ -13,18 +13,18 @@ class SnapshotObject:Sendable
     let snapshot:Snapshot
 
     let namespaces:[Unidoc.Scalar?]
-    let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>
+    let scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>
 
     private
     init(snapshot:Snapshot,
         hierarchy:[Int32: Unidoc.Scalar],
         namespaces:[Unidoc.Scalar?],
-        decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>)
+        scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>)
     {
         self.snapshot = snapshot
         self.hierarchy = hierarchy
         self.namespaces = namespaces
-        self.decls = decls
+        self.scalars = scalars
     }
 }
 extension SnapshotObject
@@ -42,7 +42,7 @@ extension SnapshotObject
     init(snapshot:__owned Snapshot, upstream:__shared DynamicContext.UpstreamScalars)
     {
         let zone:Unidoc.Zone = snapshot.zone
-        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> = snapshot.graph.link
+        let scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> = snapshot.graph.link
         {
             zone + $0
         }
@@ -68,7 +68,7 @@ extension SnapshotObject
                 for nested:Int32 in `extension`.nested where
                     snapshot.graph.citizens.contains(nested)
                 {
-                    hierarchy[nested] = decls[n]
+                    hierarchy[nested] = scalars[n]
                 }
             }
         }
@@ -76,7 +76,7 @@ extension SnapshotObject
         self.init(snapshot: snapshot,
             hierarchy: hierarchy,
             namespaces: namespaces,
-            decls: decls)
+            scalars: scalars)
     }
 }
 extension SnapshotObject
