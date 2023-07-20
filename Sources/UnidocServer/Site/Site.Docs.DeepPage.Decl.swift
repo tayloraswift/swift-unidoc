@@ -103,6 +103,12 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             {
                 $0[.section, { $0.class = "extension" }]
                 {
+                    $0[.h3]
+                    {
+                        $0 += "(extension in "
+                        $0 ?= self.inliner.link(module: `extension`.culture)
+                        $0 += ")"
+                    }
                     for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions
                     {
                         $0[.code]
