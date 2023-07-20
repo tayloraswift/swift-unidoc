@@ -84,7 +84,7 @@ extension DynamicResolver
         {
         case .scalar(let scalar):
             if      let _:Int = scalar / .decl,
-                    let scalar:Unidoc.Scalar = self.current.decls[scalar]
+                    let scalar:Unidoc.Scalar = self.current.scalars[scalar]
             {
                 return .path(outline.text, self.context.expand(scalar, to: length))
             }
@@ -105,8 +105,8 @@ extension DynamicResolver
         case .vector(let feature, self: let heir):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
-            if  let feature:Unidoc.Scalar = self.current.decls[feature],
-                let heir:Unidoc.Scalar = self.current.decls[heir]
+            if  let feature:Unidoc.Scalar = self.current.scalars[feature],
+                let heir:Unidoc.Scalar = self.current.scalars[heir]
             {
                 return .path(outline.text, self.context.expand((heir, feature), to: length))
             }

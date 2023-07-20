@@ -59,7 +59,7 @@ extension DynamicResolutionGroup
             let node:SymbolGraph.Node = snapshot.graph.nodes[s]
             let symbol:Symbol.Decl = snapshot.graph.decls[s]
 
-            guard let s:Unidoc.Scalar = snapshot.decls[s]
+            guard let s:Unidoc.Scalar = snapshot.scalars[s]
             else
             {
                 continue
@@ -105,10 +105,10 @@ extension DynamicResolutionGroup
             filter?.contains(`extension`.culture) ?? true
         {
             let signature:Optimizer.ExtensionSignature = .init(
-                conditions: `extension`.conditions.map  { $0.map { snapshot.decls[$0] } },
+                conditions: `extension`.conditions.map  { $0.map { snapshot.scalars[$0] } },
                 extends: outer.scalar)
 
-            self.optimizer.extensions[signature].update(with: `extension`, by: snapshot.decls)
+            self.optimizer.extensions[signature].update(with: `extension`, by: snapshot.scalars)
 
             //  This can be completely different from the namespace of the extended type!
             let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
@@ -117,7 +117,7 @@ extension DynamicResolutionGroup
                 let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls[f],
                     self: outer.symbol)
 
-                if  let f:Unidoc.Scalar = snapshot.decls[f],
+                if  let f:Unidoc.Scalar = snapshot.scalars[f],
                     let inner:SymbolGraph.Decl = context[f.package]?.nodes[f]?.decl
                 {
                     self.codelinks[qualifier, outer.path, inner.path.last]

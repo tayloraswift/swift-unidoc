@@ -286,6 +286,7 @@ let package:Package = .init(
         .target(name: "UnidocDiagnostics", dependencies:
             [
                 .target(name: "CodelinkResolution"),
+                .target(name: "Signatures"),
             ]),
 
         .target(name: "UnidocLinker",

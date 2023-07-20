@@ -1,12 +1,14 @@
 import Unidoc
 import UnidocDiagnostics
 
+@frozen public
 enum DroppedPassagesError:Equatable, Error
 {
     case fromExtension(Unidoc.Scalar, of:Unidoc.Scalar)
 }
 extension DroppedPassagesError:DynamicLinkerError
 {
+    public
     func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
     {
         let message:String

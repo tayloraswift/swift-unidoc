@@ -1,11 +1,15 @@
 import Symbols
 import UnidocDiagnostics
 
+@frozen public
 struct DroppedExtensionsError:Equatable, Error
 {
+    public
     let extendee:Symbol.Decl
+    public
     let count:Int
 
+    @inlinable public
     init(extendee:Symbol.Decl, count:Int)
     {
         self.extendee = extendee
@@ -14,6 +18,7 @@ struct DroppedExtensionsError:Equatable, Error
 }
 extension DroppedExtensionsError:DynamicLinkerError
 {
+    public
     func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
     {
         [

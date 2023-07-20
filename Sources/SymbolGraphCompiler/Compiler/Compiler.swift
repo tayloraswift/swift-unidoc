@@ -309,9 +309,19 @@ extension Compiler
             {
                 return // Type is hidden.
             }
-            if let origin:Symbol.Decl = conformance.origin
+            if  let origin:Symbol.Decl = conformance.origin
             {
                 try type.assign(origin: origin)
+            }
+            if  case .protocol = type.value.phylum
+            {
+                //  Oddly, SymbolGraphGen uses “conformsTo” for protocol inheritance.
+                //  But this conformance is not a real conformance, it is a supertype
+                //  relationship!
+                try type.add(superform: SymbolRelationship.Inheritance.init(
+                    by: type.id,
+                    of: `protocol`))
+                return
             }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
