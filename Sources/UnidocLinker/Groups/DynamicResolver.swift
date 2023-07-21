@@ -31,7 +31,7 @@ extension DynamicResolver
 {
     init(context:DynamicContext,
         namespace:ModuleIdentifier,
-        group:DynamicResolutionGroup,
+        group:DynamicClientGroup,
         scope:[String] = [])
     {
         self.init(codelinks: .init(table: group.codelinks, scope: .init(

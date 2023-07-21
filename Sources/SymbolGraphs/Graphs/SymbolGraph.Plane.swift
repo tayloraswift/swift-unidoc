@@ -45,6 +45,12 @@ extension SymbolGraph.Plane
     {
         .init(table: .init(elements: try self.indices.map { try transform($0, self[$0]) }))
     }
+
+    @inlinable public
+    init(repeating element:Element, count:Int)
+    {
+        self.init(table: .init(elements: .init(repeating: element, count: count)))
+    }
 }
 extension SymbolGraph.Plane:ExpressibleByArrayLiteral
 {

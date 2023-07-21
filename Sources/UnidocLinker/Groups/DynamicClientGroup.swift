@@ -5,28 +5,42 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-struct DynamicResolutionGroup:Sendable
+/// Abstracts over linker tables that are shared between package cultures
+/// that depend on the same set of upstream package products.
+struct DynamicClientGroup:Sendable
 {
+    /// An overlay of conformances declared by dependencies of modules in the
+    /// current client group. The sets contain the protocol scalars only, with
+    /// no constraints, because Swift does not allow conditional and
+    /// unconditional conformances to coexist on the same type.
     private(set)
-    var optimizer:Optimizer
+    var conformances:SymbolGraph.Plane<UnidocPlane.Decl, Set<Unidoc.Scalar>>
 
     private(set)
     var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
     private(set)
     var imports:[ModuleIdentifier]
 
-    init(
-        optimizer:Optimizer = .init(),
-        codelinks:CodelinkResolver<Unidoc.Scalar>.Table = .init(),
-        imports:[ModuleIdentifier] = [])
+    private
+    init(conformances:SymbolGraph.Plane<UnidocPlane.Decl, Set<Unidoc.Scalar>>,
+        codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
+        imports:[ModuleIdentifier])
     {
-        self.optimizer = optimizer
+        self.conformances = conformances
         self.codelinks = codelinks
         self.imports = imports
     }
 }
-extension DynamicResolutionGroup
+extension DynamicClientGroup
 {
+    init(nodes:Int)
+    {
+        self.init(
+            conformances: .init(repeating: [], count: nodes),
+            codelinks: .init(),
+            imports: [])
+    }
+
     mutating
     func add(snapshot:SnapshotObject,
         context:DynamicContext,
@@ -100,15 +114,32 @@ extension DynamicResolutionGroup
         context:DynamicContext,
         filter:Set<Int>?)
     {
+        /// The index of the local declaration extended by the given `extensions`.
+        /// Nil if the extension extends a declaration from another package.
+        let local:Int32? = outer.scalar - context.current.zone
+
         for `extension`:SymbolGraph.Extension in extensions where
-            // !`extension`.features.isEmpty &&
             filter?.contains(`extension`.culture) ?? true
         {
-            let signature:Optimizer.ExtensionSignature = .init(
-                conditions: `extension`.conditions.map  { $0.map { snapshot.scalars[$0] } },
-                extends: outer.scalar)
+            if  let local:Int32
+            {
+                //  If any extension (with any constraints) declares a conformance
+                //  to a protocol *p*, record it here.
+                {
+                    for p:Int32 in `extension`.conformances
+                    {
+                        if  let p:Unidoc.Scalar = snapshot.scalars[p]
+                        {
+                            $0.update(with: p)
+                        }
+                    }
+                } (&self.conformances[local])
+            }
 
-            self.optimizer.extensions[signature].update(with: `extension`, by: snapshot.scalars)
+            if `extension`.features.isEmpty
+            {
+                continue
+            }
 
             //  This can be completely different from the namespace of the extended type!
             let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]

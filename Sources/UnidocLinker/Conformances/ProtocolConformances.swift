@@ -1,59 +1,82 @@
+import ModuleGraphs
 import Signatures
+import SymbolGraphs
 import Unidoc
 
-extension Optimizer
+struct ProtocolConformances<Culture>
 {
-    struct Conformances:Sendable
-    {
-        private
-        var signatures:[Unidoc.Scalar: [ConformanceSignature]]
+    private
+    var table:[Unidoc.Scalar: [ProtocolConformance<Culture>]]
 
-        private
-        init(signatures:[Unidoc.Scalar: [ConformanceSignature]])
-        {
-            self.signatures = signatures
-        }
-    }
-}
-extension Optimizer.Conformances:ExpressibleByDictionaryLiteral
-{
-    init(dictionaryLiteral:(Unidoc.Scalar, Never)...)
+    private
+    init(table:[Unidoc.Scalar: [ProtocolConformance<Culture>]])
     {
-        self.init(signatures: [:])
+        self.table = table
     }
 }
-extension Optimizer.Conformances
+extension ProtocolConformances:Sendable where Culture:Sendable
 {
-    subscript(to protocol:Unidoc.Scalar) -> [Optimizer.ConformanceSignature]
+}
+extension ProtocolConformances
+{
+    subscript(to protocol:Unidoc.Scalar) -> [ProtocolConformance<Culture>]
     {
         _read
         {
-            yield  self.signatures[`protocol`, default: []]
+            yield  self.table[`protocol`, default: []]
         }
         _modify
         {
-            yield &self.signatures[`protocol`, default: []]
+            yield &self.table[`protocol`, default: []]
         }
     }
 }
-extension Optimizer.Conformances:Sequence
+extension ProtocolConformances:Sequence
 {
     func makeIterator() -> Iterator
     {
-        .init(self.signatures.makeIterator())
+        .init(self.table.makeIterator())
     }
 }
-extension Optimizer.Conformances
+extension ProtocolConformances:ExpressibleByDictionaryLiteral
 {
-    mutating
-    func reduce(with context:DynamicContext, errors:inout [any DynamicLinkerError])
+    init(dictionaryLiteral elements:(Unidoc.Scalar, Never)...)
     {
-        self.signatures = self.signatures.mapValues
+        self.init(table: [:])
+    }
+}
+extension ProtocolConformances<Unidoc.Scalar>
+{
+    init(context:DynamicContext,
+        errors:inout [any DynamicLinkerError],
+        with populate:(inout ProtocolConformances<Int>) throws -> Void) rethrows
+    {
+        var conformances:ProtocolConformances<Int> = [:]
+        try populate(&conformances)
+        let deduplicated:[Unidoc.Scalar: [ProtocolConformance<Culture>]] =
+            conformances.table.mapValues
         {
+            /// The set of local package cultures in which this protocol conformance
+            /// exists, either conditionally or unconditionally.
+            ///
+            /// It is valid (but totally demented) for a package to declare the same
+            /// conformance in multiple modules, as long as they never intersect in
+            /// a build tree.
+            let extancy:Set<Int> = $0.reduce(into: []) { $0.insert($1.culture) }
+
             //  Group conformances to this protocol by culture.
-            let segregated:[Unidoc.Scalar: [[GenericConstraint<Unidoc.Scalar?>]]] = $0.reduce(
+            let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = $0.reduce(
                 into: [:])
             {
+                let module:ModuleDetails = context.current.graph.cultures[$1.culture].module
+                for c:Int in module.dependencies.modules where
+                    c != $1.culture && extancy.contains(c)
+                {
+                    //  Another module in this package already declares this
+                    //  conformance, and the `$1.culture` depends on it!
+                    return
+                }
+
                 $0[$1.culture, default: []].append($1.conditions)
             }
 
@@ -64,7 +87,7 @@ extension Optimizer.Conformances
             //  `T:Equatable`, but it also conforms to `Equatable` where
             //  `T:Hashable`, because if `T` is ``Hashable`` then it is also
             //  ``Equatable``. So that conformance is redundant.
-            let reduced:[Unidoc.Scalar: [GenericConstraint<Unidoc.Scalar?>]] =
+            let reduced:[Int: [GenericConstraint<Unidoc.Scalar?>]] =
                 segregated.mapValues
             {
                 //  Swift does not have conditional disjunctions for protocol
@@ -155,12 +178,14 @@ extension Optimizer.Conformances
             //  Conformances should now be unique per culture.
             return reduced.map
             {
-                .init(conditions: $0.value, culture: $0.key)
+                .init(conditions: $0.value, culture: context.current.zone + $0.key * .module)
             }
             .sorted
             {
                 $0.culture < $1.culture
             }
         }
+
+        self.init(table: deduplicated)
     }
 }

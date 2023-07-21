@@ -1,4 +1,5 @@
 import LexicalPaths
+import Signatures
 import SymbolGraphs
 import Unidoc
 import UnidocRecords
@@ -56,15 +57,43 @@ extension DynamicLinker.Extensions
 }
 extension DynamicLinker.Extensions
 {
+    /// Creates extension records from the given symbol graph extensions, performing any
+    /// necessary de-duplication of protocol conformances and features.
+    ///
+    /// -   Returns:
+    ///     A table containing *some* of the protocols that `scope` conforms to.
+    ///
+    /// This function only gathers protocol conformances declared by modules in the current
+    /// package. The ultimate goal is to use these conformances to group valid features into
+    /// extensions, and filter out duplicate or redundant features.
+    ///
+    /// For us to retain a feature, we require the conformance to the protocol that the feature
+    /// is a member of to have been declared by at least one culture in the current package.
+    ///
+    /// For example, we could (retroactively) conform ``Optional`` to ``Sequence`` where
+    /// ``Wrapped:Collection``, which would add all of ``Sequence``’s members to ``Optional`` as
+    /// features.
+    ///
+    /// Because ``Optional`` does not “naturally” conform to ``Sequence``, we would retain all
+    /// of those additional features, even though the current package did not declare them.
+    ///
+    /// Ideally, we would also want to retain features if feature itself were declared in a
+    /// culture of the current package. For example, we could extend ``Sequence`` with an
+    /// additional member, and we would want that member to appear as a feature of every type
+    /// that conforms to ``Sequence``, including those with conformances declared in other
+    /// packages, such as ``Array``.
+    ///
+    /// At present though, SymbolGraphGen doesn’t emit vectors for these kinds of features, and
+    /// we don’t want to broadcast them ourselves. So for now, those features are lost.
     mutating
     func add(_ extensions:[SymbolGraph.Extension],
         extending scope:Int32,
         context:DynamicContext,
-        groups:[DynamicResolutionGroup],
-        errors:inout [any DynamicLinkerError]) -> Optimizer.Conformances
+        groups:[DynamicClientGroup],
+        errors:inout [any DynamicLinkerError]) -> ProtocolConformances<Unidoc.Scalar>
     {
-        guard   let scope:Unidoc.Scalar = context.current.scalars[scope],
-                let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
+        guard   let s:Unidoc.Scalar = context.current.scalars[scope],
+                let path:UnqualifiedPath = context[s.package]?.nodes[s]?.decl?.path
         else
         {
             errors.append(DroppedExtensionsError.init(
@@ -73,43 +102,95 @@ extension DynamicLinker.Extensions
             return [:]
         }
 
-        var conformances:Optimizer.Conformances = [:]
-        for `extension`:SymbolGraph.Extension in extensions
+        /// Cache these signatures, since we need to perform two passes.
+        let signatures:[DynamicLinker.ExtensionSignature] = extensions.map
         {
-            let signature:DynamicLinker.ExtensionSignature = .init(
-                conditions: `extension`.conditions.map
-                {
-                    $0.map { context.current.scalars[$0] }
-                },
-                culture: context.current.zone + `extension`.culture * .module,
-                extends: scope)
+            .init(
+                conditions: $0.conditions.map { $0.map { context.current.scalars[$0] } },
+                culture: context.current.zone + $0.culture * .module,
+                extends: s)
+        }
 
-            let group:DynamicResolutionGroup = groups[`extension`.culture]
+        let conformances:ProtocolConformances<Unidoc.Scalar> = .init(
+            context: context,
+            errors: &errors)
+        {
+            (conformances:inout ProtocolConformances<Int>) in
 
-            let optimizer:Optimizer.Extension = group.optimizer.extensions[signature.global]
-            let protocols:[Unidoc.Scalar] = `extension`.conformances.compactMap
+            for (`extension`, signature):
+                (SymbolGraph.Extension, DynamicLinker.ExtensionSignature) in zip(
+                extensions,
+                signatures)
             {
-                context.current.scalars[$0]
+                let group:DynamicClientGroup = groups[`extension`.culture]
+                for p:Int32 in `extension`.conformances
+                {
+                    //  Only track conformances that were declared by modules in
+                    //  the current package.
+                    if  let p:Unidoc.Scalar = context.current.scalars[p],
+                        case false = group.conformances[scope].contains(p)
+                    {
+                        conformances[to: p].append(.init(
+                            conditions: signature.conditions,
+                            culture: `extension`.culture))
+                    }
+                }
             }
+        }
+
+        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Unidoc.Scalar>]) in
+            conformances
+        {
+            for conformance:ProtocolConformance in conformances
+            {
+                let signature:DynamicLinker.ExtensionSignature = .init(
+                    conditions: conformance.conditions,
+                    culture: conformance.culture,
+                    extends: s)
+
+                self[signature].conformances.append(p)
+            }
+        }
+
+        for (`extension`, signature):
+            (SymbolGraph.Extension, DynamicLinker.ExtensionSignature) in zip(
+            extensions,
+            signatures)
+        {
             //  It’s possible for two locally-disjoint extensions to coalesce
             //  into a single global extension due to constraint dropping...
             {
-                $0.features += `extension`.features.compactMap
+                /// Protocols usually come with many features, so as a premature
+                /// optimization, we group the features by protocol.
+                let features:[Unidoc.Scalar: [Unidoc.Scalar]] = `extension`.features.reduce(
+                    into: [:])
                 {
-                    context.current.scalars[$0].flatMap
+                    if  let p:Unidoc.Scalar = context.current.scope(of: $1),
+                        let f:Unidoc.Scalar = context.current.scalars[$1]
                     {
-                        optimizer.features.contains($0) ? nil : $0
+                        $0[p, default: []].append(f)
                     }
                 }
-                $0.nested += `extension`.nested.compactMap
+                for (p, features):(Unidoc.Scalar, [Unidoc.Scalar]) in features
                 {
-                    context.current.scalars[$0].flatMap
+                    //  This doesn’t have great complexity, but we expect that
+                    //  multiple parallel conformances within the same package
+                    //  to be quite rare.
+                    if  conformances[to: p].contains(
+                            where: { $0.culture == signature.culture })
                     {
-                        optimizer.nested.contains($0) ? nil : $0
+                        $0.features += features
                     }
                 }
-                //  Don’t store the protocol conformances in the extension yet,
-                //  there may be duplicates.
+                //  True nested declarations shouldn’t have duplicates, so we
+                //  just store them without filtering.
+                for d:Int32 in `extension`.nested
+                {
+                    if  let d:Unidoc.Scalar = context.current.scalars[d]
+                    {
+                        $0.nested.append(d)
+                    }
+                }
 
                 guard   let article:SymbolGraph.Article<Never> = `extension`.article
                 else
@@ -119,7 +200,7 @@ extension DynamicLinker.Extensions
                 guard case (nil, nil) = ($0.overview, $0.details)
                 else
                 {
-                    errors.append(DroppedPassagesError.fromExtension($0.id, of: scope))
+                    errors.append(DroppedPassagesError.fromExtension($0.id, of: s))
                     return
                 }
 
@@ -133,41 +214,8 @@ extension DynamicLinker.Extensions
                 errors += resolver.errors
 
             } (&self[signature])
-
-            for `protocol`:Unidoc.Scalar in protocols
-            {
-                conformances[to: `protocol`].append(.init(
-                    conditions: signature.conditions,
-                    culture: signature.culture))
-            }
         }
 
-        conformances.reduce(with: context, errors: &errors)
-
-        //  Now we can populate the protocol conformances.
-        for conformance:(protocol:Unidoc.Scalar, signatures:[Optimizer.ConformanceSignature]) in
-            conformances
-        {
-            for signature:Optimizer.ConformanceSignature in conformance.signatures
-            {
-                //  This always succeeds, since all of our extension/conformance signatures
-                //  were generated by augmenting local scalars with `context.current.zone`.
-                let culture:Int = ((signature.culture, as: .module) - context.current.zone)!
-
-                let signature:DynamicLinker.ExtensionSignature = .init(
-                    conditions: signature.conditions,
-                    culture: signature.culture,
-                    extends: scope)
-
-                let optimizer:Optimizer.Extension =
-                    groups[culture].optimizer.extensions[signature.global]
-
-                if !optimizer.conformances.contains(conformance.protocol)
-                {
-                    self[signature].conformances.append(conformance.protocol)
-                }
-            }
-        }
         return conformances
     }
 }
