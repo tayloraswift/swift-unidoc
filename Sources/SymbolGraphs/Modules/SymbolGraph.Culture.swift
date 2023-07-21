@@ -11,6 +11,7 @@ extension SymbolGraph
         let module:ModuleDetails
 
         /// The namespaces that contain this module’s scalars, if it declares any.
+        /// The ranges must be contiguous and non-overlapping.
         public
         var namespaces:[SymbolGraph.Namespace]
         /// This module’s standalone articles, if it has any.
@@ -37,6 +38,20 @@ extension SymbolGraph.Culture:Identifiable
     var id:ModuleIdentifier
     {
         self.module.id
+    }
+
+    @inlinable public
+    var decls:ClosedRange<Int32>?
+    {
+        if  let first:Int32 = self.namespaces.first?.range.first,
+            let last:Int32 = self.namespaces.last?.range.last
+        {
+            return first ... last
+        }
+        else
+        {
+            return nil
+        }
     }
 }
 extension SymbolGraph.Culture
@@ -78,6 +93,7 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
             self.articles = upper < lower ? nil : lower ... upper
         }
 
+        //  TODO: validate well-formedness of scalar ranges.
         self.namespaces = try bson[.namespaces]?.decode() ?? []
         self.article = try bson[.article]?.decode()
     }

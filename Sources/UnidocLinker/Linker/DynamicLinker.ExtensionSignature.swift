@@ -19,10 +19,3 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.ExtensionSignature
-{
-    var global:Optimizer.ExtensionSignature
-    {
-        .init(conditions: self.conditions, extends: self.extends)
-    }
-}

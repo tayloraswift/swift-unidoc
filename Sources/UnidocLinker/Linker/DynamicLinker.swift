@@ -10,8 +10,9 @@ struct DynamicLinker
 {
     private
     let context:DynamicContext
+    /// Protocol conformances for each declaration in the **current** snapshot.
     private
-    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances>
+    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Unidoc.Scalar>>
 
     private
     var extensions:Extensions
@@ -22,7 +23,7 @@ struct DynamicLinker
 
     private
     init(context:DynamicContext,
-        conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances>,
+        conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Unidoc.Scalar>>,
         extensions:Extensions,
         errors:[any DynamicLinkerError])
     {
@@ -42,12 +43,12 @@ extension DynamicLinker
     public
     init(context:DynamicContext)
     {
-        let groups:[DynamicResolutionGroup] = context.groups()
+        let groups:[DynamicClientGroup] = context.groups()
 
         var extensions:Extensions = .init(zone: context.current.zone)
         var errors:[any DynamicLinkerError] = []
 
-        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, Optimizer.Conformances> =
+        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances> =
             context.current.graph.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
@@ -74,10 +75,10 @@ extension DynamicLinker
 extension DynamicLinker
 {
     private mutating
-    func link(groups:[DynamicResolutionGroup])
+    func link(groups:[DynamicClientGroup])
     {
         for ((c, input), group):
-            ((Int, SymbolGraph.Culture), DynamicResolutionGroup) in zip(zip(
+            ((Int, SymbolGraph.Culture), DynamicClientGroup) in zip(zip(
                 self.current.graph.cultures.indices,
                 self.current.graph.cultures),
             groups)
@@ -119,7 +120,7 @@ extension DynamicLinker
     private mutating
     func link(articles range:ClosedRange<Int32>,
         under namespace:ModuleIdentifier,
-        in group:DynamicResolutionGroup)
+        in group:DynamicClientGroup)
     {
         for (a, article):(Int32, SymbolGraph.Article<String>) in zip(
             self.current.graph.articles[range].indices,
@@ -148,13 +149,13 @@ extension DynamicLinker
     func link(decls range:ClosedRange<Int32>,
         under namespace:Int,
         of c:Unidoc.Scalar,
-        in group:DynamicResolutionGroup)
+        in group:DynamicClientGroup)
     {
         let n:Unidoc.Scalar = self.current.zone + namespace * .module
         let namespace:ModuleIdentifier = self.current.graph.namespaces[namespace]
 
         for (d, ((symbol, node), conformances)):
-            (Int32, ((Symbol.Decl, SymbolGraph.Node), Optimizer.Conformances)) in zip(range,
+            (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances)) in zip(range,
                 zip(zip(
                     self.current.graph.decls[range],
                     self.current.graph.nodes[range]),
@@ -173,23 +174,28 @@ extension DynamicLinker
 
             for f:Int32 in decl.features
             {
-                if  let `protocol`:Unidoc.Scalar = self.current.scope(of: f),
+                guard
+                    let p:Unidoc.Scalar = self.current.scope(of: f),
                     let f:Unidoc.Scalar = self.current.scalars[f]
+                else
                 {
-                    //  now that we know the address of the feature’s original
-                    //  protocol, we can look up the constraints for the
-                    //  conformance(s) that conceived it.
-                    for signature:Optimizer.ConformanceSignature in conformances[to: `protocol`]
-                    {
-                        let signature:ExtensionSignature = .init(
-                            conditions: signature.conditions,
-                            culture: signature.culture,
-                            extends: d)
-                        if !group.optimizer.extensions[signature.global].features.contains(f)
-                        {
-                            self.extensions[signature].features.append(f)
-                        }
-                    }
+                    continue
+                }
+
+                //  Now that we know the address of the feature’s original protocol,
+                //  we can look up the constraints for the conformance(s) that
+                //  conceived it.
+                //
+                //  This drops the feature if it belongs to a protocol whose
+                //  conformance was not declared by any culture of the current
+                //  package.
+                for conformance:ProtocolConformance in conformances[to: p]
+                {
+                    let signature:ExtensionSignature = .init(
+                        conditions: conformance.conditions,
+                        culture: conformance.culture,
+                        extends: d)
+                    self.extensions[signature].features.append(f)
                 }
             }
 

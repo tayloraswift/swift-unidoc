@@ -125,7 +125,7 @@ extension DynamicContext
 extension DynamicContext
 {
     /// Builds a codelink resolution table
-    func groups() -> [DynamicResolutionGroup]
+    func groups() -> [DynamicClientGroup]
     {
         //  Some cultures might share the same set of upstream product dependencies.
         //  So, as an optimization, we group cultures together that use the same
@@ -137,8 +137,7 @@ extension DynamicContext
         {
             print("\(culture.module.id): \(culture.module.dependencies)")
 
-            //  This dictionary is a dictionary key itself!
-            //  In the end in wonderland...
+            //  This dictionary is a dictionary key itself! Be not afraid.
             var products:[PackageIdentifier: Set<String>] = [:]
             for product:ProductIdentifier in culture.module.dependencies.products
             {
@@ -152,7 +151,7 @@ extension DynamicContext
         {
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
-                var group:DynamicResolutionGroup = .init()
+                var group:DynamicClientGroup = .init(nodes: self.current.graph.nodes.count)
                 //  We already
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {

@@ -6,7 +6,7 @@ extension SymbolGraph
     @frozen public
     struct Namespace:Equatable, Sendable
     {
-        /// A range of addresses containing scalars that share this namespace.
+        /// A range of decls that share this namespace.
         public
         let range:ClosedRange<Int32>
         /// The index of the namespace module.
