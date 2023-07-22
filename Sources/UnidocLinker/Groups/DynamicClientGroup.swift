@@ -13,8 +13,8 @@ struct DynamicClientGroup:Sendable
     /// current client group. The sets contain the protocol scalars only, with
     /// no constraints, because Swift does not allow conditional and
     /// unconditional conformances to coexist on the same type.
-    private(set)
-    var conformances:SymbolGraph.Plane<UnidocPlane.Decl, Set<Unidoc.Scalar>>
+    private
+    var conformances:Set<Unidoc.Vector>
 
     private(set)
     var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
@@ -22,25 +22,50 @@ struct DynamicClientGroup:Sendable
     var imports:[ModuleIdentifier]
 
     private
-    init(conformances:SymbolGraph.Plane<UnidocPlane.Decl, Set<Unidoc.Scalar>>,
+    let nodes:Set<Unidoc.Scalar>
+
+    private
+    init(conformances:Set<Unidoc.Vector>,
         codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
-        imports:[ModuleIdentifier])
+        imports:[ModuleIdentifier],
+        nodes:Set<Unidoc.Scalar>)
     {
         self.conformances = conformances
         self.codelinks = codelinks
         self.imports = imports
+        self.nodes = nodes
     }
 }
 extension DynamicClientGroup
 {
-    init(nodes:Int)
+    init(nodes:Slice<SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>>)
     {
-        self.init(
-            conformances: .init(repeating: [], count: nodes),
+        self.init(conformances: [],
             codelinks: .init(),
-            imports: [])
+            imports: [],
+            nodes: nodes.reduce(into: [])
+            {
+                if  let s:Unidoc.Scalar = $1
+                {
+                    $0.insert(s)
+                }
+            })
     }
-
+}
+extension DynamicClientGroup
+{
+    private mutating
+    func remember(conforms t:Unidoc.Scalar, to p:Unidoc.Scalar)
+    {
+        self.conformances.update(with: .init(sub: t, dom: p))
+    }
+    func already(conforms t:Unidoc.Scalar, to p:Unidoc.Scalar) -> Bool
+    {
+        self.conformances.contains(.init(sub: t, dom: p))
+    }
+}
+extension DynamicClientGroup
+{
     mutating
     func add(snapshot:SnapshotObject,
         context:DynamicContext,
@@ -114,26 +139,25 @@ extension DynamicClientGroup
         context:DynamicContext,
         filter:Set<Int>?)
     {
-        /// The index of the local declaration extended by the given `extensions`.
-        /// Nil if the extension extends a declaration from another package.
-        let local:Int32? = outer.scalar - context.current.zone
-
         for `extension`:SymbolGraph.Extension in extensions where
             filter?.contains(`extension`.culture) ?? true
         {
-            if  let local:Int32
+            //  We only care about extensions to types that also have extensions in the
+            //  package being linked.
+            //
+            //  This is a different condition than only caring about extensions to types
+            //  that are *declared* in the package being linked.
+            if  self.nodes.contains(outer.scalar)
             {
-                //  If any extension (with any constraints) declares a conformance
-                //  to a protocol *p*, record it here.
+                for p:Int32 in `extension`.conformances
                 {
-                    for p:Int32 in `extension`.conformances
+                    if  let p:Unidoc.Scalar = snapshot.scalars[p]
                     {
-                        if  let p:Unidoc.Scalar = snapshot.scalars[p]
-                        {
-                            $0.update(with: p)
-                        }
+                        //  If any extension (with any constraints) declares a conformance
+                        //  to a protocol *p*, record it here.
+                        self.remember(conforms: outer.scalar, to: p)
                     }
-                } (&self.conformances[local])
+                }
             }
 
             if `extension`.features.isEmpty

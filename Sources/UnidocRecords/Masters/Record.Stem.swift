@@ -83,15 +83,24 @@ extension Record.Stem
         for compound:String in uri.rest
         {
             self += " "
-            self.append(compound: compound)
+            self.append(compound: compound[...])
         }
     }
     private mutating
-    func append(compound:some StringProtocol)
+    func append(compound:Substring)
     {
         if  let dot:String.Index = compound.firstIndex(of: ".")
         {
-            self += "\(compound[..<dot])\t\(compound[compound.index(after: dot)...])"
+            var last:Substring = compound[compound.index(after: dot)...]
+            if  let i:String.Index = last.index(last.endIndex,
+                    offsetBy: -2,
+                    limitedBy: last.startIndex),
+                last[i...] == "()"
+            {
+                last = last[..<i]
+            }
+
+            self += "\(compound[..<dot])\t\(last)"
         }
         else
         {

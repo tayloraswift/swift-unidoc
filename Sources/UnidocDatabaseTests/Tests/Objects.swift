@@ -17,23 +17,49 @@ struct Objects:MongoTestBattery
         let repository:String = "https://github.com/apple/swift-nio"
         let archive:(Documentation, Documentation, Documentation)
 
-        archive.0 = try await toolchain.generateDocs(for: try await .remote(
-            package: "swift-nio",
-            from: repository,
-            at: "2.53.0",
-            in: workspace))
-
-        archive.1 = try await toolchain.generateDocs(for: try await .remote(
-            package: "swift-nio",
-            from: repository,
-            at: "2.54.0",
-            in: workspace))
-
-        archive.2 = try await toolchain.generateDocs(for: try await .remote(
-            package: "swift-nio",
-            from: repository,
-            at: "main",
-            in: workspace))
+        do
+        {
+            //  Use the cached binary if available.
+            archive.0 = try .load(package: "swift-nio",
+                at: .stable(.release(.v(2, 53, 0))),
+                in: workspace.path)
+        }
+        catch
+        {
+            archive.0 = try await toolchain.generateDocs(for: try await .remote(
+                package: "swift-nio",
+                from: repository,
+                at: "2.53.0",
+                in: workspace))
+        }
+        do
+        {
+            archive.1 = try .load(package: "swift-nio",
+                at: .stable(.release(.v(2, 54, 0))),
+                in: workspace.path)
+        }
+        catch
+        {
+            archive.1 = try await toolchain.generateDocs(for: try await .remote(
+                package: "swift-nio",
+                from: repository,
+                at: "2.54.0",
+                in: workspace))
+        }
+        do
+        {
+            archive.2 = try .load(package: "swift-nio",
+                at: .init("main"),
+                in: workspace.path)
+        }
+        catch
+        {
+            archive.2 = try await toolchain.generateDocs(for: try await .remote(
+                package: "swift-nio",
+                from: repository,
+                at: "main",
+                in: workspace))
+        }
 
         let session:Mongo.Session = try await .init(from: pool)
 

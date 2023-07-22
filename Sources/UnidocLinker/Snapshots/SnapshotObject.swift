@@ -30,7 +30,7 @@ class SnapshotObject:Sendable
 extension SnapshotObject
 {
     var files:Snapshot.View<Symbol.File> { .init(self.snapshot) }
-    var symbols:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
+    var decls:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
     var nodes:Snapshot.View<SymbolGraph.Node> { .init(self.snapshot) }
 
     var graph:SymbolGraph { self.snapshot.graph }
@@ -85,6 +85,8 @@ extension SnapshotObject
     {
         (declaration - self.zone).map(self.scope(of:)) ?? nil
     }
+    /// Returns the lexical scope of the requested declaration, if it
+    /// is a citizen of this snapshot.
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {
         self.hierarchy[declaration]

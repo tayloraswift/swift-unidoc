@@ -151,8 +151,9 @@ extension DynamicContext
         {
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
-                var group:DynamicClientGroup = .init(nodes: self.current.graph.nodes.count)
-                //  We already
+                var group:DynamicClientGroup = .init(
+                    nodes: self.current.scalars[self.current.graph.nodes.indices])
+
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {
                     group.add(snapshot: swift, context: self, filter: nil)
