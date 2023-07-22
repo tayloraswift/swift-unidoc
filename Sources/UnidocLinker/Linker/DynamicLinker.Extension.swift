@@ -35,3 +35,15 @@ extension DynamicLinker
         }
     }
 }
+extension DynamicLinker.Extension
+{
+    var isEmpty:Bool
+    {
+        self.conformances.isEmpty &&
+        self.features.isEmpty &&
+        self.nested.isEmpty &&
+        self.subforms.isEmpty &&
+        self.overview == nil &&
+        self.details == nil
+    }
+}

@@ -33,9 +33,11 @@ extension DynamicLinker.Extensions
     func records(context:DynamicContext) -> [Record.Extension]
     {
         self.table.sorted { $0.value.id < $1.value.id }
-            .map
+            .compactMap
         {
-            .init(signature: $0.key, extension: $0.value, context: context)
+            $0.value.isEmpty ? nil : .init(signature: $0.key,
+                extension: $0.value,
+                context: context)
         }
     }
 }

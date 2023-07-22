@@ -10,23 +10,31 @@ extension Site.Docs.DeepPage
     struct Decl
     {
         let master:Record.Master.Decl
-        let extensions:[Record.Extension]
+        let tabulator:Tabulator
 
         private
-        let inliner:Inliner
-
-        init(_ master:Record.Master.Decl,
-            extensions:[Record.Extension],
-            inliner:Inliner)
+        init(_ master:Record.Master.Decl, tabulator:Tabulator)
         {
             self.master = master
-            self.extensions = extensions
-            self.inliner = inliner
+            self.tabulator = tabulator
         }
     }
 }
 extension Site.Docs.DeepPage.Decl
 {
+    init(_ master:Record.Master.Decl, extensions:[Record.Extension], inliner:Inliner)
+    {
+        self.init(master, tabulator: .init(
+            extensions: extensions,
+            generics: master.signature.generics.parameters,
+            inliner: inliner))
+    }
+}
+extension Site.Docs.DeepPage.Decl
+{
+    private
+    var inliner:Inliner { self.tabulator.inliner }
+
     var zone:Record.Zone.Names
     {
         self.inliner.zones.principal.zone
@@ -88,90 +96,22 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             $0[.section] { $0.class = "details" } =
                 self.master.details.map(self.inliner.prose(_:))
 
-            $0[.section, { $0.class = "superforms" }]
+            if !self.master.superforms.isEmpty
             {
-                $0[.ul]
+                $0[.section, { $0.class = "superforms" }]
                 {
-                    for superform:Unidoc.Scalar in self.master.superforms
+                    $0[.h2] = self.master.phylum.superformHeading(self.master.customization)
+                    $0[.ul]
                     {
-                        $0[.li] = self.inliner.card(superform)
+                        for superform:Unidoc.Scalar in self.master.superforms
+                        {
+                            $0[.li] = self.inliner.card(superform)
+                        }
                     }
                 }
             }
 
-            for `extension`:Record.Extension in self.extensions
-            {
-                $0[.section, { $0.class = "extension" }]
-                {
-                    $0[.h3]
-                    {
-                        $0 += "(extension in "
-                        $0 ?= self.inliner.link(module: `extension`.culture)
-                        $0 += ")"
-                    }
-                    for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions
-                    {
-                        $0[.code]
-                        {
-                            $0[.span] { $0.highlight = .keyword } = "where"
-                            $0 += " "
-                            $0[.span] { $0.highlight = .typealias } = constraint.noun
-                            switch constraint.what
-                            {
-                            case    .conformer,
-                                    .subclass:  $0 += ":"
-                            case    .equal:     $0 += " == "
-                            }
-                            switch constraint.whom
-                            {
-                            case .nominal(let scalar):
-                                if  let scalar:Unidoc.Scalar,
-                                    let link:HTML.Link<UnqualifiedPath> = self.inliner.link(
-                                        decl: scalar)
-                                {
-                                    $0 += link
-                                }
-                                else
-                                {
-                                    $0 += "(redacted, \(scalar as Any))"
-                                }
-
-                            case .complex(let text):
-                                $0[.span] { $0.highlight = .literal } = text
-                            }
-                        }
-                    }
-
-                    $0[.ul]
-                    {
-                        for conformance:Unidoc.Scalar in `extension`.conformances
-                        {
-                            $0[.li] = self.inliner.card(conformance)
-                        }
-                    }
-                    $0[.ul]
-                    {
-                        for nested:Unidoc.Scalar in `extension`.nested
-                        {
-                            $0[.li] = self.inliner.card(nested)
-                        }
-                    }
-                    $0[.ul]
-                    {
-                        for feature:Unidoc.Scalar in `extension`.features
-                        {
-                            $0[.li] = self.inliner.card(feature)
-                        }
-                    }
-                    $0[.ul]
-                    {
-                        for subform:Unidoc.Scalar in `extension`.subforms
-                        {
-                            $0[.li] = self.inliner.card(subform)
-                        }
-                    }
-                }
-            }
+            $0 += self.tabulator
         }
     }
 }
