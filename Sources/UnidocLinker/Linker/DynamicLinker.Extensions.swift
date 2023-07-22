@@ -92,8 +92,8 @@ extension DynamicLinker.Extensions
         groups:[DynamicClientGroup],
         errors:inout [any DynamicLinkerError]) -> ProtocolConformances<Unidoc.Scalar>
     {
-        guard   let s:Unidoc.Scalar = context.current.scalars[scope],
-                let path:UnqualifiedPath = context[s.package]?.nodes[s]?.decl?.path
+        guard   let scope:Unidoc.Scalar = context.current.scalars[scope],
+                let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
         else
         {
             errors.append(DroppedExtensionsError.init(
@@ -108,7 +108,7 @@ extension DynamicLinker.Extensions
             .init(
                 conditions: $0.conditions.map { $0.map { context.current.scalars[$0] } },
                 culture: context.current.zone + $0.culture * .module,
-                extends: s)
+                extends: scope)
         }
 
         let conformances:ProtocolConformances<Unidoc.Scalar> = .init(
@@ -128,7 +128,7 @@ extension DynamicLinker.Extensions
                     //  Only track conformances that were declared by modules in
                     //  the current package.
                     if  let p:Unidoc.Scalar = context.current.scalars[p],
-                        case false = group.conformances[scope].contains(p)
+                        case false = group.already(conforms: scope, to: p)
                     {
                         conformances[to: p].append(.init(
                             conditions: signature.conditions,
@@ -146,7 +146,7 @@ extension DynamicLinker.Extensions
                 let signature:DynamicLinker.ExtensionSignature = .init(
                     conditions: conformance.conditions,
                     culture: conformance.culture,
-                    extends: s)
+                    extends: scope)
 
                 self[signature].conformances.append(p)
             }
@@ -200,7 +200,7 @@ extension DynamicLinker.Extensions
                 guard case (nil, nil) = ($0.overview, $0.details)
                 else
                 {
-                    errors.append(DroppedPassagesError.fromExtension($0.id, of: s))
+                    errors.append(DroppedPassagesError.fromExtension($0.id, of: scope))
                     return
                 }
 

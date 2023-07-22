@@ -155,11 +155,11 @@ extension DynamicLinker
         let namespace:ModuleIdentifier = self.current.graph.namespaces[namespace]
 
         for (d, ((symbol, node), conformances)):
-            (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances)) in zip(range,
-                zip(zip(
+            (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances<Unidoc.Scalar>)) in
+            zip(range, zip(zip(
                     self.current.graph.decls[range],
                     self.current.graph.nodes[range]),
-            self.conformances[range]))
+                self.conformances[range]))
         {
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
@@ -172,11 +172,13 @@ extension DynamicLinker
                 continue
             }
 
+
             for f:Int32 in decl.features
             {
+                //  The feature might have been declared in a different package!
                 guard
-                    let p:Unidoc.Scalar = self.current.scope(of: f),
-                    let f:Unidoc.Scalar = self.current.scalars[f]
+                    let f:Unidoc.Scalar = self.current.scalars[f],
+                    let p:Unidoc.Scalar = self.context[f.package]?.scope(of: f)
                 else
                 {
                     continue
@@ -189,7 +191,7 @@ extension DynamicLinker
                 //  This drops the feature if it belongs to a protocol whose
                 //  conformance was not declared by any culture of the current
                 //  package.
-                for conformance:ProtocolConformance in conformances[to: p]
+                for conformance:ProtocolConformance<Unidoc.Scalar> in conformances[to: p]
                 {
                     let signature:ExtensionSignature = .init(
                         conditions: conformance.conditions,
