@@ -16,7 +16,7 @@ class MarkdownBlock:MarkdownElement
     }
     /// Does nothing, unless it has been overridden.
     open
-    func outline(by _:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
+    func outline(by _:(MarkdownInline.Autolink) throws -> Int?) rethrows
     {
     }
     /// Emits nothing, unless it has been overridden.

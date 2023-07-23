@@ -19,6 +19,21 @@ extension HTML.ContentEncoder
 
         self[html, attributes.encode(to:)]
     }
+
+    mutating
+    func emit(newlines:inout Int)
+    {
+        if  newlines == 0
+        {
+            return
+        }
+        defer
+        {
+            newlines = 0
+        }
+
+        self[.span] { $0.class = "newline" } = String.init(repeating: "\n", count: newlines)
+    }
 }
 extension HTML.ContentEncoder
 {
@@ -46,6 +61,13 @@ extension HTML.ContentEncoder
             self.open(.aside, with: attributes)
             self[.h3] = signage.description
 
+        case .snippet:
+            self.open(.pre) { $0.class = "snippet" }
+            self.open(.code, with: attributes)
+
+            //  Empty newline element to display the first line number.
+            self[.span] { $0.class = "newline" }
+
         //  Ignores all attributes!
         case .transparent:
             return
@@ -67,6 +89,10 @@ extension HTML.ContentEncoder
 
         case .signage:
             self.close(.aside)
+
+        case .snippet:
+            self.close(.code)
+            self.close(.pre)
 
         //  Ignores all attributes!
         case .transparent:

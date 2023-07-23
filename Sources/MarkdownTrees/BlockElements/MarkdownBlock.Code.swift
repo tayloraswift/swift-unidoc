@@ -21,16 +21,13 @@ extension MarkdownBlock
         @inlinable public override
         func emit(into binary:inout MarkdownBinaryEncoder)
         {
-            binary[.pre]
+            binary[.snippet, { $0[.language] = self.language?.name }]
             {
-                $0[.code, { $0[.language] = self.language?.name }]
+                if  case nil = self.language?.highlighter.emit(self.text,
+                        into: &$0)
                 {
-                    if  case nil = self.language?.highlighter.emit(self.text,
-                            into: &$0)
-                    {
-                        MarkdownCodeLanguage.PlainText.Highlighter.none.emit(self.text,
-                            into: &$0)
-                    }
+                    MarkdownCodeLanguage.PlainText.Highlighter.none.emit(self.text,
+                        into: &$0)
                 }
             }
         }

@@ -23,14 +23,13 @@ struct DynamicCode
 }
 extension DynamicCode:HyperTextRenderableMarkdown
 {
-    func load(_ reference:UInt32, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {
         switch attribute
         {
         case .href:
-            if  let index:Int = .init(exactly: reference),
-                self.scalars.indices.contains(index),
-                let target:Unidoc.Scalar = self.scalars[index]
+            if  self.scalars.indices.contains(reference),
+                let target:Unidoc.Scalar = self.scalars[reference]
             {
                 return self.inliner.uri(target)
             }

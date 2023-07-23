@@ -34,27 +34,35 @@ extension MarkdownBytecode
         case tr
         case ul
 
+        //  Snippet pseudoelement.
+        case snippet = 0x9F
+
         //  Syntax highlights.
-        case attribute = 0x20
+        case attribute = 0xA0
         case binding
         case comment
+        case directive
+        case doccomment
         case identifier
         case interpolation
         case keyword
-        case literal
+        case literalNumber
+        case literalString
         case magic
+        case `operator`
+        case pseudo
         case actor
         case `class`
         case type
         case `typealias`
 
         //  Section elements.
-        case parameters = 0x30
+        case parameters = 0xC0
         case returns
         case `throws`
 
         //  Signage elements.
-        case attention = 0x40
+        case attention = 0xD0
         case author
         case authors
         case bug

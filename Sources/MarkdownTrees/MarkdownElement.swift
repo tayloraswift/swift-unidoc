@@ -9,7 +9,7 @@ protocol MarkdownElement
     /// with references.
     mutating
     func outline(
-        by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
+        by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
 
     func emit(into binary:inout MarkdownBinaryEncoder)
 }
@@ -17,7 +17,7 @@ extension MarkdownElement
 {
     /// Does nothing.
     @inlinable public mutating
-    func outline(by _:(MarkdownInline.Autolink) throws -> UInt32?)
+    func outline(by _:(MarkdownInline.Autolink) throws -> Int?)
     {
     }
 }

@@ -45,8 +45,10 @@ extension MarkdownBytecode
     }
 
     @inlinable internal mutating
-    func write(reference:UInt32)
+    func write(reference:Int)
     {
+        let reference:UInt = .init(bitPattern: reference)
+
         if      let uint8:UInt8 = .init(exactly: reference)
         {
             self.write(marker: .uint8)
@@ -60,18 +62,32 @@ extension MarkdownBytecode
                 self.bytes.append(contentsOf: $0)
             }
         }
-        else
+        else if let uint32:UInt32 = .init(exactly: reference)
         {
             self.write(marker: .uint32)
+            withUnsafeBytes(of: uint32.littleEndian)
+            {
+                self.bytes.append(contentsOf: $0)
+            }
+        }
+        else if UInt.bitWidth == 64
+        {
+            self.write(marker: .uint64)
             withUnsafeBytes(of: reference.littleEndian)
             {
                 self.bytes.append(contentsOf: $0)
             }
         }
+        else
+        {
+            fatalError("Unsupported architecture!")
+        }
     }
     @inlinable internal mutating
-    func write(_ attribute:Attribute, reference:UInt32)
+    func write(_ attribute:Attribute, reference:Int)
     {
+        let reference:UInt = .init(bitPattern: reference)
+
         if      let uint8:UInt8 = .init(exactly: reference)
         {
             self.write(marker: .attribute8)
@@ -88,15 +104,29 @@ extension MarkdownBytecode
                 self.bytes.append(contentsOf: $0)
             }
         }
-        else
+        else if let uint32:UInt32 = .init(exactly: reference)
         {
             self.write(marker: .attribute32)
+            self.bytes.append(attribute.rawValue)
+
+            withUnsafeBytes(of: uint32.littleEndian)
+            {
+                self.bytes.append(contentsOf: $0)
+            }
+        }
+        else if UInt.bitWidth == 64
+        {
+            self.write(marker: .attribute64)
             self.bytes.append(attribute.rawValue)
 
             withUnsafeBytes(of: reference.littleEndian)
             {
                 self.bytes.append(contentsOf: $0)
             }
+        }
+        else
+        {
+            fatalError("Unsupported architecture!")
         }
     }
     @inlinable internal mutating
