@@ -5,24 +5,25 @@ pre
     font-size: 1rem;
 }
 // line numbers
-pre code
+pre.snippet code
 {
     color: $light-swift;
 
-    counter-set: line -1;
+    counter-set: line 0;
 
-    .syntax-newline
+    span.newline
     {
         counter-increment: line;
     }
-    .syntax-newline:after
+    span.newline:after
     {
+        color: $light-snippet-line-number;
+
         position: relative;
         display: inline-block;
         content: counter(line);
         width: 0;
         right: 2rem;
-        color: $dark-gray;
         direction: rtl;
         word-wrap: normal;
     }

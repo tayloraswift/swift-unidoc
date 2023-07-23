@@ -30,8 +30,8 @@ extension MarkdownBinaryDecoder
         return self.bytes[self.index]
     }
     @inlinable internal mutating
-    func read<Reference>(_:Reference.Type = Reference.self) -> Reference?
-        where Reference:FixedWidthInteger
+    func read<Reference>(_:Reference.Type) -> Int?
+        where Reference:FixedWidthInteger & UnsignedInteger
     {
         if  let after:Int = self.bytes.index(self.index,
                 offsetBy: MemoryLayout<Reference>.size,
@@ -41,11 +41,19 @@ extension MarkdownBinaryDecoder
             {
                 self.index = after
             }
-            return self.bytes.withUnsafeBytes
+            let reference:Reference = self.bytes.withUnsafeBytes
             {
                 .init(littleEndian: $0.loadUnaligned(
                     fromByteOffset: self.index,
                     as: Reference.self))
+            }
+            if  let uint:UInt = .init(exactly: reference)
+            {
+                return .init(bitPattern: uint)
+            }
+            else
+            {
+                fatalError("Cannot decode 64-bit markdown references on a 32-bit platform!")
             }
         }
         else
@@ -74,7 +82,7 @@ extension MarkdownBinaryDecoder:IteratorProtocol
         {
         case 0x00 ... 0xBF, 0xC2 ... 0xF4:
             return .utf8(byte)
-        
+
         default:
             break
         }
@@ -86,62 +94,75 @@ extension MarkdownBinaryDecoder:IteratorProtocol
             {
                 return .push(instruction)
             }
-        
+
         case .pop?:
             return .pop
-        
+
         case .attribute?:
             if  let attribute:MarkdownBytecode.Attribute = self.read()
             {
                 return .attribute(attribute)
             }
-        
+
         case .attribute8?:
             if  let attribute:MarkdownBytecode.Attribute = self.read(),
-                let reference:UInt8 = self.read()
-            {
-                return .attribute(attribute, .init(reference))
-            }
-        
-        case .attribute16?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
-                let reference:UInt16 = self.read()
-            {
-                return .attribute(attribute, .init(reference))
-            }
-        
-        case .attribute32?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
-                let reference:UInt32 = self.read()
+                let reference:Int = self.read(UInt8.self)
             {
                 return .attribute(attribute, reference)
             }
-        
+
+        case .attribute16?:
+            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+                let reference:Int = self.read(UInt16.self)
+            {
+                return .attribute(attribute, reference)
+            }
+
+        case .attribute32?:
+            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+                let reference:Int = self.read(UInt32.self)
+            {
+                return .attribute(attribute, reference)
+            }
+
+        case .attribute64?:
+            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+                let reference:Int = self.read(UInt64.self)
+            {
+                return .attribute(attribute, reference)
+            }
+
         case .emit?:
             if  let instruction:MarkdownBytecode.Emission = self.read()
             {
                 return .emit(instruction)
             }
-        
-        case .uint8?:
-            if  let reference:UInt8 = self.read()
-            {
-                return .load(.init(reference))
-            }
 
-        case .uint16?:
-            if  let reference:UInt16 = self.read()
-            {
-                return .load(.init(reference))
-            }
-        
-        case .uint32?:
-            if  let reference:UInt32 = self.read()
+        case .uint8?:
+            if  let reference:Int = self.read(UInt8.self)
             {
                 return .load(reference)
             }
-        
-        case nil:
+
+        case .uint16?:
+            if  let reference:Int = self.read(UInt16.self)
+            {
+                return .load(reference)
+            }
+
+        case .uint32?:
+            if  let reference:Int = self.read(UInt32.self)
+            {
+                return .load(reference)
+            }
+
+        case .uint64?:
+            if  let reference:Int = self.read(UInt64.self)
+            {
+                return .load(reference)
+            }
+
+        case ._reserved?, nil:
             //  reserved byte
             break
         }

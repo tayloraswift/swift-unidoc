@@ -11,23 +11,23 @@ protocol HyperTextRenderableMarkdown:HyperTextOutputStreamable
     ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.
-    func load(_ reference:UInt32, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
-    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
+    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
 }
 extension HyperTextRenderableMarkdown
 {
     /// Returns nil.
     @inlinable public
-    func load(_ reference:UInt32, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {
         nil
     }
     /// Does nothing.
     @inlinable public
-    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
+    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
     }
 }
@@ -58,6 +58,7 @@ extension HyperTextRenderableMarkdown
             }
         }
 
+        var newlines:Int = 0
         for instruction:MarkdownInstruction in self.bytecode
         {
             switch instruction
@@ -80,7 +81,10 @@ extension HyperTextRenderableMarkdown
 
             case .emit(let element):
                 attributes.commit()
+
+                html.emit(newlines: &newlines)
                 html.emit(element: element, with: attributes)
+
                 attributes.clear()
 
             case .load(let reference):
@@ -93,6 +97,7 @@ extension HyperTextRenderableMarkdown
                 let context:MarkdownElementContext = .init(from: element,
                     attributes: &attributes)
 
+                html.emit(newlines: &newlines)
                 html.open(context: context, with: attributes)
 
                 attributes.clear()
@@ -101,12 +106,16 @@ extension HyperTextRenderableMarkdown
             case .pop:
                 attributes.clear()
 
-                if let context:MarkdownElementContext = stack.popLast()
+                switch stack.popLast()
                 {
+                case .snippet?:
+                    newlines = 0
+                    html.close(context: .snippet)
+
+                case let context?:
                     html.close(context: context)
-                }
-                else
-                {
+
+                case nil:
                     throw MarkdownRenderingError.illegalInstruction
                 }
 
@@ -117,12 +126,23 @@ extension HyperTextRenderableMarkdown
                     continue
                 }
                 //  Not in an attribute context.
-                if case .transparent? = stack.last
+                switch stack.last
                 {
+                case .transparent?:
                     html.append(escaped: codeunit)
-                }
-                else
-                {
+
+                case .snippet?:
+                    if  codeunit == 0x0A // '\n'
+                    {
+                        newlines += 1
+                    }
+                    else
+                    {
+                        html.emit(newlines: &newlines)
+                        fallthrough
+                    }
+
+                case _:
                     html.append(unescaped: codeunit)
                 }
             }

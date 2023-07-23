@@ -5,7 +5,7 @@ extension StaticOutliner
     struct Cache
     {
         private
-        var references:[String: UInt32]
+        var references:[String: Int]
         private(set)
         var outlines:[SymbolGraph.Outline]
 
@@ -20,17 +20,17 @@ extension StaticOutliner.Cache
 {
     mutating
     func callAsFunction(_ key:String,
-        with populate:() throws -> SymbolGraph.Outline?) rethrows -> UInt32?
+        with populate:() throws -> SymbolGraph.Outline?) rethrows -> Int?
     {
         try
         {
-            if  let reference:UInt32 = $0
+            if  let reference:Int = $0
             {
                 return reference
             }
             else if let outline:SymbolGraph.Outline = try populate()
             {
-                let next:UInt32 = .init(self.outlines.endIndex)
+                let next:Int = self.outlines.endIndex
                 self.outlines.append(outline)
                 $0 = next
                 return next

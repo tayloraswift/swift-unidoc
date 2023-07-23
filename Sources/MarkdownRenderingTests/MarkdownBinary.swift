@@ -17,7 +17,7 @@ extension MarkdownBinary:HyperTextRenderableMarkdown
 {
     /// Renders a placeholder `code` element describing the reference.
     public
-    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
+    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
         html[.code] = "<reference = \(reference)>"
     }

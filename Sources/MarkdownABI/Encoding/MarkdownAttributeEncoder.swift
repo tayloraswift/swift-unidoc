@@ -43,7 +43,7 @@ extension MarkdownAttributeEncoder
         }
     }
     @inlinable public
-    subscript(attribute:MarkdownBytecode.Attribute) -> UInt32?
+    subscript(attribute:MarkdownBytecode.Attribute) -> Int?
     {
         get
         {
@@ -51,7 +51,7 @@ extension MarkdownAttributeEncoder
         }
         set(reference)
         {
-            if let reference:UInt32
+            if  let reference:Int
             {
                 self.bytecode.write(attribute, reference: reference)
             }

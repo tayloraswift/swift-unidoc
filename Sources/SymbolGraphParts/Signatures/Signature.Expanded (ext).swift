@@ -6,7 +6,7 @@ extension Signature<Symbol.Decl>.Expanded
 {
     init(_ fragments:__shared some Sequence<Signature.Fragment>)
     {
-        var references:[Scalar: UInt32] = [:]
+        var references:[Scalar: Int] = [:]
         var referents:[Scalar] = []
         let bytecode:MarkdownBytecode = .init
         {
@@ -20,13 +20,13 @@ extension Signature<Symbol.Decl>.Expanded
                         {
                             $0[.href] =
                             {
-                                if  let reference:UInt32 = $0
+                                if  let reference:Int = $0
                                 {
                                     return reference
                                 }
                                 else
                                 {
-                                    let next:UInt32 = .init(referents.endIndex)
+                                    let next:Int = referents.endIndex
                                     referents.append(referent)
                                     $0 = next
                                     return next

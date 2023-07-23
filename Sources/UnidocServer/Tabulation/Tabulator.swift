@@ -87,7 +87,7 @@ extension Tabulator:HyperTextOutputStreamable
                                 $0 += ", "
                             }
 
-                            $0[.span] { $0.highlight = .typealias } = constraint.noun
+                            $0[.span] { $0.class = "noun" } = constraint.noun
                             switch constraint.what
                             {
                             case    .conformer,
@@ -109,7 +109,7 @@ extension Tabulator:HyperTextOutputStreamable
                                 }
 
                             case .complex(let text):
-                                $0[.span] { $0.highlight = .literal } = text
+                                $0[.span] { $0.class = "whom" } = text
                             }
                         }
                     }

@@ -56,7 +56,7 @@ extension Signature.Fragment.Color
     {
         switch self
         {
-        case .attribute:        return .keyword
+        case .attribute:        return .attribute
         case .binding:          return .binding
         case .identifier:       return .identifier
         case .keyword:          return .keyword
@@ -64,8 +64,8 @@ extension Signature.Fragment.Color
         case .text:             return nil
         case .typeIdentifier:   return .type
         case .typeParameter:    return .typealias
-        case .number:           return .literal
-        case .string:           return .literal
+        case .number:           return .literalNumber
+        case .string:           return .literalString
         }
     }
 }

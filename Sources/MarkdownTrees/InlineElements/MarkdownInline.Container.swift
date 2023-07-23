@@ -31,7 +31,7 @@ extension MarkdownInline.Container:Sendable where Element:Sendable
 extension MarkdownInline.Container:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
+    func outline(by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
     {
         for index:Int in self.elements.indices
         {

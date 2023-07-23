@@ -2,22 +2,35 @@
 
 pre code
 {
-    span.syntax-identifier
+    span.syntax-identifier,
+    span.syntax-operator
     {
         color: $near-black;
     }
-    span.syntax-keyword
+    span.syntax-binding
+    {
+        color: $near-black;
+        font-style: italic;
+    }
+    span.syntax-attribute,
+    span.syntax-directive,
+    span.syntax-keyword,
+    span.syntax-magic
     {
         color: $light-accent-hot-pink;
     }
-    span.syntax-magic
+    span.syntax-interpolation,
+    span.syntax-pseudo
     {
         color: $light-accent-barbie-pink;
     }
-    span.syntax-literal
+    span.syntax-literal-number,
+    span.syntax-literal-string
     {
         color: $light-accent-violet;
     }
+    span.syntax-actor, a.syntax-actor,
+    span.syntax-class, a.syntax-class,
     span.syntax-type, a.syntax-type
     {
         color: $light-accent-yellow;
@@ -27,7 +40,8 @@ pre code
         color: $light-accent-barbie-pink;
         font-style: italic;
     }
-    span.syntax-comment
+    span.syntax-comment,
+    span.syntax-doccomment
     {
         color: $light-accent-comment;
         font-style: italic;

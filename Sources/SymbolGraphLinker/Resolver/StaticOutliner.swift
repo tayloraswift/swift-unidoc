@@ -53,7 +53,7 @@ extension StaticOutliner
 extension StaticOutliner
 {
     private mutating
-    func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> UInt32?
+    func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> Int?
     {
         self.cache(autolink.text)
         {

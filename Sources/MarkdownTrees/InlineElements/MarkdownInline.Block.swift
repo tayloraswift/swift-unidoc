@@ -14,7 +14,7 @@ extension MarkdownInline
         case link(Link)
         case image(Image)
 
-        case reference(UInt32)
+        case reference(Int)
 
         case text(String)
     }
@@ -22,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Block:MarkdownElement
 {
     @inlinable public mutating
-    func outline(by register:(MarkdownInline.Autolink) throws -> UInt32?) rethrows
+    func outline(by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
     {
         switch self
         {
@@ -32,7 +32,7 @@ extension MarkdownInline.Block:MarkdownElement
             try container.outline(by: register)
 
         case .autolink(let autolink):
-            if  let reference:UInt32 = try register(autolink)
+            if  let reference:Int = try register(autolink)
             {
                 self = .reference(reference)
             }

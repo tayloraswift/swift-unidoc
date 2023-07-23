@@ -16,8 +16,12 @@ extension Delegate.Get
     static
     func admin(_ path:ArraySlice<String>) -> Self?
     {
-        if  let first:String = path.first,
-            let tool:Admin.Tool = .init(rawValue: first)
+        guard let first:String = path.first
+        else
+        {
+            return .admin(.init(tool: nil))
+        }
+        if  let tool:Admin.Tool = .init(rawValue: first)
         {
             return .admin(.init(tool: tool))
         }

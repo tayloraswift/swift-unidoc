@@ -48,28 +48,7 @@ extension MarkdownBinaryEncoder
         self.bytecode.write(utf8: utf8)
     }
     @inlinable public static
-    func &= (self:inout Self, reference:UInt32)
-    {
-        self.bytecode.write(reference: reference)
-    }
-}
-extension MarkdownBinaryEncoder
-{
-    @available(*, deprecated)
-    @inlinable public mutating
-    func write(text:some StringProtocol)
-    {
-        self.bytecode.write(text: text)
-    }
-    @available(*, deprecated)
-    @inlinable public mutating
-    func write(utf8:some Sequence<UInt8>)
-    {
-        self.bytecode.write(utf8: utf8)
-    }
-    @available(*, deprecated)
-    @inlinable public mutating
-    func write(reference:UInt32)
+    func &= (self:inout Self, reference:Int)
     {
         self.bytecode.write(reference: reference)
     }

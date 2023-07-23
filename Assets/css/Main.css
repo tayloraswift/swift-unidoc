@@ -5,36 +5,48 @@ pre {
   font-size: 1rem;
 }
 
-pre code {
+pre.snippet code {
   color: rgb(134, 134, 134);
-  counter-set: line -1;
+  counter-set: line 0;
 }
-pre code .syntax-newline {
+pre.snippet code span.newline {
   counter-increment: line;
 }
-pre code .syntax-newline:after {
+pre.snippet code span.newline:after {
+  color: rgb(192, 192, 192);
   position: relative;
   display: inline-block;
   content: counter(line);
   width: 0;
   right: 2rem;
-  color: rgb(68, 68, 68);
   direction: rtl;
   word-wrap: normal;
 }
 
-pre code span.syntax-identifier {
+pre code span.syntax-identifier,
+pre code span.syntax-operator {
   color: rgb(22, 22, 22);
 }
-pre code span.syntax-keyword {
+pre code span.syntax-binding {
+  color: rgb(22, 22, 22);
+  font-style: italic;
+}
+pre code span.syntax-attribute,
+pre code span.syntax-directive,
+pre code span.syntax-keyword,
+pre code span.syntax-magic {
   color: rgb(253, 39, 99);
 }
-pre code span.syntax-magic {
+pre code span.syntax-interpolation,
+pre code span.syntax-pseudo {
   color: rgb(255, 86, 158);
 }
-pre code span.syntax-literal {
+pre code span.syntax-literal-number,
+pre code span.syntax-literal-string {
   color: rgb(141, 61, 231);
 }
+pre code span.syntax-actor, pre code a.syntax-actor,
+pre code span.syntax-class, pre code a.syntax-class,
 pre code span.syntax-type, pre code a.syntax-type {
   color: rgb(255, 123, 0);
 }
@@ -42,7 +54,8 @@ pre code span.syntax-typealias {
   color: rgb(255, 86, 158);
   font-style: italic;
 }
-pre code span.syntax-comment {
+pre code span.syntax-comment,
+pre code span.syntax-doccomment {
   color: rgb(109, 109, 109);
   font-style: italic;
 }

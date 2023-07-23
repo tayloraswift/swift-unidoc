@@ -44,22 +44,22 @@ extension MarkdownCodeLanguage.Swift.Highlighter:MarkdownCodeHighlighter
 
                 case    .attribute:                 context = .attribute
 
-                case    .buildConfigId,
-                        .poundDirectiveKeyword:     context = .magic
+                case    .buildConfigId:             context = .directive
+                case    .poundDirectiveKeyword:     context = .magic
 
                 case    .lineComment,
-                        .blockComment,
-                        .docLineComment,
-                        .docBlockComment:           context = .comment
+                        .blockComment:              context = .comment
+                case    .docLineComment,
+                        .docBlockComment:           context = .doccomment
 
-                case    .dollarIdentifier,
-                        .identifier,
-                        .operatorIdentifier:        context = .identifier
+                case    .dollarIdentifier:          context = .pseudo
+                case    .identifier:                context = .identifier
+                case    .operatorIdentifier:        context = .operator
 
                 case    .integerLiteral,
-                        .floatingLiteral,
-                        .stringLiteral,
-                        .objectLiteral:             context = .literal
+                        .floatingLiteral:           context = .literalNumber
+                case    .stringLiteral,
+                        .objectLiteral:             context = .literalString
 
                 case    .keyword:                   context = .keyword
                 case    .stringInterpolationAnchor: context = .interpolation

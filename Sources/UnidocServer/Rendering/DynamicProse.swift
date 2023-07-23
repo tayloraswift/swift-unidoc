@@ -21,16 +21,15 @@ extension DynamicProse:HyperTextRenderableMarkdown
 {
     var bytecode:MarkdownBytecode { self.passage.markdown }
 
-    func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
+    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
-        guard   let index:Int = .init(exactly: reference),
-                self.passage.outlines.indices.contains(index)
+        guard self.passage.outlines.indices.contains(reference)
         else
         {
             return
         }
 
-        switch self.passage.outlines[index]
+        switch self.passage.outlines[reference]
         {
         case .text(let text):
             html[.code] = text

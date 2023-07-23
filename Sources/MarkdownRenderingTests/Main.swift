@@ -23,7 +23,7 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "pre" / "transparency"
+        if  let tests:TestGroup = tests / "Pre" / "Transparency"
         {
             self.run(tests: tests,
                 expecting: "<pre><span>test</span></pre>")
@@ -34,7 +34,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "escaped-characters"
+        if  let tests:TestGroup = tests / "Pre" / "EscapedCharacters"
         {
             self.run(tests: tests,
                 expecting: "<pre>&lt;span&gt;test&lt;/span&gt;</pre>")
@@ -42,7 +42,7 @@ enum Main:SyncTests
                 $0[.pre] = "<span>test</span>"
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "newlines"
+        if  let tests:TestGroup = tests / "Pre" / "Newlines"
         {
             self.run(tests: tests,
                 expecting: "<pre>    code\n    code</pre>")
@@ -54,7 +54,7 @@ enum Main:SyncTests
                 """
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "language"
+        if  let tests:TestGroup = tests / "Pre" / "Language"
         {
             self.run(tests: tests,
                 expecting: "<pre class='language-swift'>code\ncode</pre>")
@@ -62,7 +62,7 @@ enum Main:SyncTests
                 $0[.pre, { $0[.language] = "swift" }] = "code\ncode"
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "language" / "extra-css" / "before"
+        if  let tests:TestGroup = tests / "Pre" / "Language" / "ExtraCSS" / "Before"
         {
             self.run(tests: tests,
                 expecting: "<pre class='before language-swift'>code\ncode</pre>")
@@ -70,7 +70,7 @@ enum Main:SyncTests
                 $0[.pre, { $0[.class] = "before" ; $0[.language] = "swift" }] = "code\ncode"
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "language" / "extra-css" / "after"
+        if  let tests:TestGroup = tests / "Pre" / "Language" / "ExtraCSS" / "After"
         {
             self.run(tests: tests,
                 expecting: "<pre class='language-swift after'>code\ncode</pre>")
@@ -78,7 +78,7 @@ enum Main:SyncTests
                 $0[.pre, { $0[.language] = "swift" ; $0[.class] = "after" }] = "code\ncode"
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "language" / "escaped-characters"
+        if  let tests:TestGroup = tests / "Pre" / "Language" / "EscapedCharacters"
         {
             self.run(tests: tests,
                 expecting: """
@@ -91,14 +91,14 @@ enum Main:SyncTests
                     "we r never ever ever getting back together"
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "highlighting"
+        if  let tests:TestGroup = tests / "Pre" / "Highlighting"
         {
             self.run(tests: tests,
                 expecting: """
                 <pre class='language-swift'>\
                 <span class='syntax-keyword'>let</span> \
                 <span class='syntax-identifier'>x</span> = \
-                <span class='syntax-literal'>5</span>\
+                <span class='syntax-literal-number'>5</span>\
                 </pre>
                 """)
             {
@@ -108,11 +108,11 @@ enum Main:SyncTests
                     $0 += " "
                     $0[.identifier] = "x"
                     $0 += " = "
-                    $0[.literal] = "5"
+                    $0[.literalNumber] = "5"
                 }
             }
         }
-        if  let tests:TestGroup = tests / "pre" / "unicode"
+        if  let tests:TestGroup = tests / "Pre" / "Unicode"
         {
             self.run(tests: tests,
                 expecting: """
@@ -122,7 +122,90 @@ enum Main:SyncTests
                 $0[.pre, { $0[.language] = "swift" }] = "let 🇺🇸 = \"en-us\""
             }
         }
-        if  let tests:TestGroup = tests / "multiple-classes"
+        if  let tests:TestGroup = tests / "Snippet" / "SingleLine"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <pre class='snippet'>\
+                <code class='language-swift'>\
+                <span class='newline'></span><span class='syntax-keyword'>let</span> \
+                <span class='syntax-identifier'>x</span> = \
+                <span class='syntax-literal-number'>5</span>\
+                </code>\
+                </pre>
+                """)
+            {
+                $0[.snippet, { $0[.language] = "swift" }]
+                {
+                    $0[.keyword] = "let"
+                    $0 += " "
+                    $0[.identifier] = "x"
+                    $0 += " = "
+                    $0[.literalNumber] = "5"
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "Snippet" / "MultiLine"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <pre class='snippet'>\
+                <code class='language-swift'>\
+                <span class='newline'></span><span class='syntax-keyword'>import</span> \
+                NIOCore\
+                <span class='newline'>
+
+
+                </span><span class='syntax-keyword'>let</span> \
+                <span class='syntax-identifier'>x</span> = \
+                <span class='syntax-literal-number'>5</span>\
+                </code>\
+                </pre>
+                """)
+            {
+                $0[.snippet, { $0[.language] = "swift" }]
+                {
+                    $0[.keyword] = "import"
+                    $0 += """
+                     \
+                    NIOCore
+
+
+
+                    """
+                    $0[.keyword] = "let"
+                    $0 += " "
+                    $0[.identifier] = "x"
+                    $0 += " = "
+                    $0[.literalNumber] = "5"
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "Snippet" / "Trimming"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <pre class='snippet'>\
+                <code class='language-swift'>\
+                <span class='newline'></span>\
+                <span class='newline'>
+
+                </span>import NIOCore\
+                </code>\
+                </pre>
+                """)
+            {
+                $0[.snippet, { $0[.language] = "swift" }] =
+                """
+
+
+                import NIOCore
+
+
+                """
+            }
+        }
+        if  let tests:TestGroup = tests / "MultipleClasses"
         {
             self.run(tests: tests,
                 expecting: "<p class='aaa bbb ccc'> </p>")
@@ -130,7 +213,7 @@ enum Main:SyncTests
                 $0[.p, { $0[.class] = "aaa"; $0[.class] = "bbb"; $0[.class] = "ccc" }] = " "
             }
         }
-        if  let tests:TestGroup = tests / "void-elements"
+        if  let tests:TestGroup = tests / "VoidElements"
         {
             self.run(tests: tests,
                 expecting: "<p><br><br><br></p>")
@@ -143,7 +226,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "attributes" / "nesting"
+        if  let tests:TestGroup = tests / "Attributes" / "Nesting"
         {
             self.run(tests: tests,
                 expecting: """
@@ -167,7 +250,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "attributes" / "checkbox"
+        if  let tests:TestGroup = tests / "Attributes" / "Checkbox"
         {
             self.run(tests: tests,
                 expecting: "<input type='checkbox' checked disabled>")
@@ -180,7 +263,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "attributes" / "align"
+        if  let tests:TestGroup = tests / "Attributes" / "Align"
         {
             for pseudo:MarkdownBytecode.Attribute in [.center, .left, .right]
             {
@@ -194,7 +277,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "sections"
+        if  let tests:TestGroup = tests / "Sections"
         {
             self.run(tests: tests,
                 expecting: """
@@ -216,7 +299,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "signage"
+        if  let tests:TestGroup = tests / "Signage"
         {
             self.run(tests: tests,
                 expecting: """
@@ -232,7 +315,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "references"
+        if  let tests:TestGroup = tests / "References"
         {
             self.run(tests: tests,
                 expecting: """
@@ -242,11 +325,12 @@ enum Main:SyncTests
                 $0[.p] { $0 &= 12345 }
             }
 
-            for (name, reference):(String, UInt32) in
+            for (name, reference):(String, Int) in
             [
+                ("min",     .min),
                 ("uint8",    255),
                 ("uint16", 65535),
-                ("uint32",  .max),
+                ("max",     .max),
             ]
             {
                 guard let tests:TestGroup = tests / name
@@ -263,7 +347,7 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "references" / "success"
+        if  let tests:TestGroup = tests / "References" / "Success"
         {
             struct Renderable:HyperTextRenderableMarkdown
             {
@@ -277,7 +361,7 @@ enum Main:SyncTests
                     }
                 }
 
-                func load(_ reference:UInt32, into html:inout HTML.ContentEncoder)
+                func load(_ reference:Int, into html:inout HTML.ContentEncoder)
                 {
                     html[.a, { $0.href = "swiftinit.org" }] = String.init(reference,
                         radix: 16)
@@ -290,13 +374,13 @@ enum Main:SyncTests
             tests.expect(html.description ==?
                 "<p>before<a href='swiftinit.org'>aabbccdd</a>after</p>")
         }
-        if  let tests:TestGroup = tests / "reference-attributes"
+        if  let tests:TestGroup = tests / "ReferenceAttributes"
         {
             struct Renderable:HyperTextRenderableMarkdown
             {
                 let bytecode:MarkdownBytecode
 
-                init(reference:UInt32)
+                init(reference:Int)
                 {
                     self.bytecode = .init
                     {
@@ -314,17 +398,18 @@ enum Main:SyncTests
                     }
                 }
 
-                func load(_ reference:UInt32, for _:MarkdownBytecode.Attribute) -> String?
+                func load(_ reference:Int, for _:MarkdownBytecode.Attribute) -> String?
                 {
                     reference & 1 == 0 ? nil : "swiftinit.org"
                 }
             }
 
-            for (name, reference):(String, UInt32) in
+            for (name, reference):(String, Int) in
             [
+                ("-1",        -1),
                 ("uint8",    255),
                 ("uint16", 65535),
-                ("uint32",  .max),
+                ("max",     .max),
             ]
             {
                 guard let tests:TestGroup = tests / name
@@ -345,7 +430,7 @@ enum Main:SyncTests
                     """)
             }
 
-            if  let tests:TestGroup = tests / "failure"
+            if  let tests:TestGroup = tests / "Failure"
             {
                 let renderable:Renderable = .init(reference: 2)
                 let html:HTML = .init { $0 += renderable }
