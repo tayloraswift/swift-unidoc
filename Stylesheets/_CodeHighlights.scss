@@ -1,0 +1,35 @@
+@import 'Colors';
+
+pre code
+{
+    span.syntax-identifier
+    {
+        color: $near-black;
+    }
+    span.syntax-keyword
+    {
+        color: $light-accent-hot-pink;
+    }
+    span.syntax-magic
+    {
+        color: $light-accent-barbie-pink;
+    }
+    span.syntax-literal
+    {
+        color: $light-accent-violet;
+    }
+    span.syntax-type, a.syntax-type
+    {
+        color: $light-accent-yellow;
+    }
+    span.syntax-typealias
+    {
+        color: $light-accent-barbie-pink;
+        font-style: italic;
+    }
+    span.syntax-comment
+    {
+        color: $light-accent-comment;
+        font-style: italic;
+    }
+}

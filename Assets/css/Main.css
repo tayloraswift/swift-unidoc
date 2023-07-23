@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+pre {
+  margin: 2rem 0 2rem;
+  line-height: 1.5rem;
+  font-size: 1rem;
+}
+
+pre code {
+  color: rgb(134, 134, 134);
+  counter-set: line -1;
+}
+pre code .syntax-newline {
+  counter-increment: line;
+}
+pre code .syntax-newline:after {
+  position: relative;
+  display: inline-block;
+  content: counter(line);
+  width: 0;
+  right: 2rem;
+  color: rgb(68, 68, 68);
+  direction: rtl;
+  word-wrap: normal;
+}
+
+pre code span.syntax-identifier {
+  color: rgb(22, 22, 22);
+}
+pre code span.syntax-keyword {
+  color: rgb(253, 39, 99);
+}
+pre code span.syntax-magic {
+  color: rgb(255, 86, 158);
+}
+pre code span.syntax-literal {
+  color: rgb(141, 61, 231);
+}
+pre code span.syntax-type, pre code a.syntax-type {
+  color: rgb(255, 123, 0);
+}
+pre code span.syntax-typealias {
+  color: rgb(255, 86, 158);
+  font-style: italic;
+}
+pre code span.syntax-comment {
+  color: rgb(109, 109, 109);
+  font-style: italic;
+}
+
+html {
+  font-size: 1rem;
+  background-color: rgb(235, 235, 235);
+}
+
+body {
+  margin: 0;
+  color: rgb(22, 22, 22);
+  font-family: "Literata", serif;
+  font-variant-numeric: oldstyle-nums;
+  overflow-wrap: break-word;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+body main {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  min-height: 100vw;
+}
+body main > *:last-child {
+  padding-bottom: 20rem;
+}
+body main a {
+  color: rgb(253, 39, 99);
+}
+body main article p {
+  line-height: 1.8rem;
+  hyphens: auto;
+}
+
+body main section.extension ul > li a {
+  font-family: "IBM Plex Mono", monospace;
+  color: rgb(109, 109, 109);
+}
+body main section.extension ul > li a span.syntax-identifier {
+  color: rgb(253, 39, 99);
+}
+
+h1, h2, h3 {
+  font-family: "DM Sans", sans-serif;
+}
+
+code {
+  font-family: "IBM Plex Mono", monospace;
+  white-space: pre-wrap;
+  hyphens: none;
+  font-size: 93.75%;
+}
+
+/*# sourceMappingURL=Main.css.map */

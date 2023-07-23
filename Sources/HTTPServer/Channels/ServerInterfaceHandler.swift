@@ -144,27 +144,24 @@ extension ServerInterfaceHandler
 {
     private
     func accept(context:ChannelHandlerContext,
-        etag:SHA256?) -> EventLoopPromise<ServerResource>
+        etag:SHA256?) -> EventLoopPromise<ServerResponse>
     {
-        let promise:EventLoopPromise<ServerResource> = context.eventLoop.makePromise(
-            of: ServerResource.self)
+        let promise:EventLoopPromise<ServerResponse> = context.eventLoop.makePromise(
+            of: ServerResponse.self)
 
         promise.futureResult.whenComplete
         {
             switch $0
             {
-            case .success(let resource):
-                switch resource.response
+            case .success(let response):
+                switch response
                 {
-                case .redirect(let permanence):
-                    self.send(message: .init(location: resource.location,
-                            canonical: resource.canonical,
-                            redirect: permanence),
+                case .redirect(let redirect):
+                    self.send(message: .init(redirect: redirect),
                         context: context)
 
-                case .content(let content):
-                    self.send(message: .init(content: content,
-                            results: resource.results,
+                case .resource(let resource):
+                    self.send(message: .init(resource: resource,
                             using: context.channel.allocator,
                             etag: etag),
                         context: context)

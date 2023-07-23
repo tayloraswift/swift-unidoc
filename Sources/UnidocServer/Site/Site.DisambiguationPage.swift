@@ -36,23 +36,16 @@ extension Site.DisambiguationPage:HyperTextOutputStreamable
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[.head]
+        html[.section, { $0.class = "introduction" }]
         {
-            $0[.title] = "Disambiguation Page"
-        }
-        html[.body]
-        {
-            $0[.section, { $0.class = "introduction" }]
+            $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.div, { $0.class = "eyebrows" }]
-                {
-                    $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
-                }
-
-                $0[.h1] = "\(self.identity)"
-
-                $0[.p] = "This path could refer to multiple entities."
+                $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
             }
+
+            $0[.h1] = "\(self.identity)"
+
+            $0[.p] = "This path could refer to multiple entities."
         }
     }
 }

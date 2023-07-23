@@ -13,10 +13,15 @@ extension Site.Docs.DeepPage
         let tabulator:Tabulator
 
         private
+        let path:QualifiedPath?
+
+        private
         init(_ master:Record.Master.Decl, tabulator:Tabulator)
         {
             self.master = master
             self.tabulator = tabulator
+
+            self.path = .init(splitting: self.master.stem)
         }
     }
 }
@@ -44,74 +49,72 @@ extension Site.Docs.DeepPage.Decl
     {
         .init(decl: self.master, in: self.zone)
     }
+
+    var title:String?
+    {
+        //  TODO: this should include the package name
+        self.path?.last
+    }
 }
 extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        guard let path:QualifiedPath = .init(splitting: self.master.stem)
+        guard let path:QualifiedPath = self.path
         else
         {
             return
         }
 
-        html[.head]
+        html[.section, { $0.class = "introduction \(self.master.customization.accent)" }]
         {
-            //  TODO: this should include the package name
-            $0[.title] = path.last
+            $0[.div, { $0.class = "eyebrows" }]
+            {
+                $0[.span] { $0.class = "phylum" } = self.master.phylum.title
+                $0[.span] { $0.class = "version" } = self.zone.version
+                $0[.span, { $0.class = "module" }]
+                {
+                    $0 ?= self.master.namespace == self.master.culture ? nil
+                        : self.inliner.link(module: self.master.culture)
+
+                    $0[link: self.inliner.uri(self.master.namespace)] = path.namespace
+                }
+            }
+
+            $0[.h1] = path.last
+
+            $0 ?= self.master.overview.map(self.inliner.prose(_:))
+
+            $0[.span] { $0.class = "phylum" } = self.master.customization.title
         }
-        html[.body]
+
+        html[.section, { $0.class = "declaration" }]
         {
-            $0[.section, { $0.class = "introduction \(self.master.customization.accent)" }]
+            $0[.pre]
             {
-                $0[.div, { $0.class = "eyebrows" }]
-                {
-                    $0[.span] { $0.class = "phylum" } = self.master.phylum.title
-                    $0[.span] { $0.class = "version" } = self.zone.version
-                    $0[.span, { $0.class = "module" }]
-                    {
-                        $0 ?= self.master.namespace == self.master.culture ? nil
-                            : self.inliner.link(module: self.master.culture)
-
-                        $0[link: self.inliner.uri(self.master.namespace)] = path.namespace
-                    }
-                }
-
-                $0[.h1] = path.last
-
-                $0 ?= self.master.overview.map(self.inliner.prose(_:))
-
-                $0[.span] { $0.class = "phylum" } = self.master.customization.title
+                $0[.code] = self.inliner.code(self.master.signature.expanded)
             }
+        }
 
-            $0[.section, { $0.class = "declaration" }]
+        html[.section] { $0.class = "details" } =
+            self.master.details.map(self.inliner.prose(_:))
+
+        if !self.master.superforms.isEmpty
+        {
+            html[.section, { $0.class = "superforms" }]
             {
-                $0[.pre]
+                $0[.h2] = self.master.phylum.superformHeading(self.master.customization)
+                $0[.ul]
                 {
-                    $0[.code] = self.inliner.code(self.master.signature.expanded)
-                }
-            }
-
-            $0[.section] { $0.class = "details" } =
-                self.master.details.map(self.inliner.prose(_:))
-
-            if !self.master.superforms.isEmpty
-            {
-                $0[.section, { $0.class = "superforms" }]
-                {
-                    $0[.h2] = self.master.phylum.superformHeading(self.master.customization)
-                    $0[.ul]
+                    for superform:Unidoc.Scalar in self.master.superforms
                     {
-                        for superform:Unidoc.Scalar in self.master.superforms
-                        {
-                            $0[.li] = self.inliner.card(superform)
-                        }
+                        $0[.li] = self.inliner.card(superform)
                     }
                 }
             }
-
-            $0 += self.tabulator
         }
+
+        html += self.tabulator
     }
 }

@@ -34,27 +34,28 @@ extension Site.Docs.DeepPage.Article
     {
         .init(article: self.master, in: self.zone)
     }
+
+    var title:String?
+    {
+        nil
+    }
 }
 extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[.head]
-
-        html[.body]
+        html[.section, { $0.class = "introduction" }]
         {
-            $0[.section, { $0.class = "introduction" }]
+            $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.div, { $0.class = "eyebrows" }]
-                {
-                    $0[.span] { $0.class = "phylum" } = "Article"
-                    $0[.span] { $0.class = "version" } = self.zone.version
-                }
-
-                $0 ?= self.master.overview.map(self.inliner.prose(_:))
-                $0 ?= self.master.details.map(self.inliner.prose(_:))
+                $0[.span] { $0.class = "phylum" } = "Article"
+                $0[.span] { $0.class = "version" } = self.zone.version
             }
+
+            $0 ?= self.master.overview.map(self.inliner.prose(_:))
         }
+        html[.section] { $0.class = "details" } =
+            self.master.details.map(self.inliner.prose(_:))
     }
 }

@@ -11,11 +11,11 @@ extension Delegate
 {
     struct PostRequest:Sendable
     {
-        let promise:EventLoopPromise<ServerResource>
+        let promise:EventLoopPromise<ServerResponse>
         let form:MultipartForm
         let uri:URI
 
-        init(promise:EventLoopPromise<ServerResource>, form:MultipartForm, uri:URI)
+        init(promise:EventLoopPromise<ServerResponse>, form:MultipartForm, uri:URI)
         {
             self.promise = promise
             self.form = form
@@ -29,7 +29,7 @@ extension Delegate.PostRequest:ServerDelegatePostRequest
         address _:SocketAddress?,
         headers:HTTPHeaders,
         body:[UInt8],
-        with promise:() -> EventLoopPromise<ServerResource>)
+        with promise:() -> EventLoopPromise<ServerResponse>)
     {
         if  let uri:URI = .init(uri),
             let type:Substring = headers[canonicalForm: "content-type"].first,
@@ -56,7 +56,7 @@ extension Delegate.PostRequest:ServerDelegatePostRequest
 extension Delegate.PostRequest
 {
     func respond(using database:Database,
-        in pool:Mongo.SessionPool) async throws -> ServerResource?
+        in pool:Mongo.SessionPool) async throws -> ServerResponse?
     {
         let display:String?
         switch self.uri.path.normalized() as [String]
@@ -97,11 +97,9 @@ extension Delegate.PostRequest
 
         if  let display:String
         {
-            let _location:String = "\(self.uri)"
-            return .init(location: _location,
-                    response: .content(.init(.text("success! \(display)"),
-                        type: .text(.plain, charset: .utf8))),
-                    results: .one(canonical: _location))
+            return .resource(.init(.one(canonical: nil),
+                content: .text("success! \(display)"),
+                type: .text(.plain, charset: .utf8)))
         }
         else
         {

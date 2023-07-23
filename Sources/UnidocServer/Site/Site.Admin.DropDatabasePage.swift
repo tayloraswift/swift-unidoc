@@ -1,15 +1,15 @@
 import HTML
 
-extension Site.AdminPage
+extension Site.Admin
 {
-    struct DropDatabase
+    struct DropDatabasePage
     {
         init()
         {
         }
     }
 }
-extension Site.AdminPage.DropDatabase:HyperTextOutputStreamable
+extension Site.Admin.DropDatabasePage:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, _:Self)

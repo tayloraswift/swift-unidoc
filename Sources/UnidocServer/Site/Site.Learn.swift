@@ -1,13 +1,11 @@
-import URI
-
 extension Site
 {
     enum Learn
     {
     }
 }
-extension Site.Learn
+extension Site.Learn:SiteRoot
 {
     static
-    var uri:URI { ["learn"] }
+    var root:String { "learn" }
 }

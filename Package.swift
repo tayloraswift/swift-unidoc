@@ -326,6 +326,7 @@ let package:Package = .init(
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Multiparts"),
+                .target(name: "System"),
                 .target(name: "UnidocDatabase"),
                 .target(name: "URI"),
             ]),
