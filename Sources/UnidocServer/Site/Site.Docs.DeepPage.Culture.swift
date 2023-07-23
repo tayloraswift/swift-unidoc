@@ -35,47 +35,45 @@ extension Site.Docs.DeepPage.Culture
     {
         .init(culture: self.master, in: self.zone)
     }
+
+    var title:String
+    {
+        //  TODO: this should include the package name
+        self.master.module.name
+    }
 }
 extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[.head]
+        html[.section, { $0.class = "introduction" }]
         {
-            //  TODO: this should include the package name
-            $0[.title] = self.master.module.name
-        }
-        html[.body]
-        {
-            $0[.section, { $0.class = "introduction" }]
+            $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.div, { $0.class = "eyebrows" }]
-                {
-                    $0[.span] { $0.class = "phylum" } = "Module"
-                    $0[.span] { $0.class = "version" } = self.zone.version
-                }
-
-                $0[.h1] = self.master.module.name
-
-                $0 ?= self.master.overview.map(self.inliner.prose(_:))
+                $0[.span] { $0.class = "phylum" } = "Module"
+                $0[.span] { $0.class = "version" } = self.zone.version
             }
 
-            $0[.section, { $0.class = "declaration" }]
+            $0[.h1] = self.master.module.name
+
+            $0 ?= self.master.overview.map(self.inliner.prose(_:))
+        }
+
+        html[.section, { $0.class = "declaration" }]
+        {
+            $0[.pre]
             {
-                $0[.pre]
+                $0[.code]
                 {
-                    $0[.code]
-                    {
-                        $0[.span] { $0.highlight = .keyword } = "import"
-                        $0 += " "
-                        $0[.span] { $0.highlight = .identifier } = self.master.module.id
-                    }
+                    $0[.span] { $0.highlight = .keyword } = "import"
+                    $0 += " "
+                    $0[.span] { $0.highlight = .identifier } = self.master.module.id
                 }
             }
-
-            $0[.section] { $0.class = "details" } =
-                self.master.details.map(self.inliner.prose(_:))
         }
+
+        html[.section] { $0.class = "details" } =
+            self.master.details.map(self.inliner.prose(_:))
     }
 }

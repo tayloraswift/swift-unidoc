@@ -71,7 +71,7 @@ extension ServerAuthority
         }
     }
     static
-    func link(_ uri:String, rel:ServerResource.Relationship) -> String
+    func link(_ uri:String, rel:ServerResourceRelationship) -> String
     {
         "<\(Self.url(uri))>; rel=\"\(rel)\""
     }

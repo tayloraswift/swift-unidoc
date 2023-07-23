@@ -19,15 +19,12 @@ struct ServerMessage<Authority> where Authority:ServerAuthority
 }
 extension ServerMessage
 {
-    init(location:__shared String,
-        canonical:__shared String,
-        redirect:__shared ServerResource.Redirect)
+    init(redirect:__shared ServerRedirect)
     {
         var headers:HTTPHeaders = .init()
 
         headers.add(name: "host", value: Authority.domain)
-        headers.add(name: "link", value: Authority.link(canonical, rel: .canonical))
-        headers.add(name: "location", value: Authority.url(location))
+        headers.add(name: "location", value: Authority.url(redirect.location))
 
         let status:HTTPResponseStatus
         switch redirect
@@ -39,17 +36,7 @@ extension ServerMessage
         self.init(headers: headers, status: status, body: nil)
     }
 
-    init(redacting error:any Error,
-        using allocator:__shared ByteBufferAllocator)
-    {
-        self.init(content: .init(.text(Authority.redact(error: error)),
-                type: .text(.plain, charset: .utf8)),
-            results: .error,
-            using: allocator)
-    }
-
-    init(content:__shared ServerResource.Content,
-        results:__shared ServerResource.Results,
+    init(resource:__shared ServerResource,
         using allocator:__shared ByteBufferAllocator,
         etag:__shared SHA256? = nil)
     {
@@ -58,7 +45,7 @@ extension ServerMessage
         headers.add(name: "host", value: Authority.domain)
 
         let status:HTTPResponseStatus
-        switch results
+        switch resource.results
         {
         case .error:
             status = .internalServerError
@@ -70,9 +57,13 @@ extension ServerMessage
             status = .multipleChoices
 
         case .one(canonical: let location):
-            headers.add(name: "link", value: Authority.link(location, rel: .canonical))
 
-            guard let hash:SHA256 = content.hash
+            if  let location:String
+            {
+                headers.add(name: "link", value: Authority.link(location, rel: .canonical))
+            }
+
+            guard let hash:SHA256 = resource.hash
             else
             {
                 status = .ok
@@ -93,20 +84,34 @@ extension ServerMessage
 
         let buffer:ByteBuffer?
         let length:Int
-        switch content.payload
+        switch resource.content
         {
+        case .buffer(let bytes):
+            length = bytes.readableBytes
+            buffer = status == .notModified ? nil : bytes
+
         case .binary(let bytes):
             length = bytes.count
             buffer = status == .notModified ? nil : allocator.buffer(bytes: bytes)
+
         case .text(let string):
             length = string.utf8.count
             buffer = status == .notModified ? nil : allocator.buffer(string: string)
         }
 
         headers.add(name: "content-length", value: "\(length)")
-        headers.add(name: "content-type",   value: "\(content.type)")
+        headers.add(name: "content-type",   value: "\(resource.type)")
 
         self.init(headers: headers, status: status, body: buffer)
+    }
+
+    init(redacting error:any Error,
+        using allocator:__shared ByteBufferAllocator)
+    {
+        self.init(resource: .init(.error,
+                content: .text(Authority.redact(error: error)),
+                type: .text(.plain, charset: .utf8)),
+            using: allocator)
     }
 }
 extension ServerMessage

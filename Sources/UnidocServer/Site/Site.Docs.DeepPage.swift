@@ -25,6 +25,18 @@ extension Site.Docs.DeepPage
         case .disambiguation(let page): return page.location
         }
     }
+
+    private
+    var title:String?
+    {
+        switch self
+        {
+        case .article   (let page): return page.title
+        case .culture   (let page): return page.title
+        case .decl      (let page): return page.title
+        case .disambiguation:       return "Disambiguation Page"
+        }
+    }
 }
 extension Site.Docs.DeepPage
 {
@@ -99,12 +111,33 @@ extension Site.Docs.DeepPage:HyperTextOutputStreamable
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        switch self
+        html[.head]
         {
-        case .article       (let content):  html += content
-        case .culture       (let content):  html += content
-        case .decl          (let content):  html += content
-        case .disambiguation(let content):  html += content
+            $0[.title] = self.title
+            $0[.meta] { $0.charset = "UTF-8" }
+            $0[.meta]
+            {
+                $0.name     = "viewport"
+                $0.content  = "width=device-width, initial-scale=1"
+            }
+            $0[.link] { $0.href = "\(Site.Assets[.fonts_css])" ; $0.rel = .stylesheet }
+            $0[.link] { $0.href = "\(Site.Assets[.main_css])" ; $0.rel = .stylesheet }
+        }
+
+        html[.body]
+        {
+            $0[.header]
+
+            $0[.main]
+            {
+                switch self
+                {
+                case .article       (let content):  $0 += content
+                case .culture       (let content):  $0 += content
+                case .decl          (let content):  $0 += content
+                case .disambiguation(let content):  $0 += content
+                }
+            }
         }
     }
 }

@@ -16,8 +16,11 @@ actor Delegate
     private nonisolated
     let mongodb:Mongo.SessionPool
 
+    private nonisolated
+    let cache:Cache<Get.Asset>
+
     private
-    init(database:Database, mongodb:Mongo.SessionPool)
+    init(reloading mode:CacheReloading, database:Database, mongodb:Mongo.SessionPool)
     {
         var continuation:AsyncStream<AnyRequest>.Continuation? = nil
         self.requests.out = .init
@@ -28,6 +31,8 @@ actor Delegate
 
         self.database = database
         self.mongodb = mongodb
+
+        self.cache = .init(reloading: mode, from: "Assets")
     }
 }
 extension Delegate
@@ -38,18 +43,26 @@ extension Delegate
         {
             try Task.checkCancellation()
 
-            let resource:ServerResource?
+            let response:ServerResponse?
             do
             {
                 switch request
                 {
                 case .get(let request):
-                    resource = try await request.respond(
-                        using: self.database,
-                        in: self.mongodb)
+                    switch request.branch
+                    {
+                    case .admin(let admin):
+                        response = try await admin.load(pool: self.mongodb)
+
+                    case .asset(let asset):
+                        response = try await asset.load(from: self.cache)
+
+                    case .db(let db):
+                        response = try await db.load(from: self.database, pool: self.mongodb)
+                    }
 
                 case .post(let request):
-                    resource = try await request.respond(
+                    response = try await request.respond(
                         using: self.database,
                         in: self.mongodb)
                 }
@@ -60,16 +73,15 @@ extension Delegate
                 continue
             }
 
-            if  let resource:ServerResource
+            if  let response:ServerResponse
             {
-                request.promise.succeed(resource)
+                request.promise.succeed(response)
             }
             else
             {
-                request.promise.succeed(.init(location: "\(request.uri)",
-                    response: .content(.init(.text("not found"),
-                        type: .text(.plain, charset: .utf8))),
-                    results: .none))
+                request.promise.succeed(.resource(.init(.none,
+                    content: .text("not found"),
+                    type: .text(.plain, charset: .utf8))))
             }
         }
     }
@@ -127,7 +139,8 @@ extension Delegate
 
         try await mongodb.withSessionPool
         {
-            let delegate:Self = .init(database: try await .setup("unidoc", in: $0),
+            let delegate:Self = .init(reloading: options.reloading,
+                database: try await .setup("unidoc", in: $0),
                 mongodb: $0)
 
             try await withThrowingTaskGroup(of: Void.self)

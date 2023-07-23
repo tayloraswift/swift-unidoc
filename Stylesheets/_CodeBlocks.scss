@@ -1,0 +1,29 @@
+pre
+{
+    margin: 2rem 0 2rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+}
+// line numbers
+pre code
+{
+    color: $light-swift;
+
+    counter-set: line -1;
+
+    .syntax-newline
+    {
+        counter-increment: line;
+    }
+    .syntax-newline:after
+    {
+        position: relative;
+        display: inline-block;
+        content: counter(line);
+        width: 0;
+        right: 2rem;
+        color: $dark-gray;
+        direction: rtl;
+        word-wrap: normal;
+    }
+}

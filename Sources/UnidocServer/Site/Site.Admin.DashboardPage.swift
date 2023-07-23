@@ -2,9 +2,9 @@ import MongoDB
 import HTML
 import HTTPServer
 
-extension Site
+extension Site.Admin
 {
-    struct AdminPage
+    struct DashboardPage
     {
         private
         let configuration:Mongo.ReplicaSetConfiguration
@@ -15,7 +15,7 @@ extension Site
         }
     }
 }
-extension Site.AdminPage:HyperTextOutputStreamable
+extension Site.Admin.DashboardPage:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

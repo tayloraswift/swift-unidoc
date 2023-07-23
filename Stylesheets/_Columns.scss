@@ -1,0 +1,13 @@
+@mixin centered($width)
+{
+    margin-left: auto;
+    margin-right: auto;
+    max-width: $width;
+}
+
+@mixin centered-column($width)
+{
+    @include centered($width: $width);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}

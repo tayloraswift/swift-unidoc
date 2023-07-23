@@ -1,24 +1,12 @@
-import Media
-import SHA2
+import NIOCore
 
 extension ServerResource
 {
     @frozen public
-    struct Content:Equatable, Sendable
+    enum Content:Equatable, Sendable
     {
-        public
-        let payload:Payload
-        public
-        let type:MediaType
-        public
-        let hash:SHA256?
-
-        @inlinable public
-        init(_ payload:Payload, type:MediaType, hash:SHA256? = nil)
-        {
-            self.payload = payload
-            self.type = type
-            self.hash = hash
-        }
+        case buffer(ByteBuffer)
+        case binary([UInt8])
+        case text(String)
     }
 }

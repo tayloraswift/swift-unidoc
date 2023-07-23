@@ -12,21 +12,12 @@ extension Delegate
 }
 extension Delegate.AnyRequest
 {
-    var promise:EventLoopPromise<ServerResource>
+    var promise:EventLoopPromise<ServerResponse>
     {
         switch self
         {
         case .get(let request):     return request.promise
         case .post(let request):    return request.promise
-        }
-    }
-
-    var uri:URI
-    {
-        switch self
-        {
-        case .get(let request):     return request.uri
-        case .post(let request):    return request.uri
         }
     }
 }

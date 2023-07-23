@@ -1,13 +1,11 @@
-import URI
-
 extension Site
 {
     enum Docs
     {
     }
 }
-extension Site.Docs
+extension Site.Docs:SiteRoot
 {
     static
-    var uri:URI { ["docs"] }
+    var root:String { "docs" }
 }

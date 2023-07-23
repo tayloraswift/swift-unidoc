@@ -7,7 +7,7 @@ protocol ServerDelegateGetRequest:Sendable
     init?(_ uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        with promise:() -> EventLoopPromise<ServerResource>)
+        with promise:() -> EventLoopPromise<ServerResponse>)
 }
 extension ServerDelegateGetRequest where Self == Never
 {
@@ -15,7 +15,7 @@ extension ServerDelegateGetRequest where Self == Never
     init?(_ uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        with _:() -> EventLoopPromise<ServerResource>)
+        with _:() -> EventLoopPromise<ServerResponse>)
     {
         nil
     }

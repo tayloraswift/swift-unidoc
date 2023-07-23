@@ -1,35 +1,24 @@
+import Media
+import SHA2
+
 @frozen public
 struct ServerResource:Equatable, Sendable
 {
-    /// This URI is not necessarily the same as the canonical URI stored
-    /// in this resource’s ``results``.
     public
-    var location:String
-    /// The kind of redirect this response returns, or its payload, if no
-    /// redirect will be issued.
+    let results:Results
     public
-    var response:Response
-    /// The plurality of results returned by this response, or an error.
-    /// A successful match does not mean this response includes a payload;
-    /// it may return a redirect instead.
+    let content:Content
     public
-    var results:Results
+    let type:MediaType
+    public
+    var hash:SHA256?
 
     @inlinable public
-    init(location:String, response:Response, results:Results)
+    init(_ results:Results, content:Content, type:MediaType, hash:SHA256? = nil)
     {
-        self.location = location
-        self.response = response
         self.results = results
-    }
-}
-extension ServerResource
-{
-    /// Returns the canonical location of this resource, if it has one, or
-    /// its ``location`` otherwise.
-    @inlinable public
-    var canonical:String
-    {
-        self.results.canonical ?? self.location
+        self.content = content
+        self.type = type
+        self.hash = hash
     }
 }

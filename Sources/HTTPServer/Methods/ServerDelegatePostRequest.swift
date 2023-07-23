@@ -8,7 +8,7 @@ protocol ServerDelegatePostRequest:Sendable
         address:SocketAddress?,
         headers:HTTPHeaders,
         body:[UInt8],
-        with promise:() -> EventLoopPromise<ServerResource>)
+        with promise:() -> EventLoopPromise<ServerResponse>)
 }
 extension ServerDelegatePostRequest where Self == Never
 {
@@ -17,7 +17,7 @@ extension ServerDelegatePostRequest where Self == Never
         address:SocketAddress?,
         headers:HTTPHeaders,
         body:[UInt8],
-        with _:() -> EventLoopPromise<ServerResource>)
+        with _:() -> EventLoopPromise<ServerResponse>)
     {
         nil
     }
