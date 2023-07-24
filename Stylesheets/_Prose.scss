@@ -1,0 +1,68 @@
+@import 'Typefaces';
+@import 'Colors';
+
+h1, h2, h3, h4
+{
+    font-family: $typeface-sans;
+}
+h1
+{
+    font-size: 200%;
+}
+h2
+{
+    font-size: 150%;
+}
+h3
+{
+    font-size: 130%;
+}
+h4
+{
+    font-size: 110%;
+}
+
+p
+{
+    line-height: 1.8rem;
+    hyphens: auto;
+}
+p code
+{
+    background-color: $light-code-well;
+    padding: 0.2rem 0.5rem 0.25rem;
+    line-height: 0;
+    border-radius: 0.4rem;
+}
+
+aside
+{
+    position: relative;
+    margin: 2rem 0;
+    left: -1rem;
+
+    > *
+    {
+        margin-left: 1rem;
+    }
+
+    h3
+    {
+        border-radius: 0.2rem;
+        margin: 0;
+        padding: 0.5rem 1.0rem;
+        font-size: inherit;
+
+        background: $light-foreground-semi;
+        color: $light-background;
+    }
+}
+aside.important,
+aside.warning
+{
+    h3
+    {
+        background: $light-accent-hot-pink;
+        color: $light-background;
+    }
+}

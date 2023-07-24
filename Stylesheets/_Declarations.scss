@@ -1,0 +1,91 @@
+section.introduction
+{
+    margin-top: 4rem;
+    padding: 0 0 1rem;
+    border-bottom: 2px solid $light-accent-hot-pink;
+
+    div.eyebrows
+    {
+        color: $light-foreground-semi;
+        font-style: italic;
+
+        display: flex;
+        flex-direction: row;
+
+        .phylum
+        {
+            flex: 1;
+        }
+
+        .version:after
+        {
+            content: ':';
+            padding: 0 0.25rem;
+        }
+
+        .module
+        {
+            > a:last-child
+            {
+                margin-left: 0.25rem;
+            }
+            > a:last-child:before
+            {
+                content: '(';
+            }
+            > a:last-child:after
+            {
+                content: ')';
+            }
+        }
+    }
+}
+section.declaration pre
+{
+    text-indent: -2.5rem;
+    padding-left: 2.5rem;
+    margin: 2.5rem 0 2.5rem;
+    code
+    {
+        font-size: inherit;
+    }
+}
+
+section.parameters,
+section.returns
+{
+    > *,
+    > dl > dd
+    {
+        padding-left: 3rem;
+        margin-left: 0;
+    }
+    > h2,
+    > dl
+    {
+        padding-left: 0;
+    }
+}
+section.parameters
+{
+    dl
+    {
+        counter-set: parameter-index -1;
+        dt
+        {
+            counter-increment: parameter-index;
+            margin-top: 2rem;
+
+            font-family: $typeface-monospace;
+            font-weight: 700;
+        }
+        dt:before
+        {
+            content: '$' counter(parameter-index);
+            display: inline-block;
+            min-width: 3rem;
+            color: $light-snippet-line-number;
+            font-weight: normal;
+        }
+    }
+}

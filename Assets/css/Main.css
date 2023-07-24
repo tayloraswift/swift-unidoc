@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 pre {
   margin: 2rem 0 2rem;
   line-height: 1.5rem;
@@ -23,46 +25,176 @@ pre.snippet code span.newline:after {
   word-wrap: normal;
 }
 
-pre code span.syntax-identifier,
-pre code span.syntax-operator {
+code {
+  font-family: "IBM Plex Mono", monospace;
+  white-space: pre-wrap;
+  hyphens: none;
+  font-size: 90.625%;
+}
+
+code span.syntax-identifier,
+code span.syntax-operator {
   color: rgb(22, 22, 22);
 }
-pre code span.syntax-binding {
+code span.syntax-binding {
   color: rgb(22, 22, 22);
   font-style: italic;
 }
-pre code span.syntax-attribute,
-pre code span.syntax-directive,
-pre code span.syntax-keyword,
-pre code span.syntax-magic {
+code span.syntax-attribute,
+code span.syntax-directive,
+code span.syntax-keyword,
+code span.syntax-magic {
   color: rgb(253, 39, 99);
 }
-pre code span.syntax-interpolation,
-pre code span.syntax-pseudo {
+code span.syntax-interpolation,
+code span.syntax-pseudo {
   color: rgb(255, 86, 158);
 }
-pre code span.syntax-literal-number,
-pre code span.syntax-literal-string {
+code span.syntax-literal-number,
+code span.syntax-literal-string {
   color: rgb(141, 61, 231);
 }
-pre code span.syntax-actor, pre code a.syntax-actor,
-pre code span.syntax-class, pre code a.syntax-class,
-pre code span.syntax-type, pre code a.syntax-type {
+code span.syntax-actor, code a.syntax-actor,
+code span.syntax-class, code a.syntax-class,
+code span.syntax-type, code a.syntax-type {
   color: rgb(255, 123, 0);
 }
-pre code span.syntax-typealias {
+code span.syntax-typealias {
   color: rgb(255, 86, 158);
   font-style: italic;
 }
-pre code span.syntax-comment,
-pre code span.syntax-doccomment {
+code span.syntax-comment,
+code span.syntax-doccomment {
   color: rgb(109, 109, 109);
   font-style: italic;
 }
 
+section.introduction {
+  margin-top: 4rem;
+  padding: 0 0 1rem;
+  border-bottom: 2px solid rgb(253, 39, 99);
+}
+section.introduction div.eyebrows {
+  color: rgb(112, 112, 112);
+  font-style: italic;
+  display: flex;
+  flex-direction: row;
+}
+section.introduction div.eyebrows .phylum {
+  flex: 1;
+}
+section.introduction div.eyebrows .version:after {
+  content: ":";
+  padding: 0 0.25rem;
+}
+section.introduction div.eyebrows .module > a:last-child {
+  margin-left: 0.25rem;
+}
+section.introduction div.eyebrows .module > a:last-child:before {
+  content: "(";
+}
+section.introduction div.eyebrows .module > a:last-child:after {
+  content: ")";
+}
+
+section.declaration pre {
+  text-indent: -2.5rem;
+  padding-left: 2.5rem;
+  margin: 2.5rem 0 2.5rem;
+}
+section.declaration pre code {
+  font-size: inherit;
+}
+
+section.parameters > *,
+section.parameters > dl > dd,
+section.returns > *,
+section.returns > dl > dd {
+  padding-left: 3rem;
+  margin-left: 0;
+}
+section.parameters > h2,
+section.parameters > dl,
+section.returns > h2,
+section.returns > dl {
+  padding-left: 0;
+}
+
+section.parameters dl {
+  counter-set: parameter-index -1;
+}
+section.parameters dl dt {
+  counter-increment: parameter-index;
+  margin-top: 2rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+}
+section.parameters dl dt:before {
+  content: "$" counter(parameter-index);
+  display: inline-block;
+  min-width: 3rem;
+  color: rgb(192, 192, 192);
+  font-weight: normal;
+}
+
+h1, h2, h3, h4 {
+  font-family: "DM Sans", sans-serif;
+}
+
+h1 {
+  font-size: 200%;
+}
+
+h2 {
+  font-size: 150%;
+}
+
+h3 {
+  font-size: 130%;
+}
+
+h4 {
+  font-size: 110%;
+}
+
+p {
+  line-height: 1.8rem;
+  hyphens: auto;
+}
+
+p code {
+  background-color: rgb(233, 233, 233);
+  padding: 0.2rem 0.5rem 0.25rem;
+  line-height: 0;
+  border-radius: 0.4rem;
+}
+
+aside {
+  position: relative;
+  margin: 2rem 0;
+  left: -1rem;
+}
+aside > * {
+  margin-left: 1rem;
+}
+aside h3 {
+  border-radius: 0.2rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: inherit;
+  background: rgb(112, 112, 112);
+  color: rgb(240, 240, 240);
+}
+
+aside.important h3,
+aside.warning h3 {
+  background: rgb(253, 39, 99);
+  color: rgb(240, 240, 240);
+}
+
 html {
   font-size: 1rem;
-  background-color: rgb(235, 235, 235);
+  background-color: rgb(240, 240, 240);
 }
 
 body {
@@ -76,22 +208,46 @@ body {
 }
 
 body main {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 48rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
   min-height: 100vw;
 }
 body main > *:last-child {
   padding-bottom: 20rem;
 }
-body main a {
-  color: rgb(253, 39, 99);
+
+body main {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
-body main article p {
-  line-height: 1.8rem;
-  hyphens: auto;
+
+body main section.introduction > p,
+body main section.introduction > dl,
+body main section.parameters > p,
+body main section.parameters > dl,
+body main section.returns > p,
+body main section.returns > dl,
+body main section.throws > p,
+body main section.throws > dl {
+  max-width: 40rem;
+}
+
+body main section.details p {
+  max-width: 40rem;
+}
+body main section.details aside {
+  max-width: 41rem;
+}
+
+a {
+  color: rgb(253, 39, 99);
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
 }
 
 body main section.extension ul > li a {
@@ -100,17 +256,6 @@ body main section.extension ul > li a {
 }
 body main section.extension ul > li a span.syntax-identifier {
   color: rgb(253, 39, 99);
-}
-
-h1, h2, h3 {
-  font-family: "DM Sans", sans-serif;
-}
-
-code {
-  font-family: "IBM Plex Mono", monospace;
-  white-space: pre-wrap;
-  hyphens: none;
-  font-size: 93.75%;
 }
 
 /*# sourceMappingURL=Main.css.map */

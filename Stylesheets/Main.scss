@@ -1,20 +1,23 @@
 @import 'Colors';
 @import 'Columns';
 @import 'CodeBlocks';
-@import 'CodeHighlights';
+@import 'CodeSpans';
+@import 'Declarations';
+@import 'Typefaces';
+@import 'Prose';
 
 html
 {
     font-size: 1.0rem;
-    background-color: $cream-white;
+    background-color: $light-background;
 }
 
 body
 {
     margin: 0;
 
-    color: $near-black;
-    font-family: 'Literata', serif;
+    color: $light-foreground;
+    font-family: $typeface-serif;
 
     font-variant-numeric: oldstyle-nums;
     overflow-wrap: break-word;
@@ -22,31 +25,55 @@ body
     text-size-adjust: none;
 }
 
+//  Vertical layout.
 body main
 {
-    @include centered-column($width: 48rem);
     min-height: 100vw;
 
     > *:last-child
     {
         padding-bottom: 20rem;
     }
-    a
-    {
-        color: $light-accent-hot-pink;
-    }
-
-    article
-    {
-        p
-        {
-            line-height: 1.8rem;
-            hyphens: auto;
-        }
-    }
-
-
 }
+//  Horizontal layout.
+body main
+{
+    @include centered-column($width: 48rem);
+}
+body main section.introduction,
+body main section.parameters,
+body main section.returns,
+body main section.throws
+{
+    > p,
+    > dl
+    {
+        max-width: 40rem;
+    }
+}
+body main section.details
+{
+    p
+    {
+        max-width: 40rem;
+    }
+    aside
+    {
+        max-width: 41rem
+    }
+}
+
+a
+{
+    color: $light-accent-hot-pink;
+    text-decoration: none;
+}
+a:hover, a:focus
+{
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+}
+
 body main section.extension ul > li a
 {
     font-family: 'IBM Plex Mono', monospace;
@@ -59,17 +86,3 @@ body main section.extension ul > li a
     }
 }
 
-h1, h2, h3
-{
-    font-family: 'DM Sans', sans-serif;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
-code
-{
-    font-family: 'IBM Plex Mono', monospace;
-    white-space: pre-wrap;
-    hyphens: none;
-    font-size: 93.75%;
-}
