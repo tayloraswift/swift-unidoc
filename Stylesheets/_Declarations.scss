@@ -17,23 +17,33 @@ section.introduction
             flex: 1;
         }
 
-        .version:after
-        {
-            content: ':';
-            padding: 0 0.25rem;
-        }
 
-        .module
+        span.module
         {
-            > a:last-child
+            span.culture:before,
+            span.culture:after
             {
-                margin-left: 0.25rem;
+                margin: 0 0.2rem;
             }
-            > a:last-child:before
+
+            span.culture:before
             {
                 content: '(';
             }
-            > a:last-child:after
+            span.culture
+            {
+                .version:last-child:after
+                {
+                    content: '';
+                    padding: 0;
+                }
+                .version:after
+                {
+                    content: ':';
+                    padding: 0 0.25rem;
+                }
+            }
+            span.culture:after
             {
                 content: ')';
             }

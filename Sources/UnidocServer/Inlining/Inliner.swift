@@ -80,18 +80,30 @@ extension Inliner
             return nil
         }
     }
-    func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
+    func link(decl:Unidoc.Scalar) -> HTML.Link<String>?
     {
         if  case .decl(let master)? = self.masters[decl],
             let path:UnqualifiedPath = .init(splitting: master.stem)
         {
-            return .init(display: path, target: self.cache[decl, master])
+            return .init(display: "\(path)", target: self.cache[decl, master])
         }
         else
         {
             return nil
         }
     }
+    // func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
+    // {
+    //     if  case .decl(let master)? = self.masters[decl],
+    //         let path:UnqualifiedPath = .init(splitting: master.stem)
+    //     {
+    //         return .init(display: path, target: self.cache[decl, master])
+    //     }
+    //     else
+    //     {
+    //         return nil
+    //     }
+    // }
 }
 extension Inliner
 {

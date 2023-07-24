@@ -7,18 +7,18 @@ extension Unidoc.Decl.Customization
         switch self
         {
         case .unavailable:          return nil
-        case .available:            return "Customization available."
+        case .available:            return "Open."
         case .required:             return "Required."
         case .requiredOptionally:   return "Required optionally."
         }
     }
 
-    var accent:String
+    var accent:String?
     {
         switch self
         {
-        case .unavailable:          return "customization-unavailable"
-        case .available:            return "customization-available"
+        case .unavailable:          return nil
+        case .available:            return "open"
         case .required:             return "required"
         case .requiredOptionally:   return "required"
         }

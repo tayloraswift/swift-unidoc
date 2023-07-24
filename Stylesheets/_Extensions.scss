@@ -1,0 +1,68 @@
+//  Generic constraints
+section.extension code.constraints
+{
+    line-height: 1.6rem;
+    color: $light-swift;
+    font-size: inherit;
+
+    display: block;
+    text-indent: -3.6rem;
+    margin-left: 3.6rem;
+
+    span.syntax-keyword
+    {
+        color: $light-accent-comment;
+    }
+
+    span.syntax-type,
+    span.syntax-typealias
+    {
+        color: $light-accent-yellow;
+        font-weight: 500;
+
+        a
+        {
+            color: inherit;
+        }
+    }
+}
+section.extension,
+section.superforms
+{
+    ul
+    {
+        padding: 0;
+        list-style-type: none;
+    }
+    ul > li
+    {
+        margin: 1.0rem 0 1.0rem 0;
+        padding: 0;
+
+        a
+        {
+            display: block;
+            text-indent: -2.5rem;
+            margin-left: 2.5rem;
+            line-height: 1.5rem;
+
+            font-family: $typeface-monospace;
+            color: $light-accent-comment;
+
+            font-size: inherit;
+
+            span.syntax-identifier
+            {
+                color: $light-accent-hot-pink;
+            }
+            padding: 0.8em 0 0 0;
+        }
+
+        p
+        {
+            padding: 0 0 0 2.5rem;
+            line-height: 1.3rem;
+            font-size: 87.5%;
+        }
+    }
+}

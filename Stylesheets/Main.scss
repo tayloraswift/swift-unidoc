@@ -3,6 +3,7 @@
 @import 'CodeBlocks';
 @import 'CodeSpans';
 @import 'Declarations';
+@import 'Extensions';
 @import 'Typefaces';
 @import 'Prose';
 
@@ -62,6 +63,13 @@ body main section.details
         max-width: 41rem
     }
 }
+section.extension ul > li
+{
+    > p
+    {
+        max-width: 40rem;
+    }
+}
 
 a
 {
@@ -73,16 +81,3 @@ a:hover, a:focus
     text-decoration: underline;
     text-underline-offset: 0.35em;
 }
-
-body main section.extension ul > li a
-{
-    font-family: 'IBM Plex Mono', monospace;
-
-    color: $light-accent-comment;
-
-    span.syntax-identifier
-    {
-        color: $light-accent-hot-pink;
-    }
-}
-
