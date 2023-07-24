@@ -18,7 +18,7 @@ struct QualifiedPath:Equatable, Hashable, Sendable
 extension QualifiedPath
 {
     public
-    init?(splitting stem:Record.Stem)
+    init(splitting stem:Record.Stem)
     {
         if  let separator:String.Index = stem.rawValue.firstIndex(where: \.isWhitespace)
         {
@@ -29,7 +29,7 @@ extension QualifiedPath
         }
         else
         {
-            return nil
+            self.init(ModuleIdentifier.init(stem.rawValue))
         }
     }
 }
@@ -39,6 +39,19 @@ extension QualifiedPath:Comparable
     func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.lexicographicallyPrecedes(rhs)
+    }
+}
+extension QualifiedPath
+{
+    @inlinable public
+    var first:String
+    {
+        "\(self.namespace)"
+    }
+    @inlinable public
+    var last:String
+    {
+        self.names.last ?? self.first
     }
 }
 extension QualifiedPath:RandomAccessCollection
@@ -56,7 +69,7 @@ extension QualifiedPath:RandomAccessCollection
     @inlinable public
     subscript(index:Int) -> String
     {
-        index < self.names.startIndex ? "\(self.namespace)" : self.names[index]
+        index < self.names.startIndex ? self.first : self.names[index]
     }
 }
 extension QualifiedPath:CustomStringConvertible

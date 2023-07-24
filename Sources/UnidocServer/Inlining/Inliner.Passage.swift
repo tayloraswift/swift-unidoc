@@ -4,20 +4,23 @@ import HTML
 import Unidoc
 import UnidocRecords
 
-struct DynamicProse
+extension Inliner
 {
-    private
-    let passage:Record.Passage
-    private
-    let inliner:Inliner
-
-    init(passage:Record.Passage, inliner:Inliner)
+    struct Passage
     {
-        self.passage = passage
-        self.inliner = inliner
+        private
+        let passage:Record.Passage
+        private
+        let inliner:Inliner
+
+        init(_ inliner:Inliner, passage:Record.Passage)
+        {
+            self.inliner = inliner
+            self.passage = passage
+        }
     }
 }
-extension DynamicProse:HyperTextRenderableMarkdown
+extension Inliner.Passage:HyperTextRenderableMarkdown
 {
     var bytecode:MarkdownBytecode { self.passage.markdown }
 

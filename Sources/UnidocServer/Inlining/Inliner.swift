@@ -8,20 +8,23 @@ import UnidocRecords
 final
 class Inliner
 {
-    var masters:Masters
     private
-    var cache:Cache
+    var cache:InlinerCache
 
     private
-    init(masters:Masters, zones:Zones)
+    init(cache:InlinerCache)
     {
-        self.masters = masters
-        self.cache = .init(zones: zones)
+        self.cache = cache
     }
 }
 extension Inliner
 {
-    var zones:Zones
+    var masters:InlinerCache.Masters
+    {
+        _read   { yield  self.cache.masters }
+        _modify { yield &self.cache.masters }
+    }
+    var zones:InlinerCache.Zones
     {
         _read   { yield  self.cache.zones }
         _modify { yield &self.cache.zones }
@@ -32,102 +35,73 @@ extension Inliner
     convenience
     init(principal scalar:Unidoc.Scalar, zone names:Record.Zone.Names)
     {
-        self.init(
+        self.init(cache: .init(
             masters: .init(principal: scalar),
-            zones: .init(principal: (scalar.zone, names)))
+            zones: .init(principal: (scalar.zone, names))))
     }
     convenience
     init(principal zone:Unidoc.Zone, zone names:Record.Zone.Names)
     {
-        self.init(
+        self.init(cache: .init(
             masters: .init(principal: nil),
-            zones: .init(principal: (zone, names)))
+            zones: .init(principal: (zone, names))))
     }
 }
 extension Inliner
 {
-    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> DynamicCode
+    func passage(_ passage:Record.Passage) -> Passage
     {
-        .init(bytecode: snippet.bytecode, scalars: snippet.scalars, inliner: self)
+        .init(self, passage: passage)
     }
-    func prose(_ passage:Record.Passage) -> DynamicProse
+    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Code
     {
-        .init(passage: passage, inliner: self)
+        .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 }
 extension Inliner
 {
-    func card(_ scalar:Unidoc.Scalar) -> DynamicCard?
+    func card(_ scalar:Unidoc.Scalar) -> Card?
     {
-        self.masters[scalar].map
+        self.cache[scalar].map
         {
-            .init(overview: $0.overview.map(self.prose(_:)),
+            .init(overview: $0.overview.map(self.passage(_:)),
                 master: $0,
-                target: self.cache[scalar, $0])
+                target: $1)
         }
+    }
+}
+extension Inliner
+{
+    func link<Display, Scalars>(
+        _ display:Display,
+        to scalars:Scalars) -> VectorLink<Display, Scalars>
+        where Scalars:Sequence<Unidoc.Scalar>
+    {
+        .init(self, display: display, scalars: scalars)
     }
 }
 extension Inliner
 {
     func link(module:Unidoc.Scalar) -> HTML.Link<ModuleIdentifier>?
     {
-        if  case .culture(let master)? = self.masters[module]
+        self.cache[culture: module].map
         {
-            return .init(display: master.module.id, target: self.cache[module, master])
-        }
-        else
-        {
-            return nil
+            .init(display: $0.module.id, target: $1)
         }
     }
     func link(decl:Unidoc.Scalar) -> HTML.Link<String>?
     {
-        if  case .decl(let master)? = self.masters[decl],
-            let path:UnqualifiedPath = .init(splitting: master.stem)
+        self.cache[decl: decl].map
         {
-            return .init(display: "\(path)", target: self.cache[decl, master])
+            let path:UnqualifiedPath? = .init(splitting: $0.stem)
+            return .init(display: path?.description ?? "", target: $1)
         }
-        else
-        {
-            return nil
-        }
-    }
-    // func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
-    // {
-    //     if  case .decl(let master)? = self.masters[decl],
-    //         let path:UnqualifiedPath = .init(splitting: master.stem)
-    //     {
-    //         return .init(display: path, target: self.cache[decl, master])
-    //     }
-    //     else
-    //     {
-    //         return nil
-    //     }
-    // }
-}
-extension Inliner
-{
-    func link<Scalars>(_ display:[Substring],
-        to scalars:Scalars) -> DynamicVectorLink<[Substring], Scalars>
-        where Scalars:Sequence<Unidoc.Scalar>
-    {
-        .init(display: display, scalars: scalars, inliner: self)
     }
 }
 extension Inliner
 {
     func uri(_ scalar:Unidoc.Scalar) -> String?
     {
-        self.cache.load(scalar)
-        {
-            if  let master:Record.Master = self.masters[scalar]
-            {
-                return .init(master: master, in: $0)
-            }
-            else
-            {
-                return nil
-            }
-        }
+        self.cache[scalar]?.uri
     }
 }

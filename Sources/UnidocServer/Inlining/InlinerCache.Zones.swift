@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension Inliner
+extension InlinerCache
 {
     struct Zones:Sendable
     {
@@ -18,7 +18,7 @@ extension Inliner
         }
     }
 }
-extension Inliner.Zones
+extension InlinerCache.Zones
 {
     mutating
     func add(_ zones:[Record.Zone])
@@ -30,7 +30,7 @@ extension Inliner.Zones
         }
     }
 }
-extension Inliner.Zones
+extension InlinerCache.Zones
 {
     subscript(_ zone:Unidoc.Zone) -> Record.Zone.Names?
     {

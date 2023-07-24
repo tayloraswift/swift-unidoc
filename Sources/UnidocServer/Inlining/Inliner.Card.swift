@@ -1,20 +1,24 @@
 import HTML
 import UnidocRecords
 
-struct DynamicCard
+extension Inliner
 {
-    let overview:DynamicProse?
-    let master:Record.Master
-    let target:String?
-
-    init(overview:DynamicProse?, master:Record.Master, target:String?)
+    struct Card
     {
-        self.overview = overview
-        self.master = master
-        self.target = target
+        let overview:Passage?
+
+        let master:Record.Master
+        let target:String?
+
+        init(overview:Passage?, master:Record.Master, target:String?)
+        {
+            self.overview = overview
+            self.master = master
+            self.target = target
+        }
     }
 }
-extension DynamicCard:HyperTextOutputStreamable
+extension Inliner.Card:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

@@ -2,6 +2,8 @@ import LexicalPaths
 
 extension UnqualifiedPath
 {
+    /// Extracts the path components of the given stem, skipping the prefixed namespace
+    /// qualifier. Returns nil if the stem contains a namespace qualifier only.
     @inlinable public
     init?(splitting stem:Record.Stem)
     {

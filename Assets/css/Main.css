@@ -69,6 +69,30 @@ code span.syntax-doccomment {
   font-style: italic;
 }
 
+nav.decl {
+  padding: 0.5rem 0;
+}
+
+nav.decl div.breadcrumbs {
+  color: rgb(134, 134, 134);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  font-size: 90.625%;
+}
+nav.decl div.breadcrumbs a {
+  color: rgb(112, 112, 112);
+}
+nav.decl div.breadcrumbs > *:first-child {
+  margin-left: 0;
+}
+nav.decl div.breadcrumbs > * {
+  margin: 0 0.2rem;
+}
+nav.decl div.breadcrumbs > *:last-child {
+  margin-right: 0;
+  color: rgb(22, 22, 22);
+}
+
 section.introduction {
   margin-top: 4rem;
   padding: 0 0 1rem;
@@ -272,6 +296,7 @@ body main > *:last-child {
   padding-bottom: 20rem;
 }
 
+body header nav > *,
 body main {
   margin-left: auto;
   margin-right: auto;
