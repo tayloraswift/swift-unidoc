@@ -1,5 +1,6 @@
 import HTML
 import LexicalPaths
+import MarkdownRendering
 import Signatures
 import Unidoc
 import UnidocRecords
@@ -71,10 +72,10 @@ extension Tabulator:HyperTextOutputStreamable
                         $0 ?= self.inliner.link(module: `extension`.culture)
                         $0 += ")"
                     }
-                    var first:Bool = true
-                    for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions
+                    $0[.code, { $0.class = "constraints" }]
                     {
-                        $0[.code]
+                        var first:Bool = true
+                        for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions
                         {
                             if  first
                             {
@@ -87,29 +88,34 @@ extension Tabulator:HyperTextOutputStreamable
                                 $0 += ", "
                             }
 
-                            $0[.span] { $0.class = "noun" } = constraint.noun
+                            $0[.span] { $0.highlight = .typealias } = constraint.noun
+
                             switch constraint.what
                             {
                             case    .conformer,
                                     .subclass:  $0 += ":"
                             case    .equal:     $0 += " == "
                             }
-                            switch constraint.whom
-                            {
-                            case .nominal(let scalar):
-                                if  let scalar:Unidoc.Scalar,
-                                    let link:HTML.Link<UnqualifiedPath> = self.inliner.link(
-                                        decl: scalar)
-                                {
-                                    $0 += link
-                                }
-                                else
-                                {
-                                    $0 += "(redacted, \(scalar as Any))"
-                                }
 
-                            case .complex(let text):
-                                $0[.span] { $0.highlight = .literalString } = text
+                            $0[.span, { $0.highlight = .type }]
+                            {
+                                switch constraint.whom
+                                {
+                                case .nominal(let scalar):
+                                    if  let scalar:Unidoc.Scalar,
+                                        let link:HTML.Link<String> = self.inliner.link(
+                                            decl: scalar)
+                                    {
+                                        $0 += link
+                                    }
+                                    else
+                                    {
+                                        $0 += "(redacted, \(scalar as Any))"
+                                    }
+
+                                case .complex(let text):
+                                    $0 += text
+                                }
                             }
                         }
                     }

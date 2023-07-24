@@ -1,5 +1,6 @@
 import HTML
 import LexicalPaths
+import ModuleGraphs
 import Signatures
 import Unidoc
 import UnidocRecords
@@ -67,18 +68,29 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             return
         }
 
-        html[.section, { $0.class = "introduction \(self.master.customization.accent)" }]
+        html[.section]
+        {
+            $0.class = self.master.customization.accent.map
+            {
+                "introduction \($0)"
+            } ?? "introduction"
+        }
+        content:
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = self.master.phylum.title
-                $0[.span] { $0.class = "version" } = self.zone.version
                 $0[.span, { $0.class = "module" }]
                 {
-                    $0 ?= self.master.namespace == self.master.culture ? nil
-                        : self.inliner.link(module: self.master.culture)
-
                     $0[link: self.inliner.uri(self.master.namespace)] = path.namespace
+                    $0[.span, { $0.class = "culture" }]
+                    {
+                        $0[.span] { $0.class = "version" } = self.zone.version
+                        if  self.master.namespace != self.master.culture
+                        {
+                            $0 ?= self.inliner.link(module: self.master.culture)
+                        }
+                    }
                 }
             }
 
