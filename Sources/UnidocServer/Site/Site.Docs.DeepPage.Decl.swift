@@ -14,7 +14,7 @@ extension Site.Docs.DeepPage
         let tabulator:Tabulator
 
         private
-        let path:QualifiedPath?
+        let path:QualifiedPath
 
         private
         init(_ master:Record.Master.Decl, tabulator:Tabulator)
@@ -50,11 +50,27 @@ extension Site.Docs.DeepPage.Decl
     {
         .init(decl: self.master, in: self.zone)
     }
+}
+extension Site.Docs.DeepPage.Decl
+{
+    var breadcrumbs:Inliner.Breadcrumbs?
+    {
+        if  let last:Int = self.path.names.indices.last
+        {
+            return .init(last == self.path.names.startIndex ? nil :
+                self.inliner.link(self.path.names[..<last], to: self.master.scope),
+                self.path.names[last])
+        }
+        else
+        {
+            return nil
+        }
+    }
 
-    var title:String?
+    var title:String
     {
         //  TODO: this should include the package name
-        self.path?.last
+        self.path.last
     }
 }
 extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
@@ -62,12 +78,6 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        guard let path:QualifiedPath = self.path
-        else
-        {
-            return
-        }
-
         html[.section]
         {
             $0.class = self.master.customization.accent.map
@@ -82,7 +92,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
                 $0[.span] { $0.class = "phylum" } = self.master.phylum.title
                 $0[.span, { $0.class = "module" }]
                 {
-                    $0[link: self.inliner.uri(self.master.namespace)] = path.namespace
+                    $0[link: self.inliner.uri(self.master.namespace)] = self.path.namespace
                     $0[.span, { $0.class = "culture" }]
                     {
                         $0[.span] { $0.class = "version" } = self.zone.version
@@ -94,9 +104,9 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
                 }
             }
 
-            $0[.h1] = path.last
+            $0[.h1] = self.path.last
 
-            $0 ?= self.master.overview.map(self.inliner.prose(_:))
+            $0 ?= self.master.overview.map(self.inliner.passage(_:))
 
             $0[.span] { $0.class = "phylum" } = self.master.customization.title
         }
@@ -110,7 +120,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
         }
 
         html[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.prose(_:))
+            self.master.details.map(self.inliner.passage(_:))
 
         if !self.master.superforms.isEmpty
         {

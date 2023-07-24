@@ -1,25 +1,27 @@
 import HTML
 import Unidoc
-import URI
 
-struct DynamicVectorLink<Display, Scalars>
-    where Display:Sequence, Scalars:Sequence<Unidoc.Scalar>
+extension Inliner
 {
-    private
-    let display:Display
-    private
-    let scalars:Scalars
-    private
-    let inliner:Inliner
-
-    init(display:Display, scalars:Scalars, inliner:Inliner)
+    struct VectorLink<Display, Scalars> where Display:Sequence, Scalars:Sequence<Unidoc.Scalar>
     {
-        self.display = display
-        self.scalars = scalars
-        self.inliner = inliner
+        private
+        let display:Display
+        private
+        let scalars:Scalars
+        private
+        let inliner:Inliner
+
+        init(_ inliner:Inliner, display:Display, scalars:Scalars)
+        {
+            self.inliner = inliner
+
+            self.display = display
+            self.scalars = scalars
+        }
     }
 }
-extension DynamicVectorLink:HyperTextOutputStreamable
+extension Inliner.VectorLink:HyperTextOutputStreamable
     where Display.Element:HyperTextOutputStreamable
 {
     static

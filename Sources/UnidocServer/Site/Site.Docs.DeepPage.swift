@@ -126,17 +126,20 @@ extension Site.Docs.DeepPage:HyperTextOutputStreamable
 
         html[.body]
         {
-            $0[.header]
-
-            $0[.main]
+            switch self
             {
-                switch self
-                {
-                case .article       (let content):  $0 += content
-                case .culture       (let content):  $0 += content
-                case .decl          (let content):  $0 += content
-                case .disambiguation(let content):  $0 += content
-                }
+            case .article       (let content):
+                $0[.main] = content
+
+            case .culture       (let content):
+                $0[.main] = content
+
+            case .decl          (let content):
+                $0[.header] { $0[.nav] { $0.class = "decl" } = content.breadcrumbs }
+                $0[.main] = content
+
+            case .disambiguation(let content):
+                $0[.main] = content
             }
         }
     }

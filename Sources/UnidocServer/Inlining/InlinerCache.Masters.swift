@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension Inliner
+extension InlinerCache
 {
     struct Masters
     {
@@ -18,7 +18,7 @@ extension Inliner
         }
     }
 }
-extension Inliner.Masters
+extension InlinerCache.Masters
 {
     mutating
     func add(_ masters:[Record.Master])
@@ -30,7 +30,7 @@ extension Inliner.Masters
         }
     }
 }
-extension Inliner.Masters
+extension InlinerCache.Masters
 {
     subscript(_ scalar:Unidoc.Scalar) -> Record.Master?
     {

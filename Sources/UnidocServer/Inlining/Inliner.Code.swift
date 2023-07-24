@@ -5,23 +5,25 @@ import Unidoc
 import UnidocRecords
 import URI
 
-struct DynamicCode
+extension Inliner
 {
-    let bytecode:MarkdownBytecode
-
-    private
-    let scalars:[Unidoc.Scalar?]
-    private
-    let inliner:Inliner
-
-    init(bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?], inliner:Inliner)
+    struct Code
     {
-        self.bytecode = bytecode
-        self.scalars = scalars
-        self.inliner = inliner
+        let bytecode:MarkdownBytecode
+        private
+        let scalars:[Unidoc.Scalar?]
+        private
+        let inliner:Inliner
+
+        init(_ inliner:Inliner, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
+        {
+            self.bytecode = bytecode
+            self.scalars = scalars
+            self.inliner = inliner
+        }
     }
 }
-extension DynamicCode:HyperTextRenderableMarkdown
+extension Inliner.Code:HyperTextRenderableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {

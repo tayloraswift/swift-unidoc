@@ -57,7 +57,7 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
 
             $0[.h1] = self.master.module.name
 
-            $0 ?= self.master.overview.map(self.inliner.prose(_:))
+            $0 ?= self.master.overview.map(self.inliner.passage(_:))
         }
 
         html[.section, { $0.class = "declaration" }]
@@ -74,6 +74,6 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
         }
 
         html[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.prose(_:))
+            self.master.details.map(self.inliner.passage(_:))
     }
 }

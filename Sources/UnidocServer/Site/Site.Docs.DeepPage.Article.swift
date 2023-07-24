@@ -53,9 +53,9 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
                 $0[.span] { $0.class = "version" } = self.zone.version
             }
 
-            $0 ?= self.master.overview.map(self.inliner.prose(_:))
+            $0 ?= self.master.overview.map(self.inliner.passage(_:))
         }
         html[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.prose(_:))
+            self.master.details.map(self.inliner.passage(_:))
     }
 }

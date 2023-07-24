@@ -37,6 +37,7 @@ body main
     }
 }
 //  Horizontal layout.
+body header nav > *,
 body main
 {
     @include centered-column($width: 48rem);
