@@ -109,7 +109,7 @@ extension Tabulator:HyperTextOutputStreamable
                                 }
 
                             case .complex(let text):
-                                $0[.span] { $0.class = "whom" } = text
+                                $0[.span] { $0.highlight = .literalString } = text
                             }
                         }
                     }

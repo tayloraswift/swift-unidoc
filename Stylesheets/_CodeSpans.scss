@@ -1,15 +1,23 @@
 @import 'Colors';
+@import 'Typefaces';
 
-pre code
+code
+{
+    font-family: $typeface-monospace;
+    white-space: pre-wrap;
+    hyphens: none;
+    font-size: 90.625%;
+}
+code
 {
     span.syntax-identifier,
     span.syntax-operator
     {
-        color: $near-black;
+        color: $light-foreground;
     }
     span.syntax-binding
     {
-        color: $near-black;
+        color: $light-foreground;
         font-style: italic;
     }
     span.syntax-attribute,
