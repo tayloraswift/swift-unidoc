@@ -1,5 +1,6 @@
 import FNV1
 import Signatures
+import Sources
 import Symbols
 import Unidoc
 
@@ -33,7 +34,11 @@ extension Record.Master
         let culture:Unidoc.Scalar
         public
         let scope:[Unidoc.Scalar]
-
+        public
+        let file:Unidoc.Scalar?
+        //  TODO: consider combining this into flags.
+        public
+        let position:SourcePosition?
         public
         var overview:Record.Passage?
         public
@@ -51,6 +56,8 @@ extension Record.Master
             namespace:Unidoc.Scalar,
             culture:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
+            file:Unidoc.Scalar? = nil,
+            position:SourcePosition? = nil,
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil)
         {
@@ -67,7 +74,8 @@ extension Record.Master
             self.namespace = namespace
             self.culture = culture
             self.scope = scope
-
+            self.file = file
+            self.position = position
             self.overview = overview
             self.details = details
         }
@@ -75,6 +83,19 @@ extension Record.Master
 }
 extension Record.Master.Decl
 {
+    @inlinable public
+    var location:SourceLocation<Unidoc.Scalar>?
+    {
+        if  let position:SourcePosition = self.position,
+            let file:Unidoc.Scalar = self.file
+        {
+            return .init(position: position, file: file)
+        }
+        else
+        {
+            return nil
+        }
+    }
     @inlinable public
     var hash:FNV24
     {

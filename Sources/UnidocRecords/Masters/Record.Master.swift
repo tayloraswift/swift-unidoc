@@ -17,8 +17,6 @@ extension Record
         case article(Article)
         case culture(Culture)
         case decl(Decl)
-
-        @available(*, unavailable, message: "unimplemented")
         case file(File)
     }
 }
@@ -61,13 +59,14 @@ extension Record.Master
         }
     }
     @inlinable public
-    var stem:Record.Stem
+    var stem:Record.Stem?
     {
         switch self
         {
         case .article(let article): return article.stem
         case .culture(let culture): return culture.stem
         case .decl(let decl):       return decl.stem
+        case .file:                 return nil
         }
     }
 }
@@ -89,7 +88,7 @@ extension Record.Master
         case module = "M"
 
         /// Discriminator for ``File``.
-        // case file = "F"
+        case file = "F"
 
         /// Discriminator for ``Decl``.
         case decl = "D"
@@ -115,6 +114,11 @@ extension Record.Master
         case namespace = "n"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
+
+        /// Only appears in ``Decl``.
+        case position = "P"
+        /// Only appears in ``Decl``. The field contains a scalar.
+        case location = "l"
 
         /// Optional, but can appear in any master record.
         /// The field contains a passage, which contains a list of outlines,
@@ -150,8 +154,8 @@ extension Record.Master:BSONDocumentEncodable
 
         switch self
         {
-        // case .file(let file):
-        //     bson[.file] = file.symbol
+        case .file(let file):
+            bson[.file] = file.symbol
 
         case .decl(let decl):
             bson[.decl] = decl.symbol
@@ -186,14 +190,15 @@ extension Record.Master:BSONDocumentEncodable
             bson[.namespace] = decl.culture == decl.namespace ? nil : decl.namespace
             bson[.culture] = decl.culture
             bson[.scope] = decl.scope.isEmpty ? nil : decl.scope
-
-            zones.update(with: decl.namespace.zone)
-            zones.update(with: decl.culture.zone)
+            bson[.file] = decl.file
+            bson[.position] = decl.position
 
             zones.update(with: decl.signature.expanded.scalars)
             zones.update(with: decl.signature.generics.constraints)
 
             zones.update(with: decl.superforms)
+            zones.update(with: decl.namespace.zone)
+            zones.update(with: decl.culture.zone)
             zones.update(with: decl.scope)
 
             bson[.hash] = FNV24.init(hashing: "\(decl.symbol)")
@@ -251,13 +256,15 @@ extension Record.Master:BSONDocumentDecodable
                 namespace: try bson[.namespace]?.decode() ?? culture,
                 culture: culture,
                 scope: try bson[.scope]?.decode() ?? [],
+                file: try bson[.file]?.decode(),
+                position: try bson[.position]?.decode(),
                 overview: overview,
                 details: details))
         }
-        // else if let discriminator:Symbol.File = try bson[.file]?.decode()
-        // {
-        //     self = .file(.init(id: id, symbol: discriminator))
-        // }
+        else if let discriminator:Symbol.File = try bson[.file]?.decode()
+        {
+            self = .file(.init(id: id, symbol: discriminator))
+        }
         else if let discriminator:ModuleDetails = try bson[.module]?.decode()
         {
             self = .culture(.init(id: id,

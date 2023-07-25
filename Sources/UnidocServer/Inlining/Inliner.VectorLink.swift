@@ -41,7 +41,7 @@ extension Inliner.VectorLink:HyperTextOutputStreamable
                 html += "."
             }
 
-            html[link: self.inliner.uri(scalar)] = display
+            html[link: self.inliner.url(scalar)] = display
         }
     }
 }

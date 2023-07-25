@@ -11,16 +11,6 @@ enum Main:AsyncTests
     static
     func run(tests:Tests) async
     {
-        #if DEBUG
-        if ({ true }())
-        {
-            print("""
-                Warning: skipping unidoc driver integration tests because we are in debug mode!
-                """)
-            return
-        }
-        #endif
-
         guard   let workspace:Workspace =
                     await (tests ! "workspace").do({ try await .create(at: ".testing") }),
                 let toolchain:Toolchain =

@@ -4,23 +4,23 @@ import URI
 
 struct InlinerCache
 {
-    private
-    var targets:[Unidoc.Scalar: String]
-
     var masters:Masters
     var zones:Zones
 
-    init(targets:[Unidoc.Scalar: String] = [:], masters:Masters, zones:Zones)
+    private
+    var urls:[Unidoc.Scalar: String]
+
+    init(masters:Masters, zones:Zones, urls:[Unidoc.Scalar: String] = [:])
     {
-        self.targets = targets
         self.masters = masters
         self.zones = zones
+        self.urls = urls
     }
 }
 extension InlinerCache
 {
     private mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Record.Zone.Names) -> URI?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by url:(Record.Zone.Names) -> URL?) -> String?
     {
         {
             if  let target:String = $0
@@ -29,9 +29,9 @@ extension InlinerCache
             }
             else if
                 let zone:Record.Zone.Names = self.zones[scalar.zone],
-                let uri:URI = uri(zone)
+                let url:URL = url(zone)
             {
-                let target:String = "\(uri)"
+                let target:String = "\(url)"
                 $0 = target
                 return target
             }
@@ -39,18 +39,18 @@ extension InlinerCache
             {
                 return nil
             }
-        } (&self.targets[scalar])
+        } (&self.urls[scalar])
     }
 }
 extension InlinerCache
 {
-    subscript(article scalar:Unidoc.Scalar) -> (master:Record.Master.Article, uri:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (master:Record.Master.Article, url:String?)?
     {
         mutating get
         {
             if  case .article(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .init(article: master, in: $0) })
+                return (master, self.load(scalar) { .relative(.init(article: master, in: $0)) })
             }
             else
             {
@@ -59,13 +59,13 @@ extension InlinerCache
         }
     }
 
-    subscript(culture scalar:Unidoc.Scalar) -> (master:Record.Master.Culture, uri:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (master:Record.Master.Culture, url:String?)?
     {
         mutating get
         {
             if  case .culture(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .init(culture: master, in: $0) })
+                return (master, self.load(scalar) { .relative(.init(culture: master, in: $0)) })
             }
             else
             {
@@ -74,13 +74,13 @@ extension InlinerCache
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (master:Record.Master.Decl, uri:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (master:Record.Master.Decl, url:String?)?
     {
         mutating get
         {
             if  case .decl(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .init(decl: master, in: $0) })
+                return (master, self.load(scalar) { .relative(.init(decl: master, in: $0)) })
             }
             else
             {
@@ -89,7 +89,28 @@ extension InlinerCache
         }
     }
 
-    subscript(scalar:Unidoc.Scalar) -> (master:Record.Master, uri:String?)?
+    subscript(file scalar:Unidoc.Scalar,
+        line line:Int? = nil) -> (master:Record.Master.File, url:String?)?
+    {
+        mutating get
+        {
+            if  case .file(let master)? = self.masters[scalar],
+                let url:String = self.load(scalar,
+                    by: { $0.url(github: master.symbol).map(URL.absolute(_:)) })
+            {
+                //  Need to append the line fragment here and not in
+                //  ``Record.Zone.Names.url(github:)`` because the cache should
+                //  support multiple line fragments for the same file.
+                return (master, line.map { "\(url)#L\($0 + 1)" } ?? url)
+            }
+            else
+            {
+                return nil
+            }
+        }
+    }
+
+    subscript(scalar:Unidoc.Scalar) -> (master:Record.Master, url:String?)?
     {
         mutating get
         {

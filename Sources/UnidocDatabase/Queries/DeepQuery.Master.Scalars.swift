@@ -39,6 +39,7 @@ extension DeepQuery.Master.Scalars
         {
             $0.append("$\(self.key / Record.Master[.namespace])")
             $0.append("$\(self.key / Record.Master[.culture])")
+            $0.append("$\(self.key / Record.Master[.file])")
         }
 
         list.expr

@@ -33,7 +33,7 @@ extension Inliner.Code:HyperTextRenderableMarkdown
             if  self.scalars.indices.contains(reference),
                 let target:Unidoc.Scalar = self.scalars[reference]
             {
-                return self.inliner.uri(target)
+                return self.inliner.url(target)
             }
             else
             {

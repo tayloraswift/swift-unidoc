@@ -32,7 +32,7 @@ nav.decl div.breadcrumbs
 section.introduction
 {
     margin-top: 4rem;
-    padding: 0 0 1rem;
+    padding: 0 0 0.75rem;
     border-bottom: 2px solid $light-accent-hot-pink;
 
     div.eyebrows
@@ -78,6 +78,21 @@ section.introduction
             {
                 content: ')';
             }
+        }
+    }
+
+    a.source
+    {
+        font-family: $typeface-monospace;
+        font-weight: 500;
+        font-size: 87.5%;
+        color: $light-foreground-semi;
+        text-decoration-color: $light-accent-hot-pink;
+
+        span.file,
+        span.line
+        {
+            color: $light-accent-hot-pink;
         }
     }
 }

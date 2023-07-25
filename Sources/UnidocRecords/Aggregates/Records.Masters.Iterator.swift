@@ -4,11 +4,19 @@ extension Records.Masters
     enum Iterator
     {
         case articles(IndexingIterator<[Record.Master.Article]>,
-            next:IndexingIterator<[Record.Master.Culture]>,
-            then:IndexingIterator<[Record.Master.Decl]>)
+            cultures:IndexingIterator<[Record.Master.Culture]>,
+            decls:IndexingIterator<[Record.Master.Decl]>,
+            files:IndexingIterator<[Record.Master.File]>)
+
         case cultures(IndexingIterator<[Record.Master.Culture]>,
-            then:IndexingIterator<[Record.Master.Decl]>)
-        case decls(IndexingIterator<[Record.Master.Decl]>)
+            decls:IndexingIterator<[Record.Master.Decl]>,
+            files:IndexingIterator<[Record.Master.File]>)
+
+        case decls(IndexingIterator<[Record.Master.Decl]>,
+            files:IndexingIterator<[Record.Master.File]>)
+
+        case files(IndexingIterator<[Record.Master.File]>)
+
         case exhausted
     }
 }
@@ -19,39 +27,51 @@ extension Records.Masters.Iterator:IteratorProtocol
     {
         switch self
         {
-        case .articles(var iterator, next: let next, then: let then):
+        case .articles(var iterator, let cultures, let decls, let files):
             self = .exhausted
             switch iterator.next()
             {
             case nil:
-                self = .cultures(next, then: then)
+                self = .cultures(cultures, decls: decls, files: files)
                 return self.next()
             case let element?:
-                self = .articles(iterator, next: next, then: then)
+                self = .articles(iterator, cultures: cultures, decls: decls, files: files)
                 return .article(element)
             }
 
-        case .cultures(var iterator, then: let next):
+        case .cultures(var iterator, let decls, let files):
             self = .exhausted
             switch iterator.next()
             {
             case nil:
-                self = .decls(next)
+                self = .decls(decls, files: files)
                 return self.next()
             case let element?:
-                self = .cultures(iterator, then: next)
+                self = .cultures(iterator, decls: decls, files: files)
                 return .culture(element)
             }
 
-        case .decls(var iterator):
+        case .decls(var iterator, let files):
+            self = .exhausted
+            switch iterator.next()
+            {
+            case nil:
+                self = .files(files)
+                return self.next()
+            case let element?:
+                self = .decls(iterator, files: files)
+                return .decl(element)
+            }
+
+        case .files(var iterator):
             self = .exhausted
             switch iterator.next()
             {
             case nil:
                 return nil
             case let element?:
-                self = .decls(iterator)
-                return .decl(element)
+                self = .files(iterator)
+                return .file(element)
             }
 
         case .exhausted:
