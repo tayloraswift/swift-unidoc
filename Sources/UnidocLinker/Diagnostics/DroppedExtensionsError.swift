@@ -1,20 +1,12 @@
+import ModuleGraphs
 import Symbols
 import UnidocDiagnostics
 
 @frozen public
-struct DroppedExtensionsError:Equatable, Error
+enum DroppedExtensionsError:Equatable, Error
 {
-    public
-    let extendee:Symbol.Decl
-    public
-    let count:Int
-
-    @inlinable public
-    init(extendee:Symbol.Decl, count:Int)
-    {
-        self.extendee = extendee
-        self.count = count
-    }
+    case extensions(of:Symbol.Decl, count:Int)
+    case decls(of:ModuleIdentifier, count:Int)
 }
 extension DroppedExtensionsError:DynamicLinkerError
 {
@@ -22,11 +14,26 @@ extension DroppedExtensionsError:DynamicLinkerError
     func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
     {
         [
-            .init(.warning, context: .init(),
-                message: """
-                dropped \(self.count) extension(s) because its extendee \
-                (\(symbolicator.signature(of: self.extendee))) could not be loaded
-                """)
+            .init(.warning, context: .init(), message: self.message)
         ]
+    }
+
+    private
+    var message:String
+    {
+        switch self
+        {
+        case .extensions(of: let extendee, count: let count):
+            return """
+            dropped \(count) extension(s) because the type they extend \
+            (\(extendee)) could not be loaded
+            """
+
+        case .decls(of: let namespace, count: let count):
+            return """
+            dropped \(count) declarations(s) because the namespace they extend \
+            (\(namespace)) could not be loaded
+            """
+        }
     }
 }

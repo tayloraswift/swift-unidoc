@@ -86,16 +86,26 @@ extension DynamicLinker
             let namespace:ModuleIdentifier = self.current.graph.namespaces[c]
             let culture:Unidoc.Scalar = self.current.zone + c * .module
 
-            for namespace:SymbolGraph.Namespace in input.namespaces
+            for decls:SymbolGraph.Namespace in input.namespaces
             {
-                self.link(decls: namespace.range,
-                    under: namespace.index,
+                let namespace:ModuleIdentifier = self.current.graph.namespaces[decls.index]
+
+                guard let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
+                else
+                {
+                    self.errors.append(DroppedExtensionsError.decls(of: namespace,
+                        count: decls.range.count))
+                    continue
+                }
+
+                self.link(decls: decls.range,
+                    under: (n, namespace),
                     of: culture,
                     in: group)
             }
             if  let articles:ClosedRange<Int32> = input.articles
             {
-                self.link(articles: articles, under: namespace, in: group)
+                self.link(articles: articles, under: (culture, namespace), in: group)
             }
 
             var record:Record.Master.Culture = .init(id: culture, module: input.module)
@@ -119,7 +129,11 @@ extension DynamicLinker
 {
     private mutating
     func link(articles range:ClosedRange<Int32>,
-        under namespace:ModuleIdentifier,
+        under namespace:
+        (
+            scalar:Unidoc.Scalar,
+            id:ModuleIdentifier
+        ),
         in group:DynamicClientGroup)
     {
         for (a, article):(Int32, SymbolGraph.Article<String>) in zip(
@@ -133,9 +147,10 @@ extension DynamicLinker
                 continue
             }
             var record:Record.Master.Article = .init(id: self.current.zone + a,
-                stem: .init(namespace, name))
+                stem: .init(namespace.id, name),
+                culture: namespace.scalar)
             var resolver:DynamicResolver = .init(context: self.context,
-                namespace: namespace,
+                namespace: namespace.id,
                 group: group)
 
             (record.overview, record.details) = resolver.link(article: article)
@@ -147,13 +162,14 @@ extension DynamicLinker
 
     private mutating
     func link(decls range:ClosedRange<Int32>,
-        under namespace:Int,
-        of c:Unidoc.Scalar,
+        under namespace:
+        (
+            scalar:Unidoc.Scalar,
+            id:ModuleIdentifier
+        ),
+        of culture:Unidoc.Scalar,
         in group:DynamicClientGroup)
     {
-        let n:Unidoc.Scalar = self.current.zone + namespace * .module
-        let namespace:ModuleIdentifier = self.current.graph.namespaces[namespace]
-
         for (d, ((symbol, node), conformances)):
             (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances<Unidoc.Scalar>)) in
             zip(range, zip(zip(
@@ -166,7 +182,7 @@ extension DynamicLinker
             //  Ceremonial unwraps, should always succeed since we are only iterating
             //  over module ranges.
             guard   let decl:SymbolGraph.Decl = node.decl,
-                    let d:Unidoc.Scalar = self.current.scalars[d]
+                    let d:Unidoc.Scalar = self.current.scalars.decls[d]
             else
             {
                 continue
@@ -177,7 +193,7 @@ extension DynamicLinker
             {
                 //  The feature might have been declared in a different package!
                 guard
-                    let f:Unidoc.Scalar = self.current.scalars[f],
+                    let f:Unidoc.Scalar = self.current.scalars.decls[f],
                     let p:Unidoc.Scalar = self.context[f.package]?.scope(of: f)
                 else
                 {
@@ -203,10 +219,10 @@ extension DynamicLinker
 
             let superforms:[Unidoc.Scalar] = decl.superforms.compactMap
             {
-                if  let s:Unidoc.Scalar = self.current.scalars[$0]
+                if  let s:Unidoc.Scalar = self.current.scalars.decls[$0]
                 {
                     let implicit:ExtensionSignature = .init(conditions: [],
-                        culture: c,
+                        culture: culture,
                         extends: s)
 
                     self.extensions[implicit].subforms.append(d)
@@ -222,18 +238,18 @@ extension DynamicLinker
                 customization: decl.customization,
                 phylum: decl.phylum,
                 route: decl.route,
-                signature: decl.signature.map { self.current.scalars[$0] },
+                signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
-                stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),
+                stem: .init(namespace.id, decl.path, orientation: decl.phylum.orientation),
                 superforms: superforms,
-                namespace: n,
-                culture: c,
+                namespace: namespace.scalar,
+                culture: culture,
                 scope: scope.map { self.context.expand($0) } ?? [])
 
             if  let article:SymbolGraph.Article<Never> = decl.article
             {
                 var resolver:DynamicResolver = .init(context: self.context,
-                    namespace: namespace,
+                    namespace: namespace.id,
                     group: group,
                     scope: decl.phylum.scope(trimming: decl.path))
 

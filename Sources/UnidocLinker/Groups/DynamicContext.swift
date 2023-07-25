@@ -152,7 +152,7 @@ extension DynamicContext
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
                 var group:DynamicClientGroup = .init(
-                    nodes: self.current.scalars[self.current.graph.nodes.indices])
+                    nodes: self.current.scalars.decls[self.current.graph.nodes.indices])
 
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {
