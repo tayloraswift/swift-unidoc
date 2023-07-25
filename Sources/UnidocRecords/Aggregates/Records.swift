@@ -10,20 +10,24 @@ struct Records:Sendable
     var zone:Record.Zone
 
     public
+    var extensions:[Record.Extension]
+
+    public
     var articles:[Record.Master.Article]
     public
     var cultures:[Record.Master.Culture]
     public
     var decls:[Record.Master.Decl]
     public
-    var extensions:[Record.Extension]
+    var files:[Record.Master.File]
 
     @inlinable public
     init(zone:Record.Zone,
+        extensions:[Record.Extension] = [],
         articles:[Record.Master.Article] = [],
         cultures:[Record.Master.Culture] = [],
         decls:[Record.Master.Decl] = [],
-        extensions:[Record.Extension] = [])
+        files:[Record.Master.File] = [])
     {
         self.zone = zone
 
@@ -36,10 +40,11 @@ struct Records:Sendable
             self.latest = nil
         }
 
+        self.extensions = extensions
         self.articles = articles
         self.cultures = cultures
         self.decls = decls
-        self.extensions = extensions
+        self.files = files
     }
 }
 extension Records
@@ -47,7 +52,11 @@ extension Records
     @inlinable public
     var masters:Masters
     {
-        .init(articles: self.articles, cultures: self.cultures, decls: self.decls)
+        .init(
+            articles: self.articles,
+            cultures: self.cultures,
+            decls: self.decls,
+            files: self.files)
     }
 
     @inlinable public

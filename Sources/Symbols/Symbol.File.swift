@@ -15,6 +15,23 @@ extension Symbol
         }
     }
 }
+extension Symbol.File
+{
+    /// Returns the last path component of the file ``path``, not including
+    /// the path separator (one of `/` or `\`) itself.
+    @inlinable public
+    var last:Substring
+    {
+        if  let i:String.Index = self.path.lastIndex(where: { $0 == "/" || $0 == "\\" })
+        {
+            return self.path[self.path.index(after: i)...]
+        }
+        else
+        {
+            return self.path[...]
+        }
+    }
+}
 extension Symbol.File:CustomStringConvertible
 {
     @inlinable public

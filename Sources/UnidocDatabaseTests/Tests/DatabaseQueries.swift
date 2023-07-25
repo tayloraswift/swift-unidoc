@@ -252,7 +252,7 @@ struct DatabaseQueries:MongoTestBattery
                         let secondaries:[Unidoc.Scalar: Substring] = output[0].secondary.reduce(
                             into: [:])
                         {
-                            $0[$1.id] = $1.stem.last
+                            $0[$1.id] = $1.stem?.last
                         }
                         var counts:[Substring: Int] = [:]
                         for `extension`:Record.Extension in output[0].principal[0].extensions

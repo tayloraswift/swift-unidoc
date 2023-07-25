@@ -64,6 +64,12 @@ extension DynamicLinker
         self.link(groups: groups)
 
         self.projection.extensions = self.extensions.records(context: context)
+        self.projection.files = zip(
+            context.current.graph.files.indices,
+            context.current.graph.files).map
+        {
+            .init(id: context.current.zone + $0.0, symbol: $0.1)
+        }
     }
 }
 extension DynamicLinker
@@ -242,7 +248,9 @@ extension DynamicLinker
                 superforms: superforms,
                 namespace: namespace.scalar,
                 culture: culture,
-                scope: scope.map { self.context.expand($0) } ?? [])
+                scope: scope.map { self.context.expand($0) } ?? [],
+                file: decl.location.map { self.current.zone + $0.file },
+                position: decl.location?.position)
 
             if  let article:SymbolGraph.Article<Never> = decl.article
             {

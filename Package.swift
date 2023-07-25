@@ -127,6 +127,7 @@ let package:Package = .init(
         .target(name: "HTTPServer",
             dependencies:
             [
+                .target(name: "HTML"),
                 .target(name: "Media"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
@@ -322,7 +323,6 @@ let package:Package = .init(
         .executableTarget(name: "UnidocServer",
             dependencies:
             [
-                .target(name: "HTML"),
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Multiparts"),

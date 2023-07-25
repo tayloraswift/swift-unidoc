@@ -1,20 +1,7 @@
 import UnidocRecords
 import URI
+import URI
 
-extension URI
-{
-    init(master:__shared Record.Master,
-        in zone:__shared Record.Zone.Names,
-        disambiguate:Bool = true)
-    {
-        switch master
-        {
-        case .article(let article): self.init(article: article, in: zone)
-        case .culture(let culture): self.init(culture: culture, in: zone)
-        case .decl(let decl):       self.init(decl: decl, in: zone)
-        }
-    }
-}
 extension URI
 {
     init(article:__shared Record.Master.Article, in zone:__shared Record.Zone.Names)

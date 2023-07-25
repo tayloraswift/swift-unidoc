@@ -236,6 +236,8 @@ extension HTML
             @inlinable public var radiogroup:Attribute      { .radiogroup }
             @inlinable public var readonly:Attribute        { .readonly }
             @inlinable public var referrerpolicy:Attribute  { .referrerpolicy }
+            @available(*, unavailable,
+                message: "Use the typed 'rel' property on 'HTML.AttributeEncoder' instead.")
             @inlinable public var rel:Attribute             { .rel }
             @inlinable public var required:Attribute        { .required }
             @inlinable public var reversed:Attribute        { .reversed }

@@ -1,3 +1,4 @@
+import HTML
 import NIOCore
 import NIOHTTP1
 import NIOPosix
@@ -71,7 +72,7 @@ extension ServerAuthority
         }
     }
     static
-    func link(_ uri:String, rel:ServerResourceRelationship) -> String
+    func link(_ uri:String, rel:HTML.Attribute.Rel) -> String
     {
         "<\(Self.url(uri))>; rel=\"\(rel)\""
     }

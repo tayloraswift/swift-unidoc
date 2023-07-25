@@ -1,5 +1,3 @@
-import HTMLDOM
-
 extension HTML
 {
     /// A value-representation of the ``subscript(link:_:)`` encoding interface.

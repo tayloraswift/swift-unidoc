@@ -97,11 +97,18 @@ extension Inliner
             return .init(display: path?.description ?? "", target: $1)
         }
     }
+    func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
+    {
+        self.cache[file: file, line: line].map
+        {
+            .init(file: $0.symbol.last, line: line, target: $1)
+        }
+    }
 }
 extension Inliner
 {
-    func uri(_ scalar:Unidoc.Scalar) -> String?
+    func url(_ scalar:Unidoc.Scalar) -> String?
     {
-        self.cache[scalar]?.uri
+        self.cache[scalar]?.url
     }
 }

@@ -49,7 +49,7 @@ extension PackageBuild.Identity
     {
         guard case .remote(let url) = self.pin?.location,
             let colon:String.Index = url.firstIndex(of: ":"),
-            let start:String.Index = url.index(colon, offsetBy: 2, limitedBy: url.endIndex)
+            let start:String.Index = url.index(colon, offsetBy: 3, limitedBy: url.endIndex)
         else
         {
             return nil

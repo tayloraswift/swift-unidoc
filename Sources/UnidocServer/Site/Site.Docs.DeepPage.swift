@@ -94,10 +94,25 @@ extension Site.Docs.DeepPage
         else if let first:Record.Master = principal.matches.first
         {
             let inliner:Inliner = .init(principal: first.id.zone, zone: principal.zone)
-            let location:URI = .init(master: first, in: principal.zone, disambiguate: false)
 
             var identity:URI.Path = []
-                identity += first.stem
+
+            if  let stem:Record.Stem = first.stem
+            {
+                identity += stem
+            }
+
+            let location:URI
+
+            switch first
+            {
+            case .article(let first):   location = .init(article: first, in: principal.zone)
+            case .culture(let first):   location = .init(culture: first, in: principal.zone)
+            case .decl(let first):      location = .init(decl: first, in: principal.zone,
+                disambiguate: false)
+            //  We should never get this as principal output!
+            case .file:                 return nil
+            }
 
             self = .disambiguation(.init(principal.matches,
                 identity: identity,

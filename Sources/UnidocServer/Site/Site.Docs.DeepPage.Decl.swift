@@ -2,6 +2,7 @@ import HTML
 import LexicalPaths
 import ModuleGraphs
 import Signatures
+import Sources
 import Unidoc
 import UnidocRecords
 import URI
@@ -91,7 +92,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
                 $0[.span] { $0.class = "phylum" } = self.master.phylum.title
                 $0[.span, { $0.class = "module" }]
                 {
-                    $0[link: self.inliner.uri(self.master.namespace)] = self.path.namespace
+                    $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
                     $0[.span, { $0.class = "culture" }]
                     {
                         $0[.span] { $0.class = "version" } = self.zone.version
@@ -107,7 +108,12 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
 
             $0 ?= self.master.overview.map(self.inliner.passage(_:))
 
-            $0[.span] { $0.class = "phylum" } = self.master.customization.title
+            $0[.span] { $0.class = "customization" } = self.master.customization.title
+
+            if  let location:SourceLocation<Unidoc.Scalar> = self.master.location
+            {
+                $0 ?= self.inliner.link(file: location.file, line: location.position.line)
+            }
         }
 
         html[.section, { $0.class = "declaration" }]

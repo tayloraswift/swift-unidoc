@@ -54,7 +54,7 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
 
-                $0[link: self.inliner.uri(self.master.culture)] = self.path.namespace
+                $0[link: self.inliner.url(self.master.culture)] = self.path.namespace
 
                 $0[.span, { $0.class = "culture" }]
                 {
