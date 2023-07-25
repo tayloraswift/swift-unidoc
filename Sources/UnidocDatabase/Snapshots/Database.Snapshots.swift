@@ -161,7 +161,7 @@ extension Database.Snapshots
 
     func load(_ pins:[String], with session:Mongo.Session) async throws -> [Snapshot]
     {
-        try await session.run(
+        let snapshots:[Snapshot] = try await session.run(
             command: Mongo.Find<Mongo.Cursor<Snapshot>>.init(Self.name,
                 stride: 16,
                 limit: 32)
@@ -179,6 +179,14 @@ extension Database.Snapshots
         {
             try await $0.reduce(into: [], +=)
         }
+
+        let missing:Set<String> = snapshots.reduce(into: .init(pins)) { $0.remove($1.id) }
+        for missing:String in missing.sorted()
+        {
+            print("warning: could not load snapshot dependency '\(missing)'")
+        }
+
+        return snapshots
     }
 
     /// Returns the zone tuples for all snapshots in this collection.

@@ -33,3 +33,11 @@ extension PatchVersion
         }
     }
 }
+extension PatchVersion
+{
+    @inlinable public
+    var major:MajorVersion { .v(self.components.major) }
+
+    @inlinable public
+    var minor:MinorVersion { .v(self.components.major, self.components.minor) }
+}

@@ -6,7 +6,7 @@ import SemanticVersions
 @frozen public
 struct SymbolGraphMetadata:Equatable, Sendable
 {
-    /// A package name.
+    /// A package identifier.
     /// This is part of a documentation object’s identity.
     public
     let package:PackageIdentifier
@@ -58,9 +58,17 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// whereas ``version`` may render as `1.2.3`.
     public
     let refname:String?
-    /// A prefix to append to file paths when printing diagnostics.
+
+
+    /// An optional string containing the marketing name for the package.
     public
-    let root:Repository.Root?
+    var display:String?
+    /// An optional string containing the URL of the package’s GitHub repository.
+    public
+    var github:String?
+    /// An optional prefix to append to file paths when printing diagnostics.
+    public
+    var root:Repository.Root?
 
     public
     init(package:PackageIdentifier,
@@ -72,6 +80,8 @@ struct SymbolGraphMetadata:Equatable, Sendable
         requirements:[PlatformRequirement] = [],
         revision:Repository.Revision? = nil,
         refname:String? = nil,
+        display:String? = nil,
+        github:String? = nil,
         root:Repository.Root? = nil)
     {
         self.package = package
@@ -85,6 +95,9 @@ struct SymbolGraphMetadata:Equatable, Sendable
         self.requirements = requirements
         self.revision = revision
         self.refname = refname
+
+        self.display = display
+        self.github = github
         self.root = root
     }
 }
@@ -93,10 +106,25 @@ extension SymbolGraphMetadata
     public static
     func swift(triple:Triple, version:AnyVersion?, products:[ProductDetails]) -> Self
     {
-        .init(package: .swift, version: version, triple: triple,
+        let display:String
+        switch version?.canonical
+        {
+        case .stable(.release(let version))?:
+            display = "Swift \(version.minor)"
+
+        case _?:
+            display = "Swift Nightly"
+
+        case nil:
+            display = "Swift"
+        }
+
+        return .init(package: .swift, version: version, triple: triple,
             dependencies: [],
             toolchain: nil,
-            products: products)
+            products: products,
+            display: display,
+            github: "github.com/apple/swift")
     }
 }
 extension SymbolGraphMetadata
@@ -155,6 +183,8 @@ extension SymbolGraphMetadata
         case requirements
         case revision
         case refname
+        case display
+        case github
         case root
     }
 }
@@ -174,6 +204,9 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.revision] = self.revision
         bson[.refname] = self.refname
+
+        bson[.display] = self.display
+        bson[.github] = self.github
         bson[.root] = self.root
     }
 }
@@ -191,6 +224,8 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
             requirements: try bson[.requirements]?.decode() ?? [],
             revision: try bson[.revision]?.decode(),
             refname: try bson[.refname]?.decode(),
+            display: try bson[.display]?.decode(),
+            github: try bson[.github]?.decode(),
             root: try bson[.root]?.decode())
     }
 }

@@ -224,6 +224,8 @@ extension Toolchain
             requirements: manifest.requirements,
             revision: build.pin?.revision,
             refname: build.refname,
+            display: manifest.name,
+            github: build.identity.github,
             root: manifest.root)
 
         return .init(metadata: metadata, graph: try await .build(from: artifacts))

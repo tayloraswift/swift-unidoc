@@ -18,3 +18,8 @@ extension MinorVersion
         self.init(components: .init(major: major, minor: minor))
     }
 }
+extension MinorVersion
+{
+    @inlinable public
+    var major:MajorVersion { .v(self.components.major) }
+}
