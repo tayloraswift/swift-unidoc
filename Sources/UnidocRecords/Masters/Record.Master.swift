@@ -75,6 +75,9 @@ extension Record.Master
         /// Always present, but may be computed at encoding-time.
         case stem = "U"
 
+        /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
+        case culture = "c"
+
         /// Discriminator for ``Module``.
         case module = "M"
 
@@ -100,8 +103,6 @@ extension Record.Master
         /// Only appears in ``Decl``, and only when different from ``culture``.
         /// The field contains a scalar.
         case namespace = "n"
-        /// Only appears in ``Decl``. The field contains a scalar.
-        case culture = "c"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
 
@@ -169,7 +170,7 @@ extension Record.Master:BSONDocumentEncodable
             bson[.stem] = decl.stem
 
             bson[.superforms] = decl.superforms.isEmpty ? nil : decl.superforms
-            bson[.namespace] = decl.namespace == decl.culture ? nil : decl.namespace
+            bson[.namespace] = decl.culture == decl.namespace ? nil : decl.namespace
             bson[.culture] = decl.culture
             bson[.scope] = decl.scope.isEmpty ? nil : decl.scope
 
@@ -188,8 +189,10 @@ extension Record.Master:BSONDocumentEncodable
             bson[.module] = culture.module
             bson[.stem] = culture.stem
 
+
         case .article(let article):
             bson[.stem] = article.stem
+            bson[.culture] = article.culture
         }
 
         zones.update(with: self.overview?.outlines ?? [])
@@ -249,6 +252,7 @@ extension Record.Master:BSONDocumentDecodable
         {
             self = .article(.init(id: id,
                 stem: try bson[.stem].decode(),
+                culture: try bson[.culture].decode(),
                 overview: overview,
                 details: details))
         }

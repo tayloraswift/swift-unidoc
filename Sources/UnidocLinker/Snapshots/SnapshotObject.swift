@@ -11,19 +11,15 @@ class SnapshotObject:Sendable
     let hierarchy:[Int32: Unidoc.Scalar]
 
     let snapshot:Snapshot
-
-    let namespaces:[Unidoc.Scalar?]
-    let scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>
+    let scalars:Scalars
 
     private
     init(snapshot:Snapshot,
         hierarchy:[Int32: Unidoc.Scalar],
-        namespaces:[Unidoc.Scalar?],
-        scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>)
+        scalars:Scalars)
     {
         self.snapshot = snapshot
         self.hierarchy = hierarchy
-        self.namespaces = namespaces
         self.scalars = scalars
     }
 }
@@ -41,20 +37,7 @@ extension SnapshotObject
     convenience
     init(snapshot:__owned Snapshot, upstream:__shared DynamicContext.UpstreamScalars)
     {
-        let zone:Unidoc.Zone = snapshot.zone
-        let scalars:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> = snapshot.graph.link
-        {
-            zone + $0
-        }
-        dynamic:
-        {
-            upstream.citizens[$0]
-        }
-
-        let namespaces:[Unidoc.Scalar?] = snapshot.graph.namespaces.map
-        {
-            upstream.cultures[$0]
-        }
+        let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
 
         var hierarchy:[Int32: Unidoc.Scalar] = [:]
             hierarchy.reserveCapacity(snapshot.graph.nodes.count)
@@ -68,14 +51,13 @@ extension SnapshotObject
                 for nested:Int32 in `extension`.nested where
                     snapshot.graph.citizens.contains(nested)
                 {
-                    hierarchy[nested] = scalars[n]
+                    hierarchy[nested] = scalars.decls[n]
                 }
             }
         }
 
         self.init(snapshot: snapshot,
             hierarchy: hierarchy,
-            namespaces: namespaces,
             scalars: scalars)
     }
 }

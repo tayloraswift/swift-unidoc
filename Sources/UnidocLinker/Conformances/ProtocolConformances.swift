@@ -135,7 +135,7 @@ extension ProtocolConformances<Unidoc.Scalar>
                                 //  If the constraint is `T:Hashable`, `Hashable:Equatable`,
                                 //  and `T:Equatable` exists in the constraint set, then this
                                 //  constraint is redundant.
-                                if  let supertype:Unidoc.Scalar = snapshot.scalars[local],
+                                if  let supertype:Unidoc.Scalar = snapshot.scalars.decls[local],
                                         supertype != type,
                                         constraints.contains(.where(parameter,
                                             is: what,

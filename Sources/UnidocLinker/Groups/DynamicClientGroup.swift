@@ -98,7 +98,7 @@ extension DynamicClientGroup
             let node:SymbolGraph.Node = snapshot.graph.nodes[s]
             let symbol:Symbol.Decl = snapshot.graph.decls[s]
 
-            guard let s:Unidoc.Scalar = snapshot.scalars[s]
+            guard let s:Unidoc.Scalar = snapshot.scalars.decls[s]
             else
             {
                 continue
@@ -151,7 +151,7 @@ extension DynamicClientGroup
             {
                 for p:Int32 in `extension`.conformances
                 {
-                    if  let p:Unidoc.Scalar = snapshot.scalars[p]
+                    if  let p:Unidoc.Scalar = snapshot.scalars.decls[p]
                     {
                         //  If any extension (with any constraints) declares a conformance
                         //  to a protocol *p*, record it here.
@@ -172,7 +172,7 @@ extension DynamicClientGroup
                 let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls[f],
                     self: outer.symbol)
 
-                if  let f:Unidoc.Scalar = snapshot.scalars[f],
+                if  let f:Unidoc.Scalar = snapshot.scalars.decls[f],
                     let inner:SymbolGraph.Decl = context[f.package]?.nodes[f]?.decl
                 {
                     self.codelinks[qualifier, outer.path, inner.path.last]

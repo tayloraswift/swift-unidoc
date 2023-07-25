@@ -1,6 +1,7 @@
 import LexicalPaths
 import Signatures
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -94,13 +95,12 @@ extension DynamicLinker.Extensions
         groups:[DynamicClientGroup],
         errors:inout [any DynamicLinkerError]) -> ProtocolConformances<Unidoc.Scalar>
     {
-        guard   let scope:Unidoc.Scalar = context.current.scalars[scope],
+        guard   let scope:Unidoc.Scalar = context.current.scalars.decls[scope],
                 let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
         else
         {
-            errors.append(DroppedExtensionsError.init(
-                extendee: context.current.graph.decls[scope],
-                count: extensions.count))
+            let type:Symbol.Decl = context.current.graph.decls[scope]
+            errors.append(DroppedExtensionsError.extensions(of: type, count: extensions.count))
             return [:]
         }
 
@@ -108,7 +108,7 @@ extension DynamicLinker.Extensions
         let signatures:[DynamicLinker.ExtensionSignature] = extensions.map
         {
             .init(
-                conditions: $0.conditions.map { $0.map { context.current.scalars[$0] } },
+                conditions: $0.conditions.map { $0.map { context.current.scalars.decls[$0] } },
                 culture: context.current.zone + $0.culture * .module,
                 extends: scope)
         }
@@ -129,7 +129,7 @@ extension DynamicLinker.Extensions
                 {
                     //  Only track conformances that were declared by modules in
                     //  the current package.
-                    if  let p:Unidoc.Scalar = context.current.scalars[p],
+                    if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
                         case false = group.already(conforms: scope, to: p)
                     {
                         conformances[to: p].append(.init(
@@ -168,7 +168,7 @@ extension DynamicLinker.Extensions
                     into: [:])
                 {
                     if  let p:Unidoc.Scalar = context.current.scope(of: $1),
-                        let f:Unidoc.Scalar = context.current.scalars[$1]
+                        let f:Unidoc.Scalar = context.current.scalars.decls[$1]
                     {
                         $0[p, default: []].append(f)
                     }
@@ -188,7 +188,7 @@ extension DynamicLinker.Extensions
                 //  just store them without filtering.
                 for d:Int32 in `extension`.nested
                 {
-                    if  let d:Unidoc.Scalar = context.current.scalars[d]
+                    if  let d:Unidoc.Scalar = context.current.scalars.decls[d]
                     {
                         $0.nested.append(d)
                     }
