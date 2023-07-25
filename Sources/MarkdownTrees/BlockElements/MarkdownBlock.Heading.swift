@@ -25,11 +25,12 @@ extension MarkdownBlock
 }
 extension MarkdownBlock.Heading
 {
-    /// Demotes the heading by the specified number of levels, down to a minimum
-    /// level of 6.
-    public
-    func demote(by levels:Int = 1)
+    /// Clips the heading to the specified maximum level. For example, if `level` is 3, then
+    /// this function will demote `h1` and `h2` headings to `h3`, but it will leave `h3` and
+    /// `h4` headings alone. This function will never demote headings beyond `h6`.
+    @inlinable public
+    func clip(to level:Int)
     {
-        self.level = min(6, self.level + levels)
+        self.level = min(max(self.level, level), 6)
     }
 }
