@@ -94,14 +94,33 @@ extension SymbolGraph
     @inlinable public
     func link<T>(
         static transform:(Int32) throws -> T,
-        dynamic:(Symbol.Decl) throws -> T) rethrows -> Plane<UnidocPlane.Decl, T>
+        dynamic link:(ModuleIdentifier) throws -> T) rethrows -> [T]
+    {
+        var elements:[T] = [] ; elements.reserveCapacity(self.namespaces.count)
+
+        for index:Int in self.cultures.indices
+        {
+            elements.append(try transform(index * .module))
+        }
+        for colony:ModuleIdentifier in self.namespaces[self.cultures.endIndex...]
+        {
+            elements.append(try link(colony))
+        }
+
+        return elements
+    }
+
+    @inlinable public
+    func link<T>(
+        static transform:(Int32) throws -> T,
+        dynamic link:(Symbol.Decl) throws -> T) rethrows -> Plane<UnidocPlane.Decl, T>
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.decls.count)
 
         for index:Int32 in self.decls.indices
         {
             elements.append(self.citizens.contains(index) ? try transform(index) :
-                try dynamic(self.decls[index]))
+                try link(self.decls[index]))
         }
 
         return .init(table: .init(elements: elements))
