@@ -12,6 +12,8 @@ extension Site.Docs.DeepPage
 
         private
         let inliner:Inliner
+        private
+        let path:QualifiedPath
 
         init(_ master:Record.Master.Article,
             extensions:[Record.Extension],
@@ -20,6 +22,7 @@ extension Site.Docs.DeepPage
             self.master = master
             self.extensions = extensions
             self.inliner = inliner
+            self.path = .init(splitting: self.master.stem)
         }
     }
 }
@@ -50,7 +53,13 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
-                $0[.span] { $0.class = "version" } = self.zone.version
+
+                $0[link: self.inliner.uri(self.master.culture)] = self.path.namespace
+
+                $0[.span, { $0.class = "culture" }]
+                {
+                    $0[.span] { $0.class = "version" } = self.zone.version
+                }
             }
 
             $0 ?= self.master.overview.map(self.inliner.passage(_:))

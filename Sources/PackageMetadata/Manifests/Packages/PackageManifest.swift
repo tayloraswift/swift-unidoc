@@ -7,7 +7,8 @@ public
 struct PackageManifest:Equatable, Sendable
 {
     /// The name of the package. This is *not* always the same as the package’s
-    /// identity, but often is.
+    /// identity, but often is. Some packages use this field to store a “marketing
+    /// name” for the package, such as `Swift Argument Parser`.
     public
     let name:String
     public

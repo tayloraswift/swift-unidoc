@@ -43,3 +43,33 @@ extension PackageBuild.Identity
         }
     }
 }
+extension PackageBuild.Identity
+{
+    var github:String?
+    {
+        guard case .remote(let url) = self.pin?.location,
+            let colon:String.Index = url.firstIndex(of: ":"),
+            let start:String.Index = url.index(colon, offsetBy: 2, limitedBy: url.endIndex)
+        else
+        {
+            return nil
+        }
+        switch url[..<start]
+        {
+        case "http://", "https://":
+            break
+        case _:
+            return nil
+        }
+
+        if  let end:String.Index = url.lastIndex(of: "."),
+            url[end...] == ".git"
+        {
+            return .init(url[start ..< end])
+        }
+        else
+        {
+            return .init(url[start...])
+        }
+    }
+}
