@@ -85,6 +85,10 @@ extension Site.Docs.DeepPage
                 self = .decl(.init(master,
                     extensions: principal.extensions,
                     inliner: inliner))
+
+            case .file:
+                //  We should never get this as principal output!
+                return nil
             }
         }
         else if let first:Record.Master = principal.matches.first

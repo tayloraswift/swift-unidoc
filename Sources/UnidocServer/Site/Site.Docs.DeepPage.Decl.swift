@@ -69,8 +69,7 @@ extension Site.Docs.DeepPage.Decl
 
     var title:String
     {
-        //  TODO: this should include the package name
-        self.path.last
+        "\(self.path.last) - \(self.zone.display ?? "\(self.zone.package)") Documentation"
     }
 }
 extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable

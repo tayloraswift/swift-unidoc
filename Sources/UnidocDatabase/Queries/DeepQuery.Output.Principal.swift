@@ -18,6 +18,10 @@ extension DeepQuery.Output
         public
         let refname:String?
         public
+        let display:String?
+        public
+        let github:String?
+        public
         let latest:Bool
 
         public
@@ -32,6 +36,8 @@ extension DeepQuery.Output
             package:PackageIdentifier,
             version:String,
             refname:String?,
+            display:String?,
+            github:String?,
             latest:Bool,
             extensions:[Record.Extension],
             matches:[Record.Master],
@@ -40,6 +46,8 @@ extension DeepQuery.Output
             self.package = package
             self.version = version
             self.refname = refname
+            self.display = display
+            self.github = github
             self.latest = latest
 
             self.extensions = extensions
@@ -56,6 +64,8 @@ extension DeepQuery.Output.Principal
         .init(package: self.package,
             version: self.version,
             refname: self.refname,
+            display: self.display,
+            github: self.github,
             latest: self.latest)
     }
 }
@@ -74,6 +84,8 @@ extension DeepQuery.Output.Principal
         case package = "P"
         case version = "V"
         case refname = "G"
+        case display = "D"
+        case github = "H"
         case latest = "L"
     }
 
@@ -89,6 +101,8 @@ extension DeepQuery.Output.Principal:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             refname: try bson[.refname]?.decode(),
+            display: try bson[.display]?.decode(),
+            github: try bson[.github]?.decode(),
             latest: try bson[.latest]?.decode() ?? false,
             extensions: try bson[.extensions].decode(),
             matches: try bson[.matches].decode(),

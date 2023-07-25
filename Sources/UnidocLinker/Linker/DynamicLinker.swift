@@ -32,9 +32,7 @@ struct DynamicLinker
 
         self.extensions = extensions
         self.projection = .init(zone: .init(context.current.snapshot.zone,
-            package: context.current.snapshot.metadata.package,
-            version: context.current.snapshot.metadata.version,
-            refname: context.current.snapshot.metadata.refname))
+            metadata: context.current.snapshot.metadata))
         self.errors = errors
     }
 }

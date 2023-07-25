@@ -17,6 +17,9 @@ extension Record
         case article(Article)
         case culture(Culture)
         case decl(Decl)
+
+        @available(*, unavailable, message: "unimplemented")
+        case file(File)
     }
 }
 extension Record.Master:Identifiable
@@ -29,6 +32,7 @@ extension Record.Master:Identifiable
         case .article(let article): return article.id
         case .culture(let culture): return culture.id
         case .decl(let decl):       return decl.id
+        case .file(let file):       return file.id
         }
     }
 }
@@ -42,6 +46,7 @@ extension Record.Master
         case .article(let article): return article.overview
         case .culture(let culture): return culture.overview
         case .decl(let decl):       return decl.overview
+        case .file:                 return nil
         }
     }
     @inlinable public
@@ -52,6 +57,7 @@ extension Record.Master
         case .article(let article): return article.details
         case .culture(let culture): return culture.details
         case .decl(let decl):       return decl.details
+        case .file:                 return nil
         }
     }
     @inlinable public
@@ -72,19 +78,23 @@ extension Record.Master
     {
         /// Always present.
         case id = "_id"
-        /// Always present, but may be computed at encoding-time.
-        case stem = "U"
 
         /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
         case culture = "c"
+        /// Appears in ``Article``, ``Culture``, and ``Decl``, but may be computed
+        /// at encoding-time.
+        case stem = "U"
 
         /// Discriminator for ``Module``.
         case module = "M"
 
+        /// Discriminator for ``File``.
+        // case file = "F"
+
         /// Discriminator for ``Decl``.
-        case symbol = "S"
+        case decl = "D"
         /// Only appears in ``Decl``.
-        case flags = "F"
+        case flags = "Z"
         /// Only appears in ``Decl``.
         case signature_availability = "A"
         /// Only appears in ``Decl``.
@@ -140,8 +150,11 @@ extension Record.Master:BSONDocumentEncodable
 
         switch self
         {
+        // case .file(let file):
+        //     bson[.file] = file.symbol
+
         case .decl(let decl):
-            bson[.symbol] = decl.symbol
+            bson[.decl] = decl.symbol
 
             bson[.flags] = Unidoc.Decl.Flags.init(
                 customization: decl.customization,
@@ -214,7 +227,7 @@ extension Record.Master:BSONDocumentDecodable
         let overview:Record.Passage? = try bson[.overview]?.decode()
         let details:Record.Passage? = try bson[.details]?.decode()
 
-        if      let discriminator:Symbol.Decl = try bson[.symbol]?.decode()
+        if      let discriminator:Symbol.Decl = try bson[.decl]?.decode()
         {
             let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
             let culture:Unidoc.Scalar = try bson[.culture].decode()
@@ -241,6 +254,10 @@ extension Record.Master:BSONDocumentDecodable
                 overview: overview,
                 details: details))
         }
+        // else if let discriminator:Symbol.File = try bson[.file]?.decode()
+        // {
+        //     self = .file(.init(id: id, symbol: discriminator))
+        // }
         else if let discriminator:ModuleDetails = try bson[.module]?.decode()
         {
             self = .culture(.init(id: id,

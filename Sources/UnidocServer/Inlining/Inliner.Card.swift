@@ -35,6 +35,10 @@ extension Inliner.Card:HyperTextOutputStreamable
 
             case .decl(let master):
                 $0 += master.signature.abridged
+
+            case .file(_):
+                //  unimplemented
+                break
             }
         }
 
