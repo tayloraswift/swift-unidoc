@@ -26,6 +26,11 @@ extension Record
         let refname:String?
 
         public
+        let display:String?
+        public
+        let github:String?
+
+        public
         var latest:Bool
 
         public
@@ -36,6 +41,8 @@ extension Record
             package:PackageIdentifier,
             version:String,
             refname:String?,
+            display:String?,
+            github:String?,
             latest:Bool,
             patch:PatchVersion?)
         {
@@ -43,6 +50,8 @@ extension Record
             self.package = package
             self.version = version
             self.refname = refname
+            self.display = display
+            self.github = github
             self.latest = latest
             self.patch = patch
         }
@@ -59,6 +68,8 @@ extension Record.Zone
         .init(package: self.package,
             version: self.version,
             refname: self.refname,
+            display: self.display,
+            github: self.github,
             latest: self.latest)
     }
 }
@@ -72,6 +83,8 @@ extension Record.Zone
         case package = "P"
         case version = "V"
         case refname = "G"
+        case display = "D"
+        case github = "H"
         case patch = "S"
 
         case planes_min = "C"
@@ -101,6 +114,10 @@ extension Record.Zone:BSONDocumentEncodable
         bson[.package] = self.package
         bson[.version] = self.version
         bson[.refname] = self.refname
+
+        bson[.display] = self.display
+        bson[.github] = self.github
+
         bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
 
@@ -122,6 +139,8 @@ extension Record.Zone:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             refname: try bson[.refname]?.decode(),
+            display: try bson[.display]?.decode(),
+            github: try bson[.github]?.decode(),
             latest: try bson[.latest]?.decode() ?? false,
             patch: try bson[.patch]?.decode())
     }

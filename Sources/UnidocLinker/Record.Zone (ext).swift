@@ -1,17 +1,20 @@
 import ModuleGraphs
 import SemanticVersions
+import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
 extension Record.Zone
 {
-    init(_ zone:Unidoc.Zone, package:PackageIdentifier, version:AnyVersion?, refname:String?)
+    init(_ zone:Unidoc.Zone, metadata:__shared SymbolGraphMetadata)
     {
         self.init(id: zone,
-            package: package,
-            version: version?.description ?? "$anonymous",
-            refname: refname,
+            package: metadata.package,
+            version: metadata.version?.description ?? "$anonymous",
+            refname: metadata.refname,
+            display: metadata.display,
+            github: metadata.github,
             latest: true,
-            patch: version?.stable?.release)
+            patch: metadata.version?.stable?.release)
     }
 }

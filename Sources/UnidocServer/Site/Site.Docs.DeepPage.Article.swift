@@ -40,7 +40,7 @@ extension Site.Docs.DeepPage.Article
 
     var title:String?
     {
-        nil
+        "\(self.zone.display ?? "\(self.zone.package)") Documentation"
     }
 }
 extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable

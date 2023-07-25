@@ -38,8 +38,10 @@ extension Site.Docs.DeepPage.Culture
 
     var title:String
     {
-        //  TODO: this should include the package name
-        self.master.module.name
+        """
+        \(self.master.module.name) - \
+        \(self.zone.display ?? "\(self.zone.package)") Documentation
+        """
     }
 }
 extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
