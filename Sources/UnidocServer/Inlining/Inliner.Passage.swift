@@ -38,7 +38,11 @@ extension Inliner.Passage:HyperTextRenderableMarkdown
             html[.code] = text
 
         case .path(let stem, let scalars):
-            html[.code] = self.inliner.link(stem.split(separator: " "), to: scalars)
+            //  Take the suffix of the stem, because it may include a module namespace,
+            //  and we never render the module namespace, even if it was written in the
+            //  codelink text.
+            html[.code] = self.inliner.link(stem.split(separator: " ").suffix(scalars.count),
+                to: scalars)
         }
     }
 }
