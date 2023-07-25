@@ -31,7 +31,11 @@ extension SnapshotObject.Scalars
             upstream.citizens[$0]
         }
 
-        let namespaces:[Unidoc.Scalar?] = snapshot.graph.namespaces.map
+        let namespaces:[Unidoc.Scalar?] = snapshot.graph.link
+        {
+            snapshot.zone + $0
+        }
+        dynamic:
         {
             upstream.cultures[$0]
         }

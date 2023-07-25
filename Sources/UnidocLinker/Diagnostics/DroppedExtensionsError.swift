@@ -14,19 +14,19 @@ extension DroppedExtensionsError:DynamicLinkerError
     func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
     {
         [
-            .init(.warning, context: .init(), message: self.message)
+            .init(.warning, context: .init(), message: self.message(symbolicator: symbolicator))
         ]
     }
 
     private
-    var message:String
+    func message(symbolicator:DynamicSymbolicator) -> String
     {
         switch self
         {
         case .extensions(of: let extendee, count: let count):
             return """
             dropped \(count) extension(s) because the type they extend \
-            (\(extendee)) could not be loaded
+            (\(symbolicator.signature(of: extendee))) could not be loaded
             """
 
         case .decls(of: let namespace, count: let count):
