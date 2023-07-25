@@ -84,10 +84,14 @@ section.introduction
     a.source
     {
         font-family: $typeface-monospace;
-        font-weight: 500;
         font-size: 87.5%;
         color: $light-foreground-semi;
         text-decoration-color: $light-accent-hot-pink;
+
+        span.file
+        {
+            font-weight: 500;
+        }
 
         span.file,
         span.line
