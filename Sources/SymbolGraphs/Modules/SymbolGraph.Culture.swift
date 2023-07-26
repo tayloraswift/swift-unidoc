@@ -21,6 +21,9 @@ extension SymbolGraph
         public
         var article:Article<Never>?
 
+        public
+        var topics:[Topic]
+
         @inlinable public
         init(module:ModuleDetails)
         {
@@ -29,6 +32,7 @@ extension SymbolGraph
             self.namespaces = []
             self.articles = nil
             self.article = nil
+            self.topics = []
         }
     }
 }
@@ -39,7 +43,9 @@ extension SymbolGraph.Culture:Identifiable
     {
         self.module.id
     }
-
+}
+extension SymbolGraph.Culture
+{
     @inlinable public
     var decls:ClosedRange<Int32>?
     {
@@ -65,6 +71,7 @@ extension SymbolGraph.Culture
         case articles_lower = "L"
         case articles_upper = "U"
         case article = "A"
+        case topics = "T"
     }
 }
 extension SymbolGraph.Culture:BSONDocumentEncodable
@@ -78,6 +85,7 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
         bson[.articles_lower] = self.articles?.lowerBound
         bson[.articles_upper] = self.articles?.upperBound
         bson[.article] = self.article
+        bson[.topics] = self.topics.isEmpty ? nil : self.topics
     }
 }
 extension SymbolGraph.Culture:BSONDocumentDecodable
@@ -96,5 +104,6 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
         //  TODO: validate well-formedness of scalar ranges.
         self.namespaces = try bson[.namespaces]?.decode() ?? []
         self.article = try bson[.article]?.decode()
+        self.topics = try bson[.topics]?.decode() ?? []
     }
 }

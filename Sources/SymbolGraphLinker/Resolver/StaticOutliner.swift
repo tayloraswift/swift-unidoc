@@ -101,38 +101,92 @@ extension StaticOutliner
         documentation:MarkdownDocumentation,
         from sources:[MarkdownSource]) -> SymbolGraph.Article<Never>
     {
-        let overview:MarkdownBytecode = .init
-        {
-            (binary:inout MarkdownBinaryEncoder) in
+        let overview:MarkdownBytecode = self.link(
+            overview: documentation.overview,
+            from: sources)
 
-            documentation.overview.map
-            {
-                $0.outline
-                {
-                    self.outline(autolink: $0, in: sources)
-                }
-                $0.emit(into: &binary)
-            }
-        }
+        let fold:Int = self.cache.fold
 
-        let fold:Int = self.cache.outlines.endIndex
+        //  We don’t support topics lists in non-module documentation.
+        //  So we just render them into the article as lists of links.
+        let details:MarkdownBytecode = self.link(
+            details: documentation.details,
+            topics: documentation.topics,
+            from: sources)
 
-        let details:MarkdownBytecode = .init
-        {
-            (binary:inout MarkdownBinaryEncoder) in
-
-            documentation.details.visit
-            {
-                $0.outline
-                {
-                    self.outline(autolink: $0, in: sources)
-                }
-                $0.emit(into: &binary)
-            }
-        }
-        return .init(outlines: self.cache.outlines,
+        return .init(outlines: self.cache.clear(),
             overview: overview,
             details: details,
             fold: fold)
+    }
+    mutating
+    func link(topics:[MarkdownDocumentation.Topic],
+        from sources:[MarkdownSource]) -> [SymbolGraph.Topic]
+    {
+        topics.map
+        {
+            (topic:MarkdownDocumentation.Topic) in
+
+            let overview:MarkdownBytecode = .init
+            {
+                (binary:inout MarkdownBinaryEncoder) in topic.visit(members: false)
+                {
+                    $0.outline { self.outline(autolink: $0, in: sources) }
+                    $0.emit(into: &binary)
+                }
+            }
+
+            let outlines:[SymbolGraph.Outline] = self.cache.clear()
+
+            for member:MarkdownInline.Autolink in topic.members
+            {
+                let _:Int? = self.outline(autolink: member, in: sources)
+            }
+
+            let members:[SymbolGraph.Outline] = self.cache.clear()
+
+            return .init(outlines: outlines,
+                overview: overview,
+                members: members)
+        }
+    }
+
+    private mutating
+    func link(overview:MarkdownBlock.Paragraph?,
+        from sources:[MarkdownSource]) -> MarkdownBytecode
+    {
+        .init
+        {
+            (binary:inout MarkdownBinaryEncoder) in overview.map
+            {
+                $0.outline { self.outline(autolink: $0, in: sources) }
+                $0.emit(into: &binary)
+            }
+        }
+    }
+    private mutating
+    func link(details:MarkdownDocumentation.Details,
+        topics:[MarkdownDocumentation.Topic],
+        from sources:[MarkdownSource]) -> MarkdownBytecode
+    {
+        .init
+        {
+            (binary:inout MarkdownBinaryEncoder) in
+
+            details.visit
+            {
+                $0.outline { self.outline(autolink: $0, in: sources) }
+                $0.emit(into: &binary)
+            }
+
+            for topic:MarkdownDocumentation.Topic in topics
+            {
+                topic.visit(members: true)
+                {
+                    $0.outline { self.outline(autolink: $0, in: sources) }
+                    $0.emit(into: &binary)
+                }
+            }
+        }
     }
 }

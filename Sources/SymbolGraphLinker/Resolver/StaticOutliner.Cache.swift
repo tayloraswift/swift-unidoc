@@ -6,7 +6,7 @@ extension StaticOutliner
     {
         private
         var references:[String: Int]
-        private(set)
+        private
         var outlines:[SymbolGraph.Outline]
 
         init()
@@ -18,6 +18,15 @@ extension StaticOutliner
 }
 extension StaticOutliner.Cache
 {
+    var fold:Int { self.outlines.endIndex }
+
+    mutating
+    func clear() -> [SymbolGraph.Outline]
+    {
+        defer { self = .init() }
+        return self.outlines
+    }
+
     mutating
     func callAsFunction(_ key:String,
         with populate:() throws -> SymbolGraph.Outline?) rethrows -> Int?

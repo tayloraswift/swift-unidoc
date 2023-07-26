@@ -31,7 +31,10 @@ extension MarkdownDocumentation
 extension MarkdownDocumentation.Details
 {
     /// Calls ``yield`` once for each block in the structure.
-    public
+    ///
+    /// This coroutine visits the ``parameters``, then the ``returns``, then the ``throws``,
+    /// and finally the ``article``.
+    @inlinable public
     func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
     {
         try self.parameters.map(yield)

@@ -308,20 +308,31 @@ extension StaticLinker
                     doclinks: self.doclinks,
                     imports: self.imports,
                     culture: namespace)
+
                 //  We pass a single-element array as the sources list, which relies
                 //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
                 //  the source id by default.
-                let article:SymbolGraph.Article<Never> = outliner.link(
-                    documentation: standalone.parsed.article,
-                    from: [standalone.source])
+                let sources:[MarkdownSource] = [standalone.source]
 
                 if  let scalar:Int32 = standalone.scalar
                 {
-                    self.symbolizer.graph.articles[scalar].value = article
+                    self.symbolizer.graph.articles[scalar].value = outliner.link(
+                        documentation: standalone.parsed.article,
+                        from: sources)
                 }
                 else
                 {
-                    self.symbolizer.graph.cultures[culture].article = article
+                    //  This is the article for the module’s landing page.
+                    self.symbolizer.graph.cultures[culture].article = outliner.link(
+                        documentation: .init(
+                            overview: standalone.parsed.article.overview,
+                            details: standalone.parsed.article.details,
+                            topics: []),
+                        from: sources)
+
+                    self.symbolizer.graph.cultures[culture].topics = outliner.link(
+                        topics: standalone.parsed.article.topics,
+                        from: sources)
                 }
 
                 self.errors += outliner.errors

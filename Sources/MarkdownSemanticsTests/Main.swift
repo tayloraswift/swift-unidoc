@@ -888,7 +888,7 @@ enum Main:SyncTests
 
                     ### Dua Lipa
 
-                    Selected songs by Dua Lipa
+                    Selected songs by Dua Lipa.
 
                     -   ``DanceTheNight``
 
@@ -900,7 +900,7 @@ enum Main:SyncTests
 
                     ### Chase Icon
 
-                    Selected songs by Chase Icon
+                    Lyrics from *Like Me*.
 
                     -   ``StopIt``
                     -   ``DropIt``
@@ -908,7 +908,7 @@ enum Main:SyncTests
 
                     ### Taylor Swift
 
-                    Selected songs by Taylor Swift
+                    Selected songs by Taylor Swift.
 
                     >   Note: These are from the original Red album.
 
