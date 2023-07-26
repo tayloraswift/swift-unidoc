@@ -20,6 +20,30 @@ extension MarkdownDocumentation
 }
 extension MarkdownDocumentation.Topic
 {
+    /// Calls ``yield`` once for each block in the structure. If `members` is true, this
+    /// function will materialize the topic’s ``members`` as an unordered list of autolinks
+    /// at the end of the ``article``.
+    @inlinable public
+    func visit(members:Bool = true, _ yield:(MarkdownBlock) throws -> ()) rethrows
+    {
+        try self.article.forEach(yield)
+
+        guard members
+        else
+        {
+            return
+        }
+
+        let items:[MarkdownBlock.Item] = self.members.map
+        {
+            .init(elements: [MarkdownBlock.Paragraph.init([.autolink($0)])])
+        }
+
+        try yield(MarkdownBlock.UnorderedList.init(items))
+    }
+}
+extension MarkdownDocumentation.Topic
+{
     init?(_ blocks:__shared ArraySlice<MarkdownBlock>)
     {
         guard case (let list as MarkdownBlock.UnorderedList)? = blocks.last

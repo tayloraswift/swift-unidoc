@@ -10,7 +10,7 @@ struct MarkdownDocumentation
     public
     var topics:[Topic]
 
-    public
+    @inlinable public
     init(overview:MarkdownBlock.Paragraph?, details:Details, topics:[Topic])
     {
         self.overview = overview
