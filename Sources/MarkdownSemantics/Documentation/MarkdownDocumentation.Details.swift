@@ -30,6 +30,7 @@ extension MarkdownDocumentation
 }
 extension MarkdownDocumentation.Details
 {
+    /// Calls ``yield`` once for each block in the structure.
     public
     func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
     {
