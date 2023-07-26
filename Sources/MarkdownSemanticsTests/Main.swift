@@ -9,7 +9,7 @@ import Testing
 enum Main:SyncTests
 {
     private static
-    func run(tests:TestGroup, markdown:String, expected:String)
+    func run(tests:TestGroup, markdown:String, expected:String, topics:[Int] = [])
     {
         tests.do
         {
@@ -39,15 +39,20 @@ enum Main:SyncTests
             }
 
             tests.expect(html.description ==? expected)
+
+            if  let tests:TestGroup = tests / "Topics"
+            {
+                tests.expect(documentation.topics.map(\.members.count) ..? topics)
+            }
         }
     }
 
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "parameters"
+        if  let tests:TestGroup = tests / "Parameters"
         {
-            if  let tests:TestGroup = tests / "none"
+            if  let tests:TestGroup = tests / "None"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -63,7 +68,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "empty"
+            if  let tests:TestGroup = tests / "Empty"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -80,7 +85,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "one"
+            if  let tests:TestGroup = tests / "One"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -105,7 +110,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "many"
+            if  let tests:TestGroup = tests / "Many"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -136,7 +141,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "formatting"
+            if  let tests:TestGroup = tests / "Formatting"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -162,7 +167,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "line-continuations"
+            if  let tests:TestGroup = tests / "LineContinuations"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -188,7 +193,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "indentation"
+            if  let tests:TestGroup = tests / "Indentation"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -224,7 +229,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "discussion"
+            if  let tests:TestGroup = tests / "Discussion"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -255,7 +260,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "multiple-lists"
+            if  let tests:TestGroup = tests / "MultipleLists"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -290,7 +295,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "collation"
+            if  let tests:TestGroup = tests / "Collation"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -323,9 +328,9 @@ enum Main:SyncTests
                     """)
             }
         }
-        if  let tests:TestGroup = tests / "lists"
+        if  let tests:TestGroup = tests / "Lists"
         {
-            if  let tests:TestGroup = tests / "asides"
+            if  let tests:TestGroup = tests / "Asides"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -351,7 +356,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "formatting"
+            if  let tests:TestGroup = tests / "Formatting"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -378,9 +383,9 @@ enum Main:SyncTests
                     """)
             }
         }
-        if  let tests:TestGroup = tests / "blockquote"
+        if  let tests:TestGroup = tests / "Blockquote"
         {
-            if  let tests:TestGroup = tests / "literal"
+            if  let tests:TestGroup = tests / "Literal"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -401,7 +406,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "literal" / "colon"
+            if  let tests:TestGroup = tests / "Literal" / "Colon"
             {
                 //  Apostrophe will become a curly quote, due to cmark-gfm smart punctuation.
                 Self.run(tests: tests,
@@ -422,7 +427,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "asides"
+            if  let tests:TestGroup = tests / "Asides"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -465,7 +470,7 @@ enum Main:SyncTests
                     </aside>
                     """)
             }
-            if  let tests:TestGroup = tests / "formatting"
+            if  let tests:TestGroup = tests / "Formatting"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -488,7 +493,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "capitalization"
+            if  let tests:TestGroup = tests / "Capitalization"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -510,7 +515,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "wordbreaks"
+            if  let tests:TestGroup = tests / "Wordbreaks"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -549,7 +554,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "standalone"
+            if  let tests:TestGroup = tests / "Standalone"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -570,7 +575,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "parameters"
+            if  let tests:TestGroup = tests / "Parameters"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -592,7 +597,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "parameter" / "one"
+            if  let tests:TestGroup = tests / "Parameter" / "One"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -617,7 +622,7 @@ enum Main:SyncTests
                     <p>Details details details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "parameter" / "many"
+            if  let tests:TestGroup = tests / "Parameter" / "Many"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -650,7 +655,7 @@ enum Main:SyncTests
                     <p>Even more details</p>
                     """)
             }
-            if  let tests:TestGroup = tests / "parameter" / "formatting"
+            if  let tests:TestGroup = tests / "Parameter" / "Formatting"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -676,7 +681,7 @@ enum Main:SyncTests
                     """)
             }
         }
-        if  let tests:TestGroup = tests / "multiple-list-items"
+        if  let tests:TestGroup = tests / "MultipleListItems"
         {
             let html:String =
             """
@@ -700,7 +705,7 @@ enum Main:SyncTests
             </aside>\
             <p>Details details details</p>
             """
-            if  let tests:TestGroup = tests / "basic"
+            if  let tests:TestGroup = tests / "Basic"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -719,7 +724,7 @@ enum Main:SyncTests
                     """,
                     expected: html)
             }
-            if  let tests:TestGroup = tests / "interlopers"
+            if  let tests:TestGroup = tests / "Interlopers"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -738,7 +743,7 @@ enum Main:SyncTests
                     """,
                     expected: html)
             }
-            if  let tests:TestGroup = tests / "reordering"
+            if  let tests:TestGroup = tests / "Reordering"
             {
                 Self.run(tests: tests,
                     markdown:
@@ -756,6 +761,163 @@ enum Main:SyncTests
                     Details details details
                     """,
                     expected: html)
+            }
+        }
+        if  let tests:TestGroup = tests / "Topics"
+        {
+            let html:String =
+            """
+            <p>Overview overview overview</p>
+            <h2>Discussion</h2>\
+            <p>Details details details</p>
+            """
+            if  let tests:TestGroup = tests / "OneList" / "OneTopic" / "Middle"
+            {
+                Self.run(tests: tests,
+                    markdown:
+                    """
+                    Overview overview overview
+
+                    ## Topics
+
+                    ### Chase Icon
+
+                    -   ``StopIt``
+                    -   ``DropIt``
+                    -   <doc:GetAnotherTopic>
+
+                    ## Discussion
+
+                    Details details details
+                    """,
+                    expected: html,
+                    topics: [3])
+            }
+            if  let tests:TestGroup = tests / "OneList" / "OneTopic" / "End"
+            {
+                Self.run(tests: tests,
+                    markdown:
+                    """
+                    Overview overview overview
+
+                    ## Discussion
+
+                    Details details details
+
+                    ## Topics
+
+                    ### Chase Icon
+
+                    -   ``StopIt``
+                    -   ``DropIt``
+                    -   <doc:GetAnotherTopic>
+                    """,
+                    expected: html,
+                    topics: [3])
+            }
+            if  let tests:TestGroup = tests / "OneList" / "ManyTopics"
+            {
+                Self.run(tests: tests,
+                    markdown:
+                    """
+                    Overview overview overview
+
+                    ## Discussion
+
+                    Details details details
+
+                    ## Topics
+
+                    ### Chase Icon
+
+                    -   ``StopIt``
+                    -   ``DropIt``
+                    -   <doc:GetAnotherTopic>
+
+                    ### Taylor Swift
+
+                    -   ``WeAreNeverEverGettingBackTogether``
+                    -   ``AllTooWell``
+
+                    """,
+                    expected: html,
+                    topics: [3, 2])
+            }
+            if  let tests:TestGroup = tests / "ManyLists"
+            {
+                Self.run(tests: tests,
+                    markdown:
+                    """
+                    Overview overview overview
+
+                    ## Topics
+
+                    ### Dua Lipa
+
+                    -   ``DanceTheNight``
+
+                    ## Discussion
+
+                    Details details details
+
+                    ## Topics
+
+                    ### Chase Icon
+
+                    -   ``StopIt``
+                    -   ``DropIt``
+                    -   <doc:GetAnotherTopic>
+
+                    ### Taylor Swift
+
+                    -   ``WeAreNeverEverGettingBackTogether``
+                    -   ``AllTooWell``
+
+                    """,
+                    expected: html,
+                    topics: [1, 3, 2])
+            }
+            if  let tests:TestGroup = tests / "ManyLists" / "Discussions"
+            {
+                Self.run(tests: tests,
+                    markdown:
+                    """
+                    Overview overview overview
+
+                    ## Topics
+
+                    ### Dua Lipa
+
+                    Selected songs by Dua Lipa
+
+                    -   ``DanceTheNight``
+
+                    ## Discussion
+
+                    Details details details
+
+                    ## Topics
+
+                    ### Chase Icon
+
+                    Selected songs by Chase Icon
+
+                    -   ``StopIt``
+                    -   ``DropIt``
+                    -   <doc:GetAnotherTopic>
+
+                    ### Taylor Swift
+
+                    Selected songs by Taylor Swift
+
+                    >   Note: These are from the original Red album.
+
+                    -   ``WeAreNeverEverGettingBackTogether``
+                    -   ``AllTooWell``
+
+                    """,
+                    expected: html,
+                    topics: [1, 3, 2])
             }
         }
     }

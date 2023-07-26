@@ -18,12 +18,6 @@ struct MarkdownDocumentationSupplement
 extension MarkdownDocumentationSupplement:MarkdownModel
 {
     public
-    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
-    {
-        try self.article.visit(yield)
-    }
-
-    public
     init(parser parse:() -> [MarkdownBlock])
     {
         let blocks:[MarkdownBlock] = parse()

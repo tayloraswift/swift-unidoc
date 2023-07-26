@@ -24,7 +24,7 @@ extension MarkdownSemanticPrefix
     static
     func extract(from blocks:inout [MarkdownBlock]) rethrows -> Self?
     {
-        guard let paragraph:MarkdownBlock.Paragraph = blocks.first as? MarkdownBlock.Paragraph
+        guard case (let paragraph as MarkdownBlock.Paragraph)? = blocks.first
         else
         {
             return nil

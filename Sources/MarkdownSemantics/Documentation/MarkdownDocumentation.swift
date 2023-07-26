@@ -7,23 +7,19 @@ struct MarkdownDocumentation
     var overview:MarkdownBlock.Paragraph?
     public
     var details:Details
+    public
+    var topics:[Topic]
 
     public
-    init(overview:MarkdownBlock.Paragraph?, details:Details)
+    init(overview:MarkdownBlock.Paragraph?, details:Details, topics:[Topic])
     {
         self.overview = overview
         self.details = details
+        self.topics = topics
     }
 }
 extension MarkdownDocumentation:MarkdownModel
 {
-    public
-    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
-    {
-        try self.overview.map(yield)
-        try self.details.visit(yield)
-    }
-
     public
     init(parser parse:() -> [MarkdownBlock])
     {
@@ -37,7 +33,7 @@ extension MarkdownDocumentation
         var parameters:(discussion:[MarkdownBlock], list:[MarkdownBlock.Parameter]) = ([], [])
         var returns:[MarkdownBlock] = []
         var `throws`:[MarkdownBlock] = []
-        var article:[MarkdownBlock] = []
+        var interpreter:MarkdownInterpreter = .init()
 
         for block:MarkdownBlock in blocks
         {
@@ -85,20 +81,20 @@ extension MarkdownDocumentation
                         `throws` += item.elements
 
                     case .keywords(let aside):
-                        article.append(aside(item.elements))
+                        interpreter.append(aside(item.elements))
                     }
                 }
                 if !items.isEmpty
                 {
                     list.elements = items
-                    article.append(list)
+                    interpreter.append(list)
                 }
 
             case let quote as MarkdownBlock.Quote:
                 guard let prefix:MarkdownBlockPrefix = .extract(from: &quote.elements)
                 else
                 {
-                    article.append(quote)
+                    interpreter.append(quote)
                     continue
                 }
                 switch prefix
@@ -117,13 +113,18 @@ extension MarkdownDocumentation
                     `throws` += quote.elements
 
                 case .keywords(let aside):
-                    article.append(aside(quote.elements))
+                    interpreter.append(aside(quote.elements))
                 }
 
             case let block:
-                article.append(block)
+                interpreter.append(block)
             }
         }
+
+        var article:[MarkdownBlock]
+        let topics:[MarkdownDocumentation.Topic]
+
+        (article, topics) = interpreter.load()
 
         let overview:MarkdownBlock.Paragraph?
         switch article.first
@@ -137,10 +138,11 @@ extension MarkdownDocumentation
         }
 
         self.init(overview: overview, details: .init(
-            parameters: parameters.discussion.isEmpty && parameters.list.isEmpty ?
-                nil : .init(parameters.discussion, list: parameters.list),
-            returns: returns.isEmpty ? nil : .init(returns),
-            throws: `throws`.isEmpty ? nil : .init(`throws`),
-            article: article))
+                parameters: parameters.discussion.isEmpty && parameters.list.isEmpty ?
+                    nil : .init(parameters.discussion, list: parameters.list),
+                returns: returns.isEmpty ? nil : .init(returns),
+                throws: `throws`.isEmpty ? nil : .init(`throws`),
+                article: article),
+            topics: topics)
     }
 }
