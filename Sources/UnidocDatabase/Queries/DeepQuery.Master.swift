@@ -1,19 +1,19 @@
-import BSONEncoding
+import MongoSchema
 
 extension DeepQuery
 {
     struct Master
     {
-        let key:BSON.Key
+        let path:Mongo.KeyPath
 
-        init(in key:BSON.Key)
+        init(in path:Mongo.KeyPath)
         {
-            self.key = key
+            self.path = path
         }
     }
 }
 extension DeepQuery.Master
 {
-    var scalars:Scalars { .init(in: self.key) }
-    var zones:Zones { .init(in: self.key) }
+    var scalars:Scalars { .init(in: self.path) }
+    var zones:Zones { .init(in: self.path) }
 }

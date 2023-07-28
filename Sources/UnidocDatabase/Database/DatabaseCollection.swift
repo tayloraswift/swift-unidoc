@@ -71,25 +71,11 @@ extension DatabaseCollection<Unidoc.Scalar>
         }
     }
 }
-extension DatabaseCollection<Unidoc.Scalar>
-{
-    func insert(_ elements:Records.Masters, with session:Mongo.Session) async throws
-    {
-        try await self.insert(count: elements.count, elements, with: session)
-    }
-}
 extension DatabaseCollection
 {
     func insert(
-        _ elements:__owned some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
-        with session:Mongo.Session) async throws
-    {
-        try await self.insert(count: elements.count, elements, with: session)
-    }
-
-    private
-    func insert(count:Int,
-        _ elements:__owned some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        _ elements:
+            __owned some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws
     {
         let response:Mongo.InsertResponse = try await session.run(
@@ -101,7 +87,7 @@ extension DatabaseCollection
             },
             against: self.database)
 
-        if  response.inserted != count
+        if  response.inserted != elements.count
         {
             throw response.error
         }

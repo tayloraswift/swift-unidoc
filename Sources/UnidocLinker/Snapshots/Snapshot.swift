@@ -68,9 +68,6 @@ extension Snapshot
         //  Computed field, outlined for MongoDB’s convenience.
         case stable = "S"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Snapshot:BSONDocumentEncodable
 {

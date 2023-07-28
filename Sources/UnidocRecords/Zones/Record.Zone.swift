@@ -101,9 +101,6 @@ extension Record.Zone
         /// the database according to the value of the ``patch`` field.
         case latest = "L"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Zone:BSONDocumentEncodable
 {

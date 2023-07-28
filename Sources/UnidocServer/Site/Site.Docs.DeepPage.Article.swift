@@ -7,20 +7,19 @@ extension Site.Docs.DeepPage
 {
     struct Article
     {
-        let master:Record.Master.Article
-        let extensions:[Record.Extension]
-
         private
         let inliner:Inliner
         private
         let path:QualifiedPath
 
-        init(_ master:Record.Master.Article,
-            extensions:[Record.Extension],
-            inliner:Inliner)
+        let master:Record.Master.Article
+        let groups:[Record.Group]
+
+
+        init(_ inliner:Inliner, master:Record.Master.Article, groups:[Record.Group])
         {
             self.master = master
-            self.extensions = extensions
+            self.groups = groups
             self.inliner = inliner
             self.path = .init(splitting: self.master.stem)
         }

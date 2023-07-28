@@ -7,12 +7,12 @@ extension Tabulator.Library
     struct Extensions
     {
         private(set)
-        var concrete:[Record.Extension]
+        var concrete:[Record.Group.Extension]
         private(set)
-        var generic:[Record.Extension]
+        var generic:[Record.Group.Extension]
 
         private
-        init(concrete:[Record.Extension] = [], generic:[Record.Extension] = [])
+        init(concrete:[Record.Group.Extension] = [], generic:[Record.Group.Extension] = [])
         {
             self.concrete = concrete
             self.generic = generic
@@ -22,13 +22,13 @@ extension Tabulator.Library
 extension Tabulator.Library.Extensions
 {
     init(
-        partitioning extensions:__shared [Record.Extension],
+        partitioning extensions:__shared [Record.Group.Extension],
         generics:__shared [GenericParameter])
     {
         self.init()
 
         let generics:Set<String> = generics.reduce(into: []) { $0.insert($1.name) }
-        for `extension`:Record.Extension in extensions
+        for `extension`:Record.Group.Extension in extensions
         {
             var substituted:Int = 0
             for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions

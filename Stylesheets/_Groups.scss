@@ -1,5 +1,5 @@
 //  Generic constraints
-section.extension code.constraints
+section.group code.constraints
 {
     line-height: 1.6rem;
     color: $light-swift;
@@ -26,7 +26,7 @@ section.extension code.constraints
         }
     }
 }
-section.extension,
+section.group,
 section.superforms
 {
     ul
@@ -36,7 +36,7 @@ section.superforms
     }
     ul > li
     {
-        margin: 1.0rem 0 1.0rem 0;
+        margin: 0.5rem 0 0.5rem 0;
         padding: 0;
 
         a

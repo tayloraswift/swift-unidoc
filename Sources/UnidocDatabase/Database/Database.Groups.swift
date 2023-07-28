@@ -4,7 +4,7 @@ import UnidocRecords
 
 extension Database
 {
-    struct Extensions
+    struct Groups
     {
         let database:Mongo.Database
 
@@ -14,14 +14,14 @@ extension Database
         }
     }
 }
-extension Database.Extensions:DatabaseCollection
+extension Database.Groups:DatabaseCollection
 {
     typealias ElementID = Unidoc.Scalar
 
     static
-    var name:Mongo.Collection { "extensions" }
+    var name:Mongo.Collection { "groups" }
 }
-extension Database.Extensions
+extension Database.Groups
 {
     func setup(with session:Mongo.Session) async throws
     {
@@ -33,25 +33,21 @@ extension Database.Extensions
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Extension[.id]),\(Record.Extension[.latest]))
-                        """
+                        $0[.name] = "id"
                         $0[.key] = .init
                         {
-                            $0[Record.Extension[.id]] = (+)
-                            $0[Record.Extension[.latest]] = (-)
+                            $0[Record.Group[.id]] = (+)
+                            $0[Record.Group[.latest]] = (-)
                         }
                     },
                     .init
                     {
                         $0[.unique] = false
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Extension[.scope]),\(Record.Extension[.latest]))
-                        """
+                        $0[.name] = "scope"
                         $0[.key] = .init
                         {
-                            $0[Record.Extension[.scope]] = (+)
-                            $0[Record.Extension[.latest]] = (-)
+                            $0[Record.Group[.scope]] = (+)
+                            $0[Record.Group[.latest]] = (-)
                         }
                     },
                 ]),
@@ -60,7 +56,7 @@ extension Database.Extensions
         assert(response.indexesAfter == 3)
     }
 }
-extension Database.Extensions
+extension Database.Groups
 {
     func align(latest zone:Unidoc.Zone,
         with session:Mongo.Session,
@@ -98,15 +94,15 @@ extension Database.Extensions
                         {
                             $0.append
                             {
-                                $0[Record.Extension[.id]] = .init { $0[.gte] = zone.min }
+                                $0[Record.Group[.id]] = .init { $0[.gte] = zone.min }
                             }
                             $0.append
                             {
-                                $0[Record.Extension[.id]] = .init { $0[.lte] = zone.max }
+                                $0[Record.Group[.id]] = .init { $0[.lte] = zone.max }
                             }
                             $0.append
                             {
-                                $0[Record.Extension[.latest]] = .init { $0[.ne] = true }
+                                $0[Record.Group[.latest]] = .init { $0[.ne] = true }
                             }
                         }
                     }
@@ -114,7 +110,7 @@ extension Database.Extensions
                     {
                         $0[.set] = .init
                         {
-                            $0[Record.Extension[.latest]] = true
+                            $0[Record.Group[.latest]] = true
                         }
                     }
                 },
@@ -131,11 +127,11 @@ extension Database.Extensions
 
                             $0.append
                             {
-                                $0[Record.Extension[.id]] = .init { $0[.gte] = cell.min.min }
+                                $0[Record.Group[.id]] = .init { $0[.gte] = cell.min.min }
                             }
                             $0.append
                             {
-                                $0[Record.Extension[.id]] = .init { $0[.lte] = cell.max.max }
+                                $0[Record.Group[.id]] = .init { $0[.lte] = cell.max.max }
                             }
                             $0.append
                             {
@@ -143,17 +139,17 @@ extension Database.Extensions
                                 {
                                     $0.append
                                     {
-                                        $0[Record.Extension[.id]] = .init { $0[.lt] = zone.min }
+                                        $0[Record.Group[.id]] = .init { $0[.lt] = zone.min }
                                     }
                                     $0.append
                                     {
-                                        $0[Record.Extension[.id]] = .init { $0[.gt] = zone.max }
+                                        $0[Record.Group[.id]] = .init { $0[.gt] = zone.max }
                                     }
                                 }
                             }
                             $0.append
                             {
-                                $0[Record.Extension[.latest]] = .init { $0[.exists] = true }
+                                $0[Record.Group[.latest]] = .init { $0[.exists] = true }
                             }
                         }
                     }
@@ -161,7 +157,7 @@ extension Database.Extensions
                     {
                         $0[.unset] = .init
                         {
-                            $0[Record.Extension[.latest]] = ()
+                            $0[Record.Group[.latest]] = ()
                         }
                     }
                 }

@@ -29,8 +29,8 @@ extension Database
     @inlinable public
     var snapshots:Snapshots { .init(database: self.id) }
 
-    var extensions:Extensions { .init(database: self.id) }
     var masters:Masters { .init(database: self.id) }
+    var groups:Groups { .init(database: self.id) }
     var zones:Zones { .init(database: self.id) }
 }
 extension Database
@@ -46,13 +46,13 @@ extension Database
     private
     func setup(with session:Mongo.Session) async throws
     {
-        try await self.packages.setup(with: session)
-        try await self.snapshots.setup(with: session)
-
         do
         {
-            try await self.extensions.setup(with: session)
+            try await self.packages.setup(with: session)
+            try await self.snapshots.setup(with: session)
+
             try await self.masters.setup(with: session)
+            try await self.groups.setup(with: session)
             try await self.zones.setup(with: session)
         }
         catch let error
@@ -86,8 +86,8 @@ extension Database
         //  overflows the transaction cache.
         let zones:[Unidoc.Zone] = try await self.snapshots.list(with: session)
 
-        try await self.extensions.replace(with: session)
         try await self.masters.replace(with: session)
+        try await self.groups.replace(with: session)
         try await self.zones.replace(with: session)
 
         for zone:Unidoc.Zone in zones
@@ -169,15 +169,15 @@ extension Database
 
         if  records.zone.latest
         {
-            try await self.extensions.insert(records.extensions(latest: true), with: session)
+            try await self.groups.insert(records.groups(latest: true), with: session)
         }
         else
         {
-            try await self.extensions.insert(records.extensions, with: session)
+            try await self.groups.insert(records.groups, with: session)
         }
         if  let latest:Unidoc.Zone = records.latest
         {
-            try await self.extensions.align(latest: latest, with: session)
+            try await self.groups.align(latest: latest, with: session)
             try await self.zones.align(latest: latest, with: session)
         }
     }

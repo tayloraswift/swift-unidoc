@@ -1,27 +1,29 @@
 import BSONEncoding
+import UnidocRecords
 
 extension Records
 {
     @frozen public
-    struct Extensions<Latest> where Latest:BSONEncodable
+    struct Groups<Latest> where Latest:BSONEncodable
     {
         @usableFromInline internal
-        let base:[Record.Extension]
+        let base:[Record.Group]
+
         public
         let latest:Latest
 
         @inlinable internal
-        init(_ base:[Record.Extension], latest:Latest)
+        init(_ base:[Record.Group], latest:Latest)
         {
             self.base = base
             self.latest = latest
         }
     }
 }
-extension Records.Extensions:Sendable where Latest:Sendable
+extension Records.Groups:Sendable where Latest:Sendable
 {
 }
-extension Records.Extensions:RandomAccessCollection
+extension Records.Groups:RandomAccessCollection
 {
     @inlinable public
     var startIndex:Int { self.base.startIndex }

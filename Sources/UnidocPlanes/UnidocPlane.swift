@@ -9,6 +9,7 @@ enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
     //  never appears in a symbol graph.
     case `extension`    = 0x81_000000
     case  file          = 0x82_000000
+    case  topic         = 0x83_000000
 
     case  zone          = 0xFF_000000
 }
@@ -22,11 +23,12 @@ extension UnidocPlane:Comparable
 }
 extension UnidocPlane
 {
-    @inlinable internal static
+    @inlinable public static
     func of(_ scalar:Int32) -> Self?
     {
         self.init(rawValue: .init(bitPattern: scalar) & 0xFF_000000)
     }
+
     @inlinable public static
     func | (self:Self, significand:Int32) -> Int32
     {

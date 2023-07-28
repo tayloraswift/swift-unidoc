@@ -34,9 +34,7 @@ extension Database.Zones
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Zone[.id]),\(Record.Zone[.latest]))
-                        """
+                        $0[.name] = "id,latest"
 
                         $0[.key] = .init
                         {
@@ -47,9 +45,7 @@ extension Database.Zones
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Zone[.id]),\(Record.Zone[.patch]))
-                        """
+                        $0[.name] = "id,patch"
 
                         $0[.key] = .init
                         {
@@ -64,9 +60,7 @@ extension Database.Zones
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Zone[.package]),\(Record.Zone[.patch]))
-                        """
+                        $0[.name] = "package,patch"
 
                         $0[.key] = .init
                         {
@@ -81,9 +75,7 @@ extension Database.Zones
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = """
-                        \(Self.name)(\(Record.Zone[.package]),\(Record.Zone[.version]))
-                        """
+                        $0[.name] = "package,version"
 
                         $0[.key] = .init
                         {

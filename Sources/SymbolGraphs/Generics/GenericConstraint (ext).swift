@@ -26,9 +26,6 @@ extension GenericConstraint
         case nominal = "N"
         case complex = "C"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
     where Scalar:BSONEncodable

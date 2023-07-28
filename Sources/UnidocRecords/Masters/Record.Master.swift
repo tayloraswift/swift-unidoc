@@ -138,9 +138,6 @@ extension Record.Master
         /// for ``Decl`` records.
         case hash = "H"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Master:BSONDocumentEncodable
 {

@@ -1,6 +1,5 @@
 import BSONEncoding
-import MongoBuiltins
-import MongoExpressions
+import MongoDB
 import Signatures
 import UnidocRecords
 import Unidoc
@@ -9,11 +8,11 @@ extension DeepQuery.Master
 {
     struct Scalars
     {
-        let key:BSON.Key
+        let path:Mongo.KeyPath
 
-        init(in key:BSON.Key)
+        init(in path:Mongo.KeyPath)
         {
-            self.key = key
+            self.path = path
         }
     }
 }
@@ -31,43 +30,33 @@ extension DeepQuery.Master.Scalars
         {
             list.expr
             {
-                $0[.coalesce] = ("$\(self.key / Record.Master[array])", [] as [Never])
+                $0[.coalesce] = (self.path / Record.Master[array], [] as [Never])
             }
         }
 
         list.append
         {
-            $0.append("$\(self.key / Record.Master[.namespace])")
-            $0.append("$\(self.key / Record.Master[.culture])")
-            $0.append("$\(self.key / Record.Master[.file])")
+            $0.append(self.path / Record.Master[.namespace])
+            $0.append(self.path / Record.Master[.culture])
+            $0.append(self.path / Record.Master[.file])
         }
 
         list.expr
         {
-            let constraint:DeepQuery.Variable<GenericConstraint<Unidoc.Scalar?>> = "self"
+            let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.KeyPath> =
+                .init(in: self.path / Record.Master[.signature_generics_constraints])
 
-            $0[.map] = .let(constraint)
-            {
-                $0[.input] = .expr
-                {
-                    $0[.coalesce] =
-                    (
-                        "$\(self.key / Record.Master[.signature_generics_constraints])",
-                        [] as [Never]
-                    )
-                }
-                $0[.in] = constraint.scalar
-            }
+            $0[.map] = constraints.map { $0[.nominal] }
         }
 
         for passage:Record.Master.CodingKey in [.overview, .details]
         {
             list.expr
             {
-                let outlines:DeepQuery.List<Record.Outline> = .init(
-                    in: self.key / Record.Master[passage] / Record.Passage[.outlines])
+                let outlines:Mongo.List<Record.Outline, Mongo.KeyPath> = .init(
+                    in: self.path / Record.Master[passage] / Record.Passage[.outlines])
 
-                $0[.reduce] = outlines.join(\.scalars)
+                $0[.reduce] = outlines.flatMap(\.scalars)
             }
         }
     }

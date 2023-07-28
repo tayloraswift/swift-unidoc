@@ -72,19 +72,13 @@ extension Site.Docs.DeepPage
             switch master
             {
             case .article(let master):
-                self = .article(.init(master,
-                    extensions: principal.extensions,
-                    inliner: inliner))
+                self = .article(.init(inliner, master: master, groups: principal.groups))
 
             case .culture(let master):
-                self = .culture(.init(master,
-                    extensions: principal.extensions,
-                    inliner: inliner))
+                self = .culture(.init(inliner, master: master, groups: principal.groups))
 
             case .decl(let master):
-                self = .decl(.init(master,
-                    extensions: principal.extensions,
-                    inliner: inliner))
+                self = .decl(.init(inliner, master: master, groups: principal.groups))
 
             case .file:
                 //  We should never get this as principal output!

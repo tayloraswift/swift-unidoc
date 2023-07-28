@@ -1,4 +1,5 @@
 import BSONDecoding
+import MongoSchema
 import UnidocRecords
 
 extension DeepQuery
@@ -22,7 +23,7 @@ extension DeepQuery
         }
     }
 }
-extension DeepQuery.Output
+extension DeepQuery.Output:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String
@@ -31,9 +32,6 @@ extension DeepQuery.Output
         case secondary
         case zones
     }
-
-    static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension DeepQuery.Output:BSONDocumentDecodable
 {

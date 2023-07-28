@@ -8,34 +8,43 @@ extension Site.Docs.DeepPage
 {
     struct Culture
     {
+        private
+        let tabulator:Tabulator
         let master:Record.Master.Culture
-        let extensions:[Record.Extension]
 
         private
-        let inliner:Inliner
-
-        init(_ master:Record.Master.Culture,
-            extensions:[Record.Extension],
-            inliner:Inliner)
+        init(tabulator:Tabulator, master:Record.Master.Culture)
         {
+            self.tabulator = tabulator
             self.master = master
-            self.extensions = extensions
-            self.inliner = inliner
         }
     }
 }
 extension Site.Docs.DeepPage.Culture
 {
-    var zone:Record.Zone.Names
+    init(_ inliner:Inliner, master:Record.Master.Culture, groups:[Record.Group])
     {
-        self.inliner.zones.principal.zone
+        self.init(
+            tabulator: .init(inliner, generics: [], groups: groups),
+            master: master)
     }
+}
+extension Site.Docs.DeepPage.Culture
+{
+    private
+    var inliner:Inliner { self.tabulator.inliner }
 
     var location:URI
     {
         .init(culture: self.master, in: self.zone)
     }
-
+    var zone:Record.Zone.Names
+    {
+        self.inliner.zones.principal.zone
+    }
+}
+extension Site.Docs.DeepPage.Culture
+{
     var title:String
     {
         """
@@ -77,5 +86,7 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
 
         html[.section] { $0.class = "details" } =
             self.master.details.map(self.inliner.passage(_:))
+
+        html += self.tabulator
     }
 }

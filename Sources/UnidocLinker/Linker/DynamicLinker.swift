@@ -22,6 +22,9 @@ struct DynamicLinker
     var errors:[any DynamicLinkerError]
 
     private
+    var topic:Unidoc.Counter<UnidocPlane.Topic>
+
+    private
     init(context:DynamicContext,
         conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Unidoc.Scalar>>,
         extensions:Extensions,
@@ -34,6 +37,8 @@ struct DynamicLinker
         self.projection = .init(zone: .init(context.current.snapshot.zone,
             metadata: context.current.snapshot.metadata))
         self.errors = errors
+
+        self.topic = .init(zone: context.current.zone)
     }
 }
 extension DynamicLinker
@@ -63,12 +68,20 @@ extension DynamicLinker
 
         self.link(groups: groups)
 
-        self.projection.extensions = self.extensions.records(context: context)
-        self.projection.files = zip(
+        for (f, file):(Int32, Symbol.File) in zip(
             context.current.graph.files.indices,
-            context.current.graph.files).map
+            context.current.graph.files)
         {
-            .init(id: context.current.zone + $0.0, symbol: $0.1)
+            self.projection.masters.append(.file(.init(id: context.current.zone + f,
+                symbol: file)))
+        }
+
+        for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
+            where !`extension`.isEmpty
+        {
+            self.projection.groups.append(.extension(.init(signature: signature,
+                extension: `extension`,
+                context: context)))
         }
     }
 }
@@ -114,18 +127,29 @@ extension DynamicLinker
 
             var record:Record.Master.Culture = .init(id: culture, module: input.module)
 
+            var resolver:DynamicResolver = .init(context: self.context,
+                namespace: namespace,
+                group: group)
+
             if  let article:SymbolGraph.Article<Never> = input.article
             {
-                var resolver:DynamicResolver = .init(context: self.context,
-                    namespace: namespace,
-                    group: group)
-
                 (record.overview, record.details) = resolver.link(article: article)
-
-                self.errors += resolver.errors
             }
 
-            self.projection.cultures.append(record)
+            self.projection.masters.append(.culture(record))
+
+            for topic:SymbolGraph.Topic in input.topics
+            {
+                var record:Record.Group.Topic = .init(id: self.topic.id(),
+                    culture: culture,
+                    scope: culture)
+
+                (record.overview, record.members) = resolver.link(topic: topic)
+
+                self.projection.groups.append(.topic(record))
+            }
+
+            self.errors += resolver.errors
         }
     }
 }
@@ -159,7 +183,7 @@ extension DynamicLinker
 
             (record.overview, record.details) = resolver.link(article: article)
 
-            self.projection.articles.append(record)
+            self.projection.masters.append(.article(record))
             self.errors += resolver.errors
         }
     }
@@ -264,7 +288,7 @@ extension DynamicLinker
                 self.errors += resolver.errors
             }
 
-            self.projection.decls.append(record)
+            self.projection.masters.append(.decl(record))
         }
     }
 }

@@ -1,3 +1,4 @@
+import BSON
 import ModuleGraphs
 import MongoDB
 
@@ -31,10 +32,10 @@ extension Database.Packages
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] = "\(Self.name)(\(Registration[.address]))"
+                        $0[.name] = "cell"
                         $0[.key] = .init
                         {
-                            $0[Registration[.address]] = (-)
+                            $0[Registration[.cell]] = (-)
                         }
                     },
                 ]),
@@ -45,7 +46,7 @@ extension Database.Packages
 
     //  TODO: consider caching package identifier addresses?
 
-    /// Registers the given package identifier in the database, returning its address.
+    /// Registers the given package identifier in the database, returning its cell.
     /// This is really just a glorified string internment system.
     ///
     /// This function is very expensive. It only makes one query if the package is
@@ -80,7 +81,7 @@ extension Database.Packages
 
         if  let registered:Registration = registered.first
         {
-            return registered.address
+            return registered.cell
         }
 
         let unregistered:Registration = try await transaction.run(
@@ -91,7 +92,7 @@ extension Database.Packages
                     {
                         $0[.sort] = .init
                         {
-                            $0[Registration[.address]] = (-)
+                            $0[Registration[.cell]] = (-)
                         }
                     }
                     $0.stage
@@ -100,13 +101,10 @@ extension Database.Packages
                     }
                     $0.stage
                     {
-                        $0[.replaceWith] = .init
+                        $0[.replaceWith] = BSON.Document.init(Registration.CodingKey.self)
                         {
-                            $0[Registration[.id]] = package
-                            $0[Registration[.address]] = .expr
-                            {
-                                $0[.add] = ("$\(Registration[.address])", 1)
-                            }
+                            $0[.id] = package
+                            $0[.cell] = .expr { $0[.add] = (Registration[.cell], 1) }
                         }
                     }
                 },
@@ -114,14 +112,14 @@ extension Database.Packages
                 {
                     $0[.hint] = .init
                     {
-                        $0[Registration[.address]] = (-)
+                        $0[Registration[.cell]] = (-)
                     }
                 },
             against: self.database)
         {
             //  If there are no results, the collection is completely uninitialized,
             //  and we should start the count from zero.
-            try await $0.reduce(into: [], +=).first ?? .init(id: package, address: 0)
+            try await $0.reduce(into: [], +=).first ?? .init(id: package, cell: 0)
         }
 
         let response:Mongo.InsertResponse = try await transaction.run(
@@ -130,7 +128,7 @@ extension Database.Packages
 
         if  response.inserted == 1
         {
-            return unregistered.address
+            return unregistered.cell
         }
         else
         {
