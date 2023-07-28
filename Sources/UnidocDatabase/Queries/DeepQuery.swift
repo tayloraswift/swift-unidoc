@@ -233,6 +233,8 @@ extension DeepQuery
                 $0[.lookup] = .init
                 {
                     let id:Mongo.Variable<Unidoc.Scalar> = "id"
+
+                    let topic:Mongo.Variable<Unidoc.Scalar> = "topic"
                     let min:Mongo.Variable<Unidoc.Scalar> = "min"
                     let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
@@ -240,6 +242,8 @@ extension DeepQuery
                     $0[.let] = .init
                     {
                         $0[let: id] = Output.Principal[.master] / Record.Master[.id]
+
+                        $0[let: topic] = Output.Principal[.master] / Record.Master[.group]
                         $0[let: min] = Record.Zone[.planes_min]
                         $0[let: max] = Record.Zone[.planes_max]
                     }
@@ -247,7 +251,7 @@ extension DeepQuery
                     {
                         $0.stage
                         {
-                            $0[.match] = id.groups(min: min, max: max)
+                            $0[.match] = id.groups(min: min, max: max, or: topic)
                         }
                     }
                     $0[.as] = Output.Principal[.groups]

@@ -11,18 +11,18 @@ import UnidocRecords
 struct DynamicResolver
 {
     private
+    let diagnostics:DynamicLinkerDiagnostics
+    private
     let codelinks:CodelinkResolver<Unidoc.Scalar>
     private
     let context:DynamicContext
 
-    private(set)
-    var errors:[any DynamicLinkerError]
-
     private
-    init(codelinks:CodelinkResolver<Unidoc.Scalar>, context:DynamicContext)
+    init(diagnostics:DynamicLinkerDiagnostics,
+        codelinks:CodelinkResolver<Unidoc.Scalar>,
+        context:DynamicContext)
     {
-        self.errors = []
-
+        self.diagnostics = diagnostics
         self.codelinks = codelinks
         self.context = context
     }
@@ -30,13 +30,16 @@ struct DynamicResolver
 extension DynamicResolver
 {
     init(context:DynamicContext,
+        diagnostics:DynamicLinkerDiagnostics,
         namespace:ModuleIdentifier,
-        group:DynamicClientGroup,
+        clients:DynamicClientGroup,
         scope:[String] = [])
     {
-        self.init(codelinks: .init(table: group.codelinks, scope: .init(
+        self.init(
+            diagnostics: diagnostics,
+            codelinks: .init(table: clients.codelinks, scope: .init(
                 namespace: namespace,
-                imports: group.imports,
+                imports: clients.imports,
                 path: scope)),
             context: context)
     }
@@ -49,7 +52,6 @@ extension DynamicResolver
 
 extension DynamicResolver
 {
-    mutating
     func link(article:SymbolGraph.Article<some Any>) ->
     (
         overview:Record.Passage?,
@@ -67,7 +69,6 @@ extension DynamicResolver
         return (overview, details)
     }
 
-    mutating
     func link(topic:SymbolGraph.Topic) -> (overview:Record.Passage?, members:[Record.Link])
     {
         let overview:Record.Passage? = topic.overview.isEmpty ? nil : .init(
@@ -79,7 +80,7 @@ extension DynamicResolver
 }
 extension DynamicResolver
 {
-    private mutating
+    private
     func expand(_ outline:SymbolGraph.Outline) -> Record.Outline
     {
         var length:Int
@@ -145,7 +146,7 @@ extension DynamicResolver
         return .text("<unavailable>")
     }
 
-    private mutating
+    private
     func resolve(_ outline:SymbolGraph.Outline) -> Record.Link
     {
         switch outline.referent
@@ -195,7 +196,7 @@ extension DynamicResolver
         return .text("<unavailable>")
     }
 
-    private mutating
+    private
     func resolve(_ expression:String, at location:SourceLocation<Int32>?) ->
     (
         codelink:Codelink,
@@ -221,7 +222,7 @@ extension DynamicResolver
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.errors.append(InvalidAutolinkError<Unidoc.Scalar>.init(
+            self.diagnostics.errors.append(InvalidAutolinkError<Unidoc.Scalar>.init(
                 expression: expression,
                 context: context))
             return nil
@@ -230,7 +231,7 @@ extension DynamicResolver
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.errors.append(InvalidCodelinkError<Unidoc.Scalar>.init(
+            self.diagnostics.errors.append(InvalidCodelinkError<Unidoc.Scalar>.init(
                 overloads: overloads,
                 codelink: codelink,
                 context: context))

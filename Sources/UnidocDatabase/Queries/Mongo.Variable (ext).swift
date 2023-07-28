@@ -94,39 +94,49 @@ extension Mongo.Variable<Unidoc.Scalar>
     /// Returns a predicate that matches all extensions to the same scope as
     /// the value of this variable, and is either from the latest version of
     /// its home package, or has an ID between the given min and max.
-    func groups(min:Self, max:Self) -> Mongo.PredicateDocument
+    func groups(min:Self, max:Self, or topic:Self) -> Mongo.PredicateDocument
     {
         .init
         {
             $0[.expr] = .expr
             {
-                $0[.and] = .init
+                $0[.or] = .init
                 {
                     $0.expr
                     {
-                        $0[.eq] = (Record.Group[.scope], self)
+                        $0[.eq] = (Record.Group[.id], topic)
                     }
                     $0.expr
                     {
-                        $0[.or] = .init
+                        $0[.and] = .init
                         {
                             $0.expr
                             {
-                                $0[.and] = .init
-                                {
-                                    $0.expr
-                                    {
-                                        $0[.gte] = (Record.Group[.id], min)
-                                    }
-                                    $0.expr
-                                    {
-                                        $0[.lte] = (Record.Group[.id], max)
-                                    }
-                                }
+                                $0[.eq] = (Record.Group[.scope], self)
                             }
                             $0.expr
                             {
-                                $0[.eq] = (Record.Group[.latest], true)
+                                $0[.or] = .init
+                                {
+                                    $0.expr
+                                    {
+                                        $0[.and] = .init
+                                        {
+                                            $0.expr
+                                            {
+                                                $0[.gte] = (Record.Group[.id], min)
+                                            }
+                                            $0.expr
+                                            {
+                                                $0[.lte] = (Record.Group[.id], max)
+                                            }
+                                        }
+                                    }
+                                    $0.expr
+                                    {
+                                        $0[.eq] = (Record.Group[.latest], true)
+                                    }
+                                }
                             }
                         }
                     }

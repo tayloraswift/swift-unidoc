@@ -35,10 +35,12 @@ extension Record.Master
         public
         let scope:[Unidoc.Scalar]
         public
-        let file:Unidoc.Scalar?
+        var group:Unidoc.Scalar?
+        public
+        var file:Unidoc.Scalar?
         //  TODO: consider combining this into flags.
         public
-        let position:SourcePosition?
+        var position:SourcePosition?
         public
         var overview:Record.Passage?
         public
@@ -59,7 +61,8 @@ extension Record.Master
             file:Unidoc.Scalar? = nil,
             position:SourcePosition? = nil,
             overview:Record.Passage? = nil,
-            details:Record.Passage? = nil)
+            details:Record.Passage? = nil,
+            group:Unidoc.Scalar? = nil)
         {
             self.id = id
             self.customization = customization
@@ -75,9 +78,11 @@ extension Record.Master
             self.culture = culture
             self.scope = scope
             self.file = file
+
             self.position = position
             self.overview = overview
             self.details = details
+            self.group = group
         }
     }
 }

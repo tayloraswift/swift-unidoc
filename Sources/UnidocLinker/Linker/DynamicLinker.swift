@@ -13,31 +13,36 @@ struct DynamicLinker
     /// Protocol conformances for each declaration in the **current** snapshot.
     private
     let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Unidoc.Scalar>>
+    private
+    let diagnostics:DynamicLinkerDiagnostics
 
     private
     var extensions:Extensions
     public private(set)
     var projection:Records
-    public private(set)
-    var errors:[any DynamicLinkerError]
 
+    /// Maps masters to groups.
+    private
+    var topics:[Int32: Unidoc.Scalar]
     private
     var topic:Unidoc.Counter<UnidocPlane.Topic>
 
     private
     init(context:DynamicContext,
         conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Unidoc.Scalar>>,
-        extensions:Extensions,
-        errors:[any DynamicLinkerError])
+        diagnostics:DynamicLinkerDiagnostics,
+        extensions:Extensions)
     {
         self.context = context
+
         self.conformances = conformances
+        self.diagnostics = diagnostics
 
         self.extensions = extensions
         self.projection = .init(zone: .init(context.current.snapshot.zone,
             metadata: context.current.snapshot.metadata))
-        self.errors = errors
 
+        self.topics = [:]
         self.topic = .init(zone: context.current.zone)
     }
 }
@@ -46,10 +51,10 @@ extension DynamicLinker
     public
     init(context:DynamicContext)
     {
-        let groups:[DynamicClientGroup] = context.groups()
+        let clients:[DynamicClientGroup] = context.groups()
 
+        let diagnostics:DynamicLinkerDiagnostics = .init()
         var extensions:Extensions = .init(zone: context.current.zone)
-        var errors:[any DynamicLinkerError] = []
 
         let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances> =
             context.current.graph.nodes.map
@@ -57,17 +62,18 @@ extension DynamicLinker
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
                 extending: $0,
                 context: context,
-                groups: groups,
-                errors: &errors)
+                clients: clients,
+                diagnostics: diagnostics)
         }
 
         self.init(context: context,
             conformances: conformances,
-            extensions: extensions,
-            errors: errors)
+            diagnostics: diagnostics,
+            extensions: extensions)
 
-        self.link(groups: groups)
+        self.link(clients: clients)
 
+        //  Create file records.
         for (f, file):(Int32, Symbol.File) in zip(
             context.current.graph.files.indices,
             context.current.graph.files)
@@ -75,7 +81,7 @@ extension DynamicLinker
             self.projection.masters.append(.file(.init(id: context.current.zone + f,
                 symbol: file)))
         }
-
+        //  Create extension records.
         for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
             where !`extension`.isEmpty
         {
@@ -87,22 +93,44 @@ extension DynamicLinker
 }
 extension DynamicLinker
 {
+    public
+    var errors:[any DynamicLinkerError] { self.diagnostics.errors }
+
     var current:SnapshotObject { self.context.current }
 }
 extension DynamicLinker
 {
     private mutating
-    func link(groups:[DynamicClientGroup])
+    func link(clients:[DynamicClientGroup])
     {
-        for ((c, input), group):
+        //  First pass to create the topic records, which also populates topic memberships.
+        for ((culture, input), clients):
             ((Int, SymbolGraph.Culture), DynamicClientGroup) in zip(zip(
                 self.current.graph.cultures.indices,
                 self.current.graph.cultures),
-            groups)
+            clients)
         {
-            let namespace:ModuleIdentifier = self.current.graph.namespaces[c]
-            let culture:Unidoc.Scalar = self.current.zone + c * .module
+            let namespace:ModuleIdentifier = self.current.graph.namespaces[culture]
+            let culture:Unidoc.Scalar = self.current.zone + culture * .module
 
+            //  Create topic records.
+            self.link(topics: input.topics, under: (culture, namespace), in: clients)
+        }
+
+        //  Second pass to create various master records, which reads from the ``topics``.
+        for ((culture, input), clients):
+            ((Int, SymbolGraph.Culture), DynamicClientGroup) in zip(zip(
+                self.current.graph.cultures.indices,
+                self.current.graph.cultures),
+            clients)
+        {
+            let namespace:ModuleIdentifier = self.current.graph.namespaces[culture]
+            let culture:Unidoc.Scalar = self.link(culture: input,
+                under: namespace,
+                index: culture,
+                in: clients)
+
+            //  Create decl records.
             for decls:SymbolGraph.Namespace in input.namespaces
             {
                 let namespace:ModuleIdentifier = self.current.graph.namespaces[decls.index]
@@ -110,7 +138,7 @@ extension DynamicLinker
                 guard let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
                 else
                 {
-                    self.errors.append(DroppedExtensionsError.decls(of: namespace,
+                    self.diagnostics.errors.append(DroppedExtensionsError.decls(of: namespace,
                         count: decls.range.count))
                     continue
                 }
@@ -118,43 +146,79 @@ extension DynamicLinker
                 self.link(decls: decls.range,
                     under: (n, namespace),
                     of: culture,
-                    in: group)
+                    in: clients)
             }
+            //  Create article records.
             if  let articles:ClosedRange<Int32> = input.articles
             {
-                self.link(articles: articles, under: (culture, namespace), in: group)
+                self.link(articles: articles, under: (culture, namespace), in: clients)
             }
-
-            var record:Record.Master.Culture = .init(id: culture, module: input.module)
-
-            var resolver:DynamicResolver = .init(context: self.context,
-                namespace: namespace,
-                group: group)
-
-            if  let article:SymbolGraph.Article<Never> = input.article
-            {
-                (record.overview, record.details) = resolver.link(article: article)
-            }
-
-            self.projection.masters.append(.culture(record))
-
-            for topic:SymbolGraph.Topic in input.topics
-            {
-                var record:Record.Group.Topic = .init(id: self.topic.id(),
-                    culture: culture,
-                    scope: culture)
-
-                (record.overview, record.members) = resolver.link(topic: topic)
-
-                self.projection.groups.append(.topic(record))
-            }
-
-            self.errors += resolver.errors
         }
     }
 }
 extension DynamicLinker
 {
+    private mutating
+    func link(topics:[SymbolGraph.Topic],
+        under namespace:
+        (
+            scalar:Unidoc.Scalar,
+            id:ModuleIdentifier
+        ),
+        in clients:DynamicClientGroup)
+    {
+        let resolver:DynamicResolver = .init(context: self.context,
+            diagnostics: self.diagnostics,
+            namespace: namespace.id,
+            clients: clients)
+
+        for topic:SymbolGraph.Topic in topics
+        {
+            var record:Record.Group.Topic = .init(id: self.topic.id(),
+                culture: namespace.scalar,
+                scope: namespace.scalar)
+
+            (record.overview, record.members) = resolver.link(topic: topic)
+
+            self.projection.groups.append(.topic(record))
+
+            for case .scalar(let master) in record.members
+            {
+                //  TODO: diagnose overlapping topics
+                if  let local:Int32 = master - self.current.zone
+                {
+                    self.topics[local] = record.id
+                }
+            }
+        }
+    }
+}
+extension DynamicLinker
+{
+    private mutating
+    func link(culture:SymbolGraph.Culture,
+        under namespace:ModuleIdentifier,
+        index c:Int,
+        in clients:DynamicClientGroup) -> Unidoc.Scalar
+    {
+        let resolver:DynamicResolver = .init(context: self.context,
+            diagnostics: self.diagnostics,
+            namespace: namespace,
+            clients: clients)
+
+        var record:Record.Master.Culture = .init(id: self.current.zone + c * .module,
+            module: culture.module,
+            group: self.topics.removeValue(forKey: c * .module))
+
+        if  let article:SymbolGraph.Article<Never> = culture.article
+        {
+            (record.overview, record.details) = resolver.link(article: article)
+        }
+
+        self.projection.masters.append(.culture(record))
+        return record.id
+    }
+
     private mutating
     func link(articles range:ClosedRange<Int32>,
         under namespace:
@@ -162,8 +226,13 @@ extension DynamicLinker
             scalar:Unidoc.Scalar,
             id:ModuleIdentifier
         ),
-        in group:DynamicClientGroup)
+        in clients:DynamicClientGroup)
     {
+        let resolver:DynamicResolver = .init(context: self.context,
+            diagnostics: self.diagnostics,
+            namespace: namespace.id,
+            clients: clients)
+
         for (a, article):(Int32, SymbolGraph.Article<String>) in zip(
             self.current.graph.articles[range].indices,
             self.current.graph.articles[range])
@@ -177,15 +246,12 @@ extension DynamicLinker
             var record:Record.Master.Article = .init(id: self.current.zone + a,
                 stem: .init(namespace.id, name),
                 culture: namespace.scalar,
-                headline: article.headline)
-            var resolver:DynamicResolver = .init(context: self.context,
-                namespace: namespace.id,
-                group: group)
+                headline: article.headline,
+                group: self.topics.removeValue(forKey: a))
 
             (record.overview, record.details) = resolver.link(article: article)
 
             self.projection.masters.append(.article(record))
-            self.errors += resolver.errors
         }
     }
 
@@ -197,7 +263,7 @@ extension DynamicLinker
             id:ModuleIdentifier
         ),
         of culture:Unidoc.Scalar,
-        in group:DynamicClientGroup)
+        in clients:DynamicClientGroup)
     {
         for (d, ((symbol, node), conformances)):
             (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances<Unidoc.Scalar>)) in
@@ -206,6 +272,7 @@ extension DynamicLinker
                     self.current.graph.nodes[range]),
                 self.conformances[range]))
         {
+            let group:Unidoc.Scalar? = self.topics.removeValue(forKey: d)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
             //  Ceremonial unwraps, should always succeed since we are only iterating
@@ -275,18 +342,18 @@ extension DynamicLinker
                 culture: culture,
                 scope: scope.map { self.context.expand($0) } ?? [],
                 file: decl.location.map { self.current.zone + $0.file },
-                position: decl.location?.position)
+                position: decl.location?.position,
+                group: group)
 
             if  let article:SymbolGraph.Article<Never> = decl.article
             {
-                var resolver:DynamicResolver = .init(context: self.context,
+                let resolver:DynamicResolver = .init(context: self.context,
+                    diagnostics: self.diagnostics,
                     namespace: namespace.id,
-                    group: group,
+                    clients: clients,
                     scope: decl.phylum.scope(trimming: decl.path))
 
                 (record.overview, record.details) = resolver.link(article: article)
-
-                self.errors += resolver.errors
             }
 
             self.projection.masters.append(.decl(record))

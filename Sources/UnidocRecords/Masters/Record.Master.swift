@@ -33,6 +33,23 @@ extension Record.Master:Identifiable
         case .file(let file):       return file.id
         }
     }
+
+    // @inlinable public
+    // var group:Unidoc.Scalar?
+    // {
+    //     get
+    //     {
+    //         switch self
+    //         {
+    //         case .article(let article): return article.group
+    //         case .culture(let culture): return culture.group
+    //         case .decl(let decl):       return decl.group
+    //         case .file:                 return nil
+    //         }
+    //     }
+    //     set(value)
+
+    // }
 }
 extension Record.Master
 {
@@ -78,20 +95,15 @@ extension Record.Master
         /// Always present.
         case id = "_id"
 
-        /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
-        case culture = "c"
+        /// Appears in ``Decl`` and ``File``.
+        case symbol = "Y"
         /// Appears in ``Article``, ``Culture``, and ``Decl``, but may be computed
         /// at encoding-time.
         case stem = "U"
 
-        /// Discriminator for ``Module``.
+        /// Only appears in ``Module``.
         case module = "M"
 
-        /// Discriminator for ``File``.
-        case file = "F"
-
-        /// Discriminator for ``Decl``.
-        case decl = "D"
         /// Only appears in ``Decl``.
         case flags = "Z"
         /// Only appears in ``Decl``.
@@ -112,13 +124,16 @@ extension Record.Master
         /// Only appears in ``Decl``, and only when different from ``culture``.
         /// The field contains a scalar.
         case namespace = "n"
+        /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
+        case culture = "c"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
+        /// Can appear in ``Article``, ``Culture``, or ``Decl``.
+        /// The field contains a scalar.
+        case file = "f"
 
         /// Only appears in ``Decl``.
         case position = "P"
-        /// Only appears in ``Decl``. The field contains a scalar.
-        case location = "l"
 
         /// Only appears in ``Article``.
         case headline = "T"
@@ -130,6 +145,10 @@ extension Record.Master
         /// The field contains a passage, which contains a list of outlines,
         /// each of which may contain a scalar.
         case details = "d"
+
+        /// Can appear in ``Article``, ``Culture``, or ``Decl``.
+        /// The field contains a *group* scalar. (Not a master scalar!)
+        case group = "t"
 
         /// Contains a list of precomputed zones, as MongoDB cannot easily
         /// convert scalars to zones. This field will be computed and
@@ -154,10 +173,10 @@ extension Record.Master:BSONDocumentEncodable
         switch self
         {
         case .file(let self):
-            bson[.file] = self.symbol
+            bson[.symbol] = self.symbol
 
         case .decl(let self):
-            bson[.decl] = self.symbol
+            bson[.symbol] = self.symbol
 
             bson[.flags] = Unidoc.Decl.Flags.init(
                 customization: self.customization,
@@ -190,7 +209,13 @@ extension Record.Master:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope.isEmpty ? nil : self.scope
             bson[.file] = self.file
+
             bson[.position] = self.position
+            bson[.overview] = self.overview
+            bson[.details] = self.details
+            bson[.group] = self.group
+
+            bson[.hash] = FNV24.init(hashing: "\(self.symbol)")
 
             zones.update(with: self.signature.expanded.scalars)
             zones.update(with: self.signature.generics.constraints)
@@ -200,24 +225,34 @@ extension Record.Master:BSONDocumentEncodable
             zones.update(with: self.culture.zone)
             zones.update(with: self.scope)
 
-            bson[.hash] = FNV24.init(hashing: "\(self.symbol)")
+            zones.update(with: self.overview?.outlines ?? [])
+            zones.update(with: self.details?.outlines ?? [])
 
         case .culture(let self):
-            bson[.module] = self.module
             bson[.stem] = self.stem
+            bson[.module] = self.module
+            bson[.file] = self.file
 
+            bson[.overview] = self.overview
+            bson[.details] = self.details
+            bson[.group] = self.group
+
+            zones.update(with: self.overview?.outlines ?? [])
+            zones.update(with: self.details?.outlines ?? [])
 
         case .article(let self):
             bson[.stem] = self.stem
             bson[.culture] = self.culture
+            bson[.file] = self.file
             bson[.headline] = self.headline
+
+            bson[.overview] = self.overview
+            bson[.details] = self.details
+            bson[.group] = self.group
+
+            zones.update(with: self.overview?.outlines ?? [])
+            zones.update(with: self.details?.outlines ?? [])
         }
-
-        zones.update(with: self.overview?.outlines ?? [])
-        zones.update(with: self.details?.outlines ?? [])
-
-        bson[.overview] = self.overview
-        bson[.details] = self.details
 
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
@@ -234,8 +269,10 @@ extension Record.Master:BSONDocumentDecodable
         case .module?:
             self = .culture(.init(id: id,
                 module: try bson[.module].decode(),
+                file: try bson[.file]?.decode(),
                 overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode()))
+                details: try bson[.details]?.decode(),
+                group: try bson[.group]?.decode()))
 
         case .decl?:
             let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
@@ -255,7 +292,7 @@ extension Record.Master:BSONDocumentDecodable
                     generics: Signature<Unidoc.Scalar?>.Generics.init(
                         constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
                         parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
-                symbol: try bson[.decl].decode(),
+                symbol: try bson[.symbol].decode(),
                 stem: try bson[.stem].decode(),
                 superforms: try bson[.superforms]?.decode() ?? [],
                 namespace: try bson[.namespace]?.decode() ?? culture,
@@ -264,18 +301,21 @@ extension Record.Master:BSONDocumentDecodable
                 file: try bson[.file]?.decode(),
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode()))
+                details: try bson[.details]?.decode(),
+                group: try bson[.group]?.decode()))
 
         case .file?:
-            self = .file(.init(id: id, symbol: try bson[.file].decode()))
+            self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
 
         case _:
             self = .article(.init(id: id,
                 stem: try bson[.stem].decode(),
                 culture: try bson[.culture].decode(),
+                file: try bson[.file]?.decode(),
                 headline: try bson[.headline].decode(),
                 overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode()))
+                details: try bson[.details]?.decode(),
+                group: try bson[.group]?.decode()))
         }
     }
 }

@@ -9,32 +9,42 @@ extension Record.Master
         public
         let id:Unidoc.Scalar
         public
-        let stem:Record.Stem
+        var stem:Record.Stem
 
         public
-        let culture:Unidoc.Scalar
+        var culture:Unidoc.Scalar
+        public
+        var file:Unidoc.Scalar?
 
         public
-        let headline:MarkdownBytecode
+        var headline:MarkdownBytecode
         public
         var overview:Record.Passage?
         public
         var details:Record.Passage?
+        public
+        var group:Unidoc.Scalar?
 
         @inlinable public
         init(id:Unidoc.Scalar,
             stem:Record.Stem,
             culture:Unidoc.Scalar,
-            headline:MarkdownBytecode,
+            file:Unidoc.Scalar? = nil,
+            headline:MarkdownBytecode = [],
             overview:Record.Passage? = nil,
-            details:Record.Passage? = nil)
+            details:Record.Passage? = nil,
+            group:Unidoc.Scalar? = nil)
         {
             self.id = id
             self.stem = stem
+
             self.culture = culture
+            self.file = file
+
             self.headline = headline
             self.overview = overview
             self.details = details
+            self.group = group
         }
     }
 }
