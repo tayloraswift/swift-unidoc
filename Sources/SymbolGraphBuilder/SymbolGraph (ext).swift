@@ -61,7 +61,7 @@ extension SymbolGraph
                 }
             }
 
-            time.linking = try clock.measure
+            time.linking = clock.measure
             {
                 let scalarPositions:[[SymbolGraph.Namespace]] = linker.allocate(
                     namespaces: namespaces)
@@ -70,7 +70,7 @@ extension SymbolGraph
 
                 if  let supplements
                 {
-                    try linker.attach(supplements: supplements)
+                    linker.attach(supplements: supplements)
                 }
 
                 linker.link(namespaces: namespaces, at: scalarPositions)

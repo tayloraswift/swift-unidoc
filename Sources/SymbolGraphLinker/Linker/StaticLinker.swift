@@ -36,7 +36,7 @@ struct StaticLinker
     var router:StaticRouter
 
     private
-    var supplements:[Int32: [MarkdownDocumentationSupplement]]
+    var supplements:[Int32: [MarkdownSupplement]]
 
     public private(set)
     var errors:[any StaticLinkerError]
@@ -258,9 +258,9 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[MarkdownFile]]) throws
+    func attach(supplements:[[MarkdownFile]])
     {
-        let standalone:[[Article]] = try zip(supplements.indices, supplements).map
+        let articles:[[Article]] = zip(supplements.indices, supplements).map
         {
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[$0.0]
 
@@ -269,11 +269,11 @@ extension StaticLinker
 
             for file:MarkdownFile in $0.1
             {
-                if  let article:Article = try self.attach(supplement: file, in: namespace)
+                if  let article:Article = self.attach(supplement: file, in: namespace)
                 {
                     articles.append(article)
 
-                    guard let scalar:Int32 = article.scalar
+                    guard let scalar:Int32 = article.standalone?.id
                     else
                     {
                         continue
@@ -296,10 +296,10 @@ extension StaticLinker
         }
         //  Now that standalone articles have all been exposed for doclink resolution,
         //  we can link them.
-        for (culture, standalone):(Int, [Article]) in zip(standalone.indices, standalone)
+        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
         {
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
-            for standalone:Article in standalone
+            for article:Article in articles
             {
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
@@ -310,26 +310,27 @@ extension StaticLinker
                 //  We pass a single-element array as the sources list, which relies
                 //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
                 //  the source id by default.
-                let sources:[MarkdownSource] = [standalone.source]
+                let sources:[MarkdownSource] = [article.source]
 
-                if  let scalar:Int32 = standalone.scalar
+                if  let standalone:Article.Standalone = article.standalone
                 {
-                    self.symbolizer.graph.articles[scalar].value = outliner.link(
-                        documentation: standalone.parsed.article,
+                    self.symbolizer.graph.articles[standalone.id].value = outliner.link(
+                        title: standalone.title,
+                        body: article.body,
                         from: sources)
                 }
                 else
                 {
                     //  This is the article for the module’s landing page.
                     self.symbolizer.graph.cultures[culture].article = outliner.link(
-                        documentation: .init(
-                            overview: standalone.parsed.article.overview,
-                            details: standalone.parsed.article.details,
+                        body: .init(
+                            overview: article.body.overview,
+                            details: article.body.details,
                             topics: []),
                         from: sources)
 
                     self.symbolizer.graph.cultures[culture].topics = outliner.link(
-                        topics: standalone.parsed.article.topics,
+                        topics: article.body.topics,
                         from: sources)
                 }
 
@@ -341,90 +342,105 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement:MarkdownFile,
-        in namespace:ModuleIdentifier) throws -> Article?
+    func attach(supplement:MarkdownFile, in namespace:ModuleIdentifier) -> Article?
     {
-        let markdown:MarkdownDocumentationSupplement = .init(parsing: supplement.text,
+        let markdown:MarkdownSupplement = .init(parsing: supplement.text,
             with: self.markdownParser,
             as: SwiftFlavoredMarkdown.self)
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
-        let source:MarkdownSource = .init(
-            location: .init(position: .zero, file: self.symbolizer.intern(supplement.id)),
-            text: supplement.text)
-        do
+        let location:SourceLocation<Int32> = .init(position: .zero,
+            file: self.symbolizer.intern(supplement.id))
+        let source:MarkdownSource = .init(location: location, text: supplement.text)
+
+        guard let headline:MarkdownSupplement.Headline = markdown.headline
+        else
         {
-            switch try self.binding(of: markdown, in: namespace, source: source)
+            self.errors.append(SupplementError.untitled(location))
+            return nil
+        }
+
+        switch headline
+        {
+        case .binding(let binding):
+            let decl:Int32?
+            do
             {
-            case nil:
-                let scalar:Int32 = try
-                {
-                    switch $0
-                    {
-                    case nil:
-                        let scalar:Int32 = self.symbolizer.graph.articles.append(.init(
-                            id: supplement.name))
-                        $0 = scalar
-                        return scalar
-
-                    case  _?:
-                        throw DuplicateSymbolError.article(supplement.name)
-                    }
-                //  Make the standalone article visible for doclink resolution.
-                } (&self.doclinks[.documentation(namespace), supplement.name])
-
-                //  Assign the standalone article a URI.
-                self.router[namespace, supplement.name][nil, default: []].append(scalar)
-
-                return .init(scalar: scalar, parsed: markdown, source: source)
-
-            case .module?:
-                return .init(scalar: nil, parsed: markdown, source: source)
-
-            case .scalar(let binding)?:
-                self.supplements[binding, default: []].append(markdown)
+                decl = try self.resolve(decl: binding, in: namespace, source: source)
+            }
+            catch let diagnosis as any StaticLinkerError
+            {
+                self.errors.append(diagnosis)
                 return nil
             }
-        }
-        catch let diagnosis as any StaticLinkerError
-        {
-            self.errors.append(diagnosis)
-            return nil
-        }
-        catch
-        {
-            return nil
+            catch
+            {
+                return nil
+            }
+
+            if  let decl:Int32
+            {
+                self.supplements[decl, default: []].append(markdown)
+                return nil
+            }
+            else
+            {
+                return .init(standalone: nil, source: source, body: markdown.body)
+            }
+
+        case .heading(let heading):
+            let scalar:Int32? =
+            {
+                switch $0
+                {
+                case nil:
+                    let scalar:Int32 = self.symbolizer.graph.articles.append(.init(
+                        id: supplement.name))
+                    $0 = scalar
+                    return scalar
+
+                case  _?:
+                    return nil
+                }
+            //  Make the standalone article visible for doclink resolution.
+            } (&self.doclinks[.documentation(namespace), supplement.name])
+
+            if  let scalar:Int32
+            {
+                //  Assign the standalone article a URI.
+                self.router[namespace, supplement.name][nil, default: []].append(scalar)
+                let standalone:Article.Standalone = .init(id: scalar, title: heading)
+                return .init(standalone: standalone, source: source, body: markdown.body)
+            }
+            else
+            {
+                self.errors.append(SupplementError.duplicate(id: supplement.name, location))
+                return nil
+            }
         }
     }
 
     private
-    func binding(
-        of supplement:MarkdownDocumentationSupplement,
+    func resolve(decl binding:MarkdownInline.Autolink,
         in namespace:ModuleIdentifier,
-        source:MarkdownSource) throws -> ArticleBinding?
+        source:MarkdownSource) throws -> Int32?
     {
-        guard let autolink:MarkdownInline.Autolink = supplement.binding
-        else
-        {
-            return nil
-        }
-
         //  Special rule for article bindings: if the text of the codelink matches
         //  the current namespace, then the article is the primary article for
         //  that module.
-        if  autolink.text == "\(namespace)"
+        if  binding.text == "\(namespace)"
         {
-            return .module
+            return nil
         }
         var context:Diagnostic.Context<Int32>?
         {
-            autolink.source.map { .init(of: $0.range, in: source) }
+            binding.source.map { .init(of: $0.range, in: source) }
         }
 
-        guard let codelink:Codelink = .init(autolink.text)
+        guard let codelink:Codelink = .init(binding.text)
         else
         {
-            throw InvalidAutolinkError<Int32>.init(expression: autolink.text, context: context)
+            throw InvalidAutolinkError<Int32>.init(expression: binding.text, context: context)
         }
 
         let resolver:CodelinkResolver<Int32> = .init(table: self.codelinks, scope: .init(
@@ -436,10 +452,10 @@ extension StaticLinker
             switch overload.target
             {
             case .scalar(let scalar):
-                return .scalar(scalar)
+                return scalar
 
             case .vector(let feature, self: let heir):
-                throw InvalidArticleBindingError.init(.vector(feature, self: heir),
+                throw SupplementBindingError.init(.vector(feature, self: heir),
                     codelink: codelink,
                     context: context)
             }
@@ -447,7 +463,7 @@ extension StaticLinker
         case .some(let overloads):
             if  overloads.isEmpty
             {
-                throw InvalidArticleBindingError.init(.none(in: namespace),
+                throw SupplementBindingError.init(.none(in: namespace),
                     codelink: codelink,
                     context: context)
             }

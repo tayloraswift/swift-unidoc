@@ -120,6 +120,8 @@ extension Record.Master
         /// Only appears in ``Decl``. The field contains a scalar.
         case location = "l"
 
+        /// Only appears in ``Article``.
+        case headline = "T"
         /// Optional, but can appear in any master record.
         /// The field contains a passage, which contains a list of outlines,
         /// each of which may contain a scalar.
@@ -151,63 +153,64 @@ extension Record.Master:BSONDocumentEncodable
 
         switch self
         {
-        case .file(let file):
-            bson[.file] = file.symbol
+        case .file(let self):
+            bson[.file] = self.symbol
 
-        case .decl(let decl):
-            bson[.decl] = decl.symbol
+        case .decl(let self):
+            bson[.decl] = self.symbol
 
             bson[.flags] = Unidoc.Decl.Flags.init(
-                customization: decl.customization,
-                phylum: decl.phylum,
-                route: decl.route)
+                customization: self.customization,
+                phylum: self.phylum,
+                route: self.route)
 
             bson[.signature_availability] =
-                decl.signature.availability.isEmpty ? nil :
-                decl.signature.availability
+                self.signature.availability.isEmpty ? nil :
+                self.signature.availability
 
-            bson[.signature_abridged_bytecode] = decl.signature.abridged.bytecode
-            bson[.signature_expanded_bytecode] = decl.signature.expanded.bytecode
+            bson[.signature_abridged_bytecode] = self.signature.abridged.bytecode
+            bson[.signature_expanded_bytecode] = self.signature.expanded.bytecode
 
             bson[.signature_expanded_scalars] =
-                decl.signature.expanded.scalars.isEmpty ? nil :
-                decl.signature.expanded.scalars
+                self.signature.expanded.scalars.isEmpty ? nil :
+                self.signature.expanded.scalars
 
             bson[.signature_generics_constraints] =
-                decl.signature.generics.constraints.isEmpty ? nil :
-                decl.signature.generics.constraints
+                self.signature.generics.constraints.isEmpty ? nil :
+                self.signature.generics.constraints
 
             bson[.signature_generics_parameters] =
-                decl.signature.generics.parameters.isEmpty ? nil :
-                decl.signature.generics.parameters
+                self.signature.generics.parameters.isEmpty ? nil :
+                self.signature.generics.parameters
 
-            bson[.stem] = decl.stem
+            bson[.stem] = self.stem
 
-            bson[.superforms] = decl.superforms.isEmpty ? nil : decl.superforms
-            bson[.namespace] = decl.culture == decl.namespace ? nil : decl.namespace
-            bson[.culture] = decl.culture
-            bson[.scope] = decl.scope.isEmpty ? nil : decl.scope
-            bson[.file] = decl.file
-            bson[.position] = decl.position
+            bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
+            bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
+            bson[.culture] = self.culture
+            bson[.scope] = self.scope.isEmpty ? nil : self.scope
+            bson[.file] = self.file
+            bson[.position] = self.position
 
-            zones.update(with: decl.signature.expanded.scalars)
-            zones.update(with: decl.signature.generics.constraints)
+            zones.update(with: self.signature.expanded.scalars)
+            zones.update(with: self.signature.generics.constraints)
 
-            zones.update(with: decl.superforms)
-            zones.update(with: decl.namespace.zone)
-            zones.update(with: decl.culture.zone)
-            zones.update(with: decl.scope)
+            zones.update(with: self.superforms)
+            zones.update(with: self.namespace.zone)
+            zones.update(with: self.culture.zone)
+            zones.update(with: self.scope)
 
-            bson[.hash] = FNV24.init(hashing: "\(decl.symbol)")
+            bson[.hash] = FNV24.init(hashing: "\(self.symbol)")
 
-        case .culture(let culture):
-            bson[.module] = culture.module
-            bson[.stem] = culture.stem
+        case .culture(let self):
+            bson[.module] = self.module
+            bson[.stem] = self.stem
 
 
-        case .article(let article):
-            bson[.stem] = article.stem
-            bson[.culture] = article.culture
+        case .article(let self):
+            bson[.stem] = self.stem
+            bson[.culture] = self.culture
+            bson[.headline] = self.headline
         }
 
         zones.update(with: self.overview?.outlines ?? [])
@@ -226,13 +229,18 @@ extension Record.Master:BSONDocumentDecodable
     {
         let id:Unidoc.Scalar = try bson[.id].decode()
 
-        let overview:Record.Passage? = try bson[.overview]?.decode()
-        let details:Record.Passage? = try bson[.details]?.decode()
-
-        if      let discriminator:Symbol.Decl = try bson[.decl]?.decode()
+        switch id.plane
         {
+        case .module?:
+            self = .culture(.init(id: id,
+                module: try bson[.module].decode(),
+                overview: try bson[.overview]?.decode(),
+                details: try bson[.details]?.decode()))
+
+        case .decl?:
             let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
             let culture:Unidoc.Scalar = try bson[.culture].decode()
+
             self = .decl(.init(id: id,
                 customization: flags.customization,
                 phylum: flags.phylum,
@@ -247,7 +255,7 @@ extension Record.Master:BSONDocumentDecodable
                     generics: Signature<Unidoc.Scalar?>.Generics.init(
                         constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
                         parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
-                symbol: discriminator,
+                symbol: try bson[.decl].decode(),
                 stem: try bson[.stem].decode(),
                 superforms: try bson[.superforms]?.decode() ?? [],
                 namespace: try bson[.namespace]?.decode() ?? culture,
@@ -255,27 +263,19 @@ extension Record.Master:BSONDocumentDecodable
                 scope: try bson[.scope]?.decode() ?? [],
                 file: try bson[.file]?.decode(),
                 position: try bson[.position]?.decode(),
-                overview: overview,
-                details: details))
-        }
-        else if let discriminator:Symbol.File = try bson[.file]?.decode()
-        {
-            self = .file(.init(id: id, symbol: discriminator))
-        }
-        else if let discriminator:ModuleDetails = try bson[.module]?.decode()
-        {
-            self = .culture(.init(id: id,
-                module: discriminator,
-                overview: overview,
-                details: details))
-        }
-        else
-        {
+                overview: try bson[.overview]?.decode(),
+                details: try bson[.details]?.decode()))
+
+        case .file?:
+            self = .file(.init(id: id, symbol: try bson[.file].decode()))
+
+        case _:
             self = .article(.init(id: id,
                 stem: try bson[.stem].decode(),
                 culture: try bson[.culture].decode(),
-                overview: overview,
-                details: details))
+                headline: try bson[.headline].decode(),
+                overview: try bson[.overview]?.decode(),
+                details: try bson[.details]?.decode()))
         }
     }
 }

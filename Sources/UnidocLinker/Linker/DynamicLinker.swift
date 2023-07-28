@@ -176,7 +176,8 @@ extension DynamicLinker
             }
             var record:Record.Master.Article = .init(id: self.current.zone + a,
                 stem: .init(namespace.id, name),
-                culture: namespace.scalar)
+                culture: namespace.scalar,
+                headline: article.headline)
             var resolver:DynamicResolver = .init(context: self.context,
                 namespace: namespace.id,
                 group: group)
