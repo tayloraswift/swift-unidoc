@@ -53,7 +53,7 @@ enum Main:AsyncTests
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
-                        at: "2.53.0",
+                        at: "2.57.0",
                         in: workspace,
                         clean: true),
                     pretty: true)

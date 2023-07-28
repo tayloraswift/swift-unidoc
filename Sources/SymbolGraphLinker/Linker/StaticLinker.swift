@@ -296,9 +296,7 @@ extension StaticLinker
         }
         //  Now that standalone articles have all been exposed for doclink resolution,
         //  we can link them.
-        for (culture, standalone):(Int, [Article]) in zip(
-            standalone.indices,
-            standalone)
+        for (culture, standalone):(Int, [Article]) in zip(standalone.indices, standalone)
         {
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
             for standalone:Article in standalone
