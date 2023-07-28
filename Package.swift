@@ -63,10 +63,10 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-           from: "0.5.1")),
+           from: "0.5.2")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
-            from: "2.54.0")),
+            from: "2.57.0")),
         .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
             from: "2.24.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
@@ -262,6 +262,10 @@ let package:Package = .init(
 
                 .product(name: "BSONDecoding", package: "swift-mongodb"),
                 .product(name: "BSONEncoding", package: "swift-mongodb"),
+            ],
+            exclude:
+            [
+                "README.md",
             ]),
 
         .target(name: "SymbolGraphTesting", dependencies:
