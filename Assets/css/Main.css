@@ -210,8 +210,8 @@ section.superforms ul > li {
   margin: 0.5rem 0 0.5rem 0;
   padding: 0;
 }
-section.group ul > li a,
-section.superforms ul > li a {
+section.group ul > li > a,
+section.superforms ul > li > a {
   display: block;
   text-indent: -2.5rem;
   margin-left: 2.5rem;
@@ -221,8 +221,8 @@ section.superforms ul > li a {
   font-size: inherit;
   padding: 0.8em 0 0 0;
 }
-section.group ul > li a span.syntax-identifier,
-section.superforms ul > li a span.syntax-identifier {
+section.group ul > li > a span.syntax-identifier,
+section.superforms ul > li > a span.syntax-identifier {
   color: rgb(253, 39, 99);
 }
 section.group ul > li p,

@@ -17,7 +17,7 @@ struct Objects:MongoTestBattery
 
         let repository:String = "https://github.com/apple/swift-nio"
         var archives:[Documentation] = []
-        for ref:String in ["2.53.0", "2.54.0", "2.55.0", "2.56.0", "main"]
+        for ref:String in ["2.53.0", "2.54.0", "2.55.0", "2.56.0", "2.57.0", "main"]
         {
             if  let archive:Documentation = try? .load(package: "swift-nio",
                     at: .init(ref),
