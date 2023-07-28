@@ -1,3 +1,4 @@
+import MarkdownABI
 import Unidoc
 
 extension Record.Master
@@ -14,6 +15,8 @@ extension Record.Master
         let culture:Unidoc.Scalar
 
         public
+        let headline:MarkdownBytecode
+        public
         var overview:Record.Passage?
         public
         var details:Record.Passage?
@@ -22,12 +25,14 @@ extension Record.Master
         init(id:Unidoc.Scalar,
             stem:Record.Stem,
             culture:Unidoc.Scalar,
+            headline:MarkdownBytecode,
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil)
         {
             self.id = id
             self.stem = stem
             self.culture = culture
+            self.headline = headline
             self.overview = overview
             self.details = details
         }

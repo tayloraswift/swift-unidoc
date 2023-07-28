@@ -86,11 +86,11 @@ extension StaticOutliner
     mutating
     func link(comment:MarkdownSource,
         parser:SwiftFlavoredMarkdownParser,
-        adding extra:[MarkdownDocumentationSupplement]? = nil) -> SymbolGraph.Article<Never>
+        adding extra:[MarkdownSupplement]? = nil) -> SymbolGraph.Article<Never>
     {
         //  TODO: use supplements
         let sources:[MarkdownSource] = [comment]
-        return self.link(documentation: .init(parsing: comment.text,
+        return self.link(body: .init(parsing: comment.text,
                 from: sources.startIndex,
                 with: parser,
                 as: SwiftFlavoredMarkdownComment.self),
@@ -98,11 +98,14 @@ extension StaticOutliner
     }
     mutating
     func link(
-        documentation:MarkdownDocumentation,
+        title:MarkdownBlock.Heading? = nil,
+        body:MarkdownDocumentation,
         from sources:[MarkdownSource]) -> SymbolGraph.Article<Never>
     {
+        //  No links in the headline!
+        let headline:MarkdownBytecode = .init { title?.emit(into: &$0) }
         let overview:MarkdownBytecode = self.link(
-            overview: documentation.overview,
+            overview: body.overview,
             from: sources)
 
         let fold:Int = self.cache.fold
@@ -110,11 +113,13 @@ extension StaticOutliner
         //  We don’t support topics lists in non-module documentation.
         //  So we just render them into the article as lists of links.
         let details:MarkdownBytecode = self.link(
-            details: documentation.details,
-            topics: documentation.topics,
+            details: body.details,
+            topics: body.topics,
             from: sources)
 
-        return .init(outlines: self.cache.clear(),
+        return .init(
+            headline: headline,
+            outlines: self.cache.clear(),
             overview: overview,
             details: details,
             fold: fold)
@@ -165,7 +170,8 @@ extension StaticOutliner
         }
     }
     private mutating
-    func link(details:MarkdownDocumentation.Details,
+    func link(
+        details:MarkdownDocumentation.Details,
         topics:[MarkdownDocumentation.Topic],
         from sources:[MarkdownSource]) -> MarkdownBytecode
     {

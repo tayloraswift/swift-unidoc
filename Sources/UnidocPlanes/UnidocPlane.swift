@@ -5,11 +5,11 @@ enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
     case  decl          = 0x01_000000
 
     case  article       = 0x80_000000
+    case  file          = 0x81_000000
     //  Used to identify extension records in the Unidoc database;
     //  never appears in a symbol graph.
-    case `extension`    = 0x81_000000
-    case  file          = 0x82_000000
-    case  topic         = 0x83_000000
+    case `extension`    = 0xC2_000000
+    case  topic         = 0xC3_000000
 
     case  zone          = 0xFF_000000
 }

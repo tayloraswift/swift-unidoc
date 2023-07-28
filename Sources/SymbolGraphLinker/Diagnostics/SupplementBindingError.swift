@@ -3,7 +3,7 @@ import Codelinks
 import SymbolGraphs
 import UnidocDiagnostics
 
-struct InvalidArticleBindingError:Error
+struct SupplementBindingError:Error
 {
     let resolution:Resolution
 
@@ -19,7 +19,7 @@ struct InvalidArticleBindingError:Error
         self.context = context ?? .init()
     }
 }
-extension InvalidArticleBindingError
+extension SupplementBindingError
 {
     private
     var message:String
@@ -39,7 +39,7 @@ extension InvalidArticleBindingError
         }
     }
 }
-extension InvalidArticleBindingError:StaticLinkerError
+extension SupplementBindingError:StaticLinkerError
 {
     func symbolicated(with symbolicator:StaticSymbolicator) -> [Diagnostic]
     {

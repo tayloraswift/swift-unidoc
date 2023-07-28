@@ -8,6 +8,8 @@ extension SymbolGraph
     struct Article<ID>:Equatable, Sendable where ID:Equatable & Sendable
     {
         public
+        var headline:MarkdownBytecode
+        public
         var outlines:[Outline]
         public
         var overview:MarkdownBytecode
@@ -21,12 +23,15 @@ extension SymbolGraph
         let id:ID?
 
         @inlinable public
-        init(outlines:[Outline] = [],
+        init(
+            headline:MarkdownBytecode = [],
+            outlines:[Outline] = [],
             overview:MarkdownBytecode = [],
             details:MarkdownBytecode = [],
             fold:Int? = nil,
             id:ID? = nil)
         {
+            self.headline = headline
             self.outlines = outlines
             self.overview = overview
             self.details = details
@@ -44,6 +49,7 @@ extension SymbolGraph.Article
         get
         {
             .init(
+                headline: self.headline,
                 outlines: self.outlines,
                 overview: self.overview,
                 details: self.details,
@@ -51,6 +57,7 @@ extension SymbolGraph.Article
         }
         set(value)
         {
+            self.headline = value.headline
             self.outlines = value.outlines
             self.overview = value.overview
             self.details = value.details
@@ -63,6 +70,7 @@ extension SymbolGraph.Article
     public
     enum CodingKey:String
     {
+        case headline = "H"
         case outlines = "L"
         case overview = "O"
         case details = "D"
@@ -76,6 +84,7 @@ extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
+        bson[.headline] = self.headline.isEmpty ? nil : self.headline
         bson[.outlines] = self.outlines.isEmpty ? nil : self.outlines
         bson[.overview] = self.overview.isEmpty ? nil : self.overview
         bson[.details] = self.details.isEmpty ? nil : self.details
@@ -91,6 +100,7 @@ extension SymbolGraph.Article:BSONDocumentDecodable, BSONDocumentViewDecodable, 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
+            headline: try bson[.headline]?.decode() ?? [],
             outlines: try bson[.outlines]?.decode() ?? [],
             overview: try bson[.overview]?.decode() ?? [],
             details: try bson[.details]?.decode() ?? [],

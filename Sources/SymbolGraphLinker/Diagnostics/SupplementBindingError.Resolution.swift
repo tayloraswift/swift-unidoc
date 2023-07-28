@@ -1,6 +1,6 @@
 import ModuleGraphs
 
-extension InvalidArticleBindingError
+extension SupplementBindingError
 {
     enum Resolution
     {
