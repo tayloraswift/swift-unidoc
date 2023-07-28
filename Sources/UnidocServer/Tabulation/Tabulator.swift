@@ -7,31 +7,40 @@ import UnidocRecords
 
 struct Tabulator
 {
-    let libraries:[Library]
     let inliner:Inliner
 
+    let libraries:[Library]
+    let topics:[Record.Group.Topic]
+
     private
-    init(libraries:[Library], inliner:Inliner)
+    init(_ inliner:Inliner, libraries:[Library], topics:[Record.Group.Topic])
     {
-        self.libraries = libraries
         self.inliner = inliner
+
+        self.libraries = libraries
+        self.topics = topics
     }
 }
 extension Tabulator
 {
-    init(
-        extensions:__shared [Record.Extension],
+    init(_ inliner:__owned Inliner,
         generics:__shared [GenericParameter],
-        inliner:__owned Inliner)
+        groups:__shared [Record.Group])
     {
-        let libraries:[Library] = extensions.reduce(into: [:] as [Party: [Record.Extension]])
+        let libraries:[Library] = groups.reduce(into: [:] as [Party: [Record.Group.Extension]])
         {
+            guard case .extension(let `extension`) = $1
+            else
+            {
+                return
+            }
+
             let party:Party
-            if  $1.id.zone == inliner.zones.principal.id
+            if  `extension`.id.zone == inliner.zones.principal.id
             {
                 party = .first
             }
-            else if let zone:Record.Zone.Names = inliner.zones[$1.id.zone]
+            else if let zone:Record.Zone.Names = inliner.zones[`extension`.id.zone]
             {
                 party = .third(zone.package)
             }
@@ -40,7 +49,7 @@ extension Tabulator
                 return
             }
 
-            $0[party, default: []].append($1)
+            $0[party, default: []].append(`extension`)
         }
         .map
         {
@@ -51,7 +60,23 @@ extension Tabulator
             $0.party < $1.party
         }
 
-        self.init(libraries: libraries, inliner: inliner)
+        let topics:[Record.Group.Topic] = groups.compactMap
+        {
+            if  case .topic(let topic) = $0
+            {
+                return topic
+            }
+            else
+            {
+                return nil
+            }
+        }
+        .sorted
+        {
+            $0.id < $1.id
+        }
+
+        self.init(inliner, libraries: libraries, topics: topics)
     }
 }
 extension Tabulator:HyperTextOutputStreamable
@@ -59,12 +84,32 @@ extension Tabulator:HyperTextOutputStreamable
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
+        for topic:Record.Group.Topic in self.topics
+        {
+            html[.section, { $0.class = "group topic" }]
+            {
+                $0 ?= topic.overview.map(self.inliner.passage(_:))
+
+                $0[.ul]
+                {
+                    for member:Record.Link in topic.members
+                    {
+                        switch member
+                        {
+                        case .scalar(let scalar):   $0[.li] = self.inliner.card(scalar)
+                        case .text(let text):       $0[.li] { $0[.span] { $0[.code] = text } }
+                        }
+                    }
+                }
+            }
+        }
+
         for library:Library in self.libraries
         {
-            for `extension`:Record.Extension in
+            for `extension`:Record.Group.Extension in
                 [library.extensions.generic, library.extensions.concrete].joined()
             {
-                html[.section, { $0.class = "extension" }]
+                html[.section, { $0.class = "group extension" }]
                 {
                     $0[.h3]
                     {

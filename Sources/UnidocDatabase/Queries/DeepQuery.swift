@@ -78,7 +78,7 @@ extension DeepQuery
     {
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
-        .init(Database.Zones.name, pipeline: self.pipeline, stride: 1)
+        return .init(Database.Zones.name, pipeline: self.pipeline, stride: 1)
         {
             $0[.collation] = Self.collation
             $0[.hint] = .init
@@ -161,14 +161,14 @@ extension DeepQuery
             {
                 $0[.lookup] = .init
                 {
-                    let min:Variable<Unidoc.Scalar> = "min"
-                    let max:Variable<Unidoc.Scalar> = "max"
+                    let min:Mongo.Variable<Unidoc.Scalar> = "min"
+                    let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
                     $0[.from] = Database.Masters.name
                     $0[.let] = .init
                     {
-                        $0[let: min] = "$\(Record.Zone[self.planes.range.min])"
-                        $0[let: max] = "$\(Record.Zone[self.planes.range.max])"
+                        $0[let: min] = Record.Zone[self.planes.range.min]
+                        $0[let: max] = Record.Zone[self.planes.range.max]
                     }
                     $0[.pipeline] = .init
                     {
@@ -184,11 +184,11 @@ extension DeepQuery
                                     (
                                         .expr
                                         {
-                                            $0[.gte] = ("$\(Record.Master[.id])", min)
+                                            $0[.gte] = (Record.Master[.id], min)
                                         },
                                         .expr
                                         {
-                                            $0[.lte] = ("$\(Record.Master[.id])", max)
+                                            $0[.lte] = (Record.Master[.id], max)
                                         }
                                     )
                                 }
@@ -217,11 +217,11 @@ extension DeepQuery
                             {
                                 $0[.eq] =
                                 (
-                                    1, .expr { $0[.size] = "$\(Output.Principal[.matches])" }
+                                    1, .expr { $0[.size] = Output.Principal[.matches] }
                                 )
                             },
-                            then: .expr { $0[.first] = "$\(Output.Principal[.matches])" },
-                            else: (nil as Never?) as Never??
+                            then: .expr { $0[.first] = Output.Principal[.matches] },
+                            else: Never??.some(nil)
                         )
                     }
                 }
@@ -232,40 +232,40 @@ extension DeepQuery
             {
                 $0[.lookup] = .init
                 {
-                    let id:Variable<Unidoc.Scalar> = "id"
-                    let min:Variable<Unidoc.Scalar> = "min"
-                    let max:Variable<Unidoc.Scalar> = "max"
+                    let id:Mongo.Variable<Unidoc.Scalar> = "id"
+                    let min:Mongo.Variable<Unidoc.Scalar> = "min"
+                    let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-                    $0[.from] = Database.Extensions.name
+                    $0[.from] = Database.Groups.name
                     $0[.let] = .init
                     {
-                        $0[let: id] = "$\(Output.Principal[.master] / Record.Master[.id])"
-                        $0[let: min] = "$\(Record.Zone[.planes_min])"
-                        $0[let: max] = "$\(Record.Zone[.planes_max])"
+                        $0[let: id] = Output.Principal[.master] / Record.Master[.id]
+                        $0[let: min] = Record.Zone[.planes_min]
+                        $0[let: max] = Record.Zone[.planes_max]
                     }
                     $0[.pipeline] = .init
                     {
                         $0.stage
                         {
-                            $0[.match] = id.extensions(min: min, max: max)
+                            $0[.match] = id.groups(min: min, max: max)
                         }
                     }
-                    $0[.as] = Output.Principal[.extensions]
+                    $0[.as] = Output.Principal[.groups]
                 }
             }
 
             //  Extract (and de-duplicate) the scalars mentioned by the extensions.
             //  Store them in this temporary field:
-            let scalars:BSON.Key = "scalars"
+            let scalars:Mongo.KeyPath = "scalars"
             //  The extensions have precomputed zone ids for MongoDB’s convenience.
-            let zones:BSON.Key = "zones"
+            let zones:Mongo.KeyPath = "zones"
 
             $0.stage
             {
                 $0[.set] = Mongo.SetDocument.init // helps typechecking massively
                 {
-                    let extensions:List<Record.Extension> = .init(
-                        in: Output.Principal[.extensions])
+                    let extensions:Mongo.List<Record.Group, Mongo.KeyPath> = .init(
+                        in: Output.Principal[.groups])
                     let master:Master = .init(
                         in: Output.Principal[.master])
 
@@ -273,7 +273,7 @@ extension DeepQuery
                     {
                         $0[.setUnion] = .init
                         {
-                            $0 += extensions.zones
+                            $0.expr { $0[.reduce] = extensions.flatMap(\.zones) }
                             $0 += master.zones
                         }
                     }
@@ -281,7 +281,7 @@ extension DeepQuery
                     {
                         $0[.setUnion] = .init
                         {
-                            $0 += extensions.scalars
+                            $0.expr { $0[.reduce] = extensions.flatMap(\.scalars) }
                             $0 += master.scalars
                         }
                     }
@@ -307,15 +307,17 @@ extension DeepQuery
                     }
                     $0[Output[.secondary]] = .init
                     {
+                        let results:Mongo.KeyPath = "results"
+
                         $0.stage
                         {
-                            $0[.unwind] = "$\(scalars)"
+                            $0[.unwind] = scalars
                         }
                         $0.stage
                         {
                             $0[.match] = .init
                             {
-                                $0[scalars] = .init { $0[.ne] = .some(nil as Never?) }
+                                $0[scalars] = .init { $0[.ne] = Never??.some(nil) }
                             }
                         }
                         $0.stage
@@ -325,16 +327,16 @@ extension DeepQuery
                                 $0[.from] = Database.Masters.name
                                 $0[.localField] = scalars
                                 $0[.foreignField] = Record.Master[.id]
-                                $0[.as] = "results"
+                                $0[.as] = results
                             }
                         }
                         $0.stage
                         {
-                            $0[.unwind] = "$results"
+                            $0[.unwind] = results
                         }
                         $0.stage
                         {
-                            $0[.replaceWith] = "$results"
+                            $0[.replaceWith] = results
                         }
                         $0.stage
                         {
@@ -345,9 +347,11 @@ extension DeepQuery
                     }
                     $0[Output[.zones]] = .init
                     {
+                        let results:Mongo.KeyPath = "results"
+
                         $0.stage
                         {
-                            $0[.unwind] = "$\(zones)"
+                            $0[.unwind] = zones
                         }
                         $0.stage
                         {
@@ -361,7 +365,7 @@ extension DeepQuery
                                     }
                                     $0.append
                                     {
-                                        $0[zones] = .init { $0[.ne] = "$\(Record.Zone[.id])" }
+                                        $0[zones] = .init { $0[.ne] = Record.Zone[.id] }
                                     }
                                 }
                             }
@@ -373,16 +377,16 @@ extension DeepQuery
                                 $0[.from] = Database.Zones.name
                                 $0[.localField] = zones
                                 $0[.foreignField] = Record.Zone[.id]
-                                $0[.as] = "results"
+                                $0[.as] = results
                             }
                         }
                         $0.stage
                         {
-                            $0[.unwind] = "$results"
+                            $0[.unwind] = results
                         }
                         $0.stage
                         {
-                            $0[.replaceWith] = "$results"
+                            $0[.replaceWith] = results
                         }
                     }
                 }

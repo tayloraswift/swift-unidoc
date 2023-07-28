@@ -19,9 +19,6 @@ extension Record.Outline
         case display = "T"
         case scalars = "s"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Outline:BSONDocumentEncodable
 {

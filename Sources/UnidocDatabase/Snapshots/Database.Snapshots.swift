@@ -33,11 +33,7 @@ extension Database.Snapshots
                     .init
                     {
                         $0[.unique] = true
-                        $0[.name] =
-                        """
-                        \(Self.name)\
-                        (\(Snapshot[.package]), \(Snapshot[.version]))
-                        """
+                        $0[.name] = "package,version"
                         $0[.key] = .init
                         {
                             $0[Snapshot[.package]] = (-)

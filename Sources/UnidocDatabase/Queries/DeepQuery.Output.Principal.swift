@@ -1,6 +1,7 @@
 import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
+import MongoSchema
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
@@ -25,11 +26,11 @@ extension DeepQuery.Output
         let latest:Bool
 
         public
-        let extensions:[Record.Extension]
-        public
         let matches:[Record.Master]
         public
         let master:Record.Master?
+        public
+        let groups:[Record.Group]
 
         @inlinable internal
         init(
@@ -39,9 +40,9 @@ extension DeepQuery.Output
             display:String?,
             github:String?,
             latest:Bool,
-            extensions:[Record.Extension],
             matches:[Record.Master],
-            master:Record.Master?)
+            master:Record.Master?,
+            groups:[Record.Group])
         {
             self.package = package
             self.version = version
@@ -50,9 +51,9 @@ extension DeepQuery.Output
             self.github = github
             self.latest = latest
 
-            self.extensions = extensions
             self.matches = matches
             self.master = master
+            self.groups = groups
         }
     }
 }
@@ -69,14 +70,16 @@ extension DeepQuery.Output.Principal
             latest: self.latest)
     }
 }
-extension DeepQuery.Output.Principal
+//  TODO: this is a pretty fishy conformance... we should not have two master models for
+//  the same document type.
+extension DeepQuery.Output.Principal:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable
     {
-        case extensions = "e"
         case matches = "a"
         case master = "m"
+        case groups = "g"
 
         //  These keys come from ``Record.Zone.CodingKey``.
         //  TODO: find a way to hitch this to the actual definitions
@@ -87,10 +90,9 @@ extension DeepQuery.Output.Principal
         case display = "D"
         case github = "H"
         case latest = "L"
-    }
 
-    static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
+        // case _scalars = "scalars"
+    }
 }
 extension DeepQuery.Output.Principal:BSONDocumentDecodable
 {
@@ -104,8 +106,8 @@ extension DeepQuery.Output.Principal:BSONDocumentDecodable
             display: try bson[.display]?.decode(),
             github: try bson[.github]?.decode(),
             latest: try bson[.latest]?.decode() ?? false,
-            extensions: try bson[.extensions].decode(),
             matches: try bson[.matches].decode(),
-            master: try bson[.master]?.decode())
+            master: try bson[.master]?.decode(),
+            groups: try bson[.groups].decode())
     }
 }

@@ -1,18 +1,16 @@
 import BSONEncoding
-import MongoBuiltins
-import MongoExpressions
-import Signatures
+import MongoSchema
 import UnidocRecords
 
 extension DeepQuery.Master
 {
     struct Zones
     {
-        let key:BSON.Key
+        let path:Mongo.KeyPath
 
-        init(in key:BSON.Key)
+        init(in path:Mongo.KeyPath)
         {
-            self.key = key
+            self.path = path
         }
     }
 }
@@ -23,7 +21,7 @@ extension DeepQuery.Master.Zones
     {
         list.expr
         {
-            $0[.coalesce] = ("$\(self.key / Record.Master[.zones])", [] as [Never])
+            $0[.coalesce] = (self.path / Record.Master[.zones], [] as [Never])
         }
     }
 }

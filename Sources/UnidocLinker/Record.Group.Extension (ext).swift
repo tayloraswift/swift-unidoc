@@ -2,7 +2,7 @@ import Signatures
 import UnidocRecords
 import Unidoc
 
-extension Record.Extension
+extension Record.Group.Extension
 {
     init(signature:DynamicLinker.ExtensionSignature,
         extension:DynamicLinker.Extension,
@@ -34,6 +34,8 @@ extension Record.Extension
             features: `extension`.features,
             nested: `extension`.nested,
             subforms: `extension`.subforms,
-            prefetch: prefetch)
+            prefetch: prefetch,
+            overview: `extension`.overview,
+            details: `extension`.details)
     }
 }

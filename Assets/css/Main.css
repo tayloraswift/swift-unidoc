@@ -179,7 +179,7 @@ section.parameters dl dt:before {
   font-weight: normal;
 }
 
-section.extension code.constraints {
+section.group code.constraints {
   line-height: 1.6rem;
   color: rgb(134, 134, 134);
   font-size: inherit;
@@ -187,30 +187,30 @@ section.extension code.constraints {
   text-indent: -3.6rem;
   margin-left: 3.6rem;
 }
-section.extension code.constraints span.syntax-keyword {
+section.group code.constraints span.syntax-keyword {
   color: rgb(109, 109, 109);
 }
-section.extension code.constraints span.syntax-type,
-section.extension code.constraints span.syntax-typealias {
+section.group code.constraints span.syntax-type,
+section.group code.constraints span.syntax-typealias {
   color: rgb(255, 123, 0);
   font-weight: 500;
 }
-section.extension code.constraints span.syntax-type a,
-section.extension code.constraints span.syntax-typealias a {
+section.group code.constraints span.syntax-type a,
+section.group code.constraints span.syntax-typealias a {
   color: inherit;
 }
 
-section.extension ul,
+section.group ul,
 section.superforms ul {
   padding: 0;
   list-style-type: none;
 }
-section.extension ul > li,
+section.group ul > li,
 section.superforms ul > li {
-  margin: 1rem 0 1rem 0;
+  margin: 0.5rem 0 0.5rem 0;
   padding: 0;
 }
-section.extension ul > li a,
+section.group ul > li a,
 section.superforms ul > li a {
   display: block;
   text-indent: -2.5rem;
@@ -221,11 +221,11 @@ section.superforms ul > li a {
   font-size: inherit;
   padding: 0.8em 0 0 0;
 }
-section.extension ul > li a span.syntax-identifier,
+section.group ul > li a span.syntax-identifier,
 section.superforms ul > li a span.syntax-identifier {
   color: rgb(253, 39, 99);
 }
-section.extension ul > li p,
+section.group ul > li p,
 section.superforms ul > li p {
   padding: 0 0 0 2.5rem;
   line-height: 1.3rem;

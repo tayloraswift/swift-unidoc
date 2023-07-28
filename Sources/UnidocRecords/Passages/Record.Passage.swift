@@ -29,9 +29,6 @@ extension Record.Passage
         case outlines = "o"
         case markdown = "M"
     }
-
-    @inlinable public static
-    subscript(key:CodingKey) -> BSON.Key { .init(key) }
 }
 extension Record.Passage:BSONDocumentEncodable
 {

@@ -11,17 +11,18 @@ extension Site.Docs.DeepPage
 {
     struct Decl
     {
-        let master:Record.Master.Decl
+        private
         let tabulator:Tabulator
+        let master:Record.Master.Decl
 
         private
         let path:QualifiedPath
 
         private
-        init(_ master:Record.Master.Decl, tabulator:Tabulator)
+        init(tabulator:Tabulator, master:Record.Master.Decl)
         {
-            self.master = master
             self.tabulator = tabulator
+            self.master = master
 
             self.path = .init(splitting: self.master.stem)
         }
@@ -29,12 +30,12 @@ extension Site.Docs.DeepPage
 }
 extension Site.Docs.DeepPage.Decl
 {
-    init(_ master:Record.Master.Decl, extensions:[Record.Extension], inliner:Inliner)
+    init(_ inliner:Inliner, master:Record.Master.Decl, groups:[Record.Group])
     {
-        self.init(master, tabulator: .init(
-            extensions: extensions,
-            generics: master.signature.generics.parameters,
-            inliner: inliner))
+        self.init(tabulator: .init(inliner,
+                generics: master.signature.generics.parameters,
+                groups: groups),
+            master: master)
     }
 }
 extension Site.Docs.DeepPage.Decl
@@ -42,14 +43,13 @@ extension Site.Docs.DeepPage.Decl
     private
     var inliner:Inliner { self.tabulator.inliner }
 
-    var zone:Record.Zone.Names
-    {
-        self.inliner.zones.principal.zone
-    }
-
     var location:URI
     {
         .init(decl: self.master, in: self.zone)
+    }
+    var zone:Record.Zone.Names
+    {
+        self.inliner.zones.principal.zone
     }
 }
 extension Site.Docs.DeepPage.Decl

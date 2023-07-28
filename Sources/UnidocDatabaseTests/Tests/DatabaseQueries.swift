@@ -255,7 +255,7 @@ struct DatabaseQueries:MongoTestBattery
                             $0[$1.id] = $1.stem?.last
                         }
                         var counts:[Substring: Int] = [:]
-                        for `extension`:Record.Extension in output[0].principal[0].extensions
+                        for case .extension(let `extension`) in output[0].principal[0].groups
                         {
                             for p:Unidoc.Scalar in `extension`.conformances
                             {
