@@ -6,10 +6,13 @@ import SemanticVersions
 @frozen public
 struct SymbolGraphMetadata:Equatable, Sendable
 {
+    public
+    var abi:MinorVersion
+
     /// A package identifier.
     /// This is part of a documentation object’s identity.
     public
-    let package:PackageIdentifier
+    var package:PackageIdentifier
     /// A version to associate with the relevant symbol graph.
     ///
     /// This is part of a documentation object’s identity, if non-nil.
@@ -19,45 +22,45 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// Versions are an SPM/toolchain concept; to obtain the git-based version
     /// information, use ``refname`` or ``revision``.
     public
-    let version:AnyVersion?
+    var version:AnyVersion?
     /// A swift target triple.
     /// This is part of a documentation object’s identity.
     public
-    let triple:Triple
+    var triple:Triple
 
 
     /// All other packages (and their pins) that the relevant package is aware of.
     /// This list is used to select other documentation objects to link against.
     public
-    let dependencies:[Dependency]
+    var dependencies:[Dependency]
     /// The swift toolchain the relevant documentation was generated with,
     /// which is used to select a version of the standard library to link
     /// against. This is nil if the documentation *is* the toolchain
     /// documentation.
     public
-    let toolchain:AnyVersion?
+    var toolchain:AnyVersion?
     /// The package products contained within the relevant documentation.
     /// The products in this list contain references to packages named in
     /// ``dependencies``. This list is used to filter other documentation objects
     /// to link against.
     public
-    let products:[ProductDetails]
+    var products:[ProductDetails]
 
 
     /// The platform requirements of the relevant package. This field is
     /// informative only.
     public
-    let requirements:[PlatformRequirement]
+    var requirements:[PlatformRequirement]
     /// The commit hash of the relevant documentation. It is a more specific
     /// notion of version than ``ref``, but it is used for validation only.
     public
-    let revision:Repository.Revision?
+    var revision:Repository.Revision?
     /// The git ref used to check out the original package sources, if the
     /// relevant symbol graph was generated for a source-controlled SPM package.
     /// Unlike ``version``, this is an exact string; e.g. it can be `v1.2.3`
     /// whereas ``version`` may render as `1.2.3`.
     public
-    let refname:String?
+    var refname:String?
 
 
     /// An optional string containing the marketing name for the package.
@@ -84,6 +87,8 @@ struct SymbolGraphMetadata:Equatable, Sendable
         github:String? = nil,
         root:Repository.Root? = nil)
     {
+        self.abi = ABI.version
+
         self.package = package
         self.triple = triple
         self.version = version
@@ -174,6 +179,7 @@ extension SymbolGraphMetadata
     @frozen public
     enum CodingKey:String
     {
+        case abi
         case package
         case version
         case triple
@@ -193,6 +199,7 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
+        bson[.abi] = self.abi
         bson[.package] = self.package
         bson[.version] = self.version
         bson[.triple] = self.triple
@@ -227,5 +234,7 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
             display: try bson[.display]?.decode(),
             github: try bson[.github]?.decode(),
             root: try bson[.root]?.decode())
+
+        self.abi = try bson[.abi].decode()
     }
 }
