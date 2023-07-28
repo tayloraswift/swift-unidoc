@@ -86,15 +86,18 @@ extension DynamicLinker.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending scope:Int32,
         context:DynamicContext,
-        groups:[DynamicClientGroup],
-        errors:inout [any DynamicLinkerError]) -> ProtocolConformances<Unidoc.Scalar>
+        clients:[DynamicClientGroup],
+        diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Unidoc.Scalar>
     {
         guard   let scope:Unidoc.Scalar = context.current.scalars.decls[scope],
                 let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
         else
         {
             let type:Symbol.Decl = context.current.graph.decls[scope]
-            errors.append(DroppedExtensionsError.extensions(of: type, count: extensions.count))
+
+            diagnostics.errors.append(DroppedExtensionsError.extensions(of: type,
+                count: extensions.count))
+
             return [:]
         }
 
@@ -109,7 +112,7 @@ extension DynamicLinker.Extensions
 
         let conformances:ProtocolConformances<Unidoc.Scalar> = .init(
             context: context,
-            errors: &errors)
+            errors: &diagnostics.errors)
         {
             (conformances:inout ProtocolConformances<Int>) in
 
@@ -118,7 +121,7 @@ extension DynamicLinker.Extensions
                 extensions,
                 signatures)
             {
-                let group:DynamicClientGroup = groups[`extension`.culture]
+                let group:DynamicClientGroup = clients[`extension`.culture]
                 for p:Int32 in `extension`.conformances
                 {
                     //  Only track conformances that were declared by modules in
@@ -196,18 +199,18 @@ extension DynamicLinker.Extensions
                 guard case (nil, nil) = ($0.overview, $0.details)
                 else
                 {
-                    errors.append(DroppedPassagesError.fromExtension($0.id, of: scope))
+                    diagnostics.errors.append(DroppedPassagesError.fromExtension($0.id,
+                        of: scope))
                     return
                 }
 
-                var resolver:DynamicResolver = .init(context: context,
+                let resolver:DynamicResolver = .init(context: context,
+                    diagnostics: diagnostics,
                     namespace: context.current.graph.namespaces[`extension`.namespace],
-                    group: groups[`extension`.culture],
+                    clients: clients[`extension`.culture],
                     scope: [String].init(path))
 
                 ($0.overview, $0.details) = resolver.link(article: article)
-
-                errors += resolver.errors
 
             } (&self[signature])
         }
