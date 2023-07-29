@@ -49,6 +49,12 @@ struct Objects:MongoTestBattery
             version: 1,
             id: "swift-nio v2.54.0 x86_64-unknown-linux-gnu"))
 
+        tests.expect(try await database.store(docs: archives[1], with: session) ==? .init(
+            overwritten: true,
+            package: 0,
+            version: 1,
+            id: "swift-nio v2.54.0 x86_64-unknown-linux-gnu"))
+
         tests.expect(try await database.store(docs: archives.last!, with: session) ==? .init(
             overwritten: false,
             package: 0,
@@ -58,8 +64,14 @@ struct Objects:MongoTestBattery
         tests.expect(try await database.store(docs: archives.last!, with: session) ==? .init(
             overwritten: true,
             package: 0,
-            version: 3,
+            version: 2,
             id: "swift-nio @main x86_64-unknown-linux-gnu"))
+
+        tests.expect(try await database.store(docs: archives[0], with: session) ==? .init(
+            overwritten: true,
+            package: 0,
+            version: 0,
+            id: "swift-nio v2.53.0 x86_64-unknown-linux-gnu"))
 
         for archive:Documentation in archives
         {
