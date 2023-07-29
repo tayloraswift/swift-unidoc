@@ -10,3 +10,6 @@ Please check if you need to update the version tuple in <file:ABI.swift> when ch
 -   ``MarkdownSemantics``
 -   ``MarkdownTrees``
 -   ``SymbolGraphs``
+-   ``SymbolGraphCompiler``
+-   ``SymbolGraphLinker``
+-   ``SymbolGraphParts``

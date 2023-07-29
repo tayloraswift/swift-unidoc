@@ -61,9 +61,12 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
                 }
             }
 
-            $0 ?= self.master.overview.map(self.inliner.passage(_:))
+            $0[.h1] = self.master.headline.safe
         }
-        html[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.passage(_:))
+        html[.section, { $0.class = "details" }]
+        {
+            $0 ?= self.master.overview.map(self.inliner.passage(_:))
+            $0 ?= self.master.details.map(self.inliner.passage(_:))
+        }
     }
 }

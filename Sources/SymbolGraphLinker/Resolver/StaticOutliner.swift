@@ -103,7 +103,14 @@ extension StaticOutliner
         from sources:[MarkdownSource]) -> SymbolGraph.Article<Never>
     {
         //  No links in the headline!
-        let headline:MarkdownBytecode = .init { title?.emit(into: &$0) }
+        let headline:MarkdownBytecode = .init
+        {
+            //  Don’t emit the enclosing `h1` tag!
+            for element:MarkdownInline.Block in title?.elements ?? []
+            {
+                element.emit(into: &$0)
+            }
+        }
         let overview:MarkdownBytecode = self.link(
             overview: body.overview,
             from: sources)
