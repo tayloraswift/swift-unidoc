@@ -28,7 +28,7 @@ extension Inliner.Card:HyperTextOutputStreamable
             switch self.master
             {
             case .article(let master):
-                $0 ?= master.stem.last
+                $0 += master.headline.safe
 
             case .culture(let master):
                 $0 += master.module.id
