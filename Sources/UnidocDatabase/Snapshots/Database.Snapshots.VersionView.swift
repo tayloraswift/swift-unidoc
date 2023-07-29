@@ -19,10 +19,6 @@ extension Database.Snapshots.VersionView:BSONDocumentDecodable
 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        for field in bson
-        {
-            print(field)
-        }
         self.init(version: try bson[.version].decode())
     }
 }
