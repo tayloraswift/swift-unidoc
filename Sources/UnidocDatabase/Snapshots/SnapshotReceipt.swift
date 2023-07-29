@@ -1,3 +1,5 @@
+import Unidoc
+
 @frozen public
 struct SnapshotReceipt:Equatable, Hashable, Sendable
 {
@@ -17,5 +19,13 @@ struct SnapshotReceipt:Equatable, Hashable, Sendable
         self.package = package
         self.version = version
         self.id = id
+    }
+}
+extension SnapshotReceipt
+{
+    @inlinable public
+    var zone:Unidoc.Zone
+    {
+        .init(package: self.package, version: self.version)
     }
 }

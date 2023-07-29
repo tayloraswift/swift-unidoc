@@ -115,6 +115,13 @@ extension Database
                 graph: docs.graph),
             with: session)
 
+        if  receipt.overwritten
+        {
+            try await self.masters.clear(receipt.zone, with: session)
+            try await self.groups.clear(receipt.zone, with: session)
+            try await self.zones.delete(receipt.zone, with: session)
+        }
+
         try await self.push(records, with: session)
         return receipt
     }

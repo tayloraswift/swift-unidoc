@@ -66,41 +66,110 @@ extension Database.Snapshots
         with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
         //  Look up the snapshot with the highest version index in the database
-        let predecessors:[MetadataView] = try await transaction.run(
-            command: Mongo.Find<Mongo.SingleBatch<MetadataView>>.init(Self.name,
-                limit: 1)
+        let pipeline:Mongo.Pipeline = .init
+        {
+            let predecessor:Mongo.KeyPath = "predecessor"
+            let existing:Mongo.KeyPath = "existing"
+            let zone:Mongo.KeyPath = "zone"
+
+            $0.stage
             {
-                $0[.filter] = .init
+                $0[.match] = .init
                 {
                     $0[Snapshot[.package]] = package
                 }
+            }
+            $0.stage
+            {
+                $0[.facet] = .init
+                {
+                    $0[predecessor] = .init
+                    {
+                        $0.stage
+                        {
+                            $0[.sort] = .init
+                            {
+                                $0[Snapshot[.version]] = (-)
+                            }
+                        }
+                        $0.stage
+                        {
+                            $0[.limit] = 1
+                        }
+                        $0.stage
+                        {
+                            $0[.set] = .init
+                            {
+                                $0[Snapshot[.version]] = .expr
+                                {
+                                    $0[.add] = (Snapshot[.version], 1)
+                                }
+                            }
+                        }
+                    }
+                    $0[existing] = .init
+                    {
+                        $0.stage
+                        {
+                            $0[.match] = .init
+                            {
+                                $0[Snapshot[.id]] = id
+                            }
+                        }
+                    }
+                }
+            }
+            $0.stage
+            {
+                $0[.set] = .init
+                {
+                    $0[zone] = .expr { $0[.concatArrays] = (predecessor, existing) }
+                }
+            }
+            $0.stage
+            {
+                $0[.unwind] = zone
+            }
+            $0.stage
+            {
+                $0[.set] = .init
+                {
+                    $0[Snapshot[.version]] = zone / Snapshot[.version]
+                }
+            }
+            $0.stage
+            {
+                //  If a snapshot with the same revision already exists, return that first.
                 $0[.sort] = .init
                 {
-                    $0[Snapshot[.version]] = (-)
+                    $0[Snapshot[.version]] = (+)
                 }
-                $0[.hint] = .init
+            }
+            $0.stage
+            {
+                $0[.project] = .init
                 {
-                    $0[Snapshot[.package]] = (-)
-                    $0[Snapshot[.version]] = (-)
+                    $0[Snapshot[.version]] = 1
                 }
-                $0[.projection] = .init
-                {
-                    $0[Snapshot[.id]] = false
-                    $0[Snapshot[.package]] = true
-                    $0[Snapshot[.version]] = true
-                }
-            },
-            against: self.database)
+            }
+            $0.stage
+            {
+                $0[.limit] = 1
+            }
+        }
 
-        let predecessor:Int32 = predecessors.first?.version ?? -1
-        if  predecessor == .max
+        let version:Int32 = try await transaction.run(
+            command: Mongo.Aggregate<Mongo.Cursor<VersionView>>.init(Self.name,
+                pipeline: pipeline,
+                stride: 1),
+            against: self.database)
         {
-            fatalError("unimplemented")
+            try await $0.reduce(into: [], +=).first?.version ?? 0
         }
 
         let snapshot:Snapshot = .init(id: id,
             package: package,
-            version: predecessor + 1,
+            version: version,
             metadata: docs.metadata,
             graph: docs.graph)
 
@@ -110,9 +179,15 @@ extension Database.Snapshots
                     .init
                     {
                         $0[.upsert] = true
+                        $0[.hint] = .init
+                        {
+                            $0[Snapshot[.package]] = (-)
+                            $0[Snapshot[.version]] = (-)
+                        }
                         $0[.q] = .init
                         {
-                            $0[Snapshot[.id]] = snapshot.id
+                            $0[Snapshot[.package]] = package
+                            $0[Snapshot[.version]] = version
                         }
                         $0[.u] = snapshot
                     },

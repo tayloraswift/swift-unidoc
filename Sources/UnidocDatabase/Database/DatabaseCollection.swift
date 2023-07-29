@@ -27,10 +27,34 @@ extension DatabaseCollection
         try await self.setup(with: session)
     }
 }
+extension DatabaseCollection where ElementID:BSONEncodable
+{
+    func delete(_ id:ElementID, with session:Mongo.Session) async throws
+    {
+        let response:Mongo.DeleteResponse = try await session.run(
+            command: Mongo.Delete<Mongo.One>.init(Self.name,
+                deletes:
+                [
+                    .init
+                    {
+                        $0[.limit] = .one
+                        $0[.q] = .init { $0["_id"] = id }
+                    },
+                ]),
+            against: self.database)
+
+        if  let error:any Error =
+                response.writeConcernError ??
+                response.writeErrors.first
+        {
+            throw error
+        }
+    }
+}
 extension DatabaseCollection<Unidoc.Scalar>
 {
     /// Deletes all records from the collection within the specified zone.
-    func clear(zone:Unidoc.Zone, with session:Mongo.Session) async throws
+    func clear(_ zone:Unidoc.Zone, with session:Mongo.Session) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name,
