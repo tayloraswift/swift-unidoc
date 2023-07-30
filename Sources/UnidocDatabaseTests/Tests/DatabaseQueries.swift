@@ -205,6 +205,29 @@ struct DatabaseQueries:MongoTestBattery
                 }
             }
         }
+        /// The symbol graph linker should have mangled the space in `Getting Started.md`
+        /// into a hyphen.
+        if  let tests:TestGroup = tests / "Barbie" / "GettingStarted",
+            let query:DeepQuery = tests.expect(
+                value: .init(.learn, "swift-malibu",
+                [
+                    "$anonymous:barbiecore",
+                    "getting-started",
+                ]))
+        {
+            await tests.do
+            {
+                let output:[DeepQuery.Output] = try await database.execute(query: query,
+                    with: session)
+
+                if  tests.expect(output.count ==? 1),
+                    tests.expect(output[0].principal.count ==? 1),
+                    let _:Record.Master = tests.expect(
+                        value: output[0].principal[0].master)
+                {
+                }
+            }
+        }
 
         /// The ``BarbieHousing`` module vends an extension on ``Array`` that
         /// conforms it to the ``DollhouseSecurity.DollhouseKeychain`` protocol.
