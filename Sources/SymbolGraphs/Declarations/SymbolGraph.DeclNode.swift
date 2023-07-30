@@ -1,10 +1,12 @@
 import BSONDecoding
 import BSONEncoding
+import Symbols
+import Unidoc
 
 extension SymbolGraph
 {
     @frozen public
-    struct Node:Equatable, Sendable
+    struct DeclNode:Equatable, Sendable
     {
         public
         var extensions:[Extension]
@@ -19,7 +21,17 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.Node
+extension SymbolGraph.DeclNode:SymbolGraphNode
+{
+    public
+    typealias Plane = UnidocPlane.Decl
+    public
+    typealias ID = Symbol.Decl
+
+    @inlinable public
+    var isCitizen:Bool { self.decl != nil }
+}
+extension SymbolGraph.DeclNode
 {
     public mutating
     func push(_ extension:__owned SymbolGraph.Extension) -> Int
@@ -28,7 +40,7 @@ extension SymbolGraph.Node
         return self.extensions.endIndex
     }
 }
-extension SymbolGraph.Node
+extension SymbolGraph.DeclNode
 {
     @frozen public
     enum CodingKey:String
@@ -37,7 +49,7 @@ extension SymbolGraph.Node
         case decl = "V"
     }
 }
-extension SymbolGraph.Node:BSONDocumentEncodable
+extension SymbolGraph.DeclNode:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -46,7 +58,7 @@ extension SymbolGraph.Node:BSONDocumentEncodable
         bson[.extensions] = self.extensions.isEmpty ? nil : self.extensions
     }
 }
-extension SymbolGraph.Node:BSONDocumentDecodable
+extension SymbolGraph.DeclNode:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

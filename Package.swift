@@ -53,6 +53,7 @@ let package:Package = .init(
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
+        .library(name: "URI", targets: ["URI"]),
 
         .executable(name: "UnidocServer", targets: ["UnidocServer"]),
     ],

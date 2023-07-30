@@ -1,4 +1,6 @@
 import CodelinkResolution
+import MarkdownABI
+import MarkdownTrees
 import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphs
@@ -12,6 +14,9 @@ extension StaticLinker
         /// are not included in the symbol graph being linked.
         private
         var modules:[ModuleIdentifier: Int]
+
+        private
+        var articles:[Symbol.Article: Int32]
         private
         var decls:[Symbol.Decl: Int32]
         private
@@ -22,6 +27,8 @@ extension StaticLinker
         init(modules:[ModuleDetails])
         {
             self.modules = [:]
+
+            self.articles = [:]
             self.decls = [:]
             self.files = [:]
 
@@ -31,6 +38,35 @@ extension StaticLinker
 }
 extension StaticLinker.Symbolizer
 {
+    /// Indexes the given article and appends it to the symbol graph, if an article
+    /// with the same mangled name has not already been indexed. (This function checks
+    /// for duplicates.)
+    mutating
+    func allocate(article:Symbol.Article, title:__owned MarkdownBlock.Heading) -> Int32?
+    {
+        {
+            if  case nil = $0
+            {
+                let headline:MarkdownBytecode = .init
+                {
+                    //  Don’t emit the enclosing `h1` tag!
+                    for element:MarkdownInline.Block in title.elements
+                    {
+                        element.emit(into: &$0)
+                    }
+                }
+                let scalar:Int32 = self.graph.articles.append(.init(headline: headline),
+                    id: article)
+                $0 = scalar
+                return scalar
+            }
+            else
+            {
+                return nil
+            }
+        } (&self.articles[article])
+    }
+
     /// Indexes the given declaration and appends it to the symbol graph.
     ///
     /// This function only populates basic information (flags and path)
@@ -41,15 +77,16 @@ extension StaticLinker.Symbolizer
     mutating
     func allocate(decl:Compiler.Decl) -> Int32
     {
-        let scalar:Int32 = self.graph.append(.init(
+        let scalar:Int32 = self.graph.decls.append(.init(decl: .init(
                 customization: decl.customization,
                 phylum: decl.phylum,
-                path: decl.path),
+                path: decl.path)),
             id: decl.id)
 
         self.decls[decl.id] = scalar
         return scalar
     }
+
     /// Indexes the declaration extended by the given extension and appends
     /// the (empty) declaration to the symbol graph, if it has not already
     /// been indexed. (This function checks for duplicates.)
@@ -62,7 +99,8 @@ extension StaticLinker.Symbolizer
             switch $0
             {
             case nil:
-                let scalar:Int32 = self.graph.append(nil, id: decl)
+                let scalar:Int32 = self.graph.decls.append(.init(extensions: []),
+                    id: decl)
                 $0 = scalar
                 return scalar
 
@@ -86,7 +124,7 @@ extension StaticLinker.Symbolizer
             switch $0
             {
             case nil:
-                let scalar:Int32 = self.graph.decls.append(id)
+                let scalar:Int32 = self.graph.decls.symbols.append(id)
                 $0 = scalar
                 return scalar
 

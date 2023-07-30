@@ -1,3 +1,4 @@
+public
 protocol PercentEncodingSet
 {
     static

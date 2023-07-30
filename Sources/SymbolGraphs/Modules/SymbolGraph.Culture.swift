@@ -19,7 +19,7 @@ extension SymbolGraph
         var articles:ClosedRange<Int32>?
         /// This module’s primary article, if it has one.
         public
-        var article:Article<Never>?
+        var article:Article?
 
         public
         var topics:[Topic]

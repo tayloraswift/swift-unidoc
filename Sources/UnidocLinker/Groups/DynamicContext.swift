@@ -37,7 +37,7 @@ extension DynamicContext
 
         for snapshot:Snapshot in dependencies
         {
-            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.citizens
+            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.decls.citizens
             {
                 upstream.citizens[symbol] = snapshot.zone + citizen
             }
@@ -152,7 +152,7 @@ extension DynamicContext
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
                 var group:DynamicClientGroup = .init(
-                    nodes: self.current.scalars.decls[self.current.graph.nodes.indices])
+                    nodes: self.current.scalars.decls[self.current.graph.decls.nodes.indices])
 
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {

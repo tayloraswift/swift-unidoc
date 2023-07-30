@@ -95,8 +95,8 @@ extension DynamicClientGroup
         let qualifier:ModuleIdentifier = snapshot.graph.namespaces[namespace.index]
         for s:Int32 in namespace.range
         {
-            let node:SymbolGraph.Node = snapshot.graph.nodes[s]
-            let symbol:Symbol.Decl = snapshot.graph.decls[s]
+            let node:SymbolGraph.DeclNode = snapshot.graph.decls.nodes[s]
+            let symbol:Symbol.Decl = snapshot.graph.decls.symbols[s]
 
             guard let s:Unidoc.Scalar = snapshot.scalars.decls[s]
             else
@@ -169,7 +169,7 @@ extension DynamicClientGroup
             let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features
             {
-                let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls[f],
+                let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls.symbols[f],
                     self: outer.symbol)
 
                 if  let f:Unidoc.Scalar = snapshot.scalars.decls[f],

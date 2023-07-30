@@ -37,13 +37,13 @@ extension Snapshot.View<Symbol.Decl>
 {
     subscript(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
-        (scalar - self.zone).map { self.graph.decls[$0] }
+        (scalar - self.zone).map { self.graph.decls.symbols[$0] }
     }
 }
-extension Snapshot.View<SymbolGraph.Node>
+extension Snapshot.View<SymbolGraph.DeclNode>
 {
-    subscript(_ scalar:Unidoc.Scalar) -> SymbolGraph.Node?
+    subscript(_ scalar:Unidoc.Scalar) -> SymbolGraph.DeclNode?
     {
-        (scalar - self.zone).map { self.graph.nodes[$0] }
+        (scalar - self.zone).map { self.graph.decls.nodes[$0] }
     }
 }

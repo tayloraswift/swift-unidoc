@@ -12,7 +12,7 @@ extension Record.Master
         public
         let module:ModuleDetails
         public
-        var file:Unidoc.Scalar?
+        var readme:Unidoc.Scalar?
 
         public
         var overview:Record.Passage?
@@ -24,7 +24,7 @@ extension Record.Master
         @inlinable public
         init(id:Unidoc.Scalar,
             module:ModuleDetails,
-            file:Unidoc.Scalar? = nil,
+            readme:Unidoc.Scalar? = nil,
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil,
             group:Unidoc.Scalar? = nil)
@@ -32,7 +32,7 @@ extension Record.Master
             self.id = id
 
             self.module = module
-            self.file = file
+            self.readme = readme
 
             self.overview = overview
             self.details = details

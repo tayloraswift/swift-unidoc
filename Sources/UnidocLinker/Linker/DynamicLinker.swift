@@ -57,7 +57,7 @@ extension DynamicLinker
         var extensions:Extensions = .init(zone: context.current.zone)
 
         let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances> =
-            context.current.graph.nodes.map
+            context.current.graph.decls.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
                 extending: $0,
@@ -210,8 +210,9 @@ extension DynamicLinker
             module: culture.module,
             group: self.topics.removeValue(forKey: c * .module))
 
-        if  let article:SymbolGraph.Article<Never> = culture.article
+        if  let article:SymbolGraph.Article = culture.article
         {
+            record.readme = article.file.map { self.current.zone + $0 }
             (record.overview, record.details) = resolver.link(article: article)
         }
 
@@ -233,23 +234,19 @@ extension DynamicLinker
             namespace: namespace.id,
             clients: clients)
 
-        for (a, article):(Int32, SymbolGraph.Article<String>) in zip(
-            self.current.graph.articles[range].indices,
-            self.current.graph.articles[range])
+        for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(
+            self.current.graph.articles.nodes[range].indices,
+            self.current.graph.articles.nodes[range])
         {
-            guard let name:String = article.id
-            else
-            {
-                //  TODO: This is a package-level article.
-                continue
-            }
+            let symbol:Symbol.Article = self.current.graph.articles.symbols[a]
             var record:Record.Master.Article = .init(id: self.current.zone + a,
-                stem: .init(namespace.id, name),
+                stem: .init(namespace.id, symbol.name),
                 culture: namespace.scalar,
-                headline: article.headline,
+                file: node.body.file.map { self.current.zone + $0 },
+                headline: node.headline,
                 group: self.topics.removeValue(forKey: a))
 
-            (record.overview, record.details) = resolver.link(article: article)
+            (record.overview, record.details) = resolver.link(article: node.body)
 
             self.projection.masters.append(.article(record))
         }
@@ -266,10 +263,10 @@ extension DynamicLinker
         in clients:DynamicClientGroup)
     {
         for (d, ((symbol, node), conformances)):
-            (Int32, ((Symbol.Decl, SymbolGraph.Node), ProtocolConformances<Unidoc.Scalar>)) in
-            zip(range, zip(zip(
-                    self.current.graph.decls[range],
-                    self.current.graph.nodes[range]),
+            (Int32, ((Symbol.Decl, SymbolGraph.DeclNode), ProtocolConformances<Unidoc.Scalar>))
+            in zip(range, zip(zip(
+                    self.current.graph.decls.symbols[range],
+                    self.current.graph.decls.nodes[range]),
                 self.conformances[range]))
         {
             let group:Unidoc.Scalar? = self.topics.removeValue(forKey: d)
@@ -345,7 +342,7 @@ extension DynamicLinker
                 position: decl.location?.position,
                 group: group)
 
-            if  let article:SymbolGraph.Article<Never> = decl.article
+            if  let article:SymbolGraph.Article = decl.article
             {
                 let resolver:DynamicResolver = .init(context: self.context,
                     diagnostics: self.diagnostics,

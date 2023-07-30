@@ -93,7 +93,7 @@ extension DynamicLinker.Extensions
                 let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
         else
         {
-            let type:Symbol.Decl = context.current.graph.decls[scope]
+            let type:Symbol.Decl = context.current.graph.decls.symbols[scope]
 
             diagnostics.errors.append(DroppedExtensionsError.extensions(of: type,
                 count: extensions.count))
@@ -191,7 +191,7 @@ extension DynamicLinker.Extensions
                     }
                 }
 
-                guard   let article:SymbolGraph.Article<Never> = `extension`.article
+                guard   let article:SymbolGraph.Article = `extension`.article
                 else
                 {
                     return

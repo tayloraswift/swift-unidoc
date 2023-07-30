@@ -22,7 +22,8 @@ extension SnapshotObject.Scalars
 {
     init(snapshot:__shared Snapshot, upstream:__shared DynamicContext.UpstreamScalars)
     {
-        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> = snapshot.graph.link
+        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> =
+            snapshot.graph.decls.link
         {
             snapshot.zone + $0
         }

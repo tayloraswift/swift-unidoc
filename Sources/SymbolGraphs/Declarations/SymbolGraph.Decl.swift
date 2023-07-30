@@ -30,7 +30,7 @@ extension SymbolGraph
         var location:SourceLocation<Int32>?
         /// This scalar’s binary markdown documentation, if it has any.
         public
-        var article:Article<Never>?
+        var article:Article?
 
         /// The addresses of the scalars that this scalar implements,
         /// overrides, or inherits from. Superforms are intrinsic but there
@@ -61,7 +61,7 @@ extension SymbolGraph
             path:UnqualifiedPath,
             signature:Signature<Int32> = .init(),
             location:SourceLocation<Int32>? = nil,
-            article:Article<Never>? = nil,
+            article:Article? = nil,
             superforms:[Int32] = [],
             features:[Int32] = [],
             origin:Int32? = nil)

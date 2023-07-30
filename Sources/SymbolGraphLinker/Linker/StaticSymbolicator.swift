@@ -28,7 +28,7 @@ extension StaticSymbolicator:Symbolicator
     public
     func loadDeclSymbol(_ scalar:Int32) -> Symbol.Decl?
     {
-        self.graph.decls[scalar] as Symbol.Decl?
+        self.graph.decls.symbols[scalar] as Symbol.Decl?
     }
     public
     func loadFileSymbol(_ scalar:Int32) -> Symbol.File?

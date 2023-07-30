@@ -51,7 +51,7 @@ extension Record.Stem
         self.init(rawValue: "\(namespace)")
     }
     @inlinable public
-    init(_ namespace:ModuleIdentifier, _ name:String)
+    init(_ namespace:ModuleIdentifier, _ name:Substring)
     {
         self.init(rawValue: "\(namespace) \(name)")
     }

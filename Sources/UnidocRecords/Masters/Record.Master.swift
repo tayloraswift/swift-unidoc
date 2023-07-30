@@ -33,23 +33,6 @@ extension Record.Master:Identifiable
         case .file(let file):       return file.id
         }
     }
-
-    // @inlinable public
-    // var group:Unidoc.Scalar?
-    // {
-    //     get
-    //     {
-    //         switch self
-    //         {
-    //         case .article(let article): return article.group
-    //         case .culture(let culture): return culture.group
-    //         case .decl(let decl):       return decl.group
-    //         case .file:                 return nil
-    //         }
-    //     }
-    //     set(value)
-
-    // }
 }
 extension Record.Master
 {
@@ -129,7 +112,8 @@ extension Record.Master
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
         /// Can appear in ``Article``, ``Culture``, or ``Decl``.
-        /// The field contains a scalar.
+        /// The field contains a scalar. In ``Culture``, it points to the readme
+        /// article for the module.
         case file = "f"
 
         /// Only appears in ``Decl``.
@@ -231,7 +215,7 @@ extension Record.Master:BSONDocumentEncodable
         case .culture(let self):
             bson[.stem] = self.stem
             bson[.module] = self.module
-            bson[.file] = self.file
+            bson[.file] = self.readme
 
             bson[.overview] = self.overview
             bson[.details] = self.details
@@ -269,7 +253,7 @@ extension Record.Master:BSONDocumentDecodable
         case .module?:
             self = .culture(.init(id: id,
                 module: try bson[.module].decode(),
-                file: try bson[.file]?.decode(),
+                readme: try bson[.file]?.decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
