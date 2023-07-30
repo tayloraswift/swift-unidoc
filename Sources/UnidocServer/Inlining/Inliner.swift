@@ -33,18 +33,18 @@ extension Inliner
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, zone names:Record.Zone.Names)
+    init(principal scalar:Unidoc.Scalar, zone trunk:Record.Trunk)
     {
         self.init(cache: .init(
             masters: .init(principal: scalar),
-            zones: .init(principal: (scalar.zone, names))))
+            zones: .init(principal: (scalar.zone, trunk))))
     }
     convenience
-    init(principal zone:Unidoc.Zone, zone names:Record.Zone.Names)
+    init(principal zone:Unidoc.Zone, zone trunk:Record.Trunk)
     {
         self.init(cache: .init(
             masters: .init(principal: nil),
-            zones: .init(principal: (zone, names))))
+            zones: .init(principal: (zone, trunk))))
     }
 }
 extension Inliner

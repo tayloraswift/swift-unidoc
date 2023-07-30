@@ -52,6 +52,7 @@ let package:Package = .init(
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
+        .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
         .library(name: "URI", targets: ["URI"]),
 
@@ -125,8 +126,7 @@ let package:Package = .init(
                 .target(name: "HTMLDOM"),
             ]),
 
-        .target(name: "HTTPServer",
-            dependencies:
+        .target(name: "HTTPServer", dependencies:
             [
                 .target(name: "HTML"),
                 .target(name: "Media"),
@@ -282,10 +282,10 @@ let package:Package = .init(
                 .target(name: "UnidocPlanes"),
             ]),
 
-        .target(name: "UnidocDatabase",
-            dependencies:
+        .target(name: "UnidocDatabase", dependencies:
             [
                 .target(name: "UnidocLinker"),
+                .target(name: "UnidocQueries"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -295,8 +295,7 @@ let package:Package = .init(
                 .target(name: "Signatures"),
             ]),
 
-        .target(name: "UnidocLinker",
-            dependencies:
+        .target(name: "UnidocLinker", dependencies:
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
@@ -305,6 +304,11 @@ let package:Package = .init(
             ]),
 
         .target(name: "UnidocPlanes"),
+
+        .target(name: "UnidocQueries", dependencies:
+            [
+                .target(name: "UnidocRecords"),
+            ]),
 
         .target(name: "UnidocRecords", dependencies:
             [
@@ -325,8 +329,7 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "UnidocServer",
-            dependencies:
+        .executableTarget(name: "UnidocServer", dependencies:
             [
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
@@ -430,6 +433,12 @@ let package:Package = .init(
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
+            ]),
+
+        .executableTarget(name: "UnidocQueryTests", dependencies:
+            [
+                .target(name: "UnidocQueries"),
+                .product(name: "Testing", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "URITests", dependencies:

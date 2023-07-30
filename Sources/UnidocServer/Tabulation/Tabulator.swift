@@ -40,9 +40,9 @@ extension Tabulator
             {
                 party = .first
             }
-            else if let zone:Record.Zone.Names = inliner.zones[`extension`.id.zone]
+            else if let trunk:Record.Trunk = inliner.zones[`extension`.id.zone]
             {
-                party = .third(zone.package)
+                party = .third(trunk.package)
             }
             else
             {
@@ -88,8 +88,22 @@ extension Tabulator:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group topic" }]
             {
-                $0 ?= topic.overview.map(self.inliner.passage(_:))
-
+                let containsPrincipal:Bool = topic.members.contains
+                {
+                    switch $0
+                    {
+                    case .scalar(let scalar):   return scalar == self.inliner.masters.principal
+                    case .text:                 return false
+                    }
+                }
+                if  containsPrincipal
+                {
+                    $0[.h2] = "See Also"
+                }
+                else
+                {
+                    $0 ?= topic.overview.map(self.inliner.passage(_:))
+                }
                 $0[.ul]
                 {
                     for member:Record.Link in topic.members
@@ -113,9 +127,8 @@ extension Tabulator:HyperTextOutputStreamable
                 {
                     $0[.h3]
                     {
-                        $0 += "(extension in "
+                        $0 += "Extension in "
                         $0 ?= self.inliner.link(module: `extension`.culture)
-                        $0 += ")"
                     }
                     $0[.code, { $0.class = "constraints" }]
                     {

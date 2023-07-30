@@ -10,6 +10,9 @@ extension Record
     @frozen public
     struct Zone:Identifiable, Equatable, Sendable
     {
+        @available(*, deprecated, renamed: "Record.Trunk")
+        public typealias Names = Trunk
+
         public
         let id:Unidoc.Zone
 
@@ -63,7 +66,7 @@ extension Record.Zone
     var planes:Planes { .init(zone: self.id) }
 
     @inlinable public
-    var names:Names
+    var names:Record.Trunk
     {
         .init(package: self.package,
             version: self.version,

@@ -26,9 +26,9 @@ extension Site
 }
 extension Site.DisambiguationPage
 {
-    var zone:Record.Zone.Names
+    var trunk:Record.Trunk
     {
-        self.inliner.zones.principal.zone
+        self.inliner.zones.principal.trunk
     }
 }
 extension Site.DisambiguationPage:HyperTextOutputStreamable

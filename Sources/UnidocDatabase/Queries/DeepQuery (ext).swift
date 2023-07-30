@@ -5,64 +5,9 @@ import MongoDB
 import Signatures
 import SymbolGraphs
 import Unidoc
+import UnidocQueries
 import UnidocRecords
 
-/// A deep query is a query for a single code-level entity,
-/// such as a declaration or a module.
-@frozen public
-struct DeepQuery
-{
-    let planes:Planes
-    let package:PackageIdentifier
-    let version:Substring?
-    let stem:Record.Stem
-    private(set)
-    var hash:FNV24?
-
-    private
-    init(_ planes:Planes,
-        package:PackageIdentifier,
-        version:Substring?,
-        stem:Record.Stem,
-        hash:FNV24? = nil)
-    {
-        self.planes = planes
-
-        self.package = package
-        self.version = version
-        self.stem = stem
-        self.hash = hash
-    }
-}
-extension DeepQuery
-{
-    public
-    init?(_ planes:Planes, _ trunk:String, _ tail:ArraySlice<String>, hash:FNV24? = nil)
-    {
-        if  let colon:String.Index = trunk.firstIndex(of: ":")
-        {
-            self.init(planes,
-                package: .init(trunk[..<colon]),
-                version: nil,
-                stem: .init(uri: (trunk[trunk.index(after: colon)...], tail)),
-                hash: hash)
-        }
-        else if
-            let next:String = tail.first,
-            let colon:String.Index = next.firstIndex(of: ":")
-        {
-            self.init(planes,
-                package: .init(trunk),
-                version: next[..<colon],
-                stem: .init(uri: (next[next.index(after: colon)...], tail.dropFirst())),
-                hash: hash)
-        }
-        else
-        {
-            return nil
-        }
-    }
-}
 extension DeepQuery
 {
     static

@@ -5,6 +5,7 @@ import MongoSchema
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import UnidocQueries
 import UnidocRecords
 
 extension DeepQuery.Output
@@ -60,7 +61,7 @@ extension DeepQuery.Output
 extension DeepQuery.Output.Principal
 {
     @inlinable public
-    var zone:Record.Zone.Names
+    var zone:Record.Trunk
     {
         .init(package: self.package,
             version: self.version,

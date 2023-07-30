@@ -4,6 +4,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import Unidoc
 import UnidocDatabase
+import UnidocQueries
 import UnidocRecords
 
 struct DatabaseQueries:MongoTestBattery

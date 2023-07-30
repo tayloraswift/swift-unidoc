@@ -21,16 +21,16 @@ extension URL:CustomStringConvertible
 extension URL
 {
     init?(master:__shared Record.Master,
-        in zone:__shared Record.Zone.Names,
+        in trunk:__shared Record.Trunk,
         disambiguate:Bool = true)
     {
         switch master
         {
-        case .article(let article): self = .relative(.init(article: article, in: zone))
-        case .culture(let culture): self = .relative(.init(culture: culture, in: zone))
-        case .decl(let decl):       self = .relative(.init(decl: decl, in: zone))
+        case .article(let article): self = .relative(.init(article: article, in: trunk))
+        case .culture(let culture): self = .relative(.init(culture: culture, in: trunk))
+        case .decl(let decl):       self = .relative(.init(decl: decl, in: trunk))
         case .file(let file):
-            if  let url:String = zone.url(github: file.symbol)
+            if  let url:String = trunk.url(github: file.symbol)
             {
                 self = .absolute(url)
             }

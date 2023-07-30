@@ -2,6 +2,7 @@ import HTML
 import HTTPServer
 import MongoDB
 import UnidocDatabase
+import UnidocQueries
 import URI
 
 extension Delegate.Get
@@ -12,9 +13,9 @@ extension Delegate.Get
 
         var canonical:Bool
         var explain:Bool
-        var query:DeepQuery?
+        var query:DeepQuery
 
-        init(canonical:Bool, explain:Bool, query:DeepQuery?, uri:URI)
+        init(canonical:Bool, explain:Bool, query:DeepQuery, uri:URI)
         {
             self.requested = uri
 
@@ -28,19 +29,12 @@ extension Delegate.Get.DB
 {
     func load(from database:Database, pool:Mongo.SessionPool) async throws -> ServerResponse?
     {
-        guard let query:DeepQuery = self.query
-        else
-        {
-            // unimplemented
-            return nil
-        }
-
         let session:Mongo.Session = try await .init(from: pool)
 
         if  self.explain
         {
             let explanation:String = try await database.explain(
-                query: query,
+                query: self.query,
                 with: session)
 
             return .resource(.init(.one(canonical: nil),
@@ -49,7 +43,7 @@ extension Delegate.Get.DB
         }
         else if
             let page:Site.Docs.DeepPage = .init(try await database.execute(
-                query: query,
+                query: self.query,
                 with: session))
         {
             let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }

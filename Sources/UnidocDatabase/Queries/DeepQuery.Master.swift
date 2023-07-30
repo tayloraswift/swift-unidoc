@@ -1,4 +1,5 @@
 import MongoSchema
+import UnidocQueries
 
 extension DeepQuery
 {

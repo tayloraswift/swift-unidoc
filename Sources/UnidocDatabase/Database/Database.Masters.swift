@@ -1,5 +1,6 @@
 import MongoDB
 import Unidoc
+import UnidocQueries
 import UnidocRecords
 
 extension Database
