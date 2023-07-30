@@ -51,6 +51,7 @@ extension MarkdownDocumentation.Topic
         {
             return nil
         }
+
         var members:[MarkdownInline.Autolink] = []
             members.reserveCapacity(list.elements.count)
 
@@ -67,6 +68,11 @@ extension MarkdownDocumentation.Topic
             {
                 return nil
             }
+        }
+        //  Promote all (unnested) headings by one level
+        for case (let heading as MarkdownBlock.Heading) in blocks
+        {
+            heading.level += 2
         }
 
         self.init(article: .init(blocks.dropLast()), members: members)

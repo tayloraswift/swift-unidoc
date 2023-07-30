@@ -54,25 +54,27 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
 
-                $0[link: self.inliner.url(self.master.culture)] = self.path.namespace
-
-                $0[.span, { $0.class = "culture" }]
+                $0[.span, { $0.class = "module" }]
                 {
-                    $0[.span] { $0.class = "version" } = self.zone.version
+                    $0[link: self.inliner.url(self.master.culture)] = self.path.namespace
+
+                    $0[.span, { $0.class = "culture" }]
+                    {
+                        $0[.span] { $0.class = "version" } = self.zone.version
+                    }
                 }
             }
 
             $0[.h1] = self.master.headline.safe
+
+            $0 ?= self.master.overview.map(self.inliner.passage(_:))
 
             if  let file:Unidoc.Scalar = self.master.file
             {
                 $0 ?= self.inliner.link(file: file)
             }
         }
-        html[.section, { $0.class = "details" }]
-        {
-            $0 ?= self.master.overview.map(self.inliner.passage(_:))
-            $0 ?= self.master.details.map(self.inliner.passage(_:))
-        }
+        html[.section, { $0.class = "details" }] =
+            self.master.details.map(self.inliner.passage(_:))
     }
 }
