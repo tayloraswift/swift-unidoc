@@ -68,6 +68,11 @@ extension Site.Docs.DeepPage.Decl
         }
     }
 
+    var demonym:Demonym
+    {
+        .init(customization: self.master.customization, phylum: self.master.phylum)
+    }
+
     var title:String
     {
         "\(self.path.last) - \(self.zone.display ?? "\(self.zone.package)") Documentation"
@@ -89,7 +94,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = self.master.phylum.title
+                $0[.span] { $0.class = "phylum" } = self.demonym
                 $0[.span, { $0.class = "module" }]
                 {
                     $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
@@ -107,8 +112,6 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             $0[.h1] = self.path.last
 
             $0 ?= self.master.overview.map(self.inliner.passage(_:))
-
-            $0[.span] { $0.class = "customization" } = self.master.customization.title
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.master.location
             {

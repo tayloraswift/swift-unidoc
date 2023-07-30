@@ -30,7 +30,7 @@ extension MarkdownFile
     {
         let stem:Substring = path.last.prefix { $0 != "." }
         let id:String = .init(
-            decoding: stem.utf8.map { URI.Path.Component.EncodingSet.contains($0) ? $0 : 0x2d },
+            decoding: stem.utf8.map { URI.Path.Component.EncodingSet.contains($0) ? 0x2d : $0 },
             as: Unicode.ASCII.self)
 
         self.init(symbol: .init(bundle, id), path: path, text: text)
