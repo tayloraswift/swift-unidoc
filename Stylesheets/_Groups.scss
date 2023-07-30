@@ -26,15 +26,38 @@ section.group code.constraints
         }
     }
 }
-section.group,
-section.superforms
+section.group ul
 {
-    ul
+    > li.article
     {
-        padding: 0;
-        list-style-type: none;
+        margin: 0.5rem 0 0.5rem 0;
+
+        a:first-child
+        {
+            color: inherit;
+
+            h3
+            {
+                font-family: $typeface-serif;
+                font-weight: normal;
+                font-size: 125%;
+                margin: 0.5rem 0;
+            }
+        }
+        a.read-more
+        {
+            font-style: italic;
+        }
     }
-    ul > li
+}
+section.group ul,
+section.superforms ul
+{
+    padding: 0;
+    list-style-type: none;
+
+    > li.decl,
+    > li.module
     {
         margin: 0.5rem 0 0.5rem 0;
         padding: 0;
@@ -62,7 +85,7 @@ section.superforms
         {
             padding: 0 0 0 2.5rem;
             line-height: 1.3rem;
-            font-size: 87.5%;
+            font-size: 90.625%;
         }
     }
 }

@@ -23,25 +23,37 @@ extension Inliner.Card:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[self.target == nil ? .span : .a, { $0.href = self.target }]
+        switch self.master
         {
-            switch self.master
+        case .article(let master):
+            html[.li, { $0.class = "article" }]
             {
-            case .article(let master):
-                $0 += master.headline.safe
+                $0[link: self.target] { $0[.h3] = master.headline.safe }
 
-            case .culture(let master):
-                $0 += master.module.id
-
-            case .decl(let master):
-                $0 += master.signature.abridged
-
-            case .file(_):
-                //  unimplemented
-                break
+                if  let overview:Inliner.Passage = self.overview
+                {
+                    $0 += overview
+                    $0[link: self.target] { $0.class = "read-more" } = "Read More"
+                }
             }
-        }
 
-        html ?= self.overview
+        case .culture(let master):
+            html[.li, { $0.class = "module" }]
+            {
+                $0[link: self.target] = master.module.id
+                $0 ?= self.overview
+            }
+
+        case .decl(let master):
+            html[.li, { $0.class = "decl" }]
+            {
+                $0[link: self.target] = master.signature.abridged
+                $0 ?= self.overview
+            }
+
+        case .file(_):
+            //  unimplemented
+            break
+        }
     }
 }

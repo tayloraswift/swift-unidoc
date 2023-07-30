@@ -200,18 +200,38 @@ section.group code.constraints span.syntax-typealias a {
   color: inherit;
 }
 
+section.group ul > li.article {
+  margin: 0.5rem 0 0.5rem 0;
+}
+section.group ul > li.article a:first-child {
+  color: inherit;
+}
+section.group ul > li.article a:first-child h3 {
+  font-family: "Literata", serif;
+  font-weight: normal;
+  font-size: 125%;
+  margin: 0.5rem 0;
+}
+section.group ul > li.article a.read-more {
+  font-style: italic;
+}
+
 section.group ul,
 section.superforms ul {
   padding: 0;
   list-style-type: none;
 }
-section.group ul > li,
-section.superforms ul > li {
+section.group ul > li.decl,
+section.group ul > li.module,
+section.superforms ul > li.decl,
+section.superforms ul > li.module {
   margin: 0.5rem 0 0.5rem 0;
   padding: 0;
 }
-section.group ul > li > a,
-section.superforms ul > li > a {
+section.group ul > li.decl > a,
+section.group ul > li.module > a,
+section.superforms ul > li.decl > a,
+section.superforms ul > li.module > a {
   display: block;
   text-indent: -2.5rem;
   margin-left: 2.5rem;
@@ -221,15 +241,19 @@ section.superforms ul > li > a {
   font-size: inherit;
   padding: 0.8em 0 0 0;
 }
-section.group ul > li > a span.syntax-identifier,
-section.superforms ul > li > a span.syntax-identifier {
+section.group ul > li.decl > a span.syntax-identifier,
+section.group ul > li.module > a span.syntax-identifier,
+section.superforms ul > li.decl > a span.syntax-identifier,
+section.superforms ul > li.module > a span.syntax-identifier {
   color: rgb(253, 39, 99);
 }
-section.group ul > li p,
-section.superforms ul > li p {
+section.group ul > li.decl p,
+section.group ul > li.module p,
+section.superforms ul > li.decl p,
+section.superforms ul > li.module p {
   padding: 0 0 0 2.5rem;
   line-height: 1.3rem;
-  font-size: 87.5%;
+  font-size: 90.625%;
 }
 
 h1, h2, h3, h4 {

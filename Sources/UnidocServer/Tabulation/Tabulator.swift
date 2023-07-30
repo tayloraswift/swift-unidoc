@@ -96,7 +96,7 @@ extension Tabulator:HyperTextOutputStreamable
                     {
                         switch member
                         {
-                        case .scalar(let scalar):   $0[.li] = self.inliner.card(scalar)
+                        case .scalar(let scalar):   $0 ?= self.inliner.card(scalar)
                         case .text(let text):       $0[.li] { $0[.span] { $0[.code] = text } }
                         }
                     }
@@ -120,7 +120,8 @@ extension Tabulator:HyperTextOutputStreamable
                     $0[.code, { $0.class = "constraints" }]
                     {
                         var first:Bool = true
-                        for constraint:GenericConstraint<Unidoc.Scalar?> in `extension`.conditions
+                        for constraint:GenericConstraint<Unidoc.Scalar?> in
+                            `extension`.conditions
                         {
                             if  first
                             {
@@ -169,28 +170,28 @@ extension Tabulator:HyperTextOutputStreamable
                     {
                         for conformance:Unidoc.Scalar in `extension`.conformances
                         {
-                            $0[.li] = self.inliner.card(conformance)
+                            $0 ?= self.inliner.card(conformance)
                         }
                     }
                     $0[.ul]
                     {
                         for nested:Unidoc.Scalar in `extension`.nested
                         {
-                            $0[.li] = self.inliner.card(nested)
+                            $0 ?= self.inliner.card(nested)
                         }
                     }
                     $0[.ul]
                     {
                         for feature:Unidoc.Scalar in `extension`.features
                         {
-                            $0[.li] = self.inliner.card(feature)
+                            $0 ?= self.inliner.card(feature)
                         }
                     }
                     $0[.ul]
                     {
                         for subform:Unidoc.Scalar in `extension`.subforms
                         {
-                            $0[.li] = self.inliner.card(subform)
+                            $0 ?= self.inliner.card(subform)
                         }
                     }
                 }
