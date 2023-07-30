@@ -1,6 +1,7 @@
 import HTML
 import MarkdownRendering
 import UnidocRecords
+import Unidoc
 import URI
 
 extension Site.Docs.DeepPage
@@ -62,6 +63,11 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
             }
 
             $0[.h1] = self.master.headline.safe
+
+            if  let file:Unidoc.Scalar = self.master.file
+            {
+                $0 ?= self.inliner.link(file: file)
+            }
         }
         html[.section, { $0.class = "details" }]
         {

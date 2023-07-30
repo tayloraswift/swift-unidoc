@@ -2,6 +2,7 @@ import HTML
 import MarkdownRendering
 import ModuleGraphs
 import UnidocRecords
+import Unidoc
 import URI
 
 extension Site.Docs.DeepPage
@@ -69,6 +70,11 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
             $0[.h1] = self.master.module.name
 
             $0 ?= self.master.overview.map(self.inliner.passage(_:))
+
+            if  let readme:Unidoc.Scalar = self.master.readme
+            {
+                $0 ?= self.inliner.link(file: readme)
+            }
         }
 
         html[.section, { $0.class = "declaration" }]

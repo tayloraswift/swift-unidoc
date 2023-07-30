@@ -81,7 +81,7 @@ extension SymbolGraph
 
             print("""
                 Linked documentation in \(time.linking)
-                symbols         : \(graph.decls.count)
+                symbols         : \(graph.decls.symbols.count)
                 """)
 
             let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)

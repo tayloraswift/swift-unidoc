@@ -52,7 +52,7 @@ extension DynamicResolver
 
 extension DynamicResolver
 {
-    func link(article:SymbolGraph.Article<some Any>) ->
+    func link(article:SymbolGraph.Article) ->
     (
         overview:Record.Passage?,
         details:Record.Passage?

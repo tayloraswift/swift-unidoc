@@ -27,7 +27,7 @@ extension SymbolGraph
         var nested:[Int32]
 
         public
-        var article:Article<Never>?
+        var article:Article?
 
         @inlinable public
         init(conditions:[GenericConstraint<Int32>],
@@ -35,7 +35,8 @@ extension SymbolGraph
             culture:Int,
             conformances:[Int32] = [],
             features:[Int32] = [],
-            nested:[Int32] = [])
+            nested:[Int32] = [],
+            article:Article? = nil)
         {
             self.conditions = conditions
             self.namespace = namespace
@@ -45,7 +46,7 @@ extension SymbolGraph
             self.features = features
             self.nested = nested
 
-            self.article = nil
+            self.article = article
         }
     }
 }
@@ -94,8 +95,7 @@ extension SymbolGraph.Extension:BSONDocumentDecodable
             features: try bson[.features]?.decode(
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             nested: try bson[.nested]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [])
-
-        self.article = try bson[.article]?.decode()
+                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+            article: try bson[.article]?.decode())
     }
 }

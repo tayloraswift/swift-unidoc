@@ -1,27 +1,25 @@
-import Symbols
-
-extension SymbolGraph.Citizens
+extension SymbolGraph.Layer.Citizens
 {
     @frozen public
     struct Iterator
     {
         @usableFromInline internal
-        let base:SymbolGraph.Citizens
+        let base:SymbolGraph.Layer<Node>
         @usableFromInline internal
         var index:Int32
 
         @inlinable internal
-        init(_ base:SymbolGraph.Citizens)
+        init(_ base:SymbolGraph.Layer<Node>)
         {
             self.base = base
             self.index = self.base.nodes.startIndex
         }
     }
 }
-extension SymbolGraph.Citizens.Iterator:IteratorProtocol
+extension SymbolGraph.Layer.Citizens.Iterator:IteratorProtocol
 {
     @inlinable public mutating
-    func next() -> (index:Int32, symbol:Symbol.Decl)?
+    func next() -> (index:Int32, symbol:Node.ID)?
     {
         while self.index < self.base.nodes.endIndex
         {
@@ -29,7 +27,7 @@ extension SymbolGraph.Citizens.Iterator:IteratorProtocol
             {
                 self.index = self.base.nodes.index(after: self.index)
             }
-            if  self.base.contains(self.index)
+            if  self.base.contains(citizen: self.index)
             {
                 return (self.index, self.base.symbols[self.index])
             }

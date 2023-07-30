@@ -41,6 +41,8 @@ extension Artifacts.Culture
 {
     func loadArticles(root:Repository.Root) throws -> [MarkdownFile]
     {
+        //  Compute this once, since it’s used in the loop below.
+        let bundle:ModuleIdentifier = self.module.id
         let root:FilePath = .init(root.path).lexicallyNormalized()
 
         return try self.articles.sorted
@@ -61,7 +63,7 @@ extension Artifacts.Culture
 
             print("Loading artifact: \(id)")
 
-            return .init(text: try $0.read(), name: $0.stem ?? "", id: id)
+            return .init(bundle: bundle, path: id, text: try $0.read())
         }
     }
     func loadSymbols() throws -> [SymbolGraphPart]

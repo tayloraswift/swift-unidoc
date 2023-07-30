@@ -111,7 +111,7 @@ extension StaticLinker
         {
             let feature:Int32 = self.symbolizer.intern($0)
             if  let (last, phylum):(String, Unidoc.Decl) =
-                self.symbolizer.graph[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
+                self.symbolizer.graph.decls[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
                 let vector:Symbol.Decl.Vector = .init($0, self: extended)
@@ -234,7 +234,7 @@ extension StaticLinker
             let nested:[Int32] = self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.symbolizer.graph.nodes[$0.0].push(.init(
+            let index:Int = self.symbolizer.graph.decls.nodes[$0.0].push(.init(
                 conditions: $0.1.conditions.map
                 {
                     $0.map { self.symbolizer.intern($0) }
@@ -273,7 +273,7 @@ extension StaticLinker
                 {
                     articles.append(article)
 
-                    guard let scalar:Int32 = article.standalone?.id
+                    guard let scalar:Int32 = article.standalone
                     else
                     {
                         continue
@@ -312,10 +312,9 @@ extension StaticLinker
                 //  the source id by default.
                 let sources:[MarkdownSource] = [article.source]
 
-                if  let standalone:Article.Standalone = article.standalone
+                if  let standalone:Int32 = article.standalone
                 {
-                    self.symbolizer.graph.articles[standalone.id].value = outliner.link(
-                        title: standalone.title,
+                    self.symbolizer.graph.articles.nodes[standalone].body = outliner.link(
                         body: article.body,
                         from: sources)
                 }
@@ -342,18 +341,18 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement:MarkdownFile, in namespace:ModuleIdentifier) -> Article?
+    func attach(supplement article:MarkdownFile, in namespace:ModuleIdentifier) -> Article?
     {
-        let markdown:MarkdownSupplement = .init(parsing: supplement.text,
+        let supplement:MarkdownSupplement = .init(parsing: article.text,
             with: self.markdownParser,
             as: SwiftFlavoredMarkdown.self)
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
         let location:SourceLocation<Int32> = .init(position: .zero,
-            file: self.symbolizer.intern(supplement.id))
-        let source:MarkdownSource = .init(location: location, text: supplement.text)
+            file: self.symbolizer.intern(article.path))
+        let source:MarkdownSource = .init(location: location, text: article.text)
 
-        guard let headline:MarkdownSupplement.Headline = markdown.headline
+        guard let headline:MarkdownSupplement.Headline = supplement.headline
         else
         {
             self.errors.append(SupplementError.untitled(location))
@@ -380,41 +379,28 @@ extension StaticLinker
 
             if  let decl:Int32
             {
-                self.supplements[decl, default: []].append(markdown)
+                self.supplements[decl, default: []].append(supplement)
                 return nil
             }
             else
             {
-                return .init(standalone: nil, source: source, body: markdown.body)
+                return .init(standalone: nil, source: source, body: supplement.body)
             }
 
         case .heading(let heading):
-            let scalar:Int32? =
+            let id:String = .init(article.id)
+            if  let scalar:Int32 = self.symbolizer.allocate(article: article.symbol,
+                    title: heading)
             {
-                switch $0
-                {
-                case nil:
-                    let scalar:Int32 = self.symbolizer.graph.articles.append(.init(
-                        id: supplement.name))
-                    $0 = scalar
-                    return scalar
-
-                case  _?:
-                    return nil
-                }
-            //  Make the standalone article visible for doclink resolution.
-            } (&self.doclinks[.documentation(namespace), supplement.name])
-
-            if  let scalar:Int32
-            {
+                //  Make the standalone article visible for doclink resolution.
+                self.doclinks[.documentation(namespace), id] = scalar
                 //  Assign the standalone article a URI.
-                self.router[namespace, supplement.name][nil, default: []].append(scalar)
-                let standalone:Article.Standalone = .init(id: scalar, title: heading)
-                return .init(standalone: standalone, source: source, body: markdown.body)
+                self.router[namespace, id][nil, default: []].append(scalar)
+                return .init(standalone: scalar, source: source, body: supplement.body)
             }
             else
             {
-                self.errors.append(SupplementError.duplicate(id: supplement.name, location))
+                self.errors.append(DuplicateSymbolError.article(id: id, location))
                 return nil
             }
         }
@@ -520,7 +506,7 @@ extension StaticLinker
             {
                 self.symbolizer.intern($0)
             }
-            let article:SymbolGraph.Article<Never>? = decl.comment.map
+            let article:SymbolGraph.Article? = decl.comment.map
             {
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
@@ -549,7 +535,7 @@ extension StaticLinker
                 $0?.features = features
                 $0?.origin = origin
 
-            } (&self.symbolizer.graph.nodes[scalar].decl)
+            } (&self.symbolizer.graph.decls.nodes[scalar].decl)
         }
     }
 }
@@ -614,7 +600,7 @@ extension StaticLinker
 
                     self.errors += outliner.errors
 
-                } (&self.symbolizer.graph.nodes[scalar].extensions[index])
+                } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
             }
         }
     }
@@ -634,7 +620,7 @@ extension StaticLinker
                     {
                         //  If `hash` is present, then we know the decl is a valid
                         //  declaration node index.
-                        self.symbolizer.graph.nodes[stacked].decl?.route = .hashed
+                        self.symbolizer.graph.decls.nodes[stacked].decl?.route = .hashed
                     }
                     if  case .some(let collisions) = addresses
                     {
@@ -650,7 +636,7 @@ extension StaticLinker
                     {
                         print("""
                             WARNING: Standalone article \
-                            (\(self.symbolizer.graph.articles[stacked].id ?? "<anonymous>")) \
+                            (\(self.symbolizer.graph.articles.symbols[stacked])) \
                             does not have a unique URL! (\(path))
                             """)
                     }

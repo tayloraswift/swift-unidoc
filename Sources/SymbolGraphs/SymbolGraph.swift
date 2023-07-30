@@ -17,30 +17,26 @@ struct SymbolGraph:Equatable, Sendable
     var cultures:[Culture]
 
     public
-    var articles:Plane<UnidocPlane.Article, Article<String>>
+    var articles:Layer<ArticleNode>
+    public
+    var decls:Layer<DeclNode>
+
     public
     var files:Plane<UnidocPlane.File, Symbol.File>
-    public
-    var decls:Plane<UnidocPlane.Decl, Symbol.Decl>
-    public
-    var nodes:Plane<UnidocPlane.Decl, Node>
 
     @inlinable internal
     init(namespaces:[ModuleIdentifier],
         cultures:[Culture],
-        articles:Plane<UnidocPlane.Article, Article<String>> = [],
-        files:Plane<UnidocPlane.File, Symbol.File> = [],
-        decls:Plane<UnidocPlane.Decl, Symbol.Decl> = [],
-        nodes:Plane<UnidocPlane.Decl, Node> = [])
+        articles:Layer<ArticleNode> = .init(),
+        decls:Layer<DeclNode> = .init(),
+        files:Plane<UnidocPlane.File, Symbol.File> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures
 
-
         self.articles = articles
         self.files = files
         self.decls = decls
-        self.nodes = nodes
     }
 }
 extension SymbolGraph
@@ -54,17 +50,6 @@ extension SymbolGraph
 }
 extension SymbolGraph
 {
-    /// Appends a new node to the symbol graph, and its associated symbol to the
-    /// symbol. This function doesn’t check for duplicates.
-    @inlinable public mutating
-    func append(_ citizen:SymbolGraph.Decl?, id:Symbol.Decl) -> Int32
-    {
-        let symbol:Int32 = self.decls.append(id)
-        let node:Int32 = self.nodes.append(.init(decl: citizen))
-        assert(symbol == node)
-        return node
-    }
-
     /// Appends a new namespace to the symbol graph. This function doesn’t check
     /// for duplicates, and it doesn’t check if the module name is already associated
     /// with a culture.
@@ -75,20 +60,7 @@ extension SymbolGraph
         return self.namespaces.endIndex
     }
 }
-extension SymbolGraph
-{
-    @inlinable public
-    subscript(address:Int32) -> SymbolGraph.Node?
-    {
-        self.nodes.indices.contains(address) ? self.nodes[address] : nil
-    }
 
-    @inlinable public
-    var citizens:Citizens
-    {
-        .init(symbols: self.decls, nodes: self.nodes)
-    }
-}
 extension SymbolGraph
 {
     @inlinable public
@@ -109,22 +81,6 @@ extension SymbolGraph
 
         return elements
     }
-
-    @inlinable public
-    func link<T>(
-        static transform:(Int32) throws -> T,
-        dynamic link:(Symbol.Decl) throws -> T) rethrows -> Plane<UnidocPlane.Decl, T>
-    {
-        var elements:[T] = [] ; elements.reserveCapacity(self.decls.count)
-
-        for index:Int32 in self.decls.indices
-        {
-            elements.append(self.citizens.contains(index) ? try transform(index) :
-                try link(self.decls[index]))
-        }
-
-        return .init(table: .init(elements: elements))
-    }
 }
 extension SymbolGraph
 {
@@ -133,10 +89,14 @@ extension SymbolGraph
     {
         case namespaces
         case cultures
-        case articles
+
+        case articles_symbols
+        case articles_nodes
+
+        case decls_symbols
+        case decls_nodes
+
         case files
-        case decls
-        case nodes
     }
 }
 extension SymbolGraph:BSONDocumentEncodable
@@ -146,10 +106,14 @@ extension SymbolGraph:BSONDocumentEncodable
     {
         bson[.namespaces] = self.namespaces
         bson[.cultures] = self.cultures
-        bson[.articles] = self.articles
+
+        bson[.articles_symbols] = self.articles.symbols
+        bson[.articles_nodes] = self.articles.nodes
+
+        bson[.decls_symbols] = self.decls.symbols
+        bson[.decls_nodes] = self.decls.nodes
+
         bson[.files] = self.files
-        bson[.decls] = self.decls
-        bson[.nodes] = self.nodes
     }
 }
 extension SymbolGraph:BSONDocumentDecodable
@@ -160,9 +124,12 @@ extension SymbolGraph:BSONDocumentDecodable
         self.init(
             namespaces: try bson[.namespaces].decode(),
             cultures: try bson[.cultures].decode(),
-            articles: try bson[.articles].decode(),
-            files: try bson[.files].decode(),
-            decls: try bson[.decls].decode(),
-            nodes: try bson[.nodes].decode())
+            articles: .init(
+                symbols:try bson[.articles_symbols].decode(),
+                nodes:try bson[.articles_nodes].decode()),
+            decls: .init(
+                symbols:try bson[.decls_symbols].decode(),
+                nodes:try bson[.decls_nodes].decode()),
+            files: try bson[.files].decode())
     }
 }

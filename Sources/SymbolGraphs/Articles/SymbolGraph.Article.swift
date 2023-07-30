@@ -5,10 +5,8 @@ import MarkdownABI
 extension SymbolGraph
 {
     @frozen public
-    struct Article<ID>:Equatable, Sendable where ID:Equatable & Sendable
+    struct Article:Equatable, Sendable
     {
-        public
-        var headline:MarkdownBytecode
         public
         var outlines:[Outline]
         public
@@ -18,50 +16,21 @@ extension SymbolGraph
         /// The number of outlines used by the overview paragraph alone.
         public
         var fold:Int
-
         public
-        let id:ID?
+        var file:Int32?
 
         @inlinable public
-        init(
-            headline:MarkdownBytecode = [],
-            outlines:[Outline] = [],
+        init(outlines:[Outline] = [],
             overview:MarkdownBytecode = [],
             details:MarkdownBytecode = [],
             fold:Int? = nil,
-            id:ID? = nil)
+            file:Int32? = nil)
         {
-            self.headline = headline
             self.outlines = outlines
             self.overview = overview
             self.details = details
             self.fold = fold ?? self.outlines.endIndex
-
-            self.id = id
-        }
-    }
-}
-extension SymbolGraph.Article
-{
-    @inlinable public
-    var value:SymbolGraph.Article<Never>
-    {
-        get
-        {
-            .init(
-                headline: self.headline,
-                outlines: self.outlines,
-                overview: self.overview,
-                details: self.details,
-                fold: self.fold)
-        }
-        set(value)
-        {
-            self.headline = value.headline
-            self.outlines = value.outlines
-            self.overview = value.overview
-            self.details = value.details
-            self.fold = value.fold
+            self.file = file
         }
     }
 }
@@ -70,41 +39,35 @@ extension SymbolGraph.Article
     public
     enum CodingKey:String
     {
-        case headline = "H"
         case outlines = "L"
         case overview = "O"
         case details = "D"
-        case fold = "F"
-        case id = "I"
+        case fold = "Z"
+        case file = "F"
     }
 }
-extension SymbolGraph.Article:BSONDocumentEncodable, BSONEncodable
-    where ID:BSONEncodable
+extension SymbolGraph.Article:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.headline] = self.headline.isEmpty ? nil : self.headline
         bson[.outlines] = self.outlines.isEmpty ? nil : self.outlines
         bson[.overview] = self.overview.isEmpty ? nil : self.overview
         bson[.details] = self.details.isEmpty ? nil : self.details
         bson[.fold] = self.fold == self.outlines.endIndex ? nil : self.fold
-        //  This is why ``id`` is optional.
-        bson[.id] = self.id
+        bson[.file] = self.file
     }
 }
-extension SymbolGraph.Article:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
-    where ID:BSONDecodable
+extension SymbolGraph.Article:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
-            headline: try bson[.headline]?.decode() ?? [],
             outlines: try bson[.outlines]?.decode() ?? [],
             overview: try bson[.overview]?.decode() ?? [],
             details: try bson[.details]?.decode() ?? [],
             fold: try bson[.fold]?.decode(),
-            id: try bson[.id]?.decode())
+            file: try bson[.file]?.decode())
     }
 }
