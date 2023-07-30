@@ -29,12 +29,8 @@ extension Inliner.Card:HyperTextOutputStreamable
             html[.li, { $0.class = "article" }]
             {
                 $0[link: self.target] { $0[.h3] = master.headline.safe }
-
-                if  let overview:Inliner.Passage = self.overview
-                {
-                    $0 += overview
-                    $0[link: self.target] { $0.class = "read-more" } = "Read More"
-                }
+                $0 ?= self.overview
+                $0[link: self.target] { $0.class = "read-more" } = "Read More"
             }
 
         case .culture(let master):
