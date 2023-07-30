@@ -6,6 +6,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocLinker
+import UnidocQueries
 import UnidocRecords
 
 @frozen public

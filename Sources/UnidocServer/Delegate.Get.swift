@@ -1,5 +1,6 @@
 import FNV1
 import UnidocDatabase
+import UnidocQueries
 import URI
 
 extension Delegate
@@ -46,6 +47,12 @@ extension Delegate.Get
     static
     func db(_ path:ArraySlice<String>, planes:DeepQuery.Planes, uri:URI) -> Self?
     {
+        guard let trunk:String = path.first
+        else
+        {
+            return nil
+        }
+
         var canonical:Bool = true
         var explain:Bool = false
         var hash:FNV24? = nil
@@ -60,18 +67,10 @@ extension Delegate.Get
             }
         }
 
-        if  let first:String = path.first,
-            let query:DeepQuery = .init(planes, first, path.dropFirst(), hash: hash)
-        {
-            return .db(.init(canonical: canonical, explain: explain, query: query, uri: uri))
-        }
-        else if path.isEmpty
-        {
-            return .db(.init(canonical: canonical, explain: explain, query: nil, uri: uri))
-        }
-        else
-        {
-            return nil
-        }
+        return .db(.init(
+            canonical: canonical,
+            explain: explain,
+            query: .init(planes, trunk, path.dropFirst(), hash: hash),
+            uri: uri))
     }
 }

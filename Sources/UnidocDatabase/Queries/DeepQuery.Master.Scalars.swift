@@ -1,8 +1,9 @@
 import BSONEncoding
 import MongoDB
 import Signatures
-import UnidocRecords
 import Unidoc
+import UnidocQueries
+import UnidocRecords
 
 extension DeepQuery.Master
 {

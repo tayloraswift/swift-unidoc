@@ -45,11 +45,11 @@ extension Site.Docs.DeepPage.Decl
 
     var location:URI
     {
-        .init(decl: self.master, in: self.zone)
+        .init(decl: self.master, in: self.trunk)
     }
-    var zone:Record.Zone.Names
+    var trunk:Record.Trunk
     {
-        self.inliner.zones.principal.zone
+        self.inliner.zones.principal.trunk
     }
 }
 extension Site.Docs.DeepPage.Decl
@@ -75,7 +75,7 @@ extension Site.Docs.DeepPage.Decl
 
     var title:String
     {
-        "\(self.path.last) - \(self.zone.display ?? "\(self.zone.package)") Documentation"
+        "\(self.path.last) - \(self.trunk.display ?? "\(self.trunk.package)") Documentation"
     }
 }
 extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
@@ -100,7 +100,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
                     $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.zone.version
+                        $0[.span] { $0.class = "version" } = self.trunk.version
                         if  self.master.namespace != self.master.culture
                         {
                             $0 ?= self.inliner.link(module: self.master.culture)

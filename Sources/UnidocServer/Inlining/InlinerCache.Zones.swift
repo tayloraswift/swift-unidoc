@@ -5,13 +5,13 @@ extension InlinerCache
 {
     struct Zones:Sendable
     {
-        let principal:(id:Unidoc.Zone, zone:Record.Zone.Names)
+        let principal:(id:Unidoc.Zone, trunk:Record.Trunk)
         private(set)
-        var secondary:[Unidoc.Zone: Record.Zone.Names]
+        var secondary:[Unidoc.Zone: Record.Trunk]
 
         init(
-            principal:(id:Unidoc.Zone, zone:Record.Zone.Names),
-            secondary:[Unidoc.Zone: Record.Zone.Names] = [:])
+            principal:(id:Unidoc.Zone, trunk:Record.Trunk),
+            secondary:[Unidoc.Zone: Record.Trunk] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -32,8 +32,8 @@ extension InlinerCache.Zones
 }
 extension InlinerCache.Zones
 {
-    subscript(_ zone:Unidoc.Zone) -> Record.Zone.Names?
+    subscript(_ zone:Unidoc.Zone) -> Record.Trunk?
     {
-        self.principal.id == zone ? self.principal.zone : self.secondary[zone]
+        self.principal.id == zone ? self.principal.trunk : self.secondary[zone]
     }
 }

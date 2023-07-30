@@ -1,5 +1,6 @@
 import BSONDecoding
 import MongoSchema
+import UnidocQueries
 import UnidocRecords
 
 extension DeepQuery

@@ -37,11 +37,11 @@ extension Site.Docs.DeepPage.Culture
 
     var location:URI
     {
-        .init(culture: self.master, in: self.zone)
+        .init(culture: self.master, in: self.trunk)
     }
-    var zone:Record.Zone.Names
+    var trunk:Record.Trunk
     {
-        self.inliner.zones.principal.zone
+        self.inliner.zones.principal.trunk
     }
 }
 extension Site.Docs.DeepPage.Culture
@@ -50,7 +50,7 @@ extension Site.Docs.DeepPage.Culture
     {
         """
         \(self.master.module.name) - \
-        \(self.zone.display ?? "\(self.zone.package)") Documentation
+        \(self.trunk.display ?? "\(self.trunk.package)") Documentation
         """
     }
 }
@@ -64,7 +64,7 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module"
-                $0[.span] { $0.class = "version" } = self.zone.version
+                $0[.span] { $0.class = "version" } = self.trunk.version
             }
 
             $0[.h1] = self.master.module.name

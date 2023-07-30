@@ -28,19 +28,19 @@ extension Site.Docs.DeepPage
 }
 extension Site.Docs.DeepPage.Article
 {
-    var zone:Record.Zone.Names
+    var trunk:Record.Trunk
     {
-        self.inliner.zones.principal.zone
+        self.inliner.zones.principal.trunk
     }
 
     var location:URI
     {
-        .init(article: self.master, in: self.zone)
+        .init(article: self.master, in: self.trunk)
     }
 
     var title:String?
     {
-        "\(self.zone.display ?? "\(self.zone.package)") Documentation"
+        "\(self.trunk.display ?? "\(self.trunk.package)") Documentation"
     }
 }
 extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
@@ -60,7 +60,7 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
 
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.zone.version
+                        $0[.span] { $0.class = "version" } = self.trunk.version
                     }
                 }
             }

@@ -1,6 +1,7 @@
 import HTML
-import UnidocRecords
 import UnidocDatabase
+import UnidocQueries
+import UnidocRecords
 import URI
 
 extension Site.Docs

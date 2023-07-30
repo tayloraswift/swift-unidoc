@@ -1,11 +1,9 @@
 import ModuleGraphs
-import Symbols
-import URI
 
-extension Record.Zone
+extension Record
 {
     @frozen public
-    struct Names:Equatable, Hashable, Sendable
+    struct Trunk:Equatable, Hashable, Sendable
     {
         public
         let package:PackageIdentifier
@@ -34,36 +32,6 @@ extension Record.Zone
             self.display = display
             self.github = github
             self.latest = latest
-        }
-    }
-}
-extension Record.Zone.Names
-{
-    @inlinable public static
-    func += (uri:inout URI.Path, self:Self)
-    {
-        if  self.latest
-        {
-            uri.append("\(self.package):")
-        }
-        else
-        {
-            uri.append("\(self.package)")
-            uri.append("\(self.version):")
-        }
-    }
-
-    public
-    func url(github file:Symbol.File) -> String?
-    {
-        if  let refname:String = self.refname,
-            let github:String = self.github
-        {
-            return "https://\(github)/blob/\(refname)/\(file)"
-        }
-        else
-        {
-            return nil
         }
     }
 }
