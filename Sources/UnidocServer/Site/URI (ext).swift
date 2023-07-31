@@ -6,7 +6,7 @@ extension URI
 {
     init(article:__shared Record.Master.Article, in trunk:__shared Record.Trunk)
     {
-        self = Site.Learn.uri
+        self = Site.Guides.uri
 
         self.path += trunk
         self.path += article.stem

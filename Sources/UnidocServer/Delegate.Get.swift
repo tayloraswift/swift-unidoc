@@ -10,6 +10,7 @@ extension Delegate
         case admin  (Admin)
         case asset  (Asset)
         case db     (DB)
+        case legacy (Legacy)
     }
 }
 extension Delegate.Get
@@ -45,7 +46,7 @@ extension Delegate.Get
         }
     }
     static
-    func db(_ path:ArraySlice<String>, planes:DeepQuery.Planes, uri:URI) -> Self?
+    func db(_ planes:DeepQuery.Planes, _ path:ArraySlice<String>, uri:URI) -> Self?
     {
         guard let trunk:String = path.first
         else
@@ -72,5 +73,31 @@ extension Delegate.Get
             explain: explain,
             query: .init(planes, trunk, path.dropFirst(), hash: hash),
             uri: uri))
+    }
+    static
+    func db(legacy planes:DeepQuery.Planes, _ path:ArraySlice<String>, uri:URI) -> Self?
+    {
+        guard let first:String = path.first
+        else
+        {
+            return nil
+        }
+
+        var overload:String? = nil
+        var from:String? = nil
+
+        for (key, value):(String, String) in uri.query?.parameters ?? []
+        {
+            switch key
+            {
+            case "overload":    overload = value
+            case "from":        from = value
+            case _:             continue
+            }
+        }
+
+        return .legacy(.init(query: .init(legacy: planes, first, path.dropFirst(),
+            overload: overload,
+            from: from)))
     }
 }

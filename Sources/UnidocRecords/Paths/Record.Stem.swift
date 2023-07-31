@@ -20,6 +20,14 @@ extension Record
         }
     }
 }
+extension Record.Stem:ExpressibleByStringLiteral
+{
+    @inlinable public
+    init(stringLiteral:String)
+    {
+        self.init(rawValue: stringLiteral)
+    }
+}
 extension Record.Stem
 {
     @inlinable public

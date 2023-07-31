@@ -45,8 +45,12 @@ extension Delegate.GetRequest:ServerDelegateGetRequest
         {
         case Site.Admin.root:   get = .admin(rest)
         case Site.Assets.root:  get = .asset(rest)
-        case Site.Docs.root:    get = .db   (rest, planes:  .docs, uri: uri)
-        case Site.Learn.root:   get = .db   (rest, planes: .learn, uri: uri)
+        case Site.Guides.root:  get = .db(.article, rest, uri: uri)
+        case Site.Docs.root:    get = .db(.docs, rest, uri: uri)
+
+        case "reference":       get = .db(legacy: .docs, rest, uri: uri)
+        case "learn":           get = .db(legacy: .article, rest, uri: uri)
+
         case _:         return nil
         }
 

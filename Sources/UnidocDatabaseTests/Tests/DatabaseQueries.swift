@@ -210,7 +210,7 @@ struct DatabaseQueries:MongoTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted",
             let query:DeepQuery = tests.expect(
-                value: .init(.learn, "swift-malibu",
+                value: .init(.article, "swift-malibu",
                 [
                     "$anonymous:barbiecore",
                     "getting-started",
