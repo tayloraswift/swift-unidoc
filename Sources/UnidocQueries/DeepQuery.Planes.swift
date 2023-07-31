@@ -5,10 +5,10 @@ extension DeepQuery
     @frozen public
     enum Planes:Equatable, Hashable, Sendable
     {
+        /// Matches the ``UnidocPlane article`` plane only.
+        case article
         /// Matches all master planes except for the ``UnidocPlane article`` plane.
         case docs
-        /// Matches the ``UnidocPlane article`` plane only.
-        case learn
     }
 }
 extension DeepQuery.Planes
@@ -18,8 +18,8 @@ extension DeepQuery.Planes
     {
         switch self
         {
+        case .article:  return (.planes_article,    .planes_extension)
         case .docs:     return (.planes_min,        .planes_article)
-        case .learn:    return (.planes_article,    .planes_extension)
         }
     }
 }

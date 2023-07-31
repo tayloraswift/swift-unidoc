@@ -58,7 +58,12 @@ extension Delegate
                         response = try await asset.load(from: self.cache)
 
                     case .db(let db):
-                        response = try await db.load(from: self.database, pool: self.mongodb)
+                        response = try await db.load(from: self.database,
+                            pool: self.mongodb)
+
+                    case .legacy(let legacy):
+                        response = try await legacy.load(from: self.database,
+                            pool: self.mongodb)
                     }
 
                 case .post(let request):
