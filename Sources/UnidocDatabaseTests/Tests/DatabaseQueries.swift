@@ -50,10 +50,9 @@ struct DatabaseQueries:MongoTestBattery
             id: "$anonymous"))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
-        if  let tests:TestGroup = tests / "Dictionary" / "Keys",
-            let query:DeepQuery = tests.expect(
-                value: .init(.docs, "swift:swift", ["dictionary", "keys"]))
+        if  let tests:TestGroup = tests / "Dictionary" / "Keys"
         {
+            let query:DeepQuery = .init(.docs, "swift", ["swift", "dictionary", "keys"])
             await tests.do
             {
                 let output:[DeepQuery.Output] = try await database.execute(query: query,
@@ -68,10 +67,9 @@ struct DatabaseQueries:MongoTestBattery
         }
 
         /// We should be able to get multiple results back for an ambiguous query.
-        if  let tests:TestGroup = tests / "Int" / "init",
-            let query:DeepQuery = tests.expect(
-                value: .init(.docs, "swift:swift", ["int.init(_:)"]))
+        if  let tests:TestGroup = tests / "Int" / "init"
         {
+            let query:DeepQuery = .init(.docs, "swift", ["swift", "int.init(_:)"])
             await tests.do
             {
                 let output:[DeepQuery.Output] = try await database.execute(query: query,
@@ -87,10 +85,10 @@ struct DatabaseQueries:MongoTestBattery
         }
 
         /// We should be able to disambiguate the previous query with an FNV-1 hash.
-        if  let tests:TestGroup = tests / "Int" / "init" / "hashed",
-            let query:DeepQuery = tests.expect(
-                value: .init(.docs, "swift:swift", ["int.init(_:)"], hash: .init("8VBWO")))
+        if  let tests:TestGroup = tests / "Int" / "init" / "hashed"
         {
+            let query:DeepQuery = .init(.docs, "swift", ["swift", "int.init(_:)"],
+                hash: .init("8VBWO"))
             await tests.do
             {
                 let output:[DeepQuery.Output] = try await database.execute(query: query,
@@ -106,15 +104,15 @@ struct DatabaseQueries:MongoTestBattery
 
         if  let tests:TestGroup = tests / "Parentheses"
         {
-            for (name, query):(String, DeepQuery?) in
+            for (name, query):(String, DeepQuery) in
             [
                 (
                     "None",
-                    .init(.docs, "swift:swift", ["bidirectionalcollection.reversed"])
+                    .init(.docs, "swift", ["swift", "bidirectionalcollection.reversed"])
                 ),
                 (
                     "Empty",
-                    .init(.docs, "swift:swift", ["bidirectionalcollection.reversed()"])
+                    .init(.docs, "swift", ["swift", "bidirectionalcollection.reversed()"])
                 ),
             ]
             {
@@ -144,15 +142,14 @@ struct DatabaseQueries:MongoTestBattery
         /// The type itself lives in ``BarbieHousing``, but it is namespaced to
         /// ``BarbieCore.Barbie``, and its codelinks should resolve relative to that
         /// namespace.
-        if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse",
-            let query:DeepQuery = tests.expect(
-                value: .init(.docs, "swift-malibu",
+        if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
+        {
+            let query:DeepQuery = .init(.docs, "swift-malibu:$anonymous",
                 [
-                    "$anonymous:barbiecore",
+                    "barbiecore",
                     "barbie",
                     "dreamhouse"
-                ]))
-        {
+                ])
             await tests.do
             {
                 let output:[DeepQuery.Output] = try await database.execute(query: query,
@@ -208,14 +205,13 @@ struct DatabaseQueries:MongoTestBattery
         }
         /// The symbol graph linker should have mangled the space in `Getting Started.md`
         /// into a hyphen.
-        if  let tests:TestGroup = tests / "Barbie" / "GettingStarted",
-            let query:DeepQuery = tests.expect(
-                value: .init(.article, "swift-malibu",
-                [
-                    "$anonymous:barbiecore",
-                    "getting-started",
-                ]))
+        if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
+            let query:DeepQuery = .init(.article, "swift-malibu:$anonymous",
+                [
+                    "barbiecore",
+                    "getting-started",
+                ])
             await tests.do
             {
                 let output:[DeepQuery.Output] = try await database.execute(query: query,
@@ -240,17 +236,17 @@ struct DatabaseQueries:MongoTestBattery
         /// conformances within the same package.
         if  let tests:TestGroup = tests / "Deduplication"
         {
-            for (name, query):(String, DeepQuery?) in
+            for (name, query):(String, DeepQuery) in
             [
                 (
                     "Upstream",
-                    .init(.docs, "swift:swift", ["array"])
+                    .init(.docs, "swift", ["swift", "array"])
                 ),
                 (
                     "Local",
-                    .init(.docs, "swift-malibu",
+                    .init(.docs, "swift-malibu:$anonymous",
                     [
-                        "$anonymous:barbiecore",
+                        "barbiecore",
                         "barbie",
                         "plastickeychain"
                     ])
