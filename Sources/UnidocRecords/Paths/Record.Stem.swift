@@ -87,7 +87,7 @@ extension Record.Stem
         }
         switch orientation
         {
-        case .straight: self.append(gay: path.last)
+        case .straight: self.append(straight: path.last)
         case .gay:      self.append(gay: path.last)
         }
     }
