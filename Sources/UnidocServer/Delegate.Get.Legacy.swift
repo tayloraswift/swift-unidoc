@@ -35,11 +35,12 @@ extension Delegate.Get.Legacy
 
         let principal:DeepQuery.Output.Principal = output[0].principal[0]
         let location:URI
-        switch principal.master
+        switch principal.master ?? principal.matches.first
         {
         case .article(let master)?: location = .init(article: master, in: principal.zone)
         case .culture(let master)?: location = .init(culture: master, in: principal.zone)
-        case .decl(let master)?:    location = .init(decl: master, in: principal.zone)
+        case .decl(let master)?:    location = .init(decl: master, in: principal.zone,
+            disambiguate: principal.master != nil)
         case .file?, nil:           return nil
         }
 
