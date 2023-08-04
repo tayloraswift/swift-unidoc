@@ -1,4 +1,6 @@
 import HTML
+import Unidoc
+import UnidocQueries
 import UnidocRecords
 import URI
 
@@ -6,29 +8,57 @@ extension Site
 {
     struct DisambiguationPage
     {
-        let matches:[Record.Master]
-        let identity:URI.Path
-        let location:URI
-
         private
         let inliner:Inliner
 
-        init(_ matches:[Record.Master], identity:URI.Path, location:URI, inliner:Inliner)
+        let identity:URI.Path
+        let location:URI
+        let matches:[Unidoc.Scalar]
+
+        private
+        init(_ inliner:Inliner, identity:URI.Path, location:URI, matches:[Unidoc.Scalar])
         {
-            self.matches = matches
+            self.inliner = inliner
 
             self.identity = identity
             self.location = location
-
-            self.inliner = inliner
+            self.matches = matches
         }
     }
 }
 extension Site.DisambiguationPage
 {
-    var trunk:Record.Trunk
+    init?(matches:[Record.Master], in trunk:Record.Trunk)
     {
-        self.inliner.zones.principal.trunk
+        guard let first:Record.Master = matches.first
+        else
+        {
+            return nil
+        }
+
+        var identity:URI.Path = []
+
+        if  let stem:Record.Stem = first.stem
+        {
+            identity += stem
+        }
+
+        let location:URI
+
+        switch first
+        {
+        case .article(let first):   location = .init(article: first, in: trunk)
+        case .culture(let first):   location = .init(culture: first, in: trunk)
+        case .decl(let first):      location = .init(decl: first, in: trunk,
+            disambiguate: false)
+        //  We should never get this as principal output!
+        case .file:                 return nil
+        }
+
+        let inliner:Inliner = .init(principal: first.id.zone, zone: trunk)
+            inliner.masters.add(matches)
+
+        self.init(inliner, identity: identity, location: location, matches: matches.map(\.id))
     }
 }
 extension Site.DisambiguationPage:HyperTextOutputStreamable
@@ -46,6 +76,16 @@ extension Site.DisambiguationPage:HyperTextOutputStreamable
             $0[.h1] = "\(self.identity)"
 
             $0[.p] = "This path could refer to multiple entities."
+        }
+        html[.section, { $0.class = "group choices" }]
+        {
+            $0[.ul]
+            {
+                for match:Unidoc.Scalar in self.matches
+                {
+                    $0 ?= self.inliner.card(match)
+                }
+            }
         }
     }
 }

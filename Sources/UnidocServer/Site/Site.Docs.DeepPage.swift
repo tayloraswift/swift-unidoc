@@ -67,8 +67,8 @@ extension Site.Docs.DeepPage
         if  let master:Record.Master = principal.master
         {
             let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
-            inliner.masters.add(output.secondary)
-            inliner.zones.add(output.zones)
+                inliner.masters.add(output.secondary)
+                inliner.zones.add(output.zones)
 
             switch master
             {
@@ -86,33 +86,12 @@ extension Site.Docs.DeepPage
                 return nil
             }
         }
-        else if let first:Record.Master = principal.matches.first
+        else if
+            let disambiguation:Site.DisambiguationPage = .init(
+                matches: principal.matches,
+                in: principal.zone)
         {
-            let inliner:Inliner = .init(principal: first.id.zone, zone: principal.zone)
-
-            var identity:URI.Path = []
-
-            if  let stem:Record.Stem = first.stem
-            {
-                identity += stem
-            }
-
-            let location:URI
-
-            switch first
-            {
-            case .article(let first):   location = .init(article: first, in: principal.zone)
-            case .culture(let first):   location = .init(culture: first, in: principal.zone)
-            case .decl(let first):      location = .init(decl: first, in: principal.zone,
-                disambiguate: false)
-            //  We should never get this as principal output!
-            case .file:                 return nil
-            }
-
-            self = .disambiguation(.init(principal.matches,
-                identity: identity,
-                location: location,
-                inliner: inliner))
+            self = .disambiguation(disambiguation)
         }
         else
         {
