@@ -4,7 +4,7 @@ import UnidocRecords
 import Unidoc
 import URI
 
-extension Site.Docs.DeepPage
+extension Site.Guides
 {
     struct Article
     {
@@ -26,29 +26,28 @@ extension Site.Docs.DeepPage
         }
     }
 }
-extension Site.Docs.DeepPage.Article
+extension Site.Guides.Article
 {
     var trunk:Record.Trunk
     {
         self.inliner.zones.principal.trunk
     }
-
+}
+extension Site.Guides.Article:FixedPage
+{
     var location:URI
     {
         .init(article: self.master, in: self.trunk)
     }
 
-    var title:String?
+    var title:String
     {
         "\(self.trunk.display ?? "\(self.trunk.package)") Documentation"
     }
-}
-extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
-{
-    public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+
+    func emit(main:inout HTML.ContentEncoder)
     {
-        html[.section, { $0.class = "introduction" }]
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -74,7 +73,7 @@ extension Site.Docs.DeepPage.Article:HyperTextOutputStreamable
                 $0 ?= self.inliner.link(file: file)
             }
         }
-        html[.section, { $0.class = "details" }] =
+        main[.section, { $0.class = "details" }] =
             self.master.details.map(self.inliner.passage(_:))
     }
 }

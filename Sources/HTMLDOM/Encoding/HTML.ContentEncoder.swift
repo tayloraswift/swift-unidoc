@@ -30,17 +30,22 @@ extension HTML.ContentEncoder
 }
 extension HTML.ContentEncoder
 {
-    /// Writes a void HTML tag to the output stream.
-    ///
-    /// Calling this function is equivalent to calling the mutating getter of
-    /// ``subscript(_:_:)``.
     @inlinable internal mutating
-    func emit(_ tag:some RawRepresentable<String>,
+    func emit(opening tag:some RawRepresentable<String>,
         with yield:(inout HTML.AttributeEncoder) -> ())
     {
         self.utf8.append(0x3C) // '<'
         self.utf8.append(contentsOf: tag.rawValue.utf8)
         yield(&self.attribute)
+        self.utf8.append(0x3E) // '>'
+    }
+
+    @inlinable internal mutating
+    func emit(closing tag:some RawRepresentable<String>)
+    {
+        self.utf8.append(0x3C) // '<'
+        self.utf8.append(0x2F) // '/'
+        self.utf8.append(contentsOf: tag.rawValue.utf8)
         self.utf8.append(0x3E) // '>'
     }
 }
@@ -54,7 +59,7 @@ extension HTML.ContentEncoder
     func open(_ tag:HTML.ContainerElement,
         with yield:(inout HTML.AttributeEncoder) -> () = { _ in })
     {
-        self.emit(tag, with: yield)
+        self.emit(opening: tag, with: yield)
     }
     /// Appends a *raw* UTF-8 code unit to the output stream.
     @inlinable public mutating
@@ -88,10 +93,7 @@ extension HTML.ContentEncoder
     @inlinable public mutating
     func close(_ tag:HTML.ContainerElement)
     {
-        self.utf8.append(0x3C) // '<'
-        self.utf8.append(0x2F) // '/'
-        self.utf8.append(contentsOf: tag.rawValue.utf8)
-        self.utf8.append(0x3E) // '>'
+        self.emit(closing: tag)
     }
 }
 extension HTML.ContentEncoder
@@ -125,7 +127,32 @@ extension HTML.ContentEncoder
     {
         mutating get
         {
-            self.emit(tag, with: attributes)
+            self.emit(opening: tag, with: attributes)
+        }
+    }
+}
+extension HTML.ContentEncoder
+{
+    @inlinable public
+    subscript(_ tag:HTML.UnsafeElement,
+        attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Void
+    {
+        mutating get
+        {
+            self.emit(opening: tag, with: attributes)
+            self.emit(closing: tag)
+        }
+    }
+    @inlinable public
+    subscript(unsafe tag:HTML.UnsafeElement,
+        attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> String
+    {
+        get { "" }
+        set(unsafe)
+        {
+            self.emit(opening: tag, with: attributes)
+            self.utf8 += unsafe.utf8
+            self.emit(closing: tag)
         }
     }
 }

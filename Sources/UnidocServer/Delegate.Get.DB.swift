@@ -3,6 +3,7 @@ import HTTPServer
 import MongoDB
 import UnidocDatabase
 import UnidocQueries
+import UnidocRecords
 import URI
 
 extension Delegate.Get
@@ -41,20 +42,71 @@ extension Delegate.Get.DB
                 content: .text(explanation),
                 type: .text(.plain, charset: .utf8)))
         }
-        else if
-            let page:Site.Docs.DeepPage = .init(try await database.execute(
-                query: self.query,
-                with: session))
-        {
-            let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
 
-            return .resource(.init(.one(canonical: "\(page.location)"),
-                content: .binary(html.utf8),
-                type: .text(.html, charset: .utf8)))
+        let outputs:[DeepQuery.Output] = try await database.execute(
+            query: self.query,
+            with: session)
+
+        guard outputs.count == 1
+        else
+        {
+            return nil
+        }
+
+        let output:DeepQuery.Output = outputs[0]
+
+        guard output.principal.count == 1
+        else
+        {
+            return nil
+        }
+
+        let principal:DeepQuery.Output.Principal = output.principal[0]
+        let resource:ServerResource
+
+        if  let master:Record.Master = principal.master
+        {
+            let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
+                inliner.masters.add(output.secondary)
+                inliner.zones.add(output.zones)
+
+            switch master
+            {
+            case .article(let master):
+                let article:Site.Guides.Article = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = article.rendered()
+
+            case .culture(let master):
+                let culture:Site.Docs.Culture = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = culture.rendered()
+
+            case .decl(let master):
+                let decl:Site.Docs.Decl = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = decl.rendered()
+
+            case .file:
+                //  We should never get this as principal output!
+                return nil
+            }
+        }
+        else if
+            let disambiguation:Site.Docs.Disambiguation = .init(
+                matches: principal.matches,
+                in: principal.zone)
+        {
+            resource = disambiguation.rendered()
         }
         else
         {
             return nil
         }
+
+        return .resource(resource)
     }
 }

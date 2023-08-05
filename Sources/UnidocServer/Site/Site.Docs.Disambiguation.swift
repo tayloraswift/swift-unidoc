@@ -4,9 +4,9 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Site
+extension Site.Docs
 {
-    struct DisambiguationPage
+    struct Disambiguation
     {
         private
         let inliner:Inliner
@@ -26,7 +26,7 @@ extension Site
         }
     }
 }
-extension Site.DisambiguationPage
+extension Site.Docs.Disambiguation
 {
     init?(matches:[Record.Master], in trunk:Record.Trunk)
     {
@@ -61,12 +61,13 @@ extension Site.DisambiguationPage
         self.init(inliner, identity: identity, location: location, matches: matches.map(\.id))
     }
 }
-extension Site.DisambiguationPage:HyperTextOutputStreamable
+extension Site.Docs.Disambiguation:FixedPage
 {
-    public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    var title:String { "Disambiguation Page" }
+
+    func emit(main:inout HTML.ContentEncoder)
     {
-        html[.section, { $0.class = "introduction" }]
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -77,7 +78,7 @@ extension Site.DisambiguationPage:HyperTextOutputStreamable
 
             $0[.p] = "This path could refer to multiple entities."
         }
-        html[.section, { $0.class = "group choices" }]
+        main[.section, { $0.class = "group choices" }]
         {
             $0[.ul]
             {

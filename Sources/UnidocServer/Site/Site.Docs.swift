@@ -4,7 +4,7 @@ extension Site
     {
     }
 }
-extension Site.Docs:SiteRoot
+extension Site.Docs:FixedRoot
 {
     static
     var root:String { "docs" }

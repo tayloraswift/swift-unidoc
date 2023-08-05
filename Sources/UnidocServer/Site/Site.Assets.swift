@@ -6,7 +6,7 @@ extension Site
     {
     }
 }
-extension Site.Assets:SiteRoot
+extension Site.Assets:FixedRoot
 {
     static
     var root:String { "assets" }

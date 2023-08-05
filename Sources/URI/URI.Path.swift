@@ -136,6 +136,20 @@ extension URI.Path:RangeReplaceableCollection
 }
 extension URI.Path
 {
+    @inlinable public static
+    func / (self:Self, component:Component) -> URI
+    {
+        return .init(path: self.appending(component))
+    }
+
+    @inlinable public
+    func appending(_ component:Component) -> Self
+    {
+        var path:Self = self
+            path.append(component)
+        return path
+    }
+
     @inlinable public mutating
     func append(_ component:String)
     {

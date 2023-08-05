@@ -4,7 +4,7 @@ extension Site
     {
     }
 }
-extension Site.Guides:SiteRoot
+extension Site.Guides:FixedRoot
 {
     static
     var root:String { "guides" }

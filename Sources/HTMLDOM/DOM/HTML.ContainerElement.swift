@@ -79,11 +79,9 @@ extension HTML
         case small
         case section
         case span
-        case script
         case select
         case slot
         case strong
-        case style
         case sub
         case summary
         case sup
@@ -102,5 +100,10 @@ extension HTML
         case ul
         case `var`
         case video
+
+        @available(*, unavailable)
+        case script
+        @available(*, unavailable)
+        case style
     }
 }

@@ -7,7 +7,7 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Site.Docs.DeepPage
+extension Site.Docs
 {
     struct Decl
     {
@@ -28,7 +28,7 @@ extension Site.Docs.DeepPage
         }
     }
 }
-extension Site.Docs.DeepPage.Decl
+extension Site.Docs.Decl
 {
     init(_ inliner:Inliner, master:Record.Master.Decl, groups:[Record.Group])
     {
@@ -38,22 +38,20 @@ extension Site.Docs.DeepPage.Decl
             master: master)
     }
 }
-extension Site.Docs.DeepPage.Decl
+extension Site.Docs.Decl
 {
     private
     var inliner:Inliner { self.tabulator.inliner }
 
-    var location:URI
-    {
-        .init(decl: self.master, in: self.trunk)
-    }
+    private
     var trunk:Record.Trunk
     {
         self.inliner.zones.principal.trunk
     }
 }
-extension Site.Docs.DeepPage.Decl
+extension Site.Docs.Decl
 {
+    private
     var breadcrumbs:Inliner.Breadcrumbs?
     {
         if  let last:Int = self.path.names.indices.last
@@ -68,22 +66,32 @@ extension Site.Docs.DeepPage.Decl
         }
     }
 
+    private
     var demonym:Demonym
     {
         .init(customization: self.master.customization, phylum: self.master.phylum)
+    }
+}
+extension Site.Docs.Decl:FixedPage
+{
+    var location:URI
+    {
+        .init(decl: self.master, in: self.trunk)
     }
 
     var title:String
     {
         "\(self.path.last) - \(self.trunk.display ?? "\(self.trunk.package)") Documentation"
     }
-}
-extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
-{
-    public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+
+    func emit(header:inout HTML.ContentEncoder)
     {
-        html[.section]
+        header[.nav] { $0.class = "decl" } = self.breadcrumbs
+    }
+
+    func emit(main:inout HTML.ContentEncoder)
+    {
+        main[.section]
         {
             $0.class = self.master.customization.accent.map
             {
@@ -119,7 +127,7 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             }
         }
 
-        html[.section, { $0.class = "declaration" }]
+        main[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -127,12 +135,12 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             }
         }
 
-        html[.section] { $0.class = "details" } =
+        main[.section] { $0.class = "details" } =
             self.master.details.map(self.inliner.passage(_:))
 
         if !self.master.superforms.isEmpty
         {
-            html[.section, { $0.class = "superforms" }]
+            main[.section, { $0.class = "superforms" }]
             {
                 $0[.h2] = self.master.phylum.superformHeading(self.master.customization)
                 $0[.ul]
@@ -145,6 +153,6 @@ extension Site.Docs.DeepPage.Decl:HyperTextOutputStreamable
             }
         }
 
-        html += self.tabulator
+        main += self.tabulator
     }
 }
