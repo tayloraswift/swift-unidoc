@@ -5,7 +5,7 @@ import UnidocRecords
 import Unidoc
 import URI
 
-extension Site.Docs.DeepPage
+extension Site.Docs
 {
     struct Culture
     {
@@ -21,7 +21,7 @@ extension Site.Docs.DeepPage
         }
     }
 }
-extension Site.Docs.DeepPage.Culture
+extension Site.Docs.Culture
 {
     init(_ inliner:Inliner, master:Record.Master.Culture, groups:[Record.Group])
     {
@@ -30,22 +30,23 @@ extension Site.Docs.DeepPage.Culture
             master: master)
     }
 }
-extension Site.Docs.DeepPage.Culture
+extension Site.Docs.Culture
 {
     private
     var inliner:Inliner { self.tabulator.inliner }
 
-    var location:URI
-    {
-        .init(culture: self.master, in: self.trunk)
-    }
     var trunk:Record.Trunk
     {
         self.inliner.zones.principal.trunk
     }
 }
-extension Site.Docs.DeepPage.Culture
+extension Site.Docs.Culture:FixedPage
 {
+    var location:URI
+    {
+        .init(culture: self.master, in: self.trunk)
+    }
+
     var title:String
     {
         """
@@ -53,13 +54,10 @@ extension Site.Docs.DeepPage.Culture
         \(self.trunk.display ?? "\(self.trunk.package)") Documentation
         """
     }
-}
-extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
-{
-    public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+
+    func emit(main:inout HTML.ContentEncoder)
     {
-        html[.section, { $0.class = "introduction" }]
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -77,7 +75,7 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
             }
         }
 
-        html[.section, { $0.class = "declaration" }]
+        main[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -90,9 +88,9 @@ extension Site.Docs.DeepPage.Culture:HyperTextOutputStreamable
             }
         }
 
-        html[.section] { $0.class = "details" } =
+        main[.section] { $0.class = "details" } =
             self.master.details.map(self.inliner.passage(_:))
 
-        html += self.tabulator
+        main += self.tabulator
     }
 }

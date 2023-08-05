@@ -4,6 +4,7 @@
 @import 'CodeSpans';
 @import 'Declarations';
 @import 'Groups';
+@import 'Logo';
 @import 'Typefaces';
 @import 'Prose';
 
@@ -27,6 +28,10 @@ body
 }
 
 //  Vertical layout.
+nav
+{
+    padding: 0.25rem 0;
+}
 body main
 {
     min-height: 100vw;

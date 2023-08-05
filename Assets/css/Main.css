@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 pre {
   margin: 2rem 0 2rem;
   line-height: 1.5rem;
@@ -256,6 +257,12 @@ section.superforms ul > li.module p {
   font-size: 90.625%;
 }
 
+nav a.logo {
+  font-family: "DM Sans", sans-serif;
+  font-size: 12pt;
+  font-weight: 700;
+}
+
 h1, h2, h3, h4 {
   font-family: "DM Sans", sans-serif;
 }
@@ -324,6 +331,10 @@ body {
   overflow-wrap: break-word;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
+}
+
+nav {
+  padding: 0.25rem 0;
 }
 
 body main {

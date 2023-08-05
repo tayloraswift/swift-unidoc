@@ -18,26 +18,21 @@ extension Delegate.Get.Admin
 {
     func load(pool:Mongo.SessionPool) async throws -> ServerResponse
     {
+        let resource:ServerResource
         switch self.tool
         {
         case nil:
-            let page:Site.Admin.DashboardPage = .init(configuration: try await pool.run(
+            let page:Site.Admin = .init(configuration: try await pool.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin))
 
-            let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
-
-            return .resource(.init(.one(canonical: nil),
-                content: .binary(html.utf8),
-                type: .text(.html, charset: .utf8)))
+            resource = page.rendered()
 
         case .dropDatabase:
-            let page:Site.Admin.DropDatabasePage = .init()
-            let html:HTML = .document { $0[.html] { $0.lang = "en" } = page }
+            let page:Site.Admin.DropDatabase = .init()
 
-            return .resource(.init(.one(canonical: nil),
-                content: .binary(html.utf8),
-                type: .text(.html, charset: .utf8)))
+            resource = page.rendered()
         }
+        return .resource(resource)
     }
 }

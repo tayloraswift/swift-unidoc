@@ -1,7 +1,7 @@
 import HTML
 import Unidoc
 
-extension Site.Docs.DeepPage.Decl
+extension Site.Docs.Decl
 {
     struct Demonym
     {
@@ -9,7 +9,7 @@ extension Site.Docs.DeepPage.Decl
         let phylum:Unidoc.Decl
     }
 }
-extension Site.Docs.DeepPage.Decl.Demonym:HyperTextOutputStreamable
+extension Site.Docs.Decl.Demonym:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
