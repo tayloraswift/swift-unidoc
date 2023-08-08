@@ -5,6 +5,7 @@ import UnidocRecords
 
 extension Database
 {
+    public
     struct Zones
     {
         let database:Mongo.Database
@@ -19,7 +20,7 @@ extension Database.Zones:DatabaseCollection
 {
     typealias ElementID = Unidoc.Zone
 
-    static
+    @inlinable public static
     var name:Mongo.Collection { "zones" }
 }
 extension Database.Zones

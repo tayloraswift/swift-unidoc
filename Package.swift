@@ -52,7 +52,7 @@ let package:Package = .init(
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
-        .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
+        .library(name: "UnidocSelectors", targets: ["UnidocSelectors"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
         .library(name: "URI", targets: ["URI"]),
 
@@ -65,7 +65,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-           from: "0.5.3")),
+           from: "0.7.0")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
@@ -285,7 +285,7 @@ let package:Package = .init(
         .target(name: "UnidocDatabase", dependencies:
             [
                 .target(name: "UnidocLinker"),
-                .target(name: "UnidocQueries"),
+                .target(name: "UnidocSelectors"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -303,11 +303,20 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
+        .target(name: "UnidocPages", dependencies:
+            [
+                .target(name: "HTTPServer"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "UnidocQueries"),
+                .target(name: "URI"),
+            ]),
+
         .target(name: "UnidocPlanes"),
 
         .target(name: "UnidocQueries", dependencies:
             [
-                .target(name: "UnidocRecords"),
+                .target(name: "UnidocDatabase"),
+                .target(name: "UnidocSelectors"),
             ]),
 
         .target(name: "UnidocRecords", dependencies:
@@ -315,6 +324,11 @@ let package:Package = .init(
                 .target(name: "FNV1"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "URI"),
+            ]),
+
+        .target(name: "UnidocSelectors", dependencies:
+            [
+                .target(name: "UnidocRecords"),
             ]),
 
         .target(name: "URI", dependencies:
@@ -331,12 +345,9 @@ let package:Package = .init(
 
         .executableTarget(name: "UnidocServer", dependencies:
             [
-                .target(name: "HTTPServer"),
-                .target(name: "MarkdownRendering"),
                 .target(name: "Multiparts"),
                 .target(name: "System"),
-                .target(name: "UnidocDatabase"),
-                .target(name: "URI"),
+                .target(name: "UnidocPages"),
             ]),
 
 
@@ -429,15 +440,15 @@ let package:Package = .init(
 
         .executableTarget(name: "UnidocDatabaseTests", dependencies:
             [
-                .target(name: "UnidocDatabase"),
+                .target(name: "UnidocQueries"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "UnidocQueryTests", dependencies:
+        .executableTarget(name: "UnidocSelectorTests", dependencies:
             [
-                .target(name: "UnidocQueries"),
+                .target(name: "UnidocSelectors"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

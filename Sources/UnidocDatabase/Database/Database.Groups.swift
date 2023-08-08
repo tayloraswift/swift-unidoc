@@ -4,6 +4,7 @@ import UnidocRecords
 
 extension Database
 {
+    public
     struct Groups
     {
         let database:Mongo.Database
@@ -18,7 +19,7 @@ extension Database.Groups:DatabaseCollection
 {
     typealias ElementID = Unidoc.Scalar
 
-    static
+    @inlinable public static
     var name:Mongo.Collection { "groups" }
 }
 extension Database.Groups

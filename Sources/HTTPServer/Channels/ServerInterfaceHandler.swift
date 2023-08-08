@@ -65,15 +65,15 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
             case .GET:
                 self.request = nil
 
-                let request:Delegate.GetRequest? = .init(head.uri,
+                let request:Delegate.Request? = .init(get: head.uri,
                     address: self.address,
                     headers: head.headers)
                 {
                     self.accept(context: context, etag: head.etag)
                 }
-                if  let request:Delegate.GetRequest
+                if  let request:Delegate.Request
                 {
-                    self.delegate.serve(get: request)
+                    self.delegate.yield(request)
                 }
                 else
                 {
@@ -122,16 +122,16 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 
             self.request = nil
 
-            let request:Delegate.PostRequest? = .init(head.uri,
+            let request:Delegate.Request? = .init(post: head.uri,
                     address: self.address,
                     headers: head.headers,
                     body: body)
             {
                 self.accept(context: context, etag: head.etag)
             }
-            if  let request:Delegate.PostRequest
+            if  let request:Delegate.Request
             {
-                self.delegate.serve(post: request)
+                self.delegate.yield(request)
             }
             else
             {

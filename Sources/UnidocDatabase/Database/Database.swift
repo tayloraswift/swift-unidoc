@@ -6,7 +6,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocLinker
-import UnidocQueries
+import UnidocSelectors
 import UnidocRecords
 
 @frozen public
@@ -33,6 +33,15 @@ extension Database
     var masters:Masters { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
     var zones:Zones { .init(database: self.id) }
+
+    public static
+    var collation:Mongo.Collation
+    {
+        .init(locale: "en", // casing is a property of english, not unicode
+            caseLevel: false, // url paths are case-insensitive
+            normalization: true, // normalize unicode on insert
+            strength: .secondary) // diacritics are significant
+    }
 }
 extension Database
 {
@@ -192,24 +201,32 @@ extension Database
 }
 extension Database
 {
-    public
-    func execute(query:__owned DeepQuery,
-        with session:Mongo.Session) async throws -> [DeepQuery.Output]
+    //  This should be part of the swift-mongodb package.
+    private
+    func explain<Command>(command:__owned Command,
+        with session:Mongo.Session) async throws -> String
+        where Command:MongoCommand
     {
-        try await session.run(command: query.command, against: self.id)
-        {
-            try await $0.reduce(into: [], +=)
-        }
+        try await session.run(
+            command: Mongo.Explain<Command>.init(
+                verbosity: .executionStats,
+                command: command),
+            against: self.id)
     }
 
     public
-    func explain(query:__owned DeepQuery,
+    func explain<Query>(query:__owned Query,
         with session:Mongo.Session) async throws -> String
+        where Query:DatabaseQuery
     {
-        try await session.run(
-            command: Mongo.Explain<Mongo.Aggregate<Mongo.Cursor<DeepQuery.Output>>>.init(
-                verbosity: .executionStats,
-                command: query.command),
-            against: self.id)
+        try await self.explain(command: query.command, with: session)
+    }
+
+    @inlinable public
+    func execute<Query>(query:__owned Query,
+        with session:Mongo.Session) async throws -> Query.Output?
+        where Query:DatabaseQuery
+    {
+        try await session.run(command: query.command, against: self.id)
     }
 }
