@@ -6,6 +6,7 @@ import Unidoc
 import UnidocDatabase
 import UnidocQueries
 import UnidocRecords
+import UnidocSelectors
 
 struct DatabaseQueries:MongoTestBattery
 {
@@ -52,15 +53,14 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
         {
-            let query:DeepQuery = .init(.docs, "swift", ["swift", "dictionary", "keys"])
+            let query:WideQuery = .init(.docs, "swift", ["swift", "dictionary", "keys"])
             await tests.do
             {
-                let output:[DeepQuery.Output] = try await database.execute(query: query,
-                    with: session)
 
-                if  tests.expect(output.count ==? 1),
-                    tests.expect(output[0].principal.count ==? 1),
-                    let _:Record.Master = tests.expect(value: output[0].principal[0].master)
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    tests.expect(output.principal.count ==? 1),
+                    let _:Record.Master = tests.expect(value: output.principal[0].master)
                 {
                 }
             }
@@ -69,16 +69,15 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to get multiple results back for an ambiguous query.
         if  let tests:TestGroup = tests / "Int" / "init"
         {
-            let query:DeepQuery = .init(.docs, "swift", ["swift", "int.init(_:)"])
+            let query:WideQuery = .init(.docs, "swift", ["swift", "int.init(_:)"])
             await tests.do
             {
-                let output:[DeepQuery.Output] = try await database.execute(query: query,
-                    with: session)
 
-                if  tests.expect(output.count ==? 1),
-                    tests.expect(output[0].principal.count ==? 1),
-                    tests.expect(output[0].principal[0].matches.count >? 1),
-                    tests.expect(nil: output[0].principal[0].master)
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    tests.expect(output.principal.count ==? 1),
+                    tests.expect(output.principal[0].matches.count >? 1),
+                    tests.expect(nil: output.principal[0].master)
                 {
                 }
             }
@@ -87,16 +86,15 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to disambiguate the previous query with an FNV-1 hash.
         if  let tests:TestGroup = tests / "Int" / "init" / "hashed"
         {
-            let query:DeepQuery = .init(.docs, "swift", ["swift", "int.init(_:)"],
+            let query:WideQuery = .init(.docs, "swift", ["swift", "int.init(_:)"],
                 hash: .init("8VBWO"))
             await tests.do
             {
-                let output:[DeepQuery.Output] = try await database.execute(query: query,
-                    with: session)
 
-                if  tests.expect(output.count ==? 1),
-                    tests.expect(output[0].principal.count ==? 1),
-                    let _:Record.Master = tests.expect(value: output[0].principal[0].master)
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    tests.expect(output.principal.count ==? 1),
+                    let _:Record.Master = tests.expect(value: output.principal[0].master)
                 {
                 }
             }
@@ -104,7 +102,7 @@ struct DatabaseQueries:MongoTestBattery
 
         if  let tests:TestGroup = tests / "Parentheses"
         {
-            for (name, query):(String, DeepQuery) in
+            for (name, query):(String, WideQuery) in
             [
                 (
                     "None",
@@ -118,19 +116,17 @@ struct DatabaseQueries:MongoTestBattery
             {
                 guard
                     let tests:TestGroup = tests / name,
-                    let query:DeepQuery = tests.expect(value: query)
+                    let query:WideQuery = tests.expect(value: query)
                 else
                 {
                     continue
                 }
                 await tests.do
                 {
-                    let output:[DeepQuery.Output] = try await database.execute(query: query,
-                        with: session)
-
-                    if  tests.expect(output.count ==? 1),
-                        tests.expect(output[0].principal.count ==? 1),
-                        let _:Record.Master = tests.expect(value: output[0].principal[0].master)
+                    if  let output:WideQuery.Output = tests.expect(
+                            value: try await database.execute(query: query, with: session)),
+                        tests.expect(output.principal.count ==? 1),
+                        let _:Record.Master = tests.expect(value: output.principal[0].master)
                     {
                     }
                 }
@@ -144,7 +140,7 @@ struct DatabaseQueries:MongoTestBattery
         /// namespace.
         if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
         {
-            let query:DeepQuery = .init(.docs, "swift-malibu:$anonymous",
+            let query:WideQuery = .init(.docs, "swift-malibu:$anonymous",
                 [
                     "barbiecore",
                     "barbie",
@@ -152,19 +148,16 @@ struct DatabaseQueries:MongoTestBattery
                 ])
             await tests.do
             {
-                let output:[DeepQuery.Output] = try await database.execute(query: query,
-                    with: session)
-
-                if  tests.expect(output.count ==? 1),
-                    tests.expect(output[0].principal.count ==? 1),
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    tests.expect(output.principal.count ==? 1),
                     let master:Record.Master = tests.expect(
-                        value: output[0].principal[0].master),
+                        value: output.principal[0].master),
                     let overview:Record.Passage = tests.expect(
                         value: master.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
-                    let secondaries:Set<Unidoc.Scalar> = .init(
-                        output[0].secondary.lazy.map(\.id))
+                    let secondaries:Set<Unidoc.Scalar> = .init(output.secondary.lazy.map(\.id))
 
                     for outline:Record.Outline in overview.outlines
                     {
@@ -207,20 +200,19 @@ struct DatabaseQueries:MongoTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
-            let query:DeepQuery = .init(.article, "swift-malibu:$anonymous",
+            let query:WideQuery = .init(.article, "swift-malibu:$anonymous",
                 [
                     "barbiecore",
                     "getting-started",
                 ])
             await tests.do
             {
-                let output:[DeepQuery.Output] = try await database.execute(query: query,
-                    with: session)
 
-                if  tests.expect(output.count ==? 1),
-                    tests.expect(output[0].principal.count ==? 1),
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    tests.expect(output.principal.count ==? 1),
                     let _:Record.Master = tests.expect(
-                        value: output[0].principal[0].master)
+                        value: output.principal[0].master)
                 {
                 }
             }
@@ -236,7 +228,7 @@ struct DatabaseQueries:MongoTestBattery
         /// conformances within the same package.
         if  let tests:TestGroup = tests / "Deduplication"
         {
-            for (name, query):(String, DeepQuery) in
+            for (name, query):(String, WideQuery) in
             [
                 (
                     "Upstream",
@@ -255,27 +247,26 @@ struct DatabaseQueries:MongoTestBattery
             {
                 guard
                     let tests:TestGroup = tests / name,
-                    let query:DeepQuery = tests.expect(value: query)
+                    let query:WideQuery = tests.expect(value: query)
                 else
                 {
                     continue
                 }
                 await tests.do
                 {
-                    let output:[DeepQuery.Output] = try await database.execute(query: query,
-                        with: session)
 
-                    if  tests.expect(output.count ==? 1),
-                        tests.expect(output[0].principal.count ==? 1),
-                        let _:Record.Master = tests.expect(value: output[0].principal[0].master)
+                    if  let output:WideQuery.Output = tests.expect(
+                            value: try await database.execute(query: query, with: session)),
+                        tests.expect(output.principal.count ==? 1),
+                        let _:Record.Master = tests.expect(value: output.principal[0].master)
                     {
-                        let secondaries:[Unidoc.Scalar: Substring] = output[0].secondary.reduce(
+                        let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
                             into: [:])
                         {
                             $0[$1.id] = $1.stem?.last
                         }
                         var counts:[Substring: Int] = [:]
-                        for case .extension(let `extension`) in output[0].principal[0].groups
+                        for case .extension(let `extension`) in output.principal[0].groups
                         {
                             for p:Unidoc.Scalar in `extension`.conformances
                             {

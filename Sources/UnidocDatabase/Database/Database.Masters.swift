@@ -1,10 +1,11 @@
 import MongoDB
 import Unidoc
-import UnidocQueries
+import UnidocSelectors
 import UnidocRecords
 
 extension Database
 {
+    public
     struct Masters
     {
         let database:Mongo.Database
@@ -19,7 +20,7 @@ extension Database.Masters:DatabaseCollection
 {
     typealias ElementID = Unidoc.Scalar
 
-    static
+    @inlinable public static
     var name:Mongo.Collection { "masters" }
 }
 extension Database.Masters
@@ -36,7 +37,7 @@ extension Database.Masters
                         $0[.unique] = false
                         $0[.name] = "stem,hash"
 
-                        $0[.collation] = DeepQuery.collation
+                        $0[.collation] = Database.collation
                         $0[.key] = .init
                         {
                             $0[Record.Master[.stem]] = (+)

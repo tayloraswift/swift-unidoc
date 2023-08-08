@@ -10,9 +10,6 @@ extension Record
     @frozen public
     struct Zone:Identifiable, Equatable, Sendable
     {
-        @available(*, deprecated, renamed: "Record.Trunk")
-        public typealias Names = Trunk
-
         public
         let id:Unidoc.Zone
 
