@@ -5,7 +5,7 @@ import BSONEncoding
 struct Documentation:Equatable, Sendable
 {
     public
-    let metadata:SymbolGraphMetadata
+    var metadata:SymbolGraphMetadata
     public
     let graph:SymbolGraph
 

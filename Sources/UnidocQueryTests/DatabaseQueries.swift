@@ -18,12 +18,16 @@ struct DatabaseQueries:MongoTestBattery
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
 
-        let example:Documentation = try await toolchain.generateDocs(
+        var example:Documentation = try await toolchain.generateDocs(
             for: try await .local(package: "swift-malibu",
                 from: "TestPackages",
                 in: workspace,
                 clean: true),
             pretty: true)
+
+        //  Cross-package features won’t work unless the snapshot has a
+        //  semantic version number.
+        example.metadata.version = .stable(.release(.v(0, 0, 0)))
 
         example.roundtrip(for: tests, in: workspace.path)
 
@@ -51,7 +55,7 @@ struct DatabaseQueries:MongoTestBattery
             overwritten: false,
             package: 1,
             version: 0,
-            id: "swift-malibu ? x86_64-unknown-linux-gnu"))
+            id: "swift-malibu v0.0.0 x86_64-unknown-linux-gnu"))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
@@ -143,7 +147,7 @@ struct DatabaseQueries:MongoTestBattery
         /// namespace.
         if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
         {
-            let query:WideQuery = .init(.docs, "swift-malibu:$unversioned",
+            let query:WideQuery = .init(.docs, "swift-malibu",
                 [
                     "barbiecore",
                     "barbie",
@@ -203,7 +207,7 @@ struct DatabaseQueries:MongoTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
-            let query:WideQuery = .init(.article, "swift-malibu:$unversioned",
+            let query:WideQuery = .init(.article, "swift-malibu",
                 [
                     "barbiecore",
                     "getting-started",
@@ -239,7 +243,7 @@ struct DatabaseQueries:MongoTestBattery
                 ),
                 (
                     "Local",
-                    .init(.docs, "swift-malibu:$unversioned",
+                    .init(.docs, "swift-malibu",
                     [
                         "barbiecore",
                         "barbie",
