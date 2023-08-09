@@ -8,7 +8,7 @@ extension WideQuery.Output:ServerResponseFactory
     public
     func response(for _:URI) throws -> ServerResponse
     {
-        guard self.principal.count == 1
+        guard let principal:WideQuery.Output.Principal = self.principal.first
         else
         {
             return .resource(.init(.none,
@@ -16,52 +16,61 @@ extension WideQuery.Output:ServerResponseFactory
                 type: .text(.plain, charset: .utf8)))
         }
 
-        let principal:WideQuery.Output.Principal = self.principal[0]
-        let resource:ServerResource
-
-        if  let master:Record.Master = principal.master
-        {
-            let inliner:Inliner = .init(principal: master.id, trunk: principal.trunk)
-                inliner.masters.add(self.secondary)
-                inliner.trunks.add(self.zones)
-
-            switch master
-            {
-            case .article(let master):
-                let article:Site.Guides.Article = .init(inliner,
-                    master: master,
-                    groups: principal.groups)
-                resource = article.rendered()
-
-            case .culture(let master):
-                let culture:Site.Docs.Culture = .init(inliner,
-                    master: master,
-                    groups: principal.groups)
-                resource = culture.rendered()
-
-            case .decl(let master):
-                let decl:Site.Docs.Decl = .init(inliner,
-                    master: master,
-                    groups: principal.groups)
-                resource = decl.rendered()
-
-            case .file:
-                //  We should never get this as principal output!
-                throw WideQuery.OutputError.malformed
-            }
-        }
-        else if
-            let disambiguation:Site.Docs.Disambiguation = .init(
-                matches: principal.matches,
-                in: principal.trunk)
-        {
-            resource = disambiguation.rendered()
-        }
+        guard self.principal.count == 1
         else
         {
             throw WideQuery.OutputError.malformed
         }
 
-        return .resource(resource)
+
+        if  let master:Record.Master = principal.master
+        {
+            let resource:ServerResource
+            let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
+                inliner.masters.add(self.secondary)
+                inliner.zones.add(self.zones)
+
+            switch master
+            {
+            case .article(let master):
+                let page:Site.Guides.Article = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = page.rendered()
+
+            case .culture(let master):
+                let page:Site.Docs.Culture = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = page.rendered()
+
+            case .decl(let master):
+                let page:Site.Docs.Decl = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = page.rendered()
+
+            case .file:
+                //  We should never get this as principal output!
+                throw WideQuery.OutputError.malformed
+            }
+
+            return .resource(resource)
+        }
+        else
+        {
+            let inliner:Inliner = .init(principal: principal.zone)
+                inliner.masters.add(principal.matches)
+
+            if  let disambiguation:Site.Docs.Disambiguation = .init(inliner,
+                    matches: principal.matches)
+            {
+                return .resource(disambiguation.rendered())
+            }
+        }
+
+        return .resource(.init(.none,
+            content: .text("Record not found."),
+            type: .text(.plain, charset: .utf8)))
     }
 }

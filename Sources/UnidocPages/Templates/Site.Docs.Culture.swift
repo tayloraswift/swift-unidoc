@@ -35,23 +35,23 @@ extension Site.Docs.Culture
     private
     var inliner:Inliner { self.tabulator.inliner }
 
-    var trunk:Record.Trunk
+    var zone:Record.Zone
     {
-        self.inliner.trunks.principal.trunk
+        self.inliner.zones.principal
     }
 }
 extension Site.Docs.Culture:FixedPage
 {
     var location:URI
     {
-        .init(culture: self.master, in: self.trunk)
+        .init(culture: self.master, in: self.zone)
     }
 
     var title:String
     {
         """
         \(self.master.module.name) - \
-        \(self.trunk.display ?? "\(self.trunk.package)") Documentation
+        \(self.zone.display ?? "\(self.zone.package)") Documentation
         """
     }
 
@@ -62,7 +62,7 @@ extension Site.Docs.Culture:FixedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module"
-                $0[.span] { $0.class = "version" } = self.trunk.version
+                $0[.span] { $0.class = "version" } = self.zone.version
             }
 
             $0[.h1] = self.master.module.name

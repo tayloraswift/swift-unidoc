@@ -52,8 +52,10 @@ let package:Package = .init(
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
-        .library(name: "UnidocSelectors", targets: ["UnidocSelectors"]),
+        .library(name: "UnidocPages", targets: ["UnidocPages"]),
+        .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
+        .library(name: "UnidocSelectors", targets: ["UnidocSelectors"]),
         .library(name: "URI", targets: ["URI"]),
 
         .executable(name: "UnidocServer", targets: ["UnidocServer"]),

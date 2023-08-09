@@ -36,13 +36,13 @@ extension Tabulator
             }
 
             let party:Party
-            if  `extension`.id.zone == inliner.trunks.principal.id
+            if  `extension`.id.zone == inliner.zones.principal.id
             {
                 party = .first
             }
-            else if let trunk:Record.Trunk = inliner.trunks[`extension`.id.zone]
+            else if let zone:Record.Zone = inliner.zones[`extension`.id.zone]
             {
-                party = .third(trunk.package)
+                party = .third(zone.package)
             }
             else
             {

@@ -5,22 +5,22 @@ import URI
 struct InlinerCache
 {
     var masters:Masters
-    var trunks:Trunks
+    var zones:Zones
 
     private
     var urls:[Unidoc.Scalar: String]
 
-    init(masters:Masters, trunks:Trunks, urls:[Unidoc.Scalar: String] = [:])
+    init(masters:Masters, zones:Zones, urls:[Unidoc.Scalar: String] = [:])
     {
         self.masters = masters
-        self.trunks = trunks
+        self.zones = zones
         self.urls = urls
     }
 }
 extension InlinerCache
 {
     private mutating
-    func load(_ scalar:Unidoc.Scalar, by url:(Record.Trunk) -> URL?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by url:(Record.Zone) -> URL?) -> String?
     {
         {
             if  let target:String = $0
@@ -28,8 +28,8 @@ extension InlinerCache
                 return target
             }
             else if
-                let trunk:Record.Trunk = self.trunks[scalar.zone],
-                let url:URL = url(trunk)
+                let zone:Record.Zone = self.zones[scalar.zone],
+                let url:URL = url(zone)
             {
                 let target:String = "\(url)"
                 $0 = target
@@ -99,7 +99,7 @@ extension InlinerCache
                     by: { $0.url(github: master.symbol).map(URL.absolute(_:)) })
             {
                 //  Need to append the line fragment here and not in
-                //  ``Record.Trunk.url(github:)`` because the cache should
+                //  ``Record.Zone.url(github:)`` because the cache should
                 //  support multiple line fragments for the same file.
                 return (master, line.map { "\(url)#L\($0 + 1)" } ?? url)
             }

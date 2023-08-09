@@ -61,17 +61,6 @@ extension Record.Zone
 {
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
-
-    @inlinable public
-    var names:Record.Trunk
-    {
-        .init(package: self.package,
-            version: self.version,
-            refname: self.refname,
-            display: self.display,
-            github: self.github,
-            latest: self.latest)
-    }
 }
 extension Record.Zone
 {
@@ -100,6 +89,24 @@ extension Record.Zone
         /// exists as a query optimization. It is computed and aligned within
         /// the database according to the value of the ``patch`` field.
         case latest = "L"
+
+        /// The list of non-computed fields in this scheme. This is used as a
+        /// projection filter to avoid returning computed fields.
+        @inlinable public static
+        var independent:[Self]
+        {
+            [
+                .id,
+                .package,
+                .version,
+                .refname,
+                .display,
+                .github,
+                .patch,
+
+                .latest,
+            ]
+        }
     }
 }
 extension Record.Zone:BSONDocumentEncodable

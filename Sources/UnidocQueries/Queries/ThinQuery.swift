@@ -31,12 +31,12 @@ extension ThinQuery:DatabaseQuery
         .init
         {
             $0 += Stages.Zone<Selector.Zone>.init(self.zone,
-                as: Output[.trunk])
+                as: Output[.zone])
 
             $0.stage
             {
                 $0[.lookup] = self.mode.lookup(
-                    input: Output[.trunk],
+                    input: Output[.zone],
                     as: Output[.masters])
             }
         }

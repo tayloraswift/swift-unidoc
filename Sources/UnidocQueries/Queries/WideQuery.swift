@@ -30,12 +30,12 @@ extension WideQuery:DatabaseQuery
         .init
         {
             $0 += Stages.Zone<Selector.Zone>.init(self.zone,
-                as: Output.Principal[.trunk])
+                as: Output.Principal[.zone])
 
             $0.stage
             {
                 $0[.lookup] = self.mode.lookup(
-                    input: Output.Principal[.trunk],
+                    input: Output.Principal[.zone],
                     as: Output.Principal[.matches])
             }
 
@@ -81,8 +81,8 @@ extension WideQuery:DatabaseQuery
                         $0[let: id] = Output.Principal[.master] / Record.Master[.id]
 
                         $0[let: topic] = Output.Principal[.master] / Record.Master[.group]
-                        $0[let: min] = Output.Principal[.trunk] / Record.Zone[.planes_min]
-                        $0[let: max] = Output.Principal[.trunk] / Record.Zone[.planes_max]
+                        $0[let: min] = Output.Principal[.zone] / Record.Zone[.planes_min]
+                        $0[let: max] = Output.Principal[.zone] / Record.Zone[.planes_max]
                     }
                     $0[.pipeline] = .init
                     {
@@ -142,13 +142,15 @@ extension WideQuery:DatabaseQuery
                             {
                                 for key:Output.Principal.CodingKey in
                                         Output.Principal.CodingKey.allCases where
-                                    key != .trunk
+                                    key != .zone
                                 {
                                     $0[Output.Principal[key]] = true
                                 }
-                                for key:Record.Zone.CodingKey in Record.Trunk.keys
+                                //  Do not return computed fields.
+                                for key:Record.Zone.CodingKey in
+                                    Record.Zone.CodingKey.independent
                                 {
-                                    $0[Output.Principal[.trunk] / Record.Zone[key]] = true
+                                    $0[Output.Principal[.zone] / Record.Zone[key]] = true
                                 }
                             }
                         }
@@ -216,7 +218,7 @@ extension WideQuery:DatabaseQuery
                                         $0[zones] = .init
                                         {
                                             $0[.ne] =
-                                                Output.Principal[.trunk] / Record.Zone[.id]
+                                                Output.Principal[.zone] / Record.Zone[.id]
                                         }
                                     }
                                 }
@@ -239,6 +241,17 @@ extension WideQuery:DatabaseQuery
                         $0.stage
                         {
                             $0[.replaceWith] = results
+                        }
+                        $0.stage
+                        {
+                            $0[.project] = .init
+                            {
+                                for key:Record.Zone.CodingKey in
+                                    Record.Zone.CodingKey.independent
+                                {
+                                    $0[Record.Zone[key]] = true
+                                }
+                            }
                         }
                     }
                 }
