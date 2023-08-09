@@ -28,21 +28,21 @@ extension Site.Guides
 }
 extension Site.Guides.Article
 {
-    var trunk:Record.Trunk
+    var zone:Record.Zone
     {
-        self.inliner.trunks.principal.trunk
+        self.inliner.zones.principal
     }
 }
 extension Site.Guides.Article:FixedPage
 {
     var location:URI
     {
-        .init(article: self.master, in: self.trunk)
+        .init(article: self.master, in: self.zone)
     }
 
     var title:String
     {
-        "\(self.trunk.display ?? "\(self.trunk.package)") Documentation"
+        "\(self.zone.display ?? "\(self.zone.package)") Documentation"
     }
 
     func emit(main:inout HTML.ContentEncoder)
@@ -59,7 +59,7 @@ extension Site.Guides.Article:FixedPage
 
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.trunk.version
+                        $0[.span] { $0.class = "version" } = self.zone.version
                     }
                 }
             }

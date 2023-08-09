@@ -11,13 +11,13 @@ extension ThinQuery
         public
         let masters:[Record.Master]
         public
-        let trunk:Record.Trunk
+        let zone:Record.Zone
 
         @inlinable internal
-        init(masters:[Record.Master], trunk:Record.Trunk)
+        init(masters:[Record.Master], zone:Record.Zone)
         {
             self.masters = masters
-            self.trunk = trunk
+            self.zone = zone
         }
     }
 }
@@ -27,7 +27,7 @@ extension ThinQuery.Output:MongoMasterCodingModel
     enum CodingKey:String, CaseIterable
     {
         case masters = "M"
-        case trunk = "T"
+        case zone = "Z"
     }
 }
 extension ThinQuery.Output:BSONDocumentDecodable
@@ -35,6 +35,6 @@ extension ThinQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(masters: try bson[.masters].decode(), trunk: try bson[.trunk].decode())
+        self.init(masters: try bson[.masters].decode(), zone: try bson[.zone].decode())
     }
 }

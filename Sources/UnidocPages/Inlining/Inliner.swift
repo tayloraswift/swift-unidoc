@@ -24,27 +24,27 @@ extension Inliner
         _read   { yield  self.cache.masters }
         _modify { yield &self.cache.masters }
     }
-    var trunks:InlinerCache.Trunks
+    var zones:InlinerCache.Zones
     {
-        _read   { yield  self.cache.trunks }
-        _modify { yield &self.cache.trunks }
+        _read   { yield  self.cache.zones }
+        _modify { yield &self.cache.zones }
     }
 }
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, trunk:Record.Trunk)
+    init(principal scalar:Unidoc.Scalar, zone:Record.Zone)
     {
         self.init(cache: .init(
             masters: .init(principal: scalar),
-            trunks: .init(principal: (scalar.zone, trunk))))
+            zones: .init(principal: zone)))
     }
     convenience
-    init(principal zone:Unidoc.Zone, trunk:Record.Trunk)
+    init(principal zone:Record.Zone)
     {
         self.init(cache: .init(
             masters: .init(principal: nil),
-            trunks: .init(principal: (zone, trunk))))
+            zones: .init(principal: zone)))
     }
 }
 extension Inliner

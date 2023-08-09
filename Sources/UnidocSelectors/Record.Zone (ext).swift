@@ -3,7 +3,7 @@ import Symbols
 import UnidocRecords
 import URI
 
-extension Record.Trunk
+extension Record.Zone
 {
     @inlinable public static
     func += (uri:inout URI.Path, self:Self)

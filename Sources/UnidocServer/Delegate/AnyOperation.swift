@@ -93,14 +93,26 @@ extension AnyOperation
             }
         }
 
-        let query:WideQuery = .init(
-            for: .init(planes: planes, stem: stem, hash: hash),
-            in: .init(trunk))
+        if  stem.isEmpty
+        {
+            let query:ThinQuery<Selector.Planes> = .init(for: planes, in: .init(trunk))
 
-        return .database(QueryOperation<WideQuery>.init(
-            explain: explain,
-            query: query,
-            uri: uri))
+            return .database(QueryOperation<ThinQuery<Selector.Planes>>.init(
+                explain: explain,
+                query: query,
+                uri: uri))
+        }
+        else
+        {
+            let query:WideQuery = .init(
+                for: .init(planes: planes, stem: stem, hash: hash),
+                in: .init(trunk))
+
+            return .database(QueryOperation<WideQuery>.init(
+                explain: explain,
+                query: query,
+                uri: uri))
+        }
     }
     private static
     func get(

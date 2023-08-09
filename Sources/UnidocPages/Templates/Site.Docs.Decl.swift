@@ -44,9 +44,9 @@ extension Site.Docs.Decl
     var inliner:Inliner { self.tabulator.inliner }
 
     private
-    var trunk:Record.Trunk
+    var zone:Record.Zone
     {
-        self.inliner.trunks.principal.trunk
+        self.inliner.zones.principal
     }
 }
 extension Site.Docs.Decl
@@ -76,12 +76,12 @@ extension Site.Docs.Decl:FixedPage
 {
     var location:URI
     {
-        .init(decl: self.master, in: self.trunk)
+        .init(decl: self.master, in: self.zone)
     }
 
     var title:String
     {
-        "\(self.path.last) - \(self.trunk.display ?? "\(self.trunk.package)") Documentation"
+        "\(self.path.last) - \(self.zone.display ?? "\(self.zone.package)") Documentation"
     }
 
     func emit(header:inout HTML.ContentEncoder)
@@ -108,7 +108,7 @@ extension Site.Docs.Decl:FixedPage
                     $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.trunk.version
+                        $0[.span] { $0.class = "version" } = self.zone.version
                         if  self.master.namespace != self.master.culture
                         {
                             $0 ?= self.inliner.link(module: self.master.culture)

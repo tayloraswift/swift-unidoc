@@ -28,7 +28,7 @@ extension Site.Docs
 }
 extension Site.Docs.Disambiguation
 {
-    init?(matches:[Record.Master], in trunk:Record.Trunk)
+    init?(_ inliner:__owned Inliner, matches:__shared [Record.Master])
     {
         guard let first:Record.Master = matches.first
         else
@@ -47,16 +47,19 @@ extension Site.Docs.Disambiguation
 
         switch first
         {
-        case .article(let first):   location = .init(article: first, in: trunk)
-        case .culture(let first):   location = .init(culture: first, in: trunk)
-        case .decl(let first):      location = .init(decl: first, in: trunk,
-            disambiguate: false)
-        //  We should never get this as principal output!
-        case .file:                 return nil
-        }
+        case .article(let first):
+            location = .init(article: first, in: inliner.zones.principal)
 
-        let inliner:Inliner = .init(principal: first.id.zone, trunk: trunk)
-            inliner.masters.add(matches)
+        case .culture(let first):
+            location = .init(culture: first, in: inliner.zones.principal)
+
+        case .decl(let first):
+            location = .init(decl: first, in: inliner.zones.principal, disambiguate: false)
+
+        case .file:
+            //  We should never get this as principal output!
+            return nil
+        }
 
         self.init(inliner, identity: identity, location: location, matches: matches.map(\.id))
     }

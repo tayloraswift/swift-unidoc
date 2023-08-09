@@ -23,9 +23,9 @@ extension Stages.Zone<Selector.Zone>
     {
         defer
         {
-            //  ``Record.Zone`` and its subset ``Record.Trunk`` have many keys.
-            //  to simplify the output schema and allow re-use of the earlier
-            //  pipeline stages, we demote the trunk keys to a subdocument.
+            //  ``Record.Zone`` has many keys. to simplify the output schema
+            //  and allow re-use of the earlier pipeline stages, we demote
+            //  the zone fields to a subdocument.
             pipeline.stage
             {
                 $0[.replaceWith] = .init
