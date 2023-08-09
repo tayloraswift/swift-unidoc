@@ -17,7 +17,7 @@ struct Objects:MongoTestBattery
 
         let repository:String = "https://github.com/apple/swift-nio"
         var archives:[Documentation] = []
-        for ref:String in ["2.53.0", "2.54.0", "2.55.0", "2.56.0", "2.57.0", "main"]
+        for ref:String in ["main", "2.53.0", "2.54.0", "2.55.0", "2.56.0", "2.57.0"]
         {
             if  let archive:Documentation = try? .load(package: "swift-nio",
                     at: .init(ref),
@@ -37,37 +37,37 @@ struct Objects:MongoTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.store(docs: archives[0], with: session) ==? .init(
+        tests.expect(try await database.store(docs: archives[1], with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 0,
             id: "swift-nio v2.53.0 x86_64-unknown-linux-gnu"))
 
-        tests.expect(try await database.store(docs: archives[1], with: session) ==? .init(
+        tests.expect(try await database.store(docs: archives[2], with: session) ==? .init(
             overwritten: false,
             package: 0,
             version: 1,
             id: "swift-nio v2.54.0 x86_64-unknown-linux-gnu"))
 
-        tests.expect(try await database.store(docs: archives[1], with: session) ==? .init(
+        tests.expect(try await database.store(docs: archives[2], with: session) ==? .init(
             overwritten: true,
             package: 0,
             version: 1,
             id: "swift-nio v2.54.0 x86_64-unknown-linux-gnu"))
 
-        tests.expect(try await database.store(docs: archives.last!, with: session) ==? .init(
+        tests.expect(try await database.store(docs: archives[0], with: session) ==? .init(
             overwritten: false,
-            package: 0,
-            version: 2,
-            id: "swift-nio @main x86_64-unknown-linux-gnu"))
-
-        tests.expect(try await database.store(docs: archives.last!, with: session) ==? .init(
-            overwritten: true,
             package: 0,
             version: 2,
             id: "swift-nio @main x86_64-unknown-linux-gnu"))
 
         tests.expect(try await database.store(docs: archives[0], with: session) ==? .init(
+            overwritten: true,
+            package: 0,
+            version: 2,
+            id: "swift-nio @main x86_64-unknown-linux-gnu"))
+
+        tests.expect(try await database.store(docs: archives[1], with: session) ==? .init(
             overwritten: true,
             package: 0,
             version: 0,

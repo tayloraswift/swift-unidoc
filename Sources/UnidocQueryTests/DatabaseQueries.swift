@@ -2,6 +2,7 @@ import MongoDB
 import MongoTesting
 import SymbolGraphBuilder
 import SymbolGraphs
+import SymbolGraphTesting
 import Unidoc
 import UnidocDatabase
 import UnidocQueries
@@ -23,6 +24,8 @@ struct DatabaseQueries:MongoTestBattery
                 in: workspace,
                 clean: true),
             pretty: true)
+
+        example.roundtrip(for: tests, in: workspace.path)
 
         let swift:Documentation
         do
@@ -48,7 +51,7 @@ struct DatabaseQueries:MongoTestBattery
             overwritten: false,
             package: 1,
             version: 0,
-            id: "$anonymous"))
+            id: "swift-malibu ? x86_64-unknown-linux-gnu"))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
@@ -140,7 +143,7 @@ struct DatabaseQueries:MongoTestBattery
         /// namespace.
         if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
         {
-            let query:WideQuery = .init(.docs, "swift-malibu:$anonymous",
+            let query:WideQuery = .init(.docs, "swift-malibu:$unversioned",
                 [
                     "barbiecore",
                     "barbie",
@@ -200,7 +203,7 @@ struct DatabaseQueries:MongoTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
-            let query:WideQuery = .init(.article, "swift-malibu:$anonymous",
+            let query:WideQuery = .init(.article, "swift-malibu:$unversioned",
                 [
                     "barbiecore",
                     "getting-started",
@@ -236,7 +239,7 @@ struct DatabaseQueries:MongoTestBattery
                 ),
                 (
                     "Local",
-                    .init(.docs, "swift-malibu:$anonymous",
+                    .init(.docs, "swift-malibu:$unversioned",
                     [
                         "barbiecore",
                         "barbie",

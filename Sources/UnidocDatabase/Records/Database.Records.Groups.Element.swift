@@ -2,17 +2,13 @@ import BSONEncoding
 import Unidoc
 import UnidocRecords
 
-extension Records.Groups
+extension Database.Records.Groups
 {
-    @frozen public
     struct Element
     {
-        public
         let base:Record.Group
-        public
         let latest:Latest
 
-        @inlinable internal
         init(_ base:Record.Group, latest:Latest)
         {
             self.base = base
@@ -20,17 +16,15 @@ extension Records.Groups
         }
     }
 }
-extension Records.Groups.Element:Sendable where Latest:Sendable
+extension Database.Records.Groups.Element:Sendable where Latest:Sendable
 {
 }
-extension Records.Groups.Element:Identifiable
+extension Database.Records.Groups.Element:Identifiable
 {
-    @inlinable public
     var id:Unidoc.Scalar { self.base.id }
 }
-extension Records.Groups.Element:BSONDocumentEncodable
+extension Database.Records.Groups.Element:BSONDocumentEncodable
 {
-    public
     func encode(to bson:inout BSON.DocumentEncoder<Record.Group.CodingKey>)
     {
         self.base.encode(to: &bson)

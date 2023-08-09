@@ -18,14 +18,19 @@ struct DynamicLinker
 
     private
     var extensions:Extensions
-    public private(set)
-    var projection:Records
 
     /// Maps masters to groups.
     private
     var topics:[Int32: Unidoc.Scalar]
     private
     var topic:Unidoc.Counter<UnidocPlane.Topic>
+
+    public private(set)
+    var masters:[Record.Master]
+    public private(set)
+    var groups:[Record.Group]
+    public
+    let zone:Record.Zone
 
     private
     init(context:DynamicContext,
@@ -39,11 +44,14 @@ struct DynamicLinker
         self.diagnostics = diagnostics
 
         self.extensions = extensions
-        self.projection = .init(zone: .init(context.current.snapshot.zone,
-            metadata: context.current.snapshot.metadata))
 
         self.topics = [:]
         self.topic = .init(zone: context.current.zone)
+
+        self.masters = []
+        self.groups = []
+        self.zone = .init(context.current.snapshot.zone,
+            metadata: context.current.snapshot.metadata)
     }
 }
 extension DynamicLinker
@@ -78,14 +86,13 @@ extension DynamicLinker
             context.current.graph.files.indices,
             context.current.graph.files)
         {
-            self.projection.masters.append(.file(.init(id: context.current.zone + f,
-                symbol: file)))
+            self.masters.append(.file(.init(id: context.current.zone + f, symbol: file)))
         }
         //  Create extension records.
         for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
             where !`extension`.isEmpty
         {
-            self.projection.groups.append(.extension(.init(signature: signature,
+            self.groups.append(.extension(.init(signature: signature,
                 extension: `extension`,
                 context: context)))
         }
@@ -180,7 +187,7 @@ extension DynamicLinker
 
             (record.overview, record.members) = resolver.link(topic: topic)
 
-            self.projection.groups.append(.topic(record))
+            self.groups.append(.topic(record))
 
             for case .scalar(let master) in record.members
             {
@@ -216,7 +223,7 @@ extension DynamicLinker
             (record.overview, record.details) = resolver.link(article: article)
         }
 
-        self.projection.masters.append(.culture(record))
+        self.masters.append(.culture(record))
         return record.id
     }
 
@@ -248,7 +255,7 @@ extension DynamicLinker
 
             (record.overview, record.details) = resolver.link(article: node.body)
 
-            self.projection.masters.append(.article(record))
+            self.masters.append(.article(record))
         }
     }
 
@@ -353,7 +360,7 @@ extension DynamicLinker
                 (record.overview, record.details) = resolver.link(article: article)
             }
 
-            self.projection.masters.append(.decl(record))
+            self.masters.append(.decl(record))
         }
     }
 }

@@ -442,6 +442,14 @@ let package:Package = .init(
 
         .executableTarget(name: "UnidocDatabaseTests", dependencies:
             [
+                .target(name: "UnidocDatabase"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "SymbolGraphTesting"),
+                .product(name: "MongoTesting", package: "swift-mongodb"),
+            ]),
+
+        .executableTarget(name: "UnidocQueryTests", dependencies:
+            [
                 .target(name: "UnidocQueries"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),

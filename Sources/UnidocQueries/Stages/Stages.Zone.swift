@@ -61,10 +61,7 @@ extension Stages.Zone<Selector.Zone>
                 $0[.match] = .init
                 {
                     $0[Record.Zone[.package]] = self.selector.package
-                    $0[Record.Zone[.patch]] = .init
-                    {
-                        $0[.ne] = Never??.some(nil)
-                    }
+                    $0[Record.Zone[.patch]] = .init { $0[.exists] = true }
                 }
             }
             //  We use the patch number instead of the latest-flag because

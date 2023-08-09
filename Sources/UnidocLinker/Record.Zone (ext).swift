@@ -10,7 +10,7 @@ extension Record.Zone
     {
         self.init(id: zone,
             package: metadata.package,
-            version: metadata.version?.description ?? "$anonymous",
+            version: metadata.version?.description ?? "$unversioned",
             refname: metadata.refname,
             display: metadata.display,
             github: metadata.github,

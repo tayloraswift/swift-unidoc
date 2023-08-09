@@ -63,6 +63,7 @@ extension Database.Zones
                         $0[.unique] = true
                         $0[.name] = "package,patch"
 
+                        $0[.collation] = Database.collation
                         $0[.key] = .init
                         {
                             $0[Record.Zone[.package]] = (+)
@@ -78,6 +79,7 @@ extension Database.Zones
                         $0[.unique] = true
                         $0[.name] = "package,version"
 
+                        $0[.collation] = Database.collation
                         $0[.key] = .init
                         {
                             $0[Record.Zone[.package]] = (+)

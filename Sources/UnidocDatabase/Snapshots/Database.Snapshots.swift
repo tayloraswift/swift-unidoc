@@ -46,25 +46,24 @@ extension Database.Snapshots
         assert(response.indexesAfter == 2)
     }
 
-    public
     func push(_ docs:Documentation,
         for package:Int32,
-        as id:String,
         with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         let result:Mongo.TransactionResult = await session.withSnapshotTransaction(
             writeConcern: .majority)
         {
-            try await self.push(docs, for: package, as: id, with: $0)
+            try await self.push(docs, for: package, with: $0)
         }
         return try result()
     }
 
     func push(_ docs:Documentation,
         for package:Int32,
-        as id:String,
         with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
+        let id:String = docs.metadata.id
+
         //  Look up the snapshot with the highest version index in the database
         let pipeline:Mongo.Pipeline = .init
         {
@@ -167,7 +166,7 @@ extension Database.Snapshots
             try await $0.reduce(into: [], +=).first?.version ?? 0
         }
 
-        let snapshot:Snapshot = .init(id: id,
+        let snapshot:Snapshot = .init(
             package: package,
             version: version,
             metadata: docs.metadata,

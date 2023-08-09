@@ -38,22 +38,16 @@ extension AdminOperation:DatabaseOperation
 
         case .perform(.upload, let form?):
             var receipts:[SnapshotReceipt] = []
+
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                let docs:Documentation = try .init(buffer: item.value)
-
-                if  let _:String = docs.metadata.id
-                {
-                    receipts.append(try await database.publish(docs: docs, with: session))
-                }
-                else
-                {
-                    throw DocumentationIdentificationError.init()
-                }
+                receipts.append(try await database.publish(
+                    docs: try .init(buffer: item.value),
+                    with: session))
             }
 
-            page = .init(action: .rebuild, text: "\(receipts)")
+            page = .init(action: .upload, text: "\(receipts)")
 
         case .perform(.upload, nil):
             return nil
