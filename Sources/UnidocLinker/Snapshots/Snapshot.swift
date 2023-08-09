@@ -8,9 +8,6 @@ import Unidoc
 struct Snapshot:Equatable, Sendable
 {
     public
-    let id:String
-
-    public
     let package:Int32
     public
     let version:Int32
@@ -21,18 +18,22 @@ struct Snapshot:Equatable, Sendable
     let graph:SymbolGraph
 
     @inlinable public
-    init(id:String,
+    init(
         package:Int32,
         version:Int32,
         metadata:SymbolGraphMetadata,
         graph:SymbolGraph)
     {
-        self.id = id
         self.package = package
         self.version = version
         self.metadata = metadata
         self.graph = graph
     }
+}
+extension Snapshot:Identifiable
+{
+    @inlinable public
+    var id:String { self.metadata.id }
 }
 extension Snapshot
 {
@@ -60,6 +61,7 @@ extension Snapshot
     enum CodingKey:String
     {
         case id = "_id"
+
         case package = "P"
         case version = "V"
         case metadata = "M"
@@ -89,7 +91,7 @@ extension Snapshot:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(id: try bson[.id].decode(),
+        self.init(
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             metadata: try bson[.metadata].decode(),

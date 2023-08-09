@@ -118,7 +118,7 @@ extension Database
         with session:__shared Mongo.Session) async throws -> SnapshotReceipt
     {
         let receipt:SnapshotReceipt = try await self.store(docs: docs, with: session)
-        let records:Records = try await self.pull(from: .init(id: receipt.id,
+        let records:Records = try await self.pull(from: .init(
                 package: receipt.package,
                 version: receipt.version,
                 metadata: docs.metadata,
@@ -144,7 +144,6 @@ extension Database
         //  TODO: enforce population limits
         try await self.snapshots.push(docs,
             for: try await self.packages.register(docs.metadata.package, with: session),
-            as: docs.metadata.id ?? "$anonymous",
             with: session)
     }
     private
@@ -161,21 +160,11 @@ extension Database
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        var output:Records = linker.projection
-
-        if  let latest:Zones.PatchView = try await self.zones.latest(of: snapshot.cell,
-                with: session)
-        {
-            guard let current:PatchVersion = output.zone.patch, latest.patch < current
-            else
-            {
-                output.latest = latest.id
-                output.zone.latest = false
-                return output
-            }
-        }
-
-        return output
+        return .init(latest: try await self.zones.latest(of: snapshot.cell,
+                with: session),
+            masters: linker.masters,
+            groups: linker.groups,
+            zone: linker.zone)
     }
     private
     func push(_ records:__owned Records,

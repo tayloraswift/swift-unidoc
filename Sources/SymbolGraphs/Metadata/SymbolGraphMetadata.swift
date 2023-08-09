@@ -134,15 +134,19 @@ extension SymbolGraphMetadata
 }
 extension SymbolGraphMetadata
 {
-    /// Returns the relevant documentation object’s identity string, if it has one.
+    /// Returns the relevant documentation object’s identity string. This string encodes
+    /// the package identifier, snapshot target triple, and package version if available.
+    /// (This implies that two unversioned snapshots of the same package will have the
+    /// same identity strings.)
     public
-    var id:String?
+    var id:String
     {
-        self.version.map { self.pin(self.package, $0) }
+        self.version.map { self.pin(self.package, $0) } ?? "\(self.package) ? \(self.triple)"
     }
 
     /// Returns all the relevant documentation object’s dependencies’ identity strings,
-    /// including the one for its toolchain dependency.
+    /// including the one for its toolchain dependency, unless it is itself a toolchain
+    /// snapshot.
     public
     func pins() -> [String]
     {

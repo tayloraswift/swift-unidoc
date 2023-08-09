@@ -21,8 +21,6 @@ enum Main:AsyncTests
         }
 
         await mongodb.run(tests,
-            DatabaseSetup.init(),
-            Registrations.init(),
-            Objects.init())
+            DatabaseQueries.init())
     }
 }
