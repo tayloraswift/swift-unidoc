@@ -30,6 +30,15 @@ extension WideQuery.Output:ServerResponseFactory
                 inliner.masters.add(self.secondary)
                 inliner.zones.add(self.zones)
 
+            master.overview.map
+            {
+                inliner.outlines += $0.outlines
+            }
+            master.details.map
+            {
+                inliner.outlines += $0.outlines
+            }
+
             switch master
             {
             case .article(let master):

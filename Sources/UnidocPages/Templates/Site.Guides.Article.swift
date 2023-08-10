@@ -66,7 +66,7 @@ extension Site.Guides.Article:FixedPage
 
             $0[.h1] = self.master.headline.safe
 
-            $0 ?= self.master.overview.map(self.inliner.passage(_:))
+            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
 
             if  let file:Unidoc.Scalar = self.master.file
             {
@@ -74,6 +74,6 @@ extension Site.Guides.Article:FixedPage
             }
         }
         main[.section, { $0.class = "details" }] =
-            self.master.details.map(self.inliner.passage(_:))
+            (self.master.details?.markdown).map(self.inliner.passage(_:))
     }
 }

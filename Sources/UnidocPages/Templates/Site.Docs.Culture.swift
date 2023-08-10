@@ -67,7 +67,7 @@ extension Site.Docs.Culture:FixedPage
 
             $0[.h1] = self.master.module.name
 
-            $0 ?= self.master.overview.map(self.inliner.passage(_:))
+            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
 
             if  let readme:Unidoc.Scalar = self.master.readme
             {
@@ -89,7 +89,7 @@ extension Site.Docs.Culture:FixedPage
         }
 
         main[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.passage(_:))
+            (self.master.details?.markdown).map(self.inliner.passage(_:))
 
         main += self.tabulator
     }
