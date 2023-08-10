@@ -24,6 +24,18 @@ extension CodelinkResolver.Table:Sendable where Scalar:Sendable
 extension CodelinkResolver.Table
 {
     @inlinable public
+    subscript(namespace:ModuleIdentifier) -> CodelinkResolver<Scalar>.Overloads
+    {
+        _read
+        {
+            yield  self.entries[.init(namespace), default: .some([])]
+        }
+        _modify
+        {
+            yield &self.entries[.init(namespace), default: .some([])]
+        }
+    }
+    @inlinable public
     subscript(namespace:ModuleIdentifier,
         path:UnqualifiedPath) -> CodelinkResolver<Scalar>.Overloads
     {

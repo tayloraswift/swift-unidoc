@@ -10,6 +10,7 @@ extension Codelink
         case `enum`
         case `func`(Objectivity)
         case  macro
+        case  module
         case `protocol`
         case `struct`
         case `subscript`(Subscript)
@@ -65,6 +66,7 @@ extension Codelink.Filter
         case .func(.type):          return "swift.type.method"
         case .func(_):              return nil
         case .macro:                return "swift.macro"
+        case .module:               return nil
         case .protocol:             return "swift.protocol"
         case .struct:               return "swift.struct"
         case .subscript(.instance): return "swift.subscript"
@@ -90,6 +92,7 @@ extension Codelink.Filter
         case .func(.class):         return (.class, .func)
         case .func(_):              return (.func, nil)
         case .macro:                return (.macro, nil)
+        case .module:               return (.import, nil)
         case .protocol:             return (.protocol, nil)
         case .struct:               return (.struct, nil)
         case .subscript(.static):   return (.static, nil)

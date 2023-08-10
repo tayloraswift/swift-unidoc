@@ -31,25 +31,9 @@ extension StaticResolver
         in sources:[MarkdownSource],
         at source:SourceText<Int>?) -> SymbolGraph.Outline?
     {
-        if  let scalar:Int32 = self.doclinks.resolve(doclink)
+        self.doclinks.resolve(doclink).map
         {
-            return .init(referent: .scalar(scalar), text: doclink.path.last ?? "")
-        }
-        //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-        if !doclink.absolute,
-            let codelink:Codelink = .init(doclink.path.joined(separator: "/"))
-        {
-            return self.outline(expression: expression,
-                as: codelink,
-                in: sources,
-                at: source)
-        }
-        else
-        {
-            print("DEBUG: doclink '\(expression)' will be resolved dynamically")
-            return .init(
-                referent: .unresolved(source?.start.translated(through: sources)),
-                text: expression)
+            .scalar($0, text: doclink.path.last ?? "")
         }
     }
     mutating
@@ -65,32 +49,21 @@ extension StaticResolver
             switch overload.target
             {
             case .scalar(let address):
-                return .init(
-                    referent: .scalar(address),
-                    text: text)
+                return .scalar(address, text: text)
 
             case .vector(let address, self: let heir):
-                return .init(
-                    referent: .vector(address, self: heir),
-                    text: text)
+                return .vector(address, self: heir, text: text)
             }
 
         case .some(let overloads):
-            if  overloads.isEmpty
-            {
-                print("DEBUG: autolink '\(expression)' will be resolved dynamically")
-                return .init(
-                    referent: .unresolved(source?.start.translated(through: sources)),
-                    text: expression)
-            }
-            else
+            if !overloads.isEmpty
             {
                 self.errors.append(InvalidCodelinkError<Int32>.init(
                     overloads: overloads,
                     codelink: codelink,
                     context: source.map { .init(of: $0, in: sources) }))
-                return nil
             }
+            return nil
         }
     }
 }

@@ -76,7 +76,18 @@ extension DynamicClientGroup
             snapshot.graph.cultures) where
             filter?.contains(c) ?? true
         {
-            self.imports.append(snapshot.graph.namespaces[c])
+            let module:ModuleIdentifier = snapshot.graph.namespaces[c]
+
+            self.imports.append(module)
+
+            if  let c:Unidoc.Scalar = snapshot.scalars.namespaces[c]
+            {
+                self.codelinks[module].overload(with: .init(
+                    target: .scalar(c),
+                    phylum: nil,
+                    hash: .init(hashing: "\(module)")))
+            }
+
             for namespace:SymbolGraph.Namespace in culture.namespaces
             {
                 self.add(namespace: namespace,

@@ -155,6 +155,7 @@ extension Codelink
             case ((.class, .var)?,          .nominal(_, nil)):  filter = .var(.class)
             case ((.enum, nil)?,            .nominal(_, nil)):  filter = .enum
             case ((.func, nil)?,            .nominal):          filter = .func(.default)
+            case ((.import, nil)?,          .nominal(_, nil)):  filter = .module
             case ((.macro, nil)?,           .nominal(_, nil)):  filter = .macro
             case ((.protocol, nil)?,        .nominal(_, nil)):  filter = .protocol
             case ((.static, nil)?,          .subscript):        filter = .subscript(.static)

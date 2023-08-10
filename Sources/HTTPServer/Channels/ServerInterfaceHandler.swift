@@ -96,8 +96,8 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 
             self.request = nil
 
-            //  16 MB size limit
-            if  1 << 24 < body.count + buffer.readableBytes
+            //  32 MB size limit
+            if  1 << 25 < body.count + buffer.readableBytes
             {
                 self.send(message: .init(status: .payloadTooLarge), context: context)
             }
