@@ -920,5 +920,32 @@ enum Main:SyncTests
                     topics: [1, 3, 2])
             }
         }
+        if  let tests:TestGroup = tests / "Bindings"
+        {
+            if  let tests:TestGroup = tests / "Basic"
+            {
+                let documentation:MarkdownSupplement = .init(parsing: """
+                    # ``Taylor``
+
+                    I think for me, um.
+                    """,
+                    with: SwiftFlavoredMarkdownParser.init(),
+                    as: SwiftFlavoredMarkdown.self)
+
+                tests.expect(documentation.headline?.binding?.text ==? "Taylor")
+            }
+            if  let tests:TestGroup = tests / "TrailingComment"
+            {
+                let documentation:MarkdownSupplement = .init(parsing: """
+                    # ``Taylor`` <!-- Allison -->
+
+                    I think for me, um.
+                    """,
+                    with: SwiftFlavoredMarkdownParser.init(),
+                    as: SwiftFlavoredMarkdown.self)
+
+                tests.expect(documentation.headline?.binding?.text ==? "Taylor")
+            }
+        }
     }
 }

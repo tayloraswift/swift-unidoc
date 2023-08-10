@@ -11,10 +11,22 @@ extension MarkdownSupplement
 }
 extension MarkdownSupplement.Headline
 {
+    @inlinable public
+    var binding:MarkdownInline.Autolink?
+    {
+        switch self
+        {
+        case .binding(let binding): return binding
+        case .heading:              return nil
+        }
+    }
+}
+extension MarkdownSupplement.Headline
+{
     init(_ heading:MarkdownBlock.Heading)
     {
-        if  heading.elements.count == 1,
-            case .autolink(let binding) = heading.elements[0]
+        //  Do not expect exactly one inline element, there may be HTML comments.
+        if  case .autolink(let binding)? = heading.elements.first
         {
             self = .binding(binding)
         }

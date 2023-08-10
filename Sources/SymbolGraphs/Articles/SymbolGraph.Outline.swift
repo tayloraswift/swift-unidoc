@@ -6,19 +6,12 @@ import Sources
 extension SymbolGraph
 {
     @frozen public
-    struct Outline:Equatable, Hashable, Sendable
+    enum Outline:Equatable, Hashable, Sendable
     {
-        public
-        let referent:Referent
-        public
-        let text:String
-
-        @inlinable public
-        init(referent:Referent, text:String)
-        {
-            self.referent = referent
-            self.text = text
-        }
+        case scalar(Int32, text:String)
+        case vector(Int32, self:Int32, text:String)
+        case codelink(String, SourceLocation<Int32>?)
+        case doclink(String, SourceLocation<Int32>?)
     }
 }
 extension SymbolGraph.Outline
@@ -26,6 +19,8 @@ extension SymbolGraph.Outline
     public
     enum CodingKey:String
     {
+        case codelink = "C"
+        case doclink = "D"
         case location = "L"
         case scalar = "R"
         case `self` = "S"
@@ -37,19 +32,24 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.text] = self.text
-
-        switch self.referent
+        switch self
         {
-        case .scalar(let scalar):
-            bson[.scalar] = scalar
+        case .codelink(let expression, let location):
+            bson[.codelink] = expression
+            bson[.location] = location
 
-        case .vector(let scalar, self: let heir):
+        case .doclink(let expression, let location):
+            bson[.doclink] = expression
+            bson[.location] = location
+
+        case .scalar(let scalar, text: let text):
+            bson[.scalar] = scalar
+            bson[.text] = text
+
+        case .vector(let scalar, self: let heir, text: let text):
             bson[.scalar] = scalar
             bson[.self] = heir
-
-        case .unresolved(let location):
-            bson[.location] = location
+            bson[.text] = text
         }
     }
 }
@@ -58,24 +58,32 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let referent:SymbolGraph.Outline.Referent
-
-        if      let scalar:Int32 = try bson[.scalar]?.decode()
+        if  let scalar:Int32 = try bson[.scalar]?.decode()
         {
+            let text:String = try bson[.text].decode()
+
             if  let heir:Int32 = try bson[.self]?.decode()
             {
-                referent = .vector(scalar, self: heir)
+                self = .vector(scalar, self: heir, text: text)
             }
             else
             {
-                referent = .scalar(scalar)
+                self = .scalar(scalar, text: text)
             }
+
+            return
+        }
+
+        let location:SourceLocation<Int32>? = try bson[.location]?.decode()
+
+        if  let expression:String = try bson[.codelink]?.decode()
+        {
+            self = .codelink(expression, location)
         }
         else
         {
-            referent = .unresolved(try bson[.location]?.decode())
+            let expression:String = try bson[.doclink].decode()
+            self = .doclink(expression, location)
         }
-
-        self.init(referent: referent, text: try bson[.text].decode())
     }
 }

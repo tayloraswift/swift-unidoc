@@ -8,6 +8,7 @@ extension Codelink
         case `class`
         case `enum`
         case `func`
+        case `import`
         case  macro
         case `protocol`
         case `static`

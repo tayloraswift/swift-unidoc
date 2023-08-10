@@ -15,6 +15,12 @@ struct CodelinkResolutionPath:Equatable, Hashable, Sendable
 }
 extension CodelinkResolutionPath
 {
+    @inlinable internal
+    init(_ namespace:ModuleIdentifier)
+    {
+        self.init(string: "\(namespace)")
+    }
+
     @inlinable internal static
     func join(_ namespace:ModuleIdentifier, _ path:UnqualifiedPath, _ last:String) -> Self
     {

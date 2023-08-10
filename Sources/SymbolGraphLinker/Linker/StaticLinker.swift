@@ -294,8 +294,20 @@ extension StaticLinker
 
             return articles
         }
+
         //  Now that standalone articles have all been exposed for doclink resolution,
-        //  we can link them.
+        //  we can link them. But before doing that, we need to register all known namespaces
+        //  for codelink resolution.
+        for (n, namespace):(Int, ModuleIdentifier) in zip(
+            self.symbolizer.graph.namespaces.indices,
+            self.symbolizer.graph.namespaces)
+        {
+            self.codelinks[namespace].overload(with: .init(
+                target: .scalar(n * .module),
+                phylum: nil,
+                hash: .init(hashing: "\(namespace)")))
+        }
+
         for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
         {
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]

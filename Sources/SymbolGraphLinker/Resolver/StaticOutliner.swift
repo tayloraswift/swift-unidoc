@@ -57,27 +57,57 @@ extension StaticOutliner
     {
         self.cache(autolink.text)
         {
-            if      let doclink:Doclink = .init(autolink.text)
+            if  autolink.code
             {
-                return self.resolver.outline(expression: autolink.text,
-                    as: doclink,
-                    in: sources,
-                    at: autolink.source)
+                if  let codelink:Codelink = .init(autolink.text)
+                {
+                    if  let outline:SymbolGraph.Outline = self.resolver.outline(
+                            expression: autolink.text,
+                            as: codelink,
+                            in: sources,
+                            at: autolink.source)
+                    {
+                        return outline
+                    }
+                    else
+                    {
+                        return .codelink(autolink.text, autolink.source?.start.translated(
+                            through: sources))
+                    }
+                }
             }
-            else if let codelink:Codelink = .init(autolink.text)
+            else if let doclink:Doclink = .init(doc: autolink.text[...])
             {
-                return self.resolver.outline(expression: autolink.text,
-                    as: codelink,
-                    in: sources,
-                    at: autolink.source)
+                if  let outline:SymbolGraph.Outline = self.resolver.outline(
+                        expression: autolink.text,
+                        as: doclink,
+                        in: sources,
+                        at: autolink.source)
+                {
+                    return outline
+                }
+                //  Resolution might still succeed by reinterpreting the doclink as a codelink.
+                else if !doclink.absolute,
+                    let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
+                    let outline:SymbolGraph.Outline = self.resolver.outline(
+                        expression: autolink.text,
+                        as: codelink,
+                        in: sources,
+                        at: autolink.source)
+                {
+                    return outline
+                }
+                else
+                {
+                    return .doclink(autolink.text, autolink.source?.start.translated(
+                        through: sources))
+                }
             }
-            else
-            {
-                self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
-                    expression: autolink.text,
-                    context: autolink.source.map { .init(of: $0, in: sources) }))
-                return nil
-            }
+
+            self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
+                expression: autolink.text,
+                context: autolink.source.map { .init(of: $0, in: sources) }))
+            return nil
         }
     }
 }

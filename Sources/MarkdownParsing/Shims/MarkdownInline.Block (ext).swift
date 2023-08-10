@@ -50,11 +50,13 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                 MarkdownInline.init(from: $0, in: id)
             }
             if  let destination:String = link.destination,
-                    destination.starts(with: "doc:"),
+                let colon:String.Index = destination.firstIndex(of: ":"),
+                    destination[..<colon] == "doc",
                     elements.count == 1,
                     elements[0] == .text(destination)
             {
-                self = .autolink(.init(destination,
+                self = .autolink(.init(
+                    String.init(destination[destination.index(after: colon)...]),
                     code: false, // exclude the angle brackets from the source range
                     source: .init(link.range, in: id, trimming: 1)))
             }

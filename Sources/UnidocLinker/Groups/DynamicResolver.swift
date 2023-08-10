@@ -61,10 +61,10 @@ extension DynamicResolver
         let outlines:[Record.Outline] = article.outlines.map { self.expand($0) }
 
         let overview:Record.Passage? = article.overview.isEmpty ? nil : .init(
-            outlines: .init(outlines.prefix(article.fold)),
+            outlines: .init(outlines[..<article.fold]),
             markdown: article.overview)
         let details:Record.Passage? = article.details.isEmpty ? nil : .init(
-            outlines: .init(outlines.dropFirst(article.fold)),
+            outlines: .init(outlines[article.fold...]),
             markdown: article.details)
         return (overview, details)
     }
@@ -83,27 +83,27 @@ extension DynamicResolver
     private
     func expand(_ outline:SymbolGraph.Outline) -> Record.Outline
     {
-        var length:Int
+        func words(in text:String) -> Int
         {
             var length:Int = 1
-            for character:Character in outline.text where character == " "
+            for character:Character in text where character == " "
             {
                 length += 1
             }
             return length
         }
 
-        switch outline.referent
+        switch outline
         {
-        case .scalar(let scalar):
+        case    .scalar(let scalar, text: let text):
             if      let _:Int = scalar / .decl,
                     let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
             {
-                return .path(outline.text, self.context.expand(scalar, to: length))
+                return .path(text, self.context.expand(scalar, to: words(in: text)))
             }
             else if let _:Int = scalar / .article
             {
-                return .path(outline.text, [self.current.zone + scalar])
+                return .path(text, [self.current.zone + scalar])
             }
             else if let _:Int = scalar / .file
             {
@@ -112,23 +112,23 @@ extension DynamicResolver
             else if let namespace:Int = scalar / .module,
                     let scalar:Unidoc.Scalar = self.current.scalars.namespaces[namespace]
             {
-                return .path(outline.text, [scalar])
+                return .path(text, [scalar])
             }
 
-        case .vector(let feature, self: let heir):
+        case    .vector(let feature, self: let heir, text: let text):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
             if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature],
                 let heir:Unidoc.Scalar = self.current.scalars.decls[heir]
             {
-                return .path(outline.text, self.context.expand((heir, feature), to: length))
+                return .path(text, self.context.expand((heir, feature), to: words(in: text)))
             }
 
-        case .unresolved(let location):
-            switch self.resolve(outline.text, at: location)
+        case    .codelink(let expression, let location):
+            switch self.resolve(expression, at: location)
             {
             case  nil:
-                return .text(outline.text)
+                return .text(expression)
 
             case (let codelink, nil)?:
                 return .text("\(codelink.path)")
@@ -141,6 +141,23 @@ extension DynamicResolver
                 return .path("\(codelink.path)", self.context.expand((heir, feature),
                     to: codelink.path.components.count))
             }
+        case    .doclink(let expression, let location):
+            switch self.resolve(expression, at: location)
+            {
+            case  nil:
+                return .text(expression)
+
+            case (_, nil)?:
+                return .text(expression)
+
+            case (let codelink, .scalar(let scalar)?)?:
+                return .path(expression, self.context.expand(scalar,
+                    to: codelink.path.components.count))
+
+            case (let codelink, .vector(let feature, self: let heir)?)?:
+                return .path(expression, self.context.expand((heir, feature),
+                    to: codelink.path.components.count))
+            }
         }
 
         return .text("<unavailable>")
@@ -149,9 +166,9 @@ extension DynamicResolver
     private
     func resolve(_ outline:SymbolGraph.Outline) -> Record.Link
     {
-        switch outline.referent
+        switch outline
         {
-        case .scalar(let scalar):
+        case   .scalar(let scalar, text: _):
             if      let _:Int = scalar / .decl,
                     let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
             {
@@ -167,8 +184,7 @@ extension DynamicResolver
                 //  The rest of the planes don’t cross packages... yet...
                 return .scalar(self.current.zone + scalar)
             }
-
-        case .vector(let feature, self: _):
+        case    .vector(let feature, self: _, text: _):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
             if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature]
@@ -176,11 +192,12 @@ extension DynamicResolver
                 return .scalar(feature)
             }
 
-        case .unresolved(let location):
-            switch self.resolve(outline.text, at: location)
+        case    .codelink(let expression, let location),
+                .doclink(let expression, let location):
+            switch self.resolve(expression, at: location)
             {
             case  nil:
-                return .text(outline.text)
+                return .text(expression)
 
             case (let codelink, nil)?:
                 return .text("\(codelink.path)")

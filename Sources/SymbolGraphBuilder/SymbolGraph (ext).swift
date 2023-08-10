@@ -49,10 +49,6 @@ extension SymbolGraph
         }
         do
         {
-            var linker:StaticLinker = .init(nominations: nominations,
-                modules: artifacts.cultures.map(\.module),
-                plugins: [.swift])
-
             let supplements:[[MarkdownFile]]? = try artifacts.root.map
             {
                 (root:Repository.Root) in try artifacts.cultures.map
@@ -61,6 +57,10 @@ extension SymbolGraph
                 }
             }
 
+            var linker:StaticLinker = .init(nominations: nominations,
+                modules: artifacts.cultures.map(\.module),
+                plugins: [.swift])
+
             time.linking = clock.measure
             {
                 let scalarPositions:[[SymbolGraph.Namespace]] = linker.allocate(
@@ -68,10 +68,8 @@ extension SymbolGraph
                 let extensionPositions:[(Int32, Int)] = linker.allocate(
                     extensions: extensions)
 
-                if  let supplements
-                {
-                    linker.attach(supplements: supplements)
-                }
+                //  Calling this is mandatory, even if there are no supplements.
+                linker.attach(supplements: supplements ?? [])
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
