@@ -60,7 +60,9 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
             }
             else
             {
-                self = .link(.init(target: link.destination, elements: elements))
+                self = .link(.init(target: link.destination,
+                    elements: elements,
+                    source: .init(link.range, in: id)))
             }
 
         case let unsupported:

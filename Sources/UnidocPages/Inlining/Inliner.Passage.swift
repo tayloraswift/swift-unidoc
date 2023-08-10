@@ -25,6 +25,21 @@ extension Inliner
 }
 extension Inliner.Passage:HyperTextRenderableMarkdown
 {
+    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    {
+        if  case .href = attribute,
+            self.outlines.indices.contains(reference),
+            case .path(_, let scalars) = self.outlines[reference],
+            let target:Unidoc.Scalar = scalars.last
+        {
+            return self.inliner.url(target)
+        }
+        else
+        {
+            return nil
+        }
+    }
+
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
         guard self.outlines.indices.contains(reference)

@@ -22,5 +22,7 @@ extension MarkdownBytecode
         case left
         /// Pseudo-attribute, expands to `align='right'`. Always drops values.
         case right
+        /// Pseudo-attribute, expands to `rel='noopener nofollow ugc' href='value'`.
+        case external
     }
 }

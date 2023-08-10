@@ -23,8 +23,8 @@ extension HTML.SourceLink:HyperTextOutputStreamable
     {
         html[link: self.target]
         {
+            $0.rel = .noopener
             $0.rel = .google_ugc
-            $0.target = "_blank"
             $0.class = "source"
         }
         content:

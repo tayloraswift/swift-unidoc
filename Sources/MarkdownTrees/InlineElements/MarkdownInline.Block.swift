@@ -26,18 +26,23 @@ extension MarkdownInline.Block:MarkdownElement
     {
         switch self
         {
-        case .container(var container):
-            self = .text("")
-            defer { self = .container(container) }
-            try container.outline(by: register)
-
         case .autolink(let autolink):
             if  let reference:Int = try register(autolink)
             {
                 self = .reference(reference)
             }
 
-        case .code, .html, .image, .link, .reference, .text:
+        case .container(var container):
+            self = .text("")
+            defer { self = .container(container) }
+            try container.outline(by: register)
+
+        case .link(var link):
+            self = .text("")
+            defer { self = .link(link) }
+            try link.outline(by: register)
+
+        case .code, .html, .image, .reference, .text:
             return
         }
     }

@@ -45,6 +45,12 @@ extension MarkdownAttributeContext
         case .href:     self.complete.append((.href, value))
         case .src:      self.complete.append((.src, value))
         case .title:    self.complete.append((.title, value))
+
+        case .external:
+            self.complete.append((.rel, "\(HTML.Attribute.Rel.nofollow)"))
+            self.complete.append((.rel, "\(HTML.Attribute.Rel.noopener)"))
+            self.complete.append((.rel, "\(HTML.Attribute.Rel.google_ugc)"))
+            self.complete.append((.href, value))
         }
     }
 }
