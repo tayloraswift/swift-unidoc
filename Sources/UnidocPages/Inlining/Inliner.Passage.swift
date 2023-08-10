@@ -9,30 +9,31 @@ extension Inliner
     struct Passage
     {
         private
-        let passage:Record.Passage
-        private
         let inliner:Inliner
 
-        init(_ inliner:Inliner, passage:Record.Passage)
+        let bytecode:MarkdownBytecode
+        let outlines:[Record.Outline]
+
+        init(_ inliner:Inliner, bytecode:MarkdownBytecode, outlines:[Record.Outline])
         {
             self.inliner = inliner
-            self.passage = passage
+
+            self.bytecode = bytecode
+            self.outlines = outlines
         }
     }
 }
 extension Inliner.Passage:HyperTextRenderableMarkdown
 {
-    var bytecode:MarkdownBytecode { self.passage.markdown }
-
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
-        guard self.passage.outlines.indices.contains(reference)
+        guard self.outlines.indices.contains(reference)
         else
         {
             return
         }
 
-        switch self.passage.outlines[reference]
+        switch self.outlines[reference]
         {
         case .text(let text):
             html[.code] = text

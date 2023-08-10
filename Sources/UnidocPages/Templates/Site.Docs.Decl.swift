@@ -119,7 +119,7 @@ extension Site.Docs.Decl:FixedPage
 
             $0[.h1] = self.path.last
 
-            $0 ?= self.master.overview.map(self.inliner.passage(_:))
+            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.master.location
             {
@@ -136,7 +136,7 @@ extension Site.Docs.Decl:FixedPage
         }
 
         main[.section] { $0.class = "details" } =
-            self.master.details.map(self.inliner.passage(_:))
+            (self.master.details?.markdown).map(self.inliner.passage(_:))
 
         if !self.master.superforms.isEmpty
         {

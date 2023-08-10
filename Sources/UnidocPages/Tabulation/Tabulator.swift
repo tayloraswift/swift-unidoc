@@ -102,7 +102,7 @@ extension Tabulator:HyperTextOutputStreamable
                 }
                 else
                 {
-                    $0 ?= topic.overview.map(self.inliner.passage(_:))
+                    $0 ?= topic.overview.map(self.inliner.passage(overview:))
                 }
                 $0[.ul]
                 {

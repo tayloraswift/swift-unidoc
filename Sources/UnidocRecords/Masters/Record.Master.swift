@@ -20,6 +20,45 @@ extension Record
         case file(File)
     }
 }
+extension Record.Master
+{
+    @inlinable public
+    var article:Article?
+    {
+        switch self
+        {
+        case .article(let article): return article
+        case _:                     return nil
+        }
+    }
+    @inlinable public
+    var culture:Culture?
+    {
+        switch self
+        {
+        case .culture(let culture): return culture
+        case _:                     return nil
+        }
+    }
+    @inlinable public
+    var decl:Decl?
+    {
+        switch self
+        {
+        case .decl(let decl): return decl
+        case _:               return nil
+        }
+    }
+    @inlinable public
+    var file:File?
+    {
+        switch self
+        {
+        case .file(let file): return file
+        case _:               return nil
+        }
+    }
+}
 extension Record.Master:Identifiable
 {
     @inlinable public

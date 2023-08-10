@@ -1,5 +1,6 @@
 import HTML
 import LexicalPaths
+import MarkdownABI
 import ModuleGraphs
 import Signatures
 import Unidoc
@@ -8,12 +9,16 @@ import UnidocRecords
 final
 class Inliner
 {
+    /// Shared outlines, valid for the overview and details passages.
+    var outlines:[Record.Outline]
+
     private
     var cache:InlinerCache
 
     private
     init(cache:InlinerCache)
     {
+        self.outlines = []
         self.cache = cache
     }
 }
@@ -49,9 +54,15 @@ extension Inliner
 }
 extension Inliner
 {
-    func passage(_ passage:Record.Passage) -> Passage
+    func passage(overview passage:Record.Passage) -> Passage
     {
-        .init(self, passage: passage)
+        .init(self, bytecode: passage.markdown, outlines: passage.outlines)
+    }
+    func passage(_ bytecode:MarkdownBytecode) -> Passage
+    {
+        //  We need to use the shared outlines, and not the array from the passage
+        //  record, lest we make a frameshift indexing error.
+        .init(self, bytecode: bytecode, outlines: self.outlines)
     }
     func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Code
     {
@@ -64,7 +75,7 @@ extension Inliner
     {
         self.cache[scalar].map
         {
-            .init(overview: $0.overview.map(self.passage(_:)),
+            .init(overview: $0.overview.map(self.passage(overview:)),
                 master: $0,
                 target: $1)
         }
