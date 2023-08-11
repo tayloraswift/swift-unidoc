@@ -187,3 +187,25 @@ extension DynamicContext
         }
     }
 }
+extension DynamicContext
+{
+    /// Get the sort-priority of a declaration.
+    func priority(of decl:Unidoc.Scalar) -> (SortLeague, String, Int32)?
+    {
+        self[decl.package]?.priority(of: decl)
+    }
+
+    func sort(lexically decls:[Unidoc.Scalar]) -> [Unidoc.Scalar]
+    {
+        decls.sorted
+        {
+            switch (self.priority(of: $0), self.priority(of: $1))
+            {
+            case (nil, nil):            return $0 < $1
+            case (nil,  _?):            return true
+            case ( _?, nil):            return false
+            case (let lhs?, let rhs?):  return lhs < rhs
+            }
+        }
+    }
+}

@@ -1,10 +1,10 @@
 import Signatures
 import Symbols
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct Conformance:Equatable, Hashable, Sendable
+    struct ConformanceRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
         let conditions:[GenericConstraint<Symbol.Decl>]
@@ -28,7 +28,7 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.Conformance:CustomStringConvertible
+extension Symbol.ConformanceRelationship:CustomStringConvertible
 {
     public
     var description:String

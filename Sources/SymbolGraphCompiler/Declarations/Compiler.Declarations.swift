@@ -176,6 +176,17 @@ extension Compiler.Declarations
             return resolution
         }
     }
+    subscript(included resolution:Symbol.Decl) -> Compiler.DeclObject?
+    {
+        if  case .included(let scalar)? = self.entries[resolution]
+        {
+            return scalar
+        }
+        else
+        {
+            return nil
+        }
+    }
     func callAsFunction(
         internal resolution:Symbol.Decl) throws -> Compiler.DeclObject?
     {

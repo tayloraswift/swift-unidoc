@@ -26,8 +26,39 @@ section.group code.constraints
         }
     }
 }
+section.group h2
+{
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+section.group h2 + h3,
+section.group code.constraints + h3
+{
+    margin-top: 1rem;
+}
+section.group h2 + h3
+{
+    border-top: solid 1px $light-accent-barbie-pink;
+}
+section.group code.constraints + h3
+{
+    border-top: solid 1px $light-accent-yellow;
+}
+section.group h3
+{
+    margin-top: 1rem;
+    border-top: dashed 1px $light-foreground-semi;
+    padding-top: 0.75rem;
+
+    font-weight: 600;
+    color: $light-foreground-semi;
+}
 section.group ul
 {
+    padding: 0;
+    margin-bottom: 3rem;
+    list-style-type: none;
+
     > li.article
     {
         margin: 0.5rem 0 0.5rem 0;
@@ -49,12 +80,7 @@ section.group ul
             font-style: italic;
         }
     }
-}
-section.group ul,
-section.superforms ul
-{
-    padding: 0;
-    list-style-type: none;
+
 
     > li.decl,
     > li.module

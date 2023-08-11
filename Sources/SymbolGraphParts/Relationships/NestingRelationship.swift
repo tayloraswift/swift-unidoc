@@ -2,12 +2,11 @@ import Symbols
 import Unidoc
 
 public
-protocol NestingRelationship
+protocol NestingRelationship:SymbolRelationship
 {
-    var origin:Symbol.Decl? { get }
-    var scope:Symbol? { get }
+    var scope:Symbol { get }
 
-    var customization:Unidoc.Decl.Customization? { get }
+    var kinks:Unidoc.Decl.Kinks { get }
 
     func validate(source phylum:Unidoc.Decl) -> Bool
 }

@@ -9,32 +9,23 @@ extension Site.Docs
 {
     struct Culture
     {
-        private
-        let tabulator:Tabulator
-        let master:Record.Master.Culture
+        let inliner:Inliner
 
         private
-        init(tabulator:Tabulator, master:Record.Master.Culture)
+        let master:Record.Master.Culture
+        private
+        let groups:[Record.Group]
+
+        init(_ inliner:Inliner, master:Record.Master.Culture, groups:[Record.Group])
         {
-            self.tabulator = tabulator
+            self.inliner = inliner
             self.master = master
+            self.groups = groups
         }
     }
 }
 extension Site.Docs.Culture
 {
-    init(_ inliner:Inliner, master:Record.Master.Culture, groups:[Record.Group])
-    {
-        self.init(
-            tabulator: .init(inliner, generics: [], groups: groups),
-            master: master)
-    }
-}
-extension Site.Docs.Culture
-{
-    private
-    var inliner:Inliner { self.tabulator.inliner }
-
     var zone:Record.Zone
     {
         self.inliner.zones.principal
@@ -57,6 +48,10 @@ extension Site.Docs.Culture:FixedPage
 
     func emit(main:inout HTML.ContentEncoder)
     {
+        let groups:Inliner.Groups = .init(inliner,
+            groups: self.groups,
+            bias: self.master.id)
+
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
@@ -91,6 +86,6 @@ extension Site.Docs.Culture:FixedPage
         main[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        main += self.tabulator
+        main += groups
     }
 }

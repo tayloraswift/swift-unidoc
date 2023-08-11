@@ -1,10 +1,10 @@
 import Symbols
 import Unidoc
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct Override:SuperformRelationship, Equatable, Hashable, Sendable
+    struct OverrideRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
         let source:Symbol.Decl
@@ -22,8 +22,11 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.Override
+extension Symbol.OverrideRelationship:SuperformRelationship
 {
+    @inlinable public
+    var kinks:Unidoc.Decl.Kinks { [.override] }
+
     public
     func validate(source phylum:Unidoc.Decl) -> Bool
     {
@@ -49,7 +52,7 @@ extension SymbolRelationship.Override
         }
     }
 }
-extension SymbolRelationship.Override:CustomStringConvertible
+extension Symbol.OverrideRelationship:CustomStringConvertible
 {
     public
     var description:String

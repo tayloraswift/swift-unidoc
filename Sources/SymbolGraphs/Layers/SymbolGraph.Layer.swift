@@ -40,16 +40,16 @@ extension SymbolGraph.Layer
 extension SymbolGraph.Layer
 {
     @inlinable public
-    subscript(citizen:Int32) -> Node?
+    subscript(scalar:Int32) -> Node?
     {
-        self.nodes.indices.contains(citizen) ? self.nodes[citizen] : nil
+        self.nodes.indices.contains(scalar) ? self.nodes[scalar] : nil
     }
 
     @inlinable public
-    func contains(citizen:Int32) -> Bool
+    func contains(citizen scalar:Int32) -> Bool
     {
-        self.nodes.indices.contains(citizen) &&
-        self.nodes[citizen].isCitizen
+        self.nodes.indices.contains(scalar) &&
+        self.nodes[scalar].isCitizen
     }
 
     @inlinable public

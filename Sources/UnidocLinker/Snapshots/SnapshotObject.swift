@@ -63,6 +63,19 @@ extension SnapshotObject
 }
 extension SnapshotObject
 {
+    func priority(of decl:Unidoc.Scalar) -> (DynamicContext.SortLeague, String, Int32)?
+    {
+        if  let local:Int32 = decl - self.zone,
+            let decl:SymbolGraph.Decl = snapshot.graph.decls[local]?.decl
+        {
+            return (.init(decl.phylum), decl.path.last, local)
+        }
+        else
+        {
+            return nil
+        }
+    }
+
     func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
     {
         (declaration - self.zone).map(self.scope(of:)) ?? nil

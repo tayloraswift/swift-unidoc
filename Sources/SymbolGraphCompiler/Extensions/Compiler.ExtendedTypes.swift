@@ -35,13 +35,8 @@ extension Compiler.ExtendedTypes
     {
         self.init()
 
-        for relationship:SymbolRelationship in colony.relationships
+        for case .extension(let relationship) in colony.relationships
         {
-            guard case .extension(let relationship) = relationship
-            else
-            {
-                continue
-            }
             guard case nil = self.extendees.updateValue(relationship.target,
                     forKey: relationship.source)
             else

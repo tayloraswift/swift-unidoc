@@ -84,16 +84,16 @@ extension DynamicLinker.Extensions
     /// we don’t want to broadcast them ourselves. So for now, those features are lost.
     mutating
     func add(_ extensions:[SymbolGraph.Extension],
-        extending scope:Int32,
+        extending s:Int32,
         context:DynamicContext,
         clients:[DynamicClientGroup],
         diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Unidoc.Scalar>
     {
-        guard   let scope:Unidoc.Scalar = context.current.scalars.decls[scope],
-                let path:UnqualifiedPath = context[scope.package]?.nodes[scope]?.decl?.path
+        guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
+                let scope:SymbolGraph.Decl = context[s.package]?.nodes[s]?.decl
         else
         {
-            let type:Symbol.Decl = context.current.graph.decls.symbols[scope]
+            let type:Symbol.Decl = context.current.graph.decls.symbols[s]
 
             diagnostics.errors.append(DroppedExtensionsError.extensions(of: type,
                 count: extensions.count))
@@ -107,7 +107,7 @@ extension DynamicLinker.Extensions
             .init(
                 conditions: $0.conditions.map { $0.map { context.current.scalars.decls[$0] } },
                 culture: context.current.zone + $0.culture * .module,
-                extends: scope)
+                extends: s)
         }
 
         let conformances:ProtocolConformances<Unidoc.Scalar> = .init(
@@ -127,7 +127,7 @@ extension DynamicLinker.Extensions
                     //  Only track conformances that were declared by modules in
                     //  the current package.
                     if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
-                        case false = group.already(conforms: scope, to: p)
+                        case false = group.already(conforms: s, to: p)
                     {
                         conformances[to: p].append(.init(
                             conditions: signature.conditions,
@@ -145,7 +145,7 @@ extension DynamicLinker.Extensions
                 let signature:DynamicLinker.ExtensionSignature = .init(
                     conditions: conformance.conditions,
                     culture: conformance.culture,
-                    extends: scope)
+                    extends: s)
 
                 self[signature].conformances.append(p)
             }
@@ -185,9 +185,22 @@ extension DynamicLinker.Extensions
                 //  just store them without filtering.
                 for d:Int32 in `extension`.nested
                 {
-                    if  let d:Unidoc.Scalar = context.current.scalars.decls[d]
+                    guard let scalar:Unidoc.Scalar = context.current.scalars.decls[d]
+                    else
                     {
-                        $0.nested.append(d)
+                        continue
+                    }
+                    //  Requirements can only ever appear in the same culture as
+                    //  the protocol itself, so we can limit our search to the
+                    //  current context only.
+                    if  case .protocol = scope.phylum,
+                        case true? = context.current.graph.decls[d]?.decl?.kinks[is: .required]
+                    {
+                        $0.requirements.append(scalar)
+                    }
+                    else
+                    {
+                        $0.nested.append(scalar)
                     }
                 }
 
@@ -200,7 +213,7 @@ extension DynamicLinker.Extensions
                 else
                 {
                     diagnostics.errors.append(DroppedPassagesError.fromExtension($0.id,
-                        of: scope))
+                        of: s))
                     return
                 }
 
@@ -208,7 +221,7 @@ extension DynamicLinker.Extensions
                     diagnostics: diagnostics,
                     namespace: context.current.graph.namespaces[`extension`.namespace],
                     clients: clients[`extension`.culture],
-                    scope: [String].init(path))
+                    scope: [String].init(scope.path))
 
                 ($0.overview, $0.details) = resolver.link(article: article)
 

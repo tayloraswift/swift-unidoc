@@ -1,6 +1,12 @@
 import HTML
 import UnidocRecords
 
+extension Inliner.Card
+{
+    enum Color
+    {
+    }
+}
 extension Inliner
 {
     struct Card

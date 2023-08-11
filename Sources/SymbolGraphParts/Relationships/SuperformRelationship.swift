@@ -2,11 +2,9 @@ import Symbols
 import Unidoc
 
 public
-protocol SuperformRelationship
+protocol SuperformRelationship:SymbolRelationship<Symbol.Decl, Symbol.Decl>
 {
-    var source:Symbol.Decl { get }
-    var target:Symbol.Decl { get }
-    var origin:Symbol.Decl? { get }
+    var kinks:Unidoc.Decl.Kinks { get }
 
     func validate(source phylum:Unidoc.Decl) -> Bool
 }
