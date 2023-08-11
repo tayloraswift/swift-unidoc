@@ -12,9 +12,9 @@ extension SymbolGraph
     struct Decl:Equatable, Sendable
     {
         public
-        let customization:Unidoc.Decl.Customization
-        public
         let phylum:Unidoc.Decl
+        public
+        var kinks:Unidoc.Decl.Kinks
         public
         var route:Unidoc.Decl.Route
 
@@ -55,8 +55,9 @@ extension SymbolGraph
         var origin:Int32?
 
         @inlinable internal
-        init(customization:Unidoc.Decl.Customization,
+        init(
             phylum:Unidoc.Decl,
+            kinks:Unidoc.Decl.Kinks,
             route:Unidoc.Decl.Route,
             path:UnqualifiedPath,
             signature:Signature<Int32> = .init(),
@@ -66,8 +67,8 @@ extension SymbolGraph
             features:[Int32] = [],
             origin:Int32? = nil)
         {
-            self.customization = customization
             self.phylum = phylum
+            self.kinks = kinks
             self.route = route
             self.path = path
 
@@ -84,12 +85,9 @@ extension SymbolGraph
 extension SymbolGraph.Decl
 {
     @inlinable public
-    init(customization:Unidoc.Decl.Customization, phylum:Unidoc.Decl, path:UnqualifiedPath)
+    init(phylum:Unidoc.Decl, kinks:Unidoc.Decl.Kinks, path:UnqualifiedPath)
     {
-        self.init(customization: customization,
-            phylum: phylum,
-            route: .unhashed,
-            path: path)
+        self.init(phylum: phylum, kinks: kinks, route: .unhashed, path: path)
     }
 }
 extension SymbolGraph.Decl
@@ -121,8 +119,8 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.flags] = Unidoc.Decl.Flags.init(
-            customization: self.customization,
             phylum: self.phylum,
+            kinks: self.kinks,
             route: self.route)
 
         bson[.path] = self.path.joined(separator: " ")
@@ -162,8 +160,8 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
     {
         let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
         self.init(
-            customization: flags.customization,
             phylum: flags.phylum,
+            kinks: flags.kinks,
             route: flags.route,
             path: try bson[.path].decode(),
             //  Adding the type names here *massively* improves compilation times, for

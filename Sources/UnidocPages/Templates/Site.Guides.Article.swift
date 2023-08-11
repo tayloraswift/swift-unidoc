@@ -10,18 +10,21 @@ extension Site.Guides
     {
         private
         let inliner:Inliner
+
+        private
+        let master:Record.Master.Article
+        private
+        let groups:[Record.Group]
+
         private
         let path:QualifiedPath
-
-        let master:Record.Master.Article
-        let groups:[Record.Group]
 
 
         init(_ inliner:Inliner, master:Record.Master.Article, groups:[Record.Group])
         {
+            self.inliner = inliner
             self.master = master
             self.groups = groups
-            self.inliner = inliner
             self.path = .init(splitting: self.master.stem)
         }
     }
@@ -73,6 +76,7 @@ extension Site.Guides.Article:FixedPage
                 $0 ?= self.inliner.link(file: file)
             }
         }
+
         main[.section, { $0.class = "details" }] =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
     }

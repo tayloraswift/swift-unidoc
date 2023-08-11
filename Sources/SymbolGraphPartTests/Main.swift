@@ -236,38 +236,43 @@ enum Main:SyncTests
                 }
                     **?
                 [
-                    .defaultImplementation(.init(.init(
-                        "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!,
+                    .intrinsicWitness(.init(.init(
+                            "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!,
                         of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!,
                         origin: .init(.init(
                             "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
+                    .member(.init(
+                        _ : .scalar(.init(
+                            "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP7nowhereytvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
+                    .member(.init(
+                        _ : .scalar(.init(
+                            "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP10refinementytvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
+                    .member(.init(
+                        _ : .scalar(.init(
+                            "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP9conformerytvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
+                    .member(.init(
+                        _ : .scalar(.init(
+                            "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP10everywhereytvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
+                    .member(.init(
+                        _ : .scalar(.init(
+                            "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
@@ -319,7 +324,7 @@ enum Main:SyncTests
                 /// had no documentation of their own, and successfully inherited some.
                 tests.expect(part.relationships.filter
                 {
-                    if  case .membership(let membership) = $0,
+                    if  case .member(let membership) = $0,
                         case .scalar = membership.source,
                         case _? = membership.origin
                     {
@@ -332,14 +337,18 @@ enum Main:SyncTests
                 }
                     **?
                 [
-                    .membership(.init(of: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp")!),
+                    .member(.init(
+                        _ : .scalar(.init("""
+                            s:33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp
+                            """)!),
                         in: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
+                            "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
                         origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
 
-                    .membership(.init(of: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp")!),
+                    .member(.init(
+                        _ : .scalar(.init("""
+                            s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp
+                            """)!),
                         in: .scalar(.init(
                         "s:33DocumentationInheritanceFromSwift10DocumentedV")!),
                         origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),

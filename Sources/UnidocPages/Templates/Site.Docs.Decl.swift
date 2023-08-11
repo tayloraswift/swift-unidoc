@@ -11,18 +11,22 @@ extension Site.Docs
 {
     struct Decl
     {
+        let inliner:Inliner
+
         private
-        let tabulator:Tabulator
         let master:Record.Master.Decl
+        private
+        let groups:[Record.Group]
 
         private
         let path:QualifiedPath
 
-        private
-        init(tabulator:Tabulator, master:Record.Master.Decl)
+        init(_ inliner:Inliner, master:Record.Master.Decl, groups:[Record.Group])
         {
-            self.tabulator = tabulator
+            self.inliner = inliner
+
             self.master = master
+            self.groups = groups
 
             self.path = .init(splitting: self.master.stem)
         }
@@ -30,19 +34,6 @@ extension Site.Docs
 }
 extension Site.Docs.Decl
 {
-    init(_ inliner:Inliner, master:Record.Master.Decl, groups:[Record.Group])
-    {
-        self.init(tabulator: .init(inliner,
-                generics: master.signature.generics.parameters,
-                groups: groups),
-            master: master)
-    }
-}
-extension Site.Docs.Decl
-{
-    private
-    var inliner:Inliner { self.tabulator.inliner }
-
     private
     var zone:Record.Zone
     {
@@ -65,12 +56,6 @@ extension Site.Docs.Decl
             return nil
         }
     }
-
-    private
-    var demonym:Demonym
-    {
-        .init(customization: self.master.customization, phylum: self.master.phylum)
-    }
 }
 extension Site.Docs.Decl:FixedPage
 {
@@ -91,18 +76,27 @@ extension Site.Docs.Decl:FixedPage
 
     func emit(main:inout HTML.ContentEncoder)
     {
+        let groups:Inliner.Groups = .init(self.inliner,
+            superforms: self.master.superforms,
+            generics: self.master.signature.generics.parameters,
+            groups: self.groups,
+            phylum: self.master.phylum,
+            kinks: self.master.kinks,
+            bias: self.master.culture)
+
         main[.section]
         {
-            $0.class = self.master.customization.accent.map
-            {
-                "introduction \($0)"
-            } ?? "introduction"
+            $0.class = "introduction"
         }
         content:
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = self.demonym
+                let demonym:Demonym = .init(
+                    phylum: self.master.phylum,
+                    kinks: self.master.kinks)
+
+                $0[.span] { $0.class = "phylum" } = demonym
                 $0[.span, { $0.class = "module" }]
                 {
                     $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
@@ -138,21 +132,6 @@ extension Site.Docs.Decl:FixedPage
         main[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        if !self.master.superforms.isEmpty
-        {
-            main[.section, { $0.class = "superforms" }]
-            {
-                $0[.h2] = self.master.phylum.superformHeading(self.master.customization)
-                $0[.ul]
-                {
-                    for superform:Unidoc.Scalar in self.master.superforms
-                    {
-                        $0[.li] = self.inliner.card(superform)
-                    }
-                }
-            }
-        }
-
-        main += self.tabulator
+        main += groups
     }
 }

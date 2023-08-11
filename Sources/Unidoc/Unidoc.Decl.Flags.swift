@@ -4,17 +4,17 @@ extension Unidoc.Decl
     struct Flags:Equatable, Sendable
     {
         public
-        let customization:Customization
-        public
         let phylum:Unidoc.Decl
+        public
+        let kinks:Kinks
         public
         var route:Route
 
         @inlinable public
-        init(customization:Customization, phylum:Unidoc.Decl, route:Route)
+        init(phylum:Unidoc.Decl, kinks:Kinks, route:Route)
         {
-            self.customization = customization
             self.phylum = phylum
+            self.kinks = kinks
             self.route = route
         }
     }
@@ -24,23 +24,22 @@ extension Unidoc.Decl.Flags:RawRepresentable
     @inlinable public
     var rawValue:Int32
     {
-        .init(self.customization.rawValue)  << 24 |
-        .init(self.phylum.rawValue)         << 16 |
-
+        .init(self.phylum.rawValue) << 24 |
+        .init(self.kinks.rawValue)  << 16 |
         .init(self.route.rawValue)
     }
     @inlinable public
     init?(rawValue:Int32)
     {
         if
-            let customization:Unidoc.Decl.Customization = .init(
-                rawValue: .init(truncatingIfNeeded: rawValue >> 24)),
             let phylum:Unidoc.Decl = .init(
+                rawValue: .init(truncatingIfNeeded: rawValue >> 24)),
+            let kinks:Unidoc.Decl.Kinks = .init(
                 rawValue: .init(truncatingIfNeeded: rawValue >> 16)),
             let route:Unidoc.Decl.Route = .init(
                 rawValue: .init(truncatingIfNeeded: rawValue))
         {
-            self.init(customization: customization, phylum: phylum, route: route)
+            self.init(phylum: phylum, kinks: kinks, route: route)
         }
         else
         {

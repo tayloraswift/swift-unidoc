@@ -13,9 +13,9 @@ extension Record.Master
         let id:Unidoc.Scalar
 
         public
-        let customization:Unidoc.Decl.Customization
-        public
         let phylum:Unidoc.Decl
+        public
+        let kinks:Unidoc.Decl.Kinks
         public
         let route:Unidoc.Decl.Route
 
@@ -48,8 +48,8 @@ extension Record.Master
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            customization:Unidoc.Decl.Customization,
             phylum:Unidoc.Decl,
+            kinks:Unidoc.Decl.Kinks,
             route:Unidoc.Decl.Route,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
@@ -65,8 +65,8 @@ extension Record.Master
             group:Unidoc.Scalar? = nil)
         {
             self.id = id
-            self.customization = customization
             self.phylum = phylum
+            self.kinks = kinks
             self.route = route
 
             self.signature = signature

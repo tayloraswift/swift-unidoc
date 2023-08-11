@@ -1,4 +1,5 @@
 import SymbolGraphParts
+import Symbols
 import TraceableErrors
 
 extension Compiler
@@ -7,12 +8,12 @@ extension Compiler
     struct EdgeError:Error, Sendable
     {
         public
-        let relationship:SymbolRelationship
+        let relationship:Symbol.AnyRelationship
         public
         let underlying:any Error
 
         public
-        init(underlying:any Error, in relationship:SymbolRelationship)
+        init(underlying:any Error, in relationship:Symbol.AnyRelationship)
         {
             self.underlying = underlying
             self.relationship = relationship

@@ -1,7 +1,7 @@
 import JSONDecoding
 import Symbols
 
-extension SymbolRelationship
+extension Symbol.AnyRelationship
 {
     struct SourceOrigin:Equatable, Hashable, Sendable
     {
@@ -13,7 +13,7 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.SourceOrigin:JSONObjectDecodable
+extension Symbol.AnyRelationship.SourceOrigin:JSONObjectDecodable
 {
     enum CodingKey:String
     {

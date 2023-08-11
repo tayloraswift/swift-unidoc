@@ -2,6 +2,7 @@ import MarkdownABI
 
 extension MarkdownBytecode
 {
+    /// Renders the wrapped bytecode without inlining any references.
     @frozen public
     struct SafeView:Equatable, Sendable
     {

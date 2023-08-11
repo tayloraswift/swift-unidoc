@@ -1,5 +1,6 @@
 import JSONDecoding
 import ModuleGraphs
+import Symbols
 
 @frozen public
 struct SymbolGraphPart:Equatable, Sendable
@@ -13,14 +14,14 @@ struct SymbolGraphPart:Equatable, Sendable
     public
     let symbols:[SymbolDescription]
     public
-    let relationships:[SymbolRelationship]
+    let relationships:[Symbol.AnyRelationship]
 
     private
     init(metadata:Metadata,
         culture:ModuleIdentifier,
         colony:ModuleIdentifier?,
         symbols:[SymbolDescription],
-        relationships:[SymbolRelationship])
+        relationships:[Symbol.AnyRelationship])
     {
         self.metadata = metadata
         self.culture = culture

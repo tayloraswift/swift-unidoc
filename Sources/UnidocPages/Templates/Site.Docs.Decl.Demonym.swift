@@ -5,8 +5,14 @@ extension Site.Docs.Decl
 {
     struct Demonym
     {
-        let customization:Unidoc.Decl.Customization
         let phylum:Unidoc.Decl
+        let kinks:Unidoc.Decl.Kinks
+
+        init(phylum:Unidoc.Decl, kinks:Unidoc.Decl.Kinks)
+        {
+            self.phylum = phylum
+            self.kinks = kinks
+        }
     }
 }
 extension Site.Docs.Decl.Demonym:HyperTextOutputStreamable
@@ -14,61 +20,55 @@ extension Site.Docs.Decl.Demonym:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        let adjective:String?
-        let noun:String
-        switch self.phylum
+        let kink:String?
+        if      self.kinks[is: .open]
         {
-        case .actor:                noun = "Actor"
-        case .associatedtype:       noun = "Associated Type"
-        case .case:                 noun = "Enumeration Case"
-        case .class:                noun = "Class"
-        case .deinitializer:        noun = "Deinitializer"
-        case .enum:                 noun = "Enumeration"
-        case .func(nil):            noun = "Global Function"
-        case .func(.class):         noun = "Class Method"
-        case .func(.instance):      noun = "Instance Method"
-        case .func(.static):        noun = "Static Method"
-        case .initializer:          noun = "Initializer"
-        case .operator:             noun = "Operator"
-        case .protocol:             noun = "Protocol"
-        case .struct:               noun = "Structure"
-        case .subscript(.class):    noun = "Class Subscript"
-        case .subscript(.instance): noun = "Instance Subscript"
-        case .subscript(.static):   noun = "Static Subscript"
-        case .typealias:            noun = "Type Alias"
-        case .var(nil):             noun = "Global Variable"
-        case .var(.class):          noun = "Class Property"
-        case .var(.instance):       noun = "Instance Property"
-        case .var(.static):         noun = "Static Property"
+            kink = "Open"
         }
-
-        switch  (self.customization, self.phylum)
+        else if self.kinks[is: .required]
         {
-        case    (.available,          .class),
-                (.available,          .func),
-                (.available,          .initializer),
-                (.available,          .subscript),
-                (.available,          .var):        adjective = "Open"
-        case    (.required,           .func),
-                (.required,           .initializer),
-                (.required,           .subscript),
-                (.required,           .var):        adjective = "Required"
-        case    (.requiredOptionally, .func),
-                (.requiredOptionally, .initializer),
-                (.requiredOptionally, .subscript),
-                (.requiredOptionally, .var):        adjective = "Optionally Required"
-
-        default:                                    adjective = nil
-        }
-
-        if  let adjective:String
-        {
-            html[.span, { $0.class = "customization" }] = adjective
-            html += " \(noun)"
+            kink = "Required"
         }
         else
         {
-            html += noun
+            kink = nil
+        }
+
+        if  let kink:String
+        {
+            html[.span, { $0.class = "kink" }] = kink
+            html += " "
+        }
+
+        switch self.phylum
+        {
+        case .actor:                html += "Actor"
+        case .associatedtype:       html += "Associated Type"
+        case .case:                 html += "Enumeration Case"
+        case .class:                html += "Class"
+        case .deinitializer:        html += "Deinitializer"
+        case .enum:                 html += "Enumeration"
+        case .func(nil):            html += "Global Function"
+        case .func(.class):         html += "Class Method"
+        case .func(.instance):      html += "Instance Method"
+        case .func(.static):        html += "Static Method"
+        case .initializer:          html += "Initializer"
+        case .operator:             html += "Operator"
+        case .protocol:             html += "Protocol"
+        case .struct:               html += "Structure"
+        case .subscript(.class):    html += "Class Subscript"
+        case .subscript(.instance): html += "Instance Subscript"
+        case .subscript(.static):   html += "Static Subscript"
+        case .typealias:            html += "Type Alias"
+        case .var(nil):             html += "Global Variable"
+        case .var(.class):          html += "Class Property"
+        case .var(.instance):       html += "Instance Property"
+        case .var(.static):         html += "Static Property"
+        }
+
+        if  self.kinks[is: .intrinsicWitness]
+        {
+            html += " (Intrinsic Witness)"
         }
     }
 }

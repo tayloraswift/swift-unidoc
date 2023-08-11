@@ -1,10 +1,10 @@
 import Symbols
 import Unidoc
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct Requirement:Equatable, Hashable, Sendable
+    struct IntrinsicWitnessRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
         let source:Symbol.Decl
@@ -12,34 +12,20 @@ extension SymbolRelationship
         let target:Symbol.Decl
         public
         let origin:Symbol.Decl?
-        public
-        let optional:Bool
 
-        init(_ source:Symbol.Decl,
-            of target:Symbol.Decl,
-            origin:Symbol.Decl? = nil,
-            optional:Bool = false)
+        @inlinable public
+        init(_ source:Symbol.Decl, of target:Symbol.Decl, origin:Symbol.Decl? = nil)
         {
             self.source = source
             self.target = target
             self.origin = origin
-            self.optional = optional
         }
     }
 }
-extension SymbolRelationship.Requirement:NestingRelationship
+extension Symbol.IntrinsicWitnessRelationship:SuperformRelationship
 {
     @inlinable public
-    var customization:Unidoc.Decl.Customization?
-    {
-        self.optional ? .requiredOptionally : .required
-    }
-
-    @inlinable public
-    var scope:Symbol?
-    {
-        .scalar(self.target)
-    }
+    var kinks:Unidoc.Decl.Kinks { [.intrinsicWitness] }
 
     public
     func validate(source phylum:Unidoc.Decl) -> Bool
@@ -47,7 +33,7 @@ extension SymbolRelationship.Requirement:NestingRelationship
         switch phylum
         {
         case .actor:                return false
-        case .associatedtype:       return true
+        case .associatedtype:       return false
         case .case:                 return false
         case .class:                return false
         case .deinitializer:        return false
@@ -59,19 +45,19 @@ extension SymbolRelationship.Requirement:NestingRelationship
         case .protocol:             return false
         case .struct:               return false
         case .subscript:            return true
-        case .typealias:            return false
+        case .typealias:            return true
         case .var(nil):             return false
         case .var(_?):              return true
         }
     }
 }
-extension SymbolRelationship.Requirement:CustomStringConvertible
+extension Symbol.IntrinsicWitnessRelationship:CustomStringConvertible
 {
     public
     var description:String
     {
         """
-        (\(self.optional ? "optional " : "")requirement: \(self.source), of: \(self.target))
+        (default implementation: \(self.source), of: \(self.target))
         """
     }
 }

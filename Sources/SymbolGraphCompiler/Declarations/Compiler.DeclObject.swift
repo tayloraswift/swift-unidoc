@@ -48,6 +48,12 @@ extension Compiler.DeclObject
     {
         self.value.id
     }
+
+    var kinks:Unidoc.Decl.Kinks
+    {
+        _read   { yield  self.value.kinks }
+        _modify { yield &self.value.kinks }
+    }
 }
 extension Compiler.DeclObject
 {
@@ -82,12 +88,9 @@ extension Compiler.DeclObject
         else
         {
             self.scope = nesting.scope
+            self.kinks += nesting.kinks
         }
 
-        if  let customization:Unidoc.Decl.Customization = nesting.customization
-        {
-            self.value.customization = customization
-        }
         if  let origin:Symbol.Decl = nesting.origin
         {
             try self.assign(origin: origin)
@@ -113,6 +116,7 @@ extension Compiler.DeclObject
         {
         case nil, (is Superform.Type)?:
             self.value.superforms.insert(superform.target)
+            self.kinks += superform.kinks
             self.superforms = Superform.self
 
         case let type?:

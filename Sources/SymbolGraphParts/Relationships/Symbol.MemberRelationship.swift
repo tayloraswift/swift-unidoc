@@ -1,20 +1,20 @@
 import Symbols
 import Unidoc
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct DefaultImplementation:SuperformRelationship, Equatable, Hashable, Sendable
+    struct MemberRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
-        let source:Symbol.Decl
+        let source:Symbol
         public
-        let target:Symbol.Decl
+        let target:Symbol
         public
         let origin:Symbol.Decl?
 
         @inlinable public
-        init(_ source:Symbol.Decl, of target:Symbol.Decl, origin:Symbol.Decl? = nil)
+        init(_ source:Symbol, in target:Symbol, origin:Symbol.Decl? = nil)
         {
             self.source = source
             self.target = target
@@ -22,25 +22,31 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.DefaultImplementation
+extension Symbol.MemberRelationship:NestingRelationship
 {
+    @inlinable public
+    var kinks:Unidoc.Decl.Kinks { [] }
+
+    @inlinable public
+    var scope:Symbol { self.target }
+
     public
     func validate(source phylum:Unidoc.Decl) -> Bool
     {
         switch phylum
         {
-        case .actor:                return false
-        case .associatedtype:       return false
-        case .case:                 return false
-        case .class:                return false
-        case .deinitializer:        return false
-        case .enum:                 return false
+        case .actor:                return true
+        case .associatedtype:       return true
+        case .case:                 return true
+        case .class:                return true
+        case .deinitializer:        return true
+        case .enum:                 return true
         case .func(nil):            return false
         case .func(_?):             return true
         case .initializer:          return true
         case .operator:             return true
         case .protocol:             return false
-        case .struct:               return false
+        case .struct:               return true
         case .subscript:            return true
         case .typealias:            return true
         case .var(nil):             return false
@@ -48,13 +54,13 @@ extension SymbolRelationship.DefaultImplementation
         }
     }
 }
-extension SymbolRelationship.DefaultImplementation:CustomStringConvertible
+extension Symbol.MemberRelationship:CustomStringConvertible
 {
     public
     var description:String
     {
         """
-        (default implementation: \(self.source), of: \(self.target))
+        (member: \(self.source), of: \(self.target))
         """
     }
 }

@@ -1,9 +1,9 @@
 import Symbols
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct Extension:Equatable, Hashable, Sendable
+    struct ExtensionRelationship:Equatable, Hashable, Sendable
     {
         public
         let source:Symbol.Block
@@ -18,7 +18,12 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.Extension:CustomStringConvertible
+extension Symbol.ExtensionRelationship:SymbolRelationship
+{
+    @inlinable public
+    var origin:Symbol.Decl? { nil }
+}
+extension Symbol.ExtensionRelationship:CustomStringConvertible
 {
     public
     var description:String

@@ -202,8 +202,8 @@ extension Record.Master:BSONDocumentEncodable
             bson[.symbol] = self.symbol
 
             bson[.flags] = Unidoc.Decl.Flags.init(
-                customization: self.customization,
                 phylum: self.phylum,
+                kinks: self.kinks,
                 route: self.route)
 
             bson[.signature_availability] =
@@ -302,8 +302,8 @@ extension Record.Master:BSONDocumentDecodable
             let culture:Unidoc.Scalar = try bson[.culture].decode()
 
             self = .decl(.init(id: id,
-                customization: flags.customization,
                 phylum: flags.phylum,
+                kinks: flags.kinks,
                 route: flags.route,
                 signature: .init(
                     availability: try bson[.signature_availability]?.decode() ?? .init(),

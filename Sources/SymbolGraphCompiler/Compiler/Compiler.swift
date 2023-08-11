@@ -104,7 +104,7 @@ extension Compiler
         //  Pass II. Scan for nesting relationships.
         for part:SymbolGraphPart in parts
         {
-            for relationship:SymbolRelationship in part.relationships
+            for relationship:Symbol.AnyRelationship in part.relationships
             {
                 do
                 {
@@ -116,10 +116,10 @@ extension Compiler
                     case .requirement(let requirement):
                         try self.assign(requirement, by: culture.index)
 
-                    case .membership(let membership):
+                    case .member(let membership):
                         try self.assign(membership, by: culture.index)
 
-                    case .conformance, .defaultImplementation, .inheritance, .override:
+                    case .conformance, .inheritance, .override, .intrinsicWitness:
                         continue // Next pass.
                     }
                 }
@@ -131,25 +131,25 @@ extension Compiler
         }
         for part:SymbolGraphPart in parts
         {
-            for relationship:SymbolRelationship in part.relationships
+            for relationship:Symbol.AnyRelationship in part.relationships
             {
                 do
                 {
                     switch relationship
                     {
-                    case .extension, .requirement, .membership:
+                    case .extension, .requirement, .member:
                         continue // Already handled these.
 
                     case .conformance(let conformance):
                         try self.insert(conformance, by: culture.index)
 
-                    case .defaultImplementation(let relationship):
-                        try self.insert(relationship)
-
                     case .inheritance(let relationship):
                         try self.insert(relationship)
 
                     case .override(let relationship):
+                        try self.insert(relationship)
+
+                    case .intrinsicWitness(let relationship):
                         try self.insert(relationship)
                     }
                 }
@@ -164,7 +164,7 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func assign(_ relationship:SymbolRelationship.Requirement, by culture:Int) throws
+    func assign(_ relationship:Symbol.RequirementRelationship, by culture:Int) throws
     {
         /// Protocol must always be from the same module.
         guard let `protocol`:DeclObject = try self.declarations(internal: relationship.target)
@@ -182,7 +182,7 @@ extension Compiler
         }
     }
     private mutating
-    func assign(_ relationship:SymbolRelationship.Membership, by culture:Int) throws
+    func assign(_ relationship:Symbol.MemberRelationship, by culture:Int) throws
     {
         switch relationship.source
         {
@@ -285,7 +285,7 @@ extension Compiler
 extension Compiler
 {
     private mutating
-    func insert(_ conformance:SymbolRelationship.Conformance, by culture:Int) throws
+    func insert(_ conformance:Symbol.ConformanceRelationship, by culture:Int) throws
     {
         guard let `protocol`:Symbol.Decl = self.declarations[conformance.target]
         else
@@ -318,7 +318,7 @@ extension Compiler
                 //  Oddly, SymbolGraphGen uses “conformsTo” for protocol inheritance.
                 //  But this conformance is not a real conformance, it is a supertype
                 //  relationship!
-                try type.add(superform: SymbolRelationship.Inheritance.init(
+                try type.add(superform: Symbol.InheritanceRelationship.init(
                     by: type.id,
                     of: `protocol`))
                 return
@@ -343,7 +343,7 @@ extension Compiler
     private mutating
     func insert(_ relationship:some SuperformRelationship) throws
     {
-        if case nil = self.declarations[relationship.target]
+        if  case nil = self.declarations[relationship.target]
         {
             return // Superform is hidden.
         }
@@ -352,6 +352,13 @@ extension Compiler
         if  let subform:DeclObject = try self.declarations(internal: relationship.source)
         {
             try subform.add(superform: relationship)
+        }
+        /// Having a universal witness is not intrinsic, but it is useful to know
+        /// if we have one from the same package.
+        if  case let relationship as Symbol.IntrinsicWitnessRelationship = relationship,
+            let superform:DeclObject = self.declarations[included: relationship.target]
+        {
+            superform.kinks[is: .implemented] = true
         }
     }
 }

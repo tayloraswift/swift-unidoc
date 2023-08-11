@@ -26,8 +26,6 @@ extension Compiler
         public
         let path:UnqualifiedPath
 
-        public internal(set)
-        var customization:Unidoc.Decl.Customization
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.
@@ -50,13 +48,15 @@ extension Compiler
         /// to this scalar.
         public internal(set)
         var origin:Symbol.Decl?
+        public internal(set)
+        var kinks:Unidoc.Decl.Kinks
 
         public private(set)
         var comment:Doccomment?
 
+
         private
         init(_ id:Symbol.Decl,
-            visibility:SymbolDescription.Visibility,
             signature:Signature<Symbol.Decl>,
             location:SourceLocation<Symbol.File>?,
             phylum:Unidoc.Decl,
@@ -69,11 +69,11 @@ extension Compiler
             self.phylum = phylum
             self.path = path
 
-            self.customization = visibility == .open ? .available : .unavailable
 
             self.superforms = []
             self.features = []
             self.origin = nil
+            self.kinks = []
 
             self.comment = nil
         }
@@ -92,11 +92,12 @@ extension Compiler.Decl
         }
 
         self.init(resolution,
-            visibility: description.visibility,
             signature: description.signature,
             location: try description.location?.map(culture.resolve(uri:)),
             phylum: phylum,
             path: description.path)
+
+        self.kinks[is: .open] = description.visibility == .open
 
         if  let doccomment:SymbolDescription.Doccomment = description.doccomment
         {

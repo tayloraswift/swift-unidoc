@@ -1,10 +1,10 @@
 import Symbols
 import Unidoc
 
-extension SymbolRelationship
+extension Symbol
 {
     @frozen public
-    struct Inheritance:SuperformRelationship, Equatable, Hashable, Sendable
+    struct InheritanceRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
         let source:Symbol.Decl
@@ -22,8 +22,11 @@ extension SymbolRelationship
         }
     }
 }
-extension SymbolRelationship.Inheritance
+extension Symbol.InheritanceRelationship:SuperformRelationship
 {
+    @inlinable public
+    var kinks:Unidoc.Decl.Kinks { [] }
+
     public
     func validate(source phylum:Unidoc.Decl) -> Bool
     {
@@ -46,7 +49,7 @@ extension SymbolRelationship.Inheritance
         }
     }
 }
-extension SymbolRelationship.Inheritance:CustomStringConvertible
+extension Symbol.InheritanceRelationship:CustomStringConvertible
 {
     public
     var description:String
