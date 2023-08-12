@@ -7,7 +7,7 @@ import UnidocDatabase
 import UnidocPages
 
 final
-actor Delegate
+actor Server
 {
     private nonisolated
     let requests:(in:AsyncStream<Request>.Continuation, out:AsyncStream<Request>)
@@ -36,7 +36,7 @@ actor Delegate
         self.cache = .init(reloading: mode, from: "Assets")
     }
 }
-extension Delegate
+extension Server
 {
     func respond() async throws
     {
@@ -79,7 +79,7 @@ extension Delegate
         }
     }
 }
-extension Delegate:ServerDelegate
+extension Server:ServerDelegate
 {
     nonisolated
     func yield(_ request:Request)
@@ -93,7 +93,7 @@ extension Delegate:ServerDelegate
 }
 
 @main
-extension Delegate
+extension Server
 {
     public static
     func main() async throws

@@ -1,6 +1,6 @@
 import HTTPServer
 
-extension Delegate
+extension Server
 {
     struct Options
     {
@@ -24,7 +24,7 @@ extension Delegate
         }
     }
 }
-extension Delegate.Options
+extension Server.Options
 {
     static
     func parse() throws -> Self
@@ -43,12 +43,12 @@ extension Delegate.Options
                 guard let authority:String = arguments.next()
                 else
                 {
-                    throw Delegate.OptionsError.invalidAuthority(nil)
+                    throw Server.OptionsError.invalidAuthority(nil)
                 }
                 guard let authority:Authority = .init(rawValue: authority)
                 else
                 {
-                    throw Delegate.OptionsError.invalidAuthority(authority)
+                    throw Server.OptionsError.invalidAuthority(authority)
                 }
 
                 options.authority = authority
@@ -57,7 +57,7 @@ extension Delegate.Options
                 guard let certificates:String = arguments.next()
                 else
                 {
-                    throw Delegate.OptionsError.invalidCertificateDirectory
+                    throw Server.OptionsError.invalidCertificateDirectory
                 }
 
                 options.certificates = certificates
@@ -72,25 +72,25 @@ extension Delegate.Options
                 switch arguments.next()
                 {
                 case let host?:     options.mongo = host
-                case nil:           throw Delegate.OptionsError.invalidMongoReplicaSetSeed
+                case nil:           throw Server.OptionsError.invalidMongoReplicaSetSeed
                 }
 
             case "-p", "--port":
                 guard let port:String = arguments.next()
                 else
                 {
-                    throw Delegate.OptionsError.invalidPort(nil)
+                    throw Server.OptionsError.invalidPort(nil)
                 }
                 guard let port:Int = .init(port)
                 else
                 {
-                    throw Delegate.OptionsError.invalidPort(port)
+                    throw Server.OptionsError.invalidPort(port)
                 }
 
                 options.port = port
 
             case let unrecognized:
-                throw Delegate.OptionsError.unrecognized(unrecognized)
+                throw Server.OptionsError.unrecognized(unrecognized)
             }
         }
 

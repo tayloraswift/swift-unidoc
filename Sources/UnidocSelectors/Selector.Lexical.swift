@@ -5,7 +5,7 @@ import UnidocRecords
 extension Selector
 {
     @frozen public
-    struct Master:Equatable, Hashable, Sendable
+    struct Lexical:Equatable, Hashable, Sendable
     {
         public
         var planes:Planes
@@ -24,7 +24,7 @@ extension Selector
         }
     }
 }
-extension Selector.Master
+extension Selector.Lexical
 {
     public
     init(planes:__shared Selector.Planes,

@@ -1,7 +1,7 @@
 import HTTPServer
 import NIOSSL
 
-extension Delegate.Options
+extension Server.Options
 {
     enum Authority:String, Equatable, Hashable, Sendable
     {
@@ -9,7 +9,7 @@ extension Delegate.Options
         case testing
     }
 }
-extension Delegate.Options.Authority
+extension Server.Options.Authority
 {
     var type:any ServerAuthority.Type
     {
@@ -31,7 +31,7 @@ extension Delegate.Options.Authority
             guard let directory:String = certificates
             else
             {
-                throw Delegate.CertificateError.directoryRequired
+                throw Server.CertificateError.directoryRequired
             }
 
             let certificates:[NIOSSLCertificate] =

@@ -1,4 +1,4 @@
-extension Delegate
+extension Server
 {
     @frozen public
     enum OptionsError:Error, Equatable, Sendable

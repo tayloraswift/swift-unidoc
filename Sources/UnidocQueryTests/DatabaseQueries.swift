@@ -66,9 +66,10 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    tests.expect(output.principal.count ==? 1),
-                    let _:Record.Master = tests.expect(value: output.principal[0].master)
+                    let master:Record.Master.Decl = tests.expect(
+                        value: output.principal.first?.master?.decl)
                 {
+                    tests.expect(master.stem.last ==? "Keys")
                 }
             }
         }
@@ -103,6 +104,24 @@ struct DatabaseQueries:MongoTestBattery
                     tests.expect(output.principal.count ==? 1),
                     let _:Record.Master = tests.expect(value: output.principal[0].master)
                 {
+                }
+            }
+        }
+
+        /// We should be able to use a mangled decl identifier to obtain a redirect.
+        if  let tests:TestGroup = tests / "Int" / "init" / "overload"
+        {
+            let query:ThinQuery<Selector.Precise> = .init(
+                for: .init(.init(.s, ascii: "Si10bitPatternSiSO_tcfc")),
+                in: .init("swift"))
+            await tests.do
+            {
+                if  let output:ThinQuery<Selector.Precise>.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    let master:Record.Master.Decl = tests.expect(
+                        value: output.masters.first?.decl)
+                {
+                    tests.expect(master.stem.last ==? "init(bitPattern:)")
                 }
             }
         }

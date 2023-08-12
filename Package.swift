@@ -67,7 +67,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-           from: "0.7.0")),
+           from: "0.7.1")),
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
@@ -362,6 +362,12 @@ let package:Package = .init(
         .executableTarget(name: "DoclinkTests", dependencies:
             [
                 .target(name: "Doclinks"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "FNV1Tests", dependencies:
+            [
+                .target(name: "FNV1"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

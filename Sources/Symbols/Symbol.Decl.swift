@@ -35,7 +35,7 @@ extension Symbol.Decl
     /// Creates a symbol identifier from the given language prefix and
     /// mangled suffix. This initializer does not validate the suffix.
     @inlinable public
-    init(_ language:Unicode.Scalar, ascii suffix:some StringProtocol)
+    init(_ language:Language, ascii suffix:some StringProtocol)
     {
         self.init(unchecked: "\(language)\(suffix)")
     }
@@ -45,7 +45,7 @@ extension Symbol.Decl
     ///
     /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '.', '-', and `@`.
     @inlinable public
-    init?(_ language:Unicode.Scalar, _ suffix:some StringProtocol)
+    init?(_ language:Language, _ suffix:some StringProtocol)
     {
         for ascii:UInt8 in suffix.utf8
         {
@@ -62,15 +62,15 @@ extension Symbol.Decl
     }
 
     @inlinable public
-    var language:Unicode.Scalar
+    var language:Language
     {
         //  Should not be possible to generate an empty symbol identifier.
-        self.rawValue.unicodeScalars.first!
+        .init(ascii: self.rawValue.utf8.first!)
     }
     @inlinable public
     var suffix:Substring
     {
-        self.rawValue.suffix(from: self.rawValue.unicodeScalars.index(
+        self.rawValue.suffix(from: self.rawValue.utf8.index(
             after: self.rawValue.startIndex))
     }
 }
@@ -122,7 +122,8 @@ extension Symbol.Decl:LosslessStringConvertible
     init?(fragments:__shared [Substring])
     {
         if  fragments.count == 2,
-            let language:Unicode.Scalar = .init(fragments[0])
+            let language:Unicode.Scalar = .init(fragments[0]),
+            let language:Language = .init(language)
         {
             self.init(language, fragments[1])
         }

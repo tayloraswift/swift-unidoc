@@ -3,7 +3,7 @@ import SemanticVersions
 import UnidocQueries
 import UnidocSelectors
 
-extension ThinQuery<Selector.Master>
+extension ThinQuery<Selector.Lexical>
 {
     static
     func legacy(
