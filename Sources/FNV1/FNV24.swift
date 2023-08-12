@@ -10,24 +10,6 @@ struct FNV24:Equatable, Hashable, Sendable
         self.value = value
     }
 }
-extension FNV24:RawRepresentable
-{
-    @inlinable public
-    init?(rawValue:Int32)
-    {
-        if  0 ... 0x00_ff_ff_ff ~= rawValue
-        {
-            self.init(value: .init(rawValue))
-        }
-        else
-        {
-            return nil
-        }
-    }
-
-    @inlinable public
-    var rawValue:Int32 { .init(bitPattern: value) }
-}
 extension FNV24:CustomStringConvertible
 {
     @inlinable public
@@ -60,11 +42,28 @@ extension FNV24
         }
     }
 
-    //  https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+    @inlinable public
+    init(folding fnv32:FNV32)
+    {
+        self.init(value: fnv32.folded.value >> 8)
+    }
+
     @inlinable public
     init(hashing string:String)
     {
-        let full:UInt32 = string.utf8.reduce(2166136261) { ($0 &* 16777619) ^ .init($1) }
-        self.init(value: (full >> 24) ^ (full & 0x00_ff_ff_ff))
+        self.init(folding: .init(hashing: string))
+    }
+}
+extension FNV24
+{
+    @inlinable public
+    var min:Extended
+    {
+        .init(value: self.value << 8)
+    }
+    @inlinable public
+    var max:Extended
+    {
+        .init(value: self.value << 8 | 0x00_00_00_ff)
     }
 }

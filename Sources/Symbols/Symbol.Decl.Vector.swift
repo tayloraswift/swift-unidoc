@@ -37,9 +37,11 @@ extension Symbol.Decl.Vector:LosslessStringConvertible
     {
         if  fragments.count == 5,
             let language:Unicode.Scalar = .init(fragments[0]),
+            let language:Symbol.Decl.Language = .init(language),
             let member:Symbol.Decl = .init(language, fragments[1]),
             fragments[2] == "SYNTHESIZED",
             let language:Unicode.Scalar = .init(fragments[3]),
+            let language:Symbol.Decl.Language = .init(language),
             let heir:Symbol.Decl = .init(language, fragments[4])
         {
             self.init(member, self: heir)

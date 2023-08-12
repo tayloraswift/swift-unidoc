@@ -144,7 +144,7 @@ extension Compiler.Declarations
 
             case .included?, .excluded?:
                 //  if both symbols are C symbols, they are allowed to duplicate
-                if  resolution.language == "c" ||
+                if  resolution.language == .c ||
                     resolution.suffix.starts(with: "So")
                 {
                     return

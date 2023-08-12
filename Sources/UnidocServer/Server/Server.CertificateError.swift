@@ -1,4 +1,4 @@
-extension Delegate
+extension Server
 {
     enum CertificateError:Error, Sendable
     {

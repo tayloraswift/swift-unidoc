@@ -8,12 +8,12 @@ import UnidocSelectors
 struct WideQuery:Equatable, Hashable, Sendable
 {
     public
-    let mode:Selector.Master
+    let mode:Selector.Lexical
     public
     let zone:Selector.Zone
 
     @inlinable public
-    init(for mode:Selector.Master, in zone:Selector.Zone)
+    init(for mode:Selector.Lexical, in zone:Selector.Zone)
     {
         self.mode = mode
         self.zone = zone

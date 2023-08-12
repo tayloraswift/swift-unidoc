@@ -134,7 +134,7 @@ extension AnyOperation
             }
         }
 
-        let query:ThinQuery<Selector.Master> = .legacy(
+        let query:ThinQuery<Selector.Lexical> = .legacy(
             planes: .docs,
             head: trunk,
             rest: stem,
@@ -142,14 +142,14 @@ extension AnyOperation
 
         if  let overload:Symbol.Decl
         {
-            return .database(QueryOperation<ThinQuery<Selector.Decl>>.init(
+            return .database(QueryOperation<ThinQuery<Selector.Precise>>.init(
                 explain: false,
-                query: .init(for: .symbol(overload), in: query.zone),
+                query: .init(for: .init(overload), in: query.zone),
                 uri: uri))
         }
         else
         {
-            return .database(QueryOperation<ThinQuery<Selector.Master>>.init(
+            return .database(QueryOperation<ThinQuery<Selector.Lexical>>.init(
                 explain: false,
                 query: query,
                 uri: uri))

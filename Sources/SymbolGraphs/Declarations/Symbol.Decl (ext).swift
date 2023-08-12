@@ -2,8 +2,33 @@ import BSONDecoding
 import BSONEncoding
 import Symbols
 
-/// Uses the ``RawRepresentable`` conformance, which encodes without
-/// the interior colon.
-extension Symbol.Decl:BSONDecodable, BSONEncodable
+extension Symbol.Decl:BSONEncodable
 {
+    /// Encodes the symbol declaration as a binary array, with the language tag in the binary
+    /// subtype byte. The purpose of encoding it as binary data, and not as a UTF-8 string is
+    /// to exempt it from string collation. This is important because mangled symbol identifiers
+    /// are always case-sensitive.
+    @inlinable public
+    func encode(to field:inout BSON.Field)
+    {
+        var suffix:Substring = self.suffix
+            suffix.withUTF8
+        {
+            let language:BSON.BinarySubtype = .custom(code: 0x80 | self.language.ascii)
+            let binary:BSON.BinaryView<UnsafeBufferPointer<UInt8>> = .init(
+                subtype: language,
+                slice: $0)
+
+            binary.encode(to: &field)
+        }
+    }
+}
+extension Symbol.Decl:BSONDecodable, BSONBinaryViewDecodable
+{
+    @inlinable public
+    init(bson:BSON.BinaryView<some RandomAccessCollection<UInt8>>) throws
+    {
+        let suffix:String = .init(decoding: bson.slice, as: Unicode.ASCII.self)
+        self.init(Language.init(ascii: bson.subtype.rawValue & 0x7F), ascii: suffix)
+    }
 }

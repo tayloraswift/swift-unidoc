@@ -117,6 +117,13 @@ extension Record.Master
         /// Always present.
         case id = "_id"
 
+        /// Always present, computed from ``id``. This field will never be decoded.
+        ///
+        /// This field is cheap (64-bit integer plus 3 bytes of keying overhead) and
+        /// allows us to reuse compound indices for zone-bound queries by performing
+        /// an equality match instead of a range match.
+        case zone = "I"
+
         /// Appears in ``Decl`` and ``File``.
         case symbol = "Y"
         /// Appears in ``Article``, ``Culture``, and ``Decl``, but may be computed
@@ -178,7 +185,7 @@ extension Record.Master
         /// encoded if non-empty, but it will never be decoded.
         case zones = "z"
 
-        /// Optional FNV24 hash of the record’s symbol. Currently only computed
+        /// Optional extended FNV24 hash of the record’s symbol. Currently only computed
         /// for ``Decl`` records.
         case hash = "H"
     }
@@ -189,6 +196,7 @@ extension Record.Master:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+        bson[.zone] = self.id.zone
 
         //  Masters never appear outside their native zone.
         var zones:Unidoc.ZoneSet = .init(except: self.id.zone)
@@ -238,7 +246,7 @@ extension Record.Master:BSONDocumentEncodable
             bson[.details] = self.details
             bson[.group] = self.group
 
-            bson[.hash] = FNV24.init(hashing: "\(self.symbol)")
+            bson[.hash] = FNV24.Extended.init(hashing: "\(self.symbol)")
 
             zones.update(with: self.signature.expanded.scalars)
             zones.update(with: self.signature.generics.constraints)

@@ -6,7 +6,7 @@ import NIOHTTP1
 import UnidocPages
 import URI
 
-extension Delegate
+extension Server
 {
     struct Request:Sendable
     {
@@ -20,7 +20,7 @@ extension Delegate
         }
     }
 }
-extension Delegate.Request:ServerDelegateRequest
+extension Server.Request:ServerDelegateRequest
 {
     init?(get uri:String,
         address _:SocketAddress?,

@@ -20,14 +20,7 @@ enum Main:SyncTests
         {
             if  let usr:Symbol = tests.expect(value: .init("s:s12IdentifiableP"))
             {
-                tests.expect(usr ==? .scalar(.init("s", ascii: "s12IdentifiableP")))
-            }
-        }
-        if  let tests:TestGroup = tests / "scalar" / "unicode"
-        {
-            if  let usr:Symbol = tests.expect(value: .init("♥:s12IdentifiableP"))
-            {
-                tests.expect(usr ==? .scalar(.init("♥", ascii: "s12IdentifiableP")))
+                tests.expect(usr ==? .scalar(.init(.s, ascii: "s12IdentifiableP")))
             }
         }
         if  let tests:TestGroup = tests / "scalar" / "invalid-language"
@@ -45,8 +38,8 @@ enum Main:SyncTests
                     "s:s12IdentifiablePsRlzCrlE2idSOvp::SYNTHESIZED::s:Sq"))
             {
                 tests.expect(usr ==?
-                    .vector(.init(.init("s", ascii: "s12IdentifiablePsRlzCrlE2idSOvp"),
-                        self: .init("s", ascii: "Sq"))))
+                    .vector(.init(.init(.s, ascii: "s12IdentifiablePsRlzCrlE2idSOvp"),
+                        self: .init(.s, ascii: "Sq"))))
             }
         }
         if  let tests:TestGroup = tests / "compound" / "invalid-prefix"
