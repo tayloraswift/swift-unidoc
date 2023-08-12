@@ -85,3 +85,11 @@ extension AnyVersion:LosslessStringConvertible
         }
     }
 }
+extension AnyVersion:ExpressibleByStringLiteral
+{
+    @inlinable public
+    init(stringLiteral:String)
+    {
+        self.init(stringLiteral)
+    }
+}
