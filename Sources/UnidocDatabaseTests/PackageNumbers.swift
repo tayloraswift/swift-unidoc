@@ -2,7 +2,7 @@ import MongoDB
 import MongoTesting
 import UnidocDatabase
 
-struct Registrations:MongoTestBattery
+struct PackageNumbers:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {

@@ -62,9 +62,50 @@ extension Database.Snapshots
         for package:Int32,
         with transaction:Mongo.Transaction) async throws -> SnapshotReceipt
     {
-        let id:String = docs.metadata.id
+        let version:Int32 = try await self.version(docs.metadata.id,
+            package: package,
+            with: transaction)
 
-        //  Look up the snapshot with the highest version index in the database
+        let snapshot:Snapshot = .init(
+            package: package,
+            version: version,
+            metadata: docs.metadata,
+            graph: docs.graph)
+
+        let response:Mongo.UpdateResponse<String> = try await transaction.run(
+            command: Mongo.Update<Mongo.One, String>.init(Self.name,
+                updates: [
+                    .init
+                    {
+                        $0[.upsert] = true
+                        $0[.hint] = .init
+                        {
+                            $0[Snapshot[.package]] = (-)
+                            $0[Snapshot[.version]] = (-)
+                        }
+                        $0[.q] = .init
+                        {
+                            $0[Snapshot[.package]] = package
+                            $0[Snapshot[.version]] = version
+                        }
+                        $0[.u] = snapshot
+                    },
+                ]),
+            against: self.database)
+
+        return .init(overwritten: response.upserted.isEmpty,
+            package: package,
+            version: snapshot.version,
+            id: snapshot.id)
+    }
+}
+extension Database.Snapshots
+{
+    private
+    func version(_ id:String,
+        package:Int32,
+        with transaction:Mongo.Transaction) async throws -> Int32
+    {
         let pipeline:Mongo.Pipeline = .init
         {
             let predecessor:Mongo.KeyPath = "predecessor"
@@ -157,7 +198,7 @@ extension Database.Snapshots
             }
         }
 
-        let version:Int32 = try await transaction.run(
+        return try await transaction.run(
             command: Mongo.Aggregate<Mongo.Cursor<VersionView>>.init(Self.name,
                 pipeline: pipeline,
                 stride: 1),
@@ -165,38 +206,6 @@ extension Database.Snapshots
         {
             try await $0.reduce(into: [], +=).first?.version ?? 0
         }
-
-        let snapshot:Snapshot = .init(
-            package: package,
-            version: version,
-            metadata: docs.metadata,
-            graph: docs.graph)
-
-        let response:Mongo.UpdateResponse<String> = try await transaction.run(
-            command: Mongo.Update<Mongo.One, String>.init(Self.name,
-                updates: [
-                    .init
-                    {
-                        $0[.upsert] = true
-                        $0[.hint] = .init
-                        {
-                            $0[Snapshot[.package]] = (-)
-                            $0[Snapshot[.version]] = (-)
-                        }
-                        $0[.q] = .init
-                        {
-                            $0[Snapshot[.package]] = package
-                            $0[Snapshot[.version]] = version
-                        }
-                        $0[.u] = snapshot
-                    },
-                ]),
-            against: self.database)
-
-        return .init(overwritten: response.upserted.isEmpty,
-            package: package,
-            version: snapshot.version,
-            id: id)
     }
 }
 extension Database.Snapshots
