@@ -7,7 +7,6 @@ extension ThinQuery<Selector.Lexical>
 {
     static
     func legacy(
-        planes:Selector.Planes,
         head:String,
         rest:ArraySlice<String>,
         from:String? = nil) -> Self
@@ -79,7 +78,6 @@ extension ThinQuery<Selector.Lexical>
         }
 
         return .init(for: .init(
-                planes: planes,
                 stem: stem,
                 hash: nil),
             in: .init(

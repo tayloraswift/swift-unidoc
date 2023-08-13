@@ -31,44 +31,6 @@ extension AnyOperation
     }
 
     private static
-    func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI) -> Self?
-    {
-        switch root
-        {
-        case Site.Admin.root:
-            if  let action:Site.Action = .init(rawValue: trunk)
-            {
-                return .dataless(ConfirmOperation.init(action))
-            }
-
-        case Site.Asset.root:
-            if  let asset:Site.Asset = .init(rawValue: trunk)
-            {
-                return .datafile(asset)
-            }
-
-        case Site.Guides.root:
-            return .get(planes: .article, trunk: trunk, stem: stem, uri: uri)
-
-        case Site.Docs.root:
-            return .get(planes: .docs, trunk: trunk, stem: stem, uri: uri)
-
-        case "reference":
-            return .get(legacy: .docs, trunk: trunk, stem: stem, uri: uri)
-
-        case "learn":
-            return .get(legacy: .article, trunk: trunk, stem: stem, uri: uri)
-
-        case _:
-            break
-        }
-
-        return nil
-    }
-}
-extension AnyOperation
-{
-    private static
     func get(root:String) -> Self?
     {
         switch root
@@ -77,9 +39,38 @@ extension AnyOperation
         case _:                 return nil
         }
     }
+
     private static
-    func get(planes:Selector.Planes, trunk:String, stem:ArraySlice<String>, uri:URI) -> Self
+    func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI) -> Self?
     {
+        let planes:Selector.Planes?
+
+        switch root
+        {
+        case Site.Docs.root:
+            planes = nil
+
+        case Site.Guides.root:
+            planes = .article
+
+        case Site.Admin.root:
+            let action:Site.Action? = .init(rawValue: trunk)
+            return action.map { .dataless(ConfirmOperation.init($0)) }
+
+        case Site.Asset.root:
+            let asset:Site.Asset? = .init(rawValue: trunk)
+            return asset.map { .datafile($0) }
+
+        case "reference":
+            return .get(legacy: trunk, stem: stem, uri: uri)
+
+        case "learn":
+            return .get(legacy: trunk, stem: stem, uri: uri)
+
+        case _:
+            return nil
+        }
+
         var explain:Bool = false
         var hash:FNV24? = nil
 
@@ -93,7 +84,8 @@ extension AnyOperation
             }
         }
 
-        if  stem.isEmpty
+        if  stem.isEmpty,
+            let planes
         {
             let query:ThinQuery<Selector.Planes> = .init(for: planes, in: .init(trunk))
 
@@ -102,10 +94,10 @@ extension AnyOperation
                 query: query,
                 uri: uri))
         }
-        else
+        else if case nil = planes
         {
             let query:WideQuery = .init(
-                for: .init(planes: planes, stem: stem, hash: hash),
+                for: .init(stem: stem, hash: hash),
                 in: .init(trunk))
 
             return .database(QueryOperation<WideQuery>.init(
@@ -113,11 +105,15 @@ extension AnyOperation
                 query: query,
                 uri: uri))
         }
+        else
+        {
+            return nil
+        }
     }
+
     private static
     func get(
-        legacy planes:Selector.Planes,
-        trunk:String,
+        legacy trunk:String,
         stem:ArraySlice<String>,
         uri:URI) -> Self
     {
@@ -134,11 +130,7 @@ extension AnyOperation
             }
         }
 
-        let query:ThinQuery<Selector.Lexical> = .legacy(
-            planes: .docs,
-            head: trunk,
-            rest: stem,
-            from: from)
+        let query:ThinQuery<Selector.Lexical> = .legacy(head: trunk, rest: stem, from: from)
 
         if  let overload:Symbol.Decl
         {

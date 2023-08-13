@@ -30,34 +30,16 @@ extension Site.Docs.Disambiguation
 {
     init?(_ inliner:__owned Inliner, matches:__shared [Record.Master])
     {
-        guard let first:Record.Master = matches.first
-        else
-        {
-            return nil
-        }
-
+        let location:URI
         var identity:URI.Path = []
 
-        if  let stem:Record.Stem = first.stem
+        if  let shoot:Record.Shoot = matches.first?.shoot
         {
-            identity += stem
+            location = Site.Docs[inliner.zones.principal, shoot]
+            identity += shoot.stem
         }
-
-        let location:URI
-
-        switch first
+        else
         {
-        case .article(let first):
-            location = .init(article: first, in: inliner.zones.principal)
-
-        case .culture(let first):
-            location = .init(culture: first, in: inliner.zones.principal)
-
-        case .decl(let first):
-            location = .init(decl: first, in: inliner.zones.principal, disambiguate: false)
-
-        case .file:
-            //  We should never get this as principal output!
             return nil
         }
 

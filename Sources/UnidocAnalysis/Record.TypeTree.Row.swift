@@ -25,13 +25,13 @@ extension Record.TypeTree
 extension Record.TypeTree.Row
 {
     @inlinable public
-    init(node:Record.IndexNode, top:Bool = false)
+    init(shoot:Record.Shoot, top:Bool = false)
     {
-        self.init(stem: node.stem, hash: node.hash, top: top)
+        self.init(stem: shoot.stem, hash: shoot.hash, top: top)
     }
 
     @inlinable public
-    var node:Record.IndexNode
+    var shoot:Record.Shoot
     {
         .init(stem: self.stem, hash: self.hash)
     }

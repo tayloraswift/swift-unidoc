@@ -335,9 +335,10 @@ extension DynamicLinker
             }
 
             var record:Record.Master.Decl = .init(id: d,
-                phylum: decl.phylum,
-                kinks: decl.kinks,
-                route: decl.route,
+                flags: .init(
+                    phylum: decl.phylum,
+                    kinks: decl.kinks,
+                    route: decl.route),
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace.id, decl.path, orientation: decl.phylum.orientation),

@@ -48,3 +48,11 @@ extension Record.Master
         }
     }
 }
+extension Record.Master.Article
+{
+    @inlinable public
+    var shoot:Record.Shoot
+    {
+        .init(stem: self.stem)
+    }
+}

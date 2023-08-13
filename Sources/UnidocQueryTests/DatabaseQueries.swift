@@ -60,7 +60,7 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
         {
-            let query:WideQuery = .init(.docs, "swift", ["swift", "dictionary", "keys"])
+            let query:WideQuery = .init("swift", ["swift", "dictionary", "keys"])
             await tests.do
             {
 
@@ -77,7 +77,7 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to get multiple results back for an ambiguous query.
         if  let tests:TestGroup = tests / "Int" / "init"
         {
-            let query:WideQuery = .init(.docs, "swift", ["swift", "int.init(_:)"])
+            let query:WideQuery = .init("swift", ["swift", "int.init(_:)"])
             await tests.do
             {
 
@@ -95,7 +95,7 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to disambiguate the previous query with an FNV-1 hash.
         if  let tests:TestGroup = tests / "Int" / "init" / "hashed"
         {
-            let query:WideQuery = .init(.docs, "swift", ["swift", "int.init(_:)"],
+            let query:WideQuery = .init("swift", ["swift", "int.init(_:)"],
                 hash: .init("8VBWO"))
             await tests.do
             {
@@ -134,11 +134,11 @@ struct DatabaseQueries:MongoTestBattery
             [
                 (
                     "None",
-                    .init(.docs, "swift", ["swift", "bidirectionalcollection.reversed"])
+                    .init("swift", ["swift", "bidirectionalcollection.reversed"])
                 ),
                 (
                     "Empty",
-                    .init(.docs, "swift", ["swift", "bidirectionalcollection.reversed()"])
+                    .init("swift", ["swift", "bidirectionalcollection.reversed()"])
                 ),
             ]
             {
@@ -162,7 +162,7 @@ struct DatabaseQueries:MongoTestBattery
 
         if  let tests:TestGroup = tests / "BarbieCore"
         {
-            let query:WideQuery = .init(.docs, "swift-malibu", ["barbiecore"])
+            let query:WideQuery = .init("swift-malibu", ["barbiecore"])
             await tests.do
             {
                 if  let output:WideQuery.Output = tests.expect(
@@ -191,12 +191,7 @@ struct DatabaseQueries:MongoTestBattery
         /// namespace.
         if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
         {
-            let query:WideQuery = .init(.docs, "swift-malibu",
-                [
-                    "barbiecore",
-                    "barbie",
-                    "dreamhouse"
-                ])
+            let query:WideQuery = .init("swift-malibu", ["barbiecore", "barbie", "dreamhouse"])
             await tests.do
             {
                 if  let output:WideQuery.Output = tests.expect(
@@ -258,11 +253,7 @@ struct DatabaseQueries:MongoTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
-            let query:WideQuery = .init(.article, "swift-malibu",
-                [
-                    "barbiecore",
-                    "getting-started",
-                ])
+            let query:WideQuery = .init("swift-malibu", ["barbiecore", "getting-started"])
             await tests.do
             {
 
@@ -289,16 +280,11 @@ struct DatabaseQueries:MongoTestBattery
             [
                 (
                     "Upstream",
-                    .init(.docs, "swift", ["swift", "array"])
+                    .init("swift", ["swift", "array"])
                 ),
                 (
                     "Local",
-                    .init(.docs, "swift-malibu",
-                    [
-                        "barbiecore",
-                        "barbie",
-                        "plastickeychain"
-                    ])
+                    .init("swift-malibu", ["barbiecore", "barbie", "plastickeychain"])
                 ),
             ]
             {
@@ -319,7 +305,7 @@ struct DatabaseQueries:MongoTestBattery
                         let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
                             into: [:])
                         {
-                            $0[$1.id] = $1.stem?.last
+                            $0[$1.id] = $1.shoot?.stem.last
                         }
                         var counts:[Substring: Int] = [:]
                         for case .extension(let `extension`) in output.principal?.groups ?? []

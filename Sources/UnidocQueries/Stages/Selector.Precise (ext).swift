@@ -15,13 +15,11 @@ extension Selector.Precise:DatabaseLookupSelector
             let min:Mongo.Variable<Unidoc.Scalar> = "min"
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-            let planes:Selector.Planes = .docs
-
             $0[.from] = Database.Masters.name
             $0[.let] = .init
             {
-                $0[let: min] = input / Record.Zone[planes.range.min]
-                $0[let: max] = input / Record.Zone[planes.range.max]
+                $0[let: min] = input / Record.Zone[.planes_min]
+                $0[let: max] = input / Record.Zone[.planes_max]
             }
             $0[.pipeline] = .init
             {

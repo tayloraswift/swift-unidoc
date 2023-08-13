@@ -98,13 +98,13 @@ extension Record.Master
         }
     }
     @inlinable public
-    var stem:Record.Stem?
+    var shoot:Record.Shoot?
     {
         switch self
         {
-        case .article(let article): return article.stem
-        case .culture(let culture): return culture.stem
-        case .decl(let decl):       return decl.stem
+        case .article(let article): return article.shoot
+        case .culture(let culture): return culture.shoot
+        case .decl(let decl):       return decl.shoot
         case .file:                 return nil
         }
     }
@@ -209,10 +209,7 @@ extension Record.Master:BSONDocumentEncodable
         case .decl(let self):
             bson[.symbol] = self.symbol
 
-            bson[.flags] = Unidoc.Decl.Flags.init(
-                phylum: self.phylum,
-                kinks: self.kinks,
-                route: self.route)
+            bson[.flags] = self.flags
 
             bson[.signature_availability] =
                 self.signature.availability.isEmpty ? nil :
@@ -306,13 +303,10 @@ extension Record.Master:BSONDocumentDecodable
                 group: try bson[.group]?.decode()))
 
         case .decl?:
-            let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
             let culture:Unidoc.Scalar = try bson[.culture].decode()
 
             self = .decl(.init(id: id,
-                phylum: flags.phylum,
-                kinks: flags.kinks,
-                route: flags.route,
+                flags: try bson[.flags].decode(),
                 signature: .init(
                     availability: try bson[.signature_availability]?.decode() ?? .init(),
                     abridged: Signature<Unidoc.Scalar?>.Abridged.init(

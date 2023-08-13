@@ -13,11 +13,7 @@ extension Record.Master
         let id:Unidoc.Scalar
 
         public
-        let phylum:Unidoc.Decl
-        public
-        let kinks:Unidoc.Decl.Kinks
-        public
-        let route:Unidoc.Decl.Route
+        let flags:Unidoc.Decl.Flags
 
         public
         let signature:Signature<Unidoc.Scalar?>
@@ -48,9 +44,7 @@ extension Record.Master
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            phylum:Unidoc.Decl,
-            kinks:Unidoc.Decl.Kinks,
-            route:Unidoc.Decl.Route,
+            flags:Unidoc.Decl.Flags,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Record.Stem,
@@ -65,9 +59,7 @@ extension Record.Master
             group:Unidoc.Scalar? = nil)
         {
             self.id = id
-            self.phylum = phylum
-            self.kinks = kinks
-            self.route = route
+            self.flags = flags
 
             self.signature = signature
             self.symbol = symbol
@@ -101,6 +93,25 @@ extension Record.Master.Decl
             return nil
         }
     }
+
+    @inlinable public
+    var phylum:Unidoc.Decl
+    {
+        self.flags.phylum
+    }
+
+    @inlinable public
+    var kinks:Unidoc.Decl.Kinks
+    {
+        self.flags.kinks
+    }
+
+    @inlinable public
+    var shoot:Record.Shoot
+    {
+        .init(stem: self.stem, hash: self.flags.route == .hashed ? self.hash : nil)
+    }
+
     @inlinable public
     var hash:FNV24
     {

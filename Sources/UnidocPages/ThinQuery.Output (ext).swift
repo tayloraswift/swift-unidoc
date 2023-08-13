@@ -34,17 +34,11 @@ extension ThinQuery.Output:ServerResponseFactory
     {
         switch self.masters.first
         {
-        case .article(let master)?:
-            return .init(article: master, in: self.zone)
-
-        case .culture(let master)?:
-            return .init(culture: master, in: self.zone)
-
-        case .decl(let master)?:
-            return .init(decl: master, in: self.zone, disambiguate: self.masters.count == 1)
-
-        case .file?, nil:
-            return nil
+        case .article(let master)?: return Site.Docs[self.zone, master.shoot]
+        case .culture(let master)?: return Site.Docs[self.zone, master.shoot]
+        case .decl(let master)?:    return Site.Docs[self.zone,
+            self.masters.count > 1 ? .init(stem: master.stem) : master.shoot]
+        case .file?, nil:           return nil
         }
     }
 }

@@ -50,7 +50,7 @@ extension InlinerCache
         {
             if  case .article(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .relative(.init(article: master, in: $0)) })
+                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
             }
             else
             {
@@ -65,7 +65,7 @@ extension InlinerCache
         {
             if  case .culture(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .relative(.init(culture: master, in: $0)) })
+                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
             }
             else
             {
@@ -80,7 +80,7 @@ extension InlinerCache
         {
             if  case .decl(let master)? = self.masters[scalar]
             {
-                return (master, self.load(scalar) { .relative(.init(decl: master, in: $0)) })
+                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
             }
             else
             {

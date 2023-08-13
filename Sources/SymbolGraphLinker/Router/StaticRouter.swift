@@ -4,6 +4,8 @@ import ModuleGraphs
 import Symbols
 import Unidoc
 
+/// `StaticRouter` is responsible for detecting URL path collisions between routes in the
+/// same symbol graph.
 struct StaticRouter
 {
     private(set)
@@ -22,11 +24,11 @@ extension StaticRouter
     {
         _read
         {
-            yield  self.paths[.declaration(namespace, path, phylum), default: [:]]
+            yield  self.paths[.decl(namespace, path, phylum), default: [:]]
         }
         _modify
         {
-            yield &self.paths[.declaration(namespace, path, phylum), default: [:]]
+            yield &self.paths[.decl(namespace, path, phylum), default: [:]]
         }
     }
     subscript(namespace:ModuleIdentifier,
@@ -34,11 +36,11 @@ extension StaticRouter
     {
         _read
         {
-            yield  self.paths[.standalone(namespace, name), default: [:]]
+            yield  self.paths[.article(namespace, name), default: [:]]
         }
         _modify
         {
-            yield &self.paths[.standalone(namespace, name), default: [:]]
+            yield &self.paths[.article(namespace, name), default: [:]]
         }
     }
 }

@@ -5,14 +5,12 @@ extension Records.TypeLevels
 {
     struct Node
     {
-        let stem:Record.Stem
-        let hash:FNV24?
+        let shoot:Record.Shoot
         var nest:[Node]
 
-        init(stem:Record.Stem, hash:FNV24? = nil, nest:[Node] = [])
+        init(shoot:Record.Shoot, nest:[Node] = [])
         {
-            self.stem = stem
-            self.hash = hash
+            self.shoot = shoot
             self.nest = nest
         }
     }
@@ -23,6 +21,6 @@ extension Records.TypeLevels.Node
     mutating
     func sort()
     {
-        self.nest.sort { $0.stem.last < $1.stem.last }
+        self.nest.sort { $0.shoot.stem.last < $1.shoot.stem.last }
     }
 }

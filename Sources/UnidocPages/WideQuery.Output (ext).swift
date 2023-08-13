@@ -35,7 +35,7 @@ extension WideQuery.Output:ServerResponseFactory
             switch master
             {
             case .article(let master):
-                let page:Site.Guides.Article = .init(inliner,
+                let page:Site.Docs.Article = .init(inliner,
                     master: master,
                     groups: principal.groups)
                 resource = page.rendered()
