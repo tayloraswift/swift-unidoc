@@ -162,10 +162,38 @@ extension WideQuery:DatabaseQuery
                         {
                             $0[.lookup] = .init
                             {
+                                let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
+
                                 $0[.from] = Database.Trees.name
-                                $0[.localField] =
-                                    Output.Principal[.master] / Record.Master[.culture]
-                                $0[.foreignField] = Record.TypeTree[.id]
+                                $0[.let] = .init
+                                {
+                                    $0[let: tree] = .expr
+                                    {
+                                        //  ``Record.Master.Culture`` doesn’t have a `culture`
+                                        //  field, but we still want to get the type tree for
+                                        //  its `_id`. The ``Database.Trees`` collection only
+                                        //  contains type trees, so it’s okay if the `_id` is
+                                        //  not a culture.
+                                        $0[.coalesce] =
+                                        (
+                                            Output.Principal[.master] / Record.Master[.culture],
+                                            Output.Principal[.master] / Record.Master[.id]
+                                        )
+                                    }
+                                }
+                                $0[.pipeline] = .init
+                                {
+                                    $0.stage
+                                    {
+                                        $0[.match] = .init
+                                        {
+                                            $0[.expr] = .expr
+                                            {
+                                                $0[.eq] = (Record.TypeTree[.id], tree)
+                                            }
+                                        }
+                                    }
+                                }
                                 $0[.as] = Output.Principal[.types]
                             }
                         }

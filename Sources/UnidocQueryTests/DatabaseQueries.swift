@@ -160,6 +160,30 @@ struct DatabaseQueries:MongoTestBattery
             }
         }
 
+        if  let tests:TestGroup = tests / "BarbieCore"
+        {
+            let query:WideQuery = .init(.docs, "swift-malibu", ["barbiecore"])
+            await tests.do
+            {
+                if  let output:WideQuery.Output = tests.expect(
+                        value: try await database.execute(query: query, with: session)),
+                    let master:Record.Master.Culture = tests.expect(
+                        value: output.principal?.master?.culture),
+                    let types:Record.TypeTree = tests.expect(
+                        value: output.principal?.types)
+                {
+                    tests.expect(master.id ==? types.id)
+                    tests.expect(types.rows ..?
+                        [
+                            .init(stem: "BarbieCore Barbie", top: true),
+                            .init(stem: "BarbieCore Barbie ID", top: false),
+                            .init(stem: "BarbieCore Barbie PlasticKeychain", top: false),
+                            .init(stem: "BarbieCore Getting-Started", top: true),
+                        ])
+                }
+            }
+        }
+
         /// The ``Barbie.Dreamhouse`` type has a doccomment with many cross-module
         /// and cross-package references. We should be able to resolve all of them.
         /// The type itself lives in ``BarbieHousing``, but it is namespaced to
