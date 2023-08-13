@@ -31,9 +31,9 @@ struct Records
 extension Records
 {
     public
-    func _buildTypeTrees() -> [TypeTree]
+    func _buildTypeTrees() -> [Record.TypeTree]
     {
-        var levels:[Unidoc.Scalar: Records.TypeLevels] = [:]
+        var levels:[Unidoc.Scalar: TypeLevels] = [:]
         for master:Record.Master in self.masters
         {
             let culture:Unidoc.Scalar
@@ -67,10 +67,10 @@ extension Records
 
         //  TODO: include extended types
 
-        var trees:[TypeTree] = []
+        var trees:[Record.TypeTree] = []
             trees.reserveCapacity(levels.count)
 
-        var l:Dictionary<Unidoc.Scalar, Records.TypeLevels>.Index = levels.startIndex
+        var l:Dictionary<Unidoc.Scalar, TypeLevels>.Index = levels.startIndex
         while   l < levels.endIndex
         {
             defer
@@ -80,7 +80,7 @@ extension Records
 
             levels.values[l].collapse()
 
-            let (culture, levels):(Unidoc.Scalar, Records.TypeLevels) = levels[l]
+            let (culture, levels):(Unidoc.Scalar, TypeLevels) = levels[l]
 
             trees.append(.init(id: culture,
                 top: levels.top.values.sorted { $0.stem < $1.stem }))

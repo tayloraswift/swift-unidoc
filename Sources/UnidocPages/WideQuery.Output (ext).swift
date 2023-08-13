@@ -8,20 +8,13 @@ extension WideQuery.Output:ServerResponseFactory
     public
     func response(for _:URI) throws -> ServerResponse
     {
-        guard let principal:WideQuery.Output.Principal = self.principal.first
+        guard let principal:WideQuery.Output.Principal = self.principal
         else
         {
             return .resource(.init(.none,
                 content: .text("Snapshot not found."),
                 type: .text(.plain, charset: .utf8)))
         }
-
-        guard self.principal.count == 1
-        else
-        {
-            throw WideQuery.OutputError.malformed
-        }
-
 
         if  let master:Record.Master = principal.master
         {

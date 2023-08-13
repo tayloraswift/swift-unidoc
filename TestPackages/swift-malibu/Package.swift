@@ -39,10 +39,6 @@ let package:Package = .init(name: "Swift Malibu",
             dependencies:
             [
                 .target(name: "BarbieHousing"),
-            ],
-            exclude:
-            [
-                "documentation",
             ]),
 
         .target(name: "DollhouseSecurity"),

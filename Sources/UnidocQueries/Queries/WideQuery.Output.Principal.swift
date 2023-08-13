@@ -4,6 +4,7 @@ import MongoSchema
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import UnidocAnalysis
 import UnidocSelectors
 import UnidocRecords
 
@@ -19,18 +20,23 @@ extension WideQuery.Output
         public
         let groups:[Record.Group]
         public
+        let types:Record.TypeTree?
+        public
         let zone:Record.Zone
+
 
         @inlinable internal
         init(
             matches:[Record.Master],
             master:Record.Master?,
             groups:[Record.Group],
+            types:Record.TypeTree?,
             zone:Record.Zone)
         {
             self.matches = matches
             self.master = master
             self.groups = groups
+            self.types = types
             self.zone = zone
         }
     }
@@ -43,6 +49,7 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
         case matches = "A"
         case master = "M"
         case groups = "G"
+        case types = "T"
         case zone = "Z"
 
         // case _scalars = "scalars"
@@ -57,6 +64,7 @@ extension WideQuery.Output.Principal:BSONDocumentDecodable
             matches: try bson[.matches].decode(),
             master: try bson[.master]?.decode(),
             groups: try bson[.groups].decode(),
+            types: try bson[.types]?.decode(),
             zone: try bson[.zone].decode())
     }
 }
