@@ -5,6 +5,7 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocAnalysis
 import UnidocLinker
 import UnidocSelectors
 import UnidocRecords
@@ -33,6 +34,8 @@ extension Database
     var masters:Masters { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
     var zones:Zones { .init(database: self.id) }
+
+    var trees:TypeTrees { .init(database: self.id) }
 
     public static
     var collation:Mongo.Collation
@@ -64,6 +67,7 @@ extension Database
             try await self.masters.setup(with: session)
             try await self.groups.setup(with: session)
             try await self.zones.setup(with: session)
+            try await self.trees.setup(with: session)
         }
         catch let error
         {
@@ -160,11 +164,33 @@ extension Database
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        return .init(latest: try await self.zones.latest(of: snapshot.cell,
-                with: session),
+        let latest:Zones.PatchView? = try await self.zones.latest(of: snapshot.cell,
+            with: session)
+
+        var records:Records = .init(latest: latest?.id,
             masters: linker.masters,
             groups: linker.groups,
             zone: linker.zone)
+
+        guard let patch:PatchVersion = records.zone.patch
+        else
+        {
+            records.zone.latest = false
+            return records
+        }
+
+        if  let latest:PatchVersion = latest?.patch,
+                latest > patch
+        {
+            records.zone.latest = false
+        }
+        else
+        {
+            records.zone.latest = true
+            records.latest = records.zone.id
+        }
+
+        return records
     }
     private
     func push(_ records:__owned Records,
