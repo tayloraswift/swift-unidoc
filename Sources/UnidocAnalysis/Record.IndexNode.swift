@@ -1,10 +1,10 @@
 import FNV1
 import UnidocRecords
 
-extension Records.TypeTree
+extension Record
 {
     @frozen public
-    struct Node
+    struct IndexNode:Equatable, Hashable, Sendable
     {
         public
         let stem:Record.Stem
@@ -19,10 +19,18 @@ extension Records.TypeTree
         }
     }
 }
-extension Records.TypeTree.Node
+extension Record.IndexNode:Comparable
+{
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        (lhs.stem, lhs.hash?.value ?? 0) < (rhs.stem, rhs.hash?.value ?? 0)
+    }
+}
+extension Record.IndexNode
 {
     @inlinable internal static
-    func deserialize<Bytes>(_ bytes:Bytes) -> Self where Bytes:RandomAccessCollection<UInt8>
+    func deserialize<Bytes>(from bytes:Bytes) -> Self where Bytes:RandomAccessCollection<UInt8>
     {
         let stem:Record.Stem
         let hash:FNV24?
@@ -54,7 +62,9 @@ extension Records.TypeTree.Node
             buffer += hash.description.utf8
         }
     }
-
+}
+extension Record.IndexNode
+{
     func description(_ indent:String = "    ") -> String
     {
         let indent:String = .init(repeating: indent, count: max(0, self.stem.depth - 1))

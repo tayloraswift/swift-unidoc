@@ -29,6 +29,7 @@ extension WideQuery:DatabaseQuery
     {
         .init
         {
+            //  This pipeline section only ever outputs one document.
             $0 += Stages.Zone<Selector.Zone>.init(self.zone,
                 as: Output.Principal[.zone])
 
@@ -103,7 +104,7 @@ extension WideQuery:DatabaseQuery
 
             $0.stage
             {
-                $0[.set] = Mongo.SetDocument.init // helps typechecking massively
+                $0[.set] = .init
                 {
                     let extensions:Mongo.List<Record.Group, Mongo.KeyPath> = .init(
                         in: Output.Principal[.groups])
@@ -141,8 +142,11 @@ extension WideQuery:DatabaseQuery
                             $0[.project] = .init
                             {
                                 for key:Output.Principal.CodingKey in
-                                        Output.Principal.CodingKey.allCases where
-                                    key != .zone
+                                [
+                                    .matches,
+                                    .master,
+                                    .groups,
+                                ]
                                 {
                                     $0[Output.Principal[key]] = true
                                 }
@@ -151,6 +155,28 @@ extension WideQuery:DatabaseQuery
                                     Record.Zone.CodingKey.independent
                                 {
                                     $0[Output.Principal[.zone] / Record.Zone[key]] = true
+                                }
+                            }
+                        }
+                        $0.stage
+                        {
+                            $0[.lookup] = .init
+                            {
+                                $0[.from] = Database.Trees.name
+                                $0[.localField] =
+                                    Output.Principal[.master] / Record.Master[.culture]
+                                $0[.foreignField] = Record.TypeTree[.id]
+                                $0[.as] = Output.Principal[.types]
+                            }
+                        }
+                        $0.stage
+                        {
+                            //  Unbox single-element array.
+                            $0[.set] = .init
+                            {
+                                $0[Output.Principal[.types]] = .expr
+                                {
+                                    $0[.first] = Output.Principal[.types]
                                 }
                             }
                         }
@@ -247,13 +273,21 @@ extension WideQuery:DatabaseQuery
                             $0[.project] = .init
                             {
                                 for key:Record.Zone.CodingKey in
-                                    Record.Zone.CodingKey.independent
+                                        Record.Zone.CodingKey.independent
                                 {
                                     $0[Record.Zone[key]] = true
                                 }
                             }
                         }
                     }
+                }
+            }
+            //  Unbox single-element arrays.
+            $0.stage
+            {
+                $0[.set] = .init
+                {
+                    $0[Output[.principal]] = .expr { $0[.first] = Output[.principal] }
                 }
             }
         }

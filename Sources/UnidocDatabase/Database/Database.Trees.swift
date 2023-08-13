@@ -5,7 +5,7 @@ import UnidocRecords
 extension Database
 {
     public
-    struct TypeTrees
+    struct Trees
     {
         let database:Mongo.Database
 
@@ -15,14 +15,14 @@ extension Database
         }
     }
 }
-extension Database.TypeTrees:DatabaseCollection
+extension Database.Trees:DatabaseCollection
 {
     typealias ElementID = Unidoc.Scalar
 
     @inlinable public static
-    var name:Mongo.Collection { "typetrees" }
+    var name:Mongo.Collection { "trees" }
 }
-extension Database.TypeTrees
+extension Database.Trees
 {
     func setup(with session:Mongo.Session) async throws
     {

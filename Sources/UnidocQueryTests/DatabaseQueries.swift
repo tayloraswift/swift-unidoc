@@ -67,7 +67,7 @@ struct DatabaseQueries:MongoTestBattery
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
                     let master:Record.Master.Decl = tests.expect(
-                        value: output.principal.first?.master?.decl)
+                        value: output.principal?.master?.decl)
                 {
                     tests.expect(master.stem.last ==? "Keys")
                 }
@@ -83,9 +83,10 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    tests.expect(output.principal.count ==? 1),
-                    tests.expect(output.principal[0].matches.count >? 1),
-                    tests.expect(nil: output.principal[0].master)
+                    let principal:WideQuery.Output.Principal = tests.expect(
+                        value: output.principal),
+                    tests.expect(principal.matches.count >? 1),
+                    tests.expect(nil: principal.master)
                 {
                 }
             }
@@ -101,8 +102,9 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    tests.expect(output.principal.count ==? 1),
-                    let _:Record.Master = tests.expect(value: output.principal[0].master)
+                    let principal:WideQuery.Output.Principal = tests.expect(
+                        value: output.principal),
+                    let _:Record.Master = tests.expect(value: principal.master)
                 {
                 }
             }
@@ -151,8 +153,7 @@ struct DatabaseQueries:MongoTestBattery
                 {
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await database.execute(query: query, with: session)),
-                        tests.expect(output.principal.count ==? 1),
-                        let _:Record.Master = tests.expect(value: output.principal[0].master)
+                        let _:Record.Master = tests.expect(value: output.principal?.master)
                     {
                     }
                 }
@@ -176,13 +177,20 @@ struct DatabaseQueries:MongoTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    tests.expect(output.principal.count ==? 1),
                     let master:Record.Master = tests.expect(
-                        value: output.principal[0].master),
+                        value: output.principal?.master),
+                    let types:Record.TypeTree = tests.expect(
+                        value: output.principal?.types),
                     let overview:Record.Passage = tests.expect(
                         value: master.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
+                    tests.expect(types.rows ..?
+                        [
+                            .init(stem: "BarbieCore Barbie Dreamhouse", top: true),
+                            .init(stem: "BarbieCore Barbie Dreamhouse Keys", top: false),
+                        ])
+
                     let secondaries:Set<Unidoc.Scalar> = .init(output.secondary.lazy.map(\.id))
 
                     for outline:Record.Outline in overview.outlines
@@ -236,9 +244,8 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    tests.expect(output.principal.count ==? 1),
                     let _:Record.Master = tests.expect(
-                        value: output.principal[0].master)
+                        value: output.principal?.master)
                 {
                 }
             }
@@ -283,8 +290,7 @@ struct DatabaseQueries:MongoTestBattery
 
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await database.execute(query: query, with: session)),
-                        tests.expect(output.principal.count ==? 1),
-                        let _:Record.Master = tests.expect(value: output.principal[0].master)
+                        let _:Record.Master = tests.expect(value: output.principal?.master)
                     {
                         let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
                             into: [:])
@@ -292,7 +298,7 @@ struct DatabaseQueries:MongoTestBattery
                             $0[$1.id] = $1.stem?.last
                         }
                         var counts:[Substring: Int] = [:]
-                        for case .extension(let `extension`) in output.principal[0].groups
+                        for case .extension(let `extension`) in output.principal?.groups ?? []
                         {
                             for p:Unidoc.Scalar in `extension`.conformances
                             {

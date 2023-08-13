@@ -1,7 +1,7 @@
 import BSONDecoding
 import MongoSchema
-import UnidocSelectors
 import UnidocRecords
+import UnidocSelectors
 
 extension WideQuery
 {
@@ -9,14 +9,16 @@ extension WideQuery
     struct Output:Equatable, Sendable
     {
         public
-        let principal:[Principal]
+        let principal:Principal?
         public
         let secondary:[Record.Master]
         public
         let zones:[Record.Zone]
 
         @inlinable public
-        init(principal:[Principal], secondary:[Record.Master], zones:[Record.Zone])
+        init(principal:Principal?,
+            secondary:[Record.Master],
+            zones:[Record.Zone])
         {
             self.principal = principal
             self.secondary = secondary
@@ -40,7 +42,7 @@ extension WideQuery.Output:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
-            principal: try bson[.principal].decode(),
+            principal: try bson[.principal]?.decode(),
             secondary: try bson[.secondary].decode(),
             zones: try bson[.zones].decode())
     }
