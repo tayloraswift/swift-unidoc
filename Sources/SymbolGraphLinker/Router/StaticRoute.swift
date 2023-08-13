@@ -6,14 +6,13 @@ import URI
 
 enum StaticRoute:Equatable, Hashable, Sendable
 {
-    case declaration(String)
-    case standalone(String)
+    case main(String)
     case tutorial(String)
 }
 extension StaticRoute
 {
     static
-    func declaration(_ namespace:ModuleIdentifier,
+    func decl(_ namespace:ModuleIdentifier,
         _ path:UnqualifiedPath,
         _ phylum:Unidoc.Decl) -> Self
     {
@@ -29,11 +28,11 @@ extension StaticRoute
             stem += path.lazy.map(URI.Path.Component.push(_:))
         }
 
-        return .declaration("\(stem)".lowercased())
+        return .main("\(stem)".lowercased())
     }
     static
-    func standalone(_ namespace:ModuleIdentifier, _ name:String) -> Self
+    func article(_ namespace:ModuleIdentifier, _ name:String) -> Self
     {
-        .standalone("/\(namespace)/\(name)".lowercased())
+        .main("/\(namespace)/\(name)".lowercased())
     }
 }

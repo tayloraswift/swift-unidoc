@@ -1,10 +1,9 @@
 import FNV1
-import UnidocRecords
 
 extension Record
 {
     @frozen public
-    struct IndexNode:Equatable, Hashable, Sendable
+    struct Shoot:Equatable, Hashable, Sendable
     {
         public
         let stem:Record.Stem
@@ -19,7 +18,7 @@ extension Record
         }
     }
 }
-extension Record.IndexNode:Comparable
+extension Record.Shoot:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -27,9 +26,9 @@ extension Record.IndexNode:Comparable
         (lhs.stem, lhs.hash?.value ?? 0) < (rhs.stem, rhs.hash?.value ?? 0)
     }
 }
-extension Record.IndexNode
+extension Record.Shoot
 {
-    @inlinable internal static
+    @inlinable public static
     func deserialize<Bytes>(from bytes:Bytes) -> Self where Bytes:RandomAccessCollection<UInt8>
     {
         let stem:Record.Stem
@@ -53,6 +52,7 @@ extension Record.IndexNode
         return .init(stem: stem, hash: hash)
     }
 
+    @inlinable public
     func serialize(into buffer:inout [UInt8])
     {
         buffer += self.stem.rawValue.utf8
@@ -61,13 +61,5 @@ extension Record.IndexNode
             buffer.append(0x00)
             buffer += hash.description.utf8
         }
-    }
-}
-extension Record.IndexNode
-{
-    func description(_ indent:String = "    ") -> String
-    {
-        let indent:String = .init(repeating: indent, count: max(0, self.stem.depth - 1))
-        return "\(indent)\(self.stem.last)"
     }
 }

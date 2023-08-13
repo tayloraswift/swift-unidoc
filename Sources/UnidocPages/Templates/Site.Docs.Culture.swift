@@ -33,10 +33,7 @@ extension Site.Docs.Culture
 }
 extension Site.Docs.Culture:FixedPage
 {
-    var location:URI
-    {
-        .init(culture: self.master, in: self.zone)
-    }
+    var location:URI { Site.Docs[self.zone, self.master.shoot] }
 
     var title:String
     {

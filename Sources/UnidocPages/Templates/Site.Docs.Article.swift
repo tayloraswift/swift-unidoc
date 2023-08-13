@@ -4,7 +4,7 @@ import UnidocRecords
 import Unidoc
 import URI
 
-extension Site.Guides
+extension Site.Docs
 {
     struct Article
     {
@@ -29,19 +29,16 @@ extension Site.Guides
         }
     }
 }
-extension Site.Guides.Article
+extension Site.Docs.Article
 {
     var zone:Record.Zone
     {
         self.inliner.zones.principal
     }
 }
-extension Site.Guides.Article:FixedPage
+extension Site.Docs.Article:FixedPage
 {
-    var location:URI
-    {
-        .init(article: self.master, in: self.zone)
-    }
+    var location:URI { Site.Docs[self.zone, self.master.shoot] }
 
     var title:String
     {

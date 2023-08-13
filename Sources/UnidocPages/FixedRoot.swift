@@ -1,4 +1,7 @@
+import FNV1
 import HTML
+import UnidocSelectors
+import UnidocRecords
 import URI
 
 public
@@ -26,4 +29,19 @@ extension FixedRoot where Self:CustomStringConvertible, Self:RawRepresentable<St
 {
     @inlinable public
     var description:String { "/\(Self.root)/\(self.rawValue)" }
+}
+extension FixedRoot
+{
+    static
+    subscript(zone:Record.Zone, shoot:Record.Shoot) -> URI
+    {
+        var uri:URI = Self.uri
+
+        uri.path += zone
+        uri.path += shoot.stem
+
+        uri["hash"] = shoot.hash?.description
+
+        return uri
+    }
 }

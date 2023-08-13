@@ -17,7 +17,6 @@ extension URL:CustomStringConvertible
         }
     }
 }
-
 extension URL
 {
     init?(master:__shared Record.Master,
@@ -26,9 +25,9 @@ extension URL
     {
         switch master
         {
-        case .article(let article): self = .relative(.init(article: article, in: zone))
-        case .culture(let culture): self = .relative(.init(culture: culture, in: zone))
-        case .decl(let decl):       self = .relative(.init(decl: decl, in: zone))
+        case .article(let article): self = .relative(Site.Docs[zone, article.shoot])
+        case .culture(let culture): self = .relative(Site.Docs[zone, culture.shoot])
+        case .decl(let decl):       self = .relative(Site.Docs[zone, decl.shoot])
         case .file(let file):
             if  let url:String = zone.url(github: file.symbol)
             {

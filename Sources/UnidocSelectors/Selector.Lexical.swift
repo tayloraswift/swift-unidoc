@@ -8,17 +8,13 @@ extension Selector
     struct Lexical:Equatable, Hashable, Sendable
     {
         public
-        var planes:Planes
-
-        public
         var stem:Record.Stem
         public
         var hash:FNV24?
 
         private
-        init(planes:Planes, stem:Record.Stem, hash:FNV24?)
+        init(stem:Record.Stem, hash:FNV24?)
         {
-            self.planes = planes
             self.stem = stem
             self.hash = hash
         }
@@ -27,10 +23,8 @@ extension Selector
 extension Selector.Lexical
 {
     public
-    init(planes:__shared Selector.Planes,
-        stem path:__shared ArraySlice<String>,
-        hash:__owned FNV24? = nil)
+    init(stem path:__shared ArraySlice<String>, hash:__owned FNV24? = nil)
     {
-        self.init(planes: planes, stem: .init(path: path), hash: hash)
+        self.init(stem: .init(path: path), hash: hash)
     }
 }

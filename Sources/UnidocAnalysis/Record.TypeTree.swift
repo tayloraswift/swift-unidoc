@@ -29,7 +29,7 @@ extension Record.TypeTree
 
         for top:Records.TypeLevels.Node in top
         {
-            self.rows.append(.init(stem: top.stem, hash: top.hash, top: true))
+            self.rows.append(.init(shoot: top.shoot, top: true))
             self += top.nest
         }
     }
@@ -39,7 +39,7 @@ extension Record.TypeTree
     {
         for node:Records.TypeLevels.Node in nodes
         {
-            self.rows.append(.init(stem: node.stem, hash: node.hash))
+            self.rows.append(.init(shoot: node.shoot, top: false))
             self += node.nest
         }
     }
@@ -94,7 +94,7 @@ extension Record.TypeTree:CustomStringConvertible
             }
             else
             {
-                description += "\(row.node.description())\n"
+                description += "\(row.shoot.description())\n"
             }
         }
         return description

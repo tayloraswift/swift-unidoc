@@ -43,6 +43,12 @@ extension Record.Master
 extension Record.Master.Culture
 {
     @inlinable public
+    var shoot:Record.Shoot
+    {
+        .init(stem: self.stem)
+    }
+
+    @inlinable public
     var stem:Record.Stem
     {
         .init(self.module.id)

@@ -59,10 +59,7 @@ extension Site.Docs.Decl
 }
 extension Site.Docs.Decl:FixedPage
 {
-    var location:URI
-    {
-        .init(decl: self.master, in: self.zone)
-    }
+    var location:URI { Site.Docs[self.zone, self.master.shoot] }
 
     var title:String
     {

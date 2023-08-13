@@ -27,7 +27,7 @@ extension Record.TypeTree.Table:BSONEncodable
         var buffer:[UInt8] = []
         for row:Record.TypeTree.Row in self.rows
         {
-            row.node.serialize(into: &buffer)
+            row.shoot.serialize(into: &buffer)
             // We are kind of abusing these control characters here, but the point is that
             // they will never conflict with the UTF-8 encoding of a valid index node.
             buffer.append(row.top ?
@@ -49,12 +49,12 @@ extension Record.TypeTree.Table:BSONDecodable, BSONBinaryViewDecodable
         while   let end:Bytes.Index = bson.slice[start...].firstIndex(
                     where: { $0 == 0x01 || $0 == 0x02 })
         {
-            let node:Record.IndexNode = .deserialize(from: bson.slice[start ..< end])
+            let shoot:Record.Shoot = .deserialize(from: bson.slice[start ..< end])
             let top:Bool = bson.slice[end] == 0x01
 
             start = bson.slice.index(after: end)
 
-            self.rows.append(.init(node: node, top: top))
+            self.rows.append(.init(shoot: shoot, top: top))
         }
     }
 }
