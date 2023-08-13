@@ -1,7 +1,8 @@
 import BSONEncoding
+import UnidocAnalysis
 import UnidocRecords
 
-extension Database.Records
+extension Records
 {
     struct Groups<Latest> where Latest:BSONEncodable
     {
@@ -15,10 +16,10 @@ extension Database.Records
         }
     }
 }
-extension Database.Records.Groups:Sendable where Latest:Sendable
+extension Records.Groups:Sendable where Latest:Sendable
 {
 }
-extension Database.Records.Groups:RandomAccessCollection
+extension Records.Groups:RandomAccessCollection
 {
     var startIndex:Int { self.base.startIndex }
     var endIndex:Int { self.base.endIndex }

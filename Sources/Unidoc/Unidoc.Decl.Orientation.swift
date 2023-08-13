@@ -1,7 +1,7 @@
 extension Unidoc.Decl
 {
     @frozen public
-    enum Orientation
+    enum Orientation:Equatable, Hashable, Comparable, Sendable
     {
         /// A declaration with a traditionally lowercased name, like `func foo`,
         /// a name that doesn’t fit into a lettercasing category, like ``func +``,

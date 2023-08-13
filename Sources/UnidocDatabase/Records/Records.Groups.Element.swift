@@ -1,8 +1,9 @@
 import BSONEncoding
 import Unidoc
+import UnidocAnalysis
 import UnidocRecords
 
-extension Database.Records.Groups
+extension Records.Groups
 {
     struct Element
     {
@@ -16,14 +17,14 @@ extension Database.Records.Groups
         }
     }
 }
-extension Database.Records.Groups.Element:Sendable where Latest:Sendable
+extension Records.Groups.Element:Sendable where Latest:Sendable
 {
 }
-extension Database.Records.Groups.Element:Identifiable
+extension Records.Groups.Element:Identifiable
 {
     var id:Unidoc.Scalar { self.base.id }
 }
-extension Database.Records.Groups.Element:BSONDocumentEncodable
+extension Records.Groups.Element:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<Record.Group.CodingKey>)
     {

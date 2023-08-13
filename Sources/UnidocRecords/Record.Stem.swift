@@ -7,6 +7,50 @@ import URI
 
 extension Record
 {
+    /// A stem is a special representation of a master record’s lexical name within a snapshot.
+    /// A stem always begins with a ``ModuleIdentifier``.
+    ///
+    /// ## Empty stems
+    ///
+    /// By definition, a stem always contains at least one lexical component, even if its
+    /// storage contains the empty string. In such a case, we define the first stem component
+    /// to be an empty ``ModuleIdentifier``.
+    ///
+    /// ## Whitewashing
+    ///
+    /// The raw storage of a stem encodes a lexical path using a **whitewash transformation**.
+    /// The whitewashed representation uses ASCII whitespace characters to encode path
+    /// separators. This has three major advantages:
+    ///
+    /// 1.  Whitewashed strings are easy to split into components. Encoding declaration names
+    ///     such as ``UnboundedRange_....(_:)`` without whitewashing requires decoders to have
+    ///     knowledge of complex swift grammar rules.
+    ///
+    /// 1.  Whitespace characters are never legal within a declaration, module, article, or
+    ///     file path component. This contrasts with characters such as `/`, which are legal
+    ///     swift operator characters. This means that whitewashed stems never need any
+    ///     escape sequences.
+    ///
+    /// 1.  Whitewashed strings are human-readable when they appear in debug output.
+    ///
+    /// ## Path orientation
+    ///
+    /// The specific separator characters used influence the URL representation of the stem.
+    /// Specifically, the space character (`U+0020`) appears as a slash (`/`), and the
+    /// horizontal tab character (`U+0009`) appears as a dot (`.`). This feature is called
+    /// **path orientation**, and it decreases the likelihood of stem collisions under
+    /// case-folding.
+    ///
+    /// ## Comparing stems
+    ///
+    /// Stems support relatively efficient comparisons, because they are stored as strings
+    /// rather than arrays of substrings. The sort ordering is unicode-aware, and sorts the
+    /// ``Unidoc.Decl.Orientation gay`` path orientation before the
+    /// ``Unidoc.Decl.Orientation straight`` orientation.
+    ///
+    /// >   Note:
+    ///     If you have a collection of stems that all share a common prefix, it may be even
+    ///     more efficient to compare them by ``last`` component only.
     @frozen public
     struct Stem:RawRepresentable, Equatable, Hashable, Sendable
     {
@@ -20,6 +64,14 @@ extension Record
         }
     }
 }
+extension Record.Stem:Comparable
+{
+    @inlinable public static
+    func < (lhs:Self, rhs:Self) -> Bool
+    {
+        lhs.rawValue < rhs.rawValue
+    }
+}
 extension Record.Stem:ExpressibleByStringLiteral
 {
     @inlinable public
@@ -30,6 +82,33 @@ extension Record.Stem:ExpressibleByStringLiteral
 }
 extension Record.Stem
 {
+    /// Returns the total number of components in this stem. This is ``depth`` plus one.
+    ///
+    /// Calling this property is faster than splitting the stem into components and accessing
+    /// the array count.
+    @inlinable public
+    var components:Int { self.depth + 1 }
+
+    /// Returns the number of *unqualified* path components in this stem. This is one fewer
+    /// than the total number of components in this stem. The depth of a module stem is 0, and
+    /// the depth of a top-level declaration stem is 1.
+    @inlinable public
+    var depth:Int
+    {
+        self.rawValue.reduce(into: 0)
+        {
+            if  $1.isWhitespace
+            {
+                $0 += 1
+            }
+        }
+    }
+
+    /// Returns the last lexical path component of this stem. If the stem is empty, this
+    /// property returns an empty string.
+    ///
+    /// Calling this property is faster than splitting the stem into components and accessing
+    /// the last array element.
     @inlinable public
     var last:Substring
     {
@@ -40,6 +119,28 @@ extension Record.Stem
         else
         {
             return self.rawValue[...]
+        }
+    }
+}
+extension Record.Stem:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        .init(unsafeUninitializedCapacity: self.rawValue.utf8.count)
+        {
+            var i:Int = $0.startIndex
+            for codeunit:UInt8 in self.rawValue.utf8
+            {
+                switch codeunit
+                {
+                case 0x09, 0x20:    $0[i] = 0x2E // '.'
+                case let codeunit:  $0[i] = codeunit
+                }
+
+                i = $0.index(after: i)
+            }
+            return i
         }
     }
 }

@@ -284,8 +284,14 @@ let package:Package = .init(
                 .target(name: "UnidocPlanes"),
             ]),
 
+        .target(name: "UnidocAnalysis", dependencies:
+            [
+                .target(name: "UnidocRecords"),
+            ]),
+
         .target(name: "UnidocDatabase", dependencies:
             [
+                .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocSelectors"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
