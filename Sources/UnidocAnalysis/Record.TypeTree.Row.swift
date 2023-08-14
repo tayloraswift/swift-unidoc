@@ -1,3 +1,4 @@
+import FNV1
 import UnidocRecords
 
 extension Record.TypeTree
@@ -16,6 +17,14 @@ extension Record.TypeTree
             self.shoot = shoot
             self.top = top
         }
+    }
+}
+extension Record.TypeTree.Row
+{
+    @inlinable public
+    init(stem:Record.Stem, hash:FNV24?, top:Bool = false)
+    {
+        self.init(shoot: .init(stem: stem, hash: hash), top: top)
     }
 }
 extension Record.TypeTree.Row
