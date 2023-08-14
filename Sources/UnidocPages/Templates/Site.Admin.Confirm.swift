@@ -31,9 +31,9 @@ extension Site.Admin.Confirm:FixedPage
     var title:String { "\(self.label)?" }
 
     public
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content html:inout HTML.ContentEncoder)
     {
-        main[.form]
+        html[.form]
         {
             $0.enctype = "multipart/form-data"
             $0.action = "\(self.action)"

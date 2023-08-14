@@ -48,9 +48,9 @@ extension Site.Guides.Feed:FixedPage
     func emit(header:inout HTML.ContentEncoder)
     {
     }
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content html:inout HTML.ContentEncoder)
     {
-        main[.section, { $0.class = "group feed" }]
+        html[.section, { $0.class = "group feed" }]
         {
             $0[.ul]
             {

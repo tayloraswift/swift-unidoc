@@ -17,39 +17,41 @@ extension Site.Docs
         let master:Record.Master.Decl
         private
         let groups:[Record.Group]
-
         private
-        let path:QualifiedPath
+        let types:[Record.TypeTree.Row]
 
-        init(_ inliner:Inliner, master:Record.Master.Decl, groups:[Record.Group])
+        init(_ inliner:Inliner,
+            master:Record.Master.Decl,
+            groups:[Record.Group],
+            types:[Record.TypeTree.Row])
         {
             self.inliner = inliner
 
             self.master = master
             self.groups = groups
-
-            self.path = .init(splitting: self.master.stem)
+            self.types = types
         }
     }
 }
 extension Site.Docs.Decl
 {
     private
-    var zone:Record.Zone
-    {
-        self.inliner.zones.principal
-    }
+    var zone:Record.Zone { self.inliner.zones.principal }
+
+    private
+    var stem:Record.Stem { self.master.stem }
 }
 extension Site.Docs.Decl
 {
     private
     var breadcrumbs:Inliner.Breadcrumbs?
     {
-        if  let last:Int = self.path.names.indices.last
+        if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
-            return .init(last == self.path.names.startIndex ? nil :
-                self.inliner.link(self.path.names[..<last], to: self.master.scope),
-                self.path.names[last])
+            return .init(
+                scope: self.master.scope.isEmpty ? nil : self.inliner.link(scope,
+                    to: self.master.scope),
+                last: last)
         }
         else
         {
@@ -63,7 +65,15 @@ extension Site.Docs.Decl:FixedPage
 
     var title:String
     {
-        "\(self.path.last) - \(self.zone.display ?? "\(self.zone.package)") Documentation"
+        """
+        \(self.master.stem.last) - \
+        \(self.zone.display ?? "\(self.zone.package)") Documentation
+        """
+    }
+
+    var sidebar:Inliner.TypeTree?
+    {
+        .init(self.inliner, types: self.types)
     }
 
     func emit(header:inout HTML.ContentEncoder)
@@ -71,7 +81,7 @@ extension Site.Docs.Decl:FixedPage
         header[.nav] { $0.class = "decl" } = self.breadcrumbs
     }
 
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content html:inout HTML.ContentEncoder)
     {
         let groups:Inliner.Groups = .init(self.inliner,
             superforms: self.master.superforms,
@@ -81,7 +91,7 @@ extension Site.Docs.Decl:FixedPage
             kinks: self.master.kinks,
             bias: self.master.culture)
 
-        main[.section]
+        html[.section]
         {
             $0.class = "introduction"
         }
@@ -96,7 +106,7 @@ extension Site.Docs.Decl:FixedPage
                 $0[.span] { $0.class = "phylum" } = demonym
                 $0[.span, { $0.class = "module" }]
                 {
-                    $0[link: self.inliner.url(self.master.namespace)] = self.path.namespace
+                    $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
                     $0[.span, { $0.class = "culture" }]
                     {
                         $0[.span] { $0.class = "version" } = self.zone.version
@@ -108,7 +118,7 @@ extension Site.Docs.Decl:FixedPage
                 }
             }
 
-            $0[.h1] = self.path.last
+            $0[.h1] = self.stem.last
 
             $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
 
@@ -118,7 +128,7 @@ extension Site.Docs.Decl:FixedPage
             }
         }
 
-        main[.section, { $0.class = "declaration" }]
+        html[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -126,9 +136,9 @@ extension Site.Docs.Decl:FixedPage
             }
         }
 
-        main[.section] { $0.class = "details" } =
+        html[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        main += groups
+        html += groups
     }
 }

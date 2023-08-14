@@ -360,12 +360,9 @@ nav {
 body main {
   min-height: 100vw;
 }
-body main > *:last-child {
-  padding-bottom: 20rem;
-}
 
 body header nav > *,
-body main {
+body main div.content {
   margin-left: auto;
   margin-right: auto;
   max-width: 48rem;
@@ -373,26 +370,45 @@ body main {
   padding-right: 1.5rem;
 }
 
-body main section.introduction > p,
-body main section.introduction > dl,
-body main section.parameters > p,
-body main section.parameters > dl,
-body main section.returns > p,
-body main section.returns > dl,
-body main section.throws > p,
-body main section.throws > dl {
+body main div.content section.introduction > p,
+body main div.content section.introduction > dl,
+body main div.content section.parameters > p,
+body main div.content section.parameters > dl,
+body main div.content section.returns > p,
+body main div.content section.returns > dl,
+body main div.content section.throws > p,
+body main div.content section.throws > dl {
   max-width: 40rem;
 }
-
-body main section.details p {
+body main div.content section.details p {
   max-width: 40rem;
 }
-body main section.details aside {
+body main div.content section.details aside {
   max-width: 41rem;
 }
-
-section.extension ul > li > p {
+body main div.content section.extension ul > li > p {
   max-width: 40rem;
+}
+body main div.content > *:last-child {
+  padding-bottom: 10rem;
+}
+
+body main div.sidebar {
+  position: fixed;
+  overflow: scroll;
+  height: 100%;
+  width: 24rem;
+  top: 0;
+  right: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.875rem;
+}
+body main div.sidebar ul {
+  list-style-type: none;
+  padding-left: 1rem;
+}
+body main div.sidebar ul a {
+  color: rgb(112, 112, 112);
 }
 
 a {

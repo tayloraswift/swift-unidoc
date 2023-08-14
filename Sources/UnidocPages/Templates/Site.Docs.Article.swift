@@ -15,26 +15,29 @@ extension Site.Docs
         let master:Record.Master.Article
         private
         let groups:[Record.Group]
-
         private
-        let path:QualifiedPath
+        let types:[Record.TypeTree.Row]
 
 
-        init(_ inliner:Inliner, master:Record.Master.Article, groups:[Record.Group])
+        init(_ inliner:Inliner,
+            master:Record.Master.Article,
+            groups:[Record.Group],
+            types:[Record.TypeTree.Row])
         {
             self.inliner = inliner
             self.master = master
             self.groups = groups
-            self.path = .init(splitting: self.master.stem)
+            self.types = types
         }
     }
 }
 extension Site.Docs.Article
 {
-    var zone:Record.Zone
-    {
-        self.inliner.zones.principal
-    }
+    private
+    var zone:Record.Zone { self.inliner.zones.principal }
+
+    private
+    var stem:Record.Stem { self.master.stem }
 }
 extension Site.Docs.Article:FixedPage
 {
@@ -45,9 +48,14 @@ extension Site.Docs.Article:FixedPage
         "\(self.zone.display ?? "\(self.zone.package)") Documentation"
     }
 
-    func emit(main:inout HTML.ContentEncoder)
+    var sidebar:Inliner.TypeTree?
     {
-        main[.section, { $0.class = "introduction" }]
+        .init(self.inliner, types: self.types)
+    }
+
+    func emit(content html:inout HTML.ContentEncoder)
+    {
+        html[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -55,7 +63,7 @@ extension Site.Docs.Article:FixedPage
 
                 $0[.span, { $0.class = "module" }]
                 {
-                    $0[link: self.inliner.url(self.master.culture)] = self.path.namespace
+                    $0[link: self.inliner.url(self.master.culture)] = self.stem.first
 
                     $0[.span, { $0.class = "culture" }]
                     {
@@ -74,7 +82,7 @@ extension Site.Docs.Article:FixedPage
             }
         }
 
-        main[.section, { $0.class = "details" }] =
+        html[.section, { $0.class = "details" }] =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
     }
 }

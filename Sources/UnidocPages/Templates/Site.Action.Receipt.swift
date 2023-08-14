@@ -28,8 +28,8 @@ extension Site.Action.Receipt:FixedPage
     var title:String { "Action complete" }
 
     public
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content html:inout HTML.ContentEncoder)
     {
-        main[.p] = self.text
+        html[.p] = self.text
     }
 }

@@ -6,13 +6,13 @@ extension Inliner
     struct Breadcrumbs
     {
         private
-        let scope:VectorLink<ArraySlice<String>, [Unidoc.Scalar]>?
+        let scope:VectorLink<[Substring], [Unidoc.Scalar]>?
         private
-        let last:String
+        let last:Substring
 
         init(
-            _ scope:VectorLink<ArraySlice<String>, [Unidoc.Scalar]>?,
-            _ last:String)
+            scope:VectorLink<[Substring], [Unidoc.Scalar]>?,
+            last:Substring)
         {
             self.scope = scope
             self.last = last
@@ -26,7 +26,7 @@ extension Inliner.Breadcrumbs:HyperTextOutputStreamable
     {
         html[.div, { $0.class = "breadcrumbs" }]
         {
-            if  let scope:Inliner.VectorLink<ArraySlice<String>, [Unidoc.Scalar]> = self.scope
+            if  let scope:Inliner.VectorLink<[Substring], [Unidoc.Scalar]> = self.scope
             {
                 $0 += scope
                 $0 += "."

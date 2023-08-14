@@ -90,7 +90,7 @@ extension Record.TypeTree:CustomStringConvertible
         {
             if  row.top
             {
-                description += "\(row.stem)\n"
+                description += "\(row.shoot.stem.name)\n"
             }
             else
             {

@@ -15,12 +15,18 @@ extension Site.Docs
         let master:Record.Master.Culture
         private
         let groups:[Record.Group]
+        private
+        let types:[Record.TypeTree.Row]
 
-        init(_ inliner:Inliner, master:Record.Master.Culture, groups:[Record.Group])
+        init(_ inliner:Inliner,
+            master:Record.Master.Culture,
+            groups:[Record.Group],
+            types:[Record.TypeTree.Row])
         {
             self.inliner = inliner
             self.master = master
             self.groups = groups
+            self.types = types
         }
     }
 }
@@ -43,13 +49,18 @@ extension Site.Docs.Culture:FixedPage
         """
     }
 
-    func emit(main:inout HTML.ContentEncoder)
+    var sidebar:Inliner.TypeTree?
+    {
+        .init(self.inliner, types: self.types)
+    }
+
+    func emit(content html:inout HTML.ContentEncoder)
     {
         let groups:Inliner.Groups = .init(inliner,
             groups: self.groups,
             bias: self.master.id)
 
-        main[.section, { $0.class = "introduction" }]
+        html[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -67,7 +78,7 @@ extension Site.Docs.Culture:FixedPage
             }
         }
 
-        main[.section, { $0.class = "declaration" }]
+        html[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -80,9 +91,9 @@ extension Site.Docs.Culture:FixedPage
             }
         }
 
-        main[.section] { $0.class = "details" } =
+        html[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        main += groups
+        html += groups
     }
 }
