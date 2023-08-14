@@ -2,6 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 pre {
   margin: 2rem 0 2rem;
   line-height: 1.5rem;
@@ -72,6 +73,8 @@ code span.syntax-doccomment {
 
 nav.decl {
   padding: 0.5rem 0;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 nav.decl div.breadcrumbs {
@@ -222,7 +225,7 @@ section.group code.constraints + h3 {
   border-top: solid 1px rgb(255, 123, 0);
 }
 
-section.group h3 {
+section.group.extension h3 {
   margin-top: 1rem;
   border-top: dashed 1px rgb(112, 112, 112);
   padding-top: 0.75rem;
@@ -236,7 +239,7 @@ section.group ul {
   list-style-type: none;
 }
 section.group ul > li.article {
-  margin: 0.5rem 0 0.5rem 0;
+  margin: 1.5rem 0 0.5rem 0;
 }
 section.group ul > li.article a:first-child {
   color: inherit;
@@ -249,6 +252,9 @@ section.group ul > li.article a:first-child h3 {
 }
 section.group ul > li.article a.read-more {
   font-style: italic;
+}
+section.group ul > li.article + li.article {
+  margin-top: 2rem;
 }
 section.group ul > li.decl,
 section.group ul > li.module {
@@ -281,6 +287,35 @@ nav a.logo {
   font-family: "DM Sans", sans-serif;
   font-size: 12pt;
   font-weight: 700;
+}
+
+ul.typetree {
+  margin-top: 10rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8125rem;
+}
+ul.typetree > li::first-letter {
+  color: rgb(255, 86, 158);
+}
+
+ul.typetree,
+ul.typetree ul {
+  list-style-type: none;
+  padding-left: 1rem;
+}
+
+ul.typetree li {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: "...";
+  color: rgb(112, 112, 112);
+}
+ul.typetree li a {
+  color: inherit;
+}
+ul.typetree li a:hover {
+  text-decoration: none;
+  color: rgb(255, 86, 158);
 }
 
 h1, h2, h3, h4 {
@@ -338,77 +373,72 @@ aside.warning h3 {
   color: rgb(240, 240, 240);
 }
 
+nav {
+  padding: 0.25rem 0;
+}
+
+body {
+  min-height: 100vw;
+  margin: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
+body div.sidebar {
+  display: none;
+}
+body div.content {
+  flex: 0 1 48rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  overflow: hidden;
+  overflow-wrap: break-word;
+}
+
+@media only screen and (min-width: 50rem) {
+  body div.sidebar {
+    display: block;
+    flex: 0 0 16rem;
+    width: 16rem;
+  }
+  div.content {
+    padding-left: 4rem;
+  }
+}
+body main section.introduction > p,
+body main section.introduction > dl,
+body main section.parameters > p,
+body main section.parameters > dl,
+body main section.returns > p,
+body main section.returns > dl,
+body main section.throws > p,
+body main section.throws > dl {
+  max-width: 40rem;
+}
+body main section.details p {
+  max-width: 40rem;
+}
+body main section.details aside {
+  max-width: 41rem;
+}
+body main section.extension ul > li > p {
+  max-width: 40rem;
+}
+body main > *:last-child {
+  padding-bottom: 10rem;
+}
+
 html {
   font-size: 1rem;
   background-color: rgb(240, 240, 240);
 }
 
 body {
-  margin: 0;
   color: rgb(22, 22, 22);
   font-family: "Literata", serif;
   font-variant-numeric: oldstyle-nums;
-  overflow-wrap: break-word;
-  -webkit-text-size-adjust: none;
   text-size-adjust: none;
-}
-
-nav {
-  padding: 0.25rem 0;
-}
-
-body main {
-  min-height: 100vw;
-}
-
-body header nav > *,
-body main div.content {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 48rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-body main div.content section.introduction > p,
-body main div.content section.introduction > dl,
-body main div.content section.parameters > p,
-body main div.content section.parameters > dl,
-body main div.content section.returns > p,
-body main div.content section.returns > dl,
-body main div.content section.throws > p,
-body main div.content section.throws > dl {
-  max-width: 40rem;
-}
-body main div.content section.details p {
-  max-width: 40rem;
-}
-body main div.content section.details aside {
-  max-width: 41rem;
-}
-body main div.content section.extension ul > li > p {
-  max-width: 40rem;
-}
-body main div.content > *:last-child {
-  padding-bottom: 10rem;
-}
-
-body main div.sidebar {
-  position: fixed;
-  overflow: scroll;
-  height: 100%;
-  width: 24rem;
-  top: 0;
-  right: 0;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.875rem;
-}
-body main div.sidebar ul {
-  list-style-type: none;
-  padding-left: 1rem;
-}
-body main div.sidebar ul a {
-  color: rgb(112, 112, 112);
+  -webkit-text-size-adjust: none;
 }
 
 a {

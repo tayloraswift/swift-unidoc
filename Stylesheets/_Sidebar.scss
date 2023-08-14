@@ -1,0 +1,38 @@
+@import 'Colors';
+@import 'Typefaces';
+
+ul.typetree
+{
+    margin-top: 10rem;
+
+    font-family: $typeface-monospace;
+    font-size: 0.8125rem;
+
+    > li::first-letter
+    {
+        color: $light-accent-barbie-pink;
+    }
+}
+ul.typetree,
+ul.typetree ul
+{
+    list-style-type: none;
+    padding-left: 1.0rem;
+}
+ul.typetree li
+{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: '...';
+    color: $light-foreground-semi;
+
+    a
+    {
+        color: inherit;
+    }
+    a:hover
+    {
+        text-decoration: none;
+        color: $light-accent-barbie-pink;
+    }
+}

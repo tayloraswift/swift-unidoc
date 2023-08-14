@@ -63,12 +63,12 @@ extension FixedPage
 
                 $0[.body]
                 {
-                    $0[.header, content: self.emit(header:)]
-                    $0[.main]
+                    $0[.div, { $0.class = "content" }]
                     {
-                        $0[.div, { $0.class = "content" }, content: self.emit(content:)]
-                        $0[.div] { $0.class = "sidebar" } = self.sidebar
+                        $0[.header, content: self.emit(header:)]
+                        $0[.main, content: self.emit(content:)]
                     }
+                    $0[.div] { $0.class = "sidebar" } = self.sidebar
                 }
             }
         }
