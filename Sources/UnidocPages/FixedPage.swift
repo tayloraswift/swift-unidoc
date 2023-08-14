@@ -5,11 +5,20 @@ import URI
 public
 protocol FixedPage
 {
+    associatedtype Sidebar:HyperTextOutputStreamable = Never
+
     var location:URI { get }
     var title:String { get }
 
+    var sidebar:Sidebar? { get }
+
     func emit(header:inout HTML.ContentEncoder)
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content:inout HTML.ContentEncoder)
+}
+extension FixedPage where Sidebar == Never
+{
+    @inlinable public
+    var sidebar:Sidebar? { nil }
 }
 extension FixedPage
 {
@@ -55,7 +64,11 @@ extension FixedPage
                 $0[.body]
                 {
                     $0[.header, content: self.emit(header:)]
-                    $0[.main, content: self.emit(main:)]
+                    $0[.main]
+                    {
+                        $0[.div, { $0.class = "content" }, content: self.emit(content:)]
+                        $0[.div] { $0.class = "sidebar" } = self.sidebar
+                    }
                 }
             }
         }

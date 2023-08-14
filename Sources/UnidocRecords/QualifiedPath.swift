@@ -1,5 +1,6 @@
 import ModuleGraphs
 
+@available(*, deprecated, message: "Do we really need this?")
 @frozen public
 struct QualifiedPath:Equatable, Hashable, Sendable
 {
@@ -15,6 +16,7 @@ struct QualifiedPath:Equatable, Hashable, Sendable
         self.names = names
     }
 }
+@available(*, deprecated)
 extension QualifiedPath
 {
     public
@@ -33,6 +35,7 @@ extension QualifiedPath
         }
     }
 }
+@available(*, deprecated)
 extension QualifiedPath:Comparable
 {
     @inlinable public static
@@ -41,6 +44,7 @@ extension QualifiedPath:Comparable
         lhs.lexicographicallyPrecedes(rhs)
     }
 }
+@available(*, deprecated)
 extension QualifiedPath
 {
     @inlinable public
@@ -54,6 +58,7 @@ extension QualifiedPath
         self.names.last ?? self.first
     }
 }
+@available(*, deprecated)
 extension QualifiedPath:RandomAccessCollection
 {
     @inlinable public
@@ -72,6 +77,7 @@ extension QualifiedPath:RandomAccessCollection
         index < self.names.startIndex ? self.first : self.names[index]
     }
 }
+@available(*, deprecated)
 extension QualifiedPath:CustomStringConvertible
 {
     @inlinable public

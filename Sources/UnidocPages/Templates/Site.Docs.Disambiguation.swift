@@ -50,9 +50,9 @@ extension Site.Docs.Disambiguation:FixedPage
 {
     var title:String { "Disambiguation Page" }
 
-    func emit(main:inout HTML.ContentEncoder)
+    func emit(content html:inout HTML.ContentEncoder)
     {
-        main[.section, { $0.class = "introduction" }]
+        html[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -63,7 +63,7 @@ extension Site.Docs.Disambiguation:FixedPage
 
             $0[.p] = "This path could refer to multiple entities."
         }
-        main[.section, { $0.class = "group choices" }]
+        html[.section, { $0.class = "group choices" }]
         {
             $0[.ul]
             {

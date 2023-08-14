@@ -36,44 +36,72 @@ body main
 {
     min-height: 100vw;
 
-    > *:last-child
-    {
-        padding-bottom: 20rem;
-    }
 }
 //  Horizontal layout.
 body header nav > *,
-body main
+body main div.content
 {
     @include centered-column($width: 48rem);
 }
-body main section.introduction,
-body main section.parameters,
-body main section.returns,
-body main section.throws
+body main div.content
 {
-    > p,
-    > dl
+    section.introduction,
+    section.parameters,
+    section.returns,
+    section.throws
     {
-        max-width: 40rem;
+        > p,
+        > dl
+        {
+            max-width: 40rem;
+        }
+    }
+    section.details
+    {
+        p
+        {
+            max-width: 40rem;
+        }
+        aside
+        {
+            max-width: 41rem
+        }
+    }
+    section.extension ul > li
+    {
+        > p
+        {
+            max-width: 40rem;
+        }
+    }
+
+    > *:last-child
+    {
+        padding-bottom: 10rem;
     }
 }
-body main section.details
+
+body main div.sidebar
 {
-    p
+    position: fixed;
+    overflow: scroll;
+    height: 100%;
+    width: 24rem;
+    top: 0;
+    right: 0;
+
+    font-family: $typeface-monospace;
+    font-size: 0.875rem;
+
+    ul
     {
-        max-width: 40rem;
-    }
-    aside
-    {
-        max-width: 41rem
-    }
-}
-section.extension ul > li
-{
-    > p
-    {
-        max-width: 40rem;
+        list-style-type: none;
+        padding-left: 1.0rem;
+
+        a
+        {
+            color: $light-foreground-semi;
+        }
     }
 }
 

@@ -104,6 +104,23 @@ extension Record.Stem
         }
     }
 
+    /// Returns the first lexical path component of this stem. If the stem is empty, this
+    /// property returns an empty string.
+    ///
+    /// Calling this property is faster than splitting the stem into components and accessing
+    /// the first array element.
+    @inlinable public
+    var first:Substring
+    {
+        if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
+        {
+            return self.rawValue[..<separator]
+        }
+        else
+        {
+            return self.rawValue[...]
+        }
+    }
     /// Returns the last lexical path component of this stem. If the stem is empty, this
     /// property returns an empty string.
     ///
@@ -121,16 +138,65 @@ extension Record.Stem
             return self.rawValue[...]
         }
     }
+    /// Returns the unqualified name of this stem, if it contains more than one component,
+    /// formatted with the dot character (`.`) as the path separator. If the stem contains
+    /// only one component, this property returns that component unchanged.
+    @inlinable public
+    var name:Substring
+    {
+        if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
+        {
+            return Self.format(self.rawValue[self.rawValue.index(after: separator)...])[...]
+        }
+        else
+        {
+            return self.rawValue[...]
+        }
+    }
+
+    @inlinable public
+    func split() -> (namespace:Substring, scope:[Substring], last:Substring)?
+    {
+        if  let i:String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
+            let j:String.Index = self.rawValue.lastIndex(where: \.isWhitespace)
+        {
+            let namespace:Substring = self.rawValue[..<i]
+            let scope:[Substring]
+
+            if  i < j
+            {
+                scope = self.rawValue[self.rawValue.index(after: i) ..< j].split(
+                    whereSeparator: \.isWhitespace)
+            }
+            else
+            {
+                scope = []
+            }
+
+            let last:Substring = self.rawValue[self.rawValue.index(after: j)...]
+
+            return (namespace, scope, last)
+        }
+        else
+        {
+            return nil
+        }
+    }
 }
 extension Record.Stem:CustomStringConvertible
 {
     @inlinable public
-    var description:String
+    var description:String { Self.format(self.rawValue) }
+}
+extension Record.Stem
+{
+    @inlinable internal static
+    func format(_ string:some StringProtocol, separator:UInt8 = 0x2E) -> String
     {
-        .init(unsafeUninitializedCapacity: self.rawValue.utf8.count)
+        .init(unsafeUninitializedCapacity: string.utf8.count)
         {
             var i:Int = $0.startIndex
-            for codeunit:UInt8 in self.rawValue.utf8
+            for codeunit:UInt8 in string.utf8
             {
                 switch codeunit
                 {
