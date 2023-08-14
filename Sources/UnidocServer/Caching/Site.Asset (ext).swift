@@ -8,10 +8,8 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
-        case    .fonts_css,
-                .main_css:      return nil
-        case    .fonts_css_map,
-                .main_css_map:  return .hot
+        case    .main_css:      return nil
+        case    .main_css_map:  return .hot
         }
     }
 
@@ -19,8 +17,6 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
-        case .fonts_css:        return ["css", "Fonts.css"]
-        case .fonts_css_map:    return ["css", "Fonts.css.map"]
         case .main_css:         return ["css", "Main.css"]
         case .main_css_map:     return ["css", "Main.css.map"]
         }
@@ -30,11 +26,8 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
-        case    .fonts_css,
-                .main_css:      return .text(.css, charset: .utf8)
-
-        case    .fonts_css_map,
-                .main_css_map:  return .application(.json, charset: .utf8)
+        case    .main_css:      return .text(.css, charset: .utf8)
+        case    .main_css_map:  return .application(.json, charset: .utf8)
         }
     }
 }
