@@ -22,7 +22,7 @@ extension Record.TypeTree
 extension Record.TypeTree.Row
 {
     @inlinable public
-    init(stem:Record.Stem, hash:FNV24?, top:Bool = false)
+    init(stem:Record.Stem, hash:FNV24? = nil, top:Bool = false)
     {
         self.init(shoot: .init(stem: stem, hash: hash), top: top)
     }
