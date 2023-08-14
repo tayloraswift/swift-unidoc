@@ -53,12 +53,15 @@ extension FixedPage
                         $0.name     = "viewport"
                         $0.content  = "width=device-width, initial-scale=1"
                     }
-                    $0[.link] { $0.href = "\(Site.Asset.fonts_css)" ; $0.rel = .stylesheet }
                     $0[.link] { $0.href = "\(Site.Asset.main_css)" ; $0.rel = .stylesheet }
 
                     $0[unsafe: .script] = """
                     history.replaceState(null, "", "\(location)")
                     """
+                    //  Inlining this saves the client a round-trip to the google fonts API.
+                    //  It is only about 1.87 KB, which is less than 5 percent of the total
+                    //  size of a typical page.
+                    $0[unsafe: .style] = Self.FontFaces
                 }
 
                 $0[.body]
