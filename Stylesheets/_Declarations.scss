@@ -1,6 +1,9 @@
 nav.decl
 {
     padding: 0.5rem 0;
+
+    overflow: hidden;
+    overflow-wrap: break-word;
 }
 nav.decl div.breadcrumbs
 {

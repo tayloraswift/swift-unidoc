@@ -1,49 +1,56 @@
 @import 'Colors';
-@import 'Columns';
 @import 'CodeBlocks';
 @import 'CodeSpans';
 @import 'Declarations';
 @import 'Groups';
 @import 'Logo';
+@import 'Sidebar';
 @import 'Typefaces';
 @import 'Prose';
 
-html
-{
-    font-size: 1.0rem;
-    background-color: $light-background;
-}
-
-body
-{
-    margin: 0;
-
-    color: $light-foreground;
-    font-family: $typeface-serif;
-
-    font-variant-numeric: oldstyle-nums;
-    overflow-wrap: break-word;
-    -webkit-text-size-adjust: none;
-    text-size-adjust: none;
-}
-
-//  Vertical layout.
 nav
 {
     padding: 0.25rem 0;
 }
-body main
+body
 {
     min-height: 100vw;
+    margin: 0;
 
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+
+    div.sidebar
+    {
+        display: none;
+    }
+    div.content
+    {
+        flex: 0 1 48rem;
+
+        padding-left: 1rem;
+        padding-right: 1rem;
+
+        overflow: hidden;
+        overflow-wrap: break-word;
+    }
 }
-//  Horizontal layout.
-body header nav > *,
-body main div.content
+@media only screen and (min-width: 50rem)
 {
-    @include centered-column($width: 48rem);
+    body div.sidebar
+    {
+        display: block;
+        flex: 0 0 16rem;
+        width: 16rem;
+    }
+    div.content
+    {
+        padding-left: 4rem;
+    }
 }
-body main div.content
+
+body main
 {
     section.introduction,
     section.parameters,
@@ -81,28 +88,19 @@ body main div.content
     }
 }
 
-body main div.sidebar
+html
 {
-    position: fixed;
-    overflow: scroll;
-    height: 100%;
-    width: 24rem;
-    top: 0;
-    right: 0;
+    font-size: 1.0rem;
+    background-color: $light-background;
+}
+body
+{
+    color: $light-foreground;
+    font-family: $typeface-serif;
 
-    font-family: $typeface-monospace;
-    font-size: 0.875rem;
-
-    ul
-    {
-        list-style-type: none;
-        padding-left: 1.0rem;
-
-        a
-        {
-            color: $light-foreground-semi;
-        }
-    }
+    font-variant-numeric: oldstyle-nums;
+    text-size-adjust: none;
+    -webkit-text-size-adjust: none;
 }
 
 a

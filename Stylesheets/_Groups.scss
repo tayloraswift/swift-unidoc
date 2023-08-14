@@ -44,7 +44,7 @@ section.group code.constraints + h3
 {
     border-top: solid 1px $light-accent-yellow;
 }
-section.group h3
+section.group.extension h3
 {
     margin-top: 1rem;
     border-top: dashed 1px $light-foreground-semi;
@@ -61,7 +61,7 @@ section.group ul
 
     > li.article
     {
-        margin: 0.5rem 0 0.5rem 0;
+        margin: 1.5rem 0 0.5rem 0;
 
         a:first-child
         {
@@ -81,6 +81,10 @@ section.group ul
         }
     }
 
+    > li.article + li.article
+    {
+        margin-top: 2rem;
+    }
 
     > li.decl,
     > li.module
