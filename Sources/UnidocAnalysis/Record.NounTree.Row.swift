@@ -1,7 +1,7 @@
 import FNV1
 import UnidocRecords
 
-extension Record.TypeTree
+extension Record.NounTree
 {
     @frozen public
     struct Row:Equatable, Hashable, Sendable
@@ -19,7 +19,7 @@ extension Record.TypeTree
         }
     }
 }
-extension Record.TypeTree.Row
+extension Record.NounTree.Row
 {
     @inlinable public
     init(stem:Record.Stem, hash:FNV24? = nil, top:Bool = false)
@@ -27,7 +27,7 @@ extension Record.TypeTree.Row
         self.init(shoot: .init(stem: stem, hash: hash), top: top)
     }
 }
-extension Record.TypeTree.Row
+extension Record.NounTree.Row
 {
     /// Returns 1 if this is a top-level row, otherwise returns the ``Record.Stem depth``
     /// of the ``shoot``’s stem.

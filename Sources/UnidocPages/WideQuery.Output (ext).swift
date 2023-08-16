@@ -17,7 +17,7 @@ extension WideQuery.Output:ServerResponseFactory
         }
 
         if  let master:Record.Master = principal.master,
-            let types:Record.TypeTree = principal.types
+            let tree:Record.NounTree = principal.tree
         {
             let resource:ServerResource
             let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
@@ -39,21 +39,21 @@ extension WideQuery.Output:ServerResponseFactory
                 let page:Site.Docs.Article = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    types: types.rows)
+                    nouns: tree.rows)
                 resource = page.rendered()
 
             case .culture(let master):
                 let page:Site.Docs.Culture = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    types: types.rows)
+                    nouns: tree.rows)
                 resource = page.rendered()
 
             case .decl(let master):
                 let page:Site.Docs.Decl = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    types: types.rows)
+                    nouns: tree.rows)
                 resource = page.rendered()
 
             case .file:

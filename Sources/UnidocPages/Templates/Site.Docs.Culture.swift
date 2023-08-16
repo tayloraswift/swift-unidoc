@@ -16,25 +16,18 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let types:[Record.TypeTree.Row]
+        let nouns:[Record.NounTree.Row]
 
         init(_ inliner:Inliner,
             master:Record.Master.Culture,
             groups:[Record.Group],
-            types:[Record.TypeTree.Row])
+            nouns:[Record.NounTree.Row])
         {
             self.inliner = inliner
             self.master = master
             self.groups = groups
-            self.types = types
+            self.nouns = nouns
         }
-    }
-}
-extension Site.Docs.Culture
-{
-    var zone:Record.Zone
-    {
-        self.inliner.zones.principal
     }
 }
 extension Site.Docs.Culture:FixedPage
@@ -49,9 +42,11 @@ extension Site.Docs.Culture:FixedPage
         """
     }
 
-    var sidebar:Inliner.TypeTree?
+    var zone:Record.Zone { self.inliner.zones.principal }
+
+    var sidebar:Inliner.NounTree?
     {
-        .init(self.inliner, types: self.types)
+        .init(self.inliner, nouns: self.nouns)
     }
 
     func emit(content html:inout HTML.ContentEncoder)

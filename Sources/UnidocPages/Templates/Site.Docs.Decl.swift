@@ -18,26 +18,23 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let types:[Record.TypeTree.Row]
+        let nouns:[Record.NounTree.Row]
 
         init(_ inliner:Inliner,
             master:Record.Master.Decl,
             groups:[Record.Group],
-            types:[Record.TypeTree.Row])
+            nouns:[Record.NounTree.Row])
         {
             self.inliner = inliner
 
             self.master = master
             self.groups = groups
-            self.types = types
+            self.nouns = nouns
         }
     }
 }
 extension Site.Docs.Decl
 {
-    private
-    var zone:Record.Zone { self.inliner.zones.principal }
-
     private
     var stem:Record.Stem { self.master.stem }
 }
@@ -71,14 +68,33 @@ extension Site.Docs.Decl:FixedPage
         """
     }
 
-    var sidebar:Inliner.TypeTree?
+    var zone:Record.Zone { self.inliner.zones.principal }
+
+    var sidebar:Inliner.NounTree?
     {
-        .init(self.inliner, types: self.types)
+        .init(self.inliner, nouns: self.nouns)
     }
 
     func emit(header:inout HTML.ContentEncoder)
     {
         header[.nav] { $0.class = "decl" } = self.breadcrumbs
+        header[.div, { $0.class = "searchbar-container" }]
+        {
+            $0[.div, { $0.class = "searchbar" }]
+            {
+                $0[.form, { $0.id = "search" ; $0.role = "search" }]
+                {
+                    $0[.input]
+                    {
+                        $0.id = "search-input"
+                        $0.type = "search"
+                        $0.placeholder = "search symbols"
+                        $0.autocomplete = "off"
+                    }
+                }
+            }
+            $0[.ol] { $0.id = "search-results" }
+        }
     }
 
     func emit(content html:inout HTML.ContentEncoder)

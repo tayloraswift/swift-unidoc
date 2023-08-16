@@ -1,4 +1,4 @@
-import MongoDB
+import MongoQL
 import Unidoc
 import UnidocDatabase
 import UnidocRecords
@@ -189,12 +189,12 @@ extension WideQuery:DatabaseQuery
                                         {
                                             $0[.expr] = .expr
                                             {
-                                                $0[.eq] = (Record.TypeTree[.id], tree)
+                                                $0[.eq] = (Record.NounTree[.id], tree)
                                             }
                                         }
                                     }
                                 }
-                                $0[.as] = Output.Principal[.types]
+                                $0[.as] = Output.Principal[.tree]
                             }
                         }
                         $0.stage
@@ -202,9 +202,9 @@ extension WideQuery:DatabaseQuery
                             //  Unbox single-element array.
                             $0[.set] = .init
                             {
-                                $0[Output.Principal[.types]] = .expr
+                                $0[Output.Principal[.tree]] = .expr
                                 {
-                                    $0[.first] = Output.Principal[.types]
+                                    $0[.first] = Output.Principal[.tree]
                                 }
                             }
                         }

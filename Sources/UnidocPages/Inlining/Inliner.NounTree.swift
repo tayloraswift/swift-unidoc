@@ -5,31 +5,31 @@ import URI
 
 extension Inliner
 {
-    struct TypeTree
+    struct NounTree
     {
         private
         let inliner:Inliner
 
-        let types:[Record.TypeTree.Row]
+        let nouns:[Record.NounTree.Row]
 
-        init(_ inliner:Inliner, types:[Record.TypeTree.Row])
+        init(_ inliner:Inliner, nouns:[Record.NounTree.Row])
         {
             self.inliner = inliner
 
-            self.types = types
+            self.nouns = nouns
         }
     }
 }
-extension Inliner.TypeTree:HyperTextOutputStreamable
+extension Inliner.NounTree:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         var depth:Int = 0
 
-        for type:Record.TypeTree.Row in self.types
+        for noun:Record.NounTree.Row in self.nouns
         {
-            let current:Int = type.depth
+            let current:Int = noun.depth
             if  current < depth
             {
                 for _:Int in current ..< depth
@@ -41,7 +41,7 @@ extension Inliner.TypeTree:HyperTextOutputStreamable
             {
                 for i:Int in depth ..< current
                 {
-                    html.open(.ul) { $0.class = i == 0 ? "typetree" : nil }
+                    html.open(.ul) { $0.class = i == 0 ? "nountree" : nil }
                 }
             }
 
@@ -49,11 +49,11 @@ extension Inliner.TypeTree:HyperTextOutputStreamable
 
             html[.li]
             {
-                let uri:URI = Site.Docs[self.inliner.zones.principal, type.shoot]
+                let uri:URI = Site.Docs[self.inliner.zones.principal, noun.shoot]
 
-                $0[.a] { $0.href = "\(uri)" } = type.top ?
-                    type.shoot.stem.name :
-                    type.shoot.stem.last
+                $0[.a] { $0.href = "\(uri)" } = noun.top ?
+                    noun.shoot.stem.name :
+                    noun.shoot.stem.last
             }
         }
         for _:Int in 0 ..< depth
