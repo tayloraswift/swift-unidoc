@@ -43,16 +43,8 @@ extension AnyOperation
     private static
     func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI) -> Self?
     {
-        let planes:Selector.Planes?
-
         switch root
         {
-        case Site.Docs.root:
-            planes = nil
-
-        case Site.Guides.root:
-            planes = .article
-
         case Site.Admin.root:
             let action:Site.Action? = .init(rawValue: trunk)
             return action.map { .dataless(ConfirmOperation.init($0)) }
@@ -68,7 +60,7 @@ extension AnyOperation
             return .get(legacy: trunk, stem: stem, uri: uri)
 
         case _:
-            return nil
+            break
         }
 
         var explain:Bool = false
@@ -84,18 +76,9 @@ extension AnyOperation
             }
         }
 
-        if  stem.isEmpty,
-            let planes
+        switch root
         {
-            let query:ThinQuery<Selector.Planes> = .init(for: planes, in: .init(trunk))
-
-            return .database(QueryOperation<ThinQuery<Selector.Planes>>.init(
-                explain: explain,
-                query: query,
-                uri: uri))
-        }
-        else if case nil = planes
-        {
+        case Site.Docs.root:
             let query:WideQuery = .init(
                 for: .init(stem: stem, hash: hash),
                 in: .init(trunk))
@@ -104,9 +87,24 @@ extension AnyOperation
                 explain: explain,
                 query: query,
                 uri: uri))
-        }
-        else
-        {
+
+        case Site.Guides.root:
+            let query:ThinQuery<Selector.Planes> = .init(for: .article, in: .init(trunk))
+
+            return .database(QueryOperation<ThinQuery<Selector.Planes>>.init(
+                explain: explain,
+                query: query,
+                uri: uri))
+
+        case Site.NounMaps.root:
+            let query:NounMapQuery = .init(in: .init(trunk))
+
+            return .database(QueryOperation<NounMapQuery>.init(
+                explain: explain,
+                query: query,
+                uri: uri))
+
+        case _:
             return nil
         }
     }

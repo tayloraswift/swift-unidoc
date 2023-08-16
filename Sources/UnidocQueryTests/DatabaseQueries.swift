@@ -169,11 +169,11 @@ struct DatabaseQueries:MongoTestBattery
                         value: try await database.execute(query: query, with: session)),
                     let master:Record.Master.Culture = tests.expect(
                         value: output.principal?.master?.culture),
-                    let types:Record.TypeTree = tests.expect(
-                        value: output.principal?.types)
+                    let tree:Record.NounTree = tests.expect(
+                        value: output.principal?.tree)
                 {
-                    tests.expect(master.id ==? types.id)
-                    tests.expect(types.rows ..?
+                    tests.expect(master.id ==? tree.id)
+                    tests.expect(tree.rows ..?
                         [
                             .init(stem: "BarbieCore Barbie", top: true),
                             .init(stem: "BarbieCore Barbie ID", top: false),
@@ -198,13 +198,13 @@ struct DatabaseQueries:MongoTestBattery
                         value: try await database.execute(query: query, with: session)),
                     let master:Record.Master = tests.expect(
                         value: output.principal?.master),
-                    let types:Record.TypeTree = tests.expect(
-                        value: output.principal?.types),
+                    let tree:Record.NounTree = tests.expect(
+                        value: output.principal?.tree),
                     let overview:Record.Passage = tests.expect(
                         value: master.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
-                    tests.expect(types.rows ..?
+                    tests.expect(tree.rows ..?
                         [
                             .init(stem: "BarbieCore Barbie Dreamhouse", top: true),
                             .init(stem: "BarbieCore Barbie Dreamhouse Keys", top: false),

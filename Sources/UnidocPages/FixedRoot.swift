@@ -33,13 +33,17 @@ extension FixedRoot where Self:CustomStringConvertible, Self:RawRepresentable<St
 extension FixedRoot
 {
     static
+    subscript(zone:Record.Zone) -> URI
+    {
+        var uri:URI = Self.uri ; uri.path += zone ; return uri
+    }
+
+    static
     subscript(zone:Record.Zone, shoot:Record.Shoot) -> URI
     {
-        var uri:URI = Self.uri
+        var uri:URI = Self[zone]
 
-        uri.path += zone
         uri.path += shoot.stem
-
         uri["hash"] = shoot.hash?.description
 
         return uri

@@ -3,7 +3,7 @@ import BSONEncoding
 import FNV1
 import UnidocRecords
 
-extension Record.TypeTree
+extension Record.NounTree
 {
     /// A somewhat more-efficient representation for serializing an array of ``Row``s.
     @frozen @usableFromInline internal
@@ -19,13 +19,13 @@ extension Record.TypeTree
         }
     }
 }
-extension Record.TypeTree.Table:BSONEncodable
+extension Record.NounTree.Table:BSONEncodable
 {
     @usableFromInline internal
     func encode(to field:inout BSON.Field)
     {
         var buffer:[UInt8] = []
-        for row:Record.TypeTree.Row in self.rows
+        for row:Record.NounTree.Row in self.rows
         {
             row.shoot.serialize(into: &buffer)
             // We are kind of abusing these control characters here, but the point is that
@@ -38,7 +38,7 @@ extension Record.TypeTree.Table:BSONEncodable
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: buffer).encode(to: &field)
     }
 }
-extension Record.TypeTree.Table:BSONDecodable, BSONBinaryViewDecodable
+extension Record.NounTree.Table:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable internal
     init<Bytes>(bson:BSON.BinaryView<Bytes>) throws

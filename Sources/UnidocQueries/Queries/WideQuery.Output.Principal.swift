@@ -20,7 +20,7 @@ extension WideQuery.Output
         public
         let groups:[Record.Group]
         public
-        let types:Record.TypeTree?
+        let tree:Record.NounTree?
         public
         let zone:Record.Zone
 
@@ -30,13 +30,13 @@ extension WideQuery.Output
             matches:[Record.Master],
             master:Record.Master?,
             groups:[Record.Group],
-            types:Record.TypeTree?,
+            tree:Record.NounTree?,
             zone:Record.Zone)
         {
             self.matches = matches
             self.master = master
             self.groups = groups
-            self.types = types
+            self.tree = tree
             self.zone = zone
         }
     }
@@ -49,7 +49,7 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
         case matches = "A"
         case master = "M"
         case groups = "G"
-        case types = "T"
+        case tree = "T"
         case zone = "Z"
 
         // case _scalars = "scalars"
@@ -64,7 +64,7 @@ extension WideQuery.Output.Principal:BSONDocumentDecodable
             matches: try bson[.matches].decode(),
             master: try bson[.master]?.decode(),
             groups: try bson[.groups].decode(),
-            types: try bson[.types]?.decode(),
+            tree: try bson[.tree]?.decode(),
             zone: try bson[.zone].decode())
     }
 }

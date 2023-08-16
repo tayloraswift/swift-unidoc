@@ -34,8 +34,8 @@ extension Database
     var masters:Masters { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
+    var nouns:Nouns { .init(database: self.id) }
     var zones:Zones { .init(database: self.id) }
-
 
     public static
     var collation:Mongo.Collation
@@ -67,6 +67,7 @@ extension Database
             try await self.masters.setup(with: session)
             try await self.groups.setup(with: session)
             try await self.trees.setup(with: session)
+            try await self.nouns.setup(with: session)
             try await self.zones.setup(with: session)
         }
         catch let error
@@ -103,6 +104,7 @@ extension Database
         try await self.masters.replace(with: session)
         try await self.groups.replace(with: session)
         try await self.trees.replace(with: session)
+        try await self.nouns.replace(with: session)
         try await self.zones.replace(with: session)
 
         for zone:Unidoc.Zone in zones
@@ -136,6 +138,7 @@ extension Database
             try await self.groups.clear(receipt.zone, with: session)
             try await self.trees.clear(receipt.zone, with: session)
 
+            try await self.nouns.delete(receipt.zone, with: session)
             try await self.zones.delete(receipt.zone, with: session)
         }
 
@@ -199,11 +202,12 @@ extension Database
     func push(_ records:__owned Records,
         with session:__shared Mongo.Session) async throws
     {
-        let trees:[Record.TypeTree] = records._buildTypeTrees()
+        let (nouns, trees):(Record.NounMap, [Record.NounTree]) = records.indexes()
 
         try await self.masters.insert(records.masters, with: session)
         try await self.trees.insert(trees, with: session)
 
+        try await self.nouns.insert(nouns, with: session)
         try await self.zones.insert(records.zone, with: session)
 
         if  records.zone.latest

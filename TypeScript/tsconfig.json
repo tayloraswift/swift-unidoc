@@ -1,0 +1,28 @@
+{
+    "compilerOptions":
+    {
+        "lib":
+        [
+            "dom",
+            "es2021"
+        ],
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "strict": true,
+        "sourceMap": true
+    },
+    "files":
+    [
+        "Sources/NounMap.ts",
+        "Sources/NounMapCulture.ts",
+        "Sources/Symbol.ts",
+
+        "Sources/Search.ts",
+        "Sources/Searchbar.ts",
+        "Sources/SearchIndex.ts",
+        "Sources/SearchOutput.ts",
+    ]
+}

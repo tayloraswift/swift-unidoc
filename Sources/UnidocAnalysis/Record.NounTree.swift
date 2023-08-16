@@ -5,8 +5,14 @@ import UnidocRecords
 
 extension Record
 {
+    @available(*, deprecated, renamed: "NounTree")
+    public
+    typealias TypeTree = NounTree
+}
+extension Record
+{
     @frozen public
-    struct TypeTree:Identifiable, Equatable, Sendable
+    struct NounTree:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -21,7 +27,7 @@ extension Record
         }
     }
 }
-extension Record.TypeTree
+extension Record.NounTree
 {
     init(id:Unidoc.Scalar, top:[Records.TypeLevels.Node])
     {
@@ -44,7 +50,7 @@ extension Record.TypeTree
         }
     }
 }
-extension Record.TypeTree
+extension Record.NounTree
 {
     @inlinable internal
     init(id:Unidoc.Scalar, table:Table)
@@ -54,7 +60,7 @@ extension Record.TypeTree
 
     var table:Table { .init(rows: self.rows) }
 }
-extension Record.TypeTree
+extension Record.NounTree
 {
     public
     enum CodingKey:String
@@ -63,7 +69,7 @@ extension Record.TypeTree
         case table = "T"
     }
 }
-extension Record.TypeTree:BSONDocumentEncodable
+extension Record.NounTree:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -72,7 +78,7 @@ extension Record.TypeTree:BSONDocumentEncodable
         bson[.table] = self.table
     }
 }
-extension Record.TypeTree:BSONDocumentDecodable
+extension Record.NounTree:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
@@ -80,7 +86,7 @@ extension Record.TypeTree:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(), table: try bson[.table].decode())
     }
 }
-extension Record.TypeTree:CustomStringConvertible
+extension Record.NounTree:CustomStringConvertible
 {
     public
     var description:String

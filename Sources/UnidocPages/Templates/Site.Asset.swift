@@ -7,6 +7,9 @@ extension Site
     {
         case main_css       = "main.css"
         case main_css_map   = "main.css.map"
+
+        case main_js        = "main.js"
+        case main_js_map    = "main.js.map"
     }
 }
 extension Site.Asset:FixedRoot

@@ -5,6 +5,8 @@
 
 TestDeployment/data/
 
+node_modules/
+
 *.profdata
 *.profraw
 

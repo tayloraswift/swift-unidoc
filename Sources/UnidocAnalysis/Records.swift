@@ -1,4 +1,5 @@
 import FNV1
+import ModuleGraphs
 import Unidoc
 import UnidocRecords
 
@@ -31,8 +32,9 @@ struct Records
 extension Records
 {
     public
-    func _buildTypeTrees() -> [Record.TypeTree]
+    func indexes() -> (Record.NounMap, [Record.NounTree])
     {
+        var modules:[Unidoc.Scalar: ModuleIdentifier] = [:]
         var levels:[Unidoc.Scalar: TypeLevels] = [:]
         for master:Record.Master in self.masters
         {
@@ -46,6 +48,10 @@ extension Records
                 scope = nil
                 node = .init(shoot: master.shoot)
 
+            case .culture(let master):
+                modules[master.id] = master.module.id
+                continue
+
             case .decl(let master):
                 switch master.phylum
                 {
@@ -57,7 +63,7 @@ extension Records
                 scope = master.scope.last
                 node = .init(shoot: master.shoot)
 
-            case .file, .culture:
+            case .file:
                 continue
             }
 
@@ -66,7 +72,7 @@ extension Records
 
         //  TODO: include extended types
 
-        var trees:[Record.TypeTree] = []
+        var trees:[Record.NounTree] = []
             trees.reserveCapacity(levels.count)
 
         var l:Dictionary<Unidoc.Scalar, TypeLevels>.Index = levels.startIndex
@@ -85,6 +91,8 @@ extension Records
                 top: levels.top.values.sorted { $0.shoot.stem < $1.shoot.stem }))
         }
 
-        return trees
+        let nouns:Record.NounMap = .init(id: self.zone.id, from: trees, for: modules)
+
+        return (nouns, trees)
     }
 }

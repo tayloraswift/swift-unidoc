@@ -28,22 +28,16 @@ extension Site.Guides.Feed
         self.init(inliner, scalars: masters.map(\.id))
     }
 }
-extension Site.Guides.Feed
-{
-    private
-    var zone:Record.Zone { self.inliner.zones.principal }
-}
 extension Site.Guides.Feed:FixedPage
 {
-    var location:URI
-    {
-        var uri:URI = Site.Guides.uri ; uri.path += self.zone ; return uri
-    }
+    var location:URI { Site.Guides[self.zone] }
 
     var title:String
     {
         self.zone.display ?? "\(self.zone.package)"
     }
+
+    var zone:Record.Zone { self.inliner.zones.principal }
 
     func emit(header:inout HTML.ContentEncoder)
     {
