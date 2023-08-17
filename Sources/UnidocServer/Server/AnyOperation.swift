@@ -1,4 +1,5 @@
 import FNV1
+import MD5
 import Multiparts
 import Symbols
 import UnidocPages
@@ -8,21 +9,22 @@ import URI
 
 enum AnyOperation:Sendable
 {
-    case datafile(Site.Asset)
+    case datafile(Cache<Site.Asset>.Request)
     case dataless(any DatalessOperation)
     case database(any DatabaseOperation)
 }
 extension AnyOperation
 {
     static
-    func get(root:String, rest:ArraySlice<String>, uri:URI) -> Self?
+    func get(root:String, rest:ArraySlice<String>, uri:URI, tag:MD5?) -> Self?
     {
         if  let trunk:Int = rest.indices.first
         {
             return .get(root: root,
                 trunk: rest[trunk],
                 stem: rest[rest.index(after: trunk)...],
-                uri: uri)
+                uri: uri,
+                tag: tag)
         }
         else
         {
@@ -41,7 +43,7 @@ extension AnyOperation
     }
 
     private static
-    func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI) -> Self?
+    func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI, tag:MD5?) -> Self?
     {
         switch root
         {
@@ -51,7 +53,7 @@ extension AnyOperation
 
         case Site.Asset.root:
             let asset:Site.Asset? = .init(rawValue: trunk)
-            return asset.map { .datafile($0) }
+            return asset.map { .datafile(.init($0, tag: tag)) }
 
         case "reference":
             return .get(legacy: trunk, stem: stem, uri: uri)

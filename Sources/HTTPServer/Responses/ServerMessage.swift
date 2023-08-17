@@ -36,9 +36,7 @@ extension ServerMessage
         self.init(headers: headers, status: status, body: nil)
     }
 
-    init(resource:__shared ServerResource,
-        using allocator:__shared ByteBufferAllocator,
-        etag:__shared MD5? = nil)
+    init(resource:__shared ServerResource, using allocator:__shared ByteBufferAllocator)
     {
         var headers:HTTPHeaders = .init()
 
@@ -57,28 +55,15 @@ extension ServerMessage
             status = .multipleChoices
 
         case .one(canonical: let location):
+            status = .ok
 
             if  let location:String
             {
                 headers.add(name: "link", value: Authority.link(location, rel: .canonical))
             }
-
-            guard let hash:MD5 = resource.hash
-            else
+            if  let hash:MD5 = resource.hash
             {
-                status = .ok
-                break
-            }
-
-            headers.add(name: "etag", value: "\"\(hash)\"")
-
-            if  case hash? = etag
-            {
-                status = .notModified
-            }
-            else
-            {
-                status = .ok
+                headers.add(name: "etag", value: "\"\(hash)\"")
             }
         }
 
@@ -88,28 +73,38 @@ extension ServerMessage
         {
         case .buffer(let bytes):
             length = bytes.readableBytes
-            buffer = status == .notModified ? nil : bytes
+            buffer = bytes
 
         case .binary(let bytes):
             length = bytes.count
-            buffer = status == .notModified ? nil : allocator.buffer(bytes: bytes)
+            buffer = allocator.buffer(bytes: bytes)
 
-        case .text(let string):
+        case .string(let string):
             length = string.utf8.count
-            buffer = status == .notModified ? nil : allocator.buffer(string: string)
+            buffer = allocator.buffer(string: string)
+
+        case .length(let bytes):
+            length = bytes
+            buffer = nil
         }
 
         headers.add(name: "content-length", value: "\(length)")
         headers.add(name: "content-type",   value: "\(resource.type)")
 
-        self.init(headers: headers, status: status, body: buffer)
+        if  let buffer
+        {
+            self.init(headers: headers, status: status, body: buffer)
+        }
+        else
+        {
+            self.init(headers: headers, status: .notModified)
+        }
     }
 
-    init(redacting error:any Error,
-        using allocator:__shared ByteBufferAllocator)
+    init(redacting error:any Error, using allocator:__shared ByteBufferAllocator)
     {
         self.init(resource: .init(.error,
-                content: .text(Authority.redact(error: error)),
+                content: .string(Authority.redact(error: error)),
                 type: .text(.plain, charset: .utf8)),
             using: allocator)
     }

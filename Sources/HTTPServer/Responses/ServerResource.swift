@@ -7,9 +7,9 @@ struct ServerResource:Equatable, Sendable
     public
     let results:Results
     public
-    let content:Content
+    var content:Content
     public
-    let type:MediaType
+    var type:MediaType
     public
     var hash:MD5?
 

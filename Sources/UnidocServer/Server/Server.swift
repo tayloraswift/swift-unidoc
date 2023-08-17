@@ -53,8 +53,8 @@ extension Server
                     response = try await operation.load(from: self.database,
                         pool: self.mongodb)
 
-                case .datafile(let asset):
-                    response = try await asset.load(from: self.cache)
+                case .datafile(let operation):
+                    response = try await operation.load(from: self.cache)
 
                 case .dataless(let operation):
                     response = try operation.load()
@@ -73,7 +73,7 @@ extension Server
             else
             {
                 request.promise.succeed(.resource(.init(.none,
-                    content: .text("not found"),
+                    content: .string("not found"),
                     type: .text(.plain, charset: .utf8))))
             }
         }

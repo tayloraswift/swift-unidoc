@@ -69,7 +69,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                     address: self.address,
                     headers: head.headers)
                 {
-                    self.accept(context: context, etag: head.etag)
+                    self.accept(context: context)
                 }
                 if  let request:Delegate.Request
                 {
@@ -127,7 +127,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                     headers: head.headers,
                     body: body)
             {
-                self.accept(context: context, etag: head.etag)
+                self.accept(context: context)
             }
             if  let request:Delegate.Request
             {
@@ -143,8 +143,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 extension ServerInterfaceHandler
 {
     private
-    func accept(context:ChannelHandlerContext,
-        etag:MD5?) -> EventLoopPromise<ServerResponse>
+    func accept(context:ChannelHandlerContext) -> EventLoopPromise<ServerResponse>
     {
         let promise:EventLoopPromise<ServerResponse> = context.eventLoop.makePromise(
             of: ServerResponse.self)
@@ -162,8 +161,7 @@ extension ServerInterfaceHandler
 
                 case .resource(let resource):
                     self.send(message: .init(resource: resource,
-                            using: context.channel.allocator,
-                            etag: etag),
+                            using: context.channel.allocator),
                         context: context)
                 }
 
