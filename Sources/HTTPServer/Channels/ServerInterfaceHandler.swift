@@ -1,6 +1,6 @@
+import MD5
 import NIOCore
 import NIOHTTP1
-import SHA2
 
 final
 class ServerInterfaceHandler<Authority, Delegate>
@@ -144,7 +144,7 @@ extension ServerInterfaceHandler
 {
     private
     func accept(context:ChannelHandlerContext,
-        etag:SHA256?) -> EventLoopPromise<ServerResponse>
+        etag:MD5?) -> EventLoopPromise<ServerResponse>
     {
         let promise:EventLoopPromise<ServerResponse> = context.eventLoop.makePromise(
             of: ServerResponse.self)

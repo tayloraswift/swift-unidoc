@@ -28,6 +28,8 @@ let package:Package = .init(
 
         .library(name: "Media", targets: ["Media"]),
 
+        .library(name: "MD5", targets: ["MD5"]),
+
         .library(name: "ModuleGraphs", targets: ["ModuleGraphs"]),
 
         .library(name: "Multiparts", targets: ["Multiparts"]),
@@ -132,10 +134,13 @@ let package:Package = .init(
             [
                 .target(name: "HTML"),
                 .target(name: "Media"),
+                .target(name: "MD5"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
+
+        .target(name: "InlineBuffer"),
 
         .target(name: "LexicalPaths"),
 
@@ -173,11 +178,17 @@ let package:Package = .init(
                 .target(name: "MarkdownTrees"),
             ]),
 
+        .target(name: "MD5", dependencies:
+            [
+                .target(name: "InlineBuffer"),
+            ]),
+
         .target(name: "Media"),
 
         .target(name: "ModuleGraphs", dependencies:
             [
                 .target(name: "SemanticVersions"),
+                .target(name: "SHA1"),
             ]),
 
         .target(name: "Multiparts", dependencies:
@@ -200,6 +211,11 @@ let package:Package = .init(
             ]),
 
         .target(name: "SemanticVersions"),
+
+        .target(name: "SHA1", dependencies:
+            [
+                .target(name: "InlineBuffer"),
+            ]),
 
         .target(name: "Signatures", dependencies:
             [
@@ -394,6 +410,12 @@ let package:Package = .init(
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "MarkdownSemantics"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "MD5Tests", dependencies:
+            [
+                .target(name: "MD5"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

@@ -1,7 +1,7 @@
 import Media
+import MD5
 import NIOCore
 import NIOHTTP1
-import SHA2
 
 struct ServerMessage<Authority> where Authority:ServerAuthority
 {
@@ -38,7 +38,7 @@ extension ServerMessage
 
     init(resource:__shared ServerResource,
         using allocator:__shared ByteBufferAllocator,
-        etag:__shared SHA256? = nil)
+        etag:__shared MD5? = nil)
     {
         var headers:HTTPHeaders = .init()
 
@@ -63,7 +63,7 @@ extension ServerMessage
                 headers.add(name: "link", value: Authority.link(location, rel: .canonical))
             }
 
-            guard let hash:SHA256 = resource.hash
+            guard let hash:MD5 = resource.hash
             else
             {
                 status = .ok

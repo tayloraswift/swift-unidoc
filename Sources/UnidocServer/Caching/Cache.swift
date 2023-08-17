@@ -1,4 +1,5 @@
 import HTTPServer
+import MD5
 import System
 
 final
@@ -39,9 +40,12 @@ extension Cache
 
             case    (.cold, nil),
                     (.hot, _):
+                let asset:[UInt8] = try self.assets.appending(key.source).read()
+                let hash:MD5 = .init(hashing: asset)
                 let resource:ServerResource = .init(.one(canonical: nil),
-                    content: .binary(try self.assets.appending(key.source).read()),
-                    type: key.type)
+                    content: .binary(asset),
+                    type: key.type,
+                    hash: hash)
                 $0 = resource
                 return resource
             }
