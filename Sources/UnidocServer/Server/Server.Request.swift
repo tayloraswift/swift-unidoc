@@ -1,5 +1,6 @@
 import HTTPServer
 import Media
+import MD5
 import Multiparts
 import NIOCore
 import NIOHTTP1
@@ -24,7 +25,7 @@ extension Server.Request:ServerDelegateRequest
 {
     init?(get uri:String,
         address _:SocketAddress?,
-        headers _:HTTPHeaders,
+        headers:HTTPHeaders,
         with promise:() -> EventLoopPromise<ServerResponse>)
     {
         guard let uri:URI = .init(uri)
@@ -34,12 +35,14 @@ extension Server.Request:ServerDelegateRequest
         }
 
         let path:[String] = uri.path.normalized(lowercase: true)
+        let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         if  let root:Int = path.indices.first,
             let get:AnyOperation = .get(
                 root: path[root],
                 rest: path[path.index(after: root)...],
-                uri: uri)
+                uri: uri,
+                tag: tag)
         {
             self.init(operation: get, promise: promise())
         }

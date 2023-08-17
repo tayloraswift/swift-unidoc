@@ -24,7 +24,7 @@ extension ThinQuery.Output:ServerResponseFactory
         else
         {
             return .resource(.init(.none,
-                content: .text("Record not found."),
+                content: .string("Record not found."),
                 type: .text(.plain, charset: .utf8)))
         }
     }

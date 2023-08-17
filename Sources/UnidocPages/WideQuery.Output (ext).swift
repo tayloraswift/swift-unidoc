@@ -12,7 +12,7 @@ extension WideQuery.Output:ServerResponseFactory
         else
         {
             return .resource(.init(.none,
-                content: .text("Snapshot not found."),
+                content: .string("Snapshot not found."),
                 type: .text(.plain, charset: .utf8)))
         }
 
@@ -76,7 +76,7 @@ extension WideQuery.Output:ServerResponseFactory
         }
 
         return .resource(.init(.none,
-            content: .text("Record not found."),
+            content: .string("Record not found."),
             type: .text(.plain, charset: .utf8)))
     }
 }

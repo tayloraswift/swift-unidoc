@@ -30,7 +30,7 @@ extension QueryOperation:DatabaseOperation
                 with: session)
 
             return .resource(.init(.one(canonical: nil),
-                content: .text(explanation),
+                content: .string(explanation),
                 type: .text(.plain, charset: .utf8)))
         }
 
