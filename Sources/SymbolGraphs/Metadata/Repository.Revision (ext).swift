@@ -2,14 +2,19 @@
 import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
+import SHA1
 
 extension Repository.Revision:BSONEncodable
 {
     public
     func encode(to field:inout BSON.Field)
     {
-        let view:BSON.BinaryView<Self> = .init(subtype: .generic, slice: self)
-        view.encode(to: &field)
+        switch self
+        {
+        case .sha1(let hash):
+            let view:BSON.BinaryView<SHA1> = .init(subtype: .generic, slice: hash)
+                view.encode(to: &field)
+        }
     }
 }
 extension Repository.Revision:BSONDecodable, BSONBinaryViewDecodable
@@ -19,9 +24,9 @@ extension Repository.Revision:BSONDecodable, BSONBinaryViewDecodable
     {
         try bson.subtype.expect(.generic)
 
-        if  let revision:Self = .init(bytes: bson.slice)
+        if  let hash:SHA1 = .copy(from: bson.slice)
         {
-            self = revision
+            self = .sha1(hash)
         }
         else
         {

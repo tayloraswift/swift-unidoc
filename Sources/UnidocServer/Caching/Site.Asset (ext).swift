@@ -4,6 +4,9 @@ import UnidocPages
 
 extension Site.Asset:CacheKey
 {
+    /// Indicates if the asset should never be reloaded (``CacheReloading cold``),
+    /// served only when hot-reloading is enabled (``CacheReloading hot``), or reloaded
+    /// depending on whether hot-reloading is enabled (`nil`).
     var requirement:CacheReloading?
     {
         switch self

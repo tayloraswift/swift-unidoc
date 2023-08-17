@@ -1,5 +1,5 @@
 import Media
-import SHA2
+import MD5
 
 @frozen public
 struct ServerResource:Equatable, Sendable
@@ -11,10 +11,10 @@ struct ServerResource:Equatable, Sendable
     public
     let type:MediaType
     public
-    var hash:SHA256?
+    var hash:MD5?
 
     @inlinable public
-    init(_ results:Results, content:Content, type:MediaType, hash:SHA256? = nil)
+    init(_ results:Results, content:Content, type:MediaType, hash:MD5? = nil)
     {
         self.results = results
         self.content = content
