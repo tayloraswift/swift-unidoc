@@ -5,48 +5,19 @@ import UnidocRecords
 
 extension Record
 {
-    @available(*, deprecated, renamed: "NounTree")
-    public
-    typealias TypeTree = NounTree
-}
-extension Record
-{
     @frozen public
     struct NounTree:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
         public
-        var rows:[Row]
+        var rows:[Noun]
 
         @inlinable public
-        init(id:Unidoc.Scalar, rows:[Row] = [])
+        init(id:Unidoc.Scalar, rows:[Noun] = [])
         {
             self.id = id
             self.rows = rows
-        }
-    }
-}
-extension Record.NounTree
-{
-    init(id:Unidoc.Scalar, top:[Records.TypeLevels.Node])
-    {
-        self.init(id: id)
-
-        for top:Records.TypeLevels.Node in top
-        {
-            self.rows.append(.init(shoot: top.shoot, top: true))
-            self += top.nest
-        }
-    }
-
-    static
-    func += (self:inout Self, nodes:[Records.TypeLevels.Node])
-    {
-        for node:Records.TypeLevels.Node in nodes
-        {
-            self.rows.append(.init(shoot: node.shoot, top: false))
-            self += node.nest
         }
     }
 }
@@ -92,7 +63,7 @@ extension Record.NounTree:CustomStringConvertible
     var description:String
     {
         var description:String = ""
-        for row:Row in self.rows
+        for row:Record.Noun in self.rows
         {
             if  row.top
             {

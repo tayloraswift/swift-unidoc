@@ -35,18 +35,17 @@ extension Records
     func indexes() -> (Record.NounMap, [Record.NounTree])
     {
         var modules:[Unidoc.Scalar: ModuleIdentifier] = [:]
-        var levels:[Unidoc.Scalar: TypeLevels] = [:]
+        var nouns:[Unidoc.Scalar: [Record.Noun]] = [:]
+
         for master:Record.Master in self.masters
         {
             let culture:Unidoc.Scalar
-            let scope:Unidoc.Scalar?
-            let node:TypeLevels.Node
+            let noun:Record.Noun
             switch master
             {
             case .article(let master):
                 culture = master.culture
-                scope = nil
-                node = .init(shoot: master.shoot)
+                noun = .init(shoot: master.shoot, top: true)
 
             case .culture(let master):
                 modules[master.id] = master.module.id
@@ -60,39 +59,24 @@ extension Records
                 }
 
                 culture = master.culture
-                scope = master.scope.last
-                node = .init(shoot: master.shoot)
+                noun = .init(shoot: master.shoot, top: master.stem.depth < 2)
 
             case .file:
                 continue
             }
 
-            levels[culture, default: .init()][node.shoot.stem.depth, master.id] = (scope, node)
+            nouns[culture, default: []].append(noun)
         }
 
         //  TODO: include extended types
 
-        var trees:[Record.NounTree] = []
-            trees.reserveCapacity(levels.count)
-
-        var l:Dictionary<Unidoc.Scalar, TypeLevels>.Index = levels.startIndex
-        while   l < levels.endIndex
+        let trees:[Record.NounTree] = nouns.map
         {
-            defer
-            {
-                l = levels.index(after: l)
-            }
-
-            levels.values[l].collapse()
-
-            let (culture, levels):(Unidoc.Scalar, TypeLevels) = levels[l]
-
-            trees.append(.init(id: culture,
-                top: levels.top.values.sorted { $0.shoot.stem < $1.shoot.stem }))
+            .init(id: $0.key, rows: $0.value.sorted { $0.shoot < $1.shoot })
         }
 
-        let nouns:Record.NounMap = .init(id: self.zone.id, from: trees, for: modules)
+        let map:Record.NounMap = .init(id: self.zone.id, from: trees, for: modules)
 
-        return (nouns, trees)
+        return (map, trees)
     }
 }

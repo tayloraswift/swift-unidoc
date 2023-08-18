@@ -34,7 +34,7 @@ section.introduction
 {
     margin-top: 0;
     padding: 0 0 0.75rem;
-    border-bottom: 2px solid $light-accent-hot-pink;
+    border-bottom: 2px solid $light-accent-barbie-pink;
 
     div.eyebrows
     {
@@ -92,7 +92,7 @@ section.introduction
         font-family: $typeface-monospace;
         font-size: 87.5%;
         color: $light-foreground-semi;
-        text-decoration-color: $light-accent-hot-pink;
+        text-decoration-color: $light-accent-barbie-pink;
 
         span.file
         {
@@ -102,7 +102,7 @@ section.introduction
         span.file,
         span.line
         {
-            color: $light-accent-hot-pink;
+            color: $light-accent-barbie-pink;
         }
     }
 }

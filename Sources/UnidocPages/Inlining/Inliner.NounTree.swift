@@ -10,9 +10,9 @@ extension Inliner
         private
         let inliner:Inliner
 
-        let nouns:[Record.NounTree.Row]
+        let nouns:[Record.Noun]
 
-        init(_ inliner:Inliner, nouns:[Record.NounTree.Row])
+        init(_ inliner:Inliner, nouns:[Record.Noun])
         {
             self.inliner = inliner
 
@@ -27,7 +27,7 @@ extension Inliner.NounTree:HyperTextOutputStreamable
     {
         var depth:Int = 0
 
-        for noun:Record.NounTree.Row in self.nouns
+        for noun:Record.Noun in self.nouns
         {
             let current:Int = noun.depth
             if  current < depth
