@@ -45,7 +45,7 @@ extension Record.NounMap
                     $0["c"] = "\(culture)"
                     $0["n"]
                     {
-                        for row:Record.NounTree.Row in tree.rows
+                        for row:Record.Noun in tree.rows
                         {
                             $0[+, Any.self]
                             {

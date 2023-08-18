@@ -21,6 +21,11 @@ div.searchbar
     box-shadow: 0 0.25rem 0 $light-accent-barbie-pink;
 }
 
+#search-input::placeholder
+{
+    color: $light-accent-barbie-pink;
+    opacity: 1;
+}
 #search-input
 {
     width: 100%;
@@ -29,7 +34,7 @@ div.searchbar
     outline: none;
     background: none;
 
-    color: $light-foreground;
+    color: $light-accent-hot-pink;
     font-family: $typeface-monospace;
     font-size: 100%;
 }

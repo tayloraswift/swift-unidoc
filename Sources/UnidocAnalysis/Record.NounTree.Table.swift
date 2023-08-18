@@ -10,10 +10,10 @@ extension Record.NounTree
     struct Table
     {
         @usableFromInline internal
-        var rows:[Row]
+        var rows:[Record.Noun]
 
         @inlinable internal
-        init(rows:[Row])
+        init(rows:[Record.Noun])
         {
             self.rows = rows
         }
@@ -25,7 +25,7 @@ extension Record.NounTree.Table:BSONEncodable
     func encode(to field:inout BSON.Field)
     {
         var buffer:[UInt8] = []
-        for row:Record.NounTree.Row in self.rows
+        for row:Record.Noun in self.rows
         {
             row.shoot.serialize(into: &buffer)
             // We are kind of abusing these control characters here, but the point is that

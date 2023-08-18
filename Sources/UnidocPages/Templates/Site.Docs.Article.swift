@@ -16,13 +16,13 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let nouns:[Record.NounTree.Row]
+        let nouns:[Record.Noun]
 
 
         init(_ inliner:Inliner,
             master:Record.Master.Article,
             groups:[Record.Group],
-            nouns:[Record.NounTree.Row])
+            nouns:[Record.Noun])
         {
             self.inliner = inliner
             self.master = master

@@ -3,8 +3,14 @@ import UnidocRecords
 
 extension Record.NounTree
 {
+    @available(*, deprecated, renamed: "Record.Noun")
+    public
+    typealias Row = Record.Noun
+}
+extension Record
+{
     @frozen public
-    struct Row:Equatable, Hashable, Sendable
+    struct Noun:Equatable, Hashable, Sendable
     {
         public
         let shoot:Record.Shoot
@@ -19,7 +25,7 @@ extension Record.NounTree
         }
     }
 }
-extension Record.NounTree.Row
+extension Record.Noun
 {
     @inlinable public
     init(stem:Record.Stem, hash:FNV24? = nil, top:Bool = false)
@@ -27,7 +33,7 @@ extension Record.NounTree.Row
         self.init(shoot: .init(stem: stem, hash: hash), top: top)
     }
 }
-extension Record.NounTree.Row
+extension Record.Noun
 {
     /// Returns 1 if this is a top-level row, otherwise returns the ``Record.Stem depth``
     /// of the ``shoot``’s stem.
