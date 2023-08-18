@@ -1,5 +1,6 @@
 import BSONDecoding
 import BSONEncoding
+import MD5
 import ModuleGraphs
 import SymbolGraphs
 import Unidoc
@@ -15,7 +16,7 @@ extension Record
         public
         let json:JSON
 
-        @inlinable public
+        @inlinable internal
         init(id:Unidoc.Zone, json:JSON)
         {
             self.id = id
@@ -66,7 +67,10 @@ extension Record.NounMap
     enum CodingKey:String
     {
         case id = "_id"
+        /// Contains JSON, encoded as a UTF-8 string.
         case json = "J"
+        /// Never decoded from the database.
+        case hash = "H"
     }
 }
 extension Record.NounMap:BSONDocumentEncodable
@@ -76,6 +80,7 @@ extension Record.NounMap:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.json] = BSON.UTF8View<[UInt8]>.init(slice: self.json.utf8)
+        bson[.hash] = MD5.init(hashing: self.json.utf8)
     }
 }
 extension Record.NounMap:BSONDocumentDecodable

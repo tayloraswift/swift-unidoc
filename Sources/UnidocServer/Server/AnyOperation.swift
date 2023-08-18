@@ -99,7 +99,7 @@ extension AnyOperation
                 uri: uri))
 
         case Site.NounMaps.root:
-            let query:NounMapQuery = .init(in: .init(trunk))
+            let query:NounMapQuery = .init(zone: .init(trunk), tag: tag)
 
             return .database(QueryOperation<NounMapQuery>.init(
                 explain: explain,
