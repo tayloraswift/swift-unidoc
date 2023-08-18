@@ -1,3 +1,4 @@
+import MD5
 import MongoQL
 import Unidoc
 import UnidocAnalysis
@@ -10,18 +11,18 @@ struct NounMapQuery:Equatable, Hashable, Sendable
 {
     public
     let zone:Selector.Zone
+    public
+    let tag:MD5?
 
     @inlinable public
-    init(in zone:Selector.Zone)
+    init(zone:Selector.Zone, tag:MD5?)
     {
         self.zone = zone
+        self.tag = tag
     }
 }
 extension NounMapQuery:DatabaseQuery
 {
-    public
-    typealias Output = Record.NounMap
-
     public
     var hint:Mongo.SortDocument { self.zone.hint }
 
@@ -52,7 +53,27 @@ extension NounMapQuery:DatabaseQuery
             }
             $0.stage
             {
-                $0[.replaceWith] = maps
+                $0[.replaceWith] = .init
+                {
+                    if  let tag:MD5 = self.tag
+                    {
+                        $0[Record.NounMap[.json]] = .expr
+                        {
+                            $0[.cond] =
+                            (
+                                if: .expr { $0[.eq] = (tag, maps / Record.NounMap[.hash]) },
+                                then: .expr { $0[.binarySize] = maps / Record.NounMap[.json] },
+                                else: maps / Record.NounMap[.json]
+                            )
+                        }
+                    }
+                    else
+                    {
+                        $0[Record.NounMap[.json]] = maps / Record.NounMap[.json]
+                    }
+
+                    $0[Record.NounMap[.hash]] = maps / Record.NounMap[.hash]
+                }
             }
         }
     }

@@ -303,6 +303,7 @@ let package:Package = .init(
         .target(name: "UnidocAnalysis", dependencies:
             [
                 .target(name: "UnidocRecords"),
+                .target(name: "MD5"),
             ]),
 
         .target(name: "UnidocDatabase", dependencies:
