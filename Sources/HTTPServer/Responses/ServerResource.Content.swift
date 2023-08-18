@@ -5,8 +5,8 @@ extension ServerResource
     @frozen public
     enum Content:Equatable, Sendable
     {
-        case buffer(ByteBuffer)
         case binary([UInt8])
+        case buffer(ByteBuffer)
         case string(String)
         case length(Int)
     }
@@ -20,8 +20,8 @@ extension ServerResource.Content
     {
         switch self
         {
+        case .binary(let buffer):   self = .length(buffer.count)
         case .buffer(let buffer):   self = .length(buffer.readableBytes)
-        case .binary(let bytes):    self = .length(bytes.count)
         case .string(let string):   self = .length(string.utf8.count)
         case .length:               return
         }

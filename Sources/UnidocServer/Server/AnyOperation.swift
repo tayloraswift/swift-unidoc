@@ -88,7 +88,8 @@ extension AnyOperation
             return .database(QueryOperation<WideQuery>.init(
                 explain: explain,
                 query: query,
-                uri: uri))
+                uri: uri,
+                tag: tag))
 
         case Site.Guides.root:
             let query:ThinQuery<Selector.Planes> = .init(for: .article, in: .init(trunk))
@@ -96,7 +97,8 @@ extension AnyOperation
             return .database(QueryOperation<ThinQuery<Selector.Planes>>.init(
                 explain: explain,
                 query: query,
-                uri: uri))
+                uri: uri,
+                tag: tag))
 
         case Site.NounMaps.root:
             let query:NounMapQuery = .init(zone: .init(trunk), tag: tag)
@@ -104,7 +106,8 @@ extension AnyOperation
             return .database(QueryOperation<NounMapQuery>.init(
                 explain: explain,
                 query: query,
-                uri: uri))
+                uri: uri,
+                tag: tag))
 
         case _:
             return nil

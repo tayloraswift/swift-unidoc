@@ -1,4 +1,5 @@
 import HTTPServer
+import MD5
 import MongoDB
 import UnidocDatabase
 import URI
@@ -6,15 +7,17 @@ import URI
 struct QueryOperation<Query>:Sendable
     where Query:DatabaseQuery, Query.Output:ServerResponseFactory<URI>
 {
-    let requested:URI
-    var explain:Bool
-    var query:Query
+    let explain:Bool
+    let query:Query
+    let uri:URI
+    let tag:MD5?
 
-    init(explain:Bool, query:Query, uri:URI)
+    init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
     {
-        self.requested = uri
         self.explain = explain
         self.query = query
+        self.uri = uri
+        self.tag = tag
     }
 }
 extension QueryOperation:DatabaseOperation
@@ -34,15 +37,22 @@ extension QueryOperation:DatabaseOperation
                 type: .text(.plain, charset: .utf8)))
         }
 
-        if  let output:Query.Output = try await database.execute(
-                query: self.query,
-                with: session)
-        {
-            return try output.response(for: self.requested)
-        }
+        guard   let output:Query.Output = try await database.execute(
+                    query: self.query,
+                    with: session)
         else
         {
             return nil
+        }
+
+        switch try output.response(for: self.uri)
+        {
+        case .redirect(let redirect):
+            return .redirect(redirect)
+
+        case .resource(var resource):
+            resource.optimize(tag: self.tag)
+            return .resource(resource)
         }
     }
 }
