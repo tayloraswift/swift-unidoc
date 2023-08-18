@@ -4,14 +4,11 @@
 @import 'Declarations';
 @import 'Groups';
 @import 'Logo';
+@import 'Searchbars';
 @import 'Sidebar';
 @import 'Typefaces';
 @import 'Prose';
 
-nav
-{
-    padding: 0.25rem 0;
-}
 body
 {
     min-height: 100vw;
@@ -50,8 +47,42 @@ body
     }
 }
 
+//  Navigation bar
+body div.content header
+{
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+
+    nav
+    {
+        background-color: $light-background;
+        width: 100%;
+        padding-left: 1rem;
+        position: relative;
+        left: -1rem;
+    }
+    nav.decl
+    {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    nav.default
+    {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+
+    > div
+    {
+        max-width: 48rem;
+    }
+}
+
 body main
 {
+    margin-top: 6rem;
+
     section.introduction,
     section.parameters,
     section.returns,
