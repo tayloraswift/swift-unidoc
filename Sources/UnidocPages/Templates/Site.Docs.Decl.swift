@@ -93,6 +93,9 @@ extension Site.Docs.Decl:FixedPage
                     }
                 }
             }
+        }
+        header[.div, { $0.class = "search-results-container" }]
+        {
             $0[.ol] { $0.id = "search-results" }
         }
     }
