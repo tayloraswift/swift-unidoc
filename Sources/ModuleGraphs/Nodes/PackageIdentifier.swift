@@ -50,10 +50,7 @@ extension PackageIdentifier:LosslessStringConvertible
         switch string.lowercased()
         {
         case    "swift-standard-library",
-                "standard-library",
-                "swift-stdlib",
-                "stdlib",
-                "std":
+                "swift-core-libraries":
             self = .swift
 
         case let name:
