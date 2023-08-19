@@ -36,6 +36,7 @@ extension Database
     var trees:Trees { .init(database: self.id) }
     var nouns:Nouns { .init(database: self.id) }
     var zones:Zones { .init(database: self.id) }
+    var siteMaps:SiteMaps { .init(database: self.id) }
 
     public static
     var collation:Mongo.Collation
@@ -69,6 +70,7 @@ extension Database
             try await self.trees.setup(with: session)
             try await self.nouns.setup(with: session)
             try await self.zones.setup(with: session)
+            try await self.siteMaps.setup(with: session)
         }
         catch let error
         {
@@ -106,6 +108,7 @@ extension Database
         try await self.trees.replace(with: session)
         try await self.nouns.replace(with: session)
         try await self.zones.replace(with: session)
+        try await self.siteMaps.replace(with: session)
 
         for zone:Unidoc.Zone in zones
         {
@@ -144,6 +147,13 @@ extension Database
 
         try await self.push(records, with: session)
         return receipt
+    }
+
+    public
+    func siteMap(_ package:__owned PackageIdentifier,
+        with session:__shared Mongo.Session) async throws -> Record.SiteMap<PackageIdentifier>?
+    {
+        try await self.siteMaps.find(by: package, with: session)
     }
 }
 extension Database
@@ -212,7 +222,11 @@ extension Database
 
         if  records.zone.latest
         {
-            try await self.groups.insert(records.groups(latest: true), with: session)
+            try await self.siteMaps.upsert(records.siteMap(for: records.zone.package),
+                with: session)
+
+            try await self.groups.insert(records.groups(latest: true),
+                with: session)
         }
         else
         {

@@ -32,6 +32,30 @@ struct Records
 extension Records
 {
     public
+    func siteMap(for id:PackageIdentifier) -> Record.SiteMap<PackageIdentifier>
+    {
+        var lines:[UInt8] = []
+        for master:Record.Master in self.masters
+        {
+            switch master
+            {
+            case .culture(let master):
+                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+
+            case .article(let master):
+                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+
+            case .decl(let master):
+                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+
+            case .file:
+                break
+            }
+        }
+
+        return .init(id: id, lines: lines)
+    }
+    public
     func indexes() -> (Record.NounMap, [Record.NounTree])
     {
         var modules:[Unidoc.Scalar: ModuleIdentifier] = [:]
@@ -65,9 +89,10 @@ extension Records
 
         //  TODO: include extended types
 
-        let trees:[Record.NounTree] = types.trees()
-        let map:Record.NounMap = .init(id: self.zone.id, from: trees, for: modules)
+        let nounTrees:[Record.NounTree] = types.trees()
+        let nounMap:Record.NounMap = .init(id: self.zone.id, from: nounTrees, for: modules)
 
-        return (map, trees)
+        return (nounMap, nounTrees)
     }
 }
+
