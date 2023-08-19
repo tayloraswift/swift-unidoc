@@ -1,38 +1,46 @@
 @import 'Colors';
 @import 'Typefaces';
 
-ul.nountree
+div.nountree
 {
+    margin-left: 1rem;
     margin-top: 10rem;
 
     font-family: $typeface-monospace;
     font-size: 0.8125rem;
 
-    > li::first-letter
+    > a::first-letter
     {
         color: $light-accent-barbie-pink;
     }
+
+    > a.extension::first-letter
+    {
+        color: $light-accent-lavender;
+    }
 }
-ul.nountree,
-ul.nountree ul
+div.nountree div.indent
 {
-    list-style-type: none;
     padding-left: 1.0rem;
 }
-ul.nountree li
+div.nountree
 {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: '...';
-    color: $light-foreground-semi;
-
-    a
+    a, span
     {
-        color: inherit;
+        display: block;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: '...';
+        color: $light-foreground-semi;
+
     }
     a:hover
     {
         text-decoration: none;
         color: $light-accent-barbie-pink;
+    }
+    a.extension:hover
+    {
+        color: $light-accent-lavender;
     }
 }

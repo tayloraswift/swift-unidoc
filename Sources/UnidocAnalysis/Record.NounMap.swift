@@ -13,6 +13,11 @@ extension Record
     {
         public
         let id:Unidoc.Zone
+        /// The contents of the noun map, encoded as JSON. The server never parses it back; it
+        /// is only ever sent to the client as opaque data.
+        ///
+        /// There are many things we could do to make this JSON smaller. But none of them would
+        /// be as effective as applying a general text compression algorithm to the raw string.
         public
         let json:JSON
 

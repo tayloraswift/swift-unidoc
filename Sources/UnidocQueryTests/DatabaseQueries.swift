@@ -175,10 +175,10 @@ struct DatabaseQueries:MongoTestBattery
                     tests.expect(master.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Barbie", top: true),
-                            .init(stem: "BarbieCore Barbie ID", top: false),
-                            .init(stem: "BarbieCore Barbie PlasticKeychain", top: false),
-                            .init(stem: "BarbieCore Getting-Started", top: true),
+                            .init(stem: "BarbieCore Barbie", same: .culture),
+                            .init(stem: "BarbieCore Barbie ID", same: .culture),
+                            .init(stem: "BarbieCore Barbie PlasticKeychain", same: .culture),
+                            .init(stem: "BarbieCore Getting-Started", same: .culture),
                         ])
                 }
             }
@@ -206,8 +206,9 @@ struct DatabaseQueries:MongoTestBattery
                 {
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Barbie Dreamhouse", top: true),
-                            .init(stem: "BarbieCore Barbie Dreamhouse Keys", top: false),
+                            .init(stem: "BarbieCore Barbie", same: .package),
+                            .init(stem: "BarbieCore Barbie Dreamhouse", same: .culture),
+                            .init(stem: "BarbieCore Barbie Dreamhouse Keys", same: .culture),
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.secondary.lazy.map(\.id))

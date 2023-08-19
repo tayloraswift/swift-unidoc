@@ -21,16 +21,16 @@ enum Main:SyncTests
                     "BarbieCore Barbie ID",
                     "BarbieCore Raquelle",
                     "BarbieCore Raquelle ID",
-                ].map
+                ].enumerated().map
                 {
-                    .decl(.init(id: culture.zone + 0 * .decl,
+                    .decl(.init(id: culture.zone + $0.0 * .decl,
                         flags: .init(
                             phylum: .struct,
                             kinks: [],
                             route: .unhashed),
                         signature: .init(),
                         symbol: .init(.s, ascii: ""),
-                        stem: $0,
+                        stem: $0.1,
                         superforms: [],
                         namespace: culture,
                         culture: culture,
@@ -51,12 +51,12 @@ enum Main:SyncTests
             {
                 tests.expect(tree ==? .init(id: culture, rows:
                     [
-                        .init(stem: "BarbieCore Barbie", top: true),
-                        .init(stem: "BarbieCore Barbie ID", top: false),
-                        .init(stem: "BarbieCore Barbie PlasticKeychain", top: false),
-                        .init(stem: "BarbieCore Raquelle", top: true),
-                        .init(stem: "BarbieCore Raquelle ID", top: false),
-                        .init(stem: "BarbieCore Raquelle PlasticKeychain", top: false),
+                        .init(stem: "BarbieCore Barbie", same: .culture),
+                        .init(stem: "BarbieCore Barbie ID", same: .culture),
+                        .init(stem: "BarbieCore Barbie PlasticKeychain", same: .culture),
+                        .init(stem: "BarbieCore Raquelle", same: .culture),
+                        .init(stem: "BarbieCore Raquelle ID", same: .culture),
+                        .init(stem: "BarbieCore Raquelle PlasticKeychain", same: .culture),
                     ]))
             }
         }
@@ -71,33 +71,43 @@ enum Main:SyncTests
             if  let tests:TestGroup = tests / "One",
                     tests.roundtrip(Record.NounTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC", hash: nil, top: true),
+                        .init(stem: "CryptoKit BTC"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Many",
                     tests.roundtrip(Record.NounTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC", hash: nil, top: true),
-                        .init(stem: "CryptoKit ETH", hash: nil, top: true),
-                        .init(stem: "CryptoKit ETH Classic", hash: nil, top: false),
-                        .init(stem: "CryptoKit SOL", hash: nil, top: true),
+                        .init(stem: "CryptoKit BTC"),
+                        .init(stem: "CryptoKit ETH"),
+                        .init(stem: "CryptoKit ETH Classic"),
+                        .init(stem: "CryptoKit SOL"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Hashed",
                     tests.roundtrip(Record.NounTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC", hash: nil, top: true),
-                        .init(stem: "CryptoKit ETH", hash: nil, top: true),
-                        .init(stem: "CryptoKit ETH Classic", hash: nil, top: false),
+                        .init(stem: "CryptoKit BTC"),
+                        .init(stem: "CryptoKit ETH"),
+                        .init(stem: "CryptoKit ETH Classic"),
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
-                            hash: .init(hashing: "moist"),
-                            top: false),
+                            hash: .init(hashing: "moist")),
+                        .init(stem: "CryptoKit ETH Classic\tinit(_:)",
+                            hash: .init(hashing: "the’ir")),
+                        .init(stem: "CryptoKit SOL"),
+                    ]))
+            {
+            }
+            if  let tests:TestGroup = tests / "Races",
+                    tests.roundtrip(Record.NounTree.init(id: id, rows:
+                    [
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
                             hash: .init(hashing: "the’ir"),
-                            top: false),
-                        .init(stem: "CryptoKit SOL", hash: nil, top: true),
+                            same: .culture),
+                        .init(stem: "CryptoCore BTC\tinit(_:)",
+                            hash: .init(hashing: "the’ir"),
+                            same: .package),
                     ]))
             {
             }
