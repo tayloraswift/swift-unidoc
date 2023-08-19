@@ -57,23 +57,3 @@ extension Record.NounTree:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(), table: try bson[.table].decode())
     }
 }
-extension Record.NounTree:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        var description:String = ""
-        for row:Record.Noun in self.rows
-        {
-            if  row.top
-            {
-                description += "\(row.shoot.stem.name)\n"
-            }
-            else
-            {
-                description += "\(row.shoot.description())\n"
-            }
-        }
-        return description
-    }
-}

@@ -1,11 +1,14 @@
 import FNV1
 import UnidocRecords
 
-extension Record.NounTree
+extension Record.Noun
 {
-    @available(*, deprecated, renamed: "Record.Noun")
-    public
-    typealias Row = Record.Noun
+    @frozen public
+    enum Race:UInt8, Equatable, Hashable, Sendable
+    {
+        case culture = 0x01
+        case package = 0x02
+    }
 }
 extension Record
 {
@@ -15,28 +18,21 @@ extension Record
         public
         let shoot:Record.Shoot
         public
-        let top:Bool
+        let same:Race?
 
-        @inlinable public
-        init(shoot:Record.Shoot, top:Bool = false)
+        @inlinable internal
+        init(shoot:Record.Shoot, same:Race? = nil)
         {
             self.shoot = shoot
-            self.top = top
+            self.same = same
         }
     }
 }
 extension Record.Noun
 {
     @inlinable public
-    init(stem:Record.Stem, hash:FNV24? = nil, top:Bool = false)
+    init(stem:Record.Stem, hash:FNV24? = nil, same race:Race? = nil)
     {
-        self.init(shoot: .init(stem: stem, hash: hash), top: top)
+        self.init(shoot: .init(stem: stem, hash: hash), same: race)
     }
-}
-extension Record.Noun
-{
-    /// Returns 1 if this is a top-level row, otherwise returns the ``Record.Stem depth``
-    /// of the ``shoot``’s stem.
-    @inlinable public
-    var depth:Int { self.top ? 1 : self.shoot.stem.depth }
 }

@@ -30,9 +30,7 @@ extension Record.NounTree.Table:BSONEncodable
             row.shoot.serialize(into: &buffer)
             // We are kind of abusing these control characters here, but the point is that
             // they will never conflict with the UTF-8 encoding of a valid index node.
-            buffer.append(row.top ?
-                0x01 :  // Start-of-Heading
-                0x02)   // Start-of-Text
+            buffer.append(row.same?.rawValue ?? 0x03)
         }
 
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: buffer).encode(to: &field)
@@ -47,14 +45,14 @@ extension Record.NounTree.Table:BSONDecodable, BSONBinaryViewDecodable
 
         var start:Bytes.Index = bson.slice.startIndex
         while   let end:Bytes.Index = bson.slice[start...].firstIndex(
-                    where: { $0 == 0x01 || $0 == 0x02 })
+                    where: { 0x01 ... 0x03 ~= $0 })
         {
             let shoot:Record.Shoot = .deserialize(from: bson.slice[start ..< end])
-            let top:Bool = bson.slice[end] == 0x01
+            let race:Record.Noun.Race? = .init(rawValue: bson.slice[end])
 
             start = bson.slice.index(after: end)
 
-            self.rows.append(.init(shoot: shoot, top: top))
+            self.rows.append(.init(shoot: shoot, same: race))
         }
     }
 }

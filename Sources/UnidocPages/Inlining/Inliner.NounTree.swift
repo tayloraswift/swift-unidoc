@@ -25,40 +25,47 @@ extension Inliner.NounTree:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        var depth:Int = 0
-
-        for noun:Record.Noun in self.nouns
+        //  Unfortunately, this cannot be a proper `ul`, because `ul` cannot contain another
+        //  `ul` as a direct child.
+        html[.div, { $0.class = "nountree" }]
         {
-            let current:Int = noun.depth
-            if  current < depth
+            var depth:Int = 1
+
+            for noun:Record.Noun in self.nouns
             {
-                for _:Int in current ..< depth
+                let current:Int = max(1, noun.shoot.stem.depth)
+                if  current < depth
                 {
-                    html.close(.ul)
+                    for _:Int in current ..< depth
+                    {
+                        $0.close(.div)
+                    }
+                }
+                else
+                {
+                    for _:Int in depth ..< current
+                    {
+                        $0.open(.div) { $0.class = "indent" }
+                    }
+                }
+
+                depth = current
+
+                //  The URI is only correct if the noun is a citizen in the principal zone!
+                var uri:URI { Site.Docs[self.inliner.zones.principal, noun.shoot] }
+                let name:Substring = noun.shoot.stem.last
+
+                switch noun.same
+                {
+                case nil:       $0[.span] = name
+                case .culture?: $0[.a] { $0.href = "\(uri)" } = name
+                case .package?: $0[.a] { $0.href = "\(uri)" ; $0.class = "extension" } = name
                 }
             }
-            else
+            for _:Int in 1 ..< depth
             {
-                for i:Int in depth ..< current
-                {
-                    html.open(.ul) { $0.class = i == 0 ? "nountree" : nil }
-                }
+                $0.close(.div)
             }
-
-            depth = current
-
-            html[.li]
-            {
-                let uri:URI = Site.Docs[self.inliner.zones.principal, noun.shoot]
-
-                $0[.a] { $0.href = "\(uri)" } = noun.top ?
-                    noun.shoot.stem.name :
-                    noun.shoot.stem.last
-            }
-        }
-        for _:Int in 0 ..< depth
-        {
-            html.close(.ul)
         }
     }
 }
