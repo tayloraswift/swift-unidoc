@@ -302,7 +302,7 @@ let package:Package = .init(
 
         .target(name: "UnidocAnalysis", dependencies:
             [
-                .target(name: "UnidocRecords"),
+                .target(name: "UnidocSelectors"),
                 .target(name: "MD5"),
             ]),
 
@@ -310,7 +310,6 @@ let package:Package = .init(
             [
                 .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
-                .target(name: "UnidocSelectors"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
