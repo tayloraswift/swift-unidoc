@@ -79,6 +79,7 @@ extension DynamicLinker
             diagnostics: diagnostics,
             extensions: extensions)
 
+        self.synthesizeTopics()
         self.link(clients: clients)
 
         //  Create file records.
@@ -108,8 +109,33 @@ extension DynamicLinker
 extension DynamicLinker
 {
     private mutating
+    func synthesizeTopics()
+    {
+
+    }
+    private mutating
     func link(clients:[DynamicClientGroup])
     {
+        //  Create a synthetic topic containing all the cultures. This will become a “See Also”
+        //  for their module pages, unless they belong to a custom topic group.
+        let cultures:Record.Group.Topic = .init(id: self.topic.id(),
+            members: self.current.graph.cultures.indices.sorted
+            {
+                self.current.graph.namespaces[$0] <
+                self.current.graph.namespaces[$1]
+            }
+            .map
+            {
+                .scalar(self.current.zone + $0 * .module)
+            })
+
+        self.groups.append(.topic(cultures))
+
+        for c:Int in self.current.graph.cultures.indices
+        {
+            self.topics[c * .module] = cultures.id
+        }
+
         //  First pass to create the topic records, which also populates topic memberships.
         for ((culture, input), clients):
             ((Int, SymbolGraph.Culture), DynamicClientGroup) in zip(zip(
@@ -191,7 +217,7 @@ extension DynamicLinker
 
             for case .scalar(let master) in record.members
             {
-                //  TODO: diagnose overlapping topics
+                //  This may replace a synthesized topic.
                 if  let local:Int32 = master - self.current.zone
                 {
                     self.topics[local] = record.id
