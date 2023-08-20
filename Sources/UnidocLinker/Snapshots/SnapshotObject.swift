@@ -46,12 +46,25 @@ extension SnapshotObject
             snapshot.graph.decls.nodes.indices,
             snapshot.graph.decls.nodes)
         {
+            guard let n:Unidoc.Scalar = scalars.decls[n]
+            else
+            {
+                continue
+            }
+
+            if  let requirements:[Int32] = node.decl?.requirements
+            {
+                for requirement:Int32 in requirements
+                {
+                    hierarchy[requirement] = n
+                }
+            }
             for `extension`:SymbolGraph.Extension in node.extensions
             {
                 for nested:Int32 in `extension`.nested where
                     snapshot.graph.decls.contains(citizen: nested)
                 {
-                    hierarchy[nested] = scalars.decls[n]
+                    hierarchy[nested] = n
                 }
             }
         }

@@ -325,6 +325,7 @@ extension DynamicLinker
             {
                 self.current.scalars.decls[$0]
             }
+
             for s:Unidoc.Scalar in superforms
             {
                 let implicit:ExtensionSignature = .init(conditions: [],
