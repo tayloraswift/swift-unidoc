@@ -9,9 +9,9 @@ extension Record.Group
         let id:Unidoc.Scalar
 
         public
-        let culture:Unidoc.Scalar
+        let culture:Unidoc.Scalar?
         public
-        let scope:Unidoc.Scalar
+        let scope:Unidoc.Scalar?
 
         /// Additional scalars to prefetch when this extension is loaded.
         /// This is used to obtain the masters for passage referents in the
@@ -27,8 +27,8 @@ extension Record.Group
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            culture:Unidoc.Scalar,
-            scope:Unidoc.Scalar,
+            culture:Unidoc.Scalar? = nil,
+            scope:Unidoc.Scalar? = nil,
             prefetch:[Unidoc.Scalar] = [],
             overview:Record.Passage? = nil,
             members:[Record.Link] = [])

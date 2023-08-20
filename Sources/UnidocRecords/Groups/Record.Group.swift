@@ -26,9 +26,10 @@ extension Record.Group
         /// constraints, which contain scalars.
         case conditions = "g"
 
-        /// Always present, contains a scalar.
+        /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
         case culture = "c"
-        /// Always present, contains a scalar (but usually doesn’t need a secondary lookup).
+        /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
+        /// Usually doesn’t need a secondary lookup.
         case scope = "X"
 
         /// Optional and appears in ``Extension`` only.
@@ -133,7 +134,7 @@ extension Record.Group:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.members] = self.members.isEmpty ? nil : self.members
 
-            zones.update(with: self.culture.zone)
+            zones.update(with: self.culture?.zone)
             zones.update(with: self.prefetch)
         }
 
@@ -149,8 +150,8 @@ extension Record.Group:BSONDocumentDecodable
         if  case .topic? = id.plane
         {
             self = .topic(.init(id: id,
-                culture: try bson[.culture].decode(),
-                scope: try bson[.scope].decode(),
+                culture: try bson[.culture]?.decode(),
+                scope: try bson[.scope]?.decode(),
                 prefetch: try bson[.prefetch]?.decode() ?? [],
                 overview: try bson[.overview]?.decode(),
                 members: try bson[.members]?.decode() ?? []))
