@@ -2,5 +2,5 @@ import SemanticVersions
 
 enum ABI
 {
-    static let version:MinorVersion = .v(6, 0)
+    static let version:MinorVersion = .v(7, 0)
 }

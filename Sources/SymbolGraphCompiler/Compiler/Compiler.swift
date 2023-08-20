@@ -167,18 +167,11 @@ extension Compiler
     func assign(_ relationship:Symbol.RequirementRelationship, by culture:Int) throws
     {
         /// Protocol must always be from the same module.
-        guard let `protocol`:DeclObject = try self.declarations(internal: relationship.target)
-        else
+        if  let target:DeclObject = try self.declarations(internal: relationship.target),
+            let source:DeclObject = try self.declarations(internal: relationship.source)
         {
-            return // Protocol is hidden.
-        }
-        if  let requirement:DeclObject = try self.declarations(internal: relationship.source)
-        {
-            try requirement.assign(nesting: relationship)
-
-            //  Generate an implicit, internal extension for this requirement,
-            //  if one does not already exist.
-            self.extensions(culture, `protocol`, where: []).add(nested: requirement.id)
+            try source.assign(scope: relationship)
+            try target.add(requirement: source.id)
         }
     }
     private mutating
@@ -253,7 +246,7 @@ extension Compiler
                 //  We should never see an external type reference here either.
                 if  let type:DeclObject = try self.declarations(internal: type)
                 {
-                    try member.assign(nesting: relationship)
+                    try member.assign(scope: relationship)
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
                     self.extensions(culture, type, where: member.conditions).add(
@@ -264,7 +257,7 @@ extension Compiler
                 let group:ExtensionObject = try self.extensions.named(block)
                 if  group.conditions == member.conditions
                 {
-                    try member.assign(nesting: relationship)
+                    try member.assign(scope: relationship)
                     group.add(nested: member.id)
                 }
                 else

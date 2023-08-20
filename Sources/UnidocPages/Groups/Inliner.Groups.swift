@@ -12,6 +12,8 @@ extension Inliner
         let inliner:Inliner
 
         private
+        let requirements:[Unidoc.Scalar]?
+        private
         let superforms:[Unidoc.Scalar]?
         private
         let extensions:[Record.Group.Extension]
@@ -27,6 +29,7 @@ extension Inliner
 
         private
         init(_ inliner:Inliner,
+            requirements:[Unidoc.Scalar]?,
             superforms:[Unidoc.Scalar]?,
             extensions:[Record.Group.Extension],
             topics:[Record.Group.Topic],
@@ -36,6 +39,7 @@ extension Inliner
         {
             self.inliner = inliner
 
+            self.requirements = requirements
             self.superforms = superforms
             self.extensions = extensions
             self.topics = topics
@@ -48,6 +52,7 @@ extension Inliner
 extension Inliner.Groups
 {
     init(_ inliner:__owned Inliner,
+        requirements:__owned [Unidoc.Scalar] = [],
         superforms:__owned [Unidoc.Scalar] = [],
         generics:__shared [GenericParameter] = [],
         groups:__shared [Record.Group],
@@ -81,6 +86,7 @@ extension Inliner.Groups
         }
 
         self.init(inliner,
+            requirements: requirements.isEmpty ? nil : requirements,
             superforms: superforms.isEmpty ? nil : superforms,
             extensions: libraries.sorted
             {
@@ -198,13 +204,27 @@ extension Inliner.Groups:HyperTextOutputStreamable
             }
         }
 
+        if  let requirements:[Unidoc.Scalar] = self.requirements
+        {
+            html[.section, { $0.class = "group requirements" }]
+            {
+                $0[.h2] = "Requirements"
+                $0[.ul]
+                {
+                    for requirement:Unidoc.Scalar in requirements
+                    {
+                        $0 ?= self.inliner.card(requirement)
+                    }
+                }
+            }
+        }
+
         for group:Record.Group.Extension in self.extensions
         {
             html[.section, { $0.class = "group extension" }]
             {
                 $0 += self.header(for: group)
 
-                $0 ?= self.list(group.requirements, under: "Requirements")
                 $0 ?= self.list(group.conformances, under: "Conformances")
                 $0 ?= self.list(group.nested, under: "Members")
                 $0 ?= self.list(group.features, under: "Features")

@@ -23,6 +23,8 @@ extension Record.Master
         let stem:Record.Stem
 
         public
+        let requirements:[Unidoc.Scalar]
+        public
         let superforms:[Unidoc.Scalar]
         public
         let namespace:Unidoc.Scalar
@@ -48,7 +50,8 @@ extension Record.Master
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Record.Stem,
-            superforms:[Unidoc.Scalar],
+            requirements:[Unidoc.Scalar] = [],
+            superforms:[Unidoc.Scalar] = [],
             namespace:Unidoc.Scalar,
             culture:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
@@ -65,6 +68,7 @@ extension Record.Master
             self.symbol = symbol
             self.stem = stem
 
+            self.requirements = requirements
             self.superforms = superforms
             self.namespace = namespace
             self.culture = culture

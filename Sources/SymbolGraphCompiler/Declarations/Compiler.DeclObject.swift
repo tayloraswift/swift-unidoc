@@ -66,32 +66,32 @@ extension Compiler.DeclObject
             self.value.origin = origin
 
         case let other?:
-            throw Compiler.OriginError.conflict(with: other)
+            throw Compiler.SemanticError.already(has: .origin(other))
         }
     }
     /// Assigns a lexical scope to this scalar object.
-    func assign(nesting:some NestingRelationship) throws
+    func assign(scope relationship:some NestingRelationship) throws
     {
-        guard nesting.validate(source: self.value.phylum)
+        guard relationship.validate(source: self.value.phylum)
         else
         {
-            throw Compiler.NestingError.phylum(self.value.phylum)
+            throw Compiler.SemanticError.cannot(have: .scope, as: self.value.phylum)
         }
 
         //  Allowed to restate the exact same nesting relationship multiple times.
         //  This sometimes happens when compiling C modules.
         if  let scope:Symbol = self.scope,
-                scope != nesting.scope
+                scope != relationship.scope
         {
-            throw Compiler.NestingError.conflict(with: scope)
+            throw Compiler.SemanticError.already(has: .scope(scope))
         }
         else
         {
-            self.scope = nesting.scope
-            self.kinks += nesting.kinks
+            self.scope = relationship.scope
+            self.kinks += relationship.kinks
         }
 
-        if  let origin:Symbol.Decl = nesting.origin
+        if  let origin:Symbol.Decl = relationship.origin
         {
             try self.assign(origin: origin)
         }
@@ -103,28 +103,42 @@ extension Compiler.DeclObject
     /// relationship, it can receive additional superforms of that type, but it
     /// cannot receive a ``SymbolRelationship Override``, because a scalar cannot
     /// be a default implementation and a protocol requirement at the same time.
-    func add<Superform>(superform:Superform) throws
+    func add<Superform>(superform relationship:Superform) throws
         where Superform:SuperformRelationship
     {
-        guard superform.validate(source: self.value.phylum)
+        guard relationship.validate(source: self.value.phylum)
         else
         {
-            throw Compiler.SuperformError.phylum(self.value.phylum)
+            throw Compiler.SemanticError.cannot(have: .superforms(besides: nil),
+                as: self.value.phylum)
         }
 
         switch self.superforms
         {
         case nil, (is Superform.Type)?:
-            self.value.superforms.insert(superform.target)
-            self.kinks += superform.kinks
+            self.value.superforms.insert(relationship.target)
+            self.kinks += relationship.kinks
             self.superforms = Superform.self
 
         case let type?:
-            throw Compiler.SuperformError.conflict(with: type)
+            throw Compiler.SemanticError.cannot(have: .superforms(besides: type),
+                as: self.value.phylum)
         }
-        if  let origin:Symbol.Decl = superform.origin
+        if  let origin:Symbol.Decl = relationship.origin
         {
             try self.assign(origin: origin)
+        }
+    }
+    /// Adds a requirement to this scalar object, assuming it is a protocol.
+    func add(requirement:Symbol.Decl) throws
+    {
+        if  case .protocol = self.value.phylum
+        {
+            self.value.requirements.insert(requirement)
+        }
+        else
+        {
+            throw Compiler.SemanticError.cannot(have: .requirements, as: self.value.phylum)
         }
     }
     /// Adds an *unqualified* feature to this scalar object.

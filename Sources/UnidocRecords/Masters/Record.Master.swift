@@ -149,6 +149,8 @@ extension Record.Master
         /// Only appears in ``Decl``.
         case signature_generics_parameters = "G"
         /// Only appears in ``Decl``. The field contains a list of scalars.
+        case requirements = "r"
+        /// Only appears in ``Decl``. The field contains a list of scalars.
         case superforms = "p"
         /// Only appears in ``Decl``, and only when different from ``culture``.
         /// The field contains a scalar.
@@ -232,6 +234,7 @@ extension Record.Master:BSONDocumentEncodable
 
             bson[.stem] = self.stem
 
+            bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
             bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
             bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
             bson[.culture] = self.culture
@@ -319,6 +322,7 @@ extension Record.Master:BSONDocumentDecodable
                         parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
                 symbol: try bson[.symbol].decode(),
                 stem: try bson[.stem].decode(),
+                requirements: try bson[.requirements]?.decode() ?? [],
                 superforms: try bson[.superforms]?.decode() ?? [],
                 namespace: try bson[.namespace]?.decode() ?? culture,
                 culture: culture,

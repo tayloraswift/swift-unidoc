@@ -32,13 +32,16 @@ extension SymbolGraph
         public
         var article:Article?
 
+        /// Protocol requirements.
+        public
+        var requirements:[Int32]
         /// The addresses of the scalars that this scalar implements,
         /// overrides, or inherits from. Superforms are intrinsic but there
         /// can be more than one per scalar.
         ///
         /// All of the superforms in this array have the same relationship
         /// to this declaration; the relationship type is a function of
-        /// ``aperture`` and ``phylum``.
+        /// ``kinks`` and ``phylum``.
         public
         var superforms:[Int32]
         /// The addresses of the *unqualified* features inherited by this
@@ -63,6 +66,7 @@ extension SymbolGraph
             signature:Signature<Int32> = .init(),
             location:SourceLocation<Int32>? = nil,
             article:Article? = nil,
+            requirements:[Int32] = [],
             superforms:[Int32] = [],
             features:[Int32] = [],
             origin:Int32? = nil)
@@ -76,6 +80,7 @@ extension SymbolGraph
             self.location = location
             self.article = article
 
+            self.requirements = requirements
             self.superforms = superforms
             self.features = features
             self.origin = origin
@@ -105,6 +110,7 @@ extension SymbolGraph.Decl
         case signature_generics_constraints = "C"
         case signature_generics_parameters = "G"
 
+        case requirements = "R"
         case superforms = "S"
         case features = "F"
         case origin = "O"
@@ -144,6 +150,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
             self.signature.generics.parameters.isEmpty ? nil :
             self.signature.generics.parameters
 
+        bson[.requirements] = SymbolGraph.Buffer.init(elidingEmpty: self.requirements)
         bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
         bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
 
@@ -179,6 +186,8 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
 
             location: try bson[.location]?.decode(),
             article: try bson[.article]?.decode(),
+            requirements: try bson[.requirements]?.decode(
+                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             superforms: try bson[.superforms]?.decode(
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             features: try bson[.features]?.decode(

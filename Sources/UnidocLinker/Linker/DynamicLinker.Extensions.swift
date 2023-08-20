@@ -185,20 +185,7 @@ extension DynamicLinker.Extensions
                 //  just store them without filtering.
                 for d:Int32 in `extension`.nested
                 {
-                    guard let scalar:Unidoc.Scalar = context.current.scalars.decls[d]
-                    else
-                    {
-                        continue
-                    }
-                    //  Requirements can only ever appear in the same culture as
-                    //  the protocol itself, so we can limit our search to the
-                    //  current context only.
-                    if  case .protocol = scope.phylum,
-                        case true? = context.current.graph.decls[d]?.decl?.kinks[is: .required]
-                    {
-                        $0.requirements.append(scalar)
-                    }
-                    else
+                    if  let scalar:Unidoc.Scalar = context.current.scalars.decls[d]
                     {
                         $0.nested.append(scalar)
                     }

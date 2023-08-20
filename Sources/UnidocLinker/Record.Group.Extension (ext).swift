@@ -15,7 +15,6 @@ extension Record.Group.Extension
             conditions: signature.conditions,
             culture: signature.culture,
             scope: signature.extends,
-            requirements: context.sort(lexically: `extension`.requirements),
             conformances: context.sort(lexically: `extension`.conformances),
             features: context.sort(lexically: `extension`.features),
             nested: context.sort(lexically: `extension`.nested),

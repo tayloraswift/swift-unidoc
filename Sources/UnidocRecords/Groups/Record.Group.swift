@@ -33,9 +33,6 @@ extension Record.Group
 
         /// Optional and appears in ``Extension`` only.
         /// The field contains a list of scalars.
-        case requirements = "r"
-        /// Optional and appears in ``Extension`` only.
-        /// The field contains a list of scalars.
         case conformances = "p"
         /// Optional and appears in ``Extension`` only.
         /// The field contains a list of scalars.
@@ -105,7 +102,6 @@ extension Record.Group:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
-            bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
             bson[.conformances] = self.conformances.isEmpty ? nil : self.conformances
             bson[.features] = self.features.isEmpty ? nil : self.features
             bson[.nested] = self.nested.isEmpty ? nil : self.nested
@@ -165,7 +161,6 @@ extension Record.Group:BSONDocumentDecodable
                 conditions: try bson[.conditions]?.decode() ?? [],
                 culture: try bson[.culture].decode(),
                 scope: try bson[.scope].decode(),
-                requirements: try bson[.requirements]?.decode() ?? [],
                 conformances: try bson[.conformances]?.decode() ?? [],
                 features: try bson[.features]?.decode() ?? [],
                 nested: try bson[.nested]?.decode() ?? [],
