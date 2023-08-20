@@ -27,3 +27,11 @@ extension Record.Noun
         self.init(shoot: .init(stem: stem, hash: hash), same: race)
     }
 }
+extension Record.Noun:CustomDebugStringConvertible
+{
+    public
+    var debugDescription:String
+    {
+        "\(self.shoot)\(self.same.map { " (same \($0))" } ?? "")"
+    }
+}

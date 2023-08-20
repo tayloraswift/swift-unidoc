@@ -49,7 +49,13 @@ extension Records.Types
                 //  Prevent infinite loops.
                 for _:Int in 1 ..< max(1, stem.depth)
                 {
-                    guard let type:Unidoc.Scalar = scope, !$0.value.keys.contains(type)
+                    guard let type:Unidoc.Scalar = scope
+                    else
+                    {
+                        break
+                    }
+                    // Don’t synthesize nodes more than once.
+                    guard !$0.value.keys.contains(type), case nil = aliens.update(with: type)
                     else
                     {
                         break
@@ -61,8 +67,7 @@ extension Records.Types
                         scope = type.scope
                         stem = type.shoot.stem
                     }
-                    else if // Don’t synthesize alien nodes more than once!
-                        case nil = aliens.update(with: type),
+                    else if
                         let scope:[Substring] = stem.split()?.scope
                     {
                         for scope:Substring in scope
