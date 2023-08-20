@@ -63,3 +63,14 @@ extension Record.Shoot
         }
     }
 }
+extension Record.Shoot:CustomDebugStringConvertible
+{
+    public
+    var debugDescription:String
+    {
+        self.hash.map
+        {
+            "\"\(self.stem)\" [\($0)]"
+        } ?? "\"\(self.stem)\""
+    }
+}
