@@ -103,6 +103,7 @@ extension Site.Docs.Decl:FixedPage
     func emit(content html:inout HTML.ContentEncoder)
     {
         let groups:Inliner.Groups = .init(self.inliner,
+            requirements: self.master.requirements,
             superforms: self.master.superforms,
             generics: self.master.signature.generics.parameters,
             groups: self.groups,

@@ -331,7 +331,7 @@ extension DynamicLinker
                     culture: culture,
                     extends: s)
 
-                self.extensions[implicit].subforms.append(s)
+                self.extensions[implicit].subforms.append(d)
             }
 
             var record:Record.Master.Decl = .init(id: d,
@@ -342,8 +342,8 @@ extension DynamicLinker
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace.id, decl.path, orientation: decl.phylum.orientation),
-                requirements: requirements,
-                superforms: superforms,
+                requirements: self.context.sort(lexically: requirements),
+                superforms: self.context.sort(lexically: superforms),
                 namespace: namespace.scalar,
                 culture: culture,
                 scope: scope.map { self.context.expand($0) } ?? [],
