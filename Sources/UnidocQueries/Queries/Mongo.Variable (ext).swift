@@ -33,7 +33,6 @@ extension Mongo.Variable<Record.Group>
 
                 for key:T.CodingKey in
                 [
-                    .requirements,
                     .conformances,
                     .features,
                     .nested,

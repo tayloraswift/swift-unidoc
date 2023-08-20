@@ -317,21 +317,21 @@ extension DynamicLinker
                 }
             }
 
+            let requirements:[Unidoc.Scalar] = decl.requirements.compactMap
+            {
+                self.current.scalars.decls[$0]
+            }
             let superforms:[Unidoc.Scalar] = decl.superforms.compactMap
             {
-                if  let s:Unidoc.Scalar = self.current.scalars.decls[$0]
-                {
-                    let implicit:ExtensionSignature = .init(conditions: [],
-                        culture: culture,
-                        extends: s)
+                self.current.scalars.decls[$0]
+            }
+            for s:Unidoc.Scalar in superforms
+            {
+                let implicit:ExtensionSignature = .init(conditions: [],
+                    culture: culture,
+                    extends: s)
 
-                    self.extensions[implicit].subforms.append(d)
-                    return s
-                }
-                else
-                {
-                    return nil
-                }
+                self.extensions[implicit].subforms.append(s)
             }
 
             var record:Record.Master.Decl = .init(id: d,
@@ -342,6 +342,7 @@ extension DynamicLinker
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace.id, decl.path, orientation: decl.phylum.orientation),
+                requirements: requirements,
                 superforms: superforms,
                 namespace: namespace.scalar,
                 culture: culture,

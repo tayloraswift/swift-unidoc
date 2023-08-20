@@ -510,6 +510,7 @@ extension StaticLinker
             }
 
             //  Sort for deterministic addresses.
+            let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
             let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
             let features:[Int32] = self.addresses(of: decl.features.sorted())
             let origin:Int32? = self.address(of: decl.origin)
@@ -543,6 +544,7 @@ extension StaticLinker
                 $0?.location = location
                 $0?.article = article
 
+                $0?.requirements = requirements
                 $0?.superforms = superforms
                 $0?.features = features
                 $0?.origin = origin

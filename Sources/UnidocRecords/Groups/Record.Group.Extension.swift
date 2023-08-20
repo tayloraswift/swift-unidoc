@@ -17,8 +17,6 @@ extension Record.Group
         let scope:Unidoc.Scalar
 
         public
-        let requirements:[Unidoc.Scalar]
-        public
         let conformances:[Unidoc.Scalar]
         public
         let features:[Unidoc.Scalar]
@@ -44,7 +42,6 @@ extension Record.Group
             conditions:[GenericConstraint<Unidoc.Scalar?>],
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,
-            requirements:[Unidoc.Scalar] = [],
             conformances:[Unidoc.Scalar] = [],
             features:[Unidoc.Scalar] = [],
             nested:[Unidoc.Scalar] = [],
@@ -59,7 +56,6 @@ extension Record.Group
             self.culture = culture
             self.scope = scope
 
-            self.requirements = requirements
             self.conformances = conformances
             self.features = features
             self.nested = nested

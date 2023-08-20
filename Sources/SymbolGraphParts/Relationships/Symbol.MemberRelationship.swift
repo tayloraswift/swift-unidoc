@@ -45,7 +45,7 @@ extension Symbol.MemberRelationship:NestingRelationship
         case .func(_?):             return true
         case .initializer:          return true
         case .operator:             return true
-        case .protocol:             return false
+        case .protocol:             return true // SE-404
         case .struct:               return true
         case .subscript:            return true
         case .typealias:            return true

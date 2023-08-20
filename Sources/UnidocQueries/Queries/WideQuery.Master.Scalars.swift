@@ -25,6 +25,7 @@ extension WideQuery.Master.Scalars
         for array:Record.Master.CodingKey in
         [
             .signature_expanded_scalars,
+            .requirements,
             .superforms,
             .scope,
         ]
