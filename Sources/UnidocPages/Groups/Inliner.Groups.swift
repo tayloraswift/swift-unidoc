@@ -238,7 +238,29 @@ extension Inliner.Groups:HyperTextOutputStreamable
                     $0 ?= self.list(group.subforms, under: "Subclasses")
 
                 case _:
-                    $0 ?= self.list(group.subforms, under: "Subforms")
+                    if  self.kinks[is: .required]
+                    {
+                        let (restatements, witnesses):([Unidoc.Scalar], [Unidoc.Scalar]) =
+                            group.subforms.reduce(into: ([], []))
+                        {
+                            if  case true? =
+                                self.inliner.masters[$1]?.decl?.kinks[is: .intrinsicWitness]
+                            {
+                                $0.1.append($1)
+                            }
+                            else
+                            {
+                                $0.0.append($1)
+                            }
+                        }
+
+                        $0 ?= self.list(restatements, under: "Restated By")
+                        $0 ?= self.list(witnesses, under: "Default Implementations")
+                    }
+                    else
+                    {
+                        $0 ?= self.list(group.subforms, under: "Overridden By")
+                    }
                 }
             }
         }
