@@ -1,9 +1,5 @@
 extension Unidoc.Decl
 {
-    @available(*, deprecated, renamed: "Kink")
-    public
-    typealias Customization = Kinks
-
     @frozen public
     struct Kinks:Equatable, Hashable, Sendable
     {
@@ -68,15 +64,3 @@ extension Unidoc.Decl.Kinks
         }
     }
 }
-// extension Unidoc.Decl.Kinks
-// {
-
-//         /// Cannot be overridden (from outside its original module).
-//         case unavailable = 0b0000_0000
-//         /// Can be overridden (open class member).
-//         case available = 0b0000_0001
-//         /// Protocol requirement (must be overridden).
-//         case required = 0b0000_0010
-//         /// Objective-C optional requirement.
-//         case requiredOptionally = 0b0000_0011
-// }
