@@ -68,7 +68,7 @@ extension Site.Docs.Decl.Demonym:HyperTextOutputStreamable
 
         if  self.kinks[is: .intrinsicWitness]
         {
-            html += " (Intrinsic Witness)"
+            html += " (Default Implementation)"
         }
     }
 }
