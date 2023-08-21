@@ -79,7 +79,6 @@ extension DynamicLinker
             diagnostics: diagnostics,
             extensions: extensions)
 
-        self.synthesizeTopics()
         self.link(clients: clients)
 
         //  Create file records.
@@ -108,11 +107,6 @@ extension DynamicLinker
 }
 extension DynamicLinker
 {
-    private mutating
-    func synthesizeTopics()
-    {
-
-    }
     private mutating
     func link(clients:[DynamicClientGroup])
     {
