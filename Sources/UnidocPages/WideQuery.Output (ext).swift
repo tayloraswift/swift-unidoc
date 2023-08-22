@@ -62,6 +62,9 @@ extension WideQuery.Output:ServerResponseFactory
             case .file:
                 //  We should never get this as principal output!
                 throw WideQuery.OutputError.malformed
+
+            case .meta:
+                fatalError("unimplemented")
             }
 
             return .resource(resource)

@@ -29,7 +29,7 @@ extension URL
         case .culture(let culture): self = .relative(Site.Docs[zone, culture.shoot])
         case .decl(let decl):       self = .relative(Site.Docs[zone, decl.shoot])
         case .file(let file):
-            if  let url:String = zone.url(github: file.symbol)
+            if  let url:String = zone.github(blob: file.symbol)
             {
                 self = .absolute(url)
             }
@@ -37,6 +37,7 @@ extension URL
             {
                 return nil
             }
+        case .meta:                 self = .relative(Site.Docs[zone])
         }
     }
 }

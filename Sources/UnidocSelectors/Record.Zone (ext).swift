@@ -12,7 +12,7 @@ extension Record.Zone
     }
 
     public
-    func url(github file:Symbol.File) -> String?
+    func github(blob file:Symbol.File) -> String?
     {
         if  let refname:String = self.refname,
             let github:String = self.github

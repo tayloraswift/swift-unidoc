@@ -8,7 +8,7 @@ extension HTML
         let line:Int?
         let target:String?
 
-        init(file:Substring, line:Int?, target:String?)
+        init(file:Substring, line:Int? = nil, target:String?)
         {
             self.file = file
             self.line = line

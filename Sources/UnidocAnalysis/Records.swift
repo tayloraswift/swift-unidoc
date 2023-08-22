@@ -48,8 +48,8 @@ extension Records
             case .decl(let master):
                 master.shoot.serialize(into: &lines) ; lines.append(0x0A)
 
-            case .file:
-                break
+            case .file, .meta:
+                continue
             }
         }
 
@@ -79,15 +79,13 @@ extension Records
                         shoot: master.shoot,
                         scope: master.scope.last)
                 case _:
-                    break
+                    continue
                 }
 
-            case .file:
-                break
+            case .file, .meta:
+                continue
             }
         }
-
-        //  TODO: include extended types
 
         let nounTrees:[Record.NounTree] = types.trees()
         let nounMap:Record.NounMap = .init(id: self.zone.id, from: nounTrees, for: modules)
