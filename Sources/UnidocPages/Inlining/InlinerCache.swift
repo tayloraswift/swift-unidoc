@@ -96,7 +96,7 @@ extension InlinerCache
         {
             if  case .file(let master)? = self.masters[scalar],
                 let url:String = self.load(scalar,
-                    by: { $0.url(github: master.symbol).map(URL.absolute(_:)) })
+                    by: { $0.github(blob: master.symbol).map(URL.absolute(_:)) })
             {
                 //  Need to append the line fragment here and not in
                 //  ``Record.Zone.url(github:)`` because the cache should

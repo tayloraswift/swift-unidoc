@@ -18,6 +18,7 @@ extension Record
         case culture(Culture)
         case decl(Decl)
         case file(File)
+        case meta(Meta)
     }
 }
 extension Record.Master
@@ -58,6 +59,15 @@ extension Record.Master
         case _:               return nil
         }
     }
+    @inlinable public
+    var meta:Meta?
+    {
+        switch self
+        {
+        case .meta(let meta): return meta
+        case _:               return nil
+        }
+    }
 }
 extension Record.Master:Identifiable
 {
@@ -70,6 +80,7 @@ extension Record.Master:Identifiable
         case .culture(let culture): return culture.id
         case .decl(let decl):       return decl.id
         case .file(let file):       return file.id
+        case .meta(let meta):       return meta.id
         }
     }
 }
@@ -84,6 +95,7 @@ extension Record.Master
         case .culture(let culture): return culture.overview
         case .decl(let decl):       return decl.overview
         case .file:                 return nil
+        case .meta:                 return nil
         }
     }
     @inlinable public
@@ -95,6 +107,7 @@ extension Record.Master
         case .culture(let culture): return culture.details
         case .decl(let decl):       return decl.details
         case .file:                 return nil
+        case .meta:                 return nil
         }
     }
     @inlinable public
@@ -106,6 +119,7 @@ extension Record.Master
         case .culture(let culture): return culture.shoot
         case .decl(let decl):       return decl.shoot
         case .file:                 return nil
+        case .meta:                 return nil
         }
     }
 }
@@ -126,9 +140,21 @@ extension Record.Master
 
         /// Appears in ``Decl`` and ``File``.
         case symbol = "Y"
-        /// Appears in ``Article``, ``Culture``, and ``Decl``, but may be computed
-        /// at encoding-time.
+        /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Meta``, but may be computed
+        /// at encoding-time. In ``Meta``, it is always the empty string.
         case stem = "U"
+
+        /// Appears in ``Meta`` only.
+        case abi = "V"
+        /// Appears in ``Meta`` only. Contains a list of dependencies, which contain zone
+        /// references.
+        case dependencies = "D"
+        /// Appears in ``Meta`` only.
+        case platforms = "O"
+        /// Appears in ``Meta`` only.
+        case revision = "R"
+        /// Appears in ``Meta`` only.
+        case stats = "S"
 
         /// Only appears in ``Module``.
         case module = "M"
@@ -178,7 +204,7 @@ extension Record.Master
         /// each of which may contain a scalar.
         case details = "d"
 
-        /// Can appear in ``Article``, ``Culture``, or ``Decl``.
+        /// Can appear in any master record except a ``File``.
         /// The field contains a *group* scalar. (Not a master scalar!)
         case group = "t"
 
@@ -205,8 +231,18 @@ extension Record.Master:BSONDocumentEncodable
 
         switch self
         {
-        case .file(let self):
-            bson[.symbol] = self.symbol
+        case .article(let self):
+            bson[.stem] = self.stem
+            bson[.culture] = self.culture
+            bson[.file] = self.file
+            bson[.headline] = self.headline
+
+            bson[.overview] = self.overview
+            bson[.details] = self.details
+            bson[.group] = self.group
+
+            zones.update(with: self.overview?.outlines ?? [])
+            zones.update(with: self.details?.outlines ?? [])
 
         case .decl(let self):
             bson[.symbol] = self.symbol
@@ -271,18 +307,18 @@ extension Record.Master:BSONDocumentEncodable
             zones.update(with: self.overview?.outlines ?? [])
             zones.update(with: self.details?.outlines ?? [])
 
-        case .article(let self):
-            bson[.stem] = self.stem
-            bson[.culture] = self.culture
-            bson[.file] = self.file
-            bson[.headline] = self.headline
+        case .file(let self):
+            bson[.symbol] = self.symbol
 
-            bson[.overview] = self.overview
-            bson[.details] = self.details
-            bson[.group] = self.group
+        case .meta(let self):
+            bson[.abi] = self.abi
+            bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
+            bson[.platforms] = self.platforms.isEmpty ? nil : self.platforms
+            bson[.revision] = self.revision
+            bson[.stats] = self.stats
 
-            zones.update(with: self.overview?.outlines ?? [])
-            zones.update(with: self.details?.outlines ?? [])
+            //  We can recover the zone references from an aggregation query, so encoding
+            //  them into ``CodingKey zones`` is unnecessary.
         }
 
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
@@ -333,10 +369,7 @@ extension Record.Master:BSONDocumentDecodable
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
 
-        case .file?:
-            self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
-
-        case _:
+        case .article?:
             self = .article(.init(id: id,
                 stem: try bson[.stem].decode(),
                 culture: try bson[.culture].decode(),
@@ -345,6 +378,17 @@ extension Record.Master:BSONDocumentDecodable
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
+
+        case .file?:
+            self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
+
+        case _:
+            self = .meta(.init(id: id,
+                abi: try bson[.abi].decode(),
+                dependencies: try bson[.dependencies]?.decode() ?? [],
+                platforms: try bson[.platforms]?.decode() ?? [],
+                revision: try bson[.revision]?.decode(),
+                stats: try bson[.stats].decode()))
         }
     }
 }

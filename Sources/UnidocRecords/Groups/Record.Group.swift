@@ -10,6 +10,7 @@ extension Record
     @frozen public
     enum Group:Equatable, Sendable
     {
+        case  automatic (Automatic)
         case `extension`(Extension)
         case  topic(Topic)
     }
@@ -28,7 +29,7 @@ extension Record.Group
 
         /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
         case culture = "c"
-        /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
+        /// Always present in ``Extension``, optional otherwise, and contains a scalar.
         /// Usually doesn’t need a secondary lookup.
         case scope = "X"
 
@@ -56,7 +57,9 @@ extension Record.Group
         /// Contains a passage, which contains a list of outlines,
         /// each of which may contain a scalar. Only appears in ``Extension``.
         case details = "d"
-        /// Only appears in ``Topic``. The field contains links, some of which are scalars.
+        /// Appears in ``Automatic`` and ``Topic``. In ``Topic``, the field contains links,
+        /// some of which are scalars. In ``Automatic`` the field contains scalars, all of
+        /// which are, of course, scalars.
         case members = "t"
 
         /// Contains a list of precomputed zones, as MongoDB cannot easily
@@ -81,6 +84,7 @@ extension Record.Group:Identifiable
     {
         switch self
         {
+        case .automatic(let group): return group.id
         case .extension(let group): return group.id
         case .topic(let group):     return group.id
         }
@@ -98,6 +102,12 @@ extension Record.Group:BSONDocumentEncodable
 
         switch self
         {
+        case .automatic(let self):
+            bson[.scope] = self.scope
+            bson[.members] = self.members.isEmpty ? nil : self.members
+
+            zones.update(with: self.members)
+
         case .extension(let self):
             bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
             bson[.culture] = self.culture
@@ -147,17 +157,17 @@ extension Record.Group:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let id:Unidoc.Scalar = try bson[.id].decode()
-        if  case .topic? = id.plane
+        switch id.plane
         {
+        case .topic?:
             self = .topic(.init(id: id,
                 culture: try bson[.culture]?.decode(),
                 scope: try bson[.scope]?.decode(),
                 prefetch: try bson[.prefetch]?.decode() ?? [],
                 overview: try bson[.overview]?.decode(),
                 members: try bson[.members]?.decode() ?? []))
-        }
-        else
-        {
+
+        case .extension?:
             self = .extension(.init(id: id,
                 conditions: try bson[.conditions]?.decode() ?? [],
                 culture: try bson[.culture].decode(),
@@ -169,6 +179,11 @@ extension Record.Group:BSONDocumentDecodable
                 prefetch: try bson[.prefetch]?.decode() ?? [],
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode()))
+
+        case _:
+            self = .automatic(.init(id: id,
+                scope: try bson[.scope].decode(),
+                members: try bson[.members]?.decode() ?? []))
         }
     }
 }

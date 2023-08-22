@@ -60,13 +60,7 @@ extension Site.Docs.Decl:FixedPage
 {
     var location:URI { Site.Docs[self.zone, self.master.shoot] }
 
-    var title:String
-    {
-        """
-        \(self.master.stem.last) - \
-        \(self.zone.display ?? "\(self.zone.package)") Documentation
-        """
-    }
+    var title:String { "\(self.master.stem.last) - \(self.zone.title)" }
 
     var zone:Record.Zone { self.inliner.zones.principal }
 
@@ -107,9 +101,8 @@ extension Site.Docs.Decl:FixedPage
             superforms: self.master.superforms,
             generics: self.master.signature.generics.parameters,
             groups: self.groups,
-            phylum: self.master.phylum,
-            kinks: self.master.kinks,
-            bias: self.master.culture)
+            bias: self.master.culture,
+            mode: .decl(self.master.phylum, self.master.kinks))
 
         html[.section]
         {

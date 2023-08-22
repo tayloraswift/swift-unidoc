@@ -53,7 +53,7 @@ extension Inliner.Card:HyperTextOutputStreamable
                 $0 ?= self.overview
             }
 
-        case .file(_):
+        case .file(_), .meta(_):
             //  unimplemented
             break
         }

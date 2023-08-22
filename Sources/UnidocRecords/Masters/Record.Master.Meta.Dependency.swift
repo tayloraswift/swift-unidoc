@@ -2,52 +2,50 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 import SemanticVersions
+import SymbolGraphs
+import Unidoc
 
-extension SymbolGraphMetadata
+extension Record.Master.Meta
 {
     @frozen public
-    struct Dependency:Equatable, Sendable
+    struct Dependency:Identifiable, Equatable, Sendable
     {
         public
-        let package:PackageIdentifier
+        let id:PackageIdentifier
+
         public
-        let requirement:Repository.Requirement?
+        var requirement:Repository.Requirement?
         public
-        let revision:Repository.Revision
-        public
-        let version:AnyVersion
+        var resolution:Unidoc.Zone?
 
         @inlinable public
-        init(package:PackageIdentifier,
-            requirement:Repository.Requirement?,
-            revision:Repository.Revision,
-            version:AnyVersion)
+        init(id:PackageIdentifier,
+            requirement:Repository.Requirement? = nil,
+            resolution:Unidoc.Zone? = nil)
         {
-            self.package = package
+            self.id = id
             self.requirement = requirement
-            self.revision = revision
-            self.version = version
+            self.resolution = resolution
         }
     }
 }
-extension SymbolGraphMetadata.Dependency
+extension Record.Master.Meta.Dependency
 {
-    @frozen public
+    public
     enum CodingKey:String
     {
-        case package = "P"
+        case id = "_id"
         case requirement_lower = "L"
         case requirement_upper = "U"
-        case revision = "H"
-        case version = "V"
+        case resolution = "p"
     }
 }
-extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
+extension Record.Master.Meta.Dependency:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.package] = self.package
+        bson[.id] = self.id
 
         switch self.requirement
         {
@@ -62,11 +60,10 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
             bson[.requirement_upper] = versions.upperBound
         }
 
-        bson[.revision] = self.revision
-        bson[.version] = self.version
+        bson[.resolution] = self.resolution
     }
 }
-extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
+extension Record.Master.Meta.Dependency:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
@@ -88,9 +85,8 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
             requirement = upper < lower ? nil : .range(lower ..< upper)
         }
 
-        self.init(package: try bson[.package].decode(),
+        self.init(id: try bson[.id].decode(),
             requirement: requirement,
-            revision: try bson[.revision].decode(),
-            version: try bson[.version].decode())
+            resolution: try bson[.resolution]?.decode())
     }
 }

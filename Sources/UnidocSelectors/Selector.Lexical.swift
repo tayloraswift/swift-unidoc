@@ -12,7 +12,7 @@ extension Selector
         public
         var hash:FNV24?
 
-        private
+        @inlinable internal
         init(stem:Record.Stem, hash:FNV24?)
         {
             self.stem = stem
@@ -27,4 +27,9 @@ extension Selector.Lexical
     {
         self.init(stem: .init(path: path), hash: hash)
     }
+}
+extension Selector.Lexical
+{
+    @inlinable public static
+    var trunk:Self { .init(stem: "", hash: nil) }
 }

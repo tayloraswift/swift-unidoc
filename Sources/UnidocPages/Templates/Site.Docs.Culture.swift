@@ -36,10 +36,7 @@ extension Site.Docs.Culture:FixedPage
 
     var title:String
     {
-        """
-        \(self.master.module.name) - \
-        \(self.zone.display ?? "\(self.zone.package)") Documentation
-        """
+        "\(self.master.module.name) - \(self.zone.title))"
     }
 
     var zone:Record.Zone { self.inliner.zones.principal }
@@ -53,7 +50,8 @@ extension Site.Docs.Culture:FixedPage
     {
         let groups:Inliner.Groups = .init(inliner,
             groups: self.groups,
-            bias: self.master.id)
+            bias: self.master.id,
+            mode: nil)
 
         html[.section, { $0.class = "introduction" }]
         {

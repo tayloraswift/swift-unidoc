@@ -40,10 +40,7 @@ extension Site.Docs.Article:FixedPage
 {
     var location:URI { Site.Docs[self.zone, self.master.shoot] }
 
-    var title:String
-    {
-        "\(self.zone.display ?? "\(self.zone.package)") Documentation"
-    }
+    var title:String { self.zone.title }
 
     var zone:Record.Zone { self.inliner.zones.principal }
 
@@ -54,6 +51,11 @@ extension Site.Docs.Article:FixedPage
 
     func emit(content html:inout HTML.ContentEncoder)
     {
+        let groups:Inliner.Groups = .init(inliner,
+            groups: self.groups,
+            bias: self.master.id,
+            mode: nil)
+
         html[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
@@ -83,5 +85,7 @@ extension Site.Docs.Article:FixedPage
 
         html[.section, { $0.class = "details" }] =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
+
+        html += groups
     }
 }

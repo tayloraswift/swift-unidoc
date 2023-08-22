@@ -82,7 +82,7 @@ extension WideQuery:DatabaseQuery
                         $0[let: id] = Output.Principal[.master] / Record.Master[.id]
 
                         $0[let: topic] = Output.Principal[.master] / Record.Master[.group]
-                        $0[let: min] = Output.Principal[.zone] / Record.Zone[.planes_min]
+                        $0[let: min] = Output.Principal[.zone] / Record.Zone[.planes_autogroup]
                         $0[let: max] = Output.Principal[.zone] / Record.Zone[.planes_max]
                     }
                     $0[.pipeline] = .init
