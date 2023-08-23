@@ -1,30 +1,15 @@
 extension HTML
 {
     @frozen public
-    struct ContentEncoder
+    struct ContentEncoder:StreamingEncoder
     {
         @usableFromInline internal
-        var attribute:AttributeEncoder
+        var utf8:[UInt8]
 
-        @inlinable public
-        init()
+        @inlinable internal
+        init(utf8:[UInt8] = [])
         {
-            self.attribute = .init()
-        }
-    }
-}
-extension HTML.ContentEncoder
-{
-    @inlinable internal
-    var utf8:[UInt8]
-    {
-        _read
-        {
-            yield  self.attribute.utf8
-        }
-        _modify
-        {
-            yield &self.attribute.utf8
+            self.utf8 = utf8
         }
     }
 }
@@ -36,7 +21,7 @@ extension HTML.ContentEncoder
     {
         self.utf8.append(0x3C) // '<'
         self.utf8.append(contentsOf: tag.rawValue.utf8)
-        yield(&self.attribute)
+        yield(&self[as: HTML.AttributeEncoder.self])
         self.utf8.append(0x3E) // '>'
     }
 
@@ -153,6 +138,23 @@ extension HTML.ContentEncoder
             self.emit(opening: tag, with: attributes)
             self.utf8 += unsafe.utf8
             self.emit(closing: tag)
+        }
+    }
+}
+extension HTML.ContentEncoder
+{
+    @inlinable public
+    subscript(_:SVG,
+        attributes:(inout SVG.AttributeEncoder) -> (),
+        content encode:(inout SVG.ContentEncoder) -> ()) -> Void
+    {
+        mutating get
+        {
+            {
+                $0.open(.svg, with: attributes)
+                encode(&$0)
+                $0.close(.svg)
+            } (&self[as: SVG.ContentEncoder.self])
         }
     }
 }
