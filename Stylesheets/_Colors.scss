@@ -1,13 +1,13 @@
 $light-background: rgb(240, 240, 240);
 $light-background-pink: rgb(255, 224, 239);
 $light-foreground: rgb(22, 22, 22);
-$light-foreground-semi: rgb(112, 112, 112);
+$light-foreground-semi: rgb(109, 109, 109);
 
 $light-code-well: rgb(233, 233, 233);
 $light-snippet-line-number: rgb(192, 192, 192);
 
 $light-swift: rgb(134, 134, 134);
-$light-accent-comment: rgb(109, 109, 109);
+$light-accent-comment: $light-foreground-semi;
 $light-accent-barbie-pink: rgb(255, 86, 158);
 $light-accent-hot-pink: rgb(253, 39, 110);
 $light-accent-yellow: rgb(255, 123, 0);

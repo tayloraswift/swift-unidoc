@@ -311,6 +311,7 @@ extension Record.Master:BSONDocumentEncodable
             bson[.symbol] = self.symbol
 
         case .meta(let self):
+            bson[.stem] = ""
             bson[.abi] = self.abi
             bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
             bson[.platforms] = self.platforms.isEmpty ? nil : self.platforms

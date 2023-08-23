@@ -1,9 +1,4 @@
-nav.decl
-{
-    overflow: hidden;
-    overflow-wrap: break-word;
-}
-nav.decl div.breadcrumbs
+div.breadcrumbs
 {
     color: $light-swift;
     font-family: $typeface-monospace;
@@ -54,13 +49,18 @@ section.introduction
             }
         }
 
-
-        span.module
+        span.domain
         {
             span.culture:before,
-            span.culture:after
+            span.culture:after,
+            span.package:after
             {
                 margin: 0 0.2rem;
+            }
+
+            span.package:after
+            {
+                content: ':';
             }
 
             span.culture:before
@@ -76,7 +76,7 @@ section.introduction
                 }
                 .version:after
                 {
-                    content: ':';
+                    content: '/';
                     padding: 0 0.25rem;
                 }
             }
@@ -152,6 +152,63 @@ section.parameters
             min-width: 3rem;
             color: $light-snippet-line-number;
             font-weight: normal;
+        }
+    }
+}
+section.details
+{
+    dl
+    {
+        display: grid;
+        grid-template-columns: 33% auto;
+
+        dt
+        {
+            grid-column: 1;
+        }
+        dd
+        {
+            grid-column: 2;
+        }
+    }
+
+    table
+    {
+        width: 100%;
+    }
+    table th
+    {
+        text-align: left;
+        font-family: $typeface-sans;
+        padding-bottom: 0.5rem;
+
+        color: $light-foreground-semi;
+        border-bottom: 2px solid $light-swift;
+    }
+    table tbody tr:first-child td
+    {
+        padding-top: 0.5rem;
+    }
+    table th,
+    table td
+    {
+        padding-left: 0.5rem;
+    }
+    table th:first-child,
+    table td:first-child
+    {
+        padding-left: 0;
+    }
+
+    table.dependencies
+    {
+        td:first-child
+        {
+            font-style: italic;
+        }
+        td span.upto
+        {
+            padding: 0 0.5rem;
         }
     }
 }

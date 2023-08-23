@@ -28,23 +28,29 @@ extension Site.Guides.Feed
         self.init(inliner, scalars: masters.map(\.id))
     }
 }
+extension Site.Guides.Feed
+{
+    private
+    var zone:Record.Zone { self.inliner.zones.principal }
+}
 extension Site.Guides.Feed:FixedPage
 {
     var location:URI { Site.Guides[self.zone] }
+    var title:String { self.zone.title }
+}
+extension Site.Guides.Feed:ApplicationPage
+{
+    typealias Navigator = HTML.Logo
+    typealias Sidebar = Never
 
-    var title:String
+    var search:URI
     {
-        self.zone.display ?? "\(self.zone.package)"
+        Site.NounMaps[self.zone]
     }
 
-    var zone:Record.Zone { self.inliner.zones.principal }
-
-    func emit(header:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder)
     {
-    }
-    func emit(content html:inout HTML.ContentEncoder)
-    {
-        html[.section, { $0.class = "group feed" }]
+        main[.section, { $0.class = "group feed" }]
         {
             $0[.ul]
             {

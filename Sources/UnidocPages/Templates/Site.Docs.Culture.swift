@@ -16,12 +16,12 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let nouns:[Record.Noun]
+        let nouns:[Record.Noun]?
 
         init(_ inliner:Inliner,
             master:Record.Master.Culture,
             groups:[Record.Group],
-            nouns:[Record.Noun])
+            nouns:[Record.Noun]?)
         {
             self.inliner = inliner
             self.master = master
@@ -30,38 +30,56 @@ extension Site.Docs
         }
     }
 }
+extension Site.Docs.Culture
+{
+    private
+    var zone:Record.Zone { self.inliner.zones.principal }
+    private
+    var name:String { self.master.module.name }
+}
 extension Site.Docs.Culture:FixedPage
 {
     var location:URI { Site.Docs[self.zone, self.master.shoot] }
-
-    var title:String
-    {
-        "\(self.master.module.name) - \(self.zone.title))"
-    }
-
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var title:String { "\(self.name) - \(self.zone.title))" }
+}
+extension Site.Docs.Culture:ApplicationPage
+{
+    typealias Navigator = HTML.Logo
 
     var sidebar:Inliner.NounTree?
     {
-        .init(self.inliner, nouns: self.nouns)
+        self.nouns.map { .init(self.inliner, nouns: $0) }
     }
 
-    func emit(content html:inout HTML.ContentEncoder)
+    var search:URI
+    {
+        Site.NounMaps[self.zone]
+    }
+
+    func main(_ main:inout HTML.ContentEncoder)
     {
         let groups:Inliner.Groups = .init(inliner,
             groups: self.groups,
             bias: self.master.id,
             mode: nil)
 
-        html[.section, { $0.class = "introduction" }]
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module"
-                $0[.span] { $0.class = "version" } = self.zone.version
+                $0[.span, { $0.class = "domain" }]
+                {
+                    $0[.span, { $0.class = "package" }]
+                    {
+                        $0[.a] { $0.href = "\(Site.Docs[self.zone])" } = "\(self.zone.package)"
+                    }
+
+                    $0[.span] { $0.class = "version" } = self.zone.version
+                }
             }
 
-            $0[.h1] = self.master.module.name
+            $0[.h1] = self.name
 
             $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
 
@@ -71,7 +89,7 @@ extension Site.Docs.Culture:FixedPage
             }
         }
 
-        html[.section, { $0.class = "declaration" }]
+        main[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -84,9 +102,9 @@ extension Site.Docs.Culture:FixedPage
             }
         }
 
-        html[.section] { $0.class = "details" } =
+        main[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        html += groups
+        main += groups
     }
 }
