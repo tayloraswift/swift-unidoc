@@ -7,3 +7,10 @@ extension Never:HyperTextOutputStreamable
     {
     }
 }
+extension Never:ScalableVectorOutputStreamable
+{
+    @inlinable public static
+    func += (_:inout SVG.ContentEncoder, _:Self)
+    {
+    }
+}

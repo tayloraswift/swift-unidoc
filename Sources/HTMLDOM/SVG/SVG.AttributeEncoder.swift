@@ -1,4 +1,4 @@
-extension HTML
+extension SVG
 {
     @dynamicMemberLookup
     @frozen public
@@ -14,12 +14,12 @@ extension HTML
         }
     }
 }
-extension HTML.AttributeEncoder
+extension SVG.AttributeEncoder
 {
     /// Serializes an empty attribute, if the assigned boolean is true.
     /// Does nothing if it is false. The getter always returns false.
     @inlinable public
-    subscript(name name:HTML.Attribute) -> Bool
+    subscript(name name:SVG.Attribute) -> Bool
     {
         get
         {
@@ -32,7 +32,7 @@ extension HTML.AttributeEncoder
     }
 
     @inlinable public
-    subscript(name name:HTML.Attribute) -> String?
+    subscript(name name:SVG.Attribute) -> String?
     {
         get
         {
@@ -42,15 +42,15 @@ extension HTML.AttributeEncoder
         {
             if  let text:String
             {
-                self.utf8 += DOM.Property<HTML.Attribute>.init(name, text)
+                self.utf8 += DOM.Property<SVG.Attribute>.init(name, text)
             }
         }
     }
 }
-extension HTML.AttributeEncoder
+extension SVG.AttributeEncoder
 {
     @inlinable public
-    subscript(dynamicMember path:KeyPath<HTML.Attribute.Factory, HTML.Attribute>) -> Bool
+    subscript(dynamicMember path:KeyPath<SVG.Attribute.Factory, SVG.Attribute>) -> Bool
     {
         get
         {
@@ -58,11 +58,11 @@ extension HTML.AttributeEncoder
         }
         set(bool)
         {
-            self[name: HTML.Attribute.Factory.init()[keyPath: path]] = bool
+            self[name: SVG.Attribute.Factory.init()[keyPath: path]] = bool
         }
     }
     @inlinable public
-    subscript(dynamicMember path:KeyPath<HTML.Attribute.Factory, HTML.Attribute>) -> String?
+    subscript(dynamicMember path:KeyPath<SVG.Attribute.Factory, SVG.Attribute>) -> String?
     {
         get
         {
@@ -70,22 +70,7 @@ extension HTML.AttributeEncoder
         }
         set(text)
         {
-            self[name: HTML.Attribute.Factory.init()[keyPath: path]] = text
-        }
-    }
-}
-extension HTML.AttributeEncoder
-{
-    @inlinable public
-    var rel:HTML.Attribute.Rel?
-    {
-        get
-        {
-            nil
-        }
-        set(value)
-        {
-            self[name: .rel] = value?.rawValue
+            self[name: SVG.Attribute.Factory.init()[keyPath: path]] = text
         }
     }
 }
