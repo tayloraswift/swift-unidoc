@@ -122,14 +122,23 @@ extension DynamicLinker
             }
         }
 
+        var dependencies:[Record.Master.Meta.Dependency] = []
+
+        if  case _? = context.current.metadata.toolchain,
+            let resolution:Unidoc.Zone = context[.swift]?.zone
+        {
+            dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
+        }
+        for dependency:SymbolGraphMetadata.Dependency in context.current.metadata.dependencies
+        {
+            dependencies.append(.init(id: dependency.package,
+                requirement: dependency.requirement,
+                resolution: context[dependency.package]?.zone))
+        }
+
         self.masters.append(.meta(.init(id: context.current.zone.meta,
             abi: context.current.metadata.abi,
-            dependencies: context.current.metadata.dependencies.map
-            {
-                .init(id: $0.package,
-                    requirement: $0.requirement,
-                    resolution: context[$0.package]?.zone)
-            },
+            dependencies: dependencies,
             platforms: context.current.metadata.requirements,
             revision: context.current.metadata.revision,
             stats: stats)))

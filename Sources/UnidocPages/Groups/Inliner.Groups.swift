@@ -1,5 +1,6 @@
 import HTML
 import LexicalPaths
+import ModuleGraphs
 import MarkdownRendering
 import Signatures
 import Unidoc
@@ -62,50 +63,58 @@ extension Inliner.Groups
     {
         let generics:Generics = .init(generics)
 
-        let libraries:[Partisanship: [Record.Group.Extension]]
-        let automatic:[Record.Group.Automatic]
-        let topics:[Record.Group.Topic]
+        var extensions:[(Record.Group.Extension, Partisanship, Genericness)] = []
+        var automatic:[Record.Group.Automatic] = []
+        var topics:[Record.Group.Topic] = []
 
-        (libraries, automatic, topics) = groups.reduce(into: ([:], [], []) as
-        (
-            libraries:[Partisanship: [Record.Group.Extension]],
-            automatic:[Record.Group.Automatic],
-            topics:[Record.Group.Topic]
-        ))
+        for group:Record.Group in groups
         {
-            switch $1
+            switch group
             {
-            case .extension(let `extension`):
-                if  let party:Partisanship = .of(extension: `extension`.id,
-                        zones: inliner.zones)
+            case .extension(let group):
+                let partisanship:Partisanship = inliner.zones.secondary[group.id.zone].map
                 {
-                    $0.libraries[party, default: []].append(`extension`)
-                }
+                    .third($0.package)
+                } ?? .first
 
-            case .automatic(let automatic):
-                $0.automatic.append(automatic)
+                let genericness:Genericness =
+                    generics.count(substituting: group.conditions) == 0 ? .generic : .concrete
 
-            case .topic(let topic):
-                $0.topics.append(topic)
+                extensions.append((group, partisanship, genericness))
+
+            case .automatic(let group):
+                automatic.append(group)
+
+            case .topic(let group):
+                topics.append(group)
             }
         }
+
+        extensions.sort
+        {
+            //  Sort libraries by partisanship, first-party first, then third-party
+            //  by package identifier.
+            //  Then, break ties by extension culture. Module numbers are
+            //  lexicographically ordered according to the package’s internal dependency
+            //  graph, so the library with the lowest module number will always be the
+            //  current culture, if it is present.
+            //  Then, break ties by genericness. Generic extensions come first, concrete
+            //  extensions come last.
+            //  Finally, break ties by extension id. This is arbitrary, but we usually try
+            //  to assign id numbers such that the extensions with the fewest constraints
+            //  come first.
+            ($0.1, $0.0.culture.citizen, $0.2, $0.0.id) <
+            ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
+        }
+        automatic.sort { $0.id < $1.id }
+        topics.sort { $0.id < $1.id }
 
         self.init(inliner,
             requirements: requirements.isEmpty ? nil : requirements,
             superforms: superforms.isEmpty ? nil : superforms,
-            extensions: libraries.sorted
-            {
-                //  Sort libraries by partisanship, first-party first, then third-party
-                //  by package identifier.
-                $0.key < $1.key
-            }
-                .flatMap
-            {
-                //  Within each library, sort extensions by genericness, then by culture.
-                generics.partition(extensions: $0.value)
-            },
-            automatic: automatic.sorted { $0.id < $1.id },
-            topics: topics.sorted { $0.id < $1.id },
+            extensions: extensions.map(\.0),
+            automatic: automatic,
+            topics: topics,
             bias: bias,
             mode: mode)
     }

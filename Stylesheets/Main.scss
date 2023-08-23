@@ -14,69 +14,70 @@ body
     min-height: 100vw;
     margin: 0;
 
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-
-    div.sidebar
+    > header
     {
-        display: none;
+        position: fixed;
+        z-index: 1;
+        width: 100%;
     }
-    div.content
+
+    > *
     {
-        flex: 0 1 48rem;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
 
-        padding-left: 1rem;
-        padding-right: 1rem;
+        > *.sidebar
+        {
+            display: none;
+        }
 
-        overflow: hidden;
-        overflow-wrap: break-word;
+        > *.content
+        {
+            flex: 0 1 48rem;
+
+            padding-left: 1rem;
+            padding-right: 1rem;
+
+            overflow: hidden;
+            overflow-wrap: break-word;
+        }
     }
 }
 @media only screen and (min-width: 50rem)
 {
-    body div.sidebar
+    body > *
     {
-        display: block;
-        flex: 0 0 16rem;
-        width: 16rem;
-    }
-    body div.content
-    {
-        padding-left: 4rem;
+        > *.sidebar
+        {
+            display: block;
+            flex: 0 0 16rem;
+            width: 16rem;
+        }
+
+        > *.content
+        {
+            padding-left: 4rem;
+        }
     }
 }
 
-//  Navigation bar
-body div.content header
+body nav
 {
-    position: fixed;
+    background-color: $light-background;
     width: 100%;
-    z-index: 1;
+    min-height: 1.5rem;
+    position: relative;
 
-    nav
-    {
-        background-color: $light-background;
-        width: 100%;
-        padding-left: 1rem;
-        position: relative;
-        left: -1rem;
-    }
-    nav.decl
-    {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-    }
-    nav.default
-    {
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
-    }
+    box-shadow: -1rem 0 0 $light-background;
 
-    > div
-    {
-        max-width: 48rem;
-    }
+    padding: 0.25rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    overflow: hidden;
+    overflow-wrap: break-word;
 }
 
 body main
