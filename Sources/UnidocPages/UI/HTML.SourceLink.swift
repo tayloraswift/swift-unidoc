@@ -8,7 +8,7 @@ extension HTML
         let line:Int?
         let target:String?
 
-        init(file:Substring, line:Int?, target:String?)
+        init(file:Substring, line:Int? = nil, target:String?)
         {
             self.file = file
             self.line = line
@@ -25,6 +25,7 @@ extension HTML.SourceLink:HyperTextOutputStreamable
         {
             $0.rel = .noopener
             $0.rel = .google_ugc
+            $0.target = "_blank"
             $0.class = "source"
         }
         content:

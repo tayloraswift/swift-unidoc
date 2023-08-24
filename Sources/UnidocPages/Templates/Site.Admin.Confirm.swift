@@ -26,14 +26,15 @@ extension Site.Admin.Confirm:FixedPage
 {
     public
     var location:URI { Site.Admin.confirm(self.action) }
-
     public
     var title:String { "\(self.label)?" }
-
+}
+extension Site.Admin.Confirm:AdministrativePage
+{
     public
-    func emit(content html:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder)
     {
-        html[.form]
+        main[.form]
         {
             $0.enctype = "multipart/form-data"
             $0.action = "\(self.action)"

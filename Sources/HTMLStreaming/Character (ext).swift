@@ -8,3 +8,11 @@ extension Character:HyperTextOutputStreamable
         html += self.utf8
     }
 }
+extension Character:ScalableVectorOutputStreamable
+{
+    @inlinable public static
+    func += (svg:inout SVG.ContentEncoder, self:Self)
+    {
+        svg += self.utf8
+    }
+}

@@ -16,13 +16,13 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let nouns:[Record.Noun]
+        let nouns:[Record.Noun]?
 
 
         init(_ inliner:Inliner,
             master:Record.Master.Article,
             groups:[Record.Group],
-            nouns:[Record.Noun])
+            nouns:[Record.Noun]?)
         {
             self.inliner = inliner
             self.master = master
@@ -34,33 +34,43 @@ extension Site.Docs
 extension Site.Docs.Article
 {
     private
+    var zone:Record.Zone { self.inliner.zones.principal }
+    private
     var stem:Record.Stem { self.master.stem }
 }
 extension Site.Docs.Article:FixedPage
 {
     var location:URI { Site.Docs[self.zone, self.master.shoot] }
-
-    var title:String
-    {
-        "\(self.zone.display ?? "\(self.zone.package)") Documentation"
-    }
-
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var title:String { self.zone.title }
+}
+extension Site.Docs.Article:ApplicationPage
+{
+    typealias Navigator = HTML.Logo
 
     var sidebar:Inliner.NounTree?
     {
-        .init(self.inliner, nouns: self.nouns)
+        self.nouns.map { .init(self.inliner, nouns: $0) }
     }
 
-    func emit(content html:inout HTML.ContentEncoder)
+    var search:URI
     {
-        html[.section, { $0.class = "introduction" }]
+        Site.NounMaps[self.zone]
+    }
+
+    func main(_ main:inout HTML.ContentEncoder)
+    {
+        let groups:Inliner.Groups = .init(inliner,
+            groups: self.groups,
+            bias: self.master.id,
+            mode: nil)
+
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
 
-                $0[.span, { $0.class = "module" }]
+                $0[.span, { $0.class = "domain" }]
                 {
                     $0[link: self.inliner.url(self.master.culture)] = self.stem.first
 
@@ -81,7 +91,9 @@ extension Site.Docs.Article:FixedPage
             }
         }
 
-        html[.section, { $0.class = "details" }] =
+        main[.section, { $0.class = "details" }] =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
+
+        main += groups
     }
 }

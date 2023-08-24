@@ -18,12 +18,12 @@ extension Site.Docs
         private
         let groups:[Record.Group]
         private
-        let nouns:[Record.Noun]
+        let nouns:[Record.Noun]?
 
         init(_ inliner:Inliner,
             master:Record.Master.Decl,
             groups:[Record.Group],
-            nouns:[Record.Noun])
+            nouns:[Record.Noun]?)
         {
             self.inliner = inliner
 
@@ -36,12 +36,18 @@ extension Site.Docs
 extension Site.Docs.Decl
 {
     private
+    var zone:Record.Zone { self.inliner.zones.principal }
+    private
     var stem:Record.Stem { self.master.stem }
 }
-extension Site.Docs.Decl
+extension Site.Docs.Decl:FixedPage
 {
-    private
-    var breadcrumbs:Inliner.Breadcrumbs?
+    var location:URI { Site.Docs[self.zone, self.master.shoot] }
+    var title:String { "\(self.stem.last) - \(self.zone.title)" }
+}
+extension Site.Docs.Decl:ApplicationPage
+{
+    var navigator:Inliner.Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
@@ -52,66 +58,33 @@ extension Site.Docs.Decl
         }
         else
         {
-            return nil
+            return .init(
+                scope: nil,
+                last: self.stem.last)
         }
     }
-}
-extension Site.Docs.Decl:FixedPage
-{
-    var location:URI { Site.Docs[self.zone, self.master.shoot] }
-
-    var title:String
-    {
-        """
-        \(self.master.stem.last) - \
-        \(self.zone.display ?? "\(self.zone.package)") Documentation
-        """
-    }
-
-    var zone:Record.Zone { self.inliner.zones.principal }
 
     var sidebar:Inliner.NounTree?
     {
-        .init(self.inliner, nouns: self.nouns)
+        self.nouns.map { .init(self.inliner, nouns: $0) }
     }
 
-    func emit(header:inout HTML.ContentEncoder)
+    var search:URI
     {
-        header[.nav] { $0.class = "decl" } = self.breadcrumbs
-        header[.div, { $0.class = "searchbar-container" }]
-        {
-            $0[.div, { $0.class = "searchbar" }]
-            {
-                $0[.form, { $0.id = "search" ; $0.role = "search" }]
-                {
-                    $0[.input]
-                    {
-                        $0.id = "search-input"
-                        $0.type = "search"
-                        $0.placeholder = "search symbols"
-                        $0.autocomplete = "off"
-                    }
-                }
-            }
-        }
-        header[.div, { $0.class = "search-results-container" }]
-        {
-            $0[.ol] { $0.id = "search-results" }
-        }
+        Site.NounMaps[self.zone]
     }
 
-    func emit(content html:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder)
     {
         let groups:Inliner.Groups = .init(self.inliner,
             requirements: self.master.requirements,
             superforms: self.master.superforms,
             generics: self.master.signature.generics.parameters,
             groups: self.groups,
-            phylum: self.master.phylum,
-            kinks: self.master.kinks,
-            bias: self.master.culture)
+            bias: self.master.culture,
+            mode: .decl(self.master.phylum, self.master.kinks))
 
-        html[.section]
+        main[.section]
         {
             $0.class = "introduction"
         }
@@ -124,7 +97,7 @@ extension Site.Docs.Decl:FixedPage
                     kinks: self.master.kinks)
 
                 $0[.span] { $0.class = "phylum" } = demonym
-                $0[.span, { $0.class = "module" }]
+                $0[.span, { $0.class = "domain" }]
                 {
                     $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
                     $0[.span, { $0.class = "culture" }]
@@ -148,7 +121,7 @@ extension Site.Docs.Decl:FixedPage
             }
         }
 
-        html[.section, { $0.class = "declaration" }]
+        main[.section, { $0.class = "declaration" }]
         {
             $0[.pre]
             {
@@ -156,9 +129,9 @@ extension Site.Docs.Decl:FixedPage
             }
         }
 
-        html[.section] { $0.class = "details" } =
+        main[.section] { $0.class = "details" } =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
 
-        html += groups
+        main += groups
     }
 }

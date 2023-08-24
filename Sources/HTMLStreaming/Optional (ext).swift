@@ -13,3 +13,14 @@ extension Optional where Wrapped:HyperTextOutputStreamable
         }
     }
 }
+extension Optional where Wrapped:ScalableVectorOutputStreamable
+{
+    @inlinable public static
+    func ?= (svg:inout SVG.ContentEncoder, wrapped:Wrapped?)
+    {
+        if  let wrapped:Wrapped
+        {
+            svg += wrapped
+        }
+    }
+}

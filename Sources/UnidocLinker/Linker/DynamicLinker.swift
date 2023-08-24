@@ -21,7 +21,9 @@ struct DynamicLinker
 
     /// Maps masters to groups.
     private
-    var topics:[Int32: Unidoc.Scalar]
+    var memberships:[Int32: Unidoc.Scalar]
+    private
+    var autogroup:Unidoc.Counter<UnidocPlane.Autogroup>
     private
     var topic:Unidoc.Counter<UnidocPlane.Topic>
 
@@ -45,7 +47,9 @@ struct DynamicLinker
 
         self.extensions = extensions
 
-        self.topics = [:]
+        self.memberships = [:]
+
+        self.autogroup = .init(zone: context.current.zone)
         self.topic = .init(zone: context.current.zone)
 
         self.masters = []
@@ -79,7 +83,6 @@ extension DynamicLinker
             diagnostics: diagnostics,
             extensions: extensions)
 
-        self.synthesizeTopics()
         self.link(clients: clients)
 
         //  Create file records.
@@ -89,14 +92,56 @@ extension DynamicLinker
         {
             self.masters.append(.file(.init(id: context.current.zone + f, symbol: file)))
         }
+
         //  Create extension records.
+        var stats:Record.Master.Meta.Stats = .init()
+
         for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
             where !`extension`.isEmpty
         {
             self.groups.append(.extension(.init(signature: signature,
                 extension: `extension`,
                 context: context)))
+
+            for feature:Unidoc.Scalar in `extension`.features
+            {
+                if  let decl:SymbolGraph.Decl = context[feature.package]?.nodes[feature]?.decl
+                {
+                    signature.extends.zone == context.current.zone ?
+                        stats.firstPartyFeatures.count(decl) :
+                        stats.thirdPartyFeatures.count(decl)
+                }
+            }
         }
+        //  Create the meta record.
+        for node:SymbolGraph.DeclNode in context.current.graph.decls.nodes
+        {
+            if  let decl:SymbolGraph.Decl = node.decl
+            {
+                stats.decls.count(decl)
+            }
+        }
+
+        var dependencies:[Record.Master.Meta.Dependency] = []
+
+        if  case _? = context.current.metadata.toolchain,
+            let resolution:Unidoc.Zone = context[.swift]?.zone
+        {
+            dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
+        }
+        for dependency:SymbolGraphMetadata.Dependency in context.current.metadata.dependencies
+        {
+            dependencies.append(.init(id: dependency.package,
+                requirement: dependency.requirement,
+                resolution: context[dependency.package]?.zone))
+        }
+
+        self.masters.append(.meta(.init(id: context.current.zone.meta,
+            abi: context.current.metadata.abi,
+            dependencies: dependencies,
+            platforms: context.current.metadata.requirements,
+            revision: context.current.metadata.revision,
+            stats: stats)))
     }
 }
 extension DynamicLinker
@@ -109,16 +154,12 @@ extension DynamicLinker
 extension DynamicLinker
 {
     private mutating
-    func synthesizeTopics()
-    {
-
-    }
-    private mutating
     func link(clients:[DynamicClientGroup])
     {
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let cultures:Record.Group.Topic = .init(id: self.topic.id(),
+        let cultures:Record.Group.Automatic = .init(id: self.autogroup.id(),
+            scope: self.current.zone.meta,
             members: self.current.graph.cultures.indices.sorted
             {
                 self.current.graph.namespaces[$0] <
@@ -126,14 +167,14 @@ extension DynamicLinker
             }
             .map
             {
-                .scalar(self.current.zone + $0 * .module)
+                self.current.zone + $0 * .module
             })
 
-        self.groups.append(.topic(cultures))
+        self.groups.append(.automatic(cultures))
 
         for c:Int in self.current.graph.cultures.indices
         {
-            self.topics[c * .module] = cultures.id
+            self.memberships[c * .module] = cultures.id
         }
 
         //  First pass to create the topic records, which also populates topic memberships.
@@ -220,7 +261,7 @@ extension DynamicLinker
                 //  This may replace a synthesized topic.
                 if  let local:Int32 = master - self.current.zone
                 {
-                    self.topics[local] = record.id
+                    self.memberships[local] = record.id
                 }
             }
         }
@@ -241,7 +282,7 @@ extension DynamicLinker
 
         var record:Record.Master.Culture = .init(id: self.current.zone + c * .module,
             module: culture.module,
-            group: self.topics.removeValue(forKey: c * .module))
+            group: self.memberships.removeValue(forKey: c * .module))
 
         if  let article:SymbolGraph.Article = culture.article
         {
@@ -277,7 +318,7 @@ extension DynamicLinker
                 culture: namespace.scalar,
                 file: node.body.file.map { self.current.zone + $0 },
                 headline: node.headline,
-                group: self.topics.removeValue(forKey: a))
+                group: self.memberships.removeValue(forKey: a))
 
             (record.overview, record.details) = resolver.link(article: node.body)
 
@@ -302,7 +343,7 @@ extension DynamicLinker
                     self.current.graph.decls.nodes[range]),
                 self.conformances[range]))
         {
-            let group:Unidoc.Scalar? = self.topics.removeValue(forKey: d)
+            let group:Unidoc.Scalar? = self.memberships.removeValue(forKey: d)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
             //  Ceremonial unwraps, should always succeed since we are only iterating
