@@ -34,6 +34,26 @@ extension HTML.ContentEncoder
 extension HTML.ContentEncoder
 {
     @inlinable public
+    subscript<Renderable>(svg:SVG,
+        attributes:(inout SVG.AttributeEncoder) -> () = { _ in }) -> Renderable?
+        where Renderable:ScalableVectorOutputStreamable
+    {
+        get
+        {
+            nil
+        }
+        set(value)
+        {
+            if  let value:Renderable
+            {
+                self[svg, attributes] { $0 += value }
+            }
+        }
+    }
+}
+extension HTML.ContentEncoder
+{
+    @inlinable public
     subscript<Renderable>(link target:String?,
         attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
         where Renderable:HyperTextOutputStreamable
