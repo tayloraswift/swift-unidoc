@@ -86,8 +86,16 @@ section.group ul
         margin-top: 2rem;
     }
 
-    > li.decl,
     > li.module
+    {
+        margin: 0.5rem 0 0.5rem 0;
+
+        > a
+        {
+            font-style: italic;
+        }
+    }
+    > li.decl
     {
         margin: 0.5rem 0 0.5rem 0;
         padding: 0;
@@ -95,6 +103,8 @@ section.group ul
         > a
         {
             display: block;
+            padding: 0.8em 0 0 0;
+
             text-indent: -2.5rem;
             margin-left: 2.5rem;
             line-height: 1.5rem;
@@ -108,7 +118,6 @@ section.group ul
             {
                 color: $light-accent-hot-pink;
             }
-            padding: 0.8em 0 0 0;
         }
 
         p

@@ -2,7 +2,7 @@ extension HTML
 {
     @dynamicMemberLookup
     @frozen public
-    struct AttributeEncoder
+    struct AttributeEncoder:StreamingEncoder
     {
         @usableFromInline internal
         var utf8:[UInt8]
@@ -12,31 +12,6 @@ extension HTML
         {
             self.utf8 = utf8
         }
-    }
-}
-
-extension HTML.AttributeEncoder
-{
-    @available(*, unavailable, renamed: "subscript(name:)",
-        message: """
-        Encode constant attributes through the encoder’s instance properties instead.
-        """)
-    @inlinable public
-    subscript(name:HTML.Attribute) -> Bool
-    {
-        get         { false }
-        set(bool)   { self[name: name] = bool }
-    }
-
-    @available(*, unavailable, renamed: "subscript(name:)",
-        message: """
-        Encode constant attributes through the encoder’s instance properties instead.
-        """)
-    @inlinable public
-    subscript(name:HTML.Attribute) -> String?
-    {
-        get         { nil }
-        set(text)   { self[name: name] = text }
     }
 }
 extension HTML.AttributeEncoder
@@ -67,30 +42,7 @@ extension HTML.AttributeEncoder
         {
             if  let text:String
             {
-                self.utf8.append(0x20) // ' '
-                self.utf8 += name.rawValue.utf8
-
-                if  text.isEmpty
-                {
-                    return
-                }
-
-                self.utf8.append(0x3D) // '='
-                self.utf8.append(0x27) // '''
-
-                for byte:UInt8 in text.utf8
-                {
-                    if  byte == 0x27
-                    {
-                        self.utf8 += "&#39;".utf8
-                    }
-                    else
-                    {
-                        self.utf8.append(byte)
-                    }
-                }
-
-                self.utf8.append(0x27) // '''
+                self.utf8 += DOM.Property<HTML.Attribute>.init(name, text)
             }
         }
     }

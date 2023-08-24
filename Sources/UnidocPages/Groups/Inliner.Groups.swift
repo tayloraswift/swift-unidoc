@@ -1,5 +1,6 @@
 import HTML
 import LexicalPaths
+import ModuleGraphs
 import MarkdownRendering
 import Signatures
 import Unidoc
@@ -15,37 +16,38 @@ extension Inliner
         let requirements:[Unidoc.Scalar]?
         private
         let superforms:[Unidoc.Scalar]?
+
         private
         let extensions:[Record.Group.Extension]
+        private
+        let automatic:[Record.Group.Automatic]
         private
         let topics:[Record.Group.Topic]
 
         private
-        let phylum:Unidoc.Decl?
-        private
-        let kinks:Unidoc.Decl.Kinks
-        private
         let bias:Unidoc.Scalar?
+        private
+        let mode:Mode?
 
         private
         init(_ inliner:Inliner,
             requirements:[Unidoc.Scalar]?,
             superforms:[Unidoc.Scalar]?,
             extensions:[Record.Group.Extension],
+            automatic:[Record.Group.Automatic],
             topics:[Record.Group.Topic],
-            phylum:Unidoc.Decl?,
-            kinks:Unidoc.Decl.Kinks,
-            bias:Unidoc.Scalar?)
+            bias:Unidoc.Scalar?,
+            mode:Mode?)
         {
             self.inliner = inliner
 
             self.requirements = requirements
             self.superforms = superforms
             self.extensions = extensions
+            self.automatic = automatic
             self.topics = topics
-            self.phylum = phylum
-            self.kinks = kinks
             self.bias = bias
+            self.mode = mode
         }
     }
 }
@@ -56,53 +58,65 @@ extension Inliner.Groups
         superforms:__owned [Unidoc.Scalar] = [],
         generics:__shared [GenericParameter] = [],
         groups:__shared [Record.Group],
-        phylum:Unidoc.Decl? = nil,
-        kinks:Unidoc.Decl.Kinks = [],
-        bias:Unidoc.Scalar? = nil)
+        bias:Unidoc.Scalar? = nil,
+        mode:Mode? = nil)
     {
         let generics:Generics = .init(generics)
 
-        let libraries:[Partisanship: [Record.Group.Extension]]
-        let topics:[Record.Group.Topic]
+        var extensions:[(Record.Group.Extension, Partisanship, Genericness)] = []
+        var automatic:[Record.Group.Automatic] = []
+        var topics:[Record.Group.Topic] = []
 
-        (libraries, topics) = groups.reduce(into: ([:], []) as
-        (
-            extensions:[Partisanship: [Record.Group.Extension]],
-            topics:[Record.Group.Topic]
-        ))
+        for group:Record.Group in groups
         {
-            switch $1
+            switch group
             {
-            case .topic(let topic):
-                $0.topics.append(topic)
-
-            case .extension(let `extension`):
-                if  let party:Partisanship = .of(extension: `extension`.id,
-                        zones: inliner.zones)
+            case .extension(let group):
+                let partisanship:Partisanship = inliner.zones.secondary[group.id.zone].map
                 {
-                    $0.extensions[party, default: []].append(`extension`)
-                }
+                    .third($0.package)
+                } ?? .first
+
+                let genericness:Genericness =
+                    generics.count(substituting: group.conditions) == 0 ? .generic : .concrete
+
+                extensions.append((group, partisanship, genericness))
+
+            case .automatic(let group):
+                automatic.append(group)
+
+            case .topic(let group):
+                topics.append(group)
             }
         }
+
+        extensions.sort
+        {
+            //  Sort libraries by partisanship, first-party first, then third-party
+            //  by package identifier.
+            //  Then, break ties by extension culture. Module numbers are
+            //  lexicographically ordered according to the package’s internal dependency
+            //  graph, so the library with the lowest module number will always be the
+            //  current culture, if it is present.
+            //  Then, break ties by genericness. Generic extensions come first, concrete
+            //  extensions come last.
+            //  Finally, break ties by extension id. This is arbitrary, but we usually try
+            //  to assign id numbers such that the extensions with the fewest constraints
+            //  come first.
+            ($0.1, $0.0.culture.citizen, $0.2, $0.0.id) <
+            ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
+        }
+        automatic.sort { $0.id < $1.id }
+        topics.sort { $0.id < $1.id }
 
         self.init(inliner,
             requirements: requirements.isEmpty ? nil : requirements,
             superforms: superforms.isEmpty ? nil : superforms,
-            extensions: libraries.sorted
-            {
-                //  Sort libraries by partisanship, first-party first, then third-party
-                //  by package identifier.
-                $0.key < $1.key
-            }
-                .flatMap
-            {
-                //  Within each library, sort extensions by genericness, then by culture.
-                generics.partition(extensions: $0.value)
-            },
-            topics: topics.sorted { $0.id < $1.id },
-            phylum: phylum,
-            kinks: kinks,
-            bias: bias)
+            extensions: extensions.map(\.0),
+            automatic: automatic,
+            topics: topics,
+            bias: bias,
+            mode: mode)
     }
 }
 extension Inliner.Groups
@@ -142,6 +156,20 @@ extension Inliner.Groups:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
+        for group:Record.Group.Automatic in self.automatic
+        {
+            html[.section, { $0.class = "group automatic" }]
+            {
+                $0[.h2] = self.mode == .meta ? "Modules" : "See Also"
+                $0[.ul]
+                {
+                    for member:Unidoc.Scalar in group.members
+                    {
+                        $0 ?= self.inliner.card(member)
+                    }
+                }
+            }
+        }
         for group:Record.Group.Topic in self.topics
         {
             html[.section, { $0.class = "group topic" }]
@@ -169,23 +197,29 @@ extension Inliner.Groups:HyperTextOutputStreamable
             }
         }
 
+        guard case .decl(let phylum, let kinks)? = self.mode
+        else
+        {
+            return
+        }
+
         if  let superforms:[Unidoc.Scalar] = self.superforms
         {
             html[.section, { $0.class = "group superforms" }]
             {
-                if      self.kinks[is: .required]
+                if      kinks[is: .required]
                 {
                     $0[.h2] = "Restates"
                 }
-                else if self.kinks[is: .intrinsicWitness]
+                else if kinks[is: .intrinsicWitness]
                 {
                     $0[.h2] = "Implements"
                 }
-                else if self.kinks[is: .override]
+                else if kinks[is: .override]
                 {
                     $0[.h2] = "Overrides"
                 }
-                else if case .class? = self.phylum
+                else if case .class = phylum
                 {
                     $0[.h2] = "Superclasses"
                 }
@@ -229,16 +263,16 @@ extension Inliner.Groups:HyperTextOutputStreamable
                 $0 ?= self.list(group.nested, under: "Members")
                 $0 ?= self.list(group.features, under: "Features")
 
-                switch self.phylum
+                switch phylum
                 {
-                case .protocol?:
+                case .protocol:
                     $0 ?= self.list(group.subforms, under: "Subtypes")
 
-                case .class?:
+                case .class:
                     $0 ?= self.list(group.subforms, under: "Subclasses")
 
                 case _:
-                    if  self.kinks[is: .required]
+                    if  kinks[is: .required]
                     {
                         let (restatements, witnesses):([Unidoc.Scalar], [Unidoc.Scalar]) =
                             group.subforms.reduce(into: ([], []))

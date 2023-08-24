@@ -54,10 +54,10 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
         case nil:
             break
 
-        case .exact(let version):
+        case .exact(let version)?:
             bson[.requirement_lower] = version
 
-        case .range(let versions):
+        case .range(let versions)?:
             bson[.requirement_lower] = versions.lowerBound
             bson[.requirement_upper] = versions.upperBound
         }

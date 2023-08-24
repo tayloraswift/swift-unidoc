@@ -1,0 +1,73 @@
+extension SVG
+{
+    @frozen public
+    enum ContainerElement:String, Equatable, Hashable, Sendable
+    {
+        case a
+        case animate
+        case animateMotion
+        case animateTransform
+        case circle
+        case clipPath
+        case defs
+        case desc
+        case discard
+        case ellipse
+        case feBlend
+        case feColorMatrix
+        case feComponentTransfer
+        case feComposite
+        case feConvolveMatrix
+        case feDiffuseLighting
+        case feDisplacementMap
+        case feDistantLight
+        case feDropShadow
+        case feFlood
+        case feFuncA
+        case feFuncB
+        case feFuncG
+        case feFuncR
+        case feGaussianBlur
+        case feImage
+        case feMerge
+        case feMergeNode
+        case feMorphology
+        case feOffset
+        case fePointLight
+        case feSpecularLighting
+        case feSpotLight
+        case feTile
+        case feTurbulence
+        case filter
+        case foreignObject
+        case g
+        case hatch
+        case hatchpath
+        case image
+        case line
+        case linearGradient
+        case marker
+        case mask
+        case metadata
+        case mpath
+        case path
+        case pattern
+        case polygon
+        case polyline
+        case radialGradient
+        case rect
+        case script
+        case set
+        case stop
+        case style
+        case svg
+        case `switch`
+        case symbol
+        case text
+        case textPath
+        case title
+        case tspan
+        case use
+        case view
+    }
+}

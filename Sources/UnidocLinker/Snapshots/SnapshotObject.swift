@@ -29,6 +29,7 @@ extension SnapshotObject
     var decls:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
     var nodes:Snapshot.View<SymbolGraph.DeclNode> { .init(self.snapshot) }
 
+    var metadata:SymbolGraphMetadata { self.snapshot.metadata }
     var graph:SymbolGraph { self.snapshot.graph }
     var zone:Unidoc.Zone { self.snapshot.zone }
 }

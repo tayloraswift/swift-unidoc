@@ -39,6 +39,7 @@ extension ThinQuery.Output:ServerResponseFactory
         case .decl(let master)?:    return Site.Docs[self.zone,
             self.masters.count > 1 ? .init(stem: master.stem) : master.shoot]
         case .file?, nil:           return nil
+        case .meta?:                return Site.Docs[self.zone]
         }
     }
 }

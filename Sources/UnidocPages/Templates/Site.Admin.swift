@@ -35,11 +35,13 @@ extension Site.Admin:FixedPage
 {
     public
     var title:String { "Administrator Tools" }
-
+}
+extension Site.Admin:AdministrativePage
+{
     public
-    func emit(content html:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder)
     {
-        html[.form]
+        main[.form]
         {
             $0.enctype = "multipart/form-data"
             $0.action = "\(Site.Action.upload)"
@@ -62,9 +64,9 @@ extension Site.Admin:FixedPage
             }
         }
 
-        html[.hr]
+        main[.hr]
 
-        html[.form]
+        main[.form]
         {
             $0.enctype = "multipart/form-data"
             $0.action = "\(Site.Action.rebuild)"
@@ -78,9 +80,9 @@ extension Site.Admin:FixedPage
             }
         }
 
-        html[.hr]
+        main[.hr]
 
-        html[.form]
+        main[.form]
         {
             $0.enctype = "application/x-www-form-urlencoded"
             $0.action = "\(Self.confirm(.dropDatabase))"
@@ -94,11 +96,11 @@ extension Site.Admin:FixedPage
             }
         }
 
-        html[.hr]
+        main[.hr]
 
-        html[.h2] = "Replica set information"
+        main[.h2] = "Replica set information"
 
-        html[.dl]
+        main[.dl]
         {
             $0[.dt] = "name"
             $0[.dd] = self.configuration.name

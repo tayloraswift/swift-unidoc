@@ -32,36 +32,40 @@ extension WideQuery.Output:ServerResponseFactory
                 inliner.outlines += $0.outlines
             }
 
-            /// Tree won’t exist if the module contains no declarations. (For example,
-            /// an `@_exported` shim.)
-            let nouns:[Record.Noun] = principal.tree?.rows ?? []
-
+            //  Note: noun tree won’t exist if the module contains no declarations.
+            //  (For example, an `@_exported` shim.)
             switch master
             {
             case .article(let master):
                 let page:Site.Docs.Article = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    nouns: nouns)
+                    nouns: principal.tree?.rows)
                 resource = page.rendered()
 
             case .culture(let master):
                 let page:Site.Docs.Culture = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    nouns: nouns)
+                    nouns: principal.tree?.rows)
                 resource = page.rendered()
 
             case .decl(let master):
                 let page:Site.Docs.Decl = .init(inliner,
                     master: master,
                     groups: principal.groups,
-                    nouns: nouns)
+                    nouns: principal.tree?.rows)
                 resource = page.rendered()
 
             case .file:
                 //  We should never get this as principal output!
                 throw WideQuery.OutputError.malformed
+
+            case .meta(let master):
+                let page:Site.Docs.Meta = .init(inliner,
+                    master: master,
+                    groups: principal.groups)
+                resource = page.rendered()
             }
 
             return .resource(resource)
@@ -72,7 +76,8 @@ extension WideQuery.Output:ServerResponseFactory
                 inliner.masters.add(principal.matches)
 
             if  let disambiguation:Site.Docs.Disambiguation = .init(inliner,
-                    matches: principal.matches)
+                    matches: principal.matches,
+                    nouns: principal.tree?.rows ?? [])
             {
                 return .resource(disambiguation.rendered())
             }

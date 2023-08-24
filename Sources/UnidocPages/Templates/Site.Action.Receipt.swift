@@ -23,13 +23,14 @@ extension Site.Action.Receipt:FixedPage
 {
     public
     var location:URI { Site.Action.uri.path / self.action.rawValue }
-
     public
     var title:String { "Action complete" }
-
+}
+extension Site.Action.Receipt:AdministrativePage
+{
     public
-    func emit(content html:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder)
     {
-        html[.p] = self.text
+        main[.p] = self.text
     }
 }

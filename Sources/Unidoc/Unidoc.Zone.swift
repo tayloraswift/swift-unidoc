@@ -19,6 +19,9 @@ extension Unidoc
 extension Unidoc.Zone
 {
     @inlinable public
+    var meta:Unidoc.Scalar { self + 0 * .meta }
+
+    @inlinable public
     var min:Unidoc.Scalar { self + Int32.init(bitPattern: .min) }
     @inlinable public
     var max:Unidoc.Scalar { self + Int32.init(bitPattern: .max) }
