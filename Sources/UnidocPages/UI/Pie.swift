@@ -1,7 +1,7 @@
 import HTML
 
 @frozen public
-struct Pie
+struct Pie<Value> where Value:PieValue
 {
     public
     var values:[Value]
@@ -62,7 +62,7 @@ extension Pie:ScalableVectorOutputStreamable
                 let r:Double = 2 * Double.pi * f
 
                 let share:Double = Double.init(value.weight) / divisor
-                let slice:Slice = .init(share: share,
+                let slice:PieSlice = .init(share: share,
                     from: start,
                     to: r)
 
@@ -75,7 +75,7 @@ extension Pie:ScalableVectorOutputStreamable
             if  w > 0
             {
                 let share:Double = Double.init(value.weight) / divisor
-                let slice:Slice = .init(share: share,
+                let slice:PieSlice = .init(share: share,
                     startArc: start,
                     endArc: .init(1, 0),
                     end: 2 * Double.pi)
