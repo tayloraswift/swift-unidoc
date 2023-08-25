@@ -13,6 +13,8 @@ extension Record.Master
         let module:ModuleDetails
         public
         var readme:Unidoc.Scalar?
+        public
+        var census:Record.Census
 
         public
         var overview:Record.Passage?
@@ -25,6 +27,7 @@ extension Record.Master
         init(id:Unidoc.Scalar,
             module:ModuleDetails,
             readme:Unidoc.Scalar? = nil,
+            census:Record.Census = .init(),
             overview:Record.Passage? = nil,
             details:Record.Passage? = nil,
             group:Unidoc.Scalar? = nil)
@@ -33,6 +36,7 @@ extension Record.Master
 
             self.module = module
             self.readme = readme
+            self.census = census
 
             self.overview = overview
             self.details = details

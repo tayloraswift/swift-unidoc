@@ -72,11 +72,10 @@ extension DynamicClientGroup
         filter:Set<Int>?)
     {
         for (c, culture):(Int, SymbolGraph.Culture) in zip(
-            snapshot.graph.cultures.indices,
-            snapshot.graph.cultures) where
-            filter?.contains(c) ?? true
+            snapshot.cultures.indices,
+            snapshot.cultures) where filter?.contains(c) ?? true
         {
-            let module:ModuleIdentifier = snapshot.graph.namespaces[c]
+            let module:ModuleIdentifier = snapshot.namespaces[c]
 
             self.imports.append(module)
 
@@ -103,11 +102,11 @@ extension DynamicClientGroup
         context:DynamicContext,
         filter:Set<Int>?)
     {
-        let qualifier:ModuleIdentifier = snapshot.graph.namespaces[namespace.index]
+        let qualifier:ModuleIdentifier = snapshot.namespaces[namespace.index]
         for s:Int32 in namespace.range
         {
-            let node:SymbolGraph.DeclNode = snapshot.graph.decls.nodes[s]
-            let symbol:Symbol.Decl = snapshot.graph.decls.symbols[s]
+            let node:SymbolGraph.DeclNode = snapshot.decls.nodes[s]
+            let symbol:Symbol.Decl = snapshot.decls.symbols[s]
 
             guard let s:Unidoc.Scalar = snapshot.scalars.decls[s]
             else
@@ -128,7 +127,7 @@ extension DynamicClientGroup
             }
             //  Extension may extend a scalar from a different package.
             if  let outer:SymbolGraph.Decl = node.decl ??
-                    context[s.package]?.nodes[s]?.decl
+                    context[s.package]?.decls[s.citizen]?.decl
             {
                 self.add(extensions: node.extensions,
                     extending: (s, symbol, outer.path),
@@ -177,14 +176,14 @@ extension DynamicClientGroup
             }
 
             //  This can be completely different from the namespace of the extended type!
-            let qualifier:ModuleIdentifier = snapshot.graph.namespaces[`extension`.namespace]
+            let qualifier:ModuleIdentifier = snapshot.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features
             {
-                let symbol:Symbol.Decl.Vector = .init(snapshot.graph.decls.symbols[f],
+                let symbol:Symbol.Decl.Vector = .init(snapshot.decls.symbols[f],
                     self: outer.symbol)
 
                 if  let f:Unidoc.Scalar = snapshot.scalars.decls[f],
-                    let inner:SymbolGraph.Decl = context[f.package]?.nodes[f]?.decl
+                    let inner:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
                 {
                     self.codelinks[qualifier, outer.path, inner.path.last]
                         .overload(with: .init(

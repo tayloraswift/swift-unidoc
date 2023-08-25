@@ -1,0 +1,96 @@
+import SymbolGraphs
+import Unidoc
+import UnidocRecords
+
+extension WritableKeyPath<Record.Stats.Coverage, Int>
+{
+    static
+    func classify(_ decl:SymbolGraph.Decl,
+        from object:SnapshotObject,
+        at local:Int32) -> WritableKeyPath<Record.Stats.Coverage, Int>
+    {
+        if  case _? = decl.article
+        {
+            return \.direct
+        }
+        if  case _? = decl.origin
+        {
+            return \.indirect
+        }
+        //  We only count indirect documentation from a lexical scope if the decl is not itself
+        //  a scope, and its scope was declared and documented in the same package.
+        switch decl.phylum
+        {
+        case    .actor, .class, .enum, .protocol, .struct:
+            return \.undocumented
+
+        case    .associatedtype,
+                .case,
+                .deinitializer,
+                .func,
+                .initializer,
+                .operator,
+                .subscript,
+                .typealias,
+                .var:
+            break
+        }
+
+        if  let scope:Unidoc.Scalar = object.scope(of: local),
+            let scope:Int32 = scope - object.zone,
+            case _? = object.decls[scope]?.decl?.article
+        {
+            return \.indirect
+        }
+        else
+        {
+            return \.undocumented
+        }
+    }
+}
+extension WritableKeyPath<Record.Stats.Decl, Int>
+{
+    static
+    func classify(_ decl:SymbolGraph.Decl) -> WritableKeyPath<Record.Stats.Decl, Int>
+    {
+        if  decl.kinks[is: .required]
+        {
+            return \.requirements
+        }
+        if  decl.kinks[is: .intrinsicWitness]
+        {
+            return \.witnesses
+        }
+        if  case .func(.instance?) = decl.phylum,
+            decl.path.last.prefix(while: { $0 != "(" }) == "callAsFunction"
+        {
+            return \.functors
+        }
+
+        switch decl.phylum
+        {
+        case    .associatedtype:        return \.requirements
+        case    .typealias:             return \.typealiases
+        case    .struct,
+                .enum:                  return \.structures
+        case    .protocol:              return \.protocols
+        case    .class:                 return \.classes
+        case    .actor:                 return \.actors
+        case    .initializer,
+                .subscript(.static),
+                .subscript(.class),
+                .func(.static?),
+                .func(.class?),
+                .var(.static?),
+                .var(.class?),
+                .case:                  return \.constructors
+        case    .subscript(.instance):  return \.subscripts
+        case    .deinitializer,
+                .func(.instance?),
+                .var(.instance?):       return \.methods
+        case    .operator:              return \.operators
+        case    .func(nil),
+                .var(nil):              return \.functions
+        }
+    }
+}

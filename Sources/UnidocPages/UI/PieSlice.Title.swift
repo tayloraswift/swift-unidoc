@@ -1,6 +1,6 @@
 import HTML
 
-extension Pie.Slice
+extension PieSlice
 {
     struct Title
     {
@@ -12,7 +12,7 @@ extension Pie.Slice
         }
     }
 }
-extension Pie.Slice.Title:ScalableVectorOutputStreamable
+extension PieSlice.Title:ScalableVectorOutputStreamable
 {
     static
     func += (svg:inout SVG.ContentEncoder, self:Self)
