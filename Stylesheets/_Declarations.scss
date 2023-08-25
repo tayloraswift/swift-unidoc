@@ -172,6 +172,36 @@ section.details
         }
     }
 
+    div.stats
+    {
+        width: 14rem;
+        float: right;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        h2, h3
+        {
+            font-size: 100%;
+            margin: 0;
+        }
+        h3
+        {
+            font-weight: 500;
+            color: $light-foreground-semi;
+        }
+
+        figure
+        {
+            margin: 1rem;
+
+            div.pie
+            {
+                font-size: 10px;
+            }
+        }
+    }
+
     table
     {
         width: 100%;
@@ -209,119 +239,6 @@ section.details
         td span.upto
         {
             padding: 0 0.5rem;
-        }
-    }
-
-    div.pie
-    {
-        width: 20rem;
-
-        > div.pie-color
-        {
-            height: 0;
-            width: 0;
-            margin: 0;
-        }
-
-        > div.pie-color > svg,
-        > div.pie-geometry
-        {
-            width: 12rem;
-            height: 12rem;
-            margin: 0;
-            position: relative;
-        }
-
-        > div.pie-geometry
-        {
-            transition: box-shadow 0.1s ease-out;
-            pointer-events: none;
-
-            border-radius: 6rem;
-            box-shadow:
-                inset 0 -0.5rem 0.75rem -0.75rem rgba(255, 255, 255, 0.3),
-                inset 0 -0.4rem 0.05rem  0.1rem rgba(0,0,0,0.33),
-                inset 0 -1.3rem 5rem     0.1rem rgba(0,0,0,0.18);
-        }
-        > div.pie-color:hover + div.pie-geometry
-        {
-            box-shadow:
-                inset 0 -0.5rem 1.5rem -0.75rem rgba(255, 255, 255, 0.5),
-                inset 0 -0.4rem 0.05rem  0.1rem rgba(0,0,0,0.33),
-                inset 0 -1.3rem 5rem     0.1rem rgba(0,0,0,0.11);
-        }
-
-        > div.pie-color > svg g
-        {
-            > *
-            {
-                fill: rgb(255, 255, 255);
-            }
-            > *.protocol
-            {
-                fill: rgb(82, 206, 255);
-            }
-            > *.requirement
-            {
-                fill: rgb(130, 255, 249);
-            }
-            > *.witness
-            {
-                fill: rgb(171, 255, 244);
-            }
-            > *.actor
-            {
-                fill: rgb(202, 255, 55);
-            }
-            > *.class
-            {
-                fill: rgb(255, 244, 94);
-            }
-            > *.typealias
-            {
-                fill: rgb(255, 154, 38);
-            }
-            > *.structure
-            {
-                fill: rgb(255, 212, 72);
-            }
-            > *.constructor
-            {
-                fill: rgb(255, 103, 141);
-            }
-            > *.method
-            {
-                fill: rgb(255, 170, 196);
-            }
-            > *.functor
-            {
-                fill: rgb(255, 112, 243);
-            }
-            > *.subscript
-            {
-                fill: rgb(250, 104, 255);
-            }
-            > *.operator
-            {
-                fill: rgb(255, 50, 111);
-            }
-            > *.function
-            {
-                fill: rgb(255, 103, 103);
-            }
-
-            > *.coverage.undocumented
-            {
-                fill: rgb(238, 238, 238);
-            }
-            > *.coverage.indirect
-            {
-                fill: rgb(255, 170, 196);
-            }
-            > *.coverage.direct
-            {
-                fill: rgb(255, 103, 141);
-            }
         }
     }
 }

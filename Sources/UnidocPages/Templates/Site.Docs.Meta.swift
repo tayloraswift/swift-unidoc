@@ -156,95 +156,21 @@ extension Site.Docs.Meta:ApplicationPage
                 }
             }
 
-            var breakdown:
-            (
-                unweighted:Pie<HTML.Stats.DeclPhylum>,
-                weighted:Pie<HTML.Stats.DeclPhylum>
-            ) = ([], [])
+            $0[.h2] = "Interface Breakdown"
 
-            for category:KeyPath<Record.Stats.Decl, Int> in
-            [
-                \.functions,
-                \.operators,
-                \.constructors,
-                \.methods,
-                \.subscripts,
-                \.functors,
-                \.protocols,
-                \.requirements,
-                \.witnesses,
-                \.actors,
-                \.classes,
-                \.structures,
-                \.typealiases,
-            ]
-            {
-                let unweighted:Int = self.master.census.unweighted.decls[keyPath: category]
-                if  unweighted > 0
-                {
-                    breakdown.unweighted.values.append(.init(category,
-                        domain: "declarations in this package",
-                        weight: unweighted))
-                }
+            $0 += StatsBreakdown.init(
+                unweighted: self.master.census.unweighted.decls,
+                weighted: self.master.census.weighted.decls,
+                domain: "this package")
 
-                let weighted:Int = self.master.census.weighted.decls[keyPath: category]
-                if  weighted > 0
-                {
-                    breakdown.weighted.values.append(.init(category,
-                        domain: "symbols in this package",
-                        weight: weighted))
-                }
-            }
-
-            $0[.h2] = "Symbol Breakdown"
-
-            $0[.h3] = "Symbols"
-
-            $0 += breakdown.weighted
-
-            $0[.h3] = "Declarations"
-
-            $0 += breakdown.unweighted
-
-            var coverage:
-            (
-                unweighted:Pie<HTML.Stats.Coverage>,
-                weighted:Pie<HTML.Stats.Coverage>
-            ) = ([], [])
-
-            for category:KeyPath<Record.Stats.Coverage, Int> in
-            [
-                \.direct,
-                \.indirect,
-                \.undocumented,
-            ]
-            {
-                let unweighted:Int = self.master.census.unweighted.coverage[keyPath: category]
-                if  unweighted > 0
-                {
-                    coverage.unweighted.values.append(.init(category,
-                        domain: "declarations in this package",
-                        weight: unweighted))
-                }
-
-                let weighted:Int = self.master.census.weighted.coverage[keyPath: category]
-                if  weighted > 0
-                {
-                    coverage.weighted.values.append(.init(category,
-                        domain: "symbols in this package",
-                        weight: weighted))
-                }
-            }
 
             $0[.h2] = "Documentation Coverage"
 
-            $0[.h3] = "Symbols"
+            $0 += StatsBreakdown.init(
+                unweighted: self.master.census.unweighted.coverage,
+                weighted: self.master.census.weighted.coverage,
+                domain: "this package")
 
-            $0 += coverage.weighted
-
-            $0[.h3] = "Declarations"
-
-            $0 += coverage.unweighted
 
             $0[.h2] = "Snapshot Information"
 
