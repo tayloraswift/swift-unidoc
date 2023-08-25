@@ -87,13 +87,13 @@ extension DynamicLinker.Extensions
         extending s:Int32,
         context:DynamicContext,
         clients:[DynamicClientGroup],
-        diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Unidoc.Scalar>
+        diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Int>
     {
         guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
-                let scope:SymbolGraph.Decl = context[s.package]?.nodes[s]?.decl
+                let scope:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
         else
         {
-            let type:Symbol.Decl = context.current.graph.decls.symbols[s]
+            let type:Symbol.Decl = context.current.decls.symbols[s]
 
             diagnostics.errors.append(DroppedExtensionsError.extensions(of: type,
                 count: extensions.count))
@@ -106,11 +106,11 @@ extension DynamicLinker.Extensions
         {
             .init(
                 conditions: $0.conditions.map { $0.map { context.current.scalars.decls[$0] } },
-                culture: context.current.zone + $0.culture * .module,
+                culture: $0.culture,
                 extends: s)
         }
 
-        let conformances:ProtocolConformances<Unidoc.Scalar> = .init(
+        let conformances:ProtocolConformances<Int> = .init(
             context: context,
             errors: &diagnostics.errors)
         {
@@ -137,10 +137,10 @@ extension DynamicLinker.Extensions
             }
         }
 
-        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Unidoc.Scalar>]) in
+        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Int>]) in
             conformances
         {
-            for conformance:ProtocolConformance in conformances
+            for conformance:ProtocolConformance<Int> in conformances
             {
                 let signature:DynamicLinker.ExtensionSignature = .init(
                     conditions: conformance.conditions,
@@ -206,7 +206,7 @@ extension DynamicLinker.Extensions
 
                 let resolver:DynamicResolver = .init(context: context,
                     diagnostics: diagnostics,
-                    namespace: context.current.graph.namespaces[`extension`.namespace],
+                    namespace: context.current.namespaces[`extension`.namespace],
                     clients: clients[`extension`.culture],
                     scope: [String].init(scope.path))
 

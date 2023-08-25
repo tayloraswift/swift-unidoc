@@ -3,6 +3,7 @@ import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocRecords
 
 @frozen public
 struct DynamicContext
@@ -124,6 +125,26 @@ extension DynamicContext
 }
 extension DynamicContext
 {
+    func dependencies() -> [Record.Master.Meta.Dependency]
+    {
+        var dependencies:[Record.Master.Meta.Dependency] = []
+            dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
+
+        if  case _? = self.current.metadata.toolchain,
+            let resolution:Unidoc.Zone = self[.swift]?.zone
+        {
+            dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
+        }
+        for dependency:SymbolGraphMetadata.Dependency in self.current.metadata.dependencies
+        {
+            dependencies.append(.init(id: dependency.package,
+                requirement: dependency.requirement,
+                resolution: self[dependency.package]?.zone))
+        }
+
+        return dependencies
+    }
+
     /// Builds a codelink resolution table
     func groups() -> [DynamicClientGroup]
     {
@@ -132,8 +153,8 @@ extension DynamicContext
         //  resolution tables.
         var groups:[[PackageIdentifier: Set<String>]: [Int]] = [:]
         for (c, culture):(Int, SymbolGraph.Culture) in zip(
-            self.current.graph.cultures.indices,
-            self.current.graph.cultures)
+            self.current.cultures.indices,
+            self.current.cultures)
         {
             print("\(culture.module.id): \(culture.module.dependencies)")
 
@@ -147,12 +168,12 @@ extension DynamicContext
             groups[products, default: []].append(c)
         }
 
-        return .init(unsafeUninitializedCapacity: self.current.graph.cultures.count)
+        return .init(unsafeUninitializedCapacity: self.current.cultures.count)
         {
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
                 var group:DynamicClientGroup = .init(
-                    nodes: self.current.scalars.decls[self.current.graph.decls.nodes.indices])
+                    nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
 
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {

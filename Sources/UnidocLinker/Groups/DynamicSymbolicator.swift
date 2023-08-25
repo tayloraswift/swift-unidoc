@@ -28,12 +28,12 @@ extension DynamicSymbolicator:Symbolicator
     public
     func loadDeclSymbol(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
-        self.context[scalar.package]?.decls[scalar]
+        self.context[scalar.package]?.decls.symbols[scalar.citizen]
     }
     public
     func loadFileSymbol(_ scalar:Unidoc.Scalar) -> Symbol.File?
     {
-        self.context[scalar.package]?.files[scalar]
+        self.context[scalar.package]?.files[scalar.citizen]
     }
 }
 extension DynamicSymbolicator

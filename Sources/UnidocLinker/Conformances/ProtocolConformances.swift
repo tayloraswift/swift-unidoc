@@ -45,7 +45,7 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
         self.init(table: [:])
     }
 }
-extension ProtocolConformances<Unidoc.Scalar>
+extension ProtocolConformances<Int>
 {
     init(context:DynamicContext,
         errors:inout [any DynamicLinkerError],
@@ -53,7 +53,7 @@ extension ProtocolConformances<Unidoc.Scalar>
     {
         var conformances:ProtocolConformances<Int> = [:]
         try populate(&conformances)
-        let deduplicated:[Unidoc.Scalar: [ProtocolConformance<Culture>]] =
+        let deduplicated:[Unidoc.Scalar: [ProtocolConformance<Int>]] =
             conformances.table.mapValues
         {
             /// The set of local package cultures in which this protocol conformance
@@ -68,7 +68,7 @@ extension ProtocolConformances<Unidoc.Scalar>
             let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = $0.reduce(
                 into: [:])
             {
-                let module:ModuleDetails = context.current.graph.cultures[$1.culture].module
+                let module:ModuleDetails = context.current.cultures[$1.culture].module
                 for c:Int in module.dependencies.modules where
                     c != $1.culture && extancy.contains(c)
                 {
@@ -128,7 +128,7 @@ extension ProtocolConformances<Unidoc.Scalar>
                     case .where(let parameter, is: let what, to: let type):
                         if  case .nominal(let type?) = type,
                             let snapshot:SnapshotObject = context[type.package],
-                            let local:[Int32] = snapshot.nodes[type]?.decl?.superforms
+                            let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
                         {
                             for local:Int32 in local
                             {
@@ -178,7 +178,7 @@ extension ProtocolConformances<Unidoc.Scalar>
             //  Conformances should now be unique per culture.
             return reduced.map
             {
-                .init(conditions: $0.value, culture: context.current.zone + $0.key * .module)
+                .init(conditions: $0.value, culture: $0.key)
             }
             .sorted
             {

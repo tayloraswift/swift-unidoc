@@ -1,28 +1,25 @@
 import HTML
 
-extension Pie
+struct PieSlice
 {
-    struct Slice
-    {
-        let share:Double
-        let startArc:SVG.Point<Double>
-        let endArc:SVG.Point<Double>
-        /// The end of the slice, in radians.
-        let end:Double
+    let share:Double
+    let startArc:SVG.Point<Double>
+    let endArc:SVG.Point<Double>
+    /// The end of the slice, in radians.
+    let end:Double
 
-        init(share:Double,
-            startArc:SVG.Point<Double>,
-            endArc:SVG.Point<Double>,
-            end:Double)
-        {
-            self.share = share
-            self.startArc = startArc
-            self.endArc = endArc
-            self.end = end
-        }
+    init(share:Double,
+        startArc:SVG.Point<Double>,
+        endArc:SVG.Point<Double>,
+        end:Double)
+    {
+        self.share = share
+        self.startArc = startArc
+        self.endArc = endArc
+        self.end = end
     }
 }
-extension Pie.Slice
+extension PieSlice
 {
     init(share:Double, from start:SVG.Point<Double>, to end:Double)
     {
@@ -32,7 +29,7 @@ extension Pie.Slice
             end: end)
     }
 }
-extension Pie.Slice
+extension PieSlice
 {
     var d:String
     {

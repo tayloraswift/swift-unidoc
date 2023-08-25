@@ -1,3 +1,4 @@
+import Sources
 import Unidoc
 
 extension DynamicContext
@@ -9,7 +10,10 @@ extension DynamicContext
 
         case `associatedtype`
 
-        case `case`
+        /// Enumeration cases sort by their declaration order. Because it is impossible for
+        /// them to appear in a different file than the enum’s declaration, we can simply use
+        /// the source position of the case declaration.
+        case `case`(SourcePosition)
         case  initializer
         case  deinitializer
 
@@ -25,14 +29,14 @@ extension DynamicContext
 }
 extension DynamicContext.SortLeague
 {
-    init(_ phylum:Unidoc.Decl)
+    init(_ phylum:Unidoc.Decl, position:SourcePosition? = nil)
     {
         switch phylum
         {
         case    .var(nil):                      self = .var
         case    .func(nil):                     self = .func
         case    .associatedtype:                self = .associatedtype
-        case    .case:                          self = .case
+        case    .case:                          self = .case(position ?? .zero)
         case    .initializer:                   self = .initializer
         case    .deinitializer:                 self = .deinitializer
         case    .protocol:                      self = .protocol

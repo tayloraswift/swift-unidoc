@@ -13,7 +13,7 @@ extension Record.Group.Extension
 
         self.init(id: `extension`.id,
             conditions: signature.conditions,
-            culture: signature.culture,
+            culture: context.current.zone + signature.culture,
             scope: signature.extends,
             conformances: context.sort(lexically: `extension`.conformances),
             features: context.sort(lexically: `extension`.features),

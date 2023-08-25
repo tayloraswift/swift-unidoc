@@ -156,113 +156,43 @@ extension Site.Docs.Meta:ApplicationPage
                 }
             }
 
-            var breakdown:(unweighted:Pie, weighted:Pie) = ([], [])
-            for (value, `class`, what):
-                (KeyPath<Record.Master.Meta.Stats.Decl, Int>, String, String) in
+            var breakdown:
+            (
+                unweighted:Pie<HTML.Stats.DeclPhylum>,
+                weighted:Pie<HTML.Stats.DeclPhylum>
+            ) = ([], [])
+
+            for category:KeyPath<Record.Stats.Decl, Int> in
             [
-                (
-                    \.functions,
-                    "function",
-                    "free functions or variables"
-                ),
-                (
-                    \.operators,
-                    "operator",
-                    "operators"
-                ),
-                (
-                    \.constructors,
-                    "constructor",
-                    "initializers, type members, or enum cases"
-                ),
-                (
-                    \.methods,
-                    "method",
-                    "instance methods"
-                ),
-                (
-                    \.subscripts,
-                    "subscript",
-                    "instance subscripts"
-                ),
-                (
-                    \.functors,
-                    "functor",
-                    "functors"
-                ),
-                (
-                    \.protocols,
-                    "protocol",
-                    "protocols"
-                ),
-                (
-                    \.requirements,
-                    "requirement",
-                    "protocol requirements"
-                ),
-                (
-                    \.witnesses,
-                    "witness",
-                    "default implementations"
-                ),
-                (
-                    \.actors,
-                    "actor",
-                    "actors"
-                ),
-                (
-                    \.classes,
-                    "class",
-                    "classes"
-                ),
-                (
-                    \.structures,
-                    "structure",
-                    "structs or enums"
-                ),
-                (
-                    \.typealiases,
-                    "typealias",
-                    "typealiases"
-                ),
+                \.functions,
+                \.operators,
+                \.constructors,
+                \.methods,
+                \.subscripts,
+                \.functors,
+                \.protocols,
+                \.requirements,
+                \.witnesses,
+                \.actors,
+                \.classes,
+                \.structures,
+                \.typealiases,
             ]
             {
-                @Sendable
-                func percent(_ value:Double) -> String
-                {
-                    let permille:Int = .init((value * 1000).rounded())
-                    let (percent, f):(Int, Int) = permille.quotientAndRemainder(
-                        dividingBy: 10)
-
-                    return "\(percent).\(f) percent"
-                }
-
-                let unweighted:Int = self.master.stats.decls[keyPath: value]
-                let weighted:Int = unweighted +
-                    self.master.stats.firstPartyFeatures[keyPath: value] +
-                    self.master.stats.thirdPartyFeatures[keyPath: value]
-
+                let unweighted:Int = self.master.census.unweighted.decls[keyPath: category]
                 if  unweighted > 0
                 {
-                    let value:Pie.Value = .init(weight: unweighted,
-                        class: `class`)
-                    {
-                        return """
-                        \(percent($0)) of the declarations in this package are \(what)
-                        """
-                    }
-                    breakdown.unweighted.values.append(value)
+                    breakdown.unweighted.values.append(.init(category,
+                        domain: "declarations in this package",
+                        weight: unweighted))
                 }
+
+                let weighted:Int = self.master.census.weighted.decls[keyPath: category]
                 if  weighted > 0
                 {
-                    let value:Pie.Value = .init(weight: weighted,
-                        class: `class`)
-                    {
-                        return """
-                        \(percent($0)) of the symbols in this package are \(what)
-                        """
-                    }
-                    breakdown.weighted.values.append(value)
+                    breakdown.weighted.values.append(.init(category,
+                        domain: "symbols in this package",
+                        weight: weighted))
                 }
             }
 
@@ -275,6 +205,46 @@ extension Site.Docs.Meta:ApplicationPage
             $0[.h3] = "Declarations"
 
             $0 += breakdown.unweighted
+
+            var coverage:
+            (
+                unweighted:Pie<HTML.Stats.Coverage>,
+                weighted:Pie<HTML.Stats.Coverage>
+            ) = ([], [])
+
+            for category:KeyPath<Record.Stats.Coverage, Int> in
+            [
+                \.direct,
+                \.indirect,
+                \.undocumented,
+            ]
+            {
+                let unweighted:Int = self.master.census.unweighted.coverage[keyPath: category]
+                if  unweighted > 0
+                {
+                    coverage.unweighted.values.append(.init(category,
+                        domain: "declarations in this package",
+                        weight: unweighted))
+                }
+
+                let weighted:Int = self.master.census.weighted.coverage[keyPath: category]
+                if  weighted > 0
+                {
+                    coverage.weighted.values.append(.init(category,
+                        domain: "symbols in this package",
+                        weight: weighted))
+                }
+            }
+
+            $0[.h2] = "Documentation Coverage"
+
+            $0[.h3] = "Symbols"
+
+            $0 += coverage.weighted
+
+            $0[.h3] = "Declarations"
+
+            $0 += coverage.unweighted
 
             $0[.h2] = "Snapshot Information"
 

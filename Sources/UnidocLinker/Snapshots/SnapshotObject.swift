@@ -3,6 +3,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
+@dynamicMemberLookup
 @usableFromInline internal final
 class SnapshotObject:Sendable
 {
@@ -25,13 +26,15 @@ class SnapshotObject:Sendable
 }
 extension SnapshotObject
 {
-    var files:Snapshot.View<Symbol.File> { .init(self.snapshot) }
-    var decls:Snapshot.View<Symbol.Decl> { .init(self.snapshot) }
-    var nodes:Snapshot.View<SymbolGraph.DeclNode> { .init(self.snapshot) }
-
     var metadata:SymbolGraphMetadata { self.snapshot.metadata }
-    var graph:SymbolGraph { self.snapshot.graph }
     var zone:Unidoc.Zone { self.snapshot.zone }
+}
+extension SnapshotObject
+{
+    subscript<T>(dynamicMember keyPath:KeyPath<SymbolGraph, T>) -> T
+    {
+        self.snapshot.graph[keyPath: keyPath]
+    }
 }
 extension SnapshotObject
 {
@@ -82,7 +85,9 @@ extension SnapshotObject
         if  let local:Int32 = decl - self.zone,
             let decl:SymbolGraph.Decl = snapshot.graph.decls[local]?.decl
         {
-            return (.init(decl.phylum), decl.path.last, local)
+            let league:DynamicContext.SortLeague = .init(decl.phylum,
+                position: decl.location?.position)
+            return (league, decl.path.last, local)
         }
         else
         {
@@ -94,7 +99,7 @@ extension SnapshotObject
     {
         (declaration - self.zone).map(self.scope(of:)) ?? nil
     }
-    /// Returns the lexical scope of the requested declaration, if it
+    /// Returns the lexical scope of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {
