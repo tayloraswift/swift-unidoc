@@ -1,15 +1,15 @@
 import HTML
 
 public
-protocol PieValue
+protocol PieSector
 {
-    var weight:Int { get }
     var `class`:String? { get }
+    var  value:Int { get }
 
     func label(share:Double) -> String
     func legend(_ html:inout HTML.ContentEncoder, share:Double)
 }
-extension PieValue
+extension PieSector
 {
     func title(_ share:Double) -> PieSlice.Title
     {
