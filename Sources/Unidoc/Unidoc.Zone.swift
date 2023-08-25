@@ -38,6 +38,13 @@ extension Unidoc.Zone
 }
 extension Unidoc.Zone
 {
+    /// A shorthand for `self + culture * .module`.
+    @inlinable public static
+    func + (self:Self, culture:Int) -> Unidoc.Scalar
+    {
+        self + culture * .module
+    }
+
     @inlinable public static
     func + (self:Self, citizen:Int32) -> Unidoc.Scalar
     {

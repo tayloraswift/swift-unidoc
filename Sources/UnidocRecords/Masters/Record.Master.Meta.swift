@@ -23,8 +23,9 @@ extension Record.Master
         var platforms:[PlatformRequirement]
         public
         var revision:Repository.Revision?
+
         public
-        var stats:Stats
+        var census:Record.Census
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -32,7 +33,7 @@ extension Record.Master
             dependencies:[Dependency] = [],
             platforms:[PlatformRequirement] = [],
             revision:Repository.Revision? = nil,
-            stats:Stats = .init())
+            census:Record.Census = .init())
         {
             self.id = id
 
@@ -40,7 +41,7 @@ extension Record.Master
             self.dependencies = dependencies
             self.platforms = platforms
             self.revision = revision
-            self.stats = stats
+            self.census = census
         }
     }
 }

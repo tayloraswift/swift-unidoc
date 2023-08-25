@@ -4,7 +4,7 @@ import LexicalPaths
 import SymbolGraphs
 import Unidoc
 
-extension Record.Master.Meta.Stats
+extension Record.Stats
 {
     @frozen public
     struct Decl:Equatable, Sendable
@@ -87,7 +87,7 @@ extension Record.Master.Meta.Stats
         }
     }
 }
-extension Record.Master.Meta.Stats.Decl:ExpressibleByDictionaryLiteral
+extension Record.Stats.Decl:ExpressibleByDictionaryLiteral
 {
     @inlinable public
     init(dictionaryLiteral elements:(Never, Int)...)
@@ -108,58 +108,9 @@ extension Record.Master.Meta.Stats.Decl:ExpressibleByDictionaryLiteral
             functions: 0)
     }
 }
-extension Record.Master.Meta.Stats.Decl
+extension Record.Stats.Decl
 {
-    @inlinable public mutating
-    func count(_ decl:SymbolGraph.Decl)
-    {
-        if  decl.kinks[is: .required]
-        {
-            self.requirements += 1
-            return
-        }
-        if  decl.kinks[is: .intrinsicWitness]
-        {
-            self.witnesses += 1
-            return
-        }
-        if  case .func(.instance?) = decl.phylum,
-            decl.path.last.prefix(while: { $0 != "(" }) == "callAsFunction"
-        {
-            self.functors += 1
-            return
-        }
-
-        switch decl.phylum
-        {
-        case    .associatedtype:        self.requirements += 1
-        case    .typealias:             self.typealiases += 1
-        case    .struct,
-                .enum:                  self.structures += 1
-        case    .protocol:              self.protocols += 1
-        case    .class:                 self.classes += 1
-        case    .actor:                 self.actors += 1
-        case    .initializer,
-                .subscript(.static),
-                .subscript(.class),
-                .func(.static?),
-                .func(.class?),
-                .var(.static?),
-                .var(.class?),
-                .case:                  self.constructors += 1
-        case    .subscript(.instance):  self.subscripts += 1
-        case    .deinitializer,
-                .func(.instance?),
-                .var(.instance?):       self.methods += 1
-        case    .operator:              self.operators += 1
-        case    .func(nil),
-                .var(nil):              self.functions += 1
-        }
-    }
-}
-extension Record.Master.Meta.Stats.Decl
-{
-    public
+    @frozen public
     enum CodingKey:String
     {
         case typealiases = "T"
@@ -177,7 +128,7 @@ extension Record.Master.Meta.Stats.Decl
         case functions = "F"
     }
 }
-extension Record.Master.Meta.Stats.Decl:BSONDocumentEncodable
+extension Record.Stats.Decl:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -197,7 +148,7 @@ extension Record.Master.Meta.Stats.Decl:BSONDocumentEncodable
         bson[.functions]    = self.functions    != 0 ? self.functions : nil
     }
 }
-extension Record.Master.Meta.Stats.Decl:BSONDocumentDecodable
+extension Record.Stats.Decl:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

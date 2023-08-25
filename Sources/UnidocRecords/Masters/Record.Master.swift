@@ -153,10 +153,11 @@ extension Record.Master
         case platforms = "O"
         /// Appears in ``Meta`` only.
         case revision = "R"
-        /// Appears in ``Meta`` only.
-        case stats = "S"
 
-        /// Only appears in ``Module``.
+        /// Appears in ``Meta`` and ``Culture``.
+        case census = "S"
+
+        /// Only appears in ``Culture``.
         case module = "M"
 
         /// Only appears in ``Decl``.
@@ -299,6 +300,7 @@ extension Record.Master:BSONDocumentEncodable
             bson[.stem] = self.stem
             bson[.module] = self.module
             bson[.file] = self.readme
+            bson[.census] = self.census
 
             bson[.overview] = self.overview
             bson[.details] = self.details
@@ -316,7 +318,7 @@ extension Record.Master:BSONDocumentEncodable
             bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
             bson[.platforms] = self.platforms.isEmpty ? nil : self.platforms
             bson[.revision] = self.revision
-            bson[.stats] = self.stats
+            bson[.census] = self.census
 
             //  We can recover the zone references from an aggregation query, so encoding
             //  them into ``CodingKey zones`` is unnecessary.
@@ -338,6 +340,7 @@ extension Record.Master:BSONDocumentDecodable
             self = .culture(.init(id: id,
                 module: try bson[.module].decode(),
                 readme: try bson[.file]?.decode(),
+                census: try bson[.census].decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
@@ -389,7 +392,7 @@ extension Record.Master:BSONDocumentDecodable
                 dependencies: try bson[.dependencies]?.decode() ?? [],
                 platforms: try bson[.platforms]?.decode() ?? [],
                 revision: try bson[.revision]?.decode(),
-                stats: try bson[.stats].decode()))
+                census: try bson[.census].decode()))
         }
     }
 }
