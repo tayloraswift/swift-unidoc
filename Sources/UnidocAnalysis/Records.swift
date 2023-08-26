@@ -56,7 +56,7 @@ extension Records
         return .init(id: id, lines: lines)
     }
     public
-    func indexes() -> (Record.NounMap, [Record.NounTree])
+    func indexes() -> (Record.SearchIndex<Unidoc.Zone>, [Record.NounTree])
     {
         var modules:[Unidoc.Scalar: ModuleIdentifier] = [:]
         var types:Types = .init()
@@ -88,9 +88,10 @@ extension Records
         }
 
         let nounTrees:[Record.NounTree] = types.trees()
-        let nounMap:Record.NounMap = .init(id: self.zone.id, from: nounTrees, for: modules)
+        let nounMap:Record.SearchIndex<Unidoc.Zone> = .nouns(id: self.zone.id,
+            from: nounTrees,
+            for: modules)
 
         return (nounMap, nounTrees)
     }
 }
-

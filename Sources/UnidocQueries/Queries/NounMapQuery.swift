@@ -24,6 +24,14 @@ struct NounMapQuery:Equatable, Hashable, Sendable
 extension NounMapQuery:DatabaseQuery
 {
     public
+    typealias Output = SearchIndexQuery<Unidoc.Zone>.Output
+
+    /// A noun map query begins with a zone query. But if we ever formalize a notion of
+    /// string-based zone identities, we should query from ``Database.Nouns`` directly.
+    @inlinable public static
+    var collection:Mongo.Collection { Database.Zones.name }
+
+    public
     var hint:Mongo.SortDocument { self.zone.hint }
 
     public
@@ -43,7 +51,7 @@ extension NounMapQuery:DatabaseQuery
                 {
                     $0[.from] = Database.Nouns.name
                     $0[.localField] = zone / Record.Zone[.id]
-                    $0[.foreignField] = Record.NounMap[.id]
+                    $0[.foreignField] = Record.SearchIndex<Unidoc.Zone>[.id]
                     $0[.as] = maps
                 }
             }
@@ -53,27 +61,15 @@ extension NounMapQuery:DatabaseQuery
             }
             $0.stage
             {
-                $0[.replaceWith] = .init
-                {
-                    if  let tag:MD5 = self.tag
-                    {
-                        $0[Record.NounMap[.json]] = .expr
-                        {
-                            $0[.cond] =
-                            (
-                                if: .expr { $0[.eq] = (tag, maps / Record.NounMap[.hash]) },
-                                then: .expr { $0[.binarySize] = maps / Record.NounMap[.json] },
-                                else: maps / Record.NounMap[.json]
-                            )
-                        }
-                    }
-                    else
-                    {
-                        $0[Record.NounMap[.json]] = maps / Record.NounMap[.json]
-                    }
+                $0[.replaceWith] = maps
+            }
 
-                    $0[Record.NounMap[.hash]] = maps / Record.NounMap[.hash]
-                }
+            $0 ?= self.tag.map
+            {
+                Stages.Elision.init(
+                    field: Record.SearchIndex<Unidoc.Zone>[.json],
+                    where: Record.SearchIndex<Unidoc.Zone>[.hash],
+                    is: $0)
             }
         }
     }

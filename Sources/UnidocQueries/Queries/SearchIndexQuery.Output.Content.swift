@@ -1,4 +1,4 @@
-extension NounMapQuery.Output
+extension SearchIndexQuery.Output
 {
     @frozen public
     enum Content:Sendable

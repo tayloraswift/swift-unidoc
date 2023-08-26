@@ -8,11 +8,17 @@ import UnidocRecords
 
 extension Record
 {
+    @available(*, deprecated, message: "Use `Record.SearchIndex` instead.")
+    public
+    typealias NounMap = SearchIndex<Unidoc.Zone>
+}
+extension Record
+{
     @frozen public
-    struct NounMap:Identifiable, Sendable
+    struct SearchIndex<ID>:Identifiable, Sendable where ID:Hashable & Sendable
     {
         public
-        let id:Unidoc.Zone
+        let id:ID
         /// The contents of the noun map, encoded as JSON. The server never parses it back; it
         /// is only ever sent to the client as opaque data.
         ///
@@ -21,19 +27,28 @@ extension Record
         public
         let json:JSON
 
-        @inlinable internal
-        init(id:Unidoc.Zone, json:JSON)
+        @inlinable public
+        init(id:ID, json:JSON)
         {
             self.id = id
             self.json = json
         }
     }
 }
-extension Record.NounMap
+extension Record.SearchIndex<Never?>
 {
-    init(id:Unidoc.Zone,
+    @inlinable public
+    init(json:JSON)
+    {
+        self.init(id: nil, json: json)
+    }
+}
+extension Record.SearchIndex<Unidoc.Zone>
+{
+    static
+    func nouns(id:Unidoc.Zone,
         from trees:__shared [Record.NounTree],
-        for modules:__shared [Unidoc.Scalar: ModuleIdentifier])
+        for modules:__shared [Unidoc.Scalar: ModuleIdentifier]) -> Self
     {
         let json:JSON = .array
         {
@@ -50,7 +65,7 @@ extension Record.NounMap
                     $0["c"] = "\(culture)"
                     $0["n"]
                     {
-                        for row:Record.Noun in tree.rows
+                        for row:Record.Noun in tree.rows where row.same != nil
                         {
                             $0[+, Any.self]
                             {
@@ -63,12 +78,12 @@ extension Record.NounMap
             }
         }
 
-        self.init(id: id, json: json)
+        return .init(id: id, json: json)
     }
 }
-extension Record.NounMap
+extension Record.SearchIndex
 {
-    public
+    @frozen public
     enum CodingKey:String
     {
         case id = "_id"
@@ -78,7 +93,8 @@ extension Record.NounMap
         case hash = "H"
     }
 }
-extension Record.NounMap:BSONDocumentEncodable
+extension Record.SearchIndex:BSONDocumentEncodable, BSONEncodable
+    where ID:BSONEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -88,7 +104,8 @@ extension Record.NounMap:BSONDocumentEncodable
         bson[.hash] = MD5.init(hashing: self.json.utf8)
     }
 }
-extension Record.NounMap:BSONDocumentDecodable
+extension Record.SearchIndex:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+    where ID:BSONDecodable
 {
     @inlinable public
     init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws

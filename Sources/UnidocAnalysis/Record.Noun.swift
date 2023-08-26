@@ -9,22 +9,22 @@ extension Record
         public
         let shoot:Record.Shoot
         public
-        let same:Race?
+        let same:Locality?
 
         @inlinable internal
-        init(shoot:Record.Shoot, same:Race? = nil)
+        init(shoot:Record.Shoot, same locality:Locality? = nil)
         {
             self.shoot = shoot
-            self.same = same
+            self.same = locality
         }
     }
 }
 extension Record.Noun
 {
     @inlinable public
-    init(stem:Record.Stem, hash:FNV24? = nil, same race:Race? = nil)
+    init(stem:Record.Stem, hash:FNV24? = nil, same locality:Locality? = nil)
     {
-        self.init(shoot: .init(stem: stem, hash: hash), same: race)
+        self.init(shoot: .init(stem: stem, hash: hash), same: locality)
     }
 }
 extension Record.Noun:CustomDebugStringConvertible

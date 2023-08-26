@@ -28,16 +28,20 @@ extension AnyOperation
         }
         else
         {
-            return .get(root: root)
+            return .get(root: root, uri: uri, tag: tag)
         }
     }
 
     private static
-    func get(root:String) -> Self?
+    func get(root:String, uri:URI, tag:MD5?) -> Self?
     {
         switch root
         {
         case Site.Admin.root:   return .database(AdminOperation.status)
+        case "packages.json":   return .database(QueryOperation<SearchIndexQuery<Never?>>.init(
+            explain: false,
+            query: .init(tag: tag, id: nil),
+            uri: uri))
         case _:                 return nil
         }
     }

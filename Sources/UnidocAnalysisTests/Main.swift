@@ -134,7 +134,7 @@ enum Main:SyncTests
                     latest: true,
                     patch: nil))
 
-            let (_, trees):(Record.NounMap, [Record.NounTree]) = records.indexes()
+            let (_, trees):(_, [Record.NounTree]) = records.indexes()
             if  let tree:Record.NounTree = tests.expect(value: trees.first { $0.id == culture })
             {
                 tests.expect(tree ==? .init(id: culture, rows:

@@ -1,44 +1,39 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
-import MongoSchema
-import SymbolGraphs
+import MongoQL
 
 extension Database.Packages
 {
-    struct Registration
+    @frozen public
+    struct Registration:Equatable, Hashable, Sendable
     {
-        let id:PackageIdentifier
+        public
         let cell:Int32
+        public
+        let new:Bool
 
-        init(id:PackageIdentifier, cell:Int32)
+        @inlinable public
+        init(cell:Int32, new:Bool)
         {
-            self.id = id
             self.cell = cell
+            self.new = new
         }
     }
 }
 extension Database.Packages.Registration:MongoMasterCodingModel
 {
+    public
     enum CodingKey:String
     {
-        case id = "_id"
-        case cell = "P"
-    }
-}
-extension Database.Packages.Registration:BSONDocumentEncodable
-{
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
-        bson[.id] = self.id
-        bson[.cell] = self.cell
+        case cell
+        case new
     }
 }
 extension Database.Packages.Registration:BSONDocumentDecodable
 {
+    @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(id: try bson[.id].decode(), cell: try bson[.cell].decode())
+        self.init(cell: try bson[.cell].decode(), new: try bson[.new].decode())
     }
 }
-
