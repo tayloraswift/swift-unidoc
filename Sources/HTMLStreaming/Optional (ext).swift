@@ -1,7 +1,5 @@
 import HTMLDOM
 
-infix operator ?= : AssignmentPrecedence
-
 extension Optional where Wrapped:HyperTextOutputStreamable
 {
     @inlinable public static

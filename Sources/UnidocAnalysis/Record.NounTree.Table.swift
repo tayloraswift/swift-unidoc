@@ -48,11 +48,11 @@ extension Record.NounTree.Table:BSONDecodable, BSONBinaryViewDecodable
                     where: { 0x01 ... 0x03 ~= $0 })
         {
             let shoot:Record.Shoot = .deserialize(from: bson.slice[start ..< end])
-            let race:Record.Noun.Race? = .init(rawValue: bson.slice[end])
+            let same:Record.Noun.Locality? = .init(rawValue: bson.slice[end])
 
             start = bson.slice.index(after: end)
 
-            self.rows.append(.init(shoot: shoot, same: race))
+            self.rows.append(.init(shoot: shoot, same: same))
         }
     }
 }

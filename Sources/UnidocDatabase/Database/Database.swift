@@ -38,6 +38,9 @@ extension Database
     var zones:Zones { .init(database: self.id) }
     var siteMaps:SiteMaps { .init(database: self.id) }
 
+    @inlinable public
+    var search:Search { .init(database: self.id) }
+
     public static
     var collation:Mongo.Collation
     {
@@ -62,6 +65,7 @@ extension Database
     {
         do
         {
+            try await self.search.setup(with: session)
             try await self.packages.setup(with: session)
             try await self.snapshots.setup(with: session)
 
@@ -162,9 +166,19 @@ extension Database
     func store(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         //  TODO: enforce population limits
-        try await self.snapshots.push(docs,
-            for: try await self.packages.register(docs.metadata.package, with: session),
+        let registration:Packages.Registration = try await self.packages.register(
+            docs.metadata.package,
             with: session)
+
+        if  registration.new
+        {
+            let packageMap:Record.SearchIndex<Never?> = try await self.packages.scan(
+                with: session)
+
+            try await self.search.upsert(packageMap, with: session)
+        }
+
+        return try await self.snapshots.push(docs, for: registration.cell, with: session)
     }
     private
     func pull(from snapshot:__owned Snapshot,
@@ -212,7 +226,8 @@ extension Database
     func push(_ records:__owned Records,
         with session:__shared Mongo.Session) async throws
     {
-        let (nouns, trees):(Record.NounMap, [Record.NounTree]) = records.indexes()
+        let (nouns, trees):(Record.SearchIndex<Unidoc.Zone>, [Record.NounTree]) =
+            records.indexes()
 
         try await self.masters.insert(records.masters, with: session)
         try await self.trees.insert(trees, with: session)

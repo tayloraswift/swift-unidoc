@@ -16,7 +16,7 @@ extension Stages
         }
     }
 }
-extension Stages.Zone<Selector.Zone>
+extension Stages.Zone<Selector.Zone>:StageBuilder
 {
     static
     func += (pipeline:inout Mongo.Pipeline, self:Self)

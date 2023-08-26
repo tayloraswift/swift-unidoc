@@ -22,6 +22,9 @@ struct ThinQuery<LookupMode>:Equatable, Hashable, Sendable
 }
 extension ThinQuery:DatabaseQuery
 {
+    @inlinable public static
+    var collection:Mongo.Collection { Database.Zones.name }
+
     public
     var hint:Mongo.SortDocument { self.zone.hint }
 

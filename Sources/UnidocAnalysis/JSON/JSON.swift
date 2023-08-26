@@ -39,6 +39,15 @@ extension JSON
 {
     @inlinable public static
     func array(
+        with encode:(inout ArrayEncoder) async throws -> Void) async rethrows -> Self
+    {
+        var encoder:ArrayEncoder = .empty
+        try await encode(&encoder)
+        return encoder.move()
+    }
+
+    @inlinable public static
+    func array(
         with encode:(inout ArrayEncoder) throws -> Void) rethrows -> Self
     {
         var encoder:ArrayEncoder = .empty

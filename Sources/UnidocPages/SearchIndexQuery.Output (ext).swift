@@ -2,7 +2,7 @@ import HTTPServer
 import UnidocQueries
 import URI
 
-extension NounMapQuery.Output:ServerResponseFactory
+extension SearchIndexQuery.Output:ServerResponseFactory
 {
     public
     func response(for _:URI) throws -> ServerResponse

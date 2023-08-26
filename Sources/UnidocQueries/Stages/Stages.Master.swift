@@ -20,7 +20,7 @@ extension Stages
         }
     }
 }
-extension Stages.Master
+extension Stages.Master:StageBuilder
 {
     static
     func += (pipeline:inout Mongo.Pipeline, self:Self)

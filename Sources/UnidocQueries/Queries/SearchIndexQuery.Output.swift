@@ -3,7 +3,7 @@ import MD5
 import UnidocAnalysis
 import UnidocRecords
 
-extension NounMapQuery
+extension SearchIndexQuery
 {
     @frozen public
     struct Output:Sendable
@@ -21,10 +21,10 @@ extension NounMapQuery
         }
     }
 }
-extension NounMapQuery.Output:BSONDocumentDecodable
+extension SearchIndexQuery.Output:BSONDocumentDecodable
 {
     public
-    typealias CodingKey = Record.NounMap.CodingKey
+    typealias CodingKey = Record.SearchIndex<ID>.CodingKey
 
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
