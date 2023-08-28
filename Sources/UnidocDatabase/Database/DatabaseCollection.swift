@@ -46,6 +46,10 @@ extension DatabaseCollection
         _ elements:some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws
     {
+        if  elements.isEmpty
+        {
+            return
+        }
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,
                 writeConcern: .majority,
