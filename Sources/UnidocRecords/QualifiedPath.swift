@@ -20,7 +20,7 @@ struct QualifiedPath:Equatable, Hashable, Sendable
 extension QualifiedPath
 {
     public
-    init(splitting stem:Record.Stem)
+    init(splitting stem:Volume.Stem)
     {
         if  let separator:String.Index = stem.rawValue.firstIndex(where: \.isWhitespace)
         {

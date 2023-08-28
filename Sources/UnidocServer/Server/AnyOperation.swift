@@ -2,9 +2,11 @@ import FNV1
 import MD5
 import Multiparts
 import Symbols
+import UnidocDatabase
 import UnidocPages
 import UnidocQueries
 import UnidocSelectors
+import UnidocRecords
 import URI
 
 enum AnyOperation:Sendable
@@ -38,10 +40,6 @@ extension AnyOperation
         switch root
         {
         case Site.Admin.root:   return .database(AdminOperation.status)
-        case "packages.json":   return .database(QueryOperation<SearchIndexQuery<Never?>>.init(
-            explain: false,
-            query: .init(tag: tag, id: nil),
-            uri: uri))
         case _:                 return nil
         }
     }
@@ -88,33 +86,49 @@ extension AnyOperation
         switch root
         {
         case Site.Docs.root:
-            let query:WideQuery = .init(
-                for: .init(stem: stem, hash: hash),
-                in: .init(trunk))
-
             return .database(QueryOperation<WideQuery>.init(
                 explain: explain,
-                query: query,
+                query: .init(
+                    volume: .init(trunk),
+                    lookup: .init(stem: stem, hash: hash)),
                 uri: uri,
                 tag: tag))
 
         case Site.Guides.root:
-            let query:ThinQuery<Selector.Planes> = .init(for: .article, in: .init(trunk))
-
-            return .database(QueryOperation<ThinQuery<Selector.Planes>>.init(
+            return .database(QueryOperation<ThinQuery<Volume.Range>>.init(
                 explain: explain,
-                query: query,
+                query: .init(
+                    volume: .init(trunk),
+                    lookup: .articles),
                 uri: uri,
                 tag: tag))
 
-        case Site.NounMaps.root:
-            let query:NounMapQuery = .init(zone: .init(trunk), tag: tag)
-
-            return .database(QueryOperation<NounMapQuery>.init(
-                explain: explain,
-                query: query,
-                uri: uri,
-                tag: tag))
+        case "lunr":
+            if  let id:VolumeIdentifier = .init(trunk)
+            {
+                return .database(QueryOperation<SearchIndexQuery<VolumeIdentifier>>.init(
+                    explain: explain,
+                    query: .init(
+                        from: Database.Search.name,
+                        tag: tag,
+                        id: id),
+                    uri: uri,
+                    tag: tag))
+            }
+            else if trunk == "packages.json"
+            {
+                return .database(QueryOperation<SearchIndexQuery<Never?>>.init(
+                    explain: false,
+                    query: .init(
+                        from: Database.Packages.name,
+                        tag: tag,
+                        id: nil),
+                    uri: uri))
+            }
+            else
+            {
+                return nil
+            }
 
         case _:
             return nil
@@ -140,18 +154,18 @@ extension AnyOperation
             }
         }
 
-        let query:ThinQuery<Selector.Lexical> = .legacy(head: trunk, rest: stem, from: from)
+        let query:ThinQuery<Volume.Shoot> = .legacy(head: trunk, rest: stem, from: from)
 
         if  let overload:Symbol.Decl
         {
-            return .database(QueryOperation<ThinQuery<Selector.Precise>>.init(
+            return .database(QueryOperation<ThinQuery<Symbol.Decl>>.init(
                 explain: false,
-                query: .init(for: .init(overload), in: query.zone),
+                query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .database(QueryOperation<ThinQuery<Selector.Lexical>>.init(
+            return .database(QueryOperation<ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))

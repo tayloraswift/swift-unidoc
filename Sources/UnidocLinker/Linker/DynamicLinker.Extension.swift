@@ -12,16 +12,16 @@ extension DynamicLinker
         var nested:[Unidoc.Scalar]
         var subforms:[Unidoc.Scalar]
 
-        var overview:Record.Passage?
-        var details:Record.Passage?
+        var overview:Volume.Passage?
+        var details:Volume.Passage?
 
         init(id:Unidoc.Scalar,
             conformances:[Unidoc.Scalar] = [],
             features:[Unidoc.Scalar] = [],
             nested:[Unidoc.Scalar] = [],
             subforms:[Unidoc.Scalar] = [],
-            overview:Record.Passage? = nil,
-            details:Record.Passage? = nil)
+            overview:Volume.Passage? = nil,
+            details:Volume.Passage? = nil)
         {
             self.id = id
 

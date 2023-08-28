@@ -14,30 +14,29 @@ extension WideQuery.Output
     struct Principal:Equatable, Sendable
     {
         public
-        let matches:[Record.Master]
+        let matches:[Volume.Master]
         public
-        let master:Record.Master?
+        let master:Volume.Master?
         public
-        let groups:[Record.Group]
+        let groups:[Volume.Group]
         public
-        let tree:Record.NounTree?
+        let names:Volume.Names
         public
-        let zone:Record.Zone
-
+        let tree:Volume.NounTree?
 
         @inlinable internal
         init(
-            matches:[Record.Master],
-            master:Record.Master?,
-            groups:[Record.Group],
-            tree:Record.NounTree?,
-            zone:Record.Zone)
+            matches:[Volume.Master],
+            master:Volume.Master?,
+            groups:[Volume.Group],
+            names:Volume.Names,
+            tree:Volume.NounTree?)
         {
             self.matches = matches
             self.master = master
             self.groups = groups
+            self.names = names
             self.tree = tree
-            self.zone = zone
         }
     }
 }
@@ -49,8 +48,8 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
         case matches = "A"
         case master = "M"
         case groups = "G"
+        case names = "Z"
         case tree = "T"
-        case zone = "Z"
 
         // case _scalars = "scalars"
     }
@@ -64,7 +63,7 @@ extension WideQuery.Output.Principal:BSONDocumentDecodable
             matches: try bson[.matches].decode(),
             master: try bson[.master]?.decode(),
             groups: try bson[.groups].decode(),
-            tree: try bson[.tree]?.decode(),
-            zone: try bson[.zone].decode())
+            names: try bson[.names].decode(),
+            tree: try bson[.tree]?.decode())
     }
 }

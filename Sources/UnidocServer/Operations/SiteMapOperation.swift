@@ -29,7 +29,8 @@ extension SiteMapOperation:DatabaseOperation
     {
         let session:Mongo.Session = try await .init(from: pool)
 
-        guard   let siteMap:Record.SiteMap = try await database.siteMap(self.package,
+        guard   let siteMap:Volume.SiteMap<PackageIdentifier> = try await database.siteMap(
+                    package: self.package,
                     with: session)
         else
         {
@@ -44,7 +45,7 @@ extension SiteMapOperation:DatabaseOperation
         {
             defer { i = siteMap.lines.index(after: j) }
 
-            let shoot:Record.Shoot = .deserialize(from: siteMap.lines[i..<j])
+            let shoot:Volume.Shoot = .deserialize(from: siteMap.lines[i..<j])
             var uri:URI = [] ; uri.path += shoot.stem ; uri["hash"] = shoot.hash?.description
 
             string += "\(prefix)\(uri)\n"

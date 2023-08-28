@@ -30,11 +30,11 @@ struct DynamicLinker
     )
 
     public private(set)
-    var masters:[Record.Master]
+    var masters:[Volume.Master]
     public private(set)
-    var groups:[Record.Group]
+    var groups:[Volume.Group]
     public
-    let zone:Record.Zone
+    let names:Volume.Names
 
     private
     init(context:DynamicContext,
@@ -56,8 +56,13 @@ struct DynamicLinker
 
         self.masters = []
         self.groups = []
-        self.zone = .init(context.current.snapshot.zone,
-            metadata: context.current.snapshot.metadata)
+        self.names = .init(id: context.current.snapshot.zone,
+            refname: context.current.metadata.refname,
+            display: context.current.metadata.display,
+            github: context.current.metadata.github,
+            volume: context.current.metadata.volume,
+            latest: true,
+            patch: context.current.metadata.version?.stable?.release)
     }
 }
 extension DynamicLinker
@@ -87,8 +92,8 @@ extension DynamicLinker
 
         self.autogroup()
 
-        var cultures:[Record.Master.Culture] = self.link(clients: clients)
-        var meta:Record.Master.Meta = .init(id: context.current.zone.meta,
+        var cultures:[Volume.Master.Culture] = self.link(clients: clients)
+        var meta:Volume.Master.Meta = .init(id: context.current.zone.meta,
             abi: context.current.metadata.abi,
             dependencies: context.dependencies(),
             platforms: context.current.metadata.requirements,
@@ -97,7 +102,7 @@ extension DynamicLinker
         defer
         {
             self.masters.append(.meta(meta))
-            for culture:Record.Master.Culture in cultures
+            for culture:Volume.Master.Culture in cultures
             {
                 self.masters.append(.culture(culture))
             }
@@ -116,11 +121,11 @@ extension DynamicLinker
             {
                 if  let decl:SymbolGraph.Decl = context.current.decls.nodes[d].decl
                 {
-                    let coverage:WritableKeyPath<Record.Stats.Coverage, Int> = .classify(decl,
+                    let coverage:WritableKeyPath<Volume.Stats.Coverage, Int> = .classify(decl,
                         from: context.current,
                         at: d)
 
-                    let decl:WritableKeyPath<Record.Stats.Decl, Int> = .classify(decl)
+                    let decl:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
 
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
@@ -149,15 +154,14 @@ extension DynamicLinker
         for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
             where !`extension`.isEmpty
         {
-            self.groups.append(.extension(.init(signature: signature,
-                extension: `extension`,
-                context: context)))
+            self.groups.append(.extension(context.assemble(extension: `extension`,
+                signature: signature)))
 
             for f:Unidoc.Scalar in `extension`.features
             {
                 if  let decl:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
                 {
-                    let bin:WritableKeyPath<Record.Stats.Decl, Int> = .classify(decl)
+                    let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
 
                     cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
                     meta.census.weighted.decls[keyPath: bin] += 1
@@ -180,7 +184,7 @@ extension DynamicLinker
     {
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let cultures:Record.Group.Automatic = .init(id: self.next.autogroup.id(),
+        let cultures:Volume.Group.Automatic = .init(id: self.next.autogroup.id(),
             scope: self.current.zone.meta,
             members: self.current.cultures.indices.sorted
             {
@@ -200,7 +204,7 @@ extension DynamicLinker
         }
     }
     private mutating
-    func link(clients:[DynamicClientGroup]) -> [Record.Master.Culture]
+    func link(clients:[DynamicClientGroup]) -> [Volume.Master.Culture]
     {
         //  First pass to create the topic records, which also populates topic memberships.
         for ((culture, input), clients):((Int, SymbolGraph.Culture), DynamicClientGroup)
@@ -216,7 +220,7 @@ extension DynamicLinker
         }
 
         //  Second pass to create various master records, which reads from the ``topics``.
-        var cultures:[Record.Master.Culture] = []
+        var cultures:[Volume.Master.Culture] = []
             cultures.reserveCapacity(self.current.cultures.count)
 
         for ((culture, input), clients):
@@ -226,7 +230,7 @@ extension DynamicLinker
             clients)
         {
             let namespace:ModuleIdentifier = self.current.namespaces[culture]
-            let record:Record.Master.Culture = self.link(culture: input,
+            let record:Volume.Master.Culture = self.link(culture: input,
                 named: namespace,
                 at: culture,
                 in: clients)
@@ -277,7 +281,7 @@ extension DynamicLinker
 
         for topic:SymbolGraph.Topic in topics
         {
-            var record:Record.Group.Topic = .init(id: self.next.topic.id(),
+            var record:Volume.Group.Topic = .init(id: self.next.topic.id(),
                 culture: n,
                 scope: n)
 
@@ -302,7 +306,7 @@ extension DynamicLinker
     func link(culture:SymbolGraph.Culture,
         named name:ModuleIdentifier,
         at index:Int,
-        in clients:DynamicClientGroup) -> Record.Master.Culture
+        in clients:DynamicClientGroup) -> Volume.Master.Culture
     {
         let resolver:DynamicResolver = .init(context: self.context,
             diagnostics: self.diagnostics,
@@ -310,7 +314,7 @@ extension DynamicLinker
             clients: clients)
 
         let scalar:Unidoc.Scalar = self.current.zone + index
-        var record:Record.Master.Culture = .init(id: scalar,
+        var record:Volume.Master.Culture = .init(id: scalar,
             module: culture.module,
             group: self.memberships.removeValue(forKey: scalar.citizen))
 
@@ -338,7 +342,7 @@ extension DynamicLinker
             self.current.articles.nodes[range])
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
-            var record:Record.Master.Article = .init(id: self.current.zone + a,
+            var record:Volume.Master.Article = .init(id: self.current.zone + a,
                 stem: .init(culture.id, symbol.name),
                 culture: self.current.zone + culture.index,
                 file: node.body.file.map { self.current.zone + $0 },
@@ -423,7 +427,7 @@ extension DynamicLinker
                 self.extensions[implicit].subforms.append(d)
             }
 
-            var record:Record.Master.Decl = .init(id: d,
+            var record:Volume.Master.Decl = .init(id: d,
                 flags: .init(
                     phylum: decl.phylum,
                     kinks: decl.kinks,

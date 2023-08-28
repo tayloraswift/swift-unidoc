@@ -26,20 +26,19 @@ extension Database
 {
     var policies:Policies { .init() }
 
-    @inlinable public
     var packages:Packages { .init(database: self.id) }
+
+    @inlinable public
+    var package:Package { .init(database: self.id) }
     @inlinable public
     var snapshots:Snapshots { .init(database: self.id) }
 
     var masters:Masters { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
-    var trees:Trees { .init(database: self.id) }
-    var nouns:Nouns { .init(database: self.id) }
-    var zones:Zones { .init(database: self.id) }
-    var siteMaps:SiteMaps { .init(database: self.id) }
-
-    @inlinable public
     var search:Search { .init(database: self.id) }
+    var trees:Trees { .init(database: self.id) }
+    var names:Names { .init(database: self.id) }
+    var siteMaps:SiteMaps { .init(database: self.id) }
 
     public static
     var collation:Mongo.Collation
@@ -65,15 +64,15 @@ extension Database
     {
         do
         {
-            try await self.search.setup(with: session)
             try await self.packages.setup(with: session)
+            try await self.package.setup(with: session)
             try await self.snapshots.setup(with: session)
 
             try await self.masters.setup(with: session)
             try await self.groups.setup(with: session)
+            try await self.search.setup(with: session)
             try await self.trees.setup(with: session)
-            try await self.nouns.setup(with: session)
-            try await self.zones.setup(with: session)
+            try await self.names.setup(with: session)
             try await self.siteMaps.setup(with: session)
         }
         catch let error
@@ -109,17 +108,17 @@ extension Database
 
         try await self.masters.replace(with: session)
         try await self.groups.replace(with: session)
+        try await self.search.replace(with: session)
         try await self.trees.replace(with: session)
-        try await self.nouns.replace(with: session)
-        try await self.zones.replace(with: session)
+        try await self.names.replace(with: session)
         try await self.siteMaps.replace(with: session)
 
         for zone:Unidoc.Zone in zones
         {
             let snapshot:Snapshot = try await self.snapshots.load(zone, with: session)
-            let records:Records = try await self.pull(from: snapshot, with: session)
+            let volume:Volume = try await self.pull(from: snapshot, with: session)
 
-            try await self.push(records, with: session)
+            try await self.push(volume, with: session)
 
             print("regenerated records for snapshot: \(snapshot.id)")
         }
@@ -132,7 +131,7 @@ extension Database
         with session:__shared Mongo.Session) async throws -> SnapshotReceipt
     {
         let receipt:SnapshotReceipt = try await self.store(docs: docs, with: session)
-        let records:Records = try await self.pull(from: .init(
+        let volume:Volume = try await self.pull(from: .init(
                 package: receipt.package,
                 version: receipt.version,
                 metadata: docs.metadata,
@@ -141,21 +140,22 @@ extension Database
 
         if  receipt.overwritten
         {
+            try await self.search.delete(volume.id, with: session)
+
             try await self.masters.clear(receipt.zone, with: session)
             try await self.groups.clear(receipt.zone, with: session)
             try await self.trees.clear(receipt.zone, with: session)
 
-            try await self.nouns.delete(receipt.zone, with: session)
-            try await self.zones.delete(receipt.zone, with: session)
+            try await self.names.delete(receipt.zone, with: session)
         }
 
-        try await self.push(records, with: session)
+        try await self.push(volume, with: session)
         return receipt
     }
 
     public
-    func siteMap(_ package:__owned PackageIdentifier,
-        with session:__shared Mongo.Session) async throws -> Record.SiteMap<PackageIdentifier>?
+    func siteMap(package:__owned PackageIdentifier,
+        with session:__shared Mongo.Session) async throws -> Volume.SiteMap<PackageIdentifier>?
     {
         try await self.siteMaps.find(by: package, with: session)
     }
@@ -166,23 +166,23 @@ extension Database
     func store(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         //  TODO: enforce population limits
-        let registration:Packages.Registration = try await self.packages.register(
+        let registration:Package.Registration = try await self.package.register(
             docs.metadata.package,
             with: session)
 
         if  registration.new
         {
-            let packageMap:Record.SearchIndex<Never?> = try await self.packages.scan(
+            let index:SearchIndex<Never?> = try await self.package.scan(
                 with: session)
 
-            try await self.search.upsert(packageMap, with: session)
+            try await self.packages.upsert(index, with: session)
         }
 
         return try await self.snapshots.push(docs, for: registration.cell, with: session)
     }
     private
     func pull(from snapshot:__owned Snapshot,
-        with session:__shared Mongo.Session) async throws -> Records
+        with session:__shared Mongo.Session) async throws -> Volume
     {
         let context:DynamicContext = .init(snapshot,
             dependencies: try await self.snapshots.load(snapshot.metadata.pins(),
@@ -194,63 +194,58 @@ extension Database
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        let latest:Zones.PatchView? = try await self.zones.latest(of: snapshot.cell,
+        let latest:Names.PatchView? = try await self.names.latest(of: snapshot.cell,
             with: session)
 
-        var records:Records = .init(latest: latest?.id,
+        var volume:Volume = .init(latest: latest?.id,
             masters: linker.masters,
             groups: linker.groups,
-            zone: linker.zone)
+            names: linker.names)
 
-        guard let patch:PatchVersion = records.zone.patch
+        guard let patch:PatchVersion = volume.names.patch
         else
         {
-            records.zone.latest = false
-            return records
+            volume.names.latest = false
+            return volume
         }
 
         if  let latest:PatchVersion = latest?.patch,
                 latest > patch
         {
-            records.zone.latest = false
+            volume.names.latest = false
         }
         else
         {
-            records.zone.latest = true
-            records.latest = records.zone.id
+            volume.names.latest = true
+            volume.latest = volume.names.id
         }
 
-        return records
+        return volume
     }
     private
-    func push(_ records:__owned Records,
+    func push(_ volume:__owned Volume,
         with session:__shared Mongo.Session) async throws
     {
-        let (nouns, trees):(Record.SearchIndex<Unidoc.Zone>, [Record.NounTree]) =
-            records.indexes()
+        let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.NounTree]) = volume.indexes()
 
-        try await self.masters.insert(records.masters, with: session)
+        try await self.masters.insert(volume.masters, with: session)
+        try await self.names.insert(volume.names, with: session)
         try await self.trees.insert(trees, with: session)
+        try await self.search.insert(index, with: session)
 
-        try await self.nouns.insert(nouns, with: session)
-        try await self.zones.insert(records.zone, with: session)
-
-        if  records.zone.latest
+        if  volume.names.latest
         {
-            try await self.siteMaps.upsert(records.siteMap(for: records.zone.package),
-                with: session)
-
-            try await self.groups.insert(records.groups(latest: true),
-                with: session)
+            try await self.siteMaps.upsert(volume.siteMap(), with: session)
+            try await self.groups.insert(volume.groups(latest: true), with: session)
         }
         else
         {
-            try await self.groups.insert(records.groups, with: session)
+            try await self.groups.insert(volume.groups, with: session)
         }
-        if  let latest:Unidoc.Zone = records.latest
+        if  let latest:Unidoc.Zone = volume.latest
         {
             try await self.groups.align(latest: latest, with: session)
-            try await self.zones.align(latest: latest, with: session)
+            try await self.names.align(latest: latest, with: session)
         }
     }
 }
