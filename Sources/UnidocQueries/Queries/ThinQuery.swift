@@ -1,47 +1,33 @@
 import MongoQL
 import Unidoc
-import UnidocDatabase
 import UnidocRecords
-import UnidocSelectors
 
 @frozen public
-struct ThinQuery<LookupMode>:Equatable, Hashable, Sendable
-    where LookupMode:DatabaseLookupSelector
+struct ThinQuery<LookupPredicate>:Equatable, Hashable, Sendable
+    where LookupPredicate:VolumeLookupPredicate
 {
     public
-    let mode:LookupMode
+    let volume:Volume.Selector
     public
-    let zone:Selector.Zone
+    let lookup:LookupPredicate
 
     @inlinable public
-    init(for mode:LookupMode, in zone:Selector.Zone)
+    init(volume:Volume.Selector, lookup:LookupPredicate)
     {
-        self.mode = mode
-        self.zone = zone
+        self.volume = volume
+        self.lookup = lookup
     }
 }
-extension ThinQuery:DatabaseQuery
+extension ThinQuery:VolumeLookupQuery
 {
     @inlinable public static
-    var collection:Mongo.Collection { Database.Zones.name }
+    var names:Mongo.KeyPath { Output[.names] }
 
-    public
-    var hint:Mongo.SortDocument { self.zone.hint }
+    @inlinable public static
+    var input:Mongo.KeyPath { Output[.masters] }
 
-    public
-    var pipeline:Mongo.Pipeline
+    @inlinable public
+    func extend(pipeline:inout Mongo.Pipeline)
     {
-        .init
-        {
-            $0 += Stages.Zone<Selector.Zone>.init(self.zone,
-                as: Output[.zone])
-
-            $0.stage
-            {
-                $0[.lookup] = self.mode.lookup(
-                    input: Output[.zone],
-                    as: Output[.masters])
-            }
-        }
     }
 }

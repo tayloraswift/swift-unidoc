@@ -55,8 +55,8 @@ extension StatsBreakdown
 extension StatsBreakdown
 {
     init(
-        unweighted:__shared Record.Stats.Coverage,
-        weighted:__shared Record.Stats.Coverage,
+        unweighted:__shared Volume.Stats.Coverage,
+        weighted:__shared Volume.Stats.Coverage,
         domain:__shared String)
     {
         self.init(
@@ -88,8 +88,8 @@ extension StatsBreakdown
     }
 
     init(
-        unweighted:__shared Record.Stats.Decl,
-        weighted:__shared Record.Stats.Decl,
+        unweighted:__shared Volume.Stats.Decl,
+        weighted:__shared Volume.Stats.Decl,
         domain:__shared String)
     {
         self.init(

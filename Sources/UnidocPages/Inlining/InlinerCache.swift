@@ -5,22 +5,22 @@ import URI
 struct InlinerCache
 {
     var masters:Masters
-    var zones:Zones
+    var names:Names
 
     private
     var urls:[Unidoc.Scalar: String]
 
-    init(masters:Masters, zones:Zones, urls:[Unidoc.Scalar: String] = [:])
+    init(masters:Masters, names:Names, urls:[Unidoc.Scalar: String] = [:])
     {
         self.masters = masters
-        self.zones = zones
+        self.names = names
         self.urls = urls
     }
 }
 extension InlinerCache
 {
     private mutating
-    func load(_ scalar:Unidoc.Scalar, by url:(Record.Zone) -> URL?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by url:(Volume.Names) -> URL?) -> String?
     {
         {
             if  let target:String = $0
@@ -28,8 +28,8 @@ extension InlinerCache
                 return target
             }
             else if
-                let zone:Record.Zone = self.zones[scalar.zone],
-                let url:URL = url(zone)
+                let names:Volume.Names = self.names[scalar.zone],
+                let url:URL = url(names)
             {
                 let target:String = "\(url)"
                 $0 = target
@@ -44,7 +44,7 @@ extension InlinerCache
 }
 extension InlinerCache
 {
-    subscript(article scalar:Unidoc.Scalar) -> (master:Record.Master.Article, url:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Master.Article, url:String?)?
     {
         mutating get
         {
@@ -59,7 +59,7 @@ extension InlinerCache
         }
     }
 
-    subscript(culture scalar:Unidoc.Scalar) -> (master:Record.Master.Culture, url:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (master:Volume.Master.Culture, url:String?)?
     {
         mutating get
         {
@@ -74,7 +74,7 @@ extension InlinerCache
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (master:Record.Master.Decl, url:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (master:Volume.Master.Decl, url:String?)?
     {
         mutating get
         {
@@ -90,7 +90,7 @@ extension InlinerCache
     }
 
     subscript(file scalar:Unidoc.Scalar,
-        line line:Int? = nil) -> (master:Record.Master.File, url:String?)?
+        line line:Int? = nil) -> (master:Volume.Master.File, url:String?)?
     {
         mutating get
         {
@@ -99,7 +99,7 @@ extension InlinerCache
                     by: { $0.github(blob: master.symbol).map(URL.absolute(_:)) })
             {
                 //  Need to append the line fragment here and not in
-                //  ``Record.Zone.url(github:)`` because the cache should
+                //  ``Volume.Names.url(github:)`` because the cache should
                 //  support multiple line fragments for the same file.
                 return (master, line.map { "\(url)#L\($0 + 1)" } ?? url)
             }
@@ -110,13 +110,13 @@ extension InlinerCache
         }
     }
 
-    subscript(scalar:Unidoc.Scalar) -> (master:Record.Master, url:String?)?
+    subscript(scalar:Unidoc.Scalar) -> (master:Volume.Master, url:String?)?
     {
         mutating get
         {
             self.masters[scalar].map
             {
-                (master:Record.Master) in
+                (master:Volume.Master) in
                 (master, self.load(scalar) { .init(master: master, in: $0) })
             }
         }

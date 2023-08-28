@@ -19,8 +19,8 @@ extension URL:CustomStringConvertible
 }
 extension URL
 {
-    init?(master:__shared Record.Master,
-        in zone:__shared Record.Zone,
+    init?(master:__shared Volume.Master,
+        in zone:__shared Volume.Names,
         disambiguate:Bool = true)
     {
         switch master

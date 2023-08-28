@@ -4,7 +4,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Mongo.Variable<Record.Outline>
+extension Mongo.Variable<Volume.Outline>
 {
     var scalars:Mongo.Expression
     {
@@ -14,7 +14,7 @@ extension Mongo.Variable<Record.Outline>
         }
     }
 }
-extension Mongo.Variable<Record.Group>
+extension Mongo.Variable<Volume.Group>
 {
     var scalars:Mongo.Expression
     {
@@ -49,13 +49,13 @@ extension Mongo.Variable<Record.Group>
 
                 for passage:Mongo.KeyPath in
                 [
-                    self[.overview] / Record.Passage[.outlines],
-                    self[.details] / Record.Passage[.outlines],
+                    self[.overview] / Volume.Passage[.outlines],
+                    self[.details] / Volume.Passage[.outlines],
                 ]
                 {
                     $0.expr
                     {
-                        let outlines:Mongo.List<Record.Outline, Mongo.KeyPath> = .init(
+                        let outlines:Mongo.List<Volume.Outline, Mongo.KeyPath> = .init(
                             in: passage)
 
                         $0[.reduce] = outlines.flatMap(\.scalars)
@@ -64,12 +64,12 @@ extension Mongo.Variable<Record.Group>
 
                 $0.expr
                 {
-                    let members:Mongo.List<Record.Link, Mongo.KeyPath> = .init(
+                    let members:Mongo.List<Volume.Link, Mongo.KeyPath> = .init(
                         in: self[.members])
 
                     $0[.filter] = members.filter
                     {
-                        (link:Mongo.Variable<Record.Link>) in Mongo.Expression.expr
+                        (link:Mongo.Variable<Volume.Link>) in Mongo.Expression.expr
                         {
                             $0[.eq] = ("objectId", .expr { $0[.type] = link })
                         }
@@ -102,7 +102,7 @@ extension Mongo.Variable<Unidoc.Scalar>
                 {
                     $0.expr
                     {
-                        $0[.eq] = (Record.Group[.id], topic)
+                        $0[.eq] = (Volume.Group[.id], topic)
                     }
                     $0.expr
                     {
@@ -110,7 +110,7 @@ extension Mongo.Variable<Unidoc.Scalar>
                         {
                             $0.expr
                             {
-                                $0[.eq] = (Record.Group[.scope], self)
+                                $0[.eq] = (Volume.Group[.scope], self)
                             }
                             $0.expr
                             {
@@ -122,17 +122,17 @@ extension Mongo.Variable<Unidoc.Scalar>
                                         {
                                             $0.expr
                                             {
-                                                $0[.gte] = (Record.Group[.id], min)
+                                                $0[.gte] = (Volume.Group[.id], min)
                                             }
                                             $0.expr
                                             {
-                                                $0[.lte] = (Record.Group[.id], max)
+                                                $0[.lte] = (Volume.Group[.id], max)
                                             }
                                         }
                                     }
                                     $0.expr
                                     {
-                                        $0[.eq] = (Record.Group[.latest], true)
+                                        $0[.eq] = (Volume.Group[.latest], true)
                                     }
                                 }
                             }

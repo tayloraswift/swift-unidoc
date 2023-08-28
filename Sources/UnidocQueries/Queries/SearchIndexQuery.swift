@@ -15,44 +15,58 @@ struct SearchIndexQuery<ID>:Equatable, Hashable, Sendable
             ID:BSONEncodable
 {
     public
+    let origin:Mongo.Collection
+    public
     let tag:MD5?
     public
     let id:ID
 
     @inlinable public
-    init(tag:MD5?, id:ID)
+    init(from origin:Mongo.Collection, tag:MD5?, id:ID)
     {
+        self.origin = origin
         self.tag = tag
         self.id = id
     }
 }
 extension SearchIndexQuery:DatabaseQuery
 {
-    @inlinable public static
-    var collection:Mongo.Collection { Database.Search.name }
+    @inlinable public
+    var hint:Mongo.SortDocument? { nil }
 
     public
-    var hint:Mongo.SortDocument { .init { $0["_id"] = (+) } }
-
-    public
-    var pipeline:Mongo.Pipeline
+    func build(pipeline:inout Mongo.Pipeline)
     {
-        .init
+        pipeline.stage
         {
-            $0.stage
+            $0[.match] = .init
             {
-                $0[.match] = .init
-                {
-                    $0[Record.SearchIndex<ID>[.id]] = self.id
-                }
+                $0[SearchIndex<ID>[.id]] = self.id
             }
+        }
 
-            $0 ?= self.tag.map
+        guard let tag:MD5 = self.tag
+        else
+        {
+            return
+        }
+
+        pipeline.stage
+        {
+            $0[.set] = .init
             {
-                Stages.Elision.init(
-                    field: Record.SearchIndex<ID>[.json],
-                    where: Record.SearchIndex<ID>[.hash],
-                    is: $0)
+                $0[SearchIndex<ID>[.json]] = .expr
+                {
+                    $0[.cond] =
+                    (
+                        if: .expr { $0[.eq] = (tag, SearchIndex<ID>[.hash]) },
+                        then: .expr
+                        {
+                            $0[.binarySize] = SearchIndex<ID>[.json]
+                        },
+                        else: SearchIndex<ID>[.json]
+                    )
+                }
             }
         }
     }

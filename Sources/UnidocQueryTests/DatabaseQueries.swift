@@ -1,5 +1,6 @@
 import MongoDB
 import MongoTesting
+import Symbols
 import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
@@ -66,7 +67,7 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    let master:Record.Master.Decl = tests.expect(
+                    let master:Volume.Master.Decl = tests.expect(
                         value: output.principal?.master?.decl)
                 {
                     tests.expect(master.stem.last ==? "Keys")
@@ -104,7 +105,7 @@ struct DatabaseQueries:MongoTestBattery
                         value: try await database.execute(query: query, with: session)),
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
-                    let _:Record.Master = tests.expect(value: principal.master)
+                    let _:Volume.Master = tests.expect(value: principal.master)
                 {
                 }
             }
@@ -113,14 +114,15 @@ struct DatabaseQueries:MongoTestBattery
         /// We should be able to use a mangled decl identifier to obtain a redirect.
         if  let tests:TestGroup = tests / "Int" / "init" / "overload"
         {
-            let query:ThinQuery<Selector.Precise> = .init(
-                for: .init(.init(.s, ascii: "Si10bitPatternSiSO_tcfc")),
-                in: .init("swift"))
+            let query:ThinQuery<Symbol.Decl> = .init(
+                volume: .init(package: "swift", version: nil),
+                lookup: .init(.s, ascii: "Si10bitPatternSiSO_tcfc"))
+
             await tests.do
             {
-                if  let output:ThinQuery<Selector.Precise>.Output = tests.expect(
+                if  let output:ThinQuery<Symbol.Decl>.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    let master:Record.Master.Decl = tests.expect(
+                    let master:Volume.Master.Decl = tests.expect(
                         value: output.masters.first?.decl)
                 {
                     tests.expect(master.stem.last ==? "init(bitPattern:)")
@@ -153,7 +155,7 @@ struct DatabaseQueries:MongoTestBattery
                 {
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await database.execute(query: query, with: session)),
-                        let _:Record.Master = tests.expect(value: output.principal?.master)
+                        let _:Volume.Master = tests.expect(value: output.principal?.master)
                     {
                     }
                 }
@@ -167,9 +169,9 @@ struct DatabaseQueries:MongoTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    let master:Record.Master.Culture = tests.expect(
+                    let master:Volume.Master.Culture = tests.expect(
                         value: output.principal?.master?.culture),
-                    let tree:Record.NounTree = tests.expect(
+                    let tree:Volume.NounTree = tests.expect(
                         value: output.principal?.tree)
                 {
                     tests.expect(master.id ==? tree.id)
@@ -196,11 +198,11 @@ struct DatabaseQueries:MongoTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    let master:Record.Master = tests.expect(
+                    let master:Volume.Master = tests.expect(
                         value: output.principal?.master),
-                    let tree:Record.NounTree = tests.expect(
+                    let tree:Volume.NounTree = tests.expect(
                         value: output.principal?.tree),
-                    let overview:Record.Passage = tests.expect(
+                    let overview:Volume.Passage = tests.expect(
                         value: master.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
@@ -213,7 +215,7 @@ struct DatabaseQueries:MongoTestBattery
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.secondary.lazy.map(\.id))
 
-                    for outline:Record.Outline in overview.outlines
+                    for outline:Volume.Outline in overview.outlines
                     {
                         let scalars:[Unidoc.Scalar]?
                         switch outline
@@ -260,7 +262,7 @@ struct DatabaseQueries:MongoTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await database.execute(query: query, with: session)),
-                    let _:Record.Master = tests.expect(
+                    let _:Volume.Master = tests.expect(
                         value: output.principal?.master)
                 {
                 }
@@ -301,7 +303,7 @@ struct DatabaseQueries:MongoTestBattery
 
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await database.execute(query: query, with: session)),
-                        let _:Record.Master = tests.expect(value: output.principal?.master)
+                        let _:Volume.Master = tests.expect(value: output.principal?.master)
                     {
                         let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
                             into: [:])

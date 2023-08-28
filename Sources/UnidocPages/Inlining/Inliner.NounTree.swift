@@ -10,9 +10,9 @@ extension Inliner
         private
         let inliner:Inliner
 
-        let nouns:[Record.Noun]
+        let nouns:[Volume.Noun]
 
-        init(_ inliner:Inliner, nouns:[Record.Noun])
+        init(_ inliner:Inliner, nouns:[Volume.Noun])
         {
             self.inliner = inliner
 
@@ -31,7 +31,7 @@ extension Inliner.NounTree:HyperTextOutputStreamable
         {
             var depth:Int = 1
 
-            for noun:Record.Noun in self.nouns
+            for noun:Volume.Noun in self.nouns
             {
                 let current:Int = max(1, noun.shoot.stem.depth)
                 if  current < depth
@@ -52,7 +52,7 @@ extension Inliner.NounTree:HyperTextOutputStreamable
                 depth = current
 
                 //  The URI is only correct if the noun is a citizen in the principal zone!
-                var uri:URI { Site.Docs[self.inliner.zones.principal, noun.shoot] }
+                var uri:URI { Site.Docs[self.inliner.names.principal, noun.shoot] }
                 let name:Substring = noun.shoot.stem.last
 
                 switch noun.same

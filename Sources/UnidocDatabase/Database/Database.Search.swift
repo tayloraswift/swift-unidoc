@@ -4,14 +4,11 @@ import UnidocRecords
 
 extension Database
 {
-    /// A single-document collection containing a ``Record.SearchIndex``.
-    @frozen public
+    public
     struct Search
     {
-        public
         let database:Mongo.Database
 
-        @inlinable public
         init(database:Mongo.Database)
         {
             self.database = database
@@ -20,7 +17,7 @@ extension Database
 }
 extension Database.Search:DatabaseCollection
 {
-    typealias ElementID = Never?
+    typealias ElementID = VolumeIdentifier
 
     @inlinable public static
     var name:Mongo.Collection { "search" }

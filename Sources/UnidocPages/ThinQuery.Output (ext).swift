@@ -1,6 +1,6 @@
 import HTTPServer
 import UnidocQueries
-import UnidocSelectors
+import UnidocRecords
 import URI
 
 extension ThinQuery.Output:ServerResponseFactory
@@ -8,9 +8,9 @@ extension ThinQuery.Output:ServerResponseFactory
     public
     func response(for _:URI) throws -> ServerResponse
     {
-        if  LookupMode.self is Selector.Planes.Type
+        if  LookupPredicate.self is Volume.Range.Type
         {
-            let inliner:Inliner = .init(principal: self.zone)
+            let inliner:Inliner = .init(principal: self.names)
                 inliner.masters.add(self.masters)
 
             let feed:Site.Guides.Feed = .init(inliner, masters: self.masters)
@@ -24,7 +24,7 @@ extension ThinQuery.Output:ServerResponseFactory
         else
         {
             return .resource(.init(.none,
-                content: .string("Record not found."),
+                content: .string("Volume not found."),
                 type: .text(.plain, charset: .utf8)))
         }
     }
@@ -34,12 +34,12 @@ extension ThinQuery.Output:ServerResponseFactory
     {
         switch self.masters.first
         {
-        case .article(let master)?: return Site.Docs[self.zone, master.shoot]
-        case .culture(let master)?: return Site.Docs[self.zone, master.shoot]
-        case .decl(let master)?:    return Site.Docs[self.zone,
+        case .article(let master)?: return Site.Docs[self.names, master.shoot]
+        case .culture(let master)?: return Site.Docs[self.names, master.shoot]
+        case .decl(let master)?:    return Site.Docs[self.names,
             self.masters.count > 1 ? .init(stem: master.stem) : master.shoot]
         case .file?, nil:           return nil
-        case .meta?:                return Site.Docs[self.zone]
+        case .meta?:                return Site.Docs[self.names]
         }
     }
 }

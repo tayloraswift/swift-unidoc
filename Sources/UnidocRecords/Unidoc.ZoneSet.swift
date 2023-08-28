@@ -71,7 +71,7 @@ extension Unidoc.ZoneSet
         }
     }
     mutating
-    func update(with outlines:[Record.Outline])
+    func update(with outlines:[Volume.Outline])
     {
         for case .path(_, let scalars) in outlines
         {

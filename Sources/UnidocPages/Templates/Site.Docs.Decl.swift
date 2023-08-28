@@ -14,16 +14,16 @@ extension Site.Docs
         let inliner:Inliner
 
         private
-        let master:Record.Master.Decl
+        let master:Volume.Master.Decl
         private
-        let groups:[Record.Group]
+        let groups:[Volume.Group]
         private
-        let nouns:[Record.Noun]?
+        let nouns:[Volume.Noun]?
 
         init(_ inliner:Inliner,
-            master:Record.Master.Decl,
-            groups:[Record.Group],
-            nouns:[Record.Noun]?)
+            master:Volume.Master.Decl,
+            groups:[Volume.Group],
+            nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
 
@@ -36,14 +36,14 @@ extension Site.Docs
 extension Site.Docs.Decl
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
     private
-    var stem:Record.Stem { self.master.stem }
+    var stem:Volume.Stem { self.master.stem }
 }
 extension Site.Docs.Decl:FixedPage
 {
-    var location:URI { Site.Docs[self.zone, self.master.shoot] }
-    var title:String { "\(self.stem.last) - \(self.zone.title)" }
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var title:String { "\(self.stem.last) - \(self.names.title)" }
 }
 extension Site.Docs.Decl:ApplicationPage
 {
@@ -64,15 +64,9 @@ extension Site.Docs.Decl:ApplicationPage
         }
     }
 
-    var sidebar:Inliner.NounTree?
-    {
-        self.nouns.map { .init(self.inliner, nouns: $0) }
-    }
+    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -102,7 +96,7 @@ extension Site.Docs.Decl:ApplicationPage
                     $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.zone.version
+                        $0[.span] { $0.class = "version" } = self.names.version
                         if  self.master.namespace != self.master.culture
                         {
                             $0 ?= self.inliner.link(module: self.master.culture)

@@ -12,17 +12,17 @@ extension Site.Docs
         let inliner:Inliner
 
         private
-        let master:Record.Master.Article
+        let master:Volume.Master.Article
         private
-        let groups:[Record.Group]
+        let groups:[Volume.Group]
         private
-        let nouns:[Record.Noun]?
+        let nouns:[Volume.Noun]?
 
 
         init(_ inliner:Inliner,
-            master:Record.Master.Article,
-            groups:[Record.Group],
-            nouns:[Record.Noun]?)
+            master:Volume.Master.Article,
+            groups:[Volume.Group],
+            nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
             self.master = master
@@ -34,28 +34,22 @@ extension Site.Docs
 extension Site.Docs.Article
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
     private
-    var stem:Record.Stem { self.master.stem }
+    var stem:Volume.Stem { self.master.stem }
 }
 extension Site.Docs.Article:FixedPage
 {
-    var location:URI { Site.Docs[self.zone, self.master.shoot] }
-    var title:String { self.zone.title }
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var title:String { self.names.title }
 }
 extension Site.Docs.Article:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    var sidebar:Inliner.NounTree?
-    {
-        self.nouns.map { .init(self.inliner, nouns: $0) }
-    }
+    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -76,7 +70,7 @@ extension Site.Docs.Article:ApplicationPage
 
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.zone.version
+                        $0[.span] { $0.class = "version" } = self.names.version
                     }
                 }
             }

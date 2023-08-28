@@ -1,7 +1,6 @@
 import BSONDecoding
 import MD5
 import UnidocAnalysis
-import UnidocRecords
 
 extension SearchIndexQuery
 {
@@ -24,7 +23,7 @@ extension SearchIndexQuery
 extension SearchIndexQuery.Output:BSONDocumentDecodable
 {
     public
-    typealias CodingKey = Record.SearchIndex<ID>.CodingKey
+    typealias CodingKey = SearchIndex<ID>.CodingKey
 
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

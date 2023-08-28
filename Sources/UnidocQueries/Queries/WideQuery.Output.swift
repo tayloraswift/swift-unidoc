@@ -11,18 +11,18 @@ extension WideQuery
         public
         let principal:Principal?
         public
-        let secondary:[Record.Master]
+        let secondary:[Volume.Master]
         public
-        let zones:[Record.Zone]
+        let names:[Volume.Names]
 
         @inlinable public
         init(principal:Principal?,
-            secondary:[Record.Master],
-            zones:[Record.Zone])
+            secondary:[Volume.Master],
+            names:[Volume.Names])
         {
             self.principal = principal
             self.secondary = secondary
-            self.zones = zones
+            self.names = names
         }
     }
 }
@@ -33,7 +33,7 @@ extension WideQuery.Output:MongoMasterCodingModel
     {
         case principal
         case secondary
-        case zones
+        case names
     }
 }
 extension WideQuery.Output:BSONDocumentDecodable
@@ -44,6 +44,6 @@ extension WideQuery.Output:BSONDocumentDecodable
         self.init(
             principal: try bson[.principal]?.decode(),
             secondary: try bson[.secondary].decode(),
-            zones: try bson[.zones].decode())
+            names: try bson[.names].decode())
     }
 }
