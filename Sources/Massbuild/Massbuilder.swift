@@ -55,12 +55,15 @@ extension Massbuilder
             return
         }
 
-        let docs:Documentation = try await toolchain.generateDocs(
-            for: try await .local(package: "swift-init",
+        var docs:Documentation = try await toolchain.generateDocs(
+            for: try await .local(package: "swiftinit",
                 from: "TestPackages",
                 in: workspace,
                 clean: true),
             pretty: false)
+
+        docs.metadata.package = "__swiftinit"
+        docs.metadata.version = "0.0.0"
 
         let bson:BSON.Document = .init(encoding: docs)
         try file.overwrite(with: bson.bytes)

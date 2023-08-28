@@ -56,6 +56,7 @@ div.searchbar,
     li
     {
         background-color: $light-background-pink;
+
         a
         {
             display: flex;
@@ -72,6 +73,11 @@ div.searchbar,
             > span.module
             {
                 font-style: italic;
+            }
+            > span:last-child
+            {
+                flex-shrink: 0;
+                margin-left: 1rem;
             }
         }
         > *

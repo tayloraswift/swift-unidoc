@@ -5,6 +5,7 @@ import Multiparts
 import NIOCore
 import NIOHTTP1
 import UnidocPages
+import UnidocQueries
 import URI
 
 extension Server
@@ -48,7 +49,17 @@ extension Server.Request:ServerDelegateRequest
         }
         else
         {
-            return nil
+            //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
+            //  for the standard library.
+            let get:AnyOperation = .database(QueryOperation<WideQuery>.init(
+                explain: false,
+                query: .init(
+                    volume: .init(package: .swift, version: nil),
+                    lookup: .init(stem: [])),
+                uri: uri,
+                tag: tag))
+
+            self.init(operation: get, promise: promise())
         }
     }
 
