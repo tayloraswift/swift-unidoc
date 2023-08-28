@@ -103,6 +103,15 @@ extension AnyOperation
                 uri: uri,
                 tag: tag))
 
+        case "articles":
+            return .database(QueryOperation<WideQuery>.init(
+                explain: explain,
+                query: .init(
+                    volume: .init(package: "__swiftinit", version: "0.0.0"),
+                    lookup: .init(stem: ["Articles"] + stem, hash: nil)),
+                uri: uri,
+                tag: tag))
+
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {

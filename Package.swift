@@ -367,6 +367,11 @@ let package:Package = .init(
             ]),
 
 
+        .executableTarget(name: "Massbuild", dependencies:
+            [
+                .target(name: "SymbolGraphBuilder"),
+            ]),
+
         .executableTarget(name: "UnidocServer", dependencies:
             [
                 .target(name: "Multiparts"),
