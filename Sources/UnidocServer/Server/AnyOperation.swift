@@ -57,8 +57,12 @@ extension AnyOperation
             let asset:Site.Asset? = .init(rawValue: trunk)
             return asset.map { .datafile(.init($0, tag: tag)) }
 
-        case "sitemap":
-            return .database(SiteMapOperation.init(package: .init(trunk), uri: uri, tag: tag))
+        case "sitemaps":
+            //  Ignore file extension.
+            return .database(SiteMapOperation.init(
+                package: .init(trunk.prefix { $0 != "." }),
+                uri: uri,
+                tag: tag))
 
         case "reference":
             return .get(legacy: trunk, stem: stem, uri: uri)
