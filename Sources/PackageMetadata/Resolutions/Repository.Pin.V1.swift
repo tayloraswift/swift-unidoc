@@ -29,14 +29,10 @@ extension Repository.Pin.V1:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let location:String = try json[.location].decode()
-        let start:String.Index = location.lastIndex(of: "/").map(location.index(after:)) ??
-            location.startIndex
+        let repository:Repository = .init(location: try json[.location].decode())
 
-        self.init(value: .init(id: .init(location[start...].prefix(while: { $0 != "." })),
-            location: location.first == "/" ?
-                .local(root: .init(location)) :
-                .remote(url: location),
+        self.init(value: .init(id: .init(repository.name),
+            location: repository,
             state: try json[.state].decode()))
     }
 }
