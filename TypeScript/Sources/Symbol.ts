@@ -1,5 +1,5 @@
 export interface Symbol {
-    module: string;
+    module: string | null;
     signature: string[];
     display: string;
     uri: string;

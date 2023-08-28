@@ -60,7 +60,7 @@ export class Searchbar {
                 for (const index of indexes) {
                     for (const id of index.packages) {
                         symbols.push({
-                            module: '(package)',
+                            module: null,
                             signature: id.split(/\-/),
                             display: id,
                             uri: '/docs/' + id
@@ -120,13 +120,20 @@ export class Searchbar {
             const item: HTMLElement = document.createElement("li");
             const anchor: HTMLElement = document.createElement("a");
             const display: HTMLElement = document.createElement("span");
-            const module: HTMLElement = document.createElement("span");
+            const category: HTMLElement = document.createElement("span");
 
             display.appendChild(document.createTextNode(symbol.display));
-            module.appendChild(document.createTextNode(symbol.module));
+
+            if (symbol.module !== null) {
+                category.appendChild(document.createTextNode(symbol.module));
+                category.classList.add('module');
+            }
+            else {
+                category.appendChild(document.createTextNode('(package)'));
+            }
 
             anchor.appendChild(display);
-            anchor.appendChild(module);
+            anchor.appendChild(category);
             anchor.setAttribute('href', symbol.uri);
 
             item.appendChild(anchor);

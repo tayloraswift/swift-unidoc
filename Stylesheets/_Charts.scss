@@ -113,12 +113,26 @@ figure.chart
 {
     margin: 2rem 0;
     display: flex;
-    align-items: center;
+    flex-direction: column;
 }
 figure.chart div.pie
 {
     //  This controls the size of the pie disc.
     font-size: 20px;
+
+    margin: 0 2rem 2rem 2rem;
+}
+@media only screen and (min-width: 50rem)
+{
+    figure.chart
+    {
+        align-items: center;
+        flex-direction: row;
+    }
+    figure.chart div.pie
+    {
+        margin: 0;
+    }
 }
 figure.chart div.pie + figcaption
 {
