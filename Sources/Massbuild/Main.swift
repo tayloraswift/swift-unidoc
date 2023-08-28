@@ -105,25 +105,25 @@ enum Main
         try await builder.build("swift-hash",
             repository: "https://github.com/tayloraswift/swift-hash.git",
             versions:
-            "0.2.3")
+            "v0.2.3")
 
         try await builder.build("swift-dom",
             repository: "https://github.com/tayloraswift/swift-dom.git",
             versions:
-            "0.5.0")
+            "v0.5.0")
 
         try await builder.build("swift-grammar",
             repository: "https://github.com/tayloraswift/swift-grammar.git",
             versions:
-            "0.1.4",
-            "0.1.5",
-            "0.2.0")
+            "v0.1.4",
+            "v0.1.5",
+            "v0.2.0")
 
         try await builder.build("swift-json",
             repository: "https://github.com/tayloraswift/swift-json.git",
             versions:
-            "0.2.2",
-            "0.3.0")
+            "v0.2.2",
+            "v0.3.0")
 
         try await builder.build("bson",
             repository: "https://github.com/orlandos-nl/bson.git",
@@ -134,7 +134,6 @@ enum Main
         try await builder.build("dnsclient",
             repository: "https://github.com/orlandos-nl/dnsclient.git",
             versions:
-            "2.0.7",
             "2.4.1")
 
         try await builder.build("mongokitten",
@@ -144,7 +143,7 @@ enum Main
             "7.1.0",
             "7.2.0",
             "7.2.1",
-            "7.2.2",
-            "7.7.1")
+            "7.2.2")
+            // "7.7.1"
     }
 }

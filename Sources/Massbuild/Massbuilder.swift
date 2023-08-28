@@ -41,7 +41,7 @@ extension Massbuilder
                 at: version,
                 in: self.workspace,
                 clean: true),
-            pretty: false)
+            pretty: true)
 
         let bson:BSON.Document = .init(encoding: docs)
         try file.overwrite(with: bson.bytes)

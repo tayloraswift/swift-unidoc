@@ -194,7 +194,7 @@ extension Toolchain
         ]
         for pin:Repository.Pin in pins
         {
-            let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.id)"
+            let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.location.name)"
 
             let manifest:PackageManifest = try await .dump(from: .init(
                 identity: .upstream(pin),
