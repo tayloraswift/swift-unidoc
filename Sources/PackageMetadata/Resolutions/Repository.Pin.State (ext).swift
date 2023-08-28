@@ -15,7 +15,8 @@ extension Repository.Pin.State:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let version:AnyVersion
-        if  let stable:SemanticVersion = try json[.version]?.decode(
+        //  `try?` because sometimes we have explicit JSON null
+        if  let stable:SemanticVersion = try? json[.version]?.decode(
                 as: JSON.StringRepresentation<SemanticVersion>.self,
                 with: \.value)
         {
