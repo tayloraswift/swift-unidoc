@@ -20,7 +20,9 @@ extension Repository.Pin.V1:JSONObjectDecodable
     public
     enum CodingKey:String
     {
-        case id = "package"
+        //  this field is completely useless!
+        //  case id = "package"
+
         case location = "repositoryURL"
         case state
     }
@@ -28,7 +30,10 @@ extension Repository.Pin.V1:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let location:String = try json[.location].decode()
-        self.init(value: .init(id: try json[.id].decode(),
+        let start:String.Index = location.lastIndex(of: "/").map(location.index(after:)) ??
+            location.startIndex
+
+        self.init(value: .init(id: .init(location[start...].prefix(while: { $0 != "." })),
             location: location.first == "/" ?
                 .local(root: .init(location)) :
                 .remote(url: location),
