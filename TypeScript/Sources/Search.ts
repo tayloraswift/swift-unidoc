@@ -23,15 +23,3 @@ if (list !== null) {
             (event: Event) => searchbar.follow(event));
     }
 }
-
-// // prevents clicking on the label from defocusing the search input
-// version.addEventListener('mousedown', function(event:Event) {
-//         event.preventDefault();
-//     });
-// // defocuses the search input once the menu is actually toggled (on mouseup)
-// versionMenuToggle.addEventListener('change', function(event:Event) {
-//         searchInput.blur();
-//         //versionMenuToggle.focus();
-//         toolbar.toggleVersionMenu(event);
-//     });
-
