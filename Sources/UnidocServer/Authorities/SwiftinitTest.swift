@@ -1,7 +1,7 @@
 import HTTPServer
 import NIOSSL
 
-struct Swiftinit
+struct SwiftinitTest
 {
     private
     let context:NIOSSLContext
@@ -11,13 +11,13 @@ struct Swiftinit
         self.context = context
     }
 }
-extension Swiftinit:ServerAuthority
+extension SwiftinitTest:ServerAuthority
 {
     static
     var scheme:ServerScheme { .https }
 
     static
-    var domain:String { "swiftinit.org" }
+    var domain:String { "test.swiftinit.org" }
 
     var tls:NIOSSLContext? { self.context }
 

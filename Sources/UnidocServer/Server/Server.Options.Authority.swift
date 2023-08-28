@@ -5,8 +5,9 @@ extension Server.Options
 {
     enum Authority:String, Equatable, Hashable, Sendable
     {
-        case localhost
+        case production
         case testing
+        case localhost
     }
 }
 extension Server.Options.Authority
@@ -15,19 +16,16 @@ extension Server.Options.Authority
     {
         switch self
         {
+        case .production:   return Swiftinit.self
+        case .testing:      return SwiftinitTest.self
         case .localhost:    return Localhost.self
-        case .testing:      return Swiftinit.self
         }
     }
 
     func load(certificates:String?) throws -> any ServerAuthority
     {
-        switch self
+        func context() throws -> NIOSSLContext
         {
-        case .localhost:
-            return .localhost
-
-        case .testing:
             guard let directory:String = certificates
             else
             {
@@ -39,11 +37,16 @@ extension Server.Options.Authority
             let privateKey:NIOSSLPrivateKey =
                 try .init(file: "\(directory)/privkey.pem", format: .pem)
 
-            let context:NIOSSLContext = try .init(configuration: .makeServerConfiguration(
+            return try .init(configuration: .makeServerConfiguration(
                 certificateChain: certificates.map(NIOSSLCertificateSource.certificate(_:)),
                 privateKey: .privateKey(privateKey)))
+        }
 
-            return .swiftinit(context)
+        switch self
+        {
+        case .production:   return .swiftinit(try context())
+        case .testing:      return .swiftinitTest(try context())
+        case .localhost:    return .localhost
         }
     }
 }
