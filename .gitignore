@@ -1,4 +1,5 @@
 .build
+.massbuild
 .testing
 .unidoc
 .vscode

@@ -5,7 +5,7 @@ extension UnqualifiedPath
     /// Extracts the path components of the given stem, skipping the prefixed namespace
     /// qualifier. Returns nil if the stem contains a namespace qualifier only.
     @inlinable public
-    init?(splitting stem:Record.Stem)
+    init?(splitting stem:Volume.Stem)
     {
         if  let separator:String.Index = stem.rawValue.firstIndex(where: \.isWhitespace)
         {

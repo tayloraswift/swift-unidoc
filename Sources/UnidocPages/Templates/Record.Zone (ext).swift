@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Record.Zone
+extension Volume.Names
 {
     var title:String
     {

@@ -37,8 +37,8 @@ extension Database.Groups
                         $0[.name] = "id"
                         $0[.key] = .init
                         {
-                            $0[Record.Group[.id]] = (+)
-                            $0[Record.Group[.latest]] = (-)
+                            $0[Volume.Group[.id]] = (+)
+                            $0[Volume.Group[.latest]] = (-)
                         }
                     },
                     .init
@@ -47,8 +47,8 @@ extension Database.Groups
                         $0[.name] = "scope"
                         $0[.key] = .init
                         {
-                            $0[Record.Group[.scope]] = (+)
-                            $0[Record.Group[.latest]] = (-)
+                            $0[Volume.Group[.scope]] = (+)
+                            $0[Volume.Group[.latest]] = (-)
                         }
                     },
                 ]),
@@ -95,15 +95,15 @@ extension Database.Groups
                         {
                             $0.append
                             {
-                                $0[Record.Group[.id]] = .init { $0[.gte] = zone.min }
+                                $0[Volume.Group[.id]] = .init { $0[.gte] = zone.min }
                             }
                             $0.append
                             {
-                                $0[Record.Group[.id]] = .init { $0[.lte] = zone.max }
+                                $0[Volume.Group[.id]] = .init { $0[.lte] = zone.max }
                             }
                             $0.append
                             {
-                                $0[Record.Group[.latest]] = .init { $0[.ne] = true }
+                                $0[Volume.Group[.latest]] = .init { $0[.ne] = true }
                             }
                         }
                     }
@@ -111,7 +111,7 @@ extension Database.Groups
                     {
                         $0[.set] = .init
                         {
-                            $0[Record.Group[.latest]] = true
+                            $0[Volume.Group[.latest]] = true
                         }
                     }
                 },
@@ -128,11 +128,11 @@ extension Database.Groups
 
                             $0.append
                             {
-                                $0[Record.Group[.id]] = .init { $0[.gte] = cell.min.min }
+                                $0[Volume.Group[.id]] = .init { $0[.gte] = cell.min.min }
                             }
                             $0.append
                             {
-                                $0[Record.Group[.id]] = .init { $0[.lte] = cell.max.max }
+                                $0[Volume.Group[.id]] = .init { $0[.lte] = cell.max.max }
                             }
                             $0.append
                             {
@@ -140,17 +140,17 @@ extension Database.Groups
                                 {
                                     $0.append
                                     {
-                                        $0[Record.Group[.id]] = .init { $0[.lt] = zone.min }
+                                        $0[Volume.Group[.id]] = .init { $0[.lt] = zone.min }
                                     }
                                     $0.append
                                     {
-                                        $0[Record.Group[.id]] = .init { $0[.gt] = zone.max }
+                                        $0[Volume.Group[.id]] = .init { $0[.gt] = zone.max }
                                     }
                                 }
                             }
                             $0.append
                             {
-                                $0[Record.Group[.latest]] = .init { $0[.exists] = true }
+                                $0[Volume.Group[.latest]] = .init { $0[.exists] = true }
                             }
                         }
                     }
@@ -158,7 +158,7 @@ extension Database.Groups
                     {
                         $0[.unset] = .init
                         {
-                            $0[Record.Group[.latest]] = ()
+                            $0[Volume.Group[.latest]] = ()
                         }
                     }
                 }

@@ -17,14 +17,14 @@ extension Site.Docs
         private
         let matches:[Unidoc.Scalar]
         private
-        let nouns:[Record.Noun]?
+        let nouns:[Volume.Noun]?
 
         private
         init(_ inliner:Inliner,
             identity:URI.Path,
             location:URI,
             matches:[Unidoc.Scalar],
-            nouns:[Record.Noun]?)
+            nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
 
@@ -38,15 +38,15 @@ extension Site.Docs
 extension Site.Docs.Disambiguation
 {
     init?(_ inliner:__owned Inliner,
-        matches:__shared [Record.Master],
-        nouns:__owned [Record.Noun]?)
+        matches:__shared [Volume.Master],
+        nouns:__owned [Volume.Noun]?)
     {
         let location:URI
         var identity:URI.Path = []
 
-        if  let shoot:Record.Shoot = matches.first?.shoot
+        if  let shoot:Volume.Shoot = matches.first?.shoot
         {
-            location = Site.Docs[inliner.zones.principal, shoot]
+            location = Site.Docs[inliner.names.principal, shoot]
             identity += shoot.stem
         }
         else
@@ -64,7 +64,7 @@ extension Site.Docs.Disambiguation
 extension Site.Docs.Disambiguation
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
 }
 extension Site.Docs.Disambiguation:FixedPage
 {
@@ -74,15 +74,9 @@ extension Site.Docs.Disambiguation:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    var sidebar:Inliner.NounTree?
-    {
-        self.nouns.map { .init(self.inliner, nouns: $0) }
-    }
+    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {

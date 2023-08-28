@@ -18,11 +18,11 @@ extension Inliner
         let superforms:[Unidoc.Scalar]?
 
         private
-        let extensions:[Record.Group.Extension]
+        let extensions:[Volume.Group.Extension]
         private
-        let automatic:[Record.Group.Automatic]
+        let automatic:[Volume.Group.Automatic]
         private
-        let topics:[Record.Group.Topic]
+        let topics:[Volume.Group.Topic]
 
         private
         let bias:Unidoc.Scalar?
@@ -33,9 +33,9 @@ extension Inliner
         init(_ inliner:Inliner,
             requirements:[Unidoc.Scalar]?,
             superforms:[Unidoc.Scalar]?,
-            extensions:[Record.Group.Extension],
-            automatic:[Record.Group.Automatic],
-            topics:[Record.Group.Topic],
+            extensions:[Volume.Group.Extension],
+            automatic:[Volume.Group.Automatic],
+            topics:[Volume.Group.Topic],
             bias:Unidoc.Scalar?,
             mode:Mode?)
         {
@@ -57,22 +57,22 @@ extension Inliner.Groups
         requirements:__owned [Unidoc.Scalar] = [],
         superforms:__owned [Unidoc.Scalar] = [],
         generics:__shared [GenericParameter] = [],
-        groups:__shared [Record.Group],
+        groups:__shared [Volume.Group],
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
         let generics:Generics = .init(generics)
 
-        var extensions:[(Record.Group.Extension, Partisanship, Genericness)] = []
-        var automatic:[Record.Group.Automatic] = []
-        var topics:[Record.Group.Topic] = []
+        var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
+        var automatic:[Volume.Group.Automatic] = []
+        var topics:[Volume.Group.Topic] = []
 
-        for group:Record.Group in groups
+        for group:Volume.Group in groups
         {
             switch group
             {
             case .extension(let group):
-                let partisanship:Partisanship = inliner.zones.secondary[group.id.zone].map
+                let partisanship:Partisanship = inliner.names.secondary[group.id.zone].map
                 {
                     .third($0.package)
                 } ?? .first
@@ -122,7 +122,7 @@ extension Inliner.Groups
 extension Inliner.Groups
 {
     private
-    func header(for extension:Record.Group.Extension) -> Inliner.ExtensionHeader
+    func header(for extension:Volume.Group.Extension) -> Inliner.ExtensionHeader
     {
         let display:String
         switch (self.bias, self.bias?.zone)
@@ -156,7 +156,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        for group:Record.Group.Automatic in self.automatic
+        for group:Volume.Group.Automatic in self.automatic
         {
             html[.section, { $0.class = "group automatic" }]
             {
@@ -170,7 +170,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
                 }
             }
         }
-        for group:Record.Group.Topic in self.topics
+        for group:Volume.Group.Topic in self.topics
         {
             html[.section, { $0.class = "group topic" }]
             {
@@ -185,7 +185,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
                 }
                 $0[.ul]
                 {
-                    for member:Record.Link in group.members
+                    for member:Volume.Link in group.members
                     {
                         switch member
                         {
@@ -253,7 +253,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
             }
         }
 
-        for group:Record.Group.Extension in self.extensions
+        for group:Volume.Group.Extension in self.extensions
         {
             html[.section, { $0.class = "group extension" }]
             {

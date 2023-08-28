@@ -10,14 +10,14 @@ struct PackageNumbers:MongoTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.packages.register("a", with: session) ==? 0)
-        tests.expect(try await database.packages.register("a", with: session) ==? 0)
-        tests.expect(try await database.packages.register("b", with: session) ==? 1)
-        tests.expect(try await database.packages.register("a", with: session) ==? 0)
-        tests.expect(try await database.packages.register("b", with: session) ==? 1)
-        tests.expect(try await database.packages.register("c", with: session) ==? 2)
-        tests.expect(try await database.packages.register("c", with: session) ==? 2)
-        tests.expect(try await database.packages.register("a", with: session) ==? 0)
-        tests.expect(try await database.packages.register("b", with: session) ==? 1)
+        tests.expect(try await database.package.register("a", with: session).cell ==? 0)
+        tests.expect(try await database.package.register("a", with: session).cell ==? 0)
+        tests.expect(try await database.package.register("b", with: session).cell ==? 1)
+        tests.expect(try await database.package.register("a", with: session).cell ==? 0)
+        tests.expect(try await database.package.register("b", with: session).cell ==? 1)
+        tests.expect(try await database.package.register("c", with: session).cell ==? 2)
+        tests.expect(try await database.package.register("c", with: session).cell ==? 2)
+        tests.expect(try await database.package.register("a", with: session).cell ==? 0)
+        tests.expect(try await database.package.register("b", with: session).cell ==? 1)
     }
 }

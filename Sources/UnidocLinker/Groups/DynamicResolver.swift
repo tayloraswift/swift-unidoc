@@ -54,24 +54,24 @@ extension DynamicResolver
 {
     func link(article:SymbolGraph.Article) ->
     (
-        overview:Record.Passage?,
-        details:Record.Passage?
+        overview:Volume.Passage?,
+        details:Volume.Passage?
     )
     {
-        let outlines:[Record.Outline] = article.outlines.map { self.expand($0) }
+        let outlines:[Volume.Outline] = article.outlines.map { self.expand($0) }
 
-        let overview:Record.Passage? = article.overview.isEmpty ? nil : .init(
+        let overview:Volume.Passage? = article.overview.isEmpty ? nil : .init(
             outlines: .init(outlines[..<article.fold]),
             markdown: article.overview)
-        let details:Record.Passage? = article.details.isEmpty ? nil : .init(
+        let details:Volume.Passage? = article.details.isEmpty ? nil : .init(
             outlines: .init(outlines[article.fold...]),
             markdown: article.details)
         return (overview, details)
     }
 
-    func link(topic:SymbolGraph.Topic) -> (overview:Record.Passage?, members:[Record.Link])
+    func link(topic:SymbolGraph.Topic) -> (overview:Volume.Passage?, members:[Volume.Link])
     {
-        let overview:Record.Passage? = topic.overview.isEmpty ? nil : .init(
+        let overview:Volume.Passage? = topic.overview.isEmpty ? nil : .init(
             outlines: topic.outlines.map { self.expand($0) },
             markdown: topic.overview)
 
@@ -81,7 +81,7 @@ extension DynamicResolver
 extension DynamicResolver
 {
     private
-    func expand(_ outline:SymbolGraph.Outline) -> Record.Outline
+    func expand(_ outline:SymbolGraph.Outline) -> Volume.Outline
     {
         func words(in text:String) -> Int
         {
@@ -164,7 +164,7 @@ extension DynamicResolver
     }
 
     private
-    func resolve(_ outline:SymbolGraph.Outline) -> Record.Link
+    func resolve(_ outline:SymbolGraph.Outline) -> Volume.Link
     {
         switch outline
         {

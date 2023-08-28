@@ -347,12 +347,12 @@ let package:Package = .init(
             [
                 .target(name: "FNV1"),
                 .target(name: "SymbolGraphs"),
-                .target(name: "URI"),
             ]),
 
         .target(name: "UnidocSelectors", dependencies:
             [
                 .target(name: "UnidocRecords"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "URI", dependencies:
@@ -366,6 +366,11 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
+
+        .executableTarget(name: "Massbuild", dependencies:
+            [
+                .target(name: "SymbolGraphBuilder"),
+            ]),
 
         .executableTarget(name: "UnidocServer", dependencies:
             [
@@ -494,12 +499,6 @@ let package:Package = .init(
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
-            ]),
-
-        .executableTarget(name: "UnidocSelectorTests", dependencies:
-            [
-                .target(name: "UnidocSelectors"),
-                .product(name: "Testing", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "URITests", dependencies:

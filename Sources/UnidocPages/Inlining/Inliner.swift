@@ -10,7 +10,7 @@ final
 class Inliner
 {
     /// Shared outlines, valid for the overview and details passages.
-    var outlines:[Record.Outline]
+    var outlines:[Volume.Outline]
 
     private
     var cache:InlinerCache
@@ -29,32 +29,32 @@ extension Inliner
         _read   { yield  self.cache.masters }
         _modify { yield &self.cache.masters }
     }
-    var zones:InlinerCache.Zones
+    var names:InlinerCache.Names
     {
-        _read   { yield  self.cache.zones }
-        _modify { yield &self.cache.zones }
+        _read   { yield  self.cache.names }
+        _modify { yield &self.cache.names }
     }
 }
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, zone:Record.Zone)
+    init(principal scalar:Unidoc.Scalar, names:Volume.Names)
     {
         self.init(cache: .init(
             masters: .init(principal: scalar),
-            zones: .init(principal: zone)))
+            names: .init(principal: names)))
     }
     convenience
-    init(principal zone:Record.Zone)
+    init(principal names:Volume.Names)
     {
         self.init(cache: .init(
             masters: .init(principal: nil),
-            zones: .init(principal: zone)))
+            names: .init(principal: names)))
     }
 }
 extension Inliner
 {
-    func passage(overview passage:Record.Passage) -> Passage
+    func passage(overview passage:Volume.Passage) -> Passage
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
     }

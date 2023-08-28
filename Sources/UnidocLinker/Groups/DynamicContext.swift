@@ -125,9 +125,9 @@ extension DynamicContext
 }
 extension DynamicContext
 {
-    func dependencies() -> [Record.Master.Meta.Dependency]
+    func dependencies() -> [Volume.Master.Meta.Dependency]
     {
-        var dependencies:[Record.Master.Meta.Dependency] = []
+        var dependencies:[Volume.Master.Meta.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  case _? = self.current.metadata.toolchain,
@@ -206,6 +206,28 @@ extension DynamicContext
 
             $1 = $0.count
         }
+    }
+}
+extension DynamicContext
+{
+    func assemble(
+        extension:DynamicLinker.Extension,
+        signature:DynamicLinker.ExtensionSignature) -> Volume.Group.Extension
+    {
+        let prefetch:[Unidoc.Scalar] = []
+        //  TODO: compute tertiary scalars
+
+        return .init(id: `extension`.id,
+            conditions: signature.conditions,
+            culture: self.current.zone + signature.culture,
+            scope: signature.extends,
+            conformances: self.sort(lexically: `extension`.conformances),
+            features: self.sort(lexically: `extension`.features),
+            nested: self.sort(lexically: `extension`.nested),
+            subforms: self.sort(lexically: `extension`.subforms),
+            prefetch: prefetch,
+            overview: `extension`.overview,
+            details: `extension`.details)
     }
 }
 extension DynamicContext
