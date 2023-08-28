@@ -14,7 +14,8 @@ extension Site.Asset:CacheKey
         case    .literata45_woff2,
                 .literata47_woff2,
                 .literata75_woff2,
-                .literata77_woff2:  return .cold
+                .literata77_woff2,
+                .robots_txt:        return .cold
         case    .main_css,
                 .main_js:           return nil
         case    .main_css_map,
@@ -30,6 +31,7 @@ extension Site.Asset:CacheKey
         case .literata47_woff2: return ["woff2", "Literata_24pt-Italic.woff2"]
         case .literata75_woff2: return ["woff2", "Literata_24pt-Bold.woff2"]
         case .literata77_woff2: return ["woff2", "Literata_24pt-BoldItalic.woff2"]
+        case .robots_txt:       return ["robots.txt"]
         case .main_css:         return ["css", "Main.css"]
         case .main_css_map:     return ["css", "Main.css.map"]
         case .main_js:          return ["js", "Main.js"]
@@ -41,6 +43,7 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
+        case    .robots_txt:        return .text(.plain, charset: .utf8)
         case    .literata45_woff2,
                 .literata47_woff2,
                 .literata75_woff2,

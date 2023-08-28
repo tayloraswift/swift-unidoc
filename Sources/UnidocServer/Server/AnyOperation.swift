@@ -40,6 +40,7 @@ extension AnyOperation
         switch root
         {
         case Site.Admin.root:   return .database(AdminOperation.status)
+        case "robots.txt":      return .datafile(.init(.robots_txt, tag: tag))
         case _:                 return nil
         }
     }

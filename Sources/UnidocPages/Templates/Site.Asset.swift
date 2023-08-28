@@ -18,6 +18,8 @@ extension Site
 
         case main_js            = "main.js"
         case main_js_map        = "main.js.map"
+
+        case robots_txt         = "robots.txt"
     }
 }
 extension Site.Asset:FixedRoot
