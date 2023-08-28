@@ -1,4 +1,5 @@
 import HTML
+import UnidocRecords
 import URI
 
 public
@@ -9,7 +10,8 @@ protocol ApplicationPage:FixedPage
 
     var navigator:Navigator { get }
     var sidebar:Sidebar? { get }
-    var search:URI { get }
+
+    var volume:VolumeIdentifier { get }
 
     func main(_:inout HTML.ContentEncoder)
 }
@@ -28,7 +30,7 @@ extension ApplicationPage
     func head(augmenting head:inout HTML.ContentEncoder)
     {
         head[unsafe: .script] = """
-        const nouns = ["\(self.search)"];
+        const volumes = ["\(self.volume)"];
         """
     }
     public

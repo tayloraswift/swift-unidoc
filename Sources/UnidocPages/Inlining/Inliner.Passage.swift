@@ -12,9 +12,9 @@ extension Inliner
         let inliner:Inliner
 
         let bytecode:MarkdownBytecode
-        let outlines:[Record.Outline]
+        let outlines:[Volume.Outline]
 
-        init(_ inliner:Inliner, bytecode:MarkdownBytecode, outlines:[Record.Outline])
+        init(_ inliner:Inliner, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
         {
             self.inliner = inliner
 

@@ -12,13 +12,13 @@ extension Site.Docs
         let inliner:Inliner
 
         private
-        let master:Record.Master.Meta
+        let master:Volume.Master.Meta
         private
-        let groups:[Record.Group]
+        let groups:[Volume.Group]
 
         init(_ inliner:Inliner,
-            master:Record.Master.Meta,
-            groups:[Record.Group])
+            master:Volume.Master.Meta,
+            groups:[Volume.Group])
         {
             self.inliner = inliner
             self.master = master
@@ -29,22 +29,19 @@ extension Site.Docs
 extension Site.Docs.Meta
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
 }
 extension Site.Docs.Meta:FixedPage
 {
-    var location:URI { Site.Docs[self.zone] }
-    var title:String { self.zone.title }
+    var location:URI { Site.Docs[self.names] }
+    var title:String { self.names.title }
 }
 extension Site.Docs.Meta:ApplicationPage
 {
     typealias Navigator = HTML.Logo
     typealias Sidebar = Never
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -61,20 +58,20 @@ extension Site.Docs.Meta:ApplicationPage
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = self.zone.package == .swift ?
+                $0[.span] { $0.class = "phylum" } = self.names.package == .swift ?
                     "Standard Library" :
                     "Package"
 
                 $0[.span, { $0.class = "domain" }]
                 {
-                    $0[.span] { $0.class = "version" } = self.zone.version
+                    $0[.span] { $0.class = "version" } = self.names.version
                 }
             }
 
             $0[.h1] = self.title
 
-            if  let refname:String = self.zone.refname,
-                let github:String = self.zone.github,
+            if  let refname:String = self.names.refname,
+                let github:String = self.names.github,
                 let slash:String.Index = github.firstIndex(of: "/")
             {
                 $0 += HTML.SourceLink.init(
@@ -120,7 +117,7 @@ extension Site.Docs.Meta:ApplicationPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Record.Master.Meta.Dependency in self.master.dependencies
+                        for dependency:Volume.Master.Meta.Dependency in self.master.dependencies
                         {
                             $0[.tr]
                             {
@@ -139,7 +136,7 @@ extension Site.Docs.Meta:ApplicationPage
                                 }
 
                                 if  let pin:Unidoc.Zone = dependency.resolution,
-                                    let pin:Record.Zone = self.inliner.zones[pin]
+                                    let pin:Volume.Names = self.inliner.names[pin]
                                 {
                                     $0[.td]
                                     {
@@ -184,7 +181,7 @@ extension Site.Docs.Meta:ApplicationPage
                     $0[.dt] = "Git Revision"
                     $0[.dd]
                     {
-                        $0[link: self.zone.github.map { "https://\($0)/tree/\(revision)" }]
+                        $0[link: self.names.github.map { "https://\($0)/tree/\(revision)" }]
                         {
                             $0.rel = .noopener
                             $0.rel = .google_ugc

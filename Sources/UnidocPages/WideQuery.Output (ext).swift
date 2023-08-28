@@ -16,12 +16,12 @@ extension WideQuery.Output:ServerResponseFactory
                 type: .text(.plain, charset: .utf8)))
         }
 
-        if  let master:Record.Master = principal.master
+        if  let master:Volume.Master = principal.master
         {
             let resource:ServerResource
-            let inliner:Inliner = .init(principal: master.id, zone: principal.zone)
+            let inliner:Inliner = .init(principal: master.id, names: principal.names)
                 inliner.masters.add(self.secondary)
-                inliner.zones.add(self.zones)
+                inliner.names.add(self.names)
 
             master.overview.map
             {
@@ -37,6 +37,13 @@ extension WideQuery.Output:ServerResponseFactory
             switch master
             {
             case .article(let master):
+                if  principal.names.package == "__swiftinit"
+                {
+                    let page:Site.Blog.Article = .init(inliner, master: master)
+                    resource = page.rendered()
+                    break
+                }
+
                 let page:Site.Docs.Article = .init(inliner,
                     master: master,
                     groups: principal.groups,
@@ -72,7 +79,7 @@ extension WideQuery.Output:ServerResponseFactory
         }
         else
         {
-            let inliner:Inliner = .init(principal: principal.zone)
+            let inliner:Inliner = .init(principal: principal.names)
                 inliner.masters.add(principal.matches)
 
             if  let disambiguation:Site.Docs.Disambiguation = .init(inliner,
@@ -84,7 +91,7 @@ extension WideQuery.Output:ServerResponseFactory
         }
 
         return .resource(.init(.none,
-            content: .string("Record not found."),
+            content: .string("Volume not found."),
             type: .text(.plain, charset: .utf8)))
     }
 }

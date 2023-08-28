@@ -23,7 +23,7 @@ extension Site.Guides
 }
 extension Site.Guides.Feed
 {
-    init(_ inliner:__owned Inliner, masters:__shared [Record.Master])
+    init(_ inliner:__owned Inliner, masters:__shared [Volume.Master])
     {
         self.init(inliner, scalars: masters.map(\.id))
     }
@@ -31,22 +31,19 @@ extension Site.Guides.Feed
 extension Site.Guides.Feed
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
 }
 extension Site.Guides.Feed:FixedPage
 {
-    var location:URI { Site.Guides[self.zone] }
-    var title:String { self.zone.title }
+    var location:URI { Site.Guides[self.names] }
+    var title:String { self.names.title }
 }
 extension Site.Guides.Feed:ApplicationPage
 {
     typealias Navigator = HTML.Logo
     typealias Sidebar = Never
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {

@@ -82,17 +82,21 @@ extension Compiler
                             with: symbol,
                             in: culture)
 
+                    case (.block(let block), excluded: true):
+                        //  We *do* in fact care about extension blocks that only contain
+                        //  internal/private members, because they might contain a conformance
+                        //  to an internal protocol that inherits from a public protocol.
+                        //  SymbolGraphGen probably shouldn’t be marking these extension blocks
+                        //  as internal, but SymbolGraphGen doesn’t care what we think.
+                        fallthrough
+                        //  continue
+
                     case (.block(let block), excluded: false):
                         try self.extensions.include(block: block,
                             extending: try extensions.extendee(of: block),
                             namespace: namespace,
                             with: symbol,
                             in: culture)
-
-                    case (.block, excluded: true):
-                        //  We do not care about extension blocks that only contain
-                        //  internal/private members.
-                        continue
                     }
                 }
                 catch let error

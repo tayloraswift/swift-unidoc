@@ -13,10 +13,10 @@ extension Inliner
     {
         let overview:Passage?
 
-        let master:Record.Master
+        let master:Volume.Master
         let target:String?
 
-        init(overview:Passage?, master:Record.Master, target:String?)
+        init(overview:Passage?, master:Volume.Master, target:String?)
         {
             self.overview = overview
             self.master = master

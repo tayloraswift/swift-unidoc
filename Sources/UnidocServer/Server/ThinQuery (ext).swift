@@ -1,9 +1,9 @@
 import ModuleGraphs
 import SemanticVersions
 import UnidocQueries
-import UnidocSelectors
+import UnidocRecords
 
-extension ThinQuery<Selector.Lexical>
+extension ThinQuery<Volume.Shoot>
 {
     static
     func legacy(
@@ -77,11 +77,12 @@ extension ThinQuery<Selector.Lexical>
             }
         }
 
-        return .init(for: .init(
-                stem: stem,
-                hash: nil),
-            in: .init(
+        return .init(
+            volume: .init(
                 package: package,
-                version: version.map { "\(PatchVersion.init(padding: $0))" }))
+                version: version.map { "\(PatchVersion.init(padding: $0))" }),
+            lookup: .init(
+                stem: stem,
+                hash: nil))
     }
 }

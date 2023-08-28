@@ -45,15 +45,15 @@ extension Database.Masters
                         $0[.collation] = Database.collation
                         $0[.key] = .init
                         {
-                            $0[Record.Master[.zone]] = (+)
-                            $0[Record.Master[.stem]] = (+)
-                            $0[Record.Master[.hash]] = (+)
+                            $0[Volume.Master[.zone]] = (+)
+                            $0[Volume.Master[.stem]] = (+)
+                            $0[Volume.Master[.hash]] = (+)
                         }
                         //  This limits the index to masters with a stem. This is all of them,
-                        //  except for ``Record.Master.File``.
+                        //  except for ``Volume.Master.File``.
                         $0[.partialFilterExpression] = .init
                         {
-                            $0[Record.Master[.stem]] = .init { $0[.exists] = true }
+                            $0[Volume.Master[.stem]] = .init { $0[.exists] = true }
                         }
                     },
                     .init
@@ -64,8 +64,8 @@ extension Database.Masters
                         $0[.collation] = Database.collation
                         $0[.key] = .init
                         {
-                            $0[Record.Master[.hash]] = (+)
-                            $0[Record.Master[.id]] = (+)
+                            $0[Volume.Master[.hash]] = (+)
+                            $0[Volume.Master[.id]] = (+)
                         }
                     },
                 ]),

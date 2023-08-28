@@ -12,16 +12,16 @@ extension Site.Docs
         let inliner:Inliner
 
         private
-        let master:Record.Master.Culture
+        let master:Volume.Master.Culture
         private
-        let groups:[Record.Group]
+        let groups:[Volume.Group]
         private
-        let nouns:[Record.Noun]?
+        let nouns:[Volume.Noun]?
 
         init(_ inliner:Inliner,
-            master:Record.Master.Culture,
-            groups:[Record.Group],
-            nouns:[Record.Noun]?)
+            master:Volume.Master.Culture,
+            groups:[Volume.Group],
+            nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
             self.master = master
@@ -33,28 +33,22 @@ extension Site.Docs
 extension Site.Docs.Culture
 {
     private
-    var zone:Record.Zone { self.inliner.zones.principal }
+    var names:Volume.Names { self.inliner.names.principal }
     private
     var name:String { self.master.module.name }
 }
 extension Site.Docs.Culture:FixedPage
 {
-    var location:URI { Site.Docs[self.zone, self.master.shoot] }
-    var title:String { "\(self.name) - \(self.zone.title))" }
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var title:String { "\(self.name) - \(self.names.title))" }
 }
 extension Site.Docs.Culture:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    var sidebar:Inliner.NounTree?
-    {
-        self.nouns.map { .init(self.inliner, nouns: $0) }
-    }
+    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var search:URI
-    {
-        Site.NounMaps[self.zone]
-    }
+    var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -72,10 +66,13 @@ extension Site.Docs.Culture:ApplicationPage
                 {
                     $0[.span, { $0.class = "package" }]
                     {
-                        $0[.a] { $0.href = "\(Site.Docs[self.zone])" } = "\(self.zone.package)"
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.names])"
+                        } = "\(self.names.package)"
                     }
 
-                    $0[.span] { $0.class = "version" } = self.zone.version
+                    $0[.span] { $0.class = "version" } = self.names.version
                 }
             }
 

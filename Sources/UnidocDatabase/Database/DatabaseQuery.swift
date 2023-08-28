@@ -6,15 +6,17 @@ protocol DatabaseQuery<Output>:Sendable
 {
     associatedtype Output:BSONDocumentDecodable
 
-    var pipeline:Mongo.Pipeline { get }
-    var hint:Mongo.SortDocument { get }
+    func build(pipeline:inout Mongo.Pipeline)
+
+    var origin:Mongo.Collection { get }
+    var hint:Mongo.SortDocument? { get }
 }
 extension DatabaseQuery
 {
     @inlinable public
     var command:Mongo.Aggregate<Mongo.Single<Output>>
     {
-        .init(Database.Zones.name, pipeline: self.pipeline)
+        .init(self.origin, pipeline: .init(with: self.build(pipeline:)))
         {
             $0[.collation] = Database.collation
             $0[.hint] = self.hint

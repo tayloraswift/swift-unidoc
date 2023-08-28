@@ -46,7 +46,7 @@ enum Main:SyncTests
                 }
             }
             let culture:Unidoc.Scalar = swift_malibu.id + 1 * .module
-            let records:Records = .init(latest: nil,
+            let records:Volume = .init(latest: nil,
                 masters:
                 [
                     .culture(.init(id: swift_malibu.BarbieCore.id,
@@ -125,17 +125,18 @@ enum Main:SyncTests
                         scope: [swift_malibu.id + 4 * .decl])),
                 ],
                 groups: [],
-                zone: .init(id: swift_malibu.id,
-                    package: "swift-malibu",
-                    version: "master",
+                names: .init(id: swift_malibu.id,
                     refname: nil,
                     display: nil,
                     github: nil,
+                    volume: .init(
+                        package: "swift-malibu",
+                        version: "master"),
                     latest: true,
                     patch: nil))
 
-            let (_, trees):(Record.NounMap, [Record.NounTree]) = records.indexes()
-            if  let tree:Record.NounTree = tests.expect(value: trees.first { $0.id == culture })
+            let (_, trees):(_, [Volume.NounTree]) = records.indexes()
+            if  let tree:Volume.NounTree = tests.expect(value: trees.first { $0.id == culture })
             {
                 tests.expect(tree ==? .init(id: culture, rows:
                     [
@@ -156,18 +157,18 @@ enum Main:SyncTests
             let id:Unidoc.Scalar = .init(package: 1, version: 2, citizen: 3)
 
             if  let tests:TestGroup = tests / "Empty",
-                    tests.roundtrip(Record.NounTree.init(id: id, rows: []))
+                    tests.roundtrip(Volume.NounTree.init(id: id, rows: []))
             {
             }
             if  let tests:TestGroup = tests / "One",
-                    tests.roundtrip(Record.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Many",
-                    tests.roundtrip(Record.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -177,7 +178,7 @@ enum Main:SyncTests
             {
             }
             if  let tests:TestGroup = tests / "Hashed",
-                    tests.roundtrip(Record.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -191,7 +192,7 @@ enum Main:SyncTests
             {
             }
             if  let tests:TestGroup = tests / "Races",
-                    tests.roundtrip(Record.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
                             hash: .init(hashing: "the’ir"),
