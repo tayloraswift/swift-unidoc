@@ -108,7 +108,7 @@ extension AnyOperation
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
-                    lookup: .init(stem: ["Articles"] + stem, hash: nil)),
+                    lookup: .init(stem: ["Articles", trunk], hash: nil)),
                 uri: uri,
                 tag: tag))
 

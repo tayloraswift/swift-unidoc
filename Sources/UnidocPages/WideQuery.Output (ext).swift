@@ -37,6 +37,13 @@ extension WideQuery.Output:ServerResponseFactory
             switch master
             {
             case .article(let master):
+                if  principal.names.package == "__swiftinit"
+                {
+                    let page:Site.Blog.Article = .init(inliner, master: master)
+                    resource = page.rendered()
+                    break
+                }
+
                 let page:Site.Docs.Article = .init(inliner,
                     master: master,
                     groups: principal.groups,
