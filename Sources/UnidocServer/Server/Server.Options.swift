@@ -6,8 +6,8 @@ extension Server
     {
         var authority:Authority
         var certificates:String?
-        var reloading:CacheReloading
         var redirect:Bool
+        var reload:Bool
         var mongo:String
         /// This is the port that the server binds to. It is not necessarily
         /// the port that the server is accessed through.
@@ -17,8 +17,8 @@ extension Server
         {
             self.authority = .localhost
             self.certificates = nil
-            self.reloading = .cold
             self.redirect = false
+            self.reload = false
             self.mongo = "unidoc-mongod"
             self.port = 8080
         }
@@ -66,7 +66,7 @@ extension Server.Options
                 options.redirect = true
 
             case "-R", "--reload":
-                options.reloading = .hot
+                options.reload = true
 
             case "-m", "--mongo":
                 switch arguments.next()

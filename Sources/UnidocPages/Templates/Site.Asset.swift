@@ -5,6 +5,8 @@ extension Site
     @frozen public
     enum Asset:String, Equatable, Hashable, Sendable
     {
+        case favicon_ico        = "favicon.ico"
+        case favicon_png        = "favicon.png"
         //  We let Google Fonts serve most of the fonts, but we host Literata ourselves because
         //  the front-end CSS uses opentype features such as old-style numerals, and Google
         //  Fonts strips those out.

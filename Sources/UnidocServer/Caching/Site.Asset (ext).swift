@@ -4,22 +4,20 @@ import UnidocPages
 
 extension Site.Asset:CacheKey
 {
-    /// Indicates if the asset should never be reloaded (``CacheReloading cold``),
-    /// served only when hot-reloading is enabled (``CacheReloading hot``), or reloaded
-    /// depending on whether hot-reloading is enabled (`nil`).
-    var requirement:CacheReloading?
+    /// Indicates if the asset will be reloaded from disk when hot-reloading is enabled.
+    /// (Some assets will never be reloaded, such as the favicon.)
+    var reloadable:Bool
     {
         switch self
         {
-        case    .literata45_woff2,
-                .literata47_woff2,
-                .literata75_woff2,
-                .literata77_woff2,
-                .robots_txt:        return .cold
         case    .main_css,
-                .main_js:           return nil
-        case    .main_css_map,
-                .main_js_map:       return .hot
+                .main_css_map,
+                .main_js,
+                .main_js_map:
+            return true
+
+        case    _:
+            return false
         }
     }
 
@@ -27,6 +25,8 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
+        case .favicon_ico:      return ["icons", "favicon.ico"]
+        case .favicon_png:      return ["icons", "favicon.png"]
         case .literata45_woff2: return ["woff2", "Literata_24pt-Regular.woff2"]
         case .literata47_woff2: return ["woff2", "Literata_24pt-Italic.woff2"]
         case .literata75_woff2: return ["woff2", "Literata_24pt-Bold.woff2"]
@@ -43,6 +43,8 @@ extension Site.Asset:CacheKey
     {
         switch self
         {
+        case    .favicon_ico:       return .image(.icon)
+        case    .favicon_png:       return .image(.png)
         case    .robots_txt:        return .text(.plain, charset: .utf8)
         case    .literata45_woff2,
                 .literata47_woff2,

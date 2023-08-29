@@ -1,5 +1,6 @@
 import HTML
 import HTTPServer
+import Media
 import URI
 
 public
@@ -42,7 +43,17 @@ extension FixedPage
                         $0.name     = "viewport"
                         $0.content  = "width=device-width, initial-scale=1"
                     }
-                    $0[.link] { $0.href = "\(Site.Asset.main_css)" ; $0.rel = .stylesheet }
+                    $0[.link]
+                    {
+                        $0.href = "\(Site.Asset.favicon_png)"
+                        $0.type = "\(MediaType.image(.png))"
+                        $0.rel = .icon
+                    }
+                    $0[.link]
+                    {
+                        $0.href = "\(Site.Asset.main_css)"
+                        $0.rel = .stylesheet
+                    }
                     //  Inlining this saves the client a round-trip to the google fonts API.
                     //  It is only about 1.87 KB, which is less than 5 percent of the total
                     //  size of a typical page.

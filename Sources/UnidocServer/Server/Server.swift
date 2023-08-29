@@ -21,7 +21,7 @@ actor Server
     let cache:Cache<Site.Asset>
 
     private
-    init(reloading mode:CacheReloading, database:Database, mongodb:Mongo.SessionPool)
+    init(database:Database, mongodb:Mongo.SessionPool, reload:Bool)
     {
         var continuation:AsyncStream<Request>.Continuation? = nil
         self.requests.out = .init
@@ -33,7 +33,7 @@ actor Server
         self.database = database
         self.mongodb = mongodb
 
-        self.cache = .init(reloading: mode, from: "Assets")
+        self.cache = .init(source: "Assets", reload: reload)
     }
 }
 extension Server
@@ -123,9 +123,10 @@ extension Server
 
         try await mongodb.withSessionPool
         {
-            let delegate:Self = .init(reloading: options.reloading,
+            let delegate:Self = .init(
                 database: try await .setup("unidoc", in: $0),
-                mongodb: $0)
+                mongodb: $0,
+                reload: options.reload)
 
             try await withThrowingTaskGroup(of: Void.self)
             {
