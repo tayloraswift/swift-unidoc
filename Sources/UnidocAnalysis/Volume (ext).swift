@@ -3,9 +3,6 @@ import ModuleGraphs
 import Unidoc
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Volume")
-public typealias Records = Volume
-
 extension Volume
 {
     public
@@ -51,7 +48,8 @@ extension Volume
             case .decl(let master):
                 switch master.phylum
                 {
-                case .actor, .class, .struct, .enum, .protocol:
+                case    .actor, .class, .struct, .enum, .protocol,
+                        .func(nil), .var(nil):
                     types[master.culture, master.id] = .init(
                         shoot: master.shoot,
                         scope: master.scope.last)
