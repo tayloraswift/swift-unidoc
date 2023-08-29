@@ -1,9 +1,10 @@
+
 import Sources
 import Unidoc
 
-extension DynamicContext
+extension DynamicContext.SortPriority
 {
-    enum SortLeague:Equatable, Comparable
+    enum Phylum:Equatable, Comparable
     {
         case `var`
         case `func`
@@ -27,7 +28,7 @@ extension DynamicContext
         case  method(Unidoc.Decl.Objectivity)
     }
 }
-extension DynamicContext.SortLeague
+extension DynamicContext.SortPriority.Phylum
 {
     init(_ phylum:Unidoc.Decl, position:SourcePosition? = nil)
     {
