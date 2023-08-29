@@ -34,35 +34,124 @@ p code
     line-height: 0;
     border-radius: 0.4rem;
 }
-
-aside
+section.details
 {
-    position: relative;
-    margin: 2rem 0;
-    left: -1rem;
-
-    > *
+    aside
     {
-        margin-left: 1rem;
+        position: relative;
+        margin: 2rem 0;
+        left: -1rem;
+
+        > *
+        {
+            margin-left: 1rem;
+        }
+
+        h3
+        {
+            border-radius: 0.2rem;
+            margin: 0;
+            padding: 0.5rem 1.0rem;
+            font-size: inherit;
+
+            background: $light-foreground-semi;
+            color: $light-background;
+        }
     }
-
-    h3
+    aside.important,
+    aside.warning
     {
-        border-radius: 0.2rem;
-        margin: 0;
-        padding: 0.5rem 1.0rem;
-        font-size: inherit;
-
-        background: $light-foreground-semi;
-        color: $light-background;
+        h3
+        {
+            background: $light-accent-hot-pink;
+            color: $light-background;
+        }
     }
 }
-aside.important,
-aside.warning
+section.details
 {
-    h3
+    dl
     {
-        background: $light-accent-hot-pink;
-        color: $light-background;
+        display: grid;
+        grid-template-columns: 33% auto;
+
+        dt
+        {
+            grid-column: 1;
+        }
+        dd
+        {
+            grid-column: 2;
+        }
+    }
+
+    div.stats
+    {
+        width: 14rem;
+        float: right;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        h2, h3
+        {
+            font-size: 100%;
+            margin: 0;
+        }
+        h3
+        {
+            font-weight: 500;
+            color: $light-foreground-semi;
+        }
+
+        figure
+        {
+            margin: 1rem;
+
+            div.pie
+            {
+                font-size: 10px;
+            }
+        }
+    }
+
+    table
+    {
+        width: 100%;
+    }
+    table th
+    {
+        text-align: left;
+        font-family: $typeface-sans;
+        padding-bottom: 0.5rem;
+
+        color: $light-foreground-semi;
+        border-bottom: 2px solid $light-swift;
+    }
+    table tbody tr:first-child td
+    {
+        padding-top: 0.5rem;
+    }
+    table th,
+    table td
+    {
+        padding-left: 0.5rem;
+    }
+    table th:first-child,
+    table td:first-child
+    {
+        padding-left: 0;
+    }
+
+    table.dependencies
+    {
+        td:first-child
+        {
+            font-style: italic;
+        }
+        td span.upto
+        {
+            padding: 0 0.5rem;
+        }
     }
 }

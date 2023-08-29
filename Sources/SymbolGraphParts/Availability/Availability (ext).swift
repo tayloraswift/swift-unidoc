@@ -45,7 +45,8 @@ extension Availability:JSONDecodable
                     message: message)
 
             case .platform(let domain):
-                let deprecated:Availability.AnyRange? = try json[.isUnconditionallyDeprecated]?.decode(
+                let deprecated:Availability.AnyRange? =
+                    try json[.isUnconditionallyDeprecated]?.decode(
                         as: Bool.self)
                     {
                         $0 ? .unconditionally : nil
