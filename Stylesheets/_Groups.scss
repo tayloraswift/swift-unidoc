@@ -120,6 +120,16 @@ section.group ul
             }
         }
 
+        > a.not-recommended
+        {
+            text-decoration: line-through;
+
+            span.syntax-identifier
+            {
+                color: inherit;
+            }
+        }
+
         p
         {
             padding: 0 0 0 2.5rem;
