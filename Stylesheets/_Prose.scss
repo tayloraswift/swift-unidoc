@@ -70,7 +70,7 @@ section.details
 }
 section.details
 {
-    dl
+    > dl
     {
         display: grid;
         grid-template-columns: 33% auto;
