@@ -2,6 +2,6 @@ import UnidocAnalysis
 import UnidocRecords
 import MongoQL
 
-extension Volume.NounTree:MongoMasterCodingModel
+extension Volume.TypeTree:MongoMasterCodingModel
 {
 }

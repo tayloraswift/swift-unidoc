@@ -171,7 +171,7 @@ struct DatabaseQueries:MongoTestBattery
                         value: try await database.execute(query: query, with: session)),
                     let master:Volume.Master.Culture = tests.expect(
                         value: output.principal?.master?.culture),
-                    let tree:Volume.NounTree = tests.expect(
+                    let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree)
                 {
                     tests.expect(master.id ==? tree.id)
@@ -200,7 +200,7 @@ struct DatabaseQueries:MongoTestBattery
                         value: try await database.execute(query: query, with: session)),
                     let master:Volume.Master = tests.expect(
                         value: output.principal?.master),
-                    let tree:Volume.NounTree = tests.expect(
+                    let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree),
                     let overview:Volume.Passage = tests.expect(
                         value: master.overview),

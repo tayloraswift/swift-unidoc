@@ -46,7 +46,7 @@ extension Site.Docs.Culture:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
+    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
     var volume:VolumeIdentifier { self.names.volume }
 

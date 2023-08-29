@@ -179,7 +179,7 @@ extension WideQuery:VolumeLookupQuery
                                     {
                                         $0[.expr] = .expr
                                         {
-                                            $0[.eq] = (Volume.NounTree[.id], tree)
+                                            $0[.eq] = (Volume.TypeTree[.id], tree)
                                         }
                                     }
                                 }

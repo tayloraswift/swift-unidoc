@@ -32,7 +32,7 @@ extension Volume.Types
         }
     }
 
-    func trees() -> [Volume.NounTree]
+    func trees() -> [Volume.TypeTree]
     {
         self.cultures.map
         {
