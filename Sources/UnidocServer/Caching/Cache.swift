@@ -6,40 +6,34 @@ final
 actor Cache<Key> where Key:CacheKey
 {
     nonisolated
-    let reloading:CacheReloading
-    nonisolated
     let assets:FilePath
+    nonisolated
+    let reload:Bool
 
     private
     var table:[Key: ServerResource]
 
-    init(reloading:CacheReloading, from assets:FilePath)
+    init(source assets:FilePath, reload:Bool)
     {
-        self.reloading = reloading
         self.assets = assets
+        self.reload = reload
 
         self.table = [:]
     }
 }
 extension Cache
 {
-    func load(_ key:Key) throws -> ServerResource?
+    func load(_ key:Key) throws -> ServerResource
     {
-        let mode:CacheReloading = key.requirement ?? self.reloading
-        if  mode > self.reloading
+        try
         {
-            return nil
-        }
-
-        return try
-        {
-            switch (mode, $0)
+            switch  (reload: self.reload && key.reloadable, $0)
             {
-            case    (.cold, let cached?):
+            case    (reload: false, let cached?):
                 return cached
 
-            case    (.cold, nil),
-                    (.hot, _):
+            case    (reload: false, nil),
+                    (reload: true, _):
                 let asset:[UInt8] = try self.assets.appending(key.source).read()
                 let hash:MD5 = .init(hashing: asset)
                 let resource:ServerResource = .init(.one(canonical: nil),
