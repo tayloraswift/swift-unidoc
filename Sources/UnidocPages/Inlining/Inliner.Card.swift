@@ -49,7 +49,10 @@ extension Inliner.Card:HyperTextOutputStreamable
         case .decl(let master):
             html[.li, { $0.class = "decl" }]
             {
-                $0[link: self.target] = master.signature.abridged
+                let style:String? = master.signature.availability.isGenerallyRecommended ?
+                    nil : "not-recommended"
+
+                $0[link: self.target] { $0.class = style } = master.signature.abridged
                 $0 ?= self.overview
             }
 

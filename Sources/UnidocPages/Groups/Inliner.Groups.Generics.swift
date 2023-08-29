@@ -23,6 +23,8 @@ extension Inliner.Groups.Generics
         self.init(parameters: generics.reduce(into: []) { $0.insert($1.name) })
     }
 
+    var count:Int { self.parameters.count }
+
     /// Returns the number of free generic parameters remaining after applying any same-type
     /// constraints in the given list.
     func count(substituting constraints:[GenericConstraint<Unidoc.Scalar?>]) -> Int
