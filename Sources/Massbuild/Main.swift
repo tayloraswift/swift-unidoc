@@ -102,6 +102,23 @@ enum Main
             "2.4.0",
             "2.4.1")
 
+        try await builder.build("swift-certificates",
+            repository: "https://github.com/apple/swift-certificates.git",
+            versions:
+            "0.6.0")
+
+        try await builder.build("swift-asn1",
+            repository: "https://github.com/apple/swift-asn1.git",
+            versions:
+            "0.8.0",
+            "0.9.1",
+            "0.10.0")
+
+        try await builder.build("swift-crypto",
+            repository: "https://github.com/apple/swift-crypto.git",
+            versions:
+            "2.6.0")
+
         try await builder.build("swift-hash",
             repository: "https://github.com/tayloraswift/swift-hash.git",
             versions:
