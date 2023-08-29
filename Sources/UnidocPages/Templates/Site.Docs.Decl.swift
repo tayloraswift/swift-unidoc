@@ -1,3 +1,4 @@
+import Availability
 import HTML
 import LexicalPaths
 import ModuleGraphs
@@ -112,6 +113,41 @@ extension Site.Docs.Decl:ApplicationPage
             if  let location:SourceLocation<Unidoc.Scalar> = self.master.location
             {
                 $0 ?= self.inliner.link(file: location.file, line: location.position.line)
+            }
+        }
+
+        let availability:Availability = self.master.signature.availability
+        if  let notice:String = availability.notice
+        {
+            main[.section, { $0.class = "deprecation" }] { $0[.p] = notice }
+        }
+        else if !availability.isEmpty
+        {
+            main[.section, { $0.class = "availability" }]
+            {
+                $0[.dl]
+                {
+                    if  let badge:String = availability.agnostic[.swift]?.badge
+                    {
+                        $0[.dt] = "Swift"
+                        $0[.dd] = badge
+                    }
+                    if  let badge:String = availability.agnostic[.swiftPM]?.badge
+                    {
+                        $0[.dt] = "SwiftPM"
+                        $0[.dd] = badge
+                    }
+
+                    for platform:Availability.PlatformDomain in
+                        Availability.PlatformDomain.allCases
+                    {
+                        if  let badge:String = availability.platforms[platform]?.badge
+                        {
+                            $0[.dt] = "\(platform)"
+                            $0[.dd] = badge
+                        }
+                    }
+                }
             }
         }
 

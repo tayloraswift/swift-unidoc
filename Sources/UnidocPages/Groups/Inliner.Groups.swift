@@ -77,8 +77,10 @@ extension Inliner.Groups
                     .third($0.package)
                 } ?? .first
 
-                let genericness:Genericness =
-                    generics.count(substituting: group.conditions) == 0 ? .generic : .concrete
+                let genericness:Genericness = group.conditions.isEmpty ?
+                    .unconstrained : generics.count(substituting: group.conditions) > 0 ?
+                    .constrained :
+                    .concretized
 
                 extensions.append((group, partisanship, genericness))
 

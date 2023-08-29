@@ -80,14 +80,16 @@ extension SnapshotObject
 }
 extension SnapshotObject
 {
-    func priority(of decl:Unidoc.Scalar) -> (DynamicContext.SortLeague, String, Int32)?
+    func priority(of decl:Unidoc.Scalar) -> DynamicContext.SortPriority?
     {
         if  let local:Int32 = decl - self.zone,
             let decl:SymbolGraph.Decl = snapshot.graph.decls[local]?.decl
         {
-            let league:DynamicContext.SortLeague = .init(decl.phylum,
+            let phylum:DynamicContext.SortPriority.Phylum = .init(decl.phylum,
                 position: decl.location?.position)
-            return (league, decl.path.last, local)
+            return decl.signature.availability.isGenerallyRecommended ?
+                .available(phylum, decl.path.last, local) :
+                .removed(phylum, decl.path.last, local)
         }
         else
         {
