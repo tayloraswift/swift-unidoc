@@ -233,7 +233,7 @@ extension DynamicContext
 extension DynamicContext
 {
     /// Get the sort-priority of a declaration.
-    func priority(of decl:Unidoc.Scalar) -> (SortLeague, String, Int32)?
+    func priority(of decl:Unidoc.Scalar) -> SortPriority?
     {
         self[decl.package]?.priority(of: decl)
     }
