@@ -6,7 +6,7 @@ import UnidocRecords
 extension Volume
 {
     @frozen public
-    struct NounTree:Identifiable, Equatable, Sendable
+    struct TypeTree:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -21,7 +21,7 @@ extension Volume
         }
     }
 }
-extension Volume.NounTree
+extension Volume.TypeTree
 {
     @inlinable internal
     init(id:Unidoc.Scalar, table:Table)
@@ -31,7 +31,7 @@ extension Volume.NounTree
 
     var table:Table { .init(rows: self.rows) }
 }
-extension Volume.NounTree
+extension Volume.TypeTree
 {
     public
     enum CodingKey:String
@@ -40,7 +40,7 @@ extension Volume.NounTree
         case table = "T"
     }
 }
-extension Volume.NounTree:BSONDocumentEncodable
+extension Volume.TypeTree:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -49,7 +49,7 @@ extension Volume.NounTree:BSONDocumentEncodable
         bson[.table] = self.table
     }
 }
-extension Volume.NounTree:BSONDocumentDecodable
+extension Volume.TypeTree:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

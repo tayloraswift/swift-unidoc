@@ -226,7 +226,7 @@ extension Database
     func push(_ volume:__owned Volume,
         with session:__shared Mongo.Session) async throws
     {
-        let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.NounTree]) = volume.indexes()
+        let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
         try await self.masters.insert(volume.masters, with: session)
         try await self.names.insert(volume.names, with: session)

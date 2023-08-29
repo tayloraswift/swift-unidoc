@@ -9,7 +9,7 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "NounTree" / "Sorting"
+        if  let tests:TestGroup = tests / "TypeTree" / "Sorting"
         {
             enum swift
             {
@@ -135,8 +135,8 @@ enum Main:SyncTests
                     latest: true,
                     patch: nil))
 
-            let (_, trees):(_, [Volume.NounTree]) = records.indexes()
-            if  let tree:Volume.NounTree = tests.expect(value: trees.first { $0.id == culture })
+            let (_, trees):(_, [Volume.TypeTree]) = records.indexes()
+            if  let tree:Volume.TypeTree = tests.expect(value: trees.first { $0.id == culture })
             {
                 tests.expect(tree ==? .init(id: culture, rows:
                     [
@@ -152,23 +152,23 @@ enum Main:SyncTests
                     ]))
             }
         }
-        if  let tests:TestGroup = tests / "NounTree" / "RoundTripping"
+        if  let tests:TestGroup = tests / "TypeTree" / "RoundTripping"
         {
             let id:Unidoc.Scalar = .init(package: 1, version: 2, citizen: 3)
 
             if  let tests:TestGroup = tests / "Empty",
-                    tests.roundtrip(Volume.NounTree.init(id: id, rows: []))
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows: []))
             {
             }
             if  let tests:TestGroup = tests / "One",
-                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Many",
-                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -178,7 +178,7 @@ enum Main:SyncTests
             {
             }
             if  let tests:TestGroup = tests / "Hashed",
-                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -192,7 +192,7 @@ enum Main:SyncTests
             {
             }
             if  let tests:TestGroup = tests / "Races",
-                    tests.roundtrip(Volume.NounTree.init(id: id, rows:
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
                             hash: .init(hashing: "the’ir"),

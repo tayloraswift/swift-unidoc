@@ -3,7 +3,7 @@ import BSONEncoding
 import FNV1
 import UnidocRecords
 
-extension Volume.NounTree
+extension Volume.TypeTree
 {
     /// A somewhat more-efficient representation for serializing an array of ``Row``s.
     @frozen @usableFromInline internal
@@ -19,7 +19,7 @@ extension Volume.NounTree
         }
     }
 }
-extension Volume.NounTree.Table:BSONEncodable
+extension Volume.TypeTree.Table:BSONEncodable
 {
     @usableFromInline internal
     func encode(to field:inout BSON.Field)
@@ -36,7 +36,7 @@ extension Volume.NounTree.Table:BSONEncodable
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: buffer).encode(to: &field)
     }
 }
-extension Volume.NounTree.Table:BSONDecodable, BSONBinaryViewDecodable
+extension Volume.TypeTree.Table:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable internal
     init<Bytes>(bson:BSON.BinaryView<Bytes>) throws

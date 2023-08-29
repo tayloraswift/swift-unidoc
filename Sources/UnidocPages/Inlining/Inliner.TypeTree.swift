@@ -5,7 +5,7 @@ import URI
 
 extension Inliner
 {
-    struct NounTree
+    struct TypeTree
     {
         private
         let inliner:Inliner
@@ -20,7 +20,7 @@ extension Inliner
         }
     }
 }
-extension Inliner.NounTree:HyperTextOutputStreamable
+extension Inliner.TypeTree:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

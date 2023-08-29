@@ -38,12 +38,12 @@ extension SearchIndex
 {
     static
     func nouns(id:ID,
-        from trees:__shared [Volume.NounTree],
+        from trees:__shared [Volume.TypeTree],
         for modules:__shared [Unidoc.Scalar: ModuleIdentifier]) -> Self
     {
         let json:JSON = .array
         {
-            for tree:Volume.NounTree in trees
+            for tree:Volume.TypeTree in trees
             {
                 guard let culture:ModuleIdentifier = modules[tree.id]
                 else

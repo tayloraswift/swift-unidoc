@@ -65,7 +65,7 @@ extension Site.Docs.Decl:ApplicationPage
         }
     }
 
-    var sidebar:Inliner.NounTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
+    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
     var volume:VolumeIdentifier { self.names.volume }
 

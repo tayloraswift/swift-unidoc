@@ -22,7 +22,7 @@ extension WideQuery.Output
         public
         let names:Volume.Names
         public
-        let tree:Volume.NounTree?
+        let tree:Volume.TypeTree?
 
         @inlinable internal
         init(
@@ -30,7 +30,7 @@ extension WideQuery.Output
             master:Volume.Master?,
             groups:[Volume.Group],
             names:Volume.Names,
-            tree:Volume.NounTree?)
+            tree:Volume.TypeTree?)
         {
             self.matches = matches
             self.master = master
