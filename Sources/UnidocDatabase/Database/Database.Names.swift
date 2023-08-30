@@ -18,79 +18,69 @@ extension Database
 }
 extension Database.Names:DatabaseCollection
 {
-    typealias ElementID = Unidoc.Zone
-
     @inlinable public static
     var name:Mongo.Collection { "names" }
-}
-extension Database.Names
-{
-    func setup(with session:Mongo.Session) async throws
-    {
-        let response:Mongo.CreateIndexesResponse = try await session.run(
-            command: Mongo.CreateIndexes.init(Self.name,
-                writeConcern: .majority,
-                indexes:
-                [
-                    .init
-                    {
-                        $0[.unique] = true
-                        $0[.name] = "id,latest"
 
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Names[.id]] = (+)
-                            $0[Volume.Names[.latest]] = (-)
-                        }
-                    },
-                    .init
-                    {
-                        $0[.unique] = true
-                        $0[.name] = "id,patch"
+    typealias ElementID = Unidoc.Zone
 
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Names[.id]] = (+)
-                            $0[Volume.Names[.patch]] = (-)
-                        }
-                        $0[.partialFilterExpression] = .init
-                        {
-                            $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
-                        }
-                    },
-                    .init
-                    {
-                        $0[.unique] = true
-                        $0[.name] = "package,patch"
+    static
+    let indexes:[Mongo.CreateIndexStatement] =
+    [
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "id,latest"
 
-                        $0[.collation] = Database.collation
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Names[.package]] = (+)
-                            $0[Volume.Names[.patch]] = (-)
-                        }
-                        $0[.partialFilterExpression] = .init
-                        {
-                            $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
-                        }
-                    },
-                    .init
-                    {
-                        $0[.unique] = true
-                        $0[.name] = "package,version"
+            $0[.key] = .init
+            {
+                $0[Volume.Names[.id]] = (+)
+                $0[Volume.Names[.latest]] = (-)
+            }
+        },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "id,patch"
 
-                        $0[.collation] = Database.collation
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Names[.package]] = (+)
-                            $0[Volume.Names[.version]] = (+)
-                        }
-                    },
-                ]),
-            against: self.database)
+            $0[.key] = .init
+            {
+                $0[Volume.Names[.id]] = (+)
+                $0[Volume.Names[.patch]] = (-)
+            }
+            $0[.partialFilterExpression] = .init
+            {
+                $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+            }
+        },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "package,patch"
 
-        assert(response.indexesAfter == 5)
-    }
+            $0[.collation] = Database.collation
+            $0[.key] = .init
+            {
+                $0[Volume.Names[.package]] = (+)
+                $0[Volume.Names[.patch]] = (-)
+            }
+            $0[.partialFilterExpression] = .init
+            {
+                $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+            }
+        },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "package,version"
+
+            $0[.collation] = Database.collation
+            $0[.key] = .init
+            {
+                $0[Volume.Names[.package]] = (+)
+                $0[Volume.Names[.version]] = (+)
+            }
+        },
+    ]
 }
 extension Database.Names
 {

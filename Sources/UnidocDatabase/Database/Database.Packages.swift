@@ -20,14 +20,11 @@ extension Database
 }
 extension Database.Packages:DatabaseCollection
 {
-    typealias ElementID = Never?
-
     @inlinable public static
     var name:Mongo.Collection { "packages" }
-}
-extension Database.Packages
-{
-    func setup(with session:Mongo.Session) async throws
-    {
-    }
+
+    typealias ElementID = Never?
+
+    static
+    var indexes:[Mongo.CreateIndexStatement] { [] }
 }

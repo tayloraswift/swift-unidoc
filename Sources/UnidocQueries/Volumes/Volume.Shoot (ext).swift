@@ -24,6 +24,10 @@ extension Volume.Shoot:VolumeLookupPredicate
                 {
                     $0[.match] = .init
                     {
+                        //  The stem index is partial, so we need this condition here in order
+                        //  for MongoDB to use the index.
+                        $0[Volume.Master[.stem]] = .init { $0[.exists] = true }
+
                         $0[.expr] = .expr
                         {
                             $0[.and] = .init

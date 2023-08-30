@@ -17,14 +17,11 @@ extension Database
 }
 extension Database.Search:DatabaseCollection
 {
-    typealias ElementID = VolumeIdentifier
-
     @inlinable public static
     var name:Mongo.Collection { "search" }
-}
-extension Database.Search
-{
-    func setup(with session:Mongo.Session) async throws
-    {
-    }
+
+    typealias ElementID = VolumeIdentifier
+
+    static
+    var indexes:[Mongo.CreateIndexStatement] { [] }
 }

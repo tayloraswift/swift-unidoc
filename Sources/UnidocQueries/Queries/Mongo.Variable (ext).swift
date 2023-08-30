@@ -100,6 +100,7 @@ extension Mongo.Variable<Unidoc.Scalar>
             {
                 $0[.or] = .init
                 {
+                    //  FIXME: this degenerates into a full collection scan if the topic is nil.
                     $0.expr
                     {
                         $0[.eq] = (Volume.Group[.id], topic)
