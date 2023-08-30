@@ -71,7 +71,19 @@ extension WideQuery:VolumeLookupQuery
                 {
                     $0[let: id] = Output.Principal[.master] / Volume.Master[.id]
 
-                    $0[let: topic] = Output.Principal[.master] / Volume.Master[.group]
+                    $0[let: topic] = .expr
+                    {
+                        //  For reasons I don’t understand, MongoDB will fail to use any indexes
+                        //  whatsoever for this join if the `group` field isn’t present in the
+                        //  master document. (Which is true of most of them.) The
+                        //  least-intrusive way to fix this is to use an optional-coalescence
+                        //  expression to “evaluate” the missing field to `null`.
+                        $0[.coalesce] =
+                        (
+                            Output.Principal[.master] / Volume.Master[.group],
+                            Never??.some(nil)
+                        )
+                    }
                     $0[let: min] = Output.Principal[.names] / Volume.Names[.planes_autogroup]
                     $0[let: max] = Output.Principal[.names] / Volume.Names[.planes_max]
                 }
