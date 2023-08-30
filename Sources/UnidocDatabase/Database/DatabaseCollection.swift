@@ -10,14 +10,58 @@ protocol DatabaseCollection<ElementID>
 
     static
     var name:Mongo.Collection { get }
+    static
+    var indexes:[Mongo.CreateIndexStatement] { get }
 
     var database:Mongo.Database { get }
-
-    /// Creates any necessary indexes for this collection. The witness for this
-    /// requirement must not assume the collection is empty.
-    func setup(with session:Mongo.Session) async throws
 }
+extension DatabaseCollection
+{
+    /// Creates any necessary indexes for this collection.
+    func setup(with session:Mongo.Session) async throws
+    {
+        let statements:[Mongo.CreateIndexStatement] = Self.indexes
+        if  statements.isEmpty
+        {
+            return
+        }
 
+        do
+        {
+            let response:Mongo.CreateIndexesResponse = try await session.run(
+                command: Mongo.CreateIndexes.init(Self.name,
+                    writeConcern: .majority,
+                    indexes: statements),
+                against: self.database)
+
+            if  response.indexesAfter == statements.count + 1
+            {
+                return
+            }
+        }
+        catch let error
+        {
+            print(error)
+        }
+
+        print("warning: dropping and recreating ALL indexes in \(Self.name)")
+
+        try await session.run(
+            command: Mongo.DropIndexes.init(Self.name)
+            {
+                $0[.index] = "*"
+            },
+            against: self.database)
+
+        let response:Mongo.CreateIndexesResponse = try await session.run(
+            command: Mongo.CreateIndexes.init(Self.name,
+                writeConcern: .majority,
+                indexes: statements),
+            against: self.database)
+
+        assert(response.indexesAfter == statements.count + 1)
+    }
+}
 extension DatabaseCollection
 {
     func find<Decodable>(_:Decodable.Type = Decodable.self,

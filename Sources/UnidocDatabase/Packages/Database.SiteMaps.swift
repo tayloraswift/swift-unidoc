@@ -19,14 +19,11 @@ extension Database
 }
 extension Database.SiteMaps:DatabaseCollection
 {
-    public
-    typealias ElementID = PackageIdentifier
-
     @inlinable public static
     var name:Mongo.Collection { "siteMaps" }
 
-    public
-    func setup(with session:Mongo.Session) async throws
-    {
-    }
+    typealias ElementID = PackageIdentifier
+
+    static
+    var indexes:[Mongo.CreateIndexStatement] { [] }
 }

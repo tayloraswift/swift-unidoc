@@ -17,14 +17,11 @@ extension Database
 }
 extension Database.Trees:DatabaseCollection
 {
-    typealias ElementID = Unidoc.Scalar
-
     @inlinable public static
     var name:Mongo.Collection { "trees" }
-}
-extension Database.Trees
-{
-    func setup(with session:Mongo.Session) async throws
-    {
-    }
+
+    typealias ElementID = Unidoc.Scalar
+
+    static
+    var indexes:[Mongo.CreateIndexStatement] { [] }
 }

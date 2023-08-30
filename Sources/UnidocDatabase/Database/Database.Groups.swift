@@ -17,45 +17,35 @@ extension Database
 }
 extension Database.Groups:DatabaseCollection
 {
-    typealias ElementID = Unidoc.Scalar
-
     @inlinable public static
     var name:Mongo.Collection { "groups" }
-}
-extension Database.Groups
-{
-    func setup(with session:Mongo.Session) async throws
-    {
-        let response:Mongo.CreateIndexesResponse = try await session.run(
-            command: Mongo.CreateIndexes.init(Self.name,
-                writeConcern: .majority,
-                indexes:
-                [
-                    .init
-                    {
-                        $0[.unique] = true
-                        $0[.name] = "id"
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Group[.id]] = (+)
-                            $0[Volume.Group[.latest]] = (-)
-                        }
-                    },
-                    .init
-                    {
-                        $0[.unique] = false
-                        $0[.name] = "scope"
-                        $0[.key] = .init
-                        {
-                            $0[Volume.Group[.scope]] = (+)
-                            $0[Volume.Group[.latest]] = (-)
-                        }
-                    },
-                ]),
-            against: self.database)
 
-        assert(response.indexesAfter == 3)
-    }
+    typealias ElementID = Unidoc.Scalar
+
+    static
+    let indexes:[Mongo.CreateIndexStatement] =
+    [
+        // .init
+        // {
+        //     $0[.unique] = true
+        //     $0[.name] = "id,latest"
+        //     $0[.key] = .init
+        //     {
+        //         $0[Volume.Group[.id]] = (+)
+        //         $0[Volume.Group[.latest]] = (-)
+        //     }
+        // },
+        .init
+        {
+            $0[.unique] = false
+            $0[.name] = "scope"
+            $0[.key] = .init
+            {
+                $0[Volume.Group[.scope]] = (+)
+                $0[Volume.Group[.latest]] = (-)
+            }
+        },
+    ]
 }
 extension Database.Groups
 {
