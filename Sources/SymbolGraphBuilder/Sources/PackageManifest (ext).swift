@@ -1,3 +1,4 @@
+import JSON
 import PackageMetadata
 import System
 
@@ -19,7 +20,7 @@ extension PackageManifest
         //  limit. So instead of getting the `dump-package` output from a pipe, we
         //  tell the subprocess to write it to a file, and read back the file afterwards.
         let path:FilePath = build.output.path / "\(build.id).package.json"
-        let json:String = try await path.open(.readWrite,
+        let utf8:[UInt8] = try await path.open(.readWrite,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {
@@ -29,6 +30,7 @@ extension PackageManifest
             try await dump()
             return try $0.readAll()
         }
-        return try .init(parsing: json)
+        let json:JSON = .init(utf8: utf8)
+        return try json.decode()
     }
 }

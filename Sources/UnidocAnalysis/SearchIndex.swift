@@ -1,5 +1,6 @@
 import BSONDecoding
 import BSONEncoding
+import JSONEncoding
 import MD5
 import ModuleGraphs
 import SymbolGraphs

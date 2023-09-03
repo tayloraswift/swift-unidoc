@@ -1,4 +1,4 @@
-import MarkdownTrees
+import MarkdownAST
 
 /// A variant of ``SwiftFlavoredMarkdown`` that clips all headings to a maximum of `h2`.
 @frozen public

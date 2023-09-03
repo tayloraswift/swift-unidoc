@@ -1,4 +1,5 @@
 import BSON
+import JSONEncoding
 import ModuleGraphs
 import MongoDB
 import UnidocAnalysis

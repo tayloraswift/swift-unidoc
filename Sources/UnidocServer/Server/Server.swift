@@ -1,8 +1,12 @@
+import GitHubIntegration
+import HTTPClient
 import HTTPServer
 import MongoDB
 import NIOCore
 import NIOPosix
 import NIOHTTP1
+import NIOSSL
+import System
 import UnidocDatabase
 import UnidocPages
 
@@ -38,8 +42,30 @@ actor Server
 }
 extension Server
 {
-    func respond() async throws
+    func respond(on threads:MultiThreadedEventLoopGroup) async throws
     {
+        //  This is a client context, which is different from the server context.
+        let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
+        let github:GitHubApplication.Client?
+
+        if  let secret:String =
+            try? (self.cache.assets / "secrets" / "github-app-secret").read()
+        {
+            let secret:String = .init(secret.prefix(while: \.isHexDigit))
+
+            github = .init(
+                http2: .init(threads: threads,
+                    niossl: niossl,
+                    remote: "github.com"),
+                app: .init("Iv1.dba609d35c70bf57",
+                    secret: secret))
+        }
+        else
+        {
+            print("Note: App secret unavailable, GitHub integration has been disabled!")
+            github = nil
+        }
+
         for await request:Request in self.requests.out
         {
             try Task.checkCancellation()
@@ -49,15 +75,28 @@ extension Server
             {
                 switch request.operation
                 {
+                case .github(let operation):
+                    if  let github
+                    {
+                        response = try await operation.load(from: github,
+                            into: self.database,
+                            pool: self.mongodb,
+                            with: request.cookies)
+                    }
+                    else
+                    {
+                        response = nil
+                    }
+
                 case .database(let operation):
                     response = try await operation.load(from: self.database,
                         pool: self.mongodb)
 
-                case .datafile(let operation):
+                case .load(let operation):
                     response = try await operation.load(from: self.cache)
 
-                case .dataless(let operation):
-                    response = try operation.load()
+                case .none(let stateless):
+                    response = stateless
                 }
             }
             catch let error
@@ -98,12 +137,12 @@ extension Server
     public static
     func main() async throws
     {
-        let executors:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
+        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let options:Options = try .parse()
         if  options.redirect
         {
             try await options.authority.type.redirect(from: ("0.0.0.0", options.port),
-                on: executors)
+                on: threads)
             return
         }
 
@@ -112,13 +151,13 @@ extension Server
 
         let mongodb:Mongo.DriverBootstrap = MongoDB / [options.mongo] /?
         {
-            $0.executors = .shared(executors)
+            $0.executors = .shared(threads)
             $0.appname = "Unidoc Server"
         }
 
         defer
         {
-            try? executors.syncShutdownGracefully()
+            try? threads.syncShutdownGracefully()
         }
 
         try await mongodb.withSessionPool
@@ -136,11 +175,11 @@ extension Server
                 {
                     try await delegate.serve(from: ("0.0.0.0", options.port),
                         as: authority,
-                        on: executors)
+                        on: threads)
                 }
                 tasks.addTask
                 {
-                    try await delegate.respond()
+                    try await delegate.respond(on: threads)
                 }
 
                 for try await _:Void in tasks

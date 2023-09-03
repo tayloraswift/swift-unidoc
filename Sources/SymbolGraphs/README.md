@@ -8,7 +8,7 @@ Please check if you need to update the version tuple in <file:ABI.swift> when ch
 
 -   ``MarkdownABI``
 -   ``MarkdownSemantics``
--   ``MarkdownTrees``
+-   ``MarkdownAST``
 -   ``SymbolGraphs``
 -   ``SymbolGraphCompiler``
 -   ``SymbolGraphLinker``

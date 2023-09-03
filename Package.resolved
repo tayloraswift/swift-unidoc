@@ -46,15 +46,6 @@
       }
     },
     {
-      "identity" : "swift-json",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tayloraswift/swift-json",
-      "state" : {
-        "revision" : "08553b050558495d71c732e9d4b6f0cf1ab6e442",
-        "version" : "0.6.0"
-      }
-    },
-    {
       "identity" : "swift-markdown",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown",
@@ -79,6 +70,15 @@
       "state" : {
         "revision" : "a2e487b77f17edbce9a65f2b7415f2f479dc8e48",
         "version" : "2.57.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-http2",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-http2",
+      "state" : {
+        "revision" : "a8ccf13fa62775277a5d56844878c828bbb3be1a",
+        "version" : "1.27.0"
       }
     },
     {

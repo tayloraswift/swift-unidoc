@@ -14,8 +14,11 @@ let package:Package = .init(
         .library(name: "DoclinkResolution", targets: ["DoclinkResolution"]),
         .library(name: "FNV1", targets: ["FNV1"]),
 
+        .library(name: "GitHubIntegration", targets: ["GitHubIntegration"]),
+
         .library(name: "HTML", targets: ["HTML"]),
 
+        .library(name: "HTTPClient", targets: ["HTTPClient"]),
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
@@ -24,7 +27,7 @@ let package:Package = .init(
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
         .library(name: "MarkdownRendering", targets: ["MarkdownRendering"]),
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
-        .library(name: "MarkdownTrees", targets: ["MarkdownTrees"]),
+        .library(name: "MarkdownAST", targets: ["MarkdownAST"]),
 
         .library(name: "Media", targets: ["Media"]),
 
@@ -51,6 +54,7 @@ let package:Package = .init(
         .library(name: "System", targets: ["System"]),
 
         .library(name: "Unidoc", targets: ["Unidoc"]),
+        .library(name: "UnidocAnalysis", targets: ["UnidocAnalysis"]),
         .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
@@ -64,8 +68,8 @@ let package:Package = .init(
     ],
     dependencies:
     [
-        .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "0.6.0")),
+        //.package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
+        //    from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
@@ -73,6 +77,8 @@ let package:Package = .init(
 
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
+        .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
+            from: "1.27.0")),
         .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
             from: "2.24.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
@@ -117,6 +123,12 @@ let package:Package = .init(
 
         .target(name: "FNV1"),
 
+        .target(name: "GitHubIntegration", dependencies:
+            [
+                .target(name: "JSON"),
+                .target(name: "HTTPClient"),
+            ]),
+
         .target(name: "HTML", dependencies:
             [
                 .target(name: "HTMLDOM"),
@@ -128,6 +140,17 @@ let package:Package = .init(
         .target(name: "HTMLStreaming", dependencies:
             [
                 .target(name: "HTMLDOM"),
+            ]),
+
+        .target(name: "HTTPClient", dependencies:
+            [
+                .target(name: "HTML"),
+                .target(name: "Media"),
+                .target(name: "MD5"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
         .target(name: "HTTPServer", dependencies:
@@ -142,6 +165,37 @@ let package:Package = .init(
 
         .target(name: "InlineBuffer"),
 
+
+        .target(name: "JSONAST"),
+
+        .target(name: "JSONDecoding", dependencies:
+            [
+                .target(name: "JSONAST"),
+            ]),
+
+        .target(name: "JSONEncoding", dependencies:
+            [
+                .target(name: "JSONAST"),
+            ]),
+
+        .target(name: "JSONLegacy", dependencies:
+            [
+                .target(name: "JSONDecoding"),
+            ]),
+
+        .target(name: "JSONParsing", dependencies:
+            [
+                .target(name: "JSONAST"),
+                .product(name: "Grammar", package: "swift-grammar"),
+            ]),
+
+        .target(name: "JSON", dependencies:
+            [
+                .target(name: "JSONDecoding"),
+                .target(name: "JSONEncoding"),
+                .target(name: "JSONParsing"),
+            ]),
+
         .target(name: "LexicalPaths"),
 
         .target(name: "MarkdownABI"),
@@ -152,7 +206,7 @@ let package:Package = .init(
                 .target(name: "MarkdownABI"),
             ]),
 
-        .target(name: "MarkdownTrees", dependencies:
+        .target(name: "MarkdownAST", dependencies:
             [
                 .target(name: "MarkdownABI"),
                 .target(name: "Sources"),
@@ -160,7 +214,7 @@ let package:Package = .init(
 
         .target(name: "MarkdownParsing", dependencies:
             [
-                .target(name: "MarkdownTrees"),
+                .target(name: "MarkdownAST"),
                 //  TODO: this links Foundation. Need to find a replacement.
                 .product(name: "Markdown", package: "swift-markdown"),
             ]),
@@ -175,7 +229,7 @@ let package:Package = .init(
         .target(name: "MarkdownSemantics", dependencies:
             [
                 .target(name: "Codelinks"),
-                .target(name: "MarkdownTrees"),
+                .target(name: "MarkdownAST"),
             ]),
 
         .target(name: "MD5", dependencies:
@@ -204,10 +258,8 @@ let package:Package = .init(
 
         .target(name: "PackageMetadata", dependencies:
             [
+                .target(name: "JSON"),
                 .target(name: "PackageGraphs"),
-
-                .product(name: "JSONDecoding", package: "swift-json"),
-                .product(name: "JSONEncoding", package: "swift-json"),
             ]),
 
         .target(name: "SemanticVersions"),
@@ -262,13 +314,12 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphParts", dependencies:
             [
+                .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
                 .target(name: "ModuleGraphs"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
-                .product(name: "JSONDecoding", package: "swift-json"),
-                .product(name: "JSONEncoding", package: "swift-json"),
             ]),
 
         .target(name: "SymbolGraphs", dependencies:
@@ -302,8 +353,9 @@ let package:Package = .init(
 
         .target(name: "UnidocAnalysis", dependencies:
             [
-                .target(name: "UnidocSelectors"),
+                .target(name: "JSONEncoding"),
                 .target(name: "MD5"),
+                .target(name: "UnidocSelectors"),
             ]),
 
         .target(name: "UnidocDatabase", dependencies:
@@ -329,6 +381,7 @@ let package:Package = .init(
 
         .target(name: "UnidocPages", dependencies:
             [
+                .target(name: "GitHubIntegration"),
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocQueries"),

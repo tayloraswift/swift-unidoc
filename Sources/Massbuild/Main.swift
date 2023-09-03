@@ -69,7 +69,17 @@ enum Main
             "2.45.0",
             "2.46.0",
             "2.47.0",
-            "2.48.0")
+            "2.48.0",
+            "2.49.0",
+            "2.50.0",
+            "2.51.0",
+            "2.52.0",
+            "2.53.0",
+            "2.54.0",
+            "2.55.0",
+            "2.56.0",
+            "2.57.0",
+            "2.58.0")
 
         try await builder.build("swift-nio-ssl",
             repository: "https://github.com/apple/swift-nio-ssl.git",
@@ -118,6 +128,11 @@ enum Main
             repository: "https://github.com/apple/swift-crypto.git",
             versions:
             "2.6.0")
+
+        try await builder.build("swift-nio-http2",
+            repository: "https://github.com/apple/swift-nio-http2.git",
+            versions:
+            "1.27.0")
 
         try await builder.build("swift-hash",
             repository: "https://github.com/tayloraswift/swift-hash.git",

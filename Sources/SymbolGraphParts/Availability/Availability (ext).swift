@@ -21,7 +21,7 @@ extension Availability:JSONDecodable
     }
 
     public
-    init(json:JSON) throws
+    init(json:JSON.Node) throws
     {
         self.init()
 

@@ -5,7 +5,7 @@ import PackageGraphs
 extension TargetNode.Dependencies:JSONDecodable
 {
     public
-    init(json:JSON) throws
+    init(json:JSON.Node) throws
     {
         self.init()
 

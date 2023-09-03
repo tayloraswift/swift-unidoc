@@ -4,6 +4,7 @@
 .unidoc
 .vscode
 
+Assets/secrets/
 TestDeployment/data/
 
 node_modules/

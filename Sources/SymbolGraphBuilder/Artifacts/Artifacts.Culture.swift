@@ -80,7 +80,7 @@ extension Artifacts.Culture
 
             do
             {
-                return try .init(parsing: try path.read([UInt8].self), id: $0)
+                return try .init(json: .init(utf8: try path.read()), id: $0)
             }
             catch let error
             {

@@ -3,7 +3,7 @@ import Codelinks
 import DoclinkResolution
 import Doclinks
 import MarkdownABI
-import MarkdownTrees
+import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
 import ModuleGraphs

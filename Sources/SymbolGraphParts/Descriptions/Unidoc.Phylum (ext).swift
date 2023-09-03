@@ -1,5 +1,4 @@
 import JSONDecoding
-import JSONEncoding
 import Unidoc
 
 extension Unidoc.Phylum:JSONDecodable, JSONStringDecodable

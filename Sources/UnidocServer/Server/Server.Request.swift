@@ -13,11 +13,13 @@ extension Server
     struct Request:Sendable
     {
         let operation:AnyOperation
+        let cookies:Cookies
         let promise:EventLoopPromise<ServerResponse>
 
-        init(operation:AnyOperation, promise:EventLoopPromise<ServerResponse>)
+        init(operation:AnyOperation, cookies:Cookies, promise:EventLoopPromise<ServerResponse>)
         {
             self.operation = operation
+            self.cookies = cookies
             self.promise = promise
         }
     }
@@ -36,6 +38,8 @@ extension Server.Request:ServerDelegateRequest
         }
 
         let path:[String] = uri.path.normalized(lowercase: true)
+
+        let cookies:Cookies = .init(headers[canonicalForm: "cookie"])
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         if  let root:Int = path.indices.first,
@@ -45,7 +49,7 @@ extension Server.Request:ServerDelegateRequest
                 uri: uri,
                 tag: tag)
         {
-            self.init(operation: get, promise: promise())
+            self.init(operation: get, cookies: cookies, promise: promise())
         }
         else
         {
@@ -59,7 +63,7 @@ extension Server.Request:ServerDelegateRequest
                 uri: uri,
                 tag: tag))
 
-            self.init(operation: get, promise: promise())
+            self.init(operation: get, cookies: cookies, promise: promise())
         }
     }
 
@@ -76,6 +80,8 @@ extension Server.Request:ServerDelegateRequest
         }
 
         let path:[String] = uri.path.normalized(lowercase: true)
+
+        let cookies:Cookies = .init(headers[canonicalForm: "cookie"])
         let form:MultipartForm?
 
         if  let type:Substring = headers[canonicalForm: "content-type"].first,
@@ -101,7 +107,7 @@ extension Server.Request:ServerDelegateRequest
                 rest: path[path.index(after: root)...],
                 form: form)
         {
-            self.init(operation: post, promise: promise())
+            self.init(operation: post, cookies: cookies, promise: promise())
         }
         else
         {

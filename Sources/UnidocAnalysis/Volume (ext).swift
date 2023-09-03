@@ -1,4 +1,5 @@
 import FNV1
+import JSONEncoding
 import ModuleGraphs
 import Unidoc
 import UnidocRecords

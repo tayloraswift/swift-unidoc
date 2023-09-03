@@ -6,7 +6,7 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownSemantics
 import MarkdownParsing
-import MarkdownTrees
+import MarkdownAST
 import ModuleGraphs
 import Signatures
 import Sources
