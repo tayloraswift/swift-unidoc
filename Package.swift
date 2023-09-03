@@ -123,10 +123,15 @@ let package:Package = .init(
 
         .target(name: "FNV1"),
 
+        .target(name: "GitHubClient", dependencies:
+            [
+                .target(name: "GitHubIntegration"),
+                .target(name: "HTTPClient"),
+            ]),
+
         .target(name: "GitHubIntegration", dependencies:
             [
                 .target(name: "JSON"),
-                .target(name: "HTTPClient"),
             ]),
 
         .target(name: "HTML", dependencies:
@@ -360,6 +365,7 @@ let package:Package = .init(
 
         .target(name: "UnidocDatabase", dependencies:
             [
+                .target(name: "GitHubIntegration"),
                 .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
@@ -427,6 +433,7 @@ let package:Package = .init(
 
         .executableTarget(name: "UnidocServer", dependencies:
             [
+                .target(name: "GitHubClient"),
                 .target(name: "Multiparts"),
                 .target(name: "System"),
                 .target(name: "UnidocPages"),

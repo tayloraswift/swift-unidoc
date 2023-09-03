@@ -55,7 +55,12 @@ extension Site.Login:AdministrativePage
         }
             content:
         {
-            $0[.input] { $0.type = "hidden" ; $0.name = "client_id" ; $0.value = self.app.id }
+            $0[.input]
+            {
+                $0.type = "hidden"
+                $0.name = "client_id"
+                $0.value = self.app.client
+            }
             $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "repo" }
 
             $0[.input] { $0.type = "submit" ; $0.value = "Log in with GitHub" }
