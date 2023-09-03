@@ -4,26 +4,22 @@ import JSON
 import NIOCore
 import NIOHPACK
 
-extension GitHubApplication
+@frozen public
+struct GitHubClient<Application> where Application:GitHubApplication
 {
-    @frozen public
-    struct Client
+    private
+    let http2:HTTP2Client
+    public
+    let app:Application
+
+    public
+    init(http2:HTTP2Client, app:Application)
     {
-        private
-        let http2:ClientInterface
-
-        public
-        let app:GitHubApplication
-
-        public
-        init(http2:ClientInterface, app:GitHubApplication)
-        {
-            self.http2 = http2
-            self.app = app
-        }
+        self.http2 = http2
+        self.app = app
     }
 }
-extension GitHubApplication.Client:Identifiable
+extension GitHubClient:Identifiable
 {
     @inlinable public
     var id:String { self.app.client }
@@ -31,8 +27,28 @@ extension GitHubApplication.Client:Identifiable
     @inlinable public
     var secret:String { self.app.secret }
 }
-extension GitHubApplication.Client
+extension GitHubClient
 {
+    public
+    func refresh(token:String) async -> Result<GitHubTokens, GitHubAuthenticationError>
+    {
+        let request:HPACKHeaders =
+        [
+            ":method": "POST",
+            ":scheme": "https",
+            ":authority": "github.com",
+            ":path": """
+                /login/oauth/access_token?\
+                grant_type=refresh_token&\
+                client_id=\(self.id)&client_secret=\(self.secret)&refresh_token=\(token)
+                """,
+
+            "accept": "application/vnd.github+json",
+        ]
+
+        return await self.authenticate(sending: request)
+    }
+
     public
     func exchange(code:String) async -> Result<GitHubTokens, GitHubAuthenticationError>
     {
@@ -49,7 +65,14 @@ extension GitHubApplication.Client
             "accept": "application/vnd.github+json",
         ]
 
-        let response:ClientInterface.Facet
+        return await self.authenticate(sending: request)
+    }
+
+    private
+    func authenticate(
+        sending request:HPACKHeaders) async -> Result<GitHubTokens, GitHubAuthenticationError>
+    {
+        let response:HTTP2Client.Facet
         do
         {
             response = try await self.http2.fetch(request)

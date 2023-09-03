@@ -1,4 +1,5 @@
 import GitHubClient
+import GitHubIntegration
 import HTTPClient
 import HTTPServer
 import MongoDB
@@ -46,20 +47,33 @@ extension Server
     {
         //  This is a client context, which is different from the server context.
         let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
-        let github:GitHubApplication.Client?
+        let github:(oauth:GitHubClient<GitHubOAuth>, app:GitHubClient<GitHubApp>)?
 
-        if  let secret:String =
-            try? (self.cache.assets / "secrets" / "github-app-secret").read()
+        if  let secret:(oauth:String, app:String) = try?
+            (
+                (self.cache.assets / "secrets" / "github-oauth-secret").read(),
+                (self.cache.assets / "secrets" / "github-app-secret").read()
+            )
         {
-            let secret:String = .init(secret.prefix(while: \.isHexDigit))
+            func trim(_ string:String) -> String
+            {
+                .init(string.prefix(while: \.isHexDigit))
+            }
 
-            github = .init(
-                http2: .init(threads: threads,
-                    niossl: niossl,
-                    remote: "github.com"),
-                app: .init(383005,
+            let http2:HTTP2Client = .init(threads: threads,
+                niossl: niossl,
+                remote: "github.com")
+
+            github =
+            (
+                oauth: .init(http2: http2, app: .init(
+                    client: "2378cacaed3ace362867",
+                    secret: trim(secret.oauth))),
+
+                app: .init(http2: http2, app: .init(383005,
                     client: "Iv1.dba609d35c70bf57",
-                    secret: secret))
+                    secret: trim(secret.app)))
+            )
         }
         else
         {
@@ -77,7 +91,7 @@ extension Server
                 switch request.operation
                 {
                 case .github(let operation):
-                    if  let github
+                    if  let github:GitHubClient<GitHubOAuth> = github?.oauth
                     {
                         response = try await operation.load(from: github,
                             into: self.database,

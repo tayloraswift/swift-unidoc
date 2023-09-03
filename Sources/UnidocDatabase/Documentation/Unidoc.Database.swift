@@ -22,7 +22,7 @@ extension Unidoc
         public
         let id:Mongo.Database
 
-        private
+        @inlinable public
         init(id:Mongo.Database)
         {
             self.id = id

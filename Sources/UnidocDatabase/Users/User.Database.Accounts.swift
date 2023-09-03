@@ -1,11 +1,9 @@
 import MongoQL
-import Unidoc
-import UnidocRecords
 
-extension Unidoc.Database
+extension User.Database
 {
     public
-    struct Trees
+    struct Accounts
     {
         let database:Mongo.Database
 
@@ -15,12 +13,12 @@ extension Unidoc.Database
         }
     }
 }
-extension Unidoc.Database.Trees:DatabaseCollection
+extension User.Database.Accounts:DatabaseCollection
 {
     @inlinable public static
-    var name:Mongo.Collection { "trees" }
+    var name:Mongo.Collection { "accounts" }
 
-    typealias ElementID = Unidoc.Scalar
+    typealias ElementID = User.ID
 
     static
     var indexes:[Mongo.CreateIndexStatement] { [] }

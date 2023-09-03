@@ -1,3 +1,4 @@
+import GitHubClient
 import GitHubIntegration
 import HTTPServer
 import MongoDB
@@ -16,7 +17,7 @@ extension LoginOperation
 }
 extension LoginOperation.Bounce:GitHubOperation
 {
-    func load(from github:GitHubApplication.Client,
+    func load(from github:GitHubClient<GitHubOAuth>,
         into _:Unidoc.Database,
         pool _:Mongo.SessionPool,
         with _:Server.Request.Cookies) async throws -> ServerResponse?

@@ -1,6 +1,6 @@
 import BSON
 import ModuleGraphs
-import MongoDB
+import MongoQL
 
 extension Unidoc.Database
 {
