@@ -1,19 +1,7 @@
-@frozen public
-struct GitHubApplication:Identifiable, Equatable, Hashable, Sendable
+/// The essence of a GitHub application. Not to be confused with ``GitHubApp``.
+public
+protocol GitHubApplication:Equatable, Hashable, Sendable
 {
-    public
-    let id:Int
-
-    public
-    let client:String
-    public
-    let secret:String
-
-    @inlinable public
-    init(_ id:Int, client:String, secret:String)
-    {
-        self.id = id
-        self.client = client
-        self.secret = secret
-    }
+    var client:String { get }
+    var secret:String { get }
 }

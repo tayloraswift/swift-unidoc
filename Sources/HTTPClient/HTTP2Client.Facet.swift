@@ -2,7 +2,7 @@ import NIOCore
 import NIOHPACK
 import NIOHTTP2
 
-extension ClientInterface
+extension HTTP2Client
 {
     @frozen public
     struct Facet:Sendable
@@ -19,7 +19,7 @@ extension ClientInterface
         }
     }
 }
-extension ClientInterface.Facet
+extension HTTP2Client.Facet
 {
     /// Validates the payload and adds it to the facet. Returns true if the frame is the last
     /// frame of the response stream, false otherwise.
@@ -45,6 +45,6 @@ extension ClientInterface.Facet
             break
         }
 
-        throw ClientInterface.UnexpectedFrameError.init(payload)
+        throw HTTP2Client.UnexpectedFrameError.init(payload)
     }
 }

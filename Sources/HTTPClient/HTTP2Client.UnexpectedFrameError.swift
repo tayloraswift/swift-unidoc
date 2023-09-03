@@ -1,6 +1,6 @@
 import NIOHTTP2
 
-extension ClientInterface
+extension HTTP2Client
 {
     @frozen public
     struct UnexpectedFrameError:Error, Sendable

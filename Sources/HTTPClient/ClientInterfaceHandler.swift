@@ -21,13 +21,13 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
     typealias OutboundOut = HTTP2Frame
     typealias OutboundIn =
     (
-        owner:AsyncThrowingStream<ClientInterface.Facet, any Error>.Continuation,
+        owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation,
         batch:[HPACKHeaders]
     )
 
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
-        let owner:AsyncThrowingStream<ClientInterface.Facet, any Error>.Continuation
+        let owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation
         let batch:[HPACKHeaders]
 
         (owner, batch) = self.unwrapOutboundIn(data)

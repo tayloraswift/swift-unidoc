@@ -10,10 +10,10 @@ extension Site
     struct Login
     {
         public
-        let app:GitHubApplication
+        let app:GitHubOAuth
 
         @inlinable public
-        init(app:GitHubApplication)
+        init(app:GitHubOAuth)
         {
             self.app = app
         }
@@ -28,14 +28,6 @@ extension Site.Login:FixedPage
 {
     public
     var title:String { "Log in with GitHub" }
-
-    public
-    func head(augmenting head:inout HTML.ContentEncoder)
-    {
-        head[unsafe: .script] = """
-        const client = ["\(self.app.id)"];
-        """
-    }
 }
 extension Site.Login:AdministrativePage
 {
@@ -61,7 +53,8 @@ extension Site.Login:AdministrativePage
                 $0.name = "client_id"
                 $0.value = self.app.client
             }
-            $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "repo" }
+            //  Don’t actually need this yet.
+            // $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "user:email" }
 
             $0[.input] { $0.type = "submit" ; $0.value = "Log in with GitHub" }
         }

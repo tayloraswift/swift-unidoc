@@ -5,7 +5,7 @@ import NIOHTTP2
 import NIOSSL
 
 @frozen public
-struct ClientInterface
+struct HTTP2Client
 {
     @usableFromInline internal
     let bootstrap:ClientBootstrap
@@ -21,13 +21,13 @@ struct ClientInterface
         self.remote = remote
     }
 }
-extension ClientInterface:Identifiable
+extension HTTP2Client:Identifiable
 {
     /// Returns the ``remote`` hostname.
     @inlinable public
     var id:String { self.remote }
 }
-extension ClientInterface
+extension HTTP2Client
 {
     public
     init(threads:MultiThreadedEventLoopGroup, niossl:NIOSSLContext, remote:String)
@@ -72,7 +72,7 @@ extension ClientInterface
         self.init(bootstrap: bootstrap, remote: remote)
     }
 }
-extension ClientInterface
+extension HTTP2Client
 {
     public
     func fetch(_ request:__owned HPACKHeaders) async throws -> Facet

@@ -6,11 +6,11 @@ final
 class ClientStreamHandler
 {
     private
-    var owner:AsyncThrowingStream<ClientInterface.Facet, any Error>.Continuation?
+    var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
     private
-    var facet:ClientInterface.Facet
+    var facet:HTTP2Client.Facet
 
-    init(owner:AsyncThrowingStream<ClientInterface.Facet, any Error>.Continuation?)
+    init(owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?)
     {
         self.owner = owner
         self.facet = .init()
