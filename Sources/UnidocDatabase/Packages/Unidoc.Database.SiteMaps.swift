@@ -2,7 +2,7 @@ import BSON
 import ModuleGraphs
 import MongoDB
 
-extension Database
+extension Unidoc.Database
 {
     @frozen public
     struct SiteMaps
@@ -17,7 +17,7 @@ extension Database
         }
     }
 }
-extension Database.SiteMaps:DatabaseCollection
+extension Unidoc.Database.SiteMaps:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "siteMaps" }

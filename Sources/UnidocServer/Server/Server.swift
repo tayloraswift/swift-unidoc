@@ -17,7 +17,7 @@ actor Server
     let requests:(in:AsyncStream<Request>.Continuation, out:AsyncStream<Request>)
 
     private nonisolated
-    let database:Database
+    let database:Unidoc.Database
     private nonisolated
     let mongodb:Mongo.SessionPool
 
@@ -25,7 +25,7 @@ actor Server
     let cache:Cache<Site.Asset>
 
     private
-    init(database:Database, mongodb:Mongo.SessionPool, reload:Bool)
+    init(database:Unidoc.Database, mongodb:Mongo.SessionPool, reload:Bool)
     {
         var continuation:AsyncStream<Request>.Continuation? = nil
         self.requests.out = .init

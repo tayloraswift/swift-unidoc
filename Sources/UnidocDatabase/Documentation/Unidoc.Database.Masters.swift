@@ -3,7 +3,7 @@ import Unidoc
 import UnidocSelectors
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     public
     struct Masters
@@ -16,7 +16,7 @@ extension Database
         }
     }
 }
-extension Database.Masters:DatabaseCollection
+extension Unidoc.Database.Masters:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "masters" }
@@ -36,7 +36,7 @@ extension Database.Masters:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "zone,stem,hash"
 
-            $0[.collation] = Database.collation
+            $0[.collation] = Unidoc.Database.collation
             $0[.key] = .init
             {
                 $0[Volume.Master[.zone]] = (+)
@@ -55,7 +55,7 @@ extension Database.Masters:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "hash,id"
 
-            $0[.collation] = Database.collation
+            $0[.collation] = Unidoc.Database.collation
             $0[.key] = .init
             {
                 $0[Volume.Master[.hash]] = (+)

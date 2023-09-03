@@ -45,7 +45,7 @@ extension LoginOperation
 extension LoginOperation:GitHubOperation
 {
     func load(from github:GitHubApplication.Client,
-        into _:Database,
+        into _:Unidoc.Database,
         pool _:Mongo.SessionPool,
         with cookies:Server.Request.Cookies) async throws -> ServerResponse?
     {

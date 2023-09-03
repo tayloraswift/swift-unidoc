@@ -4,5 +4,6 @@ import UnidocDatabase
 
 protocol DatabaseOperation:Sendable
 {
-    func load(from database:Database, pool:Mongo.SessionPool) async throws -> ServerResponse?
+    func load(from database:Unidoc.Database,
+        pool:Mongo.SessionPool) async throws -> ServerResponse?
 }

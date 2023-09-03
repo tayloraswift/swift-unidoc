@@ -141,7 +141,7 @@ extension AnyOperation
                 return .database(QueryOperation<SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
-                        from: Database.Search.name,
+                        from: Unidoc.Database.Search.name,
                         tag: tag,
                         id: id),
                     uri: uri,
@@ -152,7 +152,7 @@ extension AnyOperation
                 return .database(QueryOperation<SearchIndexQuery<Never?>>.init(
                     explain: false,
                     query: .init(
-                        from: Database.Packages.name,
+                        from: Unidoc.Database.Packages.name,
                         tag: tag,
                         id: nil),
                     uri: uri))

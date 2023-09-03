@@ -3,7 +3,7 @@ import BSONEncoding
 import ModuleGraphs
 import MongoQL
 
-extension Database.Package
+extension Unidoc.Database.Package
 {
     struct Cell
     {
@@ -17,7 +17,7 @@ extension Database.Package
         }
     }
 }
-extension Database.Package.Cell:MongoMasterCodingModel
+extension Unidoc.Database.Package.Cell:MongoMasterCodingModel
 {
     enum CodingKey:String
     {
@@ -25,7 +25,7 @@ extension Database.Package.Cell:MongoMasterCodingModel
         case index = "P"
     }
 }
-extension Database.Package.Cell:BSONDocumentEncodable
+extension Unidoc.Database.Package.Cell:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
@@ -33,7 +33,7 @@ extension Database.Package.Cell:BSONDocumentEncodable
         bson[.index] = self.index
     }
 }
-extension Database.Package.Cell:BSONDocumentDecodable
+extension Unidoc.Database.Package.Cell:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

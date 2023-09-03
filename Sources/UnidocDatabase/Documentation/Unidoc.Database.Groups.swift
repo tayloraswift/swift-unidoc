@@ -2,7 +2,7 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     public
     struct Groups
@@ -15,7 +15,7 @@ extension Database
         }
     }
 }
-extension Database.Groups:DatabaseCollection
+extension Unidoc.Database.Groups:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "groups" }
@@ -47,7 +47,7 @@ extension Database.Groups:DatabaseCollection
         },
     ]
 }
-extension Database.Groups
+extension Unidoc.Database.Groups
 {
     func align(latest zone:Unidoc.Zone,
         with session:Mongo.Session,

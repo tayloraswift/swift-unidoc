@@ -5,7 +5,7 @@ import MongoDB
 import UnidocAnalysis
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     @frozen public
     struct Package
@@ -20,7 +20,7 @@ extension Database
         }
     }
 }
-extension Database.Package
+extension Unidoc.Database.Package
 {
     @inlinable public static
     var name:Mongo.Collection { "package" }

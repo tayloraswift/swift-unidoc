@@ -2,7 +2,7 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     /// A single-document collection containing a ``SearchIndex``.
     @frozen public
@@ -18,7 +18,7 @@ extension Database
         }
     }
 }
-extension Database.Packages:DatabaseCollection
+extension Unidoc.Database.Packages:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "packages" }

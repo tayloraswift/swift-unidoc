@@ -10,19 +10,26 @@ import UnidocLinker
 import UnidocSelectors
 import UnidocRecords
 
-@frozen public
-struct Database:Identifiable, Sendable
-{
-    public
-    let id:Mongo.Database
+@available(*, deprecated, renamed: "Unidoc.Database")
+public
+typealias Database = Unidoc.Database
 
-    private
-    init(id:Mongo.Database)
+extension Unidoc
+{
+    @frozen public
+    struct Database:Identifiable, Sendable
     {
-        self.id = id
+        public
+        let id:Mongo.Database
+
+        private
+        init(id:Mongo.Database)
+        {
+            self.id = id
+        }
     }
 }
-extension Database
+extension Unidoc.Database
 {
     var policies:Policies { .init() }
 
@@ -49,7 +56,7 @@ extension Database
             strength: .secondary) // diacritics are significant
     }
 }
-extension Database
+extension Unidoc.Database
 {
     public static
     func setup(_ id:Mongo.Database, in pool:__owned Mongo.SessionPool) async throws -> Self
@@ -85,7 +92,7 @@ extension Database
         }
     }
 }
-extension Database
+extension Unidoc.Database
 {
     /// Drops and reinitializes the database. This destroys *all* its data!
     public
@@ -95,7 +102,7 @@ extension Database
         try await self.setup(with: session)
     }
 }
-extension Database
+extension Unidoc.Database
 {
     public
     func rebuild(with session:__shared Mongo.Session) async throws -> Int
@@ -160,7 +167,7 @@ extension Database
         try await self.siteMaps.find(by: package, with: session)
     }
 }
-extension Database
+extension Unidoc.Database
 {
     public
     func store(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
@@ -249,7 +256,7 @@ extension Database
         }
     }
 }
-extension Database
+extension Unidoc.Database
 {
     //  This should be part of the swift-mongodb package.
     private

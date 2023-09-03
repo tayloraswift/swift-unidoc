@@ -2,7 +2,7 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     public
     struct Trees
@@ -15,7 +15,7 @@ extension Database
         }
     }
 }
-extension Database.Trees:DatabaseCollection
+extension Unidoc.Database.Trees:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "trees" }

@@ -2,7 +2,7 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     public
     struct Search
@@ -15,7 +15,7 @@ extension Database
         }
     }
 }
-extension Database.Search:DatabaseCollection
+extension Unidoc.Database.Search:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "search" }
