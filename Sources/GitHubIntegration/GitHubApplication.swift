@@ -1,20 +1,19 @@
-import HTTPClient
-import JSON
-import NIOCore
-import NIOHPACK
-
 @frozen public
 struct GitHubApplication:Identifiable, Equatable, Hashable, Sendable
 {
     public
-    let secret:String
+    let id:Int
+
     public
-    let id:String
+    let client:String
+    public
+    let secret:String
 
     @inlinable public
-    init(_ id:String, secret:String = "3a892428d6381dbcfdafab55ad2fbec6d4847430")
+    init(_ id:Int, client:String, secret:String)
     {
         self.id = id
+        self.client = client
         self.secret = secret
     }
 }

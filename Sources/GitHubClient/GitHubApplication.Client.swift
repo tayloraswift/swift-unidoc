@@ -1,3 +1,4 @@
+import GitHubIntegration
 import HTTPClient
 import JSON
 import NIOCore
@@ -10,6 +11,7 @@ extension GitHubApplication
     {
         private
         let http2:ClientInterface
+
         public
         let app:GitHubApplication
 
@@ -20,6 +22,14 @@ extension GitHubApplication
             self.app = app
         }
     }
+}
+extension GitHubApplication.Client:Identifiable
+{
+    @inlinable public
+    var id:String { self.app.client }
+
+    @inlinable public
+    var secret:String { self.app.secret }
 }
 extension GitHubApplication.Client
 {
@@ -33,7 +43,7 @@ extension GitHubApplication.Client
             ":authority": "github.com",
             ":path": """
                 /login/oauth/access_token?\
-                client_id=\(self.app.id)&client_secret=\(self.app.secret)&code=\(code)
+                client_id=\(self.id)&client_secret=\(self.secret)&code=\(code)
                 """,
 
             "accept": "application/vnd.github+json",

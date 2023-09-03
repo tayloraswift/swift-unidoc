@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubClient
 import HTTPClient
 import HTTPServer
 import MongoDB
@@ -57,7 +57,8 @@ extension Server
                 http2: .init(threads: threads,
                     niossl: niossl,
                     remote: "github.com"),
-                app: .init("Iv1.dba609d35c70bf57",
+                app: .init(383005,
+                    client: "Iv1.dba609d35c70bf57",
                     secret: secret))
         }
         else
