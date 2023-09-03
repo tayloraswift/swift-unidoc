@@ -40,7 +40,7 @@ extension Site.Docs.Culture
 extension Site.Docs.Culture:FixedPage
 {
     var location:URI { Site.Docs[self.names, self.master.shoot] }
-    var title:String { "\(self.name) - \(self.names.title))" }
+    var title:String { "\(self.name) - \(self.names.title)" }
 }
 extension Site.Docs.Culture:ApplicationPage
 {
