@@ -1,4 +1,4 @@
-extension Database
+extension Unidoc.Database
 {
     public
     struct Policies

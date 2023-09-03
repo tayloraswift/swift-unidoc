@@ -1,6 +1,6 @@
 import ModuleGraphs
 
-extension Database.Package
+extension Unidoc.Database.Package
 {
     public
     struct RegistrationError:Error, Equatable, Sendable

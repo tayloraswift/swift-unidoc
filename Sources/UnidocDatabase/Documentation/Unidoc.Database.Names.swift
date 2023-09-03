@@ -3,7 +3,7 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Database
+extension Unidoc.Database
 {
     public
     struct Names
@@ -16,7 +16,7 @@ extension Database
         }
     }
 }
-extension Database.Names:DatabaseCollection
+extension Unidoc.Database.Names:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "names" }
@@ -57,7 +57,7 @@ extension Database.Names:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "package,patch"
 
-            $0[.collation] = Database.collation
+            $0[.collation] = Unidoc.Database.collation
             $0[.key] = .init
             {
                 $0[Volume.Names[.package]] = (+)
@@ -73,7 +73,7 @@ extension Database.Names:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "package,version"
 
-            $0[.collation] = Database.collation
+            $0[.collation] = Unidoc.Database.collation
             $0[.key] = .init
             {
                 $0[Volume.Names[.package]] = (+)
@@ -82,7 +82,7 @@ extension Database.Names:DatabaseCollection
         },
     ]
 }
-extension Database.Names
+extension Unidoc.Database.Names
 {
     /// Returns the latest release version of the specified package, if one exists.
     func latest(of cell:Unidoc.Cell, with session:Mongo.Session) async throws -> PatchView?
@@ -133,7 +133,7 @@ extension Database.Names
         }
     }
 }
-extension Database.Names
+extension Unidoc.Database.Names
 {
     @discardableResult
     func align(latest zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Int

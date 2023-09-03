@@ -12,7 +12,8 @@ enum AdminOperation
 }
 extension AdminOperation:DatabaseOperation
 {
-    func load(from database:Database, pool:Mongo.SessionPool) async throws -> ServerResponse?
+    func load(from database:Unidoc.Database,
+        pool:Mongo.SessionPool) async throws -> ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: pool)
         let page:Site.Action.Receipt

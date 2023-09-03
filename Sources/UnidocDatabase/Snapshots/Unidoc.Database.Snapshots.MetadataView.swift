@@ -2,7 +2,7 @@ import BSONDecoding
 import Unidoc
 import UnidocLinker
 
-extension Database.Snapshots
+extension Unidoc.Database.Snapshots
 {
     struct MetadataView:Equatable, Sendable
     {
@@ -16,11 +16,11 @@ extension Database.Snapshots
         }
     }
 }
-extension Database.Snapshots.MetadataView
+extension Unidoc.Database.Snapshots.MetadataView
 {
     var zone:Unidoc.Zone { .init(package: self.package, version: self.version) }
 }
-extension Database.Snapshots.MetadataView:BSONDocumentDecodable
+extension Unidoc.Database.Snapshots.MetadataView:BSONDocumentDecodable
 {
     typealias CodingKey = Snapshot.CodingKey
 

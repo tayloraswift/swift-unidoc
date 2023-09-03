@@ -15,7 +15,7 @@ extension Symbol.Decl:VolumeLookupPredicate
             let min:Mongo.Variable<Unidoc.Scalar> = "min"
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-            $0[.from] = Database.Masters.name
+            $0[.from] = Unidoc.Database.Masters.name
             $0[.let] = .init
             {
                 $0[let: min] = input / Volume.Names[.planes_min]

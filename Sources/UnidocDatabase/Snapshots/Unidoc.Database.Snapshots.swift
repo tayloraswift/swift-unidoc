@@ -3,7 +3,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocLinker
 
-extension Database
+extension Unidoc.Database
 {
     @frozen public
     struct Snapshots
@@ -18,7 +18,7 @@ extension Database
         }
     }
 }
-extension Database.Snapshots
+extension Unidoc.Database.Snapshots
 {
     @inlinable public static
     var name:Mongo.Collection { "snapshots" }
@@ -99,7 +99,7 @@ extension Database.Snapshots
             id: snapshot.id)
     }
 }
-extension Database.Snapshots
+extension Unidoc.Database.Snapshots
 {
     private
     func version(_ id:String,
@@ -208,7 +208,7 @@ extension Database.Snapshots
         }
     }
 }
-extension Database.Snapshots
+extension Unidoc.Database.Snapshots
 {
     func load(_ zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Snapshot
     {
