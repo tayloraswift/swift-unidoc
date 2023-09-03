@@ -16,13 +16,13 @@
     },
     "files":
     [
-        "Sources/SearchIndex.ts",
-        "Sources/NounMapCulture.ts",
-        "Sources/Symbol.ts",
+        "Sources/Main.ts",
 
-        "Sources/Search.ts",
+        "Sources/NounMapCulture.ts",
+        "Sources/SearchIndex.ts",
         "Sources/Searchbar.ts",
         "Sources/SearchRunner.ts",
         "Sources/SearchOutput.ts",
+        "Sources/Symbol.ts",
     ]
 }

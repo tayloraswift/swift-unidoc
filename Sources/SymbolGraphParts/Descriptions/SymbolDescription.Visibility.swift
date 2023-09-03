@@ -1,5 +1,4 @@
 import JSONDecoding
-import JSONEncoding
 
 extension SymbolDescription
 {
@@ -47,6 +46,6 @@ extension SymbolDescription.Visibility:LosslessStringConvertible
         }
     }
 }
-extension SymbolDescription.Visibility:JSONStringDecodable, JSONStringEncodable
+extension SymbolDescription.Visibility:JSONStringDecodable
 {
 }

@@ -1,6 +1,6 @@
 import Markdown
 import MarkdownABI
-import MarkdownTrees
+import MarkdownAST
 
 @frozen public
 struct SwiftFlavoredMarkdownParser

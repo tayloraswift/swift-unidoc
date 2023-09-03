@@ -1,5 +1,5 @@
 import MarkdownABI
-import MarkdownTrees
+import MarkdownAST
 
 @frozen public
 enum MarkdownKeywordPrefix:String, Equatable, Hashable, Sendable

@@ -1,4 +1,4 @@
-import JSONDecoding
+import JSON
 import ModuleGraphs
 import PackageGraphs
 import SemanticVersions
@@ -41,14 +41,6 @@ struct PackageManifest:Equatable, Sendable
         self.products = products
         self.targets = targets
         self.format = format
-    }
-}
-extension PackageManifest
-{
-    public
-    init(parsing json:String) throws
-    {
-        try self.init(json: try JSON.Object.init(parsing: json))
     }
 }
 extension PackageManifest:JSONObjectDecodable

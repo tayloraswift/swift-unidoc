@@ -30,9 +30,10 @@ extension ServerAuthority<Never>
 {
     @inlinable public
     var tls:SecurityContext? { nil }
-    /// Dumps detailed information about the caught error. This information will be
-    /// shown to *anyone* accessing the server. In production, you must override
-    /// this default implementation to avoid undermining site security.
+    /// Dumps detailed information about the caught error. This information will be shown to
+    /// *anyone* accessing the server. In production, we strongly recommend overriding this
+    /// default implementation to avoid inadvertently exposing sensitive data via type
+    /// reflection.
     public static
     func redact(error:any Error) -> String
     {

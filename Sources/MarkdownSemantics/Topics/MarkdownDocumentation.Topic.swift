@@ -1,4 +1,4 @@
-import MarkdownTrees
+import MarkdownAST
 
 extension MarkdownDocumentation
 {

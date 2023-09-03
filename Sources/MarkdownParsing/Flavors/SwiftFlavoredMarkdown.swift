@@ -1,4 +1,4 @@
-import MarkdownTrees
+import MarkdownAST
 
 @frozen public
 enum SwiftFlavoredMarkdown:MarkdownFlavor

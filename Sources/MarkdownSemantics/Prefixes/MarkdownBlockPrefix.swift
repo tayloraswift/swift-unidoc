@@ -1,4 +1,4 @@
-import MarkdownTrees
+import MarkdownAST
 
 enum MarkdownBlockPrefix:Equatable, Hashable, Sendable
 {

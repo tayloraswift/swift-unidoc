@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-    entry: './Sources/Search.ts',
+    entry: './Sources/Main.ts',
     output: {
         path: path.resolve(__dirname, '../Assets/js'),
         filename: 'Main.js',

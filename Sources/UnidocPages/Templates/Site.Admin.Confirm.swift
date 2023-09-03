@@ -13,12 +13,31 @@ extension Site.Admin
         public
         var text:String
 
-        @inlinable public
+        private
         init(action:Site.Action, label:String, text:String)
         {
             self.action = action
             self.label = label
             self.text = text
+        }
+    }
+}
+extension Site.Admin.Confirm
+{
+    public
+    init?(action:Site.Action)
+    {
+        switch action
+        {
+        case .dropDatabase:
+            self.init(action: action,
+                label: "Drop Database",
+                text: """
+                This will drop (and reinitialize) the entire database. Are you sure?
+                """)
+
+        case .rebuild, .upload:
+            return nil
         }
     }
 }

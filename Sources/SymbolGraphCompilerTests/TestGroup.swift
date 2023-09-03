@@ -1,4 +1,4 @@
-import JSON
+import JSONDecoding
 import SymbolGraphParts
 import System
 import Testing
@@ -19,7 +19,8 @@ extension TestGroup
             }
             return self.do
             {
-                let part:SymbolGraphPart = try .init(parsing: try path.read([UInt8].self),
+                let part:SymbolGraphPart = try .init(
+                    json: .init(utf8: try path.read([UInt8].self)),
                     id: id)
 
                 self.expect(part.metadata.version ==? .v(0, 6, 0))

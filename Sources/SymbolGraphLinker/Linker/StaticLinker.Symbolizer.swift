@@ -1,6 +1,6 @@
 import CodelinkResolution
 import MarkdownABI
-import MarkdownTrees
+import MarkdownAST
 import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphs

@@ -1,4 +1,5 @@
 import FNV1
+import HTTPServer
 import MD5
 import Multiparts
 import Symbols
@@ -11,9 +12,10 @@ import URI
 
 enum AnyOperation:Sendable
 {
-    case datafile(Cache<Site.Asset>.Request)
-    case dataless(any DatalessOperation)
     case database(any DatabaseOperation)
+    case github(any GitHubOperation)
+    case load(Cache<Site.Asset>.Request)
+    case none(ServerResponse)
 }
 extension AnyOperation
 {
@@ -40,7 +42,8 @@ extension AnyOperation
         switch root
         {
         case Site.Admin.root:   return .database(AdminOperation.status)
-        case "robots.txt":      return .datafile(.init(.robots_txt, tag: tag))
+        case Site.Login.root:   return .github(LoginOperation.Bounce.init())
+        case "robots.txt":      return .load(.init(.robots_txt, tag: tag))
         case _:                 return nil
         }
     }
@@ -51,12 +54,19 @@ extension AnyOperation
         switch root
         {
         case Site.Admin.root:
-            let action:Site.Action? = .init(rawValue: trunk)
-            return action.map { .dataless(ConfirmOperation.init($0)) }
+            if  let action:Site.Action = .init(rawValue: trunk),
+                let page:Site.Admin.Confirm = .init(action: action)
+            {
+                return .none(.resource(page.rendered()))
+            }
+            else
+            {
+                return nil
+            }
 
         case Site.Asset.root:
             let asset:Site.Asset? = .init(rawValue: trunk)
-            return asset.map { .datafile(.init($0, tag: tag)) }
+            return asset.map { .load(.init($0, tag: tag)) }
 
         case "sitemaps":
             //  Ignore file extension.
@@ -70,6 +80,14 @@ extension AnyOperation
 
         case "learn":
             return .get(legacy: trunk, stem: stem, uri: uri)
+
+        case "api":
+            if  trunk == "github",
+                let parameters:[(String, String)] = uri.query?.parameters,
+                let operation:LoginOperation = .init(parameters: parameters)
+            {
+                return .github(operation)
+            }
 
         case _:
             break

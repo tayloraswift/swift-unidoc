@@ -1,11 +1,10 @@
 import LexicalPaths
 import JSONDecoding
-import JSONEncoding
 
 extension UnqualifiedPath:JSONDecodable
 {
     public
-    init(json:JSON) throws
+    init(json:JSON.Node) throws
     {
         let json:JSON.Array = try .init(json: json)
         try json.shape.expect { $0 > 0 }

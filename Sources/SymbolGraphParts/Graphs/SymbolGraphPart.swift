@@ -1,4 +1,5 @@
 import JSONDecoding
+import JSONParsing
 import ModuleGraphs
 import Symbols
 
@@ -41,18 +42,11 @@ extension SymbolGraphPart:Identifiable
 extension SymbolGraphPart
 {
     public
-    init(parsing string:String, id:ID) throws
+    init(json:JSON, id:ID) throws
     {
-        try self.init(json: try JSON.Object.init(parsing: string), id: id)
+        try self.init(json: try JSON.Object.init(parsing: json), id: id)
     }
-    public
-    init(parsing utf8:[UInt8], id:ID) throws
-    {
-        try self.init(json: try JSON.Object.init(parsing: utf8), id: id)
-    }
-}
-extension SymbolGraphPart
-{
+
     private
     init(json:JSON.Object, id:ID) throws
     {

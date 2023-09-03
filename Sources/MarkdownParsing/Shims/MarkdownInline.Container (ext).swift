@@ -1,5 +1,5 @@
 import Markdown
-import MarkdownTrees
+import MarkdownAST
 
 extension MarkdownInline.Container where Element:ParsableAsInlineMarkup
 {

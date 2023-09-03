@@ -99,10 +99,8 @@ enum Main:SyncTests
                 tests.do
                 {
                     let filepath:FilePath = "Package.resolved"
-                    let file:[UInt8] = try filepath.read()
-                    let json:JSON.Object = try .init(parsing: file)
-
-                    let _:PackageResolutions = try .init(json: json)
+                    let json:JSON = .init(utf8: try filepath.read())
+                    let _:PackageResolutions = try json.decode()
                 }
             }
             if  let tests:TestGroup = tests / "legacy"

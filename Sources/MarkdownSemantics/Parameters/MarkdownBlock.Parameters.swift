@@ -1,5 +1,5 @@
 import MarkdownABI
-import MarkdownTrees
+import MarkdownAST
 import Sources
 
 extension MarkdownBlock

@@ -1,5 +1,4 @@
-import JSONDecoding
-import JSONEncoding
+import JSON
 
 extension JSON
 {
@@ -18,17 +17,10 @@ extension JSON
 }
 extension JSON.SingleElementRepresentation:JSONDecodable where Value:JSONDecodable
 {
-    init(json:JSON) throws
+    init(json:JSON.Node) throws
     {
         let json:JSON.Array = try .init(json: json)
         try json.shape.expect(count: 1)
         self.init(try json[0].decode())
-    }
-}
-extension JSON.SingleElementRepresentation:JSONEncodable where Value:JSONEncodable
-{
-    func encoded(as _:JSON.Type) -> JSON
-    {
-        [self.value.encoded(as: JSON.self)]
     }
 }
