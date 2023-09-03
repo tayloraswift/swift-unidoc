@@ -1,5 +1,3 @@
-import Grammar
-
 extension JSON
 {
     /// A string-keyed JSON object, which can recursively contain instances of
