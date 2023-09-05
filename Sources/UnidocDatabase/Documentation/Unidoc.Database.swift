@@ -59,7 +59,7 @@ extension Unidoc.Database
 extension Unidoc.Database
 {
     public static
-    func setup(_ id:Mongo.Database, in pool:__owned Mongo.SessionPool) async throws -> Self
+    func setup(as id:Mongo.Database, in pool:__owned Mongo.SessionPool) async throws -> Self
     {
         let database:Self = .init(id: id)
         try await database.setup(with: try await .init(from: pool))
@@ -86,7 +86,7 @@ extension Unidoc.Database
         {
             print("""
                 warning: some indexes are no longer valid. \
-                the database likely needs to be rebuilt.
+                the database '\(self.id)' likely needs to be rebuilt.
                 """)
             print(error)
         }

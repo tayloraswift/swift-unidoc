@@ -9,28 +9,31 @@ import UnidocRecords
 import UnidocSelectors
 import URI
 
-struct SiteMapOperation:Sendable
+extension Server.Endpoint
 {
-    let package:PackageIdentifier
-
-    let uri:URI
-    let tag:MD5?
-
-    init(package:PackageIdentifier, uri:URI, tag:MD5?)
+    struct SiteMap:Sendable
     {
-        self.package = package
-        self.uri = uri
-        self.tag = tag
+        let package:PackageIdentifier
+
+        let uri:URI
+        let tag:MD5?
+
+        init(package:PackageIdentifier, uri:URI, tag:MD5?)
+        {
+            self.package = package
+            self.uri = uri
+            self.tag = tag
+        }
     }
 }
-extension SiteMapOperation:DatabaseOperation
+extension Server.Endpoint.SiteMap:DatabaseOperation
 {
-    func load(from database:Unidoc.Database,
-        pool:Mongo.SessionPool) async throws -> ServerResponse?
+    func load(from database:Services.Database) async throws -> ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: pool)
+        let session:Mongo.Session = try await .init(from: database.sessions)
 
-        guard   let siteMap:Volume.SiteMap<PackageIdentifier> = try await database.siteMap(
+        guard   let siteMap:Volume.SiteMap<PackageIdentifier> =
+                try await database.unidoc.siteMap(
                     package: self.package,
                     with: session)
         else

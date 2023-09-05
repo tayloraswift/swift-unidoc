@@ -3,26 +3,26 @@ import NIOCore
 import NIOHTTP1
 
 final
-class ServerInterfaceHandler<Authority, Delegate>
-    where Authority:ServerAuthority, Delegate:ServerDelegate
+class ServerInterfaceHandler<Authority, Server>
+    where Authority:ServerAuthority, Server:HTTPServerDelegate
 {
     private
     var request:(head:HTTPRequestHead, stream:[UInt8])?,
         responding:Bool,
         receiving:Bool
     private
-    let delegate:Delegate
-    private
     let address:SocketAddress?
+    private
+    let server:Server
 
-    init(delegate:Delegate, address:SocketAddress?)
+    init(address:SocketAddress?, server:Server)
     {
         self.request = nil
         self.receiving = false
         self.responding = false
 
-        self.delegate = delegate
         self.address = address
+        self.server = server
     }
 }
 extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
@@ -65,15 +65,11 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
             case .GET:
                 self.request = nil
 
-                let request:Delegate.Request? = .init(get: head.uri,
-                    address: self.address,
-                    headers: head.headers)
+                if  let operation:Server.Operation = .init(get: head.uri,
+                        address: self.address,
+                        headers: head.headers)
                 {
-                    self.accept(context: context)
-                }
-                if  let request:Delegate.Request
-                {
-                    self.delegate.yield(request)
+                    self.server.submit(operation, promise: self.accept(context: context))
                 }
                 else
                 {
@@ -122,16 +118,12 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 
             self.request = nil
 
-            let request:Delegate.Request? = .init(post: head.uri,
+            if  let operation:Server.Operation = .init(post: head.uri,
                     address: self.address,
                     headers: head.headers,
                     body: body)
             {
-                self.accept(context: context)
-            }
-            if  let request:Delegate.Request
-            {
-                self.delegate.yield(request)
+                self.server.submit(operation, promise: self.accept(context: context))
             }
             else
             {
@@ -155,8 +147,8 @@ extension ServerInterfaceHandler
             case .success(let response):
                 switch response
                 {
-                case .redirect(let redirect):
-                    self.send(message: .init(redirect: redirect),
+                case .redirect(let redirect, cookies: let cookies):
+                    self.send(message: .init(redirect: redirect, cookies: cookies),
                         context: context)
 
                 case .resource(let resource):

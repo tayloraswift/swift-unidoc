@@ -21,6 +21,22 @@ extension HTTP2Client
 }
 extension HTTP2Client.Facet
 {
+    public
+    var status:UInt?
+    {
+        if  let headers:[String] = self.headers?[canonicalForm: ":status"],
+                headers.count == 1
+        {
+            return UInt.init(headers[0])
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
+extension HTTP2Client.Facet
+{
     /// Validates the payload and adds it to the facet. Returns true if the frame is the last
     /// frame of the response stream, false otherwise.
     mutating

@@ -4,13 +4,13 @@ import NIOHTTP1
 import NIOSSL
 
 public
-protocol ServerDelegate<Request>:Sendable
+protocol HTTPServerDelegate<Operation>:Sendable
 {
-    associatedtype Request:ServerDelegateRequest
+    associatedtype Operation:HTTPServerOperation
 
-    func yield(_ request:Request)
+    func submit(_ operation:Operation, promise:EventLoopPromise<ServerResponse>)
 }
-extension ServerDelegate
+extension HTTPServerDelegate
 {
     public
     func serve<Authority>(
@@ -29,8 +29,9 @@ extension ServerDelegate
         {
             (channel:any Channel) -> EventLoopFuture<Void> in
 
-            let endpoint:ServerInterfaceHandler<Authority, Self> = .init(delegate: self,
-                address: channel.remoteAddress)
+            let endpoint:ServerInterfaceHandler<Authority, Self> = .init(
+                address: channel.remoteAddress,
+                server: self)
 
             guard let tls:NIOSSLContext = authority.tls as? NIOSSLContext
             else

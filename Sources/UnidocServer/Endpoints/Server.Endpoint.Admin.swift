@@ -5,35 +5,37 @@ import SymbolGraphs
 import UnidocDatabase
 import UnidocPages
 
-enum AdminOperation
+extension Server.Endpoint
 {
-    case perform(Site.Action, MultipartForm?)
-    case status
-}
-extension AdminOperation:DatabaseOperation
-{
-    func load(from database:Unidoc.Database,
-        pool:Mongo.SessionPool) async throws -> ServerResponse?
+    enum Admin
     {
-        let session:Mongo.Session = try await .init(from: pool)
+        case perform(Site.Action, MultipartForm?)
+        case status
+    }
+}
+extension Server.Endpoint.Admin:DatabaseOperation
+{
+    func load(from database:Services.Database) async throws -> ServerResponse?
+    {
+        let session:Mongo.Session = try await .init(from: database.sessions)
         let page:Site.Action.Receipt
 
         switch self
         {
         case .status:
-            let page:Site.Admin = .init(configuration: try await pool.run(
+            let page:Site.Admin = .init(configuration: try await database.sessions.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin))
 
             return .resource(page.rendered())
 
         case .perform(.dropDatabase, _):
-            try await database.nuke(with: session)
+            try await database.unidoc.nuke(with: session)
 
             page = .init(action: .dropDatabase, text: "Reinitialized database!")
 
         case .perform(.rebuild, _):
-            let rebuilt:Int = try await database.rebuild(with: session)
+            let rebuilt:Int = try await database.unidoc.rebuild(with: session)
 
             page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
 
@@ -43,7 +45,7 @@ extension AdminOperation:DatabaseOperation
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                receipts.append(try await database.publish(
+                receipts.append(try await database.unidoc.publish(
                     docs: try .init(buffer: item.value),
                     with: session))
             }

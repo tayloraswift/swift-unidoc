@@ -5,9 +5,9 @@ import NIOCore
 import NIOHPACK
 
 @frozen public
-struct GitHubClient<Application> where Application:GitHubApplication
+struct GitHubClient<Application>
 {
-    private
+    @usableFromInline internal
     let http2:HTTP2Client
     public
     let app:Application
@@ -19,7 +19,7 @@ struct GitHubClient<Application> where Application:GitHubApplication
         self.app = app
     }
 }
-extension GitHubClient:Identifiable
+extension GitHubClient:Identifiable where Application:GitHubApplication
 {
     @inlinable public
     var id:String { self.app.client }
@@ -27,10 +27,11 @@ extension GitHubClient:Identifiable
     @inlinable public
     var secret:String { self.app.secret }
 }
-extension GitHubClient
+extension GitHubClient where Application:GitHubApplication<GitHubApp.Credentials>
 {
     public
-    func refresh(token:String) async -> Result<GitHubTokens, GitHubAuthenticationError>
+    func refresh(
+        token:String) async throws -> GitHubApp.Credentials
     {
         let request:HPACKHeaders =
         [
@@ -46,11 +47,15 @@ extension GitHubClient
             "accept": "application/vnd.github+json",
         ]
 
-        return await self.authenticate(sending: request)
+        return try await self.authenticate(sending: request)
     }
-
+}
+extension GitHubClient
+    where Application:GitHubApplication, Application.Credentials:JSONObjectDecodable
+{
     public
-    func exchange(code:String) async -> Result<GitHubTokens, GitHubAuthenticationError>
+    func exchange(
+        code:String) async throws -> Application.Credentials
     {
         let request:HPACKHeaders =
         [
@@ -65,28 +70,21 @@ extension GitHubClient
             "accept": "application/vnd.github+json",
         ]
 
-        return await self.authenticate(sending: request)
+        return try await self.authenticate(sending: request)
     }
 
     private
-    func authenticate(
-        sending request:HPACKHeaders) async -> Result<GitHubTokens, GitHubAuthenticationError>
+    func authenticate(sending request:HPACKHeaders)
+        async throws -> Application.Credentials
     {
-        let response:HTTP2Client.Facet
-        do
-        {
-            response = try await self.http2.fetch(request)
-        }
-        catch let error
-        {
-            return .failure(.fetch(error))
-        }
+        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
 
-        guard   let headers:HPACKHeaders = response.headers,
-                    headers[canonicalForm: ":status"] == ["200"]
-        else
+        switch response.status
         {
-            return .failure(.status)
+        case 200?:
+            break
+        case let status:
+            throw AuthenticationError.status(.init(code: status))
         }
 
         var json:JSON = .init(utf8: [])
@@ -97,11 +95,60 @@ extension GitHubClient
 
         do
         {
-            return .success(try json.decode())
+            return try json.decode()
         }
         catch let error
         {
-            return .failure(.response(error))
+            throw AuthenticationError.response(error)
         }
+    }
+}
+extension GitHubClient<GitHubAPI>
+{
+    public
+    func user(with token:String) async throws -> GitHubAPI.User
+    {
+        try await self.get(from: "/user", with: token)
+    }
+
+    @inlinable public
+    func get<Response>(_:Response.Type = Response.self,
+        from endpoint:String,
+        with token:String? = nil) async throws -> Response where Response:JSONObjectDecodable
+    {
+        var request:HPACKHeaders =
+        [
+            ":method": "GET",
+            ":scheme": "https",
+            ":authority": "api.github.com",
+            ":path": endpoint,
+
+            //  GitHub will reject the API request if the user-agent is not set.
+            "user-agent": self.app.agent,
+            "accept": "application/vnd.github+json"
+        ]
+        if  let token:String
+        {
+            request.add(name: "authorization", value: "Bearer \(token)")
+        }
+
+        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
+
+        //  TODO: support If-None-Match
+        switch response.status
+        {
+        case 200?:
+            break
+        case let status:
+            throw StatusError.init(code: status)
+        }
+
+        var json:JSON = .init(utf8: [])
+        for buffer:ByteBuffer in response.buffers
+        {
+            json.utf8 += buffer.readableBytesView
+        }
+
+        return try json.decode()
     }
 }

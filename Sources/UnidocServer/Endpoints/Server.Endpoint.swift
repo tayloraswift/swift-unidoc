@@ -10,14 +10,16 @@ import UnidocSelectors
 import UnidocRecords
 import URI
 
-enum AnyOperation:Sendable
+extension Server
 {
-    case database(any DatabaseOperation)
-    case github(any GitHubOperation)
-    case load(Cache<Site.Asset>.Request)
-    case none(ServerResponse)
+    enum Endpoint:Sendable
+    {
+        case  stateless(ServerResponse)
+        case `static`(Cache<Site.Asset>.Request)
+        case  stateful(any StatefulOperation)
+    }
 }
-extension AnyOperation
+extension Server.Endpoint
 {
     static
     func get(root:String, rest:ArraySlice<String>, uri:URI, tag:MD5?) -> Self?
@@ -41,9 +43,9 @@ extension AnyOperation
     {
         switch root
         {
-        case Site.Admin.root:   return .database(AdminOperation.status)
-        case Site.Login.root:   return .github(LoginOperation.Bounce.init())
-        case "robots.txt":      return .load(.init(.robots_txt, tag: tag))
+        case Site.Admin.root:   return .stateful(Admin.status)
+        case Site.Login.root:   return .stateful(Bounce.init())
+        case "robots.txt":      return .static(.init(.robots_txt, tag: tag))
         case _:                 return nil
         }
     }
@@ -57,7 +59,7 @@ extension AnyOperation
             if  let action:Site.Action = .init(rawValue: trunk),
                 let page:Site.Admin.Confirm = .init(action: action)
             {
-                return .none(.resource(page.rendered()))
+                return .stateless(.resource(page.rendered()))
             }
             else
             {
@@ -66,11 +68,11 @@ extension AnyOperation
 
         case Site.Asset.root:
             let asset:Site.Asset? = .init(rawValue: trunk)
-            return asset.map { .load(.init($0, tag: tag)) }
+            return asset.map { .static(.init($0, tag: tag)) }
 
         case "sitemaps":
             //  Ignore file extension.
-            return .database(SiteMapOperation.init(
+            return .stateful(SiteMap.init(
                 package: .init(trunk.prefix { $0 != "." }),
                 uri: uri,
                 tag: tag))
@@ -82,11 +84,24 @@ extension AnyOperation
             return .get(legacy: trunk, stem: stem, uri: uri)
 
         case "api":
-            if  trunk == "github",
-                let parameters:[(String, String)] = uri.query?.parameters,
-                let operation:LoginOperation = .init(parameters: parameters)
+            switch trunk
             {
-                return .github(operation)
+            case "github":
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Login = .init(parameters: parameters)
+                {
+                    return .stateful(operation)
+                }
+
+            case "register":
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Register = .init(parameters: parameters)
+                {
+                    return .stateful(operation)
+                }
+
+            case _:
+                break
             }
 
         case _:
@@ -109,7 +124,7 @@ extension AnyOperation
         switch root
         {
         case Site.Docs.root:
-            return .database(QueryOperation<WideQuery>.init(
+            return .stateful(Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -118,7 +133,7 @@ extension AnyOperation
                 tag: tag))
 
         case Site.Guides.root:
-            return .database(QueryOperation<ThinQuery<Volume.Range>>.init(
+            return .stateful(Pipeline<ThinQuery<Volume.Range>>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -127,7 +142,7 @@ extension AnyOperation
                 tag: tag))
 
         case "articles":
-            return .database(QueryOperation<WideQuery>.init(
+            return .stateful(Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -138,7 +153,7 @@ extension AnyOperation
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .database(QueryOperation<SearchIndexQuery<VolumeIdentifier>>.init(
+                return .stateful(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: Unidoc.Database.Search.name,
@@ -149,7 +164,7 @@ extension AnyOperation
             }
             else if trunk == "packages.json"
             {
-                return .database(QueryOperation<SearchIndexQuery<Never?>>.init(
+                return .stateful(Pipeline<SearchIndexQuery<Never?>>.init(
                     explain: false,
                     query: .init(
                         from: Unidoc.Database.Packages.name,
@@ -190,14 +205,14 @@ extension AnyOperation
 
         if  let overload:Symbol.Decl
         {
-            return .database(QueryOperation<ThinQuery<Symbol.Decl>>.init(
+            return .stateful(Pipeline<ThinQuery<Symbol.Decl>>.init(
                 explain: false,
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .database(QueryOperation<ThinQuery<Volume.Shoot>>.init(
+            return .stateful(Pipeline<ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))
@@ -205,7 +220,7 @@ extension AnyOperation
     }
 }
 
-extension AnyOperation
+extension Server.Endpoint
 {
     static
     func post(root:String, rest:ArraySlice<String>, form:MultipartForm?) -> Self?
@@ -218,7 +233,7 @@ extension AnyOperation
         if  let action:String = rest.first,
             let action:Site.Action = .init(rawValue: action)
         {
-            return .database(AdminOperation.perform(action, form))
+            return .stateful(Admin.perform(action, form))
         }
         else
         {
