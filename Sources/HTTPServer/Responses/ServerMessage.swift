@@ -19,12 +19,18 @@ struct ServerMessage<Authority> where Authority:ServerAuthority
 }
 extension ServerMessage
 {
-    init(redirect:__shared ServerRedirect)
+    init(redirect:ServerRedirect, cookies:[Cookie])
     {
         var headers:HTTPHeaders = .init()
 
         headers.add(name: "host", value: Authority.domain)
         headers.add(name: "location", value: Authority.url(redirect.location))
+
+        for cookie:Cookie in cookies
+        {
+            headers.add(name: "set-cookie",
+                value: "\(cookie); Secure; HttpOnly; SameSite = Lax; Path = /")
+        }
 
         let status:HTTPResponseStatus
         switch redirect
@@ -36,7 +42,7 @@ extension ServerMessage
         self.init(headers: headers, status: status, body: nil)
     }
 
-    init(resource:__shared ServerResource, using allocator:__shared ByteBufferAllocator)
+    init(resource:ServerResource, using allocator:__shared ByteBufferAllocator)
     {
         var headers:HTTPHeaders = .init()
 

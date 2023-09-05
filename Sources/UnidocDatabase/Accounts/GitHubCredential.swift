@@ -1,10 +1,30 @@
+import GitHubIntegration
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
 
+struct GitHubCredential<Instant>:Sendable where Instant:Sendable
+{
+    public
+    let expires:Instant
+    public
+    let token:String
+
+    @inlinable public
+    init(expires:Instant, token:String)
+    {
+        self.expires = expires
+        self.token = token
+    }
+}
+extension GitHubCredential:Equatable where Instant:Equatable
+{
+}
+extension GitHubCredential:Hashable where Instant:Hashable
+{
+}
 extension GitHubCredential<BSON.Millisecond>
 {
-    init(token:GitHubToken, created:BSON.Millisecond)
+    init(token:GitHubApp.Token, created:BSON.Millisecond)
     {
         self.init(expires: .init(created.value + 1000 * token.secondsRemaining),
             token: token.value)
@@ -12,7 +32,6 @@ extension GitHubCredential<BSON.Millisecond>
 }
 extension GitHubCredential
 {
-    public
     enum CodingKey:String
     {
         case expires = "E"
@@ -22,7 +41,6 @@ extension GitHubCredential
 extension GitHubCredential:BSONDocumentEncodable, BSONEncodable
     where Instant:BSONEncodable
 {
-    public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.expires] = self.expires
@@ -32,7 +50,6 @@ extension GitHubCredential:BSONDocumentEncodable, BSONEncodable
 extension GitHubCredential:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
     where Instant:BSONDecodable
 {
-    @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(

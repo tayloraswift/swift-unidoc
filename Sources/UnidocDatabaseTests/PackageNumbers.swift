@@ -6,7 +6,7 @@ struct PackageNumbers:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:Unidoc.Database = try await .setup(database, in: pool)
+        let database:Unidoc.Database = try await .setup(as: database, in: pool)
 
         let session:Mongo.Session = try await .init(from: pool)
 

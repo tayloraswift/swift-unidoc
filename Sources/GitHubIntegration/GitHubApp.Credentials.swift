@@ -1,21 +1,24 @@
 import JSON
 
-@frozen public
-struct GitHubTokens:Equatable, Hashable, Sendable
+extension GitHubApp
 {
-    public
-    let refresh:GitHubToken
-    public
-    let access:GitHubToken
-
-    @inlinable public
-    init(refresh:GitHubToken, access:GitHubToken)
+    @frozen public
+    struct Credentials:Equatable, Hashable, Sendable
     {
-        self.refresh = refresh
-        self.access = access
+        public
+        let refresh:Token
+        public
+        let access:Token
+
+        @inlinable public
+        init(refresh:Token, access:Token)
+        {
+            self.refresh = refresh
+            self.access = access
+        }
     }
 }
-extension GitHubTokens:JSONObjectDecodable
+extension GitHubApp.Credentials:JSONObjectDecodable
 {
     public
     enum CodingKey:String

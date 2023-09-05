@@ -1,4 +1,4 @@
-/// A type that can be decoded from a BSON dictionary-decoder.
+/// A type that can be decoded from a JSON dictionary-decoder.
 public
 protocol JSONObjectDecodable<CodingKey>:JSONDecodable
 {

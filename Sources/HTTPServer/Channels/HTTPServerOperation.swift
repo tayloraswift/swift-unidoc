@@ -2,26 +2,23 @@ import NIOCore
 import NIOHTTP1
 
 public
-protocol ServerDelegateRequest:Sendable
+protocol HTTPServerOperation:Sendable
 {
     init?(get uri:String,
         address:SocketAddress?,
-        headers:HTTPHeaders,
-        with promise:() -> EventLoopPromise<ServerResponse>)
+        headers:HTTPHeaders)
 
     init?(post uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        body:[UInt8],
-        with promise:() -> EventLoopPromise<ServerResponse>)
+        body:[UInt8])
 }
-extension ServerDelegateRequest
+extension HTTPServerOperation
 {
     @inlinable public
     init?(_ uri:String,
         address:SocketAddress?,
-        headers:HTTPHeaders,
-        with _:() -> EventLoopPromise<ServerResponse>)
+        headers:HTTPHeaders)
     {
         nil
     }
@@ -30,8 +27,7 @@ extension ServerDelegateRequest
     init?(_ uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
-        body:[UInt8],
-        with _:() -> EventLoopPromise<ServerResponse>)
+        body:[UInt8])
     {
         nil
     }

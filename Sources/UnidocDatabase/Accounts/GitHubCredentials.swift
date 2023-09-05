@@ -2,15 +2,12 @@ import BSONDecoding
 import BSONEncoding
 import GitHubIntegration
 
-@frozen @usableFromInline internal
+@available(*, unavailable, message: "Not needed yet.")
 struct GitHubCredentials
 {
-    @usableFromInline internal
     var refresh:GitHubCredential<BSON.Millisecond>
-    @usableFromInline internal
     var access:GitHubCredential<BSON.Millisecond>
 
-    @inlinable internal
     init(
         refresh:GitHubCredential<BSON.Millisecond>,
         access:GitHubCredential<BSON.Millisecond>)
@@ -19,36 +16,37 @@ struct GitHubCredentials
         self.access = access
     }
 }
+@available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials
 {
-    init(tokens:GitHubTokens, created:BSON.Millisecond)
+    init(tokens:GitHubApp.Credentials, created:BSON.Millisecond)
     {
         self.init(
             refresh: .init(token: tokens.refresh, created: created),
             access:  .init(token: tokens.access, created: created))
     }
 }
+@available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials
 {
-    @usableFromInline internal
     enum CodingKey:String
     {
         case refresh = "R"
         case access = "A"
     }
 }
+@available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials:BSONDocumentEncodable
 {
-    @usableFromInline internal
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.refresh] = self.refresh
         bson[.access] = self.access
     }
 }
+@available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials:BSONDocumentDecodable
 {
-    @inlinable internal
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
