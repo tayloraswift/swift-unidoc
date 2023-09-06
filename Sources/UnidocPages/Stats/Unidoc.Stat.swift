@@ -1,6 +1,7 @@
 import HTML
+import Unidoc
 
-extension StatsBreakdown
+extension Unidoc
 {
     struct Stat:Sendable
     {
@@ -18,7 +19,7 @@ extension StatsBreakdown
         }
     }
 }
-extension StatsBreakdown.Stat
+extension Unidoc.Stat
 {
     private static
     func format(share:Double) -> String
@@ -30,7 +31,7 @@ extension StatsBreakdown.Stat
         return "\(percent).\(f)"
     }
 }
-extension StatsBreakdown.Stat:PieSector
+extension Unidoc.Stat:PieSector
 {
     func legend(_ html:inout HTML.ContentEncoder, share:Double)
     {

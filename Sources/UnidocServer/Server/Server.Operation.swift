@@ -36,9 +36,6 @@ extension Server.Operation:HTTPServerOperation
 
         let path:[String] = uri.path.normalized(lowercase: true)
 
-
-        print(headers[canonicalForm: "user-agent"])
-
         let cookies:Server.Request.Cookies = .init(headers[canonicalForm: "cookie"])
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 

@@ -1,22 +1,23 @@
 import HTML
+import Unidoc
 
-extension StatsBreakdown
+extension Unidoc.StatsBreakdown
 {
     struct Condensed
     {
         private
-        let unweighted:Pie<Stat>
+        let unweighted:Pie<Unidoc.Stat>
         private
-        let weighted:Pie<Stat>
+        let weighted:Pie<Unidoc.Stat>
 
-        init(unweighted:Pie<Stat>, weighted:Pie<Stat>)
+        init(unweighted:Pie<Unidoc.Stat>, weighted:Pie<Unidoc.Stat>)
         {
             self.unweighted = unweighted
             self.weighted = weighted
         }
     }
 }
-extension StatsBreakdown.Condensed:HyperTextOutputStreamable
+extension Unidoc.StatsBreakdown.Condensed:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

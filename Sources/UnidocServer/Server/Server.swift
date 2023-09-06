@@ -12,6 +12,8 @@ import NIOSSL
 import System
 import UnidocDatabase
 import UnidocPages
+import UnidocQueries
+import UnidocRecords
 
 final
 actor Server
@@ -25,8 +27,11 @@ actor Server
     private nonisolated
     let cache:Cache<Site.Asset>
 
+    private nonisolated
+    let mode:ServerMode
+
     private
-    init(database:Services.Database, reload:Bool)
+    init(database:Services.Database, mode:ServerMode)
     {
         var continuation:AsyncStream<Request>.Continuation? = nil
         self.requests.out = .init
@@ -36,7 +41,8 @@ actor Server
         self.requests.in = continuation!
 
         self.database = database
-        self.cache = .init(source: "Assets", reload: reload)
+        self.cache = .init(source: "Assets", reload: mode == .unsecured)
+        self.mode = mode
     }
 }
 extension Server
@@ -78,7 +84,8 @@ extension Server
                         secret: trim(secret.app))),
                     api: .init(http2: api, app: .init(
                         agent: "Swiftinit (by tayloraswift)"))
-                ))
+                ),
+                mode: self.mode)
         }
         else
         {
@@ -92,6 +99,26 @@ extension Server
 
             do
             {
+                let type:WritableKeyPath<ServerTour.Stats.ByType, Int>
+                switch request.operation
+                {
+                case    is any RestrictedOperation:
+                    type = \.restricted
+
+                case    is Endpoint.Pipeline<SearchIndexQuery<VolumeIdentifier>>,
+                        is Endpoint.Pipeline<SearchIndexQuery<Never?>>:
+                    type = \.pipelineIndex
+
+                case    is Endpoint.Pipeline<WideQuery>:
+                    type = \.pipelineQuery
+
+                case    is Endpoint.SiteMap:
+                    type = \.siteMap
+
+                default:
+                    type = \.other
+                }
+
                 let response:ServerResponse = try await request.operation.load(
                     from: services,
                     with: request.cookies)
@@ -99,10 +126,31 @@ extension Server
                         content: .string("not found"),
                         type: .text(.plain, charset: .utf8)))
 
-                request.promise.succeed(response)
+                services.tour.stats.requests[keyPath: type] += 1
 
-                services.tour.transferred += response.resource?.content.length ?? 0
-                services.tour.requests += 1
+                let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int>
+                switch response
+                {
+                case .resource(let resource):
+                    switch (resource.results, resource.content)
+                    {
+                    case (.error, _):           status = \.errored
+                    case (.forbidden, _):       status = \.unauthorized
+                    case (.none, _):            status = \.notFound
+                    case (_, .length):          status = \.notModified
+                    case (.many, _):            status = \.ok
+                    case (.one, _):             status = \.ok
+                    }
+
+                    services.tour.stats.bytes[keyPath: type] += resource.content.size
+
+                case .redirect(.temporary, _):  status = \.redirectedTemporarily
+                case .redirect(.permanent, _):  status = \.redirectedPermanently
+                }
+
+                services.tour.stats.responses[keyPath: status] += 1
+
+                request.promise.succeed(response)
             }
             catch let error
             {
@@ -174,11 +222,19 @@ extension Server
 
         try await mongodb.withSessionPool
         {
+            let mode:ServerMode
+
+            switch type(of: authority).scheme
+            {
+            case .https:    mode = .secured
+            case .http:     mode = .unsecured
+            }
+
             let delegate:Self = .init(database: .init(
                     sessions: $0,
                     accounts: await .setup(as: "accounts", in: $0),
                     unidoc: await .setup(as: "unidoc", in: $0)),
-                reload: options.reload)
+                mode: mode)
 
             try await withThrowingTaskGroup(of: Void.self)
             {

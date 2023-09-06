@@ -14,6 +14,17 @@ extension ServerResource
 extension ServerResource.Content
 {
     @inlinable public
+    var size:Int
+    {
+        switch self
+        {
+        case .binary(let buffer):   return buffer.count
+        case .buffer(let buffer):   return buffer.readableBytes
+        case .string(let string):   return string.utf8.count
+        case .length:               return 0
+        }
+    }
+    @inlinable public
     var length:Int
     {
         switch self
