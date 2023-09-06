@@ -75,6 +75,8 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
            from: "0.7.2")),
 
+        .package(url: "https://github.com/swift-server/swift-backtrace", .upToNextMinor(
+            from: "1.3.4")),
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
@@ -147,6 +149,14 @@ let package:Package = .init(
                 .target(name: "HTMLDOM"),
             ]),
 
+        .target(name: "HTTP", dependencies:
+            [
+                .target(name: "Media"),
+                .target(name: "MD5"),
+
+                .product(name: "NIOCore", package: "swift-nio"),
+            ]),
+
         .target(name: "HTTPClient", dependencies:
             [
                 .target(name: "HTML"),
@@ -161,8 +171,7 @@ let package:Package = .init(
         .target(name: "HTTPServer", dependencies:
             [
                 .target(name: "HTML"),
-                .target(name: "Media"),
-                .target(name: "MD5"),
+                .target(name: "HTTP"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
@@ -388,7 +397,7 @@ let package:Package = .init(
         .target(name: "UnidocPages", dependencies:
             [
                 .target(name: "GitHubIntegration"),
-                .target(name: "HTTPServer"),
+                .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
@@ -434,9 +443,12 @@ let package:Package = .init(
         .executableTarget(name: "UnidocServer", dependencies:
             [
                 .target(name: "GitHubClient"),
+                .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
                 .target(name: "System"),
                 .target(name: "UnidocPages"),
+
+                .product(name: "Backtrace", package: "swift-backtrace"),
             ]),
 
 

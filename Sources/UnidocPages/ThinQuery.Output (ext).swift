@@ -1,4 +1,4 @@
-import HTTPServer
+import HTTP
 import UnidocQueries
 import UnidocRecords
 import URI

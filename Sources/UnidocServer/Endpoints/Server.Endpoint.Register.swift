@@ -1,6 +1,6 @@
 import GitHubClient
 import GitHubIntegration
-import HTTPServer
+import HTTP
 import MongoDB
 import UnidocDatabase
 import UnidocPages

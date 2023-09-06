@@ -1,4 +1,4 @@
-import HTTPServer
+import HTTP
 
 protocol StatefulOperation:Sendable
 {

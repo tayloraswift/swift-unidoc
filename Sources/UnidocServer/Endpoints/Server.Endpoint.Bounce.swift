@@ -1,6 +1,6 @@
 import GitHubClient
 import GitHubIntegration
-import HTTPServer
+import HTTP
 import UnidocPages
 
 extension Server.Endpoint

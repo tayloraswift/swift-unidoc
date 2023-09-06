@@ -1,4 +1,4 @@
-import HTTPServer
+import HTTP
 import NIOCore
 
 extension Server

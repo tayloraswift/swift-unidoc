@@ -1,5 +1,5 @@
 import HTML
-import HTTPServer
+import HTTP
 import Media
 import URI
 
