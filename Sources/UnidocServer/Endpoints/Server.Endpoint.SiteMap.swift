@@ -26,7 +26,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.SiteMap:DatabaseOperation
+extension Server.Endpoint.SiteMap:DatabaseOperation, UnrestrictedOperation
 {
     func load(from database:Services.Database) async throws -> ServerResponse?
     {

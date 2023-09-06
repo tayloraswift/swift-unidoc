@@ -23,7 +23,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Pipeline:DatabaseOperation
+extension Server.Endpoint.Pipeline:DatabaseOperation, UnrestrictedOperation
 {
     func load(from database:Services.Database) async throws -> ServerResponse?
     {

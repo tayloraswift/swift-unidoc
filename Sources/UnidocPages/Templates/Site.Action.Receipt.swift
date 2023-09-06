@@ -1,32 +1,32 @@
 import HTML
 import URI
 
-extension Site.Action
+extension Site.Admin
 {
     @frozen public
     struct Receipt
     {
         public
-        var action:Site.Action
+        var action:Action
         public
         var text:String
 
         @inlinable public
-        init(action:Site.Action, text:String)
+        init(action:Action, text:String)
         {
             self.action = action
             self.text = text
         }
     }
 }
-extension Site.Action.Receipt:FixedPage
+extension Site.Admin.Receipt:FixedPage
 {
     public
-    var location:URI { Site.Action.uri.path / self.action.rawValue }
+    var location:URI { Site.Admin[self.action] }
     public
     var title:String { "Action complete" }
 }
-extension Site.Action.Receipt:AdministrativePage
+extension Site.Admin.Receipt:AdministrativePage
 {
     public
     func main(_ main:inout HTML.ContentEncoder)

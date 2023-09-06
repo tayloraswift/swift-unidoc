@@ -9,12 +9,15 @@ extension Site
     struct Admin
     {
         public
-        var configuration:Mongo.ReplicaSetConfiguration
+        let configuration:Mongo.ReplicaSetConfiguration
+        public
+        let tour:Tour
 
         @inlinable public
-        init(configuration:Mongo.ReplicaSetConfiguration)
+        init(configuration:Mongo.ReplicaSetConfiguration, tour:Tour)
         {
             self.configuration = configuration
+            self.tour = tour
         }
     }
 }
@@ -26,7 +29,7 @@ extension Site.Admin:FixedRoot
 extension Site.Admin
 {
     static
-    func confirm(_ action:Site.Action) -> URI
+    subscript(action:Action) -> URI
     {
         Self.uri.path / action.rawValue
     }
@@ -41,10 +44,12 @@ extension Site.Admin:AdministrativePage
     public
     func main(_ main:inout HTML.ContentEncoder)
     {
+        main[.h2] = "Welcome Empress!"
+
         main[.form]
         {
             $0.enctype = "multipart/form-data"
-            $0.action = "\(Site.Action.upload)"
+            $0.action = "\(Self[.upload])"
             $0.method = "post"
         }
         content:
@@ -60,7 +65,7 @@ extension Site.Admin:AdministrativePage
             }
             $0[.p]
             {
-                $0[.button] { $0.type = "submit" } = "Upload Snapshots"
+                $0[.button] { $0.type = "submit" } = Action.upload.label
             }
         }
 
@@ -69,31 +74,50 @@ extension Site.Admin:AdministrativePage
         main[.form]
         {
             $0.enctype = "multipart/form-data"
-            $0.action = "\(Site.Action.rebuild)"
+            $0.action = "\(Self[.rebuild])"
             $0.method = "post"
         }
         content:
         {
             $0[.p]
             {
-                $0[.button] { $0.type = "submit" } = "Rebuild Collections"
+                $0[.button] { $0.type = "submit" } = Action.rebuild.label
+            }
+        }
+
+        for action:Action in [.dropUnidocDB, .dropAccountDB]
+        {
+            main[.hr]
+
+            main[.form]
+            {
+                $0.enctype = "application/x-www-form-urlencoded"
+                $0.action = "\(Self[action])"
+                $0.method = "get"
+            }
+            content:
+            {
+                $0[.p]
+                {
+                    $0[.button] { $0.type = "submit" } = action.label
+                }
             }
         }
 
         main[.hr]
 
-        main[.form]
+        main[.h2] = "Tour information"
+
+        main[.dl]
         {
-            $0.enctype = "application/x-www-form-urlencoded"
-            $0.action = "\(Self.confirm(.dropDatabase))"
-            $0.method = "get"
-        }
-        content:
-        {
-            $0[.p]
-            {
-                $0[.button] { $0.type = "submit" } = "Drop Database"
-            }
+            $0[.dt] = "uptime"
+            $0[.dd] = "\(self.tour.started.duration(to: .now))"
+
+            $0[.dt] = "requests"
+            $0[.dd] = "\(self.tour.requests)"
+
+            $0[.dt] = "bytes transferred (content only)"
+            $0[.dd] = "\(self.tour.transferred)"
         }
 
         main[.hr]

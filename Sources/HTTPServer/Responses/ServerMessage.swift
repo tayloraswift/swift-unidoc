@@ -54,6 +54,9 @@ extension ServerMessage
         case .error:
             status = .internalServerError
 
+        case .forbidden:
+            status = .forbidden
+
         case .none:
             status = .notFound
 

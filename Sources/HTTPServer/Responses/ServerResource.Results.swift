@@ -5,6 +5,9 @@ extension ServerResource
     enum Results:Equatable, Hashable, Sendable
     {
         case error
+
+        case forbidden
+
         case many
         case none
         case one(canonical:String?)
@@ -17,7 +20,7 @@ extension ServerResource.Results
     {
         switch self
         {
-        case .error, .many, .none:              return nil
+        case .error, .forbidden, .many, .none:  return nil
         case .one(canonical: let canonical):    return canonical
         }
     }

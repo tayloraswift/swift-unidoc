@@ -14,7 +14,7 @@ struct DatabaseQueries:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:Unidoc.Database = try await .setup(as: database, in: pool)
+        let database:Unidoc.Database = await .setup(as: database, in: pool)
 
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()

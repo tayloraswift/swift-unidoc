@@ -38,3 +38,27 @@ extension Account.ID:RawRepresentable
 extension Account.ID:BSONDecodable, BSONEncodable
 {
 }
+extension Account.ID:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        "\(UInt64.init(bitPattern: self.rawValue))"
+    }
+}
+extension Account.ID:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:some StringProtocol)
+    {
+        if  let value:UInt64 = .init(description),
+            let value:Self = .init(rawValue: .init(bitPattern: value))
+        {
+            self = value
+        }
+        else
+        {
+            return nil
+        }
+    }
+}

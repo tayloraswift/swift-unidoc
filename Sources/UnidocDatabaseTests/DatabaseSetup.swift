@@ -8,8 +8,8 @@ struct DatabaseSetup:MongoTestBattery
     {
         //  We should be able to reinitialize the database as many times as we want.
         //  (Initialization should be idempotent.)
-        let _:Unidoc.Database = try await .setup(as: database, in: pool)
-        let _:Unidoc.Database = try await .setup(as: database, in: pool)
-        let _:Unidoc.Database = try await .setup(as: database, in: pool)
+        let _:Unidoc.Database = await .setup(as: database, in: pool)
+        let _:Unidoc.Database = await .setup(as: database, in: pool)
+        let _:Unidoc.Database = await .setup(as: database, in: pool)
     }
 }

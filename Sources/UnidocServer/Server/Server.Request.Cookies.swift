@@ -16,6 +16,14 @@ extension Server.Request
 }
 extension Server.Request.Cookies
 {
+    static
+    var session:String { "__Host-session" }
+
+    static
+    var login:String { "login_state" }
+}
+extension Server.Request.Cookies
+{
     init(_ lines:[Substring])
     {
         self.init()
@@ -42,8 +50,8 @@ extension Server.Request.Cookies
     {
         switch name
         {
-        case "session":     self.session = .init(value)
-        case "login_state": self.login = .init(value)
+        case Self.session:  self.session = .init(value)
+        case Self.login:    self.login = .init(value)
         case _:             break
         }
     }

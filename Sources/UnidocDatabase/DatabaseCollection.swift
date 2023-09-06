@@ -60,6 +60,8 @@ extension DatabaseCollection
             against: self.database)
 
         assert(response.indexesAfter == statements.count + 1)
+
+        print("note: recreated \(response.indexesAfter - 1) indexes in \(Self.name)")
     }
 }
 extension DatabaseCollection

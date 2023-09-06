@@ -43,7 +43,7 @@ extension Server
     {
         //  This is a client context, which is different from the server context.
         let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
-        let services:Services
+        var services:Services
 
         if  let secret:(oauth:String, app:String) = try?
             (
@@ -98,6 +98,9 @@ extension Server
                         type: .text(.plain, charset: .utf8)))
 
                 request.promise.succeed(response)
+
+                services.tour.transferred += response.resource?.content.length ?? 0
+                services.tour.requests += 1
             }
             catch let error
             {
@@ -169,8 +172,8 @@ extension Server
         {
             let delegate:Self = .init(database: .init(
                     sessions: $0,
-                    accounts: try await .setup(as: "accounts", in: $0),
-                    unidoc: try await .setup(as: "unidoc", in: $0)),
+                    accounts: await .setup(as: "accounts", in: $0),
+                    unidoc: await .setup(as: "unidoc", in: $0)),
                 reload: options.reload)
 
             try await withThrowingTaskGroup(of: Void.self)
