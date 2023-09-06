@@ -155,7 +155,7 @@ extension Site.Docs.Meta:ApplicationPage
 
             $0[.h2] = "Interface Breakdown"
 
-            $0 += StatsBreakdown.init(
+            $0 += Unidoc.StatsBreakdown.init(
                 unweighted: self.master.census.unweighted.decls,
                 weighted: self.master.census.weighted.decls,
                 domain: "this package")
@@ -163,7 +163,7 @@ extension Site.Docs.Meta:ApplicationPage
 
             $0[.h2] = "Documentation Coverage"
 
-            $0 += StatsBreakdown.init(
+            $0 += Unidoc.StatsBreakdown.init(
                 unweighted: self.master.census.unweighted.coverage,
                 weighted: self.master.census.weighted.coverage,
                 domain: "this package")

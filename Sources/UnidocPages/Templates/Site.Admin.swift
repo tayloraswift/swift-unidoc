@@ -11,10 +11,10 @@ extension Site
         public
         let configuration:Mongo.ReplicaSetConfiguration
         public
-        let tour:Tour
+        let tour:ServerTour
 
         @inlinable public
-        init(configuration:Mongo.ReplicaSetConfiguration, tour:Tour)
+        init(configuration:Mongo.ReplicaSetConfiguration, tour:ServerTour)
         {
             self.configuration = configuration
             self.tour = tour
@@ -114,11 +114,13 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = "\(self.tour.started.duration(to: .now))"
 
             $0[.dt] = "requests"
-            $0[.dd] = "\(self.tour.requests)"
+            $0[.dd] = "\(self.tour.stats.requests.total)"
 
             $0[.dt] = "bytes transferred (content only)"
-            $0[.dd] = "\(self.tour.transferred)"
+            $0[.dd] = "\(self.tour.stats.bytes.total)"
         }
+
+        main += ServerTour.StatsBreakdown.init(self.tour.stats)
 
         main[.hr]
 

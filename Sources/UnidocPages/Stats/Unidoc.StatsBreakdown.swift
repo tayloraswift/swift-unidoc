@@ -1,21 +1,25 @@
 import HTML
+import Unidoc
 import UnidocRecords
 
-struct StatsBreakdown
+extension Unidoc
 {
-    private
-    var unweighted:Pie<Stat>
-    private
-    var weighted:Pie<Stat>
-
-    private
-    init(unweighted:Pie<Stat> = [], weighted:Pie<Stat> = [])
+    struct StatsBreakdown
     {
-        self.unweighted = unweighted
-        self.weighted = weighted
+        private
+        var unweighted:Pie<Stat>
+        private
+        var weighted:Pie<Stat>
+
+        private
+        init(unweighted:Pie<Stat> = [], weighted:Pie<Stat> = [])
+        {
+            self.unweighted = unweighted
+            self.weighted = weighted
+        }
     }
 }
-extension StatsBreakdown
+extension Unidoc.StatsBreakdown
 {
     private
     init<Stats>(
@@ -51,9 +55,7 @@ extension StatsBreakdown
             }
         }
     }
-}
-extension StatsBreakdown
-{
+
     init(
         unweighted:__shared Volume.Stats.Coverage,
         weighted:__shared Volume.Stats.Coverage,
@@ -150,14 +152,14 @@ extension StatsBreakdown
         }
     }
 }
-extension StatsBreakdown
+extension Unidoc.StatsBreakdown
 {
     var condensed:Condensed
     {
         .init(unweighted: self.unweighted, weighted: self.weighted)
     }
 }
-extension StatsBreakdown:HyperTextOutputStreamable
+extension Unidoc.StatsBreakdown:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
