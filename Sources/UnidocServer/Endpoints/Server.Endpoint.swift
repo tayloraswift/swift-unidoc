@@ -1,5 +1,5 @@
 import FNV1
-import HTTPServer
+import HTTP
 import MD5
 import Multiparts
 import Symbols

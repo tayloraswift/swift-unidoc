@@ -1,5 +1,7 @@
+import Backtrace
 import GitHubClient
 import GitHubIntegration
+import HTTP
 import HTTPClient
 import HTTPServer
 import MongoDB
@@ -145,6 +147,8 @@ extension Server
     public static
     func main() async throws
     {
+        Backtrace.install()
+
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let options:Options = try .parse()
         if  options.redirect

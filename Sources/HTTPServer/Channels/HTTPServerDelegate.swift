@@ -1,3 +1,4 @@
+import HTTP
 import NIOCore
 import NIOPosix
 import NIOHTTP1

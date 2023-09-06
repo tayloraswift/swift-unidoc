@@ -223,7 +223,6 @@ extension Volume.Stem
     @inlinable public mutating
     func append(gay component:some StringProtocol)
     {
-        precondition(!component.isEmpty)
         self.rawValue.append("\t")
         self.rawValue += component
     }

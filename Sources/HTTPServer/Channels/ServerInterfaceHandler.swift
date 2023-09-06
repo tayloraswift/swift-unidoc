@@ -1,3 +1,4 @@
+import HTTP
 import MD5
 import NIOCore
 import NIOHTTP1

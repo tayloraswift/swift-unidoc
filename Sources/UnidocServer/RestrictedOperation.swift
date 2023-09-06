@@ -1,5 +1,5 @@
 import MongoDB
-import HTTPServer
+import HTTP
 import UnidocDatabase
 import UnidocPages
 
