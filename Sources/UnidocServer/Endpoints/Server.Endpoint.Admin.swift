@@ -9,33 +9,39 @@ extension Server.Endpoint
 {
     enum Admin
     {
-        case perform(Site.Action, MultipartForm?)
+        case perform(Site.Admin.Action, MultipartForm?)
         case status
     }
 }
-extension Server.Endpoint.Admin:DatabaseOperation
+extension Server.Endpoint.Admin:RestrictedOperation
 {
-    func load(from database:Services.Database) async throws -> ServerResponse?
+    func load(from services:Services) async throws -> ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: database.sessions)
-        let page:Site.Action.Receipt
+        let session:Mongo.Session = try await .init(from: services.database.sessions)
+        let page:Site.Admin.Receipt
 
         switch self
         {
         case .status:
-            let page:Site.Admin = .init(configuration: try await database.sessions.run(
-                command: Mongo.ReplicaSetGetConfiguration.init(),
-                against: .admin))
+            let page:Site.Admin = .init(configuration: try await services.database.sessions.run(
+                    command: Mongo.ReplicaSetGetConfiguration.init(),
+                    against: .admin),
+                tour: services.tour)
 
             return .resource(page.rendered())
 
-        case .perform(.dropDatabase, _):
-            try await database.unidoc.nuke(with: session)
+        case .perform(.dropAccountDB, _):
+            try await services.database.accounts.drop(with: session)
 
-            page = .init(action: .dropDatabase, text: "Reinitialized database!")
+            page = .init(action: .dropAccountDB, text: "Reinitialized Account database!")
+
+        case .perform(.dropUnidocDB, _):
+            try await services.database.unidoc.drop(with: session)
+
+            page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
         case .perform(.rebuild, _):
-            let rebuilt:Int = try await database.unidoc.rebuild(with: session)
+            let rebuilt:Int = try await services.database.unidoc.rebuild(with: session)
 
             page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
 
@@ -45,7 +51,7 @@ extension Server.Endpoint.Admin:DatabaseOperation
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                receipts.append(try await database.unidoc.publish(
+                receipts.append(try await services.database.unidoc.publish(
                     docs: try .init(buffer: item.value),
                     with: session))
             }

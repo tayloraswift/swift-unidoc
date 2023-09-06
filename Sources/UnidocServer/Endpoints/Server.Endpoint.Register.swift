@@ -3,6 +3,7 @@ import GitHubIntegration
 import HTTPServer
 import MongoDB
 import UnidocDatabase
+import UnidocPages
 
 extension Server.Endpoint
 {
@@ -45,19 +46,11 @@ extension Server.Endpoint.Register:StatefulOperation
             role: user.id == 2556986 ? .administrator : .human)
 
         let session:Mongo.Session = try await .init(from: services.database.sessions)
-        try await services.database.accounts.upsert(account: account, with: session)
+        let cookie:String = try await services.database.accounts.users.update(
+            account: account,
+            with: session)
 
-        if  case .administrator = account.role
-        {
-            return .resource(.init(.one(canonical: nil),
-                content: .string("You are now a mighty It Girl! (token: \(self.token))"),
-                type: .text(.plain, charset: .utf8)))
-        }
-        else
-        {
-            return .resource(.init(.one(canonical: nil),
-                content: .string("Hello, \(user.login)! (token: \(self.token))"),
-                type: .text(.plain, charset: .utf8)))
-        }
+        return .redirect(.temporary("\(Site.Admin.uri)"),
+            cookies: [Server.Request.Cookies.session: cookie])
     }
 }

@@ -13,17 +13,22 @@ extension ServerResource
 }
 extension ServerResource.Content
 {
+    @inlinable public
+    var length:Int
+    {
+        switch self
+        {
+        case .binary(let buffer):   return buffer.count
+        case .buffer(let buffer):   return buffer.readableBytes
+        case .string(let string):   return string.utf8.count
+        case .length(let length):   return length
+        }
+    }
     /// Drops any payload storage held by this instance, and replaces it with the length of the
     /// dropped payload. If the payload is already a ``length(_:)``, this function does nothing.
     @inlinable public mutating
     func drop()
     {
-        switch self
-        {
-        case .binary(let buffer):   self = .length(buffer.count)
-        case .buffer(let buffer):   self = .length(buffer.readableBytes)
-        case .string(let string):   self = .length(string.utf8.count)
-        case .length:               return
-        }
+        self = .length(self.length)
     }
 }

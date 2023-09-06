@@ -1,5 +1,6 @@
 import GitHubClient
 import GitHubIntegration
+import UnidocPages
 
 struct Services
 {
@@ -10,6 +11,8 @@ struct Services
         app:GitHubClient<GitHubApp>,
         api:GitHubClient<GitHubAPI>
     )?
+
+    var tour:Site.Admin.Tour
 
     init(
         database:Database,
@@ -22,5 +25,7 @@ struct Services
     {
         self.database = database
         self.github = github
+
+        self.tour = .init(started: .now)
     }
 }

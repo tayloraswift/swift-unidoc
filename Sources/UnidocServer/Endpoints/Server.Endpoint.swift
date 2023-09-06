@@ -56,7 +56,7 @@ extension Server.Endpoint
         switch root
         {
         case Site.Admin.root:
-            if  let action:Site.Action = .init(rawValue: trunk),
+            if  let action:Site.Admin.Action = .init(rawValue: trunk),
                 let page:Site.Admin.Confirm = .init(action: action)
             {
                 return .stateless(.resource(page.rendered()))
@@ -225,13 +225,13 @@ extension Server.Endpoint
     static
     func post(root:String, rest:ArraySlice<String>, form:MultipartForm?) -> Self?
     {
-        guard root == Site.Action.root
+        guard root == Site.Admin.root
         else
         {
             return nil
         }
         if  let action:String = rest.first,
-            let action:Site.Action = .init(rawValue: action)
+            let action:Site.Admin.Action = .init(rawValue: action)
         {
             return .stateful(Admin.perform(action, form))
         }

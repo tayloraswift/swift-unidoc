@@ -56,50 +56,21 @@ extension Unidoc.Database
             strength: .secondary) // diacritics are significant
     }
 }
-extension Unidoc.Database
+extension Unidoc.Database:DatabaseModel
 {
-    public static
-    func setup(as id:Mongo.Database, in pool:__owned Mongo.SessionPool) async throws -> Self
-    {
-        let database:Self = .init(id: id)
-        try await database.setup(with: try await .init(from: pool))
-        return database
-    }
-
-    private
+    public
     func setup(with session:Mongo.Session) async throws
     {
-        do
-        {
-            try await self.packages.setup(with: session)
-            try await self.package.setup(with: session)
-            try await self.snapshots.setup(with: session)
+        try await self.packages.setup(with: session)
+        try await self.package.setup(with: session)
+        try await self.snapshots.setup(with: session)
 
-            try await self.masters.setup(with: session)
-            try await self.groups.setup(with: session)
-            try await self.search.setup(with: session)
-            try await self.trees.setup(with: session)
-            try await self.names.setup(with: session)
-            try await self.siteMaps.setup(with: session)
-        }
-        catch let error
-        {
-            print("""
-                warning: some indexes are no longer valid. \
-                the database '\(self.id)' likely needs to be rebuilt.
-                """)
-            print(error)
-        }
-    }
-}
-extension Unidoc.Database
-{
-    /// Drops and reinitializes the database. This destroys *all* its data!
-    public
-    func nuke(with session:Mongo.Session) async throws
-    {
-        try await session.run(command: Mongo.DropDatabase.init(), against: self.id)
-        try await self.setup(with: session)
+        try await self.masters.setup(with: session)
+        try await self.groups.setup(with: session)
+        try await self.search.setup(with: session)
+        try await self.trees.setup(with: session)
+        try await self.names.setup(with: session)
+        try await self.siteMaps.setup(with: session)
     }
 }
 extension Unidoc.Database
@@ -258,19 +229,6 @@ extension Unidoc.Database
 }
 extension Unidoc.Database
 {
-    //  This should be part of the swift-mongodb package.
-    private
-    func explain<Command>(command:__owned Command,
-        with session:Mongo.Session) async throws -> String
-        where Command:MongoCommand
-    {
-        try await session.run(
-            command: Mongo.Explain<Command>.init(
-                verbosity: .executionStats,
-                command: command),
-            against: self.id)
-    }
-
     public
     func explain<Query>(query:__owned Query,
         with session:Mongo.Session) async throws -> String

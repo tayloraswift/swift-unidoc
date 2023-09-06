@@ -7,14 +7,14 @@ extension Site.Admin
     struct Confirm
     {
         public
-        var action:Site.Action
+        var action:Action
         public
         var label:String
         public
         var text:String
 
         private
-        init(action:Site.Action, label:String, text:String)
+        init(action:Action, label:String, text:String)
         {
             self.action = action
             self.label = label
@@ -25,13 +25,13 @@ extension Site.Admin
 extension Site.Admin.Confirm
 {
     public
-    init?(action:Site.Action)
+    init?(action:Site.Admin.Action)
     {
         switch action
         {
-        case .dropDatabase:
+        case .dropAccountDB, .dropUnidocDB:
             self.init(action: action,
-                label: "Drop Database",
+                label: action.label,
                 text: """
                 This will drop (and reinitialize) the entire database. Are you sure?
                 """)
@@ -44,7 +44,7 @@ extension Site.Admin.Confirm
 extension Site.Admin.Confirm:FixedPage
 {
     public
-    var location:URI { Site.Admin.confirm(self.action) }
+    var location:URI { Site.Admin[self.action] }
     public
     var title:String { "\(self.label)?" }
 }
@@ -56,7 +56,7 @@ extension Site.Admin.Confirm:AdministrativePage
         main[.form]
         {
             $0.enctype = "multipart/form-data"
-            $0.action = "\(self.action)"
+            $0.action = "\(self.location)"
             $0.method = "post"
         }
         content:
