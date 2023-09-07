@@ -29,7 +29,7 @@ extension Site.Admin.Confirm
     {
         switch action
         {
-        case .dropAccountDB, .dropUnidocDB:
+        case .dropAccountDB, .dropPackageDB, .dropUnidocDB:
             self.init(action: action,
                 label: action.label,
                 text: """

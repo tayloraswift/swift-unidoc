@@ -14,7 +14,20 @@ struct DatabaseQueries:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:Unidoc.Database = await .setup(as: database, in: pool)
+        let unidoc:Mongo.Database = .init("\(database)_unidoc")
+        try await pool.withTemporaryDatabase(unidoc)
+        {
+            try await self.run(tests, pool: pool, packages: database, unidoc: unidoc)
+        }
+    }
+
+    private
+    func run(_ tests:TestGroup, pool:Mongo.SessionPool,
+        packages:Mongo.Database,
+        unidoc:Mongo.Database) async throws
+    {
+        let packages:PackageDatabase = await .setup(as: packages, in: pool)
+        let unidoc:UnidocDatabase = await .setup(as: unidoc, in: pool)
 
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
@@ -46,17 +59,19 @@ struct DatabaseQueries:MongoTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.publish(docs: swift, with: session) ==? .init(
-            overwritten: false,
-            package: 0,
-            version: 0,
-            id: "swift v5.8.1 x86_64-unknown-linux-gnu"))
+        tests.expect(try await unidoc.publish(linking: swift,
+                against: packages,
+                with: session) ==?
+            .init(id: "swift v5.8.1 x86_64-unknown-linux-gnu",
+                zone: .init(package: 0, version: 0),
+                overwritten: false))
 
-        tests.expect(try await database.publish(docs: example, with: session) ==? .init(
-            overwritten: false,
-            package: 1,
-            version: 0,
-            id: "swift-malibu v0.0.0 x86_64-unknown-linux-gnu"))
+        tests.expect(try await unidoc.publish(linking: example,
+                against: packages,
+                with: session) ==?
+            .init(id: "swift-malibu v0.0.0 x86_64-unknown-linux-gnu",
+                zone: .init(package: 1, version: 0),
+                overwritten: false))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
@@ -66,7 +81,7 @@ struct DatabaseQueries:MongoTestBattery
             {
 
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let master:Volume.Master.Decl = tests.expect(
                         value: output.principal?.master?.decl)
                 {
@@ -83,7 +98,7 @@ struct DatabaseQueries:MongoTestBattery
             {
 
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
                     tests.expect(principal.matches.count >? 1),
@@ -102,7 +117,7 @@ struct DatabaseQueries:MongoTestBattery
             {
 
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
                     let _:Volume.Master = tests.expect(value: principal.master)
@@ -121,7 +136,7 @@ struct DatabaseQueries:MongoTestBattery
             await tests.do
             {
                 if  let output:ThinQuery<Symbol.Decl>.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let master:Volume.Master.Decl = tests.expect(
                         value: output.masters.first?.decl)
                 {
@@ -154,7 +169,7 @@ struct DatabaseQueries:MongoTestBattery
                 await tests.do
                 {
                     if  let output:WideQuery.Output = tests.expect(
-                            value: try await database.execute(query: query, with: session)),
+                            value: try await unidoc.execute(query: query, with: session)),
                         let _:Volume.Master = tests.expect(value: output.principal?.master)
                     {
                     }
@@ -168,7 +183,7 @@ struct DatabaseQueries:MongoTestBattery
             await tests.do
             {
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let master:Volume.Master.Culture = tests.expect(
                         value: output.principal?.master?.culture),
                     let tree:Volume.TypeTree = tests.expect(
@@ -197,7 +212,7 @@ struct DatabaseQueries:MongoTestBattery
             await tests.do
             {
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let master:Volume.Master = tests.expect(
                         value: output.principal?.master),
                     let tree:Volume.TypeTree = tests.expect(
@@ -261,7 +276,7 @@ struct DatabaseQueries:MongoTestBattery
             {
 
                 if  let output:WideQuery.Output = tests.expect(
-                        value: try await database.execute(query: query, with: session)),
+                        value: try await unidoc.execute(query: query, with: session)),
                     let _:Volume.Master = tests.expect(
                         value: output.principal?.master)
                 {
@@ -302,7 +317,7 @@ struct DatabaseQueries:MongoTestBattery
                 {
 
                     if  let output:WideQuery.Output = tests.expect(
-                            value: try await database.execute(query: query, with: session)),
+                            value: try await unidoc.execute(query: query, with: session)),
                         let _:Volume.Master = tests.expect(value: output.principal?.master)
                     {
                         let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(

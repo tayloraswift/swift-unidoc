@@ -1,6 +1,6 @@
 import BSONDecoding
 
-extension Account.Database.Users
+extension AccountDatabase.Users
 {
     struct CookieView:Equatable, Sendable
     {
@@ -12,7 +12,7 @@ extension Account.Database.Users
         }
     }
 }
-extension Account.Database.Users.CookieView:BSONDocumentDecodable
+extension AccountDatabase.Users.CookieView:BSONDocumentDecodable
 {
     typealias CodingKey = Account.CodingKey
 

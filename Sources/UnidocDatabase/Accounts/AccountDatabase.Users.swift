@@ -1,7 +1,7 @@
 import MongoDB
 import MongoQL
 
-extension Account.Database
+extension AccountDatabase
 {
     @frozen public
     struct Users
@@ -16,7 +16,7 @@ extension Account.Database
         }
     }
 }
-extension Account.Database.Users:DatabaseCollection
+extension AccountDatabase.Users:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "users" }
@@ -26,7 +26,7 @@ extension Account.Database.Users:DatabaseCollection
     static
     let indexes:[Mongo.CreateIndexStatement] = []
 }
-extension Account.Database.Users
+extension AccountDatabase.Users
 {
     public
     func validate(cookie:String, with session:Mongo.Session) async throws -> Account.Role?

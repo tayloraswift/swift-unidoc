@@ -18,7 +18,7 @@ extension DatabaseQuery
     {
         .init(self.origin, pipeline: .init(with: self.build(pipeline:)))
         {
-            $0[.collation] = Unidoc.Database.collation
+            $0[.collation] = UnidocDatabase.collation
             $0[.hint] = self.hint
         }
     }

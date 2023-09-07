@@ -2,11 +2,11 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Database
+extension PackageDatabase
 {
     /// A single-document collection containing a ``SearchIndex``.
     @frozen public
-    struct Packages
+    struct Meta
     {
         public
         let database:Mongo.Database
@@ -18,10 +18,10 @@ extension Unidoc.Database
         }
     }
 }
-extension Unidoc.Database.Packages:DatabaseCollection
+extension PackageDatabase.Meta:DatabaseCollection
 {
     @inlinable public static
-    var name:Mongo.Collection { "packages" }
+    var name:Mongo.Collection { "meta" }
 
     typealias ElementID = Never?
 

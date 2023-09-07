@@ -1,7 +1,7 @@
 import BSONDecoding
-import UnidocLinker
+import Unidoc
 
-extension Unidoc.Database.Snapshots
+extension PackageDatabase.Editions
 {
     struct VersionView:Equatable, Sendable
     {
@@ -13,9 +13,9 @@ extension Unidoc.Database.Snapshots
         }
     }
 }
-extension Unidoc.Database.Snapshots.VersionView:BSONDocumentDecodable
+extension PackageDatabase.Editions.VersionView:BSONDocumentDecodable
 {
-    typealias CodingKey = Snapshot.CodingKey
+    typealias CodingKey = PackageEdition.CodingKey
 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

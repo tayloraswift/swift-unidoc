@@ -233,6 +233,7 @@ extension Server
             let delegate:Self = .init(database: .init(
                     sessions: $0,
                     accounts: await .setup(as: "accounts", in: $0),
+                    packages: await .setup(as: "packages", in: $0),
                     unidoc: await .setup(as: "unidoc", in: $0)),
                 mode: mode)
 

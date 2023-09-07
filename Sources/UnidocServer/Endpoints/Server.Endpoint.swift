@@ -1,6 +1,7 @@
 import FNV1
 import HTTP
 import MD5
+import ModuleGraphs
 import Multiparts
 import Symbols
 import UnidocDatabase
@@ -83,6 +84,10 @@ extension Server.Endpoint
         case "learn":
             return .get(legacy: trunk, stem: stem, uri: uri)
 
+        case "sync":
+            //  TODO: this should be POST, not GET
+            return .stateful(_SyncRepository.init(package: .init(trunk)))
+
         case "api":
             switch trunk
             {
@@ -156,7 +161,7 @@ extension Server.Endpoint
                 return .stateful(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
-                        from: Unidoc.Database.Search.name,
+                        from: UnidocDatabase.Search.name,
                         tag: tag,
                         id: id),
                     uri: uri,
@@ -167,7 +172,7 @@ extension Server.Endpoint
                 return .stateful(Pipeline<SearchIndexQuery<Never?>>.init(
                     explain: false,
                     query: .init(
-                        from: Unidoc.Database.Packages.name,
+                        from: PackageDatabase.Meta.name,
                         tag: tag,
                         id: nil),
                     uri: uri))

@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Unidoc.Database.Snapshots
+extension PackageDatabase.Graphs
 {
     public
     struct RetrievalError:Error, Equatable, Sendable

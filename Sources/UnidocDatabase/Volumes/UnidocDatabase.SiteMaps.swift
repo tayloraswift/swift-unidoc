@@ -2,7 +2,7 @@ import BSON
 import ModuleGraphs
 import MongoQL
 
-extension Unidoc.Database
+extension UnidocDatabase
 {
     @frozen public
     struct SiteMaps
@@ -17,7 +17,7 @@ extension Unidoc.Database
         }
     }
 }
-extension Unidoc.Database.SiteMaps:DatabaseCollection
+extension UnidocDatabase.SiteMaps:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "siteMaps" }

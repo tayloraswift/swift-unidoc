@@ -2,10 +2,10 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Database
+extension UnidocDatabase
 {
     public
-    struct Search
+    struct Trees
     {
         let database:Mongo.Database
 
@@ -15,12 +15,12 @@ extension Unidoc.Database
         }
     }
 }
-extension Unidoc.Database.Search:DatabaseCollection
+extension UnidocDatabase.Trees:DatabaseCollection
 {
     @inlinable public static
-    var name:Mongo.Collection { "search" }
+    var name:Mongo.Collection { "trees" }
 
-    typealias ElementID = VolumeIdentifier
+    typealias ElementID = Unidoc.Scalar
 
     static
     var indexes:[Mongo.CreateIndexStatement] { [] }
