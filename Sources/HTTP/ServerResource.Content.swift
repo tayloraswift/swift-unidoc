@@ -13,6 +13,8 @@ extension ServerResource
 }
 extension ServerResource.Content
 {
+    /// The size of the content to be transferred, in bytes. Unlike ``length``, this property
+    /// is zero if the content is a ``length(_:)`` cache result.
     @inlinable public
     var size:Int
     {
@@ -24,6 +26,8 @@ extension ServerResource.Content
         case .length:               return 0
         }
     }
+    /// The logical length of the content, in bytes, which may not reflect the actual ``size``
+    /// of the data to be transferred.
     @inlinable public
     var length:Int
     {

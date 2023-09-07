@@ -85,7 +85,7 @@ extension Site.Admin:AdministrativePage
             }
         }
 
-        for action:Action in [.dropUnidocDB, .dropAccountDB]
+        for action:Action in [.dropUnidocDB, .dropPackageDB, .dropAccountDB]
         {
             main[.hr]
 

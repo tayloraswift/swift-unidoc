@@ -3,21 +3,18 @@ import BSONEncoding
 import ModuleGraphs
 import MongoQL
 
-extension Unidoc.Database.Package
+struct PackageCell
 {
-    struct Cell
-    {
-        let id:PackageIdentifier
-        let index:Int32
+    let id:PackageIdentifier
+    let index:Int32
 
-        init(id:PackageIdentifier, index:Int32)
-        {
-            self.id = id
-            self.index = index
-        }
+    init(id:PackageIdentifier, index:Int32)
+    {
+        self.id = id
+        self.index = index
     }
 }
-extension Unidoc.Database.Package.Cell:MongoMasterCodingModel
+extension PackageCell:MongoMasterCodingModel
 {
     enum CodingKey:String
     {
@@ -25,7 +22,7 @@ extension Unidoc.Database.Package.Cell:MongoMasterCodingModel
         case index = "P"
     }
 }
-extension Unidoc.Database.Package.Cell:BSONDocumentEncodable
+extension PackageCell:BSONDocumentEncodable
 {
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
@@ -33,7 +30,7 @@ extension Unidoc.Database.Package.Cell:BSONDocumentEncodable
         bson[.index] = self.index
     }
 }
-extension Unidoc.Database.Package.Cell:BSONDocumentDecodable
+extension PackageCell:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

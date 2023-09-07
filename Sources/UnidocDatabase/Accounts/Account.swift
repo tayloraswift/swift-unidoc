@@ -39,7 +39,7 @@ extension Account:MongoMasterCodingModel
         case id = "_id"
 
         /// The session cookie associated with this account, if logged in. This is generated
-        /// randomly in ``Account.Database.update(account:with:)``.
+        /// randomly in ``AccountDatabase.update(account:with:)``.
         case cookie
 
         case role

@@ -21,7 +21,7 @@ protocol VolumeLookupQuery:DatabaseQuery
 extension VolumeLookupQuery
 {
     @inlinable public
-    var origin:Mongo.Collection { Unidoc.Database.Names.name }
+    var origin:Mongo.Collection { UnidocDatabase.Names.name }
 
     public
     var hint:Mongo.SortDocument? { self.volume.hint }

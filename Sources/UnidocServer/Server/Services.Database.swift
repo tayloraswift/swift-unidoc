@@ -7,16 +7,19 @@ extension Services
     {
         let sessions:Mongo.SessionPool
 
-        let accounts:Account.Database
-        let unidoc:Unidoc.Database
+        let accounts:AccountDatabase
+        let packages:PackageDatabase
+        let unidoc:UnidocDatabase
 
         init(sessions:Mongo.SessionPool,
-            accounts:Account.Database,
-            unidoc:Unidoc.Database)
+            accounts:AccountDatabase,
+            packages:PackageDatabase,
+            unidoc:UnidocDatabase)
         {
             self.sessions = sessions
 
             self.accounts = accounts
+            self.packages = packages
             self.unidoc = unidoc
         }
     }

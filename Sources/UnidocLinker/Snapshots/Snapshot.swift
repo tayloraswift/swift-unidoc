@@ -3,31 +3,26 @@ import BSONEncoding
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import UnidocRecords
 
 @frozen public
 struct Snapshot:Equatable, Sendable
 {
     public
-    let package:Int32
-    public
-    let version:Int32
-
+    let zone:Unidoc.Zone
     public
     let metadata:SymbolGraphMetadata
     public
     let graph:SymbolGraph
 
     @inlinable public
-    init(
-        package:Int32,
-        version:Int32,
+    init(_ zone:Unidoc.Zone,
         metadata:SymbolGraphMetadata,
         graph:SymbolGraph)
     {
-        self.package = package
-        self.version = version
         self.metadata = metadata
         self.graph = graph
+        self.zone = zone
     }
 }
 extension Snapshot:Identifiable
@@ -44,10 +39,10 @@ extension Snapshot
     }
 
     @inlinable public
-    var zone:Unidoc.Zone
-    {
-        .init(package: self.package, version: self.version)
-    }
+    var package:Int32 { self.zone.package }
+
+    @inlinable public
+    var version:Int32 { self.zone.version }
 
     @inlinable public
     var stable:Bool
@@ -61,14 +56,13 @@ extension Snapshot
     enum CodingKey:String
     {
         case id = "_id"
+        case zone = "z"
 
-        case package = "P"
-        case version = "V"
         case metadata = "M"
         case graph = "D"
 
         //  Computed field, outlined for MongoDB’s convenience.
-        case stable = "S"
+        //  case stable = "S"
     }
 }
 extension Snapshot:BSONDocumentEncodable
@@ -77,13 +71,11 @@ extension Snapshot:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-
-        bson[.package] = self.package
-        bson[.version] = self.version
+        bson[.zone] = self.zone
         bson[.metadata] = self.metadata
         bson[.graph] = self.graph
 
-        bson[.stable] = self.stable
+        //bson[.stable] = self.stable
     }
 }
 extension Snapshot:BSONDocumentDecodable
@@ -91,9 +83,7 @@ extension Snapshot:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(
-            package: try bson[.package].decode(),
-            version: try bson[.version].decode(),
+        self.init(try bson[.zone].decode(),
             metadata: try bson[.metadata].decode(),
             graph: try bson[.graph].decode())
     }

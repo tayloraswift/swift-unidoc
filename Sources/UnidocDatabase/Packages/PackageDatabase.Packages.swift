@@ -5,10 +5,10 @@ import MongoDB
 import UnidocAnalysis
 import UnidocRecords
 
-extension Unidoc.Database
+extension PackageDatabase
 {
     @frozen public
-    struct Package
+    struct Packages
     {
         public
         let database:Mongo.Database
@@ -20,10 +20,10 @@ extension Unidoc.Database
         }
     }
 }
-extension Unidoc.Database.Package
+extension PackageDatabase.Packages
 {
     @inlinable public static
-    var name:Mongo.Collection { "package" }
+    var name:Mongo.Collection { "packages" }
 
     func setup(with session:Mongo.Session) async throws
     {
@@ -38,7 +38,7 @@ extension Unidoc.Database.Package
                         $0[.name] = "cell"
                         $0[.key] = .init
                         {
-                            $0[Cell[.index]] = (-)
+                            $0[PackageCell[.index]] = (-)
                         }
                     },
                 ]),
@@ -69,14 +69,14 @@ extension Unidoc.Database.Package
                     {
                         $0[.match] = .init
                         {
-                            $0[Cell[.id]] = package
+                            $0[PackageCell[.id]] = package
                         }
                     }
                     $0.stage
                     {
                         $0[.replaceWith] = .init
                         {
-                            $0[Registration[.cell]] = Cell[.index]
+                            $0[Registration[.cell]] = PackageCell[.index]
                             $0[Registration[.new]] = false
                         }
                     }
@@ -91,7 +91,7 @@ extension Unidoc.Database.Package
                                 {
                                     $0[.sort] = .init
                                     {
-                                        $0[Cell[.index]] = (-)
+                                        $0[PackageCell[.index]] = (-)
                                     }
                                 }
                                 $0.stage
@@ -104,7 +104,7 @@ extension Unidoc.Database.Package
                                     {
                                         $0[Registration[.cell]] = .expr
                                         {
-                                            $0[.add] = (Cell[.index], 1)
+                                            $0[.add] = (PackageCell[.index], 1)
                                         }
                                         $0[Registration[.new]] = true
                                     }
@@ -139,7 +139,7 @@ extension Unidoc.Database.Package
             return registration
         }
 
-        let cell:Cell = .init(id: package, index: registration.cell)
+        let cell:PackageCell = .init(id: package, index: registration.cell)
 
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name, encoding: [cell]),
@@ -162,12 +162,12 @@ extension Unidoc.Database.Package
             (json:inout JSON.ArrayEncoder) in
 
             try await session.run(
-                command: Mongo.Find<Mongo.Cursor<Cell>>.init(Self.name, stride: 1024),
+                command: Mongo.Find<Mongo.Cursor<PackageCell>>.init(Self.name, stride: 1024),
                 against: self.database)
             {
-                for try await batch:[Cell] in $0
+                for try await batch:[PackageCell] in $0
                 {
-                    for cell:Cell in batch
+                    for cell:PackageCell in batch
                     {
                         json[+] = "\(cell.id)"
                     }

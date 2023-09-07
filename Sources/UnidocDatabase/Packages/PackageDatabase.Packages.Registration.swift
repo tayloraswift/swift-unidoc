@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import MongoQL
 
-extension Unidoc.Database.Package
+extension PackageDatabase.Packages
 {
     @frozen public
     struct Registration:Equatable, Hashable, Sendable
@@ -20,7 +20,7 @@ extension Unidoc.Database.Package
         }
     }
 }
-extension Unidoc.Database.Package.Registration:MongoMasterCodingModel
+extension PackageDatabase.Packages.Registration:MongoMasterCodingModel
 {
     public
     enum CodingKey:String
@@ -29,7 +29,7 @@ extension Unidoc.Database.Package.Registration:MongoMasterCodingModel
         case new
     }
 }
-extension Unidoc.Database.Package.Registration:BSONDocumentDecodable
+extension PackageDatabase.Packages.Registration:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

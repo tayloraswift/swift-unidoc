@@ -35,13 +35,20 @@ extension Server.Endpoint.Admin:RestrictedOperation
 
             page = .init(action: .dropAccountDB, text: "Reinitialized Account database!")
 
+        case .perform(.dropPackageDB, _):
+            try await services.database.packages.drop(with: session)
+
+            page = .init(action: .dropPackageDB, text: "Reinitialized Package database!")
+
         case .perform(.dropUnidocDB, _):
             try await services.database.unidoc.drop(with: session)
 
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
         case .perform(.rebuild, _):
-            let rebuilt:Int = try await services.database.unidoc.rebuild(with: session)
+            let rebuilt:Int = try await services.database.unidoc.rebuild(
+                from: services.database.packages,
+                with: session)
 
             page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
 
@@ -52,7 +59,8 @@ extension Server.Endpoint.Admin:RestrictedOperation
                 where item.header.name == "documentation-binary"
             {
                 receipts.append(try await services.database.unidoc.publish(
-                    docs: try .init(buffer: item.value),
+                    linking: try .init(buffer: item.value),
+                    against: services.database.packages,
                     with: session))
             }
 

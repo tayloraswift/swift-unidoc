@@ -1,6 +1,6 @@
 import BSONDecoding
 
-extension Account.Database.Users
+extension AccountDatabase.Users
 {
     struct RoleView:Equatable, Sendable
     {
@@ -12,7 +12,7 @@ extension Account.Database.Users
         }
     }
 }
-extension Account.Database.Users.RoleView:BSONDocumentDecodable
+extension AccountDatabase.Users.RoleView:BSONDocumentDecodable
 {
     typealias CodingKey = Account.CodingKey
 
