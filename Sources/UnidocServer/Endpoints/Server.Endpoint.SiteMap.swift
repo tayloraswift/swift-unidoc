@@ -26,6 +26,13 @@ extension Server.Endpoint
         }
     }
 }
+extension Server.Endpoint.SiteMap:StatefulOperation
+{
+    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
+    {
+        \.siteMap
+    }
+}
 extension Server.Endpoint.SiteMap:DatabaseOperation, UnrestrictedOperation
 {
     func load(from database:Services.Database) async throws -> ServerResponse?

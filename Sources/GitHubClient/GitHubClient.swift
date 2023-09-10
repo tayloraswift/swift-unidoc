@@ -105,16 +105,10 @@ extension GitHubClient
 }
 extension GitHubClient<GitHubAPI>
 {
-    public
-    func user(with token:String) async throws -> GitHubAPI.User
-    {
-        try await self.get(from: "/user", with: token)
-    }
-
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
-        with token:String? = nil) async throws -> Response where Response:JSONObjectDecodable
+        with token:String? = nil) async throws -> Response where Response:JSONDecodable
     {
         var request:HPACKHeaders =
         [

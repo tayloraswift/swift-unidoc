@@ -73,7 +73,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.7.3")),
+            from: "0.8.0")),
 
         .package(url: "https://github.com/swift-server/swift-backtrace", .upToNextMinor(
             from: "1.3.4")),

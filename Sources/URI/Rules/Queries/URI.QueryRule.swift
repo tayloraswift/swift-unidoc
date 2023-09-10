@@ -3,8 +3,7 @@ import Grammar
 extension URI
 {
     /// A parsing rule that matches a leading question mark (`?`),
-    /// followed by zero or more ``QueryComponentRule``s separated by
-    /// ``QuerySeparatorRule``s.
+    /// followed by zero or more ``Parameters``.
     enum QueryRule<Location>
     {
     }
@@ -19,11 +18,6 @@ extension URI.QueryRule:ParsingRule
         where Source:Collection<UInt8>, Source.Index == Location
     {
         try input.parse(as: UnicodeEncoding<Location, UInt8>.Question.self)
-        let parameters:[URI.Query.Parameter]? = input.parse(
-            as: Pattern.Join<
-                URI.QueryComponentRule<Location>,
-                URI.QuerySeparatorRule<Location>,
-                [URI.Query.Parameter]>?.self)
-        return .init(parameters ?? [])
+        return .init(try input.parse(as: Parameters.self))
     }
 }

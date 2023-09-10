@@ -71,13 +71,26 @@ extension DatabaseCollection
         with session:Mongo.Session) async throws -> Decodable?
         where Decodable:BSONDocumentDecodable
     {
+        try await self.find(by: "_id", of: id, with: session)
+    }
+
+    func find<Decodable>(_:Decodable.Type = Decodable.self,
+        by index:Mongo.KeyPath,
+        of key:__owned some BSONEncodable,
+        with session:Mongo.Session) async throws -> Decodable?
+        where Decodable:BSONDocumentDecodable
+    {
         let response:[Decodable] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
                 limit: 1)
             {
                 $0[.filter] = .init
                 {
-                    $0["_id"] = id
+                    $0[index] = key
+                }
+                $0[.hint] = .init
+                {
+                    $0[index] = (+)
                 }
             },
             against: self.database)
@@ -105,10 +118,7 @@ extension DatabaseCollection
             },
             against: self.database)
 
-        if  response.inserted != elements.count
-        {
-            throw response.error
-        }
+        let _:Mongo.Insertions = try response.insertions()
     }
 }
 extension DatabaseCollection
@@ -122,17 +132,15 @@ extension DatabaseCollection
                 encoding: [element]),
             against: self.database)
 
-        if  response.inserted != 1
-        {
-            throw response.error
-        }
+        let _:Mongo.Insertions = try response.insertions()
     }
 }
 
 extension DatabaseCollection
 {
+    @discardableResult
     func upsert(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
-        with session:Mongo.Session) async throws
+        with session:Mongo.Session) async throws -> ElementID?
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
             command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
@@ -141,24 +149,82 @@ extension DatabaseCollection
                     .init
                     {
                         $0[.upsert] = true
-                        $0[.u] = element
                         $0[.q] = .init { $0["_id"] = element.id }
+                        $0[.u] = element
                     },
                 ]),
             against: self.database)
 
-        if  let error:any Error =
-                response.writeConcernError ??
-                response.writeErrors.first
-        {
-            throw error
-        }
+        let updates:Mongo.Updates<ElementID> = try response.updates()
+        return updates.upserted.first?.id
+    }
+}
+extension DatabaseCollection
+{
+    /// Replaces an *existing* document having the same identifier as the passed document with
+    /// the passed document. Returns true if the document was modified, false if the document
+    /// was not modified, and nil if the document was not found.
+    @discardableResult
+    func update(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
+            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+                updates:
+                [
+                    .init
+                    {
+                        $0[.upsert] = false
+                        $0[.q] = .init { $0["_id"] = element.id }
+                        $0[.u] = element
+                    },
+                ]),
+            against: self.database)
+
+        let updates:Mongo.Updates<ElementID> = try response.updates()
+        return updates.selected == 0 ? nil : updates.modified == 1
+    }
+
+    /// Sets the value of the specified field in the document with the specified identifier,
+    /// returning true if the document was modified, false if the document was not modified,
+    /// and nil if the document was not found.
+    @discardableResult
+    func update(field:Mongo.KeyPath,
+        of target:ElementID,
+        to value:__owned some BSONEncodable,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(field: field, by: "_id", of: target, to: value, with: session)
+    }
+    @discardableResult
+    func update(field:Mongo.KeyPath,
+        by index:Mongo.KeyPath,
+        of key:__owned some BSONEncodable,
+        to value:__owned some BSONEncodable,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
+            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+                updates:
+                [
+                    .init
+                    {
+                        $0[.hint] = .init { $0[index] = (+) }
+                        $0[.q] = .init { $0[index] = key }
+                        $0[.u] = .init { $0[.set] = .init { $0[field] = value } }
+                    },
+                ]),
+            against: self.database)
+
+        let updates:Mongo.Updates<ElementID> = try response.updates()
+        return updates.selected == 0 ? nil : updates.modified == 1
     }
 }
 
 extension DatabaseCollection
 {
-    func delete(_ id:ElementID, with session:Mongo.Session) async throws
+    @discardableResult
+    func delete(_ id:ElementID, with session:Mongo.Session) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name,
@@ -172,12 +238,8 @@ extension DatabaseCollection
                 ]),
             against: self.database)
 
-        if  let error:any Error =
-                response.writeConcernError ??
-                response.writeErrors.first
-        {
-            throw error
-        }
+        let deletions:Mongo.Deletions = try response.deletions()
+        return deletions.deleted != 0
     }
 }
 extension DatabaseCollection<Unidoc.Scalar>
@@ -216,12 +278,7 @@ extension DatabaseCollection<Unidoc.Scalar>
                 ]),
             against: self.database)
 
-        if  let error:any Error =
-                response.writeConcernError ??
-                response.writeErrors.first
-        {
-            throw error
-        }
+        let _:Mongo.Deletions = try response.deletions()
     }
 }
 extension DatabaseCollection

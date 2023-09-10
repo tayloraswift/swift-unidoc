@@ -67,14 +67,9 @@ extension NumericVersion:CustomStringConvertible
 extension NumericVersion:LosslessStringConvertible
 {
     @inlinable public
-    init?(_ string:String)
+    init?<String>(_ string:String) where String:StringProtocol
     {
-        self.init(string[...])
-    }
-    @inlinable public
-    init?(_ string:Substring)
-    {
-        let components:[Substring] = string.split(separator: ".", maxSplits: 2,
+        let components:[String.SubSequence] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
 
         guard components.count > 0, let major:UInt16 = .init(components[0])

@@ -41,7 +41,6 @@ extension DatabaseModel
 extension DatabaseModel
 {
     //  This should be part of the swift-mongodb package.
-    @inlinable public
     func explain<Command>(command:__owned Command,
         with session:Mongo.Session) async throws -> String
         where Command:MongoCommand
@@ -51,5 +50,21 @@ extension DatabaseModel
                 verbosity: .executionStats,
                 command: command),
             against: self.id)
+    }
+
+    public
+    func explain<Query>(query:__owned Query,
+        with session:Mongo.Session) async throws -> String
+        where Query:DatabaseQuery
+    {
+        try await self.explain(command: query.command, with: session)
+    }
+
+    @inlinable public
+    func execute<Query>(query:__owned Query,
+        with session:Mongo.Session) async throws -> Query.Output?
+        where Query:DatabaseQuery
+    {
+        try await session.run(command: query.command, against: self.id)
     }
 }

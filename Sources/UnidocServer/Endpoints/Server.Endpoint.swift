@@ -16,10 +16,11 @@ extension Server
     enum Endpoint:Sendable
     {
         case  stateless(ServerResponse)
-        case `static`(Cache<Site.Asset>.Request)
+        case `static`(Cache<Site.Asset.Get>.Request)
         case  stateful(any StatefulOperation)
     }
 }
+//  GET endpoints
 extension Server.Endpoint
 {
     static
@@ -67,8 +68,29 @@ extension Server.Endpoint
                 return nil
             }
 
+        case Site.API.root:
+            switch Site.API.Get.init(trunk)
+            {
+            case nil:
+                return nil
+
+            case .github?:
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Login = .init(parameters: parameters)
+                {
+                    return .stateful(operation)
+                }
+
+            case .register?:
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Register = .init(parameters: parameters)
+                {
+                    return .stateful(operation)
+                }
+            }
+
         case Site.Asset.root:
-            let asset:Site.Asset? = .init(rawValue: trunk)
+            let asset:Site.Asset.Get? = .init(trunk)
             return asset.map { .static(.init($0, tag: tag)) }
 
         case "sitemaps":
@@ -83,31 +105,6 @@ extension Server.Endpoint
 
         case "learn":
             return .get(legacy: trunk, stem: stem, uri: uri)
-
-        case "sync":
-            //  TODO: this should be POST, not GET
-            return .stateful(_SyncRepository.init(package: .init(trunk)))
-
-        case "api":
-            switch trunk
-            {
-            case "github":
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Login = .init(parameters: parameters)
-                {
-                    return .stateful(operation)
-                }
-
-            case "register":
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Register = .init(parameters: parameters)
-                {
-                    return .stateful(operation)
-                }
-
-            case _:
-                break
-            }
 
         case _:
             break
@@ -129,7 +126,7 @@ extension Server.Endpoint
         switch root
         {
         case Site.Docs.root:
-            return .stateful(Pipeline<WideQuery>.init(
+            return .stateful(Pipeline<UnidocDatabase, WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -138,7 +135,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case Site.Guides.root:
-            return .stateful(Pipeline<ThinQuery<Volume.Range>>.init(
+            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Volume.Range>>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -147,7 +144,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case "articles":
-            return .stateful(Pipeline<WideQuery>.init(
+            return .stateful(Pipeline<UnidocDatabase, WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -158,7 +155,8 @@ extension Server.Endpoint
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .stateful(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
+                return .stateful(Pipeline<UnidocDatabase,
+                        SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: UnidocDatabase.Search.name,
@@ -169,12 +167,12 @@ extension Server.Endpoint
             }
             else if trunk == "packages.json"
             {
-                return .stateful(Pipeline<SearchIndexQuery<Never?>>.init(
-                    explain: false,
+                return .stateful(Pipeline<PackageDatabase, SearchIndexQuery<Int32>>.init(
+                    explain: explain,
                     query: .init(
                         from: PackageDatabase.Meta.name,
                         tag: tag,
-                        id: nil),
+                        id: 0),
                     uri: uri))
             }
             else
@@ -210,14 +208,14 @@ extension Server.Endpoint
 
         if  let overload:Symbol.Decl
         {
-            return .stateful(Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Symbol.Decl>>.init(
                 explain: false,
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .stateful(Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))
@@ -225,18 +223,28 @@ extension Server.Endpoint
     }
 }
 
+//  POST endpoints
 extension Server.Endpoint
 {
     static
-    func post(root:String, rest:ArraySlice<String>, form:MultipartForm?) -> Self?
+    func post(root:String, rest:ArraySlice<String>, form:AnyForm) -> Self?
     {
-        guard root == Site.Admin.root
-        else
+        switch root
         {
-            return nil
+        case Site.Admin.root:   return .post(admin: rest, form: form)
+        case Site.API.root:     return .post(api: rest, form: form)
+        case _:                 return nil
         }
+    }
+}
+extension Server.Endpoint
+{
+    private static
+    func post(admin rest:ArraySlice<String>, form:AnyForm) -> Self?
+    {
         if  let action:String = rest.first,
-            let action:Site.Admin.Action = .init(rawValue: action)
+            let action:Site.Admin.Action = .init(rawValue: action),
+            case .multipart(let form) = form
         {
             return .stateful(Admin.perform(action, form))
         }
@@ -244,5 +252,31 @@ extension Server.Endpoint
         {
             return nil
         }
+    }
+
+    private static
+    func post(api rest:ArraySlice<String>, form:AnyForm) -> Self?
+    {
+        guard   let trunk:String = rest.first,
+                let trunk:Site.API.Post = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        switch (trunk, form)
+        {
+        case (.index, .urlencoded(let parameters)):
+            if  let owner:String = parameters["owner"],
+                let repo:String = parameters["repo"]
+            {
+                return .stateful(_SyncRepository.init(owner: owner, repo: repo))
+            }
+
+        case (_, _):
+            break
+        }
+
+        return nil
     }
 }

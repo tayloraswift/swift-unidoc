@@ -32,12 +32,7 @@ extension SemanticVersion:CustomStringConvertible
 extension SemanticVersion:LosslessStringConvertible
 {
     @inlinable public
-    init?(_ string:String)
-    {
-        self.init(string[...])
-    }
-    @inlinable public
-    init?(_ string:Substring)
+    init?(_ string:some StringProtocol)
     {
         if  let version:NumericVersion = .init(string)
         {
@@ -68,12 +63,7 @@ extension SemanticVersion
     /// `v1.2.3`. If the tag string has at least one, but fewer than three components,
     /// the semantic version is zero-extended.
     @inlinable public
-    init?(refname:String)
-    {
-        self.init(refname: refname[...])
-    }
-    @inlinable public
-    init?(refname:Substring)
+    init?(refname:some StringProtocol)
     {
         if case "v"? = refname.first
         {

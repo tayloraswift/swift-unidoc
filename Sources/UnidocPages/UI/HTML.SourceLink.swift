@@ -28,7 +28,7 @@ extension HTML.SourceLink:HyperTextOutputStreamable
             $0.target = "_blank"
             $0.class = "source"
         }
-        content:
+            content:
         {
             $0[.span] { $0.class = "file" } = self.file
 

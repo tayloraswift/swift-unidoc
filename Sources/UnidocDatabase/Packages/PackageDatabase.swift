@@ -1,6 +1,9 @@
+import GitHubIntegration
+import ModuleGraphs
 import MongoDB
 import SymbolGraphs
 import UnidocAnalysis
+import UnidocLinker
 
 @frozen public
 struct PackageDatabase:Identifiable, Sendable
@@ -18,8 +21,11 @@ extension PackageDatabase
 {
     @inlinable public
     var packages:Packages { .init(database: self.id) }
+    @inlinable public
     var editions:Editions { .init(database: self.id) }
+    @inlinable public
     var graphs:Graphs { .init(database: self.id) }
+
     var meta:Meta { .init(database: self.id) }
 
     public static
@@ -45,42 +51,153 @@ extension PackageDatabase:DatabaseModel
 extension PackageDatabase
 {
     public
-    func store(docs:Documentation, with session:Mongo.Session) async throws -> SnapshotReceipt
+    func track(repo:GitHubAPI.Repo, with session:Mongo.Session) async throws -> Int32
     {
-        //  TODO: enforce population limits
-        let registration:Packages.Registration = try await self.packages.register(
+        /// Currently, package identifiers are just the name of the repository.
+        try await self.packages.register(.init(repo.name),
+            updating: self.meta,
+            tracking: .github(repo),
+            with: session).cell
+    }
+
+    public
+    func store(docs:SymbolGraphArchive,
+        with session:Mongo.Session) async throws -> SnapshotReceipt
+    {
+        let placement:Packages.Placement = try await self.packages.register(
             docs.metadata.package,
+            updating: nil,
+            tracking: nil,
             with: session)
 
-        if  registration.new
+        let version:Int32
+
+        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit
         {
-            let index:SearchIndex<Never?> = try await self.packages.scan(
+            let placement:Editions.Placement = try await self.editions.register(
+                package: placement.cell,
+                refname: commit.refname,
+                sha1: commit.hash,
                 with: session)
 
-            try await self.meta.upsert(index, with: session)
-        }
-
-        let zone:Unidoc.Zone
-
-        if  case .sha1(let sha1)? = docs.metadata.revision,
-            let refname:String = docs.metadata.refname
-        {
-            let edition:PackageEdition = .init(id: try await self.editions.zone(
-                    package: registration.cell,
-                    refname: refname,
-                    with: session),
-                name: refname,
-                sha1: sha1)
-
-            zone = edition.id
-
-            try await self.editions.upsert(edition, with: session)
+            version = placement.cell
         }
         else
         {
-            zone = .init(package: registration.cell, version: -1)
+            version = -1
         }
 
-        return try await self.graphs.store(docs, into: zone, with: session)
+        let snapshot:Snapshot = .init(
+            package: placement.cell,
+            version: version,
+            metadata: docs.metadata,
+            graph: docs.graph)
+
+        let upsert:SnapshotReceipt.Upsert
+
+        switch try await self.graphs.upsert(snapshot, with: session)
+        {
+        case nil:   upsert = .update
+        case _?:    upsert = .insert
+        }
+
+        return .init(id: snapshot.id,
+            edition: snapshot.edition,
+            type: upsert,
+            repo: placement.repo)
+    }
+}
+extension PackageDatabase
+{
+    public
+    func editions(of package:PackageIdentifier,
+        with session:Mongo.Session) async throws -> [PackageEdition]
+    {
+        try await session.run(
+            command: Mongo.Aggregate<Mongo.Cursor<PackageEdition>>.init(Packages.name,
+                pipeline: .init
+                {
+                    $0.stage
+                    {
+                        $0[.match] = .init
+                        {
+                            $0[PackageRecord[.id]] = package
+                        }
+                    }
+
+                    let editions:Mongo.KeyPath = "editions"
+
+                    $0.stage
+                    {
+                        $0[.lookup] = .init
+                        {
+                            $0[.from] = Editions.name
+                            $0[.localField] = PackageRecord[.cell]
+                            $0[.foreignField] = PackageEdition[.package]
+                            $0[.as] = editions
+                        }
+                    }
+
+                    $0.stage
+                    {
+                        $0[.lookup] = .init
+                        {
+                            let cell:Mongo.Variable<Int32> = "cell"
+
+                            $0[.from] = Graphs.name
+                            $0[.let] = .init
+                            {
+                                $0[let: cell] = PackageRecord[.cell]
+                            }
+                            $0[.pipeline] = .init
+                            {
+                                $0.stage
+                                {
+                                    $0[.match] = .init
+                                    {
+                                        $0[.expr] = .expr
+                                        {
+                                            $0[.eq] = (Snapshot[.package], cell)
+                                        }
+                                    }
+                                }
+
+                                $0.stage
+                                {
+                                    $0[.sort] = .init
+                                    {
+                                        $0[Snapshot[.version]] = (-)
+                                    }
+                                }
+
+                                $0.stage
+                                {
+                                    $0[.limit] = 1
+                                }
+
+                                $0.stage
+                                {
+                                    $0[.replaceWith] = Snapshot[.metadata]
+                                }
+                            }
+                            $0[.as] = "recent"
+                        }
+                    }
+
+                    $0.stage
+                    {
+                        $0[.unwind] = editions
+                    }
+
+                    $0.stage
+                    {
+                        $0[.replaceWith] = editions
+                    }
+                },
+                stride: 1),
+            against: self.id)
+        {
+            try await $0.reduce(into: [], += )
+        }
     }
 }

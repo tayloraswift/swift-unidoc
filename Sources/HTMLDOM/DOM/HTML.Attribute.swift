@@ -4,7 +4,7 @@ extension HTML
     enum Attribute:String, Equatable, Hashable, Sendable
     {
         case accept
-        case acceptCharset = "accept-charset"
+        case accept_charset = "accept-charset"
         case accesskey
         case action
         case align
@@ -61,7 +61,7 @@ extension HTML
         case high
         case href
         case hreflang
-        case httpEquiv = "http-equiv"
+        case http_equiv = "http-equiv"
         case icon
         case id
         case importance
@@ -140,7 +140,7 @@ extension HTML
             @inlinable internal init() {}
 
             @inlinable public var accept:Attribute          { .accept }
-            @inlinable public var acceptCharset:Attribute   { .acceptCharset }
+            @inlinable public var accept_charset:Attribute  { .accept_charset }
             @inlinable public var accesskey:Attribute       { .accesskey }
             @inlinable public var action:Attribute          { .action }
             @inlinable public var align:Attribute           { .align }
@@ -197,7 +197,7 @@ extension HTML
             @inlinable public var high:Attribute            { .high }
             @inlinable public var href:Attribute            { .href }
             @inlinable public var hreflang:Attribute        { .hreflang }
-            @inlinable public var httpEquiv:Attribute       { .httpEquiv }
+            @inlinable public var http_equiv:Attribute      { .http_equiv }
             @inlinable public var icon:Attribute            { .icon }
             @inlinable public var id:Attribute              { .id }
             @inlinable public var importance:Attribute      { .importance }

@@ -55,9 +55,8 @@ extension ServerTour.StatsBreakdown
         for (state, value):(String, Int) in
         [
             ("for site map requests",   stats.requests.siteMap),
-            ("for index requests",      stats.requests.pipelineIndex),
-            ("for query requests",      stats.requests.pipelineQuery),
-            ("for other requests",      stats.requests.other),
+            ("for database queries",    stats.requests.query),
+            ("for other queries",       stats.requests.other),
         ]
         {
             if  value > 0
@@ -73,9 +72,8 @@ extension ServerTour.StatsBreakdown
         for (state, value):(String, Int) in
         [
             ("for site map requests",   stats.bytes.siteMap),
-            ("for index requests",      stats.bytes.pipelineIndex),
-            ("for query requests",      stats.bytes.pipelineQuery),
-            ("for other requests",      stats.bytes.other),
+            ("for database queries",    stats.bytes.query),
+            ("for other queries",       stats.bytes.other),
         ]
         {
             if  value > 0

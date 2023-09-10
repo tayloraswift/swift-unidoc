@@ -19,11 +19,11 @@ extension Volume
         let id:Unidoc.Zone
 
         public
-        var refname:String?
-        public
         var display:String?
         public
-        var github:String?
+        var refname:String?
+        public
+        var origin:Origin?
 
         public
         var volume:VolumeIdentifier
@@ -35,17 +35,17 @@ extension Volume
 
         @inlinable public
         init(id:Unidoc.Zone,
-            refname:String?,
             display:String?,
-            github:String?,
+            refname:String?,
+            origin:Origin?,
             volume:VolumeIdentifier,
             latest:Bool,
             patch:PatchVersion?)
         {
             self.id = id
-            self.refname = refname
             self.display = display
-            self.github = github
+            self.refname = refname
+            self.origin = origin
             self.volume = volume
             self.latest = latest
             self.patch = patch
@@ -72,9 +72,9 @@ extension Volume.Names
 
         case package = "P"
         case version = "V"
-        case refname = "G"
         case display = "D"
-        case github = "H"
+        case refname = "G"
+        case origin = "H"
         case patch = "S"
 
         case planes_min = "C"
@@ -105,7 +105,7 @@ extension Volume.Names
                 .version,
                 .refname,
                 .display,
-                .github,
+                .origin,
                 .patch,
 
                 .latest,
@@ -121,10 +121,10 @@ extension Volume.Names:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.package] = self.volume.package
         bson[.version] = self.volume.version
-        bson[.refname] = self.refname
 
         bson[.display] = self.display
-        bson[.github] = self.github
+        bson[.refname] = self.refname
+        bson[.origin] = self.origin
 
         bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
@@ -147,9 +147,9 @@ extension Volume.Names:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
-            refname: try bson[.refname]?.decode(),
             display: try bson[.display]?.decode(),
-            github: try bson[.github]?.decode(),
+            refname: try bson[.refname]?.decode(),
+            origin: try bson[.origin]?.decode(),
             volume: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),

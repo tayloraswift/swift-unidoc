@@ -14,10 +14,10 @@ extension Volume.Names
     public
     func github(blob file:Symbol.File) -> String?
     {
-        if  let refname:String = self.refname,
-            let github:String = self.github
+        if  case .github(let path)? = self.origin,
+            let refname:String = self.refname
         {
-            return "https://\(github)/blob/\(refname)/\(file)"
+            return "https://github.com\(path)/blob/\(refname)/\(file)"
         }
         else
         {

@@ -3,299 +3,299 @@ extension SVG
     @frozen public
     enum Attribute:String, Equatable, Hashable, Sendable
     {
-        case accentHeight                       = "accent-height"
-        case accumulate                         = "accumulate"
-        case additive                           = "additive"
-        case alignmentBaseline                  = "alignment-baseline"
-        case alphabetic                         = "alphabetic"
-        case amplitude                          = "amplitude"
-        case arabicForm                         = "arabic-form"
-        case ascent                             = "ascent"
-        case attributeName                      = "attributeName"
-        case attributeType                      = "attributeType"
-        case azimuth                            = "azimuth"
-        case baseFrequency                      = "baseFrequency"
-        case baselineShift                      = "baseline-shift"
-        case baseProfile                        = "baseProfile"
-        case bbox                               = "bbox"
-        case begin                              = "begin"
-        case bias                               = "bias"
-        case by                                 = "by"
-        case calcMode                           = "calcMode"
-        case capHeight                          = "cap-height"
-        case `class`                            = "class"
-        case clip                               = "clip"
-        case clipPathUnits                      = "clipPathUnits"
-        case clipPath                           = "clip-path"
-        case clipRule                           = "clip-rule"
-        case color                              = "color"
-        case colorInterpolation                 = "color-interpolation"
-        case colorInterpolationFilters          = "color-interpolation-filters"
-        case colorProfile                       = "color-profile"
-        case colorRendering                     = "color-rendering"
-        case contentScriptType                  = "contentScriptType"
-        case contentStyleType                   = "contentStyleType"
-        case crossorigin                        = "crossorigin"
-        case cursor                             = "cursor"
-        case cx                                 = "cx"
-        case cy                                 = "cy"
-        case d                                  = "d"
-        case decelerate                         = "decelerate"
-        case descent                            = "descent"
-        case diffuseConstant                    = "diffuseConstant"
-        case direction                          = "direction"
-        case display                            = "display"
-        case divisor                            = "divisor"
-        case dominantBaseline                   = "dominant-baseline"
-        case dur                                = "dur"
-        case dx                                 = "dx"
-        case dy                                 = "dy"
-        case edgeMode                           = "edgeMode"
-        case elevation                          = "elevation"
-        case enableBackground                   = "enable-background"
-        case end                                = "end"
-        case exponent                           = "exponent"
-        case fill                               = "fill"
-        case fillOpacity                        = "fill-opacity"
-        case fillRule                           = "fill-rule"
-        case filter                             = "filter"
-        case filterRes                          = "filterRes"
-        case filterUnits                        = "filterUnits"
-        case floodColor                         = "flood-color"
-        case floodOpacity                       = "flood-opacity"
-        case fontFamily                         = "font-family"
-        case fontSize                           = "font-size"
-        case fontSizeAdjust                     = "font-size-adjust"
-        case fontStretch                        = "font-stretch"
-        case fontStyle                          = "font-style"
-        case fontVariant                        = "font-variant"
-        case fontWeight                         = "font-weight"
-        case format                             = "format"
-        case from                               = "from"
-        case fr                                 = "fr"
-        case fx                                 = "fx"
-        case fy                                 = "fy"
-        case g1                                 = "g1"
-        case g2                                 = "g2"
-        case glyphName                          = "glyph-name"
-        case glyphOrientationHorizontal         = "glyph-orientation-horizontal"
-        case glyphOrientationVertical           = "glyph-orientation-vertical"
-        case glyphRef                           = "glyphRef"
-        case gradientTransform                  = "gradientTransform"
-        case gradientUnits                      = "gradientUnits"
-        case hanging                            = "hanging"
-        case height                             = "height"
-        case href                               = "href"
-        case hreflang                           = "hreflang"
-        case horizAdvX                          = "horiz-adv-x"
-        case horizOriginX                       = "horiz-origin-x"
-        case id                                 = "id"
-        case ideographic                        = "ideographic"
-        case imageRendering                     = "image-rendering"
-        case `in`                               = "in"
-        case in2                                = "in2"
-        case intercept                          = "intercept"
-        case k                                  = "k"
-        case k1                                 = "k1"
-        case k2                                 = "k2"
-        case k3                                 = "k3"
-        case k4                                 = "k4"
-        case kernelMatrix                       = "kernelMatrix"
-        case kernelUnitLength                   = "kernelUnitLength"
-        case kerning                            = "kerning"
-        case keyPoints                          = "keyPoints"
-        case keySplines                         = "keySplines"
-        case keyTimes                           = "keyTimes"
-        case lang                               = "lang"
-        case lengthAdjust                       = "lengthAdjust"
-        case letterSpacing                      = "letter-spacing"
-        case lightingColor                      = "lighting-color"
-        case limitingConeAngle                  = "limitingConeAngle"
-        case local                              = "local"
-        case markerEnd                          = "marker-end"
-        case markerMid                          = "marker-mid"
-        case markerStart                        = "marker-start"
-        case markerHeight                       = "markerHeight"
-        case markerUnits                        = "markerUnits"
-        case markerWidth                        = "markerWidth"
-        case mask                               = "mask"
-        case maskContentUnits                   = "maskContentUnits"
-        case maskUnits                          = "maskUnits"
-        case mathematical                       = "mathematical"
-        case max                                = "max"
-        case media                              = "media"
-        case method                             = "method"
-        case min                                = "min"
-        case mode                               = "mode"
-        case name                               = "name"
-        case numOctaves                         = "numOctaves"
-        case offset                             = "offset"
-        case opacity                            = "opacity"
-        case `operator`                         = "operator"
-        case order                              = "order"
-        case orient                             = "orient"
-        case orientation                        = "orientation"
-        case origin                             = "origin"
-        case overflow                           = "overflow"
-        case overlinePosition                   = "overline-position"
-        case overlineThickness                  = "overline-thickness"
-        case panose1                            = "panose-1"
-        case paintOrder                         = "paint-order"
-        case path                               = "path"
-        case pathLength                         = "pathLength"
-        case patternContentUnits                = "patternContentUnits"
-        case patternTransform                   = "patternTransform"
-        case patternUnits                       = "patternUnits"
-        case ping                               = "ping"
-        case pointerEvents                      = "pointer-events"
-        case points                             = "points"
-        case pointsAtX                          = "pointsAtX"
-        case pointsAtY                          = "pointsAtY"
-        case pointsAtZ                          = "pointsAtZ"
-        case preserveAlpha                      = "preserveAlpha"
-        case preserveAspectRatio                = "preserveAspectRatio"
-        case primitiveUnits                     = "primitiveUnits"
-        case r                                  = "r"
-        case radius                             = "radius"
-        case referrerPolicy                     = "referrerPolicy"
-        case refX                               = "refX"
-        case refY                               = "refY"
-        case rel                                = "rel"
-        case renderingIntent                    = "rendering-intent"
-        case repeatCount                        = "repeatCount"
-        case repeatDur                          = "repeatDur"
-        case requiredExtensions                 = "requiredExtensions"
-        case requiredFeatures                   = "requiredFeatures"
-        case restart                            = "restart"
-        case result                             = "result"
-        case rotate                             = "rotate"
-        case rx                                 = "rx"
-        case ry                                 = "ry"
-        case scale                              = "scale"
-        case seed                               = "seed"
-        case shapeRendering                     = "shape-rendering"
-        case slope                              = "slope"
-        case spacing                            = "spacing"
-        case specularConstant                   = "specularConstant"
-        case specularExponent                   = "specularExponent"
-        case speed                              = "speed"
-        case spreadMethod                       = "spreadMethod"
-        case startOffset                        = "startOffset"
-        case stdDeviation                       = "stdDeviation"
-        case stemh                              = "stemh"
-        case stemv                              = "stemv"
-        case stitchTiles                        = "stitchTiles"
-        case stopColor                          = "stop-color"
-        case stopOpacity                        = "stop-opacity"
-        case strikethroughPosition              = "strikethrough-position"
-        case strikethroughThickness             = "strikethrough-thickness"
-        case string                             = "string"
-        case stroke                             = "stroke"
-        case strokeDasharray                    = "stroke-dasharray"
-        case strokeDashoffset                   = "stroke-dashoffset"
-        case strokeLinecap                      = "stroke-linecap"
-        case strokeLinejoin                     = "stroke-linejoin"
-        case strokeMiterlimit                   = "stroke-miterlimit"
-        case strokeOpacity                      = "stroke-opacity"
-        case strokeWidth                        = "stroke-width"
-        case style                              = "style"
-        case surfaceScale                       = "surfaceScale"
-        case systemLanguage                     = "systemLanguage"
-        case tabindex                           = "tabindex"
-        case tableValues                        = "tableValues"
-        case target                             = "target"
-        case targetX                            = "targetX"
-        case targetY                            = "targetY"
-        case textAnchor                         = "text-anchor"
-        case textDecoration                     = "text-decoration"
-        case textRendering                      = "text-rendering"
-        case textLength                         = "textLength"
-        case to                                 = "to"
-        case transform                          = "transform"
-        case transformOrigin                    = "transform-origin"
-        case type                               = "type"
-        case u1                                 = "u1"
-        case u2                                 = "u2"
-        case underlinePosition                  = "underline-position"
-        case underlineThickness                 = "underline-thickness"
-        case unicode                            = "unicode"
-        case unicodeBidi                        = "unicode-bidi"
-        case unicodeRange                       = "unicode-range"
-        case unitsPerEm                         = "units-per-em"
-        case vAlphabetic                        = "v-alphabetic"
-        case vHanging                           = "v-hanging"
-        case vIdeographic                       = "v-ideographic"
-        case vMathematical                      = "v-mathematical"
-        case values                             = "values"
-        case vectorEffect                       = "vector-effect"
-        case version                            = "version"
-        case vertAdvY                           = "vert-adv-y"
-        case vertOriginX                        = "vert-origin-x"
-        case vertOriginY                        = "vert-origin-y"
-        case viewBox                            = "viewBox"
-        case viewTarget                         = "viewTarget"
-        case visibility                         = "visibility"
-        case width                              = "width"
-        case widths                             = "widths"
-        case wordSpacing                        = "word-spacing"
-        case writingMode                        = "writing-mode"
-        case x                                  = "x"
-        case xHeight                            = "x-height"
-        case x1                                 = "x1"
-        case x2                                 = "x2"
-        case xChannelSelector                   = "xChannelSelector"
-        case xlink_actuate                      = "xlink:actuate"
-        case xlink_arcrole                      = "xlink:arcrole"
-        case xlink_href                         = "xlink:href"
-        case xlink_role                         = "xlink:role"
-        case xlink_show                         = "xlink:show"
-        case xlink_title                        = "xlink:title"
-        case xlink_type                         = "xlink:type"
-        case xml_base                           = "xml:base"
-        case xml_lang                           = "xml:lang"
-        case xml_space                          = "xml:space"
-        case y                                  = "y"
-        case y1                                 = "y1"
-        case y2                                 = "y2"
-        case yChannelSelector                   = "yChannelSelector"
-        case z                                  = "z"
-        case zoomAndPan                         = "zoomAndPan"
+        case accent_height = "accent-height"
+        case accumulate
+        case additive
+        case alignment_baseline = "alignment-baseline"
+        case alphabetic
+        case amplitude
+        case arabic_form = "arabic-form"
+        case ascent
+        case attributeName
+        case attributeType
+        case azimuth
+        case baseFrequency
+        case baseline_shift = "baseline-shift"
+        case baseProfile
+        case bbox
+        case begin
+        case bias
+        case by
+        case calcMode
+        case cap_height
+        case `class`
+        case clip
+        case clipPathUnits
+        case clip_path
+        case clip_rule
+        case color
+        case color_interpolation = "color-interpolation"
+        case color_interpolation_filters = "color-interpolation-filters"
+        case color_profile = "color-profile"
+        case color_rendering = "color-rendering"
+        case contentScriptType
+        case contentStyleType
+        case crossorigin
+        case cursor
+        case cx
+        case cy
+        case d
+        case decelerate
+        case descent
+        case diffuseConstant
+        case direction
+        case display
+        case divisor
+        case dominant_baseline = "dominant-baseline"
+        case dur
+        case dx
+        case dy
+        case edgeMode
+        case elevation
+        case enable_background
+        case end
+        case exponent
+        case fill
+        case fill_opacity = "fill-opacity"
+        case fill_rule = "fill-rule"
+        case filter
+        case filterRes
+        case filterUnits
+        case flood_color
+        case flood_opacity
+        case font_family
+        case font_size = "font-size"
+        case font_size_adjust = "font-size-adjust"
+        case font_stretch = "font-stretch"
+        case font_style = "font-style"
+        case font_variant = "font-variant"
+        case font_weight = "font-weight"
+        case format
+        case from
+        case fr
+        case fx
+        case fy
+        case g1
+        case g2
+        case glyph_name = "glyph-name"
+        case glyph_orientation_horizontal = "glyph-orientation-horizontal"
+        case glyph_orientation_vertical = "glyph-orientation-vertical"
+        case glyphRef
+        case gradientTransform
+        case gradientUnits
+        case hanging
+        case height
+        case href
+        case hreflang
+        case horiz_adv_x = "horiz-adv-x"
+        case horiz_origin_x = "horiz-origin-x"
+        case id
+        case ideographic
+        case image_rendering = "image-rendering"
+        case `in`
+        case in2
+        case intercept
+        case k
+        case k1
+        case k2
+        case k3
+        case k4
+        case kernelMatrix
+        case kernelUnitLength
+        case kerning
+        case keyPoints
+        case keySplines
+        case keyTimes
+        case lang
+        case lengthAdjust
+        case letter_spacing = "letter-spacing"
+        case lighting_color = "lighting-color"
+        case limitingConeAngle
+        case local
+        case marker_end = "marker-end"
+        case marker_mid = "marker-mid"
+        case marker_start = "marker-start"
+        case markerHeight
+        case markerUnits
+        case markerWidth
+        case mask
+        case maskContentUnits
+        case maskUnits
+        case mathematical
+        case max
+        case media
+        case method
+        case min
+        case mode
+        case name
+        case numOctaves
+        case offset
+        case opacity
+        case `operator`
+        case order
+        case orient
+        case orientation
+        case origin
+        case overflow
+        case overline_position = "overline-position"
+        case overline_thickness = "overline-thickness"
+        case panose_1 = "panose-1"
+        case paint_order = "paint-order"
+        case path
+        case pathLength
+        case patternContentUnits
+        case patternTransform
+        case patternUnits
+        case ping
+        case pointer_events = "pointer-events"
+        case points
+        case pointsAtX
+        case pointsAtY
+        case pointsAtZ
+        case preserveAlpha
+        case preserveAspectRatio
+        case primitiveUnits
+        case r
+        case radius
+        case referrerPolicy
+        case refX
+        case refY
+        case rel
+        case rendering_intent = "rendering-intent"
+        case repeatCount
+        case repeatDur
+        case requiredExtensions
+        case requiredFeatures
+        case restart
+        case result
+        case rotate
+        case rx
+        case ry
+        case scale
+        case seed
+        case shape_rendering = "shape-rendering"
+        case slope
+        case spacing
+        case specularConstant
+        case specularExponent
+        case speed
+        case spreadMethod
+        case startOffset
+        case stdDeviation
+        case stemh
+        case stemv
+        case stitchTiles
+        case stop_color = "stop-color"
+        case stop_opacity = "stop-opacity"
+        case strikethrough_position = "strikethrough-position"
+        case strikethrough_thickness = "strikethrough-thickness"
+        case string
+        case stroke
+        case stroke_dasharray = "stroke-dasharray"
+        case stroke_dashoffset = "stroke-dashoffset"
+        case stroke_linecap = "stroke-linecap"
+        case stroke_linejoin = "stroke-linejoin"
+        case stroke_miterlimit = "stroke-miterlimit"
+        case stroke_opacity = "stroke-opacity"
+        case stroke_width = "stroke-width"
+        case style
+        case surfaceScale
+        case systemLanguage
+        case tabindex
+        case tableValues
+        case target
+        case targetX
+        case targetY
+        case text_anchor = "text-anchor"
+        case text_decoration = "text-decoration"
+        case text_rendering = "text-rendering"
+        case textLength
+        case to
+        case transform
+        case transform_origin = "transform-origin"
+        case type
+        case u1
+        case u2
+        case underline_position = "underline-position"
+        case underline_thickness = "underline-thickness"
+        case unicode
+        case unicode_bidi = "unicode-bidi"
+        case unicode_range = "unicode-range"
+        case units_per_em = "units-per-em"
+        case v_alphabetic = "v-alphabetic"
+        case v_hanging = "v-hanging"
+        case v_ideographic = "v-ideographic"
+        case v_mathematical = "v-mathematical"
+        case values
+        case vector_effect = "vector-effect"
+        case version
+        case vert_adv_y = "vert-adv-y"
+        case vert_origin_x = "vert-origin-x"
+        case vert_origin_y = "vert-origin-y"
+        case viewBox
+        case viewTarget
+        case visibility
+        case width
+        case widths
+        case word_spacing = "word-spacing"
+        case writing_mode = "writing-mode"
+        case x = "x"
+        case x_height = "x-height"
+        case x1
+        case x2
+        case xChannelSelector
+        case xlink_actuate = "xlink:actuate"
+        case xlink_arcrole = "xlink:arcrole"
+        case xlink_href = "xlink:href"
+        case xlink_role = "xlink:role"
+        case xlink_show = "xlink:show"
+        case xlink_title = "xlink:title"
+        case xlink_type = "xlink:type"
+        case xml_base = "xml:base"
+        case xml_lang = "xml:lang"
+        case xml_space = "xml:space"
+        case y
+        case y1
+        case y2
+        case yChannelSelector
+        case z
+        case zoomAndPan
 
         @frozen public
         struct Factory
         {
             @inlinable internal init() {}
 
-            @inlinable public var accentHeight:Attribute                    { .accentHeight }
+            @inlinable public var accent_height:Attribute                   { .accent_height }
             @inlinable public var accumulate:Attribute                      { .accumulate }
             @inlinable public var additive:Attribute                        { .additive }
-            @inlinable public var alignmentBaseline:Attribute               { .alignmentBaseline }
+            @inlinable public var alignment_baseline:Attribute              { .alignment_baseline }
             @inlinable public var alphabetic:Attribute                      { .alphabetic }
             @inlinable public var amplitude:Attribute                       { .amplitude }
-            @inlinable public var arabicForm:Attribute                      { .arabicForm }
+            @inlinable public var arabic_form:Attribute                     { .arabic_form }
             @inlinable public var ascent:Attribute                          { .ascent }
             @inlinable public var attributeName:Attribute                   { .attributeName }
             @inlinable public var attributeType:Attribute                   { .attributeType }
             @inlinable public var azimuth:Attribute                         { .azimuth }
             @inlinable public var baseFrequency:Attribute                   { .baseFrequency }
-            @inlinable public var baselineShift:Attribute                   { .baselineShift }
+            @inlinable public var baseline_shift:Attribute                  { .baseline_shift }
             @inlinable public var baseProfile:Attribute                     { .baseProfile }
             @inlinable public var bbox:Attribute                            { .bbox }
             @inlinable public var begin:Attribute                           { .begin }
             @inlinable public var bias:Attribute                            { .bias }
             @inlinable public var by:Attribute                              { .by }
             @inlinable public var calcMode:Attribute                        { .calcMode }
-            @inlinable public var capHeight:Attribute                       { .capHeight }
+            @inlinable public var cap_height:Attribute                      { .cap_height }
             @inlinable public var `class`:Attribute                         { .class }
             @inlinable public var clip:Attribute                            { .clip }
             @inlinable public var clipPathUnits:Attribute                   { .clipPathUnits }
-            @inlinable public var clipPath:Attribute                        { .clipPath }
-            @inlinable public var clipRule:Attribute                        { .clipRule }
+            @inlinable public var clip_path:Attribute                       { .clip_path }
+            @inlinable public var clip_rule:Attribute                       { .clip_rule }
             @inlinable public var color:Attribute                           { .color }
-            @inlinable public var colorInterpolation:Attribute              { .colorInterpolation }
-            @inlinable public var colorInterpolationFilters:Attribute       { .colorInterpolationFilters }
-            @inlinable public var colorProfile:Attribute                    { .colorProfile }
-            @inlinable public var colorRendering:Attribute                  { .colorRendering }
+            @inlinable public var color_interpolation:Attribute             { .color_interpolation }
+            @inlinable public var color_interpolation_filters:Attribute     { .color_interpolation_filters }
+            @inlinable public var color_profile:Attribute                   { .color_profile }
+            @inlinable public var color_rendering:Attribute                 { .color_rendering }
             @inlinable public var contentScriptType:Attribute               { .contentScriptType }
             @inlinable public var contentStyleType:Attribute                { .contentStyleType }
             @inlinable public var crossorigin:Attribute                     { .crossorigin }
@@ -309,30 +309,30 @@ extension SVG
             @inlinable public var direction:Attribute                       { .direction }
             @inlinable public var display:Attribute                         { .display }
             @inlinable public var divisor:Attribute                         { .divisor }
-            @inlinable public var dominantBaseline:Attribute                { .dominantBaseline }
+            @inlinable public var dominant_baseline:Attribute               { .dominant_baseline }
             @inlinable public var dur:Attribute                             { .dur }
             @inlinable public var dx:Attribute                              { .dx }
             @inlinable public var dy:Attribute                              { .dy }
             @inlinable public var edgeMode:Attribute                        { .edgeMode }
             @inlinable public var elevation:Attribute                       { .elevation }
-            @inlinable public var enableBackground:Attribute                { .enableBackground }
+            @inlinable public var enable_background:Attribute               { .enable_background }
             @inlinable public var end:Attribute                             { .end }
             @inlinable public var exponent:Attribute                        { .exponent }
             @inlinable public var fill:Attribute                            { .fill }
-            @inlinable public var fillOpacity:Attribute                     { .fillOpacity }
-            @inlinable public var fillRule:Attribute                        { .fillRule }
+            @inlinable public var fill_opacity:Attribute                    { .fill_opacity }
+            @inlinable public var fill_rule:Attribute                       { .fill_rule }
             @inlinable public var filter:Attribute                          { .filter }
             @inlinable public var filterRes:Attribute                       { .filterRes }
             @inlinable public var filterUnits:Attribute                     { .filterUnits }
-            @inlinable public var floodColor:Attribute                      { .floodColor }
-            @inlinable public var floodOpacity:Attribute                    { .floodOpacity }
-            @inlinable public var fontFamily:Attribute                      { .fontFamily }
-            @inlinable public var fontSize:Attribute                        { .fontSize }
-            @inlinable public var fontSizeAdjust:Attribute                  { .fontSizeAdjust }
-            @inlinable public var fontStretch:Attribute                     { .fontStretch }
-            @inlinable public var fontStyle:Attribute                       { .fontStyle }
-            @inlinable public var fontVariant:Attribute                     { .fontVariant }
-            @inlinable public var fontWeight:Attribute                      { .fontWeight }
+            @inlinable public var flood_color:Attribute                     { .flood_color }
+            @inlinable public var flood_opacity:Attribute                   { .flood_opacity }
+            @inlinable public var font_family:Attribute                     { .font_family }
+            @inlinable public var font_size:Attribute                       { .font_size }
+            @inlinable public var font_size_adjust:Attribute                { .font_size_adjust }
+            @inlinable public var font_stretch:Attribute                    { .font_stretch }
+            @inlinable public var font_style:Attribute                      { .font_style }
+            @inlinable public var font_variant:Attribute                    { .font_variant }
+            @inlinable public var font_weight:Attribute                     { .font_weight }
             @inlinable public var format:Attribute                          { .format }
             @inlinable public var from:Attribute                            { .from }
             @inlinable public var fr:Attribute                              { .fr }
@@ -340,9 +340,9 @@ extension SVG
             @inlinable public var fy:Attribute                              { .fy }
             @inlinable public var g1:Attribute                              { .g1 }
             @inlinable public var g2:Attribute                              { .g2 }
-            @inlinable public var glyphName:Attribute                       { .glyphName }
-            @inlinable public var glyphOrientationHorizontal:Attribute      { .glyphOrientationHorizontal }
-            @inlinable public var glyphOrientationVertical:Attribute        { .glyphOrientationVertical }
+            @inlinable public var glyph_name:Attribute                      { .glyph_name }
+            @inlinable public var glyph_orientation_horizontal:Attribute    { .glyph_orientation_horizontal }
+            @inlinable public var glyph_orientation_vertical:Attribute      { .glyph_orientation_vertical }
             @inlinable public var glyphRef:Attribute                        { .glyphRef }
             @inlinable public var gradientTransform:Attribute               { .gradientTransform }
             @inlinable public var gradientUnits:Attribute                   { .gradientUnits }
@@ -350,11 +350,11 @@ extension SVG
             @inlinable public var height:Attribute                          { .height }
             @inlinable public var href:Attribute                            { .href }
             @inlinable public var hreflang:Attribute                        { .hreflang }
-            @inlinable public var horizAdvX:Attribute                       { .horizAdvX }
-            @inlinable public var horizOriginX:Attribute                    { .horizOriginX }
+            @inlinable public var horiz_adv_x:Attribute                     { .horiz_adv_x }
+            @inlinable public var horiz_origin_x:Attribute                  { .horiz_origin_x }
             @inlinable public var id:Attribute                              { .id }
             @inlinable public var ideographic:Attribute                     { .ideographic }
-            @inlinable public var imageRendering:Attribute                  { .imageRendering }
+            @inlinable public var image_rendering:Attribute                 { .image_rendering }
             @inlinable public var `in`:Attribute                            { .in }
             @inlinable public var in2:Attribute                             { .in2 }
             @inlinable public var intercept:Attribute                       { .intercept }
@@ -371,13 +371,13 @@ extension SVG
             @inlinable public var keyTimes:Attribute                        { .keyTimes }
             @inlinable public var lang:Attribute                            { .lang }
             @inlinable public var lengthAdjust:Attribute                    { .lengthAdjust }
-            @inlinable public var letterSpacing:Attribute                   { .letterSpacing }
-            @inlinable public var lightingColor:Attribute                   { .lightingColor }
+            @inlinable public var letter_spacing:Attribute                  { .letter_spacing }
+            @inlinable public var lighting_color:Attribute                  { .lighting_color }
             @inlinable public var limitingConeAngle:Attribute               { .limitingConeAngle }
             @inlinable public var local:Attribute                           { .local }
-            @inlinable public var markerEnd:Attribute                       { .markerEnd }
-            @inlinable public var markerMid:Attribute                       { .markerMid }
-            @inlinable public var markerStart:Attribute                     { .markerStart }
+            @inlinable public var marker_end:Attribute                      { .marker_end }
+            @inlinable public var marker_mid:Attribute                      { .marker_mid }
+            @inlinable public var marker_start:Attribute                    { .marker_start }
             @inlinable public var markerHeight:Attribute                    { .markerHeight }
             @inlinable public var markerUnits:Attribute                     { .markerUnits }
             @inlinable public var markerWidth:Attribute                     { .markerWidth }
@@ -400,17 +400,17 @@ extension SVG
             @inlinable public var orientation:Attribute                     { .orientation }
             @inlinable public var origin:Attribute                          { .origin }
             @inlinable public var overflow:Attribute                        { .overflow }
-            @inlinable public var overlinePosition:Attribute                { .overlinePosition }
-            @inlinable public var overlineThickness:Attribute               { .overlineThickness }
-            @inlinable public var panose1:Attribute                         { .panose1 }
-            @inlinable public var paintOrder:Attribute                      { .paintOrder }
+            @inlinable public var overline_position:Attribute               { .overline_position }
+            @inlinable public var overline_thickness:Attribute              { .overline_thickness }
+            @inlinable public var panose_1:Attribute                        { .panose_1 }
+            @inlinable public var paint_order:Attribute                     { .paint_order }
             @inlinable public var path:Attribute                            { .path }
             @inlinable public var pathLength:Attribute                      { .pathLength }
             @inlinable public var patternContentUnits:Attribute             { .patternContentUnits }
             @inlinable public var patternTransform:Attribute                { .patternTransform }
             @inlinable public var patternUnits:Attribute                    { .patternUnits }
             @inlinable public var ping:Attribute                            { .ping }
-            @inlinable public var pointerEvents:Attribute                   { .pointerEvents }
+            @inlinable public var pointer_events:Attribute                  { .pointer_events }
             @inlinable public var points:Attribute                          { .points }
             @inlinable public var pointsAtX:Attribute                       { .pointsAtX }
             @inlinable public var pointsAtY:Attribute                       { .pointsAtY }
@@ -424,7 +424,7 @@ extension SVG
             @inlinable public var refX:Attribute                            { .refX }
             @inlinable public var refY:Attribute                            { .refY }
             @inlinable public var rel:Attribute                             { .rel }
-            @inlinable public var renderingIntent:Attribute                 { .renderingIntent }
+            @inlinable public var rendering_intent:Attribute                { .rendering_intent }
             @inlinable public var repeatCount:Attribute                     { .repeatCount }
             @inlinable public var repeatDur:Attribute                       { .repeatDur }
             @inlinable public var requiredExtensions:Attribute              { .requiredExtensions }
@@ -436,7 +436,7 @@ extension SVG
             @inlinable public var ry:Attribute                              { .ry }
             @inlinable public var scale:Attribute                           { .scale }
             @inlinable public var seed:Attribute                            { .seed }
-            @inlinable public var shapeRendering:Attribute                  { .shapeRendering }
+            @inlinable public var shape_rendering:Attribute                 { .shape_rendering }
             @inlinable public var slope:Attribute                           { .slope }
             @inlinable public var spacing:Attribute                         { .spacing }
             @inlinable public var specularConstant:Attribute                { .specularConstant }
@@ -448,19 +448,19 @@ extension SVG
             @inlinable public var stemh:Attribute                           { .stemh }
             @inlinable public var stemv:Attribute                           { .stemv }
             @inlinable public var stitchTiles:Attribute                     { .stitchTiles }
-            @inlinable public var stopColor:Attribute                       { .stopColor }
-            @inlinable public var stopOpacity:Attribute                     { .stopOpacity }
-            @inlinable public var strikethroughPosition:Attribute           { .strikethroughPosition }
-            @inlinable public var strikethroughThickness:Attribute          { .strikethroughThickness }
+            @inlinable public var stop_color:Attribute                      { .stop_color }
+            @inlinable public var stop_opacity:Attribute                    { .stop_opacity }
+            @inlinable public var strikethrough_position:Attribute          { .strikethrough_position }
+            @inlinable public var strikethrough_thickness:Attribute         { .strikethrough_thickness }
             @inlinable public var string:Attribute                          { .string }
             @inlinable public var stroke:Attribute                          { .stroke }
-            @inlinable public var strokeDasharray:Attribute                 { .strokeDasharray }
-            @inlinable public var strokeDashoffset:Attribute                { .strokeDashoffset }
-            @inlinable public var strokeLinecap:Attribute                   { .strokeLinecap }
-            @inlinable public var strokeLinejoin:Attribute                  { .strokeLinejoin }
-            @inlinable public var strokeMiterlimit:Attribute                { .strokeMiterlimit }
-            @inlinable public var strokeOpacity:Attribute                   { .strokeOpacity }
-            @inlinable public var strokeWidth:Attribute                     { .strokeWidth }
+            @inlinable public var stroke_dasharray:Attribute                { .stroke_dasharray }
+            @inlinable public var stroke_dashoffset:Attribute               { .stroke_dashoffset }
+            @inlinable public var stroke_linecap:Attribute                  { .stroke_linecap }
+            @inlinable public var stroke_linejoin:Attribute                 { .stroke_linejoin }
+            @inlinable public var stroke_miterlimit:Attribute               { .stroke_miterlimit }
+            @inlinable public var stroke_opacity:Attribute                  { .stroke_opacity }
+            @inlinable public var stroke_width:Attribute                    { .stroke_width }
             @inlinable public var style:Attribute                           { .style }
             @inlinable public var surfaceScale:Attribute                    { .surfaceScale }
             @inlinable public var systemLanguage:Attribute                  { .systemLanguage }
@@ -469,41 +469,41 @@ extension SVG
             @inlinable public var target:Attribute                          { .target }
             @inlinable public var targetX:Attribute                         { .targetX }
             @inlinable public var targetY:Attribute                         { .targetY }
-            @inlinable public var textAnchor:Attribute                      { .textAnchor }
-            @inlinable public var textDecoration:Attribute                  { .textDecoration }
-            @inlinable public var textRendering:Attribute                   { .textRendering }
+            @inlinable public var text_anchor:Attribute                     { .text_anchor }
+            @inlinable public var text_decoration:Attribute                 { .text_decoration }
+            @inlinable public var text_rendering:Attribute                  { .text_rendering }
             @inlinable public var textLength:Attribute                      { .textLength }
             @inlinable public var to:Attribute                              { .to }
             @inlinable public var transform:Attribute                       { .transform }
-            @inlinable public var transformOrigin:Attribute                 { .transformOrigin }
+            @inlinable public var transform_origin:Attribute                { .transform_origin }
             @inlinable public var type:Attribute                            { .type }
             @inlinable public var u1:Attribute                              { .u1 }
             @inlinable public var u2:Attribute                              { .u2 }
-            @inlinable public var underlinePosition:Attribute               { .underlinePosition }
-            @inlinable public var underlineThickness:Attribute              { .underlineThickness }
+            @inlinable public var underline_position:Attribute              { .underline_position }
+            @inlinable public var underline_thickness:Attribute             { .underline_thickness }
             @inlinable public var unicode:Attribute                         { .unicode }
-            @inlinable public var unicodeBidi:Attribute                     { .unicodeBidi }
-            @inlinable public var unicodeRange:Attribute                    { .unicodeRange }
-            @inlinable public var unitsPerEm:Attribute                      { .unitsPerEm }
-            @inlinable public var vAlphabetic:Attribute                     { .vAlphabetic }
-            @inlinable public var vHanging:Attribute                        { .vHanging }
-            @inlinable public var vIdeographic:Attribute                    { .vIdeographic }
-            @inlinable public var vMathematical:Attribute                   { .vMathematical }
+            @inlinable public var unicode_bidi:Attribute                    { .unicode_bidi }
+            @inlinable public var unicode_range:Attribute                   { .unicode_range }
+            @inlinable public var units_per_em:Attribute                    { .units_per_em }
+            @inlinable public var v_alphabetic:Attribute                    { .v_alphabetic }
+            @inlinable public var v_hanging:Attribute                       { .v_hanging }
+            @inlinable public var v_ideographic:Attribute                   { .v_ideographic }
+            @inlinable public var v_mathematical:Attribute                  { .v_mathematical }
             @inlinable public var values:Attribute                          { .values }
-            @inlinable public var vectorEffect:Attribute                    { .vectorEffect }
+            @inlinable public var vector_effect:Attribute                   { .vector_effect }
             @inlinable public var version:Attribute                         { .version }
-            @inlinable public var vertAdvY:Attribute                        { .vertAdvY }
-            @inlinable public var vertOriginX:Attribute                     { .vertOriginX }
-            @inlinable public var vertOriginY:Attribute                     { .vertOriginY }
+            @inlinable public var vert_adv_y:Attribute                      { .vert_adv_y }
+            @inlinable public var vert_origin_x:Attribute                   { .vert_origin_x }
+            @inlinable public var vert_origin_y:Attribute                   { .vert_origin_y }
             @inlinable public var viewBox:Attribute                         { .viewBox }
             @inlinable public var viewTarget:Attribute                      { .viewTarget }
             @inlinable public var visibility:Attribute                      { .visibility }
             @inlinable public var width:Attribute                           { .width }
             @inlinable public var widths:Attribute                          { .widths }
-            @inlinable public var wordSpacing:Attribute                     { .wordSpacing }
-            @inlinable public var writingMode:Attribute                     { .writingMode }
+            @inlinable public var word_spacing:Attribute                    { .word_spacing }
+            @inlinable public var writing_mode:Attribute                    { .writing_mode }
             @inlinable public var x:Attribute                               { .x }
-            @inlinable public var xHeight:Attribute                         { .xHeight }
+            @inlinable public var x_height:Attribute                        { .x_height }
             @inlinable public var x1:Attribute                              { .x1 }
             @inlinable public var x2:Attribute                              { .x2 }
             @inlinable public var xChannelSelector:Attribute                { .xChannelSelector }
