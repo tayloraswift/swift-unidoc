@@ -167,35 +167,6 @@ extension PackageDatabase.Graphs
 }
 extension PackageDatabase.Graphs
 {
-    @available(*, deprecated)
-    func load(from edition:Unidoc.Zone, with session:Mongo.Session) async throws -> Snapshot
-    {
-        let snapshots:[Snapshot] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Snapshot>>.init(Self.name, limit: 1)
-            {
-                $0[.hint] = .init
-                {
-                    $0[Snapshot[.package]] = (-)
-                    $0[Snapshot[.version]] = (-)
-                }
-                $0[.filter] = .init
-                {
-                    $0[Snapshot[.package]] = edition.package
-                    $0[Snapshot[.version]] = edition.version
-                }
-            },
-            against: self.database)
-
-        if  let snapshot:Snapshot = snapshots.first
-        {
-            return snapshot
-        }
-        else
-        {
-            throw RetrievalError.init(zone: edition)
-        }
-    }
-
     func load(_ pins:[Snapshot.ID], with session:Mongo.Session) async throws -> [Snapshot]
     {
         let snapshots:[Snapshot] = try await session.run(
