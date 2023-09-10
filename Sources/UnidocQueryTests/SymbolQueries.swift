@@ -5,7 +5,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocQueries
 import UnidocRecords
 import UnidocSelectors

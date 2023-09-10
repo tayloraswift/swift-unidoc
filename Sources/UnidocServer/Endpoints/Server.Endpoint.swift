@@ -4,7 +4,7 @@ import MD5
 import ModuleGraphs
 import Multiparts
 import Symbols
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocQueries
 import UnidocSelectors

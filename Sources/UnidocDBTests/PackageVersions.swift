@@ -3,7 +3,7 @@ import ModuleGraphs
 import MongoTesting
 import SemanticVersions
 import SymbolGraphs
-import UnidocDatabase
+import UnidocDB
 
 struct PackageVersions:MongoTestBattery
 {

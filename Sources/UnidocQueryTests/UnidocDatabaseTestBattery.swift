@@ -1,6 +1,6 @@
 import MongoDB
 import MongoTesting
-import UnidocDatabase
+import UnidocDB
 
 /// ``MongoTestBattery`` gives us one temporary database for free, this protocol sets up the
 /// other two we need.

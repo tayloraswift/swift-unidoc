@@ -4,7 +4,7 @@ import MongoDB
 import MongoTesting
 import SymbolGraphBuilder
 import SymbolGraphs
-import UnidocDatabase
+import UnidocDB
 import UnidocQueries
 
 struct PackageQueries:UnidocDatabaseTestBattery

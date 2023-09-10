@@ -1,6 +1,6 @@
 import MongoDB
 import MongoTesting
-import UnidocDatabase
+import UnidocDB
 
 struct DatabaseSetup:MongoTestBattery
 {

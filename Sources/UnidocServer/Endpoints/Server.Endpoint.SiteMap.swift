@@ -3,7 +3,7 @@ import MD5
 import ModuleGraphs
 import MongoDB
 import UnidocAnalysis
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocRecords
 import UnidocSelectors
