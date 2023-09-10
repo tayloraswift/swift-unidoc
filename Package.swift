@@ -55,7 +55,7 @@ let package:Package = .init(
 
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAnalysis", targets: ["UnidocAnalysis"]),
-        .library(name: "UnidocDatabase", targets: ["UnidocDatabase"]),
+        .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocPages", targets: ["UnidocPages"]),
@@ -372,7 +372,7 @@ let package:Package = .init(
                 .target(name: "UnidocSelectors"),
             ]),
 
-        .target(name: "UnidocDatabase", dependencies:
+        .target(name: "UnidocDB", dependencies:
             [
                 .target(name: "GitHubIntegration"),
                 .target(name: "UnidocAnalysis"),
@@ -407,7 +407,7 @@ let package:Package = .init(
 
         .target(name: "UnidocQueries", dependencies:
             [
-                .target(name: "UnidocDatabase"),
+                .target(name: "UnidocDB"),
                 .target(name: "UnidocSelectors"),
             ]),
 
@@ -562,9 +562,9 @@ let package:Package = .init(
                 .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "UnidocDatabaseTests", dependencies:
+        .executableTarget(name: "UnidocDBTests", dependencies:
             [
-                .target(name: "UnidocDatabase"),
+                .target(name: "UnidocDB"),
                 .target(name: "GitHubClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),

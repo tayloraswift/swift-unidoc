@@ -1,7 +1,7 @@
 import FNV1
 import MongoQL
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 extension Volume.Shoot:VolumeLookupPredicate

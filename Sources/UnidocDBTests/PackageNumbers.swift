@@ -2,7 +2,7 @@ import MongoDB
 import MongoTesting
 
 @_spi(testable)
-import UnidocDatabase
+import UnidocDB
 
 struct PackageNumbers:MongoTestBattery
 {

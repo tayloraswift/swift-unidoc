@@ -1,6 +1,6 @@
 import MongoDB
 import HTTP
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 
 protocol RestrictedOperation:StatefulOperation

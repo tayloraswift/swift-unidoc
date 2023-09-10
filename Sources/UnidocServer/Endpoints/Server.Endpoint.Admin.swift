@@ -4,7 +4,7 @@ import HTTP
 import MongoDB
 import Multiparts
 import SymbolGraphs
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 
 extension Server.Endpoint

@@ -2,7 +2,7 @@ import FNV1
 import MongoQL
 import Symbols
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 extension Symbol.Decl:VolumeLookupPredicate

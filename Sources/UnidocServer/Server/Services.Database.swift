@@ -1,5 +1,5 @@
 import MongoDB
-import UnidocDatabase
+import UnidocDB
 
 extension Services
 {

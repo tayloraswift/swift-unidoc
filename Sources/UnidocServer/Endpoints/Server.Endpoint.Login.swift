@@ -2,7 +2,7 @@ import GitHubClient
 import GitHubIntegration
 import HTTP
 import MongoDB
-import UnidocDatabase
+import UnidocDB
 
 extension Server.Endpoint
 {

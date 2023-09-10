@@ -4,7 +4,7 @@ import BSONDecoding
 import BSONEncoding
 import MongoQL
 import UnidocAnalysis
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 @frozen public

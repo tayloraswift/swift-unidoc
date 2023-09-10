@@ -4,7 +4,7 @@ import HTTP
 import ModuleGraphs
 import MongoDB
 import SymbolGraphs
-import UnidocDatabase
+import UnidocDB
 
 extension Server.Endpoint
 {

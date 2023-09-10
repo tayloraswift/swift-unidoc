@@ -1,7 +1,7 @@
 import HTTP
 import MD5
 import MongoDB
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import URI
 

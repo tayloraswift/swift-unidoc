@@ -10,7 +10,7 @@ import NIOPosix
 import NIOHTTP1
 import NIOSSL
 import System
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocQueries
 import UnidocRecords

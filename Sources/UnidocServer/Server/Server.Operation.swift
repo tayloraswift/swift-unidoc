@@ -4,7 +4,7 @@ import MD5
 import Multiparts
 import NIOCore
 import NIOHTTP1
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocQueries
 import URI

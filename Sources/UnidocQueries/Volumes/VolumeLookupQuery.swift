@@ -1,6 +1,6 @@
 
 import MongoQL
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 public
