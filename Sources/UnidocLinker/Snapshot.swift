@@ -43,12 +43,6 @@ extension Snapshot
     {
         .init(package: self.package, version: self.version)
     }
-
-    // @inlinable public
-    // var stable:Bool
-    // {
-    //     self.metadata.version?.stable != nil
-    // }
 }
 extension Snapshot
 {
@@ -61,9 +55,6 @@ extension Snapshot
         case version = "V"
         case metadata = "M"
         case graph = "D"
-
-        //  Computed field, outlined for MongoDB’s convenience.
-        //  case stable = "S"
     }
 }
 extension Snapshot:BSONDocumentEncodable
@@ -77,8 +68,6 @@ extension Snapshot:BSONDocumentEncodable
         bson[.version] = self.version
         bson[.metadata] = self.metadata
         bson[.graph] = self.graph
-
-        //bson[.stable] = self.stable
     }
 }
 extension Snapshot:BSONDocumentDecodable
