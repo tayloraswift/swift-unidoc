@@ -96,6 +96,9 @@ extension PackageDatabase
         else if case .swift = docs.metadata.package,
             let tagname:String = docs.metadata.commit?.refname
         {
+            /// Standard library symbol graphs don’t come with hashes, so we can’t efficiently
+            /// “prove” that a particular edition has at least one symbol graph. But we don’t
+            /// need to query that in the first place.
             let placement:Editions.Placement = try await self.editions.register(
                 package: placement.coordinate,
                 refname: tagname,
