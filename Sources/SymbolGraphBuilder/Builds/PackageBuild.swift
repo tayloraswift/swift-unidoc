@@ -24,11 +24,6 @@ extension PackageBuild
 {
     /// Always returns ``Configuration debug``.
     var configuration:Configuration { .debug }
-
-    var pin:Repository.Pin?
-    {
-        self.id.pin
-    }
 }
 extension PackageBuild
 {
