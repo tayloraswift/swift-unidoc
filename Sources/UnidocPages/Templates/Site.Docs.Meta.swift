@@ -1,6 +1,7 @@
 import HTML
 import MarkdownRendering
 import ModuleGraphs
+import SHA1
 import UnidocRecords
 import Unidoc
 import URI
@@ -54,7 +55,7 @@ extension Site.Docs.Meta:ApplicationPage
         {
             $0.class = "introduction"
         }
-        content:
+            content:
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -70,13 +71,11 @@ extension Site.Docs.Meta:ApplicationPage
 
             $0[.h1] = self.title
 
-            if  let refname:String = self.names.refname,
-                let github:String = self.names.github,
-                let slash:String.Index = github.firstIndex(of: "/")
+            if  case .github(let path)? = self.names.origin,
+                let refname:String = self.names.refname
             {
-                $0 += HTML.SourceLink.init(
-                    file: github[github.index(after: slash)...],
-                    target: "https://\(github)/tree/\(refname)")
+                $0 += HTML.SourceLink.init(file: path.dropFirst(),
+                    target: "https://github.com\(path)/tree/\(refname)")
             }
         }
 
@@ -84,7 +83,7 @@ extension Site.Docs.Meta:ApplicationPage
         {
             $0.class = "details"
         }
-        content:
+            content:
         {
             if !self.master.platforms.isEmpty
             {
@@ -176,12 +175,22 @@ extension Site.Docs.Meta:ApplicationPage
                 $0[.dt] = "Symbol Graph ABI"
                 $0[.dd] = "\(self.master.abi)"
 
-                if  let revision:Repository.Revision = self.master.revision
+                if  let revision:SHA1 = self.master.revision
                 {
                     $0[.dt] = "Git Revision"
                     $0[.dd]
                     {
-                        $0[link: self.names.github.map { "https://\($0)/tree/\(revision)" }]
+                        let url:String?
+                        if  case .github(let path)? = self.names.origin
+                        {
+                            url = "https://github.com\(path)/tree/\(revision)"
+                        }
+                        else
+                        {
+                            url = nil
+                        }
+
+                        $0[link: url]
                         {
                             $0.rel = .noopener
                             $0.rel = .google_ugc

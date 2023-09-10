@@ -1,28 +1,32 @@
 import Unidoc
+import UnidocLinker
 
 @frozen public
-struct SnapshotReceipt:Equatable, Hashable, Sendable
+struct SnapshotReceipt:Equatable, Sendable
 {
     public
-    let id:String
+    let id:Snapshot.ID
     public
-    let zone:Unidoc.Zone
+    let edition:Unidoc.Zone
     public
-    let overwritten:Bool
+    var type:Upsert
+    public
+    var repo:PackageRepo?
 
     @inlinable public
-    init(id:String, zone:Unidoc.Zone, overwritten:Bool)
+    init(id:Snapshot.ID, edition:Unidoc.Zone, type:Upsert, repo:PackageRepo? = nil)
     {
         self.id = id
-        self.zone = zone
-        self.overwritten = overwritten
+        self.edition = edition
+        self.type = type
+        self.repo = repo
     }
 }
 extension SnapshotReceipt
 {
     @inlinable public
-    var package:Int32 { self.zone.package }
+    var package:Int32 { self.edition.package }
 
     @inlinable public
-    var version:Int32 { self.zone.version }
+    var version:Int32 { self.edition.version }
 }

@@ -83,7 +83,7 @@ extension Site.Docs.Decl:ApplicationPage
         {
             $0.class = "introduction"
         }
-        content:
+            content:
         {
             $0[.div, { $0.class = "eyebrows" }]
             {

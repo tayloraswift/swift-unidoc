@@ -12,6 +12,13 @@ protocol RestrictedOperation:StatefulOperation
 }
 extension RestrictedOperation
 {
+    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
+    {
+        \.restricted
+    }
+}
+extension RestrictedOperation
+{
     static
     func admit(_ role:Account.Role) -> Bool
     {
@@ -30,7 +37,7 @@ extension RestrictedOperation
             }
 
             let session:Mongo.Session = try await .init(from: services.database.sessions)
-            let role:Account.Role? = try await services.database.accounts.users.validate(
+            let role:Account.Role? = try await services.database.account.users.validate(
                 cookie: cookie,
                 with: session)
 

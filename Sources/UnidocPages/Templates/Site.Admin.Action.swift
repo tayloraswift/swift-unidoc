@@ -6,6 +6,7 @@ extension Site.Admin
         case dropAccountDB = "drop-account-db"
         case dropPackageDB = "drop-package-db"
         case dropUnidocDB = "drop-unidoc-db"
+
         case rebuild = "rebuild"
         case upload = "upload"
     }

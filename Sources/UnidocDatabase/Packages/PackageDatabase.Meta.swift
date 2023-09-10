@@ -23,7 +23,7 @@ extension PackageDatabase.Meta:DatabaseCollection
     @inlinable public static
     var name:Mongo.Collection { "meta" }
 
-    typealias ElementID = Never?
+    typealias ElementID = Int32
 
     static
     var indexes:[Mongo.CreateIndexStatement] { [] }

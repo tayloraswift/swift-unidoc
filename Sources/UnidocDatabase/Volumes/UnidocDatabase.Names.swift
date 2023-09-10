@@ -85,16 +85,16 @@ extension UnidocDatabase.Names:DatabaseCollection
 extension UnidocDatabase.Names
 {
     /// Returns the latest release version of the specified package, if one exists.
-    func latest(of cell:Unidoc.Cell, with session:Mongo.Session) async throws -> PatchView?
+    func latestRelease(of package:Int32, with session:Mongo.Session) async throws -> PatchView?
     {
         let results:[PatchView] = try await session.run(
-            command: self.latest(of: cell),
+            command: self.latestRelease(of: package),
             against: self.database)
         return results.first
     }
 
     private
-    func latest(of cell:Unidoc.Cell) -> Mongo.Find<Mongo.SingleBatch<PatchView>>
+    func latestRelease(of package:Int32) -> Mongo.Find<Mongo.SingleBatch<PatchView>>
     {
         .init(Self.name, limit: 1)
         {
@@ -102,6 +102,8 @@ extension UnidocDatabase.Names
             {
                 $0[.and] = .init
                 {
+                    let cell:Unidoc.Cell = .init(package: package)
+
                     $0.append
                     {
                         $0[Volume.Names[.patch]] = .init { $0[.exists] = true }

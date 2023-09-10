@@ -1,7 +1,8 @@
 import BSON
+import GitHubIntegration
 import JSONEncoding
-import ModuleGraphs
 import MongoDB
+import SHA1
 import UnidocAnalysis
 import UnidocRecords
 
@@ -59,7 +60,7 @@ extension PackageDatabase.Editions
     func list(with session:Mongo.Session) async throws -> [Unidoc.Zone]
     {
         try await session.run(
-            command: Mongo.Find<Mongo.Cursor<IdentityView>>.init(Self.name,
+            command: Mongo.Find<Mongo.Cursor<Mongo.IdentityView<Unidoc.Zone>>>.init(Self.name,
                 stride: 4096,
                 limit: .max)
             {
@@ -72,7 +73,7 @@ extension PackageDatabase.Editions
         {
             try await $0.reduce(into: [])
             {
-                for view:IdentityView in $1
+                for view:Mongo.IdentityView<Unidoc.Zone> in $1
                 {
                     $0.append(view.id)
                 }
@@ -80,66 +81,67 @@ extension PackageDatabase.Editions
         }
     }
 }
-extension PackageDatabase
+extension PackageDatabase.Editions
 {
     public
-    func editions(of package:PackageIdentifier,
-        with session:Mongo.Session) async throws -> [PackageEdition]
+    func register(_ tag:__owned GitHubAPI.Tag,
+        package:Int32,
+        with session:Mongo.Session) async throws -> Int32?
     {
-        try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<PackageEdition>>.init(Packages.name,
-                pipeline: .init
-                {
-                    $0.stage
-                    {
-                        $0[.match] = .init
-                        {
-                            $0[PackageCell[.id]] = package
-                        }
-                    }
+        let allocation:Placement = try await self.register(package: package,
+            refname: tag.name,
+            sha1: tag.hash,
+            with: session)
 
-                    let editions:Mongo.KeyPath = "editions"
+        return allocation.sha1 == nil ? allocation.cell : nil
+    }
 
-                    $0.stage
-                    {
-                        $0[.lookup] = .init
-                        {
-                            $0[.from] = Editions.name
-                            $0[.localField] = PackageCell[.index]
-                            $0[.foreignField] = PackageEdition[.package]
-                            $0[.as] = editions
-                        }
-                    }
+    func register(
+        package:Int32,
+        refname:String,
+        sha1:SHA1,
+        with session:Mongo.Session) async throws -> Placement
+    {
+        let placement:Placement = try await self.place(
+            package: package,
+            refname: refname,
+            with: session)
 
-                    $0.stage
-                    {
-                        $0[.unwind] = editions
-                    }
+        let edition:Unidoc.Zone = .init(package: package, version: placement.cell)
 
-                    $0.stage
-                    {
-                        $0[.replaceWith] = editions
-                    }
-                },
-                stride: 1),
-            against: self.id)
+        switch placement.sha1
         {
-            try await $0.reduce(into: [], += )
+        case nil, sha1?:
+            let edition:PackageEdition = .init(id: edition,
+                name: refname,
+                sha1: sha1)
+
+            //  This can fail if we race with another process.
+            try await self.insert(edition, with: session)
+
+        case _?:
+            try await self.update(field: PackageEdition[.lost],
+                of: edition,
+                to: true,
+                with: session)
         }
+
+        return placement
     }
 }
 extension PackageDatabase.Editions
 {
-    func zone(
+    private
+    func place(
         package:Int32,
         refname:String,
-        with session:Mongo.Session) async throws -> Unidoc.Zone
+        with session:Mongo.Session) async throws -> Placement
     {
         let pipeline:Mongo.Pipeline = .init
         {
-            let predecessor:Mongo.KeyPath = "predecessor"
-            let existing:Mongo.KeyPath = "existing"
-            let editions:Mongo.KeyPath = "editions"
+            let new:Mongo.KeyPath = "new"
+            let old:Mongo.KeyPath = "old"
+            let all:Mongo.KeyPath = "all"
 
             $0.stage
             {
@@ -152,7 +154,26 @@ extension PackageDatabase.Editions
             {
                 $0[.facet] = .init
                 {
-                    $0[predecessor] = .init
+                    $0[old] = .init
+                    {
+                        $0.stage
+                        {
+                            $0[.match] = .init
+                            {
+                                $0[PackageEdition[.name]] = refname
+                            }
+                        }
+
+                        $0.stage
+                        {
+                            $0[.replaceWith] = .init
+                            {
+                                $0[Placement[.cell]] = PackageEdition[.version]
+                                $0[Placement[.sha1]] = PackageEdition[.sha1]
+                            }
+                        }
+                    }
+                    $0[new] = .init
                     {
                         $0.stage
                         {
@@ -167,63 +188,31 @@ extension PackageDatabase.Editions
                         }
                         $0.stage
                         {
-                            $0[.set] = .init
+                            $0[.replaceWith] = .init
                             {
-                                $0[PackageEdition[.version]] = .expr
+                                $0[Placement[.cell]] = .expr
                                 {
                                     $0[.add] = (PackageEdition[.version], 1)
                                 }
                             }
                         }
                     }
-                    $0[existing] = .init
-                    {
-                        $0.stage
-                        {
-                            $0[.match] = .init
-                            {
-                                $0[PackageEdition[.name]] = refname
-                            }
-                        }
-                    }
                 }
             }
             $0.stage
             {
                 $0[.set] = .init
                 {
-                    $0[editions] = .expr { $0[.concatArrays] = (predecessor, existing) }
+                    $0[all] = .expr { $0[.concatArrays] = (old, new) }
                 }
             }
             $0.stage
             {
-                $0[.unwind] = editions
+                $0[.unwind] = all
             }
             $0.stage
             {
-                $0[.set] = .init
-                {
-                    $0[PackageEdition[.version]] = editions / PackageEdition[.version]
-                }
-            }
-            $0.stage
-            {
-                //  If a snapshot with the same revision already exists, return that first.
-                $0[.sort] = .init
-                {
-                    $0[PackageEdition[.version]] = (+)
-                }
-            }
-            $0.stage
-            {
-                $0[.project] = .init
-                {
-                    //  The `_id` will not always be present, but the version will be.
-                    //  Some of the documents are missing the `_id` field because they
-                    //  are generated.
-                    $0[PackageEdition[.version]] = true
-                    $0[PackageEdition[.id]] = false
-                }
+                $0[.replaceWith] = all
             }
             $0.stage
             {
@@ -231,15 +220,20 @@ extension PackageDatabase.Editions
             }
         }
 
-        let version:Int32 = try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<VersionView>>.init(Self.name,
-                pipeline: pipeline,
-                stride: 1),
+        let placement:[Placement] = try await session.run(
+            command: Mongo.Aggregate<Mongo.SingleBatch<Placement>>.init(Self.name,
+                pipeline: pipeline),
             against: self.database)
-        {
-            try await $0.reduce(into: [], +=).first?.version ?? 0
-        }
 
-        return .init(package: package, version: version)
+        return placement.first ?? .first
+    }
+}
+extension PackageDatabase.Editions
+{
+    public
+    func missing(graphs:PackageDatabase.Graphs) async throws
+    {
+        //  TODO: this does a full collection scan. We should maintain some flags within
+        //  the ``PackageEdition``s to cache whether or not they have graphs.
     }
 }

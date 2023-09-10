@@ -70,13 +70,39 @@ extension UnidocDatabase
 
         print("reinitialized unidoc database...")
 
+        var origins:[Int32: Volume.Names.Origin?] = [:]
         var count:Int = 0
 
         try await ecosystem.graphs.list(with: session)
         {
-            let snapshot:Snapshot = try await ecosystem.graphs.load(from: $0, with: session)
+            (snapshot:Snapshot) in
+
+            let origin:Volume.Names.Origin? = try await
+            {
+                switch $0
+                {
+                case let origin??:
+                    return origin
+
+                case nil?:
+                    //  We already tried to find the origin for this package, and it
+                    //  didn't exist.
+                    return nil
+
+                case nil:
+                    let package:PackageRecord? = try await ecosystem.packages.find(
+                        by: PackageRecord[.cell],
+                        of: snapshot.package,
+                        with: session)
+                    let origin:Volume.Names.Origin? = package?.repo?.origin
+                    $0 = .some(origin)
+                    return origin
+                }
+            } (&origins[snapshot.package])
+
             let volume:Volume = try await self.link(snapshot,
                 against: ecosystem,
+                origin: origin,
                 with: session)
 
             try await self.publish(volume, with: session)
@@ -90,26 +116,29 @@ extension UnidocDatabase
     }
 
     public
-    func publish(linking docs:__owned Documentation,
+    func publish(linking docs:__owned SymbolGraphArchive,
         against ecosystem:PackageDatabase,
         with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         let receipt:SnapshotReceipt = try await ecosystem.store(docs: docs, with: session)
-        let volume:Volume = try await self.link(.init(receipt.zone,
+        let volume:Volume = try await self.link(.init(
+                package: receipt.package,
+                version: receipt.version,
                 metadata: docs.metadata,
                 graph: docs.graph),
             against: ecosystem,
+            origin: receipt.repo?.origin,
             with: session)
 
-        if  receipt.overwritten
+        if  case .update = receipt.type
         {
             try await self.search.delete(volume.id, with: session)
 
-            try await self.masters.clear(receipt.zone, with: session)
-            try await self.groups.clear(receipt.zone, with: session)
-            try await self.trees.clear(receipt.zone, with: session)
+            try await self.masters.clear(receipt.edition, with: session)
+            try await self.groups.clear(receipt.edition, with: session)
+            try await self.trees.clear(receipt.edition, with: session)
 
-            try await self.names.delete(receipt.zone, with: session)
+            try await self.names.delete(receipt.edition, with: session)
         }
 
         try await self.publish(volume, with: session)
@@ -147,6 +176,7 @@ extension UnidocDatabase
     private
     func link(_ snapshot:__owned Snapshot,
         against database:PackageDatabase,
+        origin:__owned Volume.Names.Origin?,
         with session:Mongo.Session) async throws -> Volume
     {
         let context:DynamicContext = .init(snapshot,
@@ -159,13 +189,20 @@ extension UnidocDatabase
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        let latest:Names.PatchView? = try await self.names.latest(of: snapshot.cell,
+        let latest:Names.PatchView? = try await self.names.latestRelease(of: snapshot.package,
             with: session)
+        let id:Snapshot.ID = snapshot.id
 
         var volume:Volume = .init(latest: latest?.id,
             masters: linker.masters,
             groups: linker.groups,
-            names: linker.names)
+            names: .init(id: snapshot.edition,
+                display: snapshot.metadata.display,
+                refname: snapshot.metadata.commit?.refname,
+                origin: origin,
+                volume: id.volume,
+                latest: true,
+                patch: id.version.stable?.release))
 
         guard let patch:PatchVersion = volume.names.patch
         else
@@ -195,23 +232,5 @@ extension UnidocDatabase
         with session:__shared Mongo.Session) async throws -> Volume.SiteMap<PackageIdentifier>?
     {
         try await self.siteMaps.find(by: package, with: session)
-    }
-}
-extension UnidocDatabase
-{
-    public
-    func explain<Query>(query:__owned Query,
-        with session:Mongo.Session) async throws -> String
-        where Query:DatabaseQuery
-    {
-        try await self.explain(command: query.command, with: session)
-    }
-
-    @inlinable public
-    func execute<Query>(query:__owned Query,
-        with session:Mongo.Session) async throws -> Query.Output?
-        where Query:DatabaseQuery
-    {
-        try await session.run(command: query.command, against: self.id)
     }
 }

@@ -3,6 +3,7 @@ import Unidoc
 
 extension PackageDatabase.Editions
 {
+    @available(*, unavailable, message: "do we need this?")
     struct VersionView:Equatable, Sendable
     {
         let version:Int32
@@ -13,6 +14,7 @@ extension PackageDatabase.Editions
         }
     }
 }
+@available(*, unavailable)
 extension PackageDatabase.Editions.VersionView:BSONDocumentDecodable
 {
     typealias CodingKey = PackageEdition.CodingKey

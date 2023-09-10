@@ -45,13 +45,13 @@ extension FixedPage
                     }
                     $0[.link]
                     {
-                        $0.href = "\(Site.Asset.favicon_png)"
+                        $0.href = "\(Site.Asset[.favicon_png])"
                         $0.type = "\(MediaType.image(.png))"
                         $0.rel = .icon
                     }
                     $0[.link]
                     {
-                        $0.href = "\(Site.Asset.main_css)"
+                        $0.href = "\(Site.Asset[.main_css])"
                         $0.rel = .stylesheet
                     }
                     //  Inlining this saves the client a round-trip to the google fonts API.
@@ -62,7 +62,7 @@ extension FixedPage
                     history.replaceState(null, "", "\(location)");
                     """
 
-                    $0[.script] { $0.src = "\(Site.Asset.main_js)" ; $0.defer = true }
+                    $0[.script] { $0.src = "\(Site.Asset[.main_js])" ; $0.defer = true }
 
                     self.head(augmenting: &$0)
                 }

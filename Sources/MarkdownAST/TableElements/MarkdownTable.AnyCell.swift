@@ -32,7 +32,7 @@ extension MarkdownTable.AnyCell
             case .right?:   $0[.right] = true
             }
         }
-        content:
+            content:
         {
             super.emit(into: &$0)
         }

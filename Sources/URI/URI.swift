@@ -68,11 +68,11 @@ extension URI:LosslessStringConvertible
     public
     init?(_ description:Substring)
     {
-        if  let value:Self = try? URI.Rule<String.Index>.parse(description.utf8)
+        do
         {
-            self = value
+            self = try URI.Rule<String.Index>.parse(description.utf8)
         }
-        else
+        catch
         {
             return nil
         }

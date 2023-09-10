@@ -3,23 +3,23 @@ import UnidocDatabase
 
 extension Services
 {
-    struct Database
+    struct Database:Sendable
     {
         let sessions:Mongo.SessionPool
 
-        let accounts:AccountDatabase
-        let packages:PackageDatabase
+        let account:AccountDatabase
+        let package:PackageDatabase
         let unidoc:UnidocDatabase
 
         init(sessions:Mongo.SessionPool,
-            accounts:AccountDatabase,
-            packages:PackageDatabase,
+            account:AccountDatabase,
+            package:PackageDatabase,
             unidoc:UnidocDatabase)
         {
             self.sessions = sessions
 
-            self.accounts = accounts
-            self.packages = packages
+            self.account = account
+            self.package = package
             self.unidoc = unidoc
         }
     }

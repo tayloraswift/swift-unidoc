@@ -1,3 +1,5 @@
+import BSONEncoding
+import ModuleGraphs
 import MongoDB
 import SymbolGraphs
 import Unidoc
@@ -21,7 +23,7 @@ extension PackageDatabase
 extension PackageDatabase.Graphs:DatabaseCollection
 {
     public
-    typealias ElementID = String
+    typealias ElementID = Snapshot.ID
 
     @inlinable public static
     var name:Mongo.Collection { "symbolgraphs" }
@@ -32,10 +34,21 @@ extension PackageDatabase.Graphs:DatabaseCollection
         .init
         {
             $0[.unique] = true // for now...
-            $0[.name] = "zone"
+            $0[.name] = "package,version"
             $0[.key] = .init
             {
-                $0[Snapshot[.zone]] = (+)
+                $0[Snapshot[.package]] = (-)
+                $0[Snapshot[.version]] = (-)
+            }
+        },
+        .init
+        {
+            $0[.unique] = true // for now...
+            $0[.name] = "metadata_package,version"
+            $0[.key] = .init
+            {
+                $0[Snapshot[.metadata] / SymbolGraphMetadata[.package]] = (-)
+                $0[Snapshot[.version]] = (-)
             }
         },
     ]
@@ -43,29 +56,62 @@ extension PackageDatabase.Graphs:DatabaseCollection
 
 extension PackageDatabase.Graphs
 {
-    func list(with session:Mongo.Session,
-        _ yield:(Unidoc.Zone) async throws -> ()) async throws
+    func list(package:Int32? = nil,
+        with session:Mongo.Session,
+        _ yield:(Snapshot) async throws -> ()) async throws
+    {
+        try await self.list(package: package, version: nil, with: session, yield)
+    }
+
+    func list(edition:Unidoc.Zone,
+        with session:Mongo.Session,
+        _ yield:(Snapshot) async throws -> ()) async throws
+    {
+        try await self.list(
+            package: edition.package,
+            version: edition.version,
+            with: session,
+            yield)
+    }
+
+    private
+    func list(
+        package:Int32?,
+        version:Int32?,
+        with session:Mongo.Session,
+        _ yield:(Snapshot) async throws -> ()) async throws
     {
         try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<ZoneView>>.init(Self.name,
+            command: Mongo.Aggregate<Mongo.Cursor<Snapshot>>.init(Self.name,
                 pipeline: .init
                 {
                     $0.stage
                     {
-                        $0[.group] = .init
+                        $0[.match] = .init
                         {
-                            $0[.id] = Snapshot[.zone]
+                            $0[Snapshot[.package]] = package
+                            $0[Snapshot[.version]] = version
                         }
                     }
                 },
-                stride: 4096),
+                stride: 1)
+            {
+                if  case _? = package
+                {
+                    $0[.hint] = .init
+                    {
+                        $0[Snapshot[.package]] = (-)
+                        $0[Snapshot[.version]] = (-)
+                    }
+                }
+            },
             against: self.database)
         {
-            for try await batch:[ZoneView] in $0
+            for try await batch:[Snapshot] in $0
             {
-                for view:ZoneView in batch
+                for snapshot:Snapshot in batch
                 {
-                    try await yield(view.zone)
+                    try await yield(snapshot)
                 }
             }
         }
@@ -73,48 +119,69 @@ extension PackageDatabase.Graphs
 }
 extension PackageDatabase.Graphs
 {
-    func store(_ docs:Documentation,
-        into zone:Unidoc.Zone,
-        with session:Mongo.Session) async throws -> SnapshotReceipt
+    public
+    func metadata(
+        package:PackageIdentifier,
+        limit:Int = 1,
+        with session:Mongo.Session) async throws -> [SymbolGraphMetadata]
     {
-        let snapshot:Snapshot = .init(zone, metadata: docs.metadata, graph: docs.graph)
-
-        let response:Mongo.UpdateResponse<String> = try await session.run(
-            command: Mongo.Update<Mongo.One, String>.init(Self.name,
-                updates: [
-                    .init
+        try await session.run(
+            command: Mongo.Aggregate<Mongo.SingleBatch<SymbolGraphMetadata>>.init(Self.name,
+                pipeline: .init
+                {
+                    $0.stage
                     {
-                        $0[.upsert] = true
-                        $0[.hint] = .init
+                        $0[.match] = .init
                         {
-                            $0[Snapshot[.zone]] = (+)
+                            $0[Snapshot[.metadata] / SymbolGraphMetadata[.package]] = package
                         }
-                        $0[.q] = .init
-                        {
-                            $0[Snapshot[.zone]] = zone
-                        }
-                        $0[.u] = snapshot
-                    },
-                ]),
-            against: self.database)
+                    }
 
-        return .init(id: snapshot.id, zone: zone, overwritten: response.upserted.isEmpty)
+                    $0.stage
+                    {
+                        $0[.sort] = .init
+                        {
+                            $0[Snapshot[.version]] = (-)
+                        }
+                    }
+
+                    $0.stage
+                    {
+                        $0[.limit] = limit
+                    }
+
+                    $0.stage
+                    {
+                        $0[.replaceWith] = Snapshot[.metadata]
+                    }
+                })
+            {
+                $0[.hint] = .init
+                {
+                    $0[Snapshot[.metadata] / SymbolGraphMetadata[.package]] = (-)
+                    $0[Snapshot[.version]] = (-)
+                }
+            },
+            against: self.database)
     }
 }
 extension PackageDatabase.Graphs
 {
-    func load(from zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Snapshot
+    @available(*, deprecated)
+    func load(from edition:Unidoc.Zone, with session:Mongo.Session) async throws -> Snapshot
     {
         let snapshots:[Snapshot] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Snapshot>>.init(Self.name, limit: 1)
             {
                 $0[.hint] = .init
                 {
-                    $0[Snapshot[.zone]] = (+)
+                    $0[Snapshot[.package]] = (-)
+                    $0[Snapshot[.version]] = (-)
                 }
                 $0[.filter] = .init
                 {
-                    $0[Snapshot[.zone]] = zone
+                    $0[Snapshot[.package]] = edition.package
+                    $0[Snapshot[.version]] = edition.version
                 }
             },
             against: self.database)
@@ -125,11 +192,11 @@ extension PackageDatabase.Graphs
         }
         else
         {
-            throw RetrievalError.init(zone: zone)
+            throw RetrievalError.init(zone: edition)
         }
     }
 
-    func load(_ pins:[String], with session:Mongo.Session) async throws -> [Snapshot]
+    func load(_ pins:[Snapshot.ID], with session:Mongo.Session) async throws -> [Snapshot]
     {
         let snapshots:[Snapshot] = try await session.run(
             command: Mongo.Find<Mongo.Cursor<Snapshot>>.init(Self.name,
@@ -146,8 +213,8 @@ extension PackageDatabase.Graphs
             try await $0.reduce(into: [], +=)
         }
 
-        let missing:Set<String> = snapshots.reduce(into: .init(pins)) { $0.remove($1.id) }
-        for missing:String in missing.sorted()
+        let missing:Set<Snapshot.ID> = snapshots.reduce(into: .init(pins)) { $0.remove($1.id) }
+        for missing:Snapshot.ID in missing.sorted(by: { $0.package < $1.package })
         {
             print("warning: could not load snapshot dependency '\(missing)'")
         }
