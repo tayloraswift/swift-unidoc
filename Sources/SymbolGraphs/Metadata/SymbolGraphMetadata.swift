@@ -159,9 +159,9 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
-            commit: try bson[.commit_hash]?.decode(as: SHA1.self)
+            commit: try bson[.commit_refname]?.decode(as: String.self)
             {
-                .init($0, refname: try bson[.commit_refname].decode())
+                .init(try bson[.commit_hash]?.decode(), refname: $0)
             },
             triple: try bson[.triple].decode(),
             swift: try bson[.swift]?.decode(),
