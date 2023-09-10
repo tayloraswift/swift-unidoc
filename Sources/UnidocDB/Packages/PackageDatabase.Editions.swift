@@ -88,9 +88,11 @@ extension PackageDatabase.Editions
         package:Int32,
         with session:Mongo.Session) async throws -> Int32?
     {
+        //  We use the SHA-1 hash as “proof” that the edition has at least one symbol graph.
+        //  Therefore, merely registering tags does not update hashes.
         let placement:Placement = try await self.register(package: package,
             refname: tag.name,
-            sha1: tag.hash,
+            sha1: nil,
             with: session)
 
         return placement.new ? placement.coordinate : nil
