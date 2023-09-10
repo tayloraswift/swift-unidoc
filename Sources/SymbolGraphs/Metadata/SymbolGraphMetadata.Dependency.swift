@@ -2,6 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 import SemanticVersions
+import SHA1
 
 extension SymbolGraphMetadata
 {
@@ -13,14 +14,14 @@ extension SymbolGraphMetadata
         public
         let requirement:Repository.Requirement?
         public
-        let revision:Repository.Revision
+        let revision:SHA1
         public
         let version:AnyVersion
 
         @inlinable public
         init(package:PackageIdentifier,
             requirement:Repository.Requirement?,
-            revision:Repository.Revision,
+            revision:SHA1,
             version:AnyVersion)
         {
             self.package = package
