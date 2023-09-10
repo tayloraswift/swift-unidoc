@@ -88,12 +88,12 @@ extension PackageDatabase.Editions
         package:Int32,
         with session:Mongo.Session) async throws -> Int32?
     {
-        let allocation:Placement = try await self.register(package: package,
+        let placement:Placement = try await self.register(package: package,
             refname: tag.name,
             sha1: tag.hash,
             with: session)
 
-        return allocation.sha1 == nil ? allocation.cell : nil
+        return placement.new ? placement.coordinate : nil
     }
 
     func register(
@@ -102,6 +102,7 @@ extension PackageDatabase.Editions
         sha1:SHA1?,
         with session:Mongo.Session) async throws -> Placement
     {
+        //  Placement involves autoincrement, which is why this cannot be done in an update.
         let placement:Placement = try await self.place(
             package: package,
             refname: refname,
@@ -109,24 +110,38 @@ extension PackageDatabase.Editions
 
         let edition:PackageEdition = .init(id: .init(
                 package: package,
-                version: placement.cell),
+                version: placement.coordinate),
             name: refname,
             sha1: sha1)
 
-        switch placement.sha1
+        if  placement.new
         {
-        case nil:
             //  This can fail if we race with another process.
             try await self.insert(edition, with: session)
+        }
+        else if let sha1:SHA1
+        {
+            switch placement.sha1
+            {
+            case nil:
+                //  If the edition would gain a hash, we should update it.
 
-        case sha1:
-            try await self.update(edition, with: session)
+                //  FIXME: this can race another update, in which case we will store an
+                //  arbitrary choice of hash without marking the edition dirty.
+                //  We should use `placement.sha1` as a hint to skip the update only,
+                //  and set the dirty flag within a custom update statement.
+                try await self.update(edition, with: session)
 
-        case _?:
-            try await self.update(field: PackageEdition[.lost],
-                of: edition.id,
-                to: true,
-                with: session)
+            case sha1?:
+                //  Nothing to do.
+                break
+
+            case _?:
+                try await self.update(field: PackageEdition[.lost],
+                    of: edition.id,
+                    to: true,
+                    with: session)
+            }
         }
 
         return placement
@@ -171,8 +186,9 @@ extension PackageDatabase.Editions
                         {
                             $0[.replaceWith] = .init
                             {
-                                $0[Placement[.cell]] = PackageEdition[.version]
+                                $0[Placement[.coordinate]] = PackageEdition[.version]
                                 $0[Placement[.sha1]] = PackageEdition[.sha1]
+                                $0[Placement[.new]] = false
                             }
                         }
                     }
@@ -193,10 +209,11 @@ extension PackageDatabase.Editions
                         {
                             $0[.replaceWith] = .init
                             {
-                                $0[Placement[.cell]] = .expr
+                                $0[Placement[.coordinate]] = .expr
                                 {
                                     $0[.add] = (PackageEdition[.version], 1)
                                 }
+                                $0[Placement[.new]] = true
                             }
                         }
                     }

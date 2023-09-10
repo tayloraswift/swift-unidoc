@@ -155,8 +155,8 @@ extension Server.Endpoint
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .stateful(Pipeline<UnidocDatabase,
-                        SearchIndexQuery<VolumeIdentifier>>.init(
+                return .stateful(
+                    Pipeline<UnidocDatabase, SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: UnidocDatabase.Search.name,
