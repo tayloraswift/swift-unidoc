@@ -59,7 +59,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             .init(id: .init(package: "swift-malibu",
                     version: "0.0.0",
                     triple: toolchain.triple),
-                edition: .init(package: 1, version: 0),
+                edition: .init(package: 1, version: -1),
                 type: .insert))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
