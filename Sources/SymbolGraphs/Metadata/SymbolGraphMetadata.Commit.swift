@@ -5,9 +5,10 @@ extension SymbolGraphMetadata
     @frozen public
     struct Commit:Equatable, Sendable
     {
-        /// The SHA-1 hash of the commit.
+        /// The SHA-1 hash of the commit, nil if unknown. If the hash is unknown, the refname
+        /// **must** point to a permanent tag.
         public
-        var hash:SHA1
+        var hash:SHA1?
         /// The git ref used to check out the original package sources, if the
         /// relevant symbol graph was generated for a source-controlled SPM package.
         /// This is an **exact** string; `v1.2.3` and  `1.2.3` are not equivalent.
@@ -18,7 +19,7 @@ extension SymbolGraphMetadata
         var refname:String
 
         @inlinable public
-        init(_  hash:SHA1, refname:String)
+        init(_ hash:SHA1?, refname:String)
         {
             self.hash = hash
             self.refname = refname

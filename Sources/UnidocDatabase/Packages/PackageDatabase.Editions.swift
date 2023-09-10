@@ -99,7 +99,7 @@ extension PackageDatabase.Editions
     func register(
         package:Int32,
         refname:String,
-        sha1:SHA1,
+        sha1:SHA1?,
         with session:Mongo.Session) async throws -> Placement
     {
         let placement:Placement = try await self.place(
@@ -107,21 +107,24 @@ extension PackageDatabase.Editions
             refname: refname,
             with: session)
 
-        let edition:Unidoc.Zone = .init(package: package, version: placement.cell)
+        let edition:PackageEdition = .init(id: .init(
+                package: package,
+                version: placement.cell),
+            name: refname,
+            sha1: sha1)
 
         switch placement.sha1
         {
-        case nil, sha1?:
-            let edition:PackageEdition = .init(id: edition,
-                name: refname,
-                sha1: sha1)
-
+        case nil:
             //  This can fail if we race with another process.
             try await self.insert(edition, with: session)
 
+        case sha1:
+            try await self.update(edition, with: session)
+
         case _?:
             try await self.update(field: PackageEdition[.lost],
-                of: edition,
+                of: edition.id,
                 to: true,
                 with: session)
         }

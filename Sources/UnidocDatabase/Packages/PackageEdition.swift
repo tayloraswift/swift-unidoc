@@ -15,14 +15,14 @@ struct PackageEdition:Identifiable
     let name:String
     /// The SHA-1 hash of the git commit associated with this edition.
     public
-    let sha1:SHA1
+    let sha1:SHA1?
     /// Indicates if the repository host has published a tag of the same name with a different
     /// ``sha1`` hash.
     public
     let lost:Bool
 
     @inlinable public
-    init(id:Unidoc.Zone, name:String, sha1:SHA1, lost:Bool = false)
+    init(id:Unidoc.Zone, name:String, sha1:SHA1?, lost:Bool = false)
     {
         self.id = id
         self.name = name
@@ -67,7 +67,7 @@ extension PackageEdition:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             name: try bson[.name].decode(),
-            sha1: try bson[.sha1].decode(),
+            sha1: try bson[.sha1]?.decode(),
             lost: try bson[.lost]?.decode() ?? false)
     }
 }
