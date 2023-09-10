@@ -44,42 +44,34 @@ extension PackageDatabase.Packages:DatabaseCollection
 }
 extension PackageDatabase.Packages
 {
-    /// Registers the given package identifier in the database, returning its cell.
-    /// This is really just a glorified string internment system.
+    /// Registers the given package identifier in the database, returning its package
+    /// coordinate. This is really just a glorified string internment system.
     ///
     /// This function can be expensive. It only makes one query if the package is already
     /// registered, but can take two round trips to intern the identifier otherwise.
-    public
     func register(_ package:PackageIdentifier,
-        with session:Mongo.Session) async throws -> Int32
-    {
-        try await self.register(package, updating: nil, tracking: nil, with: session).cell
-    }
-
-    func register(_ package:PackageIdentifier,
-        updating meta:PackageDatabase.Meta?,
+        updating meta:PackageDatabase.Meta,
         tracking repo:PackageRepo?,
         with session:Mongo.Session) async throws -> Placement
     {
+        //  Placement involves autoincrement, which is why this cannot be done in an update.
         var placement:Placement = try await self.place(package: package, with: session)
-        let record:PackageRecord = .init(id: package, cell: placement.cell, repo: repo)
+        var record:PackageRecord
+        {
+            .init(id: package, cell: placement.coordinate, repo: repo)
+        }
 
         if  placement.new
         {
             //  This can fail if we race with another process.
             try await self.insert(record, with: session)
-
+            //  Regenerate the JSON list of all packages.
+            try await meta.upsert(try await self.scan(with: session), with: session)
         }
-        else if case _? = repo
+        else if let repo:PackageRepo, repo != placement.repo
         {
             try await self.update(record, with: session)
             placement.repo = repo
-        }
-
-        if  let meta:PackageDatabase.Meta, placement.new
-        {
-            //  Update the list of all packages.
-            try await meta.upsert(try await self.scan(with: session), with: session)
         }
 
         return placement
@@ -104,7 +96,7 @@ extension PackageDatabase.Packages
             {
                 $0[.replaceWith] = .init
                 {
-                    $0[Placement[.cell]] = PackageRecord[.cell]
+                    $0[Placement[.coordinate]] = PackageRecord[.cell]
                     $0[Placement[.repo]] = PackageRecord[.repo]
                     $0[Placement[.new]] = false
                 }
@@ -131,7 +123,7 @@ extension PackageDatabase.Packages
                         {
                             $0[.replaceWith] = .init
                             {
-                                $0[Placement[.cell]] = .expr
+                                $0[Placement[.coordinate]] = .expr
                                 {
                                     $0[.add] = (PackageRecord[.cell], 1)
                                 }
@@ -146,7 +138,7 @@ extension PackageDatabase.Packages
             {
                 $0[.sort] = .init
                 {
-                    $0[Placement[.cell]] = (+)
+                    $0[Placement[.coordinate]] = (+)
                 }
             }
             $0.stage

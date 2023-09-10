@@ -10,25 +10,14 @@ import UnidocQueries
 import UnidocRecords
 import UnidocSelectors
 
-struct DatabaseQueries:MongoTestBattery
+struct SymbolQueries:UnidocDatabaseTestBattery
 {
-    func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
+    func run(_ tests:TestGroup,
+        accounts:AccountDatabase,
+        packages:PackageDatabase,
+        unidoc:UnidocDatabase,
+        pool:Mongo.SessionPool) async throws
     {
-        let unidoc:Mongo.Database = .init("\(database)_unidoc")
-        try await pool.withTemporaryDatabase(unidoc)
-        {
-            try await self.run(tests, pool: pool, packages: database, unidoc: unidoc)
-        }
-    }
-
-    private
-    func run(_ tests:TestGroup, pool:Mongo.SessionPool,
-        packages:Mongo.Database,
-        unidoc:Mongo.Database) async throws
-    {
-        let packages:PackageDatabase = await .setup(as: packages, in: pool)
-        let unidoc:UnidocDatabase = await .setup(as: unidoc, in: pool)
-
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
 

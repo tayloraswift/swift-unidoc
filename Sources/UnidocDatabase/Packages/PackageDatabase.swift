@@ -50,6 +50,17 @@ extension PackageDatabase:DatabaseModel
 }
 extension PackageDatabase
 {
+    @_spi(testable)
+    public
+    func track(package:PackageIdentifier,
+        with session:Mongo.Session) async throws -> Int32
+    {
+        try await self.packages.register(package,
+            updating: self.meta,
+            tracking: nil,
+            with: session).coordinate
+    }
+
     public
     func track(repo:GitHubAPI.Repo, with session:Mongo.Session) async throws -> Int32
     {
@@ -57,7 +68,7 @@ extension PackageDatabase
         try await self.packages.register(.init(repo.name),
             updating: self.meta,
             tracking: .github(repo),
-            with: session).cell
+            with: session).coordinate
     }
 
     public
@@ -66,7 +77,7 @@ extension PackageDatabase
     {
         let placement:Packages.Placement = try await self.packages.register(
             docs.metadata.package,
-            updating: nil,
+            updating: self.meta,
             tracking: nil,
             with: session)
 
@@ -75,23 +86,23 @@ extension PackageDatabase
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit
         {
             let placement:Editions.Placement = try await self.editions.register(
-                package: placement.cell,
+                package: placement.coordinate,
                 refname: commit.refname,
                 sha1: commit.hash,
                 with: session)
 
-            version = placement.cell
+            version = placement.coordinate
         }
         else if case .swift = docs.metadata.package,
             let tagname:String = docs.metadata.commit?.refname
         {
             let placement:Editions.Placement = try await self.editions.register(
-                package: placement.cell,
+                package: placement.coordinate,
                 refname: tagname,
                 sha1: nil,
                 with: session)
 
-            version = placement.cell
+            version = placement.coordinate
         }
         else
         {
@@ -99,7 +110,7 @@ extension PackageDatabase
         }
 
         let snapshot:Snapshot = .init(
-            package: placement.cell,
+            package: placement.coordinate,
             version: version,
             metadata: docs.metadata,
             graph: docs.graph)
