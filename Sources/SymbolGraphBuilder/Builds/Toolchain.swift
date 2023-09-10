@@ -11,12 +11,15 @@ struct Toolchain
     public
     let version:AnyVersion
     public
+    let tagname:String
+    public
     let triple:Triple
 
-    @inlinable public
-    init(version:AnyVersion, triple:Triple)
+    private
+    init(version:AnyVersion, tagname:String, triple:Triple)
     {
         self.version = version
+        self.tagname = tagname
         self.triple = triple
     }
 }
@@ -65,9 +68,38 @@ extension Toolchain
             throw ToolchainError.malformedSplash
         }
 
+        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+        //  Target: x86_64-unknown-linux-gnu
+        if  toolchain.count > 4
+        {
+            throw ToolchainError.developmentSnapshotNotSupported
+        }
+
+        let parenthesized:Substring = toolchain[3]
+
+        guard parenthesized.startIndex < parenthesized.endIndex
+        else
+        {
+            throw ToolchainError.malformedSplash
+        }
+
+        let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
+        let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
+
+        guard   i < j,
+                case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
+        else
+        {
+            throw ToolchainError.malformedSplash
+        }
+
         if  let triple:Triple = .init(triple[1])
         {
-            self.init(version: .init(toolchain[2]), triple: triple)
+
+            self.init(
+                version: .init(toolchain[2]),
+                tagname: .init(parenthesized[i ..< j]),
+                triple: triple)
         }
         else
         {
@@ -133,7 +165,9 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let metadata:SymbolGraphMetadata = .swift(self.version, triple: self.triple,
+        let metadata:SymbolGraphMetadata = .swift(self.version,
+            tagname: self.tagname,
+            triple: self.triple,
             products:
             [
                 .init(name: "__stdlib__", type: .library(.automatic),

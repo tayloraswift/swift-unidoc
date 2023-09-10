@@ -15,7 +15,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     var package:PackageIdentifier
     /// A git commit to associate with the relevant symbol graph.
     ///
-    /// This is nil for standard library symbol graphs, and local package symbol graphs.
+    /// This is nil for local package symbol graphs.
     public
     var commit:Commit?
     /// The swift target triple of the documentation artifacts this symbol graph was compiled
@@ -81,7 +81,10 @@ struct SymbolGraphMetadata:Equatable, Sendable
 extension SymbolGraphMetadata
 {
     public static
-    func swift(_ swift:AnyVersion, triple:Triple, products:[ProductDetails]) -> Self
+    func swift(_ swift:AnyVersion,
+        tagname:String,
+        triple:Triple,
+        products:[ProductDetails]) -> Self
     {
         let display:String
         switch swift.canonical
@@ -95,7 +98,7 @@ extension SymbolGraphMetadata
 
         return .init(
             package: .swift,
-            commit: nil,
+            commit: .init(nil, refname: tagname),
             triple: triple,
             swift: swift,
             products: products,

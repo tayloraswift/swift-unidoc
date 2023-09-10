@@ -82,6 +82,17 @@ extension PackageDatabase
 
             version = placement.cell
         }
+        else if case .swift = docs.metadata.package,
+            let tagname:String = docs.metadata.commit?.refname
+        {
+            let placement:Editions.Placement = try await self.editions.register(
+                package: placement.cell,
+                refname: tagname,
+                sha1: nil,
+                with: session)
+
+            version = placement.cell
+        }
         else
         {
             version = -1

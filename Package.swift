@@ -565,6 +565,7 @@ let package:Package = .init(
         .executableTarget(name: "UnidocDatabaseTests", dependencies:
             [
                 .target(name: "UnidocDatabase"),
+                .target(name: "GitHubClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
