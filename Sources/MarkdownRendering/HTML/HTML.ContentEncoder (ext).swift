@@ -4,7 +4,8 @@ import MarkdownABI
 extension HTML.ContentEncoder
 {
     mutating
-    func emit(element:MarkdownBytecode.Emission, with attributes:MarkdownAttributeContext)
+    func emit(element:MarkdownBytecode.Emission,
+        with attributes:MarkdownElementContext.AttributeContext)
     {
         let html:HTML.VoidElement
 
@@ -38,12 +39,14 @@ extension HTML.ContentEncoder
 extension HTML.ContentEncoder
 {
     private mutating
-    func open(_ element:HTML.ContainerElement, with attributes:MarkdownAttributeContext)
+    func open(_ element:HTML.ContainerElement,
+        with attributes:MarkdownElementContext.AttributeContext)
     {
         self.open(element) { attributes.encode(to: &$0) }
     }
     mutating
-    func open(context:MarkdownElementContext, with attributes:MarkdownAttributeContext)
+    func open(context:MarkdownElementContext,
+        with attributes:MarkdownElementContext.AttributeContext)
     {
         switch context
         {
