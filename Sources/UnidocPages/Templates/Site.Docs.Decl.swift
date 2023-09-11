@@ -53,8 +53,8 @@ extension Site.Docs.Decl:ApplicationPage
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             return .init(
-                scope: self.master.scope.isEmpty ? nil : self.inliner.link(scope,
-                    to: self.master.scope),
+                scope: self.master.scope.isEmpty ?
+                    nil : self.inliner.vectorLink(components: scope, to: self.master.scope),
                 last: last)
         }
         else
