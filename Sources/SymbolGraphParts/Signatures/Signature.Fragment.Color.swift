@@ -60,7 +60,7 @@ extension Signature.Fragment.Color
         case .binding:          return .binding
         case .identifier:       return .identifier
         case .keyword:          return .keyword
-        case .label:            return .identifier
+        case .label:            return .label
         case .text:             return nil
         case .typeIdentifier:   return .type
         case .typeParameter:    return .typealias

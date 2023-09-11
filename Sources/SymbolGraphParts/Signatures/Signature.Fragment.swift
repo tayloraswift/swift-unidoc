@@ -25,24 +25,6 @@ extension Signature<Symbol.Decl>
 }
 extension Signature.Fragment
 {
-    var nominal:Bool
-    {
-        switch  (self.color, self.spelling)
-        {
-        case    (.label, _),
-                (.identifier, _),
-                (.keyword, "init"),
-                (.keyword, "deinit"),
-                (.keyword, "subscript"):
-            return true
-
-        case _:
-            return false
-        }
-    }
-}
-extension Signature.Fragment
-{
     func spelled(_ spelling:__owned String) -> Self
     {
         .init(spelling, referent: self.referent, color: self.color)

@@ -92,6 +92,7 @@ extension MarkdownElementContext
         case .identifier:       self = .highlight(.identifier,      attributes: &attributes)
         case .interpolation:    self = .highlight(.interpolation,   attributes: &attributes)
         case .keyword:          self = .highlight(.keyword,         attributes: &attributes)
+        case .label:            self = .highlight(.label,           attributes: &attributes)
         case .literalNumber:    self = .highlight(.literalNumber,   attributes: &attributes)
         case .literalString:    self = .highlight(.literalString,   attributes: &attributes)
         case .magic:            self = .highlight(.magic,           attributes: &attributes)

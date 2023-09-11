@@ -10,12 +10,18 @@ extension Signature<Symbol.Decl>.Abridged
         {
             for fragment:Signature.Fragment in fragments
             {
-                if  fragment.nominal
+                switch  (fragment.color, fragment.spelling)
                 {
+                case    (.identifier, _),
+                        (.keyword, "init"),
+                        (.keyword, "deinit"),
+                        (.keyword, "subscript"):
                     $0[.identifier] = fragment.spelling
-                }
-                else
-                {
+
+                case    (.label, _):
+                    $0[.label] = fragment.spelling
+
+                case    _:
                     $0 += fragment.spelling
                 }
             }
