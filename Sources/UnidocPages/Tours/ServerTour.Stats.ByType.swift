@@ -6,25 +6,21 @@ extension ServerTour.Stats
         public
         var siteMap:Int
         public
-        var pipelineIndex:Int
-        public
-        var pipelineQuery:Int
-        public
         var restricted:Int
+        public
+        var query:Int
         public
         var other:Int
 
         @inlinable public
         init(siteMap:Int = 0,
-            pipelineIndex:Int = 0,
-            pipelineQuery:Int = 0,
             restricted:Int = 0,
+            query:Int = 0,
             other:Int = 0)
         {
             self.siteMap = siteMap
-            self.pipelineIndex = pipelineIndex
-            self.pipelineQuery = pipelineQuery
             self.restricted = restricted
+            self.query = query
             self.other = other
         }
     }
@@ -35,7 +31,7 @@ extension ServerTour.Stats.ByType
     @inlinable public
     var total:Int
     {
-        self.siteMap + self.pipelineIndex + self.pipelineQuery + self.other
+        self.siteMap + self.query + self.other
     }
 }
 extension ServerTour.Stats.ByType:ExpressibleByDictionaryLiteral

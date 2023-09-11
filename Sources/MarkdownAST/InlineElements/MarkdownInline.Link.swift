@@ -79,7 +79,7 @@ extension MarkdownInline.Link:MarkdownElement
             case nil:                       return
             }
         }
-        content:
+            content:
         {
             for element:MarkdownInline in self.elements
             {

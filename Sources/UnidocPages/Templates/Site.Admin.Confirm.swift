@@ -29,7 +29,7 @@ extension Site.Admin.Confirm
     {
         switch action
         {
-        case .dropAccountDB, .dropUnidocDB:
+        case .dropAccountDB, .dropPackageDB, .dropUnidocDB:
             self.init(action: action,
                 label: action.label,
                 text: """
@@ -59,7 +59,7 @@ extension Site.Admin.Confirm:AdministrativePage
             $0.action = "\(self.location)"
             $0.method = "post"
         }
-        content:
+            content:
         {
             $0[.p] = self.text
             $0[.p]

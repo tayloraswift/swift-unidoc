@@ -4,6 +4,7 @@ import MD5
 import Multiparts
 import NIOCore
 import NIOHTTP1
+import UnidocDB
 import UnidocPages
 import UnidocQueries
 import URI
@@ -52,7 +53,8 @@ extension Server.Operation:HTTPServerOperation
         {
             //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
             //  for the standard library.
-            let get:Server.Endpoint = .stateful(Server.Endpoint.Pipeline<WideQuery>.init(
+            let get:Server.Endpoint = .stateful(
+                Server.Endpoint.Pipeline<UnidocDatabase, WideQuery>.init(
                 explain: false,
                 query: .init(
                     volume: .init(package: .swift, version: nil),
@@ -78,23 +80,44 @@ extension Server.Operation:HTTPServerOperation
         let path:[String] = uri.path.normalized(lowercase: true)
 
         let cookies:Server.Request.Cookies = .init(headers[canonicalForm: "cookie"])
-        let form:MultipartForm?
+        let form:AnyForm
 
-        if  let type:Substring = headers[canonicalForm: "content-type"].first,
-            let type:ContentType = .init(type),
-            case .multipart(.formData(boundary: let boundary)) = type
+        guard   let type:Substring = headers[canonicalForm: "content-type"].first,
+                let type:ContentType = .init(type)
+        else
         {
-            guard let valid:MultipartForm = try? .init(splitting: body, on: boundary)
-            else
+            return nil
+        }
+
+        switch type
+        {
+        case    .media(.application(.x_www_form_urlencoded, charset: .utf8?)),
+                .media(.application(.x_www_form_urlencoded, charset: nil)):
+            do
+            {
+                let query:URI.Query = try .parse(parameters: body)
+                form = .urlencoded(query.parameters.reduce(into: [:])
+                {
+                    $0[$1.key] = $1.value
+                })
+            }
+            catch
             {
                 return nil
             }
 
-            form = valid
-        }
-        else
-        {
-            form = nil
+        case    .multipart(.form_data(boundary: let boundary?)):
+            do
+            {
+                form = .multipart(try .init(splitting: body, on: boundary))
+            }
+            catch
+            {
+                return nil
+            }
+
+        case _:
+            return nil
         }
 
         if  let root:Int = path.indices.first,

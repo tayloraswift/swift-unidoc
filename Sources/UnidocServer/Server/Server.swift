@@ -10,7 +10,7 @@ import NIOPosix
 import NIOHTTP1
 import NIOSSL
 import System
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocQueries
 import UnidocRecords
@@ -25,7 +25,7 @@ actor Server
     let database:Services.Database
 
     private nonisolated
-    let cache:Cache<Site.Asset>
+    let cache:Cache<Site.Asset.Get>
 
     private nonisolated
     let mode:ServerMode
@@ -99,25 +99,8 @@ extension Server
 
             do
             {
-                let type:WritableKeyPath<ServerTour.Stats.ByType, Int>
-                switch request.operation
-                {
-                case    is any RestrictedOperation:
-                    type = \.restricted
-
-                case    is Endpoint.Pipeline<SearchIndexQuery<VolumeIdentifier>>,
-                        is Endpoint.Pipeline<SearchIndexQuery<Never?>>:
-                    type = \.pipelineIndex
-
-                case    is Endpoint.Pipeline<WideQuery>:
-                    type = \.pipelineQuery
-
-                case    is Endpoint.SiteMap:
-                    type = \.siteMap
-
-                default:
-                    type = \.other
-                }
+                let type:WritableKeyPath<ServerTour.Stats.ByType, Int> =
+                    request.operation.statisticalType
 
                 let response:ServerResponse = try await request.operation.load(
                     from: services,
@@ -132,20 +115,14 @@ extension Server
                 switch response
                 {
                 case .resource(let resource):
-                    switch (resource.results, resource.content)
-                    {
-                    case (.error, _):           status = \.errored
-                    case (.forbidden, _):       status = \.unauthorized
-                    case (.none, _):            status = \.notFound
-                    case (_, .length):          status = \.notModified
-                    case (.many, _):            status = \.ok
-                    case (.one, _):             status = \.ok
-                    }
-
                     services.tour.stats.bytes[keyPath: type] += resource.content.size
+                    status = resource.statisticalStatus
 
-                case .redirect(.temporary, _):  status = \.redirectedTemporarily
-                case .redirect(.permanent, _):  status = \.redirectedPermanently
+                case .redirect(.temporary, _):
+                    status = \.redirectedTemporarily
+
+                case .redirect(.permanent, _):
+                    status = \.redirectedPermanently
                 }
 
                 services.tour.stats.responses[keyPath: status] += 1
@@ -232,7 +209,8 @@ extension Server
 
             let delegate:Self = .init(database: .init(
                     sessions: $0,
-                    accounts: await .setup(as: "accounts", in: $0),
+                    account: await .setup(as: "accounts", in: $0),
+                    package: await .setup(as: "packages", in: $0),
                     unidoc: await .setup(as: "unidoc", in: $0)),
                 mode: mode)
 

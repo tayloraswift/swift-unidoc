@@ -3,7 +3,7 @@ import MD5
 import ModuleGraphs
 import MongoDB
 import UnidocAnalysis
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 import UnidocRecords
 import UnidocSelectors
@@ -24,6 +24,13 @@ extension Server.Endpoint
             self.uri = uri
             self.tag = tag
         }
+    }
+}
+extension Server.Endpoint.SiteMap:StatefulOperation
+{
+    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
+    {
+        \.siteMap
     }
 }
 extension Server.Endpoint.SiteMap:DatabaseOperation, UnrestrictedOperation

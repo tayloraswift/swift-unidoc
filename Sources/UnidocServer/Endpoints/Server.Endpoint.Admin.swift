@@ -1,8 +1,10 @@
+import GitHubClient
+import GitHubIntegration
 import HTTP
 import MongoDB
 import Multiparts
 import SymbolGraphs
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 
 extension Server.Endpoint
@@ -26,14 +28,20 @@ extension Server.Endpoint.Admin:RestrictedOperation
             let page:Site.Admin = .init(configuration: try await services.database.sessions.run(
                     command: Mongo.ReplicaSetGetConfiguration.init(),
                     against: .admin),
-                tour: services.tour)
+                tour: services.tour,
+                real: services.mode == .secured)
 
             return .resource(page.rendered())
 
         case .perform(.dropAccountDB, _):
-            try await services.database.accounts.drop(with: session)
+            try await services.database.account.drop(with: session)
 
             page = .init(action: .dropAccountDB, text: "Reinitialized Account database!")
+
+        case .perform(.dropPackageDB, _):
+            try await services.database.package.drop(with: session)
+
+            page = .init(action: .dropPackageDB, text: "Reinitialized Package database!")
 
         case .perform(.dropUnidocDB, _):
             try await services.database.unidoc.drop(with: session)
@@ -41,7 +49,9 @@ extension Server.Endpoint.Admin:RestrictedOperation
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
         case .perform(.rebuild, _):
-            let rebuilt:Int = try await services.database.unidoc.rebuild(with: session)
+            let rebuilt:Int = try await services.database.unidoc.rebuild(
+                from: services.database.package,
+                with: session)
 
             page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
 
@@ -51,9 +61,13 @@ extension Server.Endpoint.Admin:RestrictedOperation
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                receipts.append(try await services.database.unidoc.publish(
-                    docs: try .init(buffer: item.value),
-                    with: session))
+                let documentation:SymbolGraphArchive = try .init(buffer: item.value)
+                let receipt:SnapshotReceipt = try await services.database.unidoc.publish(
+                    linking: documentation,
+                    against: services.database.package,
+                    with: session)
+
+                receipts.append(receipt)
             }
 
             page = .init(action: .upload, text: "\(receipts)")

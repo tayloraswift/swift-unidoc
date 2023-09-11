@@ -6,16 +6,16 @@ import System
 struct PackageBuild
 {
     /// What is being built.
-    let identity:Identity
+    let id:ID
     /// Where to emit documentation artifacts to.
     let output:Workspace
     /// Where the package root directory is. There should be a `Package.swift`
     /// manifest at the top level of this directory.
     let root:FilePath
 
-    init(identity:Identity, output:Workspace, root:FilePath)
+    init(id:ID, output:Workspace, root:FilePath)
     {
-        self.identity = identity
+        self.id = id
         self.output = output
         self.root = root
     }
@@ -24,19 +24,6 @@ extension PackageBuild
 {
     /// Always returns ``Configuration debug``.
     var configuration:Configuration { .debug }
-
-    var id:PackageIdentifier
-    {
-        self.identity.package
-    }
-    var pin:Repository.Pin?
-    {
-        self.identity.pin
-    }
-    var refname:String?
-    {
-        self.identity.refname
-    }
 }
 extension PackageBuild
 {
@@ -58,7 +45,7 @@ extension PackageBuild
         in shared:Workspace,
         clean:Bool = false) async throws -> Self
     {
-        .init(identity: .unversioned(package),
+        .init(id: .unversioned(package),
             output: try await shared.create("\(package)", clean: clean).create("artifacts"),
             root: packages / "\(package)")
     }
@@ -133,8 +120,7 @@ extension PackageBuild
                 location: .remote(url: repository),
                 revision: revision,
                 version: version)
-            return .init(
-                identity: .versioned(pin, refname: refname),
+            return .init(id: .versioned(pin, refname: refname),
                 output: artifacts,
                 root: cloned)
         }

@@ -37,7 +37,7 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
         }
 
         if  let scope:Unidoc.Scalar = object.scope(of: local),
-            let scope:Int32 = scope - object.zone,
+            let scope:Int32 = scope - object.edition,
             case _? = object.decls[scope]?.decl?.article
         {
             return \.indirect

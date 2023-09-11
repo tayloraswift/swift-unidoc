@@ -1,3 +1,4 @@
+import Media
 import MongoDB
 import HTML
 import HTTPServer
@@ -12,12 +13,15 @@ extension Site
         let configuration:Mongo.ReplicaSetConfiguration
         public
         let tour:ServerTour
+        public
+        let real:Bool
 
         @inlinable public
-        init(configuration:Mongo.ReplicaSetConfiguration, tour:ServerTour)
+        init(configuration:Mongo.ReplicaSetConfiguration, tour:ServerTour, real:Bool)
         {
             self.configuration = configuration
             self.tour = tour
+            self.real = real
         }
     }
 }
@@ -46,13 +50,58 @@ extension Site.Admin:AdministrativePage
     {
         main[.h2] = "Welcome Empress!"
 
+        main[.p]
+        {
+            $0 += "This is a "
+            $0[.strong] = self.real ? "real" : "test"
+            $0 += " deployment."
+        }
+
+        main[.hr]
+
         main[.form]
         {
-            $0.enctype = "multipart/form-data"
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Site.API[.index])"
+            $0.method = "post"
+        }
+            content:
+        {
+            $0[.p]
+            {
+                $0[.code] = "https://github.com/"
+
+                $0[.input]
+                {
+                    $0.type = "text"
+                    $0.name = "owner"
+                    $0.placeholder = "owner"
+                }
+
+                $0[.code] = "/"
+
+                $0[.input]
+                {
+                    $0.type = "text"
+                    $0.name = "repo"
+                    $0.placeholder = "repo"
+                }
+            }
+            $0[.p]
+            {
+                $0[.button] { $0.type = "submit" } = "Index GitHub Repository"
+            }
+        }
+
+        main[.hr]
+
+        main[.form]
+        {
+            $0.enctype = "\(MultipartType.form_data))"
             $0.action = "\(Self[.upload])"
             $0.method = "post"
         }
-        content:
+            content:
         {
             $0[.p]
             {
@@ -77,7 +126,7 @@ extension Site.Admin:AdministrativePage
             $0.action = "\(Self[.rebuild])"
             $0.method = "post"
         }
-        content:
+            content:
         {
             $0[.p]
             {
@@ -85,7 +134,7 @@ extension Site.Admin:AdministrativePage
             }
         }
 
-        for action:Action in [.dropUnidocDB, .dropAccountDB]
+        for action:Action in [.dropUnidocDB, .dropPackageDB, .dropAccountDB]
         {
             main[.hr]
 
@@ -95,7 +144,7 @@ extension Site.Admin:AdministrativePage
                 $0.action = "\(Self[action])"
                 $0.method = "get"
             }
-            content:
+                content:
             {
                 $0[.p]
                 {

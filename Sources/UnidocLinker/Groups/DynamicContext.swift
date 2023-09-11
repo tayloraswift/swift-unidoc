@@ -40,13 +40,13 @@ extension DynamicContext
         {
             for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.decls.citizens
             {
-                upstream.citizens[symbol] = snapshot.zone + citizen
+                upstream.citizens[symbol] = snapshot.edition + citizen
             }
             for (culture, symbol):(Int, ModuleIdentifier) in zip(
                 snapshot.graph.cultures.indices,
                 snapshot.graph.namespaces)
             {
-                upstream.cultures[symbol] = snapshot.zone + culture * .module
+                upstream.cultures[symbol] = snapshot.edition + culture * .module
             }
         }
 
@@ -130,8 +130,8 @@ extension DynamicContext
         var dependencies:[Volume.Master.Meta.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
-        if  case _? = self.current.metadata.toolchain,
-            let resolution:Unidoc.Zone = self[.swift]?.zone
+        if  self.current.metadata.package != .swift,
+            let resolution:Unidoc.Zone = self[.swift]?.edition
         {
             dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
         }
@@ -139,7 +139,7 @@ extension DynamicContext
         {
             dependencies.append(.init(id: dependency.package,
                 requirement: dependency.requirement,
-                resolution: self[dependency.package]?.zone))
+                resolution: self[dependency.package]?.edition))
         }
 
         return dependencies
@@ -219,7 +219,7 @@ extension DynamicContext
 
         return .init(id: `extension`.id,
             conditions: signature.conditions,
-            culture: self.current.zone + signature.culture,
+            culture: self.current.edition + signature.culture,
             scope: signature.extends,
             conformances: self.sort(lexically: `extension`.conformances),
             features: self.sort(lexically: `extension`.features),

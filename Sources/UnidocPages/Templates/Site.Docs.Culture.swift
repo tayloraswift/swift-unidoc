@@ -103,7 +103,7 @@ extension Site.Docs.Culture:ApplicationPage
         {
             $0.class = "details"
         }
-        content:
+            content:
         {
             $0[.div, { $0.class = "stats"}]
             {

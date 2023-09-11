@@ -1,22 +1,25 @@
 import MongoDB
-import UnidocDatabase
+import UnidocDB
 
 extension Services
 {
-    struct Database
+    struct Database:Sendable
     {
         let sessions:Mongo.SessionPool
 
-        let accounts:Account.Database
-        let unidoc:Unidoc.Database
+        let account:AccountDatabase
+        let package:PackageDatabase
+        let unidoc:UnidocDatabase
 
         init(sessions:Mongo.SessionPool,
-            accounts:Account.Database,
-            unidoc:Unidoc.Database)
+            account:AccountDatabase,
+            package:PackageDatabase,
+            unidoc:UnidocDatabase)
         {
             self.sessions = sessions
 
-            self.accounts = accounts
+            self.account = account
+            self.package = package
             self.unidoc = unidoc
         }
     }
