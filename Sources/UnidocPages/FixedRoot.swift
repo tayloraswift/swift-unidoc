@@ -7,6 +7,9 @@ import URI
 public
 protocol FixedRoot
 {
+    associatedtype Get = Never
+    associatedtype Post = Never
+
     static
     var root:String { get }
 }
@@ -15,17 +18,16 @@ extension FixedRoot
     @inlinable public static
     var uri:URI { [.push(self.root)] }
 }
-extension FixedRoot where Self:CustomStringConvertible, Self:RawRepresentable<String>
-{
-    @inlinable public
-    var description:String { "/\(Self.root)/\(self.rawValue)" }
-}
 extension FixedRoot
 {
     static
     subscript(names:Volume.Names) -> URI
     {
-        var uri:URI = Self.uri ; uri.path += names ; return uri
+        var uri:URI = Self.uri
+
+        uri.path += names
+
+        return uri
     }
 
     static
@@ -38,4 +40,14 @@ extension FixedRoot
 
         return uri
     }
+}
+extension FixedRoot where Get:FixedAPI
+{
+    static
+    subscript(get:Get) -> URI { Self.uri.path / "\(get)" }
+}
+extension FixedRoot where Post:FixedAPI
+{
+    static
+    subscript(post:Post) -> URI { Self.uri.path / "\(post)" }
 }

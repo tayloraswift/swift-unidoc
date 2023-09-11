@@ -1,6 +1,6 @@
 import MongoQL
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 import UnidocSelectors
 
@@ -66,7 +66,7 @@ extension WideQuery:VolumeLookupQuery
                 let min:Mongo.Variable<Unidoc.Scalar> = "min"
                 let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-                $0[.from] = Unidoc.Database.Groups.name
+                $0[.from] = UnidocDatabase.Groups.name
                 $0[.let] = .init
                 {
                     $0[let: id] = Output.Principal[.master] / Volume.Master[.id]
@@ -166,7 +166,7 @@ extension WideQuery:VolumeLookupQuery
                         {
                             let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
 
-                            $0[.from] = Unidoc.Database.Trees.name
+                            $0[.from] = UnidocDatabase.Trees.name
                             $0[.let] = .init
                             {
                                 $0[let: tree] = .expr
@@ -230,7 +230,7 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.lookup] = .init
                         {
-                            $0[.from] = Unidoc.Database.Masters.name
+                            $0[.from] = UnidocDatabase.Masters.name
                             $0[.localField] = scalars
                             $0[.foreignField] = Volume.Master[.id]
                             $0[.as] = results
@@ -283,7 +283,7 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.lookup] = .init
                         {
-                            $0[.from] = Unidoc.Database.Names.name
+                            $0[.from] = UnidocDatabase.Names.name
                             $0[.localField] = zones
                             $0[.foreignField] = Volume.Names[.id]
                             $0[.as] = results

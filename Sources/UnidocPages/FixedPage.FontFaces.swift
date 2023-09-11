@@ -283,28 +283,28 @@ extension FixedPage
         font-style: regular;
         font-weight: 400;
         font-display: swap;
-        src: url(\(Site.Asset.literata45_woff2)) format('woff2');
+        src: url(\(Site.Asset[.literata45_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: italic;
         font-weight: 400;
         font-display: swap;
-        src: url(\(Site.Asset.literata47_woff2)) format('woff2');
+        src: url(\(Site.Asset[.literata47_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: regular;
         font-weight: 700;
         font-display: swap;
-        src: url(\(Site.Asset.literata75_woff2)) format('woff2');
+        src: url(\(Site.Asset[.literata75_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: italic;
         font-weight: 700;
         font-display: swap;
-        src: url(\(Site.Asset.literata77_woff2)) format('woff2');
+        src: url(\(Site.Asset[.literata77_woff2])) format('woff2');
         }
         """
     }

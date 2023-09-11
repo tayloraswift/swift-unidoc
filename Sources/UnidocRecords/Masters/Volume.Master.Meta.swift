@@ -1,5 +1,6 @@
 import ModuleGraphs
 import SemanticVersions
+import SHA1
 import Unidoc
 
 extension Volume.Master
@@ -22,7 +23,7 @@ extension Volume.Master
         public
         var platforms:[PlatformRequirement]
         public
-        var revision:Repository.Revision?
+        var revision:SHA1?
 
         public
         var census:Volume.Census
@@ -32,7 +33,7 @@ extension Volume.Master
             abi:MinorVersion,
             dependencies:[Dependency] = [],
             platforms:[PlatformRequirement] = [],
-            revision:Repository.Revision? = nil,
+            revision:SHA1? = nil,
             census:Volume.Census = .init())
         {
             self.id = id

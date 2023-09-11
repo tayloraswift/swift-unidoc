@@ -11,12 +11,15 @@ struct Toolchain
     public
     let version:AnyVersion
     public
+    let tagname:String
+    public
     let triple:Triple
 
-    @inlinable public
-    init(version:AnyVersion, triple:Triple)
+    private
+    init(version:AnyVersion, tagname:String, triple:Triple)
     {
         self.version = version
+        self.tagname = tagname
         self.triple = triple
     }
 }
@@ -65,9 +68,38 @@ extension Toolchain
             throw ToolchainError.malformedSplash
         }
 
+        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+        //  Target: x86_64-unknown-linux-gnu
+        if  toolchain.count > 4
+        {
+            throw ToolchainError.developmentSnapshotNotSupported
+        }
+
+        let parenthesized:Substring = toolchain[3]
+
+        guard parenthesized.startIndex < parenthesized.endIndex
+        else
+        {
+            throw ToolchainError.malformedSplash
+        }
+
+        let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
+        let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
+
+        guard   i < j,
+                case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
+        else
+        {
+            throw ToolchainError.malformedSplash
+        }
+
         if  let triple:Triple = .init(triple[1])
         {
-            self.init(version: .init(toolchain[2]), triple: triple)
+
+            self.init(
+                version: .init(toolchain[2]),
+                tagname: .init(parenthesized[i ..< j]),
+                triple: triple)
         }
         else
         {
@@ -79,7 +111,7 @@ extension Toolchain
 {
     public
     func generateDocs(for build:ToolchainBuild,
-        pretty:Bool = false) async throws -> Documentation
+        pretty:Bool = false) async throws -> SymbolGraphArchive
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let artifacts:Artifacts = try await .dump(
@@ -133,29 +165,31 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let products:[ProductDetails] =
-        [
-            .init(name: "__stdlib__", type: .library(.automatic),
-                dependencies: [],
-                cultures: [Int].init(0 ... 7)),
-            .init(name: "__corelibs__", type: .library(.automatic),
-                dependencies: [],
-                cultures: [Int].init(artifacts.cultures.indices)),
-        ]
-
-        let metadata:SymbolGraphMetadata = .swift(triple: self.triple,
-            version: self.version,
-            products: products)
+        let metadata:SymbolGraphMetadata = .swift(self.version,
+            tagname: self.tagname,
+            triple: self.triple,
+            products:
+            [
+                .init(name: "__stdlib__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 7)),
+                .init(name: "__corelibs__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(artifacts.cultures.indices)),
+            ])
 
         return .init(metadata: metadata, graph: try await .build(from: artifacts))
     }
     public
     func generateDocs(for build:PackageBuild,
-        pretty:Bool = false) async throws -> Documentation
+        pretty:Bool = false) async throws -> SymbolGraphArchive
     {
         let manifest:PackageManifest = try await .dump(from: build)
 
-        print("Building package: '\(build.id)' (swift-tools-version: \(manifest.format))")
+        print("""
+            Building package: '\(build.id.package)' \
+            (swift-tools-version: \(manifest.format))
+            """)
 
         //  Don’t parrot the `swift build` output to the terminal
         let log:FilePath = build.output.path / "build.log"
@@ -183,7 +217,7 @@ extension Toolchain
         }
 
         let platform:PlatformIdentifier = try self.platform()
-        let sink:PackageNode = try .libraries(as: build.id,
+        let sink:PackageNode = try .libraries(as: build.id.package,
             flattening: manifest,
             platform: platform)
 
@@ -196,8 +230,7 @@ extension Toolchain
         {
             let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.location.name)"
 
-            let manifest:PackageManifest = try await .dump(from: .init(
-                identity: .upstream(pin),
+            let manifest:PackageManifest = try await .dump(from: .init(id: .upstream(pin),
                 output: build.output,
                 root: checkout))
 
@@ -217,17 +250,25 @@ extension Toolchain
             triple: self.triple,
             pretty: pretty)
 
-        let metadata:SymbolGraphMetadata = .init(package: build.id,
-            version: build.pin?.version,
+        let commit:SymbolGraphMetadata.Commit?
+        if  case .versioned(let pin, let ref) = build.id,
+            case .sha1(let sha1) = pin.revision
+        {
+            commit = .init(sha1, refname: ref)
+        }
+        else
+        {
+            commit = nil
+        }
+
+        let metadata:SymbolGraphMetadata = .init(package: build.id.package,
+            commit: commit,
             triple: self.triple,
-            dependencies: try package.pinnedDependencies(using: pins),
-            toolchain: self.version,
-            products: package.products,
+            swift: self.version,
             requirements: manifest.requirements,
-            revision: build.pin?.revision,
-            refname: build.refname,
+            dependencies: try package.pinnedDependencies(using: pins),
+            products: package.products,
             display: manifest.name,
-            github: build.identity.github,
             root: manifest.root)
 
         return .init(metadata: metadata, graph: try await .build(from: artifacts))

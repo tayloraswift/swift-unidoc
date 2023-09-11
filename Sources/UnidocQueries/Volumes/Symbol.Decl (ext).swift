@@ -2,7 +2,7 @@ import FNV1
 import MongoQL
 import Symbols
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 extension Symbol.Decl:VolumeLookupPredicate
@@ -15,7 +15,7 @@ extension Symbol.Decl:VolumeLookupPredicate
             let min:Mongo.Variable<Unidoc.Scalar> = "min"
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-            $0[.from] = Unidoc.Database.Masters.name
+            $0[.from] = UnidocDatabase.Masters.name
             $0[.let] = .init
             {
                 $0[let: min] = input / Volume.Names[.planes_min]

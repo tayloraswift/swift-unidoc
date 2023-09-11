@@ -6,12 +6,11 @@ enum MediaSubtype:String, Equatable, Hashable, Sendable
     case css
     case gif
     case html
-    case icon = "x-icon"
     case javascript
     case jpeg
     case json
     case markdown
-    case octetStream = "octet-stream"
+    case octet_stream = "octet-stream"
     case ogg
     case otf
     case plain
@@ -24,6 +23,9 @@ enum MediaSubtype:String, Equatable, Hashable, Sendable
     case webp
     case woff
     case woff2
+
+    case x_icon = "x-icon"
+    case x_www_form_urlencoded = "x-www-form-urlencoded"
 }
 extension MediaSubtype:CustomStringConvertible
 {
@@ -57,12 +59,6 @@ extension MediaSubtype:LosslessStringConvertible
             self = .wav
         case "ecmascript", "x-ecmascript", "x-javascript", "jscript", "livescript":
             self = .javascript
-        case "font/ttf":
-            self = .ttf
-        case "image/png":
-            self = .png
-        case "image/x-icon":
-            self = .icon
         case _:
             return nil
         }
@@ -77,29 +73,30 @@ extension MediaSubtype
     {
         switch self
         {
-        case .apng:         return "apng"
-        case .avif:         return "avif"
-        case .css:          return "css"
-        case .gif:          return "gif"
-        case .html:         return "html"
-        case .icon:         return "ico"
-        case .javascript:   return "js"
-        case .jpeg:         return "jpeg"
-        case .json:         return "json"
-        case .markdown:     return "md"
-        case .octetStream:  return "bin"
-        case .ogg:          return "ogg"
-        case .otf:          return "otf"
-        case .plain:        return "txt"
-        case .png:          return "png"
-        case .rss:          return "rss"
-        case .svg:          return "svg"
-        case .ttf:          return "ttf"
-        case .wav:          return "wav"
-        case .webm:         return "webm"
-        case .webp:         return "webp"
-        case .woff:         return "woff"
-        case .woff2:        return "woff2"
+        case .apng:                     return "apng"
+        case .avif:                     return "avif"
+        case .css:                      return "css"
+        case .gif:                      return "gif"
+        case .html:                     return "html"
+        case .javascript:               return "js"
+        case .jpeg:                     return "jpeg"
+        case .json:                     return "json"
+        case .markdown:                 return "md"
+        case .octet_stream:             return "bin"
+        case .ogg:                      return "ogg"
+        case .otf:                      return "otf"
+        case .plain:                    return "txt"
+        case .png:                      return "png"
+        case .rss:                      return "rss"
+        case .svg:                      return "svg"
+        case .ttf:                      return "ttf"
+        case .wav:                      return "wav"
+        case .webm:                     return "webm"
+        case .webp:                     return "webp"
+        case .woff:                     return "woff"
+        case .woff2:                    return "woff2"
+        case .x_icon:                   return "ico"
+        case .x_www_form_urlencoded:    return "txt"
         }
     }
 }

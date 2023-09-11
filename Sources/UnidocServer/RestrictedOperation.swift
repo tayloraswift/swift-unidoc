@@ -1,6 +1,6 @@
 import MongoDB
 import HTTP
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 
 protocol RestrictedOperation:StatefulOperation
@@ -9,6 +9,13 @@ protocol RestrictedOperation:StatefulOperation
     func admit(_ role:Account.Role) -> Bool
 
     func load(from services:Services) async throws -> ServerResponse?
+}
+extension RestrictedOperation
+{
+    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
+    {
+        \.restricted
+    }
 }
 extension RestrictedOperation
 {
@@ -30,7 +37,7 @@ extension RestrictedOperation
             }
 
             let session:Mongo.Session = try await .init(from: services.database.sessions)
-            let role:Account.Role? = try await services.database.accounts.users.validate(
+            let role:Account.Role? = try await services.database.account.users.validate(
                 cookie: cookie,
                 with: session)
 

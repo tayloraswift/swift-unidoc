@@ -2,6 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import ModuleGraphs
 import SemanticVersions
+import SHA1
 
 @frozen public
 struct SymbolGraphMetadata:Equatable, Sendable
@@ -9,173 +10,99 @@ struct SymbolGraphMetadata:Equatable, Sendable
     public
     var abi:MinorVersion
 
-    /// A package identifier.
-    /// This is part of a documentation object’s identity.
+    /// A package identifier to associate with this symbol graph.
     public
     var package:PackageIdentifier
-    /// A version to associate with the relevant symbol graph.
+    /// A git commit to associate with the relevant symbol graph.
     ///
-    /// This is part of a documentation object’s identity, if non-nil.
-    /// If this field is nil, other documentation objects will **not** be able
-    /// to link against the relevant documentation.
-    ///
-    /// Versions are an SPM/toolchain concept; to obtain the git-based version
-    /// information, use ``refname`` or ``revision``.
+    /// This is nil for local package symbol graphs.
     public
-    var version:AnyVersion?
-    /// A swift target triple.
-    /// This is part of a documentation object’s identity.
+    var commit:Commit?
+    /// The swift target triple of the documentation artifacts this symbol graph was compiled
+    /// from.
     public
     var triple:Triple
-
-
-    /// All other packages (and their pins) that the relevant package is aware of.
-    /// This list is used to select other documentation objects to link against.
+    /// The swift toolchain the relevant documentation was generated with, which is used to
+    /// select a version of the standard library to link against.
+    ///
+    /// Because standard library symbol graphs lack a commit hash, this is the **only** way to
+    /// distinguish between symbol graphs for different versions of the standard library.
+    /// This became mandatory for standard library symbol graphs in version 8 of the metadata
+    /// format.
     public
-    var dependencies:[Dependency]
-    /// The swift toolchain the relevant documentation was generated with,
-    /// which is used to select a version of the standard library to link
-    /// against. This is nil if the documentation *is* the toolchain
-    /// documentation.
-    public
-    var toolchain:AnyVersion?
-    /// The package products contained within the relevant documentation.
-    /// The products in this list contain references to packages named in
-    /// ``dependencies``. This list is used to filter other documentation objects
-    /// to link against.
-    public
-    var products:[ProductDetails]
-
+    var swift:AnyVersion?
 
     /// The platform requirements of the relevant package. This field is
     /// informative only.
     public
     var requirements:[PlatformRequirement]
-    /// The commit hash of the relevant documentation. It is a more specific
-    /// notion of version than ``ref``, but it is used for validation only.
+    /// All other packages (and their pins) that the relevant package is aware of.
+    /// This list is used to select other documentation objects to link against.
     public
-    var revision:Repository.Revision?
-    /// The git ref used to check out the original package sources, if the
-    /// relevant symbol graph was generated for a source-controlled SPM package.
-    /// Unlike ``version``, this is an exact string; e.g. it can be `v1.2.3`
-    /// whereas ``version`` may render as `1.2.3`.
+    var dependencies:[Dependency]
+    /// The package products contained within the relevant documentation.
+    ///
+    /// The products in this list contain references to packages named in ``dependencies``.
+    /// This list is used to filter other documentation objects to link against.
     public
-    var refname:String?
-
-
+    var products:[ProductDetails]
     /// An optional string containing the marketing name for the package.
     public
     var display:String?
-    /// An optional string containing the URL of the package’s GitHub repository.
-    public
-    var github:String?
     /// An optional prefix to append to file paths when printing diagnostics.
     public
     var root:Repository.Root?
 
     public
     init(package:PackageIdentifier,
-        version:AnyVersion?,
+        commit:Commit?,
         triple:Triple,
-        dependencies:[Dependency],
-        toolchain:AnyVersion?,
-        products:[ProductDetails],
+        swift:AnyVersion?,
         requirements:[PlatformRequirement] = [],
-        revision:Repository.Revision? = nil,
-        refname:String? = nil,
+        dependencies:[Dependency] = [],
+        products:[ProductDetails] = [],
         display:String? = nil,
-        github:String? = nil,
         root:Repository.Root? = nil)
     {
         self.abi = ABI.version
 
         self.package = package
+        self.commit = commit
         self.triple = triple
-        self.version = version
+        self.swift = swift
 
         self.dependencies = dependencies
-        self.toolchain = toolchain
-        self.products = products
-
         self.requirements = requirements
-        self.revision = revision
-        self.refname = refname
-
+        self.products = products
         self.display = display
-        self.github = github
         self.root = root
     }
 }
 extension SymbolGraphMetadata
 {
     public static
-    func swift(triple:Triple, version:AnyVersion?, products:[ProductDetails]) -> Self
+    func swift(_ swift:AnyVersion,
+        tagname:String,
+        triple:Triple,
+        products:[ProductDetails]) -> Self
     {
         let display:String
-        switch version?.canonical
-        {
-        case .stable(.release(let version))?:
-            display = "Swift \(version.minor)"
-
-        case _?:
-            display = "Swift Nightly"
-
-        case nil:
-            display = "Swift"
-        }
-
-        return .init(package: .swift, version: version, triple: triple,
-            dependencies: [],
-            toolchain: nil,
-            products: products,
-            display: display,
-            github: "github.com/apple/swift")
-    }
-}
-extension SymbolGraphMetadata
-{
-    /// Returns the relevant documentation object’s identity string. This string encodes
-    /// the package identifier, snapshot target triple, and package version if available.
-    /// (This implies that two unversioned snapshots of the same package will have the
-    /// same identity strings.)
-    public
-    var id:String
-    {
-        self.version.map { self.pin(self.package, $0) } ?? "\(self.package) ? \(self.triple)"
-    }
-
-    /// Returns all the relevant documentation object’s dependencies’ identity strings,
-    /// including the one for its toolchain dependency, unless it is itself a toolchain
-    /// snapshot.
-    public
-    func pins() -> [String]
-    {
-        var pins:[String] = []
-        if  let version:AnyVersion = self.toolchain
-        {
-            pins.reserveCapacity(self.dependencies.count + 1)
-            pins.append(self.pin(.swift, version))
-        }
-        for dependency:Dependency in self.dependencies
-        {
-            pins.append(self.pin(dependency.package, dependency.version))
-        }
-        return pins
-    }
-
-    private
-    func pin(_ package:PackageIdentifier, _ version:AnyVersion) -> String
-    {
-        switch version.canonical
+        switch swift.canonical
         {
         case .stable(.release(let version)):
-            //  swift-syntax v5.8.0 x86_64-unknown-linux-gnu
-            return "\(package) v\(version) \(self.triple)"
+            display = "Swift \(version.minor)"
 
-        case .unstable(let name):
-            //  swift-syntax @5.9-dev x86_64-unknown-linux-gnu
-            return "\(package) @\(name) \(self.triple)"
+        case .unstable:
+            display = "Swift Nightly"
         }
+
+        return .init(
+            package: .swift,
+            commit: .init(nil, refname: tagname),
+            triple: triple,
+            swift: swift,
+            products: products,
+            display: display)
     }
 }
 extension SymbolGraphMetadata
@@ -185,17 +112,25 @@ extension SymbolGraphMetadata
     {
         case abi
         case package
-        case version
+        case commit_hash = "revision"
+        case commit_refname = "refname"
         case triple
-        case dependencies
-        case toolchain
-        case products
+        case swift = "toolchain"
         case requirements
-        case revision
-        case refname
+        case dependencies
+        case products
         case display
-        case github
         case root
+
+        @available(*, unavailable, message: """
+            This is no longer part of the metadata format (removed 8.0)
+            """)
+        case version
+
+        @available(*, unavailable, message: """
+            This is no longer part of the metadata format (removed 8.0)
+            """)
+        case github
     }
 }
 extension SymbolGraphMetadata:BSONDocumentEncodable
@@ -205,19 +140,15 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
     {
         bson[.abi] = self.abi
         bson[.package] = self.package
-        bson[.version] = self.version
+        bson[.commit_hash] = self.commit?.hash
+        bson[.commit_refname] = self.commit?.refname
         bson[.triple] = self.triple
-
-        bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
-        bson[.toolchain] = self.toolchain
-        bson[.products] = self.products
+        bson[.swift] = self.swift
 
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
-        bson[.revision] = self.revision
-        bson[.refname] = self.refname
-
+        bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
+        bson[.products] = self.products
         bson[.display] = self.display
-        bson[.github] = self.github
         bson[.root] = self.root
     }
 }
@@ -226,17 +157,18 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(package: try bson[.package].decode(),
-            version: try bson[.version]?.decode(),
+        self.init(
+            package: try bson[.package].decode(),
+            commit: try bson[.commit_refname]?.decode(as: String.self)
+            {
+                .init(try bson[.commit_hash]?.decode(), refname: $0)
+            },
             triple: try bson[.triple].decode(),
-            dependencies: try bson[.dependencies]?.decode() ?? [],
-            toolchain: try bson[.toolchain]?.decode(),
-            products: try bson[.products].decode(),
+            swift: try bson[.swift]?.decode(),
             requirements: try bson[.requirements]?.decode() ?? [],
-            revision: try bson[.revision]?.decode(),
-            refname: try bson[.refname]?.decode(),
+            dependencies: try bson[.dependencies]?.decode() ?? [],
+            products: try bson[.products].decode(),
             display: try bson[.display]?.decode(),
-            github: try bson[.github]?.decode(),
             root: try bson[.root]?.decode())
 
         self.abi = try bson[.abi].decode()

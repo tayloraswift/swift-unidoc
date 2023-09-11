@@ -35,7 +35,8 @@ extension Massbuilder
             return
         }
 
-        let docs:Documentation = try await self.toolchain.generateDocs(for: try await .remote(
+        let docs:SymbolGraphArchive = try await self.toolchain.generateDocs(
+            for: try await .remote(
                 package: package,
                 from: repository,
                 at: version,
@@ -55,7 +56,7 @@ extension Massbuilder
             return
         }
 
-        var docs:Documentation = try await toolchain.generateDocs(
+        var docs:SymbolGraphArchive = try await toolchain.generateDocs(
             for: try await .local(package: "swiftinit",
                 from: "TestPackages",
                 in: workspace,
@@ -63,7 +64,6 @@ extension Massbuilder
             pretty: false)
 
         docs.metadata.package = "__swiftinit"
-        docs.metadata.version = "0.0.0"
 
         let bson:BSON.Document = .init(encoding: docs)
         try file.overwrite(with: bson.bytes)
@@ -77,9 +77,8 @@ extension Massbuilder
             return
         }
 
-        let docs:Documentation = try await self.toolchain.generateDocs(for: try await .swift(
-                in: self.workspace,
-                clean: true),
+        let docs:SymbolGraphArchive = try await self.toolchain.generateDocs(
+            for: try await .swift(in: self.workspace, clean: true),
             pretty: false)
 
         let bson:BSON.Document = .init(encoding: docs)
@@ -91,7 +90,7 @@ extension Massbuilder
     private
     func output(for package:PackageIdentifier, at version:String) -> FilePath?
     {
-        let file:FilePath = self.workspace.path / "\(package)@\(version).ss"
+        let file:FilePath = self.workspace.path / "\(package)@\(version).bson"
 
         if  let status:FileStatus = try? .status(of: file),
                 status.is(.regular)

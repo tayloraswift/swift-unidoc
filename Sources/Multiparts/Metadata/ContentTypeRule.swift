@@ -42,15 +42,15 @@ enum ContentTypeRule<Location>:ParsingRule
         case "video":       return subtype.map { .media(.video      ($0, charset: charset)) }
 
         case "multipart":
-            switch (second.lowercased(), boundary)
+            switch second.lowercased()
             {
-            case ("byteranges", let boundary?):
+            case "byteranges":
                 return .multipart(.byteranges(boundary: boundary))
 
-            case ("form-data", let boundary?):
-                return .multipart(.formData(boundary: boundary))
+            case "form-data":
+                return .multipart(.form_data(boundary: boundary))
 
-            case (_, _):
+            case _:
                 return nil
             }
 

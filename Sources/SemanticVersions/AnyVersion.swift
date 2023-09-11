@@ -60,8 +60,15 @@ extension AnyVersion:LosslessStringConvertible
     /// -   `v0.1` → `.stable(.release(.v(0, 1, 0)))`
     /// -   `0.1` → `.stable(.release(.v(0, 1, 0)))`
     /// -   `1` → `.stable(.release(.v(1, 0, 0)))`
+    ///
+    /// Although git tags are case sensitive, ``AnyVersion`` is not.
+    ///
+    /// Examples:
+    /// -   `master` → `.unstable("master")`
+    /// -   `Master` → `.unstable("master")`
+    /// -   `MASTER` → `.unstable("master")`
     @inlinable public
-    init(_ refname:String)
+    init(_ refname:some StringProtocol)
     {
         if  let semantic:SemanticVersion = .init(refname: refname)
         {
@@ -69,19 +76,7 @@ extension AnyVersion:LosslessStringConvertible
         }
         else
         {
-            self.init(canonical: .unstable(refname))
-        }
-    }
-    @inlinable public
-    init(_ refname:Substring)
-    {
-        if  let semantic:SemanticVersion = .init(refname: refname)
-        {
-            self.init(canonical: .stable(semantic))
-        }
-        else
-        {
-            self.init(canonical: .unstable(String.init(refname)))
+            self.init(canonical: .unstable(refname.lowercased()))
         }
     }
 }

@@ -21,7 +21,7 @@ enum Main:AsyncTests
         }
 
         if  let tests:TestGroup = tests / "standard-library",
-            let documentation:Documentation = (await tests.do
+            let docs:SymbolGraphArchive = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .swift(
                         in: workspace,
@@ -29,11 +29,11 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
-            documentation.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.path)
         }
 
         if  let tests:TestGroup = tests / "swift-atomics",
-            let documentation:Documentation = (await tests.do
+            let docs:SymbolGraphArchive = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-atomics",
@@ -44,11 +44,11 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
-            documentation.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.path)
         }
 
         if  let tests:TestGroup = tests / "swift-nio",
-            let documentation:Documentation = (await tests.do
+            let docs:SymbolGraphArchive = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio",
@@ -60,20 +60,20 @@ enum Main:AsyncTests
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
-            tests.expect(documentation.metadata.dependencies.map(\.package) **?
+            tests.expect(docs.metadata.dependencies.map(\.package) **?
             [
                 "swift-collections",
                 "swift-atomics",
             ])
 
-            documentation.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.path)
 
         }
 
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-nio-ssl",
-            let documentation:Documentation = (await tests.do
+            let docs:SymbolGraphArchive = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio-ssl",
@@ -84,20 +84,20 @@ enum Main:AsyncTests
                     pretty: true)
             })
         {
-            tests.expect(documentation.metadata.dependencies.map(\.package) **?
+            tests.expect(docs.metadata.dependencies.map(\.package) **?
             [
                 "swift-collections",
                 "swift-atomics",
                 "swift-nio",
             ])
 
-            documentation.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.path)
         }
 
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-syntax",
-            let documentation:Documentation = (await tests.do
+            let docs:SymbolGraphArchive = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-syntax",
@@ -109,9 +109,9 @@ enum Main:AsyncTests
             })
         {
             //  the swift-argument-parser dependency should have been linted.
-            tests.expect(documentation.metadata.dependencies.map(\.package) **? [])
+            tests.expect(docs.metadata.dependencies.map(\.package) **? [])
 
-            documentation.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.path)
         }
     }
 }

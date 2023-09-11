@@ -47,6 +47,37 @@ extension URI.Query:CustomStringConvertible
         return string
     }
 }
+extension URI.Query:LosslessStringConvertible
+{
+    public
+    init?(_ description:String)
+    {
+        self.init(description[...])
+    }
+
+    public
+    init?(_ description:Substring)
+    {
+        do
+        {
+            self = try URI.QueryRule<String.Index>.parse(description.utf8)
+        }
+        catch
+        {
+            return nil
+        }
+    }
+}
+extension URI.Query
+{
+    /// Parses query parameters from UTF-8 text. This parser does not expect a leading
+    /// question mark (`?`).
+    public static
+    func parse(parameters:[UInt8]) throws -> Self
+    {
+        .init(try URI.QueryRule<Int>.Parameters.parse(parameters))
+    }
+}
 extension URI.Query:Equatable
 {
     public static

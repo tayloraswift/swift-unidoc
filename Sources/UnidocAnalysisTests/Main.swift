@@ -126,9 +126,9 @@ enum Main:SyncTests
                 ],
                 groups: [],
                 names: .init(id: swift_malibu.id,
-                    refname: nil,
                     display: nil,
-                    github: nil,
+                    refname: nil,
+                    origin: nil,
                     volume: .init(
                         package: "swift-malibu",
                         version: "master"),

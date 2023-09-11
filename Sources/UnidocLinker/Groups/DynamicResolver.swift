@@ -103,7 +103,7 @@ extension DynamicResolver
             }
             else if let _:Int = scalar / .article
             {
-                return .path(text, [self.current.zone + scalar])
+                return .path(text, [self.current.edition + scalar])
             }
             else if let _:Int = scalar / .file
             {
@@ -182,7 +182,7 @@ extension DynamicResolver
             else
             {
                 //  The rest of the planes don’t cross packages... yet...
-                return .scalar(self.current.zone + scalar)
+                return .scalar(self.current.edition + scalar)
             }
         case    .vector(let feature, self: _, text: _):
             //  Only references to declarations can generate vectors. So we can assume
@@ -222,7 +222,7 @@ extension DynamicResolver
     {
         var context:Diagnostic.Context<Unidoc.Scalar>
         {
-            .init(location: location?.map { self.current.zone + $0 })
+            .init(location: location?.map { self.current.edition + $0 })
         }
 
         let codelink:Codelink?

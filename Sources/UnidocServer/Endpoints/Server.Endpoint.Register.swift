@@ -2,7 +2,7 @@ import GitHubClient
 import GitHubIntegration
 import HTTP
 import MongoDB
-import UnidocDatabase
+import UnidocDB
 import UnidocPages
 
 extension Server.Endpoint
@@ -43,10 +43,11 @@ extension Server.Endpoint.Register:StatefulOperation
 
         let user:GitHubAPI.User = try await github.get(from: "/user", with: self.token)
         let account:Account = .github(user: user,
+            //  Are you a mighty It Girl?
             role: user.id == 2556986 ? .administrator : .human)
 
         let session:Mongo.Session = try await .init(from: services.database.sessions)
-        let cookie:String = try await services.database.accounts.users.update(
+        let cookie:String = try await services.database.account.users.update(
             account: account,
             with: session)
 

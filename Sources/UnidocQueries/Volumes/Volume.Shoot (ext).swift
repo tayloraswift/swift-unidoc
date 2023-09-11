@@ -1,7 +1,7 @@
 import FNV1
 import MongoQL
 import Unidoc
-import UnidocDatabase
+import UnidocDB
 import UnidocRecords
 
 extension Volume.Shoot:VolumeLookupPredicate
@@ -13,7 +13,7 @@ extension Volume.Shoot:VolumeLookupPredicate
         {
             let zone:Mongo.Variable<Unidoc.Scalar> = "zone"
 
-            $0[.from] = Unidoc.Database.Masters.name
+            $0[.from] = UnidocDatabase.Masters.name
             $0[.let] = .init
             {
                 $0[let: zone] = input / Volume.Names[.id]
