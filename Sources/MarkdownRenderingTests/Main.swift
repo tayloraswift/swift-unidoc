@@ -9,14 +9,23 @@ enum Main:SyncTests
     private static
     func run(tests:TestGroup,
         expecting expected:String,
+        plain:String,
         from markdown:(inout MarkdownBinaryEncoder) -> ())
     {
         tests.do
         {
             let binary:MarkdownBinary = .init(bytecode: .init(with: markdown))
-            let html:HTML = .init { $0 += binary }
 
-            tests.expect(html.description ==? expected)
+            if  let tests:TestGroup = tests / "HTML"
+            {
+                let html:HTML = .init { $0 += binary }
+                tests.expect("\(html)" ==? expected)
+            }
+
+            if  let tests:TestGroup = tests / "PlainText"
+            {
+                tests.expect("\(binary)" ==? plain)
+            }
         }
     }
 
@@ -25,8 +34,10 @@ enum Main:SyncTests
     {
         if  let tests:TestGroup = tests / "Pre" / "Transparency"
         {
+            //  The markdown VM cannot parse inline HTML, so this will generate no plain text.
             self.run(tests: tests,
-                expecting: "<pre><span>test</span></pre>")
+                expecting: "<pre><span>test</span></pre>",
+                plain: "")
             {
                 $0[.pre]
                 {
@@ -37,7 +48,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Pre" / "EscapedCharacters"
         {
             self.run(tests: tests,
-                expecting: "<pre>&lt;span&gt;test&lt;/span&gt;</pre>")
+                expecting: "<pre>&lt;span&gt;test&lt;/span&gt;</pre>",
+                plain: "<span>test</span>")
             {
                 $0[.pre] = "<span>test</span>"
             }
@@ -45,7 +57,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Pre" / "Newlines"
         {
             self.run(tests: tests,
-                expecting: "<pre>    code\n    code</pre>")
+                expecting: "<pre>    code\n    code</pre>",
+                plain: "    code\n    code")
             {
                 $0[.pre] =
                 """
@@ -57,7 +70,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Pre" / "Language"
         {
             self.run(tests: tests,
-                expecting: "<pre class='language-swift'>code\ncode</pre>")
+                expecting: "<pre class='language-swift'>code\ncode</pre>",
+                plain: "code\ncode")
             {
                 $0[.pre, { $0[.language] = "swift" }] = "code\ncode"
             }
@@ -65,7 +79,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Pre" / "Language" / "ExtraCSS" / "Before"
         {
             self.run(tests: tests,
-                expecting: "<pre class='before language-swift'>code\ncode</pre>")
+                expecting: "<pre class='before language-swift'>code\ncode</pre>",
+                plain: "code\ncode")
             {
                 $0[.pre, { $0[.class] = "before" ; $0[.language] = "swift" }] = "code\ncode"
             }
@@ -73,7 +88,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Pre" / "Language" / "ExtraCSS" / "After"
         {
             self.run(tests: tests,
-                expecting: "<pre class='language-swift after'>code\ncode</pre>")
+                expecting: "<pre class='language-swift after'>code\ncode</pre>",
+                plain: "code\ncode")
             {
                 $0[.pre, { $0[.language] = "swift" ; $0[.class] = "after" }] = "code\ncode"
             }
@@ -85,7 +101,8 @@ enum Main:SyncTests
                 <pre class='language-taylor&#39;s version'>\
                 we r never ever ever getting back together\
                 </pre>
-                """)
+                """,
+                plain: "we r never ever ever getting back together")
             {
                 $0[.pre, { $0[.language] = "taylor's version" }] =
                     "we r never ever ever getting back together"
@@ -100,7 +117,8 @@ enum Main:SyncTests
                 <span class='syntax-identifier'>x</span> = \
                 <span class='syntax-literal-number'>5</span>\
                 </pre>
-                """)
+                """,
+                plain: "let x = 5")
             {
                 $0[.pre, { $0[.language] = "swift" }]
                 {
@@ -117,7 +135,8 @@ enum Main:SyncTests
             self.run(tests: tests,
                 expecting: """
                 <pre class='language-swift'>let 🇺🇸 = "en-us"</pre>
-                """)
+                """,
+                plain: "let 🇺🇸 = \"en-us\"")
             {
                 $0[.pre, { $0[.language] = "swift" }] = "let 🇺🇸 = \"en-us\""
             }
@@ -133,7 +152,8 @@ enum Main:SyncTests
                 <span class='syntax-literal-number'>5</span>\
                 </code>\
                 </pre>
-                """)
+                """,
+                plain: "let x = 5")
             {
                 $0[.snippet, { $0[.language] = "swift" }]
                 {
@@ -161,6 +181,12 @@ enum Main:SyncTests
                 <span class='syntax-literal-number'>5</span>\
                 </code>\
                 </pre>
+                """,
+                plain: """
+                import NIOCore
+
+
+                let x = 5
                 """)
             {
                 $0[.snippet, { $0[.language] = "swift" }]
@@ -193,6 +219,13 @@ enum Main:SyncTests
                 </span>import NIOCore\
                 </code>\
                 </pre>
+                """,
+                plain: """
+
+
+                import NIOCore
+
+
                 """)
             {
                 $0[.snippet, { $0[.language] = "swift" }] =
@@ -208,7 +241,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "MultipleClasses"
         {
             self.run(tests: tests,
-                expecting: "<p class='aaa bbb ccc'> </p>")
+                expecting: "<p class='aaa bbb ccc'> </p>",
+                plain: " ")
             {
                 $0[.p, { $0[.class] = "aaa"; $0[.class] = "bbb"; $0[.class] = "ccc" }] = " "
             }
@@ -216,7 +250,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "VoidElements"
         {
             self.run(tests: tests,
-                expecting: "<p><br><br><br></p>")
+                expecting: "<p><br><br><br></p>",
+                plain: "")
             {
                 $0[.p]
                 {
@@ -237,7 +272,8 @@ enum Main:SyncTests
                 </a>\
                 <em class='e'>.</em>\
                 </h1>
-                """)
+                """,
+                plain: "go toswift website.")
             {
                 $0[.h1, { $0[.class] = "a" }]
                 {
@@ -253,7 +289,8 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Attributes" / "Checkbox"
         {
             self.run(tests: tests,
-                expecting: "<input type='checkbox' checked disabled>")
+                expecting: "<input type='checkbox' checked disabled>",
+                plain: "")
             {
                 $0[.input]
                 {
@@ -270,7 +307,8 @@ enum Main:SyncTests
                 if  let tests:TestGroup = tests / "\(pseudo)"
                 {
                     self.run(tests: tests,
-                        expecting: "<td align='\(pseudo)'> </td>")
+                        expecting: "<td align='\(pseudo)'> </td>",
+                        plain: " ")
                     {
                         $0[.td, { $0[pseudo] = true }] = " "
                     }
@@ -287,7 +325,8 @@ enum Main:SyncTests
                 <dt>name</dt><dd>documentation</dd>\
                 </dl>\
                 </section>
-                """)
+                """,
+                plain: "namedocumentation")
             {
                 $0[.parameters, { $0[.class] = "custom" }]
                 {
@@ -307,7 +346,8 @@ enum Main:SyncTests
                 <h3>Warning</h3>\
                 <p>don’t use this!</p>\
                 </aside>
-                """)
+                """,
+                plain: "don’t use this!")
             {
                 $0[.warning]
                 {
@@ -320,7 +360,8 @@ enum Main:SyncTests
             self.run(tests: tests,
                 expecting: """
                 <p><code>&lt;reference = 12345&gt;</code></p>
-                """)
+                """,
+                plain: "<reference = 12345>")
             {
                 $0[.p] { $0 &= 12345 }
             }
@@ -341,7 +382,8 @@ enum Main:SyncTests
                 self.run(tests: tests,
                     expecting: """
                     <p><code>&lt;reference = \(reference)&gt;</code></p>
-                    """)
+                    """,
+                    plain: "<reference = \(reference)>")
                 {
                     $0[.p] { $0 &= reference }
                 }

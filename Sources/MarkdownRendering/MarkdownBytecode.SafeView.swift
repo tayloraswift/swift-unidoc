@@ -19,3 +19,6 @@ extension MarkdownBytecode
 extension MarkdownBytecode.SafeView:HyperTextRenderableMarkdown
 {
 }
+extension MarkdownBytecode.SafeView:PlainTextRenderableMarkdown
+{
+}
