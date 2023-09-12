@@ -37,7 +37,7 @@ extension PackageDatabase.Packages:DatabaseCollection
             $0[.name] = "cell"
             $0[.key] = .init
             {
-                $0[PackageRecord[.cell]] = (-)
+                $0[PackageRecord[.cell]] = (+)
             }
         },
     ]
