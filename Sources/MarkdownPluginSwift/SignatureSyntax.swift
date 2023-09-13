@@ -27,7 +27,7 @@ extension SignatureSyntax
 
         let decl:DeclSyntax = .parse(from: &parser)
 
-        for region:Syntax in decl.children(viewMode: .fixedUp)
+        for region:Syntax in decl.children(viewMode: .sourceAccurate)
         {
             if  let clause:GenericParameterClauseSyntax =
                     region.as(GenericParameterClauseSyntax.self)
@@ -37,7 +37,7 @@ extension SignatureSyntax
             else if
                 let region:FunctionSignatureSyntax = region.as(FunctionSignatureSyntax.self)
             {
-                for region:Syntax in region.children(viewMode: .fixedUp)
+                for region:Syntax in region.children(viewMode: .sourceAccurate)
                 {
                     if  let clause:ParameterClauseSyntax =
                             region.as(ParameterClauseSyntax.self)
@@ -104,14 +104,14 @@ extension SignatureSyntax
     private mutating
     func append(clause region:GenericParameterClauseSyntax)
     {
-        for region:Syntax in region.children(viewMode: .fixedUp)
+        for region:Syntax in region.children(viewMode: .sourceAccurate)
         {
             if  let region:GenericParameterListSyntax =
                     region.as(GenericParameterListSyntax.self)
             {
                 for region:GenericParameterSyntax in region
                 {
-                    for region:Syntax in region.children(viewMode: .fixedUp)
+                    for region:Syntax in region.children(viewMode: .sourceAccurate)
                     {
                         if  let region:TokenSyntax = region.as(TokenSyntax.self),
                             case .identifier = region.tokenKind
@@ -134,7 +134,7 @@ extension SignatureSyntax
     private mutating
     func append(clause region:ParameterClauseSyntax)
     {
-        for region:Syntax in region.children(viewMode: .fixedUp)
+        for region:Syntax in region.children(viewMode: .sourceAccurate)
         {
             if  let region:FunctionParameterListSyntax =
                     region.as(FunctionParameterListSyntax.self)
@@ -153,7 +153,7 @@ extension SignatureSyntax
                     }
 
                     var firstName:Bool = true
-                    for region:Syntax in region.children(viewMode: .fixedUp)
+                    for region:Syntax in region.children(viewMode: .sourceAccurate)
                     {
                         if  firstName,
                             let region:TokenSyntax = region.as(TokenSyntax.self)

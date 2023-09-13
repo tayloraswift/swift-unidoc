@@ -74,6 +74,26 @@ enum Main:SyncTests
                 """)
             }
 
+            if  let tests:TestGroup = tests / "Malformed"
+            {
+                let decl:String = """
+                init(__readers: UInt32, \
+                __writers: UInt32,
+                __wrphase_futex: UInt32,
+                __writers_futex: UInt32,
+                __pad3: UInt32,
+                __pad4: UInt32,
+                __cur_writer: Int32,
+                __shared: Int32,
+                __rwelision: Int8,
+                __pad1: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8), \
+                __pad2: UInt, \
+                __flags: UInt32)
+                """
+
+                let expanded:Signature<Never>.Expanded = .init(decl)
+                tests.expect("\(expanded.bytecode.safe)" ==? decl)
+            }
 
             if  let tests:TestGroup = tests / "Abridged"
             {

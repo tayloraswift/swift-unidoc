@@ -28,7 +28,10 @@ extension Signature.Expanded
 
         if !symbols.isEmpty
         {
-            fatalError("syntax didn’t round-trip, failed to match symbols: \(symbols)")
+            fatalError("""
+                syntax didn’t round-trip, failed to match symbols: \(symbols), \
+                source: '\(String.init(decoding: utf8, as: Unicode.UTF8.self))'
+                """)
         }
     }
 
