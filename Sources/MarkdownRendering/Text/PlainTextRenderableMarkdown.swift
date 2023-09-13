@@ -83,7 +83,7 @@ extension PlainTextRenderableMarkdown
 
             case .utf8(let codeunit):
                 if  case nil = attributes.buffer(utf8: codeunit),
-                    case .visible? = stack.last
+                    case .visible = stack.last ?? .visible
                 {
                     utf8.append(codeunit)
                 }

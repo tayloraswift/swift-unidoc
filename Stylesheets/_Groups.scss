@@ -108,15 +108,21 @@ section.group ul
             text-indent: -2.5rem;
             margin-left: 2.5rem;
             line-height: 1.5rem;
+            white-space: pre-wrap;
 
             font-family: $typeface-monospace;
             color: $light-accent-comment;
 
             font-size: inherit;
 
-            span.syntax-identifier
+            span.syntax-identifier,
+            span.syntax-label
             {
                 color: $light-accent-hot-pink;
+            }
+            span.syntax-label::before
+            {
+                content: '\a';
             }
         }
 

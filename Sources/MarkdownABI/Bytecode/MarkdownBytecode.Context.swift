@@ -55,7 +55,6 @@ extension MarkdownBytecode
         case `class`
         case type
         case `typealias`
-        /// Argument label, used to line-break long function signatures.
         /// New in 8.0.
         case label
 
