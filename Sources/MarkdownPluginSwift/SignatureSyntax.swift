@@ -8,12 +8,12 @@ import SwiftSyntax
 struct SignatureSyntax
 {
     @usableFromInline internal
-    var tokens:[Token?]
+    var elements:[Span]
 
     private
     init()
     {
-        self.tokens = []
+        self.elements = []
     }
 }
 extension SignatureSyntax
@@ -29,7 +29,12 @@ extension SignatureSyntax
 
         for region:Syntax in decl.children(viewMode: .sourceAccurate)
         {
-            if  let clause:GenericParameterClauseSyntax =
+            if  let region:TokenSyntax = region.as(TokenSyntax.self)
+            {
+                self.append(region: region, at: .toplevel)
+            }
+            else if
+                let clause:GenericParameterClauseSyntax =
                     region.as(GenericParameterClauseSyntax.self)
             {
                 self.append(clause: clause)
@@ -71,14 +76,13 @@ extension SignatureSyntax
 extension SignatureSyntax
 {
     private mutating
-    func append(region syntax:some SyntaxProtocol)
+    func append(region syntax:some SyntaxProtocol, at depth:Span.Depth? = nil)
     {
         for span:SyntaxClassifiedRange in syntax.classifications
         {
             let range:Range<Int> = span.offset ..< span.offset + span.length
 
-            self.tokens.append(.init(range: range,
-                color: .init(classification: span.kind)))
+            self.elements.append(.text(range, .init(classification: span.kind), depth))
         }
     }
 
@@ -88,14 +92,7 @@ extension SignatureSyntax
         for span:SyntaxClassifiedRange in syntax.classifications
         {
             let range:Range<Int> = span.offset ..< span.offset + span.length
-            if  case .none = span.kind
-            {
-                self.tokens.append(.init(range: range, color: nil))
-            }
-            else
-            {
-                self.tokens.append(.init(range: range, color: color))
-            }
+            self.elements.append(.text(range, span.kind == .none ? nil : color))
         }
     }
 }
@@ -139,37 +136,39 @@ extension SignatureSyntax
             if  let region:FunctionParameterListSyntax =
                     region.as(FunctionParameterListSyntax.self)
             {
-                var first:Bool = true
+                defer
+                {
+                    self.elements.append(.wbr(indent: false))
+                }
                 for region:FunctionParameterSyntax in region
                 {
-                    if  first
-                    {
-                        self.tokens.append(nil)
-                        first = false
-                    }
-                    defer
-                    {
-                        self.tokens.append(nil)
-                    }
+                    self.elements.append(.wbr(indent: true))
 
-                    var firstName:Bool = true
+                    var named:Bool = false
                     for region:Syntax in region.children(viewMode: .sourceAccurate)
                     {
-                        if  firstName,
-                            let region:TokenSyntax = region.as(TokenSyntax.self)
-                        {
-                            switch region.tokenKind
-                            {
-                            case .identifier, .wildcardKeyword:
-                                self.append(region: region, as: .label)
-                                firstName = false
-
-                            case _:
-                                self.append(region: region)
-                            }
-                        }
+                        guard
+                        let region:TokenSyntax = region.as(TokenSyntax.self)
                         else
                         {
+                            self.append(region: region)
+                            continue
+                        }
+
+                        switch region.tokenKind
+                        {
+                        case .identifier, .wildcardKeyword:
+                            if  named
+                            {
+                                self.append(region: region, as: .binding)
+                            }
+                            else
+                            {
+                                self.append(region: region, as: .identifier)
+                                named = true
+                            }
+
+                        case _:
                             self.append(region: region)
                         }
                     }

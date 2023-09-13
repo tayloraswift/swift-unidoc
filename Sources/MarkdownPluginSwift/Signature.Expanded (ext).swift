@@ -46,60 +46,67 @@ extension Signature.Expanded
     @inlinable internal
     init(utf8:[UInt8], keywords:inout InterestingKeywords, symbols:inout [Int: Scalar])
     {
-        let regions:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
+        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
         var references:[Scalar: Int] = [:]
         var referents:[Scalar] = []
 
         let bytecode:MarkdownBytecode = .init
         {
-            for token:SignatureSyntax.Token? in regions.tokens
+            for span:SignatureSyntax.Span in signature.elements
             {
-                guard let token:SignatureSyntax.Token
-                else
+                switch span
                 {
+                case .wbr(indent: false):
                     $0[.wbr]
-                    continue
-                }
 
-                let text:String = .init(decoding: utf8[token.range], as: Unicode.UTF8.self)
+                case .wbr(indent: true):
+                    $0[.indent]
 
-                guard let color:MarkdownBytecode.Context = token.color
-                else
-                {
-                    $0 += text
-                    continue
-                }
+                case .text(let range, nil, _):
+                    $0 += utf8[range]
 
-                if  case .keyword = color
-                {
-                    switch text
+                case .text(let range, let color?, .toplevel?):
+                    if  case .keyword = color
                     {
-                    case "actor":   keywords.actor = true
-                    case "class":   keywords.class = true
-                    default:        break
-                    }
-                }
-
-                $0[color]
-                {
-                    if  let referent:Scalar = symbols.removeValue(forKey: token.start)
-                    {
-                        $0[.href] =
+                        //  The `actor` and `async` keywords are contextual; there is no
+                        //  other way to detect them besides inspecting token text!
+                        switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
                         {
-                            if  let reference:Int = $0
-                            {
-                                return reference
-                            }
-                            else
-                            {
-                                let next:Int = referents.endIndex
-                                referents.append(referent)
-                                $0 = next
-                                return next
-                            }
-                        } (&references[referent])
+                        case "actor":   keywords.actor = true
+                        case "class":   keywords.class = true
+                        default:        break
+                        }
                     }
-                } = text
+
+                    fallthrough
+
+                case .text(let range, let color?, _):
+
+                    $0[color]
+                    {
+                        if  let referent:Scalar = symbols.removeValue(forKey: range.lowerBound)
+                        {
+                            $0[.href] =
+                            {
+                                if  let reference:Int = $0
+                                {
+                                    return reference
+                                }
+                                else
+                                {
+                                    let next:Int = referents.endIndex
+                                    referents.append(referent)
+                                    $0 = next
+                                    return next
+                                }
+                            } (&references[referent])
+                        }
+                    }
+                    content:
+                    {
+                        $0 += utf8[range]
+                    }
+                }
             }
         }
 

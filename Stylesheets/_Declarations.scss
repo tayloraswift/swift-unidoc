@@ -177,12 +177,29 @@ section.availability
 }
 section.declaration pre
 {
-    text-indent: -2.5rem;
-    padding-left: 2.5rem;
     margin: 2.5rem 0 2.5rem;
+
+    code a
+    {
+        text-decoration: underline dashed;
+    }
+    code a:hover
+    {
+        text-decoration: underline;
+    }
+
     code
     {
+        display: block;
+        text-indent: -2.5rem;
+        margin-left: 2.5rem;
         font-size: inherit;
+    }
+
+    code.multiline
+    {
+        text-indent: 0;
+        margin-left: 0;
     }
 }
 

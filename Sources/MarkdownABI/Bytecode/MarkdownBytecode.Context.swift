@@ -56,7 +56,7 @@ extension MarkdownBytecode
         case type
         case `typealias`
         /// New in 8.0.
-        case label
+        case indent
 
         //  Section elements.
         case parameters = 0xC0

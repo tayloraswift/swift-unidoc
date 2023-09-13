@@ -23,40 +23,44 @@ extension Signature.Abridged
     @usableFromInline internal
     init(utf8:[UInt8], actor:Bool = false)
     {
-        let regions:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
+        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
         let bytecode:MarkdownBytecode = .init
         {
-            for token:SignatureSyntax.Token? in regions.tokens
+            for span:SignatureSyntax.Span in signature.elements
             {
-                guard let token:SignatureSyntax.Token
-                else
+                switch span
                 {
+                case .wbr(indent: false):
                     $0[.wbr]
-                    continue
-                }
 
-                let text:String = .init(decoding: utf8[token.range], as: Unicode.UTF8.self)
+                case .wbr(indent: true):
+                    $0[.indent]
 
-                if  actor,
-                    case (.keyword, "class") = (token.color, text)
-                {
-                    $0 += "actor"
-                    continue
-                }
+                case .text(let range, nil, _):
+                    $0 += utf8[range]
 
-                switch  (token.color, text)
-                {
-                case    (.identifier, _),
-                        (.keyword, "init"),
-                        (.keyword, "deinit"),
-                        (.keyword, "subscript"):
-                    $0[.identifier] = text
+                case .text(let range, let color?, let depth):
+                    let text:String = .init(decoding: utf8[range], as: Unicode.UTF8.self)
+                    switch  (color, text, depth)
+                    {
+                    case    (.keyword, "subscript", .toplevel?),
+                            (.keyword, "deinit", .toplevel?),
+                            (.keyword, "init", .toplevel?),
+                            (.identifier, _, _):
+                        $0[.identifier] = text
 
-                case    (.label, _):
-                    $0[.label] = text
+                    case    (.keyword, "class", .toplevel?):
+                        guard actor
+                        else
+                        {
+                            fallthrough
+                        }
 
-                case    _:
-                    $0 += text
+                        $0 += "actor"
+
+                    case    (_, _, _):
+                        $0 += text
+                    }
                 }
             }
         }
