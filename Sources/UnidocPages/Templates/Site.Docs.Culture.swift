@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 import MarkdownRendering
 import ModuleGraphs
 import UnidocRecords
@@ -41,6 +42,25 @@ extension Site.Docs.Culture:FixedPage
 {
     var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.name) - \(self.names.title)" }
+
+    var description:String?
+    {
+        if  let overview:MarkdownBytecode = self.master.overview?.markdown
+        {
+            return "\(self.inliner.passage(overview))"
+        }
+        else if case .swift = self.names.package
+        {
+            return "\(self.name) is a module in the Swift standard library."
+        }
+        else
+        {
+            return """
+                \(self.name) is a module in the \
+                \(self.names.display ?? "\(self.names.package)") package.
+                """
+        }
+    }
 }
 extension Site.Docs.Culture:ApplicationPage
 {

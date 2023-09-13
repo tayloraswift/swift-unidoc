@@ -73,3 +73,36 @@ extension Inliner.Passage:HyperTextRenderableMarkdown
         }
     }
 }
+extension Inliner.Passage:PlainTextRenderableMarkdown
+{
+    func load(_ reference:Int, into utf8:inout [UInt8])
+    {
+        guard self.outlines.indices.contains(reference)
+        else
+        {
+            return
+        }
+        switch self.outlines[reference]
+        {
+        case .text(let text):
+            utf8 += text.utf8
+
+        case .path(let stem, let scalars):
+            let components:[Substring] = stem.split(separator: " ").suffix(scalars.count)
+            var first:Bool = true
+            for component:Substring in components
+            {
+                if  first
+                {
+                    first = false
+                }
+                else
+                {
+                    utf8.append(0x2E)
+                }
+
+                utf8 += component.utf8
+            }
+        }
+    }
+}

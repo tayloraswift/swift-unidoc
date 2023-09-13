@@ -6,6 +6,8 @@ import URI
 public
 protocol FixedPage
 {
+    /// A short description of the page, suitable for use as a `<meta>` description.
+    var description:String? { get }
     var location:URI { get }
     var title:String { get }
 
@@ -14,6 +16,9 @@ protocol FixedPage
 }
 extension FixedPage
 {
+    @inlinable public
+    var description:String? { nil }
+
     @inlinable public
     func head(augmenting    _:inout HTML.ContentEncoder)
     {
@@ -63,6 +68,11 @@ extension FixedPage
                     """
 
                     $0[.script] { $0.src = "\(Site.Asset[.main_js])" ; $0.defer = true }
+
+                    if  let description:String = self.description
+                    {
+                        $0[.meta] { $0.name = "description" ; $0.content  = description }
+                    }
 
                     self.head(augmenting: &$0)
                 }
