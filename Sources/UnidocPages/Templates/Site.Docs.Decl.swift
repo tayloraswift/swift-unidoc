@@ -1,6 +1,7 @@
 import Availability
 import HTML
 import LexicalPaths
+import MarkdownABI
 import ModuleGraphs
 import Signatures
 import Sources
@@ -45,6 +46,30 @@ extension Site.Docs.Decl:FixedPage
 {
     var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.stem.last) - \(self.names.title)" }
+
+    var description:String?
+    {
+        if  let overview:MarkdownBytecode = self.master.overview?.markdown
+        {
+            return "\(self.inliner.passage(overview))"
+        }
+
+        let what:Demonym = .init(phylum: self.master.phylum, kinks: self.master.kinks)
+
+        if  case .swift = self.names.package
+        {
+            return """
+                \(self.stem.last) is \(what) from the Swift standard library.
+                """
+        }
+        else
+        {
+            return """
+                \(self.stem.last) is \(what) from the package \
+                \(self.names.display ?? "\(self.names.package)").
+                """
+        }
+    }
 }
 extension Site.Docs.Decl:ApplicationPage
 {

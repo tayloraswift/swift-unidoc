@@ -15,6 +15,49 @@ extension Site.Docs.Decl
         }
     }
 }
+extension Site.Docs.Decl.Demonym:CustomStringConvertible
+{
+    var description:String
+    {
+        var what:String
+        switch self.phylum
+        {
+        case .actor:                what = "an actor"
+        case .associatedtype:       what = "an associated type"
+        case .case:                 what = "an enum case"
+        case .class:                what = "a class"
+        case .deinitializer:        what = "a deinitializer"
+        case .enum:                 what = "an enum"
+        case .func(nil):            what = "a global function"
+        case .func(.class):         what = "a class method"
+        case .func(.instance):      what = "an instance method"
+        case .func(.static):        what = "a static method"
+        case .initializer:          what = "an initializer"
+        case .operator:             what = "an operator"
+        case .protocol:             what = "a protocol"
+        case .struct:               what = "a struct"
+        case .subscript(.class):    what = "a class subscript"
+        case .subscript(.instance): what = "an instance subscript"
+        case .subscript(.static):   what = "a static subscript"
+        case .typealias:            what = "a typealias"
+        case .var(nil):             what = "a global variable"
+        case .var(.class):          what = "a class property"
+        case .var(.instance):       what = "an instance property"
+        case .var(.static):         what = "a static property"
+        }
+
+        if  self.kinks[is: .required]
+        {
+            what += " requirement"
+        }
+        else if self.kinks[is: .intrinsicWitness]
+        {
+            what += " default implementation"
+        }
+
+        return what
+    }
+}
 extension Site.Docs.Decl.Demonym:HyperTextOutputStreamable
 {
     static

@@ -36,6 +36,18 @@ extension Site.Docs.Meta:FixedPage
 {
     var location:URI { Site.Docs[self.names] }
     var title:String { self.names.title }
+
+    var description:String?
+    {
+        self.names.package == .swift ?
+        """
+        Read the documentation for version \(self.names.version) the Swift standard library.
+        """ :
+        """
+        Read the documentation for version \(self.names.version) of the \
+        \(self.names.display ?? "\(self.names.package)") package.
+        """
+    }
 }
 extension Site.Docs.Meta:ApplicationPage
 {
