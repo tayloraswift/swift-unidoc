@@ -31,6 +31,13 @@ extension SignatureSyntax
         {
             if  let region:TokenSyntax = region.as(TokenSyntax.self)
             {
+                //  Allows us to detect phylum keywords.
+                self.append(region: region, at: .toplevel)
+            }
+            else if
+                let region:ModifierListSyntax = region.as(ModifierListSyntax.self)
+            {
+                //  Allows us to detect `class` modifier keywords.
                 self.append(region: region, at: .toplevel)
             }
             else if

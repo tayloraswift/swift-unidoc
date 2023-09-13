@@ -38,7 +38,13 @@ extension Signature.Expanded
     @inlinable @_spi(testable) public
     init(_ string:String)
     {
-        var keywords:InterestingKeywords = .init()
+        var ignored:InterestingKeywords = .init()
+        self.init(string, keywords: &ignored)
+    }
+
+    @inlinable @_spi(testable) public
+    init(_ string:String, keywords:inout InterestingKeywords)
+    {
         var empty:[Int: Scalar] = [:]
         self.init(utf8: [UInt8].init(string.utf8), keywords: &keywords, symbols: &empty)
     }
