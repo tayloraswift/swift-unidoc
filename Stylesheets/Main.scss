@@ -140,9 +140,9 @@ a
 {
     color: $light-accent-barbie-pink;
     text-decoration: none;
+    text-underline-offset: 0.35em;
 }
 a:hover, a:focus
 {
     text-decoration: underline;
-    text-underline-offset: 0.35em;
 }

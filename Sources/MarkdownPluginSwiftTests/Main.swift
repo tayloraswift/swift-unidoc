@@ -40,23 +40,23 @@ enum Main:SyncTests
                 <span class='syntax-typealias'>IndexOfResult</span>, \
                 <span class='syntax-typealias'>ElementOfResult</span>\
                 &gt;(\
-                <wbr><span class='syntax-label'>_</span> \
-                <span class='syntax-identifier'>a</span>: \
+                <span class='xi'></span><span class='syntax-identifier'>_</span> \
+                <span class='syntax-binding'>a</span>: \
                 (<span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Index</span>, \
                 <span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Element</span>) \
                 <span class='syntax-keyword'>throws</span> \
                 -&gt; <span class='syntax-type'>IndexOfResult</span>?, \
-                <wbr><span class='syntax-label'>b</span> \
-                <span class='syntax-identifier'>b</span>: \
+                <span class='xi'></span><span class='syntax-identifier'>b</span> \
+                <span class='syntax-binding'>b</span>: \
                 (<span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Index</span>, \
                 <span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Element</span>) \
                 <span class='syntax-keyword'>throws</span> \
                 -&gt; <span class='syntax-type'>ElementOfResult</span>?, \
-                <wbr><span class='syntax-label'>c</span>: \
+                <span class='xi'></span><span class='syntax-identifier'>c</span>: \
                 ((<span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Index</span>, \
                 <span class='syntax-keyword'>Self</span>.\
@@ -115,10 +115,11 @@ enum Main:SyncTests
                 func <span class='syntax-identifier'>transform</span>&lt;\
                 IndexOfResult, ElementOfResult\
                 &gt;(\
-                <wbr>(Self.Index, Self.Element) throws -&gt; IndexOfResult?, \
-                <wbr><span class='syntax-label'>b</span>: \
+                <span class='xi'></span>\
+                (Self.Index, Self.Element) throws -&gt; IndexOfResult?, \
+                <span class='xi'></span><span class='syntax-identifier'>b</span>: \
                 (Self.Index, Self.Element) throws -&gt; ElementOfResult?, \
-                <wbr><span class='syntax-label'>c</span>: \
+                <span class='xi'></span><span class='syntax-identifier'>c</span>: \
                 ((Self.Index, Self.Element) throws -&gt; ())?\
                 <wbr>) rethrows -&gt; [(IndexOfResult, ElementOfResult)]
                 """)

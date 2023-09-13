@@ -155,7 +155,13 @@ extension Site.Docs.Decl:ApplicationPage
         {
             $0[.pre]
             {
-                $0[.code] = self.inliner.code(self.master.signature.expanded)
+                /// See note in `Inliner.Card.swift`.
+                let width:Int = "\(master.signature.expanded.bytecode.safe)".count
+
+                $0[.code]
+                {
+                    $0.class = width > 80 ? "multiline" : nil
+                } = self.inliner.code(self.master.signature.expanded)
             }
         }
 

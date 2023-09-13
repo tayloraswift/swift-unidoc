@@ -19,6 +19,7 @@ enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
     case `class`        = "syntax-class"
     case type           = "syntax-type"
     case `typealias`    = "syntax-typealias"
+    case indent         = "xi"
 }
 extension MarkdownSyntaxHighlight:CustomStringConvertible
 {
