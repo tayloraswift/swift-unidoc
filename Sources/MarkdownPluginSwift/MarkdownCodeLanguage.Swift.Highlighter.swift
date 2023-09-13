@@ -36,37 +36,14 @@ extension MarkdownCodeLanguage.Swift.Highlighter:MarkdownCodeHighlighter
                     start: base + span.offset,
                     count: span.length)
 
-                let context:MarkdownBytecode.Context
-                switch span.kind
+                if  let context:MarkdownBytecode.Context = .init(classification: span.kind)
                 {
-                case    .none,
-                        .editorPlaceholder:         binary += text ; continue
-
-                case    .attribute:                 context = .attribute
-
-                case    .buildConfigId:             context = .directive
-                case    .poundDirectiveKeyword:     context = .magic
-
-                case    .lineComment,
-                        .blockComment:              context = .comment
-                case    .docLineComment,
-                        .docBlockComment:           context = .doccomment
-
-                case    .dollarIdentifier:          context = .pseudo
-                case    .identifier:                context = .identifier
-                case    .operatorIdentifier:        context = .operator
-
-                case    .integerLiteral,
-                        .floatingLiteral:           context = .literalNumber
-                case    .stringLiteral,
-                        .objectLiteral:             context = .literalString
-
-                case    .keyword:                   context = .keyword
-                case    .stringInterpolationAnchor: context = .interpolation
-                case    .typeIdentifier:            context = .type
+                    binary[context] { $0 += text }
                 }
-
-                binary[context] { $0 += text }
+                else
+                {
+                    binary += text
+                }
             }
         }
     }
