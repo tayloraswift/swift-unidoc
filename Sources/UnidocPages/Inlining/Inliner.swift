@@ -83,8 +83,8 @@ extension Inliner
 }
 extension Inliner
 {
-    func link<Display, Scalars>(
-        _ display:Display,
+    func vectorLink<Display, Scalars>(
+        components display:Display,
         to scalars:Scalars) -> VectorLink<Display, Scalars>
         where Scalars:Sequence<Unidoc.Scalar>
     {

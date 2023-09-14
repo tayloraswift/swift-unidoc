@@ -97,7 +97,7 @@ extension Site.Admin:AdministrativePage
 
         main[.form]
         {
-            $0.enctype = "\(MultipartType.form_data))"
+            $0.enctype = "\(MultipartType.form_data)"
             $0.action = "\(Self[.upload])"
             $0.method = "post"
         }
@@ -122,7 +122,7 @@ extension Site.Admin:AdministrativePage
 
         main[.form]
         {
-            $0.enctype = "multipart/form-data"
+            $0.enctype = "\(MultipartType.form_data)"
             $0.action = "\(Self[.rebuild])"
             $0.method = "post"
         }
@@ -140,7 +140,7 @@ extension Site.Admin:AdministrativePage
 
             main[.form]
             {
-                $0.enctype = "application/x-www-form-urlencoded"
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                 $0.action = "\(Self[action])"
                 $0.method = "get"
             }

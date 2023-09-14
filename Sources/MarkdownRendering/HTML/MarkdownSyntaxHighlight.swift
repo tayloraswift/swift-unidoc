@@ -9,6 +9,7 @@ enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
     case identifier     = "syntax-identifier"
     case interpolation  = "syntax-interpolation"
     case keyword        = "syntax-keyword"
+    case label          = "syntax-label"
     case literalNumber  = "syntax-literal-number"
     case literalString  = "syntax-literal-string"
     case magic          = "syntax-magic"
@@ -18,6 +19,7 @@ enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
     case `class`        = "syntax-class"
     case type           = "syntax-type"
     case `typealias`    = "syntax-typealias"
+    case indent         = "xi"
 }
 extension MarkdownSyntaxHighlight:CustomStringConvertible
 {

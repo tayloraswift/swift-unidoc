@@ -17,8 +17,6 @@ struct SymbolDescription:Equatable, Sendable
     public
     let doccomment:Doccomment?
     public
-    let interfaces:Interfaces?
-    public
     let visibility:Visibility
     public
     let `extension`:ExtensionContext
@@ -36,7 +34,6 @@ struct SymbolDescription:Equatable, Sendable
     init(_ usr:Symbol,
         phylum:Unidoc.Phylum,
         doccomment:Doccomment?,
-        interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
         signature:Signature<Symbol.Decl>,
@@ -44,7 +41,6 @@ struct SymbolDescription:Equatable, Sendable
         path:UnqualifiedPath)
     {
         self.doccomment = doccomment
-        self.interfaces = interfaces
         self.visibility = visibility
         self.extension = `extension`
         self.signature = signature
@@ -65,68 +61,41 @@ extension SymbolDescription
         interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
-        expanded:__shared [Signature<Symbol.Decl>.Fragment],
-        abridged:__shared [Signature<Symbol.Decl>.Fragment],
+        expanded:__owned [Signature<Symbol.Decl>.Fragment],
+        abridged:__owned [Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
     {
+        var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
         var phylum:Unidoc.Phylum = phylum
 
-        for fragment:Signature<Symbol.Decl>.Fragment
-            in expanded where fragment.color == .keyword
+        let expanded:Signature<Symbol.Decl>.Expanded = .init(expanded, keywords: &keywords)
+
+        //  Heuristic for inferring actor types
+        if  keywords.actor
         {
-            switch fragment.spelling
+            phylum = .decl(.actor)
+        }
+        //  Heuristic for inferring class members
+        if  keywords.class
+        {
+            switch phylum
             {
-            //  Heuristic for inferring actor types
-            case "actor":
-                phylum = .decl(.actor)
-
-            //  Heuristic for inferring class members
-            case "class":
-                switch phylum
-                {
-                case .decl(.func(.static)):       phylum = .decl(.func(.class))
-                case .decl(.subscript(.static)):  phylum = .decl(.subscript(.class))
-                case .decl(.var(.static)):        phylum = .decl(.var(.class))
-                default:                            break
-                }
-
-            default:
-                continue
+            case .decl(.func(.static)):         phylum = .decl(.func(.class))
+            case .decl(.subscript(.static)):    phylum = .decl(.subscript(.class))
+            case .decl(.var(.static)):          phylum = .decl(.var(.class))
+            default:                            break
             }
-
-            break
         }
 
-        let signature:Signature<Symbol.Decl>
-        if  case .decl(.actor) = phylum
-        {
-            //  SymbolGraphGen incorrectly prints the fragment as 'class' in
-            //  the abridged signature
-            signature = .init(availability: availability,
-                abridged: .init(abridged.lazy.map
-                {
-                    if  case .keyword = $0.color,
-                        case "class" = $0.spelling
-                    {
-                        return $0.spelled("actor")
-                    }
-                    else
-                    {
-                        return $0
-                    }
-                }),
-                expanded: .init(expanded),
-                generics: generics)
-        }
-        else
-        {
-            signature = .init(availability: availability,
-                abridged: .init(abridged),
-                expanded: .init(expanded),
-                generics: generics)
-        }
+        //  SymbolGraphGen incorrectly prints the fragment as 'class' in
+        //  the abridged signature.
+        let signature:Signature<Symbol.Decl> = .init(availability: availability,
+            abridged: .init(abridged, actor: phylum == .decl(.actor)),
+            expanded: expanded,
+            generics: generics,
+            spis: interfaces.map { _ in [] })
 
         //  strip empty parentheses from last path component
         let simplified:UnqualifiedPath
@@ -145,7 +114,6 @@ extension SymbolDescription
         self.init(usr,
             phylum: phylum,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
-            interfaces: interfaces,
             visibility: visibility,
             extension: `extension`,
             signature: signature,

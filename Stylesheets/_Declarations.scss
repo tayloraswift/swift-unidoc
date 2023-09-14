@@ -107,6 +107,7 @@ section.introduction
     }
 }
 
+section.spi,
 section.deprecation
 {
     margin: 0.75rem 0;
@@ -114,20 +115,32 @@ section.deprecation
     display: flex;
     align-items: stretch;
 }
+section.spi::before,
 section.deprecation::before
 {
     padding: 0.25rem 1rem 0.5rem 1rem;
 
     font-family: $typeface-serif;
-    font-size: 150%;
     font-weight: 400;
 
-    background-color: $light-coral-elevated;
     border-radius: 0.5rem 0 0 0.5rem;
-    box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
     color: white;
+}
+section.spi::before
+{
+    font-size: 125%;
+    background-color: $light-accent-barbie-pink;
+    box-shadow: 0 0.25rem 0 0 $light-accent-barbie-pink-shadow;
+    content: '@';
+}
+section.deprecation::before
+{
+    font-size: 150%;
+    background-color: $light-coral-elevated;
+    box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
     content: '!';
 }
+section.spi > p,
 section.deprecation > p
 {
     flex: 1 1 auto;
@@ -177,12 +190,29 @@ section.availability
 }
 section.declaration pre
 {
-    text-indent: -2.5rem;
-    padding-left: 2.5rem;
     margin: 2.5rem 0 2.5rem;
+
+    code a
+    {
+        text-decoration: underline dashed;
+    }
+    code a:hover
+    {
+        text-decoration: underline;
+    }
+
     code
     {
+        display: block;
+        text-indent: -2.5rem;
+        margin-left: 2.5rem;
         font-size: inherit;
+    }
+
+    code.multiline
+    {
+        text-indent: 0;
+        margin-left: 0;
     }
 }
 

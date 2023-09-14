@@ -100,34 +100,42 @@ section.group ul
         margin: 0.5rem 0 0.5rem 0;
         padding: 0;
 
-        > a
+        > code
         {
             display: block;
             padding: 0.8em 0 0 0;
-
             text-indent: -2.5rem;
             margin-left: 2.5rem;
+            white-space: pre-wrap;
+
+            font-size: 100%;
             line-height: 1.5rem;
 
-            font-family: $typeface-monospace;
-            color: $light-accent-comment;
-
-            font-size: inherit;
-
-            span.syntax-identifier
+            a
             {
-                color: $light-accent-hot-pink;
+                color: $light-accent-comment;
+
+                span.syntax-identifier
+                {
+                    color: $light-accent-hot-pink;
+                }
+            }
+
+            a.discouraged
+            {
+                text-decoration: line-through;
+
+                span.syntax-identifier
+                {
+                    color: inherit;
+                }
             }
         }
 
-        > a.not-recommended
+        > code.multiline
         {
-            text-decoration: line-through;
-
-            span.syntax-identifier
-            {
-                color: inherit;
-            }
+            text-indent: 0;
+            margin-left: 0;
         }
 
         p

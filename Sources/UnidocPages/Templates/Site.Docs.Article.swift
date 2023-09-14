@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 import MarkdownRendering
 import UnidocRecords
 import Unidoc
@@ -41,7 +42,12 @@ extension Site.Docs.Article
 extension Site.Docs.Article:FixedPage
 {
     var location:URI { Site.Docs[self.names, self.master.shoot] }
-    var title:String { self.names.title }
+    var title:String { "\(self.master.headline.safe) - \(self.names.title)" }
+
+    var description:String?
+    {
+        self.master.overview.map { "\(self.inliner.passage($0.markdown))" }
+    }
 }
 extension Site.Docs.Article:ApplicationPage
 {

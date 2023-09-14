@@ -44,10 +44,13 @@ extension HyperTextRenderableMarkdown
     /// If an error occurs, stops execution and throws the error, otherwise
     /// returns nil if successful. This function always closes any HTML elements
     /// it creates, even on error.
+    ///
+    /// See ``PlainTextRenderableMarkdown.write(to:)`` for a simpler version of this function
+    /// that only renders visible text.
     public
     func render(to html:inout HTML.ContentEncoder) throws
     {
-        var attributes:MarkdownAttributeContext = .init()
+        var attributes:MarkdownElementContext.AttributeContext = .init()
         var stack:[MarkdownElementContext] = []
 
         defer
@@ -67,12 +70,10 @@ extension HyperTextRenderableMarkdown
                 throw MarkdownRenderingError.invalidInstruction
 
             case .attribute(let attribute, nil):
-                attributes.commit()
-                attributes.current = (attribute, [])
-
+                attributes.flush(beginning: attribute)
 
             case .attribute(let attribute, let reference?):
-                attributes.commit()
+                attributes.flush()
 
                 if  let value:String = self.load(reference, for: attribute)
                 {
@@ -80,7 +81,7 @@ extension HyperTextRenderableMarkdown
                 }
 
             case .emit(let element):
-                attributes.commit()
+                attributes.flush()
 
                 html.emit(newlines: &newlines)
                 html.emit(element: element, with: attributes)
@@ -92,7 +93,7 @@ extension HyperTextRenderableMarkdown
                 self.load(reference, into: &html)
 
             case .push(let element):
-                attributes.commit()
+                attributes.flush()
 
                 let context:MarkdownElementContext = .init(from: element,
                     attributes: &attributes)
@@ -120,7 +121,7 @@ extension HyperTextRenderableMarkdown
                 }
 
             case .utf8(let codeunit):
-                guard case nil = attributes.current?.utf8.append(codeunit)
+                guard case nil = attributes.buffer(utf8: codeunit)
                 else
                 {
                     continue

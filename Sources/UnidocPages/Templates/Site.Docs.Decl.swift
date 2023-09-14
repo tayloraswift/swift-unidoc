@@ -1,6 +1,7 @@
 import Availability
 import HTML
 import LexicalPaths
+import MarkdownABI
 import ModuleGraphs
 import Signatures
 import Sources
@@ -45,6 +46,30 @@ extension Site.Docs.Decl:FixedPage
 {
     var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.stem.last) - \(self.names.title)" }
+
+    var description:String?
+    {
+        if  let overview:MarkdownBytecode = self.master.overview?.markdown
+        {
+            return "\(self.inliner.passage(overview))"
+        }
+
+        let what:Demonym = .init(phylum: self.master.phylum, kinks: self.master.kinks)
+
+        if  case .swift = self.names.package
+        {
+            return """
+                \(self.stem.last) is \(what) from the Swift standard library.
+                """
+        }
+        else
+        {
+            return """
+                \(self.stem.last) is \(what) from the package \
+                \(self.names.display ?? "\(self.names.package)").
+                """
+        }
+    }
 }
 extension Site.Docs.Decl:ApplicationPage
 {
@@ -53,8 +78,8 @@ extension Site.Docs.Decl:ApplicationPage
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             return .init(
-                scope: self.master.scope.isEmpty ? nil : self.inliner.link(scope,
-                    to: self.master.scope),
+                scope: self.master.scope.isEmpty ?
+                    nil : self.inliner.vectorLink(components: scope, to: self.master.scope),
                 last: last)
         }
         else
@@ -116,6 +141,16 @@ extension Site.Docs.Decl:ApplicationPage
             }
         }
 
+        if  let _:[String] = self.master.signature.spis
+        {
+            main[.section, { $0.class = "spi" }]
+            {
+                $0[.p] = """
+                This declaration is gated by at least one @_spi attribute.
+                """
+            }
+        }
+
         let availability:Availability = self.master.signature.availability
         if  let notice:String = availability.notice
         {
@@ -155,7 +190,13 @@ extension Site.Docs.Decl:ApplicationPage
         {
             $0[.pre]
             {
-                $0[.code] = self.inliner.code(self.master.signature.expanded)
+                /// See note in `Inliner.Card.swift`.
+                let width:Int = "\(master.signature.expanded.bytecode.safe)".count
+
+                $0[.code]
+                {
+                    $0.class = width > 80 ? "multiline" : nil
+                } = self.inliner.code(self.master.signature.expanded)
             }
         }
 
