@@ -153,6 +153,7 @@ extension Inliner.Groups
         }
     }
 }
+
 extension Inliner.Groups:HyperTextOutputStreamable
 {
     static
@@ -176,23 +177,51 @@ extension Inliner.Groups:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group topic" }]
             {
-                if  let principal:Unidoc.Scalar = self.inliner.masters.principal,
-                        group.members.contains(.scalar(principal))
-                {
-                    $0[.h2] = "See Also"
-                }
+                guard
+                let principal:Unidoc.Scalar = self.inliner.masters.principal,
+                    group.members.contains(.scalar(principal))
                 else
                 {
                     $0 ?= group.overview.map(self.inliner.passage(overview:))
+                    return
                 }
-                $0[.ul]
+
+                $0[.h2] = "See Also"
+
+                if  group.members.count < 13
                 {
-                    for member:Volume.Link in group.members
+                    $0[.ul]
                     {
-                        switch member
+                        self.inliner.list(members: group.members, to: &$0)
+                    }
+                }
+                else
+                {
+                    $0[.details]
+                    {
+                        $0[.summary]
                         {
-                        case .scalar(let scalar):   $0 ?= self.inliner.card(scalar)
-                        case .text(let text):       $0[.li] { $0[.span] { $0[.code] = text } }
+                            $0[.p] { $0.class = "view" } = "View members"
+
+                            $0[.p] { $0.class = "hide" } = "Hide members"
+
+                            $0[.p, { $0.class = "reason" }]
+                            {
+                                $0 += """
+                                This section is hidden by default because it contains too many \
+
+                                """
+
+                                $0[.span] { $0.class = "count" } = "(\(group.members.count))"
+
+                                $0 += """
+                                 members.
+                                """
+                            }
+                        }
+                        $0[.ul]
+                        {
+                            self.inliner.list(members: group.members, to: &$0)
                         }
                     }
                 }

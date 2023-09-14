@@ -1,3 +1,72 @@
+//  Collapsed groups
+section.group
+{
+    details
+    {
+        summary
+        {
+            cursor: pointer;
+
+            display: flex;
+            flex-flow: column nowrap;
+            align-items: center;
+
+            text-align: center;
+
+            p
+            {
+                margin: 0;
+            }
+
+            p.view,
+            p.hide
+            {
+                font-family: $typeface-sans;
+                font-weight: 700;
+                font-size: 125%;
+
+            }
+
+            p.hide
+            {
+                display: none;
+            }
+
+            p.reason
+            {
+                margin-top: 0.5rem;
+                font-style: italic;
+                color: $light-foreground-semi;
+
+                span.count
+                {
+                    font-style: normal;
+                }
+            }
+        }
+
+        summary::marker
+        {
+            content: '';
+        }
+    }
+    details[open]
+    {
+        summary
+        {
+            p.view,
+            p.reason
+            {
+                display: none;
+            }
+
+            p.hide
+            {
+                display: block;
+            }
+        }
+    }
+}
 //  Generic constraints
 section.group code.constraints
 {
