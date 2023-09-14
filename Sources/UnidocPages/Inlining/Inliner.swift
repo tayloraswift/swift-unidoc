@@ -83,6 +83,23 @@ extension Inliner
 }
 extension Inliner
 {
+    func list(members:[Volume.Link], to list:inout HTML.ContentEncoder)
+    {
+        for member:Volume.Link in members
+        {
+            switch member
+            {
+            case .scalar(let scalar):
+                list ?= self.card(scalar)
+
+            case .text(let text):
+                list[.li] { $0[.span] { $0[.code] = text } }
+            }
+        }
+    }
+}
+extension Inliner
+{
     func vectorLink<Display, Scalars>(
         components display:Display,
         to scalars:Scalars) -> VectorLink<Display, Scalars>
