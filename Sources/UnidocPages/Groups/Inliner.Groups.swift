@@ -183,6 +183,11 @@ extension Inliner.Groups:HyperTextOutputStreamable
                 else
                 {
                     $0 ?= group.overview.map(self.inliner.passage(overview:))
+
+                    $0[.ul]
+                    {
+                        self.inliner.list(members: group.members, to: &$0)
+                    }
                     return
                 }
 
