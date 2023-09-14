@@ -136,7 +136,7 @@ extension Volume.Master
         /// This field is cheap (64-bit integer plus 3 bytes of keying overhead) and
         /// allows us to reuse compound indices for zone-bound queries by performing
         /// an equality match instead of a range match.
-        case zone = "I"
+        case zone = "Z"
 
         /// Appears in ``Decl`` and ``File``.
         case symbol = "Y"
@@ -161,7 +161,7 @@ extension Volume.Master
         case module = "M"
 
         /// Only appears in ``Decl``.
-        case flags = "Z"
+        case flags = "F"
         /// Only appears in ``Decl``.
         case signature_availability = "A"
         /// Only appears in ``Decl``.
@@ -175,6 +175,8 @@ extension Volume.Master
         case signature_generics_constraints = "g"
         /// Only appears in ``Decl``.
         case signature_generics_parameters = "G"
+        /// Only appears in ``Decl``.
+        case signature_spis = "I"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case requirements = "r"
         /// Only appears in ``Decl``. The field contains a list of scalars.
@@ -269,6 +271,8 @@ extension Volume.Master:BSONDocumentEncodable
                 self.signature.generics.parameters.isEmpty ? nil :
                 self.signature.generics.parameters
 
+            bson[.signature_spis] = self.signature.spis
+
             bson[.stem] = self.stem
 
             bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
@@ -359,7 +363,8 @@ extension Volume.Master:BSONDocumentDecodable
                         scalars: try bson[.signature_expanded_scalars]?.decode() ?? []),
                     generics: Signature<Unidoc.Scalar?>.Generics.init(
                         constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
-                        parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
+                        parameters: try bson[.signature_generics_parameters]?.decode() ?? []),
+                    spis: try bson[.signature_spis]?.decode()),
                 symbol: try bson[.symbol].decode(),
                 stem: try bson[.stem].decode(),
                 requirements: try bson[.requirements]?.decode() ?? [],

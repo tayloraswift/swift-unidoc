@@ -17,8 +17,6 @@ struct SymbolDescription:Equatable, Sendable
     public
     let doccomment:Doccomment?
     public
-    let interfaces:Interfaces?
-    public
     let visibility:Visibility
     public
     let `extension`:ExtensionContext
@@ -36,7 +34,6 @@ struct SymbolDescription:Equatable, Sendable
     init(_ usr:Symbol,
         phylum:Unidoc.Phylum,
         doccomment:Doccomment?,
-        interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
         signature:Signature<Symbol.Decl>,
@@ -44,7 +41,6 @@ struct SymbolDescription:Equatable, Sendable
         path:UnqualifiedPath)
     {
         self.doccomment = doccomment
-        self.interfaces = interfaces
         self.visibility = visibility
         self.extension = `extension`
         self.signature = signature
@@ -94,11 +90,12 @@ extension SymbolDescription
         }
 
         //  SymbolGraphGen incorrectly prints the fragment as 'class' in
-        //  the abridged signature
+        //  the abridged signature.
         let signature:Signature<Symbol.Decl> = .init(availability: availability,
             abridged: .init(abridged, actor: phylum == .decl(.actor)),
             expanded: expanded,
-            generics: generics)
+            generics: generics,
+            spis: interfaces.map { _ in [] })
 
         //  strip empty parentheses from last path component
         let simplified:UnqualifiedPath
@@ -117,7 +114,6 @@ extension SymbolDescription
         self.init(usr,
             phylum: phylum,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
-            interfaces: interfaces,
             visibility: visibility,
             extension: `extension`,
             signature: signature,
