@@ -56,6 +56,8 @@ extension Server.Endpoint._SyncRepository:RestrictedOperation
 
         return .resource(.init(.one(canonical: nil),
             content: .string("""
+                Cell: \(package)
+
                 \(repo)
 
                 Known Tags: \(old)
