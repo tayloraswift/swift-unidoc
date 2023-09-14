@@ -72,7 +72,7 @@ Unidoc symbol graphs include line-breaking markers computed by SwiftSyntax, whic
 
 ### 🛸 Documentation coverage
 
-Unidoc can compute documentation coverage on a per-package and per-module basis. You can view coverage levels as pie-chart visualizations on package and module pages; see [`swift-atomics`](https://swiftinit.org/docs/swift-atomics)’s [package page](https://swiftinit.org/docs/swift-atomics) for an example.
+Unidoc can compute documentation coverage on a per-package and per-module basis. You can view coverage levels as pie-chart visualizations on package and module pages; see [`swift-atomics`](https://github.com/apple/swift-atomics)’s [package page](https://swiftinit.org/docs/swift-atomics) for an example.
 
 
 ### :octocat: GitHub integration
