@@ -141,6 +141,16 @@ extension Site.Docs.Decl:ApplicationPage
             }
         }
 
+        if  let _:[String] = self.master.signature.spis
+        {
+            main[.section, { $0.class = "spi" }]
+            {
+                $0[.p] = """
+                This declaration is gated by at least one @_spi attribute.
+                """
+            }
+        }
+
         let availability:Availability = self.master.signature.availability
         if  let notice:String = availability.notice
         {
