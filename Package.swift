@@ -73,7 +73,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.8.1")),
+            from: "0.8.2")),
 
         .package(url: "https://github.com/swift-server/swift-backtrace", .upToNextMinor(
             from: "1.3.4")),
@@ -236,6 +236,9 @@ let package:Package = .init(
         .target(name: "MarkdownPluginSwift", dependencies:
             [
                 .target(name: "MarkdownABI"),
+                .target(name: "Signatures"),
+                .target(name: "Symbols"),
+
                 .product(name: "IDEUtils", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]),
@@ -330,6 +333,7 @@ let package:Package = .init(
             [
                 .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
+                .target(name: "MarkdownPluginSwift"),
                 .target(name: "ModuleGraphs"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
@@ -478,6 +482,13 @@ let package:Package = .init(
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "MarkdownPluginSwiftTests", dependencies:
+            [
+                .target(name: "MarkdownPluginSwift"),
+                .target(name: "MarkdownRendering"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

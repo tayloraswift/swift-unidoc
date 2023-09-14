@@ -13,6 +13,7 @@ extension PackageDatabase.Packages
         init(coordinate:Int32, repo:PackageRepo?, new:Bool)
         {
             self.coordinate = coordinate
+            self.repo = repo
             self.new = new
         }
     }

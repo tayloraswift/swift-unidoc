@@ -22,3 +22,12 @@ extension MarkdownBinary:HyperTextRenderableMarkdown
         html[.code] = "<reference = \(reference)>"
     }
 }
+extension MarkdownBinary:PlainTextRenderableMarkdown
+{
+    /// Renders a placeholder `code` element describing the reference.
+    public
+    func load(_ reference:Int, into utf8:inout [UInt8])
+    {
+        utf8 += "<reference = \(reference)>".utf8
+    }
+}

@@ -94,15 +94,15 @@ enum Main:SyncTests
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/Symbolgraphs/SPI.symbols.json")
         {
-            for (symbol, interfaces):([String], SymbolDescription.Interfaces?) in
+            for (symbol, interfaces):([String], [String]?) in
             [
                 (["NoSPI"], nil),
-                (["SPI"], .init()),
+                (["SPI"], []),
             ]
             {
                 if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
                 {
-                    tests.expect(symbol.interfaces ==? interfaces)
+                    tests.expect(symbol.signature.spis ==? interfaces)
                 }
             }
         }

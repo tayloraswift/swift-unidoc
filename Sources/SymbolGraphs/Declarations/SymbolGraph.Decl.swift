@@ -109,6 +109,7 @@ extension SymbolGraph.Decl
         case signature_expanded_scalars = "K"
         case signature_generics_constraints = "C"
         case signature_generics_parameters = "G"
+        case signature_spis = "I"
 
         case requirements = "R"
         case superforms = "S"
@@ -150,6 +151,9 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
             self.signature.generics.parameters.isEmpty ? nil :
             self.signature.generics.parameters
 
+        /// Do *not* elide empty SPI arrays!
+        bson[.signature_spis] = self.signature.spis
+
         bson[.requirements] = SymbolGraph.Buffer.init(elidingEmpty: self.requirements)
         bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
         bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
@@ -182,7 +186,8 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
                     scalars: try bson[.signature_expanded_scalars]?.decode() ?? []),
                 generics: Signature<Int32>.Generics.init(
                     constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
-                    parameters: try bson[.signature_generics_parameters]?.decode() ?? [])),
+                    parameters: try bson[.signature_generics_parameters]?.decode() ?? []),
+                spis: try bson[.signature_spis]?.decode()),
 
             location: try bson[.location]?.decode(),
             article: try bson[.article]?.decode(),

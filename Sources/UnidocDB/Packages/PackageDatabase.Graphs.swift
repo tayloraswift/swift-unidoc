@@ -105,7 +105,8 @@ extension PackageDatabase.Graphs
                     }
                 }
             },
-            against: self.database)
+            against: self.database,
+            by: .now.advanced(by: .seconds(60)))
         {
             for try await batch:[Snapshot] in $0
             {

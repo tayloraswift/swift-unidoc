@@ -26,8 +26,7 @@ enum MarkdownElementContext
 extension MarkdownElementContext
 {
     private static
-    func highlight(_ type:MarkdownSyntaxHighlight,
-        attributes:inout MarkdownAttributeContext) -> Self
+    func highlight(_ type:MarkdownSyntaxHighlight, attributes:inout AttributeContext) -> Self
     {
         let container:HTML.ContainerElement = attributes.contains(.href) ? .a : .span
         attributes.append(class: type)
@@ -35,13 +34,13 @@ extension MarkdownElementContext
     }
 
     private static
-    func section(_ type:Section, attributes:inout MarkdownAttributeContext) -> Self
+    func section(_ type:Section, attributes:inout AttributeContext) -> Self
     {
         attributes.append(class: type)
         return .section(type)
     }
     private static
-    func signage(_ type:Signage, attributes:inout MarkdownAttributeContext) -> Self
+    func signage(_ type:Signage, attributes:inout AttributeContext) -> Self
     {
         attributes.append(class: type)
         return .signage(type)
@@ -49,7 +48,7 @@ extension MarkdownElementContext
 }
 extension MarkdownElementContext
 {
-    init(from markdown:MarkdownBytecode.Context, attributes:inout MarkdownAttributeContext)
+    init(from markdown:MarkdownBytecode.Context, attributes:inout AttributeContext)
     {
         switch markdown
         {
@@ -101,6 +100,7 @@ extension MarkdownElementContext
         case .class:            self = .highlight(.class,           attributes: &attributes)
         case .type:             self = .highlight(.type,            attributes: &attributes)
         case .typealias:        self = .highlight(.typealias,       attributes: &attributes)
+        case .indent:           self = .highlight(.indent,          attributes: &attributes)
 
         case .parameters:       self = .section(.parameters,        attributes: &attributes)
         case .returns:          self = .section(.returns,           attributes: &attributes)
