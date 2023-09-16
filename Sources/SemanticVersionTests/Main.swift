@@ -7,11 +7,53 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "version-parsing" / "valid"
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Release"
+        {
+            tests.expect(SemanticVersion.init("0.1.2") ==? .release(.v(0, 1, 2)))
+        }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Release" / "V"
+        {
+            tests.expect(SemanticVersion.init(refname: "v0.1.2") ==? .release(.v(0, 1, 2)))
+        }
+
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Prerelease"
+        {
+            tests.expect(SemanticVersion.init(refname: "0.1.2-rc3") ==?
+                .prerelease(.v(0, 1, 2), "rc3"))
+        }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Prerelease" / "V"
+        {
+            tests.expect(SemanticVersion.init(refname: "v0.1.2-rc3") ==?
+                .prerelease(.v(0, 1, 2), "rc3"))
+        }
+
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Build"
+        {
+            tests.expect(SemanticVersion.init(refname: "0.1.2+build3") ==?
+                .release(.v(0, 1, 2), build: "build3"))
+        }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Build" / "V"
+        {
+            tests.expect(SemanticVersion.init(refname: "v0.1.2+build3") ==?
+                .release(.v(0, 1, 2), build: "build3"))
+        }
+
+        if  let tests:TestGroup = tests / "SemanticVersion" / "PrereleaseBuild"
+        {
+            tests.expect(SemanticVersion.init(refname: "0.1.2-rc3+build3") ==?
+                .prerelease(.v(0, 1, 2), "rc3", build: "build3"))
+        }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "PrereleaseBuild" / "V"
+        {
+            tests.expect(SemanticVersion.init(refname: "v0.1.2-rc3+build3") ==?
+                .prerelease(.v(0, 1, 2), "rc3", build: "build3"))
+        }
+
+        if  let tests:TestGroup = tests / "PatchVersion" / "Valid"
         {
             tests.expect(PatchVersion.init("0.1.2") ==? .v(0, 1, 2))
         }
-        if  let tests:TestGroup = tests / "version-parsing" / "invalid"
+        if  let tests:TestGroup = tests / "PatchVersion" / "Invalid"
         {
             if  let tests:TestGroup = tests / "empty"
             {
@@ -50,7 +92,7 @@ enum Main:SyncTests
                 tests.expect(nil: PatchVersion.init("0.1.99999"))
             }
         }
-        if  let tests:TestGroup = tests / "mask-parsing" / "valid"
+        if  let tests:TestGroup = tests / "NumericVersion" / "Valid"
         {
             if  let tests:TestGroup = tests / "major"
             {
@@ -65,7 +107,7 @@ enum Main:SyncTests
                 tests.expect(NumericVersion.init("1.2.3") ==? .patch(.v(1, 2, 3)))
             }
         }
-        if  let tests:TestGroup = tests / "mask-parsing" / "invalid"
+        if  let tests:TestGroup = tests / "NumericVersion" / "Invalid"
         {
             if  let tests:TestGroup = tests / "empty"
             {

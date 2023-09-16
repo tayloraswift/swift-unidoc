@@ -7,6 +7,8 @@ extension Site.Admin
         case dropPackageDB = "drop-package-db"
         case dropUnidocDB = "drop-unidoc-db"
 
+        case recodePackageEditions = "recode-package-editions"
+
         case rebuild = "rebuild"
         case upload = "upload"
     }
@@ -17,11 +19,12 @@ extension Site.Admin.Action
     {
         switch self
         {
-        case .dropAccountDB:    return "Drop Account Database"
-        case .dropPackageDB:    return "Drop Package Database"
-        case .dropUnidocDB:     return "Drop Unidoc Database"
-        case .rebuild:          return "Rebuild Collections"
-        case .upload:           return "Upload Snapshots"
+        case .dropAccountDB:            return "Drop Account Database"
+        case .dropPackageDB:            return "Drop Package Database"
+        case .dropUnidocDB:             return "Drop Unidoc Database"
+        case .recodePackageEditions:    return "Recode Package Editions"
+        case .rebuild:                  return "Rebuild Collections"
+        case .upload:                   return "Upload Snapshots"
         }
     }
 }

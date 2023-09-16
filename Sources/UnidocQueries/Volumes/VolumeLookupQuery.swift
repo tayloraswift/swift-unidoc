@@ -4,7 +4,7 @@ import UnidocDB
 import UnidocRecords
 
 public
-protocol VolumeLookupQuery:DatabaseQuery
+protocol VolumeLookupQuery:DatabaseQuery where Database == UnidocDatabase
 {
     associatedtype LookupPredicate:VolumeLookupPredicate
 

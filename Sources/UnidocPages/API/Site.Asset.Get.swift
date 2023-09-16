@@ -13,6 +13,9 @@ extension Site.Asset
         case literata75_woff2   = "text75.woff2"
         case literata77_woff2   = "text77.woff2"
 
+        case admin_css          = "admin.css"
+        case admin_css_map      = "admin.css.map"
+
         case main_css           = "main.css"
         case main_css_map       = "main.css.map"
 

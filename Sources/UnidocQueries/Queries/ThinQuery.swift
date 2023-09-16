@@ -1,5 +1,6 @@
 import MongoQL
 import Unidoc
+import UnidocDB
 import UnidocRecords
 
 @frozen public

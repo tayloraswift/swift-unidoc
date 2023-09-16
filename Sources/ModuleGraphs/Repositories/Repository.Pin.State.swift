@@ -28,9 +28,6 @@ extension Repository.Pin.State:CustomStringConvertible
     {
         switch self.version.canonical
         {
-        case .stable(.release(let version)):
-            return "\(version) (stable, release, \(self.revision))"
-
         case .stable(let version):
             return "\(version) (stable, \(self.revision))"
 

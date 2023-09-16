@@ -1,0 +1,73 @@
+section.details table
+{
+    width: 100%;
+
+    th
+    {
+        text-align: left;
+        font-family: $typeface-sans;
+        padding-bottom: 0.5rem;
+
+        color: $light-foreground-semi;
+        border-bottom: 2px solid $light-swift;
+    }
+    tbody tr:first-child td
+    {
+        padding-top: 0.5rem;
+    }
+    th,
+    td
+    {
+        padding-left: 0.5rem;
+    }
+    th:first-child,
+    td:first-child
+    {
+        padding-left: 0;
+    }
+}
+section.details table.dependencies
+{
+    td:first-child
+    {
+        font-style: italic;
+    }
+    td span.upto
+    {
+        padding: 0 0.5rem;
+    }
+}
+section.details table.tags
+{
+    tr.latest
+    {
+        font-weight: 700;
+    }
+
+    td.graphs
+    {
+        font-weight: 700;
+    }
+    td.graphs:before
+    {
+        margin-right: 0.5rem;
+    }
+
+    td.graphs:not(:empty)
+    {
+        color: $light-accent-barbie-pink;
+    }
+    td.graphs:not(:empty):before
+    {
+        content: '✓';
+    }
+
+    td.graphs:empty
+    {
+        color: $light-foreground-semi;
+    }
+    td.graphs:empty:before
+    {
+        content: '✗';
+    }
+}

@@ -5,7 +5,7 @@ import MongoQL
 import SymbolGraphs
 
 @frozen public
-struct PackageRecord:Identifiable
+struct PackageRecord:Identifiable, Equatable, Sendable
 {
     public
     let id:PackageIdentifier

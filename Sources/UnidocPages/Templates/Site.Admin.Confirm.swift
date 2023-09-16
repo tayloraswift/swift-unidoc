@@ -36,6 +36,13 @@ extension Site.Admin.Confirm
                 This will drop (and reinitialize) the entire database. Are you sure?
                 """)
 
+        case .recodePackageEditions:
+            self.init(action: action,
+                label: action.label,
+                text: """
+                This will recode all package editions. Are you sure?
+                """)
+
         case .rebuild, .upload:
             return nil
         }
