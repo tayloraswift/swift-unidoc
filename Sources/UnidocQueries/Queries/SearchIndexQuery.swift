@@ -1,15 +1,16 @@
 
-import MD5
 import BSONDecoding
 import BSONEncoding
+import MD5
 import MongoQL
 import UnidocAnalysis
 import UnidocDB
 import UnidocRecords
 
 @frozen public
-struct SearchIndexQuery<ID>:Equatable, Hashable, Sendable
-    where   ID:Hashable,
+struct SearchIndexQuery<Database, ID>:Equatable, Hashable, Sendable
+    where   Database:DatabaseModel,
+            ID:Hashable,
             ID:Sendable,
             ID:BSONDecodable,
             ID:BSONEncodable

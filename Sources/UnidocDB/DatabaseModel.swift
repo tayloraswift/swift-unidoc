@@ -4,8 +4,20 @@ import MongoQL
 public
 protocol DatabaseModel:Identifiable<Mongo.Database>, Equatable, Sendable
 {
+    static
+    var collation:Mongo.Collation { get }
+
     init(id:Mongo.Database)
+
     func setup(with session:Mongo.Session) async throws
+}
+extension DatabaseModel
+{
+    @inlinable public static
+    var collation:Mongo.Collation
+    {
+        .init(locale: "simple", normalization: true) // normalize unicode on insert
+    }
 }
 extension DatabaseModel
 {

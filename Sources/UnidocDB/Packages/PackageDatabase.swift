@@ -27,15 +27,6 @@ extension PackageDatabase
     var graphs:Graphs { .init(database: self.id) }
 
     var meta:Meta { .init(database: self.id) }
-
-    public static
-    var collation:Mongo.Collation
-    {
-        .init(locale: "en", // casing is a property of english, not unicode
-            caseLevel: false, // url paths are case-insensitive
-            normalization: true, // normalize unicode on insert
-            strength: .secondary) // diacritics are significant
-    }
 }
 extension PackageDatabase:DatabaseModel
 {

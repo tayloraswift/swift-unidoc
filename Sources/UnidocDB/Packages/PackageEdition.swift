@@ -1,11 +1,12 @@
 import BSONDecoding
 import BSONEncoding
 import MongoQL
+import SemanticVersions
 import SHA1
 import Unidoc
 
 @frozen public
-struct PackageEdition:Identifiable
+struct PackageEdition:Identifiable, Equatable, Sendable
 {
     public
     let id:Unidoc.Zone
@@ -30,6 +31,13 @@ struct PackageEdition:Identifiable
         self.lost = lost
     }
 }
+extension PackageEdition
+{
+    @inlinable public
+    var package:Int32 { self.id.package }
+    @inlinable public
+    var version:Int32 { self.id.version }
+}
 extension PackageEdition:MongoMasterCodingModel
 {
     public
@@ -39,6 +47,9 @@ extension PackageEdition:MongoMasterCodingModel
 
         case package = "P"
         case version = "V"
+
+        case release = "R"
+        case patch = "A"
 
         case name = "T"
         case sha1 = "S"
@@ -54,6 +65,23 @@ extension PackageEdition:BSONDocumentEncodable
 
         bson[.package] = self.id.package
         bson[.version] = self.id.version
+
+        /// Parses and returns this edition's refname as a semantic version. If the refname
+        /// looks like a semantic version, this will strip leading `v`’s, and zero-extend the
+        /// patch number.
+        switch SemanticVersion.init(refname: self.name)
+        {
+        case .release(let version, build: _)?:
+            bson[.release] = true
+            bson[.patch] = version
+
+        case .prerelease(let version, _, build: _)?:
+            bson[.release] = false
+            bson[.patch] = version
+
+        case nil:
+            break
+        }
 
         bson[.name] = self.name
         bson[.sha1] = self.sha1

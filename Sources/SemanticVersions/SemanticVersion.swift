@@ -1,20 +1,29 @@
 @frozen public
-enum SemanticVersion:Equatable, Hashable, Comparable, Sendable
+enum SemanticVersion:Equatable, Hashable, Sendable
 {
-    case release(PatchVersion)
-
-    @available(*, unavailable, message: "unimplemented")
-    case prerelease
+    case release    (PatchVersion, build:String? = nil)
+    case prerelease (PatchVersion, String, build:String? = nil)
 }
 extension SemanticVersion
 {
+    @inlinable public
+    var patch:PatchVersion
+    {
+        switch self
+        {
+        case .release   (let version,    build: _): return version
+        case .prerelease(let version, _, build: _): return version
+        }
+    }
+
+    @available(*, deprecated, message: "use 'patch' or switch explicitly instead")
     @inlinable public
     var release:PatchVersion?
     {
         switch self
         {
-        case .release(let version): return version
-        case .prerelease:           return nil
+        case .release(let version, _):  return version
+        case .prerelease:               return nil
         }
     }
 }
@@ -25,7 +34,17 @@ extension SemanticVersion:CustomStringConvertible
     {
         switch self
         {
-        case .release(let version): return "\(version)"
+        case .release(let version, build: nil):
+            return "\(version)"
+
+        case .release(let version, build: let build?):
+            return "\(version)+\(build)"
+
+        case .prerelease(let version, let alpha, build: nil):
+            return "\(version)-\(alpha)"
+
+        case .prerelease(let version, let alpha, build: let build?):
+            return "\(version)-\(alpha)+\(build)"
         }
     }
 }
@@ -34,13 +53,48 @@ extension SemanticVersion:LosslessStringConvertible
     @inlinable public
     init?(_ string:some StringProtocol)
     {
-        if  let version:NumericVersion = .init(string)
+        let patch:PatchVersion
+        let alpha:String?
+        let build:String?
+
+        var i:String.Index = string.endIndex
+
+        if  let plus:String.Index = string.lastIndex(of: "+")
         {
-            self = .release(.init(padding: version))
+            build = .init(string[string.index(after: plus)...])
+            i = plus
+        }
+        else
+        {
+            build = nil
+        }
+
+        if  let dash:String.Index = string[..<i].lastIndex(of: "-")
+        {
+            alpha = .init(string[string.index(after: dash) ..< i])
+            i = dash
+        }
+        else
+        {
+            alpha = nil
+        }
+
+        if  let version:NumericVersion = .init(string[..<i])
+        {
+            patch = .init(padding: version)
         }
         else
         {
             return nil
+        }
+
+        if  let alpha:String
+        {
+            self = .prerelease(patch, alpha, build: build)
+        }
+        else
+        {
+            self = .release(patch, build: build)
         }
     }
 }
