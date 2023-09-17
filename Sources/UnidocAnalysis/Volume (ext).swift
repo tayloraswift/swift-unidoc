@@ -10,7 +10,7 @@ extension Volume
     func siteMap() -> SiteMap<PackageIdentifier>
     {
         var lines:[UInt8] = []
-        for master:Volume.Master in self.masters
+        for master:Volume.Master in self.vertices
         {
             switch master
             {
@@ -37,7 +37,7 @@ extension Volume
         var procs:[Unidoc.Scalar: [Shoot]] = [:]
         var types:Types = .init()
 
-        for master:Master in self.masters
+        for master:Master in self.vertices
         {
             switch master
             {

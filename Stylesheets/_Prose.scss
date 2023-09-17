@@ -114,44 +114,4 @@ section.details
             }
         }
     }
-
-    table
-    {
-        width: 100%;
-    }
-    table th
-    {
-        text-align: left;
-        font-family: $typeface-sans;
-        padding-bottom: 0.5rem;
-
-        color: $light-foreground-semi;
-        border-bottom: 2px solid $light-swift;
-    }
-    table tbody tr:first-child td
-    {
-        padding-top: 0.5rem;
-    }
-    table th,
-    table td
-    {
-        padding-left: 0.5rem;
-    }
-    table th:first-child,
-    table td:first-child
-    {
-        padding-left: 0;
-    }
-
-    table.dependencies
-    {
-        td:first-child
-        {
-            font-style: italic;
-        }
-        td span.upto
-        {
-            padding: 0 0.5rem;
-        }
-    }
 }

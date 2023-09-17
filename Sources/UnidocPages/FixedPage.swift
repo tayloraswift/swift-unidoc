@@ -8,6 +8,8 @@ protocol FixedPage
 {
     /// A short description of the page, suitable for use as a `<meta>` description.
     var description:String? { get }
+
+    var canonicalURI:URI? { get }
     var location:URI { get }
     var title:String { get }
 
@@ -18,6 +20,8 @@ extension FixedPage
 {
     @inlinable public
     var description:String? { nil }
+    @inlinable public
+    var canonicalURI:URI? { nil }
 
     @inlinable public
     func head(augmenting    _:inout HTML.ContentEncoder)
@@ -34,7 +38,9 @@ extension FixedPage
     public
     func rendered() -> ServerResource
     {
+        let canonical:String? = self.canonicalURI?.description
         let location:String = "\(self.location)"
+
         let html:HTML = .document
         {
             $0[.html, { $0.lang = "en" }]
@@ -58,6 +64,14 @@ extension FixedPage
                     {
                         $0.href = "\(Site.Asset[.main_css])"
                         $0.rel = .stylesheet
+                    }
+                    if  let canonical:String
+                    {
+                        $0[.link]
+                        {
+                            $0.href = "https://swiftinit.org\(canonical)"
+                            $0.rel = .canonical
+                        }
                     }
                     //  Inlining this saves the client a round-trip to the google fonts API.
                     //  It is only about 1.87 KB, which is less than 5 percent of the total
@@ -83,7 +97,7 @@ extension FixedPage
                 }
             }
         }
-        return .init(.one(canonical: location),
+        return .init(.one(canonical: "https://swiftinit.org\(canonical ?? location)"),
                 content: .binary(html.utf8),
                 type: .text(.html, charset: .utf8))
     }

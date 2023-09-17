@@ -33,8 +33,8 @@ extension ServerTour.StatsBreakdown
 
         for (state, value):(String, Int) in
         [
-            ("OK",                      stats.responses.ok),
             ("Not Modified",            stats.responses.notModified),
+            ("OK",                      stats.responses.ok),
             ("Redirected Permanently",  stats.responses.redirectedPermanently),
             ("Redirected Temporarily",  stats.responses.redirectedTemporarily),
             ("Not Found",               stats.responses.notFound),

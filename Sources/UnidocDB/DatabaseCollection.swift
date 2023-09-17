@@ -101,6 +101,65 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
+    /// Decode and encode all documents in this collection using the specified master type.
+    ///
+    /// This function migrates documents in batches of 4096.
+    func recode<Master>(through _:Master.Type = Master.self,
+        with session:Mongo.Session,
+        by deadline:ContinuousClock.Instant) async throws -> (modified:Int, of:Int)
+        where Master:BSONDocumentDecodable & BSONDocumentEncodable & Identifiable<ElementID>
+    {
+        var modified:Int = 0
+        var selected:Int = 0
+        try await session.run(
+            command: Mongo.Find<Mongo.Cursor<Master>>.init(Self.name,
+                stride: 4096,
+                limit: .max),
+            against: self.database,
+            by: deadline)
+        {
+            for try await batch:[Master] in $0
+            {
+                let updates:Mongo.Updates<ElementID> = try await self.update(batch,
+                    with: session)
+
+                modified += updates.modified
+                selected += updates.selected
+            }
+        }
+
+        return (modified, selected)
+    }
+}
+extension DatabaseCollection
+{
+    /// Returns the identifiers of all the documents in this collection.
+    func list(with session:Mongo.Session) async throws -> [ElementID]
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.Cursor<Mongo.IdentityView<ElementID>>>.init(Self.name,
+                stride: 4096,
+                limit: .max)
+            {
+                $0[.projection] = .init
+                {
+                    $0[Mongo.IdentityView<ElementID>[.id]] = true
+                }
+            },
+            against: self.database)
+        {
+            try await $0.reduce(into: [])
+            {
+                for view:Mongo.IdentityView<ElementID> in $1
+                {
+                    $0.append(view.id)
+                }
+            }
+        }
+    }
+}
+extension DatabaseCollection
+{
     func insert(
         _ elements:some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws
@@ -138,29 +197,43 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
+    func upsert(_ elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
+    {
+        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
+            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+                updates: elements.map { .upsert($0) }),
+            against: self.database)
+
+        return try response.updates()
+    }
+
     @discardableResult
     func upsert(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
         with session:Mongo.Session) async throws -> ElementID?
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
             command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
-                updates:
-                [
-                    .init
-                    {
-                        $0[.upsert] = true
-                        $0[.q] = .init { $0["_id"] = element.id }
-                        $0[.u] = element
-                    },
-                ]),
+                updates: [.upsert(element)]),
             against: self.database)
 
         let updates:Mongo.Updates<ElementID> = try response.updates()
         return updates.upserted.first?.id
     }
 }
+
 extension DatabaseCollection
 {
+    func update(_ elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
+    {
+        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
+            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+                updates: elements.map { .replace($0) }),
+            against: self.database)
+
+        return try response.updates()
+    }
     /// Replaces an *existing* document having the same identifier as the passed document with
     /// the passed document. Returns true if the document was modified, false if the document
     /// was not modified, and nil if the document was not found.
@@ -170,15 +243,7 @@ extension DatabaseCollection
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
             command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
-                updates:
-                [
-                    .init
-                    {
-                        $0[.upsert] = false
-                        $0[.q] = .init { $0["_id"] = element.id }
-                        $0[.u] = element
-                    },
-                ]),
+                updates: [.replace(element)]),
             against: self.database)
 
         let updates:Mongo.Updates<ElementID> = try response.updates()

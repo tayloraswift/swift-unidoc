@@ -125,8 +125,15 @@ extension Server.Endpoint
 
         switch root
         {
+        case Site.Tags.root:
+            return .stateful(Pipeline<PackageEditionsQuery>.init(
+                explain: explain,
+                query: .init(package: .init(trunk)),
+                uri: uri,
+                tag: tag))
+
         case Site.Docs.root:
-            return .stateful(Pipeline<UnidocDatabase, WideQuery>.init(
+            return .stateful(Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -135,7 +142,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case Site.Guides.root:
-            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Volume.Range>>.init(
+            return .stateful(Pipeline<ThinQuery<Volume.Range>>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -144,7 +151,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case "articles":
-            return .stateful(Pipeline<UnidocDatabase, WideQuery>.init(
+            return .stateful(Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -156,7 +163,7 @@ extension Server.Endpoint
             if  let id:VolumeIdentifier = .init(trunk)
             {
                 return .stateful(
-                    Pipeline<UnidocDatabase, SearchIndexQuery<VolumeIdentifier>>.init(
+                    Pipeline<SearchIndexQuery<UnidocDatabase, VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: UnidocDatabase.Search.name,
@@ -167,7 +174,7 @@ extension Server.Endpoint
             }
             else if trunk == "packages.json"
             {
-                return .stateful(Pipeline<PackageDatabase, SearchIndexQuery<Int32>>.init(
+                return .stateful(Pipeline<SearchIndexQuery<PackageDatabase, Int32>>.init(
                     explain: explain,
                     query: .init(
                         from: PackageDatabase.Meta.name,
@@ -208,14 +215,14 @@ extension Server.Endpoint
 
         if  let overload:Symbol.Decl
         {
-            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Symbol.Decl>>.init(
+            return .stateful(Pipeline<ThinQuery<Symbol.Decl>>.init(
                 explain: false,
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .stateful(Pipeline<UnidocDatabase, ThinQuery<Volume.Shoot>>.init(
+            return .stateful(Pipeline<ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))

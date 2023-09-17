@@ -27,18 +27,25 @@ extension Site.Admin.Confirm
     public
     init?(action:Site.Admin.Action)
     {
+        let prompt:String
         switch action
         {
         case .dropAccountDB, .dropPackageDB, .dropUnidocDB:
-            self.init(action: action,
-                label: action.label,
-                text: """
-                This will drop (and reinitialize) the entire database. Are you sure?
-                """)
+            prompt = "This will drop (and reinitialize) the entire database. Are you sure?"
+
+        case .recodePackageEditions:
+            prompt = "This will recode all package editions. Are you sure?"
+
+        case .recodeUnidocVertices:
+            prompt = "This will recode all Unidoc vertices. Are you sure?"
 
         case .rebuild, .upload:
             return nil
         }
+
+        self.init(action: action,
+            label: action.label,
+            text: prompt)
     }
 }
 extension Site.Admin.Confirm:FixedPage

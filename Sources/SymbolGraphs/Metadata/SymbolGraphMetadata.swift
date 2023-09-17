@@ -89,8 +89,11 @@ extension SymbolGraphMetadata
         let display:String
         switch swift.canonical
         {
-        case .stable(.release(let version)):
+        case .stable(.release(let version, _)):
             display = "Swift \(version.minor)"
+
+        case .stable(let version):
+            display = "Swift \(version)"
 
         case .unstable:
             display = "Swift Nightly"

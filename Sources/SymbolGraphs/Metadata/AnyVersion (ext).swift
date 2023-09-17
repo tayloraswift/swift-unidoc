@@ -10,11 +10,11 @@ extension AnyVersion:BSONEncodable
     {
         switch self.canonical
         {
-        case .stable(.release(let version)):
+        case .stable(.release(let version, build: nil)):
             version.encode(to: &field)
 
-        case .unstable(let name):
-            name.encode(to: &field)
+        case let other:
+            "\(other)".encode(to: &field)
         }
     }
 }
@@ -28,7 +28,7 @@ extension AnyVersion:BSONDecodable
             switch $0
             {
             case .int64(let int64):
-                return .stable(.release(.init(rawValue: int64)))
+                return .stable(.release(.init(rawValue: int64), build: nil))
 
             case .string(let utf8):
                 return .init(String.init(bson: utf8))

@@ -48,6 +48,20 @@ extension Server.Endpoint.Admin:RestrictedOperation
 
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
+        case .perform(.recodePackageEditions, _):
+            let (modified, total):(Int, Int) =
+                try await services.database.package.editions.recode(with: session)
+
+            page = .init(action: .recodePackageEditions,
+                text: "Modified \(modified) of \(total) editions!")
+
+        case .perform(.recodeUnidocVertices, _):
+            let (modified, total):(Int, Int) =
+                try await services.database.unidoc.vertices.recode(with: session)
+
+            page = .init(action: .recodeUnidocVertices,
+                text: "Modified \(modified) of \(total) vertices!")
+
         case .perform(.rebuild, _):
             let rebuilt:Int = try await services.database.unidoc.rebuild(
                 from: services.database.package,

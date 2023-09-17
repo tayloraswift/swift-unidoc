@@ -19,7 +19,7 @@ struct DynamicLinker
     private
     var extensions:Extensions
 
-    /// Maps masters to groups.
+    /// Maps vertices to groups.
     private
     var memberships:[Int32: Unidoc.Scalar]
     private
@@ -30,7 +30,7 @@ struct DynamicLinker
     )
 
     public private(set)
-    var masters:[Volume.Master]
+    var vertices:[Volume.Master]
     public private(set)
     var groups:[Volume.Group]
 
@@ -52,7 +52,7 @@ struct DynamicLinker
         self.next.autogroup = .init(zone: context.current.edition)
         self.next.topic = .init(zone: context.current.edition)
 
-        self.masters = []
+        self.vertices = []
         self.groups = []
     }
 }
@@ -92,10 +92,10 @@ extension DynamicLinker
 
         defer
         {
-            self.masters.append(.meta(meta))
+            self.vertices.append(.meta(meta))
             for culture:Volume.Master.Culture in cultures
             {
-                self.masters.append(.culture(culture))
+                self.vertices.append(.culture(culture))
             }
         }
 
@@ -132,7 +132,7 @@ extension DynamicLinker
             context.current.files.indices,
             context.current.files)
         {
-            self.masters.append(.file(.init(id: context.current.edition + f, symbol: file)))
+            self.vertices.append(.file(.init(id: context.current.edition + f, symbol: file)))
         }
 
         //  Create extension records, and compute weighted stats.
@@ -342,7 +342,7 @@ extension DynamicLinker
 
             (record.overview, record.details) = resolver.link(article: node.body)
 
-            self.masters.append(.article(record))
+            self.vertices.append(.article(record))
         }
     }
 
@@ -446,7 +446,7 @@ extension DynamicLinker
                 (record.overview, record.details) = resolver.link(article: article)
             }
 
-            self.masters.append(.decl(record))
+            self.vertices.append(.decl(record))
         }
     }
 }

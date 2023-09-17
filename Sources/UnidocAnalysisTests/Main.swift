@@ -46,8 +46,8 @@ enum Main:SyncTests
                 }
             }
             let culture:Unidoc.Scalar = swift_malibu.id + 1 * .module
-            let records:Volume = .init(latest: nil,
-                masters:
+            let volume:Volume = .init(latest: nil,
+                vertices:
                 [
                     .culture(.init(id: swift_malibu.BarbieCore.id,
                         module: .init(name: "BarbieCore", type: .regular))),
@@ -135,7 +135,7 @@ enum Main:SyncTests
                     latest: true,
                     patch: nil))
 
-            let (_, trees):(_, [Volume.TypeTree]) = records.indexes()
+            let (_, trees):(_, [Volume.TypeTree]) = volume.indexes()
             if  let tree:Volume.TypeTree = tests.expect(value: trees.first { $0.id == culture })
             {
                 tests.expect(tree ==? .init(id: culture, rows:
