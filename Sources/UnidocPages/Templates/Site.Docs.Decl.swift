@@ -15,6 +15,7 @@ extension Site.Docs
     {
         let inliner:Inliner
 
+        let canonical:CanonicalVersion?
         private
         let master:Volume.Master.Decl
         private
@@ -23,12 +24,13 @@ extension Site.Docs
         let nouns:[Volume.Noun]?
 
         init(_ inliner:Inliner,
+            canonical:CanonicalVersion?,
             master:Volume.Master.Decl,
             groups:[Volume.Group],
             nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
-
+            self.canonical = canonical
             self.master = master
             self.groups = groups
             self.nouns = nouns
@@ -143,7 +145,7 @@ extension Site.Docs.Decl:ApplicationPage
 
         if  let _:[String] = self.master.signature.spis
         {
-            main[.section, { $0.class = "spi" }]
+            main[.section, { $0.class = "notice spi" }]
             {
                 $0[.p] = """
                 This declaration is gated by at least one @_spi attribute.
@@ -154,7 +156,7 @@ extension Site.Docs.Decl:ApplicationPage
         let availability:Availability = self.master.signature.availability
         if  let notice:String = availability.notice
         {
-            main[.section, { $0.class = "deprecation" }] { $0[.p] = notice }
+            main[.section, { $0.class = "notice deprecation" }] { $0[.p] = notice }
         }
         else if !availability.isEmpty
         {
@@ -185,6 +187,8 @@ extension Site.Docs.Decl:ApplicationPage
                 }
             }
         }
+
+        main[.section] { $0.class = "notice canonical" } = self.canonical
 
         main[.section, { $0.class = "declaration" }]
         {

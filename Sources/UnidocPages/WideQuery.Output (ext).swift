@@ -18,7 +18,6 @@ extension WideQuery.Output:ServerResponseFactory
 
         if  let master:Volume.Master = principal.master
         {
-            let resource:ServerResource
             let inliner:Inliner = .init(principal: master.id, names: principal.names)
                 inliner.masters.add(self.secondary)
                 inliner.names.add(self.names)
@@ -32,19 +31,24 @@ extension WideQuery.Output:ServerResponseFactory
                 inliner.outlines += $0.outlines
             }
 
+            //  Special case for Swiftinit blog posts.
+            if  case .article(let master) = master,
+                principal.names.package == "__swiftinit"
+            {
+                let page:Site.Blog.Article = .init(inliner, master: master)
+                return .resource(page.rendered())
+            }
+
+            let canonical:CanonicalVersion? = .init(principal: principal)
+            let resource:ServerResource
+
             //  Note: noun tree won’t exist if the module contains no declarations.
             //  (For example, an `@_exported` shim.)
             switch master
             {
             case .article(let master):
-                if  principal.names.package == "__swiftinit"
-                {
-                    let page:Site.Blog.Article = .init(inliner, master: master)
-                    resource = page.rendered()
-                    break
-                }
-
                 let page:Site.Docs.Article = .init(inliner,
+                    canonical: canonical,
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
@@ -52,6 +56,7 @@ extension WideQuery.Output:ServerResponseFactory
 
             case .culture(let master):
                 let page:Site.Docs.Culture = .init(inliner,
+                    canonical: canonical,
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
@@ -59,6 +64,7 @@ extension WideQuery.Output:ServerResponseFactory
 
             case .decl(let master):
                 let page:Site.Docs.Decl = .init(inliner,
+                    canonical: canonical,
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
@@ -70,6 +76,7 @@ extension WideQuery.Output:ServerResponseFactory
 
             case .meta(let master):
                 let page:Site.Docs.Meta = .init(inliner,
+                    canonical: canonical,
                     master: master,
                     groups: principal.groups)
                 resource = page.rendered()

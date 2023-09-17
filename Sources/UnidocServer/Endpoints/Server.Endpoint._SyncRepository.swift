@@ -43,7 +43,8 @@ extension Server.Endpoint._SyncRepository:RestrictedOperation
         var old:[GitHubAPI.Tag] = []
         var new:[GitHubAPI.Tag] = []
 
-        for tag:GitHubAPI.Tag in tags
+        //  Import tags in chronological order.
+        for tag:GitHubAPI.Tag in tags.reversed()
         {
             switch try await services.database.package.editions.register(tag,
                 package: package,

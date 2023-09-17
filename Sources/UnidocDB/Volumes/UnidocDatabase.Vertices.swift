@@ -1,3 +1,4 @@
+import MongoDB
 import MongoQL
 import Unidoc
 import UnidocSelectors
@@ -5,18 +6,20 @@ import UnidocRecords
 
 extension UnidocDatabase
 {
-    public
-    struct Masters
+    @frozen public
+    struct Vertices
     {
+        public
         let database:Mongo.Database
 
+        @inlinable internal
         init(database:Mongo.Database)
         {
             self.database = database
         }
     }
 }
-extension UnidocDatabase.Masters:DatabaseCollection
+extension UnidocDatabase.Vertices:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "masters" }
@@ -63,4 +66,14 @@ extension UnidocDatabase.Masters:DatabaseCollection
             }
         },
     ]
+}
+extension UnidocDatabase.Vertices
+{
+    public
+    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    {
+        try await self.recode(through: Volume.Master.self,
+            with: session,
+            by: .now.advanced(by: .seconds(60)))
+    }
 }

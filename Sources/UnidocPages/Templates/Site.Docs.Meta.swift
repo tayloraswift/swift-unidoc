@@ -12,16 +12,19 @@ extension Site.Docs
     {
         let inliner:Inliner
 
+        let canonical:CanonicalVersion?
         private
         let master:Volume.Master.Meta
         private
         let groups:[Volume.Group]
 
         init(_ inliner:Inliner,
+            canonical:CanonicalVersion?,
             master:Volume.Master.Meta,
             groups:[Volume.Group])
         {
             self.inliner = inliner
+            self.canonical = canonical
             self.master = master
             self.groups = groups
         }
@@ -90,6 +93,8 @@ extension Site.Docs.Meta:ApplicationPage
                     target: "https://github.com\(path)/tree/\(refname)")
             }
         }
+
+        main[.section] { $0.class = "notice canonical" } = self.canonical
 
         main[.section]
         {
