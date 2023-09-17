@@ -1,0 +1,36 @@
+@import '_Colors';
+
+figure div.pie
+{
+    > div.pie-color > svg g
+    {
+        > *.not-modified
+        {
+            fill: $light-accent-hot-pink;
+        }
+        > *.ok
+        {
+            fill: $light-accent-barbie-pink;
+        }
+        > *.redirected-permanently
+        {
+            fill: rgb(130, 255, 249);
+        }
+        > *.redirected-temporarily
+        {
+            fill: rgb(171, 255, 244);
+        }
+        > *.not-found
+        {
+            fill: rgb(255, 244, 94);
+        }
+        > *.errored
+        {
+            fill: rgb(255, 154, 38);
+        }
+        > *.unauthorized
+        {
+            fill: rgb(255, 103, 103);
+        }
+    }
+}

@@ -125,7 +125,11 @@ extension Server
                     status = \.redirectedPermanently
                 }
 
-                services.tour.stats.responses[keyPath: status] += 1
+                //  Don’t count visits to the admin dashboard.
+                if  type != \.restricted
+                {
+                    services.tour.stats.responses[keyPath: status] += 1
+                }
 
                 request.promise.succeed(response)
             }

@@ -34,6 +34,8 @@ extension PackageDatabase.Editions:DatabaseCollection
     [
         .init
         {
+            $0[.collation] = PackageDatabase.collation
+
             $0[.unique] = true
             $0[.name] = "package,name"
             $0[.key] = .init
@@ -52,33 +54,52 @@ extension PackageDatabase.Editions:DatabaseCollection
                 $0[PackageEdition[.version]] = (-)
             }
         },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "package,patch,version (release:false)"
+            $0[.key] = .init
+            {
+                $0[PackageEdition[.package]] = (-)
+                $0[PackageEdition[.patch]] = (-)
+                $0[PackageEdition[.version]] = (-)
+            }
+
+            $0[.partialFilterExpression] = .init
+            {
+                $0[PackageEdition[.release]] = .init { $0[.eq] = false }
+                $0[PackageEdition[.release]] = .init { $0[.exists] = true }
+                $0[PackageEdition[.patch]] = .init { $0[.exists] = true }
+            }
+        },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "package,patch,version (release:true)"
+            $0[.key] = .init
+            {
+                $0[PackageEdition[.package]] = (-)
+                $0[PackageEdition[.patch]] = (-)
+                $0[PackageEdition[.version]] = (-)
+            }
+
+            $0[.partialFilterExpression] = .init
+            {
+                $0[PackageEdition[.release]] = .init { $0[.eq] = true }
+                $0[PackageEdition[.release]] = .init { $0[.exists] = true }
+                $0[PackageEdition[.patch]] = .init { $0[.exists] = true }
+            }
+        },
     ]
 }
 extension PackageDatabase.Editions
 {
-    /// Returns the identifiers of all the documents in this collection.
-    func list(with session:Mongo.Session) async throws -> [Unidoc.Zone]
+    public
+    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await session.run(
-            command: Mongo.Find<Mongo.Cursor<Mongo.IdentityView<Unidoc.Zone>>>.init(Self.name,
-                stride: 4096,
-                limit: .max)
-            {
-                $0[.projection] = .init
-                {
-                    $0[PackageEdition[.id]] = true
-                }
-            },
-            against: self.database)
-        {
-            try await $0.reduce(into: [])
-            {
-                for view:Mongo.IdentityView<Unidoc.Zone> in $1
-                {
-                    $0.append(view.id)
-                }
-            }
-        }
+        try await self.recode(through: PackageEdition.self,
+            with: session,
+            by: .now.advanced(by: .seconds(60)))
     }
 }
 extension PackageDatabase.Editions

@@ -42,6 +42,16 @@ extension Site.Admin:FixedPage
 {
     public
     var title:String { "Administrator Tools" }
+
+    public
+    func head(augmenting head:inout HTML.ContentEncoder)
+    {
+        head[.link]
+        {
+            $0.href = "\(Site.Asset[.admin_css])"
+            $0.rel = .stylesheet
+        }
+    }
 }
 extension Site.Admin:AdministrativePage
 {
@@ -134,7 +144,15 @@ extension Site.Admin:AdministrativePage
             }
         }
 
-        for action:Action in [.dropUnidocDB, .dropPackageDB, .dropAccountDB]
+        for action:Action in
+        [
+            .recodePackageEditions,
+            .recodeUnidocVertices,
+
+            .dropUnidocDB,
+            .dropPackageDB,
+            .dropAccountDB,
+        ]
         {
             main[.hr]
 

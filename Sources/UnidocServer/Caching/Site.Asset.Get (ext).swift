@@ -32,6 +32,8 @@ extension Site.Asset.Get:CacheKey
         case .literata75_woff2: return ["woff2", "Literata_24pt-Bold.woff2"]
         case .literata77_woff2: return ["woff2", "Literata_24pt-BoldItalic.woff2"]
         case .robots_txt:       return ["robots.txt"]
+        case .admin_css:        return ["css", "Admin.css"]
+        case .admin_css_map:    return ["css", "Admin.css.map"]
         case .main_css:         return ["css", "Main.css"]
         case .main_css_map:     return ["css", "Main.css.map"]
         case .main_js:          return ["js", "Main.js"]
@@ -50,9 +52,11 @@ extension Site.Asset.Get:CacheKey
                 .literata47_woff2,
                 .literata75_woff2,
                 .literata77_woff2:  return .font(.woff2)
-        case    .main_css:          return .text(.css, charset: .utf8)
+        case    .admin_css,
+                .main_css:          return .text(.css, charset: .utf8)
         case    .main_js:           return .text(.javascript, charset: .utf8)
-        case    .main_css_map,
+        case    .admin_css_map,
+                .main_css_map,
                 .main_js_map:       return .application(.json, charset: .utf8)
         }
     }

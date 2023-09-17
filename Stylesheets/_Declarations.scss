@@ -107,53 +107,6 @@ section.introduction
     }
 }
 
-section.spi,
-section.deprecation
-{
-    margin: 0.75rem 0;
-
-    display: flex;
-    align-items: stretch;
-}
-section.spi::before,
-section.deprecation::before
-{
-    padding: 0.25rem 1rem 0.5rem 1rem;
-
-    font-family: $typeface-serif;
-    font-weight: 400;
-
-    border-radius: 0.5rem 0 0 0.5rem;
-    color: white;
-}
-section.spi::before
-{
-    font-size: 125%;
-    background-color: $light-accent-barbie-pink;
-    box-shadow: 0 0.25rem 0 0 $light-accent-barbie-pink-shadow;
-    content: '@';
-}
-section.deprecation::before
-{
-    font-size: 150%;
-    background-color: $light-coral-elevated;
-    box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
-    content: '!';
-}
-section.spi > p,
-section.deprecation > p
-{
-    flex: 1 1 auto;
-    margin: 0;
-    padding: 0.5rem 0.5rem 0.5rem 1rem;
-
-    font-family: $typeface-monospace;
-
-    background-color: $light-foreground-elevated;
-    border-radius: 0 0.5rem 0.5rem 0;
-    box-shadow: 0 0.25rem 0 0 $light-foreground-elevated-shadow;
-}
-
 section.availability
 {
     margin: 0.75rem 0;

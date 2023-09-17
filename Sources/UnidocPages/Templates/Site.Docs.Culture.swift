@@ -12,6 +12,7 @@ extension Site.Docs
     {
         let inliner:Inliner
 
+        let canonical:CanonicalVersion?
         private
         let master:Volume.Master.Culture
         private
@@ -20,11 +21,13 @@ extension Site.Docs
         let nouns:[Volume.Noun]?
 
         init(_ inliner:Inliner,
+            canonical:CanonicalVersion?,
             master:Volume.Master.Culture,
             groups:[Volume.Group],
             nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
+            self.canonical = canonical
             self.master = master
             self.groups = groups
             self.nouns = nouns
@@ -105,6 +108,8 @@ extension Site.Docs.Culture:ApplicationPage
                 $0 ?= self.inliner.link(file: readme)
             }
         }
+
+        main[.section] { $0.class = "notice canonical" } = self.canonical
 
         main[.section, { $0.class = "declaration" }]
         {

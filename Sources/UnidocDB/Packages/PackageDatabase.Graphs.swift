@@ -43,6 +43,8 @@ extension PackageDatabase.Graphs:DatabaseCollection
         },
         .init
         {
+            $0[.collation] = PackageDatabase.collation
+
             $0[.unique] = true // for now...
             $0[.name] = "metadata_package,version"
             $0[.key] = .init

@@ -10,7 +10,7 @@ struct Volume
     var latest:Unidoc.Zone?
 
     public
-    var masters:[Volume.Master]
+    var vertices:[Volume.Master]
     public
     var groups:[Volume.Group]
     public
@@ -18,13 +18,13 @@ struct Volume
 
     @inlinable public
     init(latest:Unidoc.Zone?,
-        masters:[Volume.Master],
+        vertices:[Volume.Master],
         groups:[Volume.Group],
         names:Volume.Names)
     {
         self.latest = latest
 
-        self.masters = masters
+        self.vertices = vertices
         self.groups = groups
         self.names = names
     }

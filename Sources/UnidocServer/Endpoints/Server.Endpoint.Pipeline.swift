@@ -7,12 +7,11 @@ import URI
 
 extension Server.Endpoint
 {
-    struct Pipeline<Database, Query>:Sendable
-        where   Database:DatabaseModel,
-                Query:DatabaseQuery,
+    struct Pipeline<Query>:Sendable
+        where   Query:DatabaseQuery,
                 Query.Output:ServerResponseFactory<URI>
     {
-        let database:@Sendable (_ among:Services.Database) -> Database
+        let database:@Sendable (_ among:Services.Database) -> Query.Database
         let explain:Bool
         let query:Query
         let uri:URI
@@ -20,7 +19,7 @@ extension Server.Endpoint
 
         private
         init(
-            database:@Sendable @escaping (Services.Database) -> Database,
+            database:@Sendable @escaping (Services.Database) -> Query.Database,
             explain:Bool,
             query:Query,
             uri:URI,
@@ -34,7 +33,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Pipeline where Database == UnidocDatabase
+extension Server.Endpoint.Pipeline where Query.Database == UnidocDatabase
 {
     init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
     {
@@ -45,7 +44,7 @@ extension Server.Endpoint.Pipeline where Database == UnidocDatabase
             tag: tag)
     }
 }
-extension Server.Endpoint.Pipeline where Database == PackageDatabase
+extension Server.Endpoint.Pipeline where Query.Database == PackageDatabase
 {
     init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
     {
@@ -73,7 +72,7 @@ extension Server.Endpoint.Pipeline:DatabaseOperation, UnrestrictedOperation
     }
 
     private
-    func load(from database:Database,
+    func load(from database:Query.Database,
         with session:Mongo.Session) async throws -> ServerResponse?
     {
         if  self.explain

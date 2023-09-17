@@ -12,6 +12,7 @@ extension Site.Docs
         private
         let inliner:Inliner
 
+        let canonical:CanonicalVersion?
         private
         let master:Volume.Master.Article
         private
@@ -21,11 +22,13 @@ extension Site.Docs
 
 
         init(_ inliner:Inliner,
+            canonical:CanonicalVersion?,
             master:Volume.Master.Article,
             groups:[Volume.Group],
             nouns:[Volume.Noun]?)
         {
             self.inliner = inliner
+            self.canonical = canonical
             self.master = master
             self.groups = groups
             self.nouns = nouns
@@ -90,6 +93,8 @@ extension Site.Docs.Article:ApplicationPage
                 $0 ?= self.inliner.link(file: file)
             }
         }
+
+        main[.section] { $0.class = "notice canonical" } = self.canonical
 
         main[.section, { $0.class = "details" }] =
             (self.master.details?.markdown).map(self.inliner.passage(_:))
