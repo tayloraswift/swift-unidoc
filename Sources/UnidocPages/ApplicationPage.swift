@@ -8,12 +8,18 @@ protocol ApplicationPage:FixedPage
     associatedtype Navigator:HyperTextOutputStreamable
     associatedtype Sidebar:HyperTextOutputStreamable
 
+    var canonical:CanonicalVersion? { get }
     var navigator:Navigator { get }
     var sidebar:Sidebar? { get }
 
     var volume:VolumeIdentifier { get }
 
     func main(_:inout HTML.ContentEncoder)
+}
+extension ApplicationPage
+{
+    @inlinable public
+    var canonical:CanonicalVersion? { nil }
 }
 extension ApplicationPage where Navigator == HTML.Logo
 {
@@ -26,6 +32,9 @@ extension ApplicationPage where Sidebar == Never
 }
 extension ApplicationPage
 {
+    @inlinable public
+    var canonicalURI:URI? { self.canonical?.uri }
+
     public
     func head(augmenting head:inout HTML.ContentEncoder)
     {

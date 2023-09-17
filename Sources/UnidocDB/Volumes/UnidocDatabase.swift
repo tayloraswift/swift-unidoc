@@ -26,7 +26,8 @@ extension UnidocDatabase
 {
     var policies:Policies { .init() }
 
-    var masters:Masters { .init(database: self.id) }
+    @inlinable public
+    var vertices:Vertices { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
     var search:Search { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
@@ -47,7 +48,7 @@ extension UnidocDatabase:DatabaseModel
     public
     func setup(with session:Mongo.Session) async throws
     {
-        try await self.masters.setup(with: session)
+        try await self.vertices.setup(with: session)
         try await self.groups.setup(with: session)
         try await self.search.setup(with: session)
         try await self.trees.setup(with: session)
@@ -134,7 +135,7 @@ extension UnidocDatabase
         {
             try await self.search.delete(volume.id, with: session)
 
-            try await self.masters.clear(receipt.edition, with: session)
+            try await self.vertices.clear(receipt.edition, with: session)
             try await self.groups.clear(receipt.edition, with: session)
             try await self.trees.clear(receipt.edition, with: session)
 
@@ -152,7 +153,7 @@ extension UnidocDatabase
     {
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
-        try await self.masters.insert(volume.masters, with: session)
+        try await self.vertices.insert(volume.vertices, with: session)
         try await self.names.insert(volume.names, with: session)
         try await self.trees.insert(trees, with: session)
         try await self.search.insert(index, with: session)
@@ -196,7 +197,7 @@ extension UnidocDatabase
         let id:Snapshot.ID = snapshot.id
 
         var volume:Volume = .init(latest: latestRelease?.id,
-            masters: linker.masters,
+            vertices: linker.vertices,
             groups: linker.groups,
             names: .init(id: snapshot.edition,
                 display: snapshot.metadata.display,

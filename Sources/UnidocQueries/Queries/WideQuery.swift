@@ -22,6 +22,8 @@ struct WideQuery:Equatable, Hashable, Sendable
 extension WideQuery:VolumeLookupQuery
 {
     @inlinable public static
+    var namesOfLatest:Mongo.KeyPath? { Output.Principal[.namesOfLatest] }
+    @inlinable public static
     var names:Mongo.KeyPath { Output.Principal[.names] }
 
     @inlinable public static
@@ -51,6 +53,91 @@ extension WideQuery:VolumeLookupQuery
                         then: .expr { $0[.first] = Output.Principal[.matches] },
                         else: Never??.some(nil)
                     )
+                }
+            }
+        }
+
+        //  This stage is a lot like the ``Symbol.Decl`` extension, but `symbol` and `hash`
+        //  are variables obtained from the `master` record.
+        pipeline.stage
+        {
+            $0[.lookup] = .init
+            {
+                let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
+                let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
+
+                let min:Mongo.Variable<Unidoc.Scalar> = "min"
+                let max:Mongo.Variable<Unidoc.Scalar> = "max"
+
+                $0[.from] = UnidocDatabase.Vertices.name
+                $0[.let] = .init
+                {
+                    $0[let: symbol] = Output.Principal[.master] / Volume.Master[.symbol]
+                    $0[let: hash] = Output.Principal[.master] / Volume.Master[.hash]
+
+                    $0[let: min] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_min]
+                    $0[let: max] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_max]
+                }
+                $0[.pipeline] = .init
+                {
+                    $0.stage
+                    {
+                        $0[.match] = .init
+                        {
+                            $0[.expr] = .expr
+                            {
+                                $0[.and] =
+                                (
+                                    //  The first three of these clauses should be able to use
+                                    //  a compound index.
+                                    .expr
+                                    {
+                                        $0[.eq] = (Volume.Master[.hash], hash)
+                                    },
+                                    .expr
+                                    {
+                                        $0[.gte] = (Volume.Master[.id], min)
+                                    },
+                                    .expr
+                                    {
+                                        $0[.lte] = (Volume.Master[.id], max)
+                                    },
+
+                                    .expr
+                                    {
+                                        $0[.eq] = (Volume.Master[.symbol], symbol)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    $0.stage
+                    {
+                        $0[.limit] = 1
+                    }
+                    $0.stage
+                    {
+                        //  We do not need to load *any* markdown for this record.
+                        $0[.unset] =
+                        [
+                            Volume.Master[.requirements],
+                            Volume.Master[.superforms],
+                            Volume.Master[.overview],
+                            Volume.Master[.details],
+                        ]
+                    }
+                }
+                $0[.as] = Output.Principal[.masterInLatest]
+            }
+        }
+        //  Unbox single-element array.
+        pipeline.stage
+        {
+            $0[.set] = .init
+            {
+                $0[Output.Principal[.masterInLatest]] = .expr
+                {
+                    $0[.first] = Output.Principal[.masterInLatest]
                 }
             }
         }
@@ -147,16 +234,24 @@ extension WideQuery:VolumeLookupQuery
                             [
                                 .matches,
                                 .master,
+                                .masterInLatest,
                                 .groups,
                             ]
                             {
                                 $0[Output.Principal[key]] = true
                             }
-                            //  Do not return computed fields.
-                            for key:Volume.Names.CodingKey in
-                                Volume.Names.CodingKey.independent
+                            for names:Output.Principal.CodingKey in
+                            [
+                                .names,
+                                .namesOfLatest,
+                            ]
                             {
-                                $0[Output.Principal[.names] / Volume.Names[key]] = true
+                                //  Do not return computed fields.
+                                for key:Volume.Names.CodingKey in
+                                    Volume.Names.CodingKey.independent
+                                {
+                                    $0[Output.Principal[names] / Volume.Names[key]] = true
+                                }
                             }
                         }
                     }
@@ -230,7 +325,7 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.lookup] = .init
                         {
-                            $0[.from] = UnidocDatabase.Masters.name
+                            $0[.from] = UnidocDatabase.Vertices.name
                             $0[.localField] = scalars
                             $0[.foreignField] = Volume.Master[.id]
                             $0[.as] = results
@@ -248,7 +343,12 @@ extension WideQuery:VolumeLookupQuery
                     {
                         //  We do not need to load all the markdown for master
                         //  records in the entourage.
-                        $0[.unset] = Volume.Master[.details]
+                        $0[.unset] =
+                        [
+                            Volume.Master[.requirements],
+                            Volume.Master[.superforms],
+                            Volume.Master[.details],
+                        ]
                     }
                 }
                 $0[Output[.names]] = .init

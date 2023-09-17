@@ -146,11 +146,12 @@ extension Site.Admin:AdministrativePage
 
         for action:Action in
         [
+            .recodePackageEditions,
+            .recodeUnidocVertices,
+
             .dropUnidocDB,
             .dropPackageDB,
             .dropAccountDB,
-
-            .recodePackageEditions,
         ]
         {
             main[.hr]

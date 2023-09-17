@@ -138,7 +138,7 @@ extension Volume.Master
         /// an equality match instead of a range match.
         case zone = "Z"
 
-        /// Appears in ``Decl`` and ``File``.
+        /// Appears in ``Decl``, ``Culture``, and ``File``.
         case symbol = "Y"
         /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Meta``, but may be computed
         /// at encoding-time. In ``Meta``, it is always the empty string.
@@ -217,7 +217,7 @@ extension Volume.Master
         case zones = "z"
 
         /// Optional extended FNV24 hash of the record’s symbol. Currently only computed
-        /// for ``Decl`` records.
+        /// for ``Decl``, ``Culture``, and ``Article`` records.
         case hash = "H"
     }
 }
@@ -235,6 +235,11 @@ extension Volume.Master:BSONDocumentEncodable
         switch self
         {
         case .article(let self):
+            //  This allows us to correlate article identifiers across different versions.
+            //  Articles are so few in number that we can afford to duplicate this.
+            bson[.symbol] = self.stem
+            bson[.hash] = FNV24.Extended.init(hashing: "\(self.stem)")
+
             bson[.stem] = self.stem
             bson[.culture] = self.culture
             bson[.file] = self.file
@@ -249,6 +254,7 @@ extension Volume.Master:BSONDocumentEncodable
 
         case .decl(let self):
             bson[.symbol] = self.symbol
+            bson[.hash] = FNV24.Extended.init(hashing: "\(self.symbol)")
 
             bson[.flags] = self.flags
 
@@ -287,8 +293,6 @@ extension Volume.Master:BSONDocumentEncodable
             bson[.details] = self.details
             bson[.group] = self.group
 
-            bson[.hash] = FNV24.Extended.init(hashing: "\(self.symbol)")
-
             zones.update(with: self.signature.expanded.scalars)
             zones.update(with: self.signature.generics.constraints)
 
@@ -301,6 +305,12 @@ extension Volume.Master:BSONDocumentEncodable
             zones.update(with: self.details?.outlines ?? [])
 
         case .culture(let self):
+            //  Save this because it is computed by mangling a target name.
+            let module:ModuleIdentifier = self.module.id
+            //  This allows us to correlate modules identifiers across different versions.
+            bson[.symbol] = module
+            bson[.hash] = FNV24.Extended.init(hashing: "s:m:\(module)")
+
             bson[.stem] = self.stem
             bson[.module] = self.module
             bson[.file] = self.readme
