@@ -138,7 +138,7 @@ extension Volume.Master
         /// an equality match instead of a range match.
         case zone = "Z"
 
-        /// Appears in ``Decl``, ``Culture``, and ``File``.
+        /// Appears in ``Article``, ``Decl``, ``Culture``, and ``File``.
         case symbol = "Y"
         /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Meta``, but may be computed
         /// at encoding-time. In ``Meta``, it is always the empty string.
