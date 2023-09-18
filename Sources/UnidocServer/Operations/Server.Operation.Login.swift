@@ -4,7 +4,7 @@ import HTTP
 import MongoDB
 import UnidocDB
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct Login:Sendable
     {
@@ -18,7 +18,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Login
+extension Server.Operation.Login
 {
     init?(parameters:__shared [(key:String, value:String)])
     {
@@ -46,12 +46,12 @@ extension Server.Endpoint.Login
         }
     }
 }
-extension Server.Endpoint.Login:StatefulOperation
+extension Server.Operation.Login:StatefulOperation
 {
-    func load(from services:Services,
+    func load(from server:ServerState,
         with cookies:Server.Request.Cookies) async throws -> ServerResponse?
     {
-        guard let oauth:GitHubClient<GitHubOAuth> = services.github?.oauth
+        guard let oauth:GitHubClient<GitHubOAuth> = server.github?.oauth
         else
         {
             return nil
@@ -65,7 +65,7 @@ extension Server.Endpoint.Login:StatefulOperation
                 type: .text(.plain, charset: .utf8)))
         }
 
-        let registration:Server.Endpoint.Register
+        let registration:Server.Operation.Register
         do
         {
             let access:GitHubOAuth.Credentials = try await oauth.exchange(code: self.code)
@@ -82,6 +82,6 @@ extension Server.Endpoint.Login:StatefulOperation
             throw error
         }
 
-        return try await registration.load(from: services, with: cookies)
+        return try await registration.load(from: server, with: cookies)
     }
 }

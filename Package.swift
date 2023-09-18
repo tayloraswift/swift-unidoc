@@ -1,4 +1,4 @@
-// swift-tools-version:5.8
+// swift-tools-version:5.9
 import PackageDescription
 
 let package:Package = .init(
@@ -75,8 +75,6 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.8.2")),
 
-        .package(url: "https://github.com/swift-server/swift-backtrace", .upToNextMinor(
-            from: "1.3.4")),
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
@@ -88,7 +86,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "508.0.1"),
+            exact: "509.0.0"),
     ],
     targets:
     [
@@ -239,7 +237,7 @@ let package:Package = .init(
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
 
-                .product(name: "IDEUtils", package: "swift-syntax"),
+                .product(name: "SwiftIDEUtils", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]),
 
@@ -456,8 +454,6 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "System"),
                 .target(name: "UnidocPages"),
-
-                .product(name: "Backtrace", package: "swift-backtrace"),
             ]),
 
 

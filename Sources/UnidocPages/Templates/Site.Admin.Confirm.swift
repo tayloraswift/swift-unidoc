@@ -33,6 +33,11 @@ extension Site.Admin.Confirm
         case .dropAccountDB, .dropPackageDB, .dropUnidocDB:
             prompt = "This will drop (and reinitialize) the entire database. Are you sure?"
 
+        case .lintPackageEditions:
+            prompt = """
+            This will delete all package editions lacking a commit hash. Are you sure?
+            """
+
         case .recodePackageEditions:
             prompt = "This will recode all package editions. Are you sure?"
 

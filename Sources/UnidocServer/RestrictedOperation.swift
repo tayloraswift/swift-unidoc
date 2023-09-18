@@ -8,7 +8,7 @@ protocol RestrictedOperation:StatefulOperation
     static
     func admit(_ role:Account.Role) -> Bool
 
-    func load(from services:Services) async throws -> ServerResponse?
+    func load(from state:ServerState) async throws -> ServerResponse?
 }
 extension RestrictedOperation
 {
@@ -25,10 +25,10 @@ extension RestrictedOperation
         role == .administrator
     }
 
-    func load(from services:Services,
+    func load(from server:ServerState,
         with cookies:Server.Request.Cookies) async throws -> ServerResponse?
     {
-        if  case .secured = services.mode
+        if  case .secured = server.mode
         {
             guard let cookie:String = cookies.session
             else
@@ -36,8 +36,8 @@ extension RestrictedOperation
                 return .redirect(.temporary("\(Site.Login.uri)"))
             }
 
-            let session:Mongo.Session = try await .init(from: services.database.sessions)
-            let role:Account.Role? = try await services.database.account.users.validate(
+            let session:Mongo.Session = try await .init(from: server.db.sessions)
+            let role:Account.Role? = try await server.db.account.users.validate(
                 cookie: cookie,
                 with: session)
 
@@ -50,6 +50,6 @@ extension RestrictedOperation
             }
         }
 
-        return try await self.load(from: services)
+        return try await self.load(from: server)
     }
 }

@@ -22,6 +22,8 @@ extension DynamicContext.SortPriority
         case `protocol`
         case  type
         case `typealias`
+
+        case  macro
     }
 }
 extension DynamicContext.SortPriority.Phylum
@@ -56,6 +58,8 @@ extension DynamicContext.SortPriority.Phylum
                 .enum,
                 .struct:                        self = .type
         case    .typealias:                     self = .typealias
+
+        case    .macro:                         self = .macro
         }
     }
 }

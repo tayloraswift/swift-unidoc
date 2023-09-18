@@ -89,6 +89,7 @@ extension Site.Tags.List:AdministrativePage
                         $0[.th] = "Git Ref"
                         $0[.th] = "Commit"
                         $0[.th] = "Semver"
+                        $0[.th] = "ID"
                         $0[.th] = "Archives?"
                     }
                 }

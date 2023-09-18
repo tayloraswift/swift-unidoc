@@ -12,12 +12,12 @@ extension JSON.Node:Decoder
     }
 
     public
-    func singleValueContainer() -> SingleValueDecodingContainer
+    func singleValueContainer() -> any SingleValueDecodingContainer
     {
-        JSON.SingleValueDecoder.init(self, path: []) as SingleValueDecodingContainer
+        JSON.SingleValueDecoder.init(self, path: []) as any SingleValueDecodingContainer
     }
     public
-    func unkeyedContainer() throws -> UnkeyedDecodingContainer
+    func unkeyedContainer() throws -> any UnkeyedDecodingContainer
     {
         try JSON.SingleValueDecoder.init(self, path: []).unkeyedContainer()
     }

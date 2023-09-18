@@ -1,5 +1,5 @@
-import IDEUtils
 import MarkdownABI
+import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
 

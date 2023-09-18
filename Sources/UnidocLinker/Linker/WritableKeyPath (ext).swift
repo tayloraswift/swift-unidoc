@@ -21,7 +21,7 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
         //  a scope, and its scope was declared and documented in the same package.
         switch decl.phylum
         {
-        case    .actor, .class, .enum, .protocol, .struct:
+        case    .actor, .class, .enum, .protocol, .struct, .macro:
             return \.undocumented
 
         case    .associatedtype,
@@ -91,6 +91,8 @@ extension WritableKeyPath<Volume.Stats.Decl, Int>
         case    .operator:              return \.operators
         case    .func(nil),
                 .var(nil):              return \.functions
+        case    .macro(.freestanding):  return \.freestandingMacros
+        case    .macro(.attached):      return \.attachedMacros
         }
     }
 }

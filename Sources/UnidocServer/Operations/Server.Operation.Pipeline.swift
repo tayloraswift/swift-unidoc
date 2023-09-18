@@ -5,13 +5,13 @@ import UnidocDB
 import UnidocPages
 import URI
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct Pipeline<Query>:Sendable
         where   Query:DatabaseQuery,
                 Query.Output:ServerResponseFactory<URI>
     {
-        let database:@Sendable (_ among:Services.Database) -> Query.Database
+        let database:@Sendable (_ among:Server.DB) -> Query.Database
         let explain:Bool
         let query:Query
         let uri:URI
@@ -19,7 +19,7 @@ extension Server.Endpoint
 
         private
         init(
-            database:@Sendable @escaping (Services.Database) -> Query.Database,
+            database:@Sendable @escaping (Server.DB) -> Query.Database,
             explain:Bool,
             query:Query,
             uri:URI,
@@ -33,7 +33,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Pipeline where Query.Database == UnidocDatabase
+extension Server.Operation.Pipeline where Query.Database == UnidocDatabase
 {
     init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
     {
@@ -44,7 +44,7 @@ extension Server.Endpoint.Pipeline where Query.Database == UnidocDatabase
             tag: tag)
     }
 }
-extension Server.Endpoint.Pipeline where Query.Database == PackageDatabase
+extension Server.Operation.Pipeline where Query.Database == PackageDatabase
 {
     init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
     {
@@ -55,29 +55,29 @@ extension Server.Endpoint.Pipeline where Query.Database == PackageDatabase
             tag: tag)
     }
 }
-extension Server.Endpoint.Pipeline:StatefulOperation
+extension Server.Operation.Pipeline:StatefulOperation
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.query
     }
 }
-extension Server.Endpoint.Pipeline:DatabaseOperation, UnrestrictedOperation
+extension Server.Operation.Pipeline:DatabaseOperation, UnrestrictedOperation
 {
-    func load(from database:Services.Database) async throws -> ServerResponse?
+    func load(from db:Server.DB) async throws -> ServerResponse?
     {
         try await self.load(
-            from: self.database(database),
-            with: try await .init(from: database.sessions))
+            from: self.database(db),
+            with: try await .init(from: db.sessions))
     }
 
     private
-    func load(from database:Query.Database,
+    func load(from db:Query.Database,
         with session:Mongo.Session) async throws -> ServerResponse?
     {
         if  self.explain
         {
-            let explanation:String = try await database.explain(
+            let explanation:String = try await db.explain(
                 query: self.query,
                 with: session)
 
@@ -86,9 +86,8 @@ extension Server.Endpoint.Pipeline:DatabaseOperation, UnrestrictedOperation
                 type: .text(.plain, charset: .utf8)))
         }
 
-        guard   let output:Query.Output = try await database.execute(
-                    query: self.query,
-                    with: session)
+        guard
+        let output:Query.Output = try await db.execute(query: self.query, with: session)
         else
         {
             return nil
