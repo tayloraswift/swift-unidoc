@@ -15,6 +15,11 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
         {
             case local
             case remote
+            enum Remote:String
+            {
+                //  appears when dumping tools version 5.1 manifest with 5.9 toolchain
+                case urlString
+            }
         }
 
         case requirement
@@ -84,9 +89,22 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
                         with: \.value))
 
                 case .remote:
-                    return .remote(url: try json.decode(
-                        as: JSON.SingleElementRepresentation<String>.self,
-                        with: \.value))
+                    let json:JSON.Array = try .init(json: json.value)
+                    try json.shape.expect(count: 1)
+
+                    let url:String
+                    do
+                    {
+                        url = try json[0].decode()
+                    }
+                    catch
+                    {
+                        url = try json[0].decode(using: CodingKey.Location.Remote.self)
+                        {
+                            try $0[.urlString].decode()
+                        }
+                    }
+                    return .remote(url: url)
                 }
             })
     }
