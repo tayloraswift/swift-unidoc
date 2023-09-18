@@ -77,6 +77,14 @@ figure div.pie
         {
             fill: rgb(171, 255, 244);
         }
+        > *.macro.attached
+        {
+            fill: rgb(61, 255, 103);
+        }
+        > *.macro.freestanding
+        {
+            fill: rgb(132, 255, 159);
+        }
         > *.structure
         {
             fill: rgb(255, 244, 94);
