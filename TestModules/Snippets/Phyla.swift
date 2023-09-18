@@ -58,7 +58,7 @@ struct Struct
     func staticMethod()
     {
     }
-    
+
     public static
     var staticProperty:Void { return }
 
@@ -123,7 +123,7 @@ actor Actor
     }
 }
 
-public
+@attached(extension) public
 macro Macro<T>(_:T.Type) = ModuleName.MacroName
 
 extension Int:Protocol
