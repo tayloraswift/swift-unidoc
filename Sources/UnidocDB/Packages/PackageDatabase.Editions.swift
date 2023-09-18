@@ -274,7 +274,7 @@ extension PackageDatabase.Editions
 extension PackageDatabase.Editions
 {
     /// Removes all editions that lack a commit hash, unless it has the exact name
-    /// `swift-5.8.1-RELEASE`.
+    /// `swift-5.8.1-RELEASE` or `swift-5.9-RELEASE`.
     public
     func _lint(with session:Mongo.Session) async throws -> Int
     {
@@ -282,6 +282,7 @@ extension PackageDatabase.Editions
         {
             $0[PackageEdition[.sha1]] = .init { $0[.exists] = false }
             $0[PackageEdition[.name]] = .init { $0[.ne] = "swift-5.8.1-RELEASE" }
+            $0[PackageEdition[.name]] = .init { $0[.ne] = "swift-5.9-RELEASE" }
         }
     }
 }
