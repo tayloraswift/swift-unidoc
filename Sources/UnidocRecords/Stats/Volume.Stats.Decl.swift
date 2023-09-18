@@ -55,6 +55,11 @@ extension Volume.Stats
         public
         var functions:Int
 
+        public
+        var freestandingMacros:Int
+        public
+        var attachedMacros:Int
+
         @inlinable public
         init(
             typealiases:Int,
@@ -69,7 +74,9 @@ extension Volume.Stats
             functors:Int,
             methods:Int,
             operators:Int,
-            functions:Int)
+            functions:Int,
+            freestandingMacros:Int,
+            attachedMacros:Int)
         {
             self.typealiases = typealiases
             self.structures = structures
@@ -84,6 +91,8 @@ extension Volume.Stats
             self.methods = methods
             self.operators = operators
             self.functions = functions
+            self.freestandingMacros = freestandingMacros
+            self.attachedMacros = attachedMacros
         }
     }
 }
@@ -105,7 +114,9 @@ extension Volume.Stats.Decl:ExpressibleByDictionaryLiteral
             functors: 0,
             methods: 0,
             operators: 0,
-            functions: 0)
+            functions: 0,
+            freestandingMacros: 0,
+            attachedMacros: 0)
     }
 }
 extension Volume.Stats.Decl
@@ -126,6 +137,8 @@ extension Volume.Stats.Decl
         case methods = "M"
         case operators = "X"
         case functions = "F"
+        case freestandingMacros = "Y"
+        case attachedMacros = "Z"
     }
 }
 extension Volume.Stats.Decl:BSONDocumentEncodable
@@ -146,6 +159,11 @@ extension Volume.Stats.Decl:BSONDocumentEncodable
         bson[.methods]      = self.methods      != 0 ? self.methods : nil
         bson[.operators]    = self.operators    != 0 ? self.operators : nil
         bson[.functions]    = self.functions    != 0 ? self.functions : nil
+
+        bson[.freestandingMacros] =
+            self.freestandingMacros != 0 ? self.freestandingMacros : nil
+        bson[.attachedMacros] =
+            self.attachedMacros != 0 ? self.attachedMacros : nil
     }
 }
 extension Volume.Stats.Decl:BSONDocumentDecodable
@@ -166,6 +184,8 @@ extension Volume.Stats.Decl:BSONDocumentDecodable
             functors: try bson[.functors]?.decode() ?? 0,
             methods: try bson[.methods]?.decode() ?? 0,
             operators: try bson[.operators]?.decode() ?? 0,
-            functions: try bson[.functions]?.decode() ?? 0)
+            functions: try bson[.functions]?.decode() ?? 0,
+            freestandingMacros: try bson[.freestandingMacros]?.decode() ?? 0,
+            attachedMacros: try bson[.attachedMacros]?.decode() ?? 0)
     }
 }

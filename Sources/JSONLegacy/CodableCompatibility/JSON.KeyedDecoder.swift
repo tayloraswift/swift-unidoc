@@ -149,9 +149,9 @@ extension JSON.KeyedDecoder:KeyedDecodingContainerProtocol
     }
 
     public
-    func singleValueContainer<Key>(forKey key:Key,
-        typed _:Key.Type = Key.self) throws -> JSON.SingleValueDecoder
-        where Key:CodingKey
+    func singleValueContainer<NestedKey>(forKey key:NestedKey,
+        typed _:NestedKey.Type = NestedKey.self) throws -> JSON.SingleValueDecoder
+        where NestedKey:CodingKey
     {
         let value:JSON.Node = try self.diagnose(key){ $0 }
         let decoder:JSON.SingleValueDecoder = .init(value,
@@ -159,12 +159,12 @@ extension JSON.KeyedDecoder:KeyedDecodingContainerProtocol
         return decoder
     }
     public
-    func nestedUnkeyedContainer(forKey key:Key) throws -> UnkeyedDecodingContainer
+    func nestedUnkeyedContainer(forKey key:Key) throws -> any UnkeyedDecodingContainer
     {
         let path:[any CodingKey] = self.codingPath + CollectionOfOne<any CodingKey>.init(key)
         let container:JSON.UnkeyedDecoder =
             .init(try self.diagnose(key, \.array), path: path)
-        return container as UnkeyedDecodingContainer
+        return container as any UnkeyedDecodingContainer
     }
     public
     func nestedContainer<NestedKey>(keyedBy _:NestedKey.Type,

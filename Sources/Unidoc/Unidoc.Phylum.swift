@@ -5,6 +5,5 @@ extension Unidoc
     {
         case decl(Decl)
         case block
-        case macro
     }
 }

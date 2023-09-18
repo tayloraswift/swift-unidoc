@@ -5,7 +5,7 @@ protocol StatefulOperation:Sendable
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int> { get }
 
-    func load(from services:Services,
+    func load(from state:ServerState,
         with cookies:Server.Request.Cookies) async throws -> ServerResponse?
 }
 extension StatefulOperation

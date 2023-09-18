@@ -53,7 +53,7 @@ extension Server.Operation:HTTPServerOperation
         {
             //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
             //  for the standard library.
-            let get:Server.Endpoint = .stateful(Server.Endpoint.Pipeline<WideQuery>.init(
+            let get:Server.Endpoint = .request(Server.Operation.Pipeline<WideQuery>.init(
                 explain: false,
                 query: .init(
                     volume: .init(package: .swift, version: nil),

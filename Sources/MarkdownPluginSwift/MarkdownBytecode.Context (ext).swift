@@ -1,5 +1,5 @@
-import IDEUtils
 import MarkdownABI
+import SwiftIDEUtils
 
 extension MarkdownBytecode.Context
 {
@@ -8,30 +8,28 @@ extension MarkdownBytecode.Context
         switch classification
         {
         case    .none,
-                .editorPlaceholder:         return nil
+                .editorPlaceholder:     return nil
 
-        case    .attribute:                 self = .attribute
+        case    .attribute:             self = .attribute
 
-        case    .buildConfigId:             self = .directive
-        case    .poundDirectiveKeyword:     self = .magic
+        case    .ifConfigDirective:     self = .directive
 
         case    .lineComment,
-                .blockComment:              self = .comment
+                .blockComment:          self = .comment
         case    .docLineComment,
-                .docBlockComment:           self = .doccomment
+                .docBlockComment:       self = .doccomment
 
-        case    .dollarIdentifier:          self = .pseudo
-        case    .identifier:                self = .identifier
-        case    .operatorIdentifier:        self = .operator
+        case    .dollarIdentifier:      self = .pseudo
+        case    .identifier:            self = .identifier
+        case    .operator:              self = .operator
 
         case    .integerLiteral,
-                .floatingLiteral:           self = .literalNumber
+                .floatLiteral:          self = .literalNumber
         case    .stringLiteral,
-                .objectLiteral:             self = .literalString
+                .regexLiteral:          self = .literalString
 
-        case    .keyword:                   self = .keyword
-        case    .stringInterpolationAnchor: self = .interpolation
-        case    .typeIdentifier:            self = .type
+        case    .keyword:               self = .keyword
+        case    .type:                  self = .type
         }
     }
 }

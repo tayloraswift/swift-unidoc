@@ -1,7 +1,7 @@
 extension Unidoc
 {
     @frozen public
-    enum Decl:Hashable, Sendable
+    enum Decl:Hashable, Equatable, Sendable
     {
         case  actor
         case `associatedtype`
@@ -11,6 +11,7 @@ extension Unidoc
         case `enum`
         case `func`(Objectivity?)
         case  initializer
+        case  macro(Macro)
         case `operator`
         case `protocol`
         case `struct`
@@ -28,6 +29,12 @@ extension Unidoc.Decl
         {
         case .case, .deinitializer, .func, .initializer, .operator, .subscript, .var:
             return .gay
+
+        case .macro(.freestanding):
+            return .gay
+
+        case .macro(.attached):
+            return .straight
 
         case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
             return .straight
@@ -63,6 +70,8 @@ extension Unidoc.Decl:RawRepresentable
         case 0xD1:  self = .var(.static)
         case 0xD2:  self = .var(.class)
         case 0xD3:  self = .var(.instance)
+        case 0xE0:  self = .macro(.attached)
+        case 0xE1:  self = .macro(.freestanding)
         case    _:  return nil
         }
     }
@@ -93,6 +102,8 @@ extension Unidoc.Decl:RawRepresentable
         case .var(.static):         return 0xD1
         case .var(.class):          return 0xD2
         case .var(.instance):       return 0xD3
+        case .macro(.attached):     return 0xE0
+        case .macro(.freestanding): return 0xE1
         }
     }
 }

@@ -9,7 +9,7 @@ import UnidocRecords
 import UnidocSelectors
 import URI
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct SiteMap:Sendable
     {
@@ -26,23 +26,23 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.SiteMap:StatefulOperation
+extension Server.Operation.SiteMap:StatefulOperation
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.siteMap
     }
 }
-extension Server.Endpoint.SiteMap:DatabaseOperation, UnrestrictedOperation
+extension Server.Operation.SiteMap:DatabaseOperation, UnrestrictedOperation
 {
-    func load(from database:Services.Database) async throws -> ServerResponse?
+    func load(from db:Server.DB) async throws -> ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: database.sessions)
+        let session:Mongo.Session = try await .init(from: db.sessions)
 
-        guard   let siteMap:Volume.SiteMap<PackageIdentifier> =
-                try await database.unidoc.siteMap(
-                    package: self.package,
-                    with: session)
+        guard
+        let siteMap:Volume.SiteMap<PackageIdentifier> = try await db.unidoc.siteMap(
+            package: self.package,
+            with: session)
         else
         {
             return nil

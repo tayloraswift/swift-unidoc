@@ -101,10 +101,9 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
-    /// Decode and encode all documents in this collection using the specified master type.
-    ///
-    /// This function migrates documents in batches of 4096.
+    /// Decode and re-encode all documents in this collection using the specified master type.
     func recode<Master>(through _:Master.Type = Master.self,
+        stride:Int = 4096,
         with session:Mongo.Session,
         by deadline:ContinuousClock.Instant) async throws -> (modified:Int, of:Int)
         where Master:BSONDocumentDecodable & BSONDocumentEncodable & Identifiable<ElementID>
@@ -113,7 +112,7 @@ extension DatabaseCollection
         var selected:Int = 0
         try await session.run(
             command: Mongo.Find<Mongo.Cursor<Master>>.init(Self.name,
-                stride: 4096,
+                stride: stride,
                 limit: .max),
             against: self.database,
             by: deadline)
@@ -288,23 +287,53 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
+    /// Deletes up to one document having the specified identifier, returning true if a
+    /// document was deleted.
     @discardableResult
     func delete(_ id:ElementID, with session:Mongo.Session) async throws -> Bool
+    {
+        try await self.delete(with: session)
+        {
+            $0[Mongo.IdentityView<ElementID>[.id]] = id
+        }
+    }
+
+    func delete(with session:Mongo.Session,
+        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name,
                 deletes:
                 [
-                    .init
+                    try .init
                     {
                         $0[.limit] = .one
-                        $0[.q] = .init { $0["_id"] = id }
+                        $0[.q] = try .init(with: predicate)
                     },
                 ]),
             against: self.database)
 
         let deletions:Mongo.Deletions = try response.deletions()
         return deletions.deleted != 0
+    }
+
+    func deleteAll(with session:Mongo.Session,
+        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Int
+    {
+        let response:Mongo.DeleteResponse = try await session.run(
+            command: Mongo.Delete<Mongo.Many>.init(Self.name,
+                deletes:
+                [
+                    try .init
+                    {
+                        $0[.limit] = .unlimited
+                        $0[.q] = try .init(with: predicate)
+                    },
+                ]),
+            against: self.database)
+
+        let deletions:Mongo.Deletions = try response.deletions()
+        return deletions.deleted
     }
 }
 extension DatabaseCollection<Unidoc.Scalar>

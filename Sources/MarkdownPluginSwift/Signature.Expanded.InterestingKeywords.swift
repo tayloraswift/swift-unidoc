@@ -8,13 +8,22 @@ extension Signature.Expanded
         public
         var actor:Bool
         public
+        var attached:Bool
+        public
         var `class`:Bool
+        public
+        var freestanding:Bool
 
         @inlinable public
-        init(actor:Bool = false, `class`:Bool = false)
+        init(actor:Bool = false,
+            attached:Bool = false,
+            `class`:Bool = false,
+            freestanding:Bool = false)
         {
             self.actor = actor
+            self.attached = attached
             self.class = `class`
+            self.freestanding = freestanding
         }
     }
 }

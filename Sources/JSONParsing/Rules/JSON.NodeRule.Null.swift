@@ -3,7 +3,7 @@ import Grammar
 extension JSON.NodeRule
 {
     /// A literal `null` expression.
-    enum Null<Location>:LiteralRule
+    enum Null:LiteralRule
     {
         typealias Terminal = UInt8
 

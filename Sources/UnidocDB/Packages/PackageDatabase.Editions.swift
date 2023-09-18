@@ -273,10 +273,15 @@ extension PackageDatabase.Editions
 }
 extension PackageDatabase.Editions
 {
+    /// Removes all editions that lack a commit hash, unless it has the exact name
+    /// `swift-5.8.1-RELEASE`.
     public
-    func missing(graphs:PackageDatabase.Graphs) async throws
+    func _lint(with session:Mongo.Session) async throws -> Int
     {
-        //  TODO: this does a full collection scan. We should maintain some flags within
-        //  the ``PackageEdition``s to cache whether or not they have graphs.
+        try await self.deleteAll(with: session)
+        {
+            $0[PackageEdition[.sha1]] = .init { $0[.exists] = false }
+            $0[PackageEdition[.name]] = .init { $0[.ne] = "swift-5.8.1-RELEASE" }
+        }
     }
 }
