@@ -5,7 +5,7 @@ import MongoDB
 import UnidocDB
 import UnidocPages
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct Register:Sendable
     {
@@ -17,7 +17,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Register
+extension Server.Operation.Register
 {
     init?(parameters:__shared [(key:String, value:String)])
     {
@@ -30,12 +30,12 @@ extension Server.Endpoint.Register
         return nil
     }
 }
-extension Server.Endpoint.Register:StatefulOperation
+extension Server.Operation.Register:StatefulOperation
 {
-    func load(from services:Services,
+    func load(from server:ServerState,
         with _:Server.Request.Cookies) async throws -> ServerResponse?
     {
-        guard let github:GitHubClient<GitHubAPI> = services.github?.api
+        guard let github:GitHubClient<GitHubAPI> = server.github?.api
         else
         {
             return nil
@@ -46,8 +46,8 @@ extension Server.Endpoint.Register:StatefulOperation
             //  Are you a mighty It Girl?
             role: user.id == 2556986 ? .administrator : .human)
 
-        let session:Mongo.Session = try await .init(from: services.database.sessions)
-        let cookie:String = try await services.database.account.users.update(
+        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        let cookie:String = try await server.db.account.users.update(
             account: account,
             with: session)
 

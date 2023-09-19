@@ -5,7 +5,7 @@ import NIOPosix
 import TraceableErrors
 
 public
-protocol ServerAuthority<SecurityContext>
+protocol ServerAuthority<SecurityContext>:Sendable
 {
     associatedtype SecurityContext = Never
 

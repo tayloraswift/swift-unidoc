@@ -35,6 +35,7 @@ extension Site.Tags.List.Item:HyperTextOutputStreamable
         tr[.td] { $0.class = "refname" } = self.edition.name
         tr[.td] { $0.class = "commit" ; $0.title = sha1 } = sha1?.prefix(7) ?? ""
         tr[.td] { $0.class = "version" } = version?.description ?? ""
+        tr[.td] { $0.class = "id" } = "\(self.edition.id.version)"
         tr[.td] { $0.class = "graphs" } = self.graphs > 0 ? "\(self.graphs)" : ""
     }
 }

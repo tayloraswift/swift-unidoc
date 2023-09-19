@@ -46,7 +46,8 @@ enum Main
         try await builder.build("swift-syntax",
             repository: "https://github.com/apple/swift-syntax.git",
             versions:
-            "508.0.1")
+            "508.0.1",
+            "509.0.0")
 
         try await builder.build("swift-system",
             repository: "https://github.com/apple/swift-system.git",

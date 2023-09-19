@@ -9,7 +9,8 @@ extension Unidoc.Phylum:JSONDecodable, JSONStringDecodable
         switch description
         {
         case "swift.extension":         self = .block
-        case "swift.macro":             self = .macro
+        //  All macros are initially assumed to be freestanding.
+        case "swift.macro":             self = .decl(.macro(.freestanding))
         case "swift.associatedtype":    self = .decl(.associatedtype)
         case "swift.enum":              self = .decl(.enum)
         case "swift.enum.case":         self = .decl(.case)
@@ -25,6 +26,7 @@ extension Unidoc.Phylum:JSONDecodable, JSONStringDecodable
         case "swift.protocol":          self = .decl(.protocol)
         case "swift.struct":            self = .decl(.struct)
         case "swift.typealias":         self = .decl(.typealias)
+        //  All type members are initially assumed to be static.
         case "swift.type.method":       self = .decl(.func(.static))
         case "swift.type.property":     self = .decl(.var(.static))
         case "swift.type.subscript":    self = .decl(.subscript(.static))

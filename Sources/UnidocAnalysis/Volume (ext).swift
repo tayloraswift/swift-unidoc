@@ -50,12 +50,12 @@ extension Volume
             case .decl(let master):
                 switch master.phylum
                 {
-                case .actor, .class, .struct, .enum, .protocol:
+                case .actor, .class, .struct, .enum, .protocol, .macro(.attached):
                     types[master.culture, master.id] = .init(
                         shoot: master.shoot,
                         scope: master.scope.last)
 
-                case .func(nil), .var(nil):
+                case .func(nil), .var(nil), .macro(.freestanding):
                     //  Global procedures show up in search, but not in the type tree.
                     procs[master.culture, default: []].append(master.shoot)
 

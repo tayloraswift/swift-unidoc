@@ -107,6 +107,8 @@ extension Unidoc.StatsBreakdown
             \.protocols,
             \.requirements,
             \.witnesses,
+            \.attachedMacros,
+            \.freestandingMacros,
             \.structures,
             \.classes,
             \.actors,
@@ -114,40 +116,44 @@ extension Unidoc.StatsBreakdown
         {
             switch $0
             {
-            case \.functions:       return "decl function"
-            case \.operators:       return "decl operator"
-            case \.constructors:    return "decl constructor"
-            case \.methods:         return "decl method"
-            case \.subscripts:      return "decl subscript"
-            case \.functors:        return "decl functor"
-            case \.protocols:       return "decl protocol"
-            case \.requirements:    return "decl requirement"
-            case \.witnesses:       return "decl witness"
-            case \.structures:      return "decl structure"
-            case \.classes:         return "decl class"
-            case \.actors:          return "decl actor"
-            case \.typealiases:     return "decl typealias"
-            case _:                 return nil
+            case \.functions:           return "decl function"
+            case \.operators:           return "decl operator"
+            case \.constructors:        return "decl constructor"
+            case \.methods:             return "decl method"
+            case \.subscripts:          return "decl subscript"
+            case \.functors:            return "decl functor"
+            case \.protocols:           return "decl protocol"
+            case \.requirements:        return "decl requirement"
+            case \.witnesses:           return "decl witness"
+            case \.attachedMacros:      return "decl macro attached"
+            case \.freestandingMacros:  return "decl macro freestanding"
+            case \.structures:          return "decl structure"
+            case \.classes:             return "decl class"
+            case \.actors:              return "decl actor"
+            case \.typealiases:         return "decl typealias"
+            case _:                     return nil
             }
         }
             prose:
         {
             switch $0
             {
-            case \.functions:       return "global functions or variables"
-            case \.operators:       return "operators"
-            case \.constructors:    return "initializers, type members, or enum cases"
-            case \.methods:         return "instance members"
-            case \.subscripts:      return "instance subscripts"
-            case \.functors:        return "functors"
-            case \.protocols:       return "protocols"
-            case \.requirements:    return "protocol requirements"
-            case \.witnesses:       return "default implementations"
-            case \.structures:      return "structures"
-            case \.classes:         return "classes"
-            case \.actors:          return "actors"
-            case \.typealiases:     return "typealiases"
-            case _:                 return nil
+            case \.functions:           return "global functions or variables"
+            case \.operators:           return "operators"
+            case \.constructors:        return "initializers, type members, or enum cases"
+            case \.methods:             return "instance members"
+            case \.subscripts:          return "instance subscripts"
+            case \.functors:            return "functors"
+            case \.protocols:           return "protocols"
+            case \.requirements:        return "protocol requirements"
+            case \.witnesses:           return "default implementations"
+            case \.attachedMacros:      return "attached macros"
+            case \.freestandingMacros:  return "freestanding macros"
+            case \.structures:          return "structures"
+            case \.classes:             return "classes"
+            case \.actors:              return "actors"
+            case \.typealiases:         return "typealiases"
+            case _:                     return nil
             }
         }
     }

@@ -14,7 +14,8 @@ extension Unidoc.Decl
                 .class,
                 .enum,
                 .protocol,
-                .struct:
+                .struct,
+                .macro(.attached):
             return path.map { $0 }
 
         case    .associatedtype,
@@ -25,7 +26,8 @@ extension Unidoc.Decl
                 .operator,
                 .subscript,
                 .typealias,
-                .var:
+                .var,
+                .macro(.freestanding):
             return path.prefix
         }
     }

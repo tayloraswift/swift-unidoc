@@ -6,7 +6,7 @@ import MongoDB
 import SymbolGraphs
 import UnidocDB
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct _SyncRepository:Sendable
     {
@@ -20,11 +20,12 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint._SyncRepository:RestrictedOperation
+extension Server.Operation._SyncRepository:RestrictedOperation
 {
-    func load(from services:Services) async throws -> ServerResponse?
+    func load(from server:ServerState) async throws -> ServerResponse?
     {
-        guard let github:GitHubClient<GitHubAPI> = services.github?.api
+        guard
+        let github:GitHubClient<GitHubAPI> = server.github?.api
         else
         {
             return nil
@@ -33,8 +34,8 @@ extension Server.Endpoint._SyncRepository:RestrictedOperation
         let repo:GitHubAPI.Repo = try await github.get(
             from: "/repos/\(self.owner)/\(self.repo)")
 
-        let session:Mongo.Session = try await .init(from: services.database.sessions)
-        let package:Int32 = try await services.database.package.track(repo: repo,
+        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        let package:Int32 = try await server.db.package.track(repo: repo,
             with: session)
 
         let tags:[GitHubAPI.Tag] = try await github.get(
@@ -46,7 +47,7 @@ extension Server.Endpoint._SyncRepository:RestrictedOperation
         //  Import tags in chronological order.
         for tag:GitHubAPI.Tag in tags.reversed()
         {
-            switch try await services.database.package.editions.register(tag,
+            switch try await server.db.package.editions.register(tag,
                 package: package,
                 with: session)
             {

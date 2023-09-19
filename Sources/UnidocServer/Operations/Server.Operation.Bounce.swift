@@ -3,7 +3,7 @@ import GitHubIntegration
 import HTTP
 import UnidocPages
 
-extension Server.Endpoint
+extension Server.Operation
 {
     struct Bounce:Sendable
     {
@@ -12,12 +12,12 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Bounce:StatefulOperation
+extension Server.Operation.Bounce:StatefulOperation
 {
-    func load(from services:Services,
+    func load(from server:ServerState,
         with _:Server.Request.Cookies) async throws -> ServerResponse?
     {
-        if  let oauth:GitHubOAuth = services.github?.oauth.app
+        if  let oauth:GitHubOAuth = server.github?.oauth.app
         {
             let page:Site.Login = .init(app: oauth)
             return .resource(page.rendered())
