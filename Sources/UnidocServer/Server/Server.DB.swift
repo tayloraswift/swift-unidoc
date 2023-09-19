@@ -1,9 +1,9 @@
 import MongoDB
 import UnidocDB
 
-extension Services
+extension Server
 {
-    struct Database:Sendable
+    struct DB:Sendable
     {
         let sessions:Mongo.SessionPool
 

@@ -88,6 +88,17 @@ extension SymbolDescription
             default:                            break
             }
         }
+        if  case .decl(.macro(_)) = phylum
+        {
+            if      keywords.attached
+            {
+                phylum = .decl(.macro(.attached))
+            }
+            else if keywords.freestanding
+            {
+                phylum = .decl(.macro(.freestanding))
+            }
+        }
 
         //  SymbolGraphGen incorrectly prints the fragment as 'class' in
         //  the abridged signature.

@@ -7,6 +7,8 @@ extension Site.Admin
         case dropPackageDB = "drop-package-db"
         case dropUnidocDB = "drop-unidoc-db"
 
+        case lintPackageEditions = "lint-package-editions"
+
         case recodePackageEditions = "recode-package-editions"
         case recodeUnidocVertices = "recode-unidoc-vertices"
 
@@ -23,6 +25,7 @@ extension Site.Admin.Action
         case .dropAccountDB:            return "Drop Account Database"
         case .dropPackageDB:            return "Drop Package Database"
         case .dropUnidocDB:             return "Drop Unidoc Database"
+        case .lintPackageEditions:      return "Lint Package Editions"
         case .recodePackageEditions:    return "Recode Package Editions"
         case .recodeUnidocVertices:     return "Recode Unidoc Vertices"
         case .rebuild:                  return "Rebuild Collections"

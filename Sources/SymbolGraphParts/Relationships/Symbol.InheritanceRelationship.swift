@@ -40,6 +40,7 @@ extension Symbol.InheritanceRelationship:SuperformRelationship
         case .enum:                 return false
         case .func:                 return false
         case .initializer:          return false
+        case .macro:                return false
         case .operator:             return false
         case .protocol:             return true
         case .struct:               return false

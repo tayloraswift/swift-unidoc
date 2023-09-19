@@ -41,6 +41,7 @@ extension Symbol.IntrinsicWitnessRelationship:SuperformRelationship
         case .func(nil):            return false
         case .func(_?):             return true
         case .initializer:          return true
+        case .macro:                return false
         case .operator:             return true
         case .protocol:             return false
         case .struct:               return false

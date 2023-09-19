@@ -31,7 +31,7 @@ enum Main:SyncTests
                 let html:HTML = .init { $0 += expanded.bytecode.safe }
 
                 tests.expect("\(html)" ==? """
-                <span class='syntax-attribute'>@</span><span class='syntax-keyword'>_spi</span>\
+                <span class='syntax-attribute'>@_spi</span>\
                 (<span class='syntax-identifier'>testing</span>) \
                 <span class='syntax-keyword'>mutating</span> \
                 <span class='syntax-keyword'>func</span> \
@@ -39,7 +39,7 @@ enum Main:SyncTests
                 <span class='syntax-typealias'>IndexOfResult</span>, \
                 <span class='syntax-typealias'>ElementOfResult</span>\
                 &gt;(\
-                <span class='xi'></span><span class='syntax-identifier'>_</span> \
+                <span class='xi'></span>_ \
                 <span class='syntax-binding'>a</span>: \
                 (<span class='syntax-keyword'>Self</span>.\
                 <span class='syntax-type'>Index</span>, \
@@ -170,6 +170,32 @@ enum Main:SyncTests
 
                 tests.expect("\(expanded.bytecode.safe)" ==? decl)
                 tests.expect(true: keywords.class)
+            }
+            if  let tests:TestGroup = tests / "FreestandingMacro"
+            {
+                let decl:String = """
+                @freestanding(expression) macro line<T: ExpressibleByIntegerLiteral>() -> T
+                """
+
+                var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
+                let expanded:Signature<Never>.Expanded = .init(decl,
+                    keywords: &keywords)
+
+                tests.expect("\(expanded.bytecode.safe)" ==? decl)
+                tests.expect(true: keywords.freestanding)
+            }
+            if  let tests:TestGroup = tests / "AttachedMacro"
+            {
+                let decl:String = """
+                @attached(member) @attached(conformance) public macro OptionSet<RawType>()
+                """
+
+                var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
+                let expanded:Signature<Never>.Expanded = .init(decl,
+                    keywords: &keywords)
+
+                tests.expect("\(expanded.bytecode.safe)" ==? decl)
+                tests.expect(true: keywords.attached)
             }
         }
     }

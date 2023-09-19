@@ -1,6 +1,6 @@
 
-import IDEUtils
 import MarkdownABI
+import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
 
@@ -35,7 +35,12 @@ extension SignatureSyntax
                 self.append(region: region, at: .toplevel)
             }
             else if
-                let region:ModifierListSyntax = region.as(ModifierListSyntax.self)
+                let region:AttributeListSyntax = region.as(AttributeListSyntax.self)
+            {
+                self.append(region: region, at: .toplevel)
+            }
+            else if
+                let region:DeclModifierListSyntax = region.as(DeclModifierListSyntax.self)
             {
                 //  Allows us to detect `class` modifier keywords.
                 self.append(region: region, at: .toplevel)
@@ -51,8 +56,8 @@ extension SignatureSyntax
             {
                 for region:Syntax in region.children(viewMode: .sourceAccurate)
                 {
-                    if  let clause:ParameterClauseSyntax =
-                            region.as(ParameterClauseSyntax.self)
+                    if  let clause:FunctionParameterClauseSyntax =
+                            region.as(FunctionParameterClauseSyntax.self)
                     {
                         self.append(clause: clause)
                     }
@@ -69,7 +74,8 @@ extension SignatureSyntax
                 }
             }
             else if
-                let clause:ParameterClauseSyntax = region.as(ParameterClauseSyntax.self)
+                let clause:FunctionParameterClauseSyntax =
+                    region.as(FunctionParameterClauseSyntax.self)
             {
                 self.append(clause: clause)
             }
@@ -136,7 +142,7 @@ extension SignatureSyntax
         }
     }
     private mutating
-    func append(clause region:ParameterClauseSyntax)
+    func append(clause region:FunctionParameterClauseSyntax)
     {
         for region:Syntax in region.children(viewMode: .sourceAccurate)
         {
@@ -164,7 +170,7 @@ extension SignatureSyntax
 
                         switch region.tokenKind
                         {
-                        case .identifier, .wildcardKeyword:
+                        case .identifier, .wildcard:
                             if  named
                             {
                                 self.append(region: region, as: .binding)

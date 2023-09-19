@@ -72,15 +72,24 @@ extension Signature.Expanded
                     $0 += utf8[range]
 
                 case .text(let range, let color?, .toplevel?):
+                    if  case .attribute = color
+                    {
+                        switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
+                        {
+                        case "@attached":       keywords.attached = true
+                        case "@freestanding":   keywords.freestanding = true
+                        default:                break
+                        }
+                    }
                     if  case .keyword = color
                     {
                         //  The `actor` and `async` keywords are contextual; there is no
                         //  other way to detect them besides inspecting token text!
                         switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
                         {
-                        case "actor":   keywords.actor = true
-                        case "class":   keywords.class = true
-                        default:        break
+                        case "actor":           keywords.actor = true
+                        case "class":           keywords.class = true
+                        default:                break
                         }
                     }
 
@@ -90,7 +99,18 @@ extension Signature.Expanded
 
                     $0[color]
                     {
-                        if  let referent:Scalar = symbols.removeValue(forKey: range.lowerBound)
+                        let offset:Int
+                        if  case .attribute = color,
+                            case 0x40 = utf8[range.lowerBound] // '@'
+                        {
+                            offset = range.lowerBound + 1
+                        }
+                        else
+                        {
+                            offset = range.lowerBound
+                        }
+
+                        if  let referent:Scalar = symbols.removeValue(forKey: offset)
                         {
                             $0[.href] =
                             {

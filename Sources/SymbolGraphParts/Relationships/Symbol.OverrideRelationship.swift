@@ -42,6 +42,7 @@ extension Symbol.OverrideRelationship:SuperformRelationship
         case .func(_?):             return true
         //  Protocol init can override another requirement.
         case .initializer:          return true
+        case .macro:                return false
         case .operator:             return true
         case .protocol:             return false
         case .struct:               return false

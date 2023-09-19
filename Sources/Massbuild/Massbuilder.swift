@@ -42,7 +42,7 @@ extension Massbuilder
                 at: version,
                 in: self.workspace,
                 clean: true),
-            pretty: true)
+            pretty: false)
 
         let bson:BSON.Document = .init(encoding: docs)
         try file.overwrite(with: bson.bytes)
@@ -79,7 +79,7 @@ extension Massbuilder
 
         let docs:SymbolGraphArchive = try await self.toolchain.generateDocs(
             for: try await .swift(in: self.workspace, clean: true),
-            pretty: false)
+            pretty: true)
 
         let bson:BSON.Document = .init(encoding: docs)
         try file.overwrite(with: bson.bytes)

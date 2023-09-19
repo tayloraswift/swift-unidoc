@@ -15,9 +15,9 @@ extension Server
 {
     enum Endpoint:Sendable
     {
-        case  stateless(ServerResponse)
+        case request(any StatefulOperation)
+        case stateless(ServerResponse)
         case `static`(Cache<Site.Asset.Get>.Request)
-        case  stateful(any StatefulOperation)
     }
 }
 //  GET endpoints
@@ -45,8 +45,8 @@ extension Server.Endpoint
     {
         switch root
         {
-        case Site.Admin.root:   return .stateful(Admin.status)
-        case Site.Login.root:   return .stateful(Bounce.init())
+        case Site.Admin.root:   return .request(Server.Operation.AdminDashboard.status)
+        case Site.Login.root:   return .request(Server.Operation.Bounce.init())
         case "robots.txt":      return .static(.init(.robots_txt, tag: tag))
         case _:                 return nil
         }
@@ -76,16 +76,16 @@ extension Server.Endpoint
 
             case .github?:
                 if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Login = .init(parameters: parameters)
+                    let operation:Server.Operation.Login = .init(parameters: parameters)
                 {
-                    return .stateful(operation)
+                    return .request(operation)
                 }
 
             case .register?:
                 if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Register = .init(parameters: parameters)
+                    let operation:Server.Operation.Register = .init(parameters: parameters)
                 {
-                    return .stateful(operation)
+                    return .request(operation)
                 }
             }
 
@@ -95,7 +95,7 @@ extension Server.Endpoint
 
         case "sitemaps":
             //  Ignore file extension.
-            return .stateful(SiteMap.init(
+            return .request(Server.Operation.SiteMap.init(
                 package: .init(trunk.prefix { $0 != "." }),
                 uri: uri,
                 tag: tag))
@@ -126,14 +126,14 @@ extension Server.Endpoint
         switch root
         {
         case Site.Tags.root:
-            return .stateful(Pipeline<PackageEditionsQuery>.init(
+            return .request(Server.Operation.Pipeline<PackageEditionsQuery>.init(
                 explain: explain,
                 query: .init(package: .init(trunk)),
                 uri: uri,
                 tag: tag))
 
         case Site.Docs.root:
-            return .stateful(Pipeline<WideQuery>.init(
+            return .request(Server.Operation.Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -142,7 +142,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case Site.Guides.root:
-            return .stateful(Pipeline<ThinQuery<Volume.Range>>.init(
+            return .request(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -151,7 +151,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case "articles":
-            return .stateful(Pipeline<WideQuery>.init(
+            return .request(Server.Operation.Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -162,8 +162,8 @@ extension Server.Endpoint
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .stateful(
-                    Pipeline<SearchIndexQuery<UnidocDatabase, VolumeIdentifier>>.init(
+                return .request(Server.Operation.Pipeline<
+                        SearchIndexQuery<UnidocDatabase, VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: UnidocDatabase.Search.name,
@@ -174,7 +174,8 @@ extension Server.Endpoint
             }
             else if trunk == "packages.json"
             {
-                return .stateful(Pipeline<SearchIndexQuery<PackageDatabase, Int32>>.init(
+                return .request(Server.Operation.Pipeline<
+                        SearchIndexQuery<PackageDatabase, Int32>>.init(
                     explain: explain,
                     query: .init(
                         from: PackageDatabase.Meta.name,
@@ -215,14 +216,14 @@ extension Server.Endpoint
 
         if  let overload:Symbol.Decl
         {
-            return .stateful(Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .request(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
                 explain: false,
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .stateful(Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .request(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))
@@ -253,7 +254,7 @@ extension Server.Endpoint
             let action:Site.Admin.Action = .init(rawValue: action),
             case .multipart(let form) = form
         {
-            return .stateful(Admin.perform(action, form))
+            return .request(Server.Operation.Admin.perform(action, form))
         }
         else
         {
@@ -277,7 +278,9 @@ extension Server.Endpoint
             if  let owner:String = parameters["owner"],
                 let repo:String = parameters["repo"]
             {
-                return .stateful(_SyncRepository.init(owner: owner, repo: repo))
+                return .request(Server.Operation._SyncRepository.init(
+                    owner: owner,
+                    repo: repo))
             }
 
         case (_, _):
