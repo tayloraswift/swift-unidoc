@@ -153,7 +153,7 @@ extension PackageDatabase.Editions
                 //  arbitrary choice of hash without marking the edition dirty.
                 //  We should use `placement.sha1` as a hint to skip the update only,
                 //  and set the dirty flag within a custom update statement.
-                try await self.update(edition, with: session)
+                try await self.update(some: edition, with: session)
 
             case sha1?:
                 //  Nothing to do.
