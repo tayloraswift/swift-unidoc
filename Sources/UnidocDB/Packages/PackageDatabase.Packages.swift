@@ -111,9 +111,9 @@ extension PackageDatabase.Packages
         if  placement.new
         {
             //  This can fail if we race with another process.
-            try await self.insert(record, with: session)
+            try await self.insert(some: record, with: session)
             //  Regenerate the JSON list of all packages.
-            try await meta.upsert(try await self.scan(with: session), with: session)
+            try await meta.upsert(some: try await self.scan(with: session), with: session)
         }
         else if let repo:PackageRepo, repo != placement.repo
         {

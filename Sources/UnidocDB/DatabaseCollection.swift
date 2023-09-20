@@ -160,7 +160,7 @@ extension DatabaseCollection
 extension DatabaseCollection
 {
     func insert(
-        _ elements:some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        some elements:some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws
     {
         if  elements.isEmpty
@@ -181,7 +181,8 @@ extension DatabaseCollection
 }
 extension DatabaseCollection
 {
-    func insert(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
+    func insert(
+        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
         with session:Mongo.Session) async throws
     {
         let response:Mongo.InsertResponse = try await session.run(
@@ -196,7 +197,8 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
-    func upsert(_ elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+    func upsert(
+        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
@@ -208,7 +210,8 @@ extension DatabaseCollection
     }
 
     @discardableResult
-    func upsert(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
+    func upsert(
+        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
         with session:Mongo.Session) async throws -> ElementID?
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
@@ -221,22 +224,6 @@ extension DatabaseCollection
     }
 }
 
-extension DatabaseCollection
-{
-    @available(*, deprecated, renamed: "update(some:with:)")
-    func update(_ elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
-        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
-    {
-        try await self.update(some: elements, with: session)
-    }
-    @available(*, deprecated, renamed: "update(some:with:)")
-    @discardableResult
-    func update(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(some: element, with: session)
-    }
-}
 extension DatabaseCollection
 {
     func update(
@@ -254,7 +241,8 @@ extension DatabaseCollection
     /// the passed document. Returns true if the document was modified, false if the document
     /// was not modified, and nil if the document was not found.
     @discardableResult
-    func update(some element:some BSONDocumentEncodable & Identifiable<ElementID>,
+    func update(
+        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
         with session:Mongo.Session) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(

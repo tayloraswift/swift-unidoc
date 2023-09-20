@@ -111,7 +111,7 @@ extension PackageDatabase
 
         let upsert:SnapshotReceipt.Upsert
 
-        switch try await self.graphs.upsert(snapshot, with: session)
+        switch try await self.graphs.upsert(some: snapshot, with: session)
         {
         case nil:   upsert = .update
         case _?:    upsert = .insert
