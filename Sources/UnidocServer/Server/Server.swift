@@ -226,9 +226,10 @@ extension Server:HTTPServerDelegate
     }
 }
 
-import GitHubIntegration
+import GitHubAPI
 import GitHubClient
 import SemanticVersions
+import UnixTime
 
 extension Server
 {
@@ -248,7 +249,14 @@ extension Server
             let session:Mongo.Session = try await .init(from: self.db.sessions)
             do
             {
-                try await self._crawl(stalest: 10, from: github, with: session)
+                try await github.api.connect
+                {
+                    try await self._crawl(stalest: 10, from: $0, with: session)
+                }
+            }
+            catch let error as any GitHubRateLimitError
+            {
+                try await Task.sleep(for: error.until - .now())
             }
             catch let error
             {
@@ -262,7 +270,7 @@ extension Server
 
     private
     func _crawl(stalest count:Int,
-        from github:GitHubPartner,
+        from github:GitHubClient<GitHubOAuth.API>.Connection,
         with session:Mongo.Session) async throws
     {
         let stale:[PackageRecord] = try await self.db.package.packages.stalest(count,
@@ -270,13 +278,14 @@ extension Server
 
         for package:PackageRecord in stale
         {
-            guard case .github(var repo) = package.repo
+            guard case .github(let old) = package.repo
             else
             {
-                continue
+                fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            repo = try await github.api.get(from: "/repos/\(repo.owner.login)/\(repo.name)")
+            let repo:GitHub.Repo = try await github.get(
+                from: "/repos/\(old.owner.login)/\(old.name)")
 
             switch try await self.db.package.packages.update(record: .init(id: package.id,
                     cell: package.cell,
@@ -287,19 +296,21 @@ extension Server
                 //  Might happen if package database is dropped while crawling.
                 continue
 
-            case true?:
-                self._packagesUpdated.wrappingIncrement(ordering: .relaxed)
-                fallthrough
-
-            case false?:
+            case _?:
+                //  To MongoDB, all repo updates look like modifications, since the package
+                //  record contains a timestamp.
                 self._packagesCrawled.wrappingIncrement(ordering: .relaxed)
             }
+            if  repo != old
+            {
+                self._packagesUpdated.wrappingIncrement(ordering: .relaxed)
+            }
 
-            let tags:[GitHubAPI.Tag] = try await github.api.get(
+            let tags:[GitHub.Tag] = try await github.get(
                 from: "/repos/\(repo.owner.login)/\(repo.name)/tags")
 
             //  Import tags in chronological order.
-            for tag:GitHubAPI.Tag in tags.reversed()
+            for tag:GitHub.Tag in tags.reversed()
             {
                 guard
                 let _:SemanticVersion = .init(refname: tag.name)

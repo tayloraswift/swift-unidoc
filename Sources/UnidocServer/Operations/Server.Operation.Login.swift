@@ -1,5 +1,5 @@
 import GitHubClient
-import GitHubIntegration
+import GitHubAPI
 import HTTP
 import MongoDB
 import UnidocDB

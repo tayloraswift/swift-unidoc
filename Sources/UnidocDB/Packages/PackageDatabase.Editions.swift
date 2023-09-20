@@ -1,5 +1,5 @@
 import BSON
-import GitHubIntegration
+import GitHubAPI
 import JSONEncoding
 import MongoDB
 import SHA1
@@ -105,7 +105,7 @@ extension PackageDatabase.Editions
 extension PackageDatabase.Editions
 {
     public
-    func register(_ tag:__owned GitHubAPI.Tag,
+    func register(_ tag:__owned GitHub.Tag,
         package:Int32,
         with session:Mongo.Session) async throws -> Int32?
     {

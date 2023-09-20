@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
+import GitHubAPI
 
-extension GitHubAPI.User:BSONDocumentEncodable
+extension GitHub.User:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -27,7 +27,7 @@ extension GitHubAPI.User:BSONDocumentEncodable
         bson[.updated] = self.updated
     }
 }
-extension GitHubAPI.User:BSONDocumentDecodable
+extension GitHub.User:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

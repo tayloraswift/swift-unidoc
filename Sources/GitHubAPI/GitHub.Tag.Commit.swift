@@ -1,7 +1,7 @@
 import JSON
 import SHA1
 
-extension GitHubAPI.Tag
+extension GitHub.Tag
 {
     struct Commit
     {
@@ -13,7 +13,7 @@ extension GitHubAPI.Tag
         }
     }
 }
-extension GitHubAPI.Tag.Commit:JSONObjectDecodable
+extension GitHub.Tag.Commit:JSONObjectDecodable
 {
     enum CodingKey:String
     {

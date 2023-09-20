@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import ModuleGraphs
 import MongoDB
 import SymbolGraphs
@@ -53,7 +53,7 @@ extension PackageDatabase
     }
 
     public
-    func track(repo:GitHubAPI.Repo, with session:Mongo.Session) async throws -> Int32
+    func track(repo:GitHub.Repo, with session:Mongo.Session) async throws -> Int32
     {
         /// Currently, package identifiers are just the name of the repository.
         try await self.packages.register(.init(repo.name),

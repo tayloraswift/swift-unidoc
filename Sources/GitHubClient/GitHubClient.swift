@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import HTTPClient
 import JSON
 import NIOCore
@@ -103,46 +103,24 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient<GitHubAPI>
+extension GitHubClient
+{
+    @inlinable public
+    func connect<T>(with body:(Connection) async throws -> T) async throws -> T
+    {
+        try await self.http2.connect
+        {
+            try await body(Connection.init(http2: $0, app: self.app))
+        }
+    }
+}
+extension GitHubClient<GitHubOAuth.API>
 {
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
         with token:String? = nil) async throws -> Response where Response:JSONDecodable
     {
-        var request:HPACKHeaders =
-        [
-            ":method": "GET",
-            ":scheme": "https",
-            ":authority": "api.github.com",
-            ":path": endpoint,
-
-            //  GitHub will reject the API request if the user-agent is not set.
-            "user-agent": self.app.agent,
-            "accept": "application/vnd.github+json"
-        ]
-        if  let token:String
-        {
-            request.add(name: "authorization", value: "Bearer \(token)")
-        }
-
-        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
-
-        //  TODO: support If-None-Match
-        switch response.status
-        {
-        case 200?:
-            break
-        case let status:
-            throw StatusError.init(code: status)
-        }
-
-        var json:JSON = .init(utf8: [])
-        for buffer:ByteBuffer in response.buffers
-        {
-            json.utf8 += buffer.readableBytesView
-        }
-
-        return try json.decode()
+        try await self.connect { try await $0.get(from: endpoint, with: token) }
     }
 }
