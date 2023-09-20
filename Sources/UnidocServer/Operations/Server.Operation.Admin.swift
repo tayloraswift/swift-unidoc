@@ -1,5 +1,5 @@
 import GitHubClient
-import GitHubIntegration
+import GitHubAPI
 import HTTP
 import MongoDB
 import Multiparts
@@ -16,7 +16,7 @@ extension Server.Operation
 }
 extension Server.Operation.Admin:RestrictedOperation
 {
-    func load(from server:ServerState) async throws -> ServerResponse?
+    func load(from server:Server.State) async throws -> ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let page:Site.Admin.Receipt
@@ -50,6 +50,13 @@ extension Server.Operation.Admin:RestrictedOperation
 
             page = .init(action: .recodePackageEditions,
                 text: "Modified \(modified) of \(total) editions!")
+
+        case .perform(.recodePackageRecords, _):
+            let (modified, total):(Int, Int) = try await server.db.package.packages.recode(
+                with: session)
+
+            page = .init(action: .recodePackageRecords,
+                text: "Modified \(modified) of \(total) packages!")
 
         case .perform(.recodeUnidocVertices, _):
             let (modified, total):(Int, Int) = try await server.db.unidoc.vertices.recode(

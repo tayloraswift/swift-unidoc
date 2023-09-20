@@ -14,7 +14,8 @@ let package:Package = .init(
         .library(name: "DoclinkResolution", targets: ["DoclinkResolution"]),
         .library(name: "FNV1", targets: ["FNV1"]),
 
-        .library(name: "GitHubIntegration", targets: ["GitHubIntegration"]),
+        .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
+        .library(name: "GitHubClient", targets: ["GitHubClient"]),
 
         .library(name: "HTML", targets: ["HTML"]),
 
@@ -68,13 +69,15 @@ let package:Package = .init(
     ],
     dependencies:
     [
-        //.package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-        //    from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.2")),
+        .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
+            from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.8.2")),
 
+        .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
+            from: "1.1.0")),
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
@@ -125,13 +128,16 @@ let package:Package = .init(
 
         .target(name: "GitHubClient", dependencies:
             [
-                .target(name: "GitHubIntegration"),
+                .target(name: "GitHubAPI"),
                 .target(name: "HTTPClient"),
+
+                .product(name: "Base64", package: "swift-hash"),
             ]),
 
-        .target(name: "GitHubIntegration", dependencies:
+        .target(name: "GitHubAPI", dependencies:
             [
                 .target(name: "JSON"),
+                .target(name: "UnixTime"),
             ]),
 
         .target(name: "HTML", dependencies:
@@ -376,9 +382,10 @@ let package:Package = .init(
 
         .target(name: "UnidocDB", dependencies:
             [
-                .target(name: "GitHubIntegration"),
+                .target(name: "GitHubAPI"),
                 .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
+                .target(name: "UnixTime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -398,7 +405,7 @@ let package:Package = .init(
 
         .target(name: "UnidocPages", dependencies:
             [
-                .target(name: "GitHubIntegration"),
+                .target(name: "GitHubAPI"),
                 .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocQueries"),
@@ -425,10 +432,7 @@ let package:Package = .init(
                 .target(name: "URI"),
             ]),
 
-        .target(name: "UnixTime", dependencies:
-            [
-                .product(name: "BSON", package: "swift-mongodb"),
-            ]),
+        .target(name: "UnixTime"),
 
         .target(name: "URI", dependencies:
             [
@@ -454,6 +458,8 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "System"),
                 .target(name: "UnidocPages"),
+
+                .product(name: "Atomics", package: "swift-atomics"),
             ]),
 
 

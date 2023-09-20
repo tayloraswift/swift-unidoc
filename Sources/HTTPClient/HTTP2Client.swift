@@ -77,25 +77,15 @@ extension HTTP2Client
     public
     func fetch(_ request:__owned HPACKHeaders) async throws -> Facet
     {
-        try await self.fetch(reducing: [request], into: .init()) { $0 = $1 }
+        try await self.connect { try await $0.fetch(request) }
     }
-
-    public
-    func fetch(_ batch:__owned [HPACKHeaders]) async throws -> [Facet]
-    {
-        try await self.fetch(reducing: batch, into: []) { $0.append($1) }
-    }
-
+}
+extension HTTP2Client
+{
+    /// Connect to the remote host over HTTPS and perform the given operation.
     @inlinable public
-    func fetch<Response>(reducing batch:__owned [HPACKHeaders],
-        into initial:__owned Response,
-        with combine:(inout Response, Facet) throws -> ()) async throws -> Response
+    func connect<T>(with body:(Connection) async throws -> T) async throws -> T
     {
-        if  batch.isEmpty
-        {
-            return initial
-        }
-
         let channel:any Channel = try await self.bootstrap.connect(
             host: self.remote,
             port: 443).get()
@@ -105,48 +95,6 @@ extension HTTP2Client
             channel.close(promise: nil)
         }
 
-        var response:Response = initial
-
-        var source:AsyncThrowingStream<Facet, any Error>.Continuation?
-        let stream:AsyncThrowingStream<Facet, any Error> = .init
-        {
-            source = $0
-        }
-        if  let source
-        {
-            channel.closeFuture.whenComplete
-            {
-                _ in
-                source.finish()
-            }
-
-            async
-            let _:Void =
-            {
-                try await Task.sleep(for: .seconds(3))
-                source.finish(throwing: RequestTimeoutError.init())
-            }()
-
-            let awaiting:Int = batch.count
-            var facets:AsyncThrowingStream<Facet, any Error>.Iterator =
-                stream.makeAsyncIterator()
-
-            channel.write((source, batch), promise: nil)
-            channel.flush()
-
-            for _:Int in 0 ..< awaiting
-            {
-                if  let facet:Facet = try await facets.next()
-                {
-                    try combine(&response, facet)
-                }
-                else
-                {
-                    throw UnexpectedStreamTerminationError.init()
-                }
-            }
-        }
-
-        return response
+        return try await body(Connection.init(channel: channel))
     }
 }

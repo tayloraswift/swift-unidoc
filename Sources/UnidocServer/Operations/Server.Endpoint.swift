@@ -15,7 +15,7 @@ extension Server
 {
     enum Endpoint:Sendable
     {
-        case request(any StatefulOperation)
+        case interactive(any InteractiveOperation)
         case stateless(ServerResponse)
         case `static`(Cache<Site.Asset.Get>.Request)
     }
@@ -45,8 +45,8 @@ extension Server.Endpoint
     {
         switch root
         {
-        case Site.Admin.root:   return .request(Server.Operation.AdminDashboard.status)
-        case Site.Login.root:   return .request(Server.Operation.Bounce.init())
+        case Site.Admin.root:   return .interactive(Server.Operation.AdminDashboard.status)
+        case Site.Login.root:   return .interactive(Server.Operation.Bounce.init())
         case "robots.txt":      return .static(.init(.robots_txt, tag: tag))
         case _:                 return nil
         }
@@ -78,14 +78,14 @@ extension Server.Endpoint
                 if  let parameters:[(String, String)] = uri.query?.parameters,
                     let operation:Server.Operation.Login = .init(parameters: parameters)
                 {
-                    return .request(operation)
+                    return .interactive(operation)
                 }
 
             case .register?:
                 if  let parameters:[(String, String)] = uri.query?.parameters,
                     let operation:Server.Operation.Register = .init(parameters: parameters)
                 {
-                    return .request(operation)
+                    return .interactive(operation)
                 }
             }
 
@@ -95,7 +95,7 @@ extension Server.Endpoint
 
         case "sitemaps":
             //  Ignore file extension.
-            return .request(Server.Operation.SiteMap.init(
+            return .interactive(Server.Operation.SiteMap.init(
                 package: .init(trunk.prefix { $0 != "." }),
                 uri: uri,
                 tag: tag))
@@ -126,14 +126,14 @@ extension Server.Endpoint
         switch root
         {
         case Site.Tags.root:
-            return .request(Server.Operation.Pipeline<PackageEditionsQuery>.init(
+            return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
                 explain: explain,
                 query: .init(package: .init(trunk)),
                 uri: uri,
                 tag: tag))
 
         case Site.Docs.root:
-            return .request(Server.Operation.Pipeline<WideQuery>.init(
+            return .interactive(Server.Operation.Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -142,7 +142,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case Site.Guides.root:
-            return .request(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
+            return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(trunk),
@@ -151,7 +151,7 @@ extension Server.Endpoint
                 tag: tag))
 
         case "articles":
-            return .request(Server.Operation.Pipeline<WideQuery>.init(
+            return .interactive(Server.Operation.Pipeline<WideQuery>.init(
                 explain: explain,
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -162,7 +162,7 @@ extension Server.Endpoint
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .request(Server.Operation.Pipeline<
+                return .interactive(Server.Operation.Pipeline<
                         SearchIndexQuery<UnidocDatabase, VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
@@ -174,7 +174,7 @@ extension Server.Endpoint
             }
             else if trunk == "packages.json"
             {
-                return .request(Server.Operation.Pipeline<
+                return .interactive(Server.Operation.Pipeline<
                         SearchIndexQuery<PackageDatabase, Int32>>.init(
                     explain: explain,
                     query: .init(
@@ -216,14 +216,14 @@ extension Server.Endpoint
 
         if  let overload:Symbol.Decl
         {
-            return .request(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .interactive(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
                 explain: false,
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
-            return .request(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
                 explain: false,
                 query: query,
                 uri: uri))
@@ -254,7 +254,7 @@ extension Server.Endpoint
             let action:Site.Admin.Action = .init(rawValue: action),
             case .multipart(let form) = form
         {
-            return .request(Server.Operation.Admin.perform(action, form))
+            return .interactive(Server.Operation.Admin.perform(action, form))
         }
         else
         {
@@ -278,7 +278,7 @@ extension Server.Endpoint
             if  let owner:String = parameters["owner"],
                 let repo:String = parameters["repo"]
             {
-                return .request(Server.Operation._SyncRepository.init(
+                return .interactive(Server.Operation._SyncRepository.init(
                     owner: owner,
                     repo: repo))
             }

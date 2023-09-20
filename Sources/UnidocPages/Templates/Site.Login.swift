@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import MongoDB
 import HTML
 import HTTPServer

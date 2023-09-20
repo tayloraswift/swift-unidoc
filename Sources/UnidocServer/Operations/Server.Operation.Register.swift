@@ -1,5 +1,5 @@
 import GitHubClient
-import GitHubIntegration
+import GitHubAPI
 import HTTP
 import MongoDB
 import UnidocDB
@@ -30,18 +30,18 @@ extension Server.Operation.Register
         return nil
     }
 }
-extension Server.Operation.Register:StatefulOperation
+extension Server.Operation.Register:InteractiveOperation
 {
-    func load(from server:ServerState,
+    func load(from server:Server.State,
         with _:Server.Request.Cookies) async throws -> ServerResponse?
     {
-        guard let github:GitHubClient<GitHubAPI> = server.github?.api
+        guard let github:GitHubClient<GitHubOAuth.API> = server.github?.api
         else
         {
             return nil
         }
 
-        let user:GitHubAPI.User = try await github.get(from: "/user", with: self.token)
+        let user:GitHub.User = try await github.get(from: "/user", with: self.token)
         let account:Account = .github(user: user,
             //  Are you a mighty It Girl?
             role: user.id == 2556986 ? .administrator : .human)

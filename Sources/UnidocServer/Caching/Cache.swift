@@ -13,7 +13,7 @@ actor Cache<Key> where Key:CacheKey
     private
     var table:[Key: ServerResource]
 
-    init(source assets:FilePath, reload:Bool)
+    init(source assets:FilePath = "Assets", reload:Bool)
     {
         self.assets = assets
         self.reload = reload

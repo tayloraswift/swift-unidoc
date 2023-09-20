@@ -5,12 +5,12 @@ extension Server
 {
     struct Request:Sendable
     {
-        let operation:any StatefulOperation
+        let operation:any InteractiveOperation
         let cookies:Cookies
         let promise:EventLoopPromise<ServerResponse>
 
         init(
-            operation:any StatefulOperation,
+            operation:any InteractiveOperation,
             cookies:Cookies,
             promise:EventLoopPromise<ServerResponse>)
         {

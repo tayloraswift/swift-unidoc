@@ -26,21 +26,21 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.SiteMap:StatefulOperation
+extension Server.Operation.SiteMap:InteractiveOperation
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.siteMap
     }
 }
-extension Server.Operation.SiteMap:DatabaseOperation, UnrestrictedOperation
+extension Server.Operation.SiteMap:UnrestrictedOperation
 {
-    func load(from db:Server.DB) async throws -> ServerResponse?
+    func load(from server:Server.State) async throws -> ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: db.sessions)
+        let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let siteMap:Volume.SiteMap<PackageIdentifier> = try await db.unidoc.siteMap(
+        let siteMap:Volume.SiteMap<PackageIdentifier> = try await server.db.unidoc.siteMap(
             package: self.package,
             with: session)
         else

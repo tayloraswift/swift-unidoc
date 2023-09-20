@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import JSONEncoding
 import ModuleGraphs
 import MongoDB
@@ -40,7 +40,63 @@ extension PackageDatabase.Packages:DatabaseCollection
                 $0[PackageRecord[.cell]] = (+)
             }
         },
+        .init
+        {
+            $0[.unique] = false
+            $0[.name] = "crawled"
+            $0[.key] = .init
+            {
+                $0[PackageRecord[.crawled]] = (+)
+            }
+
+            $0[.partialFilterExpression] = .init
+            {
+                $0[PackageRecord[.repo]] = .init { $0[.exists] = true }
+            }
+        },
     ]
+}
+extension PackageDatabase.Packages
+{
+    public
+    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    {
+        try await self.recode(through: PackageRecord.self,
+            with: session,
+            by: .now.advanced(by: .seconds(30)))
+    }
+}
+extension PackageDatabase.Packages
+{
+    public
+    func stalest(_ limit:Int, with session:Mongo.Session) async throws -> [PackageRecord]
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<PackageRecord>>.init(Self.name,
+                limit: limit)
+            {
+                $0[.filter] = .init
+                {
+                    $0[PackageRecord[.repo]] = .init { $0[.exists] = true }
+                }
+                $0[.sort] = .init
+                {
+                    $0[PackageRecord[.crawled]] = (+)
+                }
+                $0[.hint] = .init
+                {
+                    $0[PackageRecord[.crawled]] = (+)
+                }
+            },
+            against: self.database)
+    }
+
+    public
+    func update(record:PackageRecord,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(some: record, with: session)
+    }
 }
 extension PackageDatabase.Packages
 {
@@ -64,13 +120,13 @@ extension PackageDatabase.Packages
         if  placement.new
         {
             //  This can fail if we race with another process.
-            try await self.insert(record, with: session)
+            try await self.insert(some: record, with: session)
             //  Regenerate the JSON list of all packages.
-            try await meta.upsert(try await self.scan(with: session), with: session)
+            try await meta.upsert(some: try await self.scan(with: session), with: session)
         }
         else if let repo:PackageRepo, repo != placement.repo
         {
-            try await self.update(record, with: session)
+            try await self.update(some: record, with: session)
             placement.repo = repo
         }
 
@@ -155,19 +211,6 @@ extension PackageDatabase.Packages
         //  If there are no results, the collection is completely uninitialized,
         //  and we should start the count from zero.
         return placement.first ?? .first
-    }
-
-    @discardableResult
-    public
-    func update(_ package:Int32,
-        repo:PackageRepo,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(field: PackageRecord[.repo],
-            by: PackageRecord[.cell],
-            of: package,
-            to: repo,
-            with: session)
     }
 
     private

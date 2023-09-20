@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
+import GitHubAPI
 import MongoQL
 
 public
@@ -12,10 +12,10 @@ struct Account:Identifiable, Sendable
     public
     var role:Role
     public
-    var user:GitHubAPI.User?
+    var user:GitHub.User?
 
     @inlinable internal
-    init(id:ID, role:Role, user:GitHubAPI.User? = nil)
+    init(id:ID, role:Role, user:GitHub.User? = nil)
     {
         self.id = id
 
@@ -26,7 +26,7 @@ struct Account:Identifiable, Sendable
 extension Account
 {
     @inlinable public static
-    func github(user:GitHubAPI.User, role:Role) -> Self
+    func github(user:GitHub.User, role:Role) -> Self
     {
         .init(id: .github(user.id), role: role, user: user)
     }

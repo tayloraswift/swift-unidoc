@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
+import GitHubAPI
 
 @available(*, unavailable, message: "Not needed yet.")
 struct GitHubCredentials

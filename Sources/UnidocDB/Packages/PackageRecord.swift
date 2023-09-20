@@ -3,6 +3,7 @@ import BSONEncoding
 import ModuleGraphs
 import MongoQL
 import SymbolGraphs
+import UnixTime
 
 @frozen public
 struct PackageRecord:Identifiable, Equatable, Sendable
@@ -13,15 +14,24 @@ struct PackageRecord:Identifiable, Equatable, Sendable
     /// but packages that track remote repositories will always have positive cell numbers.
     public
     let cell:Int32
+
+    /// When this package *record* was last crawled. This is different from the time when the
+    /// package itself was last updated.
+    public
+    var crawled:BSON.Millisecond
     /// The repo this package tracks. Currently only GitHub repos are supported.
     public
     var repo:PackageRepo?
 
     @inlinable public
-    init(id:PackageIdentifier, cell:Int32, repo:PackageRepo? = nil)
+    init(id:PackageIdentifier,
+        cell:Int32,
+        crawled:BSON.Millisecond = .now(),
+        repo:PackageRepo? = nil)
     {
         self.id = id
         self.cell = cell
+        self.crawled = crawled
         self.repo = repo
     }
 }
@@ -32,6 +42,7 @@ extension PackageRecord:MongoMasterCodingModel
     {
         case id = "_id"
         case cell = "P"
+        case crawled = "T"
         case repo = "R"
     }
 }
@@ -42,6 +53,7 @@ extension PackageRecord:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.cell] = self.cell
+        bson[.crawled] = self.crawled
         bson[.repo] = self.repo
     }
 }
@@ -52,6 +64,7 @@ extension PackageRecord:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             cell: try bson[.cell].decode(),
+            crawled: try bson[.crawled]?.decode() ?? .now(),
             repo: try bson[.repo]?.decode())
     }
 }

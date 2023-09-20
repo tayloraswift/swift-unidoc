@@ -12,7 +12,7 @@ import UnidocPages
 import UnidocQueries
 import UnidocRecords
 
-struct Server
+struct Server:Sendable
 {
     private
     let authority:any ServerAuthority
@@ -21,14 +21,23 @@ struct Server
 
     private
     let requests:(in:AsyncStream<Request>.Continuation, out:AsyncStream<Request>)
+
+    private
+    let github:GitHubPlugin?
     private
     let cache:Cache<Site.Asset.Get>
+
 
     let mode:ServerMode
     let db:DB
 
     private
-    init(authority:any ServerAuthority, port:Int, mode:ServerMode, db:DB)
+    init(authority:any ServerAuthority,
+        port:Int,
+        github:GitHubPlugin?,
+        cache:Cache<Site.Asset.Get>,
+        mode:ServerMode,
+        db:DB)
     {
         self.authority = authority
         self.port = port
@@ -40,7 +49,9 @@ struct Server
         }
         self.requests.in = continuation!
 
-        self.cache = .init(source: "Assets", reload: mode == .unsecured)
+        self.github = github
+        self.cache = cache
+
 
         self.mode = mode
         self.db = db
@@ -53,17 +64,54 @@ extension Server
         let authority:any ServerAuthority = try options.authority.load(
             certificates: options.certificates)
 
+        let cache:Cache<Site.Asset.Get>
         let mode:ServerMode
 
         switch type(of: authority).scheme
         {
-        case .https:    mode = .secured
-        case .http:     mode = .unsecured
+        case .https:
+            cache = .init(reload: false)
+            mode = .secured
+
+        case .http:
+            cache = .init(reload: true)
+            mode = .unsecured
+        }
+
+        let github:GitHubPlugin?
+        if  let secret:(oauth:String, app:String) = try?
+            (
+                (cache.assets / "secrets" / "github-oauth-secret").read(),
+                (cache.assets / "secrets" / "github-app-secret").read()
+            )
+        {
+            //  This is a client context, which is different from the server context.
+            let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
+
+            func trim(_ string:String) -> String
+            {
+                .init(string.prefix(while: \.isHexDigit))
+            }
+
+            github = .init(niossl: niossl,
+                oauth: .init(
+                    client: "2378cacaed3ace362867",
+                    secret: trim(secret.oauth)),
+                app: .init(383005,
+                    client: "Iv1.dba609d35c70bf57",
+                    secret: trim(secret.app)))
+        }
+        else
+        {
+            print("Note: App secret unavailable, GitHub integration has been disabled!")
+            github = nil
         }
 
         self.init(
             authority: authority,
             port: options.port,
+            github: github,
+            cache: cache,
             mode: mode,
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
@@ -71,6 +119,7 @@ extension Server
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
     }
 }
+
 
 @main
 extension Server
@@ -114,13 +163,24 @@ extension Server
 
             tasks.addTask
             {
-                try await self.respond(on: threads)
-            }
-            tasks.addTask
-            {
                 try await self.serve(from: ("0.0.0.0", self.port),
                     as: self.authority,
                     on: threads)
+            }
+            tasks.addTask
+            {
+                var state:State = .init(server: self,
+                    github: try self.github?.partner(on: threads))
+
+                try await state.respond(to: self.requests.out)
+            }
+
+            if  let github:GitHubPlugin = self.github
+            {
+                tasks.addTask
+                {
+                    try await github.crawl(on: threads, db: self.db)
+                }
             }
 
             for try await _:Void in tasks
@@ -136,17 +196,8 @@ extension Server:HTTPServerDelegate
     {
         switch operation.endpoint
         {
-        case .stateless(let stateless):
-            promise.succeed(stateless)
-
-        case .static(let asset):
-            promise.completeWithTask
-            {
-                try await asset.load(from: self.cache)
-            }
-
-        case .request(let get):
-            let request:Request = .init(operation: get,
+        case .interactive(let interactive):
+            let request:Request = .init(operation: interactive,
                 cookies: operation.cookies,
                 promise: promise)
 
@@ -155,54 +206,15 @@ extension Server:HTTPServerDelegate
             {
                 fatalError("unimplemented")
             }
-        }
-    }
-}
-extension Server
-{
-    private
-    func respond(on threads:MultiThreadedEventLoopGroup) async throws
-    {
-        var state:ServerState = .init(server: self)
 
-        //  This is a client context, which is different from the server context.
-        let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
-        if  let secret:(oauth:String, app:String) = try?
-            (
-                (self.cache.assets / "secrets" / "github-oauth-secret").read(),
-                (self.cache.assets / "secrets" / "github-app-secret").read()
-            )
-        {
-            func trim(_ string:String) -> String
+        case .stateless(let stateless):
+            promise.succeed(stateless)
+
+        case .static(let asset):
+            promise.completeWithTask
             {
-                .init(string.prefix(while: \.isHexDigit))
+                try await asset.load(from: self.cache)
             }
-
-            let auth:HTTP2Client = .init(threads: threads,
-                niossl: niossl,
-                remote: "github.com")
-            let api:HTTP2Client = .init(threads: threads,
-                niossl: niossl,
-                remote: "api.github.com")
-
-            state.github =
-            (
-                oauth: .init(http2: auth, app: .init(
-                    client: "2378cacaed3ace362867",
-                    secret: trim(secret.oauth))),
-
-                app: .init(http2: auth, app: .init(383005,
-                    client: "Iv1.dba609d35c70bf57",
-                    secret: trim(secret.app))),
-                api: .init(http2: api, app: .init(
-                    agent: "Swiftinit (by tayloraswift)"))
-            )
         }
-        else
-        {
-            print("Note: App secret unavailable, GitHub integration has been disabled!")
-        }
-
-        try await state.respond(to: self.requests.out)
     }
 }
