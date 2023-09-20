@@ -22,7 +22,7 @@ extension Server.Operation
 }
 extension Server.Operation._SyncRepository:RestrictedOperation
 {
-    func load(from server:ServerState) async throws -> ServerResponse?
+    func load(from server:Server.State) async throws -> ServerResponse?
     {
         guard
         let github:GitHubClient<GitHubAPI> = server.github?.api

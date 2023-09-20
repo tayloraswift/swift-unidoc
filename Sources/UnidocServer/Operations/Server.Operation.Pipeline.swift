@@ -55,20 +55,20 @@ extension Server.Operation.Pipeline where Query.Database == PackageDatabase
             tag: tag)
     }
 }
-extension Server.Operation.Pipeline:StatefulOperation
+extension Server.Operation.Pipeline:InteractiveOperation
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.query
     }
 }
-extension Server.Operation.Pipeline:DatabaseOperation, UnrestrictedOperation
+extension Server.Operation.Pipeline:UnrestrictedOperation
 {
-    func load(from db:Server.DB) async throws -> ServerResponse?
+    func load(from server:Server.State) async throws -> ServerResponse?
     {
         try await self.load(
-            from: self.database(db),
-            with: try await .init(from: db.sessions))
+            from: self.database(server.db),
+            with: try await .init(from: server.db.sessions))
     }
 
     private

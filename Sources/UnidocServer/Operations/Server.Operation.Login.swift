@@ -46,9 +46,9 @@ extension Server.Operation.Login
         }
     }
 }
-extension Server.Operation.Login:StatefulOperation
+extension Server.Operation.Login:InteractiveOperation
 {
-    func load(from server:ServerState,
+    func load(from server:Server.State,
         with cookies:Server.Request.Cookies) async throws -> ServerResponse?
     {
         guard let oauth:GitHubClient<GitHubOAuth> = server.github?.oauth

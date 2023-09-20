@@ -75,6 +75,8 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.8.2")),
 
+        .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
+            from: "1.1.0")),
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
             from: "2.57.0")),
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
@@ -379,6 +381,7 @@ let package:Package = .init(
                 .target(name: "GitHubIntegration"),
                 .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
+                .target(name: "UnixTime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -454,6 +457,8 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "System"),
                 .target(name: "UnidocPages"),
+
+                .product(name: "Atomics", package: "swift-atomics"),
             ]),
 
 

@@ -12,10 +12,9 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.Bounce:StatefulOperation
+extension Server.Operation.Bounce:UnrestrictedOperation
 {
-    func load(from server:ServerState,
-        with _:Server.Request.Cookies) async throws -> ServerResponse?
+    func load(from server:Server.State) async throws -> ServerResponse?
     {
         if  let oauth:GitHubOAuth = server.github?.oauth.app
         {

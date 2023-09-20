@@ -3,34 +3,33 @@ import GitHubIntegration
 import HTTP
 import UnidocPages
 
-@dynamicMemberLookup
-struct ServerState
+extension Server
 {
-    let server:Server
-
-    var github:
-    (
-        oauth:GitHubClient<GitHubOAuth>,
-        app:GitHubClient<GitHubApp>,
-        api:GitHubClient<GitHubAPI>
-    )?
-
-    var tour:ServerTour
-
-    init(server:Server)
+    @dynamicMemberLookup
+    struct State
     {
-        self.server = server
-        self.tour = .init()
+        private
+        let server:Server
+        let github:GitHubPartner?
+
+        var tour:ServerTour
+
+        init(server:Server, github:GitHubPartner?)
+        {
+            self.server = server
+            self.github = github
+            self.tour = .init()
+        }
     }
 }
-extension ServerState
+extension Server.State
 {
     subscript<T>(dynamicMember keyPath:KeyPath<Server, T>) -> T
     {
         self.server[keyPath: keyPath]
     }
 }
-extension ServerState
+extension Server.State
 {
     mutating
     func respond(to requests:AsyncStream<Server.Request>) async throws
@@ -67,7 +66,7 @@ extension ServerState
                     status = \.redirectedPermanently
                 }
 
-                //  Don’t count visits to the admin dashboard.
+                //  Don’t count visits to the admin tools.
                 if  type != \.restricted
                 {
                     self.tour.stats.responses[keyPath: status] += 1

@@ -1,3 +1,4 @@
+import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
@@ -12,7 +13,7 @@ import UnidocPages
 import UnidocQueries
 import UnidocRecords
 
-struct Server
+struct Server:Sendable
 {
     private
     let authority:any ServerAuthority
@@ -21,14 +22,28 @@ struct Server
 
     private
     let requests:(in:AsyncStream<Request>.Continuation, out:AsyncStream<Request>)
+
+    private
+    let github:GitHubPlugin?
     private
     let cache:Cache<Site.Asset.Get>
+
+    let _crawlingErrors:ManagedAtomic<Int>
+    let _packagesCrawled:ManagedAtomic<Int>
+    let _packagesUpdated:ManagedAtomic<Int>
+    let _tagsCrawled:ManagedAtomic<Int>
+    let _tagsUpdated:ManagedAtomic<Int>
 
     let mode:ServerMode
     let db:DB
 
     private
-    init(authority:any ServerAuthority, port:Int, mode:ServerMode, db:DB)
+    init(authority:any ServerAuthority,
+        port:Int,
+        github:GitHubPlugin?,
+        cache:Cache<Site.Asset.Get>,
+        mode:ServerMode,
+        db:DB)
     {
         self.authority = authority
         self.port = port
@@ -40,7 +55,14 @@ struct Server
         }
         self.requests.in = continuation!
 
-        self.cache = .init(source: "Assets", reload: mode == .unsecured)
+        self.github = github
+        self.cache = cache
+
+        self._crawlingErrors = .init(0)
+        self._packagesCrawled = .init(0)
+        self._packagesUpdated = .init(0)
+        self._tagsCrawled = .init(0)
+        self._tagsUpdated = .init(0)
 
         self.mode = mode
         self.db = db
@@ -53,17 +75,54 @@ extension Server
         let authority:any ServerAuthority = try options.authority.load(
             certificates: options.certificates)
 
+        let cache:Cache<Site.Asset.Get>
         let mode:ServerMode
 
         switch type(of: authority).scheme
         {
-        case .https:    mode = .secured
-        case .http:     mode = .unsecured
+        case .https:
+            cache = .init(reload: false)
+            mode = .secured
+
+        case .http:
+            cache = .init(reload: true)
+            mode = .unsecured
+        }
+
+        let github:GitHubPlugin?
+        if  let secret:(oauth:String, app:String) = try?
+            (
+                (cache.assets / "secrets" / "github-oauth-secret").read(),
+                (cache.assets / "secrets" / "github-app-secret").read()
+            )
+        {
+            //  This is a client context, which is different from the server context.
+            let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
+
+            func trim(_ string:String) -> String
+            {
+                .init(string.prefix(while: \.isHexDigit))
+            }
+
+            github = .init(niossl: niossl,
+                oauth: .init(
+                    client: "2378cacaed3ace362867",
+                    secret: trim(secret.oauth)),
+                app: .init(383005,
+                    client: "Iv1.dba609d35c70bf57",
+                    secret: trim(secret.app)))
+        }
+        else
+        {
+            print("Note: App secret unavailable, GitHub integration has been disabled!")
+            github = nil
         }
 
         self.init(
             authority: authority,
             port: options.port,
+            github: github,
+            cache: cache,
             mode: mode,
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
@@ -71,6 +130,7 @@ extension Server
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
     }
 }
+
 
 @main
 extension Server
@@ -114,7 +174,14 @@ extension Server
 
             tasks.addTask
             {
-                try await self.respond(on: threads)
+                var state:State = .init(server: self,
+                    github: try self.github?.partner(on: threads))
+
+                try await state.respond(to: self.requests.out)
+            }
+            tasks.addTask
+            {
+                try await self._crawl(on: threads)
             }
             tasks.addTask
             {
@@ -136,17 +203,8 @@ extension Server:HTTPServerDelegate
     {
         switch operation.endpoint
         {
-        case .stateless(let stateless):
-            promise.succeed(stateless)
-
-        case .static(let asset):
-            promise.completeWithTask
-            {
-                try await asset.load(from: self.cache)
-            }
-
-        case .request(let get):
-            let request:Request = .init(operation: get,
+        case .interactive(let interactive):
+            let request:Request = .init(operation: interactive,
                 cookies: operation.cookies,
                 promise: promise)
 
@@ -155,54 +213,114 @@ extension Server:HTTPServerDelegate
             {
                 fatalError("unimplemented")
             }
+
+        case .stateless(let stateless):
+            promise.succeed(stateless)
+
+        case .static(let asset):
+            promise.completeWithTask
+            {
+                try await asset.load(from: self.cache)
+            }
         }
     }
 }
+
+import GitHubIntegration
+import GitHubClient
+import SemanticVersions
+
 extension Server
 {
-    private
-    func respond(on threads:MultiThreadedEventLoopGroup) async throws
+    func _crawl(on threads:MultiThreadedEventLoopGroup) async throws
     {
-        var state:ServerState = .init(server: self)
-
-        //  This is a client context, which is different from the server context.
-        let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
-        if  let secret:(oauth:String, app:String) = try?
-            (
-                (self.cache.assets / "secrets" / "github-oauth-secret").read(),
-                (self.cache.assets / "secrets" / "github-app-secret").read()
-            )
-        {
-            func trim(_ string:String) -> String
-            {
-                .init(string.prefix(while: \.isHexDigit))
-            }
-
-            let auth:HTTP2Client = .init(threads: threads,
-                niossl: niossl,
-                remote: "github.com")
-            let api:HTTP2Client = .init(threads: threads,
-                niossl: niossl,
-                remote: "api.github.com")
-
-            state.github =
-            (
-                oauth: .init(http2: auth, app: .init(
-                    client: "2378cacaed3ace362867",
-                    secret: trim(secret.oauth))),
-
-                app: .init(http2: auth, app: .init(383005,
-                    client: "Iv1.dba609d35c70bf57",
-                    secret: trim(secret.app))),
-                api: .init(http2: api, app: .init(
-                    agent: "Swiftinit (by tayloraswift)"))
-            )
-        }
+        guard let github:GitHubPartner = try self.github?.partner(on: threads)
         else
         {
-            print("Note: App secret unavailable, GitHub integration has been disabled!")
+            return
         }
 
-        try await state.respond(to: self.requests.out)
+        while true
+        {
+            async
+            let cooldown:Void = Task.sleep(for: .seconds(30))
+
+            let session:Mongo.Session = try await .init(from: self.db.sessions)
+            do
+            {
+                try await self._crawl(stalest: 10, from: github, with: session)
+            }
+            catch let error
+            {
+                print("Crawling error: \(error)")
+                self._crawlingErrors.wrappingIncrement(ordering: .relaxed)
+            }
+
+            try await cooldown
+        }
+    }
+
+    private
+    func _crawl(stalest count:Int,
+        from github:GitHubPartner,
+        with session:Mongo.Session) async throws
+    {
+        let stale:[PackageRecord] = try await self.db.package.packages.stalest(count,
+            with: session)
+
+        for package:PackageRecord in stale
+        {
+            guard case .github(var repo) = package.repo
+            else
+            {
+                continue
+            }
+
+            repo = try await github.api.get(from: "/repos/\(repo.owner.login)/\(repo.name)")
+
+            switch try await self.db.package.packages.update(record: .init(id: package.id,
+                    cell: package.cell,
+                    repo: .github(repo)),
+                with: session)
+            {
+            case nil:
+                //  Might happen if package database is dropped while crawling.
+                continue
+
+            case true?:
+                self._packagesUpdated.wrappingIncrement(ordering: .relaxed)
+                fallthrough
+
+            case false?:
+                self._packagesCrawled.wrappingIncrement(ordering: .relaxed)
+            }
+
+            let tags:[GitHubAPI.Tag] = try await github.api.get(
+                from: "/repos/\(repo.owner.login)/\(repo.name)/tags")
+
+            //  Import tags in chronological order.
+            for tag:GitHubAPI.Tag in tags.reversed()
+            {
+                guard
+                let _:SemanticVersion = .init(refname: tag.name)
+                else
+                {
+                    //  We don’t care about non-semver tags.
+                    continue
+                }
+
+                switch try await self.db.package.editions.register(tag,
+                    package: package.cell,
+                    with: session)
+                {
+                case _?:
+                    self._tagsUpdated.wrappingIncrement(ordering: .relaxed)
+                    fallthrough
+
+                case nil:
+                    self._tagsCrawled.wrappingIncrement(ordering: .relaxed)
+                }
+            }
+        }
     }
 }
