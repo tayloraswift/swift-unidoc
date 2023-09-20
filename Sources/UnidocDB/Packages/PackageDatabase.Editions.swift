@@ -140,7 +140,7 @@ extension PackageDatabase.Editions
         if  placement.new
         {
             //  This can fail if we race with another process.
-            try await self.insert(edition, with: session)
+            try await self.insert(some: edition, with: session)
         }
         else if let sha1:SHA1
         {
