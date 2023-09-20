@@ -10,10 +10,29 @@ class ClientInterfaceHandler
 {
     private
     let multiplexer:NIOHTTP2Handler.StreamMultiplexer
+    private
+    var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
 
     init(multiplexer:NIOHTTP2Handler.StreamMultiplexer)
     {
         self.multiplexer = multiplexer
+        self.owner = nil
+    }
+
+    deinit
+    {
+        if  case _? = self.owner
+        {
+            fatalError("ClientInterfaceHandler deinitialized with stream attached!")
+        }
+    }
+}
+extension ClientInterfaceHandler:ChannelHandler
+{
+    func handlerRemoved(context:ChannelHandlerContext)
+    {
+        self.owner?.finish()
+        self.owner = nil
     }
 }
 extension ClientInterfaceHandler:ChannelOutboundHandler
@@ -31,6 +50,9 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
         let batch:[HPACKHeaders]
 
         (owner, batch) = self.unwrapOutboundIn(data)
+
+        self.owner?.finish()
+        self.owner = owner
 
         for request:HPACKHeaders in batch
         {

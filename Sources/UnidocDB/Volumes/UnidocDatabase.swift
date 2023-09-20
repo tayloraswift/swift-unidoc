@@ -153,19 +153,19 @@ extension UnidocDatabase
     {
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
-        try await self.vertices.insert(volume.vertices, with: session)
-        try await self.names.insert(volume.names, with: session)
-        try await self.trees.insert(trees, with: session)
-        try await self.search.insert(index, with: session)
+        try await self.vertices.insert(some: volume.vertices, with: session)
+        try await self.names.insert(some: volume.names, with: session)
+        try await self.trees.insert(some: trees, with: session)
+        try await self.search.insert(some: index, with: session)
 
         if  volume.names.latest
         {
-            try await self.siteMaps.upsert(volume.siteMap(), with: session)
-            try await self.groups.insert(volume.groups(latest: true), with: session)
+            try await self.siteMaps.upsert(some: volume.siteMap(), with: session)
+            try await self.groups.insert(some: volume.groups(latest: true), with: session)
         }
         else
         {
-            try await self.groups.insert(volume.groups, with: session)
+            try await self.groups.insert(some: volume.groups, with: session)
         }
         if  let latest:Unidoc.Zone = volume.latest
         {
