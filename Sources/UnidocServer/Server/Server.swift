@@ -1,4 +1,3 @@
-import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
@@ -28,11 +27,6 @@ struct Server:Sendable
     private
     let cache:Cache<Site.Asset.Get>
 
-    let _crawlingErrors:ManagedAtomic<Int>
-    let _packagesCrawled:ManagedAtomic<Int>
-    let _packagesUpdated:ManagedAtomic<Int>
-    let _tagsCrawled:ManagedAtomic<Int>
-    let _tagsUpdated:ManagedAtomic<Int>
 
     let mode:ServerMode
     let db:DB
@@ -58,11 +52,6 @@ struct Server:Sendable
         self.github = github
         self.cache = cache
 
-        self._crawlingErrors = .init(0)
-        self._packagesCrawled = .init(0)
-        self._packagesUpdated = .init(0)
-        self._tagsCrawled = .init(0)
-        self._tagsUpdated = .init(0)
 
         self.mode = mode
         self.db = db
@@ -174,20 +163,24 @@ extension Server
 
             tasks.addTask
             {
+                try await self.serve(from: ("0.0.0.0", self.port),
+                    as: self.authority,
+                    on: threads)
+            }
+            tasks.addTask
+            {
                 var state:State = .init(server: self,
                     github: try self.github?.partner(on: threads))
 
                 try await state.respond(to: self.requests.out)
             }
-            tasks.addTask
+
+            if  let github:GitHubPlugin = self.github
             {
-                try await self._crawl(on: threads)
-            }
-            tasks.addTask
-            {
-                try await self.serve(from: ("0.0.0.0", self.port),
-                    as: self.authority,
-                    on: threads)
+                tasks.addTask
+                {
+                    try await github.crawl(on: threads, db: self.db)
+                }
             }
 
             for try await _:Void in tasks
@@ -221,116 +214,6 @@ extension Server:HTTPServerDelegate
             promise.completeWithTask
             {
                 try await asset.load(from: self.cache)
-            }
-        }
-    }
-}
-
-import GitHubAPI
-import GitHubClient
-import SemanticVersions
-import UnixTime
-
-extension Server
-{
-    func _crawl(on threads:MultiThreadedEventLoopGroup) async throws
-    {
-        guard let github:GitHubPartner = try self.github?.partner(on: threads)
-        else
-        {
-            return
-        }
-
-        while true
-        {
-            async
-            let cooldown:Void = Task.sleep(for: .seconds(30))
-
-            let session:Mongo.Session = try await .init(from: self.db.sessions)
-            do
-            {
-                try await github.api.connect
-                {
-                    try await self._crawl(stalest: 10, from: $0, with: session)
-                }
-            }
-            catch let error as any GitHubRateLimitError
-            {
-                try await Task.sleep(for: error.until - .now())
-            }
-            catch let error
-            {
-                print("Crawling error: \(error)")
-                self._crawlingErrors.wrappingIncrement(ordering: .relaxed)
-            }
-
-            try await cooldown
-        }
-    }
-
-    private
-    func _crawl(stalest count:Int,
-        from github:GitHubClient<GitHubOAuth.API>.Connection,
-        with session:Mongo.Session) async throws
-    {
-        let stale:[PackageRecord] = try await self.db.package.packages.stalest(count,
-            with: session)
-
-        for package:PackageRecord in stale
-        {
-            guard case .github(let old) = package.repo
-            else
-            {
-                fatalError("unreachable: non-GitHub package was marked as stale!")
-            }
-
-            let repo:GitHub.Repo = try await github.get(
-                from: "/repos/\(old.owner.login)/\(old.name)")
-
-            switch try await self.db.package.packages.update(record: .init(id: package.id,
-                    cell: package.cell,
-                    repo: .github(repo)),
-                with: session)
-            {
-            case nil:
-                //  Might happen if package database is dropped while crawling.
-                continue
-
-            case _?:
-                //  To MongoDB, all repo updates look like modifications, since the package
-                //  record contains a timestamp.
-                self._packagesCrawled.wrappingIncrement(ordering: .relaxed)
-            }
-            if  repo != old
-            {
-                self._packagesUpdated.wrappingIncrement(ordering: .relaxed)
-            }
-
-            let tags:[GitHub.Tag] = try await github.get(
-                from: "/repos/\(repo.owner.login)/\(repo.name)/tags")
-
-            //  Import tags in chronological order.
-            for tag:GitHub.Tag in tags.reversed()
-            {
-                guard
-                let _:SemanticVersion = .init(refname: tag.name)
-                else
-                {
-                    //  We don’t care about non-semver tags.
-                    continue
-                }
-
-                switch try await self.db.package.editions.register(tag,
-                    package: package.cell,
-                    with: session)
-                {
-                case _?:
-                    self._tagsUpdated.wrappingIncrement(ordering: .relaxed)
-                    fallthrough
-
-                case nil:
-                    self._tagsCrawled.wrappingIncrement(ordering: .relaxed)
-                }
             }
         }
     }

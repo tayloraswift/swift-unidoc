@@ -10,11 +10,11 @@ extension Server
     {
         private
         let server:Server
-        let github:GitHubPartner?
+        let github:GitHubPlugin.Partner?
 
         var tour:ServerTour
 
-        init(server:Server, github:GitHubPartner?)
+        init(server:Server, github:GitHubPlugin.Partner?)
         {
             self.server = server
             self.github = github

@@ -13,11 +13,11 @@ extension Site
         let configuration:Mongo.ReplicaSetConfiguration
 
         public
-        let crawlingErrors:Int
+        let errorsCrawling:Int
         public
-        let packagesCrawled:Int
+        let reposCrawled:Int
         public
-        let packagesUpdated:Int
+        let reposUpdated:Int
         public
         let tagsCrawled:Int
         public
@@ -30,9 +30,9 @@ extension Site
 
         @inlinable public
         init(configuration:Mongo.ReplicaSetConfiguration,
-            crawlingErrors:Int,
-            packagesCrawled:Int,
-            packagesUpdated:Int,
+            errorsCrawling:Int,
+            reposCrawled:Int,
+            reposUpdated:Int,
             tagsCrawled:Int,
             tagsUpdated:Int,
             tour:ServerTour,
@@ -40,9 +40,9 @@ extension Site
         {
             self.configuration = configuration
 
-            self.crawlingErrors = crawlingErrors
-            self.packagesCrawled = packagesCrawled
-            self.packagesUpdated = packagesUpdated
+            self.errorsCrawling = errorsCrawling
+            self.reposCrawled = reposCrawled
+            self.reposUpdated = reposUpdated
             self.tagsCrawled = tagsCrawled
             self.tagsUpdated = tagsUpdated
 
@@ -214,19 +214,19 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.stats.bytes.total)"
 
-            $0[.dt] = "crawling errors"
-            $0[.dd] = "\(self.crawlingErrors)"
+            $0[.dt] = "GitHub crawling errors"
+            $0[.dd] = "\(self.errorsCrawling)"
 
-            $0[.dt] = "packages crawled"
-            $0[.dd] = "\(self.packagesCrawled)"
+            $0[.dt] = "GitHub repos crawled"
+            $0[.dd] = "\(self.reposCrawled)"
 
-            $0[.dt] = "packages updated"
-            $0[.dd] = "\(self.packagesUpdated)"
+            $0[.dt] = "GitHub repos updated"
+            $0[.dd] = "\(self.reposUpdated)"
 
-            $0[.dt] = "tags crawled"
+            $0[.dt] = "GitHub tags crawled"
             $0[.dd] = "\(self.tagsCrawled)"
 
-            $0[.dt] = "tags updated"
+            $0[.dt] = "GitHub tags updated"
             $0[.dd] = "\(self.tagsUpdated)"
         }
 
