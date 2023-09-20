@@ -1,5 +1,5 @@
 import GitHubClient
-import GitHubIntegration
+import GitHubAPI
 import HTTPClient
 import NIOPosix
 import NIOSSL
@@ -23,10 +23,6 @@ extension Server
 }
 extension Server.GitHubPlugin
 {
-    var api:GitHubAPI { .init(agent: "Swiftinit (by tayloraswift)") }
-}
-extension Server.GitHubPlugin
-{
     func partner(on threads:MultiThreadedEventLoopGroup) throws -> Server.GitHubPartner
     {
         let root:HTTP2Client = .init(threads: threads,
@@ -38,6 +34,6 @@ extension Server.GitHubPlugin
 
         return .init(
             oauth: .init(http2: root, app: self.oauth),
-            api: .init(http2: api, app: self.api))
+            api: .init(http2: api, app: self.oauth.api))
     }
 }

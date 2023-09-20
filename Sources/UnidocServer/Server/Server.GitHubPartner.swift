@@ -1,5 +1,5 @@
 import GitHubClient
-import GitHubIntegration
+import GitHubAPI
 
 extension Server
 {
@@ -7,9 +7,9 @@ extension Server
     {
         let oauth:GitHubClient<GitHubOAuth>
         // let app:GitHubClient<GitHubApp>
-        let api:GitHubClient<GitHubAPI>
+        let api:GitHubClient<GitHubOAuth.API>
 
-        init(oauth:GitHubClient<GitHubOAuth>, api:GitHubClient<GitHubAPI>)
+        init(oauth:GitHubClient<GitHubOAuth>, api:GitHubClient<GitHubOAuth.API>)
         {
             self.oauth = oauth
             self.api = api

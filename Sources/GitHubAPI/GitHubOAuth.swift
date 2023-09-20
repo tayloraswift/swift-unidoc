@@ -1,4 +1,6 @@
 /// The essence of a GitHub OAuth application.
+///
+/// A `GitHubOAuth` instance is just a ``client`` ID and ``secret``.
 @frozen public
 struct GitHubOAuth:GitHubApplication
 {
@@ -13,4 +15,10 @@ struct GitHubOAuth:GitHubApplication
         self.client = client
         self.secret = secret
     }
+}
+extension GitHubOAuth
+{
+    /// The GitHub API.
+    @inlinable public
+    var api:API { .init(agent: "swift-unidoc (by tayloraswift)", oauth: self) }
 }

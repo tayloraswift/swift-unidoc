@@ -1,12 +1,12 @@
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
+import GitHubAPI
 import MongoQL
 
-extension GitHubAPI.Repo.Owner:MongoMasterCodingModel
+extension GitHub.Repo.Owner:MongoMasterCodingModel
 {
 }
-extension GitHubAPI.Repo.Owner:BSONDocumentEncodable
+extension GitHub.Repo.Owner:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -16,7 +16,7 @@ extension GitHubAPI.Repo.Owner:BSONDocumentEncodable
         bson[.node] = self.node
     }
 }
-extension GitHubAPI.Repo.Owner:BSONDocumentDecodable
+extension GitHub.Repo.Owner:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

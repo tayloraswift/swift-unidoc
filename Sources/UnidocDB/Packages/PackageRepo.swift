@@ -1,13 +1,13 @@
 import BSONDecoding
 import BSONEncoding
-import GitHubIntegration
+import GitHubAPI
 import MongoQL
 import UnidocRecords
 
 @frozen public
 enum PackageRepo:Equatable, Sendable
 {
-    case github(GitHubAPI.Repo)
+    case github(GitHub.Repo)
 }
 extension PackageRepo
 {

@@ -1,6 +1,6 @@
 import JSON
 
-extension GitHubAPI.Repo
+extension GitHub.Repo
 {
     @frozen public
     struct Owner:Identifiable, Equatable, Sendable
@@ -21,7 +21,7 @@ extension GitHubAPI.Repo
         }
     }
 }
-extension GitHubAPI.Repo.Owner:JSONObjectDecodable
+extension GitHub.Repo.Owner:JSONObjectDecodable
 {
     public
     enum CodingKey:String

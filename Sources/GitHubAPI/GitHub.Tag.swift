@@ -1,7 +1,7 @@
 import JSON
 import SHA1
 
-extension GitHubAPI
+extension GitHub
 {
     @frozen public
     struct Tag:Equatable, Sendable
@@ -22,7 +22,7 @@ extension GitHubAPI
         }
     }
 }
-extension GitHubAPI.Tag:JSONObjectDecodable
+extension GitHub.Tag:JSONObjectDecodable
 {
     public
     enum CodingKey:String

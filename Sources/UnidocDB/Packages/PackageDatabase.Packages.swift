@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import JSONEncoding
 import ModuleGraphs
 import MongoDB
@@ -48,6 +48,11 @@ extension PackageDatabase.Packages:DatabaseCollection
             {
                 $0[PackageRecord[.crawled]] = (+)
             }
+
+            $0[.partialFilterExpression] = .init
+            {
+                $0[PackageRecord[.repo]] = .init { $0[.exists] = true }
+            }
         },
     ]
 }
@@ -70,6 +75,10 @@ extension PackageDatabase.Packages
             command: Mongo.Find<Mongo.SingleBatch<PackageRecord>>.init(Self.name,
                 limit: limit)
             {
+                $0[.filter] = .init
+                {
+                    $0[PackageRecord[.repo]] = .init { $0[.exists] = true }
+                }
                 $0[.sort] = .init
                 {
                     $0[PackageRecord[.crawled]] = (+)

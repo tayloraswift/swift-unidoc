@@ -1,4 +1,4 @@
-import GitHubIntegration
+import GitHubAPI
 import BSONDecoding
 import BSONEncoding
 
