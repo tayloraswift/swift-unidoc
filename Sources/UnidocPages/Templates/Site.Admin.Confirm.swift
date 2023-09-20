@@ -41,6 +41,9 @@ extension Site.Admin.Confirm
         case .recodePackageEditions:
             prompt = "This will recode all package editions. Are you sure?"
 
+        case .recodePackageRecords:
+            prompt = "This will recode all package records. Are you sure?"
+
         case .recodeUnidocVertices:
             prompt = "This will recode all Unidoc vertices. Are you sure?"
 

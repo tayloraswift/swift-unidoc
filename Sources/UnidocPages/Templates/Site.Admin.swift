@@ -11,15 +11,41 @@ extension Site
     {
         public
         let configuration:Mongo.ReplicaSetConfiguration
+
+        public
+        let crawlingErrors:Int
+        public
+        let packagesCrawled:Int
+        public
+        let packagesUpdated:Int
+        public
+        let tagsCrawled:Int
+        public
+        let tagsUpdated:Int
+
         public
         let tour:ServerTour
         public
         let real:Bool
 
         @inlinable public
-        init(configuration:Mongo.ReplicaSetConfiguration, tour:ServerTour, real:Bool)
+        init(configuration:Mongo.ReplicaSetConfiguration,
+            crawlingErrors:Int,
+            packagesCrawled:Int,
+            packagesUpdated:Int,
+            tagsCrawled:Int,
+            tagsUpdated:Int,
+            tour:ServerTour,
+            real:Bool)
         {
             self.configuration = configuration
+
+            self.crawlingErrors = crawlingErrors
+            self.packagesCrawled = packagesCrawled
+            self.packagesUpdated = packagesUpdated
+            self.tagsCrawled = tagsCrawled
+            self.tagsUpdated = tagsUpdated
+
             self.tour = tour
             self.real = real
         }
@@ -148,6 +174,7 @@ extension Site.Admin:AdministrativePage
         [
             .lintPackageEditions,
             .recodePackageEditions,
+            .recodePackageRecords,
             .recodeUnidocVertices,
 
             .dropUnidocDB,
@@ -186,6 +213,21 @@ extension Site.Admin:AdministrativePage
 
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.stats.bytes.total)"
+
+            $0[.dt] = "crawling errors"
+            $0[.dd] = "\(self.crawlingErrors)"
+
+            $0[.dt] = "packages crawled"
+            $0[.dd] = "\(self.packagesCrawled)"
+
+            $0[.dt] = "packages updated"
+            $0[.dd] = "\(self.packagesUpdated)"
+
+            $0[.dt] = "tags crawled"
+            $0[.dd] = "\(self.tagsCrawled)"
+
+            $0[.dt] = "tags updated"
+            $0[.dd] = "\(self.tagsUpdated)"
         }
 
         main += ServerTour.StatsBreakdown.init(self.tour.stats)

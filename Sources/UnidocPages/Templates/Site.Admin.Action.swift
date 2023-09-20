@@ -10,6 +10,7 @@ extension Site.Admin
         case lintPackageEditions = "lint-package-editions"
 
         case recodePackageEditions = "recode-package-editions"
+        case recodePackageRecords = "recode-package-records"
         case recodeUnidocVertices = "recode-unidoc-vertices"
 
         case rebuild = "rebuild"
@@ -27,6 +28,7 @@ extension Site.Admin.Action
         case .dropUnidocDB:             return "Drop Unidoc Database"
         case .lintPackageEditions:      return "Lint Package Editions"
         case .recodePackageEditions:    return "Recode Package Editions"
+        case .recodePackageRecords:     return "Recode Package Records"
         case .recodeUnidocVertices:     return "Recode Unidoc Vertices"
         case .rebuild:                  return "Rebuild Collections"
         case .upload:                   return "Upload Snapshots"

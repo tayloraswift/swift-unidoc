@@ -30,9 +30,9 @@ extension Server.Operation.Register
         return nil
     }
 }
-extension Server.Operation.Register:StatefulOperation
+extension Server.Operation.Register:InteractiveOperation
 {
-    func load(from server:ServerState,
+    func load(from server:Server.State,
         with _:Server.Request.Cookies) async throws -> ServerResponse?
     {
         guard let github:GitHubClient<GitHubAPI> = server.github?.api
