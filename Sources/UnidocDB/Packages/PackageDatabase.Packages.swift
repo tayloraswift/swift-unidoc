@@ -86,7 +86,7 @@ extension PackageDatabase.Packages
     func update(record:PackageRecord,
         with session:Mongo.Session) async throws -> Bool?
     {
-        try await self.update(record, with: session)
+        try await self.update(some: record, with: session)
     }
 }
 extension PackageDatabase.Packages
@@ -117,7 +117,7 @@ extension PackageDatabase.Packages
         }
         else if let repo:PackageRepo, repo != placement.repo
         {
-            try await self.update(record, with: session)
+            try await self.update(some: record, with: session)
             placement.repo = repo
         }
 

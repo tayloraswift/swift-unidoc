@@ -119,7 +119,7 @@ extension DatabaseCollection
         {
             for try await batch:[Master] in $0
             {
-                let updates:Mongo.Updates<ElementID> = try await self.update(batch,
+                let updates:Mongo.Updates<ElementID> = try await self.update(some: batch,
                     with: session)
 
                 modified += updates.modified
@@ -223,7 +223,24 @@ extension DatabaseCollection
 
 extension DatabaseCollection
 {
+    @available(*, deprecated, renamed: "update(some:with:)")
     func update(_ elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
+    {
+        try await self.update(some: elements, with: session)
+    }
+    @available(*, deprecated, renamed: "update(some:with:)")
+    @discardableResult
+    func update(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(some: element, with: session)
+    }
+}
+extension DatabaseCollection
+{
+    func update(
+        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
         with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
@@ -237,7 +254,7 @@ extension DatabaseCollection
     /// the passed document. Returns true if the document was modified, false if the document
     /// was not modified, and nil if the document was not found.
     @discardableResult
-    func update(_ element:some BSONDocumentEncodable & Identifiable<ElementID>,
+    func update(some element:some BSONDocumentEncodable & Identifiable<ElementID>,
         with session:Mongo.Session) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<ElementID> = try await session.run(
