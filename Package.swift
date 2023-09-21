@@ -74,12 +74,12 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.8.2")),
+            from: "0.8.3")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
-            from: "2.57.0")),
+            from: "2.58.0")),
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.27.0")),
         .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
@@ -177,6 +177,7 @@ let package:Package = .init(
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),

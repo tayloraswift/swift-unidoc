@@ -5,7 +5,7 @@ extension Server
     struct Options
     {
         var authority:Authority
-        var certificates:String?
+        var certificates:String
         var redirect:Bool
         var mongo:String
         /// This is the port that the server binds to. It is not necessarily
@@ -15,10 +15,10 @@ extension Server
         init()
         {
             self.authority = .localhost
-            self.certificates = nil
+            self.certificates = "TestCertificates"
             self.redirect = false
             self.mongo = "unidoc-mongod"
-            self.port = 8080
+            self.port = 8443
         }
     }
 }

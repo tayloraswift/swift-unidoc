@@ -34,16 +34,9 @@ extension HTTPServerDelegate
                 address: channel.remoteAddress,
                 server: self)
 
-            guard let tls:NIOSSLContext = authority.tls as? NIOSSLContext
-            else
-            {
-                return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
-                    .flatMap
-                {
-                    channel.pipeline.addHandler(endpoint)
-                }
-            }
-            return  channel.pipeline.addHandler(NIOSSLServerHandler.init(context: tls))
+
+            return  channel.pipeline.addHandler(NIOSSLServerHandler.init(
+                context: authority.tls))
                     .flatMap
             {
                     channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)

@@ -16,37 +16,28 @@ extension Server.Options.Authority
     {
         switch self
         {
+        case .localhost:    return Localhost.self
         case .production:   return Swiftinit.self
         case .testing:      return SwiftinitTest.self
-        case .localhost:    return Localhost.self
         }
     }
 
-    func load(certificates:String?) throws -> any ServerAuthority
+    func load(certificates directory:String) throws -> any ServerAuthority
     {
-        func context() throws -> NIOSSLContext
-        {
-            guard let directory:String = certificates
-            else
-            {
-                throw Server.CertificateError.directoryRequired
-            }
+        let certificates:[NIOSSLCertificate] =
+            try NIOSSLCertificate.fromPEMFile("\(directory)/fullchain.pem")
+        let privateKey:NIOSSLPrivateKey =
+            try .init(file: "\(directory)/privkey.pem", format: .pem)
 
-            let certificates:[NIOSSLCertificate] =
-                try NIOSSLCertificate.fromPEMFile("\(directory)/fullchain.pem")
-            let privateKey:NIOSSLPrivateKey =
-                try .init(file: "\(directory)/privkey.pem", format: .pem)
-
-            return try .init(configuration: .makeServerConfiguration(
-                certificateChain: certificates.map(NIOSSLCertificateSource.certificate(_:)),
-                privateKey: .privateKey(privateKey)))
-        }
+        let niossl:NIOSSLContext = try .init(configuration: .makeServerConfiguration(
+            certificateChain: certificates.map(NIOSSLCertificateSource.certificate(_:)),
+            privateKey: .privateKey(privateKey)))
 
         switch self
         {
-        case .production:   return .swiftinit(try context())
-        case .testing:      return .swiftinitTest(try context())
-        case .localhost:    return .localhost
+        case .localhost:    return Localhost.init(tls: niossl)
+        case .production:   return Swiftinit.init(tls: niossl)
+        case .testing:      return SwiftinitTest.init(tls: niossl)
         }
     }
 }
