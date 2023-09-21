@@ -2,15 +2,11 @@
 enum ServerScheme
 {
     case https(port:Int = 443)
-    case http(port:Int = 80)
 }
 extension ServerScheme
 {
     @inlinable public static
     var https:Self { .https() }
-
-    @inlinable public static
-    var http:Self { .http() }
 }
 extension ServerScheme
 {
@@ -19,7 +15,6 @@ extension ServerScheme
     {
         switch self
         {
-        case .http(port: let port):     return port
         case .https(port: let port):    return port
         }
     }
@@ -28,7 +23,6 @@ extension ServerScheme
     {
         switch self
         {
-        case .http:             return "http"
         case .https:            return "https"
         }
     }

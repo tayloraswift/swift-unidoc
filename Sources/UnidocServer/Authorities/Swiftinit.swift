@@ -3,12 +3,11 @@ import NIOSSL
 
 struct Swiftinit
 {
-    private
-    let context:NIOSSLContext
+    let tls:NIOSSLContext
 
-    init(context:NIOSSLContext)
+    init(tls:NIOSSLContext)
     {
-        self.context = context
+        self.tls = tls
     }
 }
 extension Swiftinit:ServerAuthority
@@ -18,8 +17,6 @@ extension Swiftinit:ServerAuthority
 
     static
     var domain:String { "swiftinit.org" }
-
-    var tls:NIOSSLContext? { self.context }
 
     static
     func redact(error _:any Error) -> String

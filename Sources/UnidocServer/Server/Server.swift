@@ -67,15 +67,15 @@ extension Server
         let cache:Cache<Site.Asset.Get>
         let mode:ServerMode
 
-        switch type(of: authority).scheme
+        if  authority is Localhost
         {
-        case .https:
-            cache = .init(reload: false)
-            mode = .secured
-
-        case .http:
             cache = .init(reload: true)
             mode = .unsecured
+        }
+        else
+        {
+            cache = .init(reload: false)
+            mode = .secured
         }
 
         let github:GitHubPlugin?

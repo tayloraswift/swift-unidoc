@@ -5,6 +5,7 @@
 .vscode
 
 Assets/secrets/
+TestCertificates/*.pem
 TestDeployment/data/
 
 node_modules/
