@@ -29,9 +29,13 @@ extension Server.Options.Authority
         let privateKey:NIOSSLPrivateKey =
             try .init(file: "\(directory)/privkey.pem", format: .pem)
 
-        let niossl:NIOSSLContext = try .init(configuration: .makeServerConfiguration(
+        var configuration:TLSConfiguration = .makeServerConfiguration(
             certificateChain: certificates.map(NIOSSLCertificateSource.certificate(_:)),
-            privateKey: .privateKey(privateKey)))
+            privateKey: .privateKey(privateKey))
+
+            configuration.applicationProtocols = ["h2", "http/1.1"]
+
+        let niossl:NIOSSLContext = try .init(configuration: configuration)
 
         switch self
         {

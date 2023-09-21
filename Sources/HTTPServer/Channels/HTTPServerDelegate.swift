@@ -1,7 +1,7 @@
 import HTTP
 import NIOCore
 import NIOPosix
-import NIOHTTP1
+import NIOHTTP2
 import NIOSSL
 
 public
@@ -30,19 +30,14 @@ extension HTTPServerDelegate
         {
             (channel:any Channel) -> EventLoopFuture<Void> in
 
-            let endpoint:ServerInterfaceHandler<Authority, Self> = .init(
-                address: channel.remoteAddress,
-                server: self)
-
-
-            return  channel.pipeline.addHandler(NIOSSLServerHandler.init(
-                context: authority.tls))
-                    .flatMap
+            channel.pipeline.addHandler(NIOSSLServerHandler.init(context: authority.tls))
+                .flatMap
             {
-                    channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
-                    .flatMap
+                channel.configureCommonHTTPServerPipeline
                 {
-                    channel.pipeline.addHandler(endpoint)
+                    $0.pipeline.addHandler(ServerInterfaceHandler<Authority, Self>.init(
+                        address: channel.remoteAddress,
+                        server: self))
                 }
             }
         }
