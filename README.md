@@ -104,6 +104,8 @@ Unidoc is tightly-integrated with Swiftinit, but you can run it locally to previ
 
 Unidoc uses [MongoDB](https://www.mongodb.com/) to persist documentation. This allows for fast startup times as Unidoc performs almost no initialization, but requires you to have an active MongoDB replica set running on your local machine. See [`Testing.md`](Guides/Testing.md) for instructions on setting up a local environment.
 
+Unidoc uses HTTPS everywhere. See [`GeneratingCertificates.md`](Guides/GeneratingCertificates.md) for how to generate a local and certificate and certificate authority for `localhost`.
+
 TODO: Add example for running the Unidoc server locally.
 
 TODO: Add example for invoking the Unidoc compiler.
