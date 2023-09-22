@@ -26,7 +26,7 @@ extension Volume.Shoot:VolumeLookupPredicate
                     {
                         //  The stem index is partial, so we need this condition here in order
                         //  for MongoDB to use the index.
-                        $0[Volume.Master[.stem]] = .init { $0[.exists] = true }
+                        $0[Volume.Vertex[.stem]] = .init { $0[.exists] = true }
 
                         $0[.expr] = .expr
                         {
@@ -36,22 +36,22 @@ extension Volume.Shoot:VolumeLookupPredicate
                                 //  But that would not be as index-friendly.
                                 $0.expr
                                 {
-                                    $0[.eq] = (Volume.Master[.zone], zone)
+                                    $0[.eq] = (Volume.Vertex[.zone], zone)
                                 }
                                 $0.expr
                                 {
-                                    $0[.eq] = (Volume.Master[.stem], self.stem)
+                                    $0[.eq] = (Volume.Vertex[.stem], self.stem)
                                 }
 
                                 if  let hashrange:FNV24 = self.hash
                                 {
                                     $0.expr
                                     {
-                                        $0[.gte] = (Volume.Master[.hash], hashrange.min)
+                                        $0[.gte] = (Volume.Vertex[.hash], hashrange.min)
                                     }
                                     $0.expr
                                     {
-                                        $0[.lte] = (Volume.Master[.hash], hashrange.max)
+                                        $0[.lte] = (Volume.Vertex[.hash], hashrange.max)
                                     }
                                 }
                             }

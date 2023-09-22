@@ -162,8 +162,8 @@ extension Server.Endpoint
         case "lunr":
             if  let id:VolumeIdentifier = .init(trunk)
             {
-                return .interactive(Server.Operation.Pipeline<
-                        SearchIndexQuery<UnidocDatabase, VolumeIdentifier>>.init(
+                return .interactive(
+                    Server.Operation.Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
                     explain: explain,
                     query: .init(
                         from: UnidocDatabase.Search.name,
@@ -174,14 +174,15 @@ extension Server.Endpoint
             }
             else if trunk == "packages.json"
             {
-                return .interactive(Server.Operation.Pipeline<
-                        SearchIndexQuery<PackageDatabase, Int32>>.init(
+                return .interactive(
+                    Server.Operation.Pipeline<SearchIndexQuery<Int32>>.init(
                     explain: explain,
                     query: .init(
-                        from: PackageDatabase.Meta.name,
+                        from: UnidocDatabase.Meta.name,
                         tag: tag,
                         id: 0),
-                    uri: uri))
+                    uri: uri,
+                    tag: tag))
             }
             else
             {

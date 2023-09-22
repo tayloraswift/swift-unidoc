@@ -1,7 +1,7 @@
 import BSONDecoding
 import Unidoc
 
-extension PackageDatabase.Editions
+extension UnidocDatabase.Editions
 {
     @available(*, unavailable, message: "do we need this?")
     struct VersionView:Equatable, Sendable
@@ -15,7 +15,7 @@ extension PackageDatabase.Editions
     }
 }
 @available(*, unavailable)
-extension PackageDatabase.Editions.VersionView:BSONDocumentDecodable
+extension UnidocDatabase.Editions.VersionView:BSONDocumentDecodable
 {
     typealias CodingKey = PackageEdition.CodingKey
 

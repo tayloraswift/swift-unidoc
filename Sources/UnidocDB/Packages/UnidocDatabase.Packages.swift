@@ -5,7 +5,7 @@ import MongoDB
 import UnidocAnalysis
 import UnidocRecords
 
-extension PackageDatabase
+extension UnidocDatabase
 {
     @frozen public
     struct Packages
@@ -20,7 +20,7 @@ extension PackageDatabase
         }
     }
 }
-extension PackageDatabase.Packages:DatabaseCollection
+extension UnidocDatabase.Packages:DatabaseCollection
 {
     public
     typealias ElementID = PackageIdentifier
@@ -56,7 +56,7 @@ extension PackageDatabase.Packages:DatabaseCollection
         },
     ]
 }
-extension PackageDatabase.Packages
+extension UnidocDatabase.Packages
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
@@ -66,7 +66,7 @@ extension PackageDatabase.Packages
             by: .now.advanced(by: .seconds(30)))
     }
 }
-extension PackageDatabase.Packages
+extension UnidocDatabase.Packages
 {
     public
     func stalest(_ limit:Int, with session:Mongo.Session) async throws -> [PackageRecord]
@@ -98,7 +98,7 @@ extension PackageDatabase.Packages
         try await self.update(some: record, with: session)
     }
 }
-extension PackageDatabase.Packages
+extension UnidocDatabase.Packages
 {
     /// Registers the given package identifier in the database, returning its package
     /// coordinate. This is really just a glorified string internment system.
@@ -106,7 +106,7 @@ extension PackageDatabase.Packages
     /// This function can be expensive. It only makes one query if the package is already
     /// registered, but can take two round trips to intern the identifier otherwise.
     func register(_ package:PackageIdentifier,
-        updating meta:PackageDatabase.Meta,
+        updating meta:UnidocDatabase.Meta,
         tracking repo:PackageRepo?,
         with session:Mongo.Session) async throws -> Placement
     {

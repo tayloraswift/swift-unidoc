@@ -1,7 +1,7 @@
 import Unidoc
 import Symbols
 
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     struct File:Identifiable, Equatable, Sendable

@@ -38,7 +38,7 @@ extension Site.Docs
 extension Site.Docs.Disambiguation
 {
     init?(_ inliner:__owned Inliner,
-        matches:__shared [Volume.Master],
+        matches:__shared [Volume.Vertex],
         nouns:__owned [Volume.Noun]?)
     {
         let location:URI

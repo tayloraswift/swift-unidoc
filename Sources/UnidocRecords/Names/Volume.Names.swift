@@ -7,11 +7,6 @@ import Unidoc
 
 extension Volume
 {
-    @available(*, deprecated, renamed: "Names")
-    public typealias Zone = Names
-}
-extension Volume
-{
     @frozen public
     struct Names:Identifiable, Equatable, Sendable
     {

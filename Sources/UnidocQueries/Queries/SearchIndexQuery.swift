@@ -8,9 +8,8 @@ import UnidocDB
 import UnidocRecords
 
 @frozen public
-struct SearchIndexQuery<Database, ID>:Equatable, Hashable, Sendable
-    where   Database:DatabaseModel,
-            ID:Hashable,
+struct SearchIndexQuery<ID>:Equatable, Hashable, Sendable
+    where   ID:Hashable,
             ID:Sendable,
             ID:BSONDecodable,
             ID:BSONEncodable
@@ -32,6 +31,9 @@ struct SearchIndexQuery<Database, ID>:Equatable, Hashable, Sendable
 }
 extension SearchIndexQuery:DatabaseQuery
 {
+    public
+    typealias Collation = VolumeCollation
+
     @inlinable public
     var hint:Mongo.SortDocument? { nil }
 

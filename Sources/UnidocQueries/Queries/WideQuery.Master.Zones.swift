@@ -22,12 +22,12 @@ extension WideQuery.Master.Zones
     {
         list.expr
         {
-            $0[.coalesce] = (self.path / Volume.Master[.zones], [] as [Never])
+            $0[.coalesce] = (self.path / Volume.Vertex[.zones], [] as [Never])
         }
         list.expr
         {
-            let dependencies:Mongo.List<Volume.Master.Meta.Dependency, Mongo.KeyPath> = .init(
-                in: self.path / Volume.Master[.dependencies])
+            let dependencies:Mongo.List<Volume.Vertex.Meta.Dependency, Mongo.KeyPath> = .init(
+                in: self.path / Volume.Vertex[.dependencies])
 
             $0[.map] = dependencies.map { $0[.resolution] }
         }

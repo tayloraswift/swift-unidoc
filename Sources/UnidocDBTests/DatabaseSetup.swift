@@ -8,15 +8,6 @@ struct DatabaseSetup:MongoTestBattery
     {
         //  We should be able to reinitialize the database as many times as we want.
         //  (Initialization should be idempotent.)
-        if  let tests:TestGroup = tests / "Ecosystem"
-        {
-            await tests.do
-            {
-                let _:PackageDatabase = await .setup(as: database, in: pool)
-                let _:PackageDatabase = await .setup(as: database, in: pool)
-                let _:PackageDatabase = await .setup(as: database, in: pool)
-            }
-        }
         if  let tests:TestGroup = tests / "Unidoc"
         {
             await tests.do

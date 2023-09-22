@@ -4,7 +4,7 @@ import Sources
 import Symbols
 import Unidoc
 
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     struct Decl:Identifiable, Equatable, Sendable
@@ -82,7 +82,7 @@ extension Volume.Master
         }
     }
 }
-extension Volume.Master.Decl
+extension Volume.Vertex.Decl
 {
     @inlinable public
     var location:SourceLocation<Unidoc.Scalar>?

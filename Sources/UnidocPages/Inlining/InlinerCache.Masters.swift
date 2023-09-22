@@ -7,11 +7,11 @@ extension InlinerCache
     {
         let principal:Unidoc.Scalar?
         private(set)
-        var secondary:[Unidoc.Scalar: Volume.Master]
+        var secondary:[Unidoc.Scalar: Volume.Vertex]
 
         init(
             principal:Unidoc.Scalar?,
-            secondary:[Unidoc.Scalar: Volume.Master] = [:])
+            secondary:[Unidoc.Scalar: Volume.Vertex] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -21,9 +21,9 @@ extension InlinerCache
 extension InlinerCache.Masters
 {
     mutating
-    func add(_ masters:[Volume.Master])
+    func add(_ masters:[Volume.Vertex])
     {
-        for master:Volume.Master in masters where
+        for master:Volume.Vertex in masters where
             master.id != self.principal
         {
             self.secondary[master.id] = master
@@ -32,7 +32,7 @@ extension InlinerCache.Masters
 }
 extension InlinerCache.Masters
 {
-    subscript(_ scalar:Unidoc.Scalar) -> Volume.Master?
+    subscript(_ scalar:Unidoc.Scalar) -> Volume.Vertex?
     {
         self.principal == scalar ? nil : self.secondary[scalar]
     }

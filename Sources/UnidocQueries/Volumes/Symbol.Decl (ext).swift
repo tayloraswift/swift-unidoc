@@ -37,19 +37,19 @@ extension Symbol.Decl:VolumeLookupPredicate
                             (
                                 .expr
                                 {
-                                    $0[.eq] = (Volume.Master[.hash], hash)
+                                    $0[.eq] = (Volume.Vertex[.hash], hash)
                                 },
                                 .expr
                                 {
-                                    $0[.gte] = (Volume.Master[.id], min)
+                                    $0[.gte] = (Volume.Vertex[.id], min)
                                 },
                                 .expr
                                 {
-                                    $0[.lte] = (Volume.Master[.id], max)
+                                    $0[.lte] = (Volume.Vertex[.id], max)
                                 },
                                 .expr
                                 {
-                                    $0[.eq] = (Volume.Master[.symbol], self)
+                                    $0[.eq] = (Volume.Vertex[.symbol], self)
                                 }
                             )
                         }

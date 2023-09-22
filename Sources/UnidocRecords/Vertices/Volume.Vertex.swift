@@ -12,7 +12,7 @@ import Unidoc
 extension Volume
 {
     @frozen public
-    enum Master:Equatable, Sendable
+    enum Vertex:Equatable, Sendable
     {
         case article(Article)
         case culture(Culture)
@@ -21,7 +21,7 @@ extension Volume
         case meta(Meta)
     }
 }
-extension Volume.Master
+extension Volume.Vertex
 {
     @inlinable public
     var article:Article?
@@ -69,7 +69,7 @@ extension Volume.Master
         }
     }
 }
-extension Volume.Master:Identifiable
+extension Volume.Vertex:Identifiable
 {
     @inlinable public
     var id:Unidoc.Scalar
@@ -84,7 +84,7 @@ extension Volume.Master:Identifiable
         }
     }
 }
-extension Volume.Master
+extension Volume.Vertex
 {
     @inlinable public
     var overview:Volume.Passage?
@@ -123,7 +123,7 @@ extension Volume.Master
         }
     }
 }
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     enum CodingKey:String
@@ -221,7 +221,7 @@ extension Volume.Master
         case hash = "H"
     }
 }
-extension Volume.Master:BSONDocumentEncodable
+extension Volume.Vertex:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -341,7 +341,7 @@ extension Volume.Master:BSONDocumentEncodable
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
-extension Volume.Master:BSONDocumentDecodable
+extension Volume.Vertex:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
