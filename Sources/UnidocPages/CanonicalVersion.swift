@@ -58,7 +58,7 @@ extension CanonicalVersion
         let volume:URI = Site.Docs[names]
         let target:Target
 
-        if  let master:Volume.Master = principal.masterInLatest
+        if  let master:Volume.Vertex = principal.masterInLatest
         {
             switch master
             {
@@ -91,7 +91,7 @@ extension CanonicalVersion
     init?(relationship:Relationship,
         package:String,
         volume:URI,
-        master:Volume.Master,
+        master:Volume.Vertex,
         in names:Volume.Names)
     {
         let target:Target

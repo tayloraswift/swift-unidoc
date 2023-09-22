@@ -23,7 +23,7 @@ extension Site.Guides
 }
 extension Site.Guides.Feed
 {
-    init(_ inliner:__owned Inliner, masters:__shared [Volume.Master])
+    init(_ inliner:__owned Inliner, masters:__shared [Volume.Vertex])
     {
         self.init(inliner, scalars: masters.map(\.id))
     }

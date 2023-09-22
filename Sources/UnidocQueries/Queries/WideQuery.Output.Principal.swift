@@ -14,12 +14,12 @@ extension WideQuery.Output
     struct Principal:Equatable, Sendable
     {
         public
-        let matches:[Volume.Master]
+        let matches:[Volume.Vertex]
 
         public
-        let master:Volume.Master?
+        let master:Volume.Vertex?
         public
-        let masterInLatest:Volume.Master?
+        let masterInLatest:Volume.Vertex?
 
         public
         let groups:[Volume.Group]
@@ -34,9 +34,9 @@ extension WideQuery.Output
 
         @inlinable internal
         init(
-            matches:[Volume.Master],
-            master:Volume.Master?,
-            masterInLatest:Volume.Master?,
+            matches:[Volume.Vertex],
+            master:Volume.Vertex?,
+            masterInLatest:Volume.Vertex?,
             groups:[Volume.Group],
             names:Volume.Names,
             namesOfLatest:Volume.Names?,

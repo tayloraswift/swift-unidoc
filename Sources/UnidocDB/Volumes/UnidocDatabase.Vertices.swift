@@ -42,15 +42,15 @@ extension UnidocDatabase.Vertices:DatabaseCollection
             $0[.collation] = UnidocDatabase.collation
             $0[.key] = .init
             {
-                $0[Volume.Master[.zone]] = (+)
-                $0[Volume.Master[.stem]] = (+)
-                $0[Volume.Master[.hash]] = (+)
+                $0[Volume.Vertex[.zone]] = (+)
+                $0[Volume.Vertex[.stem]] = (+)
+                $0[Volume.Vertex[.hash]] = (+)
             }
             //  This limits the index to masters with a stem. This is all of them,
-            //  except for ``Volume.Master.File``.
+            //  except for ``Volume.Vertex.File``.
             $0[.partialFilterExpression] = .init
             {
-                $0[Volume.Master[.stem]] = .init { $0[.exists] = true }
+                $0[Volume.Vertex[.stem]] = .init { $0[.exists] = true }
             }
         },
         .init
@@ -61,8 +61,8 @@ extension UnidocDatabase.Vertices:DatabaseCollection
             $0[.collation] = UnidocDatabase.collation
             $0[.key] = .init
             {
-                $0[Volume.Master[.hash]] = (+)
-                $0[Volume.Master[.id]] = (+)
+                $0[Volume.Vertex[.hash]] = (+)
+                $0[Volume.Vertex[.id]] = (+)
             }
         },
     ]
@@ -72,7 +72,7 @@ extension UnidocDatabase.Vertices
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: Volume.Master.self,
+        try await self.recode(through: Volume.Vertex.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
     }

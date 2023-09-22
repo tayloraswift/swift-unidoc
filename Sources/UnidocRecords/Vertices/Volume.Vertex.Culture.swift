@@ -1,7 +1,7 @@
 import ModuleGraphs
 import Unidoc
 
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     struct Culture:Identifiable, Equatable, Sendable
@@ -44,7 +44,7 @@ extension Volume.Master
         }
     }
 }
-extension Volume.Master.Culture
+extension Volume.Vertex.Culture
 {
     @inlinable public
     var shoot:Volume.Shoot

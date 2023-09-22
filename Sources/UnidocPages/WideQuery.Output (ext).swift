@@ -16,7 +16,7 @@ extension WideQuery.Output:ServerResponseFactory
                 type: .text(.plain, charset: .utf8)))
         }
 
-        if  let master:Volume.Master = principal.master
+        if  let master:Volume.Vertex = principal.master
         {
             let inliner:Inliner = .init(principal: master.id, names: principal.names)
                 inliner.masters.add(self.secondary)

@@ -12,9 +12,9 @@ extension Site.Blog
         let inliner:Inliner
 
         private
-        let master:Volume.Master.Article
+        let master:Volume.Vertex.Article
 
-        init(_ inliner:Inliner, master:Volume.Master.Article)
+        init(_ inliner:Inliner, master:Volume.Vertex.Article)
         {
             self.inliner = inliner
             self.master = master

@@ -30,7 +30,7 @@ struct DynamicLinker
     )
 
     public private(set)
-    var vertices:[Volume.Master]
+    var vertices:[Volume.Vertex]
     public private(set)
     var groups:[Volume.Group]
 
@@ -83,8 +83,8 @@ extension DynamicLinker
 
         self.autogroup()
 
-        var cultures:[Volume.Master.Culture] = self.link(clients: clients)
-        var meta:Volume.Master.Meta = .init(id: context.current.edition.meta,
+        var cultures:[Volume.Vertex.Culture] = self.link(clients: clients)
+        var meta:Volume.Vertex.Meta = .init(id: context.current.edition.meta,
             abi: context.current.metadata.abi,
             dependencies: context.dependencies(),
             platforms: context.current.metadata.requirements,
@@ -93,7 +93,7 @@ extension DynamicLinker
         defer
         {
             self.vertices.append(.meta(meta))
-            for culture:Volume.Master.Culture in cultures
+            for culture:Volume.Vertex.Culture in cultures
             {
                 self.vertices.append(.culture(culture))
             }
@@ -195,7 +195,7 @@ extension DynamicLinker
         }
     }
     private mutating
-    func link(clients:[DynamicClientGroup]) -> [Volume.Master.Culture]
+    func link(clients:[DynamicClientGroup]) -> [Volume.Vertex.Culture]
     {
         //  First pass to create the topic records, which also populates topic memberships.
         for ((culture, input), clients):((Int, SymbolGraph.Culture), DynamicClientGroup)
@@ -211,7 +211,7 @@ extension DynamicLinker
         }
 
         //  Second pass to create various master records, which reads from the ``topics``.
-        var cultures:[Volume.Master.Culture] = []
+        var cultures:[Volume.Vertex.Culture] = []
             cultures.reserveCapacity(self.current.cultures.count)
 
         for ((culture, input), clients):
@@ -221,7 +221,7 @@ extension DynamicLinker
             clients)
         {
             let namespace:ModuleIdentifier = self.current.namespaces[culture]
-            let record:Volume.Master.Culture = self.link(culture: input,
+            let record:Volume.Vertex.Culture = self.link(culture: input,
                 named: namespace,
                 at: culture,
                 in: clients)
@@ -297,7 +297,7 @@ extension DynamicLinker
     func link(culture:SymbolGraph.Culture,
         named name:ModuleIdentifier,
         at index:Int,
-        in clients:DynamicClientGroup) -> Volume.Master.Culture
+        in clients:DynamicClientGroup) -> Volume.Vertex.Culture
     {
         let resolver:DynamicResolver = .init(context: self.context,
             diagnostics: self.diagnostics,
@@ -305,7 +305,7 @@ extension DynamicLinker
             clients: clients)
 
         let scalar:Unidoc.Scalar = self.current.edition + index
-        var record:Volume.Master.Culture = .init(id: scalar,
+        var record:Volume.Vertex.Culture = .init(id: scalar,
             module: culture.module,
             group: self.memberships.removeValue(forKey: scalar.citizen))
 
@@ -333,7 +333,7 @@ extension DynamicLinker
             self.current.articles.nodes[range])
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
-            var record:Volume.Master.Article = .init(id: self.current.edition + a,
+            var record:Volume.Vertex.Article = .init(id: self.current.edition + a,
                 stem: .init(culture.id, symbol.name),
                 culture: self.current.edition + culture.index,
                 file: node.body.file.map { self.current.edition + $0 },
@@ -418,7 +418,7 @@ extension DynamicLinker
                 self.extensions[implicit].subforms.append(d)
             }
 
-            var record:Volume.Master.Decl = .init(id: d,
+            var record:Volume.Vertex.Decl = .init(id: d,
                 flags: .init(
                     phylum: decl.phylum,
                     kinks: decl.kinks,

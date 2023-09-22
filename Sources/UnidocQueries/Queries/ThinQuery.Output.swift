@@ -9,12 +9,12 @@ extension ThinQuery
     struct Output:Equatable, Sendable
     {
         public
-        let masters:[Volume.Master]
+        let masters:[Volume.Vertex]
         public
         let names:Volume.Names
 
         @inlinable internal
-        init(masters:[Volume.Master], names:Volume.Names)
+        init(masters:[Volume.Vertex], names:Volume.Names)
         {
             self.masters = masters
             self.names = names

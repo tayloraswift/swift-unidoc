@@ -66,7 +66,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Master.Decl = tests.expect(
+                    let master:Volume.Vertex.Decl = tests.expect(
                         value: output.principal?.master?.decl)
                 {
                     tests.expect(master.stem.last ==? "Keys")
@@ -104,7 +104,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: try await unidoc.execute(query: query, with: session)),
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
-                    let _:Volume.Master = tests.expect(value: principal.master)
+                    let _:Volume.Vertex = tests.expect(value: principal.master)
                 {
                 }
             }
@@ -121,7 +121,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:ThinQuery<Symbol.Decl>.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Master.Decl = tests.expect(
+                    let master:Volume.Vertex.Decl = tests.expect(
                         value: output.masters.first?.decl)
                 {
                     tests.expect(master.stem.last ==? "init(bitPattern:)")
@@ -154,7 +154,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Master = tests.expect(value: output.principal?.master)
+                        let _:Volume.Vertex = tests.expect(value: output.principal?.master)
                     {
                     }
                 }
@@ -168,7 +168,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Master.Culture = tests.expect(
+                    let master:Volume.Vertex.Culture = tests.expect(
                         value: output.principal?.master?.culture),
                     let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree)
@@ -197,7 +197,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Master = tests.expect(
+                    let master:Volume.Vertex = tests.expect(
                         value: output.principal?.master),
                     let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree),
@@ -261,7 +261,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let _:Volume.Master = tests.expect(
+                    let _:Volume.Vertex = tests.expect(
                         value: output.principal?.master)
                 {
                 }
@@ -302,7 +302,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Master = tests.expect(value: output.principal?.master)
+                        let _:Volume.Vertex = tests.expect(value: output.principal?.master)
                     {
                         let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
                             into: [:])
