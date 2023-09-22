@@ -1,6 +1,6 @@
 <div align="center">
 
-<strong><em><code>unidoc</code></em></strong><br><small><code>0.2.3</code></small>
+<strong><em><code>unidoc</code></em></strong><br><small><code>0.2.4</code></small>
 
 [![ci build status](https://github.com/kelvin13/swift-unidoc/actions/workflows/build.yml/badge.svg)](https://github.com/kelvin13/swift-unidoc/actions/workflows/build.yml)
 
@@ -103,6 +103,8 @@ Unidoc avoids generating many copies of the same documentation, which can hinder
 Unidoc is tightly-integrated with Swiftinit, but you can run it locally to preview and iterate on your documentation.
 
 Unidoc uses [MongoDB](https://www.mongodb.com/) to persist documentation. This allows for fast startup times as Unidoc performs almost no initialization, but requires you to have an active MongoDB replica set running on your local machine. See [`Testing.md`](Guides/Testing.md) for instructions on setting up a local environment.
+
+Unidoc uses HTTPS everywhere. See [`GeneratingCertificates.md`](Guides/GeneratingCertificates.md) for how to generate a local and certificate and certificate authority for `localhost`.
 
 TODO: Add example for running the Unidoc server locally.
 

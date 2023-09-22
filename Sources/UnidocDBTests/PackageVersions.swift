@@ -50,7 +50,7 @@ struct PackageVersions:MongoTestBattery
         }
         do
         {
-            let tests:TestGroup = tests ! "InsertVersioned"
+            let tests:TestGroup = tests ! "InsertRelease"
 
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "1.2.3")
@@ -62,13 +62,16 @@ struct PackageVersions:MongoTestBattery
         }
         do
         {
-            let tests:TestGroup = tests ! "InsertMaster"
+            let tests:TestGroup = tests ! "InsertPrerelease"
 
             docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
-                refname: "master")
+                refname: "2.0.0-beta1")
 
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
-                id: .init(package: "swift-not-named-swift", version: "master", triple: triple),
+                id: .init(
+                    package: "swift-not-named-swift",
+                    version: "2.0.0-beta1",
+                    triple: triple),
                 edition: .init(package: 1, version: 1),
                 type: .insert))
         }
@@ -85,19 +88,22 @@ struct PackageVersions:MongoTestBattery
         }
         do
         {
-            let tests:TestGroup = tests ! "UpdateMaster"
+            let tests:TestGroup = tests ! "UpdatePrerelease"
 
             docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
-                refname: "master")
+                refname: "2.0.0-beta1")
 
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
-                id: .init(package: "swift-not-named-swift", version: "master", triple: triple),
+                id: .init(
+                    package: "swift-not-named-swift",
+                    version: "2.0.0-beta1",
+                    triple: triple),
                 edition: .init(package: 1, version: 1),
                 type: .update))
         }
         do
         {
-            let tests:TestGroup = tests ! "UpdateVersioned"
+            let tests:TestGroup = tests ! "UpdateRelease"
 
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "1.2.3")

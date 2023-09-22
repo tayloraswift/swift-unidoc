@@ -8,15 +8,18 @@ extension PackageEditionsQuery
     struct Output:Equatable, Sendable
     {
         public
-        var record:PackageRecord
+        var prereleases:[Facet]
         public
-        var facets:[Facet]
+        var releases:[Facet]
+        public
+        var record:PackageRecord
 
         @inlinable public
-        init(record:PackageRecord, facets:[Facet])
+        init(prereleases:[Facet], releases:[Facet], record:PackageRecord)
         {
+            self.prereleases = prereleases
+            self.releases = releases
             self.record = record
-            self.facets = facets
         }
     }
 }
@@ -25,8 +28,9 @@ extension PackageEditionsQuery.Output:MongoMasterCodingModel
     @frozen public
     enum CodingKey:String
     {
+        case prereleases
+        case releases
         case record
-        case facets
     }
 }
 extension PackageEditionsQuery.Output:BSONDocumentDecodable
@@ -34,6 +38,9 @@ extension PackageEditionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(record: try bson[.record].decode(), facets: try bson[.facets].decode())
+        self.init(
+            prereleases: try bson[.prereleases].decode(),
+            releases: try bson[.releases].decode(),
+            record: try bson[.record].decode())
     }
 }
