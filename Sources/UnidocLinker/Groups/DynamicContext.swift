@@ -125,9 +125,9 @@ extension DynamicContext
 }
 extension DynamicContext
 {
-    func dependencies() -> [Volume.Master.Meta.Dependency]
+    func dependencies() -> [Volume.Vertex.Meta.Dependency]
     {
-        var dependencies:[Volume.Master.Meta.Dependency] = []
+        var dependencies:[Volume.Vertex.Meta.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package != .swift,

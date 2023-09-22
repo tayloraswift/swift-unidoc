@@ -3,7 +3,7 @@ import SemanticVersions
 import SHA1
 import Unidoc
 
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     struct Meta:Identifiable, Equatable, Sendable

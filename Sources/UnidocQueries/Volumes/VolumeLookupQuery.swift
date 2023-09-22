@@ -4,15 +4,23 @@ import UnidocDB
 import UnidocRecords
 
 public
-protocol VolumeLookupQuery:DatabaseQuery where Database == UnidocDatabase
+protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
 {
     associatedtype LookupPredicate:VolumeLookupPredicate
 
     var volume:Volume.Selector { get }
     var lookup:LookupPredicate { get }
 
+    /// The field to store the ``PackageRepo`` associated with the volume in.
+    ///
+    /// If nil, the query will not look up the repo information.
+    static
+    var repo:Mongo.KeyPath? { get }
     /// The field to store the ``Volume.Names`` of the **latest stable release**
     /// (relative to the current volume) in.
+    ///
+    /// If nil, the query will still look up the latest stable release, but the result will
+    /// be discarded.
     static
     var namesOfLatest:Mongo.KeyPath? { get }
     /// The field to store the ``Volume.Names`` of the **requested snapshot** in.
@@ -28,6 +36,9 @@ protocol VolumeLookupQuery:DatabaseQuery where Database == UnidocDatabase
 }
 extension VolumeLookupQuery
 {
+    @inlinable public static
+    var repo:Mongo.KeyPath? { nil }
+
     @inlinable public static
     var namesOfLatest:Mongo.KeyPath? { nil }
 }
@@ -83,8 +94,22 @@ extension VolumeLookupQuery
             $0[.limit] = 1
         }
 
-        if  let version:Substring = self.volume.version
+        if  let _:Mongo.KeyPath = Self.repo
         {
+        }
+
+        switch self.volume.version
+        {
+        case nil:
+            pipeline.stage
+            {
+                $0[.replaceWith] = .init
+                {
+                    $0[Self.names] = Mongo.Pipeline.ROOT
+                }
+            }
+
+        case let version?:
             //  ``Volume.Names`` has many keys. to simplify the output schema
             //  and allow re-use of the earlier pipeline stages, we demote
             //  the zone fields to a subdocument.
@@ -129,16 +154,6 @@ extension VolumeLookupQuery
             pipeline.stage
             {
                 $0[.unwind] = Self.names
-            }
-        }
-        else
-        {
-            pipeline.stage
-            {
-                $0[.replaceWith] = .init
-                {
-                    $0[Self.names] = Mongo.Pipeline.ROOT
-                }
             }
         }
 

@@ -44,7 +44,7 @@ extension InlinerCache
 }
 extension InlinerCache
 {
-    subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Master.Article, url:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Article, url:String?)?
     {
         mutating get
         {
@@ -59,7 +59,7 @@ extension InlinerCache
         }
     }
 
-    subscript(culture scalar:Unidoc.Scalar) -> (master:Volume.Master.Culture, url:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Culture, url:String?)?
     {
         mutating get
         {
@@ -74,7 +74,7 @@ extension InlinerCache
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (master:Volume.Master.Decl, url:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Decl, url:String?)?
     {
         mutating get
         {
@@ -90,7 +90,7 @@ extension InlinerCache
     }
 
     subscript(file scalar:Unidoc.Scalar,
-        line line:Int? = nil) -> (master:Volume.Master.File, url:String?)?
+        line line:Int? = nil) -> (master:Volume.Vertex.File, url:String?)?
     {
         mutating get
         {
@@ -110,13 +110,13 @@ extension InlinerCache
         }
     }
 
-    subscript(scalar:Unidoc.Scalar) -> (master:Volume.Master, url:String?)?
+    subscript(scalar:Unidoc.Scalar) -> (master:Volume.Vertex, url:String?)?
     {
         mutating get
         {
             self.masters[scalar].map
             {
-                (master:Volume.Master) in
+                (master:Volume.Vertex) in
                 (master, self.load(scalar) { .init(master: master, in: $0) })
             }
         }

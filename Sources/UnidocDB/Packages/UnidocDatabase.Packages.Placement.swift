@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import MongoQL
 
-extension PackageDatabase.Packages
+extension UnidocDatabase.Packages
 {
     struct Placement
     {
@@ -18,12 +18,12 @@ extension PackageDatabase.Packages
         }
     }
 }
-extension PackageDatabase.Packages.Placement
+extension UnidocDatabase.Packages.Placement
 {
     static
     var first:Self { .init(coordinate: 0, repo: nil, new: true) }
 }
-extension PackageDatabase.Packages.Placement:MongoMasterCodingModel
+extension UnidocDatabase.Packages.Placement:MongoMasterCodingModel
 {
     enum CodingKey:String
     {
@@ -32,7 +32,7 @@ extension PackageDatabase.Packages.Placement:MongoMasterCodingModel
         case new
     }
 }
-extension PackageDatabase.Packages.Placement:BSONDocumentDecodable
+extension UnidocDatabase.Packages.Placement:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

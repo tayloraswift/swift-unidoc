@@ -25,16 +25,6 @@ extension UnidocDatabase.Groups:DatabaseCollection
     static
     let indexes:[Mongo.CreateIndexStatement] =
     [
-        // .init
-        // {
-        //     $0[.unique] = true
-        //     $0[.name] = "id,latest"
-        //     $0[.key] = .init
-        //     {
-        //         $0[Volume.Group[.id]] = (+)
-        //         $0[Volume.Group[.latest]] = (-)
-        //     }
-        // },
         .init
         {
             $0[.unique] = false

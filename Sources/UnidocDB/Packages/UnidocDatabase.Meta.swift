@@ -2,7 +2,7 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension PackageDatabase
+extension UnidocDatabase
 {
     /// A single-document collection containing a ``SearchIndex``.
     @frozen public
@@ -18,7 +18,7 @@ extension PackageDatabase
         }
     }
 }
-extension PackageDatabase.Meta:DatabaseCollection
+extension UnidocDatabase.Meta:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "meta" }

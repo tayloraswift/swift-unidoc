@@ -28,34 +28,29 @@ extension Server.Operation.Admin:RestrictedOperation
 
             page = .init(action: .dropAccountDB, text: "Reinitialized Account database!")
 
-        case .perform(.dropPackageDB, _):
-            try await server.db.package.drop(with: session)
-
-            page = .init(action: .dropPackageDB, text: "Reinitialized Package database!")
-
         case .perform(.dropUnidocDB, _):
             try await server.db.unidoc.drop(with: session)
 
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
-        case .perform(.lintPackageEditions, _):
-            let deleted:Int = try await server.db.package.editions._lint(with: session)
+        case .perform(.lintUnidocEditions, _):
+            let deleted:Int = try await server.db.unidoc.editions._lint(with: session)
 
-            page = .init(action: .lintPackageEditions,
+            page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
 
-        case .perform(.recodePackageEditions, _):
-            let (modified, total):(Int, Int) = try await server.db.package.editions.recode(
+        case .perform(.recodeUnidocEditions, _):
+            let (modified, total):(Int, Int) = try await server.db.unidoc.editions.recode(
                 with: session)
 
-            page = .init(action: .recodePackageEditions,
+            page = .init(action: .recodeUnidocEditions,
                 text: "Modified \(modified) of \(total) editions!")
 
-        case .perform(.recodePackageRecords, _):
-            let (modified, total):(Int, Int) = try await server.db.package.packages.recode(
+        case .perform(.recodeUnidocRepos, _):
+            let (modified, total):(Int, Int) = try await server.db.unidoc.packages.recode(
                 with: session)
 
-            page = .init(action: .recodePackageRecords,
+            page = .init(action: .recodeUnidocRepos,
                 text: "Modified \(modified) of \(total) packages!")
 
         case .perform(.recodeUnidocVertices, _):
@@ -66,9 +61,7 @@ extension Server.Operation.Admin:RestrictedOperation
                 text: "Modified \(modified) of \(total) vertices!")
 
         case .perform(.rebuild, _):
-            let rebuilt:Int = try await server.db.unidoc.rebuild(
-                from: server.db.package,
-                with: session)
+            let rebuilt:Int = try await server.db.unidoc._rebuild(with: session)
 
             page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
 
@@ -81,7 +74,6 @@ extension Server.Operation.Admin:RestrictedOperation
                 let documentation:SymbolGraphArchive = try .init(buffer: item.value)
                 let receipt:SnapshotReceipt = try await server.db.unidoc.publish(
                     linking: documentation,
-                    against: server.db.package,
                     with: session)
 
                 receipts.append(receipt)

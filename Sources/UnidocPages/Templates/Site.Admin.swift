@@ -172,13 +172,13 @@ extension Site.Admin:AdministrativePage
 
         for action:Action in
         [
-            .lintPackageEditions,
-            .recodePackageEditions,
-            .recodePackageRecords,
+            .lintUnidocEditions,
+
+            .recodeUnidocRepos,
+            .recodeUnidocEditions,
             .recodeUnidocVertices,
 
             .dropUnidocDB,
-            .dropPackageDB,
             .dropAccountDB,
         ]
         {

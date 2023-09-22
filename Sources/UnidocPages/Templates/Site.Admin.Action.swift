@@ -4,13 +4,12 @@ extension Site.Admin
     enum Action:String, Equatable, Hashable, Sendable
     {
         case dropAccountDB = "drop-account-db"
-        case dropPackageDB = "drop-package-db"
         case dropUnidocDB = "drop-unidoc-db"
 
-        case lintPackageEditions = "lint-package-editions"
+        case lintUnidocEditions = "lint-unidoc-editions"
 
-        case recodePackageEditions = "recode-package-editions"
-        case recodePackageRecords = "recode-package-records"
+        case recodeUnidocRepos = "recode-unidoc-repos"
+        case recodeUnidocEditions = "recode-unidoc-editions"
         case recodeUnidocVertices = "recode-unidoc-vertices"
 
         case rebuild = "rebuild"
@@ -24,12 +23,11 @@ extension Site.Admin.Action
         switch self
         {
         case .dropAccountDB:            return "Drop Account Database"
-        case .dropPackageDB:            return "Drop Package Database"
         case .dropUnidocDB:             return "Drop Unidoc Database"
-        case .lintPackageEditions:      return "Lint Package Editions"
-        case .recodePackageEditions:    return "Recode Package Editions"
-        case .recodePackageRecords:     return "Recode Package Records"
-        case .recodeUnidocVertices:     return "Recode Unidoc Vertices"
+        case .lintUnidocEditions:       return "Lint Editions"
+        case .recodeUnidocRepos:        return "Recode Repos"
+        case .recodeUnidocEditions:     return "Recode Editions"
+        case .recodeUnidocVertices:     return "Recode Vertices"
         case .rebuild:                  return "Rebuild Collections"
         case .upload:                   return "Upload Snapshots"
         }

@@ -35,7 +35,7 @@ extension Server.Operation._SyncRepository:RestrictedOperation
             from: "/repos/\(self.owner)/\(self.repo)")
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let package:Int32 = try await server.db.package.track(repo: repo,
+        let package:Int32 = try await server.db.unidoc.track(repo: repo,
             with: session)
 
 

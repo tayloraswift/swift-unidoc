@@ -32,11 +32,11 @@ extension Volume.Range:VolumeLookupPredicate
                             (
                                 .expr
                                 {
-                                    $0[.gte] = (Volume.Master[.id], min)
+                                    $0[.gte] = (Volume.Vertex[.id], min)
                                 },
                                 .expr
                                 {
-                                    $0[.lte] = (Volume.Master[.id], max)
+                                    $0[.lte] = (Volume.Vertex[.id], max)
                                 }
                             )
                         }

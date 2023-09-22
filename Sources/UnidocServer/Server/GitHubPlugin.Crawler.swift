@@ -60,7 +60,7 @@ extension GitHubPlugin.Crawler
         from github:GitHubClient<GitHubOAuth.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[PackageRecord] = try await self.db.package.packages.stalest(count,
+        let stale:[PackageRecord] = try await self.db.unidoc.packages.stalest(count,
             with: session)
 
         for package:PackageRecord in stale
@@ -74,7 +74,7 @@ extension GitHubPlugin.Crawler
             let repo:GitHub.Repo = try await github.get(
                 from: "/repos/\(old.owner.login)/\(old.name)")
 
-            switch try await self.db.package.packages.update(record: .init(id: package.id,
+            switch try await self.db.unidoc.packages.update(record: .init(id: package.id,
                     cell: package.cell,
                     repo: .github(repo)),
                 with: session)
@@ -107,7 +107,7 @@ extension GitHubPlugin.Crawler
                     continue
                 }
 
-                switch try await self.db.package.editions.register(tag,
+                switch try await self.db.unidoc.editions.register(tag,
                     package: package.cell,
                     version: version,
                     with: session)

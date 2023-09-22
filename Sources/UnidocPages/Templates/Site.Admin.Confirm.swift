@@ -30,22 +30,22 @@ extension Site.Admin.Confirm
         let prompt:String
         switch action
         {
-        case .dropAccountDB, .dropPackageDB, .dropUnidocDB:
+        case .dropAccountDB, .dropUnidocDB:
             prompt = "This will drop (and reinitialize) the entire database. Are you sure?"
 
-        case .lintPackageEditions:
+        case .lintUnidocEditions:
             prompt = """
-            This will delete all package editions lacking a commit hash. Are you sure?
+            This will delete all editions lacking a commit hash. Are you sure?
             """
 
-        case .recodePackageEditions:
-            prompt = "This will recode all package editions. Are you sure?"
+        case .recodeUnidocRepos:
+            prompt = "This will recode all repo records. Are you sure?"
 
-        case .recodePackageRecords:
-            prompt = "This will recode all package records. Are you sure?"
+        case .recodeUnidocEditions:
+            prompt = "This will recode all edition records. Are you sure?"
 
         case .recodeUnidocVertices:
-            prompt = "This will recode all Unidoc vertices. Are you sure?"
+            prompt = "This will recode all vertices. Are you sure?"
 
         case .rebuild, .upload:
             return nil

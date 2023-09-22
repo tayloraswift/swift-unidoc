@@ -11,48 +11,22 @@ extension Server.Operation
         where   Query:DatabaseQuery,
                 Query.Output:ServerResponseFactory<URI>
     {
-        let database:@Sendable (_ among:Server.DB) -> Query.Database
         let explain:Bool
         let query:Query
         let uri:URI
         let tag:MD5?
 
-        private
         init(
-            database:@Sendable @escaping (Server.DB) -> Query.Database,
             explain:Bool,
             query:Query,
             uri:URI,
-            tag:MD5?)
+            tag:MD5? = nil)
         {
-            self.database = database
             self.explain = explain
             self.query = query
             self.uri = uri
             self.tag = tag
         }
-    }
-}
-extension Server.Operation.Pipeline where Query.Database == UnidocDatabase
-{
-    init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
-    {
-        self.init(database: \.unidoc,
-            explain: explain,
-            query: query,
-            uri: uri,
-            tag: tag)
-    }
-}
-extension Server.Operation.Pipeline where Query.Database == PackageDatabase
-{
-    init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
-    {
-        self.init(database: \.package,
-            explain: explain,
-            query: query,
-            uri: uri,
-            tag: tag)
     }
 }
 extension Server.Operation.Pipeline:InteractiveOperation
@@ -67,12 +41,12 @@ extension Server.Operation.Pipeline:UnrestrictedOperation
     func load(from server:Server.State) async throws -> ServerResponse?
     {
         try await self.load(
-            from: self.database(server.db),
+            from: server.db.unidoc,
             with: try await .init(from: server.db.sessions))
     }
 
     private
-    func load(from db:Query.Database,
+    func load(from db:UnidocDatabase,
         with session:Mongo.Session) async throws -> ServerResponse?
     {
         if  self.explain

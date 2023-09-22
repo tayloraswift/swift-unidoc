@@ -14,7 +14,7 @@ extension Site.Docs
 
         let canonical:CanonicalVersion?
         private
-        let master:Volume.Master.Culture
+        let master:Volume.Vertex.Culture
         private
         let groups:[Volume.Group]
         private
@@ -22,7 +22,7 @@ extension Site.Docs
 
         init(_ inliner:Inliner,
             canonical:CanonicalVersion?,
-            master:Volume.Master.Culture,
+            master:Volume.Vertex.Culture,
             groups:[Volume.Group],
             nouns:[Volume.Noun]?)
         {

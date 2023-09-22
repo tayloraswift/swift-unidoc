@@ -32,45 +32,16 @@ struct PackageEdition:Identifiable, Equatable, Sendable
 
     @inlinable public
     init(id:Unidoc.Zone,
-        release:Bool?,
-        patch:PatchVersion?,
+        release:Bool,
+        patch:PatchVersion,
         name:String,
         sha1:SHA1?,
         lost:Bool = false)
     {
         self.id = id
 
-        //  Temporary HACK until we can migrate all the database records.
-        self.release = release ?? true
-        if  let patch:PatchVersion
-        {
-            self.patch = patch
-        }
-        else if name == "swift-5.8.1-RELEASE"
-        {
-            self.patch = .v(5, 8, 1)
-        }
-        else if name == "swift-5.9-RELEASE"
-        {
-            self.patch = .v(5, 9, 0)
-        }
-        else
-        {
-            switch SemanticVersion.init(refname: name)
-            {
-            case .release(let version, build: _)?:
-                self.release = true
-                self.patch = version
-
-            case .prerelease(let version, _, build: _)?:
-                self.release = false
-                self.patch = version
-
-            case nil:
-                fatalError("can’t infer patch version from refname: \(name)")
-            }
-        }
-        //  End temporary HACK.
+        self.release = release
+        self.patch = patch
 
         self.name = name
         self.sha1 = sha1
@@ -126,8 +97,8 @@ extension PackageEdition:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
-            release: try bson[.release]?.decode(),
-            patch: try bson[.patch]?.decode(),
+            release: try bson[.release].decode(),
+            patch: try bson[.patch].decode(),
             name: try bson[.name].decode(),
             sha1: try bson[.sha1]?.decode(),
             lost: try bson[.lost]?.decode() ?? false)

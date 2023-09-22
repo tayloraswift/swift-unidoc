@@ -22,7 +22,7 @@ extension WideQuery.Master.Scalars
     static
     func += (list:inout BSON.ListEncoder, self:Self)
     {
-        for array:Volume.Master.CodingKey in
+        for array:Volume.Vertex.CodingKey in
         [
             .signature_expanded_scalars,
             .requirements,
@@ -32,31 +32,31 @@ extension WideQuery.Master.Scalars
         {
             list.expr
             {
-                $0[.coalesce] = (self.path / Volume.Master[array], [] as [Never])
+                $0[.coalesce] = (self.path / Volume.Vertex[array], [] as [Never])
             }
         }
 
         list.append
         {
-            $0.append(self.path / Volume.Master[.namespace])
-            $0.append(self.path / Volume.Master[.culture])
-            $0.append(self.path / Volume.Master[.file])
+            $0.append(self.path / Volume.Vertex[.namespace])
+            $0.append(self.path / Volume.Vertex[.culture])
+            $0.append(self.path / Volume.Vertex[.file])
         }
 
         list.expr
         {
             let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.KeyPath> =
-                .init(in: self.path / Volume.Master[.signature_generics_constraints])
+                .init(in: self.path / Volume.Vertex[.signature_generics_constraints])
 
             $0[.map] = constraints.map { $0[.nominal] }
         }
 
-        for passage:Volume.Master.CodingKey in [.overview, .details]
+        for passage:Volume.Vertex.CodingKey in [.overview, .details]
         {
             list.expr
             {
                 let outlines:Mongo.List<Volume.Outline, Mongo.KeyPath> = .init(
-                    in: self.path / Volume.Master[passage] / Volume.Passage[.outlines])
+                    in: self.path / Volume.Vertex[passage] / Volume.Passage[.outlines])
 
                 $0[.reduce] = outlines.flatMap(\.scalars)
             }

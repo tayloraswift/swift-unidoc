@@ -7,7 +7,7 @@ import SHA1
 import UnidocAnalysis
 import UnidocRecords
 
-extension PackageDatabase
+extension UnidocDatabase
 {
     @frozen public
     struct Editions
@@ -22,7 +22,7 @@ extension PackageDatabase
         }
     }
 }
-extension PackageDatabase.Editions:DatabaseCollection
+extension UnidocDatabase.Editions:DatabaseCollection
 {
     public
     typealias ElementID = Unidoc.Zone
@@ -35,7 +35,7 @@ extension PackageDatabase.Editions:DatabaseCollection
     [
         .init
         {
-            $0[.collation] = PackageDatabase.collation
+            $0[.collation] = SimpleCollation.spec
 
             $0[.unique] = true
             $0[.name] = "package,name"
@@ -93,7 +93,7 @@ extension PackageDatabase.Editions:DatabaseCollection
         },
     ]
 }
-extension PackageDatabase.Editions
+extension UnidocDatabase.Editions
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
@@ -103,7 +103,7 @@ extension PackageDatabase.Editions
             by: .now.advanced(by: .seconds(60)))
     }
 }
-extension PackageDatabase.Editions
+extension UnidocDatabase.Editions
 {
     public
     func register(_ tag:__owned GitHub.Tag,
@@ -162,7 +162,7 @@ extension PackageDatabase.Editions
         return placement
     }
 }
-extension PackageDatabase.Editions
+extension UnidocDatabase.Editions
 {
     private
     func place(
@@ -263,7 +263,7 @@ extension PackageDatabase.Editions
         return placement.first ?? .first
     }
 }
-extension PackageDatabase.Editions
+extension UnidocDatabase.Editions
 {
     /// Removes all editions that lack a commit hash, unless it has the exact name
     /// `swift-5.8.1-RELEASE` or `swift-5.9-RELEASE`.

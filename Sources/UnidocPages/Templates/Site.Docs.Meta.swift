@@ -14,13 +14,13 @@ extension Site.Docs
 
         let canonical:CanonicalVersion?
         private
-        let master:Volume.Master.Meta
+        let master:Volume.Vertex.Meta
         private
         let groups:[Volume.Group]
 
         init(_ inliner:Inliner,
             canonical:CanonicalVersion?,
-            master:Volume.Master.Meta,
+            master:Volume.Vertex.Meta,
             groups:[Volume.Group])
         {
             self.inliner = inliner
@@ -133,7 +133,7 @@ extension Site.Docs.Meta:ApplicationPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Volume.Master.Meta.Dependency in self.master.dependencies
+                        for dependency:Volume.Vertex.Meta.Dependency in self.master.dependencies
                         {
                             $0[.tr]
                             {
