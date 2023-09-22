@@ -35,7 +35,7 @@ extension UnidocDatabase.Editions:DatabaseCollection
     [
         .init
         {
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = SimpleCollation.spec
 
             $0[.unique] = true
             $0[.name] = "package,name"

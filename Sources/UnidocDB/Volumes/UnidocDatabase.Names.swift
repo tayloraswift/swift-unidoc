@@ -57,7 +57,7 @@ extension UnidocDatabase.Names:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "package,patch"
 
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
                 $0[Volume.Names[.package]] = (+)
@@ -73,7 +73,7 @@ extension UnidocDatabase.Names:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "package,version"
 
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
                 $0[Volume.Names[.package]] = (+)

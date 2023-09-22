@@ -22,7 +22,7 @@ struct PackageEditionsQuery:Equatable, Hashable, Sendable
 extension PackageEditionsQuery:DatabaseQuery
 {
     public
-    typealias Database = UnidocDatabase
+    typealias Collation = SimpleCollation
 
     @inlinable public
     var origin:Mongo.Collection { UnidocDatabase.Packages.name }
