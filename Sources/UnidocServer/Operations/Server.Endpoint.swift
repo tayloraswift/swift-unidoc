@@ -175,10 +175,10 @@ extension Server.Endpoint
             else if trunk == "packages.json"
             {
                 return .interactive(Server.Operation.Pipeline<
-                        SearchIndexQuery<PackageDatabase, Int32>>.init(
+                        SearchIndexQuery<UnidocDatabase, Int32>>.init(
                     explain: explain,
                     query: .init(
-                        from: PackageDatabase.Meta.name,
+                        from: UnidocDatabase.Meta.name,
                         tag: tag,
                         id: 0),
                     uri: uri))
