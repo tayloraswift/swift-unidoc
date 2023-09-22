@@ -1,7 +1,7 @@
 import MarkdownABI
 import Unidoc
 
-extension Volume.Master
+extension Volume.Vertex
 {
     @frozen public
     struct Article:Identifiable, Equatable, Sendable
@@ -48,7 +48,7 @@ extension Volume.Master
         }
     }
 }
-extension Volume.Master.Article
+extension Volume.Vertex.Article
 {
     @inlinable public
     var shoot:Volume.Shoot

@@ -72,8 +72,8 @@ extension WideQuery:VolumeLookupQuery
                 $0[.from] = UnidocDatabase.Vertices.name
                 $0[.let] = .init
                 {
-                    $0[let: symbol] = Output.Principal[.master] / Volume.Master[.symbol]
-                    $0[let: hash] = Output.Principal[.master] / Volume.Master[.hash]
+                    $0[let: symbol] = Output.Principal[.master] / Volume.Vertex[.symbol]
+                    $0[let: hash] = Output.Principal[.master] / Volume.Vertex[.hash]
 
                     $0[let: min] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_min]
                     $0[let: max] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_max]
@@ -92,20 +92,20 @@ extension WideQuery:VolumeLookupQuery
                                     //  a compound index.
                                     .expr
                                     {
-                                        $0[.eq] = (Volume.Master[.hash], hash)
+                                        $0[.eq] = (Volume.Vertex[.hash], hash)
                                     },
                                     .expr
                                     {
-                                        $0[.gte] = (Volume.Master[.id], min)
+                                        $0[.gte] = (Volume.Vertex[.id], min)
                                     },
                                     .expr
                                     {
-                                        $0[.lte] = (Volume.Master[.id], max)
+                                        $0[.lte] = (Volume.Vertex[.id], max)
                                     },
 
                                     .expr
                                     {
-                                        $0[.eq] = (Volume.Master[.symbol], symbol)
+                                        $0[.eq] = (Volume.Vertex[.symbol], symbol)
                                     }
                                 )
                             }
@@ -120,10 +120,10 @@ extension WideQuery:VolumeLookupQuery
                         //  We do not need to load *any* markdown for this record.
                         $0[.unset] =
                         [
-                            Volume.Master[.requirements],
-                            Volume.Master[.superforms],
-                            Volume.Master[.overview],
-                            Volume.Master[.details],
+                            Volume.Vertex[.requirements],
+                            Volume.Vertex[.superforms],
+                            Volume.Vertex[.overview],
+                            Volume.Vertex[.details],
                         ]
                     }
                 }
@@ -156,7 +156,7 @@ extension WideQuery:VolumeLookupQuery
                 $0[.from] = UnidocDatabase.Groups.name
                 $0[.let] = .init
                 {
-                    $0[let: id] = Output.Principal[.master] / Volume.Master[.id]
+                    $0[let: id] = Output.Principal[.master] / Volume.Vertex[.id]
 
                     $0[let: topic] = .expr
                     {
@@ -167,7 +167,7 @@ extension WideQuery:VolumeLookupQuery
                         //  expression to “evaluate” the missing field to `null`.
                         $0[.coalesce] =
                         (
-                            Output.Principal[.master] / Volume.Master[.group],
+                            Output.Principal[.master] / Volume.Vertex[.group],
                             Never??.some(nil)
                         )
                     }
@@ -266,15 +266,15 @@ extension WideQuery:VolumeLookupQuery
                             {
                                 $0[let: tree] = .expr
                                 {
-                                    //  ``Volume.Master.Culture`` doesn’t have a `culture`
+                                    //  ``Volume.Vertex.Culture`` doesn’t have a `culture`
                                     //  field, but we still want to get the type tree for
                                     //  its `_id`. The ``Database.Trees`` collection only
                                     //  contains type trees, so it’s okay if the `_id` is
                                     //  not a culture.
                                     $0[.coalesce] =
                                     (
-                                        Output.Principal[.master] / Volume.Master[.culture],
-                                        Output.Principal[.master] / Volume.Master[.id]
+                                        Output.Principal[.master] / Volume.Vertex[.culture],
+                                        Output.Principal[.master] / Volume.Vertex[.id]
                                     )
                                 }
                             }
@@ -327,7 +327,7 @@ extension WideQuery:VolumeLookupQuery
                         {
                             $0[.from] = UnidocDatabase.Vertices.name
                             $0[.localField] = scalars
-                            $0[.foreignField] = Volume.Master[.id]
+                            $0[.foreignField] = Volume.Vertex[.id]
                             $0[.as] = results
                         }
                     }
@@ -345,9 +345,9 @@ extension WideQuery:VolumeLookupQuery
                         //  records in the entourage.
                         $0[.unset] =
                         [
-                            Volume.Master[.requirements],
-                            Volume.Master[.superforms],
-                            Volume.Master[.details],
+                            Volume.Vertex[.requirements],
+                            Volume.Vertex[.superforms],
+                            Volume.Vertex[.details],
                         ]
                     }
                 }

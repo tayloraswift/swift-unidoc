@@ -19,7 +19,7 @@ extension URL:CustomStringConvertible
 }
 extension URL
 {
-    init?(master:__shared Volume.Master,
+    init?(master:__shared Volume.Vertex,
         in zone:__shared Volume.Names,
         disambiguate:Bool = true)
     {

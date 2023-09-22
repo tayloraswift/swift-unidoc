@@ -10,18 +10,18 @@ extension Volume
     func siteMap() -> SiteMap<PackageIdentifier>
     {
         var lines:[UInt8] = []
-        for master:Volume.Master in self.vertices
+        for vertex:Vertex in self.vertices
         {
-            switch master
+            switch vertex
             {
-            case .culture(let master):
-                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+            case .culture(let vertex):
+                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
 
-            case .article(let master):
-                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+            case .article(let vertex):
+                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
 
-            case .decl(let master):
-                master.shoot.serialize(into: &lines) ; lines.append(0x0A)
+            case .decl(let vertex):
+                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
 
             case .file, .meta:
                 continue
@@ -37,27 +37,27 @@ extension Volume
         var procs:[Unidoc.Scalar: [Shoot]] = [:]
         var types:Types = .init()
 
-        for master:Master in self.vertices
+        for vertex:Vertex in self.vertices
         {
-            switch master
+            switch vertex
             {
-            case .culture(let master):
-                modules[master.id] = master.module.id
+            case .culture(let vertex):
+                modules[vertex.id] = vertex.module.id
 
-            case .article(let master):
-                types[master.culture, master.id] = .init(shoot: master.shoot)
+            case .article(let vertex):
+                types[vertex.culture, vertex.id] = .init(shoot: vertex.shoot)
 
-            case .decl(let master):
-                switch master.phylum
+            case .decl(let vertex):
+                switch vertex.phylum
                 {
                 case .actor, .class, .struct, .enum, .protocol, .macro(.attached):
-                    types[master.culture, master.id] = .init(
-                        shoot: master.shoot,
-                        scope: master.scope.last)
+                    types[vertex.culture, vertex.id] = .init(
+                        shoot: vertex.shoot,
+                        scope: vertex.scope.last)
 
                 case .func(nil), .var(nil), .macro(.freestanding):
                     //  Global procedures show up in search, but not in the type tree.
-                    procs[master.culture, default: []].append(master.shoot)
+                    procs[vertex.culture, default: []].append(vertex.shoot)
 
                 case _:
                     continue
