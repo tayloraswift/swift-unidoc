@@ -22,7 +22,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Vertices:DatabaseCollection
 {
     @inlinable public static
-    var name:Mongo.Collection { "masters" }
+    var name:Mongo.Collection { "vertices" }
 
     typealias ElementID = Unidoc.Scalar
 
