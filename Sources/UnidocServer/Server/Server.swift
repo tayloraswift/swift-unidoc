@@ -115,7 +115,6 @@ extension Server
             mode: mode,
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
-                package: await .setup(as: "packages", in: mongodb),
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
     }
 }

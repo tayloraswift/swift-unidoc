@@ -5,7 +5,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocLinker
 
-extension PackageDatabase
+extension UnidocDatabase
 {
     @frozen public
     struct Graphs
@@ -20,7 +20,7 @@ extension PackageDatabase
         }
     }
 }
-extension PackageDatabase.Graphs:DatabaseCollection
+extension UnidocDatabase.Graphs:DatabaseCollection
 {
     public
     typealias ElementID = Snapshot.ID
@@ -43,7 +43,7 @@ extension PackageDatabase.Graphs:DatabaseCollection
         },
         .init
         {
-            $0[.collation] = PackageDatabase.collation
+            $0[.collation] = UnidocDatabase.collation
 
             $0[.unique] = true // for now...
             $0[.name] = "metadata_package,version"
@@ -56,7 +56,7 @@ extension PackageDatabase.Graphs:DatabaseCollection
     ]
 }
 
-extension PackageDatabase.Graphs
+extension UnidocDatabase.Graphs
 {
     func list(package:Int32? = nil,
         with session:Mongo.Session,
@@ -120,7 +120,7 @@ extension PackageDatabase.Graphs
         }
     }
 }
-extension PackageDatabase.Graphs
+extension UnidocDatabase.Graphs
 {
     public
     func metadata(
@@ -168,7 +168,7 @@ extension PackageDatabase.Graphs
             against: self.database)
     }
 }
-extension PackageDatabase.Graphs
+extension UnidocDatabase.Graphs
 {
     func load(_ pins:[Snapshot.ID], with session:Mongo.Session) async throws -> [Snapshot]
     {

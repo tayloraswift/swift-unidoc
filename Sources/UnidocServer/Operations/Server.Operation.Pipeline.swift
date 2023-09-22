@@ -44,17 +44,6 @@ extension Server.Operation.Pipeline where Query.Database == UnidocDatabase
             tag: tag)
     }
 }
-extension Server.Operation.Pipeline where Query.Database == PackageDatabase
-{
-    init(explain:Bool, query:Query, uri:URI, tag:MD5? = nil)
-    {
-        self.init(database: \.package,
-            explain: explain,
-            query: query,
-            uri: uri,
-            tag: tag)
-    }
-}
 extension Server.Operation.Pipeline:InteractiveOperation
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>

@@ -2,7 +2,7 @@ import BSONDecoding
 import Unidoc
 import UnidocLinker
 
-extension PackageDatabase.Graphs
+extension UnidocDatabase.Graphs
 {
     @available(*, unavailable, message: "do we need this?")
     struct PositionView:Equatable, Sendable
@@ -18,12 +18,12 @@ extension PackageDatabase.Graphs
     }
 }
 @available(*, unavailable)
-extension PackageDatabase.Graphs.PositionView
+extension UnidocDatabase.Graphs.PositionView
 {
     var edition:Unidoc.Zone { .init(package: self.package, version: self.version) }
 }
 @available(*, unavailable)
-extension PackageDatabase.Graphs.PositionView:BSONDocumentDecodable
+extension UnidocDatabase.Graphs.PositionView:BSONDocumentDecodable
 {
     typealias CodingKey = Snapshot.CodingKey
 

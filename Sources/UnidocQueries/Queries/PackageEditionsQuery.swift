@@ -22,10 +22,10 @@ struct PackageEditionsQuery:Equatable, Hashable, Sendable
 extension PackageEditionsQuery:DatabaseQuery
 {
     public
-    typealias Database = PackageDatabase
+    typealias Database = UnidocDatabase
 
     @inlinable public
-    var origin:Mongo.Collection { PackageDatabase.Packages.name }
+    var origin:Mongo.Collection { UnidocDatabase.Packages.name }
 
     @inlinable public
     var hint:Mongo.SortDocument?
@@ -65,7 +65,7 @@ extension PackageEditionsQuery:DatabaseQuery
                 {
                     let package:Mongo.Variable<Int32> = "package"
 
-                    $0[.from] = PackageDatabase.Editions.name
+                    $0[.from] = UnidocDatabase.Editions.name
                     $0[.let] = .init
                     {
                         $0[let: package] = Output[.record] / PackageRecord[.cell]
@@ -123,7 +123,7 @@ extension PackageEditionsQuery:DatabaseQuery
                             {
                                 let version:Mongo.Variable<Int32> = "version"
 
-                                $0[.from] = PackageDatabase.Graphs.name
+                                $0[.from] = UnidocDatabase.Graphs.name
                                 $0[.let] = .init
                                 {
                                     $0[let: version] =

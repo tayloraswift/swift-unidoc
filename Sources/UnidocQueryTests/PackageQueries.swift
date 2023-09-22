@@ -11,7 +11,6 @@ struct PackageQueries:UnidocDatabaseTestBattery
 {
     func run(_ tests:TestGroup,
         accounts:AccountDatabase,
-        packages:PackageDatabase,
         unidoc:UnidocDatabase,
         pool:Mongo.SessionPool) async throws
     {
@@ -32,14 +31,14 @@ struct PackageQueries:UnidocDatabaseTestBattery
                     products: []),
                 graph: empty)
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-debut"
             docs.metadata.commit = nil
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -47,28 +46,28 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.1.2")
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
                 refname: "0.1.3")
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-speak-now"
             docs.metadata.commit = nil
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.3.0")
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -76,20 +75,20 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.4.0")
 
-            let _:SnapshotReceipt = try await packages.store(docs: docs, with: session)
+            let _:SnapshotReceipt = try await unidoc.store(docs: docs, with: session)
         }
 
         if  let tests:TestGroup = tests / "AllPackages"
         {
-            let query:SearchIndexQuery<PackageDatabase, Int32> = .init(
-                from: PackageDatabase.Meta.name,
+            let query:SearchIndexQuery<UnidocDatabase, Int32> = .init(
+                from: UnidocDatabase.Meta.name,
                 tag: nil,
                 id: 0)
 
             await tests.do
             {
-                if  let index:SearchIndexQuery<PackageDatabase, Int32>.Output = tests.expect(
-                        value: try await packages.execute(query: query, with: session)),
+                if  let index:SearchIndexQuery<UnidocDatabase, Int32>.Output = tests.expect(
+                        value: try await unidoc.execute(query: query, with: session)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
                     switch index.json
