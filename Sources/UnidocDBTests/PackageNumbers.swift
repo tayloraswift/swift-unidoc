@@ -8,7 +8,7 @@ struct PackageNumbers:MongoTestBattery
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:PackageDatabase = await .setup(as: database, in: pool)
+        let database:UnidocDatabase = await .setup(as: database, in: pool)
         let session:Mongo.Session = try await .init(from: pool)
 
         tests.expect(try await database.track(package: "a", with: session) ==? 0)
