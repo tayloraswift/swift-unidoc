@@ -1,6 +1,7 @@
 import GitHubAPI
 import ModuleGraphs
 import MongoDB
+import SemanticVersions
 import SymbolGraphs
 import UnidocAnalysis
 import UnidocLinker
@@ -74,10 +75,12 @@ extension PackageDatabase
 
         let version:Int32
 
-        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit
+        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
+            let semver:SemanticVersion = .init(refname: commit.refname)
         {
             let placement:Editions.Placement = try await self.editions.register(
                 package: placement.coordinate,
+                version: semver,
                 refname: commit.refname,
                 sha1: commit.hash,
                 with: session)
@@ -87,11 +90,21 @@ extension PackageDatabase
         else if case .swift = docs.metadata.package,
             let tagname:String = docs.metadata.commit?.refname
         {
+            //  FIXME: we need a better way to handle this
+            let semver:SemanticVersion
+            switch tagname
+            {
+            case "swift-5.8.1-RELEASE": semver = .release(.v(5, 8, 1))
+            case "swift-5.9-RELEASE":   semver = .release(.v(5, 9, 0))
+            case _:
+                fatalError("unimplemented")
+            }
             /// Standard library symbol graphs don’t come with hashes, so we can’t efficiently
             /// “prove” that a particular edition has at least one symbol graph. But we don’t
             /// need to query that in the first place.
             let placement:Editions.Placement = try await self.editions.register(
                 package: placement.coordinate,
+                version: semver,
                 refname: tagname,
                 sha1: nil,
                 with: session)

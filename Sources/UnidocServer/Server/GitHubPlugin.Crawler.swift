@@ -100,7 +100,7 @@ extension GitHubPlugin.Crawler
             for tag:GitHub.Tag in tags.reversed()
             {
                 guard
-                let _:SemanticVersion = .init(refname: tag.name)
+                let version:SemanticVersion = .init(refname: tag.name)
                 else
                 {
                     //  We don’t care about non-semver tags.
@@ -109,6 +109,7 @@ extension GitHubPlugin.Crawler
 
                 switch try await self.db.package.editions.register(tag,
                     package: package.cell,
+                    version: version,
                     with: session)
                 {
                 case _?:

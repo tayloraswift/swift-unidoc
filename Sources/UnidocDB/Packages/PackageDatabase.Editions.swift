@@ -2,6 +2,7 @@ import BSON
 import GitHubAPI
 import JSONEncoding
 import MongoDB
+import SemanticVersions
 import SHA1
 import UnidocAnalysis
 import UnidocRecords
@@ -107,11 +108,13 @@ extension PackageDatabase.Editions
     public
     func register(_ tag:__owned GitHub.Tag,
         package:Int32,
+        version:SemanticVersion,
         with session:Mongo.Session) async throws -> Int32?
     {
         //  We use the SHA-1 hash as “proof” that the edition has at least one symbol graph.
         //  Therefore, merely registering tags does not update hashes.
         let placement:Placement = try await self.register(package: package,
+            version: version,
             refname: tag.name,
             sha1: nil,
             with: session)
@@ -121,6 +124,7 @@ extension PackageDatabase.Editions
 
     func register(
         package:Int32,
+        version:SemanticVersion,
         refname:String,
         sha1:SHA1?,
         with session:Mongo.Session) async throws -> Placement
@@ -134,6 +138,8 @@ extension PackageDatabase.Editions
         let edition:PackageEdition = .init(id: .init(
                 package: package,
                 version: placement.coordinate),
+            release: version.release,
+            patch: version.patch,
             name: refname,
             sha1: sha1)
 
