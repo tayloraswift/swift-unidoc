@@ -2,6 +2,7 @@ import BSON
 import GitHubAPI
 import JSONEncoding
 import MongoDB
+import SemanticVersions
 import SHA1
 import UnidocAnalysis
 import UnidocRecords
@@ -107,13 +108,13 @@ extension PackageDatabase.Editions
     public
     func register(_ tag:__owned GitHub.Tag,
         package:Int32,
+        version:SemanticVersion,
         with session:Mongo.Session) async throws -> Int32?
     {
-        //  We use the SHA-1 hash as “proof” that the edition has at least one symbol graph.
-        //  Therefore, merely registering tags does not update hashes.
         let placement:Placement = try await self.register(package: package,
+            version: version,
             refname: tag.name,
-            sha1: nil,
+            sha1: tag.hash,
             with: session)
 
         return placement.new ? placement.coordinate : nil
@@ -121,6 +122,7 @@ extension PackageDatabase.Editions
 
     func register(
         package:Int32,
+        version:SemanticVersion,
         refname:String,
         sha1:SHA1?,
         with session:Mongo.Session) async throws -> Placement
@@ -134,6 +136,8 @@ extension PackageDatabase.Editions
         let edition:PackageEdition = .init(id: .init(
                 package: package,
                 version: placement.coordinate),
+            release: version.release,
+            patch: version.patch,
             name: refname,
             sha1: sha1)
 
@@ -146,24 +150,12 @@ extension PackageDatabase.Editions
         {
             switch placement.sha1
             {
-            case nil:
-                //  If the edition would gain a hash, we should update it.
-
-                //  FIXME: this can race another update, in which case we will store an
-                //  arbitrary choice of hash without marking the edition dirty.
-                //  We should use `placement.sha1` as a hint to skip the update only,
-                //  and set the dirty flag within a custom update statement.
-                try await self.update(some: edition, with: session)
-
             case sha1?:
                 //  Nothing to do.
                 break
 
-            case _?:
-                try await self.update(field: PackageEdition[.lost],
-                    of: edition.id,
-                    to: true,
-                    with: session)
+            case _:
+                try await self.update(some: edition, with: session)
             }
         }
 

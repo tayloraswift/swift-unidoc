@@ -16,14 +16,14 @@ extension SemanticVersion
         }
     }
 
-    @available(*, deprecated, message: "use 'patch' or switch explicitly instead")
+    /// Returns true if this is a release version, false if it is a prerelease.
     @inlinable public
-    var release:PatchVersion?
+    var release:Bool
     {
         switch self
         {
-        case .release(let version, _):  return version
-        case .prerelease:               return nil
+        case .release:      return true
+        case .prerelease:   return false
         }
     }
 }

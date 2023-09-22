@@ -2,34 +2,24 @@ import HTML
 import NIOCore
 import NIOHTTP1
 import NIOPosix
+import NIOSSL
 import TraceableErrors
 
 public
-protocol ServerAuthority<SecurityContext>:Sendable
+protocol ServerAuthority:Sendable
 {
-    associatedtype SecurityContext = Never
-
     static
     var scheme:ServerScheme { get }
     static
     var domain:String { get }
 
-    var tls:SecurityContext? { get }
+    var tls:NIOSSLContext { get }
 
     static
     func redact(error:any Error) -> String
 }
-
-extension ServerAuthority where Self == Localhost
+extension ServerAuthority
 {
-    @inlinable public static
-    var localhost:Self { .init() }
-}
-
-extension ServerAuthority<Never>
-{
-    @inlinable public
-    var tls:SecurityContext? { nil }
     /// Dumps detailed information about the caught error. This information will be shown to
     /// *anyone* accessing the server. In production, we strongly recommend overriding this
     /// default implementation to avoid inadvertently exposing sensitive data via type
@@ -66,8 +56,6 @@ extension ServerAuthority
     {
         switch self.scheme
         {
-        case .http(port: 80):           return "http://\(self.domain)\(uri)"
-        case .http(port: let port):     return "http://\(self.domain):\(port)\(uri)"
         case .https(port: 443):         return "https://\(self.domain)\(uri)"
         case .https(port: let port):    return "https://\(self.domain):\(port)\(uri)"
         }

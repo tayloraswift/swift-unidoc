@@ -10,20 +10,11 @@ extension Site.Tags
         private
         let package:PackageRecord
         private
-        var latestPrerelease:Item?
-        private
-        var latestRelease:Item?
-        private
         var page:[Item]
 
-        init(package:PackageRecord,
-            latestPrerelease:Item? = nil,
-            latestRelease:Item? = nil,
-            page:[Item] = [])
+        init(package:PackageRecord, page:[Item])
         {
             self.package = package
-            self.latestPrerelease = latestPrerelease
-            self.latestRelease = latestRelease
             self.page = page
         }
     }
@@ -32,40 +23,33 @@ extension Site.Tags.List
 {
     init(from output:PackageEditionsQuery.Output)
     {
-        self.init(package: output.record)
+        var prereleases:ArraySlice<Item> = output.prereleases.map(Item.init(facet:))[...]
+        var releases:ArraySlice<Item> = output.releases.map(Item.init(facet:))[...]
 
-        var seen:Set<Int32> = []
-        for facet:PackageEditionsQuery.Facet in output.facets
+        //  Merge the two pre-sorted arrays into a single sorted array.
+        var items:[Item] = []
+            items.reserveCapacity(prereleases.count + releases.count)
+        while
+            let prerelease:Item = prereleases.first,
+            let release:Item = releases.first
         {
-            guard
-            let release:Bool = facet.release
-            else
+            if  release.edition.patch < prerelease.edition.patch
             {
-                continue
-            }
-
-            guard case nil = seen.update(with: facet.edition.version)
-            else
-            {
-                continue
-            }
-
-            if  release
-            {
-                self.latestRelease = .init(facet: facet)
+                items.append(prerelease)
+                prereleases.removeFirst()
             }
             else
             {
-                self.latestPrerelease = .init(facet: facet)
+                items.append(release)
+                releases.removeFirst()
             }
         }
-        for facet:PackageEditionsQuery.Facet in output.facets
-        {
-            if  case nil = seen.update(with: facet.edition.version)
-            {
-                self.page.append(.init(facet: facet))
-            }
-        }
+
+        //  Append any remaining items.
+        items += prereleases
+        items += releases
+
+        self.init(package: output.record, page: items)
     }
 }
 extension Site.Tags.List:FixedPage
@@ -88,20 +72,30 @@ extension Site.Tags.List:AdministrativePage
                     {
                         $0[.th] = "Git Ref"
                         $0[.th] = "Commit"
-                        $0[.th] = "Semver"
                         $0[.th] = "ID"
+                        $0[.th] = "Version"
+                        $0[.th] = "Release?"
                         $0[.th] = "Archives?"
                     }
                 }
 
                 $0[.tbody]
                 {
-                    $0[.tr] { $0.class = "latest prerelease" } = self.latestPrerelease
-                    $0[.tr] { $0.class = "latest release" } = self.latestRelease
-
+                    var modern:(prerelease:Bool, release:Bool) = (true, true)
                     for item:Item in self.page
                     {
-                        $0[.tr] = item
+                        if  item.edition.release
+                        {
+                            $0[.tr] { $0.class = modern.release ? "modern" : nil } = item
+
+                            modern = (false, false)
+                        }
+                        else
+                        {
+                            $0[.tr] { $0.class = modern.prerelease ? "modern" : nil } = item
+
+                            modern.prerelease = false
+                        }
                     }
                 }
             }
