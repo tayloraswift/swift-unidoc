@@ -80,14 +80,14 @@ struct PackageQueries:UnidocDatabaseTestBattery
 
         if  let tests:TestGroup = tests / "AllPackages"
         {
-            let query:SearchIndexQuery<UnidocDatabase, Int32> = .init(
+            let query:SearchIndexQuery<Int32> = .init(
                 from: UnidocDatabase.Meta.name,
                 tag: nil,
                 id: 0)
 
             await tests.do
             {
-                if  let index:SearchIndexQuery<UnidocDatabase, Int32>.Output = tests.expect(
+                if  let index:SearchIndexQuery<Int32>.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {

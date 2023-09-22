@@ -39,7 +39,7 @@ extension UnidocDatabase.Vertices:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "zone,stem,hash"
 
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
                 $0[Volume.Vertex[.zone]] = (+)
@@ -58,7 +58,7 @@ extension UnidocDatabase.Vertices:DatabaseCollection
             $0[.unique] = true
             $0[.name] = "hash,id"
 
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
                 $0[Volume.Vertex[.hash]] = (+)

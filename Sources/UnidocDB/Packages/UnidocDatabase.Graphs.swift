@@ -43,7 +43,7 @@ extension UnidocDatabase.Graphs:DatabaseCollection
         },
         .init
         {
-            $0[.collation] = UnidocDatabase.collation
+            $0[.collation] = SimpleCollation.spec
 
             $0[.unique] = true // for now...
             $0[.name] = "metadata_package,version"

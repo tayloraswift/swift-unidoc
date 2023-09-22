@@ -2,9 +2,9 @@ import BSONDecoding
 import MongoDB
 
 public
-protocol DatabaseQuery<Database, Output>:Sendable
+protocol DatabaseQuery<Collation, Output>:Sendable
 {
-    associatedtype Database:DatabaseModel
+    associatedtype Collation:DatabaseCollation
     associatedtype Output:BSONDocumentDecodable
 
     func build(pipeline:inout Mongo.Pipeline)
@@ -19,7 +19,7 @@ extension DatabaseQuery
     {
         .init(self.origin, pipeline: .init(with: self.build(pipeline:)))
         {
-            $0[.collation] = Database.collation
+            $0[.collation] = Collation.spec
             $0[.hint] = self.hint
         }
     }
