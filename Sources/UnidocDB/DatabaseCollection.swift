@@ -63,6 +63,15 @@ extension DatabaseCollection
 
         print("note: recreated \(response.indexesAfter - 1) indexes in \(Self.name)")
     }
+
+    /// Drops the collection and reinitializes it by calling ``setup(with:)``.
+    func replace(with session:Mongo.Session) async throws
+    {
+        try await session.run(
+            command: Mongo.Drop.init(Self.name),
+            against: self.database)
+        try await self.setup(with: session)
+    }
 }
 extension DatabaseCollection
 {
@@ -378,16 +387,5 @@ extension DatabaseCollection<Unidoc.Scalar>
             against: self.database)
 
         let _:Mongo.Deletions = try response.deletions()
-    }
-}
-extension DatabaseCollection
-{
-    /// Drops the collection and reinitializes it by calling ``setup(with:)``.
-    func replace(with session:Mongo.Session) async throws
-    {
-        try await session.run(
-            command: Mongo.Drop.init(Self.name),
-            against: self.database)
-        try await self.setup(with: session)
     }
 }
