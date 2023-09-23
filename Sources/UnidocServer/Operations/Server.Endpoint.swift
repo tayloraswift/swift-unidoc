@@ -60,13 +60,13 @@ extension Server.Endpoint
         case Site.Admin.root:
             if  let action:Site.Admin.Action = .init(rawValue: trunk)
             {
-                return .stateless(.resource(action.rendered()))
+                return .stateless(.ok(action.resource()))
             }
             else if trunk == "recode",
                 let target:String = stem.first,
                 let target:Site.Admin.Recode.Target = .init(rawValue: target)
             {
-                return .stateless(.resource(Site.Admin.Recode.init(target: target).rendered()))
+                return .stateless(.ok(Site.Admin.Recode.init(target: target).resource()))
             }
             else
             {

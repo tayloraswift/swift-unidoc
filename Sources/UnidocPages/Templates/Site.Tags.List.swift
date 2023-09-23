@@ -52,10 +52,13 @@ extension Site.Tags.List
         self.init(package: output.record, page: items)
     }
 }
-extension Site.Tags.List:FixedPage
+extension Site.Tags.List:RenderablePage
+{
+    var title:String { "Git Tags - \(self.package.id)" }
+}
+extension Site.Tags.List:StaticPage
 {
     var location:URI { Site.Tags[self.package.id] }
-    var title:String { "Git Tags - \(self.package.id)" }
 }
 extension Site.Tags.List:AdministrativePage
 {

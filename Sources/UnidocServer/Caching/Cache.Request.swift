@@ -27,6 +27,6 @@ extension Cache.Request
             resource.content.drop()
         }
 
-        return .resource(resource)
+        return .ok(resource)
     }
 }

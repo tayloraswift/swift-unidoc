@@ -55,12 +55,15 @@ extension Site.Admin.Action
         }
     }
 }
-extension Site.Admin.Action:FixedPage
+extension Site.Admin.Action:RenderablePage
+{
+    public
+    var title:String { "\(self.label)?" }
+}
+extension Site.Admin.Action:StaticPage
 {
     public
     var location:URI { Site.Admin[self] }
-    public
-    var title:String { "\(self.label)?" }
 }
 extension Site.Admin.Action:AdministrativePage
 {

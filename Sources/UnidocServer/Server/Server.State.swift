@@ -46,30 +46,20 @@ extension Server.State
                 let response:ServerResponse = try await request.operation.load(
                     from: self,
                     with: request.cookies)
-                    ?? .resource(.init(.none,
+                    ?? .notFound(.init(
                         content: .string("not found"),
                         type: .text(.plain, charset: .utf8)))
 
                 self.tour.stats.requests[keyPath: type] += 1
 
-                let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int>
-                switch response
-                {
-                case .resource(let resource):
-                    self.tour.stats.bytes[keyPath: type] += resource.content.size
-                    status = resource.statisticalStatus
-
-                case .redirect(.temporary, _):
-                    status = \.redirectedTemporarily
-
-                case .redirect(.permanent, _):
-                    status = \.redirectedPermanently
-                }
+                let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
+                    response.statisticalStatus
 
                 //  Don’t count visits to the admin tools.
                 if  type != \.restricted
                 {
                     self.tour.stats.responses[keyPath: status] += 1
+                    self.tour.stats.bytes[keyPath: type] += response.size
                 }
 
                 request.promise.succeed(response)

@@ -62,12 +62,11 @@ extension Server.Operation.SiteMap:UnrestrictedOperation
             string += "\(prefix)\(uri)\n"
         }
 
-        var resource:ServerResource = .init(.one(canonical: nil),
-            content: .string(string),
+        var resource:ServerResource = .init(content: .string(string),
             type: .text(.plain, charset: .utf8))
 
         resource.optimize(tag: self.tag)
 
-        return .resource(resource)
+        return .ok(resource)
     }
 }

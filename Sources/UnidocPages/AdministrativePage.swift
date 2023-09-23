@@ -2,7 +2,7 @@ import HTML
 import URI
 
 public
-protocol AdministrativePage:FixedPage
+protocol AdministrativePage:StaticPage
 {
     func main(_:inout HTML.ContentEncoder)
 }

@@ -1,18 +1,39 @@
 import HTTP
 import UnidocPages
 
-extension ServerResource
+extension ServerResponse
 {
     var statisticalStatus:WritableKeyPath<ServerTour.Stats.ByStatus, Int>
     {
-        switch (self.results, self.content)
+        switch self
         {
-        case (.error, _):       return \.errored
-        case (.forbidden, _):   return \.unauthorized
-        case (.none, _):        return \.notFound
-        case (_, .length):      return \.notModified
-        case (.many, _):        return \.ok
-        case (.one, _):         return \.ok
+        case .error:
+            return \.errored
+
+        case .forbidden:
+            return \.unauthorized
+
+        case .multiple:
+            return \.multipleChoices
+
+        case .notFound:
+            return \.notFound
+
+        case .ok(let resource):
+            if  case .length = resource.content
+            {
+                return \.notModified
+            }
+            else
+            {
+                return \.ok
+            }
+
+        case .redirect(.temporary, _):
+            return \.redirectedTemporarily
+
+        case .redirect(.permanent, _):
+            return \.redirectedPermanently
         }
     }
 }

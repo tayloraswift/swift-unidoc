@@ -14,7 +14,7 @@ extension SearchIndexQuery.Output:ServerResponseFactory
         case .length(let bytes):    content = .length(bytes)
         }
 
-        return .resource(.init(.one(canonical: nil),
+        return .ok(.init(
             content: content,
             type: .application(.json, charset: .utf8),
             hash: self.hash))

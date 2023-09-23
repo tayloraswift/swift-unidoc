@@ -3,7 +3,7 @@ import UnidocRecords
 import URI
 
 public
-protocol ApplicationPage:FixedPage
+protocol ApplicationPage:RenderablePage
 {
     associatedtype Navigator:HyperTextOutputStreamable
     associatedtype Sidebar:HyperTextOutputStreamable
@@ -21,6 +21,11 @@ extension ApplicationPage
     @inlinable public
     var canonical:CanonicalVersion? { nil }
 }
+extension ApplicationPage where Self:StaticPage
+{
+    @inlinable public
+    var canonicalURI:URI? { self.canonical?.uri }
+}
 extension ApplicationPage where Navigator == HTML.Logo
 {
     var navigator:HTML.Logo { .init() }
@@ -32,9 +37,6 @@ extension ApplicationPage where Sidebar == Never
 }
 extension ApplicationPage
 {
-    @inlinable public
-    var canonicalURI:URI? { self.canonical?.uri }
-
     public
     func head(augmenting head:inout HTML.ContentEncoder)
     {

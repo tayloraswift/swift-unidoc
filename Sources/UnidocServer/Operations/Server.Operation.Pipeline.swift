@@ -55,7 +55,7 @@ extension Server.Operation.Pipeline:UnrestrictedOperation
                 query: self.query,
                 with: session)
 
-            return .resource(.init(.one(canonical: nil),
+            return .ok(.init(
                 content: .string(explanation),
                 type: .text(.plain, charset: .utf8)))
         }
@@ -72,9 +72,16 @@ extension Server.Operation.Pipeline:UnrestrictedOperation
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)
 
-        case .resource(var resource):
+        case .multiple(var resource):
             resource.optimize(tag: self.tag)
-            return .resource(resource)
+            return .multiple(resource)
+
+        case .ok(var resource):
+            resource.optimize(tag: self.tag)
+            return .ok(resource)
+
+        case let other:
+            return other
         }
     }
 }

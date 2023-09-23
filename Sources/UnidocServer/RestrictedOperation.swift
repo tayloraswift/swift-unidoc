@@ -44,7 +44,7 @@ extension RestrictedOperation
             guard case true? = role.map(Self.admit(_:))
             else
             {
-                return .resource(.init(.forbidden,
+                return .forbidden(.init(
                     content: .string("Regrettably, you are not a mighty It Girl."),
                     type: .text(.plain, charset: .utf8)))
             }

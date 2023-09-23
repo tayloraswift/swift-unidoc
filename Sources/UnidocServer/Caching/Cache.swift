@@ -36,7 +36,7 @@ extension Cache
                     (reload: true, _):
                 let asset:[UInt8] = try self.assets.appending(key.source).read()
                 let hash:MD5 = .init(hashing: asset)
-                let resource:ServerResource = .init(.one(canonical: nil),
+                let resource:ServerResource = .init(
                     content: .binary(asset),
                     type: key.type,
                     hash: hash)

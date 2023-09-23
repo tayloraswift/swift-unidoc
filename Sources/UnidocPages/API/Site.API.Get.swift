@@ -7,6 +7,6 @@ extension Site.API
         case register
     }
 }
-extension Site.API.Get:FixedAPI
+extension Site.API.Get:StaticAPI
 {
 }
