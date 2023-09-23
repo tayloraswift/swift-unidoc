@@ -1,4 +1,4 @@
-extension FixedPage
+extension RenderablePage
 {
     /// Minified from:
     /// https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Literata:ital,wght@0,400;0,700;1,400;1,700&display=swap

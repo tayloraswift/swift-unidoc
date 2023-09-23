@@ -15,7 +15,7 @@ extension ThinQuery.Output:ServerResponseFactory
 
             let feed:Site.Guides.Feed = .init(inliner, masters: self.masters)
 
-            return .resource(feed.rendered())
+            return .ok(feed.resource())
         }
         else if let redirect:URI = self.redirect
         {
@@ -23,7 +23,7 @@ extension ThinQuery.Output:ServerResponseFactory
         }
         else
         {
-            return .resource(.init(.none,
+            return .notFound(.init(
                 content: .string("Volume not found."),
                 type: .text(.plain, charset: .utf8)))
         }

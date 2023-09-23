@@ -60,7 +60,7 @@ extension Server.Operation.Login:InteractiveOperation
         guard case self.state? = cookies.login
         else
         {
-            return .resource(.init(.one(canonical: nil),
+            return .ok(.init(
                 content: .string("Authentication failed: state mismatch"),
                 type: .text(.plain, charset: .utf8)))
         }
@@ -73,7 +73,7 @@ extension Server.Operation.Login:InteractiveOperation
         }
         catch is GitHubClient<GitHubOAuth>.AuthenticationError
         {
-            return .resource(.init(.one(canonical: nil),
+            return .ok(.init(
                 content: .string("Authentication failed"),
                 type: .text(.plain, charset: .utf8)))
         }

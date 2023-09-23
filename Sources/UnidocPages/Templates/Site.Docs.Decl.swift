@@ -44,9 +44,8 @@ extension Site.Docs.Decl
     private
     var stem:Volume.Stem { self.master.stem }
 }
-extension Site.Docs.Decl:FixedPage
+extension Site.Docs.Decl:RenderablePage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.stem.last) - \(self.names.title)" }
 
     var description:String?
@@ -72,6 +71,10 @@ extension Site.Docs.Decl:FixedPage
                 """
         }
     }
+}
+extension Site.Docs.Decl:StaticPage
+{
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
 }
 extension Site.Docs.Decl:ApplicationPage
 {

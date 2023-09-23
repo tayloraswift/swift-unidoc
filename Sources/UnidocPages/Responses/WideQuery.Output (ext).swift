@@ -11,7 +11,7 @@ extension WideQuery.Output:ServerResponseFactory
         guard let principal:WideQuery.Output.Principal = self.principal
         else
         {
-            return .resource(.init(.none,
+            return .notFound(.init(
                 content: .string("Snapshot not found."),
                 type: .text(.plain, charset: .utf8)))
         }
@@ -39,7 +39,7 @@ extension WideQuery.Output:ServerResponseFactory
                 principal.names.package == "__swiftinit"
             {
                 let page:Site.Blog.Article = .init(inliner, master: master)
-                return .resource(page.rendered())
+                return .ok(page.resource())
             }
 
             let canonical:CanonicalVersion? = .init(principal: principal)
@@ -55,7 +55,7 @@ extension WideQuery.Output:ServerResponseFactory
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
-                resource = page.rendered()
+                resource = page.resource()
 
             case .culture(let master):
                 let page:Site.Docs.Culture = .init(inliner,
@@ -63,7 +63,7 @@ extension WideQuery.Output:ServerResponseFactory
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
-                resource = page.rendered()
+                resource = page.resource()
 
             case .decl(let master):
                 let page:Site.Docs.Decl = .init(inliner,
@@ -71,7 +71,7 @@ extension WideQuery.Output:ServerResponseFactory
                     master: master,
                     groups: principal.groups,
                     nouns: principal.tree?.rows)
-                resource = page.rendered()
+                resource = page.resource()
 
             case .file:
                 //  We should never get this as principal output!
@@ -82,26 +82,28 @@ extension WideQuery.Output:ServerResponseFactory
                     canonical: canonical,
                     master: master,
                     groups: principal.groups)
-                resource = page.rendered()
+                resource = page.resource()
             }
 
-            return .resource(resource)
+            return .ok(resource)
+        }
+
+        let inliner:Inliner = .init(principal: principal.names, repo: principal.repo)
+            inliner.vertices.add(principal.matches)
+
+        if  let choices:Site.Docs.MultipleFound = .init(inliner,
+                matches: principal.matches)
+        {
+            return .multiple(choices.resource())
         }
         else
         {
-            let inliner:Inliner = .init(principal: principal.names, repo: principal.repo)
-                inliner.vertices.add(principal.matches)
+            //  We currently don’t have any actual means of obtaining a type tree in this
+            //  situation, but in theory, we could.
+            let display:Site.Docs.NotFound = .init(inliner,
+                nouns: principal.tree?.rows)
 
-            if  let disambiguation:Site.Docs.Disambiguation = .init(inliner,
-                    matches: principal.matches,
-                    nouns: principal.tree?.rows ?? [])
-            {
-                return .resource(disambiguation.rendered())
-            }
+            return .notFound(display.resource())
         }
-
-        return .resource(.init(.none,
-            content: .string("Volume not found."),
-            type: .text(.plain, charset: .utf8)))
     }
 }

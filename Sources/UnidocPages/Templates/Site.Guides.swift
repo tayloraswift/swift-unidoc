@@ -5,7 +5,7 @@ extension Site
     {
     }
 }
-extension Site.Guides:FixedRoot
+extension Site.Guides:StaticRoot
 {
     @inlinable public static
     var root:String { "guides" }

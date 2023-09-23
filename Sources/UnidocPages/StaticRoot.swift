@@ -5,7 +5,7 @@ import UnidocRecords
 import URI
 
 public
-protocol FixedRoot
+protocol StaticRoot
 {
     associatedtype Get = Never
     associatedtype Post = Never
@@ -13,12 +13,12 @@ protocol FixedRoot
     static
     var root:String { get }
 }
-extension FixedRoot
+extension StaticRoot
 {
     @inlinable public static
     var uri:URI { [.push(self.root)] }
 }
-extension FixedRoot
+extension StaticRoot
 {
     static
     subscript(names:Volume.Names) -> URI
@@ -41,12 +41,12 @@ extension FixedRoot
         return uri
     }
 }
-extension FixedRoot where Get:FixedAPI
+extension StaticRoot where Get:StaticAPI
 {
     static
     subscript(get:Get) -> URI { Self.uri.path / "\(get)" }
 }
-extension FixedRoot where Post:FixedAPI
+extension StaticRoot where Post:StaticAPI
 {
     static
     subscript(post:Post) -> URI { Self.uri.path / "\(post)" }

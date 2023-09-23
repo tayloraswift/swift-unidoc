@@ -6,6 +6,6 @@ extension Site.API
         case index
     }
 }
-extension Site.API.Post:FixedAPI
+extension Site.API.Post:StaticAPI
 {
 }

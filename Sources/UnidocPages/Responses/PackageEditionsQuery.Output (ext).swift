@@ -8,6 +8,6 @@ extension PackageEditionsQuery.Output:ServerResponseFactory
     func response(for _:URI) throws -> ServerResponse
     {
         let list:Site.Tags.List = .init(from: self)
-        return .resource(list.rendered())
+        return .ok(list.resource())
     }
 }

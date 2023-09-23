@@ -33,10 +33,13 @@ extension Site.Guides.Feed
     private
     var names:Volume.Names { self.inliner.names.principal }
 }
-extension Site.Guides.Feed:FixedPage
+extension Site.Guides.Feed:RenderablePage
+{
+    var title:String { self.names.title }
+}
+extension Site.Guides.Feed:StaticPage
 {
     var location:URI { Site.Guides[self.names] }
-    var title:String { self.names.title }
 }
 extension Site.Guides.Feed:ApplicationPage
 {

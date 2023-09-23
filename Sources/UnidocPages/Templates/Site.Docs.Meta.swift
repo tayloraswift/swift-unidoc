@@ -39,9 +39,8 @@ extension Site.Docs.Meta
     private
     var repo:PackageRepo? { self.inliner.repo }
 }
-extension Site.Docs.Meta:FixedPage
+extension Site.Docs.Meta:RenderablePage
 {
-    var location:URI { Site.Docs[self.names] }
     var title:String { self.names.title }
 
     var description:String?
@@ -55,6 +54,10 @@ extension Site.Docs.Meta:FixedPage
         \(self.names.display ?? "\(self.names.package)") package.
         """
     }
+}
+extension Site.Docs.Meta:StaticPage
+{
+    var location:URI { Site.Docs[self.names] }
 }
 extension Site.Docs.Meta:ApplicationPage
 {

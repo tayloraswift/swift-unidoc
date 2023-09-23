@@ -5,7 +5,7 @@ import MD5
 struct ServerResource:Equatable, Sendable
 {
     public
-    let results:Results
+    let headers:Headers
     public
     var content:Content
     public
@@ -14,9 +14,9 @@ struct ServerResource:Equatable, Sendable
     var hash:MD5?
 
     @inlinable public
-    init(_ results:Results, content:Content, type:MediaType, hash:MD5? = nil)
+    init(headers:Headers = .init(), content:Content, type:MediaType, hash:MD5? = nil)
     {
-        self.results = results
+        self.headers = headers
         self.content = content
         self.type = type
         self.hash = hash

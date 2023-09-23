@@ -41,9 +41,8 @@ extension Site.Docs.Culture
     private
     var name:String { self.master.module.name }
 }
-extension Site.Docs.Culture:FixedPage
+extension Site.Docs.Culture:RenderablePage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.name) - \(self.names.title)" }
 
     var description:String?
@@ -64,6 +63,10 @@ extension Site.Docs.Culture:FixedPage
                 """
         }
     }
+}
+extension Site.Docs.Culture:StaticPage
+{
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
 }
 extension Site.Docs.Culture:ApplicationPage
 {
