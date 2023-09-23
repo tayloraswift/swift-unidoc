@@ -4,6 +4,10 @@ figure div.pie
 {
     > div.pie-color > svg g
     {
+        > *.multiple-choices
+        {
+            fill: rgb(255, 154, 38);
+        }
         > *.not-modified
         {
             fill: $light-accent-hot-pink;
