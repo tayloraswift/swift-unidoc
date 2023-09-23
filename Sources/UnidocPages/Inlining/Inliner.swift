@@ -4,6 +4,7 @@ import MarkdownABI
 import ModuleGraphs
 import Signatures
 import Unidoc
+import UnidocDB
 import UnidocRecords
 
 final
@@ -15,19 +16,22 @@ class Inliner
     private
     var cache:InlinerCache
 
+    let repo:PackageRepo?
+
     private
-    init(cache:InlinerCache)
+    init(cache:InlinerCache, repo:PackageRepo?)
     {
         self.outlines = []
         self.cache = cache
+        self.repo = repo
     }
 }
 extension Inliner
 {
-    var masters:InlinerCache.Masters
+    var vertices:InlinerCache.Vertices
     {
-        _read   { yield  self.cache.masters }
-        _modify { yield &self.cache.masters }
+        _read   { yield  self.cache.vertices }
+        _modify { yield &self.cache.vertices }
     }
     var names:InlinerCache.Names
     {
@@ -38,18 +42,20 @@ extension Inliner
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, names:Volume.Names)
+    init(principal scalar:Unidoc.Scalar, names:Volume.Names, repo:PackageRepo?)
     {
         self.init(cache: .init(
-            masters: .init(principal: scalar),
-            names: .init(principal: names)))
+                vertices: .init(principal: scalar),
+                names: .init(principal: names)),
+            repo: repo)
     }
     convenience
-    init(principal names:Volume.Names)
+    init(principal names:Volume.Names, repo:PackageRepo?)
     {
         self.init(cache: .init(
-            masters: .init(principal: nil),
-            names: .init(principal: names)))
+                vertices: .init(principal: nil),
+                names: .init(principal: names)),
+            repo: repo)
     }
 }
 extension Inliner
@@ -127,9 +133,19 @@ extension Inliner
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
     {
-        self.cache[file: file, line: line].map
+        if  let origin:Volume.Origin = self.repo?.origin,
+            let refname:String = self.names[file.zone]?.refname,
+            let file:Volume.Vertex.File = self.vertices[file]?.file,
+            let blob:String = origin.blob(refname: refname, file: file.symbol)
         {
-            .init(file: $0.symbol.last, line: line, target: $1)
+            return .init(
+                file: file.symbol.last,
+                line: line,
+                target: line.map { "\(blob)#L\($0 + 1)" } ?? blob)
+        }
+        else
+        {
+            return nil
         }
     }
 }

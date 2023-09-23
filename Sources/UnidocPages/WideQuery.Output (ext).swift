@@ -18,9 +18,12 @@ extension WideQuery.Output:ServerResponseFactory
 
         if  let master:Volume.Vertex = principal.master
         {
-            let inliner:Inliner = .init(principal: master.id, names: principal.names)
-                inliner.masters.add(self.secondary)
-                inliner.names.add(self.names)
+            let inliner:Inliner = .init(principal: master.id,
+                names: principal.names,
+                repo: principal.repo)
+
+            inliner.vertices.add(self.secondary)
+            inliner.names.add(self.names)
 
             master.overview.map
             {
@@ -86,8 +89,8 @@ extension WideQuery.Output:ServerResponseFactory
         }
         else
         {
-            let inliner:Inliner = .init(principal: principal.names)
-                inliner.masters.add(principal.matches)
+            let inliner:Inliner = .init(principal: principal.names, repo: principal.repo)
+                inliner.vertices.add(principal.matches)
 
             if  let disambiguation:Site.Docs.Disambiguation = .init(inliner,
                     matches: principal.matches,

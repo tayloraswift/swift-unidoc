@@ -17,8 +17,10 @@ extension Volume
         var display:String?
         public
         var refname:String?
+
+        @available(*, unavailable)
         public
-        var origin:Origin?
+        var origin:Origin? { nil }
 
         public
         var volume:VolumeIdentifier
@@ -32,7 +34,6 @@ extension Volume
         init(id:Unidoc.Zone,
             display:String?,
             refname:String?,
-            origin:Origin?,
             volume:VolumeIdentifier,
             latest:Bool,
             patch:PatchVersion?)
@@ -40,7 +41,6 @@ extension Volume
             self.id = id
             self.display = display
             self.refname = refname
-            self.origin = origin
             self.volume = volume
             self.latest = latest
             self.patch = patch
@@ -65,11 +65,18 @@ extension Volume.Names
     {
         case id = "_id"
 
+        case cell = "O"
+
         case package = "P"
         case version = "V"
         case display = "D"
+        /// This is currently copied verbatim from the symbol graph archive, but it is expected
+        /// to match (and duplicate) the refname in the associated ``PackageEdition`` record.
         case refname = "G"
+
+        @available(*, unavailable)
         case origin = "H"
+
         case patch = "S"
 
         case planes_min = "C"
@@ -100,7 +107,6 @@ extension Volume.Names
                 .version,
                 .refname,
                 .display,
-                .origin,
                 .patch,
 
                 .latest,
@@ -114,12 +120,13 @@ extension Volume.Names:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+        bson[.cell] = self.id.cell.package
+
         bson[.package] = self.volume.package
         bson[.version] = self.volume.version
 
         bson[.display] = self.display
         bson[.refname] = self.refname
-        bson[.origin] = self.origin
 
         bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
@@ -144,7 +151,6 @@ extension Volume.Names:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             display: try bson[.display]?.decode(),
             refname: try bson[.refname]?.decode(),
-            origin: try bson[.origin]?.decode(),
             volume: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
