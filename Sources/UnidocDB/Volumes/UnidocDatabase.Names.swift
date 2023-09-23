@@ -1,15 +1,18 @@
 import ModuleGraphs
+import MongoDB
 import MongoQL
 import Unidoc
 import UnidocRecords
 
 extension UnidocDatabase
 {
-    public
+    @frozen public
     struct Names
     {
+        public
         let database:Mongo.Database
 
+        @inlinable internal
         init(database:Mongo.Database)
         {
             self.database = database
@@ -81,6 +84,16 @@ extension UnidocDatabase.Names:DatabaseCollection
             }
         },
     ]
+}
+extension UnidocDatabase.Names:RecodableCollection
+{
+    public
+    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    {
+        try await self.recode(through: Volume.Names.self,
+            with: session,
+            by: .now.advanced(by: .seconds(30)))
+    }
 }
 extension UnidocDatabase.Names
 {

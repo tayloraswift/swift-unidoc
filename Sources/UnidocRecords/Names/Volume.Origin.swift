@@ -1,7 +1,8 @@
 import BSONDecoding
 import BSONEncoding
+import Symbols
 
-extension Volume.Names
+extension Volume
 {
     @frozen public
     enum Origin:Equatable, Hashable, Sendable
@@ -10,15 +11,28 @@ extension Volume.Names
         case github(String)
     }
 }
-extension Volume.Names.Origin
+extension Volume.Origin
 {
     @inlinable public static
     func github(_ owner:String, _ repo:String) -> Self
     {
         .github("/\(owner)/\(repo)")
     }
+
+    public
+    func blob(refname:String, file:Symbol.File) -> String?
+    {
+        if  case .github(let path) = self
+        {
+            return "https://github.com\(path)/blob/\(refname)/\(file)"
+        }
+        else
+        {
+            return nil
+        }
+    }
 }
-extension Volume.Names.Origin:CustomStringConvertible
+extension Volume.Origin:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -29,7 +43,7 @@ extension Volume.Names.Origin:CustomStringConvertible
         }
     }
 }
-extension Volume.Names.Origin:LosslessStringConvertible
+extension Volume.Origin:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -46,6 +60,6 @@ extension Volume.Names.Origin:LosslessStringConvertible
         }
     }
 }
-extension Volume.Names.Origin:BSONStringDecodable, BSONStringEncodable
+extension Volume.Origin:BSONStringDecodable, BSONStringEncodable
 {
 }

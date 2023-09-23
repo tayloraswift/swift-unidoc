@@ -3,7 +3,7 @@ import UnidocRecords
 
 extension InlinerCache
 {
-    struct Masters
+    struct Vertices
     {
         let principal:Unidoc.Scalar?
         private(set)
@@ -18,7 +18,7 @@ extension InlinerCache
         }
     }
 }
-extension InlinerCache.Masters
+extension InlinerCache.Vertices
 {
     mutating
     func add(_ masters:[Volume.Vertex])
@@ -30,7 +30,7 @@ extension InlinerCache.Masters
         }
     }
 }
-extension InlinerCache.Masters
+extension InlinerCache.Vertices
 {
     subscript(_ scalar:Unidoc.Scalar) -> Volume.Vertex?
     {

@@ -178,7 +178,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
             html[.section, { $0.class = "group topic" }]
             {
                 guard
-                let principal:Unidoc.Scalar = self.inliner.masters.principal,
+                let principal:Unidoc.Scalar = self.inliner.vertices.principal,
                     group.members.contains(.scalar(principal))
                 else
                 {
@@ -314,7 +314,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
                             group.subforms.reduce(into: ([], []))
                         {
                             if  case true? =
-                                self.inliner.masters[$1]?.decl?.kinks[is: .intrinsicWitness]
+                                self.inliner.vertices[$1]?.decl?.kinks[is: .intrinsicWitness]
                             {
                                 $0.1.append($1)
                             }

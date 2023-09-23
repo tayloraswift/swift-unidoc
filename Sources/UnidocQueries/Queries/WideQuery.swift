@@ -34,7 +34,7 @@ extension WideQuery:VolumeLookupQuery
     {
         pipeline.stage
         {
-            //  Populate this field only if exactly one master record matched.
+            //  Populate this field only if exactly one vertex matched.
             //  This allows us to skip looking up secondary/tertiary records if
             //  we are only going to generate a disambiguation page.
             $0[.set] = .init
@@ -54,6 +54,33 @@ extension WideQuery:VolumeLookupQuery
                         else: Never??.some(nil)
                     )
                 }
+            }
+        }
+
+        //  Lookup the repo-level information.
+        pipeline.stage
+        {
+            $0[.lookup] = .init
+            {
+                $0[.from] = UnidocDatabase.Packages.name
+                $0[.localField] = Output.Principal[.names] / Volume.Names[.cell]
+                $0[.foreignField] = PackageRecord[.cell]
+                $0[.as] = Output.Principal[.repo]
+            }
+        }
+        //  Unbox single-element array and access element field.
+        pipeline.stage
+        {
+            $0[.set] = .init
+            {
+                $0[Output.Principal[.repo]] = .expr { $0[.first] = Output.Principal[.repo] }
+            }
+        }
+        pipeline.stage
+        {
+            $0[.set] = .init
+            {
+                $0[Output.Principal[.repo]] = Output.Principal[.repo] / PackageRecord[.repo]
             }
         }
 
@@ -236,6 +263,7 @@ extension WideQuery:VolumeLookupQuery
                                 .master,
                                 .masterInLatest,
                                 .groups,
+                                .repo,
                             ]
                             {
                                 $0[Output.Principal[key]] = true

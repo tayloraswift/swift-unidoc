@@ -128,7 +128,6 @@ enum Main:SyncTests
                 names: .init(id: swift_malibu.id,
                     display: nil,
                     refname: nil,
-                    origin: nil,
                     volume: .init(
                         package: "swift-malibu",
                         version: "master"),
