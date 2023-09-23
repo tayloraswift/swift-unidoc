@@ -8,6 +8,8 @@ extension ServerTour.Stats
         public
         var notModified:Int
         public
+        var multipleChoices:Int
+        public
         var redirectedPermanently:Int
         public
         var redirectedTemporarily:Int
@@ -21,6 +23,7 @@ extension ServerTour.Stats
         @inlinable public
         init(ok:Int = 0,
             notModified:Int = 0,
+            multipleChoices:Int = 0,
             redirectedPermanently:Int = 0,
             redirectedTemporarily:Int = 0,
             notFound:Int = 0,
@@ -29,6 +32,7 @@ extension ServerTour.Stats
         {
             self.ok = ok
             self.notModified = notModified
+            self.multipleChoices = multipleChoices
             self.redirectedPermanently = redirectedPermanently
             self.redirectedTemporarily = redirectedTemporarily
             self.notFound = notFound

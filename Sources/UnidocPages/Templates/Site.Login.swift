@@ -19,12 +19,12 @@ extension Site
         }
     }
 }
-extension Site.Login:FixedRoot
+extension Site.Login:StaticRoot
 {
     @inlinable public static
     var root:String { "login" }
 }
-extension Site.Login:FixedPage
+extension Site.Login:RenderablePage
 {
     public
     var title:String { "Log in with GitHub" }

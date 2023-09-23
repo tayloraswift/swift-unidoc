@@ -25,6 +25,6 @@ extension Site.Asset
         case robots_txt         = "robots.txt"
     }
 }
-extension Site.Asset.Get:FixedAPI
+extension Site.Asset.Get:StaticAPI
 {
 }

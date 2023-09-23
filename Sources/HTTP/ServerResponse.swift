@@ -3,8 +3,13 @@ import Media
 @frozen public
 enum ServerResponse:Equatable, Sendable
 {
-    case redirect(ServerRedirect, cookies:[Cookie] = [])
-    case resource(ServerResource)
+    case error      (ServerResource)
+    case forbidden  (ServerResource)
+    case ok         (ServerResource)
+    case multiple   (ServerResource)
+    case notFound   (ServerResource)
+
+    case redirect   (ServerRedirect, cookies:[Cookie] = [])
 }
 extension ServerResponse
 {
@@ -17,12 +22,16 @@ extension ServerResponse
 extension ServerResponse
 {
     @inlinable public
-    var resource:ServerResource?
+    var size:Int
     {
         switch self
         {
-        case .redirect:                 return nil
-        case .resource(let resource):   return resource
+        case .redirect:                 return 0
+        case .error     (let resource): return resource.content.size
+        case .forbidden (let resource): return resource.content.size
+        case .ok        (let resource): return resource.content.size
+        case .multiple  (let resource): return resource.content.size
+        case .notFound  (let resource): return resource.content.size
         }
     }
 }

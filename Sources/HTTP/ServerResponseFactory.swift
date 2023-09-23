@@ -1,7 +1,7 @@
-public
-protocol ServerResponseFactory<Request>
-{
-    associatedtype Request
+import Media
 
-    func response(for requested:Request) throws -> ServerResponse
+public
+protocol ServerResponseFactory
+{
+    func response(as type:AcceptType?) throws -> ServerResponse
 }

@@ -6,75 +6,63 @@ import URI
 
 extension Site.Docs
 {
-    struct Disambiguation
+    struct MultipleFound
     {
         private
         let inliner:Inliner
 
-        let identity:URI.Path
-        let location:URI
+        let identity:Volume.Stem
 
         private
         let matches:[Unidoc.Scalar]
-        private
-        let nouns:[Volume.Noun]?
 
         private
         init(_ inliner:Inliner,
-            identity:URI.Path,
-            location:URI,
-            matches:[Unidoc.Scalar],
-            nouns:[Volume.Noun]?)
+            identity:Volume.Stem,
+            matches:[Unidoc.Scalar])
         {
             self.inliner = inliner
 
             self.identity = identity
-            self.location = location
             self.matches = matches
-            self.nouns = nouns
         }
     }
 }
-extension Site.Docs.Disambiguation
+extension Site.Docs.MultipleFound
 {
     init?(_ inliner:__owned Inliner,
-        matches:__shared [Volume.Vertex],
-        nouns:__owned [Volume.Noun]?)
+        matches:__shared [Volume.Vertex])
     {
-        let location:URI
-        var identity:URI.Path = []
-
-        if  let shoot:Volume.Shoot = matches.first?.shoot
+        if  let stem:Volume.Stem = matches.first?.shoot?.stem
         {
-            location = Site.Docs[inliner.names.principal, shoot]
-            identity += shoot.stem
+            self.init(inliner, identity: stem, matches: matches.map(\.id))
         }
         else
         {
             return nil
         }
 
-        self.init(inliner,
-            identity: identity,
-            location: location,
-            matches: matches.map(\.id),
-            nouns: nouns)
     }
 }
-extension Site.Docs.Disambiguation
+extension Site.Docs.MultipleFound
 {
     private
     var names:Volume.Names { self.inliner.names.principal }
 }
-extension Site.Docs.Disambiguation:FixedPage
+extension Site.Docs.MultipleFound:RenderablePage
 {
-    var title:String { "Disambiguation Page" }
+    var title:String { "Disambiguation Page - \(self.names.title)" }
 }
-extension Site.Docs.Disambiguation:ApplicationPage
+extension Site.Docs.MultipleFound:StaticPage
+{
+    var location:URI
+    {
+        Site.Docs[self.inliner.names.principal, .init(stem: self.identity, hash: nil)]
+    }
+}
+extension Site.Docs.MultipleFound:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
-    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
     var volume:VolumeIdentifier { self.names.volume }
 
@@ -87,7 +75,10 @@ extension Site.Docs.Disambiguation:ApplicationPage
                 $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
             }
 
-            $0[.h1] = "\(self.identity)"
+            var path:URI.Path = []
+                path += self.identity
+
+            $0[.h1] = "\(path)"
 
             $0[.p] = "This path could refer to multiple entities."
         }

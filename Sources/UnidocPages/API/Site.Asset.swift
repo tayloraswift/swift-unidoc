@@ -7,7 +7,7 @@ extension Site
     {
     }
 }
-extension Site.Asset:FixedRoot
+extension Site.Asset:StaticRoot
 {
     @inlinable public static
     var root:String { "asset" }

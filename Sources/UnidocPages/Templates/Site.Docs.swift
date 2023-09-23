@@ -5,7 +5,7 @@ extension Site
     {
     }
 }
-extension Site.Docs:FixedRoot
+extension Site.Docs:StaticRoot
 {
     @inlinable public static
     var root:String { "docs" }

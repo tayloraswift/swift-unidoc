@@ -146,20 +146,13 @@ extension ServerInterfaceHandler
             switch $0
             {
             case .success(let response):
-                switch response
-                {
-                case .redirect(let redirect, cookies: let cookies):
-                    self.send(message: .init(redirect: redirect, cookies: cookies),
-                        context: context)
-
-                case .resource(let resource):
-                    self.send(message: .init(resource: resource,
-                            using: context.channel.allocator),
-                        context: context)
-                }
+                self.send(
+                    message: .init(response: response, using: context.channel.allocator),
+                    context: context)
 
             case .failure(let error):
-                self.send(message: .init(redacting: error, using: context.channel.allocator),
+                self.send(
+                    message: .init(redacting: error, using: context.channel.allocator),
                     context: context)
             }
         }

@@ -19,7 +19,7 @@ extension Server.Operation.Bounce:UnrestrictedOperation
         if  let oauth:GitHubOAuth = server.github?.oauth.app
         {
             let page:Site.Login = .init(app: oauth)
-            return .resource(page.rendered())
+            return .ok(page.resource())
         }
         else
         {

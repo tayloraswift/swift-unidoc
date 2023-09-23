@@ -24,6 +24,6 @@ extension Server.Operation.AdminDashboard:RestrictedOperation
             tour: server.tour,
             real: server.mode == .secured)
 
-        return .resource(page.rendered())
+        return .ok(page.resource())
     }
 }

@@ -22,7 +22,7 @@ extension Site.Admin.Recode
         }
     }
 }
-extension Site.Admin.Recode.Complete:FixedPage
+extension Site.Admin.Recode.Complete:StaticPage
 {
     public
     var location:URI { Site.Admin.Recode[self.target] }

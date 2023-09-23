@@ -42,12 +42,15 @@ extension Site.Admin.Recode
         return uri
     }
 }
-extension Site.Admin.Recode:FixedPage
+extension Site.Admin.Recode:RenderablePage
+{
+    public
+    var title:String { "Recode \(self.target.label)?" }
+}
+extension Site.Admin.Recode:StaticPage
 {
     public
     var location:URI { Self[self.target] }
-    public
-    var title:String { "Recode \(self.target.label)?" }
 }
 extension Site.Admin.Recode:AdministrativePage
 {
