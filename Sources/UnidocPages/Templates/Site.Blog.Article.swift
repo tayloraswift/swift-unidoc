@@ -26,7 +26,11 @@ extension Site.Blog.Article
     private
     var names:Volume.Names { self.inliner.names.principal }
 }
-extension Site.Blog.Article:FixedPage
+extension Site.Blog.Article:RenderablePage
+{
+    var title:String { self.names.title }
+}
+extension Site.Blog.Article:StaticPage
 {
     var location:URI
     {
@@ -34,8 +38,6 @@ extension Site.Blog.Article:FixedPage
             uri.path += self.master.stem
         return uri
     }
-
-    var title:String { self.names.title }
 
     public
     func body(_ body:inout HTML.ContentEncoder)

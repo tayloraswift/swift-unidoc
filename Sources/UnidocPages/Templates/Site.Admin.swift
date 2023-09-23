@@ -51,7 +51,7 @@ extension Site
         }
     }
 }
-extension Site.Admin:FixedRoot
+extension Site.Admin:StaticRoot
 {
     @inlinable public static
     var root:String { "admin" }
@@ -64,11 +64,13 @@ extension Site.Admin
         Self.uri.path / action.rawValue
     }
 }
-extension Site.Admin:FixedPage
+extension Site.Admin:RenderablePage
 {
     public
     var title:String { "Administrator Tools" }
-
+}
+extension Site.Admin:StaticPage
+{
     public
     func head(augmenting head:inout HTML.ContentEncoder)
     {

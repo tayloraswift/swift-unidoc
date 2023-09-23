@@ -42,15 +42,18 @@ extension Site.Docs.Article
     private
     var stem:Volume.Stem { self.master.stem }
 }
-extension Site.Docs.Article:FixedPage
+extension Site.Docs.Article:RenderablePage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
     var title:String { "\(self.master.headline.safe) - \(self.names.title)" }
 
     var description:String?
     {
         self.master.overview.map { "\(self.inliner.passage($0.markdown))" }
     }
+}
+extension Site.Docs.Article:StaticPage
+{
+    var location:URI { Site.Docs[self.names, self.master.shoot] }
 }
 extension Site.Docs.Article:ApplicationPage
 {

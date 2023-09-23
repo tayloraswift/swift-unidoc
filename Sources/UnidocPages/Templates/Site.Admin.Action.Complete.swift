@@ -19,7 +19,7 @@ extension Site.Admin.Action
         }
     }
 }
-extension Site.Admin.Action.Complete:FixedPage
+extension Site.Admin.Action.Complete:StaticPage
 {
     public
     var location:URI { Site.Admin[self.action] }

@@ -20,7 +20,7 @@ extension Site.Tags
         return uri
     }
 }
-extension Site.Tags:FixedRoot
+extension Site.Tags:StaticRoot
 {
     @inlinable public static
     var root:String { "tags" }

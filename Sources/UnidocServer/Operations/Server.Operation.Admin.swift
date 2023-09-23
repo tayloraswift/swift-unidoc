@@ -41,7 +41,7 @@ extension Server.Operation.Admin:RestrictedOperation
                 modified: modified,
                 target: recode.target)
 
-            return .resource(complete.rendered())
+            return .ok(complete.resource())
 
         case .perform(.dropAccountDB, _):
             try await server.db.account.drop(with: session)
@@ -84,6 +84,6 @@ extension Server.Operation.Admin:RestrictedOperation
             return nil
         }
 
-        return .resource(page.rendered())
+        return .ok(page.resource())
     }
 }

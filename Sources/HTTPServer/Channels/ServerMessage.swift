@@ -20,6 +20,43 @@ struct ServerMessage<Authority> where Authority:ServerAuthority
 }
 extension ServerMessage
 {
+    init(response:ServerResponse, using allocator:__shared ByteBufferAllocator)
+    {
+        switch response
+        {
+        case .redirect(let redirect, cookies: let cookies):
+            self.init(redirect: redirect, cookies: cookies)
+
+        case .error(let resource):
+            self.init(resource: resource, using: allocator, as: .internalServerError)
+
+        case .forbidden(let resource):
+            self.init(resource: resource, using: allocator, as: .forbidden)
+
+        case .ok(let resource):
+            self.init(resource: resource, using: allocator, as: .ok)
+
+        case .multiple(let resource):
+            self.init(resource: resource, using: allocator, as: .multipleChoices)
+
+        case .notFound(let resource):
+            self.init(resource: resource, using: allocator, as: .notFound)
+        }
+    }
+
+    init(redacting error:any Error, using allocator:__shared ByteBufferAllocator)
+    {
+        self.init(resource: .init(
+                headers: .init(),
+                content: .string(Authority.redact(error: error)),
+                type: .text(.plain, charset: .utf8)),
+            using: allocator,
+            as: .internalServerError)
+    }
+}
+extension ServerMessage
+{
+    private
     init(redirect:ServerRedirect, cookies:[Cookie])
     {
         var headers:HTTPHeaders = .init()
@@ -43,38 +80,22 @@ extension ServerMessage
         self.init(headers: headers, status: status, body: nil)
     }
 
-    init(resource:ServerResource, using allocator:__shared ByteBufferAllocator)
+    private
+    init(resource:ServerResource,
+        using allocator:__shared ByteBufferAllocator,
+        as status:HTTPResponseStatus)
     {
         var headers:HTTPHeaders = .init()
 
         headers.add(name: "host", value: Authority.domain)
 
-        let status:HTTPResponseStatus
-        switch resource.results
+        if  let canonical:String = resource.headers.canonical
         {
-        case .error:
-            status = .internalServerError
-
-        case .forbidden:
-            status = .forbidden
-
-        case .none:
-            status = .notFound
-
-        case .many:
-            status = .multipleChoices
-
-        case .one(canonical: let location):
-            status = .ok
-
-            if  let location:String
-            {
-                headers.add(name: "link", value: Authority.link(location, rel: .canonical))
-            }
-            if  let hash:MD5 = resource.hash
-            {
-                headers.add(name: "etag", value: "\"\(hash)\"")
-            }
+            headers.add(name: "link", value: Authority.link(canonical, rel: .canonical))
+        }
+        if  let hash:MD5 = resource.hash
+        {
+            headers.add(name: "etag", value: "\"\(hash)\"")
         }
 
         let buffer:ByteBuffer?
@@ -101,7 +122,7 @@ extension ServerMessage
         headers.add(name: "content-length", value: "\(length)")
         headers.add(name: "content-type",   value: "\(resource.type)")
 
-        if  let buffer
+        if  let buffer:ByteBuffer
         {
             self.init(headers: headers, status: status, body: buffer)
         }
@@ -109,14 +130,6 @@ extension ServerMessage
         {
             self.init(headers: headers, status: .notModified)
         }
-    }
-
-    init(redacting error:any Error, using allocator:__shared ByteBufferAllocator)
-    {
-        self.init(resource: .init(.error,
-                content: .string(Authority.redact(error: error)),
-                type: .text(.plain, charset: .utf8)),
-            using: allocator)
     }
 }
 extension ServerMessage

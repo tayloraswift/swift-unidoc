@@ -39,7 +39,7 @@ extension Server.Operation._SyncRepository:RestrictedOperation
             with: session)
 
 
-        return .resource(.init(.one(canonical: nil),
+        return .ok(.init(
             content: .string("""
                 Cell: \(package)
 

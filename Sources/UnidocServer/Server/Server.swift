@@ -52,7 +52,6 @@ struct Server:Sendable
         self.github = github
         self.cache = cache
 
-
         self.mode = mode
         self.db = db
     }

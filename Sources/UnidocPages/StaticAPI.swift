@@ -1,8 +1,8 @@
 public
-protocol FixedAPI:LosslessStringConvertible
+protocol StaticAPI:LosslessStringConvertible
 {
 }
-extension FixedAPI where Self:RawRepresentable<String>
+extension StaticAPI where Self:RawRepresentable<String>
 {
     @inlinable public
     var description:String { self.rawValue }

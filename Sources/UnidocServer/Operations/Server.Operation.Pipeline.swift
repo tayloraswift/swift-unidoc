@@ -1,4 +1,5 @@
 import HTTP
+import Media
 import MD5
 import MongoDB
 import UnidocDB
@@ -8,21 +9,22 @@ import URI
 extension Server.Operation
 {
     struct Pipeline<Query>:Sendable
-        where   Query:DatabaseQuery,
-                Query.Output:ServerResponseFactory<URI>
+        where Query:DatabaseQuery, Query.Output:ServerResponseFactory
     {
-        let explain:Bool
+        /// If nil, the query will be explained instead of executed. If non-nil, this field
+        /// will be passed to the query’s output type, which may influence the response it
+        /// produces.
+        let output:AcceptType?
         let query:Query
         let uri:URI
         let tag:MD5?
 
-        init(
-            explain:Bool,
+        init(output:AcceptType?,
             query:Query,
             uri:URI,
             tag:MD5? = nil)
         {
-            self.explain = explain
+            self.output = output
             self.query = query
             self.uri = uri
             self.tag = tag
@@ -49,13 +51,15 @@ extension Server.Operation.Pipeline:UnrestrictedOperation
     func load(from db:UnidocDatabase,
         with session:Mongo.Session) async throws -> ServerResponse?
     {
-        if  self.explain
+        guard
+        let accept:AcceptType = self.output
+        else
         {
             let explanation:String = try await db.explain(
                 query: self.query,
                 with: session)
 
-            return .resource(.init(.one(canonical: nil),
+            return .ok(.init(
                 content: .string(explanation),
                 type: .text(.plain, charset: .utf8)))
         }
@@ -67,14 +71,21 @@ extension Server.Operation.Pipeline:UnrestrictedOperation
             return nil
         }
 
-        switch try output.response(for: self.uri)
+        switch try output.response(as: accept)
         {
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)
 
-        case .resource(var resource):
+        case .multiple(var resource):
             resource.optimize(tag: self.tag)
-            return .resource(resource)
+            return .multiple(resource)
+
+        case .ok(var resource):
+            resource.optimize(tag: self.tag)
+            return .ok(resource)
+
+        case let other:
+            return other
         }
     }
 }

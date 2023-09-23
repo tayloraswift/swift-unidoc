@@ -5,7 +5,7 @@ extension Site
     {
     }
 }
-extension Site.API:FixedRoot
+extension Site.API:StaticRoot
 {
     @inlinable public static
     var root:String { "api" }
