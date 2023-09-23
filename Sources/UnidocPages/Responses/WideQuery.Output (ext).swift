@@ -1,4 +1,5 @@
 import HTTP
+import Media
 import UnidocQueries
 import UnidocRecords
 import URI
@@ -6,7 +7,7 @@ import URI
 extension WideQuery.Output:ServerResponseFactory
 {
     public
-    func response(for _:URI) throws -> ServerResponse
+    func response(as _:AcceptType?) throws -> ServerResponse
     {
         guard let principal:WideQuery.Output.Principal = self.principal
         else

@@ -1,11 +1,12 @@
 import HTTP
+import Media
 import UnidocQueries
 import URI
 
 extension SearchIndexQuery.Output:ServerResponseFactory
 {
     public
-    func response(for _:URI) throws -> ServerResponse
+    func response(as _:AcceptType?) throws -> ServerResponse
     {
         let content:ServerResource.Content
         switch self.json
