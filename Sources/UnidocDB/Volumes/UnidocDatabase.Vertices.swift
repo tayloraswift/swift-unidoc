@@ -67,7 +67,7 @@ extension UnidocDatabase.Vertices:DatabaseCollection
         },
     ]
 }
-extension UnidocDatabase.Vertices
+extension UnidocDatabase.Vertices:RecodableCollection
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)

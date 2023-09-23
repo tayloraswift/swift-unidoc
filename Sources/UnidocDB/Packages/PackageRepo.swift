@@ -11,7 +11,8 @@ enum PackageRepo:Equatable, Sendable
 }
 extension PackageRepo
 {
-    var origin:Volume.Names.Origin
+    @inlinable public
+    var origin:Volume.Origin
     {
         switch self
         {

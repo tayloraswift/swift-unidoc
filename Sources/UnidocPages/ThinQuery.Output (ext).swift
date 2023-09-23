@@ -10,8 +10,8 @@ extension ThinQuery.Output:ServerResponseFactory
     {
         if  LookupPredicate.self is Volume.Range.Type
         {
-            let inliner:Inliner = .init(principal: self.names)
-                inliner.masters.add(self.masters)
+            let inliner:Inliner = .init(principal: self.names, repo: nil)
+                inliner.vertices.add(self.masters)
 
             let feed:Site.Guides.Feed = .init(inliner, masters: self.masters)
 

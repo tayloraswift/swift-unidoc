@@ -4,6 +4,7 @@ import MongoSchema
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import UnidocDB
 import UnidocAnalysis
 import UnidocSelectors
 import UnidocRecords
@@ -30,6 +31,9 @@ extension WideQuery.Output
         let namesOfLatest:Volume.Names?
 
         public
+        let repo:PackageRepo?
+
+        public
         let tree:Volume.TypeTree?
 
         @inlinable internal
@@ -40,6 +44,7 @@ extension WideQuery.Output
             groups:[Volume.Group],
             names:Volume.Names,
             namesOfLatest:Volume.Names?,
+            repo:PackageRepo?,
             tree:Volume.TypeTree?)
         {
             self.matches = matches
@@ -52,6 +57,7 @@ extension WideQuery.Output
             self.names = names
             self.namesOfLatest = namesOfLatest
 
+            self.repo = repo
             self.tree = tree
         }
     }
@@ -67,6 +73,7 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
         case groups = "G"
         case names = "Z"
         case namesOfLatest = "R"
+        case repo = "O"
         case tree = "T"
     }
 }
@@ -82,6 +89,7 @@ extension WideQuery.Output.Principal:BSONDocumentDecodable
             groups: try bson[.groups].decode(),
             names: try bson[.names].decode(),
             namesOfLatest: try bson[.namesOfLatest]?.decode(),
+            repo: try bson[.repo]?.decode(),
             tree: try bson[.tree]?.decode())
     }
 }

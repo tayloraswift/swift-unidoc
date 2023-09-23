@@ -41,6 +41,7 @@ extension UnidocDatabase
     var groups:Groups { .init(database: self.id) }
     var search:Search { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
+    @inlinable public
     var names:Names { .init(database: self.id) }
     var siteMaps:SiteMaps { .init(database: self.id) }
 }
@@ -99,39 +100,37 @@ extension UnidocDatabase
 
         print("cleared all unidoc volumes...")
 
-        var origins:[Int32: Volume.Names.Origin?] = [:]
+        // var origins:[Int32: Volume.Origin?] = [:]
         var count:Int = 0
 
         try await self.graphs.list(with: session)
         {
             (snapshot:Snapshot) in
 
-            let origin:Volume.Names.Origin? = try await
-            {
-                switch $0
-                {
-                case let origin??:
-                    return origin
+            // let origin:Volume.Origin? = try await
+            // {
+            //     switch $0
+            //     {
+            //     case let origin??:
+            //         return origin
 
-                case nil?:
-                    //  We already tried to find the origin for this package, and it
-                    //  didn't exist.
-                    return nil
+            //     case nil?:
+            //         //  We already tried to find the origin for this package, and it
+            //         //  didn't exist.
+            //         return nil
 
-                case nil:
-                    let package:PackageRecord? = try await self.packages.find(
-                        by: PackageRecord[.cell],
-                        of: snapshot.package,
-                        with: session)
-                    let origin:Volume.Names.Origin? = package?.repo?.origin
-                    $0 = .some(origin)
-                    return origin
-                }
-            } (&origins[snapshot.package])
+            //     case nil:
+            //         let package:PackageRecord? = try await self.packages.find(
+            //             by: PackageRecord[.cell],
+            //             of: snapshot.package,
+            //             with: session)
+            //         let origin:Volume.Origin? = package?.repo?.origin
+            //         $0 = .some(origin)
+            //         return origin
+            //     }
+            // } (&origins[snapshot.package])
 
-            let volume:Volume = try await self.link(snapshot,
-                origin: origin,
-                with: session)
+            let volume:Volume = try await self.link(snapshot, with: session)
 
             try await self.publish(volume, with: session)
 
@@ -347,7 +346,6 @@ extension UnidocDatabase
                 version: receipt.version,
                 metadata: docs.metadata,
                 graph: docs.graph),
-            origin: receipt.repo?.origin,
             with: session)
 
         if  case .update = receipt.type
@@ -395,7 +393,6 @@ extension UnidocDatabase
 
     private
     func link(_ snapshot:__owned Snapshot,
-        origin:__owned Volume.Names.Origin?,
         with session:Mongo.Session) async throws -> Volume
     {
         let context:DynamicContext = .init(snapshot,
@@ -420,7 +417,6 @@ extension UnidocDatabase
             names: .init(id: snapshot.edition,
                 display: snapshot.metadata.display,
                 refname: snapshot.metadata.commit?.refname,
-                origin: origin,
                 volume: id.volume,
                 latest: true,
                 patch: id.version.stable?.patch))

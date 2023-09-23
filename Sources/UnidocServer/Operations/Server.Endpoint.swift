@@ -58,10 +58,15 @@ extension Server.Endpoint
         switch root
         {
         case Site.Admin.root:
-            if  let action:Site.Admin.Action = .init(rawValue: trunk),
-                let page:Site.Admin.Confirm = .init(action: action)
+            if  let action:Site.Admin.Action = .init(rawValue: trunk)
             {
-                return .stateless(.resource(page.rendered()))
+                return .stateless(.resource(action.rendered()))
+            }
+            else if trunk == "recode",
+                let target:String = stem.first,
+                let target:Site.Admin.Recode.Target = .init(rawValue: target)
+            {
+                return .stateless(.resource(Site.Admin.Recode.init(target: target).rendered()))
             }
             else
             {
@@ -251,11 +256,25 @@ extension Server.Endpoint
     private static
     func post(admin rest:ArraySlice<String>, form:AnyForm) -> Self?
     {
-        if  let action:String = rest.first,
-            let action:Site.Admin.Action = .init(rawValue: action),
+        var rest:ArraySlice<String> = rest
+
+        guard
+        let action:String = rest.popFirst()
+        else
+        {
+            return nil
+        }
+
+        if  let action:Site.Admin.Action = .init(rawValue: action),
             case .multipart(let form) = form
         {
             return .interactive(Server.Operation.Admin.perform(action, form))
+        }
+        else if action == "recode",
+            let target:String = rest.popFirst(),
+            let target:Site.Admin.Recode.Target = .init(rawValue: target)
+        {
+            return .interactive(Server.Operation.Admin.recode(.init(target: target)))
         }
         else
         {

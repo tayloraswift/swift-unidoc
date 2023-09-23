@@ -154,19 +154,28 @@ extension Site.Admin:AdministrativePage
             }
         }
 
-        main[.hr]
+        for target:Recode.Target in
+        [
+            .packages,
+            .editions,
+            .vertices,
+            .names,
+        ]
+        {
+            main[.hr]
 
-        main[.form]
-        {
-            $0.enctype = "\(MultipartType.form_data)"
-            $0.action = "\(Self[.rebuild])"
-            $0.method = "post"
-        }
-            content:
-        {
-            $0[.p]
+            main[.form]
             {
-                $0[.button] { $0.type = "submit" } = Action.rebuild.label
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Recode[target])"
+                $0.method = "get"
+            }
+                content:
+            {
+                $0[.p]
+                {
+                    $0[.button] { $0.type = "submit" } = "Recode \(target.label)"
+                }
             }
         }
 
@@ -174,9 +183,7 @@ extension Site.Admin:AdministrativePage
         [
             .lintUnidocEditions,
 
-            .recodeUnidocRepos,
-            .recodeUnidocEditions,
-            .recodeUnidocVertices,
+            .rebuild,
 
             .dropUnidocDB,
             .dropAccountDB,
