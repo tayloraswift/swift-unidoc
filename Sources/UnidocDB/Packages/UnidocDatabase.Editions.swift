@@ -93,7 +93,7 @@ extension UnidocDatabase.Editions:DatabaseCollection
         },
     ]
 }
-extension UnidocDatabase.Editions
+extension UnidocDatabase.Editions:RecodableCollection
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)

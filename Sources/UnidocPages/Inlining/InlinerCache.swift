@@ -1,26 +1,27 @@
 import Unidoc
+import UnidocDB
 import UnidocRecords
 import URI
 
 struct InlinerCache
 {
-    var masters:Masters
+    var vertices:Vertices
     var names:Names
 
     private
-    var urls:[Unidoc.Scalar: String]
+    var uris:[Unidoc.Scalar: String]
 
-    init(masters:Masters, names:Names, urls:[Unidoc.Scalar: String] = [:])
+    init(vertices:Vertices, names:Names, uris:[Unidoc.Scalar: String] = [:])
     {
-        self.masters = masters
+        self.vertices = vertices
         self.names = names
-        self.urls = urls
+        self.uris = uris
     }
 }
 extension InlinerCache
 {
     private mutating
-    func load(_ scalar:Unidoc.Scalar, by url:(Volume.Names) -> URL?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Names) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -29,9 +30,9 @@ extension InlinerCache
             }
             else if
                 let names:Volume.Names = self.names[scalar.zone],
-                let url:URL = url(names)
+                let uri:URI = uri(names)
             {
-                let target:String = "\(url)"
+                let target:String = "\(uri)"
                 $0 = target
                 return target
             }
@@ -39,7 +40,7 @@ extension InlinerCache
             {
                 return nil
             }
-        } (&self.urls[scalar])
+        } (&self.uris[scalar])
     }
 }
 extension InlinerCache
@@ -48,9 +49,9 @@ extension InlinerCache
     {
         mutating get
         {
-            if  case .article(let master)? = self.masters[scalar]
+            if  case .article(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
+                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
             }
             else
             {
@@ -63,9 +64,9 @@ extension InlinerCache
     {
         mutating get
         {
-            if  case .culture(let master)? = self.masters[scalar]
+            if  case .culture(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
+                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
             }
             else
             {
@@ -78,9 +79,9 @@ extension InlinerCache
     {
         mutating get
         {
-            if  case .decl(let master)? = self.masters[scalar]
+            if  case .decl(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { .relative(Site.Docs[$0, master.shoot]) })
+                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
             }
             else
             {
@@ -89,35 +90,28 @@ extension InlinerCache
         }
     }
 
-    subscript(file scalar:Unidoc.Scalar,
-        line line:Int? = nil) -> (master:Volume.Vertex.File, url:String?)?
-    {
-        mutating get
-        {
-            if  case .file(let master)? = self.masters[scalar],
-                let url:String = self.load(scalar,
-                    by: { $0.github(blob: master.symbol).map(URL.absolute(_:)) })
-            {
-                //  Need to append the line fragment here and not in
-                //  ``Volume.Names.url(github:)`` because the cache should
-                //  support multiple line fragments for the same file.
-                return (master, line.map { "\(url)#L\($0 + 1)" } ?? url)
-            }
-            else
-            {
-                return nil
-            }
-        }
-    }
-
+    /// Returns the URL for the given scalar, as long as it does not point to a file.
     subscript(scalar:Unidoc.Scalar) -> (master:Volume.Vertex, url:String?)?
     {
         mutating get
         {
-            self.masters[scalar].map
+            self.vertices[scalar].map
             {
                 (master:Volume.Vertex) in
-                (master, self.load(scalar) { .init(master: master, in: $0) })
+
+                let url:String? = self.load(scalar)
+                {
+                    switch master
+                    {
+                    case .article(let article): return Site.Docs[$0, article.shoot]
+                    case .culture(let culture): return Site.Docs[$0, culture.shoot]
+                    case .decl(let decl):       return Site.Docs[$0, decl.shoot]
+                    case .file:                 return nil
+                    case .meta:                 return Site.Docs[$0]
+                    }
+                }
+
+                return (master, url)
             }
         }
     }

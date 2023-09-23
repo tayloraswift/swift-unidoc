@@ -2,8 +2,9 @@ import HTML
 import MarkdownRendering
 import ModuleGraphs
 import SHA1
-import UnidocRecords
 import Unidoc
+import UnidocDB
+import UnidocRecords
 import URI
 
 extension Site.Docs
@@ -34,6 +35,9 @@ extension Site.Docs.Meta
 {
     private
     var names:Volume.Names { self.inliner.names.principal }
+
+    private
+    var repo:PackageRepo? { self.inliner.repo }
 }
 extension Site.Docs.Meta:FixedPage
 {
@@ -86,7 +90,7 @@ extension Site.Docs.Meta:ApplicationPage
 
             $0[.h1] = self.title
 
-            if  case .github(let path)? = self.names.origin,
+            if  case .github(let path)? = self.repo?.origin,
                 let refname:String = self.names.refname
             {
                 $0 += HTML.SourceLink.init(file: path.dropFirst(),
@@ -198,7 +202,7 @@ extension Site.Docs.Meta:ApplicationPage
                     $0[.dd]
                     {
                         let url:String?
-                        if  case .github(let path)? = self.names.origin
+                        if  case .github(let path)? = self.repo?.origin
                         {
                             url = "https://github.com\(path)/tree/\(revision)"
                         }

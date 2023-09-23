@@ -12,6 +12,7 @@ extension Server.Operation
     enum Admin
     {
         case perform(Site.Admin.Action, MultipartForm?)
+        case recode(Site.Admin.Recode)
     }
 }
 extension Server.Operation.Admin:RestrictedOperation
@@ -19,10 +20,29 @@ extension Server.Operation.Admin:RestrictedOperation
     func load(from server:Server.State) async throws -> ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let page:Site.Admin.Receipt
+        let page:Site.Admin.Action.Complete
 
         switch self
         {
+        case .recode(let recode):
+            let target:any RecodableCollection
+
+            switch recode.target
+            {
+            case .packages:    target = server.db.unidoc.packages
+            case .editions:    target = server.db.unidoc.editions
+            case .vertices:    target = server.db.unidoc.vertices
+            case .names:       target = server.db.unidoc.names
+            }
+
+            let (modified, selected):(Int, Int) = try await target.recode(with: session)
+            let complete:Site.Admin.Recode.Complete = .init(
+                selected: selected,
+                modified: modified,
+                target: recode.target)
+
+            return .resource(complete.rendered())
+
         case .perform(.dropAccountDB, _):
             try await server.db.account.drop(with: session)
 
@@ -38,27 +58,6 @@ extension Server.Operation.Admin:RestrictedOperation
 
             page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
-
-        case .perform(.recodeUnidocEditions, _):
-            let (modified, total):(Int, Int) = try await server.db.unidoc.editions.recode(
-                with: session)
-
-            page = .init(action: .recodeUnidocEditions,
-                text: "Modified \(modified) of \(total) editions!")
-
-        case .perform(.recodeUnidocRepos, _):
-            let (modified, total):(Int, Int) = try await server.db.unidoc.packages.recode(
-                with: session)
-
-            page = .init(action: .recodeUnidocRepos,
-                text: "Modified \(modified) of \(total) packages!")
-
-        case .perform(.recodeUnidocVertices, _):
-            let (modified, total):(Int, Int) = try await server.db.unidoc.vertices.recode(
-                with: session)
-
-            page = .init(action: .recodeUnidocVertices,
-                text: "Modified \(modified) of \(total) vertices!")
 
         case .perform(.rebuild, _):
             let rebuilt:Int = try await server.db.unidoc._rebuild(with: session)

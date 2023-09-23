@@ -11,11 +11,6 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
     var volume:Volume.Selector { get }
     var lookup:LookupPredicate { get }
 
-    /// The field to store the ``PackageRepo`` associated with the volume in.
-    ///
-    /// If nil, the query will not look up the repo information.
-    static
-    var repo:Mongo.KeyPath? { get }
     /// The field to store the ``Volume.Names`` of the **latest stable release**
     /// (relative to the current volume) in.
     ///
@@ -36,9 +31,6 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
 }
 extension VolumeLookupQuery
 {
-    @inlinable public static
-    var repo:Mongo.KeyPath? { nil }
-
     @inlinable public static
     var namesOfLatest:Mongo.KeyPath? { nil }
 }
@@ -92,10 +84,6 @@ extension VolumeLookupQuery
         pipeline.stage
         {
             $0[.limit] = 1
-        }
-
-        if  let _:Mongo.KeyPath = Self.repo
-        {
         }
 
         switch self.volume.version
