@@ -1,4 +1,5 @@
 import HTTP
+import Media
 import UnidocQueries
 import UnidocRecords
 import URI
@@ -6,7 +7,7 @@ import URI
 extension ThinQuery.Output:ServerResponseFactory
 {
     public
-    func response(for _:URI) throws -> ServerResponse
+    func response(as _:AcceptType?) throws -> ServerResponse
     {
         if  LookupPredicate.self is Volume.Range.Type
         {

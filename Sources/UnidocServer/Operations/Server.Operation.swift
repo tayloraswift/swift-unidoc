@@ -54,7 +54,7 @@ extension Server.Operation:HTTPServerOperation
             //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
             //  for the standard library.
             let get:Server.Endpoint = .interactive(Server.Operation.Pipeline<WideQuery>.init(
-                explain: false,
+                output: .text(.html),
                 query: .init(
                     volume: .init(package: .swift, version: nil),
                     lookup: .init(stem: [])),

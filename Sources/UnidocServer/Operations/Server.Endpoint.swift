@@ -73,27 +73,6 @@ extension Server.Endpoint
                 return nil
             }
 
-        case Site.API.root:
-            switch Site.API.Get.init(trunk)
-            {
-            case nil:
-                return nil
-
-            case .github?:
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Server.Operation.Login = .init(parameters: parameters)
-                {
-                    return .interactive(operation)
-                }
-
-            case .register?:
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Server.Operation.Register = .init(parameters: parameters)
-                {
-                    return .interactive(operation)
-                }
-            }
-
         case Site.Asset.root:
             let asset:Site.Asset.Get? = .init(trunk)
             return asset.map { .static(.init($0, tag: tag)) }
@@ -130,16 +109,47 @@ extension Server.Endpoint
 
         switch root
         {
+        case Site.API.root:
+            switch Site.API.Get.init(trunk)
+            {
+            case nil:
+                return nil
+
+            case .build?:
+                if  let package:String = stem.first
+                {
+                    return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
+                        output: explain ? nil : .application(.json),
+                        query: .init(package: .init(package), limit: 1),
+                        uri: uri,
+                        tag: tag))
+                }
+
+            case .github?:
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Server.Operation.Login = .init(parameters: parameters)
+                {
+                    return .interactive(operation)
+                }
+
+            case .register?:
+                if  let parameters:[(String, String)] = uri.query?.parameters,
+                    let operation:Server.Operation.Register = .init(parameters: parameters)
+                {
+                    return .interactive(operation)
+                }
+            }
+
         case Site.Tags.root:
             return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
-                explain: explain,
+                output: explain ? nil : .text(.html),
                 query: .init(package: .init(trunk)),
                 uri: uri,
                 tag: tag))
 
         case Site.Docs.root:
             return .interactive(Server.Operation.Pipeline<WideQuery>.init(
-                explain: explain,
+                output: explain ? nil : .text(.html),
                 query: .init(
                     volume: .init(trunk),
                     lookup: .init(stem: stem, hash: hash)),
@@ -148,7 +158,7 @@ extension Server.Endpoint
 
         case Site.Guides.root:
             return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
-                explain: explain,
+                output: explain ? nil : .text(.html),
                 query: .init(
                     volume: .init(trunk),
                     lookup: .articles),
@@ -157,7 +167,7 @@ extension Server.Endpoint
 
         case "articles":
             return .interactive(Server.Operation.Pipeline<WideQuery>.init(
-                explain: explain,
+                output: explain ? nil : .text(.html),
                 query: .init(
                     volume: .init(package: "__swiftinit", version: "0.0.0"),
                     lookup: .init(stem: ["Articles", trunk], hash: nil)),
@@ -169,7 +179,7 @@ extension Server.Endpoint
             {
                 return .interactive(
                     Server.Operation.Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
-                    explain: explain,
+                    output: explain ? nil : .application(.json),
                     query: .init(
                         from: UnidocDatabase.Search.name,
                         tag: tag,
@@ -181,7 +191,7 @@ extension Server.Endpoint
             {
                 return .interactive(
                     Server.Operation.Pipeline<SearchIndexQuery<Int32>>.init(
-                    explain: explain,
+                    output: explain ? nil : .application(.json),
                     query: .init(
                         from: UnidocDatabase.Meta.name,
                         tag: tag,
@@ -189,14 +199,12 @@ extension Server.Endpoint
                     uri: uri,
                     tag: tag))
             }
-            else
-            {
-                return nil
-            }
 
         case _:
-            return nil
+            break
         }
+
+        return nil
     }
 
     private static
@@ -223,14 +231,14 @@ extension Server.Endpoint
         if  let overload:Symbol.Decl
         {
             return .interactive(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
-                explain: false,
+                output: .text(.html),
                 query: .init(volume: query.volume, lookup: overload),
                 uri: uri))
         }
         else
         {
             return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
-                explain: false,
+                output: .text(.html),
                 query: query,
                 uri: uri))
         }
