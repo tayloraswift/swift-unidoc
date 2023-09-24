@@ -18,34 +18,6 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.Login
-{
-    init?(parameters:__shared [(key:String, value:String)])
-    {
-        var state:String?
-        var code:String?
-
-        for (key, value):(String, String) in parameters
-        {
-            switch key
-            {
-            case "state":   state = value
-            case "code":    code = value
-            case _:         continue
-            }
-        }
-
-        if  let state:String,
-            let code:String
-        {
-            self.init(state: state, code: code)
-        }
-        else
-        {
-            return nil
-        }
-    }
-}
 extension Server.Operation.Login:InteractiveOperation
 {
     func load(from server:Server.State,

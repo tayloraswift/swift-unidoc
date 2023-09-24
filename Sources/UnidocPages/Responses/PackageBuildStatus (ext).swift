@@ -16,6 +16,7 @@ extension PackageBuildStatus
         }
 
         self.init(
+            coordinate: output.record.cell,
             repo: "https://\(repo.origin)",
             release: release,
             prerelease: output.prereleases.first.flatMap(Edition.init(from:)))

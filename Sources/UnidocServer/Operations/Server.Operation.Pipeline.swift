@@ -16,17 +16,14 @@ extension Server.Operation
         /// produces.
         let output:AcceptType?
         let query:Query
-        let uri:URI
         let tag:MD5?
 
         init(output:AcceptType?,
             query:Query,
-            uri:URI,
             tag:MD5? = nil)
         {
             self.output = output
             self.query = query
-            self.uri = uri
             self.tag = tag
         }
     }
