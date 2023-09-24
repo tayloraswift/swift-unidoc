@@ -122,7 +122,7 @@ extension UnidocDatabase.Graphs
 }
 extension UnidocDatabase.Graphs
 {
-    public
+    @available(*, unavailable, message: "unused")
     func metadata(
         package:PackageIdentifier,
         limit:Int = 1,

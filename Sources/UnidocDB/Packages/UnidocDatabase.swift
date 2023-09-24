@@ -107,29 +107,6 @@ extension UnidocDatabase
         {
             (snapshot:Snapshot) in
 
-            // let origin:Volume.Origin? = try await
-            // {
-            //     switch $0
-            //     {
-            //     case let origin??:
-            //         return origin
-
-            //     case nil?:
-            //         //  We already tried to find the origin for this package, and it
-            //         //  didn't exist.
-            //         return nil
-
-            //     case nil:
-            //         let package:PackageRecord? = try await self.packages.find(
-            //             by: PackageRecord[.cell],
-            //             of: snapshot.package,
-            //             with: session)
-            //         let origin:Volume.Origin? = package?.repo?.origin
-            //         $0 = .some(origin)
-            //         return origin
-            //     }
-            // } (&origins[snapshot.package])
-
             let volume:Volume = try await self.link(snapshot, with: session)
 
             try await self.publish(volume, with: session)
@@ -202,9 +179,7 @@ extension UnidocDatabase
             case _:
                 fatalError("unimplemented")
             }
-            /// Standard library symbol graphs don’t come with hashes, so we can’t efficiently
-            /// “prove” that a particular edition has at least one symbol graph. But we don’t
-            /// need to query that in the first place.
+
             let placement:Editions.Placement = try await self.editions.register(
                 package: placement.coordinate,
                 version: semver,
@@ -241,7 +216,7 @@ extension UnidocDatabase
 }
 extension UnidocDatabase
 {
-    public
+    @available(*, unavailable, message: "unused")
     func _editions(of package:PackageIdentifier,
         with session:Mongo.Session) async throws -> [PackageEdition]
     {
