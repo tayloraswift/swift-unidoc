@@ -1,5 +1,6 @@
 .build
 .massbuild
+.swiftinit
 .testing
 .unidoc
 .vscode

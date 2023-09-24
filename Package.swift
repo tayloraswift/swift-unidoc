@@ -455,11 +455,6 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "Massbuild", dependencies:
-            [
-                .target(name: "SymbolGraphBuilder"),
-            ]),
-
         .executableTarget(name: "UnidocBuild", dependencies:
             [
                 .target(name: "HTTPClient"),
