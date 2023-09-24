@@ -50,16 +50,17 @@ extension Server.State
                         content: .string("not found"),
                         type: .text(.plain, charset: .utf8)))
 
-                self.tour.stats.requests[keyPath: type] += 1
-
-                let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
-                    response.statisticalStatus
-
-                //  Don’t count visits to the admin tools.
-                if  type != \.restricted
+                //  Don’t increment stats from administrators,
+                //  they will really skew the results.
+                if  case nil = request.cookies.session
                 {
-                    self.tour.stats.responses[keyPath: status] += 1
+                    self.tour.stats.requests[keyPath: type] += 1
                     self.tour.stats.bytes[keyPath: type] += response.size
+
+                    let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
+                        response.statisticalStatus
+
+                    self.tour.stats.responses[keyPath: status] += 1
                 }
 
                 request.promise.succeed(response)

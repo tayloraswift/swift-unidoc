@@ -12,13 +12,6 @@ protocol RestrictedOperation:InteractiveOperation
 }
 extension RestrictedOperation
 {
-    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
-    {
-        \.restricted
-    }
-}
-extension RestrictedOperation
-{
     static
     func admit(_ role:Account.Role) -> Bool
     {
