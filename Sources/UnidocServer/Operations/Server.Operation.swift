@@ -14,9 +14,9 @@ extension Server
     struct Operation:Sendable
     {
         let endpoint:Endpoint
-        let cookies:Request.Cookies
+        let cookies:Cookies
 
-        init(endpoint:Endpoint, cookies:Request.Cookies)
+        init(endpoint:Endpoint, cookies:Cookies)
         {
             self.endpoint = endpoint
             self.cookies = cookies
@@ -35,7 +35,7 @@ extension Server.Operation:HTTPServerOperation
             return nil
         }
 
-        let cookies:Server.Request.Cookies = .init(headers[canonicalForm: "cookie"])
+        let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
@@ -46,7 +46,7 @@ extension Server.Operation:HTTPServerOperation
         {
             //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
             //  for the standard library.
-            let get:Server.Endpoint = .interactive(Server.Operation.Pipeline<WideQuery>.init(
+            let get:Server.Endpoint = .interactive(Server.Endpoint.Pipeline<WideQuery>.init(
                 output: .text(.html),
                 query: .init(
                     volume: .init(package: .swift, version: nil),
@@ -66,10 +66,10 @@ extension Server.Operation:HTTPServerOperation
             switch root
             {
             case Site.Admin.root:
-                endpoint = .interactive(Server.Operation.AdminDashboard.status)
+                endpoint = .interactive(Server.Endpoint.AdminDashboard.status)
 
             case Site.Login.root:
-                endpoint = .interactive(Server.Operation.Bounce.init())
+                endpoint = .interactive(Server.Endpoint.Bounce.init())
 
             case "robots.txt":
                 endpoint = .static(.init(.robots_txt, tag: tag))
@@ -174,7 +174,7 @@ extension Server.Operation:HTTPServerOperation
             return nil
         }
 
-        let cookies:Server.Request.Cookies = .init(headers[canonicalForm: "cookie"])
+        let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
 
         let endpoint:Server.Endpoint?
 
@@ -193,6 +193,50 @@ extension Server.Operation:HTTPServerOperation
         if  let endpoint:Server.Endpoint
         {
             self.init(endpoint: endpoint, cookies: cookies)
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    init?(put uri:String,
+        address _:SocketAddress?,
+        headers:HTTPHeaders,
+        body:[UInt8])
+    {
+        guard let uri:URI = .init(uri)
+        else
+        {
+            return nil
+        }
+
+        var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
+
+        guard
+        let root:String = path.popFirst(),
+        let trunk:String = path.popFirst(),
+        let type:Substring = headers[canonicalForm: "content-type"].first,
+        let type:ContentType = .init(type)
+        else
+        {
+            return nil
+        }
+
+        let endpoint:Server.Endpoint?
+
+        switch root
+        {
+        case Site.API.root:
+            endpoint = try? .put(api: trunk, body: body, type: type)
+
+        case _:
+            return nil
+        }
+
+        if  let endpoint:Server.Endpoint
+        {
+            self.init(endpoint: endpoint, cookies: .init())
         }
         else
         {

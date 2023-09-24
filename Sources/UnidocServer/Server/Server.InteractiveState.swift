@@ -6,7 +6,7 @@ import UnidocPages
 extension Server
 {
     @dynamicMemberLookup
-    struct State
+    struct InteractiveState
     {
         private
         let server:Server
@@ -22,19 +22,19 @@ extension Server
         }
     }
 }
-extension Server.State
+extension Server.InteractiveState
 {
     subscript<T>(dynamicMember keyPath:KeyPath<Server, T>) -> T
     {
         self.server[keyPath: keyPath]
     }
 }
-extension Server.State
+extension Server.InteractiveState
 {
     mutating
-    func respond(to requests:AsyncStream<Server.Request>) async throws
+    func respond(to requests:AsyncStream<Server.InteractiveRequest>) async throws
     {
-        for await request:Server.Request in requests
+        for await request:Server.InteractiveRequest in requests
         {
             try Task.checkCancellation()
 

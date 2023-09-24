@@ -3,19 +3,16 @@ import NIOCore
 
 extension Server
 {
-    struct Request:Sendable
+    struct ProceduralRequest:Sendable
     {
-        let operation:any InteractiveOperation
-        let cookies:Cookies
+        let operation:any ProceduralEndpoint
         let promise:EventLoopPromise<ServerResponse>
 
         init(
-            operation:any InteractiveOperation,
-            cookies:Cookies,
+            operation:any ProceduralEndpoint,
             promise:EventLoopPromise<ServerResponse>)
         {
             self.operation = operation
-            self.cookies = cookies
             self.promise = promise
         }
     }

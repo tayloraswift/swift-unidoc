@@ -11,134 +11,12 @@ import UnidocSelectors
 import UnidocRecords
 import URI
 
-extension Server.Endpoint
-{
-    struct AuthParameters
-    {
-        /// Only used for testing, never sent by GitHub.
-        var token:String?
-        /// Defined and sent by GitHub.
-        var state:String?
-        /// Defined and sent by GitHub.
-        var code:String?
-
-        private
-        init()
-        {
-            self.token = nil
-            self.state = nil
-            self.code = nil
-        }
-    }
-}
-extension Server.Endpoint.AuthParameters
-{
-    init(_ parameters:[(key:String, value:String)]?)
-    {
-        self.init()
-
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
-        {
-            switch key
-            {
-            case "token":   self.token = value
-            case "state":   self.state = value
-            case "code":    self.code = value
-            case _:         continue
-            }
-        }
-    }
-}
-extension Server.Endpoint
-{
-    struct LegacyParameters
-    {
-        var overload:Symbol.Decl?
-        var from:String?
-
-        private
-        init()
-        {
-            self.overload = nil
-            self.from = nil
-        }
-    }
-}
-extension Server.Endpoint.LegacyParameters
-{
-    init(_ parameters:[(key:String, value:String)]?)
-    {
-        self.init()
-
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
-        {
-            switch key
-            {
-            case "overload":    self.overload = .init(rawValue: value)
-            case "from":        self.from = value
-            case _:             continue
-            }
-        }
-    }
-}
-extension Server.Endpoint
-{
-    struct PipelineParameters
-    {
-        var explain:Bool
-        var hash:FNV24?
-
-        private
-        init()
-        {
-            self.explain = false
-            self.hash = nil
-        }
-    }
-}
-extension Server.Endpoint.PipelineParameters
-{
-    init(_ parameters:[(key:String, value:String)]?)
-    {
-        self.init()
-
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
-        {
-            switch key
-            {
-            case "explain": self.explain = value == "true"
-            case "hash":    self.hash = .init(value)
-            case _:         continue
-            }
-        }
-    }
-}
 extension Server
 {
     enum Endpoint:Sendable
     {
-        case interactive(any InteractiveOperation)
+        case interactive(any InteractiveEndpoint)
+        case procedural(any ProceduralEndpoint)
         case stateless(ServerResponse)
         case `static`(Cache<Site.Asset.Get>.Request)
     }
@@ -183,7 +61,7 @@ extension Server.Endpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
+                return .interactive(Pipeline<PackageEditionsQuery>.init(
                     output: parameters.explain ? nil : .application(.json),
                     query: .init(package: .init(package), limit: 1),
                     tag: tag))
@@ -209,13 +87,13 @@ extension Server.Endpoint
             if  let state:String = parameters.state,
                 let code:String = parameters.code
             {
-                return .interactive(Server.Operation.Login.init(state: state, code: code))
+                return .interactive(Login.init(state: state, code: code))
             }
 
         case "register":
             if  let token:String = parameters.token
             {
-                return .interactive(Server.Operation.Register.init(token: token))
+                return .interactive(Register.init(token: token))
             }
 
         case _:
@@ -230,7 +108,7 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Server.Operation.Pipeline<WideQuery>.init(
+        .interactive(Pipeline<WideQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -244,7 +122,7 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Server.Operation.Pipeline<WideQuery>.init(
+        .interactive(Pipeline<WideQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(trunk),
@@ -257,7 +135,7 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
+        .interactive(Pipeline<ThinQuery<Volume.Range>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(trunk),
@@ -272,8 +150,7 @@ extension Server.Endpoint
     {
         if  let id:VolumeIdentifier = .init(trunk)
         {
-            return .interactive(
-                Server.Operation.Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
+            return .interactive(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
                 output: parameters.explain ? nil : .application(.json),
                 query: .init(
                     from: UnidocDatabase.Search.name,
@@ -283,8 +160,7 @@ extension Server.Endpoint
         }
         else if trunk == "packages.json"
         {
-            return .interactive(
-                Server.Operation.Pipeline<SearchIndexQuery<Int32>>.init(
+            return .interactive(Pipeline<SearchIndexQuery<Int32>>.init(
                 output: parameters.explain ? nil : .application(.json),
                 query: .init(
                     from: UnidocDatabase.Meta.name,
@@ -300,7 +176,7 @@ extension Server.Endpoint
     func get(sitemaps trunk:String, tag:MD5?) -> Self
     {
         //  Ignore file extension.
-        .interactive(Server.Operation.SiteMap.init(
+        .interactive(SiteMap.init(
             package: .init(trunk.prefix { $0 != "." }),
             tag: tag))
     }
@@ -308,7 +184,7 @@ extension Server.Endpoint
     static
     func get(tags trunk:String, with parameters:PipelineParameters, tag:MD5?) -> Self
     {
-        .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
+        .interactive(Pipeline<PackageEditionsQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(package: .init(trunk)),
             tag: tag))
@@ -326,13 +202,13 @@ extension Server.Endpoint
 
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .interactive(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .interactive(Pipeline<ThinQuery<Symbol.Decl>>.init(
                 output: .text(.html),
                 query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
-            return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .interactive(Pipeline<ThinQuery<Volume.Shoot>>.init(
                 output: .text(.html),
                 query: query))
         }
@@ -351,13 +227,13 @@ extension Server.Endpoint
             case  .multipart(.form_data(boundary: let boundary?)) = type
         {
             let form:MultipartForm = try .init(splitting: body, on: boundary)
-            return .interactive(Server.Operation.Admin.perform(action, form))
+            return .interactive(Admin.perform(action, form))
         }
         else if action == "recode",
             let target:String = rest.first,
             let target:Site.Admin.Recode.Target = .init(rawValue: target)
         {
-            return .interactive(Server.Operation.Admin.recode(.init(target: target)))
+            return .interactive(Admin.recode(.init(target: target)))
         }
         else
         {
@@ -388,7 +264,7 @@ extension Server.Endpoint
             if  let owner:String = form["owner"],
                 let repo:String = form["repo"]
             {
-                return .interactive(Server.Operation._SyncRepository.init(
+                return .interactive(_SyncRepository.init(
                     owner: owner,
                     repo: repo))
             }
@@ -398,5 +274,33 @@ extension Server.Endpoint
         }
 
         return nil
+    }
+}
+
+//  PUT endpoints
+extension Server.Endpoint
+{
+    static
+    func put(api trunk:String, body:[UInt8], type:ContentType) throws -> Self?
+    {
+        guard
+        let trunk:Site.API.Put = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        switch (trunk, type)
+        {
+        case (.symbolgraph, .media(.application(.bson, charset: nil))):
+            //  This runs on the HTTP channel’s ``EventLoop``, and we *do not* want to
+            //  parse the body here, even if that would give us an opportunity to reject
+            //  the request early.
+            return .procedural(Server.Endpoint.GraphStorage.put(bson: body))
+
+        case (_, _):
+            return nil
+        }
+
     }
 }

@@ -3,6 +3,7 @@ enum MediaSubtype:String, Equatable, Hashable, Sendable
 {
     case apng
     case avif
+    case bson
     case css
     case gif
     case html
@@ -75,6 +76,7 @@ extension MediaSubtype
         {
         case .apng:                     return "apng"
         case .avif:                     return "avif"
+        case .bson:                     return "bson"
         case .css:                      return "css"
         case .gif:                      return "gif"
         case .html:                     return "html"

@@ -5,7 +5,7 @@ import MongoDB
 import UnidocDB
 import UnidocPages
 
-extension Server.Operation
+extension Server.Endpoint
 {
     struct Register:Sendable
     {
@@ -17,10 +17,10 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.Register:InteractiveOperation
+extension Server.Endpoint.Register:InteractiveEndpoint
 {
-    func load(from server:Server.State,
-        with _:Server.Request.Cookies) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState,
+        with _:Server.Cookies) async throws -> ServerResponse?
     {
         guard let github:GitHubClient<GitHubOAuth.API> = server.github?.api
         else
@@ -39,6 +39,6 @@ extension Server.Operation.Register:InteractiveOperation
             with: session)
 
         return .redirect(.temporary("\(Site.Admin.uri)"),
-            cookies: [Server.Request.Cookies.session: cookie])
+            cookies: [Server.Cookies.session: cookie])
     }
 }

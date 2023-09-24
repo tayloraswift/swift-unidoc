@@ -1,12 +1,11 @@
 
-extension Server.Request
+extension Server
 {
     struct Cookies:Equatable, Hashable, Sendable
     {
         var session:String?
         var login:String?
 
-        private
         init()
         {
             self.session = nil
@@ -14,7 +13,7 @@ extension Server.Request
         }
     }
 }
-extension Server.Request.Cookies
+extension Server.Cookies
 {
     static
     var session:String { "__Host-session" }
@@ -22,7 +21,7 @@ extension Server.Request.Cookies
     static
     var login:String { "login_state" }
 }
-extension Server.Request.Cookies
+extension Server.Cookies
 {
     init(_ lines:[Substring])
     {
