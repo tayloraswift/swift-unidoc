@@ -200,13 +200,8 @@ extension UnidocDatabase
             metadata: docs.metadata,
             graph: docs.graph)
 
-        let upsert:SnapshotReceipt.Upsert
-
-        switch try await self.graphs.upsert(some: snapshot, with: session)
-        {
-        case nil:   upsert = .update
-        case _?:    upsert = .insert
-        }
+        let upsert:SnapshotReceipt.Upsert = try await self.graphs.upsert(snapshot,
+            with: session)
 
         return .init(id: snapshot.id,
             edition: snapshot.edition,

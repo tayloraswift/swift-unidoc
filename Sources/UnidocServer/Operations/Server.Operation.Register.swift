@@ -17,19 +17,6 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.Register
-{
-    init?(parameters:__shared [(key:String, value:String)])
-    {
-        for case ("token", let value) in parameters
-        {
-            self.init(token: value)
-            return
-        }
-
-        return nil
-    }
-}
 extension Server.Operation.Register:InteractiveOperation
 {
     func load(from server:Server.State,

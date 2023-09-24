@@ -14,14 +14,11 @@ extension Server.Operation
     struct SiteMap:Sendable
     {
         let package:PackageIdentifier
-
-        let uri:URI
         let tag:MD5?
 
-        init(package:PackageIdentifier, uri:URI, tag:MD5?)
+        init(package:PackageIdentifier, tag:MD5?)
         {
             self.package = package
-            self.uri = uri
             self.tag = tag
         }
     }
