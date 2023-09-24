@@ -2,16 +2,16 @@ import HTTP
 import MongoDB
 import UnidocPages
 
-extension Server.Operation
+extension Server.Endpoint
 {
     enum AdminDashboard
     {
         case status
     }
 }
-extension Server.Operation.AdminDashboard:RestrictedOperation
+extension Server.Endpoint.AdminDashboard:RestrictedEndpoint
 {
-    func load(from server:Server.State) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         let page:Site.Admin = .init(configuration: try await server.db.sessions.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),

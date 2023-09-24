@@ -64,8 +64,8 @@ extension UnidocDatabase.Graphs
     {
         switch try await self.upsert(some: graph, with: session)
         {
-        case nil:   return .insert
-        case  _?:   return .update
+        case nil:   return .update
+        case  _?:   return .insert
         }
     }
 }

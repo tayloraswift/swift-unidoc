@@ -7,7 +7,7 @@ import SymbolGraphs
 import UnidocDB
 import UnidocPages
 
-extension Server.Operation
+extension Server.Endpoint
 {
     enum Admin
     {
@@ -15,9 +15,9 @@ extension Server.Operation
         case recode(Site.Admin.Recode)
     }
 }
-extension Server.Operation.Admin:RestrictedOperation
+extension Server.Endpoint.Admin:RestrictedEndpoint
 {
-    func load(from server:Server.State) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let page:Site.Admin.Action.Complete

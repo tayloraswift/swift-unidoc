@@ -4,7 +4,7 @@ import HTTP
 import MongoDB
 import UnidocDB
 
-extension Server.Operation
+extension Server.Endpoint
 {
     struct Login:Sendable
     {
@@ -18,10 +18,10 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation.Login:InteractiveOperation
+extension Server.Endpoint.Login:InteractiveEndpoint
 {
-    func load(from server:Server.State,
-        with cookies:Server.Request.Cookies) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState,
+        with cookies:Server.Cookies) async throws -> ServerResponse?
     {
         guard let oauth:GitHubClient<GitHubOAuth> = server.github?.oauth
         else
@@ -37,7 +37,7 @@ extension Server.Operation.Login:InteractiveOperation
                 type: .text(.plain, charset: .utf8)))
         }
 
-        let registration:Server.Operation.Register
+        let registration:Server.Endpoint.Register
         do
         {
             let access:GitHubOAuth.Credentials = try await oauth.exchange(code: self.code)
