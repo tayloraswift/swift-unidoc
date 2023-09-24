@@ -22,7 +22,7 @@ enum Main
         let http2:HTTP2Client = .init(
             threads: threads,
             niossl: niossl,
-            remote: "swiftinit.org")
+            remote: options.remote)
 
         let swiftinit:SwiftinitClient = .init(http2: http2)
 
@@ -42,11 +42,13 @@ extension Main
     struct Options
     {
         var package:PackageIdentifier
+        var remote:String
 
         private
         init(package:PackageIdentifier)
         {
             self.package = package
+            self.remote = "swiftinit.org"
         }
     }
 }
@@ -64,7 +66,28 @@ extension Main.Options
             fatalError("Usage: \(CommandLine.arguments[0]) <package>")
         }
 
-        return .init(package: .init(package))
+        var options:Self = .init(package: .init(package))
+
+        while let option:String = arguments.popFirst()
+        {
+            switch option
+            {
+            case "--remote", "-h":
+                guard
+                let remote:String = arguments.popFirst()
+                else
+                {
+                    fatalError("Expected remote hostname after '\(option)'")
+                }
+
+                options.remote = remote
+
+            case let option:
+                fatalError("Unknown option '\(option)'")
+            }
+        }
+
+        return options
     }
 }
 
@@ -89,7 +112,7 @@ extension SwiftinitClient
     {
         try await self.http2.connect
         {
-            try await body(Connection.init(http2: $0))
+            try await body(Connection.init(http2: $0, to: self.http2.remote))
         }
     }
 }
@@ -113,11 +136,14 @@ extension SwiftinitClient
     {
         @usableFromInline internal
         let http2:HTTP2Client.Connection
+        @usableFromInline internal
+        let remote:String
 
         @inlinable internal
-        init(http2:HTTP2Client.Connection)
+        init(http2:HTTP2Client.Connection, to remote:String)
         {
             self.http2 = http2
+            self.remote = remote
         }
     }
 }
@@ -137,7 +163,7 @@ extension SwiftinitClient.Connection
             [
                 ":method": "GET",
                 ":scheme": "https",
-                ":authority": "swiftinit.org",
+                ":authority": self.remote,
                 ":path": endpoint,
 
                 "user-agent": "UnidocBuild",
@@ -159,7 +185,7 @@ extension SwiftinitClient.Connection
             case 301?:
                 if  let location:String = response.headers?["location"].first
                 {
-                    endpoint = String.init(location.trimmingPrefix("https://swiftinit.org"))
+                    endpoint = String.init(location.trimmingPrefix("https://\(self.remote)"))
                     continue following
                 }
             case _:
