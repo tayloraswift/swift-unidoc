@@ -18,11 +18,16 @@ protocol HTTPServerOperation:Sendable
         address:SocketAddress?,
         headers:HTTPHeaders,
         body:[UInt8])
+
+    init?(put uri:String,
+        address:SocketAddress?,
+        headers:HTTPHeaders,
+        body:[UInt8])
 }
 extension HTTPServerOperation
 {
     @inlinable public
-    init?(_ uri:String,
+    init?(get uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders)
     {
@@ -30,7 +35,16 @@ extension HTTPServerOperation
     }
 
     @inlinable public
-    init?(_ uri:String,
+    init?(post uri:String,
+        address:SocketAddress?,
+        headers:HTTPHeaders,
+        body:[UInt8])
+    {
+        nil
+    }
+
+    @inlinable public
+    init?(put uri:String,
         address:SocketAddress?,
         headers:HTTPHeaders,
         body:[UInt8])

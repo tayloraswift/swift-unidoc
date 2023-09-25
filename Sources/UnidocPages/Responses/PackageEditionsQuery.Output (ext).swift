@@ -1,7 +1,7 @@
 import HTTP
 import JSON
 import Media
-import UnidocDB
+import UnidocAutomation
 import UnidocQueries
 import URI
 
@@ -13,38 +13,15 @@ extension PackageEditionsQuery.Output:ServerResponseFactory
         switch type
         {
         case .application(.json):
-            let json:JSON = .object
+            guard
+            let status:PackageBuildStatus = .init(from: self)
+            else
             {
-                guard
-                let repo:PackageRepo = self.record.repo,
-                let release:PackageEditionsQuery.Facet = self.releases.first
-                else
-                {
-                    return
-                }
-
-                $0["repo"] = "https://\(repo.origin)"
-
-                $0["release"]
-                {
-                    $0["graphs"] = release.graphs?.count ?? 0
-                    $0["tag"] = release.edition.name
-                }
-
-                guard
-                let prerelease:PackageEditionsQuery.Facet = self.prereleases.first,
-                    prerelease.edition.patch > release.edition.patch
-                else
-                {
-                    return
-                }
-
-                $0["prerelease"]
-                {
-                    $0["graphs"] = prerelease.graphs?.count ?? 0
-                    $0["tag"] = prerelease.edition.name
-                }
+                return .notFound(.init(content: .string(""),
+                    type: .text(.plain, charset: .utf8)))
             }
+
+            let json:JSON = .object(with: status.encode(to:))
 
             return .ok(.init(
                 content: .binary(json.utf8),

@@ -1,14 +1,14 @@
 import HTTP
 import UnidocPages
 
-protocol InteractiveOperation:Sendable
+protocol InteractiveEndpoint:Sendable
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int> { get }
 
-    func load(from server:Server.State,
-        with cookies:Server.Request.Cookies) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState,
+        with cookies:Server.Cookies) async throws -> ServerResponse?
 }
-extension InteractiveOperation
+extension InteractiveEndpoint
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {

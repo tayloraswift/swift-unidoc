@@ -6,7 +6,7 @@ import UnidocDB
 import UnidocPages
 import URI
 
-extension Server.Operation
+extension Server.Endpoint
 {
     struct Pipeline<Query>:Sendable
         where Query:DatabaseQuery, Query.Output:ServerResponseFactory
@@ -16,31 +16,28 @@ extension Server.Operation
         /// produces.
         let output:AcceptType?
         let query:Query
-        let uri:URI
         let tag:MD5?
 
         init(output:AcceptType?,
             query:Query,
-            uri:URI,
             tag:MD5? = nil)
         {
             self.output = output
             self.query = query
-            self.uri = uri
             self.tag = tag
         }
     }
 }
-extension Server.Operation.Pipeline:InteractiveOperation
+extension Server.Endpoint.Pipeline:InteractiveEndpoint
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.query
     }
 }
-extension Server.Operation.Pipeline:UnrestrictedOperation
+extension Server.Endpoint.Pipeline:PublicEndpoint
 {
-    func load(from server:Server.State) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         try await self.load(
             from: server.db.unidoc,

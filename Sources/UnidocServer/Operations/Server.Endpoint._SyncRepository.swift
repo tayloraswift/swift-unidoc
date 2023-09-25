@@ -6,7 +6,7 @@ import MongoDB
 import SymbolGraphs
 import UnidocDB
 
-extension Server.Operation
+extension Server.Endpoint
 {
     struct _SyncRepository:Sendable
     {
@@ -20,9 +20,9 @@ extension Server.Operation
         }
     }
 }
-extension Server.Operation._SyncRepository:RestrictedOperation
+extension Server.Endpoint._SyncRepository:RestrictedEndpoint
 {
-    func load(from server:Server.State) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         guard
         let github:GitHubClient<GitHubOAuth.API> = server.github?.api

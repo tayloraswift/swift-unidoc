@@ -9,33 +9,30 @@ import UnidocRecords
 import UnidocSelectors
 import URI
 
-extension Server.Operation
+extension Server.Endpoint
 {
     struct SiteMap:Sendable
     {
         let package:PackageIdentifier
-
-        let uri:URI
         let tag:MD5?
 
-        init(package:PackageIdentifier, uri:URI, tag:MD5?)
+        init(package:PackageIdentifier, tag:MD5?)
         {
             self.package = package
-            self.uri = uri
             self.tag = tag
         }
     }
 }
-extension Server.Operation.SiteMap:InteractiveOperation
+extension Server.Endpoint.SiteMap:InteractiveEndpoint
 {
     var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
     {
         \.siteMap
     }
 }
-extension Server.Operation.SiteMap:UnrestrictedOperation
+extension Server.Endpoint.SiteMap:PublicEndpoint
 {
-    func load(from server:Server.State) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 

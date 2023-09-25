@@ -94,7 +94,7 @@ extension GitHubClient<GitHubOAuth.API>.Connection
             }
 
             status = response.status
-            break
+            break following
         }
 
         throw GitHubClient<GitHubOAuth.API>.StatusError.init(code: status)

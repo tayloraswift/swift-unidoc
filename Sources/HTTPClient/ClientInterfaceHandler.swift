@@ -44,6 +44,12 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
         batch:[HPACKHeaders]
     )
 
+    func errorCaught(context:ChannelHandlerContext, error:any Error)
+    {
+        self.owner?.finish(throwing: error)
+        context.channel.close(promise: nil)
+    }
+
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
         let owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation
@@ -65,13 +71,11 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
                 switch $0
                 {
                 case .success(let stream):
-                    stream.write(HTTP2Frame.FramePayload.headers(
+                    stream.writeAndFlush(HTTP2Frame.FramePayload.headers(
                         HTTP2Frame.FramePayload.Headers.init(
                             headers: request,
                             endStream: true)),
                         promise: nil)
-
-                    stream.flush()
 
                 case .failure(let error):
                     owner.finish(throwing: error)

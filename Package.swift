@@ -56,6 +56,7 @@ let package:Package = .init(
 
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAnalysis", targets: ["UnidocAnalysis"]),
+        .library(name: "UnidocAutomation", targets: ["UnidocAutomation"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
@@ -65,6 +66,7 @@ let package:Package = .init(
         .library(name: "UnidocSelectors", targets: ["UnidocSelectors"]),
         .library(name: "URI", targets: ["URI"]),
 
+        .executable(name: "UnidocBuild", targets: ["UnidocBuild"]),
         .executable(name: "UnidocServer", targets: ["UnidocServer"]),
     ],
     dependencies:
@@ -381,6 +383,11 @@ let package:Package = .init(
                 .target(name: "UnidocSelectors"),
             ]),
 
+        .target(name: "UnidocAutomation", dependencies:
+            [
+                .target(name: "JSON"),
+            ]),
+
         .target(name: "UnidocDB", dependencies:
             [
                 .target(name: "GitHubAPI"),
@@ -409,6 +416,7 @@ let package:Package = .init(
                 .target(name: "GitHubAPI"),
                 .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
+                .target(name: "UnidocAutomation"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
             ]),
@@ -447,8 +455,10 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "Massbuild", dependencies:
+        .executableTarget(name: "UnidocBuild", dependencies:
             [
+                .target(name: "HTTPClient"),
+                .target(name: "UnidocAutomation"),
                 .target(name: "SymbolGraphBuilder"),
             ]),
 

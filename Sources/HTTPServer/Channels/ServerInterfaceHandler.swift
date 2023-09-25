@@ -77,7 +77,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                     self.send(message: .init(status: .badRequest), context: context)
                 }
 
-            case .POST:
+            case .POST, .PUT:
                 self.request = (head, .init())
 
             case _:
@@ -119,10 +119,27 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 
             self.request = nil
 
-            if  let operation:Server.Operation = .init(post: head.uri,
+            let operation:Server.Operation?
+
+            switch head.method
+            {
+            case .POST:
+                operation = .init(post: head.uri,
                     address: self.address,
                     headers: head.headers,
                     body: body)
+
+            case .PUT:
+                operation = .init(put: head.uri,
+                    address: self.address,
+                    headers: head.headers,
+                    body: body)
+
+            case _:
+                fatalError("unreachable: collected buffers for method \(head.method)!")
+            }
+
+            if  let operation:Server.Operation
             {
                 self.server.submit(operation, promise: self.accept(context: context))
             }
