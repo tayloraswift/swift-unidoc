@@ -277,27 +277,43 @@ extension Server.Endpoint
             return nil
         }
 
-        switch (trunk, type)
+        switch type
         {
-        case (.index, .media(.application(.x_www_form_urlencoded, charset: _))):
+        case .media(.application(.x_www_form_urlencoded, charset: _)):
             let query:URI.Query = try .parse(parameters: body)
             let form:[String: String] = query.parameters.reduce(into: [:])
             {
                 $0[$1.key] = $1.value
             }
-            if  let owner:String = form["owner"],
-                let repo:String = form["repo"]
+
+            switch trunk
             {
-                return .interactive(_SyncRepository.init(
-                    owner: owner,
-                    repo: repo))
+            case .index:
+                if  let owner:String = form["owner"],
+                    let repo:String = form["repo"]
+                {
+                    return .interactive(_SyncRepository.init(
+                        owner: owner,
+                        repo: repo))
+                }
+
+            case .uplink:
+                if  let package:String = form["package"],
+                    let package:Int32 = .init(package),
+                    let version:String = form["version"],
+                    let version:Int32 = .init(version)
+                {
+                    return .procedural(GraphUplink.init(
+                        package: package,
+                        version: version))
+                }
             }
 
-        case (_, _):
-            break
-        }
+            fallthrough
 
-        return nil
+        case _:
+            return nil
+        }
     }
 }
 

@@ -71,28 +71,7 @@ extension UnidocDatabase.Graphs
 }
 extension UnidocDatabase.Graphs
 {
-    func list(package:Int32? = nil,
-        with session:Mongo.Session,
-        _ yield:(Snapshot) async throws -> ()) async throws
-    {
-        try await self.list(package: package, version: nil, with: session, yield)
-    }
-
-    func list(edition:Unidoc.Zone,
-        with session:Mongo.Session,
-        _ yield:(Snapshot) async throws -> ()) async throws
-    {
-        try await self.list(
-            package: edition.package,
-            version: edition.version,
-            with: session,
-            yield)
-    }
-
-    private
-    func list(
-        package:Int32?,
-        version:Int32?,
+    func list(filter:(package:Int32, version:Int32?)? = nil,
         with session:Mongo.Session,
         _ yield:(Snapshot) async throws -> ()) async throws
     {
@@ -104,14 +83,14 @@ extension UnidocDatabase.Graphs
                     {
                         $0[.match] = .init
                         {
-                            $0[Snapshot[.package]] = package
-                            $0[Snapshot[.version]] = version
+                            $0[Snapshot[.package]] = filter?.package
+                            $0[Snapshot[.version]] = filter?.version
                         }
                     }
                 },
                 stride: 1)
             {
-                if  case _? = package
+                if  case _? = filter?.package
                 {
                     $0[.hint] = .init
                     {

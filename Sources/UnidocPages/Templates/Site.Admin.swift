@@ -159,8 +159,6 @@ extension Site.Admin:AdministrativePage
         [
             .lintUnidocEditions,
 
-            .rebuild,
-
             .dropUnidocDB,
             .dropAccountDB,
         ]
