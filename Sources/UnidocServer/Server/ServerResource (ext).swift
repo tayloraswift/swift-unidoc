@@ -7,18 +7,6 @@ extension ServerResponse
     {
         switch self
         {
-        case .error:
-            return \.errored
-
-        case .forbidden:
-            return \.unauthorized
-
-        case .multiple:
-            return \.multipleChoices
-
-        case .notFound:
-            return \.notFound
-
         case .ok(let resource):
             if  case .length = resource.content
             {
@@ -29,11 +17,23 @@ extension ServerResponse
                 return \.ok
             }
 
+        case .multiple:
+            return \.multipleChoices
+
         case .redirect(.temporary, _):
             return \.redirectedTemporarily
 
         case .redirect(.permanent, _):
             return \.redirectedPermanently
+
+        case .notFound:
+            return \.notFound
+
+        case .error:
+            return \.errored
+
+        case _:
+            return \.unauthorized
         }
     }
 }

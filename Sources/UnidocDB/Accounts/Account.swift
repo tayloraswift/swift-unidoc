@@ -26,6 +26,12 @@ struct Account:Identifiable, Sendable
 extension Account
 {
     @inlinable public static
+    func machine(_ number:Int32 = 0) -> Self
+    {
+        .init(id: .machine(number), role: .machine)
+    }
+
+    @inlinable public static
     func github(user:GitHub.User, role:Role) -> Self
     {
         .init(id: .github(user.id), role: role, user: user)
@@ -39,7 +45,7 @@ extension Account:MongoMasterCodingModel
         case id = "_id"
 
         /// The session cookie associated with this account, if logged in. This is generated
-        /// randomly in ``AccountDatabase.update(account:with:)``.
+        /// randomly in ``AccountDatabase.Users.update(account:with:)``.
         case cookie
 
         case role

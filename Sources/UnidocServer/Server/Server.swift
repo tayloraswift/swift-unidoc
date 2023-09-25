@@ -22,14 +22,14 @@ struct Server:Sendable
     private
     let interactive:
     (
-        consumer:AsyncStream<InteractiveRequest>.Continuation,
-        requests:AsyncStream<InteractiveRequest>
+        consumer:AsyncStream<Request<any InteractiveEndpoint>>.Continuation,
+        requests:AsyncStream<Request<any InteractiveEndpoint>>
     )
     private
     let procedural:
     (
-        consumer:AsyncStream<ProceduralRequest>.Continuation,
-        requests:AsyncStream<ProceduralRequest>
+        consumer:AsyncStream<Request<any ProceduralEndpoint>>.Continuation,
+        requests:AsyncStream<Request<any ProceduralEndpoint>>
     )
 
     private
@@ -54,7 +54,7 @@ struct Server:Sendable
 
         do
         {
-            var continuation:AsyncStream<InteractiveRequest>.Continuation? = nil
+            var continuation:AsyncStream<Request<any InteractiveEndpoint>>.Continuation? = nil
             self.interactive.requests = .init
             {
                 continuation = $0
@@ -63,7 +63,7 @@ struct Server:Sendable
         }
         do
         {
-            var continuation:AsyncStream<ProceduralRequest>.Continuation? = nil
+            var continuation:AsyncStream<Request<any ProceduralEndpoint>>.Continuation? = nil
             self.procedural.requests = .init
             {
                 continuation = $0
@@ -177,6 +177,16 @@ extension Server
     private
     func main(on threads:MultiThreadedEventLoopGroup) async throws
     {
+        let session:Mongo.Session = try await .init(from: self.db.sessions)
+
+        //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
+        //  want to be able to change it without restarting the server.
+        let _:Account.Cookie = try await self.db.account.users.update(
+            account: .machine(0),
+            with: session)
+
+        _ = consume session
+
         try await withThrowingTaskGroup(of: Void.self)
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
@@ -223,7 +233,7 @@ extension Server:HTTPServerDelegate
         switch operation.endpoint
         {
         case .interactive(let interactive):
-            let request:InteractiveRequest = .init(operation: interactive,
+            let request:Request<any InteractiveEndpoint> = .init(endpoint: interactive,
                 cookies: operation.cookies,
                 promise: promise)
 
@@ -234,7 +244,8 @@ extension Server:HTTPServerDelegate
             }
 
         case .procedural(let procedural):
-            let request:ProceduralRequest = .init(operation: procedural,
+            let request:Request<any ProceduralEndpoint> = .init(endpoint: procedural,
+                cookies: operation.cookies,
                 promise: promise)
 
             guard case .enqueued = self.procedural.consumer.yield(request)

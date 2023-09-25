@@ -1,9 +1,10 @@
+import UnidocDB
 
 extension Server
 {
     struct Cookies:Equatable, Hashable, Sendable
     {
-        var session:String?
+        var session:Account.Cookie?
         var login:String?
 
         init()

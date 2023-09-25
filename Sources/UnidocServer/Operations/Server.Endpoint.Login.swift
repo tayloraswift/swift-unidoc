@@ -32,9 +32,7 @@ extension Server.Endpoint.Login:InteractiveEndpoint
         guard case self.state? = cookies.login
         else
         {
-            return .ok(.init(
-                content: .string("Authentication failed: state mismatch"),
-                type: .text(.plain, charset: .utf8)))
+            return .badRequest("Authentication failed: state mismatch")
         }
 
         let registration:Server.Endpoint.Register
@@ -45,9 +43,7 @@ extension Server.Endpoint.Login:InteractiveEndpoint
         }
         catch is GitHubClient<GitHubOAuth>.AuthenticationError
         {
-            return .ok(.init(
-                content: .string("Authentication failed"),
-                type: .text(.plain, charset: .utf8)))
+            return .unauthorized("Authentication failed")
         }
         catch
         {

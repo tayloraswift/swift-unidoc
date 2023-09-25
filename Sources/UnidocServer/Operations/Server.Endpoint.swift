@@ -31,14 +31,30 @@ extension Server.Endpoint
         {
             return .stateless(.ok(action.resource()))
         }
-        else if trunk == "recode",
-            let target:String = stem.first,
-            let target:Site.Admin.Recode.Target = .init(rawValue: target)
+
+        switch trunk
         {
-            return .stateless(.ok(Site.Admin.Recode.init(target: target).resource()))
-        }
-        else
-        {
+        case Site.Admin.Recode.name:
+            guard
+            let target:String = stem.first
+            else
+            {
+                return .stateless(.ok(Site.Admin.Recode.init().resource()))
+            }
+
+            if  let target:Site.Admin.Recode.Target = .init(rawValue: target)
+            {
+                return .stateless(.ok(target.resource()))
+            }
+            else
+            {
+                return nil
+            }
+
+        case Site.Admin.Slaves.name:
+            return .interactive(SlavesDashboard.status)
+
+        case _:
             return nil
         }
     }
@@ -229,16 +245,24 @@ extension Server.Endpoint
             let form:MultipartForm = try .init(splitting: body, on: boundary)
             return .interactive(Admin.perform(action, form))
         }
-        else if action == "recode",
-            let target:String = rest.first,
-            let target:Site.Admin.Recode.Target = .init(rawValue: target)
+
+        switch action
         {
-            return .interactive(Admin.recode(.init(target: target)))
+        case Site.Admin.Recode.name:
+            if  let target:String = rest.first,
+                let target:Site.Admin.Recode.Target = .init(rawValue: target)
+            {
+                return .interactive(Admin.recode(target))
+            }
+
+        case Site.Admin.Slaves.name:
+            return .interactive(SlavesDashboard.scramble)
+
+        case _:
+            break
         }
-        else
-        {
-            return nil
-        }
+
+        return nil
     }
 
     static

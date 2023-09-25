@@ -24,23 +24,32 @@ extension ServerMessage
     {
         switch response
         {
-        case .redirect(let redirect, cookies: let cookies):
-            self.init(redirect: redirect, cookies: cookies)
-
-        case .error(let resource):
-            self.init(resource: resource, using: allocator, as: .internalServerError)
-
-        case .forbidden(let resource):
-            self.init(resource: resource, using: allocator, as: .forbidden)
-
         case .ok(let resource):
             self.init(resource: resource, using: allocator, as: .ok)
 
         case .multiple(let resource):
             self.init(resource: resource, using: allocator, as: .multipleChoices)
 
+        case .redirect(let redirect, cookies: let cookies):
+            self.init(redirect: redirect, cookies: cookies)
+
+        case .badRequest(let resource):
+            self.init(resource: resource, using: allocator, as: .badRequest)
+
+        case .unauthorized(let resource):
+            self.init(resource: resource, using: allocator, as: .unauthorized)
+
+        case .forbidden(let resource):
+            self.init(resource: resource, using: allocator, as: .forbidden)
+
         case .notFound(let resource):
             self.init(resource: resource, using: allocator, as: .notFound)
+
+        case .conflict(let resource):
+            self.init(resource: resource, using: allocator, as: .conflict)
+
+        case .error(let resource):
+            self.init(resource: resource, using: allocator, as: .internalServerError)
         }
     }
 
