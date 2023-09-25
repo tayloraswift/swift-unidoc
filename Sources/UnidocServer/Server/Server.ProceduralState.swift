@@ -24,15 +24,16 @@ extension Server.ProceduralState
 extension Server.ProceduralState
 {
     mutating
-    func respond(to requests:AsyncStream<Server.ProceduralRequest>) async throws
+    func respond(to requests:AsyncStream<Server.Request<any ProceduralEndpoint>>) async throws
     {
-        for await request:Server.ProceduralRequest in requests
+        for await request:Server.Request<any ProceduralEndpoint> in requests
         {
             try Task.checkCancellation()
 
             do
             {
-                request.promise.succeed(try await request.operation.perform(on: self, with: 0))
+                request.promise.succeed(try await request.endpoint.perform(on: self,
+                    with: request.cookies))
             }
             catch let error
             {

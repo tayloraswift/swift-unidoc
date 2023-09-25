@@ -23,7 +23,8 @@ extension RestrictedEndpoint
     {
         if  case .secured = server.mode
         {
-            guard let cookie:String = cookies.session
+            guard
+            let cookie:Account.Cookie = cookies.session
             else
             {
                 return .redirect(.temporary("\(Site.Login.uri)"))
@@ -37,9 +38,7 @@ extension RestrictedEndpoint
             guard case true? = role.map(Self.admit(_:))
             else
             {
-                return .forbidden(.init(
-                    content: .string("Regrettably, you are not a mighty It Girl."),
-                    type: .text(.plain, charset: .utf8)))
+                return .forbidden("Regrettably, you are not a mighty It Girl.")
             }
         }
 

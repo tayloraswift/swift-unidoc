@@ -32,18 +32,18 @@ extension Server.InteractiveState
 extension Server.InteractiveState
 {
     mutating
-    func respond(to requests:AsyncStream<Server.InteractiveRequest>) async throws
+    func respond(to requests:AsyncStream<Server.Request<any InteractiveEndpoint>>) async throws
     {
-        for await request:Server.InteractiveRequest in requests
+        for await request:Server.Request<any InteractiveEndpoint> in requests
         {
             try Task.checkCancellation()
 
             do
             {
                 let type:WritableKeyPath<ServerTour.Stats.ByType, Int> =
-                    request.operation.statisticalType
+                    request.endpoint.statisticalType
 
-                let response:ServerResponse = try await request.operation.load(
+                let response:ServerResponse = try await request.endpoint.load(
                     from: self,
                     with: request.cookies)
                     ?? .notFound(.init(

@@ -43,14 +43,14 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await unidoc.publish(linking: swift, with: session) ==?
+        tests.expect(try await unidoc.publish(consume swift, with: session) ==?
             .init(id: .init(package: .swift,
                     version: "5.9.0",
                     triple: toolchain.triple),
                 edition: .init(package: 0, version: 0),
                 type: .insert))
 
-        tests.expect(try await unidoc.publish(linking: example, with: session) ==?
+        tests.expect(try await unidoc.publish(consume example, with: session) ==?
             .init(id: .init(package: "swift-malibu",
                     version: "0.0.0",
                     triple: toolchain.triple),

@@ -1,21 +1,24 @@
-
 #if canImport(Glibc)
 import struct Glibc.timespec
+import struct Glibc.tm
 
 import func Glibc.clock_gettime
+import func Glibc.timegm
 import var Glibc.CLOCK_REALTIME
 
 #elseif canImport(Darwin)
 import struct Darwin.timespec
+import struct Darwin.tm
 
 import func Darwin.clock_gettime
+import func Darwin.timegm
 import var Darwin.CLOCK_REALTIME
 #else
 #error("Platform doesn’t support 'clock_gettime'")
 #endif
 
 @frozen public
-struct UnixTime:Equatable, Hashable, Sendable
+struct UnixInstant:Equatable, Hashable, Sendable
 {
     public
     var second:Int64
@@ -29,15 +32,39 @@ struct UnixTime:Equatable, Hashable, Sendable
         self.nanoseconds = nanoseconds
     }
 }
-extension UnixTime
+extension UnixInstant
 {
     @inlinable public static
     func second(_ second:Int64, plus nanoseconds:Int64 = 0) -> Self
     {
         return .init(second: second, nanoseconds: nanoseconds)
     }
+
+    @inlinable public
+    init?(timestamp:Timestamp)
+    {
+        var time:tm = .init(
+            tm_sec:     timestamp.second,
+            tm_min:     timestamp.minute,
+            tm_hour:    timestamp.hour,
+            tm_mday:    timestamp.day,
+            tm_mon:     timestamp.month - 1, // month in range 0 ... 11 !
+            tm_year:    timestamp.year - 1900,
+            tm_wday:    -1,
+            tm_yday:    -1,
+            tm_isdst:   0,
+
+            tm_gmtoff:  0,
+            tm_zone:    nil)
+
+        switch withUnsafeMutablePointer(to: &time, timegm)
+        {
+        case -1:            return nil
+        case let second:    self.init(second: Int64.init(second), nanoseconds: 0)
+        }
+    }
 }
-extension UnixTime:Comparable
+extension UnixInstant:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -45,7 +72,7 @@ extension UnixTime:Comparable
         (lhs.second, lhs.nanoseconds) < (rhs.second, rhs.nanoseconds)
     }
 }
-extension UnixTime
+extension UnixInstant
 {
     @inlinable public static
     func - (after:Self, before:Self) -> Duration
@@ -58,7 +85,7 @@ extension UnixTime
             attosecondsComponent: 1_000_000_000 * nanoseconds)
     }
 }
-extension UnixTime
+extension UnixInstant
 {
     public static
     func now() -> Self

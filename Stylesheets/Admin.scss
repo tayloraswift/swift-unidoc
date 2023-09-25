@@ -1,4 +1,34 @@
 @import '_Colors';
+@import '_Typefaces';
+
+nav.admin
+{
+    ul
+    {
+        padding: 0;
+        display: flex;
+
+        li
+        {
+            list-style-type: none;
+
+            a
+            {
+                color: $light-accent-barbie-pink;
+                font-family: $typeface-sans;
+                font-weight: 700;
+            }
+        }
+
+        li:not(:first-child)::before
+        {
+            padding: 0 1em;
+            font-size: 75%;
+            content: '❤';
+            color: $light-accent-barbie-pink;
+        }
+    }
+}
 
 figure div.pie
 {

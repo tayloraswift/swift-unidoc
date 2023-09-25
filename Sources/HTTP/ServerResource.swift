@@ -22,6 +22,14 @@ struct ServerResource:Equatable, Sendable
         self.hash = hash
     }
 }
+extension ServerResource:ExpressibleByStringLiteral
+{
+    @inlinable public
+    init(stringLiteral:String)
+    {
+        self.init(content: .string(stringLiteral), type: .text(.plain, charset: .utf8))
+    }
+}
 extension ServerResource
 {
     /// Computes and populates the resource ``hash`` if it has not already been computed, and
