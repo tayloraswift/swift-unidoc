@@ -7,10 +7,10 @@ extension GitHubClient
     struct RateLimitError:GitHubRateLimitError, Equatable, Sendable
     {
         public
-        let until:UnixTime
+        let until:UnixInstant
 
         @inlinable internal
-        init(until:UnixTime)
+        init(until:UnixInstant)
         {
             self.until = until
         }
