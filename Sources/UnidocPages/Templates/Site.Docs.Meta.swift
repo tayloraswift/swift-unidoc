@@ -1,3 +1,4 @@
+import GitHubAPI
 import HTML
 import MarkdownRendering
 import ModuleGraphs
@@ -5,6 +6,7 @@ import SHA1
 import Unidoc
 import UnidocDB
 import UnidocRecords
+import UnixTime
 import URI
 
 extension Site.Docs
@@ -93,32 +95,116 @@ extension Site.Docs.Meta:ApplicationPage
 
             $0[.h1] = self.title
 
-            if  case .github(let path)? = self.repo?.origin,
-                let refname:String = self.names.refname
+            switch self.repo
             {
-                $0 += HTML.SourceLink.init(file: path.dropFirst(),
-                    target: "https://github.com\(path)/tree/\(refname)")
+            case .github(let repo)?:
+                $0[.p] = repo.about
+
+            case nil:
+                break
+            }
+            if  let refname:String = self.names.refname
+            {
+                switch self.repo?.origin
+                {
+                case .github(let path)?:
+                    $0 += HTML.SourceLink.init(file: path.dropFirst(),
+                        target: "https://github.com\(path)/tree/\(refname)")
+
+                case nil:
+                    break
+                }
             }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        main[.section]
+        main[.section, { $0.class = "details" }]
         {
-            $0.class = "details"
-        }
-            content:
-        {
-            if !self.master.platforms.isEmpty
+            if  let repo:PackageRepo = self.repo
             {
-                $0[.h2] = "Platform Requirements"
+                $0[.h2] = "Package Repository"
 
                 $0[.dl]
                 {
-                    for platform:PlatformRequirement in self.master.platforms
+                    switch repo
                     {
-                        $0[.dt] = "\(platform.id)"
-                        $0[.dd] = "\(platform.min)"
+                    case .github(let repo):
+                        let now:UnixInstant = .now()
+
+                        $0[.dt] = "Provider"
+                        $0[.dd]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "https://github.com/\(repo.owner.login)/\(repo.name)"
+                                $0.target = "_blank"
+                            } = "GitHub"
+                        }
+
+                        if  let license:GitHub.Repo.License = repo.license
+                        {
+                            $0[.dt] = "License"
+                            $0[.dd] = license.name
+                        }
+                        if !repo.topics.isEmpty
+                        {
+                            $0[.dt] = "Keywords"
+                            $0[.dd] = repo.topics.joined(separator: ", ")
+                        }
+
+                        $0[.dt] = "Watchers"
+                        $0[.dd] = "\(repo.watchers)"
+
+                        $0[.dt] = "Forks"
+                        $0[.dd] = "\(repo.forks)"
+
+                        $0[.dt] = "Stars"
+                        $0[.dd] = "\(repo.stars)"
+
+                        $0[.dt] = "Archived?"
+                        $0[.dd] = repo.archived ? "yes" : "no"
+
+                        if  let created:Timestamp = .init(iso8601: repo.created)
+                        {
+                            $0[.dt] = "Created"
+                            $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
+                        }
+                        if  let updated:Timestamp = .init(iso8601: repo.updated),
+                            let updated:UnixInstant = .init(timestamp: updated)
+                        {
+                            let age:Duration = now - updated
+
+                            $0[.dt] = "Last Pushed"
+                            $0[.dd]
+                            {
+                                if      age.components.seconds < 2 * 60
+                                {
+                                    $0 += "just now"
+                                }
+                                else if age.components.seconds < 2 * 60 * 60
+                                {
+                                    $0 += "\(age.components.seconds / 60) minutes ago"
+                                }
+                                else if age.components.seconds < 2 * 24 * 3600
+                                {
+                                    $0 += "\(age.components.seconds / 3600) hours ago"
+                                }
+                                else
+                                {
+                                    $0 += "\(age.components.seconds / 86400) days ago"
+                                }
+
+                                $0 += " ("
+
+                                $0[.a]
+                                {
+                                    $0.href = "\(Site.Tags[self.names.package])"
+                                } = "view tags"
+
+                                $0 += ")"
+                            }
+                        }
                     }
                 }
             }
@@ -172,6 +258,20 @@ extension Site.Docs.Meta:ApplicationPage
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            if !self.master.platforms.isEmpty
+            {
+                $0[.h2] = "Platform Requirements"
+
+                $0[.dl]
+                {
+                    for platform:PlatformRequirement in self.master.platforms
+                    {
+                        $0[.dt] = "\(platform.id)"
+                        $0[.dd] = "\(platform.min)"
                     }
                 }
             }

@@ -4,7 +4,7 @@ import UnixTime
 extension BSON.Millisecond
 {
     @inlinable public
-    init(_ unix:UnixTime)
+    init(_ unix:UnixInstant)
     {
         self.init(1000 * unix.second + unix.nanoseconds / 1_000_000)
     }
