@@ -4,6 +4,7 @@ extension Site.API
     enum Post:String
     {
         case index
+        case uplink
     }
 }
 extension Site.API.Post:StaticAPI

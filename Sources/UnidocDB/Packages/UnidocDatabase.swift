@@ -72,6 +72,8 @@ extension UnidocDatabase:DatabaseModel
         try await self.siteMaps.setup(with: session)
     }
 }
+
+@available(*, unavailable, message: "unused")
 extension UnidocDatabase
 {
     private
@@ -84,134 +86,7 @@ extension UnidocDatabase
         try await self.names.replace(with: session)
         try await self.siteMaps.replace(with: session)
     }
-}
-extension UnidocDatabase
-{
-    //  TODO: we need to get out of the habit of performing database-wide rebuilds;
-    //  this procedure should be deprecated!
-    public
-    func _rebuild(with session:__shared Mongo.Session) async throws -> Int
-    {
-        //  TODO: we need to implement some kind of locking mechanism to prevent
-        //  race conditions between rebuilds and pushes. This cannot be done with
-        //  MongoDB transactions because deleting a very large number of records
-        //  overflows the transaction cache.
-        try await self._clear(with: session)
 
-        print("cleared all unidoc volumes...")
-
-        // var origins:[Int32: Volume.Origin?] = [:]
-        var count:Int = 0
-
-        try await self.graphs.list(with: session)
-        {
-            (snapshot:Snapshot) in
-
-            let volume:Volume = try await self.link(snapshot, with: session)
-
-            try await self.publish(volume, with: session)
-
-            count += 1
-
-            print("regenerated records for snapshot: \(snapshot.id)")
-        }
-
-        return count
-    }
-}
-
-extension UnidocDatabase
-{
-    @_spi(testable)
-    public
-    func track(package:PackageIdentifier,
-        with session:Mongo.Session) async throws -> Int32
-    {
-        try await self.packages.register(package,
-            updating: self.meta,
-            tracking: nil,
-            with: session).coordinate
-    }
-
-    public
-    func track(repo:GitHub.Repo, with session:Mongo.Session) async throws -> Int32
-    {
-        /// Currently, package identifiers are just the name of the repository.
-        try await self.packages.register(.init(repo.name),
-            updating: self.meta,
-            tracking: .github(repo),
-            with: session).coordinate
-    }
-
-    public
-    func store(docs:SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> SnapshotReceipt
-    {
-        let placement:Packages.Placement = try await self.packages.register(
-            docs.metadata.package,
-            updating: self.meta,
-            tracking: nil,
-            with: session)
-
-        let version:Int32
-
-        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
-            let semver:SemanticVersion = .init(refname: commit.refname)
-        {
-            let placement:Editions.Placement = try await self.editions.register(
-                package: placement.coordinate,
-                version: semver,
-                refname: commit.refname,
-                sha1: commit.hash,
-                with: session)
-
-            version = placement.coordinate
-        }
-        else if case .swift = docs.metadata.package,
-            let tagname:String = docs.metadata.commit?.refname
-        {
-            //  FIXME: we need a better way to handle this
-            let semver:SemanticVersion
-            switch tagname
-            {
-            case "swift-5.8.1-RELEASE": semver = .release(.v(5, 8, 1))
-            case "swift-5.9-RELEASE":   semver = .release(.v(5, 9, 0))
-            case _:
-                fatalError("unimplemented")
-            }
-
-            let placement:Editions.Placement = try await self.editions.register(
-                package: placement.coordinate,
-                version: semver,
-                refname: tagname,
-                sha1: nil,
-                with: session)
-
-            version = placement.coordinate
-        }
-        else
-        {
-            version = -1
-        }
-
-        let snapshot:Snapshot = .init(
-            package: placement.coordinate,
-            version: version,
-            metadata: docs.metadata,
-            graph: docs.graph)
-
-        let upsert:SnapshotReceipt.Upsert = try await self.graphs.upsert(snapshot,
-            with: session)
-
-        return .init(id: snapshot.id,
-            edition: snapshot.edition,
-            type: upsert,
-            repo: placement.repo)
-    }
-}
-extension UnidocDatabase
-{
-    @available(*, unavailable, message: "unused")
     func _editions(of package:PackageIdentifier,
         with session:Mongo.Session) async throws -> [PackageEdition]
     {
@@ -306,11 +181,102 @@ extension UnidocDatabase
 
 extension UnidocDatabase
 {
+    @_spi(testable)
     public
-    func publish(linking docs:__owned SymbolGraphArchive,
+    func track(package:PackageIdentifier,
+        with session:Mongo.Session) async throws -> Int32
+    {
+        try await self.packages.register(package,
+            updating: self.meta,
+            tracking: nil,
+            with: session).coordinate
+    }
+
+    public
+    func track(repo:GitHub.Repo, with session:Mongo.Session) async throws -> Int32
+    {
+        /// Currently, package identifiers are just the name of the repository.
+        try await self.packages.register(.init(repo.name),
+            updating: self.meta,
+            tracking: .github(repo),
+            with: session).coordinate
+    }
+
+    public
+    func store(docs:SymbolGraphArchive,
+        with session:Mongo.Session) async throws -> SnapshotReceipt
+    {
+        let placement:Packages.Placement = try await self.packages.register(
+            docs.metadata.package,
+            updating: self.meta,
+            tracking: nil,
+            with: session)
+
+        let version:Int32
+
+        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
+            let semver:SemanticVersion = .init(refname: commit.refname)
+        {
+            let placement:Editions.Placement = try await self.editions.register(
+                package: placement.coordinate,
+                version: semver,
+                refname: commit.refname,
+                sha1: commit.hash,
+                with: session)
+
+            version = placement.coordinate
+        }
+        else if case .swift = docs.metadata.package,
+            let tagname:String = docs.metadata.commit?.refname
+        {
+            //  FIXME: we need a better way to handle this
+            let semver:SemanticVersion
+            switch tagname
+            {
+            case "swift-5.8.1-RELEASE": semver = .release(.v(5, 8, 1))
+            case "swift-5.9-RELEASE":   semver = .release(.v(5, 9, 0))
+            case _:
+                fatalError("unimplemented")
+            }
+
+            let placement:Editions.Placement = try await self.editions.register(
+                package: placement.coordinate,
+                version: semver,
+                refname: tagname,
+                sha1: nil,
+                with: session)
+
+            version = placement.coordinate
+        }
+        else
+        {
+            version = -1
+        }
+
+        let snapshot:Snapshot = .init(
+            package: placement.coordinate,
+            version: version,
+            metadata: docs.metadata,
+            graph: docs.graph)
+
+        let upsert:SnapshotReceipt.Upsert = try await self.graphs.upsert(snapshot,
+            with: session)
+
+        return .init(id: snapshot.id,
+            edition: snapshot.edition,
+            type: upsert,
+            repo: placement.repo)
+    }
+}
+
+extension UnidocDatabase
+{
+    public
+    func publish(_ docs:__owned SymbolGraphArchive,
         with session:Mongo.Session) async throws -> SnapshotReceipt
     {
         let receipt:SnapshotReceipt = try await self.store(docs: docs, with: session)
+
         let volume:Volume = try await self.link(.init(
                 package: receipt.package,
                 version: receipt.version,
@@ -318,26 +284,56 @@ extension UnidocDatabase
                 graph: docs.graph),
             with: session)
 
-        if  case .update = receipt.type
+        _ = consume docs
+
+        try await self.fill(volume: consume volume,
+            clear: receipt.type == .update,
+            with: session)
+
+        return receipt
+    }
+
+    public
+    func uplink(
+        package:Int32,
+        version:Int32?,
+        with session:Mongo.Session) async throws -> Int
+    {
+        var uplinked:Int = 0
+
+        try await self.graphs.list(
+            filter: (package: package, version: version),
+            with: session)
         {
-            try await self.search.delete(volume.id, with: session)
+            try await self.fill(
+                volume: try await self.link($0, with: session),
+                clear: true,
+                with: session)
 
-            try await self.vertices.clear(receipt.edition, with: session)
-            try await self.groups.clear(receipt.edition, with: session)
-            try await self.trees.clear(receipt.edition, with: session)
-
-            try await self.names.delete(receipt.edition, with: session)
+            uplinked += 1
         }
 
-        try await self.publish(volume, with: session)
-        return receipt
+        return uplinked
     }
 }
 extension UnidocDatabase
 {
     private
-    func publish(_ volume:__owned Volume, with session:__shared Mongo.Session) async throws
+    func fill(volume:__owned Volume,
+        clear:Bool = true,
+        with session:Mongo.Session) async throws
     {
+        if  clear
+        {
+            try await self.search.delete(volume.id, with: session)
+
+            try await self.vertices.clear(volume.edition, with: session)
+            try await self.groups.clear(volume.edition, with: session)
+            try await self.trees.clear(volume.edition, with: session)
+
+            try await self.names.delete(volume.edition, with: session)
+        }
+
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
         try await self.vertices.insert(some: volume.vertices, with: session)
@@ -416,8 +412,8 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     public
-    func siteMap(package:__owned PackageIdentifier,
-        with session:__shared Mongo.Session) async throws -> Volume.SiteMap<PackageIdentifier>?
+    func siteMap(package:consuming PackageIdentifier,
+        with session:Mongo.Session) async throws -> Volume.SiteMap<PackageIdentifier>?
     {
         try await self.siteMaps.find(by: package, with: session)
     }

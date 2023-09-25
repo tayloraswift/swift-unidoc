@@ -29,6 +29,11 @@ struct Volume
         self.names = names
     }
 }
+extension Volume
+{
+    @inlinable public
+    var edition:Unidoc.Zone { self.names.id }
+}
 extension Volume:Identifiable
 {
     @inlinable public

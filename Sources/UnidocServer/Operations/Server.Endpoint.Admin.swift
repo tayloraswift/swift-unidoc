@@ -59,11 +59,6 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
 
-        case .perform(.rebuild, _):
-            let rebuilt:Int = try await server.db.unidoc._rebuild(with: session)
-
-            page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
-
         case .perform(.upload, let form?):
             var receipts:[SnapshotReceipt] = []
 
@@ -71,8 +66,7 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
                 where item.header.name == "documentation-binary"
             {
                 let documentation:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:SnapshotReceipt = try await server.db.unidoc.publish(
-                    linking: documentation,
+                let receipt:SnapshotReceipt = try await server.db.unidoc.publish(documentation,
                     with: session)
 
                 receipts.append(receipt)
