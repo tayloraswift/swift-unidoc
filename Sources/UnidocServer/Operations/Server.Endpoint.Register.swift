@@ -34,11 +34,11 @@ extension Server.Endpoint.Register:InteractiveEndpoint
             role: user.id == 2556986 ? .administrator : .human)
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:String = try await server.db.account.users.update(
+        let cookie:Account.Cookie = try await server.db.account.users.update(
             account: account,
             with: session)
 
         return .redirect(.temporary("\(Site.Admin.uri)"),
-            cookies: [Server.Cookies.session: cookie])
+            cookies: [Server.Cookies.session: "\(cookie)"])
     }
 }

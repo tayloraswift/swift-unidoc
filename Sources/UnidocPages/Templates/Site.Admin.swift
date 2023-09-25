@@ -69,30 +69,29 @@ extension Site.Admin:RenderablePage
     public
     var title:String { "Administrator Tools" }
 }
-extension Site.Admin:StaticPage
-{
-    public
-    func head(augmenting head:inout HTML.ContentEncoder)
-    {
-        head[.link]
-        {
-            $0.href = "\(Site.Asset[.admin_css])"
-            $0.rel = .stylesheet
-        }
-    }
-}
 extension Site.Admin:AdministrativePage
 {
     public
     func main(_ main:inout HTML.ContentEncoder)
     {
-        main[.h2] = "Welcome Empress!"
+        main[.h1] = "Welcome Empress!"
 
         main[.p]
         {
             $0 += "This is a "
             $0[.strong] = self.real ? "real" : "test"
             $0 += " deployment."
+        }
+
+        main[.hr]
+
+        main[.nav, { $0.class = "admin" }]
+        {
+            $0[.ul]
+            {
+                $0[.li] { $0[.a] { $0.href = "\(Site.Admin.Recode.uri)" } = "Manage Schema" }
+                $0[.li] { $0[.a] { $0.href = "\(Site.Admin.Slaves.uri)" } = "Manage Slaves" }
+            }
         }
 
         main[.hr]
@@ -153,31 +152,6 @@ extension Site.Admin:AdministrativePage
             $0[.p]
             {
                 $0[.button] { $0.type = "submit" } = Action.upload.label
-            }
-        }
-
-        for target:Recode.Target in
-        [
-            .packages,
-            .editions,
-            .vertices,
-            .names,
-        ]
-        {
-            main[.hr]
-
-            main[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Recode[target])"
-                $0.method = "get"
-            }
-                content:
-            {
-                $0[.p]
-                {
-                    $0[.button] { $0.type = "submit" } = "Recode \(target.label)"
-                }
             }
         }
 

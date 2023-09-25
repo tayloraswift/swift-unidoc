@@ -22,12 +22,15 @@ extension Site.Admin.Recode
         }
     }
 }
+extension Site.Admin.Recode.Complete:RenderablePage
+{
+    public
+    var title:String { "Migration complete" }
+}
 extension Site.Admin.Recode.Complete:StaticPage
 {
     public
-    var location:URI { Site.Admin.Recode[self.target] }
-    public
-    var title:String { "Migration complete" }
+    var location:URI { self.target.location }
 }
 extension Site.Admin.Recode.Complete:AdministrativePage
 {

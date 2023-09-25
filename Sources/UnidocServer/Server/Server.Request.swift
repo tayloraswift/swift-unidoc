@@ -3,18 +3,17 @@ import NIOCore
 
 extension Server
 {
-    struct InteractiveRequest:Sendable
+    struct Request<Endpoint>:Sendable where Endpoint:Sendable
     {
-        let operation:any InteractiveEndpoint
+        let endpoint:Endpoint
         let cookies:Cookies
         let promise:EventLoopPromise<ServerResponse>
 
-        init(
-            operation:any InteractiveEndpoint,
+        init(endpoint:Endpoint,
             cookies:Cookies,
             promise:EventLoopPromise<ServerResponse>)
         {
-            self.operation = operation
+            self.endpoint = endpoint
             self.cookies = cookies
             self.promise = promise
         }
