@@ -12,7 +12,7 @@ extension Server.Endpoint
     enum Admin
     {
         case perform(Site.Admin.Action, MultipartForm?)
-        case recode(Site.Admin.Recode)
+        case recode(Site.Admin.Recode.Target)
     }
 }
 extension Server.Endpoint.Admin:RestrictedEndpoint
@@ -24,22 +24,22 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
 
         switch self
         {
-        case .recode(let recode):
-            let target:any RecodableCollection
+        case .recode(let target):
+            let collection:any RecodableCollection
 
-            switch recode.target
+            switch target
             {
-            case .packages:    target = server.db.unidoc.packages
-            case .editions:    target = server.db.unidoc.editions
-            case .vertices:    target = server.db.unidoc.vertices
-            case .names:       target = server.db.unidoc.names
+            case .packages:    collection = server.db.unidoc.packages
+            case .editions:    collection = server.db.unidoc.editions
+            case .vertices:    collection = server.db.unidoc.vertices
+            case .names:       collection = server.db.unidoc.names
             }
 
-            let (modified, selected):(Int, Int) = try await target.recode(with: session)
+            let (modified, selected):(Int, Int) = try await collection.recode(with: session)
             let complete:Site.Admin.Recode.Complete = .init(
                 selected: selected,
                 modified: modified,
-                target: recode.target)
+                target: target)
 
             return .ok(complete.resource())
 
@@ -59,11 +59,6 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
 
-        case .perform(.rebuild, _):
-            let rebuilt:Int = try await server.db.unidoc._rebuild(with: session)
-
-            page = .init(action: .rebuild, text: "Rebuilt \(rebuilt) snapshots!")
-
         case .perform(.upload, let form?):
             var receipts:[SnapshotReceipt] = []
 
@@ -71,8 +66,7 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
                 where item.header.name == "documentation-binary"
             {
                 let documentation:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:SnapshotReceipt = try await server.db.unidoc.publish(
-                    linking: documentation,
+                let receipt:SnapshotReceipt = try await server.db.unidoc.publish(documentation,
                     with: session)
 
                 receipts.append(receipt)

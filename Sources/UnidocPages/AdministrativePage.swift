@@ -9,6 +9,16 @@ protocol AdministrativePage:StaticPage
 extension AdministrativePage
 {
     public
+    func head(augmenting head:inout HTML.ContentEncoder)
+    {
+        head[.link]
+        {
+            $0.href = "\(Site.Asset[.admin_css])"
+            $0.rel = .stylesheet
+        }
+    }
+
+    public
     func body(_ body:inout HTML.ContentEncoder)
     {
         body[.header]

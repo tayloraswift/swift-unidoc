@@ -1,6 +1,7 @@
 import BSONDecoding
 import HTTP
 import MongoDB
+import UnidocDB
 import UnidocLinker
 
 extension Server.Endpoint
@@ -12,8 +13,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.GraphStorage:ProceduralEndpoint
 {
-    func perform(on server:Server.ProceduralState,
-        with ticket:Int64) async throws -> ServerResponse
+    func perform(on server:Server.ProceduralState) async throws -> ServerResponse
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
@@ -26,14 +26,10 @@ extension Server.Endpoint.GraphStorage:ProceduralEndpoint
             switch try await server.db.unidoc.graphs.upsert(snapshot, with: session)
             {
             case .insert:
-                return .ok(.init(
-                    content: .string("Inserted"),
-                    type: .text(.plain, charset: .utf8)))
+                return .ok("Inserted")
 
             case .update:
-                return .ok(.init(
-                    content: .string("Updated"),
-                    type: .text(.plain, charset: .utf8)))
+                return .ok("Updated")
             }
         }
     }

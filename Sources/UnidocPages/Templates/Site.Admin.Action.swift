@@ -11,7 +11,6 @@ extension Site.Admin
 
         case lintUnidocEditions = "lint-unidoc-editions"
 
-        case rebuild = "rebuild"
         case upload = "upload"
     }
 }
@@ -24,7 +23,6 @@ extension Site.Admin.Action
         case .dropAccountDB:            return "Drop Account Database"
         case .dropUnidocDB:             return "Drop Unidoc Database"
         case .lintUnidocEditions:       return "Lint Editions"
-        case .rebuild:                  return "Rebuild Collections"
         case .upload:                   return "Upload Snapshots"
         }
     }
@@ -43,11 +41,6 @@ extension Site.Admin.Action
         case .lintUnidocEditions:
             return """
             This will delete all editions lacking a commit hash. Are you sure?
-            """
-
-        case .rebuild:
-            return """
-            This will rebuild all collections. Are you sure?
             """
 
         case .upload:

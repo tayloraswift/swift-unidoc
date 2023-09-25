@@ -10,7 +10,9 @@ extension Site.Asset.Get:CacheKey
     {
         switch self
         {
-        case    .main_css,
+        case    .admin_css,
+                .admin_css_map,
+                .main_css,
                 .main_css_map,
                 .main_js,
                 .main_js_map:
