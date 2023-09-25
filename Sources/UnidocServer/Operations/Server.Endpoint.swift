@@ -15,7 +15,8 @@ extension Server
 {
     enum Endpoint:Sendable
     {
-        case interactive(any InteractiveOperation)
+        case interactive(any InteractiveEndpoint)
+        case procedural(any ProceduralEndpoint)
         case stateless(ServerResponse)
         case `static`(Cache<Site.Asset.Get>.Request)
     }
@@ -24,180 +25,75 @@ extension Server
 extension Server.Endpoint
 {
     static
-    func get(root:String, rest:ArraySlice<String>, uri:URI, tag:MD5?) -> Self?
+    func get(admin trunk:String, _ stem:ArraySlice<String>, tag:MD5?) -> Self?
     {
-        if  let trunk:Int = rest.indices.first
+        if  let action:Site.Admin.Action = .init(rawValue: trunk)
         {
-            return .get(root: root,
-                trunk: rest[trunk],
-                stem: rest[rest.index(after: trunk)...],
-                uri: uri,
-                tag: tag)
+            return .stateless(.ok(action.resource()))
+        }
+        else if trunk == "recode",
+            let target:String = stem.first,
+            let target:Site.Admin.Recode.Target = .init(rawValue: target)
+        {
+            return .stateless(.ok(Site.Admin.Recode.init(target: target).resource()))
         }
         else
         {
-            return .get(root: root, uri: uri, tag: tag)
+            return nil
         }
     }
 
-    private static
-    func get(root:String, uri:URI, tag:MD5?) -> Self?
+    static
+    func get(api trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self?
     {
-        switch root
+        guard
+        let trunk:Site.API.Get = .init(trunk)
+        else
         {
-        case Site.Admin.root:   return .interactive(Server.Operation.AdminDashboard.status)
-        case Site.Login.root:   return .interactive(Server.Operation.Bounce.init())
-        case "robots.txt":      return .static(.init(.robots_txt, tag: tag))
-        case _:                 return nil
+            return nil
         }
+
+        switch trunk
+        {
+        case .build:
+            if  let package:String = stem.first
+            {
+                return .interactive(Pipeline<PackageEditionsQuery>.init(
+                    output: parameters.explain ? nil : .application(.json),
+                    query: .init(package: .init(package), limit: 1),
+                    tag: tag))
+            }
+        }
+
+        return nil
     }
 
-    private static
-    func get(root:String, trunk:String, stem:ArraySlice<String>, uri:URI, tag:MD5?) -> Self?
+    static
+    func get(asset trunk:String, tag:MD5?) -> Self?
     {
-        switch root
+        let asset:Site.Asset.Get? = .init(trunk)
+        return asset.map { .static(.init($0, tag: tag)) }
+    }
+
+    static
+    func get(auth trunk:String, with parameters:AuthParameters) -> Self?
+    {
+        switch trunk
         {
-        case Site.Admin.root:
-            if  let action:Site.Admin.Action = .init(rawValue: trunk)
+        case "github":
+            if  let state:String = parameters.state,
+                let code:String = parameters.code
             {
-                return .stateless(.ok(action.resource()))
-            }
-            else if trunk == "recode",
-                let target:String = stem.first,
-                let target:Site.Admin.Recode.Target = .init(rawValue: target)
-            {
-                return .stateless(.ok(Site.Admin.Recode.init(target: target).resource()))
-            }
-            else
-            {
-                return nil
+                return .interactive(Login.init(state: state, code: code))
             }
 
-        case Site.Asset.root:
-            let asset:Site.Asset.Get? = .init(trunk)
-            return asset.map { .static(.init($0, tag: tag)) }
-
-        case "sitemaps":
-            //  Ignore file extension.
-            return .interactive(Server.Operation.SiteMap.init(
-                package: .init(trunk.prefix { $0 != "." }),
-                uri: uri,
-                tag: tag))
-
-        case "reference":
-            return .get(legacy: trunk, stem: stem, uri: uri)
-
-        case "learn":
-            return .get(legacy: trunk, stem: stem, uri: uri)
-
-        case _:
-            break
-        }
-
-        var explain:Bool = false
-        var hash:FNV24? = nil
-
-        for (key, value):(String, String) in uri.query?.parameters ?? []
-        {
-            switch key
+        case "register":
+            if  let token:String = parameters.token
             {
-            case "explain": explain = value == "true"
-            case "hash":    hash = .init(value)
-            case _:         continue
-            }
-        }
-
-        switch root
-        {
-        case Site.API.root:
-            switch Site.API.Get.init(trunk)
-            {
-            case nil:
-                return nil
-
-            case .build?:
-                if  let package:String = stem.first
-                {
-                    return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
-                        output: explain ? nil : .application(.json),
-                        query: .init(package: .init(package), limit: 1),
-                        uri: uri,
-                        tag: tag))
-                }
-
-            case .github?:
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Server.Operation.Login = .init(parameters: parameters)
-                {
-                    return .interactive(operation)
-                }
-
-            case .register?:
-                if  let parameters:[(String, String)] = uri.query?.parameters,
-                    let operation:Server.Operation.Register = .init(parameters: parameters)
-                {
-                    return .interactive(operation)
-                }
-            }
-
-        case Site.Tags.root:
-            return .interactive(Server.Operation.Pipeline<PackageEditionsQuery>.init(
-                output: explain ? nil : .text(.html),
-                query: .init(package: .init(trunk)),
-                uri: uri,
-                tag: tag))
-
-        case Site.Docs.root:
-            return .interactive(Server.Operation.Pipeline<WideQuery>.init(
-                output: explain ? nil : .text(.html),
-                query: .init(
-                    volume: .init(trunk),
-                    lookup: .init(stem: stem, hash: hash)),
-                uri: uri,
-                tag: tag))
-
-        case Site.Guides.root:
-            return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Range>>.init(
-                output: explain ? nil : .text(.html),
-                query: .init(
-                    volume: .init(trunk),
-                    lookup: .articles),
-                uri: uri,
-                tag: tag))
-
-        case "articles":
-            return .interactive(Server.Operation.Pipeline<WideQuery>.init(
-                output: explain ? nil : .text(.html),
-                query: .init(
-                    volume: .init(package: "__swiftinit", version: "0.0.0"),
-                    lookup: .init(stem: ["Articles", trunk], hash: nil)),
-                uri: uri,
-                tag: tag))
-
-        case "lunr":
-            if  let id:VolumeIdentifier = .init(trunk)
-            {
-                return .interactive(
-                    Server.Operation.Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
-                    output: explain ? nil : .application(.json),
-                    query: .init(
-                        from: UnidocDatabase.Search.name,
-                        tag: tag,
-                        id: id),
-                    uri: uri,
-                    tag: tag))
-            }
-            else if trunk == "packages.json"
-            {
-                return .interactive(
-                    Server.Operation.Pipeline<SearchIndexQuery<Int32>>.init(
-                    output: explain ? nil : .application(.json),
-                    query: .init(
-                        from: UnidocDatabase.Meta.name,
-                        tag: tag,
-                        id: 0),
-                    uri: uri,
-                    tag: tag))
+                return .interactive(Register.init(token: token))
             }
 
         case _:
@@ -207,40 +103,114 @@ extension Server.Endpoint
         return nil
     }
 
-    private static
-    func get(
-        legacy trunk:String,
-        stem:ArraySlice<String>,
-        uri:URI) -> Self
+    static
+    func get(articles trunk:String,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self
     {
-        var overload:Symbol.Decl? = nil
-        var from:String? = nil
+        .interactive(Pipeline<WideQuery>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(
+                volume: .init(package: "__swiftinit", version: "0.0.0"),
+                lookup: .init(stem: ["Articles", trunk], hash: nil)),
+            tag: tag))
+    }
 
-        for (key, value):(String, String) in uri.query?.parameters ?? []
+    static
+    func get(docs trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self
+    {
+        .interactive(Pipeline<WideQuery>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(
+                volume: .init(trunk),
+                lookup: .init(stem: stem, hash: parameters.hash)),
+            tag: tag))
+    }
+
+    static
+    func get(guides trunk:String,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self
+    {
+        .interactive(Pipeline<ThinQuery<Volume.Range>>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(
+                volume: .init(trunk),
+                lookup: .articles),
+            tag: tag))
+    }
+
+    static
+    func get(lunr trunk:String,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self?
+    {
+        if  let id:VolumeIdentifier = .init(trunk)
         {
-            switch key
-            {
-            case "overload":    overload = .init(rawValue: value)
-            case "from":        from = value
-            case _:             continue
-            }
+            return .interactive(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
+                output: parameters.explain ? nil : .application(.json),
+                query: .init(
+                    from: UnidocDatabase.Search.name,
+                    tag: tag,
+                    id: id),
+                tag: tag))
+        }
+        else if trunk == "packages.json"
+        {
+            return .interactive(Pipeline<SearchIndexQuery<Int32>>.init(
+                output: parameters.explain ? nil : .application(.json),
+                query: .init(
+                    from: UnidocDatabase.Meta.name,
+                    tag: tag,
+                    id: 0),
+                tag: tag))
         }
 
-        let query:ThinQuery<Volume.Shoot> = .legacy(head: trunk, rest: stem, from: from)
+        return nil
+    }
 
-        if  let overload:Symbol.Decl
+    static
+    func get(sitemaps trunk:String, tag:MD5?) -> Self
+    {
+        //  Ignore file extension.
+        .interactive(SiteMap.init(
+            package: .init(trunk.prefix { $0 != "." }),
+            tag: tag))
+    }
+
+    static
+    func get(tags trunk:String, with parameters:PipelineParameters, tag:MD5?) -> Self
+    {
+        .interactive(Pipeline<PackageEditionsQuery>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(package: .init(trunk)),
+            tag: tag))
+    }
+
+    static
+    func get(
+        legacy trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:LegacyParameters) -> Self
+    {
+        let query:ThinQuery<Volume.Shoot> = .legacy(head: trunk,
+            rest: stem,
+            from: parameters.from)
+
+        if  let overload:Symbol.Decl = parameters.overload
         {
-            return .interactive(Server.Operation.Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .interactive(Pipeline<ThinQuery<Symbol.Decl>>.init(
                 output: .text(.html),
-                query: .init(volume: query.volume, lookup: overload),
-                uri: uri))
+                query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
-            return .interactive(Server.Operation.Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .interactive(Pipeline<ThinQuery<Volume.Shoot>>.init(
                 output: .text(.html),
-                query: query,
-                uri: uri))
+                query: query))
         }
     }
 }
@@ -249,40 +219,21 @@ extension Server.Endpoint
 extension Server.Endpoint
 {
     static
-    func post(root:String, rest:ArraySlice<String>, form:AnyForm) -> Self?
+    func post(admin action:String, _ rest:ArraySlice<String>,
+        body:[UInt8],
+        type:ContentType) throws -> Self?
     {
-        switch root
-        {
-        case Site.Admin.root:   return .post(admin: rest, form: form)
-        case Site.API.root:     return .post(api: rest, form: form)
-        case _:                 return nil
-        }
-    }
-}
-extension Server.Endpoint
-{
-    private static
-    func post(admin rest:ArraySlice<String>, form:AnyForm) -> Self?
-    {
-        var rest:ArraySlice<String> = rest
-
-        guard
-        let action:String = rest.popFirst()
-        else
-        {
-            return nil
-        }
-
         if  let action:Site.Admin.Action = .init(rawValue: action),
-            case .multipart(let form) = form
+            case  .multipart(.form_data(boundary: let boundary?)) = type
         {
-            return .interactive(Server.Operation.Admin.perform(action, form))
+            let form:MultipartForm = try .init(splitting: body, on: boundary)
+            return .interactive(Admin.perform(action, form))
         }
         else if action == "recode",
-            let target:String = rest.popFirst(),
+            let target:String = rest.first,
             let target:Site.Admin.Recode.Target = .init(rawValue: target)
         {
-            return .interactive(Server.Operation.Admin.recode(.init(target: target)))
+            return .interactive(Admin.recode(.init(target: target)))
         }
         else
         {
@@ -290,23 +241,30 @@ extension Server.Endpoint
         }
     }
 
-    private static
-    func post(api rest:ArraySlice<String>, form:AnyForm) -> Self?
+    static
+    func post(api trunk:String,
+        body:[UInt8],
+        type:ContentType) throws -> Self?
     {
-        guard   let trunk:String = rest.first,
-                let trunk:Site.API.Post = .init(trunk)
+        guard
+        let trunk:Site.API.Post = .init(trunk)
         else
         {
             return nil
         }
 
-        switch (trunk, form)
+        switch (trunk, type)
         {
-        case (.index, .urlencoded(let parameters)):
-            if  let owner:String = parameters["owner"],
-                let repo:String = parameters["repo"]
+        case (.index, .media(.application(.x_www_form_urlencoded, charset: _))):
+            let query:URI.Query = try .parse(parameters: body)
+            let form:[String: String] = query.parameters.reduce(into: [:])
             {
-                return .interactive(Server.Operation._SyncRepository.init(
+                $0[$1.key] = $1.value
+            }
+            if  let owner:String = form["owner"],
+                let repo:String = form["repo"]
+            {
+                return .interactive(_SyncRepository.init(
                     owner: owner,
                     repo: repo))
             }
@@ -316,5 +274,33 @@ extension Server.Endpoint
         }
 
         return nil
+    }
+}
+
+//  PUT endpoints
+extension Server.Endpoint
+{
+    static
+    func put(api trunk:String, body:[UInt8], type:ContentType) throws -> Self?
+    {
+        guard
+        let trunk:Site.API.Put = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        switch (trunk, type)
+        {
+        case (.symbolgraph, .media(.application(.bson, charset: nil))):
+            //  This runs on the HTTP channel’s ``EventLoop``, and we *do not* want to
+            //  parse the body here, even if that would give us an opportunity to reject
+            //  the request early.
+            return .procedural(Server.Endpoint.GraphStorage.put(bson: body))
+
+        case (_, _):
+            return nil
+        }
+
     }
 }

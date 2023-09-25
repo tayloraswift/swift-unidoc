@@ -12,7 +12,7 @@ struct Massbuilder
     init() async throws
     {
         self.toolchain = try await .detect()
-        self.workspace = try await .create(at: ".massbuild")
+        self.workspace = try await .create(at: ".swiftinit")
     }
 }
 extension Massbuilder

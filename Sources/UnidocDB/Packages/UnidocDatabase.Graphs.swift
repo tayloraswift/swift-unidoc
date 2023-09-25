@@ -58,6 +58,19 @@ extension UnidocDatabase.Graphs:DatabaseCollection
 
 extension UnidocDatabase.Graphs
 {
+    public
+    func upsert(_ graph:__owned Snapshot,
+        with session:Mongo.Session) async throws -> SnapshotReceipt.Upsert
+    {
+        switch try await self.upsert(some: graph, with: session)
+        {
+        case nil:   return .update
+        case  _?:   return .insert
+        }
+    }
+}
+extension UnidocDatabase.Graphs
+{
     func list(package:Int32? = nil,
         with session:Mongo.Session,
         _ yield:(Snapshot) async throws -> ()) async throws
@@ -122,7 +135,7 @@ extension UnidocDatabase.Graphs
 }
 extension UnidocDatabase.Graphs
 {
-    public
+    @available(*, unavailable, message: "unused")
     func metadata(
         package:PackageIdentifier,
         limit:Int = 1,

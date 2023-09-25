@@ -84,11 +84,11 @@ extension HTTP2Client
 {
     /// Connect to the remote host over HTTPS and perform the given operation.
     @inlinable public
-    func connect<T>(with body:(Connection) async throws -> T) async throws -> T
+    func connect<T>(port:Int = 443, with body:(Connection) async throws -> T) async throws -> T
     {
         let channel:any Channel = try await self.bootstrap.connect(
             host: self.remote,
-            port: 443).get()
+            port: port).get()
 
         defer
         {

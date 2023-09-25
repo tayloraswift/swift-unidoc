@@ -6,7 +6,7 @@ import UnidocPages
 extension Server
 {
     @dynamicMemberLookup
-    struct State
+    struct InteractiveState
     {
         private
         let server:Server
@@ -22,19 +22,19 @@ extension Server
         }
     }
 }
-extension Server.State
+extension Server.InteractiveState
 {
     subscript<T>(dynamicMember keyPath:KeyPath<Server, T>) -> T
     {
         self.server[keyPath: keyPath]
     }
 }
-extension Server.State
+extension Server.InteractiveState
 {
     mutating
-    func respond(to requests:AsyncStream<Server.Request>) async throws
+    func respond(to requests:AsyncStream<Server.InteractiveRequest>) async throws
     {
-        for await request:Server.Request in requests
+        for await request:Server.InteractiveRequest in requests
         {
             try Task.checkCancellation()
 
@@ -50,16 +50,17 @@ extension Server.State
                         content: .string("not found"),
                         type: .text(.plain, charset: .utf8)))
 
-                self.tour.stats.requests[keyPath: type] += 1
-
-                let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
-                    response.statisticalStatus
-
-                //  Don’t count visits to the admin tools.
-                if  type != \.restricted
+                //  Don’t increment stats from administrators,
+                //  they will really skew the results.
+                if  case nil = request.cookies.session
                 {
-                    self.tour.stats.responses[keyPath: status] += 1
+                    self.tour.stats.requests[keyPath: type] += 1
                     self.tour.stats.bytes[keyPath: type] += response.size
+
+                    let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
+                        response.statisticalStatus
+
+                    self.tour.stats.responses[keyPath: status] += 1
                 }
 
                 request.promise.succeed(response)

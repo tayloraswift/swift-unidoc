@@ -3,21 +3,14 @@ import HTTP
 import UnidocDB
 import UnidocPages
 
-protocol RestrictedOperation:InteractiveOperation
+protocol RestrictedEndpoint:InteractiveEndpoint
 {
     static
     func admit(_ role:Account.Role) -> Bool
 
-    func load(from state:Server.State) async throws -> ServerResponse?
+    func load(from state:Server.InteractiveState) async throws -> ServerResponse?
 }
-extension RestrictedOperation
-{
-    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
-    {
-        \.restricted
-    }
-}
-extension RestrictedOperation
+extension RestrictedEndpoint
 {
     static
     func admit(_ role:Account.Role) -> Bool
@@ -25,8 +18,8 @@ extension RestrictedOperation
         role == .administrator
     }
 
-    func load(from server:Server.State,
-        with cookies:Server.Request.Cookies) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState,
+        with cookies:Server.Cookies) async throws -> ServerResponse?
     {
         if  case .secured = server.mode
         {

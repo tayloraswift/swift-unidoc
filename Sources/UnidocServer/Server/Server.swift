@@ -20,7 +20,17 @@ struct Server:Sendable
     let port:Int
 
     private
-    let requests:(in:AsyncStream<Request>.Continuation, out:AsyncStream<Request>)
+    let interactive:
+    (
+        consumer:AsyncStream<InteractiveRequest>.Continuation,
+        requests:AsyncStream<InteractiveRequest>
+    )
+    private
+    let procedural:
+    (
+        consumer:AsyncStream<ProceduralRequest>.Continuation,
+        requests:AsyncStream<ProceduralRequest>
+    )
 
     private
     let github:GitHubPlugin?
@@ -42,12 +52,24 @@ struct Server:Sendable
         self.authority = authority
         self.port = port
 
-        var continuation:AsyncStream<Request>.Continuation? = nil
-        self.requests.out = .init
+        do
         {
-            continuation = $0
+            var continuation:AsyncStream<InteractiveRequest>.Continuation? = nil
+            self.interactive.requests = .init
+            {
+                continuation = $0
+            }
+            self.interactive.consumer = continuation!
         }
-        self.requests.in = continuation!
+        do
+        {
+            var continuation:AsyncStream<ProceduralRequest>.Continuation? = nil
+            self.procedural.requests = .init
+            {
+                continuation = $0
+            }
+            self.procedural.consumer = continuation!
+        }
 
         self.github = github
         self.cache = cache
@@ -167,10 +189,16 @@ extension Server
             }
             tasks.addTask
             {
-                var state:State = .init(server: self,
+                var state:InteractiveState = .init(server: self,
                     github: try self.github?.partner(on: threads))
 
-                try await state.respond(to: self.requests.out)
+                try await state.respond(to: self.interactive.requests)
+            }
+            tasks.addTask
+            {
+                var state:ProceduralState = .init(server: self)
+
+                try await state.respond(to: self.procedural.requests)
             }
 
             if  let github:GitHubPlugin = self.github
@@ -195,11 +223,21 @@ extension Server:HTTPServerDelegate
         switch operation.endpoint
         {
         case .interactive(let interactive):
-            let request:Request = .init(operation: interactive,
+            let request:InteractiveRequest = .init(operation: interactive,
                 cookies: operation.cookies,
                 promise: promise)
 
-            guard case .enqueued = self.requests.in.yield(request)
+            guard case .enqueued = self.interactive.consumer.yield(request)
+            else
+            {
+                fatalError("unimplemented")
+            }
+
+        case .procedural(let procedural):
+            let request:ProceduralRequest = .init(operation: procedural,
+                promise: promise)
+
+            guard case .enqueued = self.procedural.consumer.yield(request)
             else
             {
                 fatalError("unimplemented")

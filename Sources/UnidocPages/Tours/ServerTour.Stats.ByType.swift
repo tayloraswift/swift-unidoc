@@ -6,20 +6,16 @@ extension ServerTour.Stats
         public
         var siteMap:Int
         public
-        var restricted:Int
-        public
         var query:Int
         public
         var other:Int
 
         @inlinable public
         init(siteMap:Int = 0,
-            restricted:Int = 0,
             query:Int = 0,
             other:Int = 0)
         {
             self.siteMap = siteMap
-            self.restricted = restricted
             self.query = query
             self.other = other
         }
@@ -27,7 +23,7 @@ extension ServerTour.Stats
 }
 extension ServerTour.Stats.ByType
 {
-    /// The total count, except for the ``restricted`` type.
+    /// The total count.
     @inlinable public
     var total:Int
     {
