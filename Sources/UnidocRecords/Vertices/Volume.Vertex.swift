@@ -327,6 +327,10 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.symbol] = self.symbol
 
         case .meta(let self):
+            //  This must have a value, otherwise it would get lost among all the file
+            //  vertices, and queries for it would be very slow.
+            bson[.hash] = 0
+
             bson[.stem] = ""
             bson[.abi] = self.abi
             bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
