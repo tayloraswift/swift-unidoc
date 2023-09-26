@@ -73,6 +73,18 @@ extension Site.Docs.MultipleFound:ApplicationPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
+                $0[.span, { $0.class = "domain" }]
+                {
+                    $0[.span, { $0.class = "package" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.names])"
+                        } = "\(self.names.package)"
+                    }
+
+                    $0[.span] { $0.class = "version" } = self.names.version
+                }
             }
 
             var path:URI.Path = []
