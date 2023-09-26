@@ -24,7 +24,7 @@ enum Main
             niossl: niossl,
             remote: options.remote)
 
-        let swiftinit:SwiftinitClient = .init(http2: http2)
+        let swiftinit:SwiftinitClient = .init(http2: http2, cookie: options.cookie)
 
         let status:PackageBuildStatus = try await swiftinit.get(
             from: "/api/build/\(options.package)")
@@ -42,12 +42,14 @@ extension Main
     struct Options
     {
         var package:PackageIdentifier
+        var cookie:String
         var remote:String
 
         private
         init(package:PackageIdentifier)
         {
             self.package = package
+            self.cookie = ""
             self.remote = "swiftinit.org"
         }
     }
@@ -72,6 +74,16 @@ extension Main.Options
         {
             switch option
             {
+            case "--cookie", "-i":
+                guard
+                let cookie:String = arguments.popFirst()
+                else
+                {
+                    fatalError("Expected cookie after '\(option)'")
+                }
+
+                options.cookie = cookie
+
             case "--remote", "-h":
                 guard
                 let remote:String = arguments.popFirst()
@@ -98,11 +110,14 @@ struct SwiftinitClient
 {
     @usableFromInline internal
     let http2:HTTP2Client
+    @usableFromInline internal
+    let cookie:String
 
     @inlinable public
-    init(http2:HTTP2Client)
+    init(http2:HTTP2Client, cookie:String)
     {
         self.http2 = http2
+        self.cookie = cookie
     }
 }
 extension SwiftinitClient
@@ -112,7 +127,9 @@ extension SwiftinitClient
     {
         try await self.http2.connect
         {
-            try await body(Connection.init(http2: $0, to: self.http2.remote))
+            try await body(Connection.init(http2: $0,
+                cookie: self.cookie,
+                remote: self.http2.remote))
         }
     }
 }
@@ -137,12 +154,15 @@ extension SwiftinitClient
         @usableFromInline internal
         let http2:HTTP2Client.Connection
         @usableFromInline internal
+        let cookie:String
+        @usableFromInline internal
         let remote:String
 
         @inlinable internal
-        init(http2:HTTP2Client.Connection, to remote:String)
+        init(http2:HTTP2Client.Connection, cookie:String, remote:String)
         {
             self.http2 = http2
+            self.cookie = cookie
             self.remote = remote
         }
     }
@@ -167,7 +187,8 @@ extension SwiftinitClient.Connection
                 ":path": endpoint,
 
                 "user-agent": "UnidocBuild",
-                //"accept": "application/json"
+                "accept": "application/json",
+                "cookie": "__Host-session=\(self.cookie)",
             ]
 
             let response:HTTP2Client.Facet = try await self.http2.fetch(request)
