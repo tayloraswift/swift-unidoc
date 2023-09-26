@@ -37,12 +37,21 @@ extension Codelink.Path
             case (_,                "-", nil):
                 format = .legacy
                 suffix = .init(.init(codepoints))
-                //  we know we already consumed all remaining input
+                //  We know we already consumed all remaining input.
                 return
 
             case (.nominal(_, nil), "/", nil):
                 format = .legacy
-                fallthrough
+
+                //  Tolerate trailing slash.
+                if  codepoints.isEmpty
+                {
+                    return
+                }
+                else
+                {
+                    fallthrough
+                }
 
             case (.nominal(_, nil), ".", _):
                 if  let next:Component = .init(parsing: &codepoints)

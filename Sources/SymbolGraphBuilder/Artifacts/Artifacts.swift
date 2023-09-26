@@ -76,7 +76,14 @@ extension Artifacts
                 label = "\(language) module"
             }
 
-            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
+            switch sources.module.id
+            {
+            case    "_CertificateInternals":    // unbuildable, from swift-certificates 1.0.0
+                continue
+
+            case let name:
+                print("Dumping symbols for module '\(name)' (\(label))")
+            }
 
             var arguments:[String] =
             [
@@ -103,26 +110,6 @@ extension Artifacts
             try await SystemProcess.init(command: "swift", arguments: arguments)()
         }
 
-        let blacklisted:Set<ModuleIdentifier> =
-        [
-            "CDispatch",                    // too low-level
-            "CFURLSessionInterface",        // too low-level
-            "CFXMLInterface",               // too low-level
-            "CoreFoundation",               // too low-level
-            "Glibc",                        // linux-gnu specific
-            "SwiftGlibc",                   // linux-gnu specific
-            "SwiftOnoneSupport",            // contains no symbols
-            "SwiftOverlayShims",            // too low-level
-            "SwiftShims",                   // contains no symbols
-            "XCTest",                       // site policy
-            "_Builtin_intrinsics",          // contains only one symbol, free(_:)
-            "_Builtin_stddef_max_align_t",  // contains only two symbols
-            "_InternalStaticMirror",        // unbuildable
-            "_InternalSwiftScan",           // unbuildable
-            "_SwiftConcurrencyShims",       // contains only two symbols
-            "std",                          // unbuildable
-        ]
-
         var parts:[ModuleIdentifier: [SymbolGraphPart.ID]] = [:]
         for part:Result<FilePath.Component, any Error> in output.path.directory
         {
@@ -130,28 +117,40 @@ extension Artifacts
             //  because the JSON can be very large, and parsing JSON is very
             //  expensive (compared to parsing BSON). So we trust that the file
             //  name is correct and indicates what is contained within the file.
-            if  let id:SymbolGraphPart.ID = .init("\(try part.get())"),
-                !blacklisted.contains(id.namespace)
+            if  let id:SymbolGraphPart.ID = .init("\(try part.get())")
             {
-                parts[id.culture, default: []].append(id)
+                switch id.namespace
+                {
+                case    "CDispatch",                    // too low-level
+                        "CFURLSessionInterface",        // too low-level
+                        "CFXMLInterface",               // too low-level
+                        "CoreFoundation",               // too low-level
+                        "Glibc",                        // linux-gnu specific
+                        "SwiftGlibc",                   // linux-gnu specific
+                        "SwiftOnoneSupport",            // contains no symbols
+                        "SwiftOverlayShims",            // too low-level
+                        "SwiftShims",                   // contains no symbols
+                        "XCTest",                       // site policy
+                        "_Builtin_intrinsics",          // contains only one symbol, free(_:)
+                        "_Builtin_stddef_max_align_t",  // contains only two symbols
+                        "_InternalStaticMirror",        // unbuildable
+                        "_InternalSwiftScan",           // unbuildable
+                        "_SwiftConcurrencyShims",       // contains only two symbols
+                        "std":                          // unbuildable
+                    continue
+
+                default:
+                    parts[id.culture, default: []].append(id)
+                }
             }
         }
 
-        return try modules.map
+        return modules.map
         {
-            let parts:[SymbolGraphPart.ID]? = parts[$0.module.id]
-            if  case .swift = $0.language,
-                case nil = parts
-            {
-                throw Artifacts.CultureError.empty($0.module.id)
-            }
-            else
-            {
-                return .init($0.module,
-                    articles: $0.articles,
-                    artifacts: output.path,
-                    parts: parts ?? [])
-            }
+            .init($0.module,
+                articles: $0.articles,
+                artifacts: output.path,
+                parts: parts[$0.module.id, default: []])
         }
     }
 }

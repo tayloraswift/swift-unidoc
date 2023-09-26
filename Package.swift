@@ -458,8 +458,9 @@ let package:Package = .init(
         .executableTarget(name: "UnidocBuild", dependencies:
             [
                 .target(name: "HTTPClient"),
-                .target(name: "UnidocAutomation"),
                 .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocAutomation"),
+                .target(name: "UnidocLinker"),
             ]),
 
         .executableTarget(name: "UnidocServer", dependencies:
