@@ -85,7 +85,7 @@ extension HTTP2Client.Connection
             async
             let _:Void =
             {
-                try await Task.sleep(for: .seconds(3))
+                try await Task.sleep(for: .seconds(15))
                 source.finish(throwing: HTTP2Client.RequestTimeoutError.init())
             }()
 
