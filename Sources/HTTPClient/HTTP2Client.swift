@@ -79,6 +79,11 @@ extension HTTP2Client
     {
         try await self.connect { try await $0.fetch(request) }
     }
+    public
+    func fetch(_ request:__owned HTTP2Client.Request) async throws -> Facet
+    {
+        try await self.connect { try await $0.fetch(request) }
+    }
 }
 extension HTTP2Client
 {
