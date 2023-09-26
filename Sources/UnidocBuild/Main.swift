@@ -40,39 +40,52 @@ enum Main
 
             let edition:PackageBuildStatus.Edition
 
-            if  package.release.graphs == 0
+            if  options.build
             {
-                edition = package.release
-            }
-            else if
-                let prerelease:PackageBuildStatus.Edition = package.prerelease,
-                    prerelease.graphs == 0
-            {
-                edition = prerelease
+                if  package.release.graphs == 0 || options.force
+                {
+                    edition = package.release
+                }
+                else if
+                    let prerelease:PackageBuildStatus.Edition = package.prerelease,
+                        prerelease.graphs == 0
+                {
+                    edition = prerelease
+                }
+                else
+                {
+                    print("No new documentation to build")
+                    return
+                }
+
+                let build:PackageBuild = try await .remote(
+                    package: options.package,
+                    from: package.repo,
+                    at: edition.tag,
+                    in: workspace,
+                    clean: true)
+
+                let snapshot:Snapshot = .init(
+                    package: package.coordinate,
+                    version: edition.coordinate,
+                    archive: try await toolchain.generateDocs(for: build, pretty: options.pretty))
+
+                let bson:BSON.Document = .init(encoding: consume snapshot)
+
+                print("Uploading symbol graph...")
+
+                try await $0.put(bson: bson, to: "/api/symbolgraph")
+
+                print("Successfully uploaded symbol graph (tag: \(edition.tag))")
             }
             else
             {
-                print("No new documentation to build")
-                return
+                edition = package.release
             }
 
-            let build:PackageBuild = try await .remote(
-                package: options.package,
-                from: package.repo,
-                at: edition.tag,
-                in: workspace,
-                clean: true)
-
-            let snapshot:Snapshot = .init(
-                package: package.coordinate,
-                version: edition.coordinate,
-                archive: try await toolchain.generateDocs(for: build, pretty: options.pretty))
-
-            let bson:BSON.Document = .init(encoding: consume snapshot)
-
-            try await $0.put(bson: bson, to: "/api/symbolgraph")
-
-            print("Successfully uploaded symbol graph (tag: \(edition.tag))")
+            try await $0.post(
+                urlencoded: "package=\(package.coordinate)&version=\(edition.coordinate)",
+                to: "/api/uplink")
         }
     }
 }
@@ -85,6 +98,8 @@ extension Main
         var cookie:String
         var remote:String
         var pretty:Bool
+        var build:Bool
+        var force:Bool
 
         private
         init(package:PackageIdentifier)
@@ -93,6 +108,8 @@ extension Main
             self.cookie = ""
             self.remote = "swiftinit.org"
             self.pretty = false
+            self.build = true
+            self.force = false
         }
     }
 }
@@ -138,6 +155,12 @@ extension Main.Options
 
             case "--pretty", "-p":
                 options.pretty = true
+
+            case "--force", "-f":
+                options.force = true
+
+            case "--uplink-only", "-u":
+                options.build = false
 
             case let option:
                 fatalError("Unknown option '\(option)'")
