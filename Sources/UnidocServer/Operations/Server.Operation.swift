@@ -223,6 +223,8 @@ extension Server.Operation:HTTPServerOperation
             return nil
         }
 
+        let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
+
         let endpoint:Server.Endpoint?
 
         switch root
@@ -236,7 +238,7 @@ extension Server.Operation:HTTPServerOperation
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: .init())
+            self.init(endpoint: endpoint, cookies: cookies)
         }
         else
         {
