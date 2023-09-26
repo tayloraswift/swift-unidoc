@@ -102,6 +102,8 @@ extension WideQuery:VolumeLookupQuery
                     $0[let: symbol] = Output.Principal[.master] / Volume.Vertex[.symbol]
                     $0[let: hash] = Output.Principal[.master] / Volume.Vertex[.hash]
 
+                    //  ``namesOfLatest`` is always non-nil, so we don’t need to worry about
+                    //  degenerate index behavior.
                     $0[let: min] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_min]
                     $0[let: max] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_max]
                 }
