@@ -1,6 +1,6 @@
 <div align="center">
 
-<strong><em><code>unidoc</code></em></strong><br><small><code>0.2.8</code></small>
+<strong><em><code>unidoc</code></em></strong><br><small><code>0.3.0</code></small>
 
 [![ci build status](https://github.com/kelvin13/swift-unidoc/actions/workflows/build.yml/badge.svg)](https://github.com/kelvin13/swift-unidoc/actions/workflows/build.yml)
 
@@ -69,6 +69,23 @@ Unidoc generates lightweight HTML documentation that uses CSS for the majority o
 ### 📜 Readable signatures
 
 Unidoc symbol graphs include line-breaking markers computed by SwiftSyntax, which allows Unidoc to display long function signatures in a readable, line-wrapped format. This makes it much easier to scan long lists of symbols with complex signatures, such as the member list of SwiftSyntax’s [`AccessPathComponentSyntax`](https://swiftinit.org/docs/swift-syntax/swiftsyntax/accesspathcomponentsyntax).
+
+
+### 🚠 Per-symbol migration banners
+
+The Unidoc server can now query successors for symbols in older (and prerelease) versions, and display a banner directing visitors to the symbol’s counterpart in the latest stable release of its package. This link is specific to the symbol, and comes with a corresponding `<link rel="canonical">` element and HTTP header.
+
+Example: [`https://swiftinit.org/docs/swift-nio:2.57.0/niocore/eventloopgroup`](https://swiftinit.org/docs/swift-nio:2.57.0/niocore/eventloopgroup)
+
+
+### ️⛳️ Symbol disambiguation pages
+
+Unidoc is able to serve symbol disambiguation pages under the [`300 Multiple Choice`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/300) status code.
+
+Although you should avoid creating ambiguous symbol links if possible, they are a natural occurrence as APIs evolve and overloads are added.
+
+Example: [`https://swiftinit.org/docs/swift-certificates/x509/policyevaluationresult.failstomeetpolicy(reason:)`](https://swiftinit.org/docs/swift-certificates/x509/policyevaluationresult.failstomeetpolicy(reason:))
+
 
 ### 🛸 Documentation coverage
 
