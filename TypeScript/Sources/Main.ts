@@ -22,7 +22,7 @@ if (list !== null) {
 
         //  We don’t want to suggest a keyboard shortcut if the user focused the input
         //  via touch, or if they were already using the keyboard shortcut.
-        input.addEventListener('click', function (event: Event) {
+        input.addEventListener('mousedown', function (event: Event) {
              input.setAttribute('placeholder', 'search shortcut: /');
         });
 
