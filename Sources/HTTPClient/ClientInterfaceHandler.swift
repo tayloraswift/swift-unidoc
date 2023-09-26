@@ -41,7 +41,7 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
     typealias OutboundIn =
     (
         owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation,
-        batch:[HPACKHeaders]
+        batch:[HTTP2Client.Request]
     )
 
     func errorCaught(context:ChannelHandlerContext, error:any Error)
@@ -53,14 +53,14 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
         let owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation
-        let batch:[HPACKHeaders]
+        let batch:[HTTP2Client.Request]
 
         (owner, batch) = self.unwrapOutboundIn(data)
 
         self.owner?.finish()
         self.owner = owner
 
-        for request:HPACKHeaders in batch
+        for request:HTTP2Client.Request in batch
         {
             self.multiplexer.createStreamChannel
             {
@@ -71,11 +71,27 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
                 switch $0
                 {
                 case .success(let stream):
-                    stream.writeAndFlush(HTTP2Frame.FramePayload.headers(
-                        HTTP2Frame.FramePayload.Headers.init(
-                            headers: request,
-                            endStream: true)),
-                        promise: nil)
+                    if  let body:ByteBuffer = request.body
+                    {
+                        stream.write(HTTP2Frame.FramePayload.headers(
+                            HTTP2Frame.FramePayload.Headers.init(
+                                headers: request.headers,
+                                endStream: false)),
+                            promise: nil)
+                        stream.writeAndFlush(HTTP2Frame.FramePayload.data(
+                            HTTP2Frame.FramePayload.Data.init(
+                                data: .byteBuffer(body),
+                                endStream: true)),
+                            promise: nil)
+                    }
+                    else
+                    {
+                        stream.writeAndFlush(HTTP2Frame.FramePayload.headers(
+                            HTTP2Frame.FramePayload.Headers.init(
+                                headers: request.headers,
+                                endStream: true)),
+                            promise: nil)
+                    }
 
                 case .failure(let error):
                     owner.finish(throwing: error)

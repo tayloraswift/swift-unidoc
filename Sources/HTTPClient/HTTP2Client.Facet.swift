@@ -57,8 +57,12 @@ extension HTTP2Client.Facet
                 self.buffers.append(buffer)
                 return frame.endStream
             }
-        case _:
+
+        case .rstStream, .pushPromise, .goAway:
             break
+
+        case _:
+            return false
         }
 
         throw HTTP2Client.UnexpectedFrameError.init(payload)

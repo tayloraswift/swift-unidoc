@@ -26,20 +26,45 @@ extension HTTP2Client.Connection:Sendable
 }
 extension HTTP2Client.Connection
 {
+    @inlinable public
+    func buffer(string:Substring) -> ByteBuffer
+    {
+        self.channel.allocator.buffer(substring: string)
+    }
+
+    @inlinable public
+    func buffer(string:String) -> ByteBuffer
+    {
+        self.channel.allocator.buffer(string: string)
+    }
+
+    @inlinable public
+    func buffer(bytes:[UInt8]) -> ByteBuffer
+    {
+        self.channel.allocator.buffer(bytes: bytes)
+    }
+}
+extension HTTP2Client.Connection
+{
     public
     func fetch(_ request:__owned HPACKHeaders) async throws -> HTTP2Client.Facet
+    {
+        try await self.fetch(.init(headers: request, body: nil))
+    }
+    public
+    func fetch(_ request:__owned HTTP2Client.Request) async throws -> HTTP2Client.Facet
     {
         try await self.fetch(reducing: [request], into: .init()) { $0 = $1 }
     }
 
     public
-    func fetch(_ batch:__owned [HPACKHeaders]) async throws -> [HTTP2Client.Facet]
+    func fetch(_ batch:__owned [HTTP2Client.Request]) async throws -> [HTTP2Client.Facet]
     {
         try await self.fetch(reducing: batch, into: []) { $0.append($1) }
     }
 
     @inlinable public
-    func fetch<Response>(reducing batch:__owned [HPACKHeaders],
+    func fetch<Response>(reducing batch:__owned [HTTP2Client.Request],
         into initial:__owned Response,
         with combine:(inout Response, HTTP2Client.Facet) throws -> ()) async throws -> Response
     {
