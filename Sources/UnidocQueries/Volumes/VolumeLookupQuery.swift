@@ -94,6 +94,13 @@ extension VolumeLookupQuery
                 $0[.replaceWith] = .init
                 {
                     $0[Self.names] = Mongo.Pipeline.ROOT
+
+                    //  ``Volume.Names`` is complex but not that large, and duplicating this
+                    //  makes the rest of the query a lot simpler.
+                    if  let names:Mongo.KeyPath = Self.namesOfLatest
+                    {
+                        $0[names] = Mongo.Pipeline.ROOT
+                    }
                 }
             }
 

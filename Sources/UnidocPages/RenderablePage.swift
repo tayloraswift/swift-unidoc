@@ -58,7 +58,7 @@ extension RenderablePage
                     $0.href = "\(Site.Asset[.main_css])"
                     $0.rel = .stylesheet
                 }
-                if  let canonical:String
+                if  let canonical:String = canonical ?? location
                 {
                     $0[.link]
                     {
