@@ -31,6 +31,21 @@ struct Snapshot:Equatable, Sendable
         self.graph = graph
     }
 }
+extension Snapshot
+{
+    @inlinable public
+    init(
+        package:Int32,
+        version:Int32,
+        archive:SymbolGraphArchive)
+    {
+        self.init(
+            package: package,
+            version: version,
+            metadata: archive.metadata,
+            graph: archive.graph)
+    }
+}
 extension Snapshot:Identifiable
 {
     @inlinable public
