@@ -18,12 +18,38 @@ if (list !== null) {
     const input: HTMLElement | null = document.getElementById('search-input');
 
     if (input !== null) {
-        input.addEventListener('focus',
-            (event: Event) => searchbar.focus());
-        input.addEventListener('input',
-            (event: Event) => searchbar.suggest(event));
-        input.addEventListener('keydown',
-            (event: KeyboardEvent) => searchbar.navigate(event));
+        input.addEventListener('focus', (event: Event) => searchbar.focus());
+
+        //  We don’t want to suggest a keyboard shortcut if the user focused the input
+        //  via touch, or if they were already using the keyboard shortcut.
+        input.addEventListener('mousedown', function (event: Event) {
+             input.setAttribute('placeholder', 'search shortcut: /');
+        });
+
+        input.addEventListener('blur', function (event: Event) {
+             input.setAttribute('placeholder', 'search symbols');
+        });
+
+        input.addEventListener('input', (event: Event) => searchbar.suggest(event));
+        input.addEventListener('keydown', (event: KeyboardEvent) => searchbar.navigate(event));
+
+        document.addEventListener('keydown', function (event: KeyboardEvent) {
+            switch (event.key) {
+                case 'Escape': {
+                    if (document.activeElement === input) {
+                        input.blur();
+                    }
+                    break;
+                }
+                case '/': {
+                    if (document.activeElement !== input) {
+                        input.focus();
+                        event.preventDefault();
+                    }
+                    break;
+                }
+            }
+        });
     }
 
     const form: HTMLElement | null = document.getElementById('search');
