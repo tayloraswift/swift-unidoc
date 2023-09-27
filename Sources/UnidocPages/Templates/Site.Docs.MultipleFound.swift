@@ -44,27 +44,24 @@ extension Site.Docs.MultipleFound
 
     }
 }
-extension Site.Docs.MultipleFound
-{
-    private
-    var names:Volume.Names { self.inliner.names.principal }
-}
 extension Site.Docs.MultipleFound:RenderablePage
 {
-    var title:String { "Disambiguation Page - \(self.names.title)" }
+    var title:String { "Disambiguation Page - \(self.volume.title)" }
 }
 extension Site.Docs.MultipleFound:StaticPage
 {
     var location:URI
     {
-        Site.Docs[self.inliner.names.principal, .init(stem: self.identity, hash: nil)]
+        Site.Docs[self.volume, .init(stem: self.identity, hash: nil)]
     }
 }
 extension Site.Docs.MultipleFound:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
-    var volume:VolumeIdentifier { self.names.volume }
+}
+extension Site.Docs.MultipleFound:VersionedPage
+{
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -79,11 +76,17 @@ extension Site.Docs.MultipleFound:ApplicationPage
                     {
                         $0[.a]
                         {
-                            $0.href = "\(Site.Docs[self.names])"
-                        } = "\(self.names.package)"
+                            $0.href = "\(Site.Tags[self.volume.symbol.package])"
+                        } = "\(self.volume.symbol.package)"
                     }
 
-                    $0[.span] { $0.class = "version" } = self.names.version
+                    $0[.span, { $0.class = "volume" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.volume])"
+                        } = self.volume.symbol.version
+                    }
                 }
             }
 

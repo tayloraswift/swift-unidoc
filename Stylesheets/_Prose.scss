@@ -85,6 +85,20 @@ section.details
         }
     }
 
+    div.more
+    {
+        margin: 2rem 0;
+
+        text-align: center;
+        font-family: $typeface-sans;
+
+        a
+        {
+            font-weight: 700;
+            font-size: 120%;
+        }
+    }
+
     div.stats
     {
         width: 14rem;

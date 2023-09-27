@@ -17,8 +17,8 @@ extension Volume.Range:VolumeLookupPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: min] = input / Volume.Names[self.min]
-                $0[let: max] = input / Volume.Names[self.max]
+                $0[let: min] = input / Volume.Meta[self.min]
+                $0[let: max] = input / Volume.Meta[self.max]
             }
             $0[.pipeline] = .init
             {

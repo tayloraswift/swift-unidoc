@@ -52,7 +52,7 @@ extension Inliner.TypeTree:HyperTextOutputStreamable
                 depth = current
 
                 //  The URI is only correct if the noun is a citizen in the principal zone!
-                var uri:URI { Site.Docs[self.inliner.names.principal, noun.shoot] }
+                var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
                 let name:Substring = noun.shoot.stem.last
 
                 switch noun.same

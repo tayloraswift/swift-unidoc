@@ -37,13 +37,11 @@ extension Site.Docs
 extension Site.Docs.Culture
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
-    private
     var name:String { self.master.module.name }
 }
 extension Site.Docs.Culture:RenderablePage
 {
-    var title:String { "\(self.name) - \(self.names.title)" }
+    var title:String { "\(self.name) - \(self.volume.title)" }
 
     var description:String?
     {
@@ -51,7 +49,7 @@ extension Site.Docs.Culture:RenderablePage
         {
             return "\(self.inliner.passage(overview))"
         }
-        else if case .swift = self.names.package
+        else if case .swift = self.volume.symbol.package
         {
             return "\(self.name) is a module in the Swift standard library."
         }
@@ -59,22 +57,24 @@ extension Site.Docs.Culture:RenderablePage
         {
             return """
                 \(self.name) is a module in the \
-                \(self.names.display ?? "\(self.names.package)") package.
+                \(self.volume.display ?? "\(self.volume.symbol.package)") package.
                 """
         }
     }
 }
 extension Site.Docs.Culture:StaticPage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.master.shoot] }
 }
 extension Site.Docs.Culture:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
+}
+extension Site.Docs.Culture:VersionedPage
+{
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -94,11 +94,17 @@ extension Site.Docs.Culture:ApplicationPage
                     {
                         $0[.a]
                         {
-                            $0.href = "\(Site.Docs[self.names])"
-                        } = "\(self.names.package)"
+                            $0.href = "\(Site.Tags[self.volume.symbol.package])"
+                        } = "\(self.volume.symbol.package)"
                     }
 
-                    $0[.span] { $0.class = "version" } = self.names.version
+                    $0[.span, { $0.class = "volume" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.volume])"
+                        } = self.volume.symbol.version
+                    }
                 }
             }
 

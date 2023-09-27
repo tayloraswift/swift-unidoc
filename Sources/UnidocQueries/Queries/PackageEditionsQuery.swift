@@ -3,6 +3,7 @@ import MongoQL
 import Unidoc
 import UnidocDB
 import UnidocLinker
+import UnidocRecords
 
 @frozen public
 struct PackageEditionsQuery:Equatable, Hashable, Sendable
@@ -117,6 +118,19 @@ extension PackageEditionsQuery:DatabaseQuery
                             }
                         }
 
+                        //  Check if a volume has been created for this edition.
+                        $0.stage
+                        {
+                            $0[.lookup] = .init
+                            {
+                                $0[.from] = UnidocDatabase.Volumes.name
+                                $0[.localField] = Facet[.edition] / PackageEdition[.id]
+                                $0[.foreignField] = Volume.Meta[.id]
+                                $0[.as] = Facet[.volume]
+                            }
+                        }
+
+                        //  Count symbol graphs.
                         $0.stage
                         {
                             $0[.lookup] = Mongo.LookupDocument.init
@@ -161,10 +175,12 @@ extension PackageEditionsQuery:DatabaseQuery
                             }
                         }
 
+                        //  Unbox single-element arrays.
                         $0.stage
                         {
                             $0[.set] = .init
                             {
+                                $0[Facet[.volume]] = .expr { $0[.first] = Facet[.volume] }
                                 $0[Facet[.graphs]] = .expr { $0[.first] = Facet[.graphs] }
                             }
                         }

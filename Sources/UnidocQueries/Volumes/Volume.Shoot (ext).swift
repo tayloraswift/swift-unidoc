@@ -16,7 +16,7 @@ extension Volume.Shoot:VolumeLookupPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: zone] = input / Volume.Names[.id]
+                $0[let: zone] = input / Volume.Meta[.id]
             }
             $0[.pipeline] = .init
             {

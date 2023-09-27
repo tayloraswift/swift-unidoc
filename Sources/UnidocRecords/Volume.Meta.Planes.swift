@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Volume.Names
+extension Volume.Meta
 {
     @frozen public
     struct Planes
@@ -15,7 +15,7 @@ extension Volume.Names
         }
     }
 }
-extension Volume.Names.Planes
+extension Volume.Meta.Planes
 {
     @inlinable public
     var min:Unidoc.Scalar { self.zone.min }

@@ -32,7 +32,7 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             case .packages:    collection = server.db.unidoc.packages
             case .editions:    collection = server.db.unidoc.editions
             case .vertices:    collection = server.db.unidoc.vertices
-            case .names:       collection = server.db.unidoc.names
+            case .volumes:     collection = server.db.unidoc.volumes
             }
 
             let (modified, selected):(Int, Int) = try await collection.recode(with: session)

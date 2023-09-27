@@ -5,6 +5,7 @@ extension Site.API
     {
         case index
         case uplink
+        case unlink
     }
 }
 extension Site.API.Post:StaticAPI

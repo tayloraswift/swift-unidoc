@@ -13,29 +13,34 @@ struct Volume
     var vertices:[Volume.Vertex]
     public
     var groups:[Volume.Group]
+
+    @available(*, deprecated, renamed: "meta")
     public
-    var names:Volume.Names
+    var names:Volume.Meta { self.meta }
+
+    public
+    var meta:Volume.Meta
 
     @inlinable public
     init(latest:Unidoc.Zone?,
         vertices:[Volume.Vertex],
         groups:[Volume.Group],
-        names:Volume.Names)
+        meta:Volume.Meta)
     {
         self.latest = latest
 
         self.vertices = vertices
         self.groups = groups
-        self.names = names
+        self.meta = meta
     }
 }
 extension Volume
 {
     @inlinable public
-    var edition:Unidoc.Zone { self.names.id }
+    var edition:Unidoc.Zone { self.meta.id }
 }
 extension Volume:Identifiable
 {
     @inlinable public
-    var id:VolumeIdentifier { self.names.volume }
+    var id:VolumeIdentifier { self.meta.symbol }
 }

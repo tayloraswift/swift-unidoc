@@ -26,9 +26,9 @@ extension WideQuery.Output
         let groups:[Volume.Group]
 
         public
-        let names:Volume.Names
+        let names:Volume.Meta
         public
-        let namesOfLatest:Volume.Names?
+        let namesOfLatest:Volume.Meta?
 
         public
         let repo:PackageRepo?
@@ -42,8 +42,8 @@ extension WideQuery.Output
             master:Volume.Vertex?,
             masterInLatest:Volume.Vertex?,
             groups:[Volume.Group],
-            names:Volume.Names,
-            namesOfLatest:Volume.Names?,
+            names:Volume.Meta,
+            namesOfLatest:Volume.Meta?,
             repo:PackageRepo?,
             tree:Volume.TypeTree?)
         {

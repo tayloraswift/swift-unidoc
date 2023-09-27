@@ -38,7 +38,7 @@ struct Server:Sendable
     let cache:Cache<Site.Asset.Get>
 
 
-    let mode:ServerMode
+    let mode:Mode
     let db:DB
 
     private
@@ -46,7 +46,7 @@ struct Server:Sendable
         port:Int,
         github:GitHubPlugin?,
         cache:Cache<Site.Asset.Get>,
-        mode:ServerMode,
+        mode:Mode,
         db:DB)
     {
         self.authority = authority
@@ -86,7 +86,7 @@ extension Server
             certificates: options.certificates)
 
         let cache:Cache<Site.Asset.Get>
-        let mode:ServerMode
+        let mode:Mode
 
         if  authority is Localhost
         {
