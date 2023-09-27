@@ -28,7 +28,7 @@ extension Volume
             }
         }
 
-        return .init(id: self.names.package, lines: lines)
+        return .init(id: self.meta.symbol.package, lines: lines)
     }
     public
     func indexes() -> (SearchIndex<VolumeIdentifier>, [TypeTree])

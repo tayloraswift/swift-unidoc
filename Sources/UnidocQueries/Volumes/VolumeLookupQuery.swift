@@ -11,14 +11,14 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
     var volume:Volume.Selector { get }
     var lookup:LookupPredicate { get }
 
-    /// The field to store the ``Volume.Names`` of the **latest stable release**
+    /// The field to store the ``Volume.Meta`` of the **latest stable release**
     /// (relative to the current volume) in.
     ///
     /// If nil, the query will still look up the latest stable release, but the result will
     /// be discarded.
     static
     var namesOfLatest:Mongo.KeyPath? { get }
-    /// The field to store the ``Volume.Names`` of the **requested snapshot** in.
+    /// The field to store the ``Volume.Meta`` of the **requested snapshot** in.
     static
     var names:Mongo.KeyPath { get }
 
@@ -37,15 +37,15 @@ extension VolumeLookupQuery
 extension VolumeLookupQuery
 {
     @inlinable public
-    var origin:Mongo.Collection { UnidocDatabase.Names.name }
+    var origin:Mongo.Collection { UnidocDatabase.Volumes.name }
 
     public
     var hint:Mongo.SortDocument?
     {
         .init
         {
-            $0[Volume.Names[.package]] = (+)
-            $0[Volume.Names[.patch]] = (-)
+            $0[Volume.Meta[.package]] = (+)
+            $0[Volume.Meta[.patch]] = (-)
         }
     }
 
@@ -66,8 +66,8 @@ extension VolumeLookupQuery
         {
             $0[.match] = .init
             {
-                $0[Volume.Names[.package]] = self.volume.package
-                $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+                $0[Volume.Meta[.package]] = self.volume.package
+                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
             }
         }
         //  We use the patch number instead of the latest-flag because
@@ -78,7 +78,7 @@ extension VolumeLookupQuery
         {
             $0[.sort] = .init
             {
-                $0[Volume.Names[.patch]] = (-)
+                $0[Volume.Meta[.patch]] = (-)
             }
         }
         pipeline.stage
@@ -95,7 +95,7 @@ extension VolumeLookupQuery
                 {
                     $0[Self.names] = Mongo.Pipeline.ROOT
 
-                    //  ``Volume.Names`` is complex but not that large, and duplicating this
+                    //  ``Volume.Meta`` is complex but not that large, and duplicating this
                     //  makes the rest of the query a lot simpler.
                     if  let names:Mongo.KeyPath = Self.namesOfLatest
                     {
@@ -105,7 +105,7 @@ extension VolumeLookupQuery
             }
 
         case let version?:
-            //  ``Volume.Names`` has many keys. to simplify the output schema
+            //  ``Volume.Meta`` has many keys. to simplify the output schema
             //  and allow re-use of the earlier pipeline stages, we demote
             //  the zone fields to a subdocument.
             //
@@ -136,8 +136,8 @@ extension VolumeLookupQuery
                         {
                             $0[.match] = .init
                             {
-                                $0[Volume.Names[.package]] = self.volume.package
-                                $0[Volume.Names[.version]] = version
+                                $0[Volume.Meta[.package]] = self.volume.package
+                                $0[Volume.Meta[.version]] = version
                             }
                         }
                     }

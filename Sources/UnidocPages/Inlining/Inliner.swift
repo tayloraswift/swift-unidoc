@@ -33,28 +33,28 @@ extension Inliner
         _read   { yield  self.cache.vertices }
         _modify { yield &self.cache.vertices }
     }
-    var names:InlinerCache.Names
+    var volumes:InlinerCache.Volumes
     {
-        _read   { yield  self.cache.names }
-        _modify { yield &self.cache.names }
+        _read   { yield  self.cache.volumes }
+        _modify { yield &self.cache.volumes }
     }
 }
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, names:Volume.Names, repo:PackageRepo?)
+    init(principal scalar:Unidoc.Scalar, volume:Volume.Meta, repo:PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
-                names: .init(principal: names)),
+                volumes: .init(principal: volume)),
             repo: repo)
     }
     convenience
-    init(principal names:Volume.Names, repo:PackageRepo?)
+    init(principal volume:Volume.Meta, repo:PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),
-                names: .init(principal: names)),
+                volumes: .init(principal: volume)),
             repo: repo)
     }
 }
@@ -134,7 +134,7 @@ extension Inliner
     func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
     {
         if  let origin:Volume.Origin = self.repo?.origin,
-            let refname:String = self.names[file.zone]?.refname,
+            let refname:String = self.volumes[file.zone]?.refname,
             let file:Volume.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
         {

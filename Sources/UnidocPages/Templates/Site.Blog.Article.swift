@@ -24,11 +24,11 @@ extension Site.Blog
 extension Site.Blog.Article
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 }
 extension Site.Blog.Article:RenderablePage
 {
-    var title:String { self.names.title }
+    var title:String { self.volume.title }
 }
 extension Site.Blog.Article:StaticPage
 {

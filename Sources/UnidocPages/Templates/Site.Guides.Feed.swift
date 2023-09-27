@@ -30,23 +30,24 @@ extension Site.Guides.Feed
 }
 extension Site.Guides.Feed
 {
-    private
-    var names:Volume.Names { self.inliner.names.principal }
 }
 extension Site.Guides.Feed:RenderablePage
 {
-    var title:String { self.names.title }
+    var title:String { self.volume.title }
 }
 extension Site.Guides.Feed:StaticPage
 {
-    var location:URI { Site.Guides[self.names] }
+    var location:URI { Site.Guides[self.volume] }
 }
 extension Site.Guides.Feed:ApplicationPage
 {
     typealias Navigator = HTML.Logo
+}
+extension Site.Guides.Feed:VersionedPage
+{
     typealias Sidebar = Never
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {

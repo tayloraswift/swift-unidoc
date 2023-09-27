@@ -40,13 +40,11 @@ extension Site.Docs
 extension Site.Docs.Decl
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
-    private
     var stem:Volume.Stem { self.master.stem }
 }
 extension Site.Docs.Decl:RenderablePage
 {
-    var title:String { "\(self.stem.last) - \(self.names.title)" }
+    var title:String { "\(self.stem.last) - \(self.volume.title)" }
 
     var description:String?
     {
@@ -57,7 +55,7 @@ extension Site.Docs.Decl:RenderablePage
 
         let what:Demonym = .init(phylum: self.master.phylum, kinks: self.master.kinks)
 
-        if  case .swift = self.names.package
+        if  case .swift = self.volume.symbol.package
         {
             return """
                 \(self.stem.last) is \(what) from the Swift standard library.
@@ -67,14 +65,14 @@ extension Site.Docs.Decl:RenderablePage
         {
             return """
                 \(self.stem.last) is \(what) from the package \
-                \(self.names.display ?? "\(self.names.package)").
+                \(self.volume.display ?? "\(self.volume.symbol.package)").
                 """
         }
     }
 }
 extension Site.Docs.Decl:StaticPage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.master.shoot] }
 }
 extension Site.Docs.Decl:ApplicationPage
 {
@@ -94,10 +92,12 @@ extension Site.Docs.Decl:ApplicationPage
                 last: self.stem.last)
         }
     }
-
+}
+extension Site.Docs.Decl:VersionedPage
+{
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -124,13 +124,37 @@ extension Site.Docs.Decl:ApplicationPage
                 $0[.span] { $0.class = "phylum" } = demonym
                 $0[.span, { $0.class = "domain" }]
                 {
-                    $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
-                    $0[.span, { $0.class = "culture" }]
+                    if  self.master.namespace != self.master.culture
                     {
-                        $0[.span] { $0.class = "version" } = self.names.version
-                        if  self.master.namespace != self.master.culture
+                        $0[.span] { $0.class = "culture" } = self.inliner.link(
+                            module: self.master.culture)
+
+                        $0[.span, { $0.class = "volume" }]
                         {
-                            $0 ?= self.inliner.link(module: self.master.culture)
+                            $0[.a]
+                            {
+                                $0.href = "\(Site.Docs[self.volume])"
+                            } = self.volume.symbol.version
+                        }
+
+                        $0[.span, { $0.class = "namespace" }]
+                        {
+                            $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
+                        }
+                    }
+                    else
+                    {
+                        $0[.span, { $0.class = "culture" }]
+                        {
+                            $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
+                        }
+
+                        $0[.span, { $0.class = "volume" }]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "\(Site.Docs[self.volume])"
+                            } = self.volume.symbol.version
                         }
                     }
                 }

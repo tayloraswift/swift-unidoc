@@ -6,22 +6,22 @@ import URI
 struct InlinerCache
 {
     var vertices:Vertices
-    var names:Names
+    var volumes:Volumes
 
     private
     var uris:[Unidoc.Scalar: String]
 
-    init(vertices:Vertices, names:Names, uris:[Unidoc.Scalar: String] = [:])
+    init(vertices:Vertices, volumes:Volumes, uris:[Unidoc.Scalar: String] = [:])
     {
         self.vertices = vertices
-        self.names = names
+        self.volumes = volumes
         self.uris = uris
     }
 }
 extension InlinerCache
 {
-    private mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Names) -> URI?) -> String?
+    mutating
+    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Meta) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -29,8 +29,8 @@ extension InlinerCache
                 return target
             }
             else if
-                let names:Volume.Names = self.names[scalar.zone],
-                let uri:URI = uri(names)
+                let volume:Volume.Meta = self.volumes[scalar.zone],
+                let uri:URI = uri(volume)
             {
                 let target:String = "\(uri)"
                 $0 = target

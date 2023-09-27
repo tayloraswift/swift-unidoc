@@ -32,7 +32,7 @@ extension CanonicalVersion
     init?(principal:__shared WideQuery.Output.Principal)
     {
         guard
-        let names:Volume.Names = principal.namesOfLatest,
+        let names:Volume.Meta = principal.namesOfLatest,
         let patch:PatchVersion = names.patch
         else
         {
@@ -82,7 +82,7 @@ extension CanonicalVersion
         }
 
         self.init(relationship: relationship,
-            package: names.display ?? "\(names.package)",
+            package: names.display ?? "\(names.symbol.package)",
             volume: volume,
             target: target)
     }
@@ -92,7 +92,7 @@ extension CanonicalVersion
         package:String,
         volume:URI,
         master:Volume.Vertex,
-        in names:Volume.Names)
+        in names:Volume.Meta)
     {
         let target:Target
 

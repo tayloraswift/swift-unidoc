@@ -21,7 +21,7 @@ extension StaticRoot
 extension StaticRoot
 {
     static
-    subscript(names:Volume.Names) -> URI
+    subscript(names:Volume.Meta) -> URI
     {
         var uri:URI = Self.uri
 
@@ -31,7 +31,7 @@ extension StaticRoot
     }
 
     static
-    subscript(names:Volume.Names, shoot:Volume.Shoot) -> URI
+    subscript(names:Volume.Meta, shoot:Volume.Shoot) -> URI
     {
         var uri:URI = Self[names]
 

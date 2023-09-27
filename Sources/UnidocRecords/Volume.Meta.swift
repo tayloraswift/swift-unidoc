@@ -7,8 +7,13 @@ import Unidoc
 
 extension Volume
 {
+    @available(*, deprecated, renamed: "Meta")
+    public typealias Names = Volume.Meta
+}
+extension Volume
+{
     @frozen public
-    struct Names:Identifiable, Equatable, Sendable
+    struct Meta:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Zone
@@ -23,7 +28,7 @@ extension Volume
         var origin:Origin? { nil }
 
         public
-        var volume:VolumeIdentifier
+        var symbol:VolumeIdentifier
         public
         var latest:Bool
 
@@ -34,31 +39,33 @@ extension Volume
         init(id:Unidoc.Zone,
             display:String?,
             refname:String?,
-            volume:VolumeIdentifier,
+            symbol:VolumeIdentifier,
             latest:Bool,
             patch:PatchVersion?)
         {
             self.id = id
             self.display = display
             self.refname = refname
-            self.volume = volume
+            self.symbol = symbol
             self.latest = latest
             self.patch = patch
         }
     }
 }
-extension Volume.Names
+extension Volume.Meta
 {
+    @available(*, deprecated)
     @inlinable public
-    var package:PackageIdentifier { self.volume.package }
+    var package:PackageIdentifier { self.symbol.package }
 
+    @available(*, deprecated)
     @inlinable public
-    var version:String { self.volume.version }
+    var version:String { self.symbol.version }
 
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
 }
-extension Volume.Names
+extension Volume.Meta
 {
     @frozen public
     enum CodingKey:String, Equatable, Hashable, Sendable
@@ -114,7 +121,7 @@ extension Volume.Names
         }
     }
 }
-extension Volume.Names:BSONDocumentEncodable
+extension Volume.Meta:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -122,8 +129,8 @@ extension Volume.Names:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.cell] = self.id.cell.package
 
-        bson[.package] = self.volume.package
-        bson[.version] = self.volume.version
+        bson[.package] = self.symbol.package
+        bson[.version] = self.symbol.version
 
         bson[.display] = self.display
         bson[.refname] = self.refname
@@ -143,7 +150,7 @@ extension Volume.Names:BSONDocumentEncodable
         bson[.planes_max] = self.planes.max
     }
 }
-extension Volume.Names:BSONDocumentDecodable
+extension Volume.Meta:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
@@ -151,7 +158,7 @@ extension Volume.Names:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             display: try bson[.display]?.decode(),
             refname: try bson[.refname]?.decode(),
-            volume: .init(
+            symbol: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,

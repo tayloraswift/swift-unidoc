@@ -13,12 +13,12 @@ extension WideQuery
         public
         let secondary:[Volume.Vertex]
         public
-        let names:[Volume.Names]
+        let names:[Volume.Meta]
 
         @inlinable public
         init(principal:Principal?,
             secondary:[Volume.Vertex],
-            names:[Volume.Names])
+            names:[Volume.Meta])
         {
             self.principal = principal
             self.secondary = secondary
