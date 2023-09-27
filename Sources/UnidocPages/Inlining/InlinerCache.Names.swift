@@ -5,13 +5,13 @@ extension InlinerCache
 {
     struct Names:Sendable
     {
-        let principal:Volume.Names
+        let principal:Volume.Meta
         private(set)
-        var secondary:[Unidoc.Zone: Volume.Names]
+        var secondary:[Unidoc.Zone: Volume.Meta]
 
         init(
-            principal:Volume.Names,
-            secondary:[Unidoc.Zone: Volume.Names] = [:])
+            principal:Volume.Meta,
+            secondary:[Unidoc.Zone: Volume.Meta] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -21,9 +21,9 @@ extension InlinerCache
 extension InlinerCache.Names
 {
     mutating
-    func add(_ names:[Volume.Names])
+    func add(_ names:[Volume.Meta])
     {
-        for names:Volume.Names in names where
+        for names:Volume.Meta in names where
             names.id != self.principal.id
         {
             self.secondary[names.id] = names
@@ -32,7 +32,7 @@ extension InlinerCache.Names
 }
 extension InlinerCache.Names
 {
-    subscript(zone:Unidoc.Zone) -> Volume.Names?
+    subscript(zone:Unidoc.Zone) -> Volume.Meta?
     {
         self.principal.id == zone ? self.principal : self.secondary[zone]
     }

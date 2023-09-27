@@ -14,13 +14,13 @@ struct Volume
     public
     var groups:[Volume.Group]
     public
-    var names:Volume.Names
+    var names:Volume.Meta
 
     @inlinable public
     init(latest:Unidoc.Zone?,
         vertices:[Volume.Vertex],
         groups:[Volume.Group],
-        names:Volume.Names)
+        names:Volume.Meta)
     {
         self.latest = latest
 

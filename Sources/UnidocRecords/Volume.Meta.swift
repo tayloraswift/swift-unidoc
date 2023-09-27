@@ -7,8 +7,13 @@ import Unidoc
 
 extension Volume
 {
+    @available(*, deprecated, renamed: "Meta")
+    public typealias Names = Volume.Meta
+}
+extension Volume
+{
     @frozen public
-    struct Names:Identifiable, Equatable, Sendable
+    struct Meta:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Zone
@@ -47,7 +52,7 @@ extension Volume
         }
     }
 }
-extension Volume.Names
+extension Volume.Meta
 {
     @inlinable public
     var package:PackageIdentifier { self.volume.package }
@@ -58,7 +63,7 @@ extension Volume.Names
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
 }
-extension Volume.Names
+extension Volume.Meta
 {
     @frozen public
     enum CodingKey:String, Equatable, Hashable, Sendable
@@ -114,7 +119,7 @@ extension Volume.Names
         }
     }
 }
-extension Volume.Names:BSONDocumentEncodable
+extension Volume.Meta:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -143,7 +148,7 @@ extension Volume.Names:BSONDocumentEncodable
         bson[.planes_max] = self.planes.max
     }
 }
-extension Volume.Names:BSONDocumentDecodable
+extension Volume.Meta:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

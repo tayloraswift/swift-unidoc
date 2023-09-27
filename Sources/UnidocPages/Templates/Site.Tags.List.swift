@@ -1,6 +1,8 @@
+import GitHubAPI
 import HTML
 import UnidocDB
 import UnidocQueries
+import UnixTime
 import URI
 
 extension Site.Tags
@@ -60,25 +62,119 @@ extension Site.Tags.List:StaticPage
 {
     var location:URI { Site.Tags[self.package.id] }
 }
-extension Site.Tags.List:AdministrativePage
+extension Site.Tags.List:ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder)
     {
-        main[.h1] = "\(self.package.id) (tags)"
+        main[.section, { $0.class = "introduction" }]
+        {
+            $0[.h1] = "\(self.package.id)"
+        }
+
         main[.section, { $0.class = "details" }]
         {
+            if  let repo:PackageRepo = self.package.repo
+            {
+                $0[.h2] = "Package Repository"
+
+                $0[.dl]
+                {
+                    switch repo
+                    {
+                    case .github(let repo):
+                        let now:UnixInstant = .now()
+
+                        $0[.dt] = "Provider"
+                        $0[.dd]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "https://github.com/\(repo.owner.login)/\(repo.name)"
+                                $0.target = "_blank"
+                            } = "GitHub"
+                        }
+
+                        if  let license:GitHub.Repo.License = repo.license
+                        {
+                            $0[.dt] = "License"
+                            $0[.dd] = license.name
+                        }
+                        if !repo.topics.isEmpty
+                        {
+                            $0[.dt] = "Keywords"
+                            $0[.dd] = repo.topics.joined(separator: ", ")
+                        }
+
+                        $0[.dt] = "Owner"
+                        $0[.dd]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "https://github.com/\(repo.owner.login)"
+                                $0.target = "_blank"
+                            } = "@\(repo.owner.login)"
+                        }
+
+                        $0[.dt] = "Watchers"
+                        $0[.dd] = "\(repo.watchers)"
+
+                        $0[.dt] = "Forks"
+                        $0[.dd] = "\(repo.forks)"
+
+                        $0[.dt] = "Stars"
+                        $0[.dd] = "\(repo.stars)"
+
+                        $0[.dt] = "Archived?"
+                        $0[.dd] = repo.archived ? "yes" : "no"
+
+                        if  let created:Timestamp = .init(iso8601: repo.created)
+                        {
+                            $0[.dt] = "Created"
+                            $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
+                        }
+                        if  let updated:Timestamp = .init(iso8601: repo.updated),
+                            let updated:UnixInstant = .init(timestamp: updated)
+                        {
+                            let age:Duration = now - updated
+
+                            $0[.dt] = "Last Pushed"
+                            $0[.dd]
+                            {
+                                if      age.components.seconds < 2 * 60
+                                {
+                                    $0 += "just now"
+                                }
+                                else if age.components.seconds < 2 * 60 * 60
+                                {
+                                    $0 += "\(age.components.seconds / 60) minutes ago"
+                                }
+                                else if age.components.seconds < 2 * 24 * 3600
+                                {
+                                    $0 += "\(age.components.seconds / 3600) hours ago"
+                                }
+                                else
+                                {
+                                    $0 += "\(age.components.seconds / 86400) days ago"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $0[.h2] = "Package Tags"
+
             $0[.table, { $0.class = "tags" }]
             {
                 $0[.thead]
                 {
                     $0[.tr]
                     {
-                        $0[.th] = "Git Ref"
+                        $0[.th] = "Tag"
                         $0[.th] = "Commit"
-                        $0[.th] = "ID"
-                        $0[.th] = "Version"
                         $0[.th] = "Release?"
-                        $0[.th] = "Archives?"
+                        $0[.th] = "Documentation"
+                        $0[.th] = "Symbol Graphs"
                     }
                 }
 

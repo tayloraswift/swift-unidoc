@@ -21,19 +21,18 @@ extension Site.Docs
 extension Site.Docs.NotFound
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
 }
-extension Site.Docs.NotFound:RenderablePage
+extension Site.Docs.NotFound:RenderablePage, DynamicPage
 {
     var title:String { "Symbol Not Found - \(self.names.title)" }
-}
-extension Site.Docs.NotFound:DynamicPage
-{
 }
 extension Site.Docs.NotFound:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
+}
+extension Site.Docs.NotFound:VersionedPage
+{
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
     var volume:VolumeIdentifier { self.names.volume }

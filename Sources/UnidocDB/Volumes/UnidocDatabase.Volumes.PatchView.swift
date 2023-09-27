@@ -3,7 +3,7 @@ import SemanticVersions
 import Unidoc
 import UnidocRecords
 
-extension UnidocDatabase.Names
+extension UnidocDatabase.Volumes
 {
     struct PatchView:Equatable, Sendable
     {
@@ -18,9 +18,9 @@ extension UnidocDatabase.Names
         }
     }
 }
-extension UnidocDatabase.Names.PatchView:BSONDocumentDecodable
+extension UnidocDatabase.Volumes.PatchView:BSONDocumentDecodable
 {
-    typealias CodingKey = Volume.Names.CodingKey
+    typealias CodingKey = Volume.Meta.CodingKey
 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

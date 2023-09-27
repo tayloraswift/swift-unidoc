@@ -31,7 +31,7 @@ extension Site.Guides.Feed
 extension Site.Guides.Feed
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
 }
 extension Site.Guides.Feed:RenderablePage
 {
@@ -44,6 +44,9 @@ extension Site.Guides.Feed:StaticPage
 extension Site.Guides.Feed:ApplicationPage
 {
     typealias Navigator = HTML.Logo
+}
+extension Site.Guides.Feed:VersionedPage
+{
     typealias Sidebar = Never
 
     var volume:VolumeIdentifier { self.names.volume }

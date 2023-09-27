@@ -18,8 +18,8 @@ extension Symbol.Decl:VolumeLookupPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: min] = input / Volume.Names[.planes_min]
-                $0[let: max] = input / Volume.Names[.planes_max]
+                $0[let: min] = input / Volume.Meta[.planes_min]
+                $0[let: max] = input / Volume.Meta[.planes_max]
             }
             $0[.pipeline] = .init
             {

@@ -1,6 +1,7 @@
 import BSONDecoding
 import MongoQL
 import UnidocDB
+import UnidocRecords
 
 extension PackageEditionsQuery
 {
@@ -11,12 +12,15 @@ extension PackageEditionsQuery
         var edition:PackageEdition
         public
         var graphs:Graphs?
+        public
+        var volume:Volume.Meta?
 
         @inlinable public
-        init(edition:PackageEdition, graphs:Graphs? = nil)
+        init(edition:PackageEdition, graphs:Graphs? = nil, volume:Volume.Meta? = nil)
         {
             self.edition = edition
             self.graphs = graphs
+            self.volume = volume
         }
     }
 }
@@ -27,6 +31,7 @@ extension PackageEditionsQuery.Facet:MongoMasterCodingModel
     {
         case edition
         case graphs
+        case volume
     }
 }
 extension PackageEditionsQuery.Facet:BSONDocumentDecodable
@@ -36,6 +41,7 @@ extension PackageEditionsQuery.Facet:BSONDocumentDecodable
     {
         self.init(
             edition: try bson[.edition].decode(),
-            graphs: try bson[.graphs]?.decode())
+            graphs: try bson[.graphs]?.decode(),
+            volume: try bson[.volume]?.decode())
     }
 }

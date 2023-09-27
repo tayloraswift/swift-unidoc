@@ -7,7 +7,7 @@ import UnidocRecords
 extension UnidocDatabase
 {
     @frozen public
-    struct Names
+    struct Volumes
     {
         public
         let database:Mongo.Database
@@ -19,7 +19,7 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Names:DatabaseCollection
+extension UnidocDatabase.Volumes:DatabaseCollection
 {
     @inlinable public static
     var name:Mongo.Collection { "names" }
@@ -36,8 +36,8 @@ extension UnidocDatabase.Names:DatabaseCollection
 
             $0[.key] = .init
             {
-                $0[Volume.Names[.id]] = (+)
-                $0[Volume.Names[.latest]] = (-)
+                $0[Volume.Meta[.id]] = (+)
+                $0[Volume.Meta[.latest]] = (-)
             }
         },
         .init
@@ -47,12 +47,12 @@ extension UnidocDatabase.Names:DatabaseCollection
 
             $0[.key] = .init
             {
-                $0[Volume.Names[.id]] = (+)
-                $0[Volume.Names[.patch]] = (-)
+                $0[Volume.Meta[.id]] = (+)
+                $0[Volume.Meta[.patch]] = (-)
             }
             $0[.partialFilterExpression] = .init
             {
-                $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
             }
         },
         .init
@@ -63,12 +63,12 @@ extension UnidocDatabase.Names:DatabaseCollection
             $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
-                $0[Volume.Names[.package]] = (+)
-                $0[Volume.Names[.patch]] = (-)
+                $0[Volume.Meta[.package]] = (+)
+                $0[Volume.Meta[.patch]] = (-)
             }
             $0[.partialFilterExpression] = .init
             {
-                $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
             }
         },
         .init
@@ -79,23 +79,23 @@ extension UnidocDatabase.Names:DatabaseCollection
             $0[.collation] = VolumeCollation.spec
             $0[.key] = .init
             {
-                $0[Volume.Names[.package]] = (+)
-                $0[Volume.Names[.version]] = (+)
+                $0[Volume.Meta[.package]] = (+)
+                $0[Volume.Meta[.version]] = (+)
             }
         },
     ]
 }
-extension UnidocDatabase.Names:RecodableCollection
+extension UnidocDatabase.Volumes:RecodableCollection
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: Volume.Names.self,
+        try await self.recode(through: Volume.Meta.self,
             with: session,
             by: .now.advanced(by: .seconds(30)))
     }
 }
-extension UnidocDatabase.Names
+extension UnidocDatabase.Volumes
 {
     /// Returns the latest release version of the specified package, if one exists.
     func latestRelease(of package:Int32, with session:Mongo.Session) async throws -> PatchView?
@@ -119,36 +119,36 @@ extension UnidocDatabase.Names
 
                     $0.append
                     {
-                        $0[Volume.Names[.patch]] = .init { $0[.exists] = true }
+                        $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
                     }
                     $0.append
                     {
-                        $0[Volume.Names[.id]] = .init { $0[.gte] = cell.min }
+                        $0[Volume.Meta[.id]] = .init { $0[.gte] = cell.min }
                     }
                     $0.append
                     {
-                        $0[Volume.Names[.id]] = .init { $0[.lte] = cell.max }
+                        $0[Volume.Meta[.id]] = .init { $0[.lte] = cell.max }
                     }
                 }
             }
             $0[.sort] = .init
             {
-                $0[Volume.Names[.patch]] = (-)
+                $0[Volume.Meta[.patch]] = (-)
             }
             $0[.hint] = .init
             {
-                $0[Volume.Names[.id]] = (+)
-                $0[Volume.Names[.patch]] = (-)
+                $0[Volume.Meta[.id]] = (+)
+                $0[Volume.Meta[.patch]] = (-)
             }
             $0[.projection] = .init
             {
-                $0[Volume.Names[.id]] = true
-                $0[Volume.Names[.patch]] = true
+                $0[Volume.Meta[.id]] = true
+                $0[Volume.Meta[.patch]] = true
             }
         }
     }
 }
-extension UnidocDatabase.Names
+extension UnidocDatabase.Volumes
 {
     @discardableResult
     func align(latest zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Int
@@ -171,19 +171,19 @@ extension UnidocDatabase.Names
                     $0[.multi] = false
                     $0[.hint] = .init
                     {
-                        $0[Volume.Names[.id]] = (+)
-                        $0[Volume.Names[.latest]] = (-)
+                        $0[Volume.Meta[.id]] = (+)
+                        $0[Volume.Meta[.latest]] = (-)
                     }
                     $0[.q] = .init
                     {
-                        $0[Volume.Names[.id]] = zone
-                        $0[Volume.Names[.latest]] = .init { $0[.ne] = true }
+                        $0[Volume.Meta[.id]] = zone
+                        $0[Volume.Meta[.latest]] = .init { $0[.ne] = true }
                     }
                     $0[.u] = .init
                     {
                         $0[.set] = .init
                         {
-                            $0[Volume.Names[.latest]] = true
+                            $0[Volume.Meta[.latest]] = true
                         }
                     }
                 },
@@ -194,8 +194,8 @@ extension UnidocDatabase.Names
                     $0[.multi] = true
                     $0[.hint] = .init
                     {
-                        $0[Volume.Names[.id]] = (+)
-                        $0[Volume.Names[.latest]] = (-)
+                        $0[Volume.Meta[.id]] = (+)
+                        $0[Volume.Meta[.latest]] = (-)
                     }
                     $0[.q] = .init
                     {
@@ -203,16 +203,16 @@ extension UnidocDatabase.Names
                         {
                             $0.append
                             {
-                                $0[Volume.Names[.id]] = .init { $0[.gte] = zone.cell.min }
+                                $0[Volume.Meta[.id]] = .init { $0[.gte] = zone.cell.min }
                             }
                             $0.append
                             {
-                                $0[Volume.Names[.id]] = .init { $0[.lte] = zone.cell.max }
+                                $0[Volume.Meta[.id]] = .init { $0[.lte] = zone.cell.max }
                             }
                             $0.append
                             {
-                                $0[Volume.Names[.id]] = .init { $0[.ne] = zone }
-                                $0[Volume.Names[.latest]] = .init { $0[.exists] = true }
+                                $0[Volume.Meta[.id]] = .init { $0[.ne] = zone }
+                                $0[Volume.Meta[.latest]] = .init { $0[.exists] = true }
                             }
                         }
                     }
@@ -220,7 +220,7 @@ extension UnidocDatabase.Names
                     {
                         $0[.unset] = .init
                         {
-                            $0[Volume.Names[.latest]] = ()
+                            $0[Volume.Meta[.latest]] = ()
                         }
                     }
                 }

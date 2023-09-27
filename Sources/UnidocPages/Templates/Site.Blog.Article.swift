@@ -24,7 +24,7 @@ extension Site.Blog
 extension Site.Blog.Article
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
 }
 extension Site.Blog.Article:RenderablePage
 {

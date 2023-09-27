@@ -21,7 +21,7 @@ struct InlinerCache
 extension InlinerCache
 {
     private mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Names) -> URI?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Meta) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -29,7 +29,7 @@ extension InlinerCache
                 return target
             }
             else if
-                let names:Volume.Names = self.names[scalar.zone],
+                let names:Volume.Meta = self.names[scalar.zone],
                 let uri:URI = uri(names)
             {
                 let target:String = "\(uri)"

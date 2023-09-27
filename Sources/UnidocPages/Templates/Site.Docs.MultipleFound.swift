@@ -47,7 +47,7 @@ extension Site.Docs.MultipleFound
 extension Site.Docs.MultipleFound
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
 }
 extension Site.Docs.MultipleFound:RenderablePage
 {
@@ -63,7 +63,9 @@ extension Site.Docs.MultipleFound:StaticPage
 extension Site.Docs.MultipleFound:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
+}
+extension Site.Docs.MultipleFound:VersionedPage
+{
     var volume:VolumeIdentifier { self.names.volume }
 
     func main(_ main:inout HTML.ContentEncoder)

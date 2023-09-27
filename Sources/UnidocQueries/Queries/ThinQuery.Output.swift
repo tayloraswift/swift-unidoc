@@ -11,10 +11,10 @@ extension ThinQuery
         public
         let masters:[Volume.Vertex]
         public
-        let names:Volume.Names
+        let names:Volume.Meta
 
         @inlinable internal
-        init(masters:[Volume.Vertex], names:Volume.Names)
+        init(masters:[Volume.Vertex], names:Volume.Meta)
         {
             self.masters = masters
             self.names = names
