@@ -27,6 +27,15 @@ extension PackageBuild
 }
 extension PackageBuild
 {
+    public
+    func removePackageResolved() async throws
+    {
+        try await SystemProcess.init(command: "rm", "-f",
+            "\(self.root / "Package.resolved")")()
+    }
+}
+extension PackageBuild
+{
     /// Creates a build setup by attaching a package located in a directory of the
     /// same name in the specified location.
     ///
