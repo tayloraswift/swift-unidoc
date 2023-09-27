@@ -10,7 +10,7 @@ protocol VersionedPage:ApplicationPage
     var canonical:CanonicalVersion? { get }
     var sidebar:Sidebar? { get }
 
-    var volume:VolumeIdentifier { get }
+    var volume:Volume.Meta { get }
 }
 extension VersionedPage
 {
@@ -33,7 +33,7 @@ extension VersionedPage
     func head(augmenting head:inout HTML.ContentEncoder)
     {
         head[unsafe: .script] = """
-        const volumes = ["\(self.volume)"];
+        const volumes = ["\(self.volume.symbol)"];
         """
     }
     public

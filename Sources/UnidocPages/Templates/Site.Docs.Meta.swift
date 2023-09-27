@@ -36,30 +36,28 @@ extension Site.Docs
 extension Site.Docs.Meta
 {
     private
-    var names:Volume.Meta { self.inliner.names.principal }
-
-    private
     var repo:PackageRepo? { self.inliner.repo }
 }
 extension Site.Docs.Meta:RenderablePage
 {
-    var title:String { self.names.title }
+    var title:String { self.volume.title }
 
     var description:String?
     {
-        self.names.package == .swift ?
+        self.volume.symbol.package == .swift ?
         """
-        Read the documentation for version \(self.names.version) the Swift standard library.
+        Read the documentation for version \(self.volume.symbol.version) the Swift standard \
+        library.
         """ :
         """
-        Read the documentation for version \(self.names.version) of the \
-        \(self.names.display ?? "\(self.names.package)") package.
+        Read the documentation for version \(self.volume.symbol.version) of the \
+        \(self.volume.display ?? "\(self.volume.symbol.package)") package.
         """
     }
 }
 extension Site.Docs.Meta:StaticPage
 {
-    var location:URI { Site.Docs[self.names] }
+    var location:URI { Site.Docs[self.volume] }
 }
 extension Site.Docs.Meta:ApplicationPage
 {
@@ -69,7 +67,7 @@ extension Site.Docs.Meta:VersionedPage
 {
     typealias Sidebar = Never
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -86,14 +84,11 @@ extension Site.Docs.Meta:VersionedPage
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = self.names.package == .swift ?
+                $0[.span] { $0.class = "phylum" } = self.volume.symbol.package == .swift ?
                     "Standard Library" :
                     "Package"
 
-                $0[.span, { $0.class = "domain" }]
-                {
-                    $0[.span] { $0.class = "version" } = self.names.version
-                }
+                $0[.span, { $0.class = "domain" }] = self.volume.symbol.version
             }
 
             $0[.h1] = self.title
@@ -106,7 +101,7 @@ extension Site.Docs.Meta:VersionedPage
             case nil:
                 break
             }
-            if  let refname:String = self.names.refname
+            if  let refname:String = self.volume.refname
             {
                 switch self.repo?.origin
                 {
@@ -154,7 +149,7 @@ extension Site.Docs.Meta:VersionedPage
                 {
                     $0[.a]
                     {
-                        $0.href = "\(Site.Tags[self.names.package])"
+                        $0.href = "\(Site.Tags[self.volume.symbol.package])"
                     } = "Repo details and more versions"
                 }
             }
@@ -195,11 +190,14 @@ extension Site.Docs.Meta:VersionedPage
                                 }
 
                                 if  let pin:Unidoc.Zone = dependency.resolution,
-                                    let pin:Volume.Meta = self.inliner.names[pin]
+                                    let pin:Volume.Meta = self.inliner.volumes[pin]
                                 {
                                     $0[.td]
                                     {
-                                        $0[.a] { $0.href = "\(Site.Docs[pin])" } = pin.version
+                                        $0[.a]
+                                        {
+                                            $0.href = "\(Site.Docs[pin])"
+                                        } = pin.symbol.version
                                     }
                                 }
                                 else

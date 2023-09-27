@@ -3,7 +3,7 @@ import UnidocRecords
 
 extension InlinerCache
 {
-    struct Names:Sendable
+    struct Volumes:Sendable
     {
         let principal:Volume.Meta
         private(set)
@@ -18,7 +18,7 @@ extension InlinerCache
         }
     }
 }
-extension InlinerCache.Names
+extension InlinerCache.Volumes
 {
     mutating
     func add(_ names:[Volume.Meta])
@@ -30,7 +30,7 @@ extension InlinerCache.Names
         }
     }
 }
-extension InlinerCache.Names
+extension InlinerCache.Volumes
 {
     subscript(zone:Unidoc.Zone) -> Volume.Meta?
     {

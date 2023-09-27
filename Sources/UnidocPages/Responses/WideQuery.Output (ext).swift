@@ -20,11 +20,11 @@ extension WideQuery.Output:ServerResponseFactory
         if  let master:Volume.Vertex = principal.master
         {
             let inliner:Inliner = .init(principal: master.id,
-                names: principal.names,
+                volume: principal.names,
                 repo: principal.repo)
 
             inliner.vertices.add(self.secondary)
-            inliner.names.add(self.names)
+            inliner.volumes.add(self.names)
 
             master.overview.map
             {
@@ -37,7 +37,7 @@ extension WideQuery.Output:ServerResponseFactory
 
             //  Special case for Swiftinit blog posts.
             if  case .article(let master) = master,
-                principal.names.package == "__swiftinit"
+                principal.names.symbol.package == "__swiftinit"
             {
                 let page:Site.Blog.Article = .init(inliner, master: master)
                 return .ok(page.resource())

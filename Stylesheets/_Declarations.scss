@@ -51,36 +51,25 @@ section.introduction
 
         span.domain
         {
-            span.culture:before,
-            span.culture:after,
-            span.package:after
+            span.namespace::before
+            {
+                content: "->";
+                padding: 0 0.35em;
+                font-family: $typeface-serif;
+            }
+
+            span.package:after,
+            span.volume:before,
+            span.volume:after
             {
                 margin: 0 0.2rem;
             }
 
-            span.package:after
-            {
-                content: ':';
-            }
-
-            span.culture:before
+            span.volume:before
             {
                 content: '(';
             }
-            span.culture
-            {
-                .version:last-child:after
-                {
-                    content: '';
-                    padding: 0;
-                }
-                .version:after
-                {
-                    content: '/';
-                    padding: 0 0.25rem;
-                }
-            }
-            span.culture:after
+            span.volume:after
             {
                 content: ')';
             }

@@ -82,7 +82,7 @@ extension CanonicalVersion
         }
 
         self.init(relationship: relationship,
-            package: names.display ?? "\(names.package)",
+            package: names.display ?? "\(names.symbol.package)",
             volume: volume,
             target: target)
     }
