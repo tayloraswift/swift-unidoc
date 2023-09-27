@@ -325,13 +325,27 @@ extension UnidocDatabase
     {
         if  clear
         {
-            try await self.search.delete(volume.id, with: session)
-
-            try await self.volumes.delete(volume.edition, with: session)
             try await self.vertices.clear(volume.edition, with: session)
             try await self.groups.clear(volume.edition, with: session)
             try await self.trees.clear(volume.edition, with: session)
 
+            try await self.search.delete(volume.id, with: session)
+            try await self.volumes.delete(volume.edition, with: session)
+        }
+        //  If there is a volume generated from a prerelease with the same patch number,
+        //  we need to delete that too.
+        if  let volume:Volume.Meta = try await self.volumes.find(by: Volume.Meta[.version],
+                of: volume.id.version,
+                with: session)
+        {
+            try await self.vertices.clear(volume.id, with: session)
+            try await self.groups.clear(volume.id, with: session)
+            try await self.trees.clear(volume.id, with: session)
+
+            try await self.search.delete(volume.symbol, with: session)
+            //  Delete this last, otherwise if one of the other steps fails, we won’t
+            //  have an easy way to clean up the remaining documents.
+            try await self.volumes.delete(volume.id, with: session)
         }
 
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
