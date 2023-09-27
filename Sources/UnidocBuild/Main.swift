@@ -65,6 +65,9 @@ enum Main
                     in: workspace,
                     clean: true)
 
+                //  Remove the `Package.resolved` file to force a new resolution.
+                try await build.removePackageResolved()
+
                 let snapshot:Snapshot = .init(
                     package: package.coordinate,
                     version: edition.coordinate,
