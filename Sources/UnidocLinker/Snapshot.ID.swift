@@ -58,7 +58,12 @@ extension Snapshot.ID
 extension Snapshot.ID
 {
     @inlinable public
-    var volume:VolumeIdentifier { .init(package: self.package, version: "\(self.version)") }
+    var volume:VolumeIdentifier
+    {
+        .init(
+            package: self.package,
+            version: self.version.stable?.patch.description ?? "\(self.version)")
+    }
 }
 extension Snapshot.ID:CustomStringConvertible
 {
