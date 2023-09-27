@@ -86,7 +86,7 @@ extension Server
             certificates: options.certificates)
 
         let cache:Cache<Site.Asset.Get>
-        let mode:ServerMode
+        let mode:Mode
 
         if  authority is Localhost
         {
