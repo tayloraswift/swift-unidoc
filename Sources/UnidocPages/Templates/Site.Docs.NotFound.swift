@@ -18,14 +18,9 @@ extension Site.Docs
         }
     }
 }
-extension Site.Docs.NotFound
-{
-    private
-    var names:Volume.Meta { self.inliner.names.principal }
-}
 extension Site.Docs.NotFound:RenderablePage, DynamicPage
 {
-    var title:String { "Symbol Not Found - \(self.names.title)" }
+    var title:String { "Symbol Not Found - \(self.volume.title)" }
 }
 extension Site.Docs.NotFound:ApplicationPage
 {
@@ -35,7 +30,7 @@ extension Site.Docs.NotFound:VersionedPage
 {
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -46,8 +41,8 @@ extension Site.Docs.NotFound:VersionedPage
                 $0 += "Symbol not found. Try a search, or return to the documentation for "
                 $0[.a]
                 {
-                    $0.href = "\(Site.Docs[self.names])"
-                } = self.names.display ?? "\(self.names.package)"
+                    $0.href = "\(Site.Docs[self.volume])"
+                } = self.volume.display ?? "\(self.volume.symbol.package)"
                 $0 += "."
             }
         }

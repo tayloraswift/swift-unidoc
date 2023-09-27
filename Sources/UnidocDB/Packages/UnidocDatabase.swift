@@ -336,12 +336,12 @@ extension UnidocDatabase
 
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
-        try await self.volumes.insert(some: volume.names, with: session)
+        try await self.volumes.insert(some: volume.meta, with: session)
         try await self.vertices.insert(some: volume.vertices, with: session)
         try await self.trees.insert(some: trees, with: session)
         try await self.search.insert(some: index, with: session)
 
-        if  volume.names.latest
+        if  volume.meta.latest
         {
             try await self.siteMaps.upsert(some: volume.siteMap(), with: session)
             try await self.groups.insert(some: volume.groups(latest: true), with: session)
@@ -380,30 +380,30 @@ extension UnidocDatabase
         var volume:Volume = .init(latest: latestRelease?.id,
             vertices: linker.vertices,
             groups: linker.groups,
-            names: .init(id: snapshot.edition,
+            meta: .init(id: snapshot.edition,
                 display: snapshot.metadata.display,
                 refname: snapshot.metadata.commit?.refname,
-                volume: id.volume,
+                symbol: id.volume,
                 latest: true,
                 patch: id.version.stable?.patch))
 
         guard case .stable(.release(let patch, build: _)) = id.version.canonical
         else
         {
-            volume.names.latest = false
-            volume.names.patch = nil
+            volume.meta.latest = false
+            volume.meta.patch = nil
             return volume
         }
 
         if  let latest:PatchVersion = latestRelease?.patch,
                 latest > patch
         {
-            volume.names.latest = false
+            volume.meta.latest = false
         }
         else
         {
-            volume.names.latest = true
-            volume.latest = volume.names.id
+            volume.meta.latest = true
+            volume.latest = volume.meta.id
         }
 
         return volume

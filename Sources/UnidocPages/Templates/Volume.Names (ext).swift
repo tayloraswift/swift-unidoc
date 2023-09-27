@@ -4,6 +4,6 @@ extension Volume.Meta
 {
     var title:String
     {
-        "\(self.display ?? "\(self.package)") Documentation"
+        "\(self.display ?? "\(self.symbol.package)") Documentation"
     }
 }

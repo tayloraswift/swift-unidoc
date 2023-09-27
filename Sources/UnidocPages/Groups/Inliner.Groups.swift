@@ -72,9 +72,9 @@ extension Inliner.Groups
             switch group
             {
             case .extension(let group):
-                let partisanship:Partisanship = inliner.names.secondary[group.id.zone].map
+                let partisanship:Partisanship = inliner.volumes.secondary[group.id.zone].map
                 {
-                    .third($0.package)
+                    .third($0.symbol.package)
                 } ?? .first
 
                 let genericness:Genericness = group.conditions.isEmpty ?

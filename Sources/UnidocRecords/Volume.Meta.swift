@@ -28,7 +28,7 @@ extension Volume
         var origin:Origin? { nil }
 
         public
-        var volume:VolumeIdentifier
+        var symbol:VolumeIdentifier
         public
         var latest:Bool
 
@@ -39,14 +39,14 @@ extension Volume
         init(id:Unidoc.Zone,
             display:String?,
             refname:String?,
-            volume:VolumeIdentifier,
+            symbol:VolumeIdentifier,
             latest:Bool,
             patch:PatchVersion?)
         {
             self.id = id
             self.display = display
             self.refname = refname
-            self.volume = volume
+            self.symbol = symbol
             self.latest = latest
             self.patch = patch
         }
@@ -54,11 +54,13 @@ extension Volume
 }
 extension Volume.Meta
 {
+    @available(*, deprecated)
     @inlinable public
-    var package:PackageIdentifier { self.volume.package }
+    var package:PackageIdentifier { self.symbol.package }
 
+    @available(*, deprecated)
     @inlinable public
-    var version:String { self.volume.version }
+    var version:String { self.symbol.version }
 
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
@@ -127,8 +129,8 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.cell] = self.id.cell.package
 
-        bson[.package] = self.volume.package
-        bson[.version] = self.volume.version
+        bson[.package] = self.symbol.package
+        bson[.version] = self.symbol.version
 
         bson[.display] = self.display
         bson[.refname] = self.refname
@@ -156,7 +158,7 @@ extension Volume.Meta:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             display: try bson[.display]?.decode(),
             refname: try bson[.refname]?.decode(),
-            volume: .init(
+            symbol: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,

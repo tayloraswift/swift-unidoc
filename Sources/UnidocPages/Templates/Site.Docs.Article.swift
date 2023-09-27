@@ -38,13 +38,11 @@ extension Site.Docs
 extension Site.Docs.Article
 {
     private
-    var names:Volume.Meta { self.inliner.names.principal }
-    private
     var stem:Volume.Stem { self.master.stem }
 }
 extension Site.Docs.Article:RenderablePage
 {
-    var title:String { "\(self.master.headline.safe) - \(self.names.title)" }
+    var title:String { "\(self.master.headline.safe) - \(self.volume.title)" }
 
     var description:String?
     {
@@ -53,7 +51,7 @@ extension Site.Docs.Article:RenderablePage
 }
 extension Site.Docs.Article:StaticPage
 {
-    var location:URI { Site.Docs[self.names, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.master.shoot] }
 }
 extension Site.Docs.Article:ApplicationPage
 {
@@ -63,7 +61,7 @@ extension Site.Docs.Article:VersionedPage
 {
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
-    var volume:VolumeIdentifier { self.names.volume }
+    var volume:Volume.Meta { self.inliner.volumes.principal }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -80,11 +78,17 @@ extension Site.Docs.Article:VersionedPage
 
                 $0[.span, { $0.class = "domain" }]
                 {
-                    $0[link: self.inliner.url(self.master.culture)] = self.stem.first
-
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[.span] { $0.class = "version" } = self.names.version
+                        $0[link: self.inliner.url(self.master.culture)] = self.stem.first
+                    }
+
+                    $0[.span, { $0.class = "volume" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.volume])"
+                        } = self.volume.symbol.version
                     }
                 }
             }
