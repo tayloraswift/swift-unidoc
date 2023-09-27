@@ -9,7 +9,7 @@ extension Site.Admin.Recode
         case packages
         case editions
         case vertices
-        case names
+        case volumes
     }
 }
 extension Site.Admin.Recode.Target
@@ -20,8 +20,8 @@ extension Site.Admin.Recode.Target
         {
         case .packages:     return "Packages"
         case .editions:     return "Editions"
+        case .volumes:      return "Volume Metadata"
         case .vertices:     return "Vertices"
-        case .names:        return "Volume Names"
         }
     }
 
@@ -32,8 +32,8 @@ extension Site.Admin.Recode.Target
         {
         case .packages:     return "This will recode all package records. Are you sure?"
         case .editions:     return "This will recode all edition records. Are you sure?"
-        case .vertices:     return "This will recode all vertex records. Are you sure?"
-        case .names:        return "This will recode all volume names. Are you sure?"
+        case .volumes:      return "This will recode all volume metadata. Are you sure?"
+        case .vertices:     return "This will recode all volume vertices. Are you sure?"
         }
     }
 }

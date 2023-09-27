@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Volume.Names
+extension Volume.Meta
 {
     var title:String
     {

@@ -42,7 +42,7 @@ extension Inliner
 extension Inliner
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, names:Volume.Names, repo:PackageRepo?)
+    init(principal scalar:Unidoc.Scalar, names:Volume.Meta, repo:PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
@@ -50,7 +50,7 @@ extension Inliner
             repo: repo)
     }
     convenience
-    init(principal names:Volume.Names, repo:PackageRepo?)
+    init(principal names:Volume.Meta, repo:PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),

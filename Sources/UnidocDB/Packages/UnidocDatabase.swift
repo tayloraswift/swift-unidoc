@@ -37,12 +37,12 @@ extension UnidocDatabase
     var meta:Meta { .init(database: self.id) }
 
     @inlinable public
+    var volumes:Volumes { .init(database: self.id) }
+    @inlinable public
     var vertices:Vertices { .init(database: self.id) }
     var groups:Groups { .init(database: self.id) }
     var search:Search { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
-    @inlinable public
-    var names:Names { .init(database: self.id) }
     var siteMaps:SiteMaps { .init(database: self.id) }
 }
 extension UnidocDatabase:DatabaseModel
@@ -64,11 +64,11 @@ extension UnidocDatabase:DatabaseModel
         try await self.graphs.setup(with: session)
         try await self.meta.setup(with: session)
 
+        try await self.volumes.setup(with: session)
         try await self.vertices.setup(with: session)
         try await self.groups.setup(with: session)
         try await self.search.setup(with: session)
         try await self.trees.setup(with: session)
-        try await self.names.setup(with: session)
         try await self.siteMaps.setup(with: session)
     }
 }
@@ -79,11 +79,11 @@ extension UnidocDatabase
     private
     func _clear(with session:Mongo.Session) async throws
     {
+        try await self.volumes.replace(with: session)
         try await self.vertices.replace(with: session)
         try await self.groups.replace(with: session)
         try await self.search.replace(with: session)
         try await self.trees.replace(with: session)
-        try await self.names.replace(with: session)
         try await self.siteMaps.replace(with: session)
     }
 
@@ -327,17 +327,17 @@ extension UnidocDatabase
         {
             try await self.search.delete(volume.id, with: session)
 
+            try await self.volumes.delete(volume.edition, with: session)
             try await self.vertices.clear(volume.edition, with: session)
             try await self.groups.clear(volume.edition, with: session)
             try await self.trees.clear(volume.edition, with: session)
 
-            try await self.names.delete(volume.edition, with: session)
         }
 
         let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
 
+        try await self.volumes.insert(some: volume.names, with: session)
         try await self.vertices.insert(some: volume.vertices, with: session)
-        try await self.names.insert(some: volume.names, with: session)
         try await self.trees.insert(some: trees, with: session)
         try await self.search.insert(some: index, with: session)
 
@@ -352,8 +352,8 @@ extension UnidocDatabase
         }
         if  let latest:Unidoc.Zone = volume.latest
         {
+            try await self.volumes.align(latest: latest, with: session)
             try await self.groups.align(latest: latest, with: session)
-            try await self.names.align(latest: latest, with: session)
         }
     }
 
@@ -371,7 +371,7 @@ extension UnidocDatabase
 
         symbolicator.emit(linker.errors, colors: .enabled)
 
-        let latestRelease:Names.PatchView? = try await self.names.latestRelease(
+        let latestRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
             of: snapshot.package,
             with: session)
 

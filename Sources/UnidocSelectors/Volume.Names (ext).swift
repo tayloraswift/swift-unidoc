@@ -2,7 +2,7 @@ import ModuleGraphs
 import UnidocRecords
 import URI
 
-extension Volume.Names
+extension Volume.Meta
 {
     @inlinable public static
     func += (uri:inout URI.Path, self:Self)

@@ -63,7 +63,7 @@ extension WideQuery:VolumeLookupQuery
             $0[.lookup] = .init
             {
                 $0[.from] = UnidocDatabase.Packages.name
-                $0[.localField] = Output.Principal[.names] / Volume.Names[.cell]
+                $0[.localField] = Output.Principal[.names] / Volume.Meta[.cell]
                 $0[.foreignField] = PackageRecord[.cell]
                 $0[.as] = Output.Principal[.repo]
             }
@@ -104,8 +104,8 @@ extension WideQuery:VolumeLookupQuery
 
                     //  ``namesOfLatest`` is always non-nil, so we don’t need to worry about
                     //  degenerate index behavior.
-                    $0[let: min] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_min]
-                    $0[let: max] = Output.Principal[.namesOfLatest] / Volume.Names[.planes_max]
+                    $0[let: min] = Output.Principal[.namesOfLatest] / Volume.Meta[.planes_min]
+                    $0[let: max] = Output.Principal[.namesOfLatest] / Volume.Meta[.planes_max]
                 }
                 $0[.pipeline] = .init
                 {
@@ -200,8 +200,8 @@ extension WideQuery:VolumeLookupQuery
                             Never??.some(nil)
                         )
                     }
-                    $0[let: min] = Output.Principal[.names] / Volume.Names[.planes_autogroup]
-                    $0[let: max] = Output.Principal[.names] / Volume.Names[.planes_max]
+                    $0[let: min] = Output.Principal[.names] / Volume.Meta[.planes_autogroup]
+                    $0[let: max] = Output.Principal[.names] / Volume.Meta[.planes_max]
                 }
                 $0[.pipeline] = .init
                 {
@@ -277,10 +277,10 @@ extension WideQuery:VolumeLookupQuery
                             ]
                             {
                                 //  Do not return computed fields.
-                                for key:Volume.Names.CodingKey in
-                                    Volume.Names.CodingKey.independent
+                                for key:Volume.Meta.CodingKey in
+                                    Volume.Meta.CodingKey.independent
                                 {
-                                    $0[Output.Principal[names] / Volume.Names[key]] = true
+                                    $0[Output.Principal[names] / Volume.Meta[key]] = true
                                 }
                             }
                         }
@@ -403,7 +403,7 @@ extension WideQuery:VolumeLookupQuery
                                 {
                                     $0[zones] = .init
                                     {
-                                        $0[.ne] = Output.Principal[.names] / Volume.Names[.id]
+                                        $0[.ne] = Output.Principal[.names] / Volume.Meta[.id]
                                     }
                                 }
                             }
@@ -413,9 +413,9 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.lookup] = .init
                         {
-                            $0[.from] = UnidocDatabase.Names.name
+                            $0[.from] = UnidocDatabase.Volumes.name
                             $0[.localField] = zones
-                            $0[.foreignField] = Volume.Names[.id]
+                            $0[.foreignField] = Volume.Meta[.id]
                             $0[.as] = results
                         }
                     }
@@ -431,10 +431,10 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.project] = .init
                         {
-                            for key:Volume.Names.CodingKey in
-                                    Volume.Names.CodingKey.independent
+                            for key:Volume.Meta.CodingKey in
+                                    Volume.Meta.CodingKey.independent
                             {
-                                $0[Volume.Names[key]] = true
+                                $0[Volume.Meta[key]] = true
                             }
                         }
                     }

@@ -36,7 +36,7 @@ extension Site.Docs
 extension Site.Docs.Meta
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
 
     private
     var repo:PackageRepo? { self.inliner.repo }
@@ -64,6 +64,9 @@ extension Site.Docs.Meta:StaticPage
 extension Site.Docs.Meta:ApplicationPage
 {
     typealias Navigator = HTML.Logo
+}
+extension Site.Docs.Meta:VersionedPage
+{
     typealias Sidebar = Never
 
     var volume:VolumeIdentifier { self.names.volume }
@@ -130,82 +133,29 @@ extension Site.Docs.Meta:ApplicationPage
                     switch repo
                     {
                     case .github(let repo):
-                        let now:UnixInstant = .now()
-
                         $0[.dt] = "Provider"
-                        $0[.dd]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "https://github.com/\(repo.owner.login)/\(repo.name)"
-                                $0.target = "_blank"
-                            } = "GitHub"
-                        }
+                        $0[.dd] = "GitHub"
 
                         if  let license:GitHub.Repo.License = repo.license
                         {
                             $0[.dt] = "License"
                             $0[.dd] = license.name
                         }
+
                         if !repo.topics.isEmpty
                         {
                             $0[.dt] = "Keywords"
                             $0[.dd] = repo.topics.joined(separator: ", ")
                         }
-
-                        $0[.dt] = "Watchers"
-                        $0[.dd] = "\(repo.watchers)"
-
-                        $0[.dt] = "Forks"
-                        $0[.dd] = "\(repo.forks)"
-
-                        $0[.dt] = "Stars"
-                        $0[.dd] = "\(repo.stars)"
-
-                        $0[.dt] = "Archived?"
-                        $0[.dd] = repo.archived ? "yes" : "no"
-
-                        if  let created:Timestamp = .init(iso8601: repo.created)
-                        {
-                            $0[.dt] = "Created"
-                            $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
-                        }
-                        if  let updated:Timestamp = .init(iso8601: repo.updated),
-                            let updated:UnixInstant = .init(timestamp: updated)
-                        {
-                            let age:Duration = now - updated
-
-                            $0[.dt] = "Last Pushed"
-                            $0[.dd]
-                            {
-                                if      age.components.seconds < 2 * 60
-                                {
-                                    $0 += "just now"
-                                }
-                                else if age.components.seconds < 2 * 60 * 60
-                                {
-                                    $0 += "\(age.components.seconds / 60) minutes ago"
-                                }
-                                else if age.components.seconds < 2 * 24 * 3600
-                                {
-                                    $0 += "\(age.components.seconds / 3600) hours ago"
-                                }
-                                else
-                                {
-                                    $0 += "\(age.components.seconds / 86400) days ago"
-                                }
-
-                                $0 += " ("
-
-                                $0[.a]
-                                {
-                                    $0.href = "\(Site.Tags[self.names.package])"
-                                } = "view tags"
-
-                                $0 += ")"
-                            }
-                        }
                     }
+                }
+
+                $0[.div, { $0.class = "more" }]
+                {
+                    $0[.a]
+                    {
+                        $0.href = "\(Site.Tags[self.names.package])"
+                    } = "Repo details and more versions"
                 }
             }
 
@@ -245,7 +195,7 @@ extension Site.Docs.Meta:ApplicationPage
                                 }
 
                                 if  let pin:Unidoc.Zone = dependency.resolution,
-                                    let pin:Volume.Names = self.inliner.names[pin]
+                                    let pin:Volume.Meta = self.inliner.names[pin]
                                 {
                                     $0[.td]
                                     {

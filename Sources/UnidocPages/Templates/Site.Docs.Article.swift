@@ -38,7 +38,7 @@ extension Site.Docs
 extension Site.Docs.Article
 {
     private
-    var names:Volume.Names { self.inliner.names.principal }
+    var names:Volume.Meta { self.inliner.names.principal }
     private
     var stem:Volume.Stem { self.master.stem }
 }
@@ -58,7 +58,9 @@ extension Site.Docs.Article:StaticPage
 extension Site.Docs.Article:ApplicationPage
 {
     typealias Navigator = HTML.Logo
-
+}
+extension Site.Docs.Article:VersionedPage
+{
     var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
 
     var volume:VolumeIdentifier { self.names.volume }
