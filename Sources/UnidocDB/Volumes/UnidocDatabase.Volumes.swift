@@ -97,6 +97,33 @@ extension UnidocDatabase.Volumes:RecodableCollection
 }
 extension UnidocDatabase.Volumes
 {
+    func find(named symbol:VolumeIdentifier,
+        with session:Mongo.Session) async throws -> Volume.Meta?
+    {
+        let response:[Volume.Meta] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Volume.Meta>>.init(Self.name,
+                limit: 1)
+            {
+                $0[.collation] = VolumeCollation.spec
+                $0[.filter] = .init
+                {
+                    $0[Volume.Meta[.package]] = symbol.package
+                    $0[Volume.Meta[.version]] = symbol.version
+                }
+                $0[.hint] = .init
+                {
+
+                    $0[Volume.Meta[.package]] = (+)
+                    $0[Volume.Meta[.version]] = (+)
+                }
+            },
+            against: self.database)
+
+        return response.first
+    }
+}
+extension UnidocDatabase.Volumes
+{
     /// Returns the latest release version of the specified package, if one exists.
     func latestRelease(of package:Int32, with session:Mongo.Session) async throws -> PatchView?
     {
