@@ -94,7 +94,7 @@ extension GitHubPlugin.Crawler
             }
 
             let tags:[GitHub.Tag] = try await github.get(
-                from: "/repos/\(repo.owner.login)/\(repo.name)/tags")
+                from: "/repos/\(repo.owner.login)/\(repo.name)/tags?per_page=100")
 
             //  Import tags in chronological order.
             for tag:GitHub.Tag in tags.reversed()
