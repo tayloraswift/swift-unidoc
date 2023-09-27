@@ -125,10 +125,10 @@ enum Main:SyncTests
                         scope: [swift_malibu.id + 4 * .decl])),
                 ],
                 groups: [],
-                names: .init(id: swift_malibu.id,
+                meta: .init(id: swift_malibu.id,
                     display: nil,
                     refname: nil,
-                    volume: .init(
+                    symbol: .init(
                         package: "swift-malibu",
                         version: "master"),
                     latest: true,
