@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-grammar",
       "state" : {
-        "revision" : "3ed94966b1fd8145c2624a5955a9f0d17663280b",
-        "version" : "0.3.2"
+        "revision" : "163ce5d4d88db7d94f2f4ca1cabcb2ae65af8af7",
+        "version" : "0.3.3"
       }
     },
     {
