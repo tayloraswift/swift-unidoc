@@ -7,11 +7,6 @@ import Unidoc
 
 extension Volume
 {
-    @available(*, deprecated, renamed: "Meta")
-    public typealias Names = Volume.Meta
-}
-extension Volume
-{
     @frozen public
     struct Meta:Identifiable, Equatable, Sendable
     {
@@ -22,10 +17,6 @@ extension Volume
         var display:String?
         public
         var refname:String?
-
-        @available(*, unavailable)
-        public
-        var origin:Origin? { nil }
 
         public
         var symbol:VolumeIdentifier
@@ -80,10 +71,6 @@ extension Volume.Meta
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
         /// to match (and duplicate) the refname in the associated ``PackageEdition`` record.
         case refname = "G"
-
-        @available(*, unavailable)
-        case origin = "H"
-
         case patch = "S"
 
         case planes_min = "C"

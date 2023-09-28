@@ -80,14 +80,23 @@ let package:Package = .init(
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.1.0")),
-        .package(url: "https://github.com/apple/swift-nio", .upToNextMinor(
-            from: "2.58.0")),
+
+        /// swift-nio has a low rate of breakage, and can be trusted with a major-only
+        /// version requirement.
+        .package(url: "https://github.com/apple/swift-nio",
+            from: "2.58.0"),
+        /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
+        /// major-only version requirement.
+        .package(url: "https://github.com/apple/swift-nio-ssl.git",
+            from: "2.24.0"),
+
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.27.0")),
-        .package(url: "https://github.com/apple/swift-nio-ssl", .upToNextMinor(
-            from: "2.24.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.2.0")),
+        /// swift-system has broken in a minor before, and can't be trusted with a
+        /// major-only version requirement.
+        /// See: https://forums.swift.org/t/windows-build-is-broken/58036
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
