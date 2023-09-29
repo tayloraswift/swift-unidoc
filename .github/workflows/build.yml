@@ -14,8 +14,8 @@ jobs:
         strategy:
             matrix:
                 image:
-                -   swift:5.9.0-amazonlinux2
-                -   swift:5.9.0-jammy
+                -   5.9.0-amazonlinux2
+                -   5.9.0-jammy
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
@@ -36,13 +36,13 @@ jobs:
                         --name swift-environment \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
-                        ${{ matrix.image }} \
+                        swift:${{ matrix.image }} \
                         /bin/bash $(echo .github/pipeline)
 
-            -   name: store binary artifacts
+            -   name: export binary tools
                 uses: actions/upload-artifact@v3
                 with:
-                    name: unidoc binaries
+                    name: unidoc-tools-${{ matrix.image }}
                     path: |
                         .build/release/UnidocServer
                         .build/release/UnidocBuild
