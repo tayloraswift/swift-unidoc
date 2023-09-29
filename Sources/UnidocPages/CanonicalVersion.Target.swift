@@ -8,7 +8,7 @@ extension CanonicalVersion
         case article(URI?)
         case culture(URI?)
         case decl(URI?)
-        case meta
+        case global
     }
 }
 extension CanonicalVersion.Target
@@ -20,7 +20,7 @@ extension CanonicalVersion.Target
         case .article:          return "An"
         case .culture:          return "A"
         case .decl:             return "A"
-        case .meta:             return "A"
+        case .global:           return "A"
         }
     }
     var demonym:String
@@ -30,7 +30,7 @@ extension CanonicalVersion.Target
         case .article:          return "article"
         case .culture:          return "module"
         case .decl:             return "symbol"
-        case .meta:             return "package"
+        case .global:           return "package"
         }
     }
     var identity:String
@@ -40,7 +40,7 @@ extension CanonicalVersion.Target
         case .article:          return "name"
         case .culture:          return "name"
         case .decl:             return "signature"
-        case .meta:             return "identity"
+        case .global:           return "identity"
         }
     }
 
@@ -51,7 +51,7 @@ extension CanonicalVersion.Target
         case .article(let uri): return uri
         case .culture(let uri): return uri
         case .decl(let uri):    return uri
-        case .meta:             return nil
+        case .global:           return nil
         }
     }
 }

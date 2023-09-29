@@ -4,12 +4,8 @@ import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
 import Unidoc
+import SHA1
 
-extension Volume
-{
-    @available(*, deprecated, renamed: "Meta")
-    public typealias Names = Volume.Meta
-}
 extension Volume
 {
     @frozen public
@@ -19,36 +15,44 @@ extension Volume
         let id:Unidoc.Zone
 
         public
+        var dependencies:[Dependency]
+        public
         var display:String?
         public
         var refname:String?
-
-        @available(*, unavailable)
         public
-        var origin:Origin? { nil }
+        var commit:SHA1?
 
         public
         var symbol:VolumeIdentifier
         public
         var latest:Bool
-
         public
         var patch:PatchVersion?
 
+        public
+        var link:LinkDetails?
+
         @inlinable public
         init(id:Unidoc.Zone,
-            display:String?,
-            refname:String?,
+            dependencies:[Dependency] = [],
+            display:String? = nil,
+            refname:String? = nil,
+            commit:SHA1? = nil,
             symbol:VolumeIdentifier,
             latest:Bool,
-            patch:PatchVersion?)
+            patch:PatchVersion? = nil,
+            link:LinkDetails? = nil)
         {
             self.id = id
+            self.dependencies = dependencies
             self.display = display
             self.refname = refname
+            self.commit = commit
             self.symbol = symbol
             self.latest = latest
             self.patch = patch
+            self.link = link
         }
     }
 }
@@ -74,17 +78,16 @@ extension Volume.Meta
 
         case cell = "O"
 
+        case dependencies = "K"
         case package = "P"
         case version = "V"
         case display = "D"
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
         /// to match (and duplicate) the refname in the associated ``PackageEdition`` record.
         case refname = "G"
-
-        @available(*, unavailable)
-        case origin = "H"
-
+        case commit = "H"
         case patch = "S"
+        case link = "N"
 
         case planes_min = "C"
 
@@ -102,23 +105,6 @@ extension Volume.Meta
         /// exists as a query optimization. It is computed and aligned within
         /// the database according to the value of the ``patch`` field.
         case latest = "L"
-
-        /// The list of non-computed fields in this scheme. This is used as a
-        /// projection filter to avoid returning computed fields.
-        @inlinable public static
-        var independent:[Self]
-        {
-            [
-                .id,
-                .package,
-                .version,
-                .refname,
-                .display,
-                .patch,
-
-                .latest,
-            ]
-        }
     }
 }
 extension Volume.Meta:BSONDocumentEncodable
@@ -129,14 +115,17 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.cell] = self.id.cell.package
 
+        bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
         bson[.package] = self.symbol.package
         bson[.version] = self.symbol.version
 
         bson[.display] = self.display
         bson[.refname] = self.refname
+        bson[.commit] = self.commit
 
         bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
+        bson[.link] = self.link
 
         bson[.planes_min] = self.planes.min
 
@@ -156,12 +145,15 @@ extension Volume.Meta:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
+            dependencies: try bson[.dependencies]?.decode() ?? [],
             display: try bson[.display]?.decode(),
             refname: try bson[.refname]?.decode(),
+            commit: try bson[.commit]?.decode(),
             symbol: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,
-            patch: try bson[.patch]?.decode())
+            patch: try bson[.patch]?.decode(),
+            link: try bson[.link]?.decode())
     }
 }

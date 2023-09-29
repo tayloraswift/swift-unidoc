@@ -13,7 +13,7 @@ enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
     case `extension`    = 0xC2_000000
     case  topic         = 0xC3_000000
 
-    case  meta          = 0xFF_000000
+    case  global        = 0xFF_000000
 }
 extension UnidocPlane:Comparable
 {

@@ -33,6 +33,8 @@ struct DynamicLinker
     var vertices:[Volume.Vertex]
     public private(set)
     var groups:[Volume.Group]
+    public private(set)
+    var meta:Volume.Meta.LinkDetails
 
     private
     init(context:DynamicContext,
@@ -54,6 +56,8 @@ struct DynamicLinker
 
         self.vertices = []
         self.groups = []
+        self.meta = .init(abi: context.current.metadata.abi,
+            requirements: context.current.metadata.requirements)
     }
 }
 extension DynamicLinker
@@ -84,15 +88,10 @@ extension DynamicLinker
         self.autogroup()
 
         var cultures:[Volume.Vertex.Culture] = self.link(clients: clients)
-        var meta:Volume.Vertex.Meta = .init(id: context.current.edition.meta,
-            abi: context.current.metadata.abi,
-            dependencies: context.dependencies(),
-            platforms: context.current.metadata.requirements,
-            revision: context.current.metadata.commit?.hash)
 
         defer
         {
-            self.vertices.append(.meta(meta))
+            self.vertices.append(.global(.init(id: context.current.edition.global)))
             for culture:Volume.Vertex.Culture in cultures
             {
                 self.vertices.append(.culture(culture))
@@ -121,8 +120,8 @@ extension DynamicLinker
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
 
-                    meta.census.unweighted.coverage[keyPath: coverage] += 1
-                    meta.census.unweighted.decls[keyPath: decl] += 1
+                    self.meta.census.unweighted.coverage[keyPath: coverage] += 1
+                    self.meta.census.unweighted.decls[keyPath: decl] += 1
                 }
             }
         }
@@ -136,7 +135,7 @@ extension DynamicLinker
         }
 
         //  Create extension records, and compute weighted stats.
-        meta.census.weighted = meta.census.unweighted
+        self.meta.census.weighted = self.meta.census.unweighted
         for c:Int in cultures.indices
         {
             cultures[c].census.weighted = cultures[c].census.unweighted
@@ -155,7 +154,7 @@ extension DynamicLinker
                     let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
 
                     cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
-                    meta.census.weighted.decls[keyPath: bin] += 1
+                    self.meta.census.weighted.decls[keyPath: bin] += 1
                 }
             }
         }
@@ -176,7 +175,7 @@ extension DynamicLinker
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
         let cultures:Volume.Group.Automatic = .init(id: self.next.autogroup.id(),
-            scope: self.current.edition.meta,
+            scope: self.current.edition.global,
             members: self.current.cultures.indices.sorted
             {
                 self.current.namespaces[$0] <

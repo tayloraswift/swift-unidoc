@@ -38,3 +38,11 @@ jobs:
                         -w /swift/swift-unidoc \
                         ${{ matrix.image }} \
                         /bin/bash $(echo .github/pipeline)
+
+            -   name: store binary artifacts
+                uses: actions/upload-artifact@v3
+                with:
+                    name: unidoc binaries
+                    path: |
+                        .build/release/UnidocServer
+                        .build/release/UnidocBuild
