@@ -178,39 +178,6 @@ extension UnidocDatabase
         }
     }
 }
-
-extension UnidocDatabase
-{
-    public
-    func _migrateVolumeMetadata(
-        with session:Mongo.Session) async throws -> (modified:Int, of:Int)
-    {
-        try await self.volumes.recode(with: session, by: .now.advanced(by: .seconds(60)))
-        {
-            (volume:inout Volume.Meta) in
-
-            guard
-            let vertex:Volume.Vertex = try await self.vertices.find(by: volume.id.meta,
-                with: session),
-            let vertex:Volume.Vertex.Meta = vertex.meta,
-            let abi:MinorVersion = vertex.abi
-            else
-            {
-                return
-            }
-
-            volume.dependencies += vertex.__dependencies
-            volume.commit = volume.commit ?? vertex.revision
-            volume.link = volume.link ?? .init(abi: abi,
-                requirements: vertex.platforms,
-                census: vertex.census)
-
-            let empty:Volume.Vertex = .meta(.init(id: vertex.id))
-
-            try await self.vertices.update(some: empty, with: session)
-        }
-    }
-}
 extension UnidocDatabase
 {
     @_spi(testable)

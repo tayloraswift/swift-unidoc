@@ -16,6 +16,4 @@ extension WideQuery
 extension WideQuery.Master
 {
     var scalars:Scalars { .init(in: self.path) }
-    @available(*, unavailable)
-    var zones:Zones { .init(in: self.path) }
 }

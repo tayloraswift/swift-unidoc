@@ -158,7 +158,6 @@ extension Site.Admin:AdministrativePage
         for action:Action in
         [
             .lintUnidocEditions,
-            .migrateUnidocVolumes,
 
             .dropUnidocDB,
             .dropAccountDB,

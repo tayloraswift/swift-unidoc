@@ -66,7 +66,7 @@ extension CanonicalVersion
             case .culture(let master):  target = .culture(Site.Docs[names, master.shoot])
             case .decl(let master):     target = .decl(Site.Docs[names, master.shoot])
             case .file:                 return   nil
-            case .meta:                 target = .meta
+            case .global:               target = .global
             }
         }
         else
@@ -77,7 +77,7 @@ extension CanonicalVersion
             case .culture?:             target = .culture(nil)
             case .decl?:                target = .decl(nil)
             case .file?, nil:           return   nil
-            case .meta?:                target = .meta
+            case .global?:              target = .global
             }
         }
 
@@ -102,7 +102,7 @@ extension CanonicalVersion
         case .culture(let master):  target = .culture(Site.Docs[names, master.shoot])
         case .decl(let master):     target = .decl(Site.Docs[names, master.shoot])
         case .file:                 return   nil
-        case .meta:                 target = .meta
+        case .global:               target = .global
         }
 
         self.init(relationship: relationship, package: package, volume: volume, target: target)
@@ -118,7 +118,7 @@ extension CanonicalVersion
         case .article(let uri): return uri
         case .culture(let uri): return uri
         case .decl(let uri):    return uri
-        case .meta:             return self.volume
+        case .global:           return self.volume
         }
     }
 }
@@ -154,7 +154,7 @@ extension CanonicalVersion:HyperTextOutputStreamable
             }
         }
 
-        if  case .meta = self.target
+        if  case .global = self.target
         {
             section[.p]
             {

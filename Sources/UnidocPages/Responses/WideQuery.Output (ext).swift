@@ -78,7 +78,7 @@ extension WideQuery.Output:ServerResponseFactory
                 //  We should never get this as principal output!
                 throw WideQuery.OutputError.malformed
 
-            case .meta:
+            case .global:
                 let page:Site.Docs.Meta = .init(inliner,
                     canonical: canonical,
                     groups: principal.groups)

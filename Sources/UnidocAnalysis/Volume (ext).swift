@@ -23,7 +23,7 @@ extension Volume
             case .decl(let vertex):
                 vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
 
-            case .file, .meta:
+            case .file, .global:
                 continue
             }
         }
@@ -63,7 +63,7 @@ extension Volume
                     continue
                 }
 
-            case .file, .meta:
+            case .file, .global:
                 continue
             }
         }

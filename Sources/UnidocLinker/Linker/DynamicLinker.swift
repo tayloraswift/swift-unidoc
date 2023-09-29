@@ -91,7 +91,7 @@ extension DynamicLinker
 
         defer
         {
-            self.vertices.append(.meta(.init(id: context.current.edition.meta)))
+            self.vertices.append(.global(.init(id: context.current.edition.global)))
             for culture:Volume.Vertex.Culture in cultures
             {
                 self.vertices.append(.culture(culture))
@@ -175,7 +175,7 @@ extension DynamicLinker
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
         let cultures:Volume.Group.Automatic = .init(id: self.next.autogroup.id(),
-            scope: self.current.edition.meta,
+            scope: self.current.edition.global,
             members: self.current.cultures.indices.sorted
             {
                 self.current.namespaces[$0] <

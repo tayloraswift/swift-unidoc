@@ -84,11 +84,11 @@ let package:Package = .init(
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.58.0"),
+            from: "2.59.0"),
         /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
         /// major-only version requirement.
         .package(url: "https://github.com/apple/swift-nio-ssl.git",
-            from: "2.24.0"),
+            from: "2.25.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.27.0")),
