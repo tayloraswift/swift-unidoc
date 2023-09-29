@@ -4,6 +4,7 @@ import ModuleGraphs
 import NIOCore
 import NIOPosix
 import NIOSSL
+import SemanticVersions
 import SymbolGraphBuilder
 import SymbolGraphs
 import UnidocAutomation
@@ -48,7 +49,10 @@ enum Main
                 }
                 else if
                     let prerelease:PackageBuildStatus.Edition = package.prerelease,
-                        prerelease.graphs == 0
+                        prerelease.graphs == 0,
+                    let version:SemanticVersion = .init(refname: prerelease.tag),
+                    let release:SemanticVersion = .init(refname: package.release.tag),
+                        release.patch < version.patch
                 {
                     edition = prerelease
                 }
