@@ -18,7 +18,7 @@ extension Volume
         case culture(Culture)
         case decl(Decl)
         case file(File)
-        case meta(Meta)
+        case global(Global)
     }
 }
 extension Volume.Vertex
@@ -60,12 +60,12 @@ extension Volume.Vertex
         }
     }
     @inlinable public
-    var meta:Meta?
+    var global:Global?
     {
         switch self
         {
-        case .meta(let meta): return meta
-        case _:               return nil
+        case .global(let global): return global
+        case _:                   return nil
         }
     }
 }
@@ -80,7 +80,7 @@ extension Volume.Vertex:Identifiable
         case .culture(let culture): return culture.id
         case .decl(let decl):       return decl.id
         case .file(let file):       return file.id
-        case .meta(let meta):       return meta.id
+        case .global(let global):   return global.id
         }
     }
 }
@@ -95,7 +95,7 @@ extension Volume.Vertex
         case .culture(let culture): return culture.overview
         case .decl(let decl):       return decl.overview
         case .file:                 return nil
-        case .meta:                 return nil
+        case .global:               return nil
         }
     }
     @inlinable public
@@ -107,7 +107,7 @@ extension Volume.Vertex
         case .culture(let culture): return culture.details
         case .decl(let decl):       return decl.details
         case .file:                 return nil
-        case .meta:                 return nil
+        case .global:               return nil
         }
     }
     @inlinable public
@@ -119,7 +119,7 @@ extension Volume.Vertex
         case .culture(let culture): return culture.shoot
         case .decl(let decl):       return decl.shoot
         case .file:                 return nil
-        case .meta:                 return nil
+        case .global:               return nil
         }
     }
 }
@@ -140,22 +140,11 @@ extension Volume.Vertex
 
         /// Appears in ``Article``, ``Decl``, ``Culture``, and ``File``.
         case symbol = "Y"
-        /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Meta``, but may be computed
-        /// at encoding-time. In ``Meta``, it is always the empty string.
+        /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Global``, but may be computed
+        /// at encoding-time. In ``Global``, it is always the empty string.
         case stem = "U"
 
-        /// Appears in ``Meta`` only.
-        case abi = "V"
-
-        /// Will disappear soon, appears in ``Meta`` only.
-        case __dependencies = "D"
-
-        /// Appears in ``Meta`` only.
-        case platforms = "O"
-        /// Appears in ``Meta`` only.
-        case revision = "R"
-
-        /// Appears in ``Meta`` and ``Culture``.
+        /// Appears in ``Culture`` only.
         case census = "S"
 
         /// Only appears in ``Culture``.
@@ -212,11 +201,6 @@ extension Volume.Vertex
         /// The field contains a *group* scalar. (Not a master scalar!)
         case group = "t"
 
-        /// Contains a list of precomputed zones, as MongoDB cannot easily
-        /// convert scalars to zones. This field will be computed and
-        /// encoded if non-empty, but it will never be decoded.
-        case zones = "z"
-
         /// Optional extended FNV24 hash of the record’s symbol. Currently only computed
         /// for ``Decl``, ``Culture``, and ``Article`` records.
         case hash = "H"
@@ -229,9 +213,6 @@ extension Volume.Vertex:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.zone] = self.id.zone
-
-        //  Masters never appear outside their native zone.
-        var zones:Unidoc.ZoneSet = .init(except: self.id.zone)
 
         switch self
         {
@@ -249,9 +230,6 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.details] = self.details
             bson[.group] = self.group
-
-            zones.update(with: self.overview?.outlines ?? [])
-            zones.update(with: self.details?.outlines ?? [])
 
         case .decl(let self):
             bson[.symbol] = self.symbol
@@ -294,17 +272,6 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.details] = self.details
             bson[.group] = self.group
 
-            zones.update(with: self.signature.expanded.scalars)
-            zones.update(with: self.signature.generics.constraints)
-
-            zones.update(with: self.superforms)
-            zones.update(with: self.namespace.zone)
-            zones.update(with: self.culture.zone)
-            zones.update(with: self.scope)
-
-            zones.update(with: self.overview?.outlines ?? [])
-            zones.update(with: self.details?.outlines ?? [])
-
         case .culture(let self):
             //  Save this because it is computed by mangling a target name.
             let module:ModuleIdentifier = self.module.id
@@ -321,20 +288,15 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.details] = self.details
             bson[.group] = self.group
 
-            zones.update(with: self.overview?.outlines ?? [])
-            zones.update(with: self.details?.outlines ?? [])
-
         case .file(let self):
             bson[.symbol] = self.symbol
 
-        case .meta:
+        case .global:
             //  This must have a value, otherwise it would get lost among all the file
             //  vertices, and queries for it would be very slow.
             bson[.hash] = 0
             bson[.stem] = ""
         }
-
-        bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
 extension Volume.Vertex:BSONDocumentDecodable
@@ -398,12 +360,7 @@ extension Volume.Vertex:BSONDocumentDecodable
             self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
 
         case _:
-            self = .meta(.init(id: id,
-                abi: try bson[.abi]?.decode(),
-                __dependencies: try bson[.__dependencies]?.decode() ?? [],
-                platforms: try bson[.platforms]?.decode() ?? [],
-                revision: try bson[.revision]?.decode(),
-                census: try bson[.census]?.decode() ?? .init()))
+            self = .global(.init(id: id))
         }
     }
 }
