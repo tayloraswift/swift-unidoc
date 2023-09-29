@@ -234,7 +234,13 @@ extension WideQuery:VolumeLookupQuery
                     $0[.setUnion] = .init
                     {
                         $0.expr { $0[.reduce] = extensions.flatMap(\.zones) }
-                        $0 += master.zones
+                        $0.expr
+                        {
+                            let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
+                                in: Output.Principal[.names] / Volume.Meta[.dependencies])
+
+                            $0[.map] = dependencies.map { $0[.resolution] }
+                        }
                     }
                 }
                 $0[scalars] = .expr
@@ -278,7 +284,21 @@ extension WideQuery:VolumeLookupQuery
                             {
                                 //  Do not return computed fields.
                                 for key:Volume.Meta.CodingKey in
-                                    Volume.Meta.CodingKey.independent
+                                [
+                                    .id,
+                                    .dependencies,
+                                    .package,
+                                    .version,
+                                    .display,
+                                    .refname,
+                                    .commit,
+                                    .patch,
+
+                                    // TODO: we only need this for top-level queries.
+                                    .link,
+
+                                    .latest,
+                                ]
                                 {
                                     $0[Output.Principal[names] / Volume.Meta[key]] = true
                                 }
@@ -371,8 +391,7 @@ extension WideQuery:VolumeLookupQuery
                     }
                     $0.stage
                     {
-                        //  We do not need to load all the markdown for master
-                        //  records in the entourage.
+                        //  We do not need to load all the markdown for secondary vertices.
                         $0[.unset] =
                         [
                             Volume.Vertex[.requirements],
@@ -432,7 +451,15 @@ extension WideQuery:VolumeLookupQuery
                         $0[.project] = .init
                         {
                             for key:Volume.Meta.CodingKey in
-                                    Volume.Meta.CodingKey.independent
+                            [
+                                .id,
+                                .package,
+                                .version,
+                                .refname,
+                                .display,
+                                .patch,
+                                .latest,
+                            ]
                             {
                                 $0[Volume.Meta[key]] = true
                             }

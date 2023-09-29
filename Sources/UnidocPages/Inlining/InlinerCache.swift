@@ -107,7 +107,7 @@ extension InlinerCache
                     case .culture(let culture): return Site.Docs[$0, culture.shoot]
                     case .decl(let decl):       return Site.Docs[$0, decl.shoot]
                     case .file:                 return nil
-                    case .meta:                 return Site.Docs[$0]
+                    case .global:               return Site.Docs[$0]
                     }
                 }
 

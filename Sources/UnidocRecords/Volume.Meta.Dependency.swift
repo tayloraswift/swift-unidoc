@@ -5,7 +5,7 @@ import SemanticVersions
 import SymbolGraphs
 import Unidoc
 
-extension Volume.Vertex.Meta
+extension Volume.Meta
 {
     @frozen public
     struct Dependency:Identifiable, Equatable, Sendable
@@ -29,7 +29,7 @@ extension Volume.Vertex.Meta
         }
     }
 }
-extension Volume.Vertex.Meta.Dependency
+extension Volume.Meta.Dependency
 {
     public
     enum CodingKey:String
@@ -40,7 +40,7 @@ extension Volume.Vertex.Meta.Dependency
         case resolution = "p"
     }
 }
-extension Volume.Vertex.Meta.Dependency:BSONDocumentEncodable
+extension Volume.Meta.Dependency:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -63,7 +63,7 @@ extension Volume.Vertex.Meta.Dependency:BSONDocumentEncodable
         bson[.resolution] = self.resolution
     }
 }
-extension Volume.Vertex.Meta.Dependency:BSONDocumentDecodable
+extension Volume.Meta.Dependency:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
