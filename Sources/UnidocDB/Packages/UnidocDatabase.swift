@@ -181,6 +181,38 @@ extension UnidocDatabase
 
 extension UnidocDatabase
 {
+    public
+    func _migrateVolumeMetadata(
+        with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    {
+        try await self.volumes.recode(with: session, by: .now.advanced(by: .seconds(60)))
+        {
+            (volume:inout Volume.Meta) in
+
+            guard
+            let vertex:Volume.Vertex = try await self.vertices.find(by: volume.id.meta,
+                with: session),
+            let vertex:Volume.Vertex.Meta = vertex.meta,
+            let abi:MinorVersion = vertex.abi
+            else
+            {
+                return
+            }
+
+            volume.dependencies += vertex.__dependencies
+            volume.commit = volume.commit ?? vertex.revision
+            volume.link = volume.link ?? .init(abi: abi,
+                requirements: vertex.platforms,
+                census: vertex.census)
+
+            let empty:Volume.Vertex = .meta(.init(id: vertex.id))
+
+            try await self.vertices.update(some: empty, with: session)
+        }
+    }
+}
+extension UnidocDatabase
+{
     @_spi(testable)
     public
     func track(package:PackageIdentifier,
@@ -392,11 +424,12 @@ extension UnidocDatabase
             dependencies: try await self.graphs.load(snapshot.metadata.pins(),
                 with: session))
 
+        let dependencies:[Volume.Meta.Dependency] = context.dependencies()
         let symbolicator:DynamicSymbolicator = .init(context: context,
             root: snapshot.metadata.root)
-        let linker:DynamicLinker = .init(context: context)
+        let linker:DynamicLinker = .init(context: consume context)
 
-        symbolicator.emit(linker.errors, colors: .enabled)
+        (consume symbolicator).emit(linker.errors, colors: .enabled)
 
         let latestRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
             of: snapshot.package,
@@ -408,11 +441,16 @@ extension UnidocDatabase
             vertices: linker.vertices,
             groups: linker.groups,
             meta: .init(id: snapshot.edition,
+                dependencies: dependencies,
                 display: snapshot.metadata.display,
                 refname: snapshot.metadata.commit?.refname,
+                commit: snapshot.metadata.commit?.hash,
                 symbol: id.volume,
                 latest: true,
-                patch: id.version.stable?.patch))
+                patch: id.version.stable?.patch,
+                link: linker.meta))
+
+        _ = consume linker
 
         guard case .stable(.release(let patch, build: _)) = id.version.canonical
         else

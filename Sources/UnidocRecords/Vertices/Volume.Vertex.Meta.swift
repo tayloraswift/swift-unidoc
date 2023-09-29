@@ -14,9 +14,12 @@ extension Volume.Vertex
         /// The ABI version of the symbol graph this record and associated records were
         /// generated from.
         public
-        var abi:MinorVersion
+        var abi:MinorVersion?
+
+        /// Will disappear soon.
         public
-        var dependencies:[Dependency]
+        var __dependencies:[Volume.Meta.Dependency]
+
         /// Note: this is called `requirements` in the SymbolGraph API. We chose a different
         /// name here to avoid confusion with protocol requirements, which inhabit the same
         /// keyspace as this field.
@@ -30,8 +33,8 @@ extension Volume.Vertex
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            abi:MinorVersion,
-            dependencies:[Dependency] = [],
+            abi:MinorVersion? = nil,
+            __dependencies:[Volume.Meta.Dependency] = [],
             platforms:[PlatformRequirement] = [],
             revision:SHA1? = nil,
             census:Volume.Census = .init())
@@ -39,7 +42,7 @@ extension Volume.Vertex
             self.id = id
 
             self.abi = abi
-            self.dependencies = dependencies
+            self.__dependencies = __dependencies
             self.platforms = platforms
             self.revision = revision
             self.census = census

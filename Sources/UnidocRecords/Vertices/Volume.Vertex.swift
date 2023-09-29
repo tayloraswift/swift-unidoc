@@ -146,9 +146,10 @@ extension Volume.Vertex
 
         /// Appears in ``Meta`` only.
         case abi = "V"
-        /// Appears in ``Meta`` only. Contains a list of dependencies, which contain zone
-        /// references.
-        case dependencies = "D"
+
+        /// Will disappear soon, appears in ``Meta`` only.
+        case __dependencies = "D"
+
         /// Appears in ``Meta`` only.
         case platforms = "O"
         /// Appears in ``Meta`` only.
@@ -326,20 +327,11 @@ extension Volume.Vertex:BSONDocumentEncodable
         case .file(let self):
             bson[.symbol] = self.symbol
 
-        case .meta(let self):
+        case .meta:
             //  This must have a value, otherwise it would get lost among all the file
             //  vertices, and queries for it would be very slow.
             bson[.hash] = 0
-
             bson[.stem] = ""
-            bson[.abi] = self.abi
-            bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
-            bson[.platforms] = self.platforms.isEmpty ? nil : self.platforms
-            bson[.revision] = self.revision
-            bson[.census] = self.census
-
-            //  We can recover the zone references from an aggregation query, so encoding
-            //  them into ``CodingKey zones`` is unnecessary.
         }
 
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
@@ -407,11 +399,11 @@ extension Volume.Vertex:BSONDocumentDecodable
 
         case _:
             self = .meta(.init(id: id,
-                abi: try bson[.abi].decode(),
-                dependencies: try bson[.dependencies]?.decode() ?? [],
+                abi: try bson[.abi]?.decode(),
+                __dependencies: try bson[.__dependencies]?.decode() ?? [],
                 platforms: try bson[.platforms]?.decode() ?? [],
                 revision: try bson[.revision]?.decode(),
-                census: try bson[.census].decode()))
+                census: try bson[.census]?.decode() ?? .init()))
         }
     }
 }

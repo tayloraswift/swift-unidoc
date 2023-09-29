@@ -59,6 +59,13 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
 
+        case .perform(.migrateUnidocVolumes, _):
+            let (modified, selected):(Int, Int) =
+                try await server.db.unidoc._migrateVolumeMetadata(with: session)
+
+            page = .init(action: .migrateUnidocVolumes,
+                text: "Migrated \(modified) / \(selected) volumes!")
+
         case .perform(.upload, let form?):
             var receipts:[SnapshotReceipt] = []
 

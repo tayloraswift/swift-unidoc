@@ -5,6 +5,7 @@ import UnidocRecords
 
 extension WideQuery.Master
 {
+    @available(*, unavailable)
     struct Zones
     {
         let path:Mongo.KeyPath
@@ -15,6 +16,7 @@ extension WideQuery.Master
         }
     }
 }
+@available(*, unavailable)
 extension WideQuery.Master.Zones
 {
     static
@@ -26,8 +28,8 @@ extension WideQuery.Master.Zones
         }
         list.expr
         {
-            let dependencies:Mongo.List<Volume.Vertex.Meta.Dependency, Mongo.KeyPath> = .init(
-                in: self.path / Volume.Vertex[.dependencies])
+            let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
+                in: self.path / Volume.Vertex[.__dependencies])
 
             $0[.map] = dependencies.map { $0[.resolution] }
         }
