@@ -23,7 +23,7 @@ extension Signature.Abridged
     @usableFromInline internal
     init(utf8:[UInt8], actor:Bool = false)
     {
-        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
+        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .abridged($0) }
         let bytecode:MarkdownBytecode = .init
         {
             for span:SignatureSyntax.Span in signature.elements
