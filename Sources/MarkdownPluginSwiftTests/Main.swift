@@ -96,7 +96,7 @@ enum Main:SyncTests
 
             if  let tests:TestGroup = tests / "Abridged"
             {
-                let text:String = """
+                let decl:String = """
                 func transform<IndexOfResult, ElementOfResult>(\
                 (Self.Index, Self.Element) throws -> IndexOfResult?, \
                 b: (Self.Index, Self.Element) throws -> ElementOfResult?, \
@@ -104,9 +104,9 @@ enum Main:SyncTests
                 ) rethrows -> [(IndexOfResult, ElementOfResult)]
                 """
 
-                let abridged:Signature<Never>.Abridged = .init(text)
+                let abridged:Signature<Never>.Abridged = .init(decl)
 
-                tests.expect("\(abridged.bytecode.safe)" ==? text)
+                tests.expect("\(abridged.bytecode.safe)" ==? decl)
 
                 let html:HTML = .init { $0 += abridged.bytecode.safe }
 
@@ -121,6 +121,26 @@ enum Main:SyncTests
                 <span class='xi'></span><span class='syntax-identifier'>c</span>: \
                 ((Self.Index, Self.Element) throws -&gt; ())?\
                 <wbr>) rethrows -&gt; [(IndexOfResult, ElementOfResult)]
+                """)
+            }
+
+            if  let tests:TestGroup = tests / "Abridged" / "UnlabeledArguments"
+            {
+                let decl:String = """
+                func tion(Int, String.Index)
+                """
+
+                let abridged:Signature<Never>.Abridged = .init(decl)
+
+                tests.expect("\(abridged.bytecode.safe)" ==? decl)
+
+                let html:HTML = .init { $0 += abridged.bytecode.safe }
+
+                tests.expect("\(html)" ==? """
+                func <span class='syntax-identifier'>tion</span>(\
+                <span class='xi'></span>Int, \
+                <span class='xi'></span>String.Index\
+                <wbr>)
                 """)
             }
         }

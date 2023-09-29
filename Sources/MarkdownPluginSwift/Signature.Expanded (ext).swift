@@ -52,7 +52,7 @@ extension Signature.Expanded
     @inlinable internal
     init(utf8:[UInt8], keywords:inout InterestingKeywords, symbols:inout [Int: Scalar])
     {
-        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer(SignatureSyntax.init)
+        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .expanded($0) }
         var references:[Scalar: Int] = [:]
         var referents:[Scalar] = []
 

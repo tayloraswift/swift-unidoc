@@ -18,8 +18,8 @@ struct SignatureSyntax
 }
 extension SignatureSyntax
 {
-    @usableFromInline internal
-    init(utf8:UnsafeBufferPointer<UInt8>)
+    private
+    init(utf8:UnsafeBufferPointer<UInt8>, abridged:Bool)
     {
         self.init()
 
@@ -32,24 +32,24 @@ extension SignatureSyntax
             if  let region:TokenSyntax = region.as(TokenSyntax.self)
             {
                 //  Allows us to detect phylum keywords.
-                self.append(region: region, at: .toplevel)
+                self.append(region: region, offset: 0, at: .toplevel)
             }
             else if
                 let region:AttributeListSyntax = region.as(AttributeListSyntax.self)
             {
-                self.append(region: region, at: .toplevel)
+                self.append(region: region, offset: 0, at: .toplevel)
             }
             else if
                 let region:DeclModifierListSyntax = region.as(DeclModifierListSyntax.self)
             {
                 //  Allows us to detect `class` modifier keywords.
-                self.append(region: region, at: .toplevel)
+                self.append(region: region, offset: 0, at: .toplevel)
             }
             else if
                 let clause:GenericParameterClauseSyntax =
                     region.as(GenericParameterClauseSyntax.self)
             {
-                self.append(clause: clause)
+                self.append(generics: clause)
             }
             else if
                 let region:FunctionSignatureSyntax = region.as(FunctionSignatureSyntax.self)
@@ -59,17 +59,17 @@ extension SignatureSyntax
                     if  let clause:FunctionParameterClauseSyntax =
                             region.as(FunctionParameterClauseSyntax.self)
                     {
-                        self.append(clause: clause)
+                        self.append(parameters: clause, abridged: abridged)
                     }
                     else if
                         let region:ReturnClauseSyntax =
                             region.as(ReturnClauseSyntax.self)
                     {
-                        self.append(region: region)
+                        self.append(region: region, offset: 0)
                     }
                     else
                     {
-                        self.append(region: region)
+                        self.append(region: region, offset: 0)
                     }
                 }
             }
@@ -77,34 +77,58 @@ extension SignatureSyntax
                 let clause:FunctionParameterClauseSyntax =
                     region.as(FunctionParameterClauseSyntax.self)
             {
-                self.append(clause: clause)
+                self.append(parameters: clause, abridged: abridged)
             }
             else
             {
-                self.append(region: region)
+                self.append(region: region, offset: 0)
             }
         }
     }
 }
 extension SignatureSyntax
 {
+    @usableFromInline internal static
+    func abridged(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
+    {
+        .init(utf8: utf8, abridged: true)
+    }
+    @usableFromInline internal static
+    func expanded(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
+    {
+        .init(utf8: utf8, abridged: false)
+    }
+}
+extension SignatureSyntax
+{
     private mutating
-    func append(region syntax:some SyntaxProtocol, at depth:Span.Depth? = nil)
+    func append(
+        region syntax:some SyntaxProtocol,
+        offset:Int,
+        at depth:Span.Depth? = nil)
     {
         for span:SyntaxClassifiedRange in syntax.classifications
         {
-            let range:Range<Int> = span.offset ..< span.offset + span.length
+            let range:Range<Int> =
+                offset + span.offset ..<
+                offset + span.offset + span.length
 
             self.elements.append(.text(range, .init(classification: span.kind), depth))
         }
     }
 
     private mutating
-    func append(region syntax:some SyntaxProtocol, as color:MarkdownBytecode.Context)
+    func append(
+        region syntax:some SyntaxProtocol,
+        offset:Int,
+        as color:MarkdownBytecode.Context)
     {
         for span:SyntaxClassifiedRange in syntax.classifications
         {
-            let range:Range<Int> = span.offset ..< span.offset + span.length
+            let range:Range<Int> =
+                offset + span.offset ..<
+                offset + span.offset + span.length
+
             self.elements.append(.text(range, span.kind == .none ? nil : color))
         }
     }
@@ -112,9 +136,9 @@ extension SignatureSyntax
 extension SignatureSyntax
 {
     private mutating
-    func append(clause region:GenericParameterClauseSyntax)
+    func append(generics clause:GenericParameterClauseSyntax)
     {
-        for region:Syntax in region.children(viewMode: .sourceAccurate)
+        for region:Syntax in clause.children(viewMode: .sourceAccurate)
         {
             if  let region:GenericParameterListSyntax =
                     region.as(GenericParameterListSyntax.self)
@@ -126,34 +150,65 @@ extension SignatureSyntax
                         if  let region:TokenSyntax = region.as(TokenSyntax.self),
                             case .identifier = region.tokenKind
                         {
-                            self.append(region: region, as: .typealias)
+                            self.append(region: region, offset: 0, as: .typealias)
                         }
                         else
                         {
-                            self.append(region: region)
+                            self.append(region: region, offset: 0)
                         }
                     }
                 }
             }
             else
             {
-                self.append(region: region)
+                self.append(region: region, offset: 0)
             }
         }
     }
     private mutating
-    func append(clause region:FunctionParameterClauseSyntax)
+    func append(parameters region:FunctionParameterClauseSyntax, abridged:Bool)
     {
-        for region:Syntax in region.children(viewMode: .sourceAccurate)
+        if  abridged
         {
-            if  let region:FunctionParameterListSyntax =
-                    region.as(FunctionParameterListSyntax.self)
+            var reparser:Parser = .init("\(region)")
+
+            let tuple:TypeSyntax = .parse(from: &reparser)
+            guard
+            let tuple:TupleTypeSyntax = tuple.as(TupleTypeSyntax.self)
+            else
+            {
+                fatalError("not a tuple type!")
+            }
+
+            self.append(parameters: tuple,
+                offset: region.position.utf8Offset,
+                as: TupleTypeElementListSyntax.self)
+
+        }
+        else
+        {
+            self.append(parameters: region,
+                offset: 0,
+                as: FunctionParameterListSyntax.self)
+        }
+    }
+    private mutating
+    func append<ParameterListSyntax>(
+        parameters:some SyntaxProtocol,
+        offset:Int,
+        as _:ParameterListSyntax.Type)
+        where ParameterListSyntax:SyntaxCollection
+    {
+        for region:Syntax in parameters.children(viewMode: .sourceAccurate)
+        {
+            if  let region:ParameterListSyntax =
+                    region.as(ParameterListSyntax.self)
             {
                 defer
                 {
                     self.elements.append(.wbr(indent: false))
                 }
-                for region:FunctionParameterSyntax in region
+                for region:ParameterListSyntax.Element in region
                 {
                     self.elements.append(.wbr(indent: true))
 
@@ -164,7 +219,7 @@ extension SignatureSyntax
                         let region:TokenSyntax = region.as(TokenSyntax.self)
                         else
                         {
-                            self.append(region: region)
+                            self.append(region: region, offset: offset)
                             continue
                         }
 
@@ -173,23 +228,23 @@ extension SignatureSyntax
                         case .identifier, .wildcard:
                             if  named
                             {
-                                self.append(region: region, as: .binding)
+                                self.append(region: region, offset: offset, as: .binding)
                             }
                             else
                             {
-                                self.append(region: region, as: .identifier)
+                                self.append(region: region, offset: offset, as: .identifier)
                                 named = true
                             }
 
                         case _:
-                            self.append(region: region)
+                            self.append(region: region, offset: offset)
                         }
                     }
                 }
             }
             else
             {
-                self.append(region: region)
+                self.append(region: region, offset: offset)
             }
         }
     }
