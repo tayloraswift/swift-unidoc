@@ -10,6 +10,7 @@ extension Site.Admin
         case dropUnidocDB = "drop-unidoc-db"
 
         case lintUnidocEditions = "lint-unidoc-editions"
+        case migrateUnidocVolumes = "migrate-unidoc-volumes"
 
         case upload = "upload"
     }
@@ -23,6 +24,7 @@ extension Site.Admin.Action
         case .dropAccountDB:            return "Drop Account Database"
         case .dropUnidocDB:             return "Drop Unidoc Database"
         case .lintUnidocEditions:       return "Lint Editions"
+        case .migrateUnidocVolumes:     return "Migrate Volumes"
         case .upload:                   return "Upload Snapshots"
         }
     }
@@ -41,6 +43,11 @@ extension Site.Admin.Action
         case .lintUnidocEditions:
             return """
             This will delete all editions lacking a commit hash. Are you sure?
+            """
+
+        case .migrateUnidocVolumes:
+            return """
+            This will migrate all volumes to the latest schema. Are you sure?
             """
 
         case .upload:

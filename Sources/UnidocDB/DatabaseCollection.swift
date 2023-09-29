@@ -138,33 +138,49 @@ extension DatabaseCollection
 
         return (modified, selected)
     }
-}
-extension DatabaseCollection
-{
-    /// Returns the identifiers of all the documents in this collection.
-    func list(with session:Mongo.Session) async throws -> [ElementID]
+
+    /// Decode and re-encode all documents in this collection **one at a time** with the
+    /// provided closure.
+    func recode<Master>(
+        with session:Mongo.Session,
+        by deadline:ContinuousClock.Instant,
+        _ migrate:(inout Master) async throws -> ()) async throws -> (modified:Int, of:Int)
+        where Master:BSONDocumentDecodable & BSONDocumentEncodable & Identifiable<ElementID>
     {
+        var modified:Int = 0
+        var selected:Int = 0
         try await session.run(
-            command: Mongo.Find<Mongo.Cursor<Mongo.IdentityView<ElementID>>>.init(Self.name,
-                stride: 4096,
-                limit: .max)
-            {
-                $0[.projection] = .init
-                {
-                    $0[Mongo.IdentityView<ElementID>[.id]] = true
-                }
-            },
-            against: self.database)
+            command: Mongo.Find<Mongo.Cursor<Master>>.init(Self.name,
+                stride: 1,
+                limit: .max),
+            against: self.database,
+            by: deadline)
         {
-            try await $0.reduce(into: [])
+            for try await one:[Master] in $0
             {
-                for view:Mongo.IdentityView<ElementID> in $1
+                for var master:Master in consume one
                 {
-                    $0.append(view.id)
+                    try await migrate(&master)
+
+                    switch try await self.update(some: master, with: session)
+                    {
+                    case nil:
+                        continue // something raced us.
+
+                    case true?:
+                        modified += 1
+                        fallthrough
+
+                    case false?:
+                        selected += 1
+                    }
                 }
             }
         }
+
+        return (modified, selected)
     }
+
 }
 extension DatabaseCollection
 {

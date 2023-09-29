@@ -17,18 +17,14 @@ extension Site.Docs
 
         let canonical:CanonicalVersion?
         private
-        let master:Volume.Vertex.Meta
-        private
         let groups:[Volume.Group]
 
         init(_ inliner:Inliner,
             canonical:CanonicalVersion?,
-            master:Volume.Vertex.Meta,
             groups:[Volume.Group])
         {
             self.inliner = inliner
             self.canonical = canonical
-            self.master = master
             self.groups = groups
         }
     }
@@ -73,7 +69,6 @@ extension Site.Docs.Meta:VersionedPage
     {
         let groups:Inliner.Groups = .init(inliner,
             groups: self.groups,
-            bias: self.master.id,
             mode: .meta)
 
         main[.section]
@@ -154,7 +149,7 @@ extension Site.Docs.Meta:VersionedPage
                 }
             }
 
-            if !self.master.dependencies.isEmpty
+            if !self.volume.dependencies.isEmpty
             {
                 $0[.h2] = "Package Dependencies"
 
@@ -171,7 +166,7 @@ extension Site.Docs.Meta:VersionedPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Volume.Vertex.Meta.Dependency in self.master.dependencies
+                        for dependency:Volume.Meta.Dependency in self.volume.dependencies
                         {
                             $0[.tr]
                             {
@@ -210,13 +205,20 @@ extension Site.Docs.Meta:VersionedPage
                 }
             }
 
-            if !self.master.platforms.isEmpty
+            guard
+            let details:Volume.Meta.LinkDetails = self.volume.link
+            else
+            {
+                return
+            }
+
+            if !details.requirements.isEmpty
             {
                 $0[.h2] = "Platform Requirements"
 
                 $0[.dl]
                 {
-                    for platform:PlatformRequirement in self.master.platforms
+                    for platform:PlatformRequirement in details.requirements
                     {
                         $0[.dt] = "\(platform.id)"
                         $0[.dd] = "\(platform.min)"
@@ -227,16 +229,16 @@ extension Site.Docs.Meta:VersionedPage
             $0[.h2] = "Interface Breakdown"
 
             $0 += Unidoc.StatsBreakdown.init(
-                unweighted: self.master.census.unweighted.decls,
-                weighted: self.master.census.weighted.decls,
+                unweighted: details.census.unweighted.decls,
+                weighted: details.census.weighted.decls,
                 domain: "this package")
 
 
             $0[.h2] = "Documentation Coverage"
 
             $0 += Unidoc.StatsBreakdown.init(
-                unweighted: self.master.census.unweighted.coverage,
-                weighted: self.master.census.weighted.coverage,
+                unweighted: details.census.unweighted.coverage,
+                weighted: details.census.weighted.coverage,
                 domain: "this package")
 
 
@@ -245,9 +247,9 @@ extension Site.Docs.Meta:VersionedPage
             $0[.dl]
             {
                 $0[.dt] = "Symbol Graph ABI"
-                $0[.dd] = "\(self.master.abi)"
+                $0[.dd] = "\(details.abi)"
 
-                if  let revision:SHA1 = self.master.revision
+                if  let commit:SHA1 = self.volume.commit
                 {
                     $0[.dt] = "Git Revision"
                     $0[.dd]
@@ -255,7 +257,7 @@ extension Site.Docs.Meta:VersionedPage
                         let url:String?
                         if  case .github(let path)? = self.repo?.origin
                         {
-                            url = "https://github.com\(path)/tree/\(revision)"
+                            url = "https://github.com\(path)/tree/\(commit)"
                         }
                         else
                         {
@@ -267,7 +269,7 @@ extension Site.Docs.Meta:VersionedPage
                             $0.rel = .noopener
                             $0.rel = .google_ugc
                             $0.target = "_blank"
-                        } = "\(revision)"
+                        } = "\(commit)"
                     }
                 }
             }
