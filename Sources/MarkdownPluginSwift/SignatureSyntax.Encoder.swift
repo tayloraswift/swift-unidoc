@@ -15,19 +15,14 @@ extension SignatureSyntax
         /// The depth level used to encode the next span.
         private
         var depth:Span.Depth?
-        /// The frame offset used to encode the next span.
-        private
-        var frame:Int
 
         init(spans:[Span] = [],
             color:MarkdownBytecode.Context? = nil,
-            depth:Span.Depth? = nil,
-            frame:Int = 0)
+            depth:Span.Depth? = nil)
         {
             self.spans = spans
             self.color = color
             self.depth = depth
-            self.frame = frame
         }
     }
 }
@@ -50,8 +45,7 @@ extension SignatureSyntax.Encoder
         {
             .init(spans: self.spans,
                 color: color,
-                depth: self.depth,
-                frame: self.frame)
+                depth: self.depth)
         }
         _modify
         {
@@ -68,32 +62,13 @@ extension SignatureSyntax.Encoder
         {
             .init(spans: self.spans,
                 color: self.color,
-                depth: depth,
-                frame: self.frame)
+                depth: depth)
         }
         _modify
         {
             let outer:SignatureSyntax.Span.Depth? = self.depth
             self.depth = depth
             defer { self.depth = outer }
-
-            yield &self
-        }
-    }
-    subscript(offset offset:Int) -> Self
-    {
-        get
-        {
-            .init(spans: self.spans,
-                color: self.color,
-                depth: self.depth,
-                frame: self.frame + offset)
-        }
-        _modify
-        {
-            let outer:Int = self.frame
-            self.frame += offset
-            defer { self.frame = outer }
 
             yield &self
         }
@@ -111,11 +86,9 @@ extension SignatureSyntax.Encoder
     {
         for span:SyntaxClassifiedRange in syntax.classifications
         {
-            let range:Range<Int> =
-                self.frame + span.offset ..<
-                self.frame + span.offset + span.length
-
+            let range:Range<Int> = span.offset ..< span.offset + span.length
             let color:MarkdownBytecode.Context? = .init(classification: span.kind)
+
             self.spans.append(.text(range, color.map { self.color ?? $0 }, self.depth))
         }
     }
