@@ -61,7 +61,7 @@ extension SymbolDescription
         interfaces:Interfaces?,
         visibility:Visibility,
         extension:ExtensionContext,
-        expanded:__owned [Signature<Symbol.Decl>.Fragment],
+        fragments:__owned [Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
@@ -69,8 +69,19 @@ extension SymbolDescription
         var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
         var phylum:Unidoc.Phylum = phylum
 
-        let abridged:Signature<Symbol.Decl>.Abridged = .init(expanded)
-        let expanded:Signature<Symbol.Decl>.Expanded = .init(expanded, keywords: &keywords)
+        let abridged:Signature<Symbol.Decl>.Abridged
+        let expanded:Signature<Symbol.Decl>.Expanded
+
+        if  case .block = phylum
+        {
+            abridged = .init()
+            expanded = .init()
+        }
+        else
+        {
+            abridged = .init(fragments)
+            expanded = .init(fragments, keywords: &keywords)
+        }
 
         //  Heuristic for inferring actor types
         if  keywords.actor
@@ -194,7 +205,7 @@ extension SymbolDescription:JSONObjectDecodable
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
             visibility: try json[.visibility].decode(),
             extension: try json[.extension]?.decode() ?? .init(),
-            expanded: try json[.declaration].decode(),
+            fragments: try json[.declaration].decode(),
             generics: try json[.generics]?.decode() ?? .init(),
             location: try json[.location]?.decode(using: CodingKey.Location.self)
             {

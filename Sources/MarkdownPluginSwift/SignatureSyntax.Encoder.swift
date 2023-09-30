@@ -391,7 +391,7 @@ extension SignatureSyntax.Encoder<SignatureSyntax.AbridgedParameter>
         }
         else
         {
-            self += decl
+            fatalError("unsupported declaration: \(decl)")
         }
     }
 
