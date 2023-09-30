@@ -43,6 +43,8 @@ enum Main
 
             if  options.build
             {
+                /// Only build prereleases if the latest release has already been built, and
+                /// the prerelease has a higher patch version.
                 if  package.release.graphs == 0 || options.force
                 {
                     edition = package.release
