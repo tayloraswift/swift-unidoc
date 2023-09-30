@@ -4,6 +4,8 @@ extension ServerTour
     struct Stats
     {
         public
+        var agents:ByAgent
+        public
         var responses:ByStatus
         public
         var requests:ByType
@@ -12,10 +14,12 @@ extension ServerTour
 
         @inlinable public
         init(
+            agents:ByAgent = [:],
             responses:ByStatus = [:],
             requests:ByType = [:],
             bytes:ByType = [:])
         {
+            self.agents = agents
             self.responses = responses
             self.requests = requests
             self.bytes = bytes

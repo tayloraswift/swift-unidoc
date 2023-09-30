@@ -5,6 +5,8 @@ extension ServerTour
     struct StatsBreakdown
     {
         private
+        var agents:Pie<Stat>
+        private
         var responses:Pie<Stat>
         private
         var requests:Pie<Stat>
@@ -12,8 +14,13 @@ extension ServerTour
         var bytes:Pie<Stat>
 
         private
-        init(responses:Pie<Stat> = [], requests:Pie<Stat> = [], bytes:Pie<Stat> = [])
+        init(
+            agents:Pie<Stat> = [],
+            responses:Pie<Stat> = [],
+            requests:Pie<Stat> = [],
+            bytes:Pie<Stat> = [])
         {
+            self.agents = agents
             self.responses = responses
             self.requests = requests
             self.bytes = bytes
@@ -31,6 +38,23 @@ extension ServerTour.StatsBreakdown
             prose.lowercased().split(whereSeparator: \.isWhitespace).joined(separator: "-")
         }
 
+        for (state, value):(String, Int) in
+        [
+            ("Likely Search Engines",   stats.agents.likelySearchEngine),
+            ("Likely Browsers",         stats.agents.likelyBrowser),
+            ("Likely Bots",             stats.agents.likelyBot),
+            ("Other",                   stats.agents.other),
+        ]
+        {
+            if  value > 0
+            {
+                self.agents.append(.init(
+                    stratum: "agents",
+                    state: state,
+                    value: value,
+                    class: style(state)))
+            }
+        }
         for (state, value):(String, Int) in
         [
             ("Multiple Choices",        stats.responses.multipleChoices),
@@ -93,6 +117,13 @@ extension ServerTour.StatsBreakdown:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
+        html[.h3] = "Agents"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.agents
+            $0[.figcaption] { $0[.dl] = self.agents.legend }
+        }
+
         html[.h3] = "Responses"
         html[.figure, { $0.class = "chart" }]
         {
