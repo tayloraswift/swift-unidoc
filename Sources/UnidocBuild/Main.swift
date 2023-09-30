@@ -4,6 +4,7 @@ import ModuleGraphs
 import NIOCore
 import NIOPosix
 import NIOSSL
+import SemanticVersions
 import SymbolGraphBuilder
 import SymbolGraphs
 import UnidocAutomation
@@ -42,13 +43,18 @@ enum Main
 
             if  options.build
             {
+                /// Only build prereleases if the latest release has already been built, and
+                /// the prerelease has a higher patch version.
                 if  package.release.graphs == 0 || options.force
                 {
                     edition = package.release
                 }
                 else if
                     let prerelease:PackageBuildStatus.Edition = package.prerelease,
-                        prerelease.graphs == 0
+                        prerelease.graphs == 0,
+                    let version:SemanticVersion = .init(refname: prerelease.tag),
+                    let release:SemanticVersion = .init(refname: package.release.tag),
+                        release.patch < version.patch
                 {
                     edition = prerelease
                 }

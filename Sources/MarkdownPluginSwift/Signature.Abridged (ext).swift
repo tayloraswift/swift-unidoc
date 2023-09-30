@@ -4,14 +4,14 @@ import Signatures
 extension Signature.Abridged
 {
     @inlinable public
-    init(_ fragments:__shared some Sequence<Signature<Scalar>.Fragment>, actor:Bool = false)
+    init(_ fragments:__shared some Sequence<Signature<Scalar>.Fragment>)
     {
         var utf8:[UInt8] = []
         for fragment:Signature.Fragment in fragments
         {
             utf8 += fragment.spelling.utf8
         }
-        self.init(utf8: utf8, actor: actor)
+        self.init(utf8: utf8)
     }
 
     @_spi(testable) public
@@ -21,7 +21,7 @@ extension Signature.Abridged
     }
 
     @usableFromInline internal
-    init(utf8:[UInt8], actor:Bool = false)
+    init(utf8:[UInt8])
     {
         let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .abridged($0) }
         let bytecode:MarkdownBytecode = .init
@@ -46,17 +46,8 @@ extension Signature.Abridged
                     case    (.keyword, "subscript", .toplevel?),
                             (.keyword, "deinit", .toplevel?),
                             (.keyword, "init", .toplevel?),
-                            (.identifier, _, _):
+                            (.identifier, _, .toplevel?):
                         $0[.identifier] = text
-
-                    case    (.keyword, "class", .toplevel?):
-                        guard actor
-                        else
-                        {
-                            fallthrough
-                        }
-
-                        $0 += "actor"
 
                     case    (_, _, _):
                         $0 += text
