@@ -16,31 +16,33 @@ extension Server
         let endpoint:Endpoint
 
         let cookies:Cookies
-        let agent:String?
+        let agent:Agent?
+        let uri:String?
 
-        init(endpoint:Endpoint, cookies:Cookies, agent:String? = nil)
+        init(endpoint:Endpoint, cookies:Cookies, agent:Agent? = nil, uri:String? = nil)
         {
             self.endpoint = endpoint
 
             self.cookies = cookies
             self.agent = agent
+            self.uri = uri
         }
     }
 }
 extension Server.Operation:HTTPServerOperation
 {
-    init?(get uri:String,
+    init?(get unnormalized:String,
         address _:SocketAddress?,
         headers:HTTPHeaders)
     {
-        guard let uri:URI = .init(uri)
+        guard let uri:URI = .init(unnormalized)
         else
         {
             return nil
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        let agent:String? = headers["user-agent"].first
+        let agent:Server.Agent? = .init(headers["user-agent"])
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
@@ -58,7 +60,7 @@ extension Server.Operation:HTTPServerOperation
                     lookup: .init(stem: [])),
                 tag: tag))
 
-            self.init(endpoint: get, cookies: cookies, agent: agent)
+            self.init(endpoint: get, cookies: cookies, agent: agent, uri: unnormalized)
             return
         }
 
@@ -83,7 +85,7 @@ extension Server.Operation:HTTPServerOperation
                 return nil
             }
 
-            self.init(endpoint: endpoint, cookies: cookies, agent: agent)
+            self.init(endpoint: endpoint, cookies: cookies, agent: agent, uri: unnormalized)
             return
         }
 
@@ -148,7 +150,7 @@ extension Server.Operation:HTTPServerOperation
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: cookies, agent: agent)
+            self.init(endpoint: endpoint, cookies: cookies, agent: agent, uri: unnormalized)
         }
         else
         {

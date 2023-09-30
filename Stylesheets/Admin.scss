@@ -34,21 +34,29 @@ figure div.pie
 {
     > div.pie-color > svg g
     {
-        > *.likely-search-engines
+        > *.likely-googlebot
         {
-            fill: $light-accent-barbie-pink;
+            fill: #5b82ff;
         }
-        > *.likely-browsers
+        > *.likely-major-search-engines
         {
-            fill: rgb(78, 255, 246);
+            fill: #6953ff;
+        }
+        > *.likely-minor-search-engines
+        {
+            fill: #ae6aff;
+        }
+        > *.likely-barbies
+        {
+            fill: #ff73a1;
+        }
+        > *.likely-tools
+        {
+            fill: #999;
         }
         > *.likely-bots
         {
-            fill: rgb(255, 219, 101);
-        }
-        > *.other
-        {
-            fill: rgb(255, 168, 38);
+            fill: #e1e1e1;
         }
 
         > *.multiple-choices

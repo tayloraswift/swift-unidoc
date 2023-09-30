@@ -15,18 +15,3 @@ extension Cache
         }
     }
 }
-extension Cache.Request
-{
-    func load(from cache:Cache<Key>) async throws -> ServerResponse
-    {
-        var resource:ServerResource = try await cache.load(self.key)
-
-        if  let tag:MD5 = self.tag,
-            case tag? = resource.hash
-        {
-            resource.content.drop()
-        }
-
-        return .ok(resource)
-    }
-}

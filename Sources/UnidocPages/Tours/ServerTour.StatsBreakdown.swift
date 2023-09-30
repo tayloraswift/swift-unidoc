@@ -40,10 +40,12 @@ extension ServerTour.StatsBreakdown
 
         for (state, value):(String, Int) in
         [
-            ("Likely Search Engines",   stats.agents.likelySearchEngine),
-            ("Likely Browsers",         stats.agents.likelyBrowser),
-            ("Likely Bots",             stats.agents.likelyBot),
-            ("Other",                   stats.agents.other),
+            ("Likely Googlebot",            stats.agents.likelyGooglebot),
+            ("Likely Major Search Engines", stats.agents.likelyMajorSearchEngine),
+            ("Likely Minor Search Engines", stats.agents.likelyMinorSearchEngine),
+            ("Likely Barbies",              stats.agents.likelyBrowser),
+            ("Likely Tools",                stats.agents.likelyTool),
+            ("Likely Bots",                 stats.agents.likelyBot),
         ]
         {
             if  value > 0
