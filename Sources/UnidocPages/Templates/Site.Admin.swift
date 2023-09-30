@@ -192,6 +192,9 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "requests"
             $0[.dd] = "\(self.tour.stats.requests.total)"
 
+            $0[.dt] = "last user-agent"
+            $0[.dd] = self.tour.lastUA ?? "none"
+
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.stats.bytes.total)"
 
