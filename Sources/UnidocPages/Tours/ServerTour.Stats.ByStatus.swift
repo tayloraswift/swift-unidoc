@@ -4,24 +4,33 @@ extension ServerTour.Stats
     struct ByAgent
     {
         public
-        var likelySearchEngine:Int
+        var likelyGooglebot:Int
         public
-        var likelyBot:Int
+        var likelyMajorSearchEngine:Int
+        public
+        var likelyMinorSearchEngine:Int
         public
         var likelyBrowser:Int
         public
-        var other:Int
+        var likelyTool:Int
+        public
+        var likelyBot:Int
 
         @inlinable public
-        init(likelySearchEngine:Int = 0,
-            likelyBot:Int = 0,
+        init(
+            likelyGooglebot:Int = 0,
+            likelyMajorSearchEngine:Int = 0,
+            likelyMinorSearchEngine:Int = 0,
             likelyBrowser:Int = 0,
-            other:Int = 0)
+            likelyTool:Int = 0,
+            likelyBot:Int = 0)
         {
-            self.likelySearchEngine = likelySearchEngine
-            self.likelyBot = likelyBot
+            self.likelyGooglebot = likelyGooglebot
+            self.likelyMajorSearchEngine = likelyMajorSearchEngine
+            self.likelyMinorSearchEngine = likelyMinorSearchEngine
             self.likelyBrowser = likelyBrowser
-            self.other = other
+            self.likelyTool = likelyTool
+            self.likelyBot = likelyBot
         }
     }
 }
@@ -30,7 +39,7 @@ extension ServerTour.Stats.ByAgent:ExpressibleByDictionaryLiteral
     @inlinable public
     init(dictionaryLiteral elements:(Never, Int)...)
     {
-        self.init(likelySearchEngine: 0)
+        self.init(likelyGooglebot: 0)
     }
 }
 extension ServerTour.Stats

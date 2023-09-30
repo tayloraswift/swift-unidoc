@@ -61,46 +61,14 @@ extension Server.InteractiveState
                         response.statisticalStatus
 
                     self.tour.stats.responses[keyPath: status] += 1
-                    self.tour.lastUA = request.agent
+                    self.tour.lastURI = request.uri
+                    self.tour.lastUA = request.agent?.id
 
-                    if  let agent:String = request.agent?.lowercased()
+                    if  let category:WritableKeyPath<ServerTour.Stats.ByAgent, Int> =
+                            request.agent?.statisticalCategory
                     {
-                        func isLikelySearchEngine(agent:String) -> Bool
-                        {
-                            return agent.contains("petal")
-                                || agent.contains("slurp")
-                                || agent.contains("duckduckgo")
-                                || agent.contains("bing")
-                                || agent.contains("google")
-                                || agent.contains("yandex")
-                        }
-                        func isLikelyRobot(agent:String) -> Bool
-                        {
-                            return agent.contains("bot")
-                        }
-                        func isLikelyBrowser(agent:String) -> Bool
-                        {
-                            return agent.contains("mozilla")
-                        }
-
-                        if      isLikelySearchEngine(agent: agent)
-                        {
-                            self.tour.stats.agents.likelySearchEngine += 1
-                        }
-                        else if isLikelyRobot(agent: agent)
-                        {
-                            self.tour.stats.agents.likelyBot += 1
-                        }
-                        else if isLikelyBrowser(agent: agent)
-                        {
-                            self.tour.stats.agents.likelyBrowser += 1
-                        }
-                        else
-                        {
-                            self.tour.stats.agents.other += 1
-                        }
+                        self.tour.stats.agents[keyPath: category] += 1
                     }
-
                 }
 
                 request.promise.succeed(response)

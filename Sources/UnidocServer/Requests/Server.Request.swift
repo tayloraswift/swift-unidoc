@@ -8,18 +8,21 @@ extension Server
         let endpoint:Endpoint
 
         let cookies:Cookies
-        let agent:String?
+        let agent:Agent?
+        let uri:String?
 
         let promise:EventLoopPromise<ServerResponse>
 
         init(endpoint:Endpoint,
             cookies:Cookies,
-            agent:String? = nil,
+            agent:Agent? = nil,
+            uri:String? = nil,
             promise:EventLoopPromise<ServerResponse>)
         {
             self.endpoint = endpoint
             self.cookies = cookies
             self.agent = agent
+            self.uri = uri
             self.promise = promise
         }
     }

@@ -4,6 +4,8 @@ struct ServerTour
     public
     let started:ContinuousClock.Instant
     public
+    var lastURI:String?
+    public
     var lastUA:String?
     public
     var stats:Stats
@@ -12,6 +14,7 @@ struct ServerTour
     init(started:ContinuousClock.Instant = .now)
     {
         self.started = started
+        self.lastURI = nil
         self.lastUA = nil
         self.stats = .init()
     }
