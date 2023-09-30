@@ -58,7 +58,7 @@ extension Server.Operation:HTTPServerOperation
                     lookup: .init(stem: [])),
                 tag: tag))
 
-            self.init(endpoint: get, cookies: cookies)
+            self.init(endpoint: get, cookies: cookies, agent: agent)
             return
         }
 
@@ -83,7 +83,7 @@ extension Server.Operation:HTTPServerOperation
                 return nil
             }
 
-            self.init(endpoint: endpoint, cookies: cookies)
+            self.init(endpoint: endpoint, cookies: cookies, agent: agent)
             return
         }
 
