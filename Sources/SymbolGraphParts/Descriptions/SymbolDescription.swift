@@ -62,7 +62,6 @@ extension SymbolDescription
         visibility:Visibility,
         extension:ExtensionContext,
         expanded:__owned [Signature<Symbol.Decl>.Fragment],
-        abridged:__owned [Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
@@ -70,6 +69,7 @@ extension SymbolDescription
         var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
         var phylum:Unidoc.Phylum = phylum
 
+        let abridged:Signature<Symbol.Decl>.Abridged = .init(expanded)
         let expanded:Signature<Symbol.Decl>.Expanded = .init(expanded, keywords: &keywords)
 
         //  Heuristic for inferring actor types
@@ -100,10 +100,8 @@ extension SymbolDescription
             }
         }
 
-        //  SymbolGraphGen incorrectly prints the fragment as 'class' in
-        //  the abridged signature.
         let signature:Signature<Symbol.Decl> = .init(availability: availability,
-            abridged: .init(abridged, actor: phylum == .decl(.actor)),
+            abridged: abridged,
             expanded: expanded,
             generics: generics,
             spis: interfaces.map { _ in [] })
@@ -197,10 +195,6 @@ extension SymbolDescription:JSONObjectDecodable
             visibility: try json[.visibility].decode(),
             extension: try json[.extension]?.decode() ?? .init(),
             expanded: try json[.declaration].decode(),
-            abridged: try json[.names].decode(using: CodingKey.Names.self)
-            {
-                try $0[.subheading].decode()
-            },
             generics: try json[.generics]?.decode() ?? .init(),
             location: try json[.location]?.decode(using: CodingKey.Location.self)
             {
