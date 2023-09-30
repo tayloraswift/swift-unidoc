@@ -61,6 +61,7 @@ extension Server.InteractiveState
                         response.statisticalStatus
 
                     self.tour.stats.responses[keyPath: status] += 1
+                    self.tour.lastUA = request.agent
                 }
 
                 request.promise.succeed(response)
