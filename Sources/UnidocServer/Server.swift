@@ -235,6 +235,7 @@ extension Server:HTTPServerDelegate
         case .interactive(let interactive):
             let request:Request<any InteractiveEndpoint> = .init(endpoint: interactive,
                 cookies: operation.cookies,
+                agent: operation.agent,
                 promise: promise)
 
             guard case .enqueued = self.interactive.consumer.yield(request)

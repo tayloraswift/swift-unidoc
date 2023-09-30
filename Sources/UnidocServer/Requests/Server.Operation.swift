@@ -14,12 +14,16 @@ extension Server
     struct Operation:Sendable
     {
         let endpoint:Endpoint
-        let cookies:Cookies
 
-        init(endpoint:Endpoint, cookies:Cookies)
+        let cookies:Cookies
+        let agent:String?
+
+        init(endpoint:Endpoint, cookies:Cookies, agent:String? = nil)
         {
             self.endpoint = endpoint
+
             self.cookies = cookies
+            self.agent = agent
         }
     }
 }
@@ -36,6 +40,7 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
+        let agent:String? = headers[canonicalForm: "user-agent"].first.map(String.init)
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
@@ -143,7 +148,7 @@ extension Server.Operation:HTTPServerOperation
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: cookies)
+            self.init(endpoint: endpoint, cookies: cookies, agent: agent)
         }
         else
         {
