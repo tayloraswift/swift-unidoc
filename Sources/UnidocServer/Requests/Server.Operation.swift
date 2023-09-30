@@ -40,7 +40,7 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        let agent:String? = headers[canonicalForm: "user-agent"].first.map(String.init)
+        let agent:String? = headers["user-agent"].first
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
