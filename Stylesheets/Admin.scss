@@ -34,6 +34,23 @@ figure div.pie
 {
     > div.pie-color > svg g
     {
+        > *.likely-search-engines
+        {
+            fill: $light-accent-barbie-pink;
+        }
+        > *.likely-browsers
+        {
+            fill: rgb(78, 255, 246);
+        }
+        > *.likely-bots
+        {
+            fill: rgb(255, 219, 101);
+        }
+        > *.other
+        {
+            fill: rgb(255, 168, 38);
+        }
+
         > *.multiple-choices
         {
             fill: rgb(255, 154, 38);
