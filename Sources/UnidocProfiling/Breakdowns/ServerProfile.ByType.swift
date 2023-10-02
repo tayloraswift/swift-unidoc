@@ -1,4 +1,4 @@
-extension ServerTour.Stats
+extension ServerProfile
 {
     @frozen public
     struct ByType
@@ -21,7 +21,7 @@ extension ServerTour.Stats
         }
     }
 }
-extension ServerTour.Stats.ByType
+extension ServerProfile.ByType
 {
     /// The total count.
     @inlinable public
@@ -30,7 +30,7 @@ extension ServerTour.Stats.ByType
         self.siteMap + self.query + self.other
     }
 }
-extension ServerTour.Stats.ByType:ExpressibleByDictionaryLiteral
+extension ServerProfile.ByType:ExpressibleByDictionaryLiteral
 {
     @inlinable public
     init(dictionaryLiteral elements:(Never, Int)...)

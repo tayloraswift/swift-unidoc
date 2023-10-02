@@ -2,6 +2,7 @@ import Media
 import MongoDB
 import HTML
 import HTTP
+import UnidocProfiling
 import URI
 
 extension Site
@@ -216,16 +217,22 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = "\(self.tour.started.duration(to: .now))"
 
             $0[.dt] = "requests"
-            $0[.dd] = "\(self.tour.stats.requests.total)"
+            $0[.dd] = "\(self.tour.profile.requests.pages.total)"
 
             $0[.dt] = "last uri"
-            $0[.dd] = self.tour.lastURI ?? "none"
+            $0[.dd] = self.tour.last.uri ?? "none"
+
+            $0[.dt] = "last language"
+            $0[.dd] = self.tour.last.language ?? "none"
+
+            $0[.dt] = "last referrer"
+            $0[.dd] = self.tour.last.referer ?? "none"
 
             $0[.dt] = "last user-agent"
-            $0[.dd] = self.tour.lastUA ?? "none"
+            $0[.dd] = self.tour.last.agent ?? "none"
 
             $0[.dt] = "bytes transferred (content only)"
-            $0[.dd] = "\(self.tour.stats.bytes.total)"
+            $0[.dd] = "\(self.tour.profile.requests.bytes.total)"
 
             $0[.dt] = "GitHub crawling errors"
             $0[.dd] = "\(self.errorsCrawling)"
@@ -243,7 +250,7 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = "\(self.tagsUpdated)"
         }
 
-        main += ServerTour.StatsBreakdown.init(self.tour.stats)
+        main += ServerProfile.Breakdown.init(self.tour.profile)
 
         main[.hr]
 

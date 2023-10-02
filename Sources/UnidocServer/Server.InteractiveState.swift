@@ -2,6 +2,7 @@ import GitHubClient
 import GitHubAPI
 import HTTP
 import UnidocPages
+import UnidocProfiling
 
 extension Server
 {
@@ -40,9 +41,6 @@ extension Server.InteractiveState
 
             do
             {
-                let type:WritableKeyPath<ServerTour.Stats.ByType, Int> =
-                    request.endpoint.statisticalType
-
                 let response:ServerResponse = try await request.endpoint.load(
                     from: self,
                     with: request.cookies)
@@ -54,21 +52,29 @@ extension Server.InteractiveState
                 //  they will really skew the results.
                 if  case nil = request.cookies.session
                 {
-                    self.tour.stats.requests[keyPath: type] += 1
-                    self.tour.stats.bytes[keyPath: type] += response.size
+                    let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
+                    let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = request.agent
 
-                    let status:WritableKeyPath<ServerTour.Stats.ByStatus, Int> =
-                        response.statisticalStatus
+                    self.tour.profile.requests.bytes[keyPath: agent] += response.size
+                    self.tour.profile.requests.pages[keyPath: agent] += 1
 
-                    self.tour.stats.responses[keyPath: status] += 1
-                    self.tour.lastURI = request.uri
-                    self.tour.lastUA = request.agent?.id
-
-                    if  let category:WritableKeyPath<ServerTour.Stats.ByAgent, Int> =
-                            request.agent?.statisticalCategory
+                    switch agent
                     {
-                        self.tour.stats.agents[keyPath: category] += 1
+                    case    \.likelyBrowser:
+                        //  Only count languages for browsers.
+                        self.tour.profile.languages[keyPath: request.language] += 1
+                        self.tour.profile.responses.toBrowsers[keyPath: status] += 1
+
+                    case    \.likelyGooglebot,
+                            \.likelyMajorSearchEngine,
+                            \.likelyMinorSearchEngine:
+                        self.tour.profile.responses.toSearch[keyPath: status] += 1
+
+                    case    _:
+                        self.tour.profile.responses.toOther[keyPath: status] += 1
                     }
+
+                    self.tour.last = request.profile
                 }
 
                 request.promise.succeed(response)

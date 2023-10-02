@@ -4,18 +4,15 @@ struct ServerTour
     public
     let started:ContinuousClock.Instant
     public
-    var lastURI:String?
+    var profile:ServerProfile
     public
-    var lastUA:String?
-    public
-    var stats:Stats
+    var last:ServerProfile.Sample
 
     @inlinable public
     init(started:ContinuousClock.Instant = .now)
     {
         self.started = started
-        self.lastURI = nil
-        self.lastUA = nil
-        self.stats = .init()
+        self.profile = .init()
+        self.last = .init()
     }
 }

@@ -6,6 +6,7 @@ import NIOCore
 import NIOHTTP1
 import UnidocDB
 import UnidocPages
+import UnidocProfiling
 import UnidocQueries
 import URI
 
@@ -16,16 +17,13 @@ extension Server
         let endpoint:Endpoint
 
         let cookies:Cookies
-        let agent:Agent?
-        let uri:String?
+        let profile:ServerProfile.Sample
 
-        init(endpoint:Endpoint, cookies:Cookies, agent:Agent? = nil, uri:String? = nil)
+        init(endpoint:Endpoint, cookies:Cookies, profile:ServerProfile.Sample = .init())
         {
             self.endpoint = endpoint
-
             self.cookies = cookies
-            self.agent = agent
-            self.uri = uri
+            self.profile = profile
         }
     }
 }
@@ -42,7 +40,12 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        let agent:Server.Agent? = .init(headers["user-agent"])
+        let profile:ServerProfile.Sample = .init(
+            language: headers["accept-language"].first,
+            referer: headers["referer"].first,
+            agent: headers["user-agent"].first,
+            uri: unnormalized)
+
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
@@ -60,7 +63,7 @@ extension Server.Operation:HTTPServerOperation
                     lookup: .init(stem: [])),
                 tag: tag))
 
-            self.init(endpoint: get, cookies: cookies, agent: agent, uri: unnormalized)
+            self.init(endpoint: get, cookies: cookies, profile: profile)
             return
         }
 
@@ -85,7 +88,7 @@ extension Server.Operation:HTTPServerOperation
                 return nil
             }
 
-            self.init(endpoint: endpoint, cookies: cookies, agent: agent, uri: unnormalized)
+            self.init(endpoint: endpoint, cookies: cookies, profile: profile)
             return
         }
 
@@ -150,7 +153,7 @@ extension Server.Operation:HTTPServerOperation
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: cookies, agent: agent, uri: unnormalized)
+            self.init(endpoint: endpoint, cookies: cookies, profile: profile)
         }
         else
         {

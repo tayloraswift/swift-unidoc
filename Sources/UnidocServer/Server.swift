@@ -233,8 +233,7 @@ extension Server:HTTPServerDelegate
         case .interactive(let interactive):
             let request:Request<any InteractiveEndpoint> = .init(endpoint: interactive,
                 cookies: operation.cookies,
-                agent: operation.agent,
-                uri: operation.uri,
+                profile: operation.profile,
                 promise: promise)
 
             guard case .enqueued = self.interactive.consumer.yield(request)
@@ -246,6 +245,7 @@ extension Server:HTTPServerDelegate
         case .procedural(let procedural):
             let request:Request<any ProceduralEndpoint> = .init(endpoint: procedural,
                 cookies: operation.cookies,
+                profile: operation.profile,
                 promise: promise)
 
             guard case .enqueued = self.procedural.consumer.yield(request)

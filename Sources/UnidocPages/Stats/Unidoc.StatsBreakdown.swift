@@ -1,6 +1,7 @@
 import HTML
 import Unidoc
 import UnidocRecords
+import UnidocProfiling
 
 extension Unidoc
 {
@@ -37,9 +38,8 @@ extension Unidoc.StatsBreakdown
             let unweighted:Int = unweighted[keyPath: key]
             if  unweighted > 0
             {
-                self.unweighted.append(.init(
+                self.unweighted.append(.init(prose(key) ?? "?",
                     stratum: "declarations in \(domain)",
-                    state: prose(key) ?? "?",
                     value: unweighted,
                     class: `class`(key)))
             }
@@ -47,9 +47,8 @@ extension Unidoc.StatsBreakdown
             let weighted:Int = weighted[keyPath: key]
             if  weighted > 0
             {
-                self.weighted.append(.init(
+                self.weighted.append(.init(prose(key) ?? "?",
                     stratum: "symbols in \(domain)",
-                    state: prose(key) ?? "?",
                     value: weighted,
                     class: `class`(key)))
             }

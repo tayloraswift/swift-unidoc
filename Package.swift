@@ -426,8 +426,15 @@ let package:Package = .init(
                 .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocAutomation"),
+                .target(name: "UnidocProfiling"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
+            ]),
+
+        .target(name: "UnidocProfiling", dependencies:
+            [
+                .target(name: "HTTP"),
+                .target(name: "MarkdownRendering"),
             ]),
 
         .target(name: "UnidocPlanes"),
