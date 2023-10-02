@@ -20,7 +20,7 @@ extension Pie
 }
 extension Pie.Legend:HyperTextOutputStreamable
 {
-    public static
+    @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         let divisor:Double = .init(self.total)

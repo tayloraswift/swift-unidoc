@@ -1,9 +1,9 @@
 import HTTP
-import UnidocPages
+import UnidocProfiling
 
 extension ServerResponse
 {
-    var statisticalStatus:WritableKeyPath<ServerTour.Stats.ByStatus, Int>
+    var category:WritableKeyPath<ServerProfile.ByStatus, Int>
     {
         switch self
         {

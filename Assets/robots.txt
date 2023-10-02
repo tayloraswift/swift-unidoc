@@ -1,27 +1,27 @@
 # See http://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
 #
 User-agent: mauibot
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: semrushbot
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: ahrefsbot
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: blexbot
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: seo spider
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: MJ12bot
-Disallow: /
+Crawl-delay: 20
 
 
 User-agent: Bytespider
@@ -31,3 +31,4 @@ Crawl-delay: 10
 User-agent: *
 Disallow: /admin/
 Disallow: /auth/
+

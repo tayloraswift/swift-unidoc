@@ -34,60 +34,101 @@ figure div.pie
 {
     > div.pie-color > svg g
     {
-        > *.likely-googlebot
+        > *.agent.googlebot
         {
             fill: #5b82ff;
         }
-        > *.likely-major-search-engines
+        > *.agent.major-search-engine
         {
             fill: #6953ff;
         }
-        > *.likely-minor-search-engines
+        > *.agent.minor-search-engine
         {
             fill: #ae6aff;
         }
-        > *.likely-barbies
+        > *.agent.browser
         {
             fill: #ff73a1;
         }
-        > *.likely-tools
+        > *.agent.tool
         {
             fill: #999;
         }
-        > *.likely-bots
+        > *.agent.bot
         {
             fill: #e1e1e1;
         }
 
-        > *.multiple-choices
+        > *.language.zh
+        {
+            fill: #c7001b;
+        }
+        > *.language.es
+        {
+            fill: #ffb62f;
+        }
+        > *.language.en
+        {
+            fill: #ff558d;
+        }
+        > *.language.ar
+        {
+            fill: #2ba720;
+        }
+        > *.language.hi
+        {
+            fill: #ffb686;
+        }
+        > *.language.bn
+        {
+            fill: #d88f5f;
+        }
+        > *.language.pt
+        {
+            fill: #38db7c;
+        }
+        > *.language.ru
+        {
+            fill: #007a3d;
+        }
+        > *.language.other
+        {
+            fill: #999;
+        }
+        > *.language.none
+        {
+            fill: #5a5a5a;
+        }
+
+        > *.status.multiple-choices
         {
             fill: rgb(255, 154, 38);
         }
-        > *.not-modified
+        > *.status.not-modified
         {
             fill: $light-accent-hot-pink;
         }
-        > *.ok
+        > *.status.ok
         {
             fill: $light-accent-barbie-pink;
         }
-        > *.redirected-permanently
+        > *.status.redirected-permanently
         {
             fill: rgb(130, 255, 249);
         }
-        > *.redirected-temporarily
+        > *.status.redirected-temporarily
         {
             fill: rgb(171, 255, 244);
         }
-        > *.not-found
+        > *.status.not-found
         {
             fill: rgb(255, 244, 94);
         }
-        > *.errored
+        > *.status.errored
         {
             fill: rgb(255, 154, 38);
         }
-        > *.unauthorized
+        > *.status.unauthorized
         {
             fill: rgb(255, 103, 103);
         }
