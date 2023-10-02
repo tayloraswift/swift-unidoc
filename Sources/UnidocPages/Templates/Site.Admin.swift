@@ -219,17 +219,26 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "requests"
             $0[.dd] = "\(self.tour.profile.requests.pages.total)"
 
-            $0[.dt] = "last uri"
+
+            $0[.dt] = "last request, including bots"
             $0[.dd] = self.tour.last.uri ?? "none"
 
-            $0[.dt] = "last language"
-            $0[.dd] = self.tour.last.language ?? "none"
+            $0[.dt] = "last user-agent, including bots"
+            $0[.dd] = self.tour.last.agent ?? "none"
 
-            $0[.dt] = "last referrer"
-            $0[.dd] = self.tour.last.referer ?? "none"
+
+            $0[.dt] = "last impression"
+            $0[.dd] = self.tour.lastImpression.uri ?? "none"
 
             $0[.dt] = "last user-agent"
-            $0[.dd] = self.tour.last.agent ?? "none"
+            $0[.dd] = self.tour.lastImpression.agent ?? "none"
+
+            $0[.dt] = "last language"
+            $0[.dd] = self.tour.lastImpression.language ?? "none"
+
+            $0[.dt] = "last referrer"
+            $0[.dd] = self.tour.lastImpression.referer ?? "none"
+
 
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.profile.requests.bytes.total)"

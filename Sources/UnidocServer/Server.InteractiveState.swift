@@ -65,6 +65,8 @@ extension Server.InteractiveState
                         self.tour.profile.languages[keyPath: request.language] += 1
                         self.tour.profile.responses.toBrowsers[keyPath: status] += 1
 
+                        self.tour.lastImpression = request.profile
+
                     case    \.likelyGooglebot,
                             \.likelyMajorSearchEngine,
                             \.likelyMinorSearchEngine:
