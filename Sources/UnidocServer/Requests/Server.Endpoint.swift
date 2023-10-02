@@ -288,6 +288,9 @@ extension Server.Endpoint
 
             switch trunk
             {
+            case .reloadAssets:
+                return .procedural(ReloadAsset.all)
+
             case .index:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]

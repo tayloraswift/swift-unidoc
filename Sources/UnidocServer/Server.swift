@@ -34,19 +34,17 @@ struct Server:Sendable
 
     private
     let github:GitHubPlugin?
-    private
-    let cache:Cache<Site.Asset.Get>
-
-
     let mode:Mode
+
+    let cache:Cache<Site.Asset.Get>
     let db:DB
 
     private
     init(authority:any ServerAuthority,
         port:Int,
+        mode:Mode,
         github:GitHubPlugin?,
         cache:Cache<Site.Asset.Get>,
-        mode:Mode,
         db:DB)
     {
         self.authority = authority
@@ -131,9 +129,9 @@ extension Server
         self.init(
             authority: authority,
             port: options.port,
+            mode: mode,
             github: github,
             cache: cache,
-            mode: mode,
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
@@ -235,7 +233,7 @@ extension Server:HTTPServerDelegate
         case .interactive(let interactive):
             let request:Request<any InteractiveEndpoint> = .init(endpoint: interactive,
                 cookies: operation.cookies,
-                agent: operation.agent,
+                profile: operation.profile,
                 promise: promise)
 
             guard case .enqueued = self.interactive.consumer.yield(request)
@@ -247,6 +245,7 @@ extension Server:HTTPServerDelegate
         case .procedural(let procedural):
             let request:Request<any ProceduralEndpoint> = .init(endpoint: procedural,
                 cookies: operation.cookies,
+                profile: operation.profile,
                 promise: promise)
 
             guard case .enqueued = self.procedural.consumer.yield(request)
@@ -258,10 +257,10 @@ extension Server:HTTPServerDelegate
         case .stateless(let stateless):
             promise.succeed(stateless)
 
-        case .static(let asset):
+        case .static(let request):
             promise.completeWithTask
             {
-                try await asset.load(from: self.cache)
+                try await self.cache.serve(request)
             }
         }
     }

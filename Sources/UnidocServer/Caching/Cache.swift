@@ -23,6 +23,26 @@ actor Cache<Key> where Key:CacheKey
 }
 extension Cache
 {
+    func serve(_ request:Request) async throws -> ServerResponse
+    {
+        var resource:ServerResource = try self.load(request.key)
+
+        if  let tag:MD5 = request.tag, case tag? = resource.hash
+        {
+            resource.content.drop()
+        }
+
+        return .ok(resource)
+    }
+
+    func clear()
+    {
+        self.table.removeAll(keepingCapacity: true)
+    }
+}
+extension Cache
+{
+    private
     func load(_ key:Key) throws -> ServerResource
     {
         try

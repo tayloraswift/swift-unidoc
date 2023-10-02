@@ -23,13 +23,6 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.SiteMap:InteractiveEndpoint
-{
-    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
-    {
-        \.siteMap
-    }
-}
 extension Server.Endpoint.SiteMap:PublicEndpoint
 {
     func load(from server:Server.InteractiveState) async throws -> ServerResponse?
