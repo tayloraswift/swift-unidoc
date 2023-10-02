@@ -24,9 +24,14 @@ extension ThinQuery.Output:ServerResponseFactory
         }
         else
         {
-            return .gone(.init(
-                content: .string("Volume not found."),
-                type: .text(.plain, charset: .utf8)))
+            let inliner:Inliner = .init(principal: self.names, repo: nil)
+                inliner.vertices.add(self.masters)
+
+            let display:Site.Docs.NotFound = .init(inliner, nouns: nil)
+            //  We return 410 Gone instead of 404 Not Found so that search engines and
+            //  research bots will stop crawling this URL. But the page appears the same
+            //  to the user.
+            return .gone(display.resource())
         }
     }
 

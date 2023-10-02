@@ -69,7 +69,7 @@ figure div.pie
         }
         > *.language.en
         {
-            fill: #ff558d;
+            fill: #fd74a2;
         }
         > *.language.ar
         {
@@ -123,6 +123,10 @@ figure div.pie
         > *.status.not-found
         {
             fill: rgb(255, 244, 94);
+        }
+        > *.status.gone
+        {
+            fill: rgb(255, 206, 70);
         }
         > *.status.errored
         {
