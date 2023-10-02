@@ -24,7 +24,7 @@ extension ThinQuery.Output:ServerResponseFactory
         }
         else
         {
-            return .notFound(.init(
+            return .gone(.init(
                 content: .string("Volume not found."),
                 type: .text(.plain, charset: .utf8)))
         }
@@ -37,6 +37,8 @@ extension ThinQuery.Output:ServerResponseFactory
         {
         case .article(let master)?: return Site.Docs[self.names, master.shoot]
         case .culture(let master)?: return Site.Docs[self.names, master.shoot]
+        //  This is one of the few situations where we intentionally issue redirects
+        //  to a disambiguation page.
         case .decl(let master)?:    return Site.Docs[self.names,
             self.masters.count > 1 ? .init(stem: master.stem) : master.shoot]
         case .file?, nil:           return nil
