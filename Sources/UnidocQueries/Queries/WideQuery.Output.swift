@@ -11,18 +11,18 @@ extension WideQuery
         public
         let principal:Principal?
         public
-        let secondary:[Volume.Vertex]
+        let vertices:[Volume.Vertex]
         public
-        let names:[Volume.Meta]
+        let volumes:[Volume.Meta]
 
         @inlinable public
         init(principal:Principal?,
-            secondary:[Volume.Vertex],
-            names:[Volume.Meta])
+            vertices:[Volume.Vertex],
+            volumes:[Volume.Meta])
         {
             self.principal = principal
-            self.secondary = secondary
-            self.names = names
+            self.vertices = vertices
+            self.volumes = volumes
         }
     }
 }
@@ -32,8 +32,8 @@ extension WideQuery.Output:MongoMasterCodingModel
     enum CodingKey:String
     {
         case principal
-        case secondary
-        case names
+        case vertices
+        case volumes
     }
 }
 extension WideQuery.Output:BSONDocumentDecodable
@@ -43,7 +43,7 @@ extension WideQuery.Output:BSONDocumentDecodable
     {
         self.init(
             principal: try bson[.principal]?.decode(),
-            secondary: try bson[.secondary].decode(),
-            names: try bson[.names].decode())
+            vertices: try bson[.vertices].decode(),
+            volumes: try bson[.volumes].decode())
     }
 }

@@ -17,10 +17,10 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
     /// If nil, the query will still look up the latest stable release, but the result will
     /// be discarded.
     static
-    var namesOfLatest:Mongo.KeyPath? { get }
+    var volumeOfLatest:Mongo.KeyPath? { get }
     /// The field to store the ``Volume.Meta`` of the **requested snapshot** in.
     static
-    var names:Mongo.KeyPath { get }
+    var volume:Mongo.KeyPath { get }
 
     /// The field that will contain the list of matching master records, which will become the
     /// input of the conforming type’s ``extend(pipeline:)`` witness.
@@ -32,7 +32,7 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
 extension VolumeLookupQuery
 {
     @inlinable public static
-    var namesOfLatest:Mongo.KeyPath? { nil }
+    var volumeOfLatest:Mongo.KeyPath? { nil }
 }
 extension VolumeLookupQuery
 {
@@ -93,13 +93,13 @@ extension VolumeLookupQuery
             {
                 $0[.replaceWith] = .init
                 {
-                    $0[Self.names] = Mongo.Pipeline.ROOT
+                    $0[Self.volume] = Mongo.Pipeline.ROOT
 
                     //  ``Volume.Meta`` is complex but not that large, and duplicating this
                     //  makes the rest of the query a lot simpler.
-                    if  let names:Mongo.KeyPath = Self.namesOfLatest
+                    if  let volume:Mongo.KeyPath = Self.volumeOfLatest
                     {
-                        $0[names] = Mongo.Pipeline.ROOT
+                        $0[volume] = Mongo.Pipeline.ROOT
                     }
                 }
             }
@@ -110,14 +110,14 @@ extension VolumeLookupQuery
             //  the zone fields to a subdocument.
             //
             //  This clears the document if the ``Output`` type doesn’t have a
-            //  ``namesOfLatest`` field.
+            //  ``volumeOfLatest`` field.
             pipeline.stage
             {
                 $0[.replaceWith] = .init
                 {
-                    if  let names:Mongo.KeyPath = Self.namesOfLatest
+                    if  let volume:Mongo.KeyPath = Self.volumeOfLatest
                     {
-                        $0[names] = Mongo.Pipeline.ROOT
+                        $0[volume] = Mongo.Pipeline.ROOT
                     }
                 }
             }
@@ -141,20 +141,20 @@ extension VolumeLookupQuery
                             }
                         }
                     }
-                    $0[.as] = Self.names
+                    $0[.as] = Self.volume
                 }
             }
             //  Unbox the single-element array. It must contain at least one element for the
             //  query to have been successful, so we can simply use an `$unwind`.
             pipeline.stage
             {
-                $0[.unwind] = Self.names
+                $0[.unwind] = Self.volume
             }
         }
 
         pipeline.stage
         {
-            self.lookup.stage(&$0, input: Self.names, output: Self.input)
+            self.lookup.stage(&$0, input: Self.volume, output: Self.input)
         }
     }
 }

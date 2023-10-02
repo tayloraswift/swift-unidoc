@@ -2,11 +2,11 @@ import HTML
 import Signatures
 import Unidoc
 
-extension Inliner
+extension GroupSections
 {
     struct ExtensionHeader
     {
-        let inliner:Inliner
+        let inliner:VersionedPageContext
 
         private
         let display:String
@@ -15,7 +15,7 @@ extension Inliner
         private
         let `where`:[GenericConstraint<Unidoc.Scalar?>]
 
-        init(_ inliner:Inliner,
+        init(_ inliner:VersionedPageContext,
             display:String,
             culture:Unidoc.Scalar,
             where:[GenericConstraint<Unidoc.Scalar?>])
@@ -27,7 +27,7 @@ extension Inliner
         }
     }
 }
-extension Inliner.ExtensionHeader:HyperTextOutputStreamable
+extension GroupSections.ExtensionHeader:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

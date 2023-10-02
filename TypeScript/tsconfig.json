@@ -23,6 +23,7 @@
         "Sources/Searchbar.ts",
         "Sources/SearchRunner.ts",
         "Sources/SearchOutput.ts",
+        "Sources/SearchVolume.ts",
         "Sources/Symbol.ts",
     ]
 }

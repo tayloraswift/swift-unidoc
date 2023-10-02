@@ -18,17 +18,17 @@ extension WideQuery.Output
         let matches:[Volume.Vertex]
 
         public
-        let master:Volume.Vertex?
+        let vertex:Volume.Vertex?
         public
-        let masterInLatest:Volume.Vertex?
+        let vertexInLatest:Volume.Vertex?
 
         public
         let groups:[Volume.Group]
 
         public
-        let names:Volume.Meta
+        let volume:Volume.Meta
         public
-        let namesOfLatest:Volume.Meta?
+        let volumeOfLatest:Volume.Meta?
 
         public
         let repo:PackageRepo?
@@ -39,23 +39,23 @@ extension WideQuery.Output
         @inlinable internal
         init(
             matches:[Volume.Vertex],
-            master:Volume.Vertex?,
-            masterInLatest:Volume.Vertex?,
+            vertex:Volume.Vertex?,
+            vertexInLatest:Volume.Vertex?,
             groups:[Volume.Group],
-            names:Volume.Meta,
-            namesOfLatest:Volume.Meta?,
+            volume:Volume.Meta,
+            volumeOfLatest:Volume.Meta?,
             repo:PackageRepo?,
             tree:Volume.TypeTree?)
         {
             self.matches = matches
 
-            self.master = master
-            self.masterInLatest = masterInLatest
+            self.vertex = vertex
+            self.vertexInLatest = vertexInLatest
 
             self.groups = groups
 
-            self.names = names
-            self.namesOfLatest = namesOfLatest
+            self.volume = volume
+            self.volumeOfLatest = volumeOfLatest
 
             self.repo = repo
             self.tree = tree
@@ -68,11 +68,11 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
     enum CodingKey:String, CaseIterable
     {
         case matches = "A"
-        case master = "M"
-        case masterInLatest = "L"
+        case vertex = "M"
+        case vertexInLatest = "L"
         case groups = "G"
-        case names = "Z"
-        case namesOfLatest = "R"
+        case volume = "Z"
+        case volumeOfLatest = "R"
         case repo = "O"
         case tree = "T"
     }
@@ -84,11 +84,11 @@ extension WideQuery.Output.Principal:BSONDocumentDecodable
     {
         self.init(
             matches: try bson[.matches].decode(),
-            master: try bson[.master]?.decode(),
-            masterInLatest: try bson[.masterInLatest]?.decode(),
+            vertex: try bson[.vertex]?.decode(),
+            vertexInLatest: try bson[.vertexInLatest]?.decode(),
             groups: try bson[.groups].decode(),
-            names: try bson[.names].decode(),
-            namesOfLatest: try bson[.namesOfLatest]?.decode(),
+            volume: try bson[.volume].decode(),
+            volumeOfLatest: try bson[.volumeOfLatest]?.decode(),
             repo: try bson[.repo]?.decode(),
             tree: try bson[.tree]?.decode())
     }

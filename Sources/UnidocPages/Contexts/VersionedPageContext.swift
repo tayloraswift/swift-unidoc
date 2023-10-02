@@ -7,39 +7,42 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-final
-class Inliner
+@available(*, deprecated, renamed: "VersionedPageContext")
+typealias Inliner = VersionedPageContext
+
+public final
+class VersionedPageContext
 {
     /// Shared outlines, valid for the overview and details passages.
     var outlines:[Volume.Outline]
 
     private
-    var cache:InlinerCache
+    var cache:Cache
 
     let repo:PackageRepo?
 
     private
-    init(cache:InlinerCache, repo:PackageRepo?)
+    init(cache:Cache, repo:PackageRepo?)
     {
         self.outlines = []
         self.cache = cache
         self.repo = repo
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
-    var vertices:InlinerCache.Vertices
+    var vertices:Vertices
     {
         _read   { yield  self.cache.vertices }
         _modify { yield &self.cache.vertices }
     }
-    var volumes:InlinerCache.Volumes
+    var volumes:Volumes
     {
         _read   { yield  self.cache.volumes }
         _modify { yield &self.cache.volumes }
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
     convenience
     init(principal scalar:Unidoc.Scalar, volume:Volume.Meta, repo:PackageRepo?)
@@ -58,36 +61,36 @@ extension Inliner
             repo: repo)
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
-    func passage(overview passage:Volume.Passage) -> Passage
+    func prose(overview passage:Volume.Passage) -> ProseSection
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
     }
-    func passage(_ bytecode:MarkdownBytecode) -> Passage
+    func prose(_ bytecode:MarkdownBytecode) -> ProseSection
     {
         //  We need to use the shared outlines, and not the array from the passage
         //  record, lest we make a frameshift indexing error.
         .init(self, bytecode: bytecode, outlines: self.outlines)
     }
-    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Code
+    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> CodeSection
     {
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
-    func card(_ scalar:Unidoc.Scalar) -> Card?
+    func card(_ scalar:Unidoc.Scalar) -> GroupList.Card?
     {
         self.cache[scalar].map
         {
-            .init(overview: $0.overview.map(self.passage(overview:)),
+            .init(overview: $0.overview.map(self.prose(overview:)),
                 master: $0,
                 target: $1)
         }
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
     func list(members:[Volume.Link], to list:inout HTML.ContentEncoder)
     {
@@ -104,7 +107,7 @@ extension Inliner
         }
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
     func vectorLink<Display, Scalars>(
         components display:Display,
@@ -114,7 +117,7 @@ extension Inliner
         .init(self, display: display, scalars: scalars)
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
     func link(module:Unidoc.Scalar) -> HTML.Link<ModuleIdentifier>?
     {
@@ -149,7 +152,7 @@ extension Inliner
         }
     }
 }
-extension Inliner
+extension VersionedPageContext
 {
     func url(_ scalar:Unidoc.Scalar) -> String?
     {

@@ -3,22 +3,25 @@ import UnidocDB
 import UnidocRecords
 import URI
 
-struct InlinerCache
+extension VersionedPageContext
 {
-    var vertices:Vertices
-    var volumes:Volumes
-
-    private
-    var uris:[Unidoc.Scalar: String]
-
-    init(vertices:Vertices, volumes:Volumes, uris:[Unidoc.Scalar: String] = [:])
+    struct Cache
     {
-        self.vertices = vertices
-        self.volumes = volumes
-        self.uris = uris
+        var vertices:Vertices
+        var volumes:Volumes
+
+        private
+        var uris:[Unidoc.Scalar: String]
+
+        init(vertices:Vertices, volumes:Volumes, uris:[Unidoc.Scalar: String] = [:])
+        {
+            self.vertices = vertices
+            self.volumes = volumes
+            self.uris = uris
+        }
     }
 }
-extension InlinerCache
+extension VersionedPageContext.Cache
 {
     mutating
     func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Meta) -> URI?) -> String?
@@ -43,7 +46,7 @@ extension InlinerCache
         } (&self.uris[scalar])
     }
 }
-extension InlinerCache
+extension VersionedPageContext.Cache
 {
     subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Article, url:String?)?
     {

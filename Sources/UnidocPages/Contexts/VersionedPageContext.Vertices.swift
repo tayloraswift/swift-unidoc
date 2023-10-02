@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension InlinerCache
+extension VersionedPageContext
 {
     struct Vertices
     {
@@ -18,7 +18,7 @@ extension InlinerCache
         }
     }
 }
-extension InlinerCache.Vertices
+extension VersionedPageContext.Vertices
 {
     mutating
     func add(_ masters:[Volume.Vertex])
@@ -30,7 +30,7 @@ extension InlinerCache.Vertices
         }
     }
 }
-extension InlinerCache.Vertices
+extension VersionedPageContext.Vertices
 {
     subscript(_ scalar:Unidoc.Scalar) -> Volume.Vertex?
     {

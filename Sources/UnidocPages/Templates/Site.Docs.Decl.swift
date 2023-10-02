@@ -13,34 +13,34 @@ extension Site.Docs
 {
     struct Decl
     {
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let canonical:CanonicalVersion?
+        let sidebar:[Volume.Noun]?
+
         private
-        let master:Volume.Vertex.Decl
+        let vertex:Volume.Vertex.Decl
         private
         let groups:[Volume.Group]
-        private
-        let nouns:[Volume.Noun]?
 
-        init(_ inliner:Inliner,
+        init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
-            master:Volume.Vertex.Decl,
-            groups:[Volume.Group],
-            nouns:[Volume.Noun]?)
+            sidebar:[Volume.Noun]?,
+            vertex:Volume.Vertex.Decl,
+            groups:[Volume.Group])
         {
-            self.inliner = inliner
+            self.context = context
             self.canonical = canonical
-            self.master = master
+            self.sidebar = sidebar
+            self.vertex = vertex
             self.groups = groups
-            self.nouns = nouns
         }
     }
 }
 extension Site.Docs.Decl
 {
     private
-    var stem:Volume.Stem { self.master.stem }
+    var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Decl:RenderablePage
 {
@@ -48,12 +48,12 @@ extension Site.Docs.Decl:RenderablePage
 
     var description:String?
     {
-        if  let overview:MarkdownBytecode = self.master.overview?.markdown
+        if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
         {
-            return "\(self.inliner.passage(overview))"
+            return "\(self.context.prose(overview))"
         }
 
-        let what:Demonym = .init(phylum: self.master.phylum, kinks: self.master.kinks)
+        let what:Demonym = .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
 
         if  case .swift = self.volume.symbol.package
         {
@@ -72,17 +72,17 @@ extension Site.Docs.Decl:RenderablePage
 }
 extension Site.Docs.Decl:StaticPage
 {
-    var location:URI { Site.Docs[self.volume, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.vertex.shoot] }
 }
 extension Site.Docs.Decl:ApplicationPage
 {
-    var navigator:Inliner.Breadcrumbs
+    var navigator:Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             return .init(
-                scope: self.master.scope.isEmpty ?
-                    nil : self.inliner.vectorLink(components: scope, to: self.master.scope),
+                scope: self.vertex.scope.isEmpty ?
+                    nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
                 last: last)
         }
         else
@@ -95,19 +95,15 @@ extension Site.Docs.Decl:ApplicationPage
 }
 extension Site.Docs.Decl:VersionedPage
 {
-    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
-
     func main(_ main:inout HTML.ContentEncoder)
     {
-        let groups:Inliner.Groups = .init(self.inliner,
-            requirements: self.master.requirements,
-            superforms: self.master.superforms,
-            generics: self.master.signature.generics.parameters,
+        let groups:GroupSections = .init(self.context,
+            requirements: self.vertex.requirements,
+            superforms: self.vertex.superforms,
+            generics: self.vertex.signature.generics.parameters,
             groups: self.groups,
-            bias: self.master.culture,
-            mode: .decl(self.master.phylum, self.master.kinks))
+            bias: self.vertex.culture,
+            mode: .decl(self.vertex.phylum, self.vertex.kinks))
 
         main[.section]
         {
@@ -118,16 +114,16 @@ extension Site.Docs.Decl:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 let demonym:Demonym = .init(
-                    phylum: self.master.phylum,
-                    kinks: self.master.kinks)
+                    phylum: self.vertex.phylum,
+                    kinks: self.vertex.kinks)
 
                 $0[.span] { $0.class = "phylum" } = demonym
                 $0[.span, { $0.class = "domain" }]
                 {
-                    if  self.master.namespace != self.master.culture
+                    if  self.vertex.namespace != self.vertex.culture
                     {
-                        $0[.span] { $0.class = "culture" } = self.inliner.link(
-                            module: self.master.culture)
+                        $0[.span] { $0.class = "culture" } = self.context.link(
+                            module: self.vertex.culture)
 
                         $0[.span, { $0.class = "volume" }]
                         {
@@ -139,14 +135,14 @@ extension Site.Docs.Decl:VersionedPage
 
                         $0[.span, { $0.class = "namespace" }]
                         {
-                            $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
+                            $0[link: self.context.url(self.vertex.namespace)] = self.stem.first
                         }
                     }
                     else
                     {
                         $0[.span, { $0.class = "culture" }]
                         {
-                            $0[link: self.inliner.url(self.master.namespace)] = self.stem.first
+                            $0[link: self.context.url(self.vertex.namespace)] = self.stem.first
                         }
 
                         $0[.span, { $0.class = "volume" }]
@@ -162,15 +158,15 @@ extension Site.Docs.Decl:VersionedPage
 
             $0[.h1] = self.stem.last
 
-            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
+            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 
-            if  let location:SourceLocation<Unidoc.Scalar> = self.master.location
+            if  let location:SourceLocation<Unidoc.Scalar> = self.vertex.location
             {
-                $0 ?= self.inliner.link(file: location.file, line: location.position.line)
+                $0 ?= self.context.link(file: location.file, line: location.position.line)
             }
         }
 
-        if  let _:[String] = self.master.signature.spis
+        if  let _:[String] = self.vertex.signature.spis
         {
             main[.section, { $0.class = "notice spi" }]
             {
@@ -180,7 +176,7 @@ extension Site.Docs.Decl:VersionedPage
             }
         }
 
-        let availability:Availability = self.master.signature.availability
+        let availability:Availability = self.vertex.signature.availability
         if  let notice:String = availability.notice
         {
             main[.section, { $0.class = "notice deprecation" }] { $0[.p] = notice }
@@ -221,18 +217,18 @@ extension Site.Docs.Decl:VersionedPage
         {
             $0[.pre]
             {
-                /// See note in `Inliner.Card.swift`.
-                let width:Int = "\(master.signature.expanded.bytecode.safe)".count
+                /// See note in `GroupList.Card.swift`.
+                let width:Int = "\(self.vertex.signature.expanded.bytecode.safe)".count
 
                 $0[.code]
                 {
                     $0.class = width > 80 ? "multiline" : nil
-                } = self.inliner.code(self.master.signature.expanded)
+                } = self.context.code(self.vertex.signature.expanded)
             }
         }
 
         main[.section] { $0.class = "details" } =
-            (self.master.details?.markdown).map(self.inliner.passage(_:))
+            (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += groups
     }

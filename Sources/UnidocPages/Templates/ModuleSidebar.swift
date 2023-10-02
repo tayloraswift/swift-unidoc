@@ -3,24 +3,21 @@ import UnidocAnalysis
 import UnidocRecords
 import URI
 
-extension Inliner
+struct ModuleSidebar
 {
-    struct TypeTree
+    private
+    let inliner:VersionedPageContext
+
+    let nouns:[Volume.Noun]
+
+    init(_ inliner:VersionedPageContext, nouns:[Volume.Noun])
     {
-        private
-        let inliner:Inliner
+        self.inliner = inliner
 
-        let nouns:[Volume.Noun]
-
-        init(_ inliner:Inliner, nouns:[Volume.Noun])
-        {
-            self.inliner = inliner
-
-            self.nouns = nouns
-        }
+        self.nouns = nouns
     }
 }
-extension Inliner.TypeTree:HyperTextOutputStreamable
+extension ModuleSidebar:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

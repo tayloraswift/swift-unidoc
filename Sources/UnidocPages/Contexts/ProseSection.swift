@@ -4,26 +4,23 @@ import HTML
 import Unidoc
 import UnidocRecords
 
-extension Inliner
+struct ProseSection
 {
-    struct Passage
+    private
+    let inliner:VersionedPageContext
+
+    let bytecode:MarkdownBytecode
+    let outlines:[Volume.Outline]
+
+    init(_ inliner:VersionedPageContext, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
     {
-        private
-        let inliner:Inliner
+        self.inliner = inliner
 
-        let bytecode:MarkdownBytecode
-        let outlines:[Volume.Outline]
-
-        init(_ inliner:Inliner, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
-        {
-            self.inliner = inliner
-
-            self.bytecode = bytecode
-            self.outlines = outlines
-        }
+        self.bytecode = bytecode
+        self.outlines = outlines
     }
 }
-extension Inliner.Passage:HyperTextRenderableMarkdown
+extension ProseSection:HyperTextRenderableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {
@@ -73,7 +70,7 @@ extension Inliner.Passage:HyperTextRenderableMarkdown
         }
     }
 }
-extension Inliner.Passage:PlainTextRenderableMarkdown
+extension ProseSection:PlainTextRenderableMarkdown
 {
     func load(_ reference:Int, into utf8:inout [UInt8])
     {
