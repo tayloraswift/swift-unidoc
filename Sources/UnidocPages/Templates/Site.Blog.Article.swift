@@ -9,22 +9,22 @@ extension Site.Blog
     struct Article
     {
         private
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         private
-        let master:Volume.Vertex.Article
+        let vertex:Volume.Vertex.Article
 
-        init(_ inliner:Inliner, master:Volume.Vertex.Article)
+        init(_ context:VersionedPageContext, vertex:Volume.Vertex.Article)
         {
-            self.inliner = inliner
-            self.master = master
+            self.context = context
+            self.vertex = vertex
         }
     }
 }
 extension Site.Blog.Article
 {
     private
-    var volume:Volume.Meta { self.inliner.volumes.principal }
+    var volume:Volume.Meta { self.context.volumes.principal }
 }
 extension Site.Blog.Article:RenderablePage
 {
@@ -35,7 +35,7 @@ extension Site.Blog.Article:StaticPage
     var location:URI
     {
         var uri:URI = []
-            uri.path += self.master.stem
+            uri.path += self.vertex.stem
         return uri
     }
 
@@ -52,13 +52,13 @@ extension Site.Blog.Article:StaticPage
             {
                 $0[.section, { $0.class = "introduction" }]
                 {
-                    $0[.h1] = self.master.headline.safe
+                    $0[.h1] = self.vertex.headline.safe
 
                 }
                 $0[.section, { $0.class = "details" }]
                 {
-                    $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
-                    $0 ?= (self.master.details?.markdown).map(self.inliner.passage(_:))
+                    $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
+                    $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
                 }
             }
         }

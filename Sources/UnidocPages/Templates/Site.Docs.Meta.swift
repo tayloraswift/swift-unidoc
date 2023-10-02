@@ -13,17 +13,17 @@ extension Site.Docs
 {
     struct Meta
     {
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let canonical:CanonicalVersion?
         private
         let groups:[Volume.Group]
 
-        init(_ inliner:Inliner,
+        init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
             groups:[Volume.Group])
         {
-            self.inliner = inliner
+            self.context = context
             self.canonical = canonical
             self.groups = groups
         }
@@ -32,7 +32,7 @@ extension Site.Docs
 extension Site.Docs.Meta
 {
     private
-    var repo:PackageRepo? { self.inliner.repo }
+    var repo:PackageRepo? { self.context.repo }
 }
 extension Site.Docs.Meta:RenderablePage
 {
@@ -61,13 +61,11 @@ extension Site.Docs.Meta:ApplicationPage
 }
 extension Site.Docs.Meta:VersionedPage
 {
-    typealias Sidebar = Never
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
+    var sidebar:[Volume.Noun]? { nil }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
-        let groups:Inliner.Groups = .init(inliner,
+        let groups:GroupSections = .init(context,
             groups: self.groups,
             mode: .meta)
 
@@ -185,7 +183,7 @@ extension Site.Docs.Meta:VersionedPage
                                 }
 
                                 if  let pin:Unidoc.Zone = dependency.resolution,
-                                    let pin:Volume.Meta = self.inliner.volumes[pin]
+                                    let pin:Volume.Meta = self.context.volumes[pin]
                                 {
                                     $0[.td]
                                     {

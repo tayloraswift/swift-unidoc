@@ -8,24 +8,23 @@ extension Site.Guides
 {
     struct Feed
     {
-        private
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let scalars:[Unidoc.Scalar]
 
         private
-        init(_ inliner:Inliner, scalars:[Unidoc.Scalar])
+        init(_ context:VersionedPageContext, scalars:[Unidoc.Scalar])
         {
-            self.inliner = inliner
+            self.context = context
             self.scalars = scalars
         }
     }
 }
 extension Site.Guides.Feed
 {
-    init(_ inliner:__owned Inliner, masters:__shared [Volume.Vertex])
+    init(_ context:__owned VersionedPageContext, vertices:__shared [Volume.Vertex])
     {
-        self.init(inliner, scalars: masters.map(\.id))
+        self.init(context, scalars: vertices.map(\.id))
     }
 }
 extension Site.Guides.Feed
@@ -45,9 +44,8 @@ extension Site.Guides.Feed:ApplicationPage
 }
 extension Site.Guides.Feed:VersionedPage
 {
-    typealias Sidebar = Never
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
+    var canonical:CanonicalVersion? { nil }
+    var sidebar:[Volume.Noun]? { nil }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -57,7 +55,7 @@ extension Site.Guides.Feed:VersionedPage
             {
                 for scalar:Unidoc.Scalar in self.scalars
                 {
-                    $0[.li] = self.inliner.card(scalar)
+                    $0[.li] = self.context.card(scalar)
                 }
             }
         }

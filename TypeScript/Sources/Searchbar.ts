@@ -3,9 +3,10 @@ import { SearchIndex } from "./SearchIndex";
 import { NounMapCulture } from "./NounMapCulture";
 import { SearchRunner } from "./SearchRunner";
 import { SearchOutput } from "./SearchOutput";
+import { SearchVolume } from "./SearchVolume";
 import { Symbol } from "./Symbol";
 
-declare const volumes: string[];
+declare const volumes: SearchVolume[];
 
 export class Searchbar {
     list: HTMLElement;
@@ -43,20 +44,19 @@ export class Searchbar {
                 }),
         ];
         for (const volume of volumes) {
-            const uri: string = '/lunr/' + volume;
+            const uri: string = '/lunr/' + volume.id;
 
             requests.push(fetch(uri).then(
                 async function (response: Response): Promise<SearchIndex> {
                     return response.json().then(
                         function (cultures: NounMapCulture[]): SearchIndex {
-                            return { packages: [], cultures: cultures };
+                            return { packages: [], cultures: cultures, trunk: volume.trunk };
                         });
                 }));
         }
         this.runner = await Promise.all(requests)
             .then(function (indexes: SearchIndex[]): SearchRunner {
                 let symbols: Symbol[] = [];
-                const here: string[] = window.location.pathname.split('/');
                 for (const index of indexes) {
                     for (const id of index.packages) {
                         symbols.push({
@@ -69,7 +69,7 @@ export class Searchbar {
                     for (const culture of index.cultures) {
                         const module: string = culture.c;
                         for (const noun of culture.n) {
-                            var uri: string = '/' + here[1] + '/' + here[2] + '/';
+                            var uri: string = index.trunk + '/';
                             uri += noun.s
                                 .replace('\t', '.')
                                 .replaceAll(' ', '/')

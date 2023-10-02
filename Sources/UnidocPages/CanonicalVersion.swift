@@ -32,21 +32,21 @@ extension CanonicalVersion
     init?(principal:__shared WideQuery.Output.Principal)
     {
         guard
-        let names:Volume.Meta = principal.namesOfLatest,
-        let patch:PatchVersion = names.patch
+        let volume:Volume.Meta = principal.volumeOfLatest,
+        let patch:PatchVersion = volume.patch
         else
         {
             return nil
         }
 
         //  This can happen if you visit the latest stable release explicitly in the URL bar.
-        if  principal.names.id == names.id
+        if  principal.volume.id == volume.id
         {
             return nil
         }
 
         let relationship:Relationship
-        if  let origin:PatchVersion = principal.names.patch
+        if  let origin:PatchVersion = principal.volume.patch
         {
             relationship = origin < patch ? .later : .earlier
         }
@@ -55,23 +55,22 @@ extension CanonicalVersion
             relationship = .stable
         }
 
-        let volume:URI = Site.Docs[names]
         let target:Target
 
-        if  let master:Volume.Vertex = principal.masterInLatest
+        if  let vertex:Volume.Vertex = principal.vertexInLatest
         {
-            switch master
+            switch vertex
             {
-            case .article(let master):  target = .article(Site.Docs[names, master.shoot])
-            case .culture(let master):  target = .culture(Site.Docs[names, master.shoot])
-            case .decl(let master):     target = .decl(Site.Docs[names, master.shoot])
+            case .article(let vertex):  target = .article(Site.Docs[volume, vertex.shoot])
+            case .culture(let vertex):  target = .culture(Site.Docs[volume, vertex.shoot])
+            case .decl(let vertex):     target = .decl(Site.Docs[volume, vertex.shoot])
             case .file:                 return   nil
             case .global:               target = .global
             }
         }
         else
         {
-            switch principal.master
+            switch principal.vertex
             {
             case .article?:             target = .article(nil)
             case .culture?:             target = .culture(nil)
@@ -82,30 +81,9 @@ extension CanonicalVersion
         }
 
         self.init(relationship: relationship,
-            package: names.display ?? "\(names.symbol.package)",
-            volume: volume,
+            package: volume.display ?? "\(volume.symbol.package)",
+            volume: Site.Docs[volume],
             target: target)
-    }
-
-    private
-    init?(relationship:Relationship,
-        package:String,
-        volume:URI,
-        master:Volume.Vertex,
-        in names:Volume.Meta)
-    {
-        let target:Target
-
-        switch master
-        {
-        case .article(let master):  target = .article(Site.Docs[names, master.shoot])
-        case .culture(let master):  target = .culture(Site.Docs[names, master.shoot])
-        case .decl(let master):     target = .decl(Site.Docs[names, master.shoot])
-        case .file:                 return   nil
-        case .global:               target = .global
-        }
-
-        self.init(relationship: relationship, package: package, volume: volume, target: target)
     }
 }
 extension CanonicalVersion

@@ -2,7 +2,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Inliner.Groups
+extension GroupSections
 {
     struct Generics
     {
@@ -16,7 +16,7 @@ extension Inliner.Groups
         }
     }
 }
-extension Inliner.Groups.Generics
+extension GroupSections.Generics
 {
     init(_ generics:__shared [GenericParameter])
     {

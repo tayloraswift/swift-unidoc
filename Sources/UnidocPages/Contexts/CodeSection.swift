@@ -5,25 +5,22 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Inliner
+struct CodeSection
 {
-    struct Code
-    {
-        let bytecode:MarkdownBytecode
-        private
-        let scalars:[Unidoc.Scalar?]
-        private
-        let inliner:Inliner
+    let bytecode:MarkdownBytecode
+    private
+    let scalars:[Unidoc.Scalar?]
+    private
+    let inliner:VersionedPageContext
 
-        init(_ inliner:Inliner, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
-        {
-            self.bytecode = bytecode
-            self.scalars = scalars
-            self.inliner = inliner
-        }
+    init(_ inliner:VersionedPageContext, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
+    {
+        self.bytecode = bytecode
+        self.scalars = scalars
+        self.inliner = inliner
     }
 }
-extension Inliner.Code:HyperTextRenderableMarkdown
+extension CodeSection:HyperTextRenderableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {

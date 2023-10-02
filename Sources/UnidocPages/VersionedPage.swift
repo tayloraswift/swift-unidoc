@@ -1,45 +1,59 @@
 import HTML
+import JSON
+import Unidoc
+import UnidocAnalysis
 import UnidocRecords
 import URI
 
 public
 protocol VersionedPage:ApplicationPage
 {
-    associatedtype Sidebar:HyperTextOutputStreamable
-
     var canonical:CanonicalVersion? { get }
-    var sidebar:Sidebar? { get }
+    var sidebar:[Volume.Noun]? { get }
 
-    var volume:Volume.Meta { get }
-}
-extension VersionedPage
-{
-    @inlinable public
-    var canonical:CanonicalVersion? { nil }
+    var context:VersionedPageContext { get }
 }
 extension VersionedPage where Self:StaticPage
 {
     @inlinable public
     var canonicalURI:URI? { self.canonical?.uri }
 }
-extension VersionedPage where Sidebar == Never
-{
-    @inlinable public
-    var sidebar:Never? { nil }
-}
 extension VersionedPage
 {
+    var volume:Volume.Meta { self.context.volumes.principal }
+
     public
     func head(augmenting head:inout HTML.ContentEncoder)
     {
-        head[unsafe: .script] = """
-        const volumes = ["\(self.volume.symbol)"];
-        """
+        let json:JSON = .array
+        {
+            $0[+, Any.self]
+            {
+                $0["id"] = "\(self.volume.symbol)"
+                $0["trunk"] = "\(Site.Docs[self.volume])"
+            }
+
+            for dependency:Volume.Meta.Dependency in self.volume.dependencies
+            {
+                if  let resolution:Unidoc.Zone = dependency.resolution,
+                    let dependency:Volume.Meta = self.context.volumes[resolution]
+                {
+                    $0[+, Any.self]
+                    {
+                        $0["id"] = "\(dependency.symbol)"
+                        $0["trunk"] = "\(Site.Docs[dependency])"
+                    }
+                }
+            }
+        }
+
+        head[unsafe: .script] = "const volumes = \(json);"
     }
+
     public
     func body(_ body:inout HTML.ContentEncoder)
     {
-        let sidebar:Sidebar? = self.sidebar
+        let sidebar:ModuleSidebar? = self.sidebar.map { .init(self.context, nouns: $0) }
 
         body[.header]
         {

@@ -22,10 +22,10 @@ struct ThinQuery<LookupPredicate>:Equatable, Hashable, Sendable
 extension ThinQuery:VolumeLookupQuery
 {
     @inlinable public static
-    var names:Mongo.KeyPath { Output[.names] }
+    var volume:Mongo.KeyPath { Output[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Output[.masters] }
+    var input:Mongo.KeyPath { Output[.matches] }
 
     @inlinable public
     func extend(pipeline:inout Mongo.Pipeline)
