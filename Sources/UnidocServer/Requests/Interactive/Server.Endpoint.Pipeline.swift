@@ -28,13 +28,6 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Pipeline:InteractiveEndpoint
-{
-    var statisticalType:WritableKeyPath<ServerTour.Stats.ByType, Int>
-    {
-        \.query
-    }
-}
 extension Server.Endpoint.Pipeline:PublicEndpoint
 {
     func load(from server:Server.InteractiveState) async throws -> ServerResponse?

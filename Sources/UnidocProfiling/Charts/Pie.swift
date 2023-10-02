@@ -42,7 +42,7 @@ extension Pie:ExpressibleByArrayLiteral
 }
 extension Pie:HyperTextOutputStreamable
 {
-    public static
+    @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         html[.div, { $0.class = "pie-color" }]
@@ -55,7 +55,7 @@ extension Pie:HyperTextOutputStreamable
 }
 extension Pie:ScalableVectorOutputStreamable
 {
-    public static
+    @inlinable public static
     func += (svg:inout SVG.ContentEncoder, self:Self)
     {
         guard let last:Int = self.sectors.indices.last

@@ -1,13 +1,19 @@
 import HTML
 
+@frozen @usableFromInline internal
 struct PieSlice
 {
+    @usableFromInline internal
     let share:Double
+    @usableFromInline internal
     let startArc:SVG.Point<Double>
+    @usableFromInline internal
     let endArc:SVG.Point<Double>
     /// The end of the slice, in radians.
+    @usableFromInline internal
     let end:Double
 
+    @inlinable internal
     init(share:Double,
         startArc:SVG.Point<Double>,
         endArc:SVG.Point<Double>,
@@ -21,6 +27,7 @@ struct PieSlice
 }
 extension PieSlice
 {
+    @inlinable internal
     init(share:Double, from start:SVG.Point<Double>, to end:Double)
     {
         self.init(share: share,
@@ -31,6 +38,7 @@ extension PieSlice
 }
 extension PieSlice
 {
+    @usableFromInline internal
     var d:String
     {
         var d:String = "M 0,0 L \(self.startArc)"

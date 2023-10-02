@@ -34,17 +34,17 @@ extension Site.Admin.Action
         switch self
         {
         case .dropAccountDB, .dropUnidocDB:
-            return """
+            """
             This will drop (and reinitialize) the entire database. Are you sure?
             """
 
         case .lintUnidocEditions:
-            return """
+            """
             This will delete all editions lacking a commit hash. Are you sure?
             """
 
         case .upload:
-            return ""
+            ""
         }
     }
 }

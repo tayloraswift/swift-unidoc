@@ -1,5 +1,6 @@
 import HTML
 import Unidoc
+import UnidocProfiling
 
 extension Unidoc.StatsBreakdown
 {
