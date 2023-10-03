@@ -9,15 +9,15 @@ extension ThinQuery
     struct Output:Equatable, Sendable
     {
         public
-        let masters:[Volume.Vertex]
+        let matches:[Volume.Vertex]
         public
-        let names:Volume.Meta
+        let volume:Volume.Meta
 
         @inlinable internal
-        init(masters:[Volume.Vertex], names:Volume.Meta)
+        init(matches:[Volume.Vertex], volume:Volume.Meta)
         {
-            self.masters = masters
-            self.names = names
+            self.matches = matches
+            self.volume = volume
         }
     }
 }
@@ -26,8 +26,8 @@ extension ThinQuery.Output:MongoMasterCodingModel
     @frozen public
     enum CodingKey:String, CaseIterable
     {
-        case masters = "M"
-        case names = "Z"
+        case matches = "M"
+        case volume = "Z"
     }
 }
 extension ThinQuery.Output:BSONDocumentDecodable
@@ -35,6 +35,6 @@ extension ThinQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(masters: try bson[.masters].decode(), names: try bson[.names].decode())
+        self.init(matches: try bson[.matches].decode(), volume: try bson[.volume].decode())
     }
 }

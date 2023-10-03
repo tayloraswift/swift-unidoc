@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Inliner.Groups
+extension GroupSections
 {
     enum Mode:Hashable, Equatable, Sendable
     {

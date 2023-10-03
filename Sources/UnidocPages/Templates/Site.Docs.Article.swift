@@ -9,49 +9,48 @@ extension Site.Docs
 {
     struct Article
     {
-        private
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let canonical:CanonicalVersion?
+        let sidebar:[Volume.Noun]?
+
         private
-        let master:Volume.Vertex.Article
+        let vertex:Volume.Vertex.Article
         private
         let groups:[Volume.Group]
-        private
-        let nouns:[Volume.Noun]?
 
 
-        init(_ inliner:Inliner,
+        init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
-            master:Volume.Vertex.Article,
-            groups:[Volume.Group],
-            nouns:[Volume.Noun]?)
+            sidebar:[Volume.Noun]?,
+            vertex:Volume.Vertex.Article,
+            groups:[Volume.Group])
         {
-            self.inliner = inliner
+            self.context = context
             self.canonical = canonical
-            self.master = master
+            self.sidebar = sidebar
+            self.vertex = vertex
             self.groups = groups
-            self.nouns = nouns
         }
     }
 }
 extension Site.Docs.Article
 {
     private
-    var stem:Volume.Stem { self.master.stem }
+    var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Article:RenderablePage
 {
-    var title:String { "\(self.master.headline.safe) - \(self.volume.title)" }
+    var title:String { "\(self.vertex.headline.safe) - \(self.volume.title)" }
 
     var description:String?
     {
-        self.master.overview.map { "\(self.inliner.passage($0.markdown))" }
+        self.vertex.overview.map { "\(self.context.prose($0.markdown))" }
     }
 }
 extension Site.Docs.Article:StaticPage
 {
-    var location:URI { Site.Docs[self.volume, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.vertex.shoot] }
 }
 extension Site.Docs.Article:ApplicationPage
 {
@@ -59,15 +58,11 @@ extension Site.Docs.Article:ApplicationPage
 }
 extension Site.Docs.Article:VersionedPage
 {
-    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
-
     func main(_ main:inout HTML.ContentEncoder)
     {
-        let groups:Inliner.Groups = .init(inliner,
+        let groups:GroupSections = .init(context,
             groups: self.groups,
-            bias: self.master.id,
+            bias: self.vertex.id,
             mode: nil)
 
         main[.section, { $0.class = "introduction" }]
@@ -80,7 +75,7 @@ extension Site.Docs.Article:VersionedPage
                 {
                     $0[.span, { $0.class = "culture" }]
                     {
-                        $0[link: self.inliner.url(self.master.culture)] = self.stem.first
+                        $0[link: self.context.url(self.vertex.culture)] = self.stem.first
                     }
 
                     $0[.span, { $0.class = "volume" }]
@@ -93,20 +88,20 @@ extension Site.Docs.Article:VersionedPage
                 }
             }
 
-            $0[.h1] = self.master.headline.safe
+            $0[.h1] = self.vertex.headline.safe
 
-            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
+            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 
-            if  let file:Unidoc.Scalar = self.master.file
+            if  let file:Unidoc.Scalar = self.vertex.file
             {
-                $0 ?= self.inliner.link(file: file)
+                $0 ?= self.context.link(file: file)
             }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
         main[.section, { $0.class = "details" }] =
-            (self.master.details?.markdown).map(self.inliner.passage(_:))
+            (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += groups
     }

@@ -17,6 +17,8 @@ enum ServerResponse:Equatable, Sendable
     case notFound       (ServerResource)
     /// 409 Conflict.
     case conflict       (ServerResource)
+    /// 410 Gone.
+    case gone           (ServerResource)
     /// 500 Internal Server Error.
     case error          (ServerResource)
 
@@ -44,6 +46,7 @@ extension ServerResponse
         case .unauthorized  (let resource): return resource.content.size
         case .forbidden     (let resource): return resource.content.size
         case .notFound      (let resource): return resource.content.size
+        case .gone          (let resource): return resource.content.size
         case .conflict      (let resource): return resource.content.size
         case .error         (let resource): return resource.content.size
         }

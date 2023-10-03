@@ -29,6 +29,9 @@ extension ServerResponse
         case .notFound:
             return \.notFound
 
+        case .gone:
+            return \.gone
+
         case .error:
             return \.errored
 

@@ -66,10 +66,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Vertex.Decl = tests.expect(
-                        value: output.principal?.master?.decl)
+                    let vertex:Volume.Vertex.Decl = tests.expect(
+                        value: output.principal?.vertex?.decl)
                 {
-                    tests.expect(master.stem.last ==? "Keys")
+                    tests.expect(vertex.stem.last ==? "Keys")
                 }
             }
         }
@@ -86,7 +86,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
                     tests.expect(principal.matches.count >? 1),
-                    tests.expect(nil: principal.master)
+                    tests.expect(nil: principal.vertex)
                 {
                 }
             }
@@ -104,7 +104,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: try await unidoc.execute(query: query, with: session)),
                     let principal:WideQuery.Output.Principal = tests.expect(
                         value: output.principal),
-                    let _:Volume.Vertex = tests.expect(value: principal.master)
+                    let _:Volume.Vertex = tests.expect(value: principal.vertex)
                 {
                 }
             }
@@ -121,10 +121,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:ThinQuery<Symbol.Decl>.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Vertex.Decl = tests.expect(
-                        value: output.masters.first?.decl)
+                    let vertex:Volume.Vertex.Decl = tests.expect(
+                        value: output.matches.first?.decl)
                 {
-                    tests.expect(master.stem.last ==? "init(bitPattern:)")
+                    tests.expect(vertex.stem.last ==? "init(bitPattern:)")
                 }
             }
         }
@@ -154,7 +154,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Vertex = tests.expect(value: output.principal?.master)
+                        let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
                     {
                     }
                 }
@@ -168,12 +168,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Vertex.Culture = tests.expect(
-                        value: output.principal?.master?.culture),
+                    let vertex:Volume.Vertex.Culture = tests.expect(
+                        value: output.principal?.vertex?.culture),
                     let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree)
                 {
-                    tests.expect(master.id ==? tree.id)
+                    tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
                             .init(stem: "BarbieCore Barbie", same: .culture),
@@ -197,12 +197,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let master:Volume.Vertex = tests.expect(
-                        value: output.principal?.master),
+                    let vertex:Volume.Vertex = tests.expect(
+                        value: output.principal?.vertex),
                     let tree:Volume.TypeTree = tests.expect(
                         value: output.principal?.tree),
                     let overview:Volume.Passage = tests.expect(
-                        value: master.overview),
+                        value: vertex.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
                     tests.expect(tree.rows ..?
@@ -212,7 +212,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                             .init(stem: "BarbieCore Barbie Dreamhouse Keys", same: .culture),
                         ])
 
-                    let secondaries:Set<Unidoc.Scalar> = .init(output.secondary.lazy.map(\.id))
+                    let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
 
                     for outline:Volume.Outline in overview.outlines
                     {
@@ -262,7 +262,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 if  let output:WideQuery.Output = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let _:Volume.Vertex = tests.expect(
-                        value: output.principal?.master)
+                        value: output.principal?.vertex)
                 {
                 }
             }
@@ -302,9 +302,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                     if  let output:WideQuery.Output = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Vertex = tests.expect(value: output.principal?.master)
+                        let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
                     {
-                        let secondaries:[Unidoc.Scalar: Substring] = output.secondary.reduce(
+                        let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(
                             into: [:])
                         {
                             $0[$1.id] = $1.shoot?.stem.last

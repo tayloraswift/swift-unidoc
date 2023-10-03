@@ -16,6 +16,8 @@ extension ServerProfile
         public
         var notFound:Int
         public
+        var gone:Int
+        public
         var errored:Int
         public
         var unauthorized:Int
@@ -27,6 +29,7 @@ extension ServerProfile
             redirectedPermanently:Int = 0,
             redirectedTemporarily:Int = 0,
             notFound:Int = 0,
+            gone:Int = 0,
             errored:Int = 0,
             unauthorized:Int = 0)
         {
@@ -36,6 +39,7 @@ extension ServerProfile
             self.redirectedPermanently = redirectedPermanently
             self.redirectedTemporarily = redirectedTemporarily
             self.notFound = notFound
+            self.gone = gone
             self.errored = errored
             self.unauthorized = unauthorized
         }
@@ -86,6 +90,11 @@ extension ServerProfile.ByStatus
                 self.notFound,
                 "Not Found",
                 "not-found"
+            ),
+            (
+                self.gone,
+                "Gone",
+                "gone"
             ),
             (
                 self.errored,

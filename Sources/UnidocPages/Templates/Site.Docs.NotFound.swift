@@ -6,15 +6,13 @@ extension Site.Docs
 {
     struct NotFound
     {
-        private
-        let inliner:Inliner
-        private
-        let nouns:[Volume.Noun]?
+        let context:VersionedPageContext
+        let sidebar:[Volume.Noun]?
 
-        init(_ inliner:Inliner, nouns:[Volume.Noun]? = nil)
+        init(_ context:VersionedPageContext, sidebar:[Volume.Noun]?)
         {
-            self.inliner = inliner
-            self.nouns = nouns
+            self.context = context
+            self.sidebar = sidebar
         }
     }
 }
@@ -28,9 +26,7 @@ extension Site.Docs.NotFound:ApplicationPage
 }
 extension Site.Docs.NotFound:VersionedPage
 {
-    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
+    var canonical:CanonicalVersion? { nil }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
