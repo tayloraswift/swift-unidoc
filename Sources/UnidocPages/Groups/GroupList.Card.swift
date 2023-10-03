@@ -1,22 +1,16 @@
 import HTML
 import UnidocRecords
 
-extension Inliner.Card
-{
-    enum Color
-    {
-    }
-}
-extension Inliner
+extension GroupList
 {
     struct Card
     {
-        let overview:Passage?
+        let overview:ProseSection?
 
         let master:Volume.Vertex
         let target:String?
 
-        init(overview:Passage?, master:Volume.Vertex, target:String?)
+        init(overview:ProseSection?, master:Volume.Vertex, target:String?)
         {
             self.overview = overview
             self.master = master
@@ -24,7 +18,7 @@ extension Inliner
         }
     }
 }
-extension Inliner.Card:HyperTextOutputStreamable
+extension GroupList.Card:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

@@ -17,29 +17,29 @@ extension WideQuery.Output:ServerResponseFactory
                 type: .text(.plain, charset: .utf8)))
         }
 
-        if  let master:Volume.Vertex = principal.master
+        if  let vertex:Volume.Vertex = principal.vertex
         {
-            let inliner:Inliner = .init(principal: master.id,
-                volume: principal.names,
+            let context:VersionedPageContext = .init(principal: vertex.id,
+                volume: principal.volume,
                 repo: principal.repo)
 
-            inliner.vertices.add(self.secondary)
-            inliner.volumes.add(self.names)
+            context.vertices.add(self.vertices)
+            context.volumes.add(self.volumes)
 
-            master.overview.map
+            vertex.overview.map
             {
-                inliner.outlines += $0.outlines
+                context.outlines += $0.outlines
             }
-            master.details.map
+            vertex.details.map
             {
-                inliner.outlines += $0.outlines
+                context.outlines += $0.outlines
             }
 
             //  Special case for Swiftinit blog posts.
-            if  case .article(let master) = master,
-                principal.names.symbol.package == "__swiftinit"
+            if  case .article(let vertex) = vertex,
+                principal.volume.symbol.package == "__swiftinit"
             {
-                let page:Site.Blog.Article = .init(inliner, master: master)
+                let page:Site.Blog.Article = .init(context, vertex: vertex)
                 return .ok(page.resource())
             }
 
@@ -48,30 +48,30 @@ extension WideQuery.Output:ServerResponseFactory
 
             //  Note: noun tree won’t exist if the module contains no declarations.
             //  (For example, an `@_exported` shim.)
-            switch master
+            switch vertex
             {
-            case .article(let master):
-                let page:Site.Docs.Article = .init(inliner,
+            case .article(let vertex):
+                let page:Site.Docs.Article = .init(context,
                     canonical: canonical,
-                    master: master,
-                    groups: principal.groups,
-                    nouns: principal.tree?.rows)
+                    sidebar: principal.tree?.rows,
+                    vertex: vertex,
+                    groups: principal.groups)
                 resource = page.resource()
 
-            case .culture(let master):
-                let page:Site.Docs.Culture = .init(inliner,
+            case .culture(let vertex):
+                let page:Site.Docs.Culture = .init(context,
                     canonical: canonical,
-                    master: master,
-                    groups: principal.groups,
-                    nouns: principal.tree?.rows)
+                    sidebar: principal.tree?.rows,
+                    vertex: vertex,
+                    groups: principal.groups)
                 resource = page.resource()
 
-            case .decl(let master):
-                let page:Site.Docs.Decl = .init(inliner,
+            case .decl(let vertex):
+                let page:Site.Docs.Decl = .init(context,
                     canonical: canonical,
-                    master: master,
-                    groups: principal.groups,
-                    nouns: principal.tree?.rows)
+                    sidebar: principal.tree?.rows,
+                    vertex: vertex,
+                    groups: principal.groups)
                 resource = page.resource()
 
             case .file:
@@ -79,7 +79,7 @@ extension WideQuery.Output:ServerResponseFactory
                 throw WideQuery.OutputError.malformed
 
             case .global:
-                let page:Site.Docs.Meta = .init(inliner,
+                let page:Site.Docs.Meta = .init(context,
                     canonical: canonical,
                     groups: principal.groups)
                 resource = page.resource()
@@ -88,10 +88,13 @@ extension WideQuery.Output:ServerResponseFactory
             return .ok(resource)
         }
 
-        let inliner:Inliner = .init(principal: principal.names, repo: principal.repo)
-            inliner.vertices.add(principal.matches)
+        let context:VersionedPageContext = .init(
+            principal: principal.volume,
+            repo: principal.repo)
 
-        if  let choices:Site.Docs.MultipleFound = .init(inliner,
+        context.vertices.add(principal.matches)
+
+        if  let choices:Site.Docs.MultipleFound = .init(context,
                 matches: principal.matches)
         {
             return .multiple(choices.resource())
@@ -100,8 +103,8 @@ extension WideQuery.Output:ServerResponseFactory
         {
             //  We currently don’t have any actual means of obtaining a type tree in this
             //  situation, but in theory, we could.
-            let display:Site.Docs.NotFound = .init(inliner,
-                nouns: principal.tree?.rows)
+            let display:Site.Docs.NotFound = .init(context,
+                sidebar: principal.tree?.rows)
 
             return .notFound(display.resource())
         }

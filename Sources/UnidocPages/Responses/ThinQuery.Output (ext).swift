@@ -11,10 +11,10 @@ extension ThinQuery.Output:ServerResponseFactory
     {
         if  LookupPredicate.self is Volume.Range.Type
         {
-            let inliner:Inliner = .init(principal: self.names, repo: nil)
-                inliner.vertices.add(self.masters)
+            let context:VersionedPageContext = .init(principal: self.volume, repo: nil)
+                context.vertices.add(self.matches)
 
-            let feed:Site.Guides.Feed = .init(inliner, masters: self.masters)
+            let feed:Site.Guides.Feed = .init(context, vertices: self.matches)
 
             return .ok(feed.resource())
         }
@@ -24,23 +24,30 @@ extension ThinQuery.Output:ServerResponseFactory
         }
         else
         {
-            return .notFound(.init(
-                content: .string("Volume not found."),
-                type: .text(.plain, charset: .utf8)))
+            let context:VersionedPageContext = .init(principal: self.volume, repo: nil)
+                context.vertices.add(self.matches)
+
+            let display:Site.Docs.NotFound = .init(context, sidebar: nil)
+            //  We return 410 Gone instead of 404 Not Found so that search engines and
+            //  research bots will stop crawling this URL. But the page appears the same
+            //  to the user.
+            return .gone(display.resource())
         }
     }
 
     private
     var redirect:URI?
     {
-        switch self.masters.first
+        switch self.matches.first
         {
-        case .article(let master)?: return Site.Docs[self.names, master.shoot]
-        case .culture(let master)?: return Site.Docs[self.names, master.shoot]
-        case .decl(let master)?:    return Site.Docs[self.names,
-            self.masters.count > 1 ? .init(stem: master.stem) : master.shoot]
+        case .article(let master)?: return Site.Docs[self.volume, master.shoot]
+        case .culture(let master)?: return Site.Docs[self.volume, master.shoot]
+        //  This is one of the few situations where we intentionally issue redirects
+        //  to a disambiguation page.
+        case .decl(let master)?:    return Site.Docs[self.volume,
+            self.matches.count > 1 ? .init(stem: master.stem) : master.shoot]
         case .file?, nil:           return nil
-        case .global?:              return Site.Docs[self.names]
+        case .global?:              return Site.Docs[self.volume]
         }
     }
 }

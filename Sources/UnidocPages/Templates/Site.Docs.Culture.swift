@@ -10,34 +10,34 @@ extension Site.Docs
 {
     struct Culture
     {
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let canonical:CanonicalVersion?
+        let sidebar:[Volume.Noun]?
+
         private
-        let master:Volume.Vertex.Culture
+        let vertex:Volume.Vertex.Culture
         private
         let groups:[Volume.Group]
-        private
-        let nouns:[Volume.Noun]?
 
-        init(_ inliner:Inliner,
+        init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
-            master:Volume.Vertex.Culture,
-            groups:[Volume.Group],
-            nouns:[Volume.Noun]?)
+            sidebar:[Volume.Noun]?,
+            vertex:Volume.Vertex.Culture,
+            groups:[Volume.Group])
         {
-            self.inliner = inliner
+            self.context = context
             self.canonical = canonical
-            self.master = master
+            self.sidebar = sidebar
+            self.vertex = vertex
             self.groups = groups
-            self.nouns = nouns
         }
     }
 }
 extension Site.Docs.Culture
 {
     private
-    var name:String { self.master.module.name }
+    var name:String { self.vertex.module.name }
 }
 extension Site.Docs.Culture:RenderablePage
 {
@@ -45,9 +45,9 @@ extension Site.Docs.Culture:RenderablePage
 
     var description:String?
     {
-        if  let overview:MarkdownBytecode = self.master.overview?.markdown
+        if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
         {
-            return "\(self.inliner.passage(overview))"
+            return "\(self.context.prose(overview))"
         }
         else if case .swift = self.volume.symbol.package
         {
@@ -64,7 +64,7 @@ extension Site.Docs.Culture:RenderablePage
 }
 extension Site.Docs.Culture:StaticPage
 {
-    var location:URI { Site.Docs[self.volume, self.master.shoot] }
+    var location:URI { Site.Docs[self.volume, self.vertex.shoot] }
 }
 extension Site.Docs.Culture:ApplicationPage
 {
@@ -72,15 +72,11 @@ extension Site.Docs.Culture:ApplicationPage
 }
 extension Site.Docs.Culture:VersionedPage
 {
-    var sidebar:Inliner.TypeTree? { self.nouns.map { .init(self.inliner, nouns: $0) } }
-
-    var volume:Volume.Meta { self.inliner.volumes.principal }
-
     func main(_ main:inout HTML.ContentEncoder)
     {
-        let groups:Inliner.Groups = .init(inliner,
+        let groups:GroupSections = .init(context,
             groups: self.groups,
-            bias: self.master.id,
+            bias: self.vertex.id,
             mode: nil)
 
         main[.section, { $0.class = "introduction" }]
@@ -110,11 +106,11 @@ extension Site.Docs.Culture:VersionedPage
 
             $0[.h1] = self.name
 
-            $0 ?= (self.master.overview?.markdown).map(self.inliner.passage(_:))
+            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 
-            if  let readme:Unidoc.Scalar = self.master.readme
+            if  let readme:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.inliner.link(file: readme)
+                $0 ?= self.context.link(file: readme)
             }
         }
 
@@ -128,7 +124,7 @@ extension Site.Docs.Culture:VersionedPage
                 {
                     $0[.span] { $0.highlight = .keyword } = "import"
                     $0 += " "
-                    $0[.span] { $0.highlight = .identifier } = self.master.module.id
+                    $0[.span] { $0.highlight = .identifier } = self.vertex.module.id
                 }
             }
         }
@@ -144,20 +140,20 @@ extension Site.Docs.Culture:VersionedPage
                 $0[.h2] = "Interface Breakdown"
 
                 $0 += Unidoc.StatsBreakdown.init(
-                    unweighted: self.master.census.unweighted.decls,
-                    weighted: self.master.census.weighted.decls,
+                    unweighted: self.vertex.census.unweighted.decls,
+                    weighted: self.vertex.census.weighted.decls,
                     domain: "this module").condensed
 
 
                 $0[.h2] = "Doc Coverage"
 
                 $0 += Unidoc.StatsBreakdown.init(
-                    unweighted: self.master.census.unweighted.coverage,
-                    weighted: self.master.census.weighted.coverage,
+                    unweighted: self.vertex.census.unweighted.coverage,
+                    weighted: self.vertex.census.weighted.coverage,
                     domain: "this module").condensed
             }
 
-            $0 ?= (self.master.details?.markdown).map(self.inliner.passage(_:))
+            $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
         }
 
         main += groups

@@ -48,6 +48,9 @@ extension ServerMessage
         case .conflict(let resource):
             self.init(resource: resource, using: allocator, as: .conflict)
 
+        case .gone(let resource):
+            self.init(resource: resource, using: allocator, as: .gone)
+
         case .error(let resource):
             self.init(resource: resource, using: allocator, as: .internalServerError)
         }

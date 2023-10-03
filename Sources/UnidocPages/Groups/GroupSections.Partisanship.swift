@@ -1,6 +1,6 @@
 import ModuleGraphs
 
-extension Inliner.Groups
+extension GroupSections
 {
     enum Partisanship:Equatable, Hashable, Comparable, Sendable
     {

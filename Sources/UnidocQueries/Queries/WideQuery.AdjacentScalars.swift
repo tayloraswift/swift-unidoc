@@ -5,9 +5,9 @@ import Unidoc
 import UnidocRecords
 import UnidocSelectors
 
-extension WideQuery.Master
+extension WideQuery
 {
-    struct Scalars
+    struct AdjacentScalars
     {
         let path:Mongo.KeyPath
 
@@ -17,7 +17,7 @@ extension WideQuery.Master
         }
     }
 }
-extension WideQuery.Master.Scalars
+extension WideQuery.AdjacentScalars
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)

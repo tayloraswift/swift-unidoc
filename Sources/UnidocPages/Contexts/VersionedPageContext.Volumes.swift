@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension InlinerCache
+extension VersionedPageContext
 {
     struct Volumes:Sendable
     {
@@ -18,7 +18,7 @@ extension InlinerCache
         }
     }
 }
-extension InlinerCache.Volumes
+extension VersionedPageContext.Volumes
 {
     mutating
     func add(_ names:[Volume.Meta])
@@ -30,7 +30,7 @@ extension InlinerCache.Volumes
         }
     }
 }
-extension InlinerCache.Volumes
+extension VersionedPageContext.Volumes
 {
     subscript(zone:Unidoc.Zone) -> Volume.Meta?
     {

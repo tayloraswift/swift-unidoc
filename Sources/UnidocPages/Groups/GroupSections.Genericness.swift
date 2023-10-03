@@ -1,4 +1,4 @@
-extension Inliner.Groups
+extension GroupSections
 {
     enum Genericness:Equatable, Hashable, Comparable, Sendable
     {

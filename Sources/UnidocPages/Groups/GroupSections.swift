@@ -6,54 +6,51 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Inliner
+struct GroupSections
 {
-    struct Groups
+    let inliner:VersionedPageContext
+
+    private
+    let requirements:[Unidoc.Scalar]?
+    private
+    let superforms:[Unidoc.Scalar]?
+
+    private
+    let extensions:[Volume.Group.Extension]
+    private
+    let automatic:[Volume.Group.Automatic]
+    private
+    let topics:[Volume.Group.Topic]
+
+    private
+    let bias:Unidoc.Scalar?
+    private
+    let mode:Mode?
+
+    private
+    init(_ inliner:VersionedPageContext,
+        requirements:[Unidoc.Scalar]?,
+        superforms:[Unidoc.Scalar]?,
+        extensions:[Volume.Group.Extension],
+        automatic:[Volume.Group.Automatic],
+        topics:[Volume.Group.Topic],
+        bias:Unidoc.Scalar?,
+        mode:Mode?)
     {
-        let inliner:Inliner
+        self.inliner = inliner
 
-        private
-        let requirements:[Unidoc.Scalar]?
-        private
-        let superforms:[Unidoc.Scalar]?
-
-        private
-        let extensions:[Volume.Group.Extension]
-        private
-        let automatic:[Volume.Group.Automatic]
-        private
-        let topics:[Volume.Group.Topic]
-
-        private
-        let bias:Unidoc.Scalar?
-        private
-        let mode:Mode?
-
-        private
-        init(_ inliner:Inliner,
-            requirements:[Unidoc.Scalar]?,
-            superforms:[Unidoc.Scalar]?,
-            extensions:[Volume.Group.Extension],
-            automatic:[Volume.Group.Automatic],
-            topics:[Volume.Group.Topic],
-            bias:Unidoc.Scalar?,
-            mode:Mode?)
-        {
-            self.inliner = inliner
-
-            self.requirements = requirements
-            self.superforms = superforms
-            self.extensions = extensions
-            self.automatic = automatic
-            self.topics = topics
-            self.bias = bias
-            self.mode = mode
-        }
+        self.requirements = requirements
+        self.superforms = superforms
+        self.extensions = extensions
+        self.automatic = automatic
+        self.topics = topics
+        self.bias = bias
+        self.mode = mode
     }
 }
-extension Inliner.Groups
+extension GroupSections
 {
-    init(_ inliner:__owned Inliner,
+    init(_ inliner:__owned VersionedPageContext,
         requirements:__owned [Unidoc.Scalar] = [],
         superforms:__owned [Unidoc.Scalar] = [],
         generics:__shared [GenericParameter] = [],
@@ -121,10 +118,10 @@ extension Inliner.Groups
             mode: mode)
     }
 }
-extension Inliner.Groups
+extension GroupSections
 {
     private
-    func header(for extension:Volume.Group.Extension) -> Inliner.ExtensionHeader
+    func header(for extension:Volume.Group.Extension) -> ExtensionHeader
     {
         let display:String
         switch (self.bias, self.bias?.zone)
@@ -141,7 +138,7 @@ extension Inliner.Groups
     }
 
     private
-    func list(_ scalars:__owned [Unidoc.Scalar], under heading:String? = nil) -> List?
+    func list(_ scalars:__owned [Unidoc.Scalar], under heading:String? = nil) -> GroupList?
     {
         if  scalars.isEmpty
         {
@@ -154,7 +151,7 @@ extension Inliner.Groups
     }
 }
 
-extension Inliner.Groups:HyperTextOutputStreamable
+extension GroupSections:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -182,7 +179,7 @@ extension Inliner.Groups:HyperTextOutputStreamable
                     group.members.contains(.scalar(principal))
                 else
                 {
-                    $0 ?= group.overview.map(self.inliner.passage(overview:))
+                    $0 ?= group.overview.map(self.inliner.prose(overview:))
 
                     $0[.ul]
                     {

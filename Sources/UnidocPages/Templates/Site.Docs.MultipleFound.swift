@@ -8,8 +8,7 @@ extension Site.Docs
 {
     struct MultipleFound
     {
-        private
-        let inliner:Inliner
+        let context:VersionedPageContext
 
         let identity:Volume.Stem
 
@@ -17,11 +16,11 @@ extension Site.Docs
         let matches:[Unidoc.Scalar]
 
         private
-        init(_ inliner:Inliner,
+        init(_ context:VersionedPageContext,
             identity:Volume.Stem,
             matches:[Unidoc.Scalar])
         {
-            self.inliner = inliner
+            self.context = context
 
             self.identity = identity
             self.matches = matches
@@ -30,12 +29,12 @@ extension Site.Docs
 }
 extension Site.Docs.MultipleFound
 {
-    init?(_ inliner:__owned Inliner,
+    init?(_ context:__owned VersionedPageContext,
         matches:__shared [Volume.Vertex])
     {
         if  let stem:Volume.Stem = matches.first?.shoot?.stem
         {
-            self.init(inliner, identity: stem, matches: matches.map(\.id))
+            self.init(context, identity: stem, matches: matches.map(\.id))
         }
         else
         {
@@ -61,7 +60,8 @@ extension Site.Docs.MultipleFound:ApplicationPage
 }
 extension Site.Docs.MultipleFound:VersionedPage
 {
-    var volume:Volume.Meta { self.inliner.volumes.principal }
+    var canonical:CanonicalVersion? { nil }
+    var sidebar:[Volume.Noun]? { nil }
 
     func main(_ main:inout HTML.ContentEncoder)
     {
@@ -103,7 +103,7 @@ extension Site.Docs.MultipleFound:VersionedPage
             {
                 for match:Unidoc.Scalar in self.matches
                 {
-                    $0 ?= self.inliner.card(match)
+                    $0 ?= self.context.card(match)
                 }
             }
         }
