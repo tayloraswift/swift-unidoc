@@ -176,10 +176,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
+                            .init(stem: "BarbieCore Getting-Started", from: .culture),
                             .init(stem: "BarbieCore Barbie", from: .culture),
                             .init(stem: "BarbieCore Barbie ID", from: .culture),
                             .init(stem: "BarbieCore Barbie PlasticKeychain", from: .culture),
-                            .init(stem: "BarbieCore Getting-Started", from: .culture),
                         ])
                 }
             }
@@ -210,6 +210,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                             .init(stem: "BarbieCore Barbie", from: .package),
                             .init(stem: "BarbieCore Barbie Dreamhouse", from: .culture),
                             .init(stem: "BarbieCore Barbie Dreamhouse Keys", from: .culture),
+                            .init(stem: "Swift Array", from: .foreign),
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
