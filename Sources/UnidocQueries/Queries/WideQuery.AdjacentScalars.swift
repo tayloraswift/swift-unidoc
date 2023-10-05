@@ -40,6 +40,7 @@ extension WideQuery.AdjacentScalars
         {
             $0.append(self.path / Volume.Vertex[.namespace])
             $0.append(self.path / Volume.Vertex[.culture])
+            $0.append(self.path / Volume.Vertex[.extendee])
             $0.append(self.path / Volume.Vertex[.file])
         }
 

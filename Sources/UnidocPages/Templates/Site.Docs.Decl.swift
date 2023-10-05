@@ -80,15 +80,13 @@ extension Site.Docs.Decl:ApplicationPage
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
-            return .init(
-                scope: self.vertex.scope.isEmpty ?
+            .init(scope: self.vertex.scope.isEmpty ?
                     nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
                 last: last)
         }
         else
         {
-            return .init(
-                scope: nil,
+            .init(scope: nil,
                 last: self.stem.last)
         }
     }

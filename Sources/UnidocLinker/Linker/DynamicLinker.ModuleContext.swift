@@ -5,38 +5,42 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-/// Abstracts over linker tables that are shared between package cultures
-/// that depend on the same set of upstream package products.
-struct DynamicClientGroup:Sendable
+extension DynamicLinker
 {
-    /// An overlay of conformances declared by dependencies of modules in the
-    /// current client group. The sets contain the protocol scalars only, with
-    /// no constraints, because Swift does not allow conditional and
-    /// unconditional conformances to coexist on the same type.
-    private
-    var conformances:Set<Unidoc.Vector>
-
-    private(set)
-    var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
-    private(set)
-    var imports:[ModuleIdentifier]
-
-    private
-    let nodes:Set<Unidoc.Scalar>
-
-    private
-    init(conformances:Set<Unidoc.Vector>,
-        codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
-        imports:[ModuleIdentifier],
-        nodes:Set<Unidoc.Scalar>)
+    /// Abstracts over linker tables that are shared between package cultures
+    /// that depend on the same set of upstream package products.
+    struct ModuleContext:Sendable
     {
-        self.conformances = conformances
-        self.codelinks = codelinks
-        self.imports = imports
-        self.nodes = nodes
+        /// An overlay of conformances declared by dependencies of modules in the
+        /// current client group. The sets contain the protocol scalars only, with
+        /// no constraints, because Swift does not allow conditional and
+        /// unconditional conformances to coexist on the same type.
+        private
+        var conformances:Set<Unidoc.Vector>
+
+        private(set)
+        var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
+        private(set)
+        var imports:[ModuleIdentifier]
+
+        private
+        let nodes:Set<Unidoc.Scalar>
+
+        private
+        init(conformances:Set<Unidoc.Vector>,
+            codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
+            imports:[ModuleIdentifier],
+            nodes:Set<Unidoc.Scalar>)
+        {
+            self.conformances = conformances
+            self.codelinks = codelinks
+            self.imports = imports
+            self.nodes = nodes
+        }
     }
 }
-extension DynamicClientGroup
+
+extension DynamicLinker.ModuleContext
 {
     init(nodes:Slice<SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>>)
     {
@@ -52,7 +56,7 @@ extension DynamicClientGroup
             })
     }
 }
-extension DynamicClientGroup
+extension DynamicLinker.ModuleContext
 {
     private mutating
     func remember(conforms t:Unidoc.Scalar, to p:Unidoc.Scalar)
@@ -64,7 +68,7 @@ extension DynamicClientGroup
         self.conformances.contains(.init(sub: t, dom: p))
     }
 }
-extension DynamicClientGroup
+extension DynamicLinker.ModuleContext
 {
     mutating
     func add(snapshot:SnapshotObject,

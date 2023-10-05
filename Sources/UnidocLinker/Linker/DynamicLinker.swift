@@ -1,4 +1,5 @@
 import CodelinkResolution
+import JSON
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
@@ -6,10 +7,13 @@ import Unidoc
 import UnidocRecords
 
 public
-struct DynamicLinker
+struct DynamicLinker:~Copyable
 {
     private
     let context:DynamicContext
+    private
+    let modules:[ModuleContext]
+
     /// Protocol conformances for each declaration in the **current** snapshot.
     private
     let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>
@@ -29,20 +33,23 @@ struct DynamicLinker
         topic:Unidoc.Counter<UnidocPlane.Topic>
     )
 
-    public private(set)
-    var vertices:[Volume.Vertex]
-    public private(set)
+    private
+    var articles:[Volume.Vertex.Article]
+    private
+    var decls:[Volume.Vertex.Decl]
+
+    private
     var groups:[Volume.Group]
-    public private(set)
-    var meta:Volume.Meta.LinkDetails
 
     private
     init(context:DynamicContext,
+        modules:[ModuleContext],
         conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
         diagnostics:DynamicLinkerDiagnostics,
         extensions:Extensions)
     {
         self.context = context
+        self.modules = modules
 
         self.conformances = conformances
         self.diagnostics = diagnostics
@@ -54,10 +61,10 @@ struct DynamicLinker
         self.next.autogroup = .init(zone: context.current.edition)
         self.next.topic = .init(zone: context.current.edition)
 
-        self.vertices = []
+        self.articles = []
+        self.decls = []
+
         self.groups = []
-        self.meta = .init(abi: context.current.metadata.abi,
-            requirements: context.current.metadata.requirements)
     }
 }
 extension DynamicLinker
@@ -65,7 +72,7 @@ extension DynamicLinker
     public
     init(context:DynamicContext)
     {
-        let clients:[DynamicClientGroup] = context.groups()
+        let modules:[ModuleContext] = context.modules()
 
         let diagnostics:DynamicLinkerDiagnostics = .init()
         var extensions:Extensions = .init(zone: context.current.edition)
@@ -76,25 +83,61 @@ extension DynamicLinker
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
                 extending: $0,
                 context: context,
-                clients: clients,
+                modules: modules,
                 diagnostics: diagnostics)
         }
 
-        self.init(context: context,
+        self.init(
+            context: context,
+            modules: modules,
             conformances: conformances,
             diagnostics: diagnostics,
             extensions: extensions)
+    }
 
+    public consuming
+    func link() -> Mesh
+    {
         self.autogroup()
 
-        var cultures:[Volume.Vertex.Culture] = self.link(clients: clients)
+        var cultures:[Volume.Vertex.Culture] = self.link()
+        var meta:Volume.Meta.LinkDetails = .init(abi: self.current.metadata.abi,
+            requirements: self.current.metadata.requirements)
 
-        defer
+        var vertices:[Volume.Vertex] = [.global(.init(id: context.current.edition.global))]
+
+        vertices.reserveCapacity(context.current.files.count
+            + self.articles.count
+            + self.decls.count
+            + cultures.count
+            + 1)
+
+        var mapper:TreeMapper = .init(zone: context.current.edition)
+        for vertex:Volume.Vertex.Article in self.articles
         {
-            self.vertices.append(.global(.init(id: context.current.edition.global)))
-            for culture:Volume.Vertex.Culture in cultures
+            vertices.append(.article(vertex))
+            mapper.add(vertex)
+        }
+        for vertex:Volume.Vertex.Decl in self.decls
+        {
+            vertices.append(.decl(vertex))
+            mapper.add(vertex)
+        }
+
+        let context:DynamicContext = self.context
+
+        let extensions:Extensions = self.extensions
+        var groups:[Volume.Group] = self.groups
+
+        _ = consume self
+
+        //  Compute shoots for out-of-package extended types.
+        for d:Int32 in context.current.decls.nodes.indices
+        {
+            if  case nil = context.current.decls.nodes[d].decl,
+                let foreign:Unidoc.Scalar = context.current.scalars.decls[d]
             {
-                self.vertices.append(.culture(culture))
+                vertices.append(.foreign(mapper.register(foreign: foreign, with: context)))
             }
         }
 
@@ -120,33 +163,22 @@ extension DynamicLinker
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
 
-                    self.meta.census.unweighted.coverage[keyPath: coverage] += 1
-                    self.meta.census.unweighted.decls[keyPath: decl] += 1
+                    meta.census.unweighted.coverage[keyPath: coverage] += 1
+                    meta.census.unweighted.decls[keyPath: decl] += 1
                 }
             }
         }
 
-        //  Create file records.
-        for (f, file):(Int32, Symbol.File) in zip(
-            context.current.files.indices,
-            context.current.files)
-        {
-            self.vertices.append(.file(.init(id: context.current.edition + f, symbol: file)))
-        }
-
         //  Create extension records, and compute weighted stats.
-        self.meta.census.weighted = self.meta.census.unweighted
+        meta.census.weighted = meta.census.unweighted
         for c:Int in cultures.indices
         {
             cultures[c].census.weighted = cultures[c].census.unweighted
         }
 
-        for (signature, `extension`):(ExtensionSignature, Extension) in self.extensions.sorted()
+        for (signature, `extension`):(ExtensionSignature, Extension) in extensions.sorted()
             where !`extension`.isEmpty
         {
-            self.groups.append(.extension(context.assemble(extension: `extension`,
-                signature: signature)))
-
             for f:Unidoc.Scalar in `extension`.features
             {
                 if  let decl:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
@@ -154,10 +186,50 @@ extension DynamicLinker
                     let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
 
                     cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
-                    self.meta.census.weighted.decls[keyPath: bin] += 1
+                    meta.census.weighted.decls[keyPath: bin] += 1
                 }
             }
+
+            let assembled:Volume.Group.Extension = context.assemble(
+                extension: `extension`,
+                signature: signature)
+
+            defer
+            {
+                groups.append(.extension(assembled))
+            }
+
+            //  Extensions that only contain subforms are not interesting.
+            if  assembled.nested.isEmpty,
+                assembled.features.isEmpty,
+                assembled.conformances.isEmpty
+            {
+                continue
+            }
+
+            mapper.update(with: assembled)
         }
+
+        //  Create file vertices.
+        for (f, file):(Int32, Symbol.File) in zip(
+            context.current.files.indices,
+            context.current.files)
+        {
+            vertices.append(.file(.init(id: context.current.edition + f, symbol: file)))
+        }
+        //  Move culture vertices to the combined buffer.
+        for culture:Volume.Vertex.Culture in cultures
+        {
+            vertices.append(.culture(culture))
+        }
+
+        let (trees, index):([Volume.TypeTree], JSON) = mapper.build(cultures: cultures)
+
+        return .init(vertices: vertices,
+            groups: groups,
+            trees: trees,
+            index: index,
+            meta: meta)
     }
 }
 extension DynamicLinker
@@ -194,78 +266,73 @@ extension DynamicLinker
         }
     }
     private mutating
-    func link(clients:[DynamicClientGroup]) -> [Volume.Vertex.Culture]
+    func link() -> [Volume.Vertex.Culture]
     {
         //  First pass to create the topic records, which also populates topic memberships.
-        for ((culture, input), clients):((Int, SymbolGraph.Culture), DynamicClientGroup)
+        for ((c, culture), context):((Int, SymbolGraph.Culture), ModuleContext)
             in zip(zip(
                 self.current.cultures.indices,
                 self.current.cultures),
-            clients)
+            self.modules)
         {
             //  Create topic records.
-            self.link(topics: input.topics,
-                of: (culture, self.current.namespaces[culture]),
-                in: clients)
+            self.link(topics: culture.topics,
+                with: context,
+                from: (c, self.current.namespaces[c]))
         }
 
         //  Second pass to create various master records, which reads from the ``topics``.
-        var cultures:[Volume.Vertex.Culture] = []
-            cultures.reserveCapacity(self.current.cultures.count)
-
-        for ((culture, input), clients):
-            ((Int, SymbolGraph.Culture), DynamicClientGroup) in zip(zip(
-                self.current.cultures.indices,
-                self.current.cultures),
-            clients)
+        for ((c, namespace, culture), context):
+            ((Int, ModuleIdentifier, SymbolGraph.Culture), ModuleContext) in zip(
+            self.current.modules,
+            self.modules)
         {
-            let namespace:ModuleIdentifier = self.current.namespaces[culture]
-            let record:Volume.Vertex.Culture = self.link(culture: input,
-                named: namespace,
-                at: culture,
-                in: clients)
-
             //  Create decl records.
-            for decls:SymbolGraph.Namespace in input.namespaces
+            for decls:SymbolGraph.Namespace in culture.namespaces
             {
                 let namespace:ModuleIdentifier = self.current.namespaces[decls.index]
 
-                guard let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
+                guard
+                let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
                 else
                 {
-                    self.diagnostics.errors.append(DroppedExtensionsError.decls(of: namespace,
+                    self.diagnostics.errors.append(DroppedExtensionsError.extending(namespace,
                         count: decls.range.count))
                     continue
                 }
 
                 self.link(decls: decls.range,
                     under: (n, namespace),
-                    of: culture,
-                    in: clients)
+                    with: context,
+                    from: c)
             }
             //  Create article records.
-            if  let articles:ClosedRange<Int32> = input.articles
+            if  let articles:ClosedRange<Int32> = culture.articles
             {
-                self.link(articles: articles, of: (culture, namespace), in: clients)
+                self.link(articles: articles,
+                    with: context,
+                    from: (c, namespace))
             }
-
-            cultures.append(record)
         }
 
-        return cultures
+        return self.current.modules.map
+        {
+            self.link(culture: $0.culture, named: $0.name, at: $0.index)
+        }
     }
 }
 extension DynamicLinker
 {
     private mutating
     func link(topics:[SymbolGraph.Topic],
-        of culture:(index:Int, id:ModuleIdentifier),
-        in clients:DynamicClientGroup)
+        with context:ModuleContext,
+        from culture:(index:Int, id:ModuleIdentifier))
     {
-        let resolver:DynamicResolver = .init(context: self.context,
+        let resolver:DynamicResolver = .init(
             diagnostics: self.diagnostics,
             namespace: culture.id,
-            clients: clients)
+            global: self.context,
+            module: context)
 
         let n:Unidoc.Scalar = self.current.edition + culture.index
 
@@ -295,61 +362,62 @@ extension DynamicLinker
     private mutating
     func link(culture:SymbolGraph.Culture,
         named name:ModuleIdentifier,
-        at index:Int,
-        in clients:DynamicClientGroup) -> Volume.Vertex.Culture
+        at index:Int) -> Volume.Vertex.Culture
     {
-        let resolver:DynamicResolver = .init(context: self.context,
+        let resolver:DynamicResolver = .init(
             diagnostics: self.diagnostics,
             namespace: name,
-            clients: clients)
+            global: self.context,
+            module: self.modules[index])
 
         let scalar:Unidoc.Scalar = self.current.edition + index
-        var record:Volume.Vertex.Culture = .init(id: scalar,
+        var vertex:Volume.Vertex.Culture = .init(id: scalar,
             module: culture.module,
             group: self.memberships.removeValue(forKey: scalar.citizen))
 
         if  let article:SymbolGraph.Article = culture.article
         {
-            record.readme = article.file.map { self.current.edition + $0 }
-            (record.overview, record.details) = resolver.link(article: article)
+            vertex.readme = article.file.map { self.current.edition + $0 }
+            (vertex.overview, vertex.details) = resolver.link(article: article)
         }
 
-        return record
+        return vertex
     }
 
     private mutating
     func link(articles range:ClosedRange<Int32>,
-        of culture:(index:Int, id:ModuleIdentifier),
-        in clients:DynamicClientGroup)
+        with context:ModuleContext,
+        from culture:(index:Int, id:ModuleIdentifier))
     {
-        let resolver:DynamicResolver = .init(context: self.context,
+        let resolver:DynamicResolver = .init(
             diagnostics: self.diagnostics,
             namespace: culture.id,
-            clients: clients)
+            global: self.context,
+            module: context)
 
         for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(
             self.current.articles.nodes[range].indices,
             self.current.articles.nodes[range])
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
-            var record:Volume.Vertex.Article = .init(id: self.current.edition + a,
+            var vertex:Volume.Vertex.Article = .init(id: self.current.edition + a,
                 stem: .init(culture.id, symbol.name),
                 culture: self.current.edition + culture.index,
                 file: node.body.file.map { self.current.edition + $0 },
                 headline: node.headline,
                 group: self.memberships.removeValue(forKey: a))
 
-            (record.overview, record.details) = resolver.link(article: node.body)
+            (vertex.overview, vertex.details) = resolver.link(article: node.body)
 
-            self.vertices.append(.article(record))
+            self.articles.append(vertex)
         }
     }
 
     private mutating
     func link(decls range:ClosedRange<Int32>,
         under namespace:(scalar:Unidoc.Scalar, id:ModuleIdentifier),
-        of culture:Int,
-        in clients:DynamicClientGroup)
+        with context:ModuleContext,
+        from culture:Int)
     {
         for (d, ((symbol, node), conformances)):
             (Int32, ((Symbol.Decl, SymbolGraph.DeclNode), ProtocolConformances<Int>))
@@ -417,7 +485,7 @@ extension DynamicLinker
                 self.extensions[implicit].subforms.append(d)
             }
 
-            var record:Volume.Vertex.Decl = .init(id: d,
+            var vertex:Volume.Vertex.Decl = .init(id: d,
                 flags: .init(
                     phylum: decl.phylum,
                     kinks: decl.kinks,
@@ -436,16 +504,17 @@ extension DynamicLinker
 
             if  let article:SymbolGraph.Article = decl.article
             {
-                let resolver:DynamicResolver = .init(context: self.context,
+                let resolver:DynamicResolver = .init(
                     diagnostics: self.diagnostics,
                     namespace: namespace.id,
-                    clients: clients,
+                    global: self.context,
+                    module: context,
                     scope: decl.phylum.scope(trimming: decl.path))
 
-                (record.overview, record.details) = resolver.link(article: article)
+                (vertex.overview, vertex.details) = resolver.link(article: article)
             }
 
-            self.vertices.append(.decl(record))
+            self.decls.append(vertex)
         }
     }
 }

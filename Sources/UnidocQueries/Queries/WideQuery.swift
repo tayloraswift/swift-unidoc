@@ -1,3 +1,4 @@
+import BSON
 import MongoQL
 import Unidoc
 import UnidocDB
@@ -84,6 +85,9 @@ extension WideQuery:VolumeLookupQuery
             }
         }
 
+        //  Look up the vertex in the volume of the latest stable release of its home package.
+        //  The lookup correlates verticies by symbol.
+        //
         //  This stage is a lot like the ``Symbol.Decl`` extension, but `symbol` and `hash`
         //  are variables obtained from the principal `vertex` record.
         pipeline.stage
@@ -176,28 +180,53 @@ extension WideQuery:VolumeLookupQuery
         {
             $0[.lookup] = .init
             {
-                let id:Mongo.Variable<Unidoc.Scalar> = "id"
-
+                let global:Mongo.Variable<Unidoc.Scalar> = "global"
+                let local:Mongo.Variable<Unidoc.Scalar> = "local"
                 let topic:Mongo.Variable<Unidoc.Scalar> = "topic"
+
                 let min:Mongo.Variable<Unidoc.Scalar> = "min"
                 let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
                 $0[.from] = UnidocDatabase.Groups.name
                 $0[.let] = .init
                 {
-                    $0[let: id] = Output.Principal[.vertex] / Volume.Vertex[.id]
-
+                    // $0[let: global] = Output.Principal[.vertex] / Volume.Vertex[.id]
+                    $0[let: global] = .expr
+                    {
+                        $0[.cond] =
+                        (
+                            //  This is a little bit weird: if `\vertex.extendee` is non-nil,
+                            //  this evaluates to an integer, which is not a boolean `true`,
+                            //  so the `else` branch is taken. If `\vertex.extendee` is nil,
+                            //  this evaluates to `true`, so the `then` branch is taken.
+                            if: .expr
+                            {
+                                $0[.coalesce] =
+                                (
+                                    Output.Principal[.vertex] / Volume.Vertex[.extendee],
+                                    true
+                                )
+                            },
+                            then: Output.Principal[.vertex] / Volume.Vertex[.id],
+                            else: BSON.Max.init()
+                        )
+                    }
+                    $0[let: local] = .expr
+                    {
+                        $0[.coalesce] =
+                        (
+                            Output.Principal[.vertex] / Volume.Vertex[.extendee],
+                            Output.Principal[.vertex] / Volume.Vertex[.id]
+                        )
+                    }
                     $0[let: topic] = .expr
                     {
-                        //  For reasons I don’t understand, MongoDB will fail to use any indexes
-                        //  whatsoever for this join if the `group` field isn’t present in the
-                        //  vertex document. (Which is true of most of them.) The
-                        //  least-intrusive way to fix this is to use an optional-coalescence
-                        //  expression to “evaluate” the missing field to `null`.
+                        //  `BSON.max` is a safe choice for a group `_id` that will never
+                        //  match anything.
                         $0[.coalesce] =
                         (
                             Output.Principal[.vertex] / Volume.Vertex[.group],
-                            Never??.some(nil)
+                            BSON.Max.init()
                         )
                     }
                     $0[let: min] = Output.Principal[.volume] / Volume.Meta[.planes_autogroup]
@@ -207,7 +236,12 @@ extension WideQuery:VolumeLookupQuery
                 {
                     $0.stage
                     {
-                        $0[.match] = id.groups(min: min, max: max, or: topic)
+                        //  Matches groups that have the same `_id` as `topic`, or that have
+                        //  the same `scope` as `local` and are in the range `min` to `max`, or
+                        //  that have the same `scope` as `global` and are marked as `latest`.
+                        $0[.match] = .groups(id: topic,
+                            or: (scope: local, min: min, max: max),
+                            or: (scope: global, latest: true))
                     }
                 }
                 $0[.as] = Output.Principal[.groups]
@@ -294,6 +328,7 @@ extension WideQuery:VolumeLookupQuery
                                     .link,
 
                                     .latest,
+                                    .api
                                 ]
                                 {
                                     $0[Output.Principal[volume] / Volume.Meta[key]] = true
@@ -455,6 +490,7 @@ extension WideQuery:VolumeLookupQuery
                                 .display,
                                 .patch,
                                 .latest,
+                                .api
                             ]
                             {
                                 $0[Volume.Meta[key]] = true

@@ -1,5 +1,4 @@
 import FNV1
-import UnidocRecords
 
 extension Volume
 {
@@ -9,22 +8,22 @@ extension Volume
         public
         let shoot:Volume.Shoot
         public
-        let same:Locality?
+        let from:Citizenship
 
-        @inlinable internal
-        init(shoot:Volume.Shoot, same locality:Locality? = nil)
+        @inlinable public
+        init(shoot:Volume.Shoot, from citizenship:Citizenship)
         {
             self.shoot = shoot
-            self.same = locality
+            self.from = citizenship
         }
     }
 }
 extension Volume.Noun
 {
     @inlinable public
-    init(stem:Volume.Stem, hash:FNV24? = nil, same locality:Locality? = nil)
+    init(stem:Volume.Stem, hash:FNV24? = nil, from citizenship:Volume.Citizenship = .culture)
     {
-        self.init(shoot: .init(stem: stem, hash: hash), same: locality)
+        self.init(shoot: .init(stem: stem, hash: hash), from: citizenship)
     }
 }
 extension Volume.Noun:CustomDebugStringConvertible
@@ -32,6 +31,6 @@ extension Volume.Noun:CustomDebugStringConvertible
     public
     var debugDescription:String
     {
-        "\(self.shoot)\(self.same.map { " (same \($0))" } ?? "")"
+        "\(self.shoot) (from \(self.from))"
     }
 }

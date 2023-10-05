@@ -1,7 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 import Unidoc
-import UnidocRecords
 
 extension Volume
 {

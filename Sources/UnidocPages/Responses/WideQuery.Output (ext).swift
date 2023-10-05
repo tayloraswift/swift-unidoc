@@ -78,6 +78,14 @@ extension WideQuery.Output:ServerResponseFactory
                 //  We should never get this as principal output!
                 throw WideQuery.OutputError.malformed
 
+            case .foreign(let vertex):
+                let page:Site.Docs.Foreign = .init(context,
+                    canonical: canonical,
+                    sidebar: principal.tree?.rows,
+                    vertex: vertex,
+                    groups: principal.groups)
+                resource = page.resource()
+
             case .global:
                 let page:Site.Docs.Meta = .init(context,
                     canonical: canonical,

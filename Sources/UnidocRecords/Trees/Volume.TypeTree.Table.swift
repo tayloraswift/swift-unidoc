@@ -1,7 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 import FNV1
-import UnidocRecords
 
 extension Volume.TypeTree
 {
@@ -30,7 +29,7 @@ extension Volume.TypeTree.Table:BSONEncodable
             row.shoot.serialize(into: &buffer)
             // We are kind of abusing these control characters here, but the point is that
             // they will never conflict with the UTF-8 encoding of a valid index node.
-            buffer.append(row.same?.rawValue ?? 0x03)
+            buffer.append(row.from.rawValue)
         }
 
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: buffer).encode(to: &field)
@@ -43,16 +42,23 @@ extension Volume.TypeTree.Table:BSONDecodable, BSONBinaryViewDecodable
     {
         self.init(rows: [])
 
-        var start:Bytes.Index = bson.slice.startIndex
-        while   let end:Bytes.Index = bson.slice[start...].firstIndex(
-                    where: { 0x01 ... 0x03 ~= $0 })
+        var i:Bytes.Index = bson.slice.startIndex
+        var j:Bytes.Index = i
+        while j < bson.slice.endIndex
         {
-            let shoot:Volume.Shoot = .deserialize(from: bson.slice[start ..< end])
-            let same:Volume.Noun.Locality? = .init(rawValue: bson.slice[end])
+            let next:Bytes.Index = bson.slice.index(after: j)
+            if  let citizenship:Volume.Citizenship = .init(rawValue: bson.slice[j])
+            {
+                let shoot:Volume.Shoot = .deserialize(from: bson.slice[i ..< j])
+                self.rows.append(.init(shoot: shoot, from: citizenship))
 
-            start = bson.slice.index(after: end)
-
-            self.rows.append(.init(shoot: shoot, same: same))
+                i = next
+                j = next
+            }
+            else
+            {
+                j = next
+            }
         }
     }
 }

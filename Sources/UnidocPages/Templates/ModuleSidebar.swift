@@ -1,5 +1,4 @@
 import HTML
-import UnidocAnalysis
 import UnidocRecords
 import URI
 
@@ -48,16 +47,30 @@ extension ModuleSidebar:HyperTextOutputStreamable
 
                 depth = current
 
-                //  The URI is only correct if the noun is a citizen in the principal zone!
                 var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
                 let name:Substring = noun.shoot.stem.last
 
-                switch noun.same
+                //  The URI is only valid if the principal volume API version is at least 1.0!
+                if  case .foreign = noun.from, self.inliner.volumes.principal.api < .v(1, 0)
                 {
-                case nil:       $0[.span] = name
-                case .culture?: $0[.a] { $0.href = "\(uri)" } = name
-                case .package?: $0[.a] { $0.href = "\(uri)" ; $0.class = "extension" } = name
+                    $0[.span] = name
                 }
+                else
+                {
+                    $0[.a]
+                    {
+                        $0.href = "\(uri)"
+
+                        switch noun.from
+                        {
+                        case .culture:  break
+                        case .package:  $0.class = "extension local"
+                        case .foreign:  $0.class = "extension foreign"
+                        }
+
+                    } = name
+                }
+
             }
             for _:Int in 1 ..< depth
             {

@@ -63,6 +63,14 @@ extension Volume.Shoot
         }
     }
 }
+extension Volume.Shoot
+{
+    func description(_ indent:String = "    ") -> String
+    {
+        let indent:String = .init(repeating: indent, count: max(0, self.stem.depth - 1))
+        return "\(indent)\(self.stem.last)"
+    }
+}
 extension Volume.Shoot:CustomDebugStringConvertible
 {
     public

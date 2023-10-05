@@ -14,9 +14,14 @@ div.nountree
         color: $light-accent-barbie-pink;
     }
 
-    > a.extension::first-letter
+    > a.extension.local::first-letter
     {
         color: $light-accent-lavender;
+    }
+
+    > a.extension.foreign::first-letter
+    {
+        color: $light-accent-aqua;
     }
 }
 div.nountree div.indent
@@ -39,8 +44,12 @@ div.nountree
         text-decoration: none;
         color: $light-accent-barbie-pink;
     }
-    a.extension:hover
+    a.extension.local:hover
     {
         color: $light-accent-lavender;
+    }
+    a.extension.foreign:hover
+    {
+        color: $light-accent-aqua;
     }
 }

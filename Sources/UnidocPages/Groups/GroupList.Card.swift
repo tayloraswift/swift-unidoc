@@ -62,7 +62,7 @@ extension GroupList.Card:HyperTextOutputStreamable
                 $0 ?= self.overview
             }
 
-        case .file(_), .global:
+        case .file, .foreign, .global:
             //  unimplemented
             break
         }

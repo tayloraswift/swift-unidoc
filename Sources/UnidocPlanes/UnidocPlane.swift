@@ -8,11 +8,11 @@ enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
     case  file          = 0x81_000000
 
     //  Used to identify groups in the Unidoc database; never appear in a symbol graph.
-
     case  autogroup     = 0xC0_000000
     case `extension`    = 0xC2_000000
     case  topic         = 0xC3_000000
 
+    case  foreign       = 0xFE_000000
     case  global        = 0xFF_000000
 }
 extension UnidocPlane:Comparable

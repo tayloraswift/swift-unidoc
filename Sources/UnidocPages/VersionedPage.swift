@@ -1,7 +1,6 @@
 import HTML
 import JSON
 import Unidoc
-import UnidocAnalysis
 import UnidocRecords
 import URI
 

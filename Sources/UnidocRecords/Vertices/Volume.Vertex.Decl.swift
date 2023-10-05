@@ -113,11 +113,13 @@ extension Volume.Vertex.Decl
     @inlinable public
     var shoot:Volume.Shoot
     {
-        .init(stem: self.stem, hash: self.flags.route == .hashed ? self.hash : nil)
+        .init(
+            stem: self.stem,
+            hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
     }
 
-    @inlinable public
-    var hash:FNV24
+    @inlinable internal
+    var hash:FNV24.Extended
     {
         .init(hashing: "\(self.symbol)")
     }

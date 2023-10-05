@@ -2,7 +2,6 @@ import GitHubAPI
 import JSONEncoding
 import ModuleGraphs
 import MongoDB
-import UnidocAnalysis
 import UnidocRecords
 
 extension UnidocDatabase

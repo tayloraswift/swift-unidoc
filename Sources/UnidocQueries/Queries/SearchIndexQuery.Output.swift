@@ -1,6 +1,6 @@
 import BSONDecoding
 import MD5
-import UnidocAnalysis
+import UnidocRecords
 
 extension SearchIndexQuery
 {
