@@ -36,7 +36,7 @@ extension Site.Docs.Meta
 }
 extension Site.Docs.Meta:RenderablePage
 {
-    var title:String { self.volume.title }
+    var title:String { "\(self.volume.title) Documentation" }
 
     var description:String?
     {
@@ -47,7 +47,7 @@ extension Site.Docs.Meta:RenderablePage
         """ :
         """
         Read the documentation for version \(self.volume.symbol.version) of the \
-        \(self.volume.display ?? "\(self.volume.symbol.package)") package.
+        \(self.volume.title) package.
         """
     }
 }

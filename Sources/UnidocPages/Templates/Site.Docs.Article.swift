@@ -41,7 +41,7 @@ extension Site.Docs.Article
 }
 extension Site.Docs.Article:RenderablePage
 {
-    var title:String { "\(self.vertex.headline.safe) - \(self.volume.title)" }
+    var title:String { "\(self.vertex.headline.safe) - \(self.volume.title) Documentation" }
 
     var description:String?
     {

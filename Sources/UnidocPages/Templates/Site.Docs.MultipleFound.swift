@@ -45,7 +45,7 @@ extension Site.Docs.MultipleFound
 }
 extension Site.Docs.MultipleFound:RenderablePage
 {
-    var title:String { "Disambiguation Page - \(self.volume.title)" }
+    var title:String { "Disambiguation Page - \(self.volume.title) Documentation" }
 }
 extension Site.Docs.MultipleFound:StaticPage
 {

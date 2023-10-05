@@ -113,9 +113,9 @@ enum Main:SyncTests
             self.run(tests: tests,
                 expecting: """
                 <pre class='language-swift'>\
-                <span class='syntax-keyword'>let</span> \
-                <span class='syntax-identifier'>x</span> = \
-                <span class='syntax-literal-number'>5</span>\
+                <span class='xk'>let</span> \
+                <span class='xv'>x</span> = \
+                <span class='xn'>5</span>\
                 </pre>
                 """,
                 plain: "let x = 5")
@@ -147,9 +147,9 @@ enum Main:SyncTests
                 expecting: """
                 <pre class='snippet'>\
                 <code class='language-swift'>\
-                <span class='newline'></span><span class='syntax-keyword'>let</span> \
-                <span class='syntax-identifier'>x</span> = \
-                <span class='syntax-literal-number'>5</span>\
+                <span class='newline'></span><span class='xk'>let</span> \
+                <span class='xv'>x</span> = \
+                <span class='xn'>5</span>\
                 </code>\
                 </pre>
                 """,
@@ -171,14 +171,14 @@ enum Main:SyncTests
                 expecting: """
                 <pre class='snippet'>\
                 <code class='language-swift'>\
-                <span class='newline'></span><span class='syntax-keyword'>import</span> \
+                <span class='newline'></span><span class='xk'>import</span> \
                 NIOCore\
                 <span class='newline'>
 
 
-                </span><span class='syntax-keyword'>let</span> \
-                <span class='syntax-identifier'>x</span> = \
-                <span class='syntax-literal-number'>5</span>\
+                </span><span class='xk'>let</span> \
+                <span class='xv'>x</span> = \
+                <span class='xn'>5</span>\
                 </code>\
                 </pre>
                 """,
@@ -465,9 +465,9 @@ enum Main:SyncTests
 
                 tests.expect(html.description ==? """
                     <pre><code>\
-                    <span class='syntax-keyword'>let</span> \
-                    <span class='syntax-identifier'>x</span>:\
-                    <a href='swiftinit.org' class='syntax-type'>Int</a>\
+                    <span class='xk'>let</span> \
+                    <span class='xv'>x</span>:\
+                    <a href='swiftinit.org' class='xt'>Int</a>\
                     </code></pre>
                     """)
             }
@@ -479,9 +479,9 @@ enum Main:SyncTests
 
                 tests.expect(html.description ==? """
                     <pre><code>\
-                    <span class='syntax-keyword'>let</span> \
-                    <span class='syntax-identifier'>x</span>:\
-                    <span class='syntax-type'>Int</span>\
+                    <span class='xk'>let</span> \
+                    <span class='xv'>x</span>:\
+                    <span class='xt'>Int</span>\
                     </code></pre>
                     """)
             }

@@ -1,10 +1,6 @@
-import Availability
 import HTML
-import LexicalPaths
-import MarkdownABI
+import MarkdownRendering
 import ModuleGraphs
-import Signatures
-import Sources
 import Unidoc
 import UnidocRecords
 import URI
@@ -40,21 +36,24 @@ extension Site.Docs
 extension Site.Docs.Foreign
 {
     private
+    var demonym:Unidoc.Decl.Demonym<Language.EN>
+    {
+        .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
+    }
+
+    private
     var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Foreign:RenderablePage
 {
-    var title:String { "\(self.stem.last) - \(self.volume.title)" }
+    var title:String { "\(self.stem.last) (ext) - \(self.volume.title) Documentation" }
 
     var description:String?
     {
-        let what:Site.Docs.Decl.Demonym = .init(phylum: self.vertex.phylum,
-            kinks: self.vertex.kinks)
-
-        return """
-            \(self.stem.last), \(what) from \(self.stem.first), has extensions available \
-            in the package \(self.volume.display ?? "\(self.volume.symbol.package)").
-            """
+        """
+        \(self.stem.last), \(self.demonym.phrase) from \(self.stem.first), has extensions \
+        available in the package \(self.volume.title)").
+        """
     }
 }
 extension Site.Docs.Foreign:StaticPage
@@ -82,11 +81,62 @@ extension Site.Docs.Foreign:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder)
     {
-        let groups:GroupSections = .init(self.context,
+        main[.section, { $0.class = "introduction" }]
+        {
+            $0[.div, { $0.class = "eyebrows" }]
+            {
+                $0[.span] { $0.class = "phylum" } = "Extension (\(self.demonym.title))"
+                $0[.span] { $0.class = "domain" } = self.volume.domain
+            }
+
+            $0[.h1] = "\(self.stem.last) (ext)"
+        }
+
+        let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
+        if  let other:Volume.Meta = self.context.volumes[self.vertex.extendee.zone]
+        {
+            main[.section, { $0.class = "notice extendee" }]
+            {
+                $0[.p]
+                {
+                    $0 += "You’re viewing third-party extensions to "
+                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0 += ", \(self.demonym.phrase) from "
+
+                    $0[.a] { $0.href = "\(Site.Docs[other])" } = other.symbol.package == .swift
+                        ? "the Swift standard library"
+                        : other.title
+
+                    $0 += "."
+                }
+
+                $0[.p]
+                {
+                    $0 += """
+                    You can also read the documentation for
+                    """
+                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0 += " itself."
+                }
+            }
+        }
+
+        main[.section, { $0.class = "declaration" }]
+        {
+            $0[.pre]
+            {
+                $0[.code]
+                {
+                    $0[.span] { $0.highlight = .keyword } = "extension"
+                    $0 += " "
+                    $0[link: extendee?.target] { $0.class = "extendee" } = self.stem.last
+                }
+            }
+        }
+
+        main += GroupSections.init(self.context,
             groups: self.groups,
             bias: nil,
             mode: .decl(self.vertex.flags.phylum, self.vertex.flags.kinks))
-
-        main += groups
     }
 }

@@ -41,24 +41,21 @@ extension Site.Docs.Culture
 }
 extension Site.Docs.Culture:RenderablePage
 {
-    var title:String { "\(self.name) - \(self.volume.title)" }
+    var title:String { "\(self.name) - \(self.volume.title) Documentation" }
 
     var description:String?
     {
         if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
         {
-            return "\(self.context.prose(overview))"
+            "\(self.context.prose(overview))"
         }
         else if case .swift = self.volume.symbol.package
         {
-            return "\(self.name) is a module in the Swift standard library."
+            "\(self.name) is a module in the Swift standard library."
         }
         else
         {
-            return """
-                \(self.name) is a module in the \
-                \(self.volume.display ?? "\(self.volume.symbol.package)") package.
-                """
+            "\(self.name) is a module in the \(self.volume.title) package."
         }
     }
 }
@@ -84,24 +81,7 @@ extension Site.Docs.Culture:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module"
-                $0[.span, { $0.class = "domain" }]
-                {
-                    $0[.span, { $0.class = "package" }]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Site.Tags[self.volume.symbol.package])"
-                        } = "\(self.volume.symbol.package)"
-                    }
-
-                    $0[.span, { $0.class = "volume" }]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Site.Docs[self.volume])"
-                        } = self.volume.symbol.version
-                    }
-                }
+                $0[.span] { $0.class = "domain" } = self.volume.domain
             }
 
             $0[.h1] = self.name
