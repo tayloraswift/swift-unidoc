@@ -210,6 +210,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                             .init(stem: "BarbieCore Barbie", from: .package),
                             .init(stem: "BarbieCore Barbie Dreamhouse", from: .culture),
                             .init(stem: "BarbieCore Barbie Dreamhouse Keys", from: .culture),
+                            .init(stem: "BarbieCore Barbie PlasticKeychain", from: .package),
                             .init(stem: "Swift Array", from: .foreign),
                         ])
 
