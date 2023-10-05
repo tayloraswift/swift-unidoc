@@ -94,27 +94,28 @@ extension VersionedPageContext.Cache
     }
 
     /// Returns the URL for the given scalar, as long as it does not point to a file.
-    subscript(scalar:Unidoc.Scalar) -> (master:Volume.Vertex, url:String?)?
+    subscript(scalar:Unidoc.Scalar) -> (vertex:Volume.Vertex, url:String?)?
     {
         mutating get
         {
             self.vertices[scalar].map
             {
-                (master:Volume.Vertex) in
+                (vertex:Volume.Vertex) in
 
                 let url:String? = self.load(scalar)
                 {
-                    switch master
+                    switch vertex
                     {
-                    case .article(let article): return Site.Docs[$0, article.shoot]
-                    case .culture(let culture): return Site.Docs[$0, culture.shoot]
-                    case .decl(let decl):       return Site.Docs[$0, decl.shoot]
+                    case .article(let vertex):  return Site.Docs[$0, vertex.shoot]
+                    case .culture(let vertex):  return Site.Docs[$0, vertex.shoot]
+                    case .decl(let vertex):     return Site.Docs[$0, vertex.shoot]
                     case .file:                 return nil
+                    case .foreign(let vertex):  return Site.Docs[$0, vertex.shoot]
                     case .global:               return Site.Docs[$0]
                     }
                 }
 
-                return (master, url)
+                return (vertex, url)
             }
         }
     }

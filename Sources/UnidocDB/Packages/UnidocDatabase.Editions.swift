@@ -4,7 +4,6 @@ import JSONEncoding
 import MongoDB
 import SemanticVersions
 import SHA1
-import UnidocAnalysis
 import UnidocRecords
 
 extension UnidocDatabase

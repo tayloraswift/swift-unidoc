@@ -5,7 +5,6 @@ import SemanticVersions
 import SymbolGraphs
 import Unidoc
 import UnidocDB
-import UnidocAnalysis
 import UnidocSelectors
 import UnidocRecords
 

@@ -33,6 +33,9 @@ extension Volume
         public
         var link:LinkDetails?
 
+        public
+        var api:MinorVersion
+
         @inlinable public
         init(id:Unidoc.Zone,
             dependencies:[Dependency] = [],
@@ -44,6 +47,8 @@ extension Volume
             patch:PatchVersion? = nil,
             link:LinkDetails? = nil)
         {
+            self.api = VolumeAPI.version
+
             self.id = id
             self.dependencies = dependencies
             self.display = display
@@ -105,6 +110,8 @@ extension Volume.Meta
         /// exists as a query optimization. It is computed and aligned within
         /// the database according to the value of the ``patch`` field.
         case latest = "L"
+
+        case api = "I"
     }
 }
 extension Volume.Meta:BSONDocumentEncodable
@@ -137,6 +144,8 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.planes_topic] = self.planes.topic
 
         bson[.planes_max] = self.planes.max
+
+        bson[.api] = self.api
     }
 }
 extension Volume.Meta:BSONDocumentDecodable
@@ -155,5 +164,7 @@ extension Volume.Meta:BSONDocumentDecodable
             latest: try bson[.latest]?.decode() ?? false,
             patch: try bson[.patch]?.decode(),
             link: try bson[.link]?.decode())
+
+        self.api = try bson[.api]?.decode() ?? .v(0, 1)
     }
 }

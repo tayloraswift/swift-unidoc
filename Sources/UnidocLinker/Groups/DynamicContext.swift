@@ -108,7 +108,7 @@ extension DynamicContext
 
         for _:Int in 1 ..< max(1, length)
         {
-            if  let next:Unidoc.Scalar = self[current.package]?.scope(of: current),
+            if  case let next? = self[current.package]?.scope(of: current),
                 case nil = seen.update(with: next)
             {
                 path.append(next)
@@ -146,8 +146,7 @@ extension DynamicContext
         return dependencies
     }
 
-    /// Builds a codelink resolution table
-    func groups() -> [DynamicClientGroup]
+    func modules() -> [DynamicLinker.ModuleContext]
     {
         //  Some cultures might share the same set of upstream product dependencies.
         //  So, as an optimization, we group cultures together that use the same
@@ -173,12 +172,12 @@ extension DynamicContext
         {
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
-                var group:DynamicClientGroup = .init(
+                var shared:DynamicLinker.ModuleContext = .init(
                     nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
 
                 if  let swift:SnapshotObject = self[dynamic: .swift]
                 {
-                    group.add(snapshot: swift, context: self, filter: nil)
+                    shared.add(snapshot: swift, context: self, filter: nil)
                 }
                 for (package, products):(PackageIdentifier, Set<String>) in
                     dependencies.sorted(by: { $0.key < $1.key })
@@ -196,12 +195,12 @@ extension DynamicContext
                         filter.formUnion(product.cultures)
                     }
 
-                    group.add(snapshot: object, context: self, filter: filter)
+                    shared.add(snapshot: object, context: self, filter: filter)
                 }
 
                 for c:Int in cultures
                 {
-                    $0.initializeElement(at: c, to: group)
+                    $0.initializeElement(at: c, to: shared)
                 }
             }
 

@@ -8,6 +8,7 @@ extension CanonicalVersion
         case article(URI?)
         case culture(URI?)
         case decl(URI?)
+        case foreign(URI?)
         case global
     }
 }
@@ -20,6 +21,7 @@ extension CanonicalVersion.Target
         case .article:          return "An"
         case .culture:          return "A"
         case .decl:             return "A"
+        case .foreign:          return "An"
         case .global:           return "A"
         }
     }
@@ -30,6 +32,7 @@ extension CanonicalVersion.Target
         case .article:          return "article"
         case .culture:          return "module"
         case .decl:             return "symbol"
+        case .foreign:          return "extension overlay"
         case .global:           return "package"
         }
     }
@@ -40,6 +43,7 @@ extension CanonicalVersion.Target
         case .article:          return "name"
         case .culture:          return "name"
         case .decl:             return "signature"
+        case .foreign:          return "base declaration"
         case .global:           return "identity"
         }
     }
@@ -51,6 +55,7 @@ extension CanonicalVersion.Target
         case .article(let uri): return uri
         case .culture(let uri): return uri
         case .decl(let uri):    return uri
+        case .foreign(let uri): return uri
         case .global:           return nil
         }
     }

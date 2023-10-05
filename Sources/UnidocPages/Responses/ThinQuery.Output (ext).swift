@@ -40,13 +40,14 @@ extension ThinQuery.Output:ServerResponseFactory
     {
         switch self.matches.first
         {
-        case .article(let master)?: return Site.Docs[self.volume, master.shoot]
-        case .culture(let master)?: return Site.Docs[self.volume, master.shoot]
+        case .article(let vertex)?: return Site.Docs[self.volume, vertex.shoot]
+        case .culture(let vertex)?: return Site.Docs[self.volume, vertex.shoot]
         //  This is one of the few situations where we intentionally issue redirects
         //  to a disambiguation page.
-        case .decl(let master)?:    return Site.Docs[self.volume,
-            self.matches.count > 1 ? .init(stem: master.stem) : master.shoot]
+        case .decl(let vertex)?:    return Site.Docs[self.volume,
+            self.matches.count > 1 ? .init(stem: vertex.stem) : vertex.shoot]
         case .file?, nil:           return nil
+        case .foreign(let vertex)?: return Site.Docs[self.volume, vertex.shoot]
         case .global?:              return Site.Docs[self.volume]
         }
     }

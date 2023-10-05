@@ -53,7 +53,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     public
     var root:Repository.Root?
 
-    public
+    @inlinable public
     init(package:PackageIdentifier,
         commit:Commit?,
         triple:Triple,
@@ -64,7 +64,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
         display:String? = nil,
         root:Repository.Root? = nil)
     {
-        self.abi = ABI.version
+        self.abi = SymbolGraphABI.version
 
         self.package = package
         self.commit = commit

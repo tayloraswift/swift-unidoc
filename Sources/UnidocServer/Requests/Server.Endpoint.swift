@@ -306,7 +306,13 @@ extension Server.Endpoint
                     let version:String = form["version"],
                     let version:Int32 = .init(version)
                 {
-                    return .procedural(GraphUplink.init(package: package, version: version))
+                    return .procedural(GraphUplink.coordinate(package, version))
+                }
+                else if
+                    let volume:String = form["volume"],
+                    let volume:VolumeIdentifier = .init(volume)
+                {
+                    return .procedural(GraphUplink.identifier(volume))
                 }
 
             case .unlink:
