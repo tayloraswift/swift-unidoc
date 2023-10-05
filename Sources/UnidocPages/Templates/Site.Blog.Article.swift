@@ -28,7 +28,7 @@ extension Site.Blog.Article
 }
 extension Site.Blog.Article:RenderablePage
 {
-    var title:String { self.volume.title }
+    var title:String { "\(self.volume.title) Documentation" }
 }
 extension Site.Blog.Article:StaticPage
 {

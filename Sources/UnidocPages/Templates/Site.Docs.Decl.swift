@@ -40,33 +40,35 @@ extension Site.Docs
 extension Site.Docs.Decl
 {
     private
+    var demonym:Unidoc.Decl.Demonym<Language.EN>
+    {
+        .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
+    }
+
+    private
     var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Decl:RenderablePage
 {
-    var title:String { "\(self.stem.last) - \(self.volume.title)" }
+    var title:String { "\(self.stem.last) - \(self.volume.title) Documentation" }
 
     var description:String?
     {
         if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
         {
-            return "\(self.context.prose(overview))"
+            "\(self.context.prose(overview))"
         }
-
-        let what:Demonym = .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
-
-        if  case .swift = self.volume.symbol.package
+        else if case .swift = self.volume.symbol.package
         {
-            return """
-                \(self.stem.last) is \(what) from the Swift standard library.
-                """
+            """
+            \(self.stem.last) is \(self.demonym.phrase) from the Swift standard library.
+            """
         }
         else
         {
-            return """
-                \(self.stem.last) is \(what) from the package \
-                \(self.volume.display ?? "\(self.volume.symbol.package)").
-                """
+            """
+            \(self.stem.last) is \(self.demonym.phrase) from the package \(self.volume.title).
+            """
         }
     }
 }
@@ -103,19 +105,26 @@ extension Site.Docs.Decl:VersionedPage
             bias: self.vertex.culture,
             mode: .decl(self.vertex.phylum, self.vertex.kinks))
 
-        main[.section]
-        {
-            $0.class = "introduction"
-        }
-            content:
+        main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                let demonym:Demonym = .init(
-                    phylum: self.vertex.phylum,
-                    kinks: self.vertex.kinks)
+                $0[.span, { $0.class = "phylum" }]
+                {
+                    if  let kink:String = self.demonym.modifier
+                    {
+                        $0[.span, { $0.class = "kink" }] = kink
+                        $0 += " "
+                    }
 
-                $0[.span] { $0.class = "phylum" } = demonym
+                    $0 += self.demonym.title
+
+                    if  self.vertex.kinks[is: .intrinsicWitness]
+                    {
+                        $0 += " (Default Implementation)"
+                    }
+                }
+
                 $0[.span, { $0.class = "domain" }]
                 {
                     if  self.vertex.namespace != self.vertex.culture

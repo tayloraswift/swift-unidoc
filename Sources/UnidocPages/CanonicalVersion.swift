@@ -83,7 +83,7 @@ extension CanonicalVersion
         }
 
         self.init(relationship: relationship,
-            package: volume.display ?? "\(volume.symbol.package)",
+            package: volume.title,
             volume: Site.Docs[volume],
             target: target)
     }

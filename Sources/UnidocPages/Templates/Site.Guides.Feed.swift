@@ -32,7 +32,7 @@ extension Site.Guides.Feed
 }
 extension Site.Guides.Feed:RenderablePage
 {
-    var title:String { self.volume.title }
+    var title:String { "\(self.volume.title) Documentation" }
 }
 extension Site.Guides.Feed:StaticPage
 {
