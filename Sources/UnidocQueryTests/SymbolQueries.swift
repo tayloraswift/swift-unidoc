@@ -176,7 +176,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Getting-Started", from: .culture),
+                            .init(stem: "BarbieCore Getting-Started", text: "Getting started"),
                             .init(stem: "BarbieCore Barbie", from: .culture),
                             .init(stem: "BarbieCore Barbie ID", from: .culture),
                             .init(stem: "BarbieCore Barbie PlasticKeychain", from: .culture),

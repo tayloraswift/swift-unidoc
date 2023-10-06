@@ -26,6 +26,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
         html[.div, { $0.class = "nountree" }]
         {
             var depth:Int = 1
+            var outer:Volume.Stem = ""
 
             for noun:Volume.Noun in self.nouns
             {
@@ -44,8 +45,11 @@ extension ModuleSidebar:HyperTextOutputStreamable
                         $0.open(.div) { $0.class = "indent" }
                     }
                 }
-
-                depth = current
+                defer
+                {
+                    depth = current
+                    outer = noun.shoot.stem
+                }
 
                 var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
 
@@ -55,7 +59,8 @@ extension ModuleSidebar:HyperTextOutputStreamable
                     $0[.a] { $0.href = "\(uri)" ; $0.class = "text" } = text
 
                 case .stem(let citizenship):
-                    let name:Substring = noun.shoot.stem.last
+                    let name:Substring = noun.shoot.stem.trimming(scope: outer) ??
+                        noun.shoot.stem.name
                     //  The URI is only valid if the principal volume API version is at
                     //  least 1.0!
                     if  case .foreign = citizenship,
