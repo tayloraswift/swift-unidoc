@@ -48,29 +48,37 @@ extension ModuleSidebar:HyperTextOutputStreamable
                 depth = current
 
                 var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
-                let name:Substring = noun.shoot.stem.last
 
-                //  The URI is only valid if the principal volume API version is at least 1.0!
-                if  case .foreign = noun.from, self.inliner.volumes.principal.api < .v(1, 0)
+                switch noun.style
                 {
-                    $0[.span] = name
-                }
-                else
-                {
-                    $0[.a]
+                case .text(let text):
+                    $0[.a] { $0.href = "\(uri)" ; $0.class = "text" } = text
+
+                case .stem(let citizenship):
+                    let name:Substring = noun.shoot.stem.last
+                    //  The URI is only valid if the principal volume API version is at
+                    //  least 1.0!
+                    if  case .foreign = citizenship,
+                        self.inliner.volumes.principal.api < .v(1, 0)
                     {
-                        $0.href = "\(uri)"
-
-                        switch noun.from
+                        $0[.span] = name
+                    }
+                    else
+                    {
+                        $0[.a]
                         {
-                        case .culture:  break
-                        case .package:  $0.class = "extension local"
-                        case .foreign:  $0.class = "extension foreign"
-                        }
+                            $0.href = "\(uri)"
 
-                    } = name
+                            switch citizenship
+                            {
+                            case .culture:  break
+                            case .package:  $0.class = "extension local"
+                            case .foreign:  $0.class = "extension foreign"
+                            }
+
+                        } = name
+                    }
                 }
-
             }
             for _:Int in 1 ..< depth
             {

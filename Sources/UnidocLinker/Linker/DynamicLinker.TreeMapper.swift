@@ -1,4 +1,5 @@
 import JSON
+import MarkdownRendering
 import ModuleGraphs
 import SymbolGraphs
 import Symbols
@@ -41,7 +42,8 @@ extension DynamicLinker.TreeMapper
     func add(_ vertex:Volume.Vertex.Article)
     {
         self.local[vertex.id] = vertex.shoot
-        self.trees[vertex.culture, default: []].articles.append(vertex.shoot)
+        self.trees[vertex.culture, default: []].articles.append(.init(shoot: vertex.shoot,
+            style: .text("\(vertex.headline.safe)")))
     }
     mutating
     func add(_ vertex:Volume.Vertex.Decl)
@@ -146,18 +148,14 @@ extension DynamicLinker.TreeMapper
 
                 var tree:Volume.TypeTree = .init(id: id)
 
-                tree.rows += members.articles.map
+                tree.rows += members.articles.sorted
                 {
-                    .init(shoot: $0, from: .culture)
-                }
-                    .sorted
-                {
-                    $0.shoot < $1.shoot
+                    $0.style < $1.style
                 }
 
                 tree.rows += members.types.map
                 {
-                    .init(shoot: $0.key, from: $0.value)
+                    .init(shoot: $0.key, style: .stem($0.value))
                 }
                     .sorted
                 {
@@ -169,8 +167,14 @@ extension DynamicLinker.TreeMapper
                     $0["c"] = "\(culture)"
                     $0["n"]
                     {
-                        for noun:Volume.Noun in tree.rows where noun.from == .culture
+                        for noun:Volume.Noun in tree.rows
                         {
+                            if  case .stem(let citizenship) = noun.style,
+                                citizenship != .culture
+                            {
+                                continue
+                            }
+
                             $0[+, Any.self]
                             {
                                 $0["s"] = noun.shoot.stem.rawValue

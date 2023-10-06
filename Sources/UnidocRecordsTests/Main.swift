@@ -47,7 +47,7 @@ enum Main:SyncTests
                     ]))
             {
             }
-            if  let tests:TestGroup = tests / "Races",
+            if  let tests:TestGroup = tests / "Stems",
                     tests.roundtrip(Volume.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
@@ -56,6 +56,20 @@ enum Main:SyncTests
                         .init(stem: "CryptoCore BTC\tinit(_:)",
                             hash: .init(hashing: "the’ir"),
                             from: .package),
+                    ]))
+            {
+            }
+            if  let tests:TestGroup = tests / "CustomText",
+                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    [
+                        .init(stem: "CryptoKit Getting-Started",
+                            hash: .init(hashing: "Getting-Started"),
+                            text: "Getting Started"),
+                        .init(stem: "CryptoCore Weird-Title",
+                            text: "\u{00}\u{FF}"),
+                        .init(stem: "CryptoCore Weird-Title-With-Hash",
+                            hash: .init(hashing: "Weird-Title-With-Hash"),
+                            text: "\u{00}\u{FF}"),
                     ]))
             {
             }

@@ -13,9 +13,11 @@ struct Volume:~Copyable
     public
     var groups:[Group]
     public
+    var index:JSON
+    public
     var trees:[TypeTree]
     public
-    var index:JSON
+    var tree:[Noun]
     public
     var meta:Meta
 
@@ -23,16 +25,18 @@ struct Volume:~Copyable
     init(latest:Unidoc.Zone?,
         vertices:[Vertex],
         groups:[Group],
-        trees:[TypeTree],
         index:JSON,
+        trees:[TypeTree],
+        tree:[Noun],
         meta:Meta)
     {
         self.latest = latest
 
         self.vertices = vertices
         self.groups = groups
-        self.trees = trees
         self.index = index
+        self.trees = trees
+        self.tree = tree
         self.meta = meta
     }
 }

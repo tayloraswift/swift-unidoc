@@ -61,7 +61,12 @@ extension Site.Docs.Meta:ApplicationPage
 }
 extension Site.Docs.Meta:VersionedPage
 {
-    var sidebar:[Volume.Noun]? { nil }
+    var sidebar:[Volume.Noun]?
+    {
+        self.context.volumes.principal.tree.isEmpty
+            ? nil
+            : self.context.volumes.principal.tree
+    }
 
     func main(_ main:inout HTML.ContentEncoder)
     {

@@ -81,7 +81,6 @@ extension WideQuery.Output:ServerResponseFactory
             case .foreign(let vertex):
                 let page:Site.Docs.Foreign = .init(context,
                     canonical: canonical,
-                    sidebar: principal.tree?.rows,
                     vertex: vertex,
                     groups: principal.groups)
                 resource = page.resource()
