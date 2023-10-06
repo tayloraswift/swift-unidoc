@@ -233,6 +233,9 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "last user-agent"
             $0[.dd] = self.tour.lastImpression.agent ?? "none"
 
+            $0[.dt] = "last IP address"
+            $0[.dd] = self.tour.lastImpression.ip?.description ?? "none"
+
             $0[.dt] = "last language"
             $0[.dd] = self.tour.lastImpression.language ?? "none"
 
