@@ -30,7 +30,7 @@ extension Server
 extension Server.Operation:HTTPServerOperation
 {
     init?(get unnormalized:String,
-        address:SocketAddress?,
+        address ip:SocketAddress?,
         headers:HTTPHeaders)
     {
         guard let uri:URI = .init(unnormalized)
@@ -40,15 +40,28 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        /// Actually no better way than to load the IP addresses by printing them to strings;
-        /// a native SwiftNIO ``IPv4Address`` is reference counted and resilient, and we
+        /// A native SwiftNIO ``IPv4Address`` is reference counted and resilient, and we
         /// would rather pass around an inline value type.
-        let address:IP.Address? = switch address
+        let address:IP.Address?
+        switch ip
         {
-        case .v4(let address)?: .v4("\(address)")
-        case .v6(let address)?: .v6("\(address)")
-        case _:                 nil
+        case .v4(let ip)?:
+            let bytes:UInt32 = .init(bigEndian: ip.address.sin_addr.s_addr)
+            let value:IP.V4 = .init(
+                .init((bytes >> 24) & 0xFF),
+                .init((bytes >> 16) & 0xFF),
+                .init((bytes >>  8) & 0xFF),
+                .init( bytes        & 0xFF))
+
+            address = .v4(value)
+
+        case let ip?:
+            address = .v6(ip.description)
+
+        case _:
+            address = nil
         }
+
         let profile:ServerProfile.Sample = .init(ip: address,
             language: headers["accept-language"].first,
             referer: headers["referer"].first,
