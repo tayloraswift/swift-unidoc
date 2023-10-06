@@ -26,30 +26,38 @@ extension ModuleSidebar:HyperTextOutputStreamable
         html[.div, { $0.class = "nountree" }]
         {
             var depth:Int = 1
-            var outer:Volume.Stem = ""
 
             for noun:Volume.Noun in self.nouns
             {
-                let current:Int = max(1, noun.shoot.stem.depth)
-                if  current < depth
+                let indents:Int
+                let name:Substring
+                if  case .stem(.foreign) = noun.style
                 {
-                    for _:Int in current ..< depth
+                    indents = 1
+                    name = noun.shoot.stem.name
+                }
+                else
+                {
+                    indents = max(1, noun.shoot.stem.depth)
+                    name = noun.shoot.stem.last
+                }
+
+                if  indents < depth
+                {
+                    for _:Int in indents ..< depth
                     {
                         $0.close(.div)
                     }
                 }
                 else
                 {
-                    for _:Int in depth ..< current
+                    for _:Int in depth ..< indents
                     {
                         $0.open(.div) { $0.class = "indent" }
                     }
                 }
-                defer
-                {
-                    depth = current
-                    outer = noun.shoot.stem
-                }
+
+                depth = indents
 
                 var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
 
@@ -59,8 +67,6 @@ extension ModuleSidebar:HyperTextOutputStreamable
                     $0[.a] { $0.href = "\(uri)" ; $0.class = "text" } = text
 
                 case .stem(let citizenship):
-                    let name:Substring = noun.shoot.stem.trimming(scope: outer) ??
-                        noun.shoot.stem.name
                     //  The URI is only valid if the principal volume API version is at
                     //  least 1.0!
                     if  case .foreign = citizenship,
