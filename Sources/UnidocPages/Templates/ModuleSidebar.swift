@@ -25,22 +25,12 @@ extension ModuleSidebar:HyperTextOutputStreamable
         //  `ul` as a direct child.
         html[.div, { $0.class = "nountree" }]
         {
+            var previous:Volume.Stem = ""
             var depth:Int = 1
 
             for noun:Volume.Noun in self.nouns
             {
-                let indents:Int
-                let name:Substring
-                if  case .stem(.foreign) = noun.style
-                {
-                    indents = 1
-                    name = noun.shoot.stem.name
-                }
-                else
-                {
-                    indents = max(1, noun.shoot.stem.depth)
-                    name = noun.shoot.stem.last
-                }
+                let (name, indents):(Substring, Int) = noun.shoot.stem.relative(to: previous)
 
                 if  indents < depth
                 {
@@ -57,6 +47,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
                     }
                 }
 
+                previous = noun.shoot.stem
                 depth = indents
 
                 var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
