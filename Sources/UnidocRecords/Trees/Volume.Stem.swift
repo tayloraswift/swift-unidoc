@@ -154,6 +154,20 @@ extension Volume.Stem
     }
 
     @inlinable public
+    func trimming(scope:Self) -> Substring?
+    {
+        if  let separator:String.Index = self.rawValue.lastIndex(where: \.isWhitespace),
+            self.rawValue[..<separator] == scope.rawValue
+        {
+            return self.rawValue[self.rawValue.index(after: separator)...]
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    @inlinable public
     func split() -> (namespace:Substring, scope:[Substring], last:Substring)?
     {
         if  let i:String.Index = self.rawValue.firstIndex(where: \.isWhitespace),

@@ -17,8 +17,6 @@ struct Volume:~Copyable
     public
     var trees:[TypeTree]
     public
-    var tree:[Noun]
-    public
     var meta:Meta
 
     @inlinable public
@@ -27,7 +25,6 @@ struct Volume:~Copyable
         groups:[Group],
         index:JSON,
         trees:[TypeTree],
-        tree:[Noun],
         meta:Meta)
     {
         self.latest = latest
@@ -36,7 +33,6 @@ struct Volume:~Copyable
         self.groups = groups
         self.index = index
         self.trees = trees
-        self.tree = tree
         self.meta = meta
     }
 }

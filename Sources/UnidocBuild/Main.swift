@@ -22,6 +22,11 @@ enum Main
 
         var configuration:TLSConfiguration = .makeClientConfiguration()
             configuration.applicationProtocols = ["h2"]
+        if  options.remote == "localhost"
+        {
+            configuration.certificateVerification = .none
+        }
+
         let niossl:NIOSSLContext = try .init(configuration: configuration)
 
         let http2:HTTP2Client = .init(
@@ -31,7 +36,7 @@ enum Main
 
         let swiftinit:SwiftinitClient = .init(http2: http2, cookie: options.cookie)
 
-        try await swiftinit.connect
+        try await swiftinit.connect(port: options.port)
         {
             let package:PackageBuildStatus = try await $0.get(
                 from: "/api/build/\(options.package)")
@@ -106,6 +111,8 @@ extension Main
         var package:PackageIdentifier
         var cookie:String
         var remote:String
+        var port:Int
+
         var pretty:Bool
         var build:Bool
         var force:Bool
@@ -116,6 +123,8 @@ extension Main
             self.package = package
             self.cookie = ""
             self.remote = "swiftinit.org"
+            self.port = 443
+
             self.pretty = false
             self.build = true
             self.force = false
@@ -162,7 +171,18 @@ extension Main.Options
 
                 options.remote = remote
 
-            case "--pretty", "-p":
+            case "--port", "-p":
+                guard
+                let port:String = arguments.popFirst(),
+                let port:Int = .init(port)
+                else
+                {
+                    fatalError("Expected port number after '\(option)'")
+                }
+
+                options.port = port
+
+            case "--pretty", "-P":
                 options.pretty = true
 
             case "--force", "-f":
@@ -200,9 +220,9 @@ struct SwiftinitClient
 extension SwiftinitClient
 {
     @inlinable public
-    func connect<T>(with body:(Connection) async throws -> T) async throws -> T
+    func connect<T>(port:Int, with body:(Connection) async throws -> T) async throws -> T
     {
-        try await self.http2.connect
+        try await self.http2.connect(port: port)
         {
             try await body(Connection.init(http2: $0,
                 cookie: self.cookie,
@@ -214,9 +234,10 @@ extension SwiftinitClient
 {
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
+        port:Int,
         from endpoint:String) async throws -> Response where Response:JSONDecodable
     {
-        try await self.connect { try await $0.get(from: endpoint) }
+        try await self.connect(port: port) { try await $0.get(from: endpoint) }
     }
 }
 

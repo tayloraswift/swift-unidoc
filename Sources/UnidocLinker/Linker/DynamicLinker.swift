@@ -232,6 +232,10 @@ extension DynamicLinker
             tree: cultures.map
             {
                 .init(shoot: $0.shoot, style: .stem(.package))
+            }
+                .sorted
+            {
+                $0.shoot < $1.shoot
             },
             meta: meta)
     }

@@ -450,14 +450,14 @@ extension UnidocDatabase
             symbol: id.volume,
             latest: snapshot.edition == latestRelease,
             patch: thisRelease,
-            link: mesh.meta)
+            link: mesh.meta,
+            tree: mesh.tree)
 
         let volume:Volume = .init(latest: latestRelease,
             vertices: mesh.vertices,
             groups: mesh.groups,
             index: mesh.index,
             trees: mesh.trees,
-            tree: mesh.tree,
             meta: meta)
 
         return volume
