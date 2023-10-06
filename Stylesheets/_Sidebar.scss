@@ -21,6 +21,11 @@ div.nountree
         font-size: 0.875rem;
     }
 
+    > a.text + a:not(.text)
+    {
+        margin-top: 0.5rem;
+    }
+
     > a.extension.local::first-letter
     {
         color: $light-accent-lavender;

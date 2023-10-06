@@ -154,17 +154,47 @@ extension Volume.Stem
     }
 
     @inlinable public
-    func trimming(scope:Self) -> Substring?
+    func relative(to node:Self) -> (name:Substring, depth:Int)
     {
-        if  let separator:String.Index = self.rawValue.lastIndex(where: \.isWhitespace),
-            self.rawValue[..<separator] == scope.rawValue
-        {
-            return self.rawValue[self.rawValue.index(after: separator)...]
-        }
+        var depth:Int = 1
+
+        guard
+        var i:String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
+        var n:String.Index = node.rawValue.firstIndex(where: \.isWhitespace),
+        self.rawValue[..<i] == node.rawValue[..<n]
         else
         {
-            return nil
+            return (self.name, depth)
         }
+
+        i = self.rawValue.index(after: i)
+        n = node.rawValue.index(after: n)
+
+        while let j:String.Index = self.rawValue[i...].firstIndex(where: \.isWhitespace)
+        {
+            let counterpart:Substring = node.rawValue[n...].prefix { !$0.isWhitespace }
+            if  counterpart != self.rawValue[i ..< j]
+            {
+                break
+            }
+
+            defer
+            {
+                depth += 1
+                i = self.rawValue.index(after: j)
+            }
+
+            if  counterpart.endIndex < node.rawValue.endIndex
+            {
+                n = node.rawValue.index(after: counterpart.endIndex)
+            }
+            else
+            {
+                break
+            }
+        }
+
+        return (Self.format(self.rawValue[i...])[...], depth)
     }
 
     @inlinable public
