@@ -1,24 +1,28 @@
+/// Defines the CSS classes associated with each type of supported syntax highlight.
+///
+/// The two-letter codenames make the Sass sources slightly less readable, but they reduce the
+/// size of a typical rendered page by around 30 percent.
 @frozen public
 enum MarkdownSyntaxHighlight:String, Equatable, Hashable, Sendable
 {
-    case attribute      = "syntax-attribute"
-    case binding        = "syntax-binding"
-    case comment        = "syntax-comment"
-    case directive      = "syntax-directive"
-    case doccomment     = "syntax-doccomment"
-    case identifier     = "syntax-identifier"
-    case interpolation  = "syntax-interpolation"
-    case keyword        = "syntax-keyword"
-    case label          = "syntax-label"
-    case literalNumber  = "syntax-literal-number"
-    case literalString  = "syntax-literal-string"
-    case magic          = "syntax-magic"
-    case `operator`     = "syntax-operator"
-    case pseudo         = "syntax-pseudo"
-    case actor          = "syntax-actor"
-    case `class`        = "syntax-class"
-    case type           = "syntax-type"
-    case `typealias`    = "syntax-typealias"
+    case attribute      = "xa"
+    case binding        = "xb"
+    case comment        = "xc"
+    case directive      = "xr"
+    case doccomment     = "xd"
+    case identifier     = "xv"
+    case interpolation  = "xj"
+    case keyword        = "xk"
+    case label          = "xl"
+    case literalNumber  = "xn"
+    case literalString  = "xs"
+    case magic          = "xm"
+    case `operator`     = "xo"
+    case pseudo         = "xp"
+    case actor          = "xy"
+    case `class`        = "xz"
+    case type           = "xt"
+    case `typealias`    = "xu"
     case indent         = "xi"
 }
 extension MarkdownSyntaxHighlight:CustomStringConvertible

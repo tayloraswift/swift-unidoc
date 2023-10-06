@@ -8,7 +8,16 @@ section.notice
     }
 }
 
-section.notice.canonical
+section.notice.extendee
+{
+    code
+    {
+        font-style: normal;
+        background-color: transparent;
+    }
+}
+section.notice.canonical,
+section.notice.extendee
 {
     font-style: italic;
     color: $light-accent-barbie-pink;

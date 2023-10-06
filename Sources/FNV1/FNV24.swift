@@ -43,9 +43,15 @@ extension FNV24
     }
 
     @inlinable public
+    init(truncating extended:Extended)
+    {
+        self.init(value: extended.value >> 8)
+    }
+
+    @inlinable public
     init(folding fnv32:FNV32)
     {
-        self.init(value: fnv32.folded.value >> 8)
+        self.init(truncating: fnv32.folded)
     }
 
     @inlinable public

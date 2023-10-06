@@ -1,7 +1,6 @@
 import MongoDB
 import MongoQL
 import Unidoc
-import UnidocSelectors
 import UnidocRecords
 
 extension UnidocDatabase

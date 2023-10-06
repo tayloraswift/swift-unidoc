@@ -6,9 +6,7 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Unidoc
-import UnidocAnalysis
 import UnidocLinker
-import UnidocSelectors
 import UnidocRecords
 
 @frozen public
@@ -315,6 +313,23 @@ extension UnidocDatabase
         return uplinked
     }
 
+    public
+    func uplink(volume:VolumeIdentifier, with session:Mongo.Session) async throws -> Int
+    {
+        if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
+                with: session)
+        {
+            try await self.uplink(
+                package: volume.id.package,
+                version: volume.id.version,
+                with: session)
+        }
+        else
+        {
+            0
+        }
+    }
+
     @discardableResult
     public
     func unlink(volume:VolumeIdentifier,
@@ -343,7 +358,7 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     private
-    func fill(volume:__owned Volume,
+    func fill(volume:consuming Volume,
         clear:Bool = true,
         with session:Mongo.Session) async throws
     {
@@ -360,12 +375,10 @@ extension UnidocDatabase
         //  we need to delete that too.
         try await self.unlink(volume: volume.id, with: session)
 
-        let (index, trees):(SearchIndex<VolumeIdentifier>, [Volume.TypeTree]) = volume.indexes()
-
         try await self.volumes.insert(some: volume.meta, with: session)
         try await self.vertices.insert(some: volume.vertices, with: session)
-        try await self.trees.insert(some: trees, with: session)
-        try await self.search.insert(some: index, with: session)
+        try await self.trees.insert(some: volume.trees, with: session)
+        try await self.search.insert(some: volume.search, with: session)
 
         if  volume.meta.latest
         {
@@ -398,45 +411,54 @@ extension UnidocDatabase
 
         (consume symbolicator).emit(linker.errors, colors: .enabled)
 
-        let latestRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
+        let id:Snapshot.ID = snapshot.id
+
+        let formerRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
             of: snapshot.package,
             with: session)
 
-        let id:Snapshot.ID = snapshot.id
+        let latestRelease:Unidoc.Zone?
+        let thisRelease:PatchVersion?
 
-        var volume:Volume = .init(latest: latestRelease?.id,
-            vertices: linker.vertices,
-            groups: linker.groups,
-            meta: .init(id: snapshot.edition,
-                dependencies: dependencies,
-                display: snapshot.metadata.display,
-                refname: snapshot.metadata.commit?.refname,
-                commit: snapshot.metadata.commit?.hash,
-                symbol: id.volume,
-                latest: true,
-                patch: id.version.stable?.patch,
-                link: linker.meta))
-
-        _ = consume linker
-
-        guard case .stable(.release(let patch, build: _)) = id.version.canonical
-        else
+        switch id.version.canonical
         {
-            volume.meta.latest = false
-            volume.meta.patch = nil
-            return volume
+        case .stable(.release(let patch, build: _)):
+            if  let formerRelease:Volumes.PatchView,
+                    formerRelease.patch > patch
+            {
+                latestRelease = formerRelease.id
+            }
+            else
+            {
+                latestRelease = snapshot.edition
+            }
+
+            thisRelease = patch
+
+        case _:
+            latestRelease = formerRelease?.id
+            thisRelease = nil
         }
 
-        if  let latest:PatchVersion = latestRelease?.patch,
-                latest > patch
-        {
-            volume.meta.latest = false
-        }
-        else
-        {
-            volume.meta.latest = true
-            volume.latest = volume.meta.id
-        }
+        let mesh:DynamicLinker.Mesh = linker.link()
+
+        let meta:Volume.Meta = .init(id: snapshot.edition,
+            dependencies: dependencies,
+            display: snapshot.metadata.display,
+            refname: snapshot.metadata.commit?.refname,
+            commit: snapshot.metadata.commit?.hash,
+            symbol: id.volume,
+            latest: snapshot.edition == latestRelease,
+            patch: thisRelease,
+            link: mesh.meta,
+            tree: mesh.tree)
+
+        let volume:Volume = .init(latest: latestRelease,
+            vertices: mesh.vertices,
+            groups: mesh.groups,
+            index: mesh.index,
+            trees: mesh.trees,
+            meta: meta)
 
         return volume
     }

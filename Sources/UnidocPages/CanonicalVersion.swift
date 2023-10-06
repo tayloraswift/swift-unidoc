@@ -65,6 +65,7 @@ extension CanonicalVersion
             case .culture(let vertex):  target = .culture(Site.Docs[volume, vertex.shoot])
             case .decl(let vertex):     target = .decl(Site.Docs[volume, vertex.shoot])
             case .file:                 return   nil
+            case .foreign(let vertex):  target = .foreign(Site.Docs[volume, vertex.shoot])
             case .global:               target = .global
             }
         }
@@ -76,12 +77,13 @@ extension CanonicalVersion
             case .culture?:             target = .culture(nil)
             case .decl?:                target = .decl(nil)
             case .file?, nil:           return   nil
+            case .foreign?:             target = .foreign(nil)
             case .global?:              target = .global
             }
         }
 
         self.init(relationship: relationship,
-            package: volume.display ?? "\(volume.symbol.package)",
+            package: volume.title,
             volume: Site.Docs[volume],
             target: target)
     }
@@ -96,6 +98,7 @@ extension CanonicalVersion
         case .article(let uri): return uri
         case .culture(let uri): return uri
         case .decl(let uri):    return uri
+        case .foreign(let uri): return uri
         case .global:           return self.volume
         }
     }

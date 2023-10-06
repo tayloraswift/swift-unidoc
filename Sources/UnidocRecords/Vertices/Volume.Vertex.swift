@@ -18,6 +18,7 @@ extension Volume
         case culture(Culture)
         case decl(Decl)
         case file(File)
+        case foreign(Foreign)
         case global(Global)
     }
 }
@@ -28,8 +29,8 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .article(let article): return article
-        case _:                     return nil
+        case .article(let article): article
+        case _:                     nil
         }
     }
     @inlinable public
@@ -37,8 +38,8 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .culture(let culture): return culture
-        case _:                     return nil
+        case .culture(let culture): culture
+        case _:                     nil
         }
     }
     @inlinable public
@@ -46,8 +47,8 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .decl(let decl): return decl
-        case _:               return nil
+        case .decl(let decl):       decl
+        case _:                     nil
         }
     }
     @inlinable public
@@ -55,8 +56,17 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .file(let file): return file
-        case _:               return nil
+        case .file(let file):       file
+        case _:                     nil
+        }
+    }
+    @inlinable public
+    var foreign:Foreign?
+    {
+        switch self
+        {
+        case .foreign(let foreign): foreign
+        case _:                     nil
         }
     }
     @inlinable public
@@ -64,8 +74,8 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .global(let global): return global
-        case _:                   return nil
+        case .global(let global):   global
+        case _:                     nil
         }
     }
 }
@@ -76,11 +86,12 @@ extension Volume.Vertex:Identifiable
     {
         switch self
         {
-        case .article(let article): return article.id
-        case .culture(let culture): return culture.id
-        case .decl(let decl):       return decl.id
-        case .file(let file):       return file.id
-        case .global(let global):   return global.id
+        case .article(let article): article.id
+        case .culture(let culture): culture.id
+        case .decl(let decl):       decl.id
+        case .file(let file):       file.id
+        case .foreign(let foreign): foreign.id
+        case .global(let global):   global.id
         }
     }
 }
@@ -91,11 +102,12 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .article(let article): return article.overview
-        case .culture(let culture): return culture.overview
-        case .decl(let decl):       return decl.overview
-        case .file:                 return nil
-        case .global:               return nil
+        case .article(let article): article.overview
+        case .culture(let culture): culture.overview
+        case .decl(let decl):       decl.overview
+        case .file:                 nil
+        case .foreign:              nil
+        case .global:               nil
         }
     }
     @inlinable public
@@ -103,11 +115,12 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .article(let article): return article.details
-        case .culture(let culture): return culture.details
-        case .decl(let decl):       return decl.details
-        case .file:                 return nil
-        case .global:               return nil
+        case .article(let article): article.details
+        case .culture(let culture): culture.details
+        case .decl(let decl):       decl.details
+        case .file:                 nil
+        case .foreign:              nil
+        case .global:               nil
         }
     }
     @inlinable public
@@ -115,11 +128,12 @@ extension Volume.Vertex
     {
         switch self
         {
-        case .article(let article): return article.shoot
-        case .culture(let culture): return culture.shoot
-        case .decl(let decl):       return decl.shoot
-        case .file:                 return nil
-        case .global:               return nil
+        case .article(let article): article.shoot
+        case .culture(let culture): culture.shoot
+        case .decl(let decl):       decl.shoot
+        case .file:                 nil
+        case .foreign(let foreign): foreign.shoot
+        case .global:               nil
         }
     }
 }
@@ -138,10 +152,12 @@ extension Volume.Vertex
         /// an equality match instead of a range match.
         case zone = "Z"
 
+        /// Appears in ``Foreign`` only.
+        case extendee = "j"
         /// Appears in ``Article``, ``Decl``, ``Culture``, and ``File``.
         case symbol = "Y"
-        /// Appears in ``Article``, ``Culture``, ``Decl``, and ``Global``, but may be computed
-        /// at encoding-time. In ``Global``, it is always the empty string.
+        /// Appears in every vertex type except for ``File``. In ``Global``, it is always the
+        /// empty string.
         case stem = "U"
 
         /// Appears in ``Culture`` only.
@@ -150,7 +166,7 @@ extension Volume.Vertex
         /// Only appears in ``Culture``.
         case module = "M"
 
-        /// Only appears in ``Decl``.
+        /// Appears in ``Decl`` and ``Foreign``.
         case flags = "F"
         /// Only appears in ``Decl``.
         case signature_availability = "A"
@@ -201,8 +217,8 @@ extension Volume.Vertex
         /// The field contains a *group* scalar. (Not a master scalar!)
         case group = "t"
 
-        /// Optional extended FNV24 hash of the record’s symbol. Currently only computed
-        /// for ``Decl``, ``Culture``, and ``Article`` records.
+        /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
+        /// for ``File``. In ``Global``, it is always zero.
         case hash = "H"
     }
 }
@@ -221,8 +237,8 @@ extension Volume.Vertex:BSONDocumentEncodable
             //  Articles are so few in number that we can afford to duplicate this.
             bson[.symbol] = self.stem
             bson[.hash] = FNV24.Extended.init(hashing: "\(self.stem)")
-
             bson[.stem] = self.stem
+
             bson[.culture] = self.culture
             bson[.file] = self.file
             bson[.headline] = self.headline
@@ -233,9 +249,9 @@ extension Volume.Vertex:BSONDocumentEncodable
 
         case .decl(let self):
             bson[.symbol] = self.symbol
-            bson[.hash] = FNV24.Extended.init(hashing: "\(self.symbol)")
-
             bson[.flags] = self.flags
+            bson[.hash] = self.hash
+            bson[.stem] = self.stem
 
             bson[.signature_availability] =
                 self.signature.availability.isEmpty ? nil :
@@ -258,8 +274,6 @@ extension Volume.Vertex:BSONDocumentEncodable
 
             bson[.signature_spis] = self.signature.spis
 
-            bson[.stem] = self.stem
-
             bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
             bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
             bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
@@ -278,8 +292,8 @@ extension Volume.Vertex:BSONDocumentEncodable
             //  This allows us to correlate modules identifiers across different versions.
             bson[.symbol] = module
             bson[.hash] = FNV24.Extended.init(hashing: "s:m:\(module)")
-
             bson[.stem] = self.stem
+
             bson[.module] = self.module
             bson[.file] = self.readme
             bson[.census] = self.census
@@ -290,6 +304,13 @@ extension Volume.Vertex:BSONDocumentEncodable
 
         case .file(let self):
             bson[.symbol] = self.symbol
+
+        case .foreign(let self):
+            bson[.extendee] = self.extendee
+            bson[.scope] = self.scope.isEmpty ? nil : self.scope
+            bson[.flags] = self.flags
+            bson[.hash] = self.hash
+            bson[.stem] = self.stem
 
         case .global:
             //  This must have a value, otherwise it would get lost among all the file
@@ -358,6 +379,14 @@ extension Volume.Vertex:BSONDocumentDecodable
 
         case .file?:
             self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
+
+        case .foreign?:
+            self = .foreign(.init(id: id,
+                extendee: try bson[.extendee].decode(),
+                scope: try bson[.scope]?.decode() ?? [],
+                flags: try bson[.flags].decode(),
+                stem: try bson[.stem].decode(),
+                hash: try bson[.hash].decode()))
 
         case _:
             self = .global(.init(id: id))

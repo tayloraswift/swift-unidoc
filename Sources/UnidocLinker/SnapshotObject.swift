@@ -7,6 +7,11 @@ import Unidoc
 @usableFromInline internal final
 class SnapshotObject:Sendable
 {
+    /// Maps declarations to module namespaces. For declarations nested inside types from
+    /// upstream modules, this is the index of the module of the outermost type. If this is
+    /// the case, then the index is only valid within this snapshot.
+    private
+    let qualifiers:[Int32: Int]
     /// Maps nested declarations to scopes. Scopes might be non-local.
     private
     let hierarchy:[Int32: Unidoc.Scalar]
@@ -16,10 +21,12 @@ class SnapshotObject:Sendable
 
     private
     init(snapshot:Snapshot,
+        qualifiers:[Int32: Int],
         hierarchy:[Int32: Unidoc.Scalar],
         scalars:Scalars)
     {
         self.snapshot = snapshot
+        self.qualifiers = qualifiers
         self.hierarchy = hierarchy
         self.scalars = scalars
     }
@@ -73,7 +80,21 @@ extension SnapshotObject
             }
         }
 
+        var qualifiers:[Int32: Int] = [:]
+
+        for culture:SymbolGraph.Culture in snapshot.graph.cultures
+        {
+            for namespace:SymbolGraph.Namespace in culture.namespaces
+            {
+                for d:Int32 in namespace.range
+                {
+                    qualifiers[d] = namespace.index
+                }
+            }
+        }
+
         self.init(snapshot: snapshot,
+            qualifiers: qualifiers,
             hierarchy: hierarchy,
             scalars: scalars)
     }
@@ -83,7 +104,7 @@ extension SnapshotObject
     func priority(of decl:Unidoc.Scalar) -> DynamicContext.SortPriority?
     {
         if  let local:Int32 = decl - self.edition,
-            let decl:SymbolGraph.Decl = snapshot.graph.decls[local]?.decl
+            let decl:SymbolGraph.Decl = self.decls[local]?.decl
         {
             let phylum:DynamicContext.SortPriority.Phylum = .init(decl.phylum,
                 position: decl.location?.position)
@@ -97,12 +118,29 @@ extension SnapshotObject
         }
     }
 
+    func namespace(of declaration:Unidoc.Scalar) -> ModuleIdentifier?
+    {
+        (declaration - self.edition).map(self.namespace(of:)) ?? nil
+    }
+    /// Returns the module namespace of the requested declaration, if the requested declaration
+    /// is a citizen of this snapshot.
+    ///
+    /// This returns nil if the requested declaration is a top-level declaration, of if it
+    /// is not a citizen of this snapshot.
+    func namespace(of declaration:Int32) -> ModuleIdentifier?
+    {
+        self.qualifiers[declaration].map { self.namespaces[$0] }
+    }
+
     func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
     {
         (declaration - self.edition).map(self.scope(of:)) ?? nil
     }
     /// Returns the lexical scope of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
+    ///
+    /// This returns nil if the requested declaration is a top-level declaration, of if it
+    /// is not a citizen of this snapshot.
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {
         self.hierarchy[declaration]

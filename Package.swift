@@ -55,7 +55,6 @@ let package:Package = .init(
         .library(name: "System", targets: ["System"]),
 
         .library(name: "Unidoc", targets: ["Unidoc"]),
-        .library(name: "UnidocAnalysis", targets: ["UnidocAnalysis"]),
         .library(name: "UnidocAutomation", targets: ["UnidocAutomation"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
@@ -385,13 +384,6 @@ let package:Package = .init(
                 .target(name: "UnidocPlanes"),
             ]),
 
-        .target(name: "UnidocAnalysis", dependencies:
-            [
-                .target(name: "JSONEncoding"),
-                .target(name: "MD5"),
-                .target(name: "UnidocSelectors"),
-            ]),
-
         .target(name: "UnidocAutomation", dependencies:
             [
                 .target(name: "JSON"),
@@ -400,7 +392,6 @@ let package:Package = .init(
         .target(name: "UnidocDB", dependencies:
             [
                 .target(name: "GitHubAPI"),
-                .target(name: "UnidocAnalysis"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnixTime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
@@ -416,6 +407,7 @@ let package:Package = .init(
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
+                .target(name: "MarkdownRendering"),
                 .target(name: "UnidocDiagnostics"),
                 .target(name: "UnidocRecords"),
             ]),
@@ -448,6 +440,8 @@ let package:Package = .init(
         .target(name: "UnidocRecords", dependencies:
             [
                 .target(name: "FNV1"),
+                .target(name: "JSON"),
+                .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
             ]),
 
@@ -597,9 +591,9 @@ let package:Package = .init(
                 "directories",
             ]),
 
-        .executableTarget(name: "UnidocAnalysisTests", dependencies:
+        .executableTarget(name: "UnidocRecordsTests", dependencies:
             [
-                .target(name: "UnidocAnalysis"),
+                .target(name: "UnidocRecords"),
                 .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 

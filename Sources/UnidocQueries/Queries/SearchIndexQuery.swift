@@ -3,7 +3,6 @@ import BSONDecoding
 import BSONEncoding
 import MD5
 import MongoQL
-import UnidocAnalysis
 import UnidocDB
 import UnidocRecords
 

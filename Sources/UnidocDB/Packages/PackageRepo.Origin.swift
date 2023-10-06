@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import Symbols
 
-extension Volume
+extension PackageRepo
 {
     @frozen public
     enum Origin:Equatable, Hashable, Sendable
@@ -11,7 +11,7 @@ extension Volume
         case github(String)
     }
 }
-extension Volume.Origin
+extension PackageRepo.Origin
 {
     @inlinable public static
     func github(_ owner:String, _ repo:String) -> Self
@@ -32,7 +32,7 @@ extension Volume.Origin
         }
     }
 }
-extension Volume.Origin:CustomStringConvertible
+extension PackageRepo.Origin:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -43,7 +43,7 @@ extension Volume.Origin:CustomStringConvertible
         }
     }
 }
-extension Volume.Origin:LosslessStringConvertible
+extension PackageRepo.Origin:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -60,6 +60,6 @@ extension Volume.Origin:LosslessStringConvertible
         }
     }
 }
-extension Volume.Origin:BSONStringDecodable, BSONStringEncodable
+extension PackageRepo.Origin:BSONStringDecodable, BSONStringEncodable
 {
 }

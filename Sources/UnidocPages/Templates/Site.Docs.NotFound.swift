@@ -18,7 +18,7 @@ extension Site.Docs
 }
 extension Site.Docs.NotFound:RenderablePage, DynamicPage
 {
-    var title:String { "Symbol Not Found - \(self.volume.title)" }
+    var title:String { "Symbol Not Found - \(self.volume.title) Documentation" }
 }
 extension Site.Docs.NotFound:ApplicationPage
 {
@@ -35,10 +35,7 @@ extension Site.Docs.NotFound:VersionedPage
             $0[.p]
             {
                 $0 += "Symbol not found. Try a search, or return to the documentation for "
-                $0[.a]
-                {
-                    $0.href = "\(Site.Docs[self.volume])"
-                } = self.volume.display ?? "\(self.volume.symbol.package)"
+                $0[.a] { $0.href = "\(Site.Docs[self.volume])" } = self.volume.title
                 $0 += "."
             }
         }

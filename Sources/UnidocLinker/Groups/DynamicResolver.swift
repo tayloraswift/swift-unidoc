@@ -29,19 +29,19 @@ struct DynamicResolver
 }
 extension DynamicResolver
 {
-    init(context:DynamicContext,
-        diagnostics:DynamicLinkerDiagnostics,
+    init(diagnostics:DynamicLinkerDiagnostics,
         namespace:ModuleIdentifier,
-        clients:DynamicClientGroup,
+        global:DynamicContext,
+        module:DynamicLinker.ModuleContext,
         scope:[String] = [])
     {
         self.init(
             diagnostics: diagnostics,
-            codelinks: .init(table: clients.codelinks, scope: .init(
+            codelinks: .init(table: module.codelinks, scope: .init(
                 namespace: namespace,
-                imports: clients.imports,
+                imports: module.imports,
                 path: scope)),
-            context: context)
+            context: global)
     }
 }
 extension DynamicResolver

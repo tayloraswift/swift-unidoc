@@ -10,45 +10,49 @@ code
 }
 code
 {
-    span.syntax-identifier,
-    span.syntax-operator
+    span.xv,    // identifier
+    span.xo     // operator
     {
         color: $light-foreground;
     }
-    span.syntax-binding
+    span.xb     // binding
     {
         color: $light-foreground;
     }
-    span.syntax-attribute,
-    span.syntax-directive,
-    span.syntax-keyword,
-    span.syntax-magic
+    span.xa,    // attribute
+    span.xr,    // directive
+    span.xk,    // keyword
+    span.xm     // magic
     {
         color: $light-accent-hot-pink;
     }
-    span.syntax-interpolation,
-    span.syntax-pseudo
+    span.xj,    // interpolation anchor
+    span.xp     // pseudo
     {
         color: $light-accent-barbie-pink;
     }
-    span.syntax-literal-number,
-    span.syntax-literal-string
+    span.xn,    // numeric literal
+    span.xs     // string literal
     {
         color: $light-accent-violet;
     }
-    span.syntax-actor, a.syntax-actor,
-    span.syntax-class, a.syntax-class,
-    span.syntax-type, a.syntax-type
+    span.xy, a.xy,  // actor
+    span.xz, a.xz,  // class
+    span.xt, a.xt   // type
     {
         color: $light-accent-yellow;
     }
-    span.syntax-typealias
+    span.extendee, a.extendee
+    {
+        color: inherit;
+    }
+    span.xu     // typealias
     {
         color: $light-accent-barbie-pink;
         font-style: italic;
     }
-    span.syntax-comment,
-    span.syntax-doccomment
+    span.xc,    // regular comment
+    span.xd     // documentation comment
     {
         color: $light-accent-comment;
         font-style: italic;

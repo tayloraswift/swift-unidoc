@@ -136,7 +136,7 @@ extension VersionedPageContext
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
     {
-        if  let origin:Volume.Origin = self.repo?.origin,
+        if  let origin:PackageRepo.Origin = self.repo?.origin,
             let refname:String = self.volumes[file.zone]?.refname,
             let file:Volume.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
