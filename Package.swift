@@ -407,6 +407,7 @@ let package:Package = .init(
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
+                .target(name: "MarkdownRendering"),
                 .target(name: "UnidocDiagnostics"),
                 .target(name: "UnidocRecords"),
             ]),

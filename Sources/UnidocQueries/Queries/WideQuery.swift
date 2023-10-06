@@ -175,6 +175,9 @@ extension WideQuery:VolumeLookupQuery
             }
         }
 
+        let extendee:AdjacentScalar = .init(
+            in: Output.Principal[.vertex] / Volume.Vertex[.extendee])
+
         //  Gather all the extensions to the principal vertex.
         pipeline.stage
         {
@@ -190,23 +193,11 @@ extension WideQuery:VolumeLookupQuery
                 $0[.from] = UnidocDatabase.Groups.name
                 $0[.let] = .init
                 {
-                    // $0[let: global] = Output.Principal[.vertex] / Volume.Vertex[.id]
                     $0[let: global] = .expr
                     {
                         $0[.cond] =
                         (
-                            //  This is a little bit weird: if `\vertex.extendee` is non-nil,
-                            //  this evaluates to an integer, which is not a boolean `true`,
-                            //  so the `else` branch is taken. If `\vertex.extendee` is nil,
-                            //  this evaluates to `true`, so the `then` branch is taken.
-                            if: .expr
-                            {
-                                $0[.coalesce] =
-                                (
-                                    Output.Principal[.vertex] / Volume.Vertex[.extendee],
-                                    true
-                                )
-                            },
+                            if: extendee.exists,
                             then: Output.Principal[.vertex] / Volume.Vertex[.id],
                             else: BSON.Max.init()
                         )
@@ -262,7 +253,7 @@ extension WideQuery:VolumeLookupQuery
                     in: Output.Principal[.volume] / Volume.Meta[.dependencies])
                 let extensions:Mongo.List<Volume.Group, Mongo.KeyPath> = .init(
                     in: Output.Principal[.groups])
-                let adjacent:AdjacentScalars = .init(
+                let adjacent:AdjacentScalarsView = .init(
                     in: Output.Principal[.vertex])
 
                 $0[volumes] = .expr
@@ -324,8 +315,11 @@ extension WideQuery:VolumeLookupQuery
                                     .commit,
                                     .patch,
 
-                                    // TODO: we only need this for top-level queries.
+                                    //  TODO: we only need this for top-level queries!
                                     .link,
+                                    //  TODO: we only need this for top-level queries and
+                                    //  foreign vertices!
+                                    .tree,
 
                                     .latest,
                                     .api

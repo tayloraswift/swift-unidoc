@@ -455,8 +455,9 @@ extension UnidocDatabase
         let volume:Volume = .init(latest: latestRelease,
             vertices: mesh.vertices,
             groups: mesh.groups,
-            trees: mesh.trees,
             index: mesh.index,
+            trees: mesh.trees,
+            tree: mesh.tree,
             meta: meta)
 
         return volume

@@ -12,7 +12,6 @@ extension Site.Docs
         let context:VersionedPageContext
 
         let canonical:CanonicalVersion?
-        let sidebar:[Volume.Noun]?
 
         private
         let vertex:Volume.Vertex.Foreign
@@ -21,13 +20,11 @@ extension Site.Docs
 
         init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
-            sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Foreign,
             groups:[Volume.Group])
         {
             self.context = context
             self.canonical = canonical
-            self.sidebar = sidebar
             self.vertex = vertex
             self.groups = groups
         }
@@ -79,6 +76,8 @@ extension Site.Docs.Foreign:ApplicationPage
 }
 extension Site.Docs.Foreign:VersionedPage
 {
+    var sidebar:[Volume.Noun]? { self.context.volumes.principal.tree }
+
     func main(_ main:inout HTML.ContentEncoder)
     {
         main[.section, { $0.class = "introduction" }]

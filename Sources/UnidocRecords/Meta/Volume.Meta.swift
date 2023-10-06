@@ -32,6 +32,9 @@ extension Volume
 
         public
         var link:LinkDetails?
+        /// Contains a tree of the cultures in this volume.
+        public
+        var tree:[Noun]
 
         public
         var api:MinorVersion
@@ -45,7 +48,8 @@ extension Volume
             symbol:VolumeIdentifier,
             latest:Bool,
             patch:PatchVersion? = nil,
-            link:LinkDetails? = nil)
+            link:LinkDetails? = nil,
+            tree:[Noun] = [])
         {
             self.api = VolumeAPI.version
 
@@ -58,6 +62,7 @@ extension Volume
             self.latest = latest
             self.patch = patch
             self.link = link
+            self.tree = tree
         }
     }
 }
@@ -93,6 +98,7 @@ extension Volume.Meta
         case commit = "H"
         case patch = "S"
         case link = "N"
+        case tree = "X"
 
         case planes_min = "C"
 
@@ -133,6 +139,7 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.latest] = self.latest ? true : nil
         bson[.patch] = self.patch
         bson[.link] = self.link
+        bson[.tree] = Volume.NounTable.init(eliding: self.tree)
 
         bson[.planes_min] = self.planes.min
 
@@ -163,7 +170,8 @@ extension Volume.Meta:BSONDocumentDecodable
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,
             patch: try bson[.patch]?.decode(),
-            link: try bson[.link]?.decode())
+            link: try bson[.link]?.decode(),
+            tree: try bson[.tree]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
 
         self.api = try bson[.api]?.decode() ?? .v(0, 1)
     }

@@ -227,8 +227,12 @@ extension DynamicLinker
 
         return .init(vertices: vertices,
             groups: groups,
-            trees: trees,
             index: index,
+            trees: trees,
+            tree: cultures.map
+            {
+                .init(shoot: $0.shoot, style: .stem(.package))
+            },
             meta: meta)
     }
 }
