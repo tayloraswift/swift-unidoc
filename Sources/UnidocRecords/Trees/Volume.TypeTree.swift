@@ -1,7 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 import Unidoc
-import UnidocRecords
 
 extension Volume
 {
@@ -23,16 +22,6 @@ extension Volume
 }
 extension Volume.TypeTree
 {
-    @inlinable internal
-    init(id:Unidoc.Scalar, table:Table)
-    {
-        self.init(id: id, rows: table.rows)
-    }
-
-    var table:Table { .init(rows: self.rows) }
-}
-extension Volume.TypeTree
-{
     public
     enum CodingKey:String
     {
@@ -46,7 +35,7 @@ extension Volume.TypeTree:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.table] = self.table
+        bson[.table] = Volume.NounTable.init(eliding: self.rows)
     }
 }
 extension Volume.TypeTree:BSONDocumentDecodable
@@ -54,6 +43,7 @@ extension Volume.TypeTree:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(id: try bson[.id].decode(), table: try bson[.table].decode())
+        self.init(id: try bson[.id].decode(),
+            rows: try bson[.table]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
     }
 }

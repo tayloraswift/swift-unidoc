@@ -1,8 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 import MD5
-import UnidocRecords
-import UnidocSelectors
 import URI
 
 extension Volume

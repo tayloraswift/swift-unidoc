@@ -86,7 +86,7 @@ extension DynamicLinker.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
         context:DynamicContext,
-        clients:[DynamicClientGroup],
+        modules:[DynamicLinker.ModuleContext],
         diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Int>
     {
         guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
@@ -95,7 +95,7 @@ extension DynamicLinker.Extensions
         {
             let type:Symbol.Decl = context.current.decls.symbols[s]
 
-            diagnostics.errors.append(DroppedExtensionsError.extensions(of: type,
+            diagnostics.errors.append(DroppedExtensionsError.extending(type,
                 count: extensions.count))
 
             return [:]
@@ -121,13 +121,13 @@ extension DynamicLinker.Extensions
                 extensions,
                 signatures)
             {
-                let group:DynamicClientGroup = clients[`extension`.culture]
+                let module:DynamicLinker.ModuleContext = modules[`extension`.culture]
                 for p:Int32 in `extension`.conformances
                 {
                     //  Only track conformances that were declared by modules in
                     //  the current package.
                     if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
-                        case false = group.already(conforms: s, to: p)
+                        case false = module.already(conforms: s, to: p)
                     {
                         conformances[to: p].append(.init(
                             conditions: signature.conditions,
@@ -204,10 +204,11 @@ extension DynamicLinker.Extensions
                     return
                 }
 
-                let resolver:DynamicResolver = .init(context: context,
+                let resolver:DynamicResolver = .init(
                     diagnostics: diagnostics,
                     namespace: context.current.namespaces[`extension`.namespace],
-                    clients: clients[`extension`.culture],
+                    global: context,
+                    module: modules[`extension`.culture],
                     scope: [String].init(scope.path))
 
                 ($0.overview, $0.details) = resolver.link(article: article)

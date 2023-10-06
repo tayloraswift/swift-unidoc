@@ -78,13 +78,13 @@ section.group code.constraints
     text-indent: -3.6rem;
     margin-left: 3.6rem;
 
-    span.syntax-keyword
+    span.xk // keyword
     {
         color: $light-accent-comment;
     }
 
-    span.syntax-type,
-    span.syntax-typealias
+    span.xt, // type
+    span.xu  // typealias
     {
         color: $light-accent-yellow;
         font-weight: 500;
@@ -184,7 +184,7 @@ section.group ul
             {
                 color: $light-accent-comment;
 
-                span.syntax-identifier
+                span.xv
                 {
                     color: $light-accent-hot-pink;
                 }
@@ -194,7 +194,7 @@ section.group ul
             {
                 text-decoration: line-through;
 
-                span.syntax-identifier
+                span.xv
                 {
                     color: inherit;
                 }

@@ -1,11 +1,10 @@
 import BSONDecoding
 import BSONEncoding
-import JSONEncoding
+import JSON
 import MD5
 import ModuleGraphs
 import SymbolGraphs
 import Unidoc
-import UnidocRecords
 
 @frozen public
 struct SearchIndex<ID>:Identifiable, Sendable where ID:Hashable & Sendable
@@ -33,44 +32,6 @@ extension SearchIndex<Never?>
     init(json:JSON)
     {
         self.init(id: nil, json: json)
-    }
-}
-extension SearchIndex
-{
-    static
-    func nouns(id:ID,
-        from trees:__shared [Volume.TypeTree],
-        for modules:__shared [Unidoc.Scalar: ModuleIdentifier]) -> Self
-    {
-        let json:JSON = .array
-        {
-            for tree:Volume.TypeTree in trees
-            {
-                guard let culture:ModuleIdentifier = modules[tree.id]
-                else
-                {
-                    continue
-                }
-
-                $0[+, Any.self]
-                {
-                    $0["c"] = "\(culture)"
-                    $0["n"]
-                    {
-                        for row:Volume.Noun in tree.rows where row.same != nil
-                        {
-                            $0[+, Any.self]
-                            {
-                                $0["s"] = row.shoot.stem.rawValue
-                                $0["h"] = row.shoot.hash?.value
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return .init(id: id, json: json)
     }
 }
 extension SearchIndex

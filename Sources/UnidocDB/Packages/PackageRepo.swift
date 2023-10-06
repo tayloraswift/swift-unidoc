@@ -12,7 +12,7 @@ enum PackageRepo:Equatable, Sendable
 extension PackageRepo
 {
     @inlinable public
-    var origin:Volume.Origin
+    var origin:Origin
     {
         switch self
         {

@@ -7,7 +7,8 @@ import UnidocSelectors
 
 extension WideQuery
 {
-    struct AdjacentScalars
+    /// A type that binds a ``Volume.Vertex`` and knows how to extract its adjacent scalars.
+    struct AdjacentScalarsView
     {
         let path:Mongo.KeyPath
 
@@ -17,7 +18,7 @@ extension WideQuery
         }
     }
 }
-extension WideQuery.AdjacentScalars
+extension WideQuery.AdjacentScalarsView
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)
@@ -40,6 +41,7 @@ extension WideQuery.AdjacentScalars
         {
             $0.append(self.path / Volume.Vertex[.namespace])
             $0.append(self.path / Volume.Vertex[.culture])
+            $0.append(self.path / Volume.Vertex[.extendee])
             $0.append(self.path / Volume.Vertex[.file])
         }
 

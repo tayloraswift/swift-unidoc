@@ -28,11 +28,21 @@ extension UnidocDatabase.Groups:DatabaseCollection
         .init
         {
             $0[.unique] = false
-            $0[.name] = "scope"
+            $0[.name] = "scope,latest"
             $0[.key] = .init
             {
                 $0[Volume.Group[.scope]] = (+)
                 $0[Volume.Group[.latest]] = (-)
+            }
+        },
+        .init
+        {
+            $0[.unique] = true
+            $0[.name] = "scope,id"
+            $0[.key] = .init
+            {
+                $0[Volume.Group[.scope]] = (+)
+                $0[Volume.Group[.id]] = (+)
             }
         },
     ]

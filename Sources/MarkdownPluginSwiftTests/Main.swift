@@ -40,45 +40,45 @@ enum Main:SyncTests
                 let html:HTML = .init { $0 += expanded.bytecode.safe }
 
                 tests.expect("\(html)" ==? """
-                <span class='syntax-attribute'>@_spi</span>\
-                (<span class='syntax-identifier'>testing</span>) \
-                <span class='syntax-keyword'>mutating</span> \
-                <span class='syntax-keyword'>func</span> \
-                <span class='syntax-identifier'>transform</span>&lt;\
-                <span class='syntax-typealias'>IndexOfResult</span>, \
-                <span class='syntax-typealias'>ElementOfResult</span>\
+                <span class='xa'>@_spi</span>\
+                (<span class='xv'>testing</span>) \
+                <span class='xk'>mutating</span> \
+                <span class='xk'>func</span> \
+                <span class='xv'>transform</span>&lt;\
+                <span class='xu'>IndexOfResult</span>, \
+                <span class='xu'>ElementOfResult</span>\
                 &gt;(\
                 <span class='xi'></span>_ \
-                <span class='syntax-binding'>a</span>: \
-                (<span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Index</span>, \
-                <span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Element</span>) \
-                <span class='syntax-keyword'>throws</span> \
-                -&gt; <span class='syntax-type'>IndexOfResult</span>?, \
-                <span class='xi'></span><span class='syntax-identifier'>b</span> \
-                <span class='syntax-binding'>b</span>: \
-                (<span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Index</span>, \
-                <span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Element</span>) \
-                <span class='syntax-keyword'>throws</span> \
-                -&gt; <span class='syntax-type'>ElementOfResult</span>?, \
-                <span class='xi'></span><span class='syntax-identifier'>c</span>: \
-                ((<span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Index</span>, \
-                <span class='syntax-keyword'>Self</span>.\
-                <span class='syntax-type'>Element</span>) \
-                <span class='syntax-keyword'>throws</span> -&gt; ())? = \
-                <span class='syntax-keyword'>nil</span>\
-                <wbr>) <span class='syntax-keyword'>rethrows</span> -&gt; \
-                [(<span class='syntax-type'>IndexOfResult</span>, \
-                <span class='syntax-type'>ElementOfResult</span>)] \
-                <span class='syntax-keyword'>where</span> \
-                <span class='syntax-type'>IndexOfResult</span>: \
-                <span class='syntax-type'>Strideable</span>, \
-                <span class='syntax-type'>ElementOfResult</span>: \
-                <span class='syntax-type'>Sendable</span>
+                <span class='xb'>a</span>: \
+                (<span class='xk'>Self</span>.\
+                <span class='xt'>Index</span>, \
+                <span class='xk'>Self</span>.\
+                <span class='xt'>Element</span>) \
+                <span class='xk'>throws</span> \
+                -&gt; <span class='xt'>IndexOfResult</span>?, \
+                <span class='xi'></span><span class='xv'>b</span> \
+                <span class='xb'>b</span>: \
+                (<span class='xk'>Self</span>.\
+                <span class='xt'>Index</span>, \
+                <span class='xk'>Self</span>.\
+                <span class='xt'>Element</span>) \
+                <span class='xk'>throws</span> \
+                -&gt; <span class='xt'>ElementOfResult</span>?, \
+                <span class='xi'></span><span class='xv'>c</span>: \
+                ((<span class='xk'>Self</span>.\
+                <span class='xt'>Index</span>, \
+                <span class='xk'>Self</span>.\
+                <span class='xt'>Element</span>) \
+                <span class='xk'>throws</span> -&gt; ())? = \
+                <span class='xk'>nil</span>\
+                <wbr>) <span class='xk'>rethrows</span> -&gt; \
+                [(<span class='xt'>IndexOfResult</span>, \
+                <span class='xt'>ElementOfResult</span>)] \
+                <span class='xk'>where</span> \
+                <span class='xt'>IndexOfResult</span>: \
+                <span class='xt'>Strideable</span>, \
+                <span class='xt'>ElementOfResult</span>: \
+                <span class='xt'>Sendable</span>
                 """)
             }
 
@@ -346,14 +346,14 @@ enum Main:SyncTests
                 let html:HTML = .init { $0 += abridged.bytecode.safe }
 
                 tests.expect("\(html)" ==? """
-                func <span class='syntax-identifier'>transform</span>&lt;\
+                func <span class='xv'>transform</span>&lt;\
                 IndexOfResult, ElementOfResult\
                 &gt;(\
                 <span class='xi'></span>\
                 (Self.Index, Self.Element) throws -&gt; IndexOfResult?, \
-                <span class='xi'></span><span class='syntax-identifier'>b</span>: \
+                <span class='xi'></span><span class='xv'>b</span>: \
                 (Self.Index, Self.Element) throws -&gt; ElementOfResult?, \
-                <span class='xi'></span><span class='syntax-identifier'>c</span>: \
+                <span class='xi'></span><span class='xv'>c</span>: \
                 ((Self.Index, Self.Element) throws -&gt; ())?\
                 <wbr>) rethrows -&gt; [(IndexOfResult, ElementOfResult)]
                 """)
@@ -374,7 +374,7 @@ enum Main:SyncTests
                 let html:HTML = .init { $0 += abridged.bytecode.safe }
 
                 tests.expect("\(html)" ==? """
-                func <span class='syntax-identifier'>tion</span>(\
+                func <span class='xv'>tion</span>(\
                 <span class='xi'></span>Int, \
                 <span class='xi'></span>String.Index\
                 <wbr>)
@@ -399,11 +399,11 @@ enum Main:SyncTests
                 let html:HTML = .init { $0 += abridged.bytecode.safe }
 
                 tests.expect("\(html)" ==? """
-                <span class='syntax-identifier'>init</span>(\
+                <span class='xv'>init</span>(\
                 <span class='xi'></span>Mongo.Collection, \
-                <span class='xi'></span><span class='syntax-identifier'>writeConcern</span>: \
+                <span class='xi'></span><span class='xv'>writeConcern</span>: \
                 Mongo.Create&lt;Mode&gt;.WriteConcern?, \
-                <span class='xi'></span><span class='syntax-identifier'>with</span>: \
+                <span class='xi'></span><span class='xv'>with</span>: \
                 (inout Mongo.Create&lt;Mode&gt;) throws -&gt; ()\
                 <wbr>) rethrows
                 """)

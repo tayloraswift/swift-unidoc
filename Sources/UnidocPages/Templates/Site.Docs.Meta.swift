@@ -36,7 +36,7 @@ extension Site.Docs.Meta
 }
 extension Site.Docs.Meta:RenderablePage
 {
-    var title:String { self.volume.title }
+    var title:String { "\(self.volume.title) Documentation" }
 
     var description:String?
     {
@@ -47,7 +47,7 @@ extension Site.Docs.Meta:RenderablePage
         """ :
         """
         Read the documentation for version \(self.volume.symbol.version) of the \
-        \(self.volume.display ?? "\(self.volume.symbol.package)") package.
+        \(self.volume.title) package.
         """
     }
 }
@@ -61,7 +61,12 @@ extension Site.Docs.Meta:ApplicationPage
 }
 extension Site.Docs.Meta:VersionedPage
 {
-    var sidebar:[Volume.Noun]? { nil }
+    var sidebar:[Volume.Noun]?
+    {
+        self.context.volumes.principal.tree.isEmpty
+            ? nil
+            : self.context.volumes.principal.tree
+    }
 
     func main(_ main:inout HTML.ContentEncoder)
     {

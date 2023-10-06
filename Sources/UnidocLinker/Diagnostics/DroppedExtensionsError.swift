@@ -3,10 +3,33 @@ import Symbols
 import UnidocDiagnostics
 
 @frozen public
-enum DroppedExtensionsError:Equatable, Error
+struct DroppedExtensionsError:Equatable, Error
 {
-    case extensions(of:Symbol.Decl, count:Int)
-    case decls(of:ModuleIdentifier, count:Int)
+    public
+    let affected:AffectedExtensions
+    public
+    let count:Int
+
+    @inlinable internal
+    init(affected:AffectedExtensions, count:Int)
+    {
+        self.affected = affected
+        self.count = count
+    }
+}
+extension DroppedExtensionsError
+{
+    @inlinable public
+    static func extending(_ namespace:ModuleIdentifier, count:Int) -> Self
+    {
+        .init(affected: .namespace(namespace), count: count)
+    }
+
+    @inlinable public
+    static func extending(_ decl:Symbol.Decl, count:Int) -> Self
+    {
+        .init(affected: .decl(decl), count: count)
+    }
 }
 extension DroppedExtensionsError:DynamicLinkerError
 {
@@ -21,17 +44,17 @@ extension DroppedExtensionsError:DynamicLinkerError
     private
     func message(symbolicator:DynamicSymbolicator) -> String
     {
-        switch self
+        switch self.affected
         {
-        case .extensions(of: let extendee, count: let count):
+        case .decl(let decl):
             return """
-            dropped \(count) extension(s) because the type they extend \
-            (\(symbolicator.signature(of: extendee))) could not be loaded
+            dropped \(self.count) extension(s) because the type they extend \
+            (\(symbolicator.signature(of: decl))) could not be loaded
             """
 
-        case .decls(of: let namespace, count: let count):
+        case .namespace(let namespace):
             return """
-            dropped \(count) declarations(s) because the namespace they extend \
+            dropped \(self.count) extension(s) because the namespace they extend \
             (\(namespace)) could not be loaded
             """
         }
