@@ -1,4 +1,5 @@
 import HTTPServer
+import IP
 import Media
 import MD5
 import Multiparts
@@ -30,7 +31,7 @@ extension Server
 extension Server.Operation:HTTPServerOperation
 {
     init?(get unnormalized:String,
-        address ip:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders)
     {
         guard let uri:URI = .init(unnormalized)
@@ -40,27 +41,6 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        /// A native SwiftNIO ``IPv4Address`` is reference counted and resilient, and we
-        /// would rather pass around an inline value type.
-        let address:IP.Address?
-        switch ip
-        {
-        case .v4(let ip)?:
-            let bytes:UInt32 = .init(bigEndian: ip.address.sin_addr.s_addr)
-            let value:IP.V4 = .init(
-                .init((bytes >> 24) & 0xFF),
-                .init((bytes >> 16) & 0xFF),
-                .init((bytes >>  8) & 0xFF),
-                .init( bytes        & 0xFF))
-
-            address = .v4(value)
-
-        case let ip?:
-            address = .v6(ip.description)
-
-        case _:
-            address = nil
-        }
 
         let profile:ServerProfile.Sample = .init(ip: address,
             language: headers["accept-language"].first,
@@ -184,7 +164,7 @@ extension Server.Operation:HTTPServerOperation
     }
 
     init?(post uri:String,
-        address _:SocketAddress?,
+        address _:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {
@@ -233,7 +213,7 @@ extension Server.Operation:HTTPServerOperation
     }
 
     init?(put uri:String,
-        address _:SocketAddress?,
+        address _:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {

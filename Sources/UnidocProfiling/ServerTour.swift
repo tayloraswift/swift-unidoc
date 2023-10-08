@@ -9,6 +9,8 @@ struct ServerTour
     var last:ServerProfile.Sample
     public
     var lastImpression:ServerProfile.Sample
+    public
+    var slowestQuery:SlowestQuery?
 
     @inlinable public
     init(started:ContinuousClock.Instant = .now)
@@ -18,5 +20,7 @@ struct ServerTour
 
         self.last = .init()
         self.lastImpression = .init()
+
+        self.slowestQuery = nil
     }
 }
