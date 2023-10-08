@@ -1,3 +1,4 @@
+import IP
 import NIOCore
 import NIOHTTP1
 
@@ -11,16 +12,16 @@ public
 protocol HTTPServerOperation:Sendable
 {
     init?(get uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders)
 
     init?(post uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
 
     init?(put uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
 }
@@ -28,7 +29,7 @@ extension HTTPServerOperation
 {
     @inlinable public
     init?(get uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders)
     {
         nil
@@ -36,7 +37,7 @@ extension HTTPServerOperation
 
     @inlinable public
     init?(post uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {
@@ -45,7 +46,7 @@ extension HTTPServerOperation
 
     @inlinable public
     init?(put uri:String,
-        address:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {

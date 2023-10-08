@@ -243,6 +243,13 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = self.tour.lastImpression.referer ?? "none"
 
 
+            $0[.dt] = "slowest query"
+            $0[.dd] = self.tour.slowestQuery.map
+            {
+                "\($0.uri) (\($0.duration))"
+            } ?? "N/A"
+
+
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.profile.requests.bytes.total)"
 
