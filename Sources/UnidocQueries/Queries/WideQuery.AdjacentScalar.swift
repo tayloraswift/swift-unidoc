@@ -23,7 +23,7 @@ extension WideQuery.AdjacentScalar
     /// this evaluates to an integer, which is not a boolean `true`. When used as a predicate,
     /// the `else` branch will be taken. If ``path`` is nil, the predicate evaluates to `true`,
     /// so the `then` branch will be taken.
-    var exists:Mongo.Expression
+    var missing:Mongo.Expression
     {
         .expr
         {
