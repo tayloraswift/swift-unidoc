@@ -53,8 +53,7 @@ extension Server.InteractiveState
                 let finished:ContinuousClock.Instant = .now
                 let duration:Duration = finished - initiated
 
-                if  let record:Duration = self.tour.slowestQuery?.duration,
-                        record < duration,
+                if  self.tour.slowestQuery?.duration ?? .zero < duration,
                     let uri:String = request.profile.uri
                 {
                     self.tour.slowestQuery = .init(
