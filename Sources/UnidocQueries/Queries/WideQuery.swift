@@ -103,9 +103,22 @@ extension WideQuery:VolumeLookupQuery
                 $0[.from] = UnidocDatabase.Vertices.name
                 $0[.let] = .init
                 {
-                    $0[let: symbol] = Output.Principal[.vertex] / Volume.Vertex[.symbol]
-                    $0[let: hash] = Output.Principal[.vertex] / Volume.Vertex[.hash]
-
+                    $0[let: symbol] = .expr
+                    {
+                        $0[.coalesce] =
+                        (
+                            Output.Principal[.vertex] / Volume.Vertex[.symbol],
+                            BSON.Max.init()
+                        )
+                    }
+                    $0[let: hash] = .expr
+                    {
+                        $0[.coalesce] =
+                        (
+                            Output.Principal[.vertex] / Volume.Vertex[.hash],
+                            BSON.Max.init()
+                        )
+                    }
                     //  ``volumeOfLatest`` is always non-nil, so we don’t need to worry about
                     //  degenerate index behavior.
                     $0[let: min] = Output.Principal[.volumeOfLatest] / Volume.Meta[.planes_min]
@@ -197,8 +210,15 @@ extension WideQuery:VolumeLookupQuery
                     {
                         $0[.cond] =
                         (
-                            if: extendee.exists,
-                            then: Output.Principal[.vertex] / Volume.Vertex[.id],
+                            if: extendee.missing,
+                            then: .expr
+                            {
+                                $0[.coalesce] =
+                                (
+                                    Output.Principal[.vertex] / Volume.Vertex[.id],
+                                    BSON.Max.init()
+                                )
+                            },
                             else: BSON.Max.init()
                         )
                     }
@@ -207,7 +227,8 @@ extension WideQuery:VolumeLookupQuery
                         $0[.coalesce] =
                         (
                             Output.Principal[.vertex] / Volume.Vertex[.extendee],
-                            Output.Principal[.vertex] / Volume.Vertex[.id]
+                            Output.Principal[.vertex] / Volume.Vertex[.id],
+                            BSON.Max.init()
                         )
                     }
                     $0[let: topic] = .expr
@@ -349,7 +370,8 @@ extension WideQuery:VolumeLookupQuery
                                     $0[.coalesce] =
                                     (
                                         Output.Principal[.vertex] / Volume.Vertex[.culture],
-                                        Output.Principal[.vertex] / Volume.Vertex[.id]
+                                        Output.Principal[.vertex] / Volume.Vertex[.id],
+                                        BSON.Max.init()
                                     )
                                 }
                             }
