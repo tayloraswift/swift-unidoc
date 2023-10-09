@@ -1,8 +1,12 @@
+import IP
+
 extension ServerProfile
 {
     @frozen public
     struct Sample:Equatable, Sendable
     {
+        public
+        var ip:IP.Address?
         public
         var language:String?
         public
@@ -13,11 +17,13 @@ extension ServerProfile
         var uri:String?
 
         @inlinable public
-        init(language:String? = nil,
+        init(ip:IP.Address? = nil,
+            language:String? = nil,
             referer:String? = nil,
             agent:String? = nil,
             uri:String? = nil)
         {
+            self.ip = ip
             self.language = language
             self.referer = referer
             self.agent = agent

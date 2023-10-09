@@ -233,11 +233,21 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "last user-agent"
             $0[.dd] = self.tour.lastImpression.agent ?? "none"
 
+            $0[.dt] = "last IP address"
+            $0[.dd] = self.tour.lastImpression.ip?.description ?? "none"
+
             $0[.dt] = "last language"
             $0[.dd] = self.tour.lastImpression.language ?? "none"
 
             $0[.dt] = "last referrer"
             $0[.dd] = self.tour.lastImpression.referer ?? "none"
+
+
+            $0[.dt] = "slowest query"
+            $0[.dd] = self.tour.slowestQuery.map
+            {
+                "\($0.uri) (\($0.duration))"
+            } ?? "N/A"
 
 
             $0[.dt] = "bytes transferred (content only)"
