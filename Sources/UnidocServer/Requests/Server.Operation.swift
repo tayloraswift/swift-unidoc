@@ -1,4 +1,5 @@
 import HTTPServer
+import IP
 import Media
 import MD5
 import Multiparts
@@ -30,7 +31,7 @@ extension Server
 extension Server.Operation:HTTPServerOperation
 {
     init?(get unnormalized:String,
-        address _:SocketAddress?,
+        address:IP.Address?,
         headers:HTTPHeaders)
     {
         guard let uri:URI = .init(unnormalized)
@@ -40,7 +41,8 @@ extension Server.Operation:HTTPServerOperation
         }
 
         let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
-        let profile:ServerProfile.Sample = .init(
+
+        let profile:ServerProfile.Sample = .init(ip: address,
             language: headers["accept-language"].first,
             referer: headers["referer"].first,
             agent: headers["user-agent"].first,
@@ -162,7 +164,7 @@ extension Server.Operation:HTTPServerOperation
     }
 
     init?(post uri:String,
-        address _:SocketAddress?,
+        address _:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {
@@ -211,7 +213,7 @@ extension Server.Operation:HTTPServerOperation
     }
 
     init?(put uri:String,
-        address _:SocketAddress?,
+        address _:IP.Address?,
         headers:HTTPHeaders,
         body:[UInt8])
     {

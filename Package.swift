@@ -186,11 +186,14 @@ let package:Package = .init(
             [
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
+                .target(name: "IP"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
+
+        .target(name: "IP"),
 
         .target(name: "InlineBuffer"),
 

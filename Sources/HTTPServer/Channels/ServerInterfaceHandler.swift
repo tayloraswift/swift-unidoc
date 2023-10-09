@@ -1,4 +1,5 @@
 import HTTP
+import IP
 import MD5
 import NIOCore
 import NIOHTTP1
@@ -12,7 +13,7 @@ class ServerInterfaceHandler<Authority, Server>
         responding:Bool,
         receiving:Bool
     private
-    let address:SocketAddress?
+    let address:IP.Address?
     private
     let server:Server
 
@@ -22,7 +23,7 @@ class ServerInterfaceHandler<Authority, Server>
         self.receiving = false
         self.responding = false
 
-        self.address = address
+        self.address = address.map(IP.Address.init(_:)) ?? nil
         self.server = server
     }
 }

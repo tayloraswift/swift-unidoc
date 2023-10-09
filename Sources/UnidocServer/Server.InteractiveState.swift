@@ -41,12 +41,25 @@ extension Server.InteractiveState
 
             do
             {
+                let initiated:ContinuousClock.Instant = .now
+
                 let response:ServerResponse = try await request.endpoint.load(
                     from: self,
                     with: request.cookies)
                     ?? .notFound(.init(
                         content: .string("not found"),
                         type: .text(.plain, charset: .utf8)))
+
+                let finished:ContinuousClock.Instant = .now
+                let duration:Duration = finished - initiated
+
+                if  self.tour.slowestQuery?.duration ?? .zero < duration,
+                    let uri:String = request.profile.uri
+                {
+                    self.tour.slowestQuery = .init(
+                        duration: duration,
+                        uri: uri)
+                }
 
                 //  Don’t increment stats from administrators,
                 //  they will really skew the results.
