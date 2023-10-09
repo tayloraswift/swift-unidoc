@@ -39,11 +39,14 @@ extension Server.InteractiveState
         {
             try Task.checkCancellation()
 
+            let response:ServerResponse
+            let duration:Duration
+
             do
             {
                 let initiated:ContinuousClock.Instant = .now
 
-                let response:ServerResponse = try await request.endpoint.load(
+                response = try await request.endpoint.load(
                     from: self,
                     with: request.cookies)
                     ?? .notFound(.init(
@@ -51,53 +54,64 @@ extension Server.InteractiveState
                         type: .text(.plain, charset: .utf8)))
 
                 let finished:ContinuousClock.Instant = .now
-                let duration:Duration = finished - initiated
 
-                if  self.tour.slowestQuery?.duration ?? .zero < duration,
-                    let uri:String = request.profile.uri
-                {
-                    self.tour.slowestQuery = .init(
-                        duration: duration,
-                        uri: uri)
-                }
-
-                //  Don’t increment stats from administrators,
-                //  they will really skew the results.
-                if  case nil = request.cookies.session
-                {
-                    let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
-                    let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = request.agent
-
-                    self.tour.profile.requests.bytes[keyPath: agent] += response.size
-                    self.tour.profile.requests.pages[keyPath: agent] += 1
-
-                    switch agent
-                    {
-                    case    \.likelyBrowser:
-                        //  Only count languages for browsers.
-                        self.tour.profile.languages[keyPath: request.language] += 1
-                        self.tour.profile.responses.toBrowsers[keyPath: status] += 1
-
-                        self.tour.lastImpression = request.profile
-
-                    case    \.likelyGooglebot,
-                            \.likelyMajorSearchEngine,
-                            \.likelyMinorSearchEngine:
-                        self.tour.profile.responses.toSearch[keyPath: status] += 1
-
-                    case    _:
-                        self.tour.profile.responses.toOther[keyPath: status] += 1
-                    }
-
-                    self.tour.last = request.profile
-                }
-
-                request.promise.succeed(response)
+                duration = finished - initiated
             }
             catch let error
             {
                 request.promise.fail(error)
+                continue
             }
+            defer
+            {
+                request.promise.succeed(response)
+            }
+
+            //  Don’t count login requests.
+            if  request.endpoint is Server.Endpoint.Login
+            {
+                continue
+            }
+            //  Don’t increment stats from administrators,
+            //  they will really skew the results.
+            if  case _? = request.cookies.session
+            {
+                continue
+            }
+
+            if  self.tour.slowestQuery?.duration ?? .zero < duration,
+                let uri:String = request.profile.uri
+            {
+                self.tour.slowestQuery = .init(
+                    duration: duration,
+                    uri: uri)
+            }
+
+            let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
+            let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = request.agent
+
+            self.tour.profile.requests.bytes[keyPath: agent] += response.size
+            self.tour.profile.requests.pages[keyPath: agent] += 1
+
+            switch agent
+            {
+            case    \.likelyBrowser:
+                //  Only count languages for browsers.
+                self.tour.profile.languages[keyPath: request.language] += 1
+                self.tour.profile.responses.toBrowsers[keyPath: status] += 1
+
+                self.tour.lastImpression = request.profile
+
+            case    \.likelyGooglebot,
+                    \.likelyMajorSearchEngine,
+                    \.likelyMinorSearchEngine:
+                self.tour.profile.responses.toSearch[keyPath: status] += 1
+
+            case    _:
+                self.tour.profile.responses.toOther[keyPath: status] += 1
+            }
+
+            self.tour.last = request.profile
         }
     }
 }
