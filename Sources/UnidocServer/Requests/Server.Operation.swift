@@ -83,6 +83,9 @@ extension Server.Operation:HTTPServerOperation
             case Site.Login.root:
                 endpoint = .interactive(Server.Endpoint.Bounce.init())
 
+            case "_home":
+                endpoint = .interactive(Server.Endpoint._RecentActivity.init())
+
             case "robots.txt":
                 endpoint = .static(.init(.robots_txt, tag: tag))
 

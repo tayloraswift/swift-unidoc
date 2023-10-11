@@ -97,6 +97,9 @@ extension GitHubPlugin.Crawler
                 from: "/repos/\(repo.owner.login)/\(repo.name)/tags?per_page=100")
 
             //  Import tags in chronological order.
+            var prerelease:String? = nil
+            var release:String? = nil
+
             for tag:GitHub.Tag in tags.reversed()
             {
                 guard
@@ -114,11 +117,28 @@ extension GitHubPlugin.Crawler
                 {
                 case _?:
                     self.count.tagsUpdated.wrappingIncrement(ordering: .relaxed)
+
+                    switch version
+                    {
+                    case .prerelease:   prerelease = tag.name
+                    case .release:      release = tag.name
+                    }
+
                     fallthrough
 
                 case nil:
                     self.count.tagsCrawled.wrappingIncrement(ordering: .relaxed)
                 }
+            }
+
+            if  let interesting:String = release ?? prerelease
+            {
+                let activity:UnidocDatabase.RepoActivity = .init(discovered: .now(),
+                    package: package.id,
+                    refname: interesting,
+                    origin: .github(repo.owner.login, repo.name))
+
+                try await self.db.unidoc.repoFeed.push(activity, with: session)
             }
         }
     }

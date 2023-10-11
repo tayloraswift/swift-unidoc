@@ -3,7 +3,9 @@ import BSONEncoding
 import MongoQL
 import SemanticVersions
 import SHA1
+import SymbolGraphs
 import Unidoc
+import UnidocRecords
 
 @frozen public
 struct PackageEdition:Identifiable, Equatable, Sendable
@@ -93,7 +95,7 @@ extension PackageEdition:BSONDocumentEncodable
 }
 extension PackageEdition:BSONDocumentDecodable
 {
-    public
+    @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
