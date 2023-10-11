@@ -242,13 +242,15 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "last referrer"
             $0[.dd] = self.tour.lastImpression.referer ?? "none"
 
-
-            $0[.dt] = "slowest query"
-            $0[.dd] = self.tour.slowestQuery.map
+            if  let slowest:ServerTour.SlowestQuery = self.tour.slowestQuery
             {
-                "\($0.uri) (\($0.duration))"
-            } ?? "N/A"
-
+                $0[.dt] = "slowest query"
+                $0[.dd]
+                {
+                    $0[.a] { $0.href = "\(slowest.uri)" } = slowest.uri
+                    $0 += " (\(slowest.duration))"
+                }
+            }
 
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.profile.requests.bytes.total)"

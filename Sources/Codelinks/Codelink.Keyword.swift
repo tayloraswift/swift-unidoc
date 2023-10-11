@@ -19,29 +19,29 @@ extension Codelink
 }
 extension Codelink.Keyword
 {
-    init?(_ identifier:Codelink.Identifier)
+    init?(_ string:Substring)
     {
-        if !identifier.encased
+        switch string
         {
-            self.init(rawValue: identifier.unencased)
-        }
-        else
-        {
-            return nil
+        case "actor":           self = .actor
+        case "associatedtype":  self = .associatedtype
+        case "case":            self = .case
+        case "class":           self = .class
+        case "enum":            self = .enum
+        case "func":            self = .func
+        case "import":          self = .import
+        case "macro":           self = .macro
+        case "protocol":        self = .protocol
+        case "static":          self = .static
+        case "struct":          self = .struct
+        case "typealias":       self = .typealias
+        case "var":             self = .var
+        case _:                 return nil
         }
     }
-    init?(_ scope:Codelink.Scope)
-    {
-        if scope.components.prefix.isEmpty
-        {
-            self.init(scope.components.last)
-        }
-        else
-        {
-            return nil
-        }
-    }
-
+}
+extension Codelink.Keyword
+{
     var encased:String
     {
         "`\(self.rawValue)`"
