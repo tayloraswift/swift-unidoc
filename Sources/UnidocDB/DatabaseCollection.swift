@@ -10,6 +10,9 @@ protocol DatabaseCollection<ElementID>
 
     static
     var name:Mongo.Collection { get }
+
+    static
+    var capacity:(bytes:Int, count:Int?)? { get }
     static
     var indexes:[Mongo.CreateIndexStatement] { get }
 
@@ -17,24 +20,47 @@ protocol DatabaseCollection<ElementID>
 }
 extension DatabaseCollection
 {
-    /// Creates any necessary indexes for this collection.
-    func setup(with session:Mongo.Session) async throws
+    static
+    var capacity:(bytes:Int, count:Int?)? { nil }
+}
+extension DatabaseCollection
+{
+    private
+    func setup(capacity:(bytes:Int, count:Int?), with session:Mongo.Session) async throws
     {
-        let statements:[Mongo.CreateIndexStatement] = Self.indexes
-        if  statements.isEmpty
+        do
         {
-            return
+            try await session.run(
+                command: Mongo.Modify<Mongo.Collection>.init(Self.name)
+                {
+                    $0[.cappedSize] = capacity.bytes
+                    $0[.cappedMax] = capacity.count
+                },
+                against: self.database)
         }
-
+        catch is Mongo.NamespaceError
+        {
+            try await session.run(
+                command: Mongo.Create<Mongo.Collection>.init(Self.name)
+                {
+                    $0[.cap] = (size: capacity.bytes, max: capacity.count)
+                },
+                against: self.database)
+        }
+    }
+    /// Creates any necessary indexes for this collection.
+    private
+    func setup(indexes:[Mongo.CreateIndexStatement], with session:Mongo.Session) async throws
+    {
         do
         {
             let response:Mongo.CreateIndexesResponse = try await session.run(
                 command: Mongo.CreateIndexes.init(Self.name,
                     writeConcern: .majority,
-                    indexes: statements),
+                    indexes: indexes),
                 against: self.database)
 
-            if  response.indexesAfter == statements.count + 1
+            if  response.indexesAfter == indexes.count + 1
             {
                 return
             }
@@ -56,12 +82,27 @@ extension DatabaseCollection
         let response:Mongo.CreateIndexesResponse = try await session.run(
             command: Mongo.CreateIndexes.init(Self.name,
                 writeConcern: .majority,
-                indexes: statements),
+                indexes: indexes),
             against: self.database)
 
-        assert(response.indexesAfter == statements.count + 1)
+        assert(response.indexesAfter == indexes.count + 1)
 
         print("note: recreated \(response.indexesAfter - 1) indexes in \(Self.name)")
+    }
+
+
+    func setup(with session:Mongo.Session) async throws
+    {
+        if  case (let bytes, let count)? = Self.capacity
+        {
+            try await self.setup(capacity: (bytes, count), with: session)
+        }
+
+        let indexes:[Mongo.CreateIndexStatement] = Self.indexes
+        if !indexes.isEmpty
+        {
+            try await self.setup(indexes: indexes, with: session)
+        }
     }
 
     /// Drops the collection and reinitializes it by calling ``setup(with:)``.

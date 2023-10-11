@@ -40,6 +40,15 @@ extension UnixInstant
         return .init(second: second, nanoseconds: nanoseconds)
     }
 
+    @inlinable public static
+    func millisecond(_ millisecond:Int64) -> Self
+    {
+        let (second, milliseconds):(Int64, Int64) = millisecond.quotientAndRemainder(
+            dividingBy: 1000)
+
+        return .init(second: second, nanoseconds: milliseconds * 1_000_000)
+    }
+
     @inlinable public
     init?(timestamp:Timestamp)
     {
