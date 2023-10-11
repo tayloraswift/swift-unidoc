@@ -11,12 +11,20 @@ extension Codelink
         public
         var encased:Bool
 
-        @inlinable public
-        init(head:Head, encased:Bool = false)
+        @inlinable internal
+        init(characters:String, encased:Bool)
         {
-            self.characters = .init(head.codepoint)
+            self.characters = characters
             self.encased = encased
         }
+    }
+}
+extension Codelink.Identifier
+{
+    @inlinable public
+    init(head:Head, encased:Bool = false)
+    {
+        self.init(characters: .init(head.codepoint), encased: encased)
     }
 }
 extension Codelink.Identifier
@@ -91,7 +99,7 @@ extension Codelink.Identifier
         case "`"?:
             encased = true
             head = remaining.popFirst()
-        
+
         case let codepoint:
             encased = false
             head = codepoint
@@ -117,7 +125,7 @@ extension Codelink.Identifier
         {
             return nil
         }
-        
+
         codepoints = remaining
     }
 }
