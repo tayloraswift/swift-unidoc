@@ -42,6 +42,11 @@ extension UnidocDatabase
     var search:Search { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
     var siteMaps:SiteMaps { .init(database: self.id) }
+
+    @inlinable public
+    var repoFeed:RepoFeed { .init(database: self.id) }
+    @inlinable public
+    var docsFeed:DocsFeed { .init(database: self.id) }
 }
 extension UnidocDatabase:DatabaseModel
 {
@@ -57,6 +62,9 @@ extension UnidocDatabase:DatabaseModel
     public
     func setup(with session:Mongo.Session) async throws
     {
+        try await self.repoFeed.setup(with: session)
+        try await self.docsFeed.setup(with: session)
+
         try await self.packages.setup(with: session)
         try await self.editions.setup(with: session)
         try await self.graphs.setup(with: session)

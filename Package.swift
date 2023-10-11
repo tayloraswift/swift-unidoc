@@ -75,10 +75,10 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.8.3")),
+            from: "0.8.6")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
-            from: "1.1.0")),
+            from: "1.2.0")),
 
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
@@ -90,7 +90,7 @@ let package:Package = .init(
             from: "2.25.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.27.0")),
+            from: "1.28.1")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.2.0")),
         /// swift-system has broken in a minor before, and can't be trusted with a
