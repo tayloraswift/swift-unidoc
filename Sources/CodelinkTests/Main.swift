@@ -301,51 +301,57 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Codelinks" / "LegacyDocC"
         {
             if  let tests:TestGroup = tests / "Slashes",
-                let codelink:Codelink = .parse("Sloth/Color", for: tests)
+                let codelink:Codelink = .parse("Sloth/Color", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["Color"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "TrailingSlashes",
-                let codelink:Codelink = .parse("Sloth/Color/", for: tests)
+                let codelink:Codelink = .parse("Sloth/Color/", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["Color"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "Filter",
-                let codelink:Codelink = .parse("Sloth/Color-swift.enum", for: tests)
+                let codelink:Codelink = .parse("Sloth/Color-swift.enum", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .enum)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "Color"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["Color"])
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "Hash",
-                let codelink:Codelink = .parse("Sloth/update(_:)-4ko57", for: tests)
+                let codelink:Codelink = .parse("Sloth/update(_:)-4ko57", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "update(_:)"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["update(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }
             if  let tests:TestGroup = tests / "Hash" / "Minus",
-                let codelink:Codelink = .parse("Sloth/-(_:)-4ko57", for: tests)
+                let codelink:Codelink = .parse("Sloth/-(_:)-4ko57", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "-(_:)"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["-(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }
             if  let tests:TestGroup = tests / "Hash" / "Slinging" / "Slasher",
-                let codelink:Codelink = .parse("Sloth//(_:)-4ko57", for: tests)
+                let codelink:Codelink = .parse("Sloth//(_:)-4ko57", for: tests),
+                let scope:Codelink.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
-                tests.expect(nil: codelink.scope)
-                tests.expect(codelink.path.components ..? ["Sloth", "/(_:)"])
+                tests.expect(scope.components ..? ["Sloth"])
+                tests.expect(codelink.path.components ..? ["/(_:)"])
                 tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
             }
         }

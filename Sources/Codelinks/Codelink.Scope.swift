@@ -6,54 +6,66 @@ extension Codelink
     struct Scope:Equatable, Hashable, Sendable
     {
         public
-        var components:LexicalComponents<Identifier>
+        let components:LexicalComponents<Identifier>
 
         private
-        init(first:Identifier)
+        init(components:LexicalComponents<Identifier>)
         {
-            self.components = .init([], first)
+            self.components = components
         }
     }
 }
 extension Codelink.Scope
 {
-    /// Removes backticks from the last scope component, if they are unnecessary.
-    private mutating
-    func normalize()
+    /// Adds backticks to the last scope component, if necessary.
+    private
+    init(prefix:consuming [String], normalizing last:String)
     {
-        guard   self.components.prefix.isEmpty,
-                let _:Codelink.Keyword = .init(rawValue: self.components.last.characters)
+        let prefix:[String] = prefix
+        if  prefix.isEmpty,
+            let _:Codelink.Keyword = .init(rawValue: last)
+        {
+            self.init(components: .init([], .init(characters: last, encased: true)))
+        }
         else
         {
-            self.components.last.encased = false
-            return
+            self.init(components: .init(prefix, .init(characters: last, encased: false)))
         }
+    }
+
+    init?(_ components:consuming [String])
+    {
+        guard
+        let last:String = components.popLast()
+        else
+        {
+            return nil
+        }
+
+        self.init(prefix: components, normalizing: last)
     }
 
     init?(_ description:Substring)
     {
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
 
-        if  let first:Codelink.Identifier = .init(parsing: &codepoints)
-        {
-            self.init(first: first)
-        }
+        guard
+        let first:Codelink.Identifier = .init(parsing: &codepoints)
         else
         {
             return nil
         }
 
-        defer
-        {
-            self.normalize()
-        }
+        var prefix:[String] = []
+        var last:String = (consume first).unencased
 
         while let separator:Unicode.Scalar = codepoints.popFirst()
         {
             if  separator == ".",
                 let next:Codelink.Identifier = .init(parsing: &codepoints)
             {
-                self.components.append(next)
+                prefix.append(consume last)
+                last = next.unencased
             }
             else
             {
@@ -61,10 +73,13 @@ extension Codelink.Scope
             }
         }
 
-        if !codepoints.isEmpty
+        guard codepoints.isEmpty
+        else
         {
             return nil
         }
+
+        self.init(prefix: prefix, normalizing: last)
     }
 }
 extension Codelink.Scope:CustomStringConvertible
@@ -72,13 +87,6 @@ extension Codelink.Scope:CustomStringConvertible
     public
     var description:String
     {
-        if  let keyword:Codelink.Keyword = .init(self)
-        {
-            return keyword.encased
-        }
-        else
-        {
-            return self.components.joined(separator: ".")
-        }
+        self.components.joined(separator: ".")
     }
 }
