@@ -1,6 +1,7 @@
 import HTTP
 import MongoDB
 import UnidocDB
+import UnidocPages
 
 extension Server.Endpoint
 {
@@ -19,15 +20,7 @@ extension Server.Endpoint._RecentActivity:RestrictedEndpoint
         let feed:[UnidocDatabase.RepoActivity] = try await server.db.unidoc.repoFeed.last(16,
             with: session)
 
-        var text:String = ""
-
-        for item:UnidocDatabase.RepoActivity in feed
-        {
-            text += "\(item.package) @ \(item.refname)\n"
-        }
-
-        return .ok(.init(
-            content: .string(text),
-            type: .text(.plain, charset: .utf8)))
+        let page:Site.RecentActivity = .init(repoActivity: consume feed)
+        return .ok(page.resource())
     }
 }

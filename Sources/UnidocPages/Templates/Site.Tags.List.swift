@@ -135,28 +135,10 @@ extension Site.Tags.List:ApplicationPage
                         if  let updated:Timestamp = .init(iso8601: repo.updated),
                             let updated:UnixInstant = .init(timestamp: updated)
                         {
-                            let age:Duration = now - updated
+                            let age:Age<Language.EN> = .init(now - updated)
 
                             $0[.dt] = "Last Pushed"
-                            $0[.dd]
-                            {
-                                if      age.components.seconds < 2 * 60
-                                {
-                                    $0 += "just now"
-                                }
-                                else if age.components.seconds < 2 * 60 * 60
-                                {
-                                    $0 += "\(age.components.seconds / 60) minutes ago"
-                                }
-                                else if age.components.seconds < 2 * 24 * 3600
-                                {
-                                    $0 += "\(age.components.seconds / 3600) hours ago"
-                                }
-                                else
-                                {
-                                    $0 += "\(age.components.seconds / 86400) days ago"
-                                }
-                            }
+                            $0[.dd] = "\(age)"
                         }
                     }
                 }
