@@ -25,7 +25,7 @@ extension Volume.Meta
 
         @inlinable public
         init(abi:MinorVersion,
-            requirements:[PlatformRequirement] = [],
+            requirements:[PlatformRequirement],
             census:Volume.Census = .init())
         {
             self.abi = abi

@@ -12,46 +12,24 @@ protocol DatabaseCollection<ElementID>
     var name:Mongo.Collection { get }
 
     static
-    var capacity:(bytes:Int, count:Int?)? { get }
-    static
     var indexes:[Mongo.CreateIndexStatement] { get }
 
     var database:Mongo.Database { get }
+
+    func setup(with session:Mongo.Session) async throws
 }
 extension DatabaseCollection
 {
-    static
-    var capacity:(bytes:Int, count:Int?)? { nil }
-}
-extension DatabaseCollection
-{
-    private
-    func setup(capacity:(bytes:Int, count:Int?), with session:Mongo.Session) async throws
+    /// Creates any necessary indexes for this collection. Do not call this directly; call
+    /// the ``setup(with:)`` method instead.
+    func setupIndexes(with session:Mongo.Session) async throws
     {
-        do
+        let indexes:[Mongo.CreateIndexStatement] = Self.indexes
+        if  indexes.isEmpty
         {
-            try await session.run(
-                command: Mongo.Modify<Mongo.Collection>.init(Self.name)
-                {
-                    $0[.cappedSize] = capacity.bytes
-                    $0[.cappedMax] = capacity.count
-                },
-                against: self.database)
+            return
         }
-        catch is Mongo.NamespaceError
-        {
-            try await session.run(
-                command: Mongo.Create<Mongo.Collection>.init(Self.name)
-                {
-                    $0[.cap] = (size: capacity.bytes, max: capacity.count)
-                },
-                against: self.database)
-        }
-    }
-    /// Creates any necessary indexes for this collection.
-    private
-    func setup(indexes:[Mongo.CreateIndexStatement], with session:Mongo.Session) async throws
-    {
+
         do
         {
             let response:Mongo.CreateIndexesResponse = try await session.run(
@@ -90,19 +68,9 @@ extension DatabaseCollection
         print("note: recreated \(response.indexesAfter - 1) indexes in \(Self.name)")
     }
 
-
     func setup(with session:Mongo.Session) async throws
     {
-        if  case (let bytes, let count)? = Self.capacity
-        {
-            try await self.setup(capacity: (bytes, count), with: session)
-        }
-
-        let indexes:[Mongo.CreateIndexStatement] = Self.indexes
-        if !indexes.isEmpty
-        {
-            try await self.setup(indexes: indexes, with: session)
-        }
+        try await self.setupIndexes(with: session)
     }
 
     /// Drops the collection and reinitializes it by calling ``setup(with:)``.

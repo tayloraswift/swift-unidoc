@@ -68,6 +68,14 @@ extension Volume
 }
 extension Volume.Meta
 {
+    @inlinable public
+    var selector:Volume.Selector
+    {
+        .init(
+            package: self.symbol.package,
+            version: self.latest ? nil : self.symbol.version[...])
+    }
+
     @available(*, deprecated)
     @inlinable public
     var package:PackageIdentifier { self.symbol.package }
