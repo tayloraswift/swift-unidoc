@@ -1,3 +1,4 @@
+import Atomics
 import GitHubClient
 import GitHubAPI
 import HTTP
