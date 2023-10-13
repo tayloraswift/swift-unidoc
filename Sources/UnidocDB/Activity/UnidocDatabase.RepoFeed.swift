@@ -23,12 +23,14 @@ extension UnidocDatabase.RepoFeed:DatabaseCollection
 
     typealias ElementID = BSON.Millisecond
 
-    /// 1 MB ought to be enough for anybody.
-    static
-    var capacity:(bytes:Int, count:Int?)? { (1 << 20, 16) }
-
     static
     var indexes:[Mongo.CreateIndexStatement] { [] }
+}
+extension UnidocDatabase.RepoFeed:DatabaseCollectionCapped
+{
+    /// 1 MB ought to be enough for anybody.
+    static
+    var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
 extension UnidocDatabase.RepoFeed
 {
@@ -36,14 +38,9 @@ extension UnidocDatabase.RepoFeed
     func last(_ count:Int,
         with session:Mongo.Session) async throws -> [UnidocDatabase.RepoActivity]
     {
-        try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<UnidocDatabase.RepoActivity>>.init(Self.name,
-                limit: count)
-            {
-                $0[.sort] = .init { $0[.natural] = (-) }
-            },
-            against: self.database)
+        try await self.find(last: count, with: session)
     }
+
     public
     func push(_ activity:UnidocDatabase.RepoActivity,
         with session:Mongo.Session) async throws

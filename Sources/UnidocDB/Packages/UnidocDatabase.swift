@@ -301,28 +301,28 @@ extension UnidocDatabase
     public
     func uplink(
         package:Int32,
-        version:Int32?,
-        with session:Mongo.Session) async throws -> Int
+        version:Int32,
+        with session:Mongo.Session) async throws -> Unidoc.Zone?
     {
-        var uplinked:Int = 0
+        var uplinked:Unidoc.Zone? = nil
 
         try await self.graphs.list(
             filter: (package: package, version: version),
             with: session)
         {
-            try await self.fill(
-                volume: try await self.link($0, with: session),
+            try await self.fill(volume: try await self.link($0, with: session),
                 clear: true,
                 with: session)
 
-            uplinked += 1
+            uplinked = .init(package: package, version: version)
         }
 
         return uplinked
     }
 
     public
-    func uplink(volume:VolumeIdentifier, with session:Mongo.Session) async throws -> Int
+    func uplink(volume:VolumeIdentifier,
+        with session:Mongo.Session) async throws -> Unidoc.Zone?
     {
         if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
                 with: session)
@@ -334,7 +334,7 @@ extension UnidocDatabase
         }
         else
         {
-            0
+            nil
         }
     }
 

@@ -84,7 +84,12 @@ extension Server.Operation:HTTPServerOperation
                 endpoint = .interactive(Server.Endpoint.Bounce.init())
 
             case "_home":
-                endpoint = .interactive(Server.Endpoint._RecentActivity.init())
+                let parameters:Server.Endpoint.PipelineParameters = .init(uri.query?.parameters)
+
+                endpoint = .interactive(Server.Endpoint.Pipeline<RecentActivityQuery>.init(
+                    output: parameters.explain ? nil : .text(.html),
+                    query: .init(limit: 16),
+                    tag: tag))
 
             case "robots.txt":
                 endpoint = .static(.init(.robots_txt, tag: tag))
