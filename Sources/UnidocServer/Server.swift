@@ -236,9 +236,18 @@ extension Server:HTTPServerDelegate
                 profile: operation.profile,
                 promise: promise)
 
-            guard case .enqueued = self.interactive.consumer.yield(request)
-            else
+            switch self.interactive.consumer.yield(request)
             {
+            case .enqueued:
+                return
+
+            case .dropped:
+                fatalError("stream overflowed")
+
+            case .terminated:
+                fatalError("stream terminated")
+
+            @unknown case _:
                 fatalError("unimplemented")
             }
 
