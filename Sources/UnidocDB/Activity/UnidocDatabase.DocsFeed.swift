@@ -1,5 +1,6 @@
 import BSON
 import MongoDB
+import UnidocRecords
 
 extension UnidocDatabase
 {
@@ -23,10 +24,21 @@ extension UnidocDatabase.DocsFeed:DatabaseCollection
 
     typealias ElementID = BSON.Millisecond
 
-    /// 1 MB ought to be enough for anybody.
-    static
-    var capacity:(bytes:Int, count:Int?)? { (1 << 20, 16) }
-
     static
     var indexes:[Mongo.CreateIndexStatement] { [] }
+}
+extension UnidocDatabase.DocsFeed:DatabaseCollectionCapped
+{
+    /// 1 MB ought to be enough for anybody.
+    static
+    var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
+}
+extension UnidocDatabase.DocsFeed
+{
+    public
+    func push(_ activity:UnidocDatabase.DocsActivity<Unidoc.Zone>,
+        with session:Mongo.Session) async throws
+    {
+        try await self.insert(some: activity, with: session)
+    }
 }

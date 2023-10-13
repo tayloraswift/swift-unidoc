@@ -1,21 +1,25 @@
 import BSONDecoding
 import BSONEncoding
 import MongoQL
+import Unidoc
 import UnidocRecords
 
 extension UnidocDatabase
 {
     @frozen public
-    struct DocsActivity:Identifiable, Equatable, Sendable
+    struct DocsActivity<Volume>:Identifiable, Sendable
+        where   Volume:BSONEncodable,
+                Volume:BSONDecodable,
+                Volume:Sendable
     {
         public
         let id:BSON.Millisecond
 
         public
-        let volume:VolumeIdentifier
+        let volume:Volume
 
         @inlinable public
-        init(discovered id:BSON.Millisecond, volume:VolumeIdentifier)
+        init(discovered id:BSON.Millisecond, volume:Volume)
         {
             self.id = id
             self.volume = volume

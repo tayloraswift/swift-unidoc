@@ -56,16 +56,15 @@ extension Server.Operation:HTTPServerOperation
         let root:String = path.popFirst()
         else
         {
-            //  Hilariously, we don’t have a home page yet. So we just redirect to the docs
-            //  for the standard library.
-            let get:Server.Endpoint = .interactive(Server.Endpoint.Pipeline<WideQuery>.init(
-                output: .text(.html),
-                query: .init(
-                    volume: .init(package: .swift, version: nil),
-                    lookup: .init(stem: [])),
-                tag: tag))
+            let parameters:Server.Endpoint.PipelineParameters = .init(uri.query?.parameters)
 
-            self.init(endpoint: get, cookies: cookies, profile: profile)
+            self.init(endpoint: .interactive(Server.Endpoint.Pipeline<RecentActivityQuery>.init(
+                    output: parameters.explain ? nil : .text(.html),
+                    query: .init(limit: 16),
+                    tag: tag)),
+                cookies: cookies,
+                profile: profile)
+
             return
         }
 
@@ -82,9 +81,6 @@ extension Server.Operation:HTTPServerOperation
 
             case Site.Login.root:
                 endpoint = .interactive(Server.Endpoint.Bounce.init())
-
-            case "_home":
-                endpoint = .interactive(Server.Endpoint._RecentActivity.init())
 
             case "robots.txt":
                 endpoint = .static(.init(.robots_txt, tag: tag))

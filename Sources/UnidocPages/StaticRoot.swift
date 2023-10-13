@@ -25,7 +25,7 @@ extension StaticRoot
     {
         var uri:URI = Self.uri
 
-        uri.path += names
+        uri.path.append("\(names.selector)")
 
         return uri
     }

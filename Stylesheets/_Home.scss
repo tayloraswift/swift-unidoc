@@ -1,36 +1,62 @@
-h2.feed
+div.feeds
+{
+    section
+    {
+        margin-bottom: 1rem;
+    }
+    section:last-child
+    {
+        text-align: right;
+    }
+}
+@media only screen and (min-width: 50rem)
+{
+    div.feeds
+    {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        min-width: 30rem;
+    }
+}
+div.feeds h2
 {
     margin: 0;
     padding: 0;
     font-size: 112.5%;
     color: $light-foreground;
 }
-ol.feed
+div.feeds ol
 {
     list-style-type: none;
     padding: 0;
     margin: 0;
 
-    min-width: 20rem;
-
     li
     {
         margin: 0.5rem 0;
 
-        a
-        {
-            font-style: italic;
-        }
 
-        > p.tag
+        > p.edition
         {
             margin: 0;
 
-            span
+            > span:first-child
+            {
+                color: rgb(50, 50, 50);
+            }
+            > *:first-child
+            {
+                font-style: italic;
+            }
+            > *:last-child
             {
                 margin-left: 0.5em;
             }
         }
+
+
         > p.age
         {
             margin: 0;
