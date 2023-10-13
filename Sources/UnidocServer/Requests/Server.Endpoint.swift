@@ -355,6 +355,5 @@ extension Server.Endpoint
         case (_, _):
             return nil
         }
-
     }
 }

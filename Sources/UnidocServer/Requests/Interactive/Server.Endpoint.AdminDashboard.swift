@@ -16,6 +16,7 @@ extension Server.Endpoint.AdminDashboard:RestrictedEndpoint
         let page:Site.Admin = .init(configuration: try await server.db.sessions.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin),
+            requestsDropped: server.count.requestsDropped.load(ordering: .relaxed),
             errorsCrawling: server.github?.errors ?? 0,
             reposCrawled: server.github?.reposCrawled ?? 0,
             reposUpdated: server.github?.reposUpdated ?? 0,

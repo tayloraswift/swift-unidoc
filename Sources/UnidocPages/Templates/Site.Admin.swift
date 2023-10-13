@@ -14,6 +14,8 @@ extension Site
         let configuration:Mongo.ReplicaSetConfiguration
 
         public
+        let requestsDropped:Int
+        public
         let errorsCrawling:Int
         public
         let reposCrawled:Int
@@ -31,6 +33,7 @@ extension Site
 
         @inlinable public
         init(configuration:Mongo.ReplicaSetConfiguration,
+            requestsDropped:Int,
             errorsCrawling:Int,
             reposCrawled:Int,
             reposUpdated:Int,
@@ -41,6 +44,7 @@ extension Site
         {
             self.configuration = configuration
 
+            self.requestsDropped = requestsDropped
             self.errorsCrawling = errorsCrawling
             self.reposCrawled = reposCrawled
             self.reposUpdated = reposUpdated
@@ -254,6 +258,9 @@ extension Site.Admin:AdministrativePage
 
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.profile.requests.bytes.total)"
+
+            $0[.dt] = "requests dropped"
+            $0[.dd] = "\(self.requestsDropped)"
 
             $0[.dt] = "GitHub crawling errors"
             $0[.dd] = "\(self.errorsCrawling)"
