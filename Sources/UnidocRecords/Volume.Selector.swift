@@ -18,7 +18,15 @@ extension Volume
         }
     }
 }
-extension Volume.Selector
+extension Volume.Selector:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        self.version.map { "\(self.package):\($0)" } ?? "\(self.package)"
+    }
+}
+extension Volume.Selector:LosslessStringConvertible
 {
     public
     init(_ trunk:String)

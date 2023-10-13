@@ -495,23 +495,7 @@ extension WideQuery:VolumeLookupQuery
                     }
                     $0.stage
                     {
-                        $0[.project] = .init
-                        {
-                            for key:Volume.Meta.CodingKey in
-                            [
-                                .id,
-                                .package,
-                                .version,
-                                .refname,
-                                .display,
-                                .patch,
-                                .latest,
-                                .api
-                            ]
-                            {
-                                $0[Volume.Meta[key]] = true
-                            }
-                        }
+                        $0[.project] = .init(with: Volume.Meta.names(_:))
                     }
                 }
             }
