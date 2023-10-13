@@ -23,9 +23,8 @@ extension Site
 }
 extension Site.RecentActivity:StaticPage
 {
-    var canonicalURI:URI? { ["_home"] }
-
-    var location:URI { ["_home"] }
+    var canonicalURI:URI? { [] }
+    var location:URI { [] }
 }
 extension Site.RecentActivity:RenderablePage
 {
