@@ -1,3 +1,4 @@
+import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
@@ -36,6 +37,7 @@ struct Server:Sendable
     let github:GitHubPlugin?
     let mode:Mode
 
+    let count:Counters
     let cache:Cache<Site.Asset.Get>
     let db:DB
 
@@ -53,7 +55,7 @@ struct Server:Sendable
         do
         {
             var continuation:AsyncStream<Request<any InteractiveEndpoint>>.Continuation? = nil
-            self.interactive.requests = .init
+            self.interactive.requests = .init(bufferingPolicy: .bufferingOldest(128))
             {
                 continuation = $0
             }
@@ -70,6 +72,7 @@ struct Server:Sendable
         }
 
         self.github = github
+        self.count = .init()
         self.cache = cache
 
         self.mode = mode
@@ -242,7 +245,12 @@ extension Server:HTTPServerDelegate
                 return
 
             case .dropped:
-                fatalError("stream overflowed")
+                self.count.requestsDropped.wrappingIncrement(ordering: .relaxed)
+
+                promise.succeed(.unavailable("""
+                    The site is currently experiencing exceptionally high traffic. \
+                    Please try again later.
+                    """))
 
             case .terminated:
                 fatalError("stream terminated")

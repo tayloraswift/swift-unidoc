@@ -53,6 +53,9 @@ extension ServerMessage
 
         case .error(let resource):
             self.init(resource: resource, using: allocator, as: .internalServerError)
+
+        case .unavailable(let resource):
+            self.init(resource: resource, using: allocator, as: .serviceUnavailable)
         }
     }
 
