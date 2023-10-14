@@ -1,7 +1,7 @@
 import GitHubAPI
 import MongoDB
 import HTML
-import HTTPServer
+import HTTP
 import URI
 
 extension Site
