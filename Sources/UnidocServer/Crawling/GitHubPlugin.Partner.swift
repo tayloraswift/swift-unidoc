@@ -26,8 +26,7 @@ extension GitHubPlugin
 }
 extension GitHubPlugin.Partner
 {
-    subscript<Int>(
-        dynamicMember keyPath:KeyPath<GitHubPlugin.Counters, UnsafeAtomic<Int>>) -> Int
+    subscript(dynamicMember keyPath:KeyPath<GitHubPlugin.Counters, UnsafeAtomic<Int>>) -> Int
     {
         self.count[keyPath: keyPath].load(ordering: .relaxed)
     }
