@@ -1,9 +1,3 @@
-extension ServerTour
-{
-    @available(*, deprecated, renamed: "ServerProfile")
-    public
-    typealias Stats = ServerProfile
-}
 @frozen public
 struct ServerProfile
 {
@@ -12,7 +6,8 @@ struct ServerProfile
     public
     var responses:
     (
-        toBrowsers:ByStatus,
+        toBarbie:ByStatus,
+        toBratz:ByStatus,
         toSearch:ByStatus,
         toOther:ByStatus
     )
@@ -28,10 +23,11 @@ struct ServerProfile
         languages:ByLanguage = [:],
         responses:
         (
-            toBrowsers:ByStatus,
+            toBarbie:ByStatus,
+            toBratz:ByStatus,
             toSearch:ByStatus,
             toOther:ByStatus
-        ) = ([:], [:], [:]),
+        ) = ([:], [:], [:], [:]),
         requests:
         (
             pages:ByAgent,

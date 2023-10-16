@@ -96,12 +96,15 @@ extension Server.InteractiveState
 
             switch agent
             {
-            case    \.likelyBrowser:
-                //  Only count languages for browsers.
+            case    \.likelyBarbie:
+                //  Only count languages for Barbies.
                 self.tour.profile.languages[keyPath: request.language] += 1
-                self.tour.profile.responses.toBrowsers[keyPath: status] += 1
+                self.tour.profile.responses.toBarbie[keyPath: status] += 1
 
                 self.tour.lastImpression = request.profile
+
+            case    \.likelyBratz:
+                self.tour.profile.responses.toBratz[keyPath: status] += 1
 
             case    \.likelyGooglebot,
                     \.likelyMajorSearchEngine,

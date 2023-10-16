@@ -22,6 +22,7 @@ let package:Package = .init(
         .library(name: "HTTPClient", targets: ["HTTPClient"]),
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
+        .library(name: "IP", targets: ["IP"]),
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
@@ -54,6 +55,7 @@ let package:Package = .init(
 
         .library(name: "System", targets: ["System"]),
 
+        .library(name: "UA", targets: ["UA"]),
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAutomation", targets: ["UnidocAutomation"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
@@ -382,6 +384,11 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
+        .target(name: "UA", dependencies:
+            [
+                .product(name: "Grammar", package: "swift-grammar"),
+            ]),
+
         .target(name: "Unidoc", dependencies:
             [
                 .target(name: "UnidocPlanes"),
@@ -430,6 +437,7 @@ let package:Package = .init(
             [
                 .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
+                .target(name: "UA"),
             ]),
 
         .target(name: "UnidocPlanes"),
@@ -592,6 +600,12 @@ let package:Package = .init(
             exclude:
             [
                 "directories",
+            ]),
+
+        .executableTarget(name: "UATests", dependencies:
+            [
+                .target(name: "UA"),
+                .product(name: "Testing", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "UnidocRecordsTests", dependencies:

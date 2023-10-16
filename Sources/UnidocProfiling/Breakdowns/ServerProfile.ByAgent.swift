@@ -10,27 +10,31 @@ extension ServerProfile
         public
         var likelyMinorSearchEngine:Int
         public
-        var likelyBrowser:Int
+        var likelyBarbie:Int
         public
-        var likelyTool:Int
+        var likelyBratz:Int
         public
         var likelyRobot:Int
+        public
+        var likelyTool:Int
 
         @inlinable public
         init(
             likelyGooglebot:Int = 0,
             likelyMajorSearchEngine:Int = 0,
             likelyMinorSearchEngine:Int = 0,
-            likelyBrowser:Int = 0,
-            likelyTool:Int = 0,
-            likelyRobot:Int = 0)
+            likelyBarbie:Int = 0,
+            likelyBratz:Int = 0,
+            likelyRobot:Int = 0,
+            likelyTool:Int = 0)
         {
             self.likelyGooglebot = likelyGooglebot
             self.likelyMajorSearchEngine = likelyMajorSearchEngine
             self.likelyMinorSearchEngine = likelyMinorSearchEngine
-            self.likelyBrowser = likelyBrowser
-            self.likelyTool = likelyTool
+            self.likelyBarbie = likelyBarbie
+            self.likelyBratz = likelyBratz
             self.likelyRobot = likelyRobot
+            self.likelyTool = likelyTool
         }
     }
 }
@@ -51,9 +55,10 @@ extension ServerProfile.ByAgent
         return self.likelyGooglebot
             + self.likelyMajorSearchEngine
             + self.likelyMinorSearchEngine
-            + self.likelyBrowser
-            + self.likelyTool
+            + self.likelyBarbie
+            + self.likelyBratz
             + self.likelyRobot
+            + self.likelyTool
     }
 }
 extension ServerProfile.ByAgent
@@ -80,19 +85,24 @@ extension ServerProfile.ByAgent
                 "minor-search-engine"
             ),
             (
-                self.likelyBrowser,
+                self.likelyBarbie,
                 "Barbies",
-                "browser"
+                "barbie"
+            ),
+            (
+                self.likelyBratz,
+                "Bratz",
+                "bratz"
+            ),
+            (
+                self.likelyRobot,
+                "Research Bots",
+                "robot"
             ),
             (
                 self.likelyTool,
                 "Tools",
                 "tool"
-            ),
-            (
-                self.likelyRobot,
-                "Research Bots",
-                "bot"
             ),
         ]
         {
