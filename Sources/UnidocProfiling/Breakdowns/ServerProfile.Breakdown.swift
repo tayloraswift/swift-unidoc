@@ -10,7 +10,8 @@ extension ServerProfile
         private
         var responses:
         (
-            toBrowsers:Pie<ByStatus.Stat>,
+            toBarbie:Pie<ByStatus.Stat>,
+            toBratz:Pie<ByStatus.Stat>,
             toSearch:Pie<ByStatus.Stat>,
             toOther:Pie<ByStatus.Stat>
         )
@@ -26,7 +27,8 @@ extension ServerProfile
             languages:Pie<ByLanguage.Stat>,
             responses:
             (
-                toBrowsers:Pie<ByStatus.Stat>,
+                toBarbie:Pie<ByStatus.Stat>,
+                toBratz:Pie<ByStatus.Stat>,
                 toSearch:Pie<ByStatus.Stat>,
                 toOther:Pie<ByStatus.Stat>
             ),
@@ -51,8 +53,10 @@ extension ServerProfile.Breakdown
             languages: stats.languages.chart(stratum: "Barbies served"),
             responses:
             (
-                toBrowsers: stats.responses.toBrowsers.chart(
+                toBarbie: stats.responses.toBarbie.chart(
                     stratum: "responses to Barbies"),
+                toBratz: stats.responses.toBratz.chart(
+                    stratum: "responses to Bratz"),
                 toSearch: stats.responses.toSearch.chart(
                     stratum: "responses to Search Engines"),
                 toOther: stats.responses.toOther.chart(
@@ -96,8 +100,15 @@ extension ServerProfile.Breakdown:HyperTextOutputStreamable
         html[.h3] = "Responses (Barbies)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.responses.toBrowsers
-            $0[.figcaption] { $0[.dl] = self.responses.toBrowsers.legend }
+            $0[.div] { $0.class = "pie" } = self.responses.toBarbie
+            $0[.figcaption] { $0[.dl] = self.responses.toBarbie.legend }
+        }
+
+        html[.h3] = "Responses (Bratz)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.responses.toBratz
+            $0[.figcaption] { $0[.dl] = self.responses.toBratz.legend }
         }
 
         html[.h3] = "Responses (Search Engines)"
