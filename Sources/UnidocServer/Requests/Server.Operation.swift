@@ -45,7 +45,7 @@ extension Server.Operation:HTTPServerOperation
         let profile:ServerProfile.Sample = .init(ip: address,
             language: headers["accept-language"].first,
             referer: headers["referer"].first,
-            agent: headers["user-agent"].first,
+            agent: headers["user-agent"].last,
             uri: unnormalized)
 
         let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))

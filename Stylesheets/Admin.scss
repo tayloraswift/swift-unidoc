@@ -46,26 +46,46 @@ figure div.pie
         {
             fill: #ae6aff;
         }
-        > *.agent.browser
+        > *.agent.barbie
         {
             fill: #ff73a1;
+        }
+        > *.agent.bratz
+        {
+            fill: #d39fb0;
+        }
+        > *.agent.robot
+        {
+            fill: #e1e1e1;
         }
         > *.agent.tool
         {
             fill: #999;
-        }
-        > *.agent.bot
-        {
-            fill: #e1e1e1;
         }
 
         > *.language.zh
         {
             fill: #c7001b;
         }
+        > *.language.ko
+        {
+            fill: #e75568;
+        }
+        > *.language.ja
+        {
+            fill: #ffc3cb;
+        }
         > *.language.es
         {
             fill: #ffb62f;
+        }
+        > *.language.pt
+        {
+            fill: #38db7c;
+        }
+        > *.language.de
+        {
+            fill: #1f1f1f;
         }
         > *.language.en
         {
@@ -82,10 +102,6 @@ figure div.pie
         > *.language.bn
         {
             fill: #d88f5f;
-        }
-        > *.language.pt
-        {
-            fill: #38db7c;
         }
         > *.language.ru
         {
