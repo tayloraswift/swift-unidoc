@@ -182,21 +182,21 @@ extension Server.Request
 
             case .single("Firefox", let version?):
                 //  Modern Firefox version: might be a Barbie.
-                if  version.major >= 118
+                if  version.major >= 115
                 {
                     suspicion -= 1
                 }
 
             case .single("CriOS", let version?):
                 //  Modern Chrome version: might be a Barbie.
-                if  version.major >= 118
+                if  version.major >= 109
                 {
                     suspicion -= 1
                 }
 
             case .single("Chrome", let version?):
                 //  Modern Chrome version: might be a Barbie.
-                if  version.major >= 118
+                if  version.major >= 109
                 {
                     suspicion -= 1
                 }
