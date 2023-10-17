@@ -1,12 +1,12 @@
 import * as lunr from "lunr";
-import { Symbol } from "./Symbol";
+import { AnySymbol } from "./AnySymbol";
 import { SearchOutput } from "./SearchOutput";
 
 export class SearchRunner {
     index: lunr.Index;
-    symbols: Symbol[];
+    symbols: AnySymbol[];
 
-    constructor(symbols: Symbol[]) {
+    constructor(symbols: AnySymbol[]) {
         this.symbols = symbols;
         this.index = lunr(function () {
             this.ref('i');
@@ -17,7 +17,7 @@ export class SearchRunner {
             this.searchPipeline.remove(lunr.stemmer);
 
             for (let i = 0; i < symbols.length; i++) {
-                this.add({ i: i, text: symbols[i].signature });
+                this.add({ i: i, text: symbols[i].keywords });
             }
         });
     }
