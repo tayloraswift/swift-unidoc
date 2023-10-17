@@ -18,12 +18,12 @@
     [
         "Sources/Main.ts",
 
+        "Sources/AnySymbol.ts",
         "Sources/NounMapCulture.ts",
         "Sources/SearchIndex.ts",
         "Sources/Searchbar.ts",
         "Sources/SearchRunner.ts",
         "Sources/SearchOutput.ts",
         "Sources/SearchVolume.ts",
-        "Sources/Symbol.ts",
     ]
 }

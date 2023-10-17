@@ -80,11 +80,24 @@ div.searchbar,
                 margin-left: 1rem;
             }
         }
+
         > *
         {
             margin: 0;
             word-wrap: anywhere;
             padding: 0.5rem 1rem;
+        }
+    }
+    li.package
+    {
+        a
+        {
+            > span:first-child
+            {
+                font-family: $typeface-serif;
+                font-style: italic;
+                font-weight: 400;
+            }
         }
     }
 

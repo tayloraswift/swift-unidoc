@@ -4,7 +4,7 @@ import { NounMapCulture } from "./NounMapCulture";
 import { SearchRunner } from "./SearchRunner";
 import { SearchOutput } from "./SearchOutput";
 import { SearchVolume } from "./SearchVolume";
-import { Symbol } from "./Symbol";
+import { AnySymbol } from "./AnySymbol";
 
 declare const volumes: SearchVolume[];
 
@@ -35,14 +35,14 @@ export class Searchbar {
         }
         this.loading = true;
 
-        let requests: Promise<SearchIndex>[] = [
+        //  Get the list of all packages in the index.
+        let requests: Promise<SearchIndex | string[]>[] = [
             fetch('/lunr/packages.json').then(
-                async function (response: Response): Promise<SearchIndex> {
-                    return response.json().then(function (packages: string[]): SearchIndex {
-                        return { packages: packages, cultures: [] };
-                    });
+                async function (response: Response): Promise<string[]> {
+                    return response.json();
                 }),
         ];
+        //  Get the search indexes for the dependencies of the current volume.
         for (const volume of volumes) {
             const uri: string = '/lunr/' + volume.id;
 
@@ -50,39 +50,60 @@ export class Searchbar {
                 async function (response: Response): Promise<SearchIndex> {
                     return response.json().then(
                         function (cultures: NounMapCulture[]): SearchIndex {
-                            return { packages: [], cultures: cultures, trunk: volume.trunk };
+                            return { cultures: cultures, trunk: volume.trunk };
                         });
                 }));
         }
         this.runner = await Promise.all(requests)
-            .then(function (indexes: SearchIndex[]): SearchRunner {
-                let symbols: Symbol[] = [];
+            .then(function (indexes: (SearchIndex | string[])[]): SearchRunner {
+                let symbols: AnySymbol[] = [];
+                let exclude: Set<string> = new Set<string>();
+
+                for (const volume of volumes) {
+                    const dependency: string = volume.id.split(':')[0];
+
+                    exclude.add(dependency);
+
+                    symbols.push({
+                        dependency: true,
+                        keywords: dependency.split(/\-/),
+                        name: dependency,
+                        uri: volume.trunk,
+                    });
+                }
+
                 for (const index of indexes) {
-                    for (const id of index.packages) {
-                        symbols.push({
-                            module: null,
-                            signature: id.split(/\-/),
-                            display: id,
-                            uri: '/docs/' + id
-                        });
-                    }
-                    for (const culture of index.cultures) {
-                        const module: string = culture.c;
-                        for (const noun of culture.n) {
-                            var uri: string = index.trunk + '/';
-                            uri += noun.s
-                                .replace('\t', '.')
-                                .replaceAll(' ', '/')
-                                .toLowerCase();
-
-                            const signature: string[] = noun.s.split(/\s+/);
-
+                    if (index instanceof Array) {
+                        for (const id of index) {
+                            if (exclude.has(id)) {
+                                continue;
+                            }
                             symbols.push({
-                                module: module,
-                                signature: signature,
-                                display: signature.slice(1).join('.'),
-                                uri: uri
+                                dependency: false,
+                                keywords: id.split(/\-/),
+                                name: id,
+                                uri: '/tags/' + id
                             });
+                        }
+                    } else {
+                        for (const culture of index.cultures) {
+                            const module: string = culture.c;
+                            for (const noun of culture.n) {
+                                var uri: string = index.trunk + '/';
+                                uri += noun.s
+                                    .replace('\t', '.')
+                                    .replaceAll(' ', '/')
+                                    .toLowerCase();
+
+                                const stem: string[] = noun.s.split(/\s+/);
+
+                                symbols.push({
+                                    module: module,
+                                    keywords: stem,
+                                    display: stem.slice(1).join('.'),
+                                    uri: uri
+                                });
+                            }
                         }
                     }
                 }
@@ -115,21 +136,28 @@ export class Searchbar {
 
         let items: HTMLElement[] = [];
         for (const result of this.output.choices) {
-            const symbol: Symbol = this.runner.symbols[parseInt(result.ref)];
+            const symbol: AnySymbol = this.runner.symbols[parseInt(result.ref)];
 
             const item: HTMLElement = document.createElement("li");
             const anchor: HTMLElement = document.createElement("a");
             const display: HTMLElement = document.createElement("span");
             const category: HTMLElement = document.createElement("span");
 
-            display.appendChild(document.createTextNode(symbol.display));
+            if ('dependency' in symbol) {
+                if (symbol.dependency) {
+                    category.appendChild(document.createTextNode('Package Dependency'));
+                    item.classList.add('package', 'dependency');
+                } else {
+                    category.appendChild(document.createTextNode('Package'));
+                    item.classList.add('package');
+                }
 
-            if (symbol.module !== null) {
+                display.appendChild(document.createTextNode(symbol.name));
+            } else {
                 category.appendChild(document.createTextNode(symbol.module));
                 category.classList.add('module');
-            }
-            else {
-                category.appendChild(document.createTextNode('(package)'));
+
+                display.appendChild(document.createTextNode(symbol.display));
             }
 
             anchor.appendChild(display);
