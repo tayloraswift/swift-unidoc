@@ -21,7 +21,7 @@ extension AdministrativePage
     public
     func body(_ body:inout HTML.ContentEncoder)
     {
-        body[.header]
+        body[.header, { $0.class = "app" }]
         {
             $0[.div, { $0.class = "content" }] { $0[.nav] = HTML.Logo.init() }
         }

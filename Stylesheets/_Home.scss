@@ -1,3 +1,19 @@
+main.home
+{
+    div.search-tool
+    {
+        height: 5rem;
+
+        position: relative;
+        z-index: 1;
+
+    }
+    div.searchbar
+    {
+        max-width: 100%;
+    }
+}
+
 div.feeds
 {
     section
@@ -44,7 +60,7 @@ div.feeds ol
 
             > span:first-child
             {
-                color: rgb(50, 50, 50);
+                color: $light-foreground-fade;
             }
             > *:first-child
             {
