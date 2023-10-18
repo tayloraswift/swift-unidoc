@@ -1,13 +1,37 @@
 div.searchbar-container
 {
     padding: 0.5rem 0;
+
+    label.checkbox
+    {
+        background-color: $light-background;
+
+        max-width: 20rem;
+
+        margin-top: 0.5rem;
+        margin-left: 0.5rem;
+    }
 }
-div.searchbar-container,
+@media only screen and (min-width: 50rem)
+{
+    div.searchbar-container label.checkbox
+    {
+        margin-top: 0;
+    }
+    div.searchbar-container
+    {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+    }
+}
 div.search-results-container
 {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: left;
+    align-items: center;
 }
 div.searchbar
 {
@@ -112,12 +136,19 @@ div.searchbar,
         border-bottom-right-radius: 0.5rem;
     }
 
-    li:hover,
+    li:hover
+    {
+        background-color: $light-accent-barbie-pink;
+    }
     li:focus,
     li.selected
     {
         background-color: $light-accent-hot-pink;
-
+    }
+    li:hover,
+    li:focus,
+    li.selected
+    {
         a
         {
             text-decoration: none;
@@ -132,6 +163,7 @@ div.searchbar,
         display: none;
     }
 
+    div.search-tool:focus-within #search-results,
     header:focus-within #search-results
     {
         display: inherit;
