@@ -7,6 +7,7 @@ import NIOSSL
 import SemanticVersions
 import SymbolGraphBuilder
 import SymbolGraphs
+import System
 import UnidocAutomation
 import UnidocLinker
 
@@ -69,24 +70,16 @@ enum Main
                     return
                 }
 
-                let snapshot:Snapshot
+                let archive:SymbolGraphArchive
 
                 if  options.package == .swift
                 {
-                    guard edition.tag == toolchain.tagname
-                    else
-                    {
-                        fatalError("Tag mismatch: \(edition.tag) != \(toolchain.tagname)")
-                    }
-
                     let build:ToolchainBuild = try await .swift(in: workspace,
                         clean: true)
 
-                    snapshot = .init(
-                        package: package.coordinate,
-                        version: edition.coordinate,
-                        archive: try await toolchain.generateDocs(for: build,
-                            pretty: options.pretty))
+
+                    archive = try await toolchain.generateDocs(for: build,
+                        pretty: options.pretty)
                 }
                 else
                 {
@@ -99,29 +92,47 @@ enum Main
                     //  Remove the `Package.resolved` file to force a new resolution.
                     try await build.removePackageResolved()
 
-                    snapshot = .init(
-                        package: package.coordinate,
-                        version: edition.coordinate,
-                        archive: try await toolchain.generateDocs(for: build,
-                            pretty: options.pretty))
+                    archive = try await toolchain.generateDocs(for: build,
+                        pretty: options.pretty)
                 }
 
-                let bson:BSON.Document = .init(encoding: consume snapshot)
+                if  let output:FilePath = options.output.map(FilePath.init(_:))
+                {
+                    let bson:BSON.Document = .init(encoding: consume archive)
+                    try output.overwrite(with: bson.bytes)
+                }
+                else
+                {
+                    if  let tag:String = archive.metadata.commit?.refname,
+                            tag != edition.tag
+                    {
+                        fatalError("Tag mismatch: \(tag) != \(edition.tag)")
+                    }
 
-                print("Uploading symbol graph...")
+                    let snapshot:Snapshot = .init(
+                        package: package.coordinate,
+                        version: edition.coordinate,
+                        archive: archive)
 
-                try await $0.put(bson: bson, to: "/api/symbolgraph")
+                    let bson:BSON.Document = .init(encoding: consume snapshot)
+                    print("Uploading symbol graph...")
 
-                print("Successfully uploaded symbol graph (tag: \(edition.tag))")
+                    try await $0.put(bson: bson, to: "/api/symbolgraph")
+
+                    print("Successfully uploaded symbol graph (tag: \(edition.tag))")
+                }
             }
             else
             {
                 edition = package.release
             }
 
-            try await $0.post(
-                urlencoded: "package=\(package.coordinate)&version=\(edition.coordinate)",
-                to: "/api/uplink")
+            if  case nil = options.output
+            {
+                try await $0.post(
+                    urlencoded: "package=\(package.coordinate)&version=\(edition.coordinate)",
+                    to: "/api/uplink")
+            }
         }
     }
 }
