@@ -102,7 +102,7 @@ extension PackageBuild
 
         try await SystemProcess.init(command: "git", "-C", "\(cloned)",
             "-c", "advice.detachedHead=false",
-            "checkout", refname)()
+            "checkout", "-f", refname)()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
             try FileDescriptor.pipe()
