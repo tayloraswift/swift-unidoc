@@ -17,8 +17,8 @@ extension Server
     {
         case interactive(any InteractiveEndpoint)
         case procedural(any ProceduralEndpoint)
-        case stateless(ServerResponse)
-        case `static`(Cache<Site.Asset.Get>.Request)
+        case stateless(any RenderablePage & Sendable)
+        case `static`(Cache<StaticAsset>.Request)
     }
 }
 //  GET endpoints
@@ -29,7 +29,7 @@ extension Server.Endpoint
     {
         if  let action:Site.Admin.Action = .init(rawValue: trunk)
         {
-            return .stateless(.ok(action.resource()))
+            return .stateless(action)
         }
 
         switch trunk
@@ -39,12 +39,12 @@ extension Server.Endpoint
             let target:String = stem.first
             else
             {
-                return .stateless(.ok(Site.Admin.Recode.init().resource()))
+                return .stateless(Site.Admin.Recode.init())
             }
 
             if  let target:Site.Admin.Recode.Target = .init(rawValue: target)
             {
-                return .stateless(.ok(target.resource()))
+                return .stateless(target)
             }
             else
             {
@@ -90,7 +90,7 @@ extension Server.Endpoint
     static
     func get(asset trunk:String, tag:MD5?) -> Self?
     {
-        let asset:Site.Asset.Get? = .init(trunk)
+        let asset:StaticAsset? = .init(trunk)
         return asset.map { .static(.init($0, tag: tag)) }
     }
 
@@ -288,9 +288,6 @@ extension Server.Endpoint
 
             switch trunk
             {
-            case .reloadAssets:
-                return .procedural(ReloadAsset.all)
-
             case .index:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]

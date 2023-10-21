@@ -41,7 +41,7 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
                 modified: modified,
                 target: target)
 
-            return .ok(complete.resource())
+            return .ok(complete.resource(assets: server.assets))
 
         case .perform(.dropAccountDB, _):
             try await server.db.account.drop(with: session)
@@ -78,6 +78,6 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             return nil
         }
 
-        return .ok(page.resource())
+        return .ok(page.resource(assets: server.assets))
     }
 }

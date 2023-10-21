@@ -1,3 +1,4 @@
+import HTTP
 import NIOCore
 import NIOHPACK
 import NIOHTTP2
@@ -86,14 +87,14 @@ extension HTTP2Client.Connection
             let _:Void =
             {
                 try await Task.sleep(for: .seconds(15))
-                source.finish(throwing: HTTP2Client.RequestTimeoutError.init())
+                source.finish(throwing: HTTP.RequestTimeoutError.init())
             }()
 
             let awaiting:Int = batch.count
             var facets:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Iterator =
                 stream.makeAsyncIterator()
 
-            channel.writeAndFlush((source, batch)).whenFailure
+            self.channel.writeAndFlush((source, batch)).whenFailure
             {
                 source.finish(throwing: $0)
             }

@@ -1,7 +1,7 @@
-extension HTTP2Client
+extension HTTP1Client
 {
     @frozen public
-    struct RequestTimeoutError:Equatable, Error, Sendable
+    struct UnexpectedDisconnectionError:Equatable, Error, Sendable
     {
         @inlinable public
         init()

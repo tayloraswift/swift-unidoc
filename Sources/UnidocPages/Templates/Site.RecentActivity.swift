@@ -32,13 +32,54 @@ extension Site.RecentActivity:RenderablePage
 
     var title:String { "Recent Activity" }
 
+    public
+    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
+    {
+        head[unsafe: .script] = "const volumes = [];"
+    }
+
     func body(_ body:inout HTML.ContentEncoder)
     {
+        //  This div centers the content.
         body[.div]
         {
-            $0[.main]
+            $0[.main, { $0.class = "home" }]
             {
                 $0[.h1] = "swiftinit"
+
+                $0[.div, { $0.class = "search-tool" }]
+                {
+                    $0[.div, { $0.class = "searchbar-container" }]
+                    {
+                        $0[.div]
+                        {
+                            $0.class = "searchbar"
+                            $0.title = """
+                            Search for any package on Swiftinit!
+
+                            Shortcut: /
+                            """
+                        }
+                            content:
+                        {
+                            $0[.form, { $0.id = "search" ; $0.role = "search" }]
+                            {
+                                $0[.input]
+                                {
+                                    $0.id = "search-input"
+                                    $0.type = "search"
+                                    $0.placeholder = "search packages"
+                                    $0.autocomplete = "off"
+                                }
+                            }
+                        }
+                    }
+                    $0[.div, { $0.class = "search-results-container" }]
+                    {
+                        $0[.ol] { $0.id = "search-results" }
+                    }
+                }
+
                 $0[.div, { $0.class = "feeds" }]
                 {
                     $0[.section, { $0.class = "repo" }]

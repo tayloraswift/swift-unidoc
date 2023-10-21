@@ -9,16 +9,25 @@ function nonce(): string {
     return Array.from(window.crypto.getRandomValues(uint64), hex).join('')
 }
 
+const search: HTMLElement | null = document.getElementById('search');
 const login: HTMLElement | null = document.getElementById('login');
-const list: HTMLElement | null = document.getElementById('search-results');
 
-if (list !== null) {
-    const searchbar: Searchbar = new Searchbar({ list: list });
-
+if (search !== null) {
     const input: HTMLElement | null = document.getElementById('search-input');
+    const list: HTMLElement | null = document.getElementById('search-results');
+    const mode: HTMLElement | null = document.getElementById('search-packages-only');
 
-    if (input !== null) {
-        input.addEventListener('focus', (event: Event) => searchbar.focus());
+    if (input !== null && list !== null) {
+        const searchbar: Searchbar = new Searchbar({
+            input: input as HTMLInputElement,
+            mode: mode as HTMLInputElement | null,
+            list: list
+        });
+
+        //  Get the existing placeholder text.
+        const placeholder: string = input.getAttribute('placeholder') || '';
+
+        input.addEventListener('focus', (event: Event) => searchbar.reinitialize());
 
         //  We don’t want to suggest a keyboard shortcut if the user focused the input
         //  via touch, or if they were already using the keyboard shortcut.
@@ -27,11 +36,12 @@ if (list !== null) {
         });
 
         input.addEventListener('blur', function (event: Event) {
-             input.setAttribute('placeholder', 'search symbols');
+             input.setAttribute('placeholder', placeholder);
         });
 
-        input.addEventListener('input', (event: Event) => searchbar.suggest(event));
         input.addEventListener('keydown', (event: KeyboardEvent) => searchbar.navigate(event));
+        input.addEventListener('input', (event: Event) => searchbar.suggest());
+        mode?.addEventListener('click', (event: Event) => searchbar.suggest());
 
         document.addEventListener('keydown', function (event: KeyboardEvent) {
             switch (event.key) {
@@ -48,15 +58,19 @@ if (list !== null) {
                     }
                     break;
                 }
+                case ',': {
+                    if (searchbar.mode !== null) {
+                        searchbar.mode.checked = !searchbar.mode.checked;
+                        searchbar.suggest();
+                        input.focus();
+                        event.preventDefault();
+                    }
+                    break;
+                }
             }
         });
-    }
 
-    const form: HTMLElement | null = document.getElementById('search');
-
-    if (form !== null) {
-        form.addEventListener('submit',
-            (event: Event) => searchbar.follow(event));
+        search.addEventListener('submit', (event: Event) => searchbar.follow(event));
     }
 }
 
@@ -71,6 +85,5 @@ if (login !== null) {
 
     login.appendChild(input);
 
-    document.cookie = 'login_state=' + state + '; Path=/ ; SameSite=Lax';
-    // document.cookie = 'login_state=' + state + '; Path=/ ; SameSite=Lax ; Secure';
+    document.cookie = 'login_state=' + state + '; Path=/ ; SameSite=Lax ; Secure';
 }

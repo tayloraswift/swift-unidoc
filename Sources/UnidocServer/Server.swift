@@ -38,7 +38,6 @@ struct Server:Sendable
     let mode:Mode
 
     let count:Counters
-    let cache:Cache<Site.Asset.Get>
     let db:DB
 
     private
@@ -46,7 +45,6 @@ struct Server:Sendable
         port:Int,
         mode:Mode,
         github:GitHubPlugin?,
-        cache:Cache<Site.Asset.Get>,
         db:DB)
     {
         self.authority = authority
@@ -64,7 +62,7 @@ struct Server:Sendable
         do
         {
             var continuation:AsyncStream<Request<any ProceduralEndpoint>>.Continuation? = nil
-            self.procedural.requests = .init
+            self.procedural.requests = .init(bufferingPolicy: .bufferingOldest(16))
             {
                 continuation = $0
             }
@@ -73,7 +71,6 @@ struct Server:Sendable
 
         self.github = github
         self.count = .init()
-        self.cache = cache
 
         self.mode = mode
         self.db = db
@@ -86,25 +83,23 @@ extension Server
         let authority:any ServerAuthority = try options.authority.load(
             certificates: options.certificates)
 
-        let cache:Cache<Site.Asset.Get>
+        let assets:FilePath = "Assets"
         let mode:Mode
 
         if  authority is Localhost
         {
-            cache = .init(reload: true)
-            mode = .unsecured
+            mode = .development(.init(source: assets))
         }
         else
         {
-            cache = .init(reload: false)
-            mode = .secured
+            mode = .production
         }
 
         let github:GitHubPlugin?
         if  let secret:(oauth:String, app:String) = try?
             (
-                (cache.assets / "secrets" / "github-oauth-secret").read(),
-                (cache.assets / "secrets" / "github-app-secret").read()
+                (assets / "secrets" / "github-oauth-secret").read(),
+                (assets / "secrets" / "github-app-secret").read()
             )
         {
             //  This is a client context, which is different from the server context.
@@ -134,10 +129,24 @@ extension Server
             port: options.port,
             mode: mode,
             github: github,
-            cache: cache,
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
+    }
+}
+extension Server
+{
+    var assets:StaticAssets
+    {
+        guard self.mode.secured
+        else
+        {
+            return .init(version: nil)
+        }
+
+        //  Eventually, this should be dynamically configurable. But for now, we just
+        //  hard-code the version number.
+        return .init(version: .v(1, 0))
     }
 }
 
@@ -272,12 +281,20 @@ extension Server:HTTPServerDelegate
             }
 
         case .stateless(let stateless):
-            promise.succeed(stateless)
+            promise.succeed(.ok(stateless.resource(assets: self.assets)))
 
         case .static(let request):
-            promise.completeWithTask
+            if  case .development(let cache) = self.mode
             {
-                try await self.cache.serve(request)
+                promise.completeWithTask
+                {
+                    try await cache.serve(request)
+                }
+            }
+            else
+            {
+                //  In production mode, static assets are served by Cloudfront.
+                promise.succeed(.forbidden(""))
             }
         }
     }
