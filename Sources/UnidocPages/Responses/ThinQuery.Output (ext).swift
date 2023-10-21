@@ -7,7 +7,7 @@ import URI
 extension ThinQuery.Output:ServerResponseFactory
 {
     public
-    func response(as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
     {
         if  LookupPredicate.self is Volume.Range.Type
         {
@@ -16,7 +16,7 @@ extension ThinQuery.Output:ServerResponseFactory
 
             let feed:Site.Guides.Feed = .init(context, vertices: self.matches)
 
-            return .ok(feed.resource())
+            return .ok(feed.resource(assets: assets))
         }
         else if let redirect:URI = self.redirect
         {
@@ -31,7 +31,7 @@ extension ThinQuery.Output:ServerResponseFactory
             //  We return 410 Gone instead of 404 Not Found so that search engines and
             //  research bots will stop crawling this URL. But the page appears the same
             //  to the user.
-            return .gone(display.resource())
+            return .gone(display.resource(assets: assets))
         }
     }
 

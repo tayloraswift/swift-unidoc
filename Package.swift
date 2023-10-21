@@ -42,6 +42,8 @@ let package:Package = .init(
         .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
+        .library(name: "S3", targets: ["S3"]),
+
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
         .library(name: "Signatures", targets: ["Signatures"]),
         .library(name: "Sources", targets: ["Sources"]),
@@ -57,6 +59,7 @@ let package:Package = .init(
 
         .library(name: "UA", targets: ["UA"]),
         .library(name: "Unidoc", targets: ["Unidoc"]),
+        .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAutomation", targets: ["UnidocAutomation"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
@@ -176,6 +179,7 @@ let package:Package = .init(
         .target(name: "HTTPClient", dependencies:
             [
                 .target(name: "HTML"),
+                .target(name: "HTTP"),
                 .target(name: "Media"),
                 .target(name: "MD5"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -301,6 +305,13 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
+        .target(name: "S3", dependencies:
+            [
+                .target(name: "HTTPClient"),
+                .target(name: "UnixTime"),
+                .product(name: "SHA2", package: "swift-hash"),
+            ]),
+
         .target(name: "SHA1", dependencies:
             [
                 .target(name: "InlineBuffer"),
@@ -394,6 +405,12 @@ let package:Package = .init(
                 .target(name: "UnidocPlanes"),
             ]),
 
+        .target(name: "UnidocAssets", dependencies:
+            [
+                .target(name: "UnidocPages"),
+                .target(name: "System"),
+            ]),
+
         .target(name: "UnidocAutomation", dependencies:
             [
                 .target(name: "JSON"),
@@ -436,6 +453,7 @@ let package:Package = .init(
         .target(name: "UnidocProfiling", dependencies:
             [
                 .target(name: "HTTP"),
+                .target(name: "IP"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UA"),
             ]),
@@ -476,6 +494,13 @@ let package:Package = .init(
             ]),
 
 
+        .executableTarget(name: "S3Export", dependencies:
+            [
+                .target(name: "S3"),
+                .target(name: "System"),
+                .target(name: "UnidocAssets"),
+            ]),
+
         .executableTarget(name: "UnidocBuild", dependencies:
             [
                 .target(name: "HTTPClient"),
@@ -489,7 +514,7 @@ let package:Package = .init(
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
-                .target(name: "System"),
+                .target(name: "UnidocAssets"),
                 .target(name: "UnidocPages"),
 
                 .product(name: "Atomics", package: "swift-atomics"),
@@ -551,6 +576,12 @@ let package:Package = .init(
             [
                 .target(name: "PackageMetadata"),
                 .target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "S3Tests", dependencies:
+            [
+                .target(name: "S3"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

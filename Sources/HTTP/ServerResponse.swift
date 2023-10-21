@@ -24,14 +24,14 @@ enum ServerResponse:Equatable, Sendable
     /// 503 Service Unavailable.
     case unavailable    (ServerResource)
 
-    case redirect       (ServerRedirect, cookies:[Cookie] = [])
+    case redirect       (HTTP.Redirect, cookies:[HTTP.Cookie] = [])
 }
 extension ServerResponse
 {
     @inlinable public static
-    func redirect(_ redirect:ServerRedirect, cookies:KeyValuePairs<String, String>) -> Self
+    func redirect(_ redirect:HTTP.Redirect, cookies:KeyValuePairs<String, String>) -> Self
     {
-        .redirect(redirect, cookies: cookies.map(Cookie.init(name:value:)))
+        .redirect(redirect, cookies: cookies.map(HTTP.Cookie.init(name:value:)))
     }
 }
 extension ServerResponse

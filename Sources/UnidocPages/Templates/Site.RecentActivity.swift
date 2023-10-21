@@ -33,7 +33,7 @@ extension Site.RecentActivity:RenderablePage
     var title:String { "Recent Activity" }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder)
+    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         head[unsafe: .script] = "const volumes = [];"
     }

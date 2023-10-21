@@ -23,8 +23,8 @@ extension Server.Endpoint.AdminDashboard:RestrictedEndpoint
             tagsCrawled: server.github?.tagsCrawled ?? 0,
             tagsUpdated: server.github?.tagsUpdated ?? 0,
             tour: server.tour,
-            real: server.mode == .secured)
+            real: server.mode.secured)
 
-        return .ok(page.resource())
+        return .ok(page.resource(assets: server.assets))
     }
 }

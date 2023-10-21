@@ -7,17 +7,13 @@ actor Cache<Key> where Key:CacheKey
 {
     nonisolated
     let assets:FilePath
-    nonisolated
-    let reload:Bool
 
     private
     var table:[Key: ServerResource]
 
-    init(source assets:FilePath = "Assets", reload:Bool)
+    init(source assets:FilePath)
     {
         self.assets = assets
-        self.reload = reload
-
         self.table = [:]
     }
 }
@@ -47,7 +43,7 @@ extension Cache
     {
         try
         {
-            switch  (reload: self.reload && key.reloadable, $0)
+            switch  (reload: key.reloadable, $0)
             {
             case    (reload: false, let cached?):
                 return cached

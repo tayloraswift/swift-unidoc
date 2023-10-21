@@ -6,7 +6,7 @@ import URI
 extension SearchIndexQuery.Output:ServerResponseFactory
 {
     public
-    func response(as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
     {
         let content:ServerResource.Content
         switch self.json

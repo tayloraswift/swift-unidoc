@@ -1,11 +1,9 @@
 import NIOCore
 import NIOPosix
-import NIOHPACK
-import NIOHTTP2
 import NIOSSL
 
 @frozen public
-struct HTTP2Client
+struct HTTP1Client
 {
     @usableFromInline internal
     let bootstrap:ClientBootstrap
@@ -21,13 +19,13 @@ struct HTTP2Client
         self.remote = remote
     }
 }
-extension HTTP2Client:Identifiable
+extension HTTP1Client:Identifiable
 {
     /// Returns the ``remote`` hostname.
     @inlinable public
     var id:String { self.remote }
 }
-extension HTTP2Client
+extension HTTP1Client
 {
     public
     init(threads:MultiThreadedEventLoopGroup, niossl:NIOSSLContext, remote:String)
@@ -46,20 +44,10 @@ extension HTTP2Client
                 return channel.pipeline.addHandler(tls)
                     .flatMap
                 {
-                    channel.configureHTTP2Pipeline(mode: .client,
-                        connectionConfiguration: .init(),
-                        streamConfiguration: .init())
-                    {
-                        //  With no owner, the stream is unsolicited and will drop any
-                        //  responses it receives.
-                        $0.pipeline.addHandler(ClientStreamHandler.init(owner: nil))
-                    }
+                    channel.pipeline.addHTTPClientHandlers()
                         .flatMap
                     {
-                        (multiplexer:NIOHTTP2Handler.StreamMultiplexer) in
-
-                        channel.pipeline.addHandler(ClientInterfaceHandler.init(
-                            multiplexer: multiplexer))
+                        channel.pipeline.addHandler(InterfaceHandler.init())
                     }
                 }
             }
@@ -72,20 +60,7 @@ extension HTTP2Client
         self.init(bootstrap: bootstrap, remote: remote)
     }
 }
-extension HTTP2Client
-{
-    public
-    func fetch(_ request:__owned HPACKHeaders) async throws -> Facet
-    {
-        try await self.connect { try await $0.fetch(request) }
-    }
-    public
-    func fetch(_ request:__owned HTTP2Client.Request) async throws -> Facet
-    {
-        try await self.connect { try await $0.fetch(request) }
-    }
-}
-extension HTTP2Client
+extension HTTP1Client
 {
     /// Connect to the remote host over HTTPS and perform the given operation.
     @inlinable public

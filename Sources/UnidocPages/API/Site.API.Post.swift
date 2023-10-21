@@ -4,7 +4,6 @@ extension Site.API
     enum Post:String
     {
         case index
-        case reloadAssets = "reload-assets"
         case uplink
         case unlink
     }

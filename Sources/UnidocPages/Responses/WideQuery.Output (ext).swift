@@ -7,7 +7,7 @@ import URI
 extension WideQuery.Output:ServerResponseFactory
 {
     public
-    func response(as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
     {
         guard let principal:WideQuery.Output.Principal = self.principal
         else
@@ -40,7 +40,7 @@ extension WideQuery.Output:ServerResponseFactory
                 principal.volume.symbol.package == "__swiftinit"
             {
                 let page:Site.Blog.Article = .init(context, vertex: vertex)
-                return .ok(page.resource())
+                return .ok(page.resource(assets: assets))
             }
 
             let canonical:CanonicalVersion? = .init(principal: principal)
@@ -56,7 +56,7 @@ extension WideQuery.Output:ServerResponseFactory
                     sidebar: principal.tree?.rows,
                     vertex: vertex,
                     groups: principal.groups)
-                resource = page.resource()
+                resource = page.resource(assets: assets)
 
             case .culture(let vertex):
                 let page:Site.Docs.Culture = .init(context,
@@ -64,7 +64,7 @@ extension WideQuery.Output:ServerResponseFactory
                     sidebar: principal.tree?.rows,
                     vertex: vertex,
                     groups: principal.groups)
-                resource = page.resource()
+                resource = page.resource(assets: assets)
 
             case .decl(let vertex):
                 let page:Site.Docs.Decl = .init(context,
@@ -72,7 +72,7 @@ extension WideQuery.Output:ServerResponseFactory
                     sidebar: principal.tree?.rows,
                     vertex: vertex,
                     groups: principal.groups)
-                resource = page.resource()
+                resource = page.resource(assets: assets)
 
             case .file:
                 //  We should never get this as principal output!
@@ -83,13 +83,13 @@ extension WideQuery.Output:ServerResponseFactory
                     canonical: canonical,
                     vertex: vertex,
                     groups: principal.groups)
-                resource = page.resource()
+                resource = page.resource(assets: assets)
 
             case .global:
                 let page:Site.Docs.Meta = .init(context,
                     canonical: canonical,
                     groups: principal.groups)
-                resource = page.resource()
+                resource = page.resource(assets: assets)
             }
 
             return .ok(resource)
@@ -104,7 +104,7 @@ extension WideQuery.Output:ServerResponseFactory
         if  let choices:Site.Docs.MultipleFound = .init(context,
                 matches: principal.matches)
         {
-            return .multiple(choices.resource())
+            return .multiple(choices.resource(assets: assets))
         }
         else
         {
@@ -113,7 +113,7 @@ extension WideQuery.Output:ServerResponseFactory
             let display:Site.Docs.NotFound = .init(context,
                 sidebar: principal.tree?.rows)
 
-            return .notFound(display.resource())
+            return .notFound(display.resource(assets: assets))
         }
     }
 }

@@ -1,27 +1,30 @@
 import NIOCore
 import NIOHTTP2
 
-/// A simple channel handler that collates and forwards incoming HTTP/2 frames to its owner.
-final
-class ClientStreamHandler
+extension HTTP2Client
 {
-    private
-    var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
-    private
-    var facet:HTTP2Client.Facet
-
-    init(owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?)
+    /// A simple channel handler that collates and forwards incoming HTTP/2 frames to its owner.
+    final
+    class StreamHandler
     {
-        self.owner = owner
-        self.facet = .init()
-    }
+        private
+        var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
+        private
+        var facet:HTTP2Client.Facet
 
-    deinit
-    {
-        self.owner?.finish()
+        init(owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?)
+        {
+            self.owner = owner
+            self.facet = .init()
+        }
+
+        deinit
+        {
+            self.owner?.finish()
+        }
     }
 }
-extension ClientStreamHandler:ChannelInboundHandler
+extension HTTP2Client.StreamHandler:ChannelInboundHandler
 {
     typealias InboundIn = HTTP2Frame.FramePayload
 
