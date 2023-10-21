@@ -240,6 +240,7 @@ extension UnidocDatabase
             {
             case "swift-5.8.1-RELEASE": semver = .release(.v(5, 8, 1))
             case "swift-5.9-RELEASE":   semver = .release(.v(5, 9, 0))
+            case "swift-5.9.1-RELEASE": semver = .release(.v(5, 9, 1))
             case _:
                 fatalError("unimplemented")
             }
