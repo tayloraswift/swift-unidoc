@@ -72,14 +72,14 @@ extension ServerMessage
 extension ServerMessage
 {
     private
-    init(redirect:ServerRedirect, cookies:[Cookie])
+    init(redirect:HTTP.Redirect, cookies:[HTTP.Cookie])
     {
         var headers:HTTPHeaders = .init()
 
         headers.add(name: "host", value: Authority.domain)
         headers.add(name: "location", value: Authority.url(redirect.location))
 
-        for cookie:Cookie in cookies
+        for cookie:HTTP.Cookie in cookies
         {
             headers.add(name: "set-cookie",
                 value: "\(cookie); Secure; HttpOnly; SameSite = Lax; Path = /")

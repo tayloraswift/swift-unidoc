@@ -8,7 +8,7 @@ import URI
 extension PackageEditionsQuery.Output:ServerResponseFactory
 {
     public
-    func response(as type:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as type:AcceptType?) throws -> ServerResponse
     {
         switch type
         {
@@ -29,7 +29,7 @@ extension PackageEditionsQuery.Output:ServerResponseFactory
 
         case _:
             let list:Site.Tags.List = .init(from: self)
-            return .ok(list.resource())
+            return .ok(list.resource(assets: assets))
         }
     }
 }

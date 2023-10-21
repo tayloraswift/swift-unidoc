@@ -83,7 +83,7 @@ extension Server.Operation:HTTPServerOperation
                 endpoint = .interactive(Server.Endpoint.Bounce.init())
 
             case "robots.txt":
-                endpoint = .static(.init(.robots_txt, tag: tag))
+                endpoint = .interactive(Server.Endpoint.Robots.init())
 
             case _:
                 return nil

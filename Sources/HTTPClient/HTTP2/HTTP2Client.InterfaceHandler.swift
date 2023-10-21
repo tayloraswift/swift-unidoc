@@ -2,32 +2,35 @@ import NIOCore
 import NIOHPACK
 import NIOHTTP2
 
-/// An HTTP/2 handler whose sole purpose is to initiate HTTP/2 streams in parallel by
-/// creating ``ClientStreamHandler``s for the multiplexed streams and configuring them to
-/// return their responses to the owner of the requests.
-final
-class ClientInterfaceHandler
+extension HTTP2Client
 {
-    private
-    let multiplexer:NIOHTTP2Handler.StreamMultiplexer
-    private
-    var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
-
-    init(multiplexer:NIOHTTP2Handler.StreamMultiplexer)
+    /// An HTTP/2 handler whose sole purpose is to initiate HTTP/2 streams in parallel by
+    /// creating ``ClientStreamHandler``s for the multiplexed streams and configuring them to
+    /// return their responses to the owner of the requests.
+    final
+    class InterfaceHandler
     {
-        self.multiplexer = multiplexer
-        self.owner = nil
-    }
+        private
+        let multiplexer:NIOHTTP2Handler.StreamMultiplexer
+        private
+        var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
 
-    deinit
-    {
-        if  case _? = self.owner
+        init(multiplexer:NIOHTTP2Handler.StreamMultiplexer)
         {
-            fatalError("ClientInterfaceHandler deinitialized with stream attached!")
+            self.multiplexer = multiplexer
+            self.owner = nil
+        }
+
+        deinit
+        {
+            if  case _? = self.owner
+            {
+                fatalError("ClientInterfaceHandler deinitialized with stream attached!")
+            }
         }
     }
 }
-extension ClientInterfaceHandler:ChannelHandler
+extension HTTP2Client.InterfaceHandler:ChannelHandler
 {
     func handlerRemoved(context:ChannelHandlerContext)
     {
@@ -35,7 +38,7 @@ extension ClientInterfaceHandler:ChannelHandler
         self.owner = nil
     }
 }
-extension ClientInterfaceHandler:ChannelOutboundHandler
+extension HTTP2Client.InterfaceHandler:ChannelOutboundHandler
 {
     typealias OutboundOut = HTTP2Frame
     typealias OutboundIn =
@@ -43,12 +46,6 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
         owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation,
         batch:[HTTP2Client.Request]
     )
-
-    func errorCaught(context:ChannelHandlerContext, error:any Error)
-    {
-        self.owner?.finish(throwing: error)
-        context.channel.close(promise: nil)
-    }
 
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
@@ -64,7 +61,7 @@ extension ClientInterfaceHandler:ChannelOutboundHandler
         {
             self.multiplexer.createStreamChannel
             {
-                $0.pipeline.addHandler(ClientStreamHandler.init(owner: owner))
+                $0.pipeline.addHandler(HTTP2Client.StreamHandler.init(owner: owner))
             }
                 .whenComplete
             {

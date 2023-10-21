@@ -4,6 +4,7 @@ import struct Glibc.tm
 
 import func Glibc.clock_gettime
 import func Glibc.timegm
+import func Glibc.gmtime_r
 import var Glibc.CLOCK_REALTIME
 
 #elseif canImport(Darwin)
@@ -12,6 +13,7 @@ import struct Darwin.tm
 
 import func Darwin.clock_gettime
 import func Darwin.timegm
+import func Darwin.gmtime_r
 import var Darwin.CLOCK_REALTIME
 #else
 #error("Platform doesn’t support 'clock_gettime'")
@@ -50,7 +52,7 @@ extension UnixInstant
     }
 
     @inlinable public
-    init?(timestamp:Timestamp)
+    init?(utc timestamp:Timestamp.Components)
     {
         var time:tm = .init(
             tm_sec:     timestamp.second,
@@ -71,6 +73,43 @@ extension UnixInstant
         case -1:            return nil
         case let second:    self.init(second: Int64.init(second), nanoseconds: 0)
         }
+    }
+
+    public
+    var timestamp:Timestamp?
+    {
+        var segmented:tm = .init(
+            tm_sec:     -1,
+            tm_min:     -1,
+            tm_hour:    -1,
+            tm_mday:    -1,
+            tm_mon:     -1, // month in range 0 ... 11 !
+            tm_year:    -1,
+            tm_wday:    -1,
+            tm_yday:    -1,
+            tm_isdst:   0,
+
+            tm_gmtoff:  0,
+            tm_zone:    nil)
+
+        let second:Int = .init(self.second)
+
+        guard withUnsafePointer(to: second, { gmtime_r($0, &segmented) }) != nil,
+        let weekday:Timestamp.Weekday = .init(rawValue: segmented.tm_wday)
+        else
+        {
+            return nil
+        }
+
+        return .init(
+            components: .init(
+                year:       segmented.tm_year + 1900,
+                month:      segmented.tm_mon + 1,
+                day:        segmented.tm_mday,
+                hour:       segmented.tm_hour,
+                minute:     segmented.tm_min,
+                second:     segmented.tm_sec),
+            weekday: weekday)
     }
 }
 extension UnixInstant:Comparable

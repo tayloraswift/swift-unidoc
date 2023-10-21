@@ -1,9 +1,41 @@
-extension RenderablePage
+import SemanticVersions
+
+@frozen public
+struct StaticAssets:Sendable
+{
+    /// Specifies the version numbers of the static assets, if served from Cloudfront. If
+    /// nil, then assets will be loaded from the local server.
+    ///
+    /// To reduce cache churn, not all assets are versioned. For example, the fonts and
+    /// the favicon do not use the version numbers.
+    public
+    let version:MinorVersion?
+
+    @inlinable public
+    init(version:MinorVersion?)
+    {
+        self.version = version
+    }
+}
+extension StaticAssets
+{
+    subscript(asset:StaticAsset) -> String
+    {
+        if  let version:MinorVersion = self.version
+        {
+            "https://static.swiftinit.org\(asset.path(prepending: version))"
+        }
+        else
+        {
+            "/\(Site.Asset.root)/\(asset)"
+        }
+    }
+}
+extension StaticAssets
 {
     /// Minified from:
     /// https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Literata:ital,wght@0,400;0,700;1,400;1,700&display=swap
-    static
-    var FontFaces:String
+    var fontfaces:String
     {
         """
         @font-face {
@@ -283,28 +315,28 @@ extension RenderablePage
         font-style: regular;
         font-weight: 400;
         font-display: swap;
-        src: url(\(Site.Asset[.literata45_woff2])) format('woff2');
+        src: url(\(self[.literata45_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: italic;
         font-weight: 400;
         font-display: swap;
-        src: url(\(Site.Asset[.literata47_woff2])) format('woff2');
+        src: url(\(self[.literata47_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: regular;
         font-weight: 700;
         font-display: swap;
-        src: url(\(Site.Asset[.literata75_woff2])) format('woff2');
+        src: url(\(self[.literata75_woff2])) format('woff2');
         }
         @font-face {
         font-family: 'Literata';
         font-style: italic;
         font-weight: 700;
         font-display: swap;
-        src: url(\(Site.Asset[.literata77_woff2])) format('woff2');
+        src: url(\(self[.literata77_woff2])) format('woff2');
         }
         """
     }

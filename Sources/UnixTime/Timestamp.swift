@@ -2,167 +2,29 @@
 struct Timestamp:Equatable, Hashable, Sendable
 {
     public
-    var year:Int32
+    let components:Components
     public
-    var month:Int32
-    public
-    var day:Int32
-    public
-    var hour:Int32
-    public
-    var minute:Int32
-    public
-    var second:Int32
+    let weekday:Weekday
 
     @inlinable public
-    init(year:Int32, month:Int32, day:Int32, hour:Int32, minute:Int32, second:Int32)
+    init(components:Components, weekday:Weekday)
     {
-        self.year = year
-        self.month = month
-        self.day = day
-        self.hour = hour
-        self.minute = minute
-        self.second = second
+        self.components = components
+        self.weekday = weekday
     }
 }
 extension Timestamp
 {
-    public
-    init?(iso8601 string:String)
-    {
-        self.init(iso8601: string[...])
-    }
-
-    public
-    init?(iso8601 string:Substring)
-    {
-        guard
-        let hyphen:String.Index = string.firstIndex(of: "-"),
-        let year:Int32 = .init(string[..<hyphen])
-        else
-        {
-            return nil
-        }
-
-        let month:String.Index = string.index(after: hyphen)
-
-        guard
-        let hyphen:String.Index = string[month...].firstIndex(of: "-"),
-        let month:Int32 = .init(string[month ..< hyphen])
-        else
-        {
-            return nil
-        }
-
-        let day:String.Index = string.index(after: hyphen)
-
-        guard
-        let t:String.Index = string[day...].firstIndex(of: "T"),
-        let day:Int32 = .init(string[day ..< t])
-        else
-        {
-            return nil
-        }
-
-        let hour:String.Index = string.index(after: t)
-
-        guard
-        let colon:String.Index = string[hour...].firstIndex(of: ":"),
-        let hour:Int32 = .init(string[hour ..< colon])
-        else
-        {
-            return nil
-        }
-
-        let minute:String.Index = string.index(after: colon)
-
-        guard
-        let colon:String.Index = string[minute...].firstIndex(of: ":"),
-        let minute:Int32 = .init(string[minute ..< colon])
-        else
-        {
-            return nil
-        }
-
-        let second:String.Index = string.index(after: colon)
-
-        guard
-        let z:String.Index = string.indices.last, case "Z" = string[z],
-        let second:Int32 = .init(string[second ..< z])
-        else
-        {
-            return nil
-        }
-
-        if  1 ... 12 ~= month,
-            1 ... 31 ~= day,
-            0 ..< 24 ~= hour,
-            0 ..< 60 ~= minute,
-            0 ... 60 ~= second
-        {
-            self.init(
-                year: year,
-                month: month,
-                day: day,
-                hour: hour,
-                minute: minute,
-                second: second)
-        }
-        else
-        {
-            return nil
-        }
-    }
-}
-extension Timestamp
-{
+    /// Formats this timestamp as an HTTP GMT date.
     @inlinable public
-    func m(_ locale:Locale) -> String
+    var http:String
     {
-        switch locale
-        {
-        case .en:
-            switch self.month
-            {
-            case  1:    return "Jan"
-            case  2:    return "Feb"
-            case  3:    return "Mar"
-            case  4:    return "Apr"
-            case  5:    return "May"
-            case  6:    return "Jun"
-            case  7:    return "Jul"
-            case  8:    return "Aug"
-            case  9:    return "Sep"
-            case 10:    return "Oct"
-            case 11:    return "Nov"
-            case 12:    return "Dec"
-            case  _:    return "???"
-            }
-        }
-    }
-
-    @inlinable public
-    func month(_ locale:Locale) -> String
-    {
-        switch locale
-        {
-        case .en:
-            switch self.month
-            {
-            case  1:    return "January"
-            case  2:    return "February"
-            case  3:    return "March"
-            case  4:    return "April"
-            case  5:    return "May"
-            case  6:    return "June"
-            case  7:    return "July"
-            case  8:    return "August"
-            case  9:    return "September"
-            case 10:    return "October"
-            case 11:    return "November"
-            case 12:    return "December"
-            case  _:    return "?"
-            }
-        }
+        """
+        \(self.weekday.short(.en)), \
+        \(self.components.day) \
+        \(self.components.mon(.en)) \
+        \(self.components.year) \
+        \(self.components.hh):\(self.components.mm):\(self.components.ss) GMT
+        """
     }
 }

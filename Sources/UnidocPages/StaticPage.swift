@@ -22,12 +22,12 @@ extension StaticPage where Self:StaticRoot
 extension StaticPage where Self:RenderablePage
 {
     public
-    func resource() -> ServerResource
+    func resource(assets:StaticAssets) -> ServerResource
     {
         let canonical:String? = self.canonicalURI?.description
         let location:String = "\(self.location)"
 
-        let html:HTML = self.rendered(canonical: canonical, location: location)
+        let html:HTML = self.rendered(canonical: canonical, location: location, assets: assets)
 
         return .init(
             headers: .init(canonical: "https://swiftinit.org\(canonical ?? location)"),

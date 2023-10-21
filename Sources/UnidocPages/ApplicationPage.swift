@@ -17,7 +17,7 @@ extension ApplicationPage<HTML.Logo>
 extension ApplicationPage
 {
     public
-    func head(augmenting head:inout HTML.ContentEncoder)
+    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         head[unsafe: .script] = "const volumes = [];"
     }

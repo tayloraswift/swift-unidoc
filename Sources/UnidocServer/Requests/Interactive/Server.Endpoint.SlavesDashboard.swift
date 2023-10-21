@@ -41,6 +41,6 @@ extension Server.Endpoint.SlavesDashboard:RestrictedEndpoint
         }
 
         let page:Site.Admin.Slaves = .init(cookie: "\(cookie)")
-        return .ok(page.resource())
+        return .ok(page.resource(assets: server.assets))
     }
 }

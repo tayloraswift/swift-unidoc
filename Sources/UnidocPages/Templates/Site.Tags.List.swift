@@ -127,13 +127,13 @@ extension Site.Tags.List:ApplicationPage
                         $0[.dt] = "Archived?"
                         $0[.dd] = repo.archived ? "yes" : "no"
 
-                        if  let created:Timestamp = .init(iso8601: repo.created)
+                        if  let created:Timestamp.Components = .init(iso8601: repo.created)
                         {
                             $0[.dt] = "Created"
                             $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
                         }
-                        if  let updated:Timestamp = .init(iso8601: repo.updated),
-                            let updated:UnixInstant = .init(timestamp: updated)
+                        if  let updated:Timestamp.Components = .init(iso8601: repo.updated),
+                            let updated:UnixInstant = .init(utc: updated)
                         {
                             let age:Age<Language.EN> = .init(now - updated)
 

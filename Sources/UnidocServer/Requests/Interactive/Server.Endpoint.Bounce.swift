@@ -14,12 +14,12 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Bounce:PublicEndpoint
 {
-    func load(from server:Server.InteractiveState) async throws -> ServerResponse?
+    func load(from server:Server.InteractiveState) -> ServerResponse?
     {
         if  let oauth:GitHubOAuth = server.github?.oauth.app
         {
             let page:Site.Login = .init(app: oauth)
-            return .ok(page.resource())
+            return .ok(page.resource(assets: server.assets))
         }
         else
         {

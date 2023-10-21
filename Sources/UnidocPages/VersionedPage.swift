@@ -22,7 +22,7 @@ extension VersionedPage
     var volume:Volume.Meta { self.context.volumes.principal }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder)
+    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let json:JSON = .array
         {
