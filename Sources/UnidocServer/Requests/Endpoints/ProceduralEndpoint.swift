@@ -11,7 +11,7 @@ extension ProceduralEndpoint
     func perform(on server:Server.ProceduralState,
         with cookies:Server.Cookies) async throws -> ServerResponse
     {
-        if  case .secured = server.mode
+        if  server.mode.secured
         {
             guard
             let cookie:Account.Cookie = cookies.session

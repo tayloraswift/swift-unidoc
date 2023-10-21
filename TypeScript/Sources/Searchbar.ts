@@ -6,25 +6,28 @@ import { SearchOutput } from "./SearchOutput";
 import { SearchVolume } from "./SearchVolume";
 import { AnySymbol } from "./AnySymbol";
 
-declare const volumes: SearchVolume[];
+declare let volumes: SearchVolume[];
 
 export class Searchbar {
+    input: HTMLInputElement;
+    mode: HTMLInputElement | null;
     list: HTMLElement;
 
     runner?: SearchRunner;
     loading: boolean;
+    output: SearchOutput | null;
 
-    pending?: Event;
-    output?: SearchOutput;
-
-    constructor(output: { list: HTMLElement }) {
+    constructor(elements: {
+        input: HTMLInputElement,
+        mode: HTMLInputElement | null,
+        list: HTMLElement
+    }) {
         this.loading = false;
-        this.list = output.list;
-    }
+        this.output = null;
 
-    async focus() {
-        this.list.classList.remove('occluded');
-        await this.reinitialize();
+        this.input = elements.input;
+        this.mode = elements.mode;
+        this.list = elements.list;
     }
 
     async reinitialize() {
@@ -114,22 +117,17 @@ export class Searchbar {
                 return undefined;
             });
         this.loading = false;
-        if (this.pending !== undefined) {
-            this.suggest(this.pending);
-        }
+        this.suggest();
     }
 
-    suggest(event: Event) {
+    suggest() {
         if (this.runner === undefined) {
-            this.pending = event;
             return;
-        } else {
-            this.pending = undefined;
         }
         // *not* current target, as that will not work for pending events
-        const input: HTMLInputElement = event.target as HTMLInputElement;
-        this.output = this.runner.search(input.value.toLowerCase());
-        if (this.output === undefined) {
+        this.output = this.runner.search(this.input.value,
+            this.mode !== null && this.mode.checked);
+        if (this.output === null) {
             this.list.replaceChildren();
             return;
         }
@@ -172,7 +170,7 @@ export class Searchbar {
     }
 
     navigate(event: KeyboardEvent) {
-        if (this.output === undefined) {
+        if (this.output === null) {
             return;
         }
         switch (event.key) {
@@ -197,7 +195,7 @@ export class Searchbar {
 
     follow(event: Event) {
         event.preventDefault();
-        if (this.output === undefined || this.runner === undefined) {
+        if (this.output === null || this.runner === undefined) {
             return;
         }
         const choice: lunr.Index.Result = this.output.choices[this.output.index];

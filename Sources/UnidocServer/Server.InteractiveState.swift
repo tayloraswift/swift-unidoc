@@ -87,6 +87,12 @@ extension Server.InteractiveState
                     duration: duration,
                     uri: uri)
             }
+            if  duration > .seconds(1)
+            {
+                print("""
+                    Warning: query '\(request.profile.uri ?? "")' took \(duration) to complete!
+                    """)
+            }
 
             let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
             let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = request.agent
@@ -117,5 +123,46 @@ extension Server.InteractiveState
 
             self.tour.last = request.profile
         }
+    }
+}
+extension Server.InteractiveState
+{
+    /// TODO: make this configurable.
+    var robots:String
+    {
+        """
+        User-agent: mauibot
+        Crawl-delay: 20
+
+
+        User-agent: semrushbot
+        Crawl-delay: 20
+
+
+        User-agent: ahrefsbot
+        Crawl-delay: 20
+
+
+        User-agent: blexbot
+        Crawl-delay: 20
+
+
+        User-agent: seo spider
+        Crawl-delay: 20
+
+
+        User-agent: MJ12bot
+        Crawl-delay: 20
+
+
+        User-agent: Bytespider
+        Crawl-delay: 10
+
+
+        User-agent: *
+        Disallow: /admin/
+        Disallow: /auth/
+
+        """
     }
 }

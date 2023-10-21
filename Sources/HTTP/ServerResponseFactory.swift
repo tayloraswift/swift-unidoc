@@ -1,7 +1,9 @@
 import Media
 
 public
-protocol ServerResponseFactory
+protocol ServerResponseFactory<Assets>
 {
-    func response(as type:AcceptType?) throws -> ServerResponse
+    associatedtype Assets
+
+    func response(with assets:Assets, as type:AcceptType?) throws -> ServerResponse
 }

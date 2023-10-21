@@ -18,7 +18,7 @@ body
     min-height: 100vw;
     margin: 0;
 
-    > header
+    > header.app
     {
         position: fixed;
         z-index: 1;
@@ -137,6 +137,53 @@ body
     font-variant-numeric: oldstyle-nums;
     text-size-adjust: none;
     -webkit-text-size-adjust: none;
+}
+
+label.checkbox
+{
+    color: $light-foreground-fade;
+
+    line-height: 1em;
+
+    display: grid;
+    grid-template-columns: 1em auto;
+    gap: 0.3em;
+}
+
+input[type="checkbox"]
+{
+    appearance: none;
+    // For iOS < 15 to remove gradient background
+    background-color: white;
+    margin: 0;
+
+    font-size: inherit;
+    height: 1em;
+    width: 1em;
+
+    display: grid;
+    place-content: center;
+
+    transform: translateY(2px);
+    border: 2px solid $light-foreground-semi;
+    border-radius: 0.1em;
+}
+input[type="checkbox"]::before
+{
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    background-color: white;
+}
+input[type="checkbox"]:checked
+{
+    border-color: $light-accent-barbie-pink;
+    background-color: $light-accent-barbie-pink;
+}
+input[type="checkbox"]:checked::before
+{
+    transform-origin: bottom left;
+    clip-path: polygon(100% 13%, 39% 100%, 0 70%, 11% 53%, 37% 71%, 83% 0);
 }
 
 a

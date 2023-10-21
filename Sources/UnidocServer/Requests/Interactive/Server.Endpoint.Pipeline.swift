@@ -9,7 +9,7 @@ import URI
 extension Server.Endpoint
 {
     struct Pipeline<Query>:Sendable
-        where Query:DatabaseQuery, Query.Output:ServerResponseFactory
+        where Query:DatabaseQuery, Query.Output:ServerResponseFactory<StaticAssets>
     {
         /// If nil, the query will be explained instead of executed. If non-nil, this field
         /// will be passed to the query’s output type, which may influence the response it
@@ -32,20 +32,13 @@ extension Server.Endpoint.Pipeline:PublicEndpoint
 {
     func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
-        try await self.load(
-            from: server.db.unidoc,
-            with: try await .init(from: server.db.sessions))
-    }
+        let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-    private
-    func load(from db:UnidocDatabase,
-        with session:Mongo.Session) async throws -> ServerResponse?
-    {
         guard
         let accept:AcceptType = self.output
         else
         {
-            let explanation:String = try await db.explain(
+            let explanation:String = try await server.db.unidoc.explain(
                 query: self.query,
                 with: session)
 
@@ -55,13 +48,15 @@ extension Server.Endpoint.Pipeline:PublicEndpoint
         }
 
         guard
-        let output:Query.Output = try await db.execute(query: self.query, with: session)
+        let output:Query.Output = try await server.db.unidoc.execute(
+            query: self.query,
+            with: session)
         else
         {
             return nil
         }
 
-        switch try output.response(as: accept)
+        switch try output.response(with: server.assets, as: accept)
         {
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)
