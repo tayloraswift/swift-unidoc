@@ -96,27 +96,24 @@ extension Server
         }
 
         let github:GitHubPlugin?
-        if  let secret:(oauth:String, app:String) = try?
+        if  let secret:(oauth:String, app:String, pat:String) = try?
             (
-                (assets / "secrets" / "github-oauth-secret").read(),
-                (assets / "secrets" / "github-app-secret").read()
+                (assets / "secrets" / "github-oauth-secret").readLine(),
+                (assets / "secrets" / "github-app-secret").readLine(),
+                (assets / "secrets" / "github-pat").readLine()
             )
         {
             //  This is a client context, which is different from the server context.
             let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
 
-            func trim(_ string:String) -> String
-            {
-                .init(string.prefix(while: \.isHexDigit))
-            }
-
             github = .init(niossl: niossl,
                 oauth: .init(
                     client: "2378cacaed3ace362867",
-                    secret: trim(secret.oauth)),
+                    secret: secret.oauth),
                 app: .init(383005,
                     client: "Iv1.dba609d35c70bf57",
-                    secret: trim(secret.app)))
+                    secret: secret.app),
+                pat: secret.pat)
         }
         else
         {

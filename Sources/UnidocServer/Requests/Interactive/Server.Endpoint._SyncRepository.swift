@@ -25,7 +25,7 @@ extension Server.Endpoint._SyncRepository:RestrictedEndpoint
     func load(from server:Server.InteractiveState) async throws -> ServerResponse?
     {
         guard
-        let github:GitHubClient<GitHubOAuth.API> = server.github?.api
+        let github:GitHubClient<GitHub.API> = server.github?.api
         else
         {
             return nil

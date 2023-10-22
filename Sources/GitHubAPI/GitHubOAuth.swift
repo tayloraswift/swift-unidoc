@@ -20,5 +20,5 @@ extension GitHubOAuth
 {
     /// The GitHub API.
     @inlinable public
-    var api:API { .init(agent: "swift-unidoc (by tayloraswift)", oauth: self) }
+    var api:GitHub.API { .init(agent: "swift-unidoc (by tayloraswift)", oauth: self) }
 }

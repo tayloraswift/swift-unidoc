@@ -20,13 +20,12 @@ enum Main
 
         let assets:FilePath = "Assets"
         let key:AWS.AccessKey
-        if  let id:String = try? (assets / "secrets" / "aws-access-key").read(),
-            let secret:String = try? (assets / "secrets" / "aws-access-key-secret").read()
+        do
         {
-            key = .init(id: String.init(id.prefix(while: { !$0.isNewline })),
-                secret: String.init(secret.prefix(while: { !$0.isNewline })))
+            key = .init(id: try (assets / "secrets" / "aws-access-key-id").readLine(),
+                secret: try (assets / "secrets" / "aws-access-key-secret").readLine())
         }
-        else
+        catch
         {
             fatalError("could not load AWS access key!")
         }

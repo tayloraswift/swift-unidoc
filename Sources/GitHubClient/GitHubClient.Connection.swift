@@ -1,4 +1,3 @@
-import Base64
 import GitHubAPI
 import HTTPClient
 import JSON
@@ -24,8 +23,66 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient<GitHubOAuth.API>.Connection
+extension GitHubClient<GitHub.API>.Connection
 {
+    /// Run a GraphQL API request.
+    ///
+    /// The request will be charged to the user associated with the given token. It is not
+    /// possible to run a GraphQL API request without a token.
+    @inlinable public
+    func post<Response>(query:String,
+        with token:String,
+        for _:Response.Type = Response.self) async throws -> Response
+        where Response:JSONDecodable
+    {
+        let request:HTTP2Client.Request = .init(headers:
+            [
+                ":method": "POST",
+                ":scheme": "https",
+                ":authority": "api.github.com",
+                ":path": "/graphql",
+
+                "authorization": "Bearer \(token)",
+
+                //  GitHub will reject the API request if the user-agent is not set.
+                "user-agent": self.app.agent,
+                "accept": "application/vnd.github+json"
+            ],
+            body: self.http2.buffer(string: query))
+
+        /// GraphQL should never return redirects.
+        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
+
+        switch response.status
+        {
+        case 200?:
+            var json:JSON = .init(utf8: [])
+            for buffer:ByteBuffer in response.buffers
+            {
+                json.utf8 += buffer.readableBytesView
+            }
+
+            let wrapper:GraphQL.Response<Response> = try json.decode()
+            return wrapper.data
+
+        case 403?:
+            if  let second:String = response.headers?["x-ratelimit-reset"].first,
+                let second:Int64 = .init(second)
+            {
+                throw GitHubClient<GitHub.API>.RateLimitError.init(
+                    until: .second(second))
+            }
+            else
+            {
+                fallthrough
+            }
+
+        case _:
+            throw GitHubClient<GitHub.API>.StatusError.init(code: response.status)
+        }
+    }
+
+    /// Run a REST API request.
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
@@ -37,28 +94,20 @@ extension GitHubClient<GitHubOAuth.API>.Connection
         following:
         for _:Int in 0 ... 1
         {
-            var request:HPACKHeaders =
+            let request:HPACKHeaders =
             [
                 ":method": "GET",
                 ":scheme": "https",
                 ":authority": "api.github.com",
                 ":path": endpoint,
 
+                "authorization": token.map { "Bearer \($0)" } ??
+                    "Basic \(self.app.oauth.authorization)",
+
                 //  GitHub will reject the API request if the user-agent is not set.
                 "user-agent": self.app.agent,
                 "accept": "application/vnd.github+json"
             ]
-            if  let token:String
-            {
-                request.add(name: "authorization", value: "Bearer \(token)")
-            }
-            else if
-                let oauth:GitHubOAuth = self.app.oauth
-            {
-                let credentials:String = "\(oauth.client):\(oauth.secret)"
-                request.add(name: "authorization",
-                    value: "Basic \(Base64.encode(credentials.utf8))")
-            }
 
             let response:HTTP2Client.Facet = try await self.http2.fetch(request)
 
@@ -85,7 +134,7 @@ extension GitHubClient<GitHubOAuth.API>.Connection
                 if  let second:String = response.headers?["x-ratelimit-reset"].first,
                     let second:Int64 = .init(second)
                 {
-                    throw GitHubClient<GitHubOAuth.API>.RateLimitError.init(
+                    throw GitHubClient<GitHub.API>.RateLimitError.init(
                         until: .second(second))
                 }
 
@@ -97,6 +146,6 @@ extension GitHubClient<GitHubOAuth.API>.Connection
             break following
         }
 
-        throw GitHubClient<GitHubOAuth.API>.StatusError.init(code: status)
+        throw GitHubClient<GitHub.API>.StatusError.init(code: status)
     }
 }

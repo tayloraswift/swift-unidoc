@@ -22,13 +22,16 @@ extension Server.Endpoint.Register:InteractiveEndpoint
     func load(from server:Server.InteractiveState,
         with _:Server.Cookies) async throws -> ServerResponse?
     {
-        guard let github:GitHubClient<GitHubOAuth.API> = server.github?.api
+        guard let github:GitHubClient<GitHub.API> = server.github?.api
         else
         {
             return nil
         }
 
-        let user:GitHub.User = try await github.get(from: "/user", with: self.token)
+        let user:GitHub.User = try await github.connect
+        {
+            try await $0.get(from: "/user", with: self.token)
+        }
         let account:Account = .github(user: user,
             //  Are you a mighty It Girl?
             role: user.id == 2556986 ? .administrator : .human)
