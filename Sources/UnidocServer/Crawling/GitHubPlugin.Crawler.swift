@@ -123,7 +123,8 @@ extension GitHubPlugin.Crawler
 
             switch try await self.db.unidoc.packages.update(record: .init(id: package.id,
                     cell: package.cell,
-                    repo: .github(response.repo)),
+                    repo: .github(response.repo),
+                    crawled: .now()),
                 with: session)
             {
             case nil:
