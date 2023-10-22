@@ -7,6 +7,9 @@ extension Server
         var authority:Authority
         var certificates:String
         var redirect:Bool
+        /// Whether to enable GitHub integration if access keys are available.
+        /// Defaults to true.
+        var github:Bool
         var mongo:String
         /// This is the port that the server binds to. It is not necessarily
         /// the port that the server is accessed through.
@@ -17,6 +20,7 @@ extension Server
             self.authority = .localhost
             self.certificates = "TestCertificates"
             self.redirect = false
+            self.github = true
             self.mongo = "unidoc-mongod"
             self.port = 8443
         }
@@ -69,6 +73,9 @@ extension Server.Options
                 case let host?:     options.mongo = host
                 case nil:           throw Server.OptionsError.invalidMongoReplicaSetSeed
                 }
+
+            case "--no-github":
+                options.github = false
 
             case "-p", "--port":
                 guard let port:String = arguments.next()

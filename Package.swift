@@ -193,6 +193,8 @@ let package:Package = .init(
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
+
+                .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
@@ -516,8 +518,6 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocPages"),
-
-                .product(name: "Atomics", package: "swift-atomics"),
             ]),
 
 
