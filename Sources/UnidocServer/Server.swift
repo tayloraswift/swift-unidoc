@@ -143,7 +143,7 @@ extension Server
 
         //  Eventually, this should be dynamically configurable. But for now, we just
         //  hard-code the version number.
-        return .init(version: .v(1, 0))
+        return .init(version: .v(1, 1))
     }
 }
 
