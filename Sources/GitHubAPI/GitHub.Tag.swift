@@ -9,15 +9,12 @@ extension GitHub
         public
         let name:String
         public
-        var node:String
-        public
         var hash:SHA1
 
         @inlinable public
-        init(name:String, node:String, hash:SHA1)
+        init(name:String, hash:SHA1)
         {
             self.name = name
-            self.node = node
             self.hash = hash
         }
     }
@@ -28,7 +25,10 @@ extension GitHub.Tag:JSONObjectDecodable
     enum CodingKey:String
     {
         case name
+
+        @available(*, unavailable)
         case node = "node_id"
+
         case commit
     }
 
@@ -37,7 +37,6 @@ extension GitHub.Tag:JSONObjectDecodable
     {
         self.init(
             name: try json[.name].decode(),
-            node: try json[.node].decode(),
             hash: try json[.commit].decode(as: Commit.self, with: \.sha))
     }
 }

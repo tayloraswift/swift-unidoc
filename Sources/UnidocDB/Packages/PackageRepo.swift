@@ -33,7 +33,6 @@ extension PackageRepo:MongoMasterCodingModel
 
         case github_owner = "hO"
         case github_name = "hN"
-        case github_node = "hI"
         case github_license = "hL"
         case github_topics = "hT"
         case github_watchers = "hW"
@@ -63,7 +62,6 @@ extension PackageRepo:BSONDocumentEncodable
 
             bson[.github_owner] = repo.owner
             bson[.github_name] = repo.name
-            bson[.github_node] = repo.node
             bson[.github_license] = repo.license
             bson[.github_topics] = repo.topics.isEmpty ? nil : repo.topics
             bson[.github_watchers] = repo.watchers
@@ -97,7 +95,6 @@ extension PackageRepo:BSONDocumentDecodable
             self = .github(.init(id: id,
                 owner: try bson[.github_owner].decode(),
                 name: try bson[.github_name].decode(),
-                node: try bson[.github_node].decode(),
                 license: try bson[.github_license]?.decode(),
                 topics: try bson[.github_topics]?.decode() ?? [],
                 master: master,
