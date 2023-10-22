@@ -11,12 +11,11 @@ extension GitHubPlugin
         let count:Counters
 
         let oauth:GitHubClient<GitHubOAuth>
-        // let app:GitHubClient<GitHubApp>
-        let api:GitHubClient<GitHubOAuth.API>
+        let api:GitHubClient<GitHub.API>
 
         init(count:Counters,
             oauth:GitHubClient<GitHubOAuth>,
-            api:GitHubClient<GitHubOAuth.API>)
+            api:GitHubClient<GitHub.API>)
         {
             self.count = count
             self.oauth = oauth

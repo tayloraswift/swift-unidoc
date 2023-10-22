@@ -12,6 +12,7 @@ extension Main
         var pretty:Bool
         var build:Bool
         var force:Bool
+        var output:String?
 
         private
         init(package:PackageIdentifier)
@@ -24,6 +25,7 @@ extension Main
             self.pretty = false
             self.build = true
             self.force = false
+            self.output = nil
         }
     }
 }
@@ -80,6 +82,16 @@ extension Main.Options
 
             case "--pretty", "-P":
                 options.pretty = true
+
+            case "--output", "-o":
+                guard
+                let output:String = arguments.popFirst()
+                else
+                {
+                    fatalError("Expected output path after '\(option)'")
+                }
+
+                options.output = output
 
             case "--force", "-f":
                 options.force = true

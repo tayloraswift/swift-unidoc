@@ -79,6 +79,17 @@ extension FilePath
 }
 extension FilePath
 {
+    /// Reads a *single* line from this file, without the line terminator.
+    ///
+    /// This is mostly useful for reading secrets, like keys and tokens.
+    @inlinable public
+    func readLine() throws -> String
+    {
+        .init(try self.read().prefix { !$0.isNewline })
+    }
+}
+extension FilePath
+{
     @inlinable public
     func read(_:[UInt8].Type = [UInt8].self) throws -> [UInt8]
     {

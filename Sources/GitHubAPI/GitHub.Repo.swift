@@ -11,8 +11,6 @@ extension GitHub
         var owner:Owner
         public
         var name:String
-        public
-        var node:String
 
         /// The repo’s license, if GitHub was able to detect it.
         public
@@ -70,7 +68,6 @@ extension GitHub
         init(id:Int32,
             owner:Owner,
             name:String,
-            node:String,
             license:License? = nil,
             topics:[String] = [],
             master:String,
@@ -90,7 +87,6 @@ extension GitHub
             self.id = id
             self.owner = owner
             self.name = name
-            self.node = node
             self.license = license
             self.topics = topics
             self.master = master
@@ -117,7 +113,10 @@ extension GitHub.Repo:JSONObjectDecodable
         case id
         case owner
         case name
+
+        @available(*, unavailable)
         case node = "node_id"
+
         case license
         case topics
         case master = "default_branch"
@@ -142,7 +141,6 @@ extension GitHub.Repo:JSONObjectDecodable
         self.init(id: try json[.id].decode(),
             owner: try json[.owner].decode(),
             name: try json[.name].decode(),
-            node: try json[.node].decode(),
             license: try json[.license]?.decode(),
             topics: try json[.topics]?.decode() ?? [],
             master: try json[.master].decode(),

@@ -15,24 +15,24 @@ struct PackageRecord:Identifiable, Equatable, Sendable
     public
     let cell:Int32
 
+    /// The repo this package tracks. Currently only GitHub repos are supported.
+    public
+    var repo:PackageRepo?
     /// When this package *record* was last crawled. This is different from the time when the
     /// package itself was last updated.
     public
     var crawled:BSON.Millisecond
-    /// The repo this package tracks. Currently only GitHub repos are supported.
-    public
-    var repo:PackageRepo?
 
     @inlinable public
     init(id:PackageIdentifier,
         cell:Int32,
-        crawled:BSON.Millisecond = .now(),
-        repo:PackageRepo? = nil)
+        repo:PackageRepo? = nil,
+        crawled:BSON.Millisecond = 0)
     {
         self.id = id
         self.cell = cell
-        self.crawled = crawled
         self.repo = repo
+        self.crawled = crawled
     }
 }
 extension PackageRecord:MongoMasterCodingModel
@@ -42,8 +42,8 @@ extension PackageRecord:MongoMasterCodingModel
     {
         case id = "_id"
         case cell = "P"
-        case crawled = "T"
         case repo = "R"
+        case crawled = "T"
     }
 }
 extension PackageRecord:BSONDocumentEncodable
@@ -53,8 +53,8 @@ extension PackageRecord:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.cell] = self.cell
-        bson[.crawled] = self.crawled
         bson[.repo] = self.repo
+        bson[.crawled] = self.crawled
     }
 }
 extension PackageRecord:BSONDocumentDecodable
@@ -64,7 +64,7 @@ extension PackageRecord:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             cell: try bson[.cell].decode(),
-            crawled: try bson[.crawled]?.decode() ?? .now(),
-            repo: try bson[.repo]?.decode())
+            repo: try bson[.repo]?.decode(),
+            crawled: try bson[.crawled]?.decode() ?? 0)
     }
 }
