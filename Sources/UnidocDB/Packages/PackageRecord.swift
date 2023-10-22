@@ -26,7 +26,7 @@ struct PackageRecord:Identifiable, Equatable, Sendable
     @inlinable public
     init(id:PackageIdentifier,
         cell:Int32,
-        crawled:BSON.Millisecond = .now(),
+        crawled:BSON.Millisecond = 0,
         repo:PackageRepo? = nil)
     {
         self.id = id
@@ -64,7 +64,7 @@ extension PackageRecord:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             cell: try bson[.cell].decode(),
-            crawled: try bson[.crawled]?.decode() ?? .now(),
+            crawled: try bson[.crawled]?.decode() ?? 0,
             repo: try bson[.repo]?.decode())
     }
 }
