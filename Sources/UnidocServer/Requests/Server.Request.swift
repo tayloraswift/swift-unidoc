@@ -85,17 +85,20 @@ extension Server.Request
 
         switch dominant.subtag
         {
-        case "zh":  return \.zh
-        case "ko":  return \.ko
-        case "ja":  return \.ja
-        case "es":  return \.es
-        case "pt":  return \.pt
+        case "ar":  return \.ar
+        case "bn":  return \.bn
         case "de":  return \.de
         case "en":  return \.en
-        case "ar":  return \.ar
+        case "es":  return \.es
+        case "fr":  return \.fr
         case "hi":  return \.hi
-        case "bn":  return \.bn
+        case "it":  return \.it
+        case "ja":  return \.ja
+        case "ko":  return \.ko
+        case "pt":  return \.pt
         case "ru":  return \.ru
+        case "vi":  return \.vi
+        case "zh":  return \.zh
         case _:     return \.other
         }
     }
