@@ -1,5 +1,6 @@
 import GitHubAPI
 import GitHubClient
+import JSON
 import MongoDB
 import SemanticVersions
 import UnidocDB
@@ -12,14 +13,17 @@ extension GitHubPlugin
         private
         let count:Counters
         private
-        let api:GitHubClient<GitHubOAuth.API>
+        let api:GitHubClient<GitHub.API>
+        private
+        let pat:String
         private
         let db:Server.DB
 
-        init(count:Counters, api:GitHubClient<GitHubOAuth.API>, db:Server.DB)
+        init(count:Counters, api:GitHubClient<GitHub.API>, pat:String, db:Server.DB)
         {
             self.count = count
             self.api = api
+            self.pat = pat
             self.db = db
         }
     }
@@ -57,7 +61,7 @@ extension GitHubPlugin.Crawler
 
     private
     func refresh(stalest count:Int,
-        from github:GitHubClient<GitHubOAuth.API>.Connection,
+        from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
         let stale:[PackageRecord] = try await self.db.unidoc.packages.stalest(count,
@@ -71,12 +75,55 @@ extension GitHubPlugin.Crawler
                 fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            let repo:GitHub.Repo = try await github.get(
-                from: "/repos/\(old.owner.login)/\(old.name)")
+            let query:JSON = .object
+            {
+                $0["query"] = """
+                query
+                {
+                    repository(owner: "\(old.owner.login)", name: "\(old.name)")
+                    {
+                        id: databaseId
+                        owner { login }
+                        name
+
+                        license: licenseInfo { id: spdxId, name }
+                        topics: repositoryTopics(first: 16)
+                        {
+                            nodes { topic { name } }
+                        }
+                        master: defaultBranchRef { name }
+
+                        watchers(first: 0) { count: totalCount }
+                        forks: forkCount
+                        stars: stargazerCount
+                        size: diskUsage
+
+                        archived: isArchived
+                        disabled: isDisabled
+                        fork: isFork
+
+                        homepage: homepageUrl
+                        about: description
+
+                        created: createdAt
+                        updated: updatedAt
+                        pushed: pushedAt
+
+                        refs(last: 10,
+                            refPrefix: "refs/tags/",
+                            orderBy: {field: TAG_COMMIT_DATE, direction: ASC})
+                        {
+                            nodes { name, commit: target { sha: oid } }
+                        }
+                    }
+                }
+                """
+            }
+            let response:Response = try await github.post(query: "\(query)", with: self.pat)
 
             switch try await self.db.unidoc.packages.update(record: .init(id: package.id,
                     cell: package.cell,
-                    repo: .github(repo)),
+                    repo: .github(response.repo)),
                 with: session)
             {
             case nil:
@@ -88,19 +135,17 @@ extension GitHubPlugin.Crawler
                 //  record contains a timestamp.
                 self.count.reposCrawled.wrappingIncrement(ordering: .relaxed)
             }
-            if  repo != old
+            if  response.repo != old
             {
                 self.count.reposUpdated.wrappingIncrement(ordering: .relaxed)
             }
 
-            let tags:[GitHub.Tag] = try await github.get(
-                from: "/repos/\(repo.owner.login)/\(repo.name)/tags?per_page=100")
-
-            //  Import tags in chronological order.
+            //  Import tags in chronological order. The last tag in the GraphQL response
+            //  is the most recent.
             var prerelease:String? = nil
             var release:String? = nil
 
-            for tag:GitHub.Tag in tags.reversed()
+            for tag:GitHub.Tag in response.tags
             {
                 guard
                 let version:SemanticVersion = .init(refname: tag.name)
@@ -136,7 +181,7 @@ extension GitHubPlugin.Crawler
                 let activity:UnidocDatabase.RepoActivity = .init(discovered: .now(),
                     package: package.id,
                     refname: interesting,
-                    origin: .github(repo.owner.login, repo.name))
+                    origin: .github(response.repo.owner.login, response.repo.name))
 
                 try await self.db.unidoc.repoFeed.push(activity, with: session)
             }

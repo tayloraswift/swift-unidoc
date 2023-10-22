@@ -12,14 +12,16 @@ struct GitHubPlugin:Sendable
 
     let oauth:GitHubOAuth
     let app:GitHubApp
+    let pat:String
 
-    init(niossl:NIOSSLContext, oauth:GitHubOAuth, app:GitHubApp)
+    init(niossl:NIOSSLContext, oauth:GitHubOAuth, app:GitHubApp, pat:String)
     {
         self.niossl = niossl
         self.count = .init()
 
         self.oauth = oauth
         self.app = app
+        self.pat = pat
     }
 }
 extension GitHubPlugin
@@ -46,6 +48,7 @@ extension GitHubPlugin
 
         let crawler:Crawler = .init(count: self.count,
             api: .init(http2: api, app: self.oauth.api),
+            pat: self.pat,
             db: db)
 
         try await crawler.run()

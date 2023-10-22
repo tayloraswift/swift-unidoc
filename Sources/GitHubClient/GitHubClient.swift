@@ -114,8 +114,11 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient<GitHubOAuth.API>
+extension GitHubClient<GitHub.API>
 {
+    @available(*, deprecated, message: """
+        Create a connection instead, and call the corresponding method on the connection.
+        """)
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
