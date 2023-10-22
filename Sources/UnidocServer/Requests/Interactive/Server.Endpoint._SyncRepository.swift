@@ -31,8 +31,10 @@ extension Server.Endpoint._SyncRepository:RestrictedEndpoint
             return nil
         }
 
-        let repo:GitHub.Repo = try await github.get(
-            from: "/repos/\(self.owner)/\(self.repo)")
+        let repo:GitHub.Repo = try await github.connect
+        {
+            try await $0.get(from: "/repos/\(self.owner)/\(self.repo)")
+        }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let package:Int32 = try await server.db.unidoc.track(repo: repo,

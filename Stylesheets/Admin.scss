@@ -63,6 +63,10 @@ figure div.pie
             fill: #999;
         }
 
+        > *.language.vt
+        {
+            fill: #d85518;
+        }
         > *.language.zh
         {
             fill: #c7001b;
@@ -83,9 +87,17 @@ figure div.pie
         {
             fill: #38db7c;
         }
+        > *.language.it
+        {
+            fill: #6edf7d;
+        }
         > *.language.de
         {
             fill: #1f1f1f;
+        }
+        > *.language.fr
+        {
+            fill: #83aaff;
         }
         > *.language.en
         {
