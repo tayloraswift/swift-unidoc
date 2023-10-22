@@ -96,26 +96,29 @@ extension Server
         }
 
         let github:GitHubPlugin?
-        if  let secret:(oauth:String, app:String, pat:String) = try?
-            (
-                (assets / "secrets" / "github-oauth-secret").readLine(),
-                (assets / "secrets" / "github-app-secret").readLine(),
-                (assets / "secrets" / "github-pat").readLine()
-            )
+        gi:
+        do
         {
+            guard options.github
+            else
+            {
+                github = nil
+                break gi
+            }
+
             //  This is a client context, which is different from the server context.
             let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
 
             github = .init(niossl: niossl,
                 oauth: .init(
                     client: "2378cacaed3ace362867",
-                    secret: secret.oauth),
+                    secret: try (assets / "secrets" / "github-oauth-secret").readLine()),
                 app: .init(383005,
                     client: "Iv1.dba609d35c70bf57",
-                    secret: secret.app),
-                pat: secret.pat)
+                    secret: try (assets / "secrets" / "github-app-secret").readLine()),
+                pat: try (assets / "secrets" / "github-pat").readLine())
         }
-        else
+        catch
         {
             print("Note: App secret unavailable, GitHub integration has been disabled!")
             github = nil
