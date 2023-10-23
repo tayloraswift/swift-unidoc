@@ -34,7 +34,7 @@ extension Server.Request
         let language:String = self.profile.language
         else
         {
-            return \.none
+            return \.other
         }
 
         var dominant:(subtag:Substring, quality:Double) = ("", 0.0)

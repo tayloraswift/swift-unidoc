@@ -1,3 +1,4 @@
+import Atomics
 import HTTP
 import IP
 import MD5
@@ -9,9 +10,7 @@ class ServerInterfaceHandler<Authority, Server>
     where Authority:ServerAuthority, Server:HTTPServerDelegate
 {
     private
-    var request:(head:HTTPRequestHead, stream:[UInt8])?,
-        responding:Bool,
-        receiving:Bool
+    var request:(head:HTTPRequestHead, stream:[UInt8])?
     private
     let address:IP.Address?
     private
@@ -20,36 +19,22 @@ class ServerInterfaceHandler<Authority, Server>
     init(address:SocketAddress?, server:Server)
     {
         self.request = nil
-        self.receiving = false
-        self.responding = false
 
         self.address = address.map(IP.Address.init(_:)) ?? nil
         self.server = server
+    }
+}
+extension ServerInterfaceHandler:ChannelHandler
+{
+    func handlerRemoved(context:ChannelHandlerContext)
+    {
+        print("stream \(self.address as Any) closed")
     }
 }
 extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
-
-    func userInboundEventTriggered(context:ChannelHandlerContext, event:Any)
-    {
-        if  case .inputClosed? = event as? ChannelEvent
-        {
-            self.receiving = false
-        }
-        else
-        {
-            context.fireUserInboundEventTriggered(event)
-            return
-        }
-        guard self.responding
-        else
-        {
-            context.close(promise: nil)
-            return
-        }
-    }
 
     func channelReadComplete(context:ChannelHandlerContext)
     {
@@ -61,24 +46,33 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
         switch self.unwrapInboundIn(data)
         {
         case .head(let head):
-            self.receiving = head.isKeepAlive
             switch head.method
             {
             case .GET:
                 self.request = nil
 
-                if  let operation:Server.Operation = .init(get: head.uri,
-                        address: self.address,
-                        headers: head.headers)
-                {
-                    self.server.submit(operation, promise: self.accept(context: context))
-                }
+                guard
+                let operation:Server.Operation = .init(get: head.uri,
+                    address: self.address,
+                    headers: head.headers)
                 else
                 {
                     self.send(message: .init(status: .badRequest), context: context)
+                    break
+                }
+                if  let promise:EventLoopPromise<ServerResponse> = self.accept(context: context)
+                {
+                    self.server.submit(operation, promise: promise)
+                }
+                else
+                {
+                    self.reject(context: context)
                 }
 
             case .POST, .PUT:
+                print("""
+                    received POST/PUT request from \(self.address?.description ?? "unknown")
+                    """)
                 self.request = (head, .init())
 
             case _:
@@ -140,27 +134,47 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                 fatalError("unreachable: collected buffers for method \(head.method)!")
             }
 
-            if  let operation:Server.Operation
-            {
-                self.server.submit(operation, promise: self.accept(context: context))
-            }
+            guard
+            let operation:Server.Operation
             else
             {
                 self.send(message: .init(status: .badRequest), context: context)
+                break
             }
+            if  let promise:EventLoopPromise<ServerResponse> = self.accept(context: context)
+            {
+                self.server.submit(operation, promise: promise)
+            }
+            else
+            {
+                self.reject(context: context)
+            }
+
         }
     }
 }
 extension ServerInterfaceHandler
 {
     private
-    func accept(context:ChannelHandlerContext) -> EventLoopPromise<ServerResponse>
+    func accept(context:ChannelHandlerContext) -> EventLoopPromise<ServerResponse>?
     {
+        let requests:Int = self.server.meter.requests.wrappingIncrementThenLoad(
+            ordering: .relaxed)
+
+        guard requests < 16
+        else
+        {
+            self.server.meter.requests.wrappingDecrement(ordering: .relaxed)
+            return nil
+        }
+
         let promise:EventLoopPromise<ServerResponse> = context.eventLoop.makePromise(
             of: ServerResponse.self)
 
         promise.futureResult.whenComplete
         {
+            self.server.meter.requests.wrappingDecrement(ordering: .relaxed)
+
             switch $0
             {
             case .success(let response):
@@ -178,22 +192,25 @@ extension ServerInterfaceHandler
     }
 
     private
+    func reject(context:ChannelHandlerContext)
+    {
+        print("rejected request from \(self.address as Any)!")
+        self.send(message: .init(
+                response: .unavailable("Too many requests!"),
+                using: context.channel.allocator),
+            context: context)
+    }
+
+    private
     func send(message:ServerMessage<Authority>, context:ChannelHandlerContext)
     {
-        self.responding = true
-
         let sent:EventLoopPromise<Void> = context.eventLoop.makePromise(of: Void.self)
             sent.futureResult.whenComplete
         {
-            _ in
-            self.responding = false
-            if !self.receiving
-            {
-                context.channel.close(promise: nil)
-            }
+            _ in context.channel.close(promise: nil)
         }
 
-        context.write(self.wrapOutboundOut(.head(.init(version: .http1_1,
+        context.write(self.wrapOutboundOut(.head(.init(version: .http2,
                 status: message.status,
                 headers: message.headers))),
             promise: nil)
@@ -204,7 +221,6 @@ extension ServerInterfaceHandler
                 promise: nil)
         }
 
-        context.writeAndFlush(self.wrapOutboundOut(.end(nil)),
-            promise: sent)
+        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: sent)
     }
 }

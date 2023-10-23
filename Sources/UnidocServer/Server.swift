@@ -37,6 +37,7 @@ struct Server:Sendable
     let github:GitHubPlugin?
     let mode:Mode
 
+    let meter:HTTP.ServerMeter
     let count:Counters
     let db:DB
 
@@ -70,6 +71,7 @@ struct Server:Sendable
         }
 
         self.github = github
+        self.meter = .init()
         self.count = .init()
 
         self.mode = mode
