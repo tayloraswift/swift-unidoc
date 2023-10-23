@@ -1,3 +1,4 @@
+import HTTPServer
 import GitHubAPI
 import GitHubClient
 import JSON
@@ -51,7 +52,7 @@ extension GitHubPlugin.Crawler
             }
             catch let error
             {
-                print("Crawling error: \(error)")
+                Log[.warning] = "Crawling error: \(error)"
                 self.count.errors.wrappingIncrement(ordering: .relaxed)
             }
 

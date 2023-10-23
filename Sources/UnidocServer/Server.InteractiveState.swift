@@ -2,6 +2,7 @@ import Atomics
 import GitHubClient
 import GitHubAPI
 import HTTP
+import HTTPServer
 import UnidocPages
 import UnidocProfiling
 
@@ -89,9 +90,9 @@ extension Server.InteractiveState
             }
             if  duration > .seconds(1)
             {
-                print("""
-                    Warning: query '\(request.profile.uri ?? "")' took \(duration) to complete!
-                    """)
+                Log[.warning] = """
+                query '\(request.profile.uri ?? "")' took \(duration) to complete!
+                """
             }
 
             let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category

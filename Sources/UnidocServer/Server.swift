@@ -122,7 +122,7 @@ extension Server
         }
         catch
         {
-            print("Note: App secret unavailable, GitHub integration has been disabled!")
+            Log[.debug] = "App secret unavailable, GitHub integration has been disabled!"
             github = nil
         }
 

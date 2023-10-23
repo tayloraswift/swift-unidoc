@@ -24,6 +24,16 @@ class ServerInterfaceHandler<Authority, Server>
         self.server = server
     }
 }
+extension ServerInterfaceHandler:ChannelHandler
+{
+    func handlerAdded(context:ChannelHandlerContext)
+    {
+    }
+
+    func handlerRemoved(context:ChannelHandlerContext)
+    {
+    }
+}
 extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 {
     typealias InboundIn = HTTPServerRequestPart
@@ -63,9 +73,9 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
                 }
 
             case .POST, .PUT:
-                print("""
-                    received POST/PUT request from \(self.address?.description ?? "unknown")
-                    """)
+                Log[.debug] = """
+                received POST/PUT request from \(self.address?.description ?? "unknown")
+                """
                 self.request = (head, .init())
 
             case _:
@@ -187,7 +197,7 @@ extension ServerInterfaceHandler
     private
     func reject(context:ChannelHandlerContext)
     {
-        print("rejected request from \(self.address as Any)!")
+        Log[.warning] = "rejected request from \(self.address as Any)!"
         self.send(message: .init(
                 response: .unavailable("Too many requests!"),
                 using: context.channel.allocator),
