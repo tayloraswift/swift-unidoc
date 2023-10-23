@@ -1,4 +1,5 @@
 import HTTP
+import IP
 import NIOCore
 import NIOPosix
 import NIOHTTP2
@@ -10,6 +11,8 @@ protocol HTTPServerDelegate<Operation>:Sendable
     associatedtype Operation:HTTPServerOperation
 
     func submit(_ operation:Operation, promise:EventLoopPromise<ServerResponse>)
+
+    var meter:HTTP.ServerMeter { get }
 }
 extension HTTPServerDelegate
 {
@@ -25,12 +28,11 @@ extension HTTPServerDelegate
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
-            .childChannelOption(ChannelOptions.allowRemoteHalfClosure, value: true)
             .childChannelInitializer
         {
             (channel:any Channel) -> EventLoopFuture<Void> in
 
-            channel.pipeline.addHandler(NIOSSLServerHandler.init(context: authority.tls))
+            return channel.pipeline.addHandler(NIOSSLServerHandler.init(context: authority.tls))
                 .flatMap
             {
                 channel.configureCommonHTTPServerPipeline
