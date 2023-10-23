@@ -95,7 +95,7 @@ extension ServerAuthority
             host: binding.address,
             port: binding.port).get()
 
-        print("bound to:", binding.address, binding.port)
+        Log[.debug] = "bound to: \(binding.address):\(binding.port)"
 
         try await channel.closeFuture.get()
     }

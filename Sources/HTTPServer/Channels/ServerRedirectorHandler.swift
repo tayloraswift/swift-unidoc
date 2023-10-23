@@ -32,5 +32,6 @@ extension ServerRedirectorHandler:ChannelInboundHandler
 
         context.write(self.wrapOutboundOut(.head(head)), promise: nil)
         context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+        context.close(promise: nil)
     }
 }
