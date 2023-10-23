@@ -24,13 +24,6 @@ class ServerInterfaceHandler<Authority, Server>
         self.server = server
     }
 }
-extension ServerInterfaceHandler:ChannelHandler
-{
-    func handlerRemoved(context:ChannelHandlerContext)
-    {
-        print("stream \(self.address as Any) closed")
-    }
-}
 extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 {
     typealias InboundIn = HTTPServerRequestPart
