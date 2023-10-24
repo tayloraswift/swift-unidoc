@@ -203,9 +203,15 @@ extension Server
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
 
+            // tasks.addTask
+            // {
+            //     try await self.serve(from: ("0.0.0.0", self.port),
+            //         as: self.authority,
+            //         on: threads)
+            // }
             tasks.addTask
             {
-                try await self.serve(from: ("0.0.0.0", self.port),
+                try await self.serve(from: ("::", self.port),
                     as: self.authority,
                     on: threads)
             }

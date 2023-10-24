@@ -26,6 +26,11 @@ extension HTTPServerDelegate
         let bootstrap:ServerBootstrap = .init(group: threads)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .serverChannelOption(ChannelOptions.autoRead, value: false)
+            .serverChannelInitializer
+        {
+            $0.pipeline.addHandler(HTTP.ServerConnectionHandler.init())
+        }
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
             .childChannelInitializer
@@ -37,7 +42,7 @@ extension HTTPServerDelegate
             {
                 channel.configureCommonHTTPServerPipeline
                 {
-                    $0.pipeline.addHandler(ServerInterfaceHandler<Authority, Self>.init(
+                    $0.pipeline.addHandler(HTTP.ServerInterfaceHandler<Authority, Self>.init(
                         address: channel.remoteAddress,
                         server: self))
                 }
@@ -48,7 +53,9 @@ extension HTTPServerDelegate
             host: binding.address,
             port: binding.port).get()
 
-        print("bound to:", binding.address, binding.port)
+        Log[.debug] = "bound to \(binding.address):\(binding.port)"
+
+        channel.read()
 
         try await channel.closeFuture.get()
     }
