@@ -1,4 +1,5 @@
 import HTML
+import HTTP
 import NIOCore
 import NIOHTTP1
 import NIOPosix
@@ -75,19 +76,21 @@ extension ServerAuthority
         let bootstrap:ServerBootstrap = .init(group: threads)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .serverChannelOption(ChannelOptions.autoRead, value: false)
+            .serverChannelInitializer
+        {
+            $0.pipeline.addHandler(HTTP.ServerConnectionHandler.init())
+        }
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
-            .childChannelOption(ChannelOptions.allowRemoteHalfClosure, value: true)
             .childChannelInitializer
         {
             (channel:any Channel) -> EventLoopFuture<Void> in
 
-            let endpoint:ServerRedirectorHandler<Self> = .init()
-
-            return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
+            channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
                 .flatMap
             {
-                channel.pipeline.addHandler(endpoint)
+                channel.pipeline.addHandler(HTTP.ServerRedirectorHandler<Self>.init())
             }
         }
 
@@ -95,7 +98,9 @@ extension ServerAuthority
             host: binding.address,
             port: binding.port).get()
 
-        Log[.debug] = "bound to: \(binding.address):\(binding.port)"
+        Log[.debug] = "bound to \(binding.address):\(binding.port)"
+
+        channel.read()
 
         try await channel.closeFuture.get()
     }

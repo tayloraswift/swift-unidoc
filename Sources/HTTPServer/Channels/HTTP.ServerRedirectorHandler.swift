@@ -1,14 +1,18 @@
+import HTTP
 import NIOCore
 import NIOHTTP1
 
-final
-class ServerRedirectorHandler<Authority> where Authority:ServerAuthority
+extension HTTP
 {
-    init()
+    final
+    class ServerRedirectorHandler<Authority> where Authority:ServerAuthority
     {
+        init()
+        {
+        }
     }
 }
-extension ServerRedirectorHandler:ChannelInboundHandler
+extension HTTP.ServerRedirectorHandler:ChannelInboundHandler
 {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart

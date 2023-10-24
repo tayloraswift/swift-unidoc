@@ -5,26 +5,29 @@ import MD5
 import NIOCore
 import NIOHTTP1
 
-final
-class ServerInterfaceHandler<Authority, Server>
-    where Authority:ServerAuthority, Server:HTTPServerDelegate
+extension HTTP
 {
-    private
-    var request:(head:HTTPRequestHead, stream:[UInt8])?
-    private
-    let address:IP.Address?
-    private
-    let server:Server
-
-    init(address:SocketAddress?, server:Server)
+    final
+    class ServerInterfaceHandler<Authority, Server>
+        where Authority:ServerAuthority, Server:HTTPServerDelegate
     {
-        self.request = nil
+        private
+        var request:(head:HTTPRequestHead, stream:[UInt8])?
+        private
+        let address:IP.Address?
+        private
+        let server:Server
 
-        self.address = address.map(IP.Address.init(_:)) ?? nil
-        self.server = server
+        init(address:SocketAddress?, server:Server)
+        {
+            self.request = nil
+
+            self.address = address.map(IP.Address.init(_:)) ?? nil
+            self.server = server
+        }
     }
 }
-extension ServerInterfaceHandler:ChannelHandler
+extension HTTP.ServerInterfaceHandler:ChannelHandler
 {
     func handlerAdded(context:ChannelHandlerContext)
     {
@@ -34,7 +37,7 @@ extension ServerInterfaceHandler:ChannelHandler
     {
     }
 }
-extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
+extension HTTP.ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
 {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
@@ -156,7 +159,7 @@ extension ServerInterfaceHandler:ChannelInboundHandler, RemovableChannelHandler
         }
     }
 }
-extension ServerInterfaceHandler
+extension HTTP.ServerInterfaceHandler
 {
     private
     func accept(context:ChannelHandlerContext) -> EventLoopPromise<ServerResponse>?

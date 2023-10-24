@@ -28,10 +28,4 @@ extension IP.Address
     {
         if let v4:IP.V4 = .init(full) { .v4(v4) } else { nil }
     }
-
-    @inlinable public static
-    func v6(_ full:some StringProtocol) -> Self?
-    {
-        if let v6:IP.V6 = .init(full) { .v6(v6) } else { nil }
-    }
 }
