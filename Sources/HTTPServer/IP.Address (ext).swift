@@ -19,18 +19,7 @@ extension IP.Address
             self = .v4(value)
 
         case .v6(let ip):
-            let words:(UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16) =
-                ip.address.sin6_addr.__in6_u.__u6_addr16
-            let value:IP.V6 = .init(
-                words.0,
-                words.1,
-                words.2,
-                words.3,
-                words.4,
-                words.5,
-                words.6,
-                words.7)
-
+            let value:IP.V6 = .init(storage: ip.address.sin6_addr.__in6_u.__u6_addr32)
             self = .v6(value)
 
         case .unixDomainSocket:
