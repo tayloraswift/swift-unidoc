@@ -539,6 +539,12 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
+        .executableTarget(name: "IPTests", dependencies:
+            [
+                .target(name: "IP"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
         .executableTarget(name: "MarkdownParsingTests", dependencies:
             [
                 .target(name: "MarkdownParsing"),
