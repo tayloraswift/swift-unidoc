@@ -332,7 +332,7 @@ extension Server.Endpoint
 extension Server.Endpoint
 {
     static
-    func put(api trunk:String, body:[UInt8], type:ContentType) throws -> Self?
+    func put(api trunk:String, type:ContentType) throws -> Self?
     {
         guard
         let trunk:Site.API.Put = .init(trunk)
@@ -344,10 +344,7 @@ extension Server.Endpoint
         switch (trunk, type)
         {
         case (.symbolgraph, .media(.application(.bson, charset: nil))):
-            //  This runs on the HTTP channel’s ``EventLoop``, and we *do not* want to
-            //  parse the body here, even if that would give us an opportunity to reject
-            //  the request early.
-            return .procedural(Server.Endpoint.GraphStorage.put(bson: body))
+            return .procedural(Server.Endpoint.GraphStorage.put)
 
         case (_, _):
             return nil

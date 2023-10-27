@@ -5,7 +5,7 @@ import PackageGraphs
 extension TargetNode:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case name
         case type

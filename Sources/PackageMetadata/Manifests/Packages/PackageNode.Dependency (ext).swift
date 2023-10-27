@@ -5,7 +5,7 @@ import PackageGraphs
 extension PackageNode.Dependency:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case filesystem = "fileSystem"
         case resolvable = "sourceControl"

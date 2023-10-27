@@ -13,7 +13,7 @@ extension Signature<Symbol.Decl>.Fragment
 extension Signature<Symbol.Decl>.Fragment:JSONObjectDecodable, JSONDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case spelling
         case referent = "preciseIdentifier"

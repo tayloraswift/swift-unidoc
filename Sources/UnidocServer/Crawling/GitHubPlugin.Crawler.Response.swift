@@ -18,7 +18,7 @@ extension GitHubPlugin.Crawler
 }
 extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case repository
         enum Repository:String

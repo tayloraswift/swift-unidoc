@@ -144,7 +144,7 @@ extension SymbolDescription
 extension SymbolDescription:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case availability
 
@@ -155,13 +155,13 @@ extension SymbolDescription:JSONObjectDecodable
         case generics = "swiftGenerics"
 
         case names
-        enum Names:String
+        enum Names:String, Sendable
         {
             case subheading = "subHeading"
         }
 
         case identifier
-        enum Identifier:String
+        enum Identifier:String, Sendable
         {
             case precise
         }
@@ -169,17 +169,17 @@ extension SymbolDescription:JSONObjectDecodable
         case interfaces = "spi"
         case path = "pathComponents"
         case kind
-        enum Kind:String
+        enum Kind:String, Sendable
         {
             case identifier
         }
 
         case location
-        enum Location:String
+        enum Location:String, Sendable
         {
             case file = "uri"
             case position
-            enum Position:String
+            enum Position:String, Sendable
             {
                 case line
                 case column = "character"

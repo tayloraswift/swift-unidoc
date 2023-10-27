@@ -2,7 +2,7 @@
 public
 protocol JSONObjectDecodable<CodingKey>:JSONDecodable
 {
-    associatedtype CodingKey:RawRepresentable<String> & Hashable = JSON.Key
+    associatedtype CodingKey:RawRepresentable<String> & Hashable & Sendable = JSON.Key
 
     init(json:JSON.ObjectDecoder<CodingKey>) throws
 }

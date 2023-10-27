@@ -6,7 +6,7 @@ import UnidocRecords
 
 protocol DatabaseCollection<ElementID>
 {
-    associatedtype ElementID:BSONDecodable, BSONEncodable
+    associatedtype ElementID:BSONDecodable, BSONEncodable, Sendable
 
     static
     var name:Mongo.Collection { get }
@@ -87,7 +87,7 @@ extension DatabaseCollection
     func find<Decodable>(_:Decodable.Type = Decodable.self,
         by id:ElementID,
         with session:Mongo.Session) async throws -> Decodable?
-        where Decodable:BSONDocumentDecodable
+        where Decodable:BSONDocumentDecodable & Sendable
     {
         try await self.find(by: "_id", of: id, with: session)
     }
@@ -96,7 +96,8 @@ extension DatabaseCollection
         by index:Mongo.KeyPath,
         of key:__owned some BSONEncodable,
         with session:Mongo.Session) async throws -> Decodable?
-        where Decodable:BSONDocumentDecodable
+        where   Decodable:BSONDocumentDecodable,
+                Decodable:Sendable
     {
         let response:[Decodable] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
@@ -124,7 +125,10 @@ extension DatabaseCollection
         stride:Int = 4096,
         with session:Mongo.Session,
         by deadline:ContinuousClock.Instant) async throws -> (modified:Int, of:Int)
-        where Master:BSONDocumentDecodable & BSONDocumentEncodable & Identifiable<ElementID>
+        where   Master:BSONDocumentDecodable,
+                Master:BSONDocumentEncodable,
+                Master:Identifiable<ElementID>,
+                Master:Sendable
     {
         var modified:Int = 0
         var selected:Int = 0
@@ -154,7 +158,10 @@ extension DatabaseCollection
         with session:Mongo.Session,
         by deadline:ContinuousClock.Instant,
         _ migrate:(inout Master) async throws -> ()) async throws -> (modified:Int, of:Int)
-        where Master:BSONDocumentDecodable & BSONDocumentEncodable & Identifiable<ElementID>
+        where   Master:BSONDocumentDecodable,
+                Master:BSONDocumentEncodable,
+                Master:Identifiable<ElementID>,
+                Master:Sendable
     {
         var modified:Int = 0
         var selected:Int = 0

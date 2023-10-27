@@ -3,7 +3,8 @@ extension JSON
     /// A thin wrapper around a native Swift dictionary providing an efficient decoding
     /// interface for a JSON object.
     @frozen public
-    struct ObjectDecoder<CodingKey> where CodingKey:RawRepresentable<String> & Hashable
+    struct ObjectDecoder<CodingKey>
+        where CodingKey:RawRepresentable<String> & Hashable & Sendable
     {
         public
         var index:[CodingKey: JSON.Node]

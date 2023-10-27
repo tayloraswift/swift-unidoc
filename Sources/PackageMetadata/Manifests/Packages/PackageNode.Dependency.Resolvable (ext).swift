@@ -6,12 +6,12 @@ import SemanticVersions
 extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "identity"
 
         case location
-        enum Location:String
+        enum Location:String, Sendable
         {
             case local
             case remote
@@ -23,7 +23,7 @@ extension PackageNode.Dependency.Resolvable:JSONObjectDecodable
         }
 
         case requirement
-        enum Requirement:String
+        enum Requirement:String, Sendable
         {
             case branch
             case exact

@@ -15,7 +15,7 @@ extension ServerScheme
     {
         switch self
         {
-        case .https(port: let port):    return port
+        case .https(port: let port): port
         }
     }
     @inlinable public
@@ -23,7 +23,7 @@ extension ServerScheme
     {
         switch self
         {
-        case .https:            return "https"
+        case .https: "https"
         }
     }
 }

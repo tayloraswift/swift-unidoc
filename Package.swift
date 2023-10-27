@@ -88,14 +88,14 @@ let package:Package = .init(
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.59.0"),
+            from: "2.60.0"),
         /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
         /// major-only version requirement.
-        .package(url: "https://github.com/apple/swift-nio-ssl.git",
+        .package(url: "https://github.com/apple/swift-nio-ssl",
             from: "2.25.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.28.1")),
+            from: "1.29.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.2.0")),
         /// swift-system has broken in a minor before, and can't be trusted with a
@@ -683,7 +683,7 @@ for target:PackageDescription.Target in package.targets
         settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
         settings.append(.enableUpcomingFeature("ConciseMagicFile"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
-        settings.append(.enableUpcomingFeature("StrictConcurrency"))
+        settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))
 

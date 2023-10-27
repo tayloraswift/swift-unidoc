@@ -70,38 +70,65 @@ extension ServerAuthority
 extension ServerAuthority
 {
     public static
-    func redirect(from binding:(address:String, port:Int),
+    func redirect(
+        from binding:(address:String, port:Int),
         on threads:MultiThreadedEventLoopGroup) async throws
     {
         let bootstrap:ServerBootstrap = .init(group: threads)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .serverChannelOption(ChannelOptions.autoRead, value: false)
-            .serverChannelInitializer
-        {
-            $0.pipeline.addHandler(HTTP.ServerConnectionHandler.init())
-        }
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
-            .childChannelInitializer
-        {
-            (channel:any Channel) -> EventLoopFuture<Void> in
 
-            channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true)
-                .flatMap
+        let listener:NIOAsyncChannel = try await bootstrap.bind(
+            host: binding.address,
+            port: binding.port)
+        {
+            (connection:any Channel) in
+
+            connection.eventLoop.makeCompletedFuture
             {
-                channel.pipeline.addHandler(HTTP.ServerRedirectorHandler<Self>.init())
+                try connection.pipeline.syncOperations.configureHTTPServerPipeline(
+                    withErrorHandling: true)
+
+                try connection.pipeline.syncOperations.addHandler(
+                    HTTP.ServerRedirectorHandler<Self>.init())
+
+                return connection
             }
         }
 
-        let channel:any Channel = try await bootstrap.bind(
-            host: binding.address,
-            port: binding.port).get()
-
         Log[.debug] = "bound to \(binding.address):\(binding.port)"
 
-        channel.read()
+        await withTaskGroup(of: Void.self)
+        {
+            (tasks:inout TaskGroup<Void>) in
 
-        try await channel.closeFuture.get()
+            await tasks.iterate(listener.inbound, width: 20)
+            {
+                (connection:any Channel) in
+
+                /// Once we receive a connection, the peer has 4 seconds to send a request
+                /// before we enforce a timeout.
+                async
+                let _:Void =
+                {
+                    try await Task.sleep(for: .seconds(4))
+                    try await connection.close()
+                }()
+                do
+                {
+                    try await connection.closeFuture.get()
+                }
+                catch let error
+                {
+                    Log[.error] = "\(error)"
+                }
+            }
+                else:
+            {
+                Log[.error] = "\($0)"
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ extension GitHub
 extension GitHub.Tag:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case name
 
