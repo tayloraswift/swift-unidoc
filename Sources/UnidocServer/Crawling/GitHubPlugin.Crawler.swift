@@ -12,17 +12,14 @@ extension GitHubPlugin
     struct Crawler
     {
         private
-        let count:Counters
-        private
         let api:GitHubClient<GitHub.API>
         private
         let pat:String
         private
         let db:Server.DB
 
-        init(count:Counters, api:GitHubClient<GitHub.API>, pat:String, db:Server.DB)
+        init(api:GitHubClient<GitHub.API>, pat:String, db:Server.DB)
         {
-            self.count = count
             self.api = api
             self.pat = pat
             self.db = db
@@ -31,7 +28,7 @@ extension GitHubPlugin
 }
 extension GitHubPlugin.Crawler
 {
-    func run() async throws
+    func run(counters:borrowing Server.Counters) async throws
     {
         while true
         {
@@ -43,7 +40,10 @@ extension GitHubPlugin.Crawler
             {
                 try await self.api.connect
                 {
-                    try await self.refresh(stalest: 10, from: $0, with: session)
+                    try await self.refresh(updating: counters,
+                        stalest: 10,
+                        from: $0,
+                        with: session)
                 }
             }
             catch let error as any GitHubRateLimitError
@@ -53,7 +53,7 @@ extension GitHubPlugin.Crawler
             catch let error
             {
                 Log[.warning] = "Crawling error: \(error)"
-                self.count.errors.wrappingIncrement(ordering: .relaxed)
+                counters.errorsCrawling.wrappingIncrement(ordering: .relaxed)
             }
 
             try await cooldown
@@ -61,7 +61,8 @@ extension GitHubPlugin.Crawler
     }
 
     private
-    func refresh(stalest count:Int,
+    func refresh(updating counters:borrowing Server.Counters,
+        stalest count:Int,
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
@@ -135,11 +136,11 @@ extension GitHubPlugin.Crawler
             case _?:
                 //  To MongoDB, all repo updates look like modifications, since the package
                 //  record contains a timestamp.
-                self.count.reposCrawled.wrappingIncrement(ordering: .relaxed)
+                counters.reposCrawled.wrappingIncrement(ordering: .relaxed)
             }
             if  response.repo != old
             {
-                self.count.reposUpdated.wrappingIncrement(ordering: .relaxed)
+                counters.reposUpdated.wrappingIncrement(ordering: .relaxed)
             }
 
             //  Import tags in chronological order. The last tag in the GraphQL response
@@ -163,7 +164,7 @@ extension GitHubPlugin.Crawler
                     with: session)
                 {
                 case _?:
-                    self.count.tagsUpdated.wrappingIncrement(ordering: .relaxed)
+                    counters.tagsUpdated.wrappingIncrement(ordering: .relaxed)
 
                     switch version
                     {
@@ -174,7 +175,7 @@ extension GitHubPlugin.Crawler
                     fallthrough
 
                 case nil:
-                    self.count.tagsCrawled.wrappingIncrement(ordering: .relaxed)
+                    counters.tagsCrawled.wrappingIncrement(ordering: .relaxed)
                 }
             }
 

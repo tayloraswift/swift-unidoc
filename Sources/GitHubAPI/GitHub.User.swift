@@ -100,7 +100,7 @@ extension GitHub
 extension GitHub.User:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id
         case login

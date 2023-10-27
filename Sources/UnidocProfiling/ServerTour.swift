@@ -6,9 +6,9 @@ struct ServerTour
     public
     var profile:ServerProfile
     public
-    var last:ServerProfile.Sample
+    var last:ServerProfile.Sample?
     public
-    var lastImpression:ServerProfile.Sample
+    var lastImpression:ServerProfile.Sample?
     public
     var slowestQuery:SlowestQuery?
 
@@ -18,8 +18,8 @@ struct ServerTour
         self.started = started
         self.profile = .init()
 
-        self.last = .init()
-        self.lastImpression = .init()
+        self.last = nil
+        self.lastImpression = nil
 
         self.slowestQuery = nil
     }

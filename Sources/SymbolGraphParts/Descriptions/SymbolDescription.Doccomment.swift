@@ -36,7 +36,7 @@ extension SymbolDescription.Doccomment
 extension SymbolDescription.Doccomment:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case culture = "module"
         case lines

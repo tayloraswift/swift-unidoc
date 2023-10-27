@@ -1,4 +1,3 @@
-import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
@@ -7,130 +6,76 @@ import NIOCore
 import NIOPosix
 import NIOHTTP1
 import NIOSSL
-import System
 import UnidocDB
 import UnidocPages
+import UnidocProfiling
 import UnidocQueries
 import UnidocRecords
 
-struct Server:Sendable
+final
+actor Server
 {
-    private
-    let authority:any ServerAuthority
-    private
-    let port:Int
+    private nonisolated
+    let updater:AsyncStream<Update>.Continuation,
+        updates:AsyncStream<Update>
 
-    private
-    let interactive:
-    (
-        consumer:AsyncStream<Request<any InteractiveEndpoint>>.Continuation,
-        requests:AsyncStream<Request<any InteractiveEndpoint>>
-    )
-    private
-    let procedural:
-    (
-        consumer:AsyncStream<Request<any ProceduralEndpoint>>.Continuation,
-        requests:AsyncStream<Request<any ProceduralEndpoint>>
-    )
-
-    private
-    let github:GitHubPlugin?
-    let mode:Mode
-
-    let meter:HTTP.ServerMeter
+    private nonisolated
+    let options:Options
+    nonisolated
+    let plugins:Plugins
+    nonisolated
     let count:Counters
+
+    var tour:ServerTour
+
+    nonisolated
     let db:DB
 
     private
-    init(authority:any ServerAuthority,
-        port:Int,
-        mode:Mode,
-        github:GitHubPlugin?,
-        db:DB)
+    init(options:Options, plugins:Plugins, db:DB)
     {
-        self.authority = authority
-        self.port = port
-
-        do
+        var continuation:AsyncStream<Update>.Continuation? = nil
+        self.updates = .init(bufferingPolicy: .bufferingOldest(16))
         {
-            var continuation:AsyncStream<Request<any InteractiveEndpoint>>.Continuation? = nil
-            self.interactive.requests = .init(bufferingPolicy: .bufferingOldest(128))
-            {
-                continuation = $0
-            }
-            self.interactive.consumer = continuation!
+            continuation = $0
         }
-        do
-        {
-            var continuation:AsyncStream<Request<any ProceduralEndpoint>>.Continuation? = nil
-            self.procedural.requests = .init(bufferingPolicy: .bufferingOldest(16))
-            {
-                continuation = $0
-            }
-            self.procedural.consumer = continuation!
-        }
+        self.updater = continuation!
 
-        self.github = github
-        self.meter = .init()
+        self.options = options
+        self.plugins = plugins
+
         self.count = .init()
+        self.tour = .init()
 
-        self.mode = mode
         self.db = db
     }
 }
 extension Server
 {
-    init(options:__shared Options, mongodb:__owned Mongo.SessionPool) async throws
+    init(
+        options:Options,
+        threads:MultiThreadedEventLoopGroup,
+        mongodb:Mongo.SessionPool) async throws
     {
-        let authority:any ServerAuthority = try options.authority.load(
-            certificates: options.certificates)
-
-        let assets:FilePath = "Assets"
-        let mode:Mode
-
-        if  authority is Localhost
+        let github:GitHubPlugin? = options.secrets.github.map
         {
-            mode = .development(.init(source: assets))
-        }
-        else
-        {
-            mode = .production
-        }
-
-        let github:GitHubPlugin?
-        gi:
-        do
-        {
-            guard options.github
-            else
+            do
             {
-                github = nil
-                break gi
+                return try .load(secrets: $0)
             }
-
-            //  This is a client context, which is different from the server context.
-            let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
-
-            github = .init(niossl: niossl,
-                oauth: .init(
-                    client: "2378cacaed3ace362867",
-                    secret: try (assets / "secrets" / "github-oauth-secret").readLine()),
-                app: .init(383005,
-                    client: "Iv1.dba609d35c70bf57",
-                    secret: try (assets / "secrets" / "github-app-secret").readLine()),
-                pat: try (assets / "secrets" / "github-pat").readLine())
-        }
-        catch
-        {
-            Log[.debug] = "App secret unavailable, GitHub integration has been disabled!"
-            github = nil
-        }
+            catch
+            {
+                Log[.debug] = "App secret unavailable, GitHub integration has been disabled!"
+                return nil
+            }
+        } ?? nil
 
         self.init(
-            authority: authority,
-            port: options.port,
-            mode: mode,
-            github: github,
+            options: options,
+            plugins: .init(
+                threads: threads,
+                niossl: try .init(configuration: .makeClientConfiguration()),
+                github: github),
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
@@ -138,9 +83,13 @@ extension Server
 }
 extension Server
 {
+    nonisolated
+    var secured:Bool { self.options.mode.secured }
+
+    nonisolated
     var assets:StaticAssets
     {
-        guard self.mode.secured
+        guard self.options.mode.secured
         else
         {
             return .init(version: nil)
@@ -150,44 +99,21 @@ extension Server
         //  hard-code the version number.
         return .init(version: .v(1, 1))
     }
-}
 
-
-@main
-extension Server
-{
-    public static
-    func main() async throws
+    nonisolated
+    var github:PluginIntegration<GitHubPlugin>?
     {
-        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
-        let options:Options = try .parse()
-        if  options.redirect
+        self.plugins.github.map
         {
-            try await options.authority.type.redirect(from: ("0.0.0.0", options.port),
-                on: threads)
-            return
-        }
-
-        let mongodb:Mongo.DriverBootstrap = MongoDB / [options.mongo] /?
-        {
-            $0.executors = .shared(threads)
-            $0.appname = "Unidoc Server"
-        }
-
-        defer
-        {
-            try? threads.syncShutdownGracefully()
-        }
-
-        try await mongodb.withSessionPool
-        {
-            let server:Self = try await .init(options: options, mongodb: $0)
-            try await server.main(on: threads)
+            .init(threads: self.plugins.threads, niossl: self.plugins.niossl, plugin: $0)
         }
     }
+}
 
-    private
-    func main(on threads:MultiThreadedEventLoopGroup) async throws
+extension Server
+{
+    nonisolated
+    func run() async throws
     {
         let session:Mongo.Session = try await .init(from: self.db.sessions)
 
@@ -203,37 +129,23 @@ extension Server
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
 
-            // tasks.addTask
-            // {
-            //     try await self.serve(from: ("0.0.0.0", self.port),
-            //         as: self.authority,
-            //         on: threads)
-            // }
             tasks.addTask
             {
-                try await self.serve(from: ("::", self.port),
-                    as: self.authority,
-                    on: threads)
+                try await self.serve(from: ("::", self.options.port),
+                    as: self.options.authority,
+                    on: self.plugins.threads)
             }
             tasks.addTask
             {
-                var state:InteractiveState = .init(server: self,
-                    github: try self.github?.partner(on: threads))
-
-                try await state.respond(to: self.interactive.requests)
-            }
-            tasks.addTask
-            {
-                var state:ProceduralState = .init(server: self)
-
-                try await state.respond(to: self.procedural.requests)
+                try await self.update()
             }
 
-            if  let github:GitHubPlugin = self.github
+            if  let github:PluginIntegration<GitHubPlugin> = self.github
             {
                 tasks.addTask
                 {
-                    try await github.crawl(on: threads, db: self.db)
+                    let crawler:GitHubPlugin.Crawler = github.crawler(db: self.db)
+                    try await crawler.run(counters: self.count)
                 }
             }
 
@@ -244,65 +156,207 @@ extension Server
         }
     }
 }
-extension Server:HTTPServerDelegate
+extension Server
 {
-    func submit(_ operation:Operation, promise:EventLoopPromise<ServerResponse>)
+    nonisolated
+    func clearance(by cookies:Cookies) async throws -> ServerResponse?
     {
-        switch operation.endpoint
+        guard self.secured
+        else
         {
-        case .interactive(let interactive):
-            let request:Request<any InteractiveEndpoint> = .init(endpoint: interactive,
-                cookies: operation.cookies,
-                profile: operation.profile,
-                promise: promise)
+            return nil
+        }
 
-            switch self.interactive.consumer.yield(request)
-            {
-            case .enqueued:
-                return
+        guard
+        let cookie:Account.Cookie = cookies.session
+        else
+        {
+            return .unauthorized("")
+        }
 
-            case .dropped:
-                self.count.requestsDropped.wrappingIncrement(ordering: .relaxed)
+        let mongo:Mongo.Session = try await .init(from: self.db.sessions)
 
-                promise.succeed(.unavailable("""
-                    The site is currently experiencing exceptionally high traffic. \
-                    Please try again later.
-                    """))
+        switch try await self.db.account.users.validate(cookie: cookie, with: mongo)
+        {
+        case .administrator?, .machine?:
+            return nil
 
-            case .terminated:
-                fatalError("stream terminated")
+        case .human?, nil:
+            return .forbidden("")
+        }
+    }
+}
+extension Server:HTTPServer
+{
+    nonisolated
+    func clearance(for request:StreamedRequest) async throws -> ServerResponse?
+    {
+        try await self.clearance(by: request.cookies)
+    }
 
-            @unknown case _:
-                fatalError("unimplemented")
-            }
+    nonisolated
+    func response(for request:StreamedRequest,
+        with body:[UInt8]) async throws -> ServerResponse
+    {
+        guard case .procedural(let procedural) = request.endpoint
+        else
+        {
+            return .notFound("")
+        }
 
-        case .procedural(let procedural):
-            let request:Request<any ProceduralEndpoint> = .init(endpoint: procedural,
-                cookies: operation.cookies,
-                profile: operation.profile,
-                promise: promise)
-
-            guard case .enqueued = self.procedural.consumer.yield(request)
+        return try await withCheckedThrowingContinuation
+        {
+            guard case .enqueued = self.updater.yield(.init(endpoint: procedural,
+                payload: body,
+                promise: $0))
             else
             {
                 fatalError("unimplemented")
             }
+        }
+    }
+
+    nonisolated
+    func response(for request:IntegralRequest) async throws -> ServerResponse
+    {
+        switch request.endpoint
+        {
+        case .interactive(let endpoint):
+            return try await self.response(endpoint: endpoint,
+                cookies: request.cookies,
+                profile: request.profile)
+
+        case .procedural(let procedural):
+            if  let failure:ServerResponse = try await self.clearance(by: request.cookies)
+            {
+                return failure
+            }
+            return try await withCheckedThrowingContinuation
+            {
+                Log[.debug] = "enqueued request via \(request.profile.uri)"
+
+                guard case .enqueued = self.updater.yield(.init(endpoint: procedural,
+                    payload: [],
+                    promise: $0))
+                else
+                {
+                    fatalError("unimplemented")
+                }
+            }
 
         case .stateless(let stateless):
-            promise.succeed(.ok(stateless.resource(assets: self.assets)))
+            return .ok(stateless.resource(assets: self.assets))
 
         case .static(let request):
-            if  case .development(let cache) = self.mode
+            if  case .development(cache: let cache, port: _) = self.options.mode
             {
-                promise.completeWithTask
-                {
-                    try await cache.serve(request)
-                }
+                return try await cache.serve(request)
             }
             else
             {
                 //  In production mode, static assets are served by Cloudfront.
-                promise.succeed(.forbidden(""))
+                return .forbidden("")
+            }
+        }
+    }
+}
+extension Server
+{
+    private
+    func response(endpoint:any InteractiveEndpoint,
+        cookies:Cookies,
+        profile:ServerProfile.Sample) async throws -> ServerResponse
+    {
+        try Task.checkCancellation()
+
+        let initiated:ContinuousClock.Instant = .now
+
+        let response:ServerResponse = try await endpoint.load(from: self, with: cookies)
+            ?? .notFound(.init(
+                content: .string("not found"),
+                type: .text(.plain, charset: .utf8)))
+
+        let duration:Duration = .now - initiated
+
+        //  Don’t count login requests.
+        if  endpoint is Server.Endpoint.Login
+        {
+            return response
+        }
+        //  Don’t increment stats from administrators,
+        //  they will really skew the results.
+        if  case _? = cookies.session
+        {
+            return response
+        }
+
+        if  self.tour.slowestQuery?.duration ?? .zero < duration
+        {
+            self.tour.slowestQuery = .init(
+                duration: duration,
+                uri: profile.uri)
+        }
+        if  duration > .seconds(1)
+        {
+            Log[.warning] = """
+            query '\(profile.uri)' took \(duration) to complete!
+            """
+        }
+
+        let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
+        let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = profile._agent
+        let http:WritableKeyPath<ServerProfile.ByProtocol, Int> = profile.http2 ?
+            \.http2 :
+            \.http1
+
+        self.tour.profile.requests.bytes[keyPath: agent] += response.size
+        self.tour.profile.requests.pages[keyPath: agent] += 1
+
+        switch agent
+        {
+        case    \.likelyBarbie:
+            //  Only count languages for Barbies.
+            self.tour.profile.languages[keyPath: profile._language] += 1
+            self.tour.profile.responses.toBarbie[keyPath: status] += 1
+            self.tour.profile.protocols.toBarbie[keyPath: http] += 1
+
+            self.tour.lastImpression = profile
+
+        case    \.likelyBratz:
+            self.tour.profile.responses.toBratz[keyPath: status] += 1
+            self.tour.profile.protocols.toBratz[keyPath: http] += 1
+
+        case    \.likelyGooglebot,
+                \.likelyMajorSearchEngine,
+                \.likelyMinorSearchEngine:
+            self.tour.profile.responses.toSearch[keyPath: status] += 1
+            self.tour.profile.protocols.toSearch[keyPath: http] += 1
+
+        case    _:
+            self.tour.profile.responses.toOther[keyPath: status] += 1
+            self.tour.profile.protocols.toOther[keyPath: http] += 1
+        }
+
+        self.tour.last = profile
+
+        return response
+    }
+
+    private
+    func update() async throws
+    {
+        for await update:Update in self.updates
+        {
+            try Task.checkCancellation()
+
+            do
+            {
+                update.promise.resume(returning: try await update.endpoint.perform(on: self,
+                    with: update.payload))
+            }
+            catch let error
+            {
+                update.promise.resume(throwing: error)
             }
         }
     }

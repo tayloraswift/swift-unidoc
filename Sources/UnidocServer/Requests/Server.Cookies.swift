@@ -24,10 +24,10 @@ extension Server.Cookies
 }
 extension Server.Cookies
 {
-    init(_ lines:[Substring])
+    init(_ lines:[String])
     {
         self.init()
-        for line:Substring in lines
+        for line:String in lines
         {
             for cookie:Substring in line.split(separator: ";")
             {

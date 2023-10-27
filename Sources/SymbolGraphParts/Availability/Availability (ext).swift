@@ -5,7 +5,7 @@ import SemanticVersions
 extension Availability:JSONDecodable
 {
     private
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case domain
 

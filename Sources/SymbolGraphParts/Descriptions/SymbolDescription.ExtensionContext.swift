@@ -24,7 +24,7 @@ extension SymbolDescription
 extension SymbolDescription.ExtensionContext:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case conditions = "constraints"
     }

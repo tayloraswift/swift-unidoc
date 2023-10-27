@@ -24,7 +24,7 @@ extension PackageBuildStatus
 extension PackageBuildStatus.Edition
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case coordinate
         case graphs

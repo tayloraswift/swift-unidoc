@@ -4,6 +4,14 @@ struct ServerProfile
     public
     var languages:ByLanguage
     public
+    var protocols:
+    (
+        toBarbie:ByProtocol,
+        toBratz:ByProtocol,
+        toSearch:ByProtocol,
+        toOther:ByProtocol
+    )
+    public
     var responses:
     (
         toBarbie:ByStatus,
@@ -21,6 +29,13 @@ struct ServerProfile
     @inlinable public
     init(
         languages:ByLanguage = [:],
+        protocols:
+        (
+            toBarbie:ByProtocol,
+            toBratz:ByProtocol,
+            toSearch:ByProtocol,
+            toOther:ByProtocol
+        ) = ([:], [:], [:], [:]),
         responses:
         (
             toBarbie:ByStatus,
@@ -35,6 +50,7 @@ struct ServerProfile
         ) = ([:], [:]))
     {
         self.languages = languages
+        self.protocols = protocols
         self.responses = responses
         self.requests = requests
     }
