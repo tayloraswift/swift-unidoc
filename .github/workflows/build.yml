@@ -14,8 +14,8 @@ jobs:
         strategy:
             matrix:
                 image:
-                -   5.9.0-amazonlinux2
-                -   5.9.0-jammy
+                -   5.9.1-amazonlinux2
+                -   5.9.1-jammy
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
