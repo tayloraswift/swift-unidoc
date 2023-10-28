@@ -27,7 +27,7 @@ extension IP.V4:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        "\(a).\(b).\(c).\(d)"
+        "\(self.a).\(self.b).\(self.c).\(self.d)"
     }
 }
 extension IP.V4:LosslessStringConvertible

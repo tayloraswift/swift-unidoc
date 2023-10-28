@@ -57,9 +57,9 @@ extension StaticAsset
     {
         switch self.versioning
         {
-        case .none:     "/\(self)"
-        case .major:    "/\(version.major)/\(self)"
-        case .minor:    "/\(version)/\(self)"
+        case .none:     "/asset/\(self)"
+        case .major:    "/asset/\(version.major)/\(self)"
+        case .minor:    "/asset/\(version)/\(self)"
         }
     }
 }

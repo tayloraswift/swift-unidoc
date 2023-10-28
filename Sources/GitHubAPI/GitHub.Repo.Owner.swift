@@ -18,7 +18,7 @@ extension GitHub.Repo
 extension GitHub.Repo.Owner:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         @available(*, unavailable)
         case id

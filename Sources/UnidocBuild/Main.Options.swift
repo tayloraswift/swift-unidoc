@@ -2,7 +2,7 @@ import ModuleGraphs
 
 extension Main
 {
-    struct Options
+    struct Options:Sendable
     {
         var package:PackageIdentifier
         var cookie:String

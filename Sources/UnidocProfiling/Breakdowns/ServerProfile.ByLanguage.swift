@@ -33,8 +33,6 @@ extension ServerProfile
         var zh:Int
         public
         var other:Int
-        public
-        var none:Int
 
         @inlinable public
         init(
@@ -52,8 +50,7 @@ extension ServerProfile
             ru:Int = 0,
             vi:Int = 0,
             zh:Int = 0,
-            other:Int = 0,
-            none:Int = 0
+            other:Int = 0
         )
         {
             self.ar = ar
@@ -71,7 +68,6 @@ extension ServerProfile
             self.vi = vi
             self.zh = zh
             self.other = other
-            self.none = none
         }
     }
 }
@@ -122,7 +118,7 @@ extension ServerProfile.ByLanguage
                 "pt"
             ),
             (
-                self.pt,
+                self.it,
                 "Italian",
                 "it"
             ),
@@ -165,11 +161,6 @@ extension ServerProfile.ByLanguage
                 self.other,
                 "Other",
                 "other"
-            ),
-            (
-                self.none,
-                "None",
-                "none"
             ),
         ]
         {

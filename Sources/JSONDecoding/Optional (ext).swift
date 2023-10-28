@@ -3,7 +3,7 @@ extension Optional:JSONDecodable where Wrapped:JSONDecodable
     @inlinable public
     init(json:JSON.Node) throws
     {
-        if case .null = json
+        if  case .null = json
         {
             self = .none
         }

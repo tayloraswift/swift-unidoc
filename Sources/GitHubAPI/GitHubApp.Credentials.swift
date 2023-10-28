@@ -21,7 +21,7 @@ extension GitHubApp
 extension GitHubApp.Credentials:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case access_value = "access_token"
         case access_secondsRemaining = "expires_in"

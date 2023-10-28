@@ -30,7 +30,7 @@ enum Main
             fatalError("could not load AWS access key!")
         }
 
-        let version:MinorVersion = .v(1, 1)
+        let version:MinorVersion = .v(1, 2)
 
         let s3:AWS.S3Client = .init(
             http1: .init(threads: threads,
@@ -41,6 +41,8 @@ enum Main
 
         try await s3.connect
         {
+            @Sendable (connection:AWS.S3Client.Connection) in
+
             for asset:StaticAsset in StaticAsset.allCases
             {
                 let content:[UInt8] = try assets.appending(asset.source).read()
@@ -48,7 +50,7 @@ enum Main
 
                 print("Uploading \(path)...")
 
-                try await $0.put(content,
+                try await connection.put(content,
                     using: .standard,
                     path: path,
                     type: asset.type)

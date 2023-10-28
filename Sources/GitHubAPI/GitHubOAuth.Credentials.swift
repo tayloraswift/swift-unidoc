@@ -21,7 +21,7 @@ extension GitHubOAuth
 extension GitHubOAuth.Credentials:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case token = "access_token"
         case scope

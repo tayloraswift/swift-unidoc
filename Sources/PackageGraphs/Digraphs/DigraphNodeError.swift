@@ -1,9 +1,6 @@
 public
-enum DigraphNodeError<Node>:Error, Equatable where Node:DigraphNode
+enum DigraphNodeError<Node>:Error, Equatable where Node:DigraphNode, Node.ID:Sendable
 {
     case duplicate(Node.ID)
     case undefined(Node.ID)
-}
-extension DigraphNodeError:Sendable where Node.ID:Sendable
-{
 }

@@ -46,14 +46,14 @@ struct PackageManifest:Equatable, Sendable
 extension PackageManifest:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case dependencies
         case name
         case products
 
         case root = "packageKind"
-        enum Root:String
+        enum Root:String, Sendable
         {
             case root
         }
@@ -62,7 +62,7 @@ extension PackageManifest:JSONObjectDecodable
         case targets
 
         case format = "toolsVersion"
-        enum Format:String
+        enum Format:String, Sendable
         {
             case version = "_version"
         }

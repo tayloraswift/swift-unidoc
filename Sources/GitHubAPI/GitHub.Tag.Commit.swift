@@ -15,7 +15,7 @@ extension GitHub.Tag
 }
 extension GitHub.Tag.Commit:JSONObjectDecodable
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case sha
     }

@@ -1,7 +1,7 @@
 extension JSON
 {
     @frozen public
-    struct ExplicitField<Key>
+    struct ExplicitField<Key> where Key:Sendable
     {
         public
         let key:Key

@@ -4,7 +4,7 @@ import SemanticVersions
 extension PatchVersion:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case major
         case minor

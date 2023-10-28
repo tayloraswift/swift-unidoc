@@ -1,104 +1,70 @@
 import HTTPServer
+import System
 
 extension Server
 {
     struct Options
     {
-        var authority:Authority
-        var certificates:String
-        var redirect:Bool
-        var mongo:String
-        /// This is the port that the server binds to. It is not necessarily
-        /// the port that the server is accessed through.
-        var port:Int
+        let authority:any ServerAuthority
+        let secrets:Secrets
+        let mode:Mode
+        let cloudfront:Bool
 
-        init()
+        init(authority:any ServerAuthority, secrets:Secrets, mode:Mode, cloudfront:Bool)
         {
-            self.authority = .localhost
-            self.certificates = "TestCertificates"
-            self.redirect = false
-            self.mongo = "unidoc-mongod"
-            self.port = 8443
+            self.authority = authority
+            self.secrets = secrets
+            self.mode = mode
+            self.cloudfront = cloudfront
         }
     }
 }
 extension Server.Options
 {
-    static
-    func parse() throws -> Self
+    init(from options:Main.Options) throws
     {
-        var arguments:IndexingIterator<[String]> = CommandLine.arguments.makeIterator()
-        var options:Self = .init()
+        let authority:any ServerAuthority = try options.authority.load(
+            certificates: options.certificates)
 
-        //  Consume name of the executable itself.
-        let _:String? = arguments.next()
+        let assets:FilePath = "Assets"
+        let mode:Mode
+        let cloudfront:Bool
 
-        while let argument:String = arguments.next()
+        if  authority is Localhost
         {
-            switch argument
+            mode = .development(cache: .init(source: assets), port: options.port ?? 8443)
+            cloudfront = options.cloudfront
+        }
+        else
+        {
+            mode = .production
+            cloudfront = true
+
+            switch options.port
             {
-            case "-a", "--authority":
-                guard let authority:String = arguments.next()
-                else
-                {
-                    throw Server.OptionsError.invalidAuthority(nil)
-                }
-                guard let authority:Authority = .init(rawValue: authority)
-                else
-                {
-                    throw Server.OptionsError.invalidAuthority(authority)
-                }
+            case nil, 443?:
+                break
 
-                options.authority = authority
-
-            case "-c", "--certificates":
-                guard let certificates:String = arguments.next()
-                else
-                {
-                    throw Server.OptionsError.invalidCertificateDirectory
-                }
-
-                options.certificates = certificates
-
-            case "-r", "--redirect":
-                options.redirect = true
-
-            case "-m", "--mongo":
-                switch arguments.next()
-                {
-                case let host?:     options.mongo = host
-                case nil:           throw Server.OptionsError.invalidMongoReplicaSetSeed
-                }
-
-            case "-p", "--port":
-                guard let port:String = arguments.next()
-                else
-                {
-                    throw Server.OptionsError.invalidPort(nil)
-                }
-                guard let port:Int = .init(port)
-                else
-                {
-                    throw Server.OptionsError.invalidPort(port)
-                }
-
-                options.port = port
-
-            case let unrecognized:
-                throw Server.OptionsError.unrecognized(unrecognized)
+            case let port?:
+                Log[.warning] = "Ignoring custom port \(port) in production mode!"
             }
         }
 
-        //  Sanity checks.
-        if  options.port == 80 || options.port == 443,
-            case .localhost = options.authority
+        self.init(authority: authority,
+            secrets: .init(
+                github: options.github ? assets / "secrets" : nil),
+            mode: mode,
+            cloudfront: cloudfront)
+    }
+}
+extension Server.Options
+{
+    var port:Int
+    {
+        switch self.mode
         {
-            print("""
-                warning: server is running on port \(options.port) but is using hostname \
-                localhost!
-                """)
+        case .development(cache: _, port: let port):    port
+        case .production:                               443
         }
-
-        return options
     }
 }

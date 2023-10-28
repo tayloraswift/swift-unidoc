@@ -19,7 +19,7 @@ extension ApplicationPage
     public
     func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        head[unsafe: .script] = "const volumes = [];"
+        head[unsafe: .script] = assets.script(volumes: nil)
     }
 
     public

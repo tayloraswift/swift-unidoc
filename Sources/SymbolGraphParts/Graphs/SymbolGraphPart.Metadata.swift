@@ -23,7 +23,7 @@ extension SymbolGraphPart
 extension SymbolGraphPart.Metadata:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case formatVersion
         case generator

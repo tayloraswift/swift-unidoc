@@ -5,7 +5,7 @@ import SemanticVersions
 extension PlatformRequirement:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "platformName"
         case min = "version"

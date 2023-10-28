@@ -19,7 +19,7 @@ extension GraphQL
 extension GraphQL.Response:JSONObjectDecodable
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case data
     }

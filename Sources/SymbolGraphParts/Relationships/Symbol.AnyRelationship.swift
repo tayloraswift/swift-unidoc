@@ -38,7 +38,7 @@ extension Symbol.AnyRelationship
 extension Symbol.AnyRelationship:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case conditions = "swiftConstraints"
         case source

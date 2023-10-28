@@ -27,12 +27,12 @@ extension PackageResolutions
 extension PackageResolutions:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case version
 
         case object
-        enum Object:String
+        enum Object:String, Sendable
         {
             case pins
         }

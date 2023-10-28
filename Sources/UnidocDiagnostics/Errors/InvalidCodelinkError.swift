@@ -2,7 +2,7 @@ import CodelinkResolution
 import Codelinks
 
 @frozen public
-struct InvalidCodelinkError<Scalar>:Error, Equatable where Scalar:Hashable
+struct InvalidCodelinkError<Scalar>:Error, Equatable where Scalar:Hashable & Sendable
 {
     public
     let overloads:[CodelinkResolver<Scalar>.Overload]

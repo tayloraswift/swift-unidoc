@@ -44,7 +44,8 @@ extension DatabaseCollectionCapped
     func find<Decodable>(_:Decodable.Type = Decodable.self,
         last count:Int,
         with session:Mongo.Session) async throws -> [Decodable]
-        where Decodable:BSONDocumentDecodable
+        where   Decodable:BSONDocumentDecodable,
+                Decodable:Sendable
     {
         try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
