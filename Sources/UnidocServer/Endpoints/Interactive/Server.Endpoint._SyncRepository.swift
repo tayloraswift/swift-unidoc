@@ -25,27 +25,28 @@ extension Server.Endpoint._SyncRepository:RestrictedEndpoint
     func load(from server:Server) async throws -> ServerResponse?
     {
         guard
-        let github:GitHubClient<GitHub.API> = server.github?.api
+        let github:Server.PluginIntegration<GitHubPlugin> = server.github
         else
         {
             return nil
         }
 
-        let repo:GitHub.Repo = try await github.connect
+        let response:GitHubPlugin.Crawler.Response = try await github.api.connect
         {
-            try await $0.get(from: "/repos/\(self.owner)/\(self.repo)")
+            try await $0.crawl(owner: self.owner,
+                repo: self.repo,
+                pat: github.plugin.pat)
         }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let package:Int32 = try await server.db.unidoc.track(repo: repo,
+        let package:Int32 = try await server.db.unidoc.track(repo: response.repo,
             with: session)
 
+        //  Discard the tags for now, we want them to get indexed by the crawler.
 
         return .ok(.init(
             content: .string("""
                 Cell: \(package)
-
-                \(repo)
                 """),
             type: .text(.plain, charset: .utf8)))
     }

@@ -132,7 +132,7 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
                 disabled: try $0[.disabled].decode(),
                 fork: try $0[.fork].decode(),
                 homepage: try $0[.homepage]?.decode(as: String.self) { $0.isEmpty ? nil : $0 },
-                about: try $0[.about]?.decode(as: String.self) { $0.isEmpty ? nil : $0 },
+                about: try $0[.about]?.decode(to: String?.self),
                 created: try $0[.created].decode(),
                 updated: try $0[.updated].decode(),
                 pushed: try $0[.pushed].decode())

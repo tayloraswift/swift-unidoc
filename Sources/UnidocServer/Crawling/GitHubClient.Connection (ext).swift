@@ -1,0 +1,58 @@
+import GitHubAPI
+import GitHubClient
+import JSON
+
+extension GitHubClient<GitHub.API>.Connection
+{
+    func crawl(
+        owner:String,
+        repo:String,
+        pat:String) async throws -> GitHubPlugin.Crawler.Response
+    {
+        let query:JSON = .object
+        {
+            $0["query"] = """
+            query
+            {
+                repository(owner: "\(owner)", name: "\(repo)")
+                {
+                    id: databaseId
+                    owner { login }
+                    name
+
+                    license: licenseInfo { id: spdxId, name }
+                    topics: repositoryTopics(first: 16)
+                    {
+                        nodes { topic { name } }
+                    }
+                    master: defaultBranchRef { name }
+
+                    watchers(first: 0) { count: totalCount }
+                    forks: forkCount
+                    stars: stargazerCount
+                    size: diskUsage
+
+                    archived: isArchived
+                    disabled: isDisabled
+                    fork: isFork
+
+                    homepage: homepageUrl
+                    about: description
+
+                    created: createdAt
+                    updated: updatedAt
+                    pushed: pushedAt
+
+                    refs(last: 10,
+                        refPrefix: "refs/tags/",
+                        orderBy: {field: TAG_COMMIT_DATE, direction: ASC})
+                    {
+                        nodes { name, commit: target { sha: oid } }
+                    }
+                }
+            }
+            """
+        }
+        return try await self.post(query: "\(query)", with: pat)
+    }
+}
