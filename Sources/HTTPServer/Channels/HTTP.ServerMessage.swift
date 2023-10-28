@@ -142,6 +142,7 @@ extension HTTP.ServerMessage
             self.headers.add(name: "etag", value: "\"\(hash)\"")
         }
 
+        self.headers.add(name: "access-control-allow-origin", value: "*")
         self.headers.add(name: "content-length", value: "\(length)")
         self.headers.add(name: "content-type",   value: "\(resource.type)")
     }

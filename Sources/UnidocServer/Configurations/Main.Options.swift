@@ -6,6 +6,9 @@ extension Main
     {
         var authority:Authority
         var certificates:String
+        /// Whether to enable CloudFront integration even if running in development mode.
+        /// Defaults to false, but is ignored if running in production mode.
+        var cloudfront:Bool
         var redirect:Bool
         /// Whether to enable GitHub integration if access keys are available.
         /// Defaults to false.
@@ -19,6 +22,7 @@ extension Main
         {
             self.authority = .localhost
             self.certificates = "TestCertificates"
+            self.cloudfront = false
             self.redirect = false
             self.github = false
             self.mongo = "unidoc-mongod"
@@ -63,6 +67,9 @@ extension Main.Options
                 }
 
                 options.certificates = certificates
+
+            case "--enable-cloudfront":
+                options.cloudfront = true
 
             case "-r", "--redirect":
                 options.redirect = true

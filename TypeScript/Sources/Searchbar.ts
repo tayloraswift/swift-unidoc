@@ -7,6 +7,7 @@ import { SearchVolume } from "./SearchVolume";
 import { AnySymbol } from "./AnySymbol";
 
 declare let volumes: SearchVolume[];
+declare let host: string;
 
 export class Searchbar {
     input: HTMLInputElement;
@@ -38,7 +39,8 @@ export class Searchbar {
         }
         this.loading = true;
 
-        //  Get the list of all packages in the index.
+        //  Get the list of all packages in the index. We always fetch this from the
+        //  main server, as it changes often.
         let requests: Promise<SearchIndex | string[]>[] = [
             fetch('/lunr/packages.json').then(
                 async function (response: Response): Promise<string[]> {
@@ -47,7 +49,7 @@ export class Searchbar {
         ];
         //  Get the search indexes for the dependencies of the current volume.
         for (const volume of volumes) {
-            const uri: string = '/lunr/' + volume.id;
+            const uri: string = host + '/lunr/' + volume.id;
 
             requests.push(fetch(uri).then(
                 async function (response: Response): Promise<SearchIndex> {

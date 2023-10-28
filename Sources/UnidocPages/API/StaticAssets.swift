@@ -1,3 +1,4 @@
+import JSON
 import SemanticVersions
 
 @frozen public
@@ -28,6 +29,19 @@ extension StaticAssets
         else
         {
             "/\(Site.Asset.root)/\(asset)"
+        }
+    }
+
+    func script(volumes:JSON?) -> String
+    {
+        let host:String = self.version == nil ? "" : "https://static.swiftinit.org"
+        if  let volumes:JSON
+        {
+            return "const host = '\(host)'; const volumes = \(volumes);"
+        }
+        else
+        {
+            return "const host = '\(host)'; const volumes = [];"
         }
     }
 }
