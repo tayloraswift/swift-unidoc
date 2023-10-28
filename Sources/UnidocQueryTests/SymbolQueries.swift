@@ -45,7 +45,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         tests.expect(try await unidoc.publish(consume swift, with: session) ==?
             .init(id: .init(package: .swift,
-                    version: "5.9.0",
+                    version: "5.9.1",
                     triple: toolchain.triple),
                 edition: .init(package: 0, version: 0),
                 type: .insert))
