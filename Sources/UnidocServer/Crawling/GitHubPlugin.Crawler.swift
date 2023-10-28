@@ -77,51 +77,9 @@ extension GitHubPlugin.Crawler
                 fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            let query:JSON = .object
-            {
-                $0["query"] = """
-                query
-                {
-                    repository(owner: "\(old.owner.login)", name: "\(old.name)")
-                    {
-                        id: databaseId
-                        owner { login }
-                        name
-
-                        license: licenseInfo { id: spdxId, name }
-                        topics: repositoryTopics(first: 16)
-                        {
-                            nodes { topic { name } }
-                        }
-                        master: defaultBranchRef { name }
-
-                        watchers(first: 0) { count: totalCount }
-                        forks: forkCount
-                        stars: stargazerCount
-                        size: diskUsage
-
-                        archived: isArchived
-                        disabled: isDisabled
-                        fork: isFork
-
-                        homepage: homepageUrl
-                        about: description
-
-                        created: createdAt
-                        updated: updatedAt
-                        pushed: pushedAt
-
-                        refs(last: 10,
-                            refPrefix: "refs/tags/",
-                            orderBy: {field: TAG_COMMIT_DATE, direction: ASC})
-                        {
-                            nodes { name, commit: target { sha: oid } }
-                        }
-                    }
-                }
-                """
-            }
-            let response:Response = try await github.post(query: "\(query)", with: self.pat)
+            let response:Response = try await github.crawl(owner: old.owner.login,
+                repo: old.name,
+                pat: self.pat)
 
             switch try await self.db.unidoc.packages.update(record: .init(id: package.id,
                     cell: package.cell,
