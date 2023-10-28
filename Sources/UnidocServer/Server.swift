@@ -89,7 +89,7 @@ extension Server
     nonisolated
     var assets:StaticAssets
     {
-        guard self.options.mode.secured
+        guard self.options.cloudfront
         else
         {
             return .init(version: nil)
@@ -97,7 +97,7 @@ extension Server
 
         //  Eventually, this should be dynamically configurable. But for now, we just
         //  hard-code the version number.
-        return .init(version: .v(1, 1))
+        return .init(version: .v(1, 2))
     }
 
     nonisolated

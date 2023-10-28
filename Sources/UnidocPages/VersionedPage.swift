@@ -46,7 +46,7 @@ extension VersionedPage
             }
         }
 
-        head[unsafe: .script] = "const volumes = \(json);"
+        head[unsafe: .script] = assets.script(volumes: json)
     }
 
     public

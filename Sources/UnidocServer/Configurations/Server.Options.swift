@@ -8,12 +8,14 @@ extension Server
         let authority:any ServerAuthority
         let secrets:Secrets
         let mode:Mode
+        let cloudfront:Bool
 
-        init(authority:any ServerAuthority, secrets:Secrets, mode:Mode)
+        init(authority:any ServerAuthority, secrets:Secrets, mode:Mode, cloudfront:Bool)
         {
             self.authority = authority
             self.secrets = secrets
             self.mode = mode
+            self.cloudfront = cloudfront
         }
     }
 }
@@ -26,14 +28,17 @@ extension Server.Options
 
         let assets:FilePath = "Assets"
         let mode:Mode
+        let cloudfront:Bool
 
         if  authority is Localhost
         {
             mode = .development(cache: .init(source: assets), port: options.port ?? 8443)
+            cloudfront = options.cloudfront
         }
         else
         {
             mode = .production
+            cloudfront = true
 
             switch options.port
             {
@@ -48,7 +53,8 @@ extension Server.Options
         self.init(authority: authority,
             secrets: .init(
                 github: options.github ? assets / "secrets" : nil),
-            mode: mode)
+            mode: mode,
+            cloudfront: cloudfront)
     }
 }
 extension Server.Options
