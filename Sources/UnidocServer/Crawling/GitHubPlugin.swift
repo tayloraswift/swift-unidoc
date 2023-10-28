@@ -1,24 +1,14 @@
-import Atomics
-import GitHubClient
 import GitHubAPI
-import HTTPClient
-import NIOPosix
-import NIOSSL
+import System
 
 struct GitHubPlugin:Sendable
 {
-    let niossl:NIOSSLContext
-    let count:Counters
-
     let oauth:GitHubOAuth
     let app:GitHubApp
     let pat:String
 
-    init(niossl:NIOSSLContext, oauth:GitHubOAuth, app:GitHubApp, pat:String)
+    init(oauth:GitHubOAuth, app:GitHubApp, pat:String)
     {
-        self.niossl = niossl
-        self.count = .init()
-
         self.oauth = oauth
         self.app = app
         self.pat = pat
@@ -26,31 +16,16 @@ struct GitHubPlugin:Sendable
 }
 extension GitHubPlugin
 {
-    func partner(on threads:MultiThreadedEventLoopGroup) throws -> Partner
+    static
+    func load(secrets:FilePath) throws -> Self
     {
-        let root:HTTP2Client = .init(threads: threads,
-            niossl: niossl,
-            remote: "github.com")
-        let api:HTTP2Client = .init(threads: threads,
-            niossl: niossl,
-            remote: "api.github.com")
-
-        return .init(count: self.count,
-            oauth: .init(http2: root, app: self.oauth),
-            api: .init(http2: api, app: self.oauth.api))
-    }
-
-    func crawl(on threads:MultiThreadedEventLoopGroup, db:Server.DB) async throws
-    {
-        let api:HTTP2Client = .init(threads: threads,
-            niossl: niossl,
-            remote: "api.github.com")
-
-        let crawler:Crawler = .init(count: self.count,
-            api: .init(http2: api, app: self.oauth.api),
-            pat: self.pat,
-            db: db)
-
-        try await crawler.run()
+        .init(
+            oauth: .init(
+                client: "2378cacaed3ace362867",
+                secret: try (secrets / "github-oauth-secret").readLine()),
+            app: .init(383005,
+                client: "Iv1.dba609d35c70bf57",
+                secret: try (secrets / "github-app-secret").readLine()),
+            pat: try (secrets / "github-pat").readLine())
     }
 }

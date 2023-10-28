@@ -88,14 +88,14 @@ let package:Package = .init(
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.59.0"),
+            from: "2.61.0"),
         /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
         /// major-only version requirement.
-        .package(url: "https://github.com/apple/swift-nio-ssl.git",
+        .package(url: "https://github.com/apple/swift-nio-ssl",
             from: "2.25.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.28.1")),
+            from: "1.29.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.2.0")),
         /// swift-system has broken in a minor before, and can't be trusted with a
@@ -104,7 +104,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "509.0.0"),
+            exact: "509.0.1"),
     ],
     targets:
     [
@@ -193,6 +193,8 @@ let package:Package = .init(
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
+
+                .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
@@ -516,8 +518,6 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocPages"),
-
-                .product(name: "Atomics", package: "swift-atomics"),
             ]),
 
 
@@ -536,6 +536,12 @@ let package:Package = .init(
         .executableTarget(name: "FNV1Tests", dependencies:
             [
                 .target(name: "FNV1"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "IPTests", dependencies:
+            [
+                .target(name: "IP"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
@@ -677,7 +683,7 @@ for target:PackageDescription.Target in package.targets
         settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
         settings.append(.enableUpcomingFeature("ConciseMagicFile"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
-        settings.append(.enableUpcomingFeature("StrictConcurrency"))
+        settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))
 

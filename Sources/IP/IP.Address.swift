@@ -24,14 +24,14 @@ extension IP.Address:CustomStringConvertible
 extension IP.Address
 {
     @inlinable public static
-    func v4(_ full:some StringProtocol) -> Self?
+    func v4(_ string:some StringProtocol) -> Self?
     {
-        if let v4:IP.V4 = .init(full) { .v4(v4) } else { nil }
+        if let v4:IP.V4 = .init(string) { .v4(v4) } else { nil }
     }
 
     @inlinable public static
-    func v6(_ full:some StringProtocol) -> Self?
+    func v6(_ string:some StringProtocol) -> Self?
     {
-        if let v6:IP.V6 = .init(full) { .v6(v6) } else { nil }
+        if let v6:IP.V6 = .init(string) { .v6(v6) } else { nil }
     }
 }

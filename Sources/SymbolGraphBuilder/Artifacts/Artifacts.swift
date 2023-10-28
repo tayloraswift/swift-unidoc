@@ -81,6 +81,9 @@ extension Artifacts
             case    "_CertificateInternals":    // unbuildable, from swift-certificates 1.0.0
                 continue
 
+            case    "_NIODataStructures": // unbuildable, as of swift-nio 2.60.0
+                continue
+
             case let name:
                 print("Dumping symbols for module '\(name)' (\(label))")
             }

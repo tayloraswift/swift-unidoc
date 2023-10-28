@@ -5,7 +5,7 @@ public
 protocol DatabaseQuery<Collation, Output>:Sendable
 {
     associatedtype Collation:DatabaseCollation
-    associatedtype Output:BSONDocumentDecodable
+    associatedtype Output:BSONDocumentDecodable & Sendable
 
     func build(pipeline:inout Mongo.Pipeline)
 

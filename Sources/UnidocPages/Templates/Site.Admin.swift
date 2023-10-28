@@ -223,28 +223,32 @@ extension Site.Admin:AdministrativePage
             $0[.dt] = "requests"
             $0[.dd] = "\(self.tour.profile.requests.pages.total)"
 
+            if  let last:ServerProfile.Sample = self.tour.last
+            {
+                $0[.dt] = "last request, including bots"
+                $0[.dd] { $0[.a] { $0.href = last.uri } = last.uri }
 
-            $0[.dt] = "last request, including bots"
-            $0[.dd] = self.tour.last.uri ?? "none"
+                $0[.dt] = "last user-agent, including bots"
+                $0[.dd] = last.agent ?? "none"
+            }
 
-            $0[.dt] = "last user-agent, including bots"
-            $0[.dd] = self.tour.last.agent ?? "none"
+            if  let last:ServerProfile.Sample = self.tour.lastImpression
+            {
+                $0[.dt] = "last impression"
+                $0[.dd] { $0[.a] { $0.href = last.uri } = last.uri }
 
+                $0[.dt] = "last user-agent"
+                $0[.dd] = last.agent ?? "none"
 
-            $0[.dt] = "last impression"
-            $0[.dd] = self.tour.lastImpression.uri ?? "none"
+                $0[.dt] = "last IP address"
+                $0[.dd] = "\(last.ip)"
 
-            $0[.dt] = "last user-agent"
-            $0[.dd] = self.tour.lastImpression.agent ?? "none"
+                $0[.dt] = "last language"
+                $0[.dd] = last.language ?? "none"
 
-            $0[.dt] = "last IP address"
-            $0[.dd] = self.tour.lastImpression.ip?.description ?? "none"
-
-            $0[.dt] = "last language"
-            $0[.dd] = self.tour.lastImpression.language ?? "none"
-
-            $0[.dt] = "last referrer"
-            $0[.dd] = self.tour.lastImpression.referer ?? "none"
+                $0[.dt] = "last referrer"
+                $0[.dd] = last.referer ?? "none"
+            }
 
             if  let slowest:ServerTour.SlowestQuery = self.tour.slowestQuery
             {

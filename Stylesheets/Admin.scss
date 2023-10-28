@@ -63,7 +63,7 @@ figure div.pie
             fill: #999;
         }
 
-        > *.language.vt
+        > *.language.vi
         {
             fill: #d85518;
         }
@@ -163,6 +163,15 @@ figure div.pie
         > *.status.unauthorized
         {
             fill: rgb(255, 103, 103);
+        }
+
+        > *.protocol.http1
+        {
+            fill: rgb(207, 207, 207);
+        }
+        > *.protocol.http2
+        {
+            fill: rgb(105, 105, 105);
         }
     }
 }

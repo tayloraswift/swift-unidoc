@@ -4,7 +4,7 @@ import Signatures
 extension GenericConstraint:JSONObjectDecodable, JSONDecodable where Scalar:JSONDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case kind
         case lhs

@@ -4,7 +4,7 @@ import ModuleGraphs
 extension ProductType:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case executable
         case library

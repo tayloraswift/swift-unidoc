@@ -30,7 +30,7 @@ extension StaticPage where Self:RenderablePage
         let html:HTML = self.rendered(canonical: canonical, location: location, assets: assets)
 
         return .init(
-            headers: .init(canonical: "https://swiftinit.org\(canonical ?? location)"),
+            headers: .init(canonical: canonical ?? location),
             content: .binary(html.utf8),
             type: .text(.html, charset: .utf8))
     }

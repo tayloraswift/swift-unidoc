@@ -2,7 +2,7 @@ extension JSON
 {
     /// An object had an invalid key scheme.
     @frozen public
-    enum ObjectKeyError<CodingKey>:Error
+    enum ObjectKeyError<CodingKey>:Error where CodingKey:Sendable
     {
         /// An object contained more than one field with the same key.
         case duplicate(CodingKey)

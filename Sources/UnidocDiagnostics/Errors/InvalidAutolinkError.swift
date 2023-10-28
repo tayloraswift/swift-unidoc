@@ -1,5 +1,5 @@
 @frozen public
-struct InvalidAutolinkError<Scalar>:Error
+struct InvalidAutolinkError<Scalar>:Error where Scalar:Sendable
 {
     public
     let expression:String

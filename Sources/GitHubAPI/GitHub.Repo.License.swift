@@ -23,7 +23,7 @@ extension GitHub.Repo
 extension GitHub.Repo.License:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "spdx_id"
         case name

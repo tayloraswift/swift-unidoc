@@ -8,6 +8,14 @@ extension ServerProfile
         private
         var languages:Pie<ByLanguage.Stat>
         private
+        var protocols:
+        (
+            toBarbie:Pie<ByProtocol.Stat>,
+            toBratz:Pie<ByProtocol.Stat>,
+            toSearch:Pie<ByProtocol.Stat>,
+            toOther:Pie<ByProtocol.Stat>
+        )
+        private
         var responses:
         (
             toBarbie:Pie<ByStatus.Stat>,
@@ -25,6 +33,13 @@ extension ServerProfile
         private
         init(
             languages:Pie<ByLanguage.Stat>,
+            protocols:
+            (
+                toBarbie:Pie<ByProtocol.Stat>,
+                toBratz:Pie<ByProtocol.Stat>,
+                toSearch:Pie<ByProtocol.Stat>,
+                toOther:Pie<ByProtocol.Stat>
+            ),
             responses:
             (
                 toBarbie:Pie<ByStatus.Stat>,
@@ -39,6 +54,7 @@ extension ServerProfile
             ))
         {
             self.languages = languages
+            self.protocols = protocols
             self.responses = responses
             self.requests = requests
         }
@@ -51,6 +67,17 @@ extension ServerProfile.Breakdown
     {
         self.init(
             languages: stats.languages.chart(stratum: "Barbies served"),
+            protocols:
+            (
+                toBarbie: stats.protocols.toBarbie.chart(
+                    stratum: "requests made by Barbies"),
+                toBratz: stats.protocols.toBratz.chart(
+                    stratum: "requests made by Bratz"),
+                toSearch: stats.protocols.toSearch.chart(
+                    stratum: "requests made by Search Engines"),
+                toOther: stats.protocols.toOther.chart(
+                    stratum: "requests made by others")
+            ),
             responses:
             (
                 toBarbie: stats.responses.toBarbie.chart(
@@ -123,6 +150,34 @@ extension ServerProfile.Breakdown:HyperTextOutputStreamable
         {
             $0[.div] { $0.class = "pie" } = self.responses.toOther
             $0[.figcaption] { $0[.dl] = self.responses.toOther.legend }
+        }
+
+        html[.h3] = "Protocols (Barbies)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.protocols.toBarbie
+            $0[.figcaption] { $0[.dl] = self.protocols.toBarbie.legend }
+        }
+
+        html[.h3] = "Protocols (Bratz)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.protocols.toBratz
+            $0[.figcaption] { $0[.dl] = self.protocols.toBratz.legend }
+        }
+
+        html[.h3] = "Protocols (Search Engines)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.protocols.toSearch
+            $0[.figcaption] { $0[.dl] = self.protocols.toSearch.legend }
+        }
+
+        html[.h3] = "Protocols (Others)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.protocols.toOther
+            $0[.figcaption] { $0[.dl] = self.protocols.toOther.legend }
         }
     }
 }

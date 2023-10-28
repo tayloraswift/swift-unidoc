@@ -2,8 +2,10 @@ import BSON
 import HTTPClient
 import JSON
 import Media
+import ModuleGraphs
 import NIOCore
 import NIOHPACK
+import UnidocAutomation
 import URI
 
 extension SwiftinitClient
@@ -27,6 +29,22 @@ extension SwiftinitClient
         }
     }
 }
+
+extension SwiftinitClient.Connection
+{
+    func status(of package:PackageIdentifier) async throws -> PackageBuildStatus
+    {
+        try await self.get(from: "/api/build/\(package)")
+    }
+
+    func uplink(package:Int32, version:Int32) async throws
+    {
+        try await self.post(
+            urlencoded: "package=\(package)&version=\(version)",
+            to: "/api/uplink")
+    }
+}
+
 extension SwiftinitClient.Connection
 {
     @inlinable internal
@@ -96,6 +114,10 @@ extension SwiftinitClient.Connection
             if  let type:MediaType
             {
                 headers.add(name: "content-type", value: "\(type)")
+            }
+            if  let body:ByteBuffer
+            {
+                headers.add(name: "content-length", value: "\(body.readableBytes)")
             }
 
             let response:HTTP2Client.Facet = try await self.http2.fetch(.init(

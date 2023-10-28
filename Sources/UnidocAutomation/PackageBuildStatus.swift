@@ -25,7 +25,7 @@ struct PackageBuildStatus
 extension PackageBuildStatus
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case coordinate
         case repo

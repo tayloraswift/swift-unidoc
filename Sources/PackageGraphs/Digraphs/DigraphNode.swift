@@ -1,5 +1,5 @@
 public
-protocol DigraphNode:Identifiable where ID:Comparable
+protocol DigraphNode:Identifiable where ID:Comparable & Sendable
 {
     associatedtype Predecessor:Identifiable<ID>
 

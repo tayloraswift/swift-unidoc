@@ -5,7 +5,7 @@ import PackageGraphs
 extension PackageNode.Dependency.Filesystem:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "identity"
         case location = "path"

@@ -23,7 +23,7 @@ extension JSONDecodable where Self:UnsignedInteger & FixedWidthInteger
         self = try json.cast { try $0.as(Self.self) }
     }
 }
-extension JSONDecodable where Self:RawRepresentable, RawValue:JSONDecodable
+extension JSONDecodable where Self:RawRepresentable, RawValue:JSONDecodable & Sendable
 {
     @inlinable public
     init(json:JSON.Node) throws

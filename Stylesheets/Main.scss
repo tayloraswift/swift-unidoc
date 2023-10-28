@@ -47,9 +47,19 @@ body
             overflow-wrap: break-word;
         }
     }
+
+    main
+    {
+        margin-top: 8rem;
+    }
 }
 @media only screen and (min-width: 50rem)
 {
+    body main
+    {
+        margin-top: 6rem;
+    }
+
     body > *
     {
         > *.sidebar
@@ -86,8 +96,6 @@ body nav
 
 body main
 {
-    margin-top: 6rem;
-
     section.introduction,
     section.parameters,
     section.returns,
@@ -120,7 +128,7 @@ body main
 
     > *:last-child
     {
-        padding-bottom: 10rem;
+        padding-bottom: 5rem;
     }
 }
 

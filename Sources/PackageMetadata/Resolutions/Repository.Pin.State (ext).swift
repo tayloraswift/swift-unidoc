@@ -5,7 +5,7 @@ import SemanticVersions
 extension Repository.Pin.State:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case branch
         case revision

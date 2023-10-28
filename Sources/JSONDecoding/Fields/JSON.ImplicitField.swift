@@ -5,7 +5,7 @@ extension JSON
     /// is useful for obtaining structured diagnostics for “key-not-found”
     /// scenarios.
     @frozen public
-    struct ImplicitField<Key>
+    struct ImplicitField<Key> where Key:Sendable
     {
         public
         let key:Key

@@ -1,6 +1,6 @@
 /// Context for a breadth-first traversal of a digraph.
 @frozen public
-struct DigraphExplorer<Node> where Node:DigraphNode
+struct DigraphExplorer<Node> where Node:DigraphNode, Node.ID:Sendable
 {
     @usableFromInline internal
     let nodes:Nodes

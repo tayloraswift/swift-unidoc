@@ -35,7 +35,7 @@ extension Site.RecentActivity:RenderablePage
     public
     func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        head[unsafe: .script] = "const volumes = [];"
+        head[unsafe: .script] = assets.script(volumes: nil)
     }
 
     func body(_ body:inout HTML.ContentEncoder)
