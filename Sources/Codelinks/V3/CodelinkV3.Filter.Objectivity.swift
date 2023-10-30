@@ -1,4 +1,4 @@
-extension Codelink.Filter
+extension CodelinkV3.Filter
 {
     @frozen public
     enum Objectivity:Equatable, Hashable, Sendable

@@ -1,4 +1,4 @@
-extension Codelink.Path
+extension CodelinkV3.Path
 {
     enum Format:Equatable, Hashable, Sendable
     {

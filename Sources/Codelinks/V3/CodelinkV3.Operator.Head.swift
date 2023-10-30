@@ -1,4 +1,4 @@
-extension Codelink.Operator
+extension CodelinkV3.Operator
 {
     @frozen public
     struct Head:Equatable, Hashable, Sendable
@@ -13,12 +13,12 @@ extension Codelink.Operator
         }
     }
 }
-extension Codelink.Operator.Head
+extension CodelinkV3.Operator.Head
 {
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)
     {
-        switch codepoint 
+        switch codepoint
         {
         case    ".",
                 "/", "=", "-", "+", "!", "*", "%", "<", ">", "&", "|", "^", "~", "?",
@@ -46,6 +46,6 @@ extension Codelink.Operator.Head
             self.init(codepoint: codepoint)
         default:
             return nil
-        }            
+        }
     }
 }

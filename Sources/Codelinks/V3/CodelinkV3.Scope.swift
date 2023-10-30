@@ -1,6 +1,6 @@
 import LexicalPaths
 
-extension Codelink
+extension CodelinkV3
 {
     @frozen public
     struct Scope:Equatable, Hashable, Sendable
@@ -15,7 +15,7 @@ extension Codelink
         }
     }
 }
-extension Codelink.Scope
+extension CodelinkV3.Scope
 {
     /// Adds backticks to the last scope component, if necessary.
     private
@@ -23,7 +23,7 @@ extension Codelink.Scope
     {
         let prefix:[String] = prefix
         if  prefix.isEmpty,
-            let _:Codelink.Keyword = .init(rawValue: last)
+            let _:CodelinkV3.Keyword = .init(rawValue: last)
         {
             self.init(components: .init([], .init(characters: last, encased: true)))
         }
@@ -50,7 +50,7 @@ extension Codelink.Scope
         var codepoints:Substring.UnicodeScalarView = description.unicodeScalars
 
         guard
-        let first:Codelink.Identifier = .init(parsing: &codepoints)
+        let first:CodelinkV3.Identifier = .init(parsing: &codepoints)
         else
         {
             return nil
@@ -62,7 +62,7 @@ extension Codelink.Scope
         while let separator:Unicode.Scalar = codepoints.popFirst()
         {
             if  separator == ".",
-                let next:Codelink.Identifier = .init(parsing: &codepoints)
+                let next:CodelinkV3.Identifier = .init(parsing: &codepoints)
             {
                 prefix.append(consume last)
                 last = next.unencased
@@ -82,7 +82,7 @@ extension Codelink.Scope
         self.init(prefix: prefix, normalizing: last)
     }
 }
-extension Codelink.Scope:CustomStringConvertible
+extension CodelinkV3.Scope:CustomStringConvertible
 {
     public
     var description:String

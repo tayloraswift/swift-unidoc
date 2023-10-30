@@ -1,6 +1,6 @@
 import LexicalPaths
 
-extension Codelink.Path
+extension CodelinkV3.Path
 {
     @frozen public
     enum Component:Equatable, Hashable, Sendable
@@ -16,7 +16,7 @@ extension Codelink.Path
         case  nominal(Basename, Arguments?)
     }
 }
-extension Codelink.Path.Component:LexicalContinuation
+extension CodelinkV3.Path.Component:LexicalContinuation
 {
     @inlinable public
     var description:String
@@ -55,7 +55,7 @@ extension Codelink.Path.Component:LexicalContinuation
         }
     }
 }
-extension Codelink.Path.Component:LosslessStringConvertible
+extension CodelinkV3.Path.Component:LosslessStringConvertible
 {
     public
     init?(_ string:String)
@@ -68,11 +68,11 @@ extension Codelink.Path.Component:LosslessStringConvertible
         }
     }
 }
-extension Codelink.Path.Component
+extension CodelinkV3.Path.Component
 {
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
-        if  let identifier:Codelink.Identifier = .init(parsing: &codepoints)
+        if  let identifier:CodelinkV3.Identifier = .init(parsing: &codepoints)
         {
             switch (identifier.encased, identifier.characters)
             {
@@ -95,7 +95,7 @@ extension Codelink.Path.Component
         var remaining:Substring.UnicodeScalarView = codepoints
 
         //  operators must always have at least one argument.
-        if  let identifier:Codelink.Operator = .init(parsing: &remaining),
+        if  let identifier:CodelinkV3.Operator = .init(parsing: &remaining),
             let arguments:Arguments = .init(parsing: &remaining)
         {
             self = .nominal(.init(unencased: identifier.characters), arguments)
