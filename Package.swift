@@ -96,7 +96,8 @@ let package:Package = .init(
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.29.0")),
-        .package(url: "https://github.com/apple/swift-markdown", branch: "main"),
+        .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
+            from: "0.3.0")),
         /// swift-system has broken in a minor before, and can't be trusted with a
         /// major-only version requirement.
         /// See: https://forums.swift.org/t/windows-build-is-broken/58036
