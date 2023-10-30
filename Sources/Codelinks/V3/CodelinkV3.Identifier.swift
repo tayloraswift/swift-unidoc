@@ -1,6 +1,6 @@
 import LexicalPaths
 
-extension Codelink
+extension CodelinkV3
 {
     @frozen public
     struct Identifier:Equatable, Hashable, Sendable
@@ -19,7 +19,7 @@ extension Codelink
         }
     }
 }
-extension Codelink.Identifier
+extension CodelinkV3.Identifier
 {
     @inlinable public
     init(head:Head, encased:Bool = false)
@@ -27,7 +27,7 @@ extension Codelink.Identifier
         self.init(characters: .init(head.codepoint), encased: encased)
     }
 }
-extension Codelink.Identifier
+extension CodelinkV3.Identifier
 {
     @inlinable public static
     var underscore:Self { .init(head: .init(codepoint: "_")) }
@@ -38,7 +38,7 @@ extension Codelink.Identifier
         self.characters.append(Character.init(next.codepoint))
     }
 }
-extension Codelink.Identifier:Comparable
+extension CodelinkV3.Identifier:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -46,7 +46,7 @@ extension Codelink.Identifier:Comparable
         lhs.characters < rhs.characters
     }
 }
-extension Codelink.Identifier:CustomStringConvertible, LexicalContinuation
+extension CodelinkV3.Identifier:CustomStringConvertible, LexicalContinuation
 {
     /// Returns the characters of this identifier, with encasing backticks if it
     /// has any.
@@ -62,7 +62,7 @@ extension Codelink.Identifier:CustomStringConvertible, LexicalContinuation
         self.characters
     }
 }
-extension Codelink.Identifier:LosslessStringConvertible
+extension CodelinkV3.Identifier:LosslessStringConvertible
 {
     /// Creates a swift identifier by validating the given string.
     public
@@ -71,7 +71,7 @@ extension Codelink.Identifier:LosslessStringConvertible
         self.init(description[...])
     }
 }
-extension Codelink.Identifier
+extension CodelinkV3.Identifier
 {
     public
     init?(_ description:Substring)
