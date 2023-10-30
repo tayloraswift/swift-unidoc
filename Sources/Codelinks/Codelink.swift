@@ -2,9 +2,17 @@
 struct CodelinkV4:Equatable, Hashable, Sendable
 {
     public
-    let base:Bool
+    let base:Base
     public
-    let path:Path
+    var path:Path
     public
-    let suffix:Suffix?
+    var suffix:Suffix?
+
+    @inlinable internal
+    init(base:Base, path:Path, suffix:Suffix? = nil)
+    {
+        self.base = base
+        self.path = path
+        self.suffix = suffix
+    }
 }
