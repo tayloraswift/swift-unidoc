@@ -1,4 +1,5 @@
 import Codelinks
+import FNV1
 import Testing
 
 @main
@@ -7,7 +8,237 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "identifiers"
+        if  let tests:TestGroup = tests / "Codelink" / "Path"
+        {
+            if  let tests:TestGroup = tests / "DotDot",
+                let link:CodelinkV4 = tests.roundtrip("Unicode.Scalar.value")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
+                tests.expect(link.path.visible ..? ["Unicode", "Scalar", "value"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "SlashDot",
+                let link:CodelinkV4 = tests.roundtrip("Unicode/Scalar.value")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
+                tests.expect(link.path.visible ..? ["Scalar", "value"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "DotSlash",
+                let link:CodelinkV4 = tests.roundtrip("Unicode.Scalar/value")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
+                tests.expect(link.path.visible ..? ["value"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "SlashSlash",
+                let link:CodelinkV4 = tests.roundtrip("Unicode/Scalar/value")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
+                tests.expect(link.path.visible ..? ["value"])
+                tests.expect(nil: link.suffix)
+            }
+
+            if  let tests:TestGroup = tests / "Real" / "1",
+                let link:CodelinkV4 = tests.roundtrip("Real...(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
+                tests.expect(link.path.visible ..? ["Real", "..(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "2",
+                let link:CodelinkV4 = tests.roundtrip("Real/..(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
+                tests.expect(link.path.visible ..? ["..(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "3",
+                let link:CodelinkV4 = tests.roundtrip("Real....(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
+                tests.expect(link.path.visible ..? ["Real", "...(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "4",
+                let link:CodelinkV4 = tests.roundtrip("Real/...(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
+                tests.expect(link.path.visible ..? ["...(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "5",
+                let link:CodelinkV4 = tests.roundtrip("Real./(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
+                tests.expect(link.path.visible ..? ["Real", "/(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "6",
+                let link:CodelinkV4 = tests.roundtrip("Real//(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
+                tests.expect(link.path.visible ..? ["/(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "7",
+                let link:CodelinkV4 = tests.roundtrip("Real../.(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
+                tests.expect(link.path.visible ..? ["Real", "./.(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Real" / "8",
+                let link:CodelinkV4 = tests.roundtrip("Real/./.(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
+                tests.expect(link.path.visible ..? ["./.(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "EmptyTrailingParentheses",
+                let link:CodelinkV4 = tests.roundtrip("Real.init()")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "init"])
+                tests.expect(link.path.visible ..? ["Real", "init"])
+                tests.expect(nil: link.suffix)
+            }
+        }
+        if  let tests:TestGroup = tests / "Codelink" / "Disambiguator"
+        {
+            if  let tests:TestGroup = tests / "Fake" / "Enum",
+                let link:CodelinkV4 = tests.roundtrip("Fake [enum]")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Fake"])
+                tests.expect(link.suffix ==? .filter(.enum))
+            }
+            if  let tests:TestGroup = tests / "Fake" / "UncannyHash",
+                let link:CodelinkV4 = tests.roundtrip("Fake [ENUM]")
+            {
+                let hash:FNV24 = .init("ENUM", radix: 36)!
+
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Fake"])
+                tests.expect(link.suffix ==? .hash(hash))
+            }
+            if  let tests:TestGroup = tests / "Fake" / "ClassVar",
+                let link:CodelinkV4 = tests.roundtrip("Fake.max [class var]")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Fake", "max"])
+                tests.expect(link.suffix ==? .filter(.class_var))
+            }
+        }
+        if  let tests:TestGroup = tests / "Codelink" / "DocC"
+        {
+            if  let tests:TestGroup = tests / "Slashes",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/Color")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "Color"])
+                tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Filter",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.enum")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "Color"])
+                tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(link.suffix ==? .filter(.enum))
+            }
+            if  let tests:TestGroup = tests / "FilterLegacy",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.class")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "Color"])
+                tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(link.suffix ==? .legacy(.init(filter: .class)))
+            }
+            if  let tests:TestGroup = tests / "FilterAndHash",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.struct-4ko57")
+            {
+                let hash:FNV24 = .init("4ko57", radix: 36)!
+
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "Color"])
+                tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(link.suffix ==? .legacy(.init(filter: .struct, hash: hash)))
+            }
+            if  let tests:TestGroup = tests / "Hash",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/update(_:)-4ko57")
+            {
+                let hash:FNV24 = .init("4ko57", radix: 36)!
+
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "update(_:)"])
+                tests.expect(link.path.visible ..? ["update(_:)"])
+                tests.expect(link.suffix ==? .hash(hash))
+            }
+            if  let tests:TestGroup = tests / "Hash" / "Minus",
+                let link:CodelinkV4 = tests.roundtrip("Sloth/-(_:)-4ko57")
+            {
+                let hash:FNV24 = .init("4ko57", radix: 36)!
+
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "-(_:)"])
+                tests.expect(link.path.visible ..? ["-(_:)"])
+                tests.expect(link.suffix ==? .hash(hash))
+            }
+            if  let tests:TestGroup = tests / "Hash" / "Slinging" / "Slasher",
+                let link:CodelinkV4 = tests.roundtrip("Sloth//(_:)-4ko57")
+            {
+                let hash:FNV24 = .init("4ko57", radix: 36)!
+
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "/(_:)"])
+                tests.expect(link.path.visible ..? ["/(_:)"])
+                tests.expect(link.suffix ==? .hash(hash))
+            }
+        }
+        if  let tests:TestGroup = tests / "Codelink" / "Namespacing"
+        {
+            if  let tests:TestGroup = tests / "Isolated",
+                let link:CodelinkV4 = tests.roundtrip("/Swift")
+            {
+                tests.expect(link.base ==? .qualified)
+                tests.expect(link.path.components ..? ["Swift"])
+                tests.expect(link.path.visible ..? ["Swift"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Hidden",
+                let link:CodelinkV4 = tests.roundtrip("/Swift/Int")
+            {
+                tests.expect(link.base ==? .qualified)
+                tests.expect(link.path.components ..? ["Swift", "Int"])
+                tests.expect(link.path.visible ..? ["Int"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "Visible",
+                let link:CodelinkV4 = tests.roundtrip("/Swift.Int")
+            {
+                tests.expect(link.base ==? .qualified)
+                tests.expect(link.path.components ..? ["Swift", "Int"])
+                tests.expect(link.path.visible ..? ["Swift", "Int"])
+                tests.expect(nil: link.suffix)
+            }
+        }
+
+
+        if  let tests:TestGroup = tests / "Identifiers"
         {
             if  let tests:TestGroup = tests / "underscore"
             {
@@ -37,7 +268,7 @@ enum Main:SyncTests
                 tests.expect(nil: CodelinkV3.Identifier.init("x x"))
             }
         }
-        if  let tests:TestGroup = tests / "operators"
+        if  let tests:TestGroup = tests / "Operators"
         {
             if  let tests:TestGroup = tests / "underscore"
             {
@@ -72,7 +303,7 @@ enum Main:SyncTests
                 tests.expect(nil: CodelinkV3.Identifier.init("+ +"))
             }
         }
-        if  let tests:TestGroup = tests / "operators" / "reserved"
+        if  let tests:TestGroup = tests / "Operators" / "reserved"
         {
             for (pattern, name):(String, String) in
             [
@@ -90,10 +321,10 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "codelinks"
+        if  let tests:TestGroup = tests / "CodelinkV3"
         {
             if  let tests:TestGroup = tests / "component-single",
-                let codelink:CodelinkV3 = .parse("Sloth", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth")
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
@@ -101,7 +332,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-multiple",
-                let codelink:CodelinkV3 = .parse("Sloth.Color.description", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth.Color.description")
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
@@ -109,7 +340,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-parentheses",
-                let codelink:CodelinkV3 = .parse("Sloth.Color.foo()", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth.Color.foo()")
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
@@ -117,7 +348,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-arguments",
-                let codelink:CodelinkV3 = .parse("Sloth.Color.foo(bar:baz:)", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth.Color.foo(bar:baz:)")
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
@@ -125,7 +356,7 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-operator",
-                let codelink:CodelinkV3 = .parse("Sloth.Color.==(_:_:)", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth.Color.==(_:_:)")
             {
                 tests.expect(nil: codelink.filter)
                 tests.expect(nil: codelink.scope)
@@ -133,22 +364,22 @@ enum Main:SyncTests
                 tests.expect(nil: codelink.hash)
             }
             if  let tests:TestGroup = tests / "component-operator-only",
-                let codelink:CodelinkV3 = .parse("==(_:_:)", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("==(_:_:)")
             {
                 tests.expect(codelink.path.components ..? ["==(_:_:)"])
             }
             if  let tests:TestGroup = tests / "component-dots",
-                let codelink:CodelinkV3 = .parse("Sloth.Color....(_:_:)", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth.Color....(_:_:)")
             {
                 tests.expect(codelink.path.components ..? ["Sloth", "Color", "...(_:_:)"])
             }
             if  let tests:TestGroup = tests / "component-dots-only",
-                let codelink:CodelinkV3 = .parse("...(_:_:)", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("...(_:_:)")
             {
                 tests.expect(codelink.path.components ..? ["...(_:_:)"])
             }
         }
-        if  let tests:TestGroup = tests / "codelinks" / "filters"
+        if  let tests:TestGroup = tests / "CodelinkV3" / "filters"
         {
             if  let tests:TestGroup = tests / "case",
                 let codelink:CodelinkV3 = tests.expect(value: .init("case `subscript`"))
@@ -160,7 +391,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "init",
-                let codelink:CodelinkV3 = .parse("Sloth Color.init", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth Color.init"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
@@ -169,7 +400,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "subscript",
-                let codelink:CodelinkV3 = .parse("Sloth Color.subscript(_:)", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("Sloth Color.subscript(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .subscript(.instance))
@@ -177,7 +408,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "subscript(_:)"])
             }
             if  let tests:TestGroup = tests / "class-subscript",
-                let codelink:CodelinkV3 = .parse("class Sloth Color.subscript(_:)", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("class Sloth Color.subscript(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .subscript(.class))
@@ -185,7 +416,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "subscript(_:)"])
             }
             if  let tests:TestGroup = tests / "static-subscript",
-                let codelink:CodelinkV3 = .parse("static Sloth Color.subscript(_:)", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("static Sloth Color.subscript(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .subscript(.static))
@@ -194,7 +425,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "func",
-                let codelink:CodelinkV3 = .parse("func Sloth Color.`subscript`(_:)", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("func Sloth Color.`subscript`(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .func(.default))
@@ -202,8 +433,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "`subscript`(_:)"])
             }
             if  let tests:TestGroup = tests / "class-func",
-                let codelink:CodelinkV3 = .parse("class func Sloth Color.`subscript`(_:)",
-                    for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("class func Sloth Color.`subscript`(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .func(.class))
@@ -211,8 +441,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "`subscript`(_:)"])
             }
             if  let tests:TestGroup = tests / "static-func",
-                let codelink:CodelinkV3 = .parse("static func Sloth Color.`subscript`(_:)",
-                    for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("static func Sloth Color.`subscript`(_:)"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .func(.static))
@@ -221,7 +450,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "var",
-                let codelink:CodelinkV3 = .parse("var Sloth Color.`subscript`", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("var Sloth Color.`subscript`"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .var(.default))
@@ -229,7 +458,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "`subscript`"])
             }
             if  let tests:TestGroup = tests / "class-var",
-                let codelink:CodelinkV3 = .parse("class var Sloth Color.`subscript`", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("class var Sloth Color.`subscript`"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .var(.class))
@@ -237,8 +466,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Color", "`subscript`"])
             }
             if  let tests:TestGroup = tests / "static-var",
-                let codelink:CodelinkV3 = .parse("static var Sloth Color.`subscript`",
-                    for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("static var Sloth Color.`subscript`"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .var(.static))
@@ -247,7 +475,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "actor",
-                let codelink:CodelinkV3 = .parse("actor Actor", for: tests)
+                let codelink:CodelinkV3 = tests.roundtrip("actor Actor")
             {
                 tests.expect(codelink.filter ==? .actor)
                 tests.expect(nil: codelink.scope)
@@ -255,7 +483,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "scopes",
-                let codelink:CodelinkV3 = .parse("class `actor` Class", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("class `actor` Class"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(codelink.filter ==? .class)
@@ -263,10 +491,10 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Class"])
             }
         }
-        if  let tests:TestGroup = tests / "codelinks" / "scopes"
+        if  let tests:TestGroup = tests / "CodelinkV3" / "scopes"
         {
             if  let tests:TestGroup = tests / "encasing",
-                let codelink:CodelinkV3 = .parse("`actor` Class", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("`actor` Class"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
@@ -274,7 +502,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Class"])
             }
             if  let tests:TestGroup = tests / "qualified",
-                let codelink:CodelinkV3 = .parse("Foo.Bar.Baz Sloth.Color", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("Foo.Bar.Baz Sloth.Color"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
@@ -282,7 +510,7 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Sloth", "Color"])
             }
             if  let tests:TestGroup = tests / "overencased",
-                let codelink:CodelinkV3 = .parse("`Foo`.`Bar`.`Baz` `Sloth`.`Color`", for: tests),
+                let codelink:CodelinkV3 = tests.roundtrip("`Foo`.`Bar`.`Baz` `Sloth`.`Color`"),
                 let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
             {
                 tests.expect(nil: codelink.filter)
@@ -290,70 +518,13 @@ enum Main:SyncTests
                 tests.expect(codelink.path.components ..? ["Sloth", "Color"])
             }
         }
-        if  let tests:TestGroup = tests / "codelinks" / "hashes",
-            let codelink:CodelinkV3 = .parse("Sloth.update(_:) [4ko57]", for: tests)
+        if  let tests:TestGroup = tests / "CodelinkV3" / "hashes",
+            let codelink:CodelinkV3 = tests.roundtrip("Sloth.update(_:) [4ko57]")
         {
             tests.expect(nil: codelink.filter)
             tests.expect(nil: codelink.scope)
             tests.expect(codelink.path.components ..? ["Sloth", "update(_:)"])
             tests.expect(codelink.hash?.value ==? .init("4ko57", radix: 36))
-        }
-        if  let tests:TestGroup = tests / "Codelinks" / "LegacyDocC"
-        {
-            if  let tests:TestGroup = tests / "Slashes",
-                let codelink:CodelinkV3 = .parse("Sloth/Color", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(nil: codelink.filter)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["Color"])
-                tests.expect(nil: codelink.hash)
-            }
-            if  let tests:TestGroup = tests / "TrailingSlashes",
-                let codelink:CodelinkV3 = .parse("Sloth/Color/", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(nil: codelink.filter)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["Color"])
-                tests.expect(nil: codelink.hash)
-            }
-            if  let tests:TestGroup = tests / "Filter",
-                let codelink:CodelinkV3 = .parse("Sloth/Color-swift.enum", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(codelink.filter ==? .enum)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["Color"])
-                tests.expect(nil: codelink.hash)
-            }
-            if  let tests:TestGroup = tests / "Hash",
-                let codelink:CodelinkV3 = .parse("Sloth/update(_:)-4ko57", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(nil: codelink.filter)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["update(_:)"])
-                tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
-            }
-            if  let tests:TestGroup = tests / "Hash" / "Minus",
-                let codelink:CodelinkV3 = .parse("Sloth/-(_:)-4ko57", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(nil: codelink.filter)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["-(_:)"])
-                tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
-            }
-            if  let tests:TestGroup = tests / "Hash" / "Slinging" / "Slasher",
-                let codelink:CodelinkV3 = .parse("Sloth//(_:)-4ko57", for: tests),
-                let scope:CodelinkV3.Scope = tests.expect(value: codelink.scope)
-            {
-                tests.expect(nil: codelink.filter)
-                tests.expect(scope.components ..? ["Sloth"])
-                tests.expect(codelink.path.components ..? ["/(_:)"])
-                tests.expect(codelink.hash?.value ==? .init("4KO57", radix: 36))
-            }
         }
     }
 }
