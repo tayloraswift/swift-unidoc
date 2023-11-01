@@ -1,7 +1,7 @@
 import FNV1
 
 @frozen public
-struct CodelinkV4:Equatable, Hashable, Sendable
+struct Codelink:Equatable, Hashable, Sendable
 {
     public
     let base:Base
@@ -18,7 +18,7 @@ struct CodelinkV4:Equatable, Hashable, Sendable
         self.suffix = suffix
     }
 }
-extension CodelinkV4:CustomStringConvertible
+extension Codelink:CustomStringConvertible
 {
     public
     var description:String
@@ -64,7 +64,7 @@ extension CodelinkV4:CustomStringConvertible
         }
     }
 }
-extension CodelinkV4:LosslessStringConvertible
+extension Codelink:LosslessStringConvertible
 {
     public
     init?(_ string:String)
@@ -229,5 +229,73 @@ extension CodelinkV4:LosslessStringConvertible
         }
 
         return nil
+    }
+}
+extension Codelink
+{
+    public
+    init(v3 link:CodelinkV3)
+    {
+        var path:Path
+        if  let scope:CodelinkV3.Scope = link.scope
+        {
+            path = .init(components: scope.components.prefix)
+            path.components.append(scope.components.last.unencased)
+
+            path.fold = path.components.endIndex
+
+            path.components += link.path.components.prefix
+            path.components.append(link.path.components.last.unencased)
+        }
+        else
+        {
+            path = .init(components: link.path.components.prefix)
+            path.components.append(link.path.components.last.unencased)
+        }
+
+        if  let hash:FNV24 = link.hash
+        {
+            self.init(base: .qualified, path: path, suffix: .hash(hash))
+        }
+        else if
+            let filter:CodelinkV3.Filter = link.filter
+        {
+            let suffix:Suffix? =
+            switch filter
+            {
+            case .actor:                .filter(.actor)
+            case .associatedtype:       .filter(.associatedtype)
+            case .case:                 .filter(.case)
+            case .class:                .filter(.class)
+            case .enum:                 .filter(.enum)
+            case .func(.default):       .filter(.func)
+            case .func(.class):         .filter(.class_func)
+            case .func(.global):        .legacy(.init(filter: .func))
+            case .func(.instance):      .legacy(.init(filter: .method))
+            case .func(.static):        .filter(.static_func)
+            case .func(.type):          .legacy(.init(filter: .type_method))
+            case .macro:                .filter(.macro)
+            case .module:               nil
+            case .protocol:             .filter(.protocol)
+            case .struct:               .filter(.struct)
+            case .subscript(.class):    .filter(.class_subscript)
+            case .subscript(.instance): .filter(.subscript)
+            case .subscript(.static):   .filter(.static_subscript)
+            case .subscript(.type):     .legacy(.init(filter: .type_subscript))
+            case .typealias:            .filter(.typealias)
+            case .var(.default):        .filter(.var)
+            case .var(.class):          .filter(.class_var)
+            case .var(.global):         .legacy(.init(filter: .var))
+            case .var(.instance):       .legacy(.init(filter: .property))
+            case .var(.static):         .filter(.static_var)
+            case .var(.type):           .legacy(.init(filter: .type_property))
+            }
+
+            self.init(base: .qualified, path: path, suffix: suffix)
+        }
+        else
+        {
+            self.init(base: .qualified, path: path)
+        }
     }
 }

@@ -19,10 +19,11 @@ extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
 
     init?(from elements:__shared [MarkdownInline.Block])
     {
-        if  elements.count == 1,
-            let identifier:Codelink.Identifier = .init(elements[0].text)
+        if  elements.count == 1
         {
-            self.init(name: identifier.unencased)
+            //  Don’t attempt to validate the identifier for disallowed characters,
+            //  this is the wrong place for that.
+            self.init(name: elements[0].text)
         }
         else
         {

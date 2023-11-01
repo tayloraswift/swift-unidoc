@@ -1,10 +1,9 @@
 import FNV1
 import LexicalPaths
 
-// @available(*, deprecated, renamed: "CodelinkV3")
-public
-typealias Codelink = CodelinkV3
-
+/// This codelink format is deprecated and should not be used in new documentation.
+///
+/// The type itself is not deprecated for backwards compatibility reasons.
 @frozen public
 struct CodelinkV3:Equatable, Hashable, Sendable
 {

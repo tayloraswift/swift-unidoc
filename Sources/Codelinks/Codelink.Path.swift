@@ -1,4 +1,4 @@
-extension CodelinkV4
+extension Codelink
 {
     @frozen public
     struct Path:Equatable, Hashable, Sendable
@@ -18,7 +18,7 @@ extension CodelinkV4
         }
     }
 }
-extension CodelinkV4.Path
+extension Codelink.Path
 {
     @inlinable public
     var visible:ArraySlice<String>
@@ -26,7 +26,7 @@ extension CodelinkV4.Path
         self.components[self.fold...]
     }
 }
-extension CodelinkV4.Path
+extension Codelink.Path
 {
     mutating
     func extend(parsing string:Substring.UnicodeScalarView) -> String.Index?

@@ -1,6 +1,6 @@
 import FNV1
 
-extension CodelinkV4
+extension Codelink
 {
     @frozen public
     enum Suffix:Equatable, Hashable, Sendable

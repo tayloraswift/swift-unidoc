@@ -1,4 +1,4 @@
-extension CodelinkV4.Path
+extension Codelink.Path
 {
     struct IdentifierHead
     {
@@ -8,7 +8,7 @@ extension CodelinkV4.Path
         }
     }
 }
-extension CodelinkV4.Path.IdentifierHead
+extension Codelink.Path.IdentifierHead
 {
     init?(_ codepoint:Unicode.Scalar)
     {

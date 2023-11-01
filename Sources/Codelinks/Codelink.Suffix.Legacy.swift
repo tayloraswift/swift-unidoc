@@ -1,6 +1,6 @@
 import FNV1
 
-extension CodelinkV4.Suffix
+extension Codelink.Suffix
 {
     @frozen public
     struct Legacy:Equatable, Hashable, Sendable
