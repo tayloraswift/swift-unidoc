@@ -57,6 +57,7 @@ extension StaticOutliner
     {
         self.cache(autolink.text)
         {
+            var type:SymbolGraph.Outline.Unresolved.LinkType? = nil
             if  autolink.code
             {
                 if  let codelink:Codelink = .init(autolink.text)
@@ -71,8 +72,7 @@ extension StaticOutliner
                     }
                     else
                     {
-                        return .codelink(autolink.text, autolink.source?.start.translated(
-                            through: sources))
+                        type = .ucf
                     }
                 }
             }
@@ -99,15 +99,24 @@ extension StaticOutliner
                 }
                 else
                 {
-                    return .doclink(autolink.text, autolink.source?.start.translated(
-                        through: sources))
+                    type = .doc
                 }
             }
 
-            self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
-                expression: autolink.text,
-                context: autolink.source.map { .init(of: $0, in: sources) }))
-            return nil
+            if  let type:SymbolGraph.Outline.Unresolved.LinkType
+            {
+                return .unresolved(.init(
+                    link: autolink.text,
+                    type: type,
+                    location: autolink.source?.start.translated(through: sources)))
+            }
+            else
+            {
+                self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
+                    expression: autolink.text,
+                    context: autolink.source.map { .init(of: $0, in: sources) }))
+                return nil
+            }
         }
     }
 }

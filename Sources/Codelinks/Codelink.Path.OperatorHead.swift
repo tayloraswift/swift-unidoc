@@ -1,24 +1,19 @@
-extension Codelink.Operator
+extension Codelink.Path
 {
-    @frozen public
-    struct Head:Equatable, Hashable, Sendable
+    struct OperatorHead
     {
-        public
-        let codepoint:Unicode.Scalar
-
-        @inlinable internal
-        init(codepoint:Unicode.Scalar)
+        private
+        init()
         {
-            self.codepoint = codepoint
         }
     }
 }
-extension Codelink.Operator.Head
+extension Codelink.Path.OperatorHead
 {
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)
     {
-        switch codepoint 
+        switch codepoint
         {
         case    ".",
                 "/", "=", "-", "+", "!", "*", "%", "<", ">", "&", "|", "^", "~", "?",
@@ -43,9 +38,9 @@ extension Codelink.Operator.Head
                 "\u{3001}" ... "\u{3003}",
                 "\u{3008}" ... "\u{3020}",
                 "\u{3030}":
-            self.init(codepoint: codepoint)
+            self.init()
         default:
             return nil
-        }            
+        }
     }
 }

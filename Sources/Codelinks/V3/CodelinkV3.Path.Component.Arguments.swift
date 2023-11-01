@@ -1,4 +1,4 @@
-extension Codelink.Path.Component
+extension CodelinkV3.Path.Component
 {
     @frozen public
     struct Arguments:Equatable, Hashable, Sendable
@@ -13,7 +13,7 @@ extension Codelink.Path.Component
         }
     }
 }
-extension Codelink.Path.Component.Arguments:CustomStringConvertible
+extension CodelinkV3.Path.Component.Arguments:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -21,7 +21,7 @@ extension Codelink.Path.Component.Arguments:CustomStringConvertible
         "(\(self.characters))"
     }
 }
-extension Codelink.Path.Component.Arguments
+extension CodelinkV3.Path.Component.Arguments
 {
     init?(parsing codepoints:inout Substring.UnicodeScalarView)
     {
@@ -36,7 +36,7 @@ extension Codelink.Path.Component.Arguments
             return nil
         }
 
-        while let label:Codelink.Identifier = .init(parsing: &remaining)
+        while let label:CodelinkV3.Identifier = .init(parsing: &remaining)
         {
             if  case ":"? = remaining.popFirst()
             {

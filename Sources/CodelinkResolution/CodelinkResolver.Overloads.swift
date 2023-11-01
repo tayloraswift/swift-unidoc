@@ -12,6 +12,17 @@ extension CodelinkResolver.Overloads:Sendable where Scalar:Sendable
 }
 extension CodelinkResolver.Overloads
 {
+    var isEmpty:Bool
+    {
+        switch self
+        {
+        case .one:                  false
+        case .some(let overloads):  overloads.isEmpty
+        }
+    }
+}
+extension CodelinkResolver.Overloads
+{
     init(filtering overloads:[CodelinkResolver<Scalar>.Overload],
         where predicate:(CodelinkResolver<Scalar>.Overload) throws -> Bool) rethrows
     {

@@ -1,6 +1,6 @@
 import LexicalPaths
 
-extension Codelink.Path.Component
+extension CodelinkV3.Path.Component
 {
     @frozen public
     struct Basename:Equatable, Hashable, Sendable
@@ -15,7 +15,7 @@ extension Codelink.Path.Component
         }
     }
 }
-extension Codelink.Path.Component.Basename:LexicalContinuation
+extension CodelinkV3.Path.Component.Basename:LexicalContinuation
 {
     /// Returns ``unencased``, unless it is `init`, `deinit`, or `subscript`,
     /// in which case it will be encased in backticks.
@@ -31,7 +31,7 @@ extension Codelink.Path.Component.Basename:LexicalContinuation
         }
     }
 }
-extension Codelink.Path.Component.Basename
+extension CodelinkV3.Path.Component.Basename
 {
     func lowercased() -> Self
     {

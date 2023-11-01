@@ -124,39 +124,29 @@ extension DynamicResolver
                 return .path(text, self.context.expand((heir, feature), to: words(in: text)))
             }
 
-        case    .codelink(let expression, let location):
-            switch self.resolve(expression, at: location)
+        case    .unresolved(let unresolved):
+            guard
+            let (codelink, resolution):
+                (Codelink, CodelinkResolver<Unidoc.Scalar>.Overload.Target?) =
+                    self.resolve(unresolved)
+            else
             {
-            case  nil:
-                return .text(expression)
-
-            case (let codelink, nil)?:
-                return .text("\(codelink.path)")
-
-            case (let codelink, .scalar(let scalar)?)?:
-                return .path("\(codelink.path)", self.context.expand(scalar,
-                    to: codelink.path.components.count))
-
-            case (let codelink, .vector(let feature, self: let heir)?)?:
-                return .path("\(codelink.path)", self.context.expand((heir, feature),
-                    to: codelink.path.components.count))
+                return .text(unresolved.link)
             }
-        case    .doclink(let expression, let location):
-            switch self.resolve(expression, at: location)
+
+            let text:String = codelink.path.visible.joined(separator: ".")
+            let length:Int = codelink.path.visible.count
+
+            switch resolution
             {
-            case  nil:
-                return .text(expression)
+            case nil:
+                return .text(text)
 
-            case (_, nil)?:
-                return .text(expression)
+            case .scalar(let scalar)?:
+                return .path(text, self.context.expand(scalar, to: length))
 
-            case (let codelink, .scalar(let scalar)?)?:
-                return .path(expression, self.context.expand(scalar,
-                    to: codelink.path.components.count))
-
-            case (let codelink, .vector(let feature, self: let heir)?)?:
-                return .path(expression, self.context.expand((heir, feature),
-                    to: codelink.path.components.count))
+            case .vector(let feature, self: let heir)?:
+                return .path(text, self.context.expand((heir, feature), to: length))
             }
         }
 
@@ -184,6 +174,7 @@ extension DynamicResolver
                 //  The rest of the planes don’t cross packages... yet...
                 return .scalar(self.current.edition + scalar)
             }
+
         case    .vector(let feature, self: _, text: _):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
@@ -192,15 +183,14 @@ extension DynamicResolver
                 return .scalar(feature)
             }
 
-        case    .codelink(let expression, let location),
-                .doclink(let expression, let location):
-            switch self.resolve(expression, at: location)
+        case    .unresolved(let unresolved):
+            switch self.resolve(unresolved)
             {
             case  nil:
-                return .text(expression)
+                return .text(unresolved.link)
 
             case (let codelink, nil)?:
-                return .text("\(codelink.path)")
+                return .text(codelink.path.visible.joined(separator: "."))
 
             case (_, .scalar(let scalar)?)?:
                 return .scalar(scalar)
@@ -214,7 +204,7 @@ extension DynamicResolver
     }
 
     private
-    func resolve(_ expression:String, at location:SourceLocation<Int32>?) ->
+    func resolve(_ unresolved:SymbolGraph.Outline.Unresolved) ->
     (
         codelink:Codelink,
         resolved:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
@@ -222,25 +212,46 @@ extension DynamicResolver
     {
         var context:Diagnostic.Context<Unidoc.Scalar>
         {
-            .init(location: location?.map { self.current.edition + $0 })
+            .init(location: unresolved.location?.map { self.current.edition + $0 })
         }
 
         let codelink:Codelink?
 
-        if  let doclink:Doclink = .init(expression)
+        switch unresolved.type
         {
+        case .doc:
+            guard
+            let doclink:Doclink = .init(unresolved.link)
+            else
+            {
+                codelink = nil
+                break
+            }
+
             codelink = .init(doclink.path.joined(separator: "/"))
+
+        case .ucf:
+            codelink = .init(unresolved.link)
+
+        case .unidocV3:
+            guard
+            let unidocV3:CodelinkV3 = .init(unresolved.link)
+            else
+            {
+                codelink = nil
+                break
+            }
+
+            codelink = .init(v3: unidocV3)
         }
-        else
-        {
-            codelink = .init(expression)
-        }
-        guard let codelink:Codelink
+
+        guard
+        let codelink:Codelink
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
             self.diagnostics.errors.append(InvalidAutolinkError<Unidoc.Scalar>.init(
-                expression: expression,
+                expression: unresolved.link,
                 context: context))
             return nil
         }
