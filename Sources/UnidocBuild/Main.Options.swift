@@ -19,8 +19,8 @@ extension Main
         {
             self.package = package
             self.cookie = ""
-            self.remote = "swiftinit.org"
-            self.port = 443
+            self.remote = "unidoc-local"
+            self.port = 8443
 
             self.pretty = false
             self.build = true
@@ -79,6 +79,10 @@ extension Main.Options
                 }
 
                 options.port = port
+
+            case "--swiftinit", "-S":
+                options.remote = "swiftinit.org"
+                options.port = 443
 
             case "--pretty", "-P":
                 options.pretty = true
