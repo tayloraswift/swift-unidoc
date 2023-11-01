@@ -65,36 +65,42 @@ extension CodelinkResolver.Table
 }
 extension CodelinkResolver.Table
 {
-    func query(_ path:[String],
-        filter:Codelink.Filter?,
-        hash:FNV24?) -> CodelinkResolver<Scalar>.Overloads?
+    func query(
+        qualified path:[String],
+        suffix:Codelink.Suffix?) -> CodelinkResolver<Scalar>.Overloads
     {
-        let overloads:CodelinkResolver<Scalar>.Overloads = self.query(path,
-            filter: filter,
-            hash: hash)
-        if  case .some(let overloads) = overloads, overloads.isEmpty
+        guard
+        let overloads:CodelinkResolver<Scalar>.Overloads = self.entries[.join(path)]
+        else
         {
-            return nil
+            return .some([])
         }
+
+        guard
+        case .some(let overloads) = overloads,
+        let suffix:Codelink.Suffix
         else
         {
             return overloads
         }
-    }
-    func query(_ path:[String],
-        filter:Codelink.Filter?,
-        hash:FNV24?) -> CodelinkResolver<Scalar>.Overloads
-    {
-        switch (self.entries[.join(path), default: .some([])], hash, filter)
+
+        switch suffix
         {
-        case (.some(let overloads), let hash?,  _):
+        case .legacy(let suffix):
+            guard
+            let hash:FNV24 = suffix.hash
+            else
+            {
+                return .init(filtering: overloads) { suffix.filter ~= $0.phylum }
+            }
+
             return .init(filtering: overloads) { hash == $0.hash }
 
-        case (.some(let overloads), nil,        let filter?):
-            return .init(filtering: overloads) { filter ~= $0.phylum }
+        case .hash(let hash):
+            return .init(filtering: overloads) { hash == $0.hash }
 
-        case (      let overloads,  _,          _):
-            return overloads
+        case .filter(let filter):
+            return .init(filtering: overloads) { filter ~= $0.phylum }
         }
     }
 }

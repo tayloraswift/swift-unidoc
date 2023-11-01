@@ -7,8 +7,9 @@
 .vscode
 
 Assets/secrets/
-TestCertificates/*.pem
-TestDeployment/data/
+
+Local/Deployment/data/
+Local/Server/Certificates/*.pem
 
 node_modules/
 

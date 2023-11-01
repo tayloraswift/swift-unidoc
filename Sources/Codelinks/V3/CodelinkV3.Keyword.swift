@@ -1,4 +1,4 @@
-extension Codelink
+extension CodelinkV3
 {
     enum Keyword:String
     {
@@ -17,7 +17,7 @@ extension Codelink
         case `var`
     }
 }
-extension Codelink.Keyword
+extension CodelinkV3.Keyword
 {
     init?(_ string:Substring)
     {
@@ -40,7 +40,7 @@ extension Codelink.Keyword
         }
     }
 }
-extension Codelink.Keyword
+extension CodelinkV3.Keyword
 {
     var encased:String
     {

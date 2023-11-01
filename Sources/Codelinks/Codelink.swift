@@ -1,25 +1,21 @@
 import FNV1
-import LexicalPaths
 
 @frozen public
 struct Codelink:Equatable, Hashable, Sendable
 {
     public
-    let filter:Filter?
+    let base:Base
     public
-    let scope:Scope?
+    var path:Path
     public
-    let path:Path
-    public
-    let hash:FNV24?
+    var suffix:Suffix?
 
     @inlinable public
-    init(filter:Filter? = nil, scope:Scope? = nil, path:Path, hash:FNV24? = nil)
+    init(base:Base, path:Path = .init(), suffix:Suffix? = nil)
     {
-        self.filter = filter
-        self.scope = scope
+        self.base = base
         self.path = path
-        self.hash = hash
+        self.suffix = suffix
     }
 }
 extension Codelink:CustomStringConvertible
@@ -27,33 +23,45 @@ extension Codelink:CustomStringConvertible
     public
     var description:String
     {
-        var words:[String] = []
+        var string:String = ""
 
-        switch self.filter?.keywords
+        for (i, component):(Int, String) in zip(
+            self.path.components.indices,
+            self.path.components)
+        {
+            if  self.path.components.startIndex != i
+            {
+                string += self.path.fold == i ? "/" : "."
+            }
+            else if case .qualified = self.base
+            {
+                string += "/"
+            }
+
+            string += component
+        }
+
+        switch self.suffix
         {
         case nil:
-            break
+            return string
 
-        case (let first, nil)?:
-            words = [first.rawValue]
+        case .filter(let filter)?:
+            return "\(string) [\(filter)]"
 
-        case (let first, let second?)?:
-            words = [first.rawValue, second.rawValue]
+        case .hash(let hash)?:
+            return "\(string) [\(hash)]"
+
+        case .legacy(let legacy):
+            if  let hash:FNV24 = legacy.hash
+            {
+                return "\(string)-swift.\(legacy.filter.rawValue)-\(hash)"
+            }
+            else
+            {
+                return "\(string)-swift.\(legacy.filter.rawValue)"
+            }
         }
-
-        if  let scope:Scope = self.scope
-        {
-            words.append("\(scope)")
-        }
-
-        words.append("\(self.path)")
-
-        if let hash:FNV24 = self.hash
-        {
-            words.append("[\(hash)]")
-        }
-
-        return words.joined(separator: " ")
     }
 }
 extension Codelink:LosslessStringConvertible
@@ -61,143 +69,233 @@ extension Codelink:LosslessStringConvertible
     public
     init?(_ string:String)
     {
-        var string:Substring = string[...]
+        self.init(string[...])
+    }
 
-        var format:Path.Format = .unidoc
-        var suffix:Suffix? = .hash(trimming: &string)
-
-        var words:ArraySlice<Substring> = string.split(separator: " ")[...]
-
+    public
+    init?(_ string:Substring)
+    {
         guard
-        let path:Substring = words.popLast(),
-        let path:Path = .init(path, format: &format, suffix: &suffix)
+        var i:String.Index = string.indices.first
         else
         {
             return nil
         }
 
-        switch format
+        if  string[i] == "/"
         {
-        case .unidoc:
-            if  case .filter? = suffix
+            self.init(base: .qualified)
+            i = string.index(after: i)
+        }
+        else
+        {
+            self.init(base: .relative)
+        }
+
+        while let j:String.Index = self.path.extend(parsing: string.unicodeScalars[i...])
+        {
+            guard j < string.endIndex
+            else
             {
-                //  Replacing the suffix value should have also set the format to `legacy`.
-                fatalError("unreachable")
+                return
             }
 
-            //  Need to parse swift keywords first, since unencased identifiers
-            //  like 'static' are still parsable as path components.
-            var keywords:(first:Keyword, second:Keyword?)? = nil
+            i = string.index(after: j)
 
-            while let word:Substring = words.popFirst()
+            switch string[j]
             {
-                switch (keywords, word)
-                {
-                case ((let first, nil)?, "func"):
-                    keywords = (first, .func)
-                    continue
-                case ((let first, nil)?, "var"):
-                    keywords = (first, .var)
-                    continue
+            case "/":
+                self.path.fold = self.path.components.endIndex
+                continue
 
-                case (nil, let first):
-                    guard
-                    let first:Keyword = .init(first)
+            case ".":
+                continue
+
+            case " ":
+                guard
+                let bracket:String.Index = string[i...].firstIndex(of: "[")
+                else
+                {
+                    return nil
+                }
+
+                let i:String.Index = string.index(after: bracket)
+
+                guard
+                let bracket:String.Index = string[i...].firstIndex(of: "]")
+                else
+                {
+                    return nil
+                }
+
+                if  let filter:Filter = .init(string[i ..< bracket])
+                {
+                    self.suffix = .filter(filter)
+                    return
+                }
+                else if
+                    let hash:FNV24 = .init(string[i ..< bracket])
+                {
+                    self.suffix = .hash(hash)
+                    return
+                }
+                else
+                {
+                    return nil
+                }
+
+            case "-":
+                //  Parse a legacy DocC disambiguation suffix.
+                var filter:Suffix.Legacy.Filter? = nil
+                var hash:FNV24? = nil
+
+                while i < string.endIndex
+                {
+                    if  let k:String.Index = string[i...].firstIndex(of: ".")
+                    {
+                        guard string[i ..< k] == "swift"
+                        else
+                        {
+                            return nil
+                        }
+
+                        let k:String.Index = string.index(after: k)
+                        if  let hyphen:String.Index = string[k...].firstIndex(of: "-")
+                        {
+                            filter = .init(rawValue: string[k ..< hyphen])
+                            i = string.index(after: hyphen)
+                        }
+                        else
+                        {
+                            filter = .init(rawValue: string[k...])
+                            break
+                        }
+
+                        if  case nil = filter
+                        {
+                            return nil
+                        }
+                    }
                     else
                     {
-                        fallthrough
+                        if  let hyphen:String.Index = string[i...].firstIndex(of: "-")
+                        {
+                            hash = .init(string[i ..< hyphen])
+                            i = string.index(after: hyphen)
+                        }
+                        else
+                        {
+                            hash = .init(string[i...])
+                            break
+                        }
+
+                        if  case nil = hash
+                        {
+                            return nil
+                        }
                     }
+                }
 
-                    keywords = (first, nil)
-                    continue
-
-                case _:
-                    guard words.isEmpty,
-                    let scope:Scope = .init(word)
+                if  let filter:Suffix.Legacy.Filter
+                {
+                    if  case nil = hash,
+                        let filter:Filter = .init(legacy: filter)
+                    {
+                        self.suffix = .filter(filter)
+                        return
+                    }
+                    else
+                    {
+                        self.suffix = .legacy(.init(filter: filter, hash: hash))
+                        return
+                    }
+                }
+                else
+                {
+                    if  let hash:FNV24
+                    {
+                        self.suffix = .hash(hash)
+                        return
+                    }
                     else
                     {
                         return nil
                     }
-
-                    self.init(keywords: keywords, scope: scope, path: path, suffix: suffix)
-                    return
                 }
-            }
 
-            self.init(keywords: keywords, scope: nil, path: path, suffix: suffix)
-
-        case .legacy:
-            //  legacy DocC links cannot use unidoc features
-            guard words.isEmpty
-            else
-            {
+            case _:
                 return nil
             }
-
-            self.init(legacy: path, suffix: suffix)
         }
+
+        return nil
     }
 }
 extension Codelink
 {
-    private
-    init?(legacy path:consuming Path, suffix:Suffix?)
+    public
+    init(v3 link:CodelinkV3)
     {
-        let prefix:[String] = path.components.prefix ; path.components.prefix = []
-        let scope:Scope? = prefix.isEmpty ? nil : .init(prefix)
-
-        switch suffix
+        var path:Path
+        if  let scope:CodelinkV3.Scope = link.scope
         {
-        case nil:
-            self.init(filter: nil, scope: scope, path: path, hash: nil)
+            path = .init(components: scope.components.prefix)
+            path.components.append(scope.components.last.unencased)
 
-        case .hash(let hash)?:
-            self.init(filter: nil, scope: scope, path: path, hash: hash)
+            path.fold = path.components.endIndex
 
-        case .filter(let filter)?:
-            self.init(filter: filter, scope: scope, path: path, hash: nil)
+            path.components += link.path.components.prefix
+            path.components.append(link.path.components.last.unencased)
         }
-    }
-
-    private
-    init?(keywords:(first:Keyword, second:Keyword?)?,
-        scope:Scope?,
-        path:Path,
-        suffix:Suffix?)
-    {
-        let filter:Filter?
-
-        switch (keywords, path.components.last)
+        else
         {
-        case ((.actor, nil)?,           .nominal(_, nil)):  filter = .actor
-        case ((.associatedtype, nil)?,  .nominal(_, nil)):  filter = .associatedtype
-        case ((.case, nil)?,            .nominal):          filter = .case
-        case ((.class, nil)?,           .nominal(_, nil)):  filter = .class
-        case ((.class, nil)?,           .subscript):        filter = .subscript(.class)
-        case ((.class, .func)?,         .nominal):          filter = .func(.class)
-        case ((.class, .var)?,          .nominal(_, nil)):  filter = .var(.class)
-        case ((.enum, nil)?,            .nominal(_, nil)):  filter = .enum
-        case ((.func, nil)?,            .nominal):          filter = .func(.default)
-        case ((.import, nil)?,          .nominal(_, nil)):  filter = .module
-        case ((.macro, nil)?,           .nominal(_, nil)):  filter = .macro
-        case ((.protocol, nil)?,        .nominal(_, nil)):  filter = .protocol
-        case ((.static, nil)?,          .subscript):        filter = .subscript(.static)
-        case ((.static, .func)?,        .nominal):          filter = .func(.static)
-        case ((.static, .var)?,         .nominal(_, nil)):  filter = .var(.static)
-        case ((.struct, nil)?,          .nominal(_, nil)):  filter = .struct
-        case ((.typealias, nil)?,       .nominal(_, nil)):  filter = .typealias
-        case ((.var, nil)?,             .nominal(_, nil)):  filter = .var(.default)
-
-        case ((_, _)?, _):
-            return nil
-
-        case (nil, .subscript):
-            filter = .subscript(.instance)
-
-        case (nil, _):
-            filter = nil
+            path = .init(components: link.path.components.prefix)
+            path.components.append(link.path.components.last.unencased)
         }
 
-        self.init(filter: filter, scope: scope, path: path, hash: suffix?.hash)
+        if  let hash:FNV24 = link.hash
+        {
+            self.init(base: .qualified, path: path, suffix: .hash(hash))
+        }
+        else if
+            let filter:CodelinkV3.Filter = link.filter
+        {
+            let suffix:Suffix? =
+            switch filter
+            {
+            case .actor:                .filter(.actor)
+            case .associatedtype:       .filter(.associatedtype)
+            case .case:                 .filter(.case)
+            case .class:                .filter(.class)
+            case .enum:                 .filter(.enum)
+            case .func(.default):       .filter(.func)
+            case .func(.class):         .filter(.class_func)
+            case .func(.global):        .legacy(.init(filter: .func))
+            case .func(.instance):      .legacy(.init(filter: .method))
+            case .func(.static):        .filter(.static_func)
+            case .func(.type):          .legacy(.init(filter: .type_method))
+            case .macro:                .filter(.macro)
+            case .module:               nil
+            case .protocol:             .filter(.protocol)
+            case .struct:               .filter(.struct)
+            case .subscript(.class):    .filter(.class_subscript)
+            case .subscript(.instance): .filter(.subscript)
+            case .subscript(.static):   .filter(.static_subscript)
+            case .subscript(.type):     .legacy(.init(filter: .type_subscript))
+            case .typealias:            .filter(.typealias)
+            case .var(.default):        .filter(.var)
+            case .var(.class):          .filter(.class_var)
+            case .var(.global):         .legacy(.init(filter: .var))
+            case .var(.instance):       .legacy(.init(filter: .property))
+            case .var(.static):         .filter(.static_var)
+            case .var(.type):           .legacy(.init(filter: .type_property))
+            }
+
+            self.init(base: .qualified, path: path, suffix: suffix)
+        }
+        else
+        {
+            self.init(base: .qualified, path: path)
+        }
     }
 }

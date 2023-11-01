@@ -22,7 +22,7 @@ jobs:
 
             -   name: set up mock deployments
                 run: |
-                    docker compose -f TestDeployment/docker-compose.yml up -d
+                    docker compose -f Local/Deployment/docker-compose.yml up -d
 
             -   name: initialize replica set
                 run: |

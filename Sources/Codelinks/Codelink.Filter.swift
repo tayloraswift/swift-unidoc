@@ -1,107 +1,75 @@
 extension Codelink
 {
     @frozen public
-    enum Filter:Equatable, Hashable, Sendable
+    enum Filter:Substring, Equatable, Hashable, Sendable
     {
-        case  actor
-        case `associatedtype`
-        case `case`
-        case `class`
-        case `enum`
-        case `func`(Objectivity)
-        case  macro
-        case  module
-        case `protocol`
-        case `struct`
-        case `subscript`(Subscript)
-        case `typealias`
-        case `var`(Objectivity)
+        case  actor             = "actor"
+        case `associatedtype`   = "associatedtype"
+        case `enum`             = "enum"
+        case `case`             = "case"
+        case `class`            = "class"
+        case  class_func        = "class func"
+        case  class_subscript   = "class subscript"
+        case  class_var         = "class var"
+        case `deinit`           = "deinit"
+        case `func`             = "func"
+        case `init`             = "init"
+        case  macro             = "macro"
+        case `protocol`         = "protocol"
+        case  static_func       = "static func"
+        case  static_subscript  = "static subscript"
+        case  static_var        = "static var"
+        case `struct`           = "struct"
+        case `subscript`        = "subscript"
+        case `typealias`        = "typealias"
+        case `var`              = "var"
     }
 }
 extension Codelink.Filter
 {
-    public
-    init?(suffix:Substring)
+    @inlinable public
+    init?(legacy:Codelink.Suffix.Legacy.Filter)
     {
-        //  Very similar to the `Unidoc.Phylum` type, except no extensions.
-        switch suffix
+        switch legacy
         {
-        case "swift.associatedtype":    self = .associatedtype
-        case "swift.enum":              self = .enum
-        case "swift.enum.case":         self = .case
-        case "swift.class":             self = .class
-        case "swift.func":              self = .func(.global)
-        case "swift.func.op":           self = .func(.default)
-        case "swift.var":               self = .var(.global)
-        case "swift.deinit":            return nil
-        case "swift.init":              return nil
-        case "swift.method":            self = .func(.instance)
-        case "swift.property":          self = .var(.instance)
-        case "swift.subscript":         self = .subscript(.instance)
-        case "swift.macro":             self = .macro
-        case "swift.protocol":          self = .protocol
-        case "swift.struct":            self = .struct
-        case "swift.typealias":         self = .typealias
-        case "swift.type.method":       self = .func(.type)
-        case "swift.type.property":     self = .var(.type)
-        case "swift.type.subscript":    self = .subscript(.type)
-        default:                        return nil
+        case .associatedtype:   self = .associatedtype
+        case .enum:             self = .enum
+        case .enum_case:        self = .case
+        case .class:            return nil
+        case .func:             return nil
+        case .func_op:          return nil
+        case .var:              return nil
+        case .deinit:           self = .deinit
+        case .`init`:           self = .`init`
+        case .method:           return nil
+        case .property:         return nil
+        case .subscript:        self = .subscript
+        case .macro:            self = .macro
+        case .protocol:         self = .protocol
+        case .struct:           self = .struct
+        case .typealias:        self = .typealias
+        case .type_method:      return nil
+        case .type_property:    return nil
+        case .type_subscript:   return nil
         }
     }
 }
-extension Codelink.Filter
+extension Codelink.Filter:CustomStringConvertible
 {
-    var suffix:String?
+    @inlinable public
+    var description:String { .init(self.rawValue) }
+}
+extension Codelink.Filter:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:String)
     {
-        switch self
-        {
-        case .actor:                return "swift.actor"
-        case .associatedtype:       return "swift.associatedtype"
-        case .case:                 return "swift.enum.case"
-        case .class:                return "swift.class"
-        case .enum:                 return "swift.enum"
-        case .func(.default):       return "swift.func.op"
-        case .func(.global):        return "swift.func"
-        case .func(.instance):      return "swift.method"
-        case .func(.type):          return "swift.type.method"
-        case .func(_):              return nil
-        case .macro:                return "swift.macro"
-        case .module:               return nil
-        case .protocol:             return "swift.protocol"
-        case .struct:               return "swift.struct"
-        case .subscript(.instance): return "swift.subscript"
-        case .subscript(.type):     return "swift.type.subscript"
-        case .subscript(_):         return nil
-        case .typealias:            return "swift.typealias"
-        case .var(.global):         return "swift.var"
-        case .var(.instance):       return "swift.property"
-        case .var(.type):           return "swift.type.property"
-        case .var(_):               return nil
-        }
+        self.init(rawValue: description[...])
     }
-    var keywords:(first:Codelink.Keyword, second:Codelink.Keyword?)?
+
+    @inlinable public
+    init?(_ description:Substring)
     {
-        switch self
-        {
-        case .actor:                return (.actor, nil)
-        case .associatedtype:       return (.associatedtype, nil)
-        case .case:                 return (.case, nil)
-        case .class:                return (.class, nil)
-        case .enum:                 return (.enum, nil)
-        case .func(.static):        return (.static, .func)
-        case .func(.class):         return (.class, .func)
-        case .func(_):              return (.func, nil)
-        case .macro:                return (.macro, nil)
-        case .module:               return (.import, nil)
-        case .protocol:             return (.protocol, nil)
-        case .struct:               return (.struct, nil)
-        case .subscript(.static):   return (.static, nil)
-        case .subscript(.class):    return (.class, nil)
-        case .subscript(_):         return nil
-        case .typealias:            return (.typealias, nil)
-        case .var(.static):         return (.static, .var)
-        case .var(.class):          return (.class, .var)
-        case .var(_):               return (.var, nil)
-        }
+        self.init(rawValue: description)
     }
 }

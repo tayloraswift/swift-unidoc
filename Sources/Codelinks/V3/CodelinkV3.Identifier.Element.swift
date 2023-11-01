@@ -1,4 +1,4 @@
-extension Codelink.Identifier
+extension CodelinkV3.Identifier
 {
     @frozen public
     struct Element:Equatable, Hashable, Sendable
@@ -13,27 +13,27 @@ extension Codelink.Identifier
         }
     }
 }
-extension Codelink.Identifier.Element
+extension CodelinkV3.Identifier.Element
 {
     @inlinable public
-    init(_ first:Codelink.Identifier.Head)
+    init(_ first:CodelinkV3.Identifier.Head)
     {
         self.codepoint = first.codepoint
     }
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)
     {
-        switch codepoint 
+        switch codepoint
         {
-        case    "0" ... "9", 
-                "\u{0300}" ... "\u{036F}", 
-                "\u{1DC0}" ... "\u{1DFF}", 
-                "\u{20D0}" ... "\u{20FF}", 
+        case    "0" ... "9",
+                "\u{0300}" ... "\u{036F}",
+                "\u{1DC0}" ... "\u{1DFF}",
+                "\u{20D0}" ... "\u{20FF}",
                 "\u{FE20}" ... "\u{FE2F}":
             self.init(codepoint: codepoint)
-        
+
         default:
-            if let first:Codelink.Identifier.Head = .init(codepoint)
+            if let first:CodelinkV3.Identifier.Head = .init(codepoint)
             {
                 self.init(first)
             }

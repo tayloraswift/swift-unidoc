@@ -1,43 +1,37 @@
-extension Codelink.Identifier
+extension Codelink.Path
 {
-    @frozen public
-    struct Head:Equatable, Hashable, Sendable
+    struct IdentifierHead
     {
-        public
-        let codepoint:Unicode.Scalar
-
-        @inlinable internal
-        init(codepoint:Unicode.Scalar)
+        private
+        init()
         {
-            self.codepoint = codepoint
         }
     }
 }
-extension Codelink.Identifier.Head
+extension Codelink.Path.IdentifierHead
 {
-    @inlinable public
     init?(_ codepoint:Unicode.Scalar)
     {
-        switch codepoint 
+        switch codepoint
         {
-        case    "a" ... "z", 
+        case    "a" ... "z",
                 "A" ... "Z",
-                "_", 
+                "_",
                 "\u{00A8}",
                 "\u{00AA}",
                 "\u{00AD}",
-                "\u{00AF}", 
+                "\u{00AF}",
                 "\u{00B2}" ... "\u{00B5}",
                 "\u{00B7}" ... "\u{00BA}",
                 "\u{00BC}" ... "\u{00BE}",
-                "\u{00C0}" ... "\u{00D6}", 
+                "\u{00C0}" ... "\u{00D6}",
                 "\u{00D8}" ... "\u{00F6}",
                 "\u{00F8}" ... "\u{00FF}",
                 "\u{0100}" ... "\u{02FF}",
                 "\u{0370}" ... "\u{167F}",
                 "\u{1681}" ... "\u{180D}",
-                "\u{180F}" ... "\u{1DBF}", 
-                "\u{1E00}" ... "\u{1FFF}", 
+                "\u{180F}" ... "\u{1DBF}",
+                "\u{1E00}" ... "\u{1FFF}",
                 "\u{200B}" ... "\u{200D}",
                 "\u{202A}" ... "\u{202E}",
                 "\u{203F}" ... "\u{2040}",
@@ -56,25 +50,25 @@ extension Codelink.Identifier.Head
                 "\u{F900}" ... "\u{FD3D}",
                 "\u{FD40}" ... "\u{FDCF}",
                 "\u{FDF0}" ... "\u{FE1F}",
-                "\u{FE30}" ... "\u{FE44}", 
-                "\u{FE47}" ... "\u{FFFD}", 
+                "\u{FE30}" ... "\u{FE44}",
+                "\u{FE47}" ... "\u{FFFD}",
                 "\u{10000}" ... "\u{1FFFD}",
                 "\u{20000}" ... "\u{2FFFD}",
                 "\u{30000}" ... "\u{3FFFD}",
-                "\u{40000}" ... "\u{4FFFD}", 
+                "\u{40000}" ... "\u{4FFFD}",
                 "\u{50000}" ... "\u{5FFFD}",
                 "\u{60000}" ... "\u{6FFFD}",
                 "\u{70000}" ... "\u{7FFFD}",
-                "\u{80000}" ... "\u{8FFFD}", 
+                "\u{80000}" ... "\u{8FFFD}",
                 "\u{90000}" ... "\u{9FFFD}",
                 "\u{A0000}" ... "\u{AFFFD}",
                 "\u{B0000}" ... "\u{BFFFD}",
-                "\u{C0000}" ... "\u{CFFFD}", 
+                "\u{C0000}" ... "\u{CFFFD}",
                 "\u{D0000}" ... "\u{DFFFD}",
                 "\u{E0000}" ... "\u{EFFFD}":
-            self.init(codepoint: codepoint)
+            self.init()
         default:
             return nil
-        }            
+        }
     }
 }

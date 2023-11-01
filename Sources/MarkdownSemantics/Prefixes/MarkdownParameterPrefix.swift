@@ -25,10 +25,11 @@ extension MarkdownParameterPrefix:MarkdownSemanticPrefix
             whereSeparator: \.isWhitespace)
 
         if  words.count == 2,
-            words[0].lowercased() == "parameter",
-            let identifier:Codelink.Identifier = .init(words[1])
+            words[0].lowercased() == "parameter"
         {
-            self.init(name: identifier.unencased)
+            //  Don’t attempt to validate the identifier for disallowed characters,
+            //  this is the wrong place for that.
+            self.init(name: String.init(words[1]))
         }
         else
         {

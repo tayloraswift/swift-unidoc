@@ -43,10 +43,9 @@ extension InvalidCodelinkError
         self.overloads.map
         {
             let fixit:Codelink = .init(
-                filter: self.codelink.filter,
-                scope: self.codelink.scope,
+                base: self.codelink.base,
                 path: self.codelink.path,
-                hash: $0.hash)
+                suffix: .hash($0.hash))
             switch $0.target
             {
             case    .scalar(let scalar),

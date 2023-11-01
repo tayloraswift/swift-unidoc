@@ -7,7 +7,7 @@ services:
         networks:
             - unidoc-test
         ports:
-            - 50000:27017
+            - 27017:27017
         restart: always
         volumes:
             # cannot put this in docker-entrypoint-initdb.d, it does not work

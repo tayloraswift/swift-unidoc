@@ -10,8 +10,7 @@ extension SymbolGraph
     {
         case scalar(Int32, text:String)
         case vector(Int32, self:Int32, text:String)
-        case codelink(String, SourceLocation<Int32>?)
-        case doclink(String, SourceLocation<Int32>?)
+        case unresolved(Unresolved)
     }
 }
 extension SymbolGraph.Outline
@@ -19,8 +18,10 @@ extension SymbolGraph.Outline
     public
     enum CodingKey:String
     {
-        case codelink = "C"
-        case doclink = "D"
+        case unresolved_doc = "D"
+        case unresolved_ucf = "U"
+        case unresolved_unidocV3 = "C"
+
         case location = "L"
         case scalar = "R"
         case `self` = "S"
@@ -34,14 +35,6 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
     {
         switch self
         {
-        case .codelink(let expression, let location):
-            bson[.codelink] = expression
-            bson[.location] = location
-
-        case .doclink(let expression, let location):
-            bson[.doclink] = expression
-            bson[.location] = location
-
         case .scalar(let scalar, text: let text):
             bson[.scalar] = scalar
             bson[.text] = text
@@ -50,6 +43,16 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
             bson[.scalar] = scalar
             bson[.self] = heir
             bson[.text] = text
+
+        case .unresolved(let self):
+            bson[.location] = self.location
+
+            switch self.type
+            {
+            case .doc:      bson[.unresolved_doc] = self.link
+            case .ucf:      bson[.unresolved_ucf] = self.link
+            case .unidocV3: bson[.unresolved_unidocV3] = self.link
+            }
         }
     }
 }
@@ -74,16 +77,29 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
             return
         }
 
-        let location:SourceLocation<Int32>? = try bson[.location]?.decode()
+        let type:Unresolved.LinkType
+        let link:String
 
-        if  let expression:String = try bson[.codelink]?.decode()
+        if  let text:String = try bson[.unresolved_doc]?.decode()
         {
-            self = .codelink(expression, location)
+            type = .doc
+            link = text
+        }
+        else if
+            let text:String = try bson[.unresolved_ucf]?.decode()
+        {
+            type = .ucf
+            link = text
         }
         else
         {
-            let expression:String = try bson[.doclink].decode()
-            self = .doclink(expression, location)
+            type = .unidocV3
+            link = try bson[.unresolved_unidocV3].decode()
         }
+
+        self = .unresolved(.init(
+            link: link,
+            type: type,
+            location: try bson[.location]?.decode()))
     }
 }

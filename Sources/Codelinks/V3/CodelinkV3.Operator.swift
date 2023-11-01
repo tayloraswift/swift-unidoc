@@ -1,4 +1,4 @@
-extension Codelink
+extension CodelinkV3
 {
     @frozen public
     struct Operator:Equatable, Hashable, Sendable
@@ -13,7 +13,7 @@ extension Codelink
         }
     }
 }
-extension Codelink.Operator
+extension CodelinkV3.Operator
 {
     mutating
     func append(_ next:Element)
@@ -21,7 +21,7 @@ extension Codelink.Operator
         self.characters.append(Character.init(next.codepoint))
     }
 }
-extension Codelink.Operator:Comparable
+extension CodelinkV3.Operator:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -29,7 +29,7 @@ extension Codelink.Operator:Comparable
         lhs.characters < rhs.characters
     }
 }
-extension Codelink.Operator:LosslessStringConvertible
+extension CodelinkV3.Operator:LosslessStringConvertible
 {
     @inlinable public
     var description:String
@@ -47,7 +47,7 @@ extension Codelink.Operator:LosslessStringConvertible
         self.init(description[...])
     }
 }
-extension Codelink.Operator
+extension CodelinkV3.Operator
 {
     public
     init?(_ description:Substring)

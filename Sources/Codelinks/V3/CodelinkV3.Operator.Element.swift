@@ -1,4 +1,4 @@
-extension Codelink.Operator
+extension CodelinkV3.Operator
 {
     @frozen public
     struct Element:Equatable, Hashable, Sendable
@@ -13,17 +13,17 @@ extension Codelink.Operator
         }
     }
 }
-extension Codelink.Operator.Element
+extension CodelinkV3.Operator.Element
 {
     @inlinable public
-    init(_ first:Codelink.Operator.Head)
+    init(_ first:CodelinkV3.Operator.Head)
     {
         self.codepoint = first.codepoint
     }
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)
     {
-        switch codepoint 
+        switch codepoint
         {
         case    "\u{0300}" ... "\u{036F}",
                 "\u{1DC0}" ... "\u{1DFF}",
@@ -32,9 +32,9 @@ extension Codelink.Operator.Element
                 "\u{FE20}" ... "\u{FE2F}",
                 "\u{E0100}" ... "\u{E01EF}":
             self.init(codepoint: codepoint)
-        
+
         default:
-            guard let first:Codelink.Operator.Head = .init(codepoint)
+            guard let first:CodelinkV3.Operator.Head = .init(codepoint)
             else
             {
                 return nil
