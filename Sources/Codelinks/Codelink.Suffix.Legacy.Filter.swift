@@ -1,4 +1,4 @@
-extension CodelinkV4.Suffix.Legacy
+extension Codelink.Suffix.Legacy
 {
     @frozen public
     enum Filter:Substring, Equatable, Hashable, Sendable

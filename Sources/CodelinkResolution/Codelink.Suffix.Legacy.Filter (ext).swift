@@ -1,7 +1,7 @@
 import Codelinks
 import Unidoc
 
-extension Codelink.Filter
+extension Codelink.Suffix.Legacy.Filter
 {
     static
     func ~= (self:Self, phylum:Unidoc.Decl?) -> Bool
@@ -15,28 +15,30 @@ extension Codelink.Filter
 
         switch  (phylum, self)
         {
-        case    (.actor,                .actor),
+        case    (.actor,                .class),
                 (.associatedtype,       .associatedtype),
-                (.case,                 .case),
+                (.case,                 .enum_case),
                 (.class,                .class),
                 (.deinitializer,        .deinit),
                 (.enum,                 .enum),
                 (.func(nil),            .func),
-                (.func(.instance),      .func),
-                (.func(.class?),        .class_func),
-                (.func(.static?),       .static_func),
+                (.func(nil),            .func_op),
+                (.func(.instance),      .method),
+                (.func(.class?),        .type_method),
+                (.func(.static?),       .type_method),
+                (.func(.static?),       .func_op),
                 (.initializer,          .`init`),
                 (.macro,                .macro),
                 (.protocol,             .protocol),
                 (.struct,               .struct),
                 (.subscript(.instance), .subscript),
-                (.subscript(.class),    .class_subscript),
-                (.subscript(.static),   .static_subscript),
+                (.subscript(.class),    .type_subscript),
+                (.subscript(.static),   .type_subscript),
                 (.typealias,            .typealias),
                 (.var(nil),             .var),
-                (.var(.instance?),      .var),
-                (.var(.class?),         .class_var),
-                (.var(.static?),        .static_var):
+                (.var(.instance?),      .property),
+                (.var(.class?),         .type_property),
+                (.var(.static?),        .type_property):
             return true
 
         default:

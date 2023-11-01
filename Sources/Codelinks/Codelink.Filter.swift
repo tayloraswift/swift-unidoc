@@ -1,4 +1,4 @@
-extension CodelinkV4
+extension Codelink
 {
     @frozen public
     enum Filter:Substring, Equatable, Hashable, Sendable
@@ -25,10 +25,10 @@ extension CodelinkV4
         case `var`              = "var"
     }
 }
-extension CodelinkV4.Filter
+extension Codelink.Filter
 {
     @inlinable public
-    init?(legacy:CodelinkV4.Suffix.Legacy.Filter)
+    init?(legacy:Codelink.Suffix.Legacy.Filter)
     {
         switch legacy
         {
@@ -54,12 +54,12 @@ extension CodelinkV4.Filter
         }
     }
 }
-extension CodelinkV4.Filter:CustomStringConvertible
+extension Codelink.Filter:CustomStringConvertible
 {
     @inlinable public
     var description:String { .init(self.rawValue) }
 }
-extension CodelinkV4.Filter:LosslessStringConvertible
+extension Codelink.Filter:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)

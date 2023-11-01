@@ -1,4 +1,4 @@
-extension CodelinkV4
+extension Codelink
 {
     @frozen public
     enum Base:Equatable, Hashable, Sendable

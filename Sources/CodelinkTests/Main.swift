@@ -11,7 +11,7 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Codelink" / "Path"
         {
             if  let tests:TestGroup = tests / "DotDot",
-                let link:CodelinkV4 = tests.roundtrip("Unicode.Scalar.value")
+                let link:Codelink = tests.roundtrip("Unicode.Scalar.value")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
@@ -19,7 +19,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "SlashDot",
-                let link:CodelinkV4 = tests.roundtrip("Unicode/Scalar.value")
+                let link:Codelink = tests.roundtrip("Unicode/Scalar.value")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
@@ -27,7 +27,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "DotSlash",
-                let link:CodelinkV4 = tests.roundtrip("Unicode.Scalar/value")
+                let link:Codelink = tests.roundtrip("Unicode.Scalar/value")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
@@ -35,7 +35,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "SlashSlash",
-                let link:CodelinkV4 = tests.roundtrip("Unicode/Scalar/value")
+                let link:Codelink = tests.roundtrip("Unicode/Scalar/value")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
@@ -44,7 +44,7 @@ enum Main:SyncTests
             }
 
             if  let tests:TestGroup = tests / "Real" / "1",
-                let link:CodelinkV4 = tests.roundtrip("Real...(_:_:)")
+                let link:Codelink = tests.roundtrip("Real...(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
@@ -52,7 +52,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "2",
-                let link:CodelinkV4 = tests.roundtrip("Real/..(_:_:)")
+                let link:Codelink = tests.roundtrip("Real/..(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
@@ -60,7 +60,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "3",
-                let link:CodelinkV4 = tests.roundtrip("Real....(_:_:)")
+                let link:Codelink = tests.roundtrip("Real....(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
@@ -68,7 +68,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "4",
-                let link:CodelinkV4 = tests.roundtrip("Real/...(_:_:)")
+                let link:Codelink = tests.roundtrip("Real/...(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
@@ -76,7 +76,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "5",
-                let link:CodelinkV4 = tests.roundtrip("Real./(_:_:)")
+                let link:Codelink = tests.roundtrip("Real./(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
@@ -84,7 +84,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "6",
-                let link:CodelinkV4 = tests.roundtrip("Real//(_:_:)")
+                let link:Codelink = tests.roundtrip("Real//(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
@@ -92,7 +92,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "7",
-                let link:CodelinkV4 = tests.roundtrip("Real../.(_:_:)")
+                let link:Codelink = tests.roundtrip("Real../.(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
@@ -100,7 +100,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "8",
-                let link:CodelinkV4 = tests.roundtrip("Real/./.(_:_:)")
+                let link:Codelink = tests.roundtrip("Real/./.(_:_:)")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
@@ -108,7 +108,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "EmptyTrailingParentheses",
-                let link:CodelinkV4 = tests.roundtrip("Real.init()")
+                let link:Codelink = tests.roundtrip("Real.init()")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "init"])
@@ -119,14 +119,14 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Codelink" / "Disambiguator"
         {
             if  let tests:TestGroup = tests / "Fake" / "Enum",
-                let link:CodelinkV4 = tests.roundtrip("Fake [enum]")
+                let link:Codelink = tests.roundtrip("Fake [enum]")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Fake"])
                 tests.expect(link.suffix ==? .filter(.enum))
             }
             if  let tests:TestGroup = tests / "Fake" / "UncannyHash",
-                let link:CodelinkV4 = tests.roundtrip("Fake [ENUM]")
+                let link:Codelink = tests.roundtrip("Fake [ENUM]")
             {
                 let hash:FNV24 = .init("ENUM", radix: 36)!
 
@@ -135,7 +135,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Fake" / "ClassVar",
-                let link:CodelinkV4 = tests.roundtrip("Fake.max [class var]")
+                let link:Codelink = tests.roundtrip("Fake.max [class var]")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Fake", "max"])
@@ -145,7 +145,7 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Codelink" / "DocC"
         {
             if  let tests:TestGroup = tests / "Slashes",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/Color")
+                let link:Codelink = tests.roundtrip("Sloth/Color")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
@@ -153,7 +153,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Filter",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.enum")
+                let link:Codelink = tests.roundtrip("Sloth/Color-swift.enum")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
@@ -161,7 +161,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .filter(.enum))
             }
             if  let tests:TestGroup = tests / "FilterLegacy",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.class")
+                let link:Codelink = tests.roundtrip("Sloth/Color-swift.class")
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
@@ -169,7 +169,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .legacy(.init(filter: .class)))
             }
             if  let tests:TestGroup = tests / "FilterAndHash",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/Color-swift.struct-4ko57")
+                let link:Codelink = tests.roundtrip("Sloth/Color-swift.struct-4ko57")
             {
                 let hash:FNV24 = .init("4ko57", radix: 36)!
 
@@ -179,7 +179,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .legacy(.init(filter: .struct, hash: hash)))
             }
             if  let tests:TestGroup = tests / "Hash",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/update(_:)-4ko57")
+                let link:Codelink = tests.roundtrip("Sloth/update(_:)-4ko57")
             {
                 let hash:FNV24 = .init("4ko57", radix: 36)!
 
@@ -189,7 +189,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Hash" / "Minus",
-                let link:CodelinkV4 = tests.roundtrip("Sloth/-(_:)-4ko57")
+                let link:Codelink = tests.roundtrip("Sloth/-(_:)-4ko57")
             {
                 let hash:FNV24 = .init("4ko57", radix: 36)!
 
@@ -199,7 +199,7 @@ enum Main:SyncTests
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Hash" / "Slinging" / "Slasher",
-                let link:CodelinkV4 = tests.roundtrip("Sloth//(_:)-4ko57")
+                let link:Codelink = tests.roundtrip("Sloth//(_:)-4ko57")
             {
                 let hash:FNV24 = .init("4ko57", radix: 36)!
 
@@ -212,7 +212,7 @@ enum Main:SyncTests
         if  let tests:TestGroup = tests / "Codelink" / "Namespacing"
         {
             if  let tests:TestGroup = tests / "Isolated",
-                let link:CodelinkV4 = tests.roundtrip("/Swift")
+                let link:Codelink = tests.roundtrip("/Swift")
             {
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift"])
@@ -220,7 +220,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Hidden",
-                let link:CodelinkV4 = tests.roundtrip("/Swift/Int")
+                let link:Codelink = tests.roundtrip("/Swift/Int")
             {
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])
@@ -228,7 +228,7 @@ enum Main:SyncTests
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Visible",
-                let link:CodelinkV4 = tests.roundtrip("/Swift.Int")
+                let link:Codelink = tests.roundtrip("/Swift.Int")
             {
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])

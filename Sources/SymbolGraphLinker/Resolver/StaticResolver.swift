@@ -45,7 +45,7 @@ extension StaticResolver
         switch self.codelinks.resolve(codelink)
         {
         case .one(let overload):
-            let text:String = codelink.path.components.joined(separator: " ")
+            let text:String = codelink.path.visible.joined(separator: " ")
             switch overload.target
             {
             case .scalar(let address):

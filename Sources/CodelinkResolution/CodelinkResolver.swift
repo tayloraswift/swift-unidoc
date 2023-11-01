@@ -25,38 +25,43 @@ extension CodelinkResolver
     public
     func resolve(_ link:Codelink) -> Overloads
     {
-        for index:Int in (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
+        switch link.base
         {
-            let prefix:[String] = ["\(self.scope.namespace)"] + self.scope.path[..<index]
-            if  let overloads:Overloads = self.table.query(link.scope.map
-                    {
-                            prefix + $0.components + link.path.components
-                    } ??    prefix                 + link.path.components,
-                    filter: link.filter,
-                    hash: link.hash)
+        case .relative:
+            for index:Int in
+                (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
             {
-                return overloads
+                let overloads:Overloads = self.table.query(
+                    qualified: ["\(self.scope.namespace)"]
+                        + self.scope.path[..<index]
+                        + link.path.components,
+                    suffix: link.suffix)
+
+                guard overloads.isEmpty
+                else
+                {
+                    return overloads
+                }
             }
-        }
-        for namespace:ModuleIdentifier in self.scope.imports where
-            namespace != self.scope.namespace
-        {
-            if  let overloads:Overloads = self.table.query(link.scope.map
-                    {
-                            ["\(namespace)"] + $0.components + link.path.components
-                    } ??    ["\(namespace)"]                 + link.path.components,
-                    filter: link.filter,
-                    hash: link.hash)
+            for namespace:ModuleIdentifier in self.scope.imports where
+                namespace != self.scope.namespace
             {
-                return overloads
+                let overloads:Overloads = self.table.query(
+                    qualified: ["\(namespace)"] + link.path.components,
+                    suffix: link.suffix)
+
+                guard overloads.isEmpty
+                else
+                {
+                    return overloads
+                }
             }
+
+            fallthrough
+
+        case .qualified:
+            return self.table.query(qualified: link.path.components, suffix: link.suffix)
         }
 
-        return self.table.query(link.scope.map
-            {
-                [String].init($0.components) + link.path.components
-            } ??                 [String].init(link.path.components),
-            filter: link.filter,
-            hash: link.hash)
     }
 }
