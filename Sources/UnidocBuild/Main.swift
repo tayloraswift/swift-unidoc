@@ -23,7 +23,9 @@ enum Main
 
         var configuration:TLSConfiguration = .makeClientConfiguration()
             configuration.applicationProtocols = ["h2"]
-        if  options.remote == "localhost"
+
+        //  If we are not using the default port, we are probably running locally.
+        if  options.port != 443
         {
             configuration.certificateVerification = .none
         }
