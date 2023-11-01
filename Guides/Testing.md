@@ -7,10 +7,10 @@ To test the Unidoc server, you need to set up and launch a MongoDB test deployme
 To bring up the mongod instance (if it is not already online), run the following, from outside whatever dev container you are in:
 
 ```bash
-$ docker compose -f TestDeployment/docker-compose.yml up -d
+$ docker compose -f Local/Deployment/docker-compose.yml up -d
 ```
 
-The mongod instance will create a `data` directory inside the `TestDeployment` directory. The `data` directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its `data` directory.
+The mongod instance will create a `data` directory inside the `Local/Deployment` directory. The `data` directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its `data` directory.
 
 Initialize the replica set with:
 
