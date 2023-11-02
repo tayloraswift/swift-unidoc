@@ -9,14 +9,14 @@ extension RecentActivityQuery
     struct Output:Sendable
     {
         public
-        let repo:[UnidocDatabase.RepoActivity]
+        let repo:[UnidocDatabase.RepoFeed.Activity]
         public
-        let docs:[UnidocDatabase.DocsActivity<Volume.Meta>]
+        let docs:[UnidocDatabase.DocsFeed.Activity<Volume.Meta>]
 
         @inlinable internal
         init(
-            repo:[UnidocDatabase.RepoActivity],
-            docs:[UnidocDatabase.DocsActivity<Volume.Meta>])
+            repo:[UnidocDatabase.RepoFeed.Activity],
+            docs:[UnidocDatabase.DocsFeed.Activity<Volume.Meta>])
         {
             self.repo = repo
             self.docs = docs
