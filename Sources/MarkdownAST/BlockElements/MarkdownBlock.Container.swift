@@ -15,7 +15,7 @@ extension MarkdownBlock
             self.elements = elements
         }
 
-        /// Recursively calls ``MarkdownElement outline(by:)`` for each element
+        /// Recursively calls ``MarkdownElement/outline(by:)`` for each element
         /// in this container.
         public final override
         func outline(by register:(MarkdownInline.Autolink) throws -> Int?) rethrows

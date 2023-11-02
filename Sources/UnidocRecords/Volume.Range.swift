@@ -18,11 +18,11 @@ extension Volume
 }
 extension Volume.Range
 {
-    /// Matches the ``UnidocPlane article`` plane only.
+    /// Matches the ``UnidocPlane/article`` plane only.
     @inlinable public static
     var articles:Self { .init(min: .planes_article, max: .planes_file) }
 
-    /// Matches the ``UnidocPlane file`` plane only.
+    /// Matches the ``UnidocPlane/file`` plane only.
     @inlinable public static
     var files:Self { .init(min: .planes_file, max: .planes_extension) }
 }
