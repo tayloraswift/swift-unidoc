@@ -22,7 +22,7 @@ Although you *can* have a separate database for each project, it is usually easi
 
 ### Not a package plugin
 
-DocC is a package plugin, which means you “install” it by adding it as a dependency to your `Package.swift` and invoke it through SPM. Unidoc is a toolchain and you invoke it directly on an SPM project, like `swift build`. Unlike DocC (and other hosting providers like the Swift Package Index), Unidoc has no project footprint.
+DocC is a package plugin, which means you “install” it by adding it as a dependency to your `Package.swift` and invoke it through SPM. Unidoc is a toolchain and you invoke it directly on an SPM project, like `swift build`. Unlike DocC, Unidoc has no project footprint.
 
 ### Not Swiftinit
 
@@ -30,15 +30,13 @@ A local Unidoc server is not [Swiftinit](https://swiftinit.org) and it does not 
 
 ## Setting up a local database
 
-Unidoc uses [MongoDB](https://github.com/tayloraswift/swift-mongodb) for long-term storage of documentation. You use Unidoc by compiling documentation (more on that later) and then uploading the docs to a Unidoc server, which mediates access to the master database.
-
-A Unidoc server is a server that talks to a second server, a MongoDB server. Therefore, before you can start a Unidoc server, you need to set up and launch a local MongoDB deployment.
+A Unidoc server is a server that talks to a second server, a MongoDB server. Therefore, before you can start a Unidoc server, you need to set up and launch a local [MongoDB](https://github.com/tayloraswift/swift-mongodb) deployment.
 
 A MongoDB deployment consists of a [mongod](https://www.mongodb.com/docs/manual/reference/program/mongod/) process connected to a network that the Unidoc server is also connected to.
 
 ### Starting the database server
 
-Even if you have a mongod daemon running on your development machine, it is usually preferable to host mongod inside a dedicated Docker container. This repository provides a Docker compose file that does this for you.
+We recommend hosting mongod inside a dedicated Docker container. This repository provides a Docker compose file that does this for you.
 
 To bring up the mongod instance (if it is not already online), run the following:
 
@@ -91,7 +89,7 @@ From the host machine, which is not connected to the `unidoc-test` network, you 
 
 A fresh Unidoc database contains no documentation. Let’s build some now.
 
-The simplest way to build documentation is to use our prebuilt Docker image, which you can pull from [`tayloraswift/unidoc`](https://hub.docker.com/repository/docker/tayloraswift/unidoc/general). For this exercise, you don’t need any Docker compose layers, so you can just launch a container from the base image in your terminal.
+The simplest way to build documentation is to use our prebuilt Docker image, which you can pull from [`tayloraswift/unidoc`](https://hub.docker.com/repository/docker/tayloraswift/unidoc/general). Launch a container from the base image in your terminal.
 
 ```bash
 $ docker run -it --rm \
@@ -142,10 +140,10 @@ Inside the container, run `unidoc-build`, and pass the path to the `/projects` d
 # unidoc-build swift-nio -f --input /projects
 ```
 
-Unidoc will then launch a `swift build` process, which could take a few minutes. It will then compile, upload, and link the documentation, which should take a few seconds. When it is done, you should see a new documentation volume under **Recent docs** named *swift-nio*. Because the documentation is local, it will have the version number `0.0.0`.
+Unidoc will then launch a `swift build` process, which could take a few minutes. It will then compile, upload, and link the documentation. When it is done, you should see a new documentation volume under **Recent docs** named *swift-nio*. Because the documentation is local, it will have the version number `0.0.0`.
 
 >   Note:
->   If the `swift build` process fails, make sure you did not attempt to build the package locally before. If you did, your host-generated build artifacts will conflict with the container-generated build artifacts, and the build will fail. You can fix this by deleting the `.build` directory in the project directory.
+>   If you built the package locally before, your host-generated build artifacts will conflict with the container-generated build artifacts, and the build might fail. You can fix this by deleting the `.build` directory in the project directory.
 
 ## Advanced workflows
 
