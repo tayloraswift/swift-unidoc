@@ -5,6 +5,7 @@ import MD5
 import Multiparts
 import NIOHPACK
 import NIOHTTP1
+import UnidocAutomation
 import UnidocDB
 import UnidocPages
 import UnidocProfiling
@@ -112,11 +113,6 @@ extension Server.IntegralRequest:HTTPServerIntegralRequest
         case Site.Admin.root:
             endpoint = .get(admin: trunk, path, tag: tag)
 
-        case Site.API.root:
-            endpoint = .get(api: trunk, path,
-                with: .init(uri.query?.parameters),
-                tag: tag)
-
         case Site.Asset.root:
             endpoint = .get(asset: trunk, tag: tag)
 
@@ -149,6 +145,11 @@ extension Server.IntegralRequest:HTTPServerIntegralRequest
 
         case Site.Tags.root:
             endpoint = .get(tags: trunk,
+                with: .init(uri.query?.parameters),
+                tag: tag)
+
+        case UnidocAPI.root:
+            endpoint = .get(api: trunk, path,
                 with: .init(uri.query?.parameters),
                 tag: tag)
 
@@ -207,7 +208,7 @@ extension Server.IntegralRequest:HTTPServerIntegralRequest
         case Site.Admin.root:
             endpoint = try? .post(admin: trunk, path, body: body, type: type)
 
-        case Site.API.root:
+        case UnidocAPI.root:
             endpoint = try? .post(api: trunk, body: body, type: type)
 
         case _:

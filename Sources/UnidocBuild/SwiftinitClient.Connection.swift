@@ -6,6 +6,7 @@ import ModuleGraphs
 import NIOCore
 import NIOHPACK
 import UnidocAutomation
+import UnidocRecords
 import URI
 
 extension SwiftinitClient
@@ -32,7 +33,7 @@ extension SwiftinitClient
 
 extension SwiftinitClient.Connection
 {
-    func status(of package:PackageIdentifier) async throws -> PackageBuildStatus
+    func status(of package:PackageIdentifier) async throws -> UnidocAPI.PackageStatus
     {
         try await self.get(from: "/api/build/\(package)")
     }
@@ -83,8 +84,25 @@ extension SwiftinitClient.Connection
     }
 
     @inlinable public
+    func put<Response>(bson:consuming BSON.Document,
+        to endpoint:String,
+        expecting _:Response.Type = Response.self) async throws -> Response
+        where Response:JSONDecodable
+    {
+        var json:JSON = .init(utf8: [])
+
+        for buffer:ByteBuffer in try await self.put(bson: bson, to: endpoint)
+        {
+            json.utf8 += buffer.readableBytesView
+        }
+
+        return try json.decode()
+    }
+
+    @inlinable public
     func get<Response>(_:Response.Type = Response.self,
-        from endpoint:String) async throws -> Response where Response:JSONDecodable
+        from endpoint:String) async throws -> Response
+        where Response:JSONDecodable
     {
         var json:JSON = .init(utf8: [])
 

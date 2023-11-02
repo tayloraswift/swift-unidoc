@@ -1,6 +1,6 @@
 import JSON
 
-extension PackageBuildStatus
+extension UnidocAPI.PackageStatus
 {
     @frozen public
     struct Edition:Equatable, Sendable
@@ -21,7 +21,7 @@ extension PackageBuildStatus
         }
     }
 }
-extension PackageBuildStatus.Edition
+extension UnidocAPI.PackageStatus.Edition
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -31,7 +31,7 @@ extension PackageBuildStatus.Edition
         case tag
     }
 }
-extension PackageBuildStatus.Edition:JSONObjectEncodable
+extension UnidocAPI.PackageStatus.Edition:JSONObjectEncodable
 {
     public
     func encode(to json:inout JSON.ObjectEncoder<CodingKey>)
@@ -41,7 +41,7 @@ extension PackageBuildStatus.Edition:JSONObjectEncodable
         json[.tag] = self.tag
     }
 }
-extension PackageBuildStatus.Edition:JSONObjectDecodable
+extension UnidocAPI.PackageStatus.Edition:JSONObjectDecodable
 {
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws

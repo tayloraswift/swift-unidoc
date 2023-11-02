@@ -509,6 +509,7 @@ let package:Package = .init(
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "UnidocAutomation"),
                 .target(name: "UnidocLinker"),
+                .target(name: "UnidocRecords"),
             ]),
 
         .executableTarget(name: "UnidocServer", dependencies:

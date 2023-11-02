@@ -3,6 +3,7 @@ import IP
 import Media
 import Multiparts
 import NIOHPACK
+import UnidocAutomation
 import UnidocPages
 import URI
 
@@ -50,7 +51,7 @@ extension Server.StreamedRequest:HTTPServerStreamedRequest
 
         switch root
         {
-        case Site.API.root:
+        case UnidocAPI.root:
             endpoint = try? .put(api: trunk, type: type)
 
         case _:

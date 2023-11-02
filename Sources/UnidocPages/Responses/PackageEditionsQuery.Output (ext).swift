@@ -14,7 +14,7 @@ extension PackageEditionsQuery.Output:ServerResponseFactory
         {
         case .application(.json):
             guard
-            let status:PackageBuildStatus = .init(from: self)
+            let status:UnidocAPI.PackageStatus = .init(from: self)
             else
             {
                 return .notFound(.init(content: .string(""),

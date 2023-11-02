@@ -1,28 +1,31 @@
 import JSON
 
-@frozen public
-struct PackageBuildStatus
+extension UnidocAPI
 {
-    public
-    let coordinate:Int32
-    public
-    let repo:String
-
-    public
-    var release:Edition
-    public
-    var prerelease:Edition?
-
-    @inlinable public
-    init(coordinate:Int32, repo:String, release:Edition, prerelease:Edition? = nil)
+    @frozen public
+    struct PackageStatus
     {
-        self.coordinate = coordinate
-        self.repo = repo
-        self.release = release
-        self.prerelease = prerelease
+        public
+        let coordinate:Int32
+        public
+        let repo:String
+
+        public
+        var release:Edition
+        public
+        var prerelease:Edition?
+
+        @inlinable public
+        init(coordinate:Int32, repo:String, release:Edition, prerelease:Edition? = nil)
+        {
+            self.coordinate = coordinate
+            self.repo = repo
+            self.release = release
+            self.prerelease = prerelease
+        }
     }
 }
-extension PackageBuildStatus
+extension UnidocAPI.PackageStatus
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -33,7 +36,7 @@ extension PackageBuildStatus
         case prerelease
     }
 }
-extension PackageBuildStatus:JSONObjectEncodable
+extension UnidocAPI.PackageStatus:JSONObjectEncodable
 {
     public
     func encode(to json:inout JSON.ObjectEncoder<CodingKey>)
@@ -44,7 +47,7 @@ extension PackageBuildStatus:JSONObjectEncodable
         json[.prerelease] = self.prerelease
     }
 }
-extension PackageBuildStatus:JSONObjectDecodable
+extension UnidocAPI.PackageStatus:JSONObjectDecodable
 {
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
