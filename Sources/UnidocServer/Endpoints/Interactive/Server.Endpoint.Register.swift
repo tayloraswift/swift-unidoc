@@ -20,7 +20,7 @@ extension Server.Endpoint
 extension Server.Endpoint.Register:InteractiveEndpoint
 {
     func load(from server:Server,
-        with _:Server.Cookies) async throws -> ServerResponse?
+        with _:Server.Cookies) async throws -> HTTP.ServerResponse?
     {
         guard let github:GitHubClient<GitHub.API> = server.github?.api
         else

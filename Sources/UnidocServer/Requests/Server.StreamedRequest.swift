@@ -21,7 +21,7 @@ extension Server
         }
     }
 }
-extension Server.StreamedRequest:HTTPServerStreamedRequest
+extension Server.StreamedRequest:HTTP.ServerStreamedRequest
 {
     init?(put path:String,
         headers:HPACKHeaders,

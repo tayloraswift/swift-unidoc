@@ -9,7 +9,7 @@ actor Cache<Key> where Key:CacheKey
     let assets:FilePath
 
     private
-    var table:[Key: ServerResource]
+    var table:[Key: HTTP.Resource]
 
     init(source assets:FilePath)
     {
@@ -19,9 +19,9 @@ actor Cache<Key> where Key:CacheKey
 }
 extension Cache
 {
-    func serve(_ request:Request) async throws -> ServerResponse
+    func serve(_ request:Request) async throws -> HTTP.ServerResponse
     {
-        var resource:ServerResource = try self.load(request.key)
+        var resource:HTTP.Resource = try self.load(request.key)
 
         if  let tag:MD5 = request.tag, case tag? = resource.hash
         {
@@ -39,7 +39,7 @@ extension Cache
 extension Cache
 {
     private
-    func load(_ key:Key) throws -> ServerResource
+    func load(_ key:Key) throws -> HTTP.Resource
     {
         try
         {
@@ -52,7 +52,7 @@ extension Cache
                     (reload: true, _):
                 let asset:[UInt8] = try self.assets.appending(key.source).read()
                 let hash:MD5 = .init(hashing: asset)
-                let resource:ServerResource = .init(
+                let resource:HTTP.Resource = .init(
                     content: .binary(asset),
                     type: key.type,
                     hash: hash)

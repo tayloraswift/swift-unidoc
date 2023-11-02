@@ -14,7 +14,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Bounce:PublicEndpoint
 {
-    func load(from server:Server) -> ServerResponse?
+    func load(from server:Server) -> HTTP.ServerResponse?
     {
         if  let oauth:GitHubOAuth = server.plugins.github?.oauth
         {

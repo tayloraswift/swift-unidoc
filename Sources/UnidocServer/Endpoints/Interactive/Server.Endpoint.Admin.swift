@@ -17,7 +17,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Admin:RestrictedEndpoint
 {
-    func load(from server:Server) async throws -> ServerResponse?
+    func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let page:Site.Admin.Action.Complete

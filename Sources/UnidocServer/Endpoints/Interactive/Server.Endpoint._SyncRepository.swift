@@ -22,7 +22,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint._SyncRepository:RestrictedEndpoint
 {
-    func load(from server:Server) async throws -> ServerResponse?
+    func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         guard
         let github:Server.PluginIntegration<GitHubPlugin> = server.github

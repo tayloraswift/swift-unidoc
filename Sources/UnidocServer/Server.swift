@@ -159,7 +159,7 @@ extension Server
 extension Server
 {
     nonisolated
-    func clearance(by cookies:Cookies) async throws -> ServerResponse?
+    func clearance(by cookies:Cookies) async throws -> HTTP.ServerResponse?
     {
         guard self.secured
         else
@@ -186,17 +186,17 @@ extension Server
         }
     }
 }
-extension Server:HTTPServer
+extension Server:HTTP.Server
 {
     nonisolated
-    func clearance(for request:StreamedRequest) async throws -> ServerResponse?
+    func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
     {
         try await self.clearance(by: request.cookies)
     }
 
     nonisolated
     func response(for request:StreamedRequest,
-        with body:[UInt8]) async throws -> ServerResponse
+        with body:[UInt8]) async throws -> HTTP.ServerResponse
     {
         guard case .procedural(let procedural) = request.endpoint
         else
@@ -217,7 +217,7 @@ extension Server:HTTPServer
     }
 
     nonisolated
-    func response(for request:IntegralRequest) async throws -> ServerResponse
+    func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
     {
         switch request.endpoint
         {
@@ -227,7 +227,7 @@ extension Server:HTTPServer
                 profile: request.profile)
 
         case .procedural(let procedural):
-            if  let failure:ServerResponse = try await self.clearance(by: request.cookies)
+            if  let failure:HTTP.ServerResponse = try await self.clearance(by: request.cookies)
             {
                 return failure
             }
@@ -265,13 +265,13 @@ extension Server
     private
     func response(endpoint:any InteractiveEndpoint,
         cookies:Cookies,
-        profile:ServerProfile.Sample) async throws -> ServerResponse
+        profile:ServerProfile.Sample) async throws -> HTTP.ServerResponse
     {
         try Task.checkCancellation()
 
         let initiated:ContinuousClock.Instant = .now
 
-        let response:ServerResponse = try await endpoint.load(from: self, with: cookies)
+        let response:HTTP.ServerResponse = try await endpoint.load(from: self, with: cookies)
             ?? .notFound(.init(
                 content: .string("not found"),
                 type: .text(.plain, charset: .utf8)))

@@ -9,7 +9,7 @@ import URI
 extension Server.Endpoint
 {
     struct Pipeline<Query>:Sendable
-        where Query:DatabaseQuery, Query.Output:ServerResponseFactory<StaticAssets>
+        where Query:DatabaseQuery, Query.Output:HTTP.ServerResponseFactory<StaticAssets>
     {
         /// If nil, the query will be explained instead of executed. If non-nil, this field
         /// will be passed to the query’s output type, which may influence the response it
@@ -30,7 +30,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Pipeline:PublicEndpoint
 {
-    func load(from server:Server) async throws -> ServerResponse?
+    func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
@@ -61,16 +61,12 @@ extension Server.Endpoint.Pipeline:PublicEndpoint
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)
 
-        case .multiple(var resource):
-            resource.optimize(tag: self.tag)
-            return .multiple(resource)
-
-        case .ok(var resource):
-            resource.optimize(tag: self.tag)
-            return .ok(resource)
-
-        case let other:
-            return other
+        case .resource(var resource, status: let status):
+            if  status == 200 || status == 300
+            {
+                resource.optimize(tag: self.tag)
+            }
+            return .resource(resource, status: status)
         }
     }
 }

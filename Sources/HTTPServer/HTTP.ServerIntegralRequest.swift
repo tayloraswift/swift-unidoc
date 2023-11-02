@@ -1,10 +1,21 @@
+import HTTP
 import IP
 import NIOCore
 import NIOHTTP1
 import NIOHPACK
 
+extension HTTP
+{
+    public
+    typealias ServerIntegralRequest = _HTTPServerIntegralRequest
+}
+
+@available(*, deprecated, renamed: "HTTP.Server")
 public
-protocol HTTPServerIntegralRequest:Sendable
+typealias HTTPServerIntegralRequest = HTTP.ServerIntegralRequest
+
+public
+protocol _HTTPServerIntegralRequest:Sendable
 {
     init?(get path:String,
         headers:HPACKHeaders,
@@ -24,7 +35,7 @@ protocol HTTPServerIntegralRequest:Sendable
         address:IP.V6,
         body:[UInt8])
 }
-extension HTTPServerIntegralRequest
+extension HTTP.ServerIntegralRequest
 {
     @inlinable public
     init?(get path:String,

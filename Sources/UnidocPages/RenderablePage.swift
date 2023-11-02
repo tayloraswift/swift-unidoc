@@ -12,7 +12,7 @@ protocol RenderablePage
     func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
     func body(_          body:inout HTML.ContentEncoder)
 
-    func resource(assets:StaticAssets) -> ServerResource
+    func resource(assets:StaticAssets) -> HTTP.Resource
 }
 extension RenderablePage
 {

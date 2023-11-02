@@ -6,11 +6,11 @@ extension Server
     {
         let endpoint:any ProceduralEndpoint
         let payload:[UInt8]
-        let promise:CheckedContinuation<ServerResponse, any Error>
+        let promise:CheckedContinuation<HTTP.ServerResponse, any Error>
 
         init(endpoint:any ProceduralEndpoint,
             payload:[UInt8] = [],
-            promise:CheckedContinuation<ServerResponse, any Error>)
+            promise:CheckedContinuation<HTTP.ServerResponse, any Error>)
         {
             self.endpoint = endpoint
             self.payload = payload
