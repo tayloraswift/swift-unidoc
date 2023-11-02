@@ -119,7 +119,7 @@ Phylum disambiguation is denoted by prefixing the symbol name with swift keyword
 /// ``static var Int.bitWidth``
 ```
 
-This format is extremely handy when disambiguating enum cases, but it suffers from nasty edge cases when mixed with vector syntax. It also implies some strange syntax for subscripts, for example, ``class Foo.Bar.subscript(_:)``.
+This format is extremely handy when disambiguating enum cases, but it suffers from nasty edge cases when mixed with vector syntax. It also implies some strange syntax for subscripts, for example, ` ``class Foo.Bar.subscript(_:)`` `.
 
 Unidoc V3 symbol hashes appear in brackets at the end of the codelink. For example:
 
@@ -287,3 +287,15 @@ A unified codelink cannot start with multiple consecutive `/` characters. It is 
 | --- | --- |
 | ` ``/Swift/Int`` ` | `Int` |
 | ` ``/Swift.Int`` ` | `Swift.Int` |
+
+## Future directions
+
+### Codelinks to overload families
+
+There is [some interest](https://forums.swift.org/t/improving-the-presentation-of-overloaded-symbols-in-swift-docc/67713) in enabling the codelink format to refer to an entire overload family, rather than a single declaration. This would obviate the need to use hashes in many situations.
+
+We could extend the proposed codelink format to support an explicit syntax for referencing an overload family as a whole. For example, we could use the `*` character within disambiguation brackets.
+
+```
+/// ``Sequence.joined(separator:) [*]``
+```

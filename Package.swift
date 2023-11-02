@@ -6,6 +6,8 @@ let package:Package = .init(
     platforms: [.macOS(.v11)],
     products:
     [
+        .library(name: "guides", targets: ["guides"]),
+
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "Codelinks", targets: ["Codelinks"]),
@@ -108,6 +110,9 @@ let package:Package = .init(
     ],
     targets:
     [
+        .target(name: "guides", path: "Guides"),
+
+
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability", dependencies:
