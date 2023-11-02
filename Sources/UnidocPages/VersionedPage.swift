@@ -34,7 +34,7 @@ extension VersionedPage
 
             for dependency:Volume.Meta.Dependency in self.volume.dependencies
             {
-                if  let resolution:Unidoc.Zone = dependency.resolution,
+                if  let resolution:Unidoc.Edition = dependency.resolution,
                     let dependency:Volume.Meta = self.context.volumes[resolution]
                 {
                     $0[+, Any.self]

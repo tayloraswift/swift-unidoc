@@ -7,11 +7,11 @@ extension VersionedPageContext
     {
         let principal:Volume.Meta
         private(set)
-        var secondary:[Unidoc.Zone: Volume.Meta]
+        var secondary:[Unidoc.Edition: Volume.Meta]
 
         init(
             principal:Volume.Meta,
-            secondary:[Unidoc.Zone: Volume.Meta] = [:])
+            secondary:[Unidoc.Edition: Volume.Meta] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -32,7 +32,7 @@ extension VersionedPageContext.Volumes
 }
 extension VersionedPageContext.Volumes
 {
-    subscript(zone:Unidoc.Zone) -> Volume.Meta?
+    subscript(zone:Unidoc.Edition) -> Volume.Meta?
     {
         self.principal.id == zone ? self.principal : self.secondary[zone]
     }

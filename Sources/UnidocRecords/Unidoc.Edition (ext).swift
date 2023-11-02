@@ -2,7 +2,7 @@ import BSONDecoding
 import BSONEncoding
 import Unidoc
 
-extension Unidoc.Zone:RawRepresentable
+extension Unidoc.Edition:RawRepresentable
 {
     @inlinable public
     init(rawValue:Int64)
@@ -17,6 +17,6 @@ extension Unidoc.Zone:RawRepresentable
         Int64.init(self.package) << 32 | Int64.init(UInt32.init(bitPattern: self.version))
     }
 }
-extension Unidoc.Zone:BSONDecodable, BSONEncodable
+extension Unidoc.Edition:BSONDecodable, BSONEncodable
 {
 }

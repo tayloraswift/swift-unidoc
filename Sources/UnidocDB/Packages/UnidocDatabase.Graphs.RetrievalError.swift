@@ -6,10 +6,10 @@ extension UnidocDatabase.Graphs
     struct RetrievalError:Error, Equatable, Sendable
     {
         public
-        let zone:Unidoc.Zone
+        let zone:Unidoc.Edition
 
         public
-        init(zone:Unidoc.Zone)
+        init(zone:Unidoc.Edition)
         {
             self.zone = zone
         }

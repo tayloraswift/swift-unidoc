@@ -7,11 +7,11 @@ extension UnidocDatabase.Volumes
 {
     struct PatchView:Equatable, Sendable
     {
-        let id:Unidoc.Zone
+        let id:Unidoc.Edition
         let patch:PatchVersion
 
         private
-        init(id:Unidoc.Zone, patch:PatchVersion)
+        init(id:Unidoc.Edition, patch:PatchVersion)
         {
             self.id = id
             self.patch = patch

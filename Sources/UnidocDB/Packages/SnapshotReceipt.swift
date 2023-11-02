@@ -7,14 +7,14 @@ struct SnapshotReceipt:Equatable, Sendable
     public
     let id:Snapshot.ID
     public
-    let edition:Unidoc.Zone
+    let edition:Unidoc.Edition
     public
     var type:Upsert
     public
     var repo:PackageRepo?
 
     @inlinable public
-    init(id:Snapshot.ID, edition:Unidoc.Zone, type:Upsert, repo:PackageRepo? = nil)
+    init(id:Snapshot.ID, edition:Unidoc.Edition, type:Upsert, repo:PackageRepo? = nil)
     {
         self.id = id
         self.edition = edition

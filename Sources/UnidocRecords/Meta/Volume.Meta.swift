@@ -12,7 +12,7 @@ extension Volume
     struct Meta:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Zone
+        let id:Unidoc.Edition
 
         public
         var dependencies:[Dependency]
@@ -40,7 +40,7 @@ extension Volume
         var api:MinorVersion
 
         @inlinable public
-        init(id:Unidoc.Zone,
+        init(id:Unidoc.Edition,
             dependencies:[Dependency] = [],
             display:String? = nil,
             refname:String? = nil,

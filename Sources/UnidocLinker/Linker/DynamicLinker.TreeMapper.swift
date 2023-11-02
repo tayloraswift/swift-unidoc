@@ -26,7 +26,7 @@ extension DynamicLinker
         private
         var next:Unidoc.Counter<UnidocPlane.Foreign>
 
-        init(zone:Unidoc.Zone)
+        init(zone:Unidoc.Edition)
         {
             self.foreign = [:]
             self.local = [:]

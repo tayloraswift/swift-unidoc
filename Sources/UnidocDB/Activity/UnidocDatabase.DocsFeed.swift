@@ -37,7 +37,7 @@ extension UnidocDatabase.DocsFeed:DatabaseCollection
             $0[.name] = "volume"
             $0[.key] = .init
             {
-                $0[Activity<Unidoc.Zone>[.volume]] = (+)
+                $0[Activity<Unidoc.Edition>[.volume]] = (+)
             }
         },
     ]
@@ -51,29 +51,30 @@ extension UnidocDatabase.DocsFeed:DatabaseCollectionCapped
 extension UnidocDatabase.DocsFeed
 {
     public
-    func push(_ activity:Activity<Unidoc.Zone>, with session:Mongo.Session) async throws -> Bool
+    func push(_ activity:Activity<Unidoc.Edition>,
+        with session:Mongo.Session) async throws -> Bool
     {
-        let (_, inserted):(Activity<Unidoc.Zone>, BSON.Millisecond?) = try await session.run(
+        let (_, inserted):(Activity<Unidoc.Edition>, BSON.Millisecond?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Upserting<
-                    Activity<Unidoc.Zone>,
+                    Activity<Unidoc.Edition>,
                     BSON.Millisecond>>.init(
                 Self.name,
                 returning: .new)
             {
                 $0[.hint] = .init
                 {
-                    $0[Activity<Unidoc.Zone>[.volume]] = (+)
+                    $0[Activity<Unidoc.Edition>[.volume]] = (+)
                 }
                 $0[.query] = .init
                 {
-                    $0[Activity<Unidoc.Zone>[.volume]] = activity.volume
+                    $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
                 }
                 $0[.update] = .init
                 {
                     $0[.setOnInsert] = .init
                     {
-                        $0[Activity<Unidoc.Zone>[.id]] = activity.id
-                        $0[Activity<Unidoc.Zone>[.volume]] = activity.volume
+                        $0[Activity<Unidoc.Edition>[.id]] = activity.id
+                        $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
                     }
                 }
             },

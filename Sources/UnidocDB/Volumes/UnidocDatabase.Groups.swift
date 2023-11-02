@@ -49,7 +49,7 @@ extension UnidocDatabase.Groups:DatabaseCollection
 }
 extension UnidocDatabase.Groups
 {
-    func align(latest zone:Unidoc.Zone,
+    func align(latest zone:Unidoc.Edition,
         with session:Mongo.Session,
         explain:()) async throws -> String
     {
@@ -60,7 +60,7 @@ extension UnidocDatabase.Groups
             against: self.database)
     }
     @discardableResult
-    func align(latest zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Int
+    func align(latest zone:Unidoc.Edition, with session:Mongo.Session) async throws -> Int
     {
         let response:Mongo.UpdateResponse = try await session.run(
             command: self.align(latest: zone),
@@ -69,7 +69,7 @@ extension UnidocDatabase.Groups
     }
 
     private
-    func align(latest zone:Unidoc.Zone) -> Mongo.Update<Mongo.Many, Unidoc.Scalar>
+    func align(latest zone:Unidoc.Edition) -> Mongo.Update<Mongo.Many, Unidoc.Scalar>
     {
         .init(Self.name,
             updates:

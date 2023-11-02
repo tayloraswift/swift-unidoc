@@ -132,7 +132,7 @@ extension DynamicContext
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package != .swift,
-            let resolution:Unidoc.Zone = self[.swift]?.edition
+            let resolution:Unidoc.Edition = self[.swift]?.edition
         {
             dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
         }

@@ -4,12 +4,12 @@ extension Unidoc
     struct Counter<Plane>:Hashable, Equatable, Sendable where Plane:UnidocPlaneType
     {
         public
-        let zone:Zone
+        let zone:Edition
         public
         var next:Int32
 
         @inlinable public
-        init(zone:Zone, next:Int32 = 0)
+        init(zone:Edition, next:Int32 = 0)
         {
             self.zone = zone
             self.next = next

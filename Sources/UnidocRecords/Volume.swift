@@ -6,7 +6,7 @@ import Unidoc
 struct Volume:~Copyable
 {
     public
-    var latest:Unidoc.Zone?
+    var latest:Unidoc.Edition?
 
     public
     var vertices:[Vertex]
@@ -20,7 +20,7 @@ struct Volume:~Copyable
     var meta:Meta
 
     @inlinable public
-    init(latest:Unidoc.Zone?,
+    init(latest:Unidoc.Edition?,
         vertices:[Vertex],
         groups:[Group],
         index:JSON,
@@ -39,7 +39,7 @@ struct Volume:~Copyable
 extension Volume
 {
     @inlinable public
-    var edition:Unidoc.Zone { self.meta.id }
+    var edition:Unidoc.Edition { self.meta.id }
 }
 extension Volume
 {
