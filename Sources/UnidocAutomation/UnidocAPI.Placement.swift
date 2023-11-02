@@ -7,10 +7,10 @@ extension UnidocAPI
     struct Placement
     {
         public
-        let edition:Unidoc.Zone
+        let edition:Unidoc.Edition
 
         @inlinable public
-        init(edition:Unidoc.Zone)
+        init(edition:Unidoc.Edition)
         {
             self.edition = edition
         }

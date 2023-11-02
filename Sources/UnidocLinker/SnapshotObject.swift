@@ -34,7 +34,7 @@ class SnapshotObject:Sendable
 extension SnapshotObject
 {
     var metadata:SymbolGraphMetadata { self.snapshot.metadata }
-    var edition:Unidoc.Zone { self.snapshot.edition }
+    var edition:Unidoc.Edition { self.snapshot.edition }
 }
 extension SnapshotObject
 {

@@ -385,7 +385,7 @@ extension DatabaseCollection
 extension DatabaseCollection<Unidoc.Scalar>
 {
     /// Deletes all records from the collection within the specified zone.
-    func clear(_ zone:Unidoc.Zone, with session:Mongo.Session) async throws
+    func clear(_ zone:Unidoc.Edition, with session:Mongo.Session) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name,

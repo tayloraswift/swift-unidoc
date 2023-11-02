@@ -24,7 +24,7 @@ extension Unidoc.Scalar
     @inlinable public
     var plane:UnidocPlane? { .of(self.citizen) }
     @inlinable public
-    var zone:Unidoc.Zone { .init(package: self.package, version: self.version) }
+    var zone:Unidoc.Edition { .init(package: self.package, version: self.version) }
 }
 extension Unidoc.Scalar:CustomStringConvertible
 {

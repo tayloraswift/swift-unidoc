@@ -24,7 +24,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Editions:DatabaseCollection
 {
     public
-    typealias ElementID = Unidoc.Zone
+    typealias ElementID = Unidoc.Edition
 
     @inlinable public static
     var name:Mongo.Collection { "editions" }

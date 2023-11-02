@@ -15,9 +15,9 @@ extension DynamicLinker
         /// access when performing mutations on `self` while reading from the original
         /// snapshot context.
         private
-        let zone:Unidoc.Zone
+        let zone:Unidoc.Edition
 
-        init(table:[ExtensionSignature: Extension] = [:], zone:Unidoc.Zone)
+        init(table:[ExtensionSignature: Extension] = [:], zone:Unidoc.Edition)
         {
             self.table = table
             self.zone = zone

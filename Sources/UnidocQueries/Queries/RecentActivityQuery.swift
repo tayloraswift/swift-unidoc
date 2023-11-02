@@ -34,7 +34,7 @@ extension RecentActivityQuery:DatabaseQuery
             //  Cannot use $natural sort in an aggregation pipeline.
             $0[.sort] = .init
             {
-                $0[UnidocDatabase.DocsFeed.Activity<Unidoc.Zone>[.id]] = (-)
+                $0[UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.id]] = (-)
             }
         }
         pipeline.stage
@@ -52,13 +52,13 @@ extension RecentActivityQuery:DatabaseQuery
                     {
                         $0[.lookup] = .init
                         {
-                            let id:Mongo.Variable<Unidoc.Zone> = "id"
+                            let id:Mongo.Variable<Unidoc.Edition> = "id"
 
                             $0[.from] = UnidocDatabase.Volumes.name
                             $0[.let] = .init
                             {
                                 $0[let: id] =
-                                    UnidocDatabase.DocsFeed.Activity<Unidoc.Zone>[.volume]
+                                    UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.volume]
                             }
                             $0[.pipeline] = .init
                             {
