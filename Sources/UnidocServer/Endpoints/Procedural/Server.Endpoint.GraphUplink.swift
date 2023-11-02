@@ -28,18 +28,22 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
             try await server.db.unidoc.uplink(volume: volume, with: session)
         }
 
-        if  let edition:Unidoc.Zone
-        {
-            try await server.db.unidoc.docsFeed.push(.init(
-                    discovered: .now(),
-                    volume: edition),
-                with: session)
-
-            return .ok("")
-        }
+        guard
+        let edition:Unidoc.Zone
         else
         {
             return .notFound("No such symbol graph.")
+        }
+        if  try await server.db.unidoc.docsFeed.push(.init(
+                    discovered: .now(),
+                    volume: edition),
+                with: session)
+        {
+            return .ok("Uplink successful, documentation feed updated.")
+        }
+        else
+        {
+            return .ok("Uplink successful, documentation feed not updated.")
         }
     }
 }

@@ -4,14 +4,15 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension UnidocDatabase
+extension UnidocDatabase.DocsFeed
 {
     @frozen public
-    struct DocsActivity<Volume>:Identifiable, Sendable
+    struct Activity<Volume>:Identifiable, Sendable
         where   Volume:BSONEncodable,
                 Volume:BSONDecodable,
                 Volume:Sendable
     {
+        /// In retrospect, this was a truly awful choice of `_id` key.
         public
         let id:BSON.Millisecond
 
@@ -26,7 +27,7 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.DocsActivity:MongoMasterCodingModel
+extension UnidocDatabase.DocsFeed.Activity:MongoMasterCodingModel
 {
     public
     enum CodingKey:String
@@ -35,7 +36,7 @@ extension UnidocDatabase.DocsActivity:MongoMasterCodingModel
         case volume = "V"
     }
 }
-extension UnidocDatabase.DocsActivity:BSONDocumentEncodable
+extension UnidocDatabase.DocsFeed.Activity:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -44,7 +45,7 @@ extension UnidocDatabase.DocsActivity:BSONDocumentEncodable
         bson[.volume] = self.volume
     }
 }
-extension UnidocDatabase.DocsActivity:BSONDocumentDecodable
+extension UnidocDatabase.DocsFeed.Activity:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

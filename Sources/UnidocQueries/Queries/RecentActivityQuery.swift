@@ -34,7 +34,7 @@ extension RecentActivityQuery:DatabaseQuery
             //  Cannot use $natural sort in an aggregation pipeline.
             $0[.sort] = .init
             {
-                $0[UnidocDatabase.DocsActivity<Unidoc.Zone>[.id]] = (-)
+                $0[UnidocDatabase.DocsFeed.Activity<Unidoc.Zone>[.id]] = (-)
             }
         }
         pipeline.stage
@@ -57,7 +57,8 @@ extension RecentActivityQuery:DatabaseQuery
                             $0[.from] = UnidocDatabase.Volumes.name
                             $0[.let] = .init
                             {
-                                $0[let: id] = UnidocDatabase.DocsActivity<Unidoc.Zone>[.volume]
+                                $0[let: id] =
+                                    UnidocDatabase.DocsFeed.Activity<Unidoc.Zone>[.volume]
                             }
                             $0[.pipeline] = .init
                             {
@@ -76,12 +77,12 @@ extension RecentActivityQuery:DatabaseQuery
                                     $0[.project] = .init(with: Volume.Meta.names(_:))
                                 }
                             }
-                            $0[.as] = UnidocDatabase.DocsActivity<Volume.Meta>[.volume]
+                            $0[.as] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
                         }
                     }
                     $0.stage
                     {
-                        $0[.unwind] = UnidocDatabase.DocsActivity<Volume.Meta>[.volume]
+                        $0[.unwind] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
                     }
                 }
             }
@@ -98,7 +99,7 @@ extension RecentActivityQuery:DatabaseQuery
                     {
                         $0[.sort] = .init
                         {
-                            $0[UnidocDatabase.RepoActivity[.id]] = (-)
+                            $0[UnidocDatabase.RepoFeed.Activity[.id]] = (-)
                         }
                     }
                     $0.stage
