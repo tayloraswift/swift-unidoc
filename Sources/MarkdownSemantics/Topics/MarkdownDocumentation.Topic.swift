@@ -46,7 +46,10 @@ extension MarkdownDocumentation.Topic
 {
     init?(_ blocks:__shared ArraySlice<MarkdownBlock>)
     {
-        guard case (let list as MarkdownBlock.UnorderedList)? = blocks.last
+        var blocks:ArraySlice<MarkdownBlock> = blocks
+
+        guard
+        case (let list as MarkdownBlock.UnorderedList)? = blocks.popLast()
         else
         {
             return nil
@@ -75,6 +78,6 @@ extension MarkdownDocumentation.Topic
             heading.level -= 1
         }
 
-        self.init(article: .init(blocks.dropLast()), members: members)
+        self.init(article: .init(blocks), members: members)
     }
 }

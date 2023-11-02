@@ -39,18 +39,18 @@ extension SwiftFlavoredMarkdownParser:MarkdownParser
             .parseBlockDirectives,
             .parseSymbolLinks,
         ])
-        return document.blockChildren.map { self.block(from: $0, in: id) }
+        return document.blockChildren.compactMap { self.block(from: $0, in: id) }
     }
 }
 extension SwiftFlavoredMarkdownParser
 {
     private
-    func block(from markup:any BlockMarkup, in id:Int) -> MarkdownBlock
+    func block(from markup:any BlockMarkup, in id:Int) -> MarkdownBlock?
     {
         switch markup
         {
         case let block as Markdown.BlockQuote:
-            return MarkdownBlock.Quote.init(block.blockChildren.map
+            return MarkdownBlock.Quote.init(block.blockChildren.compactMap
                 {
                     self.block(from: $0, in: id)
                 })
@@ -61,7 +61,7 @@ extension SwiftFlavoredMarkdownParser
                 {
                     ($0.name, $0.value)
                 },
-                elements: block.blockChildren.map
+                elements: block.blockChildren.compactMap
                 {
                     self.block(from: $0, in: id)
                 })
@@ -89,6 +89,13 @@ extension SwiftFlavoredMarkdownParser
                 })
 
         case let block as Markdown.HTMLBlock:
+            let html:Substring = block.rawHTML.drop(while: \.isWhitespace)
+            if  html.starts(with: "<!--")
+            {
+                //  This is a comment, and should be ignored.
+                return nil
+            }
+
             return MarkdownBlock.HTML.init(text: block.rawHTML)
 
         case let block as Markdown.Paragraph:
@@ -158,6 +165,6 @@ extension SwiftFlavoredMarkdownParser
     {
         .init(
             checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },
-            elements: markup.blockChildren.map { self.block(from: $0, in: id) })
+            elements: markup.blockChildren.compactMap { self.block(from: $0, in: id) })
     }
 }
