@@ -13,7 +13,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.SlavesDashboard:RestrictedEndpoint
 {
-    func load(from server:Server) async throws -> ServerResponse?
+    func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let cookie:Account.Cookie

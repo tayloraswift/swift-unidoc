@@ -1,4 +1,4 @@
-extension ServerResource
+extension HTTP.Resource
 {
     @frozen public
     struct Headers:Equatable, Hashable, Sendable

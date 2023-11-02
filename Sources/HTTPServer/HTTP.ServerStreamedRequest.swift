@@ -1,10 +1,22 @@
+import HTTP
 import IP
 import NIOCore
 import NIOHPACK
 import NIOHTTP1
 
+extension HTTP
+{
+    public
+    typealias ServerStreamedRequest = _HTTPServerStreamedRequest
+}
+
+@available(*, deprecated, renamed: "HTTP.ServerStreamedRequest")
 public
-protocol HTTPServerStreamedRequest:Sendable
+typealias HTTPServerStreamedRequest = HTTP.ServerStreamedRequest
+
+
+public
+protocol _HTTPServerStreamedRequest:Sendable
 {
     init?(put path:String,
         headers:HPACKHeaders,
@@ -14,7 +26,7 @@ protocol HTTPServerStreamedRequest:Sendable
         headers:HTTPHeaders,
         address:IP.V6)
 }
-extension HTTPServerStreamedRequest
+extension HTTP.ServerStreamedRequest
 {
     @inlinable public
     init?(put path:String,

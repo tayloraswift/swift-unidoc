@@ -24,7 +24,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.SiteMap:PublicEndpoint
 {
-    func load(from server:Server) async throws -> ServerResponse?
+    func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
@@ -51,7 +51,7 @@ extension Server.Endpoint.SiteMap:PublicEndpoint
             string += "\(prefix)\(uri)\n"
         }
 
-        var resource:ServerResource = .init(content: .string(string),
+        var resource:HTTP.Resource = .init(content: .string(string),
             type: .text(.plain, charset: .utf8))
 
         resource.optimize(tag: self.tag)

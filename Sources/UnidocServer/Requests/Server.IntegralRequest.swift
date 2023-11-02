@@ -29,7 +29,7 @@ extension Server
         }
     }
 }
-extension Server.IntegralRequest:HTTPServerIntegralRequest
+extension Server.IntegralRequest:HTTP.ServerIntegralRequest
 {
     init?(get path:String,
         headers:HTTPHeaders,

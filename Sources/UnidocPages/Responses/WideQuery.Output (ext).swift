@@ -4,10 +4,10 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension WideQuery.Output:ServerResponseFactory
+extension WideQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
     {
         guard let principal:WideQuery.Output.Principal = self.principal
         else
@@ -44,7 +44,7 @@ extension WideQuery.Output:ServerResponseFactory
             }
 
             let canonical:CanonicalVersion? = .init(principal: principal)
-            let resource:ServerResource
+            let resource:HTTP.Resource
 
             //  Note: noun tree won’t exist if the module contains no declarations.
             //  (For example, an `@_exported` shim.)

@@ -11,7 +11,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.AdminDashboard:RestrictedEndpoint
 {
-    func load(from server:isolated Server) async throws -> ServerResponse?
+    func load(from server:isolated Server) async throws -> HTTP.ServerResponse?
     {
         let page:Site.Admin = .init(configuration: try await server.db.sessions.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
