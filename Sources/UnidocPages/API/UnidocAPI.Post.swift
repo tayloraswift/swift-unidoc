@@ -1,4 +1,6 @@
-extension Site.API
+import UnidocAutomation
+
+extension UnidocAPI
 {
     @frozen public
     enum Post:String
@@ -8,6 +10,6 @@ extension Site.API
         case unlink
     }
 }
-extension Site.API.Post:StaticAPI
+extension UnidocAPI.Post:StaticAPI
 {
 }

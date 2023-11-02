@@ -1,7 +1,7 @@
 import UnidocAutomation
 import UnidocQueries
 
-extension PackageBuildStatus.Edition
+extension UnidocAPI.PackageStatus.Edition
 {
     init?(from output:PackageEditionsQuery.Facet)
     {

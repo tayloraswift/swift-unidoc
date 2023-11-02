@@ -2,6 +2,7 @@ import Media
 import MongoDB
 import HTML
 import HTTP
+import UnidocAutomation
 import UnidocProfiling
 import URI
 
@@ -104,7 +105,7 @@ extension Site.Admin:AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Site.API[.index])"
+            $0.action = "\(UnidocAPI[.index])"
             $0.method = "post"
         }
             content:

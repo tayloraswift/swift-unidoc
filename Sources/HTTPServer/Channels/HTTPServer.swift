@@ -198,6 +198,10 @@ extension HTTPServer
                         }
                     }
                 }
+                //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
+                catch NIOSSLError.uncleanShutdown
+                {
+                }
                 catch let error
                 {
                     Log[.error] = "\(error)"
