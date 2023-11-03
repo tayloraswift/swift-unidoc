@@ -122,9 +122,39 @@ extension HTTP.Server
                     switch try await $0.get()
                     {
                     case .http1_1(let connection):
-                        let message:HTTP.ServerMessage<Authority, HTTPHeaders> = .init(
-                            response: .resource("Method requires HTTP/2", status: 505),
-                            using: connection.channel.allocator)
+                        guard
+                        let address:SocketAddress = connection.channel.remoteAddress,
+                        let address:IP.V6 = .init(address)
+                        else
+                        {
+                            // What to do here?
+                            try await connection.channel.close()
+                            return
+                        }
+
+                        /// Reap connections after 3 seconds.
+                        async
+                        let _:Void =
+                        {
+                            try await Task.sleep(for: .milliseconds(3000))
+                            try await connection.channel.close()
+                        }()
+
+                        let message:HTTP.ServerMessage<Authority, HTTPHeaders>
+                        do
+                        {
+                            message = .init(
+                                response: try await self.respond(toH1: connection,
+                                    from: address,
+                                    as: Authority.self),
+                                using: connection.channel.allocator)
+                        }
+                        catch let error
+                        {
+                            message = .init(
+                                redacting: error,
+                                using: connection.channel.allocator)
+                        }
 
                         try await connection.outbound.finish(with: message)
                         try await connection.channel.close()
@@ -195,7 +225,6 @@ extension HTTP.Server
         }
     }
 
-    @available(*, unavailable, message: "unused")
     private
     func respond<Authority>(
         toH1 stream:NIOAsyncChannel<
