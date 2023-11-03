@@ -14,24 +14,35 @@ extension NIONegotiatedHTTPVersion:@unchecked Sendable
 {
 }
 
-public
-protocol HTTPServer:Sendable
+extension HTTP
 {
-    associatedtype StreamedRequest:HTTPServerStreamedRequest
-    associatedtype IntegralRequest:HTTPServerIntegralRequest
+    public
+    typealias Server = _HTTPServer
+}
+
+@available(*, deprecated, renamed: "HTTP.Server")
+public
+typealias HTTPServer = HTTP.Server
+
+/// The name of this protocol is ``HTTP.Server``.
+public
+protocol _HTTPServer:Sendable
+{
+    associatedtype StreamedRequest:HTTP.ServerStreamedRequest
+    associatedtype IntegralRequest:HTTP.ServerIntegralRequest
 
     /// Checks whether the server should allow the request to proceed with an upload.
     /// Returns nil if the server should accept the upload, or an error response to send
     /// if the uploader lacks permissions.
-    func clearance(for request:StreamedRequest) async throws -> ServerResponse?
+    func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
 
     func response(for request:StreamedRequest,
-        with body:[UInt8]) async throws -> ServerResponse
+        with body:[UInt8]) async throws -> HTTP.ServerResponse
 
-    func response(for request:IntegralRequest) async throws -> ServerResponse
+    func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
 }
 
-extension HTTPServer
+extension HTTP.Server
 {
     public
     func serve<Authority>(
@@ -198,6 +209,10 @@ extension HTTPServer
                         }
                     }
                 }
+                //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
+                catch NIOSSLError.uncleanShutdown
+                {
+                }
                 catch let error
                 {
                     Log[.error] = "\(error)"
@@ -216,7 +231,7 @@ extension HTTPServer
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
         from address:IP.V6,
-        as _:Authority.Type) async throws -> ServerResponse
+        as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
         for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in stream.inbound
@@ -237,11 +252,11 @@ extension HTTPServer
             }
             else
             {
-                return .badRequest("Malformed request")
+                return .resource("Malformed request", status: 400)
             }
         }
 
-        return .badRequest("method requires HTTP/2")
+        return .resource("Method requires HTTP/2", status: 505)
     }
 
     private
@@ -249,7 +264,7 @@ extension HTTPServer
         toH2 stream:NIOAsyncChannel<HTTP2Frame.FramePayload, HTTP2Frame.FramePayload>,
         from address:IP.V6,
         with cop:borrowing TimeCop,
-        as _:Authority.Type) async throws -> ServerResponse
+        as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
         var inbound:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>.AsyncIterator =
@@ -273,7 +288,7 @@ extension HTTPServer
         let path:String = headers[":path"].first
         else
         {
-            return .badRequest("Missing headers")
+            return .resource("Missing headers", status: 400)
         }
 
         switch method
@@ -287,7 +302,7 @@ extension HTTPServer
             }
             else
             {
-                return .badRequest("Malformed request")
+                return .resource("Malformed request", status: 400)
             }
 
         case "PUT":
@@ -296,7 +311,7 @@ extension HTTPServer
             let length:Int = .init(length)
             else
             {
-                return .badRequest("Missing content length")
+                return .resource("Content length required", status: 411)
             }
 
             guard
@@ -305,10 +320,10 @@ extension HTTPServer
                 address: address)
             else
             {
-                return .badRequest("Malformed request")
+                return .resource("Malformed request", status: 400)
             }
 
-            if  let failure:ServerResponse = try await self.clearance(for: request)
+            if  let failure:HTTP.ServerResponse = try await self.clearance(for: request)
             {
                 return failure
             }
@@ -346,12 +361,12 @@ extension HTTPServer
             let length:Int = .init(length)
             else
             {
-                return .badRequest("Missing content length")
+                return .resource("Content length required", status: 411)
             }
 
             if  length > 1_000_000
             {
-                return .badRequest("Payload too large")
+                return .resource("Content too large", status: 413)
             }
 
             var body:[UInt8] = []
@@ -375,7 +390,7 @@ extension HTTPServer
                 }
                 else
                 {
-                    return .badRequest("Payload too large")
+                    return .resource("Content too large", status: 413)
                 }
 
                 //  Why can’t NIO do this for us?
@@ -394,7 +409,7 @@ extension HTTPServer
             }
             else
             {
-                return .badRequest("Malformed request")
+                return .resource("Malformed request", status: 400)
             }
 
         case _:

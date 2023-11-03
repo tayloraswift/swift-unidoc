@@ -9,7 +9,7 @@ protocol DynamicPage:RenderablePage
 extension DynamicPage
 {
     public
-    func resource(assets:StaticAssets) -> ServerResource
+    func resource(assets:StaticAssets) -> HTTP.Resource
     {
         let html:HTML = self.rendered(assets: assets)
 

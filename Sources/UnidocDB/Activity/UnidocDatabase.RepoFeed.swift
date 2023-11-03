@@ -35,15 +35,13 @@ extension UnidocDatabase.RepoFeed:DatabaseCollectionCapped
 extension UnidocDatabase.RepoFeed
 {
     public
-    func last(_ count:Int,
-        with session:Mongo.Session) async throws -> [UnidocDatabase.RepoActivity]
+    func last(_ count:Int, with session:Mongo.Session) async throws -> [Activity]
     {
         try await self.find(last: count, with: session)
     }
 
     public
-    func push(_ activity:UnidocDatabase.RepoActivity,
-        with session:Mongo.Session) async throws
+    func push(_ activity:Activity, with session:Mongo.Session) async throws
     {
         try await self.insert(some: activity, with: session)
     }

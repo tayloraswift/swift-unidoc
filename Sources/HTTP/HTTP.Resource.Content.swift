@@ -1,6 +1,6 @@
 import NIOCore
 
-extension ServerResource
+extension HTTP.Resource
 {
     @frozen public
     enum Content:Equatable, Sendable
@@ -11,7 +11,7 @@ extension ServerResource
         case length(Int)
     }
 }
-extension ServerResource.Content
+extension HTTP.Resource.Content
 {
     /// The size of the content to be transferred, in bytes. Unlike ``length``, this property
     /// is zero if the content is a ``length(_:)`` cache result.

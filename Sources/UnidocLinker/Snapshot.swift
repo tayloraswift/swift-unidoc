@@ -54,7 +54,7 @@ extension Snapshot:Identifiable
 extension Snapshot
 {
     @inlinable public
-    var edition:Unidoc.Zone
+    var edition:Unidoc.Edition
     {
         .init(package: self.package, version: self.version)
     }

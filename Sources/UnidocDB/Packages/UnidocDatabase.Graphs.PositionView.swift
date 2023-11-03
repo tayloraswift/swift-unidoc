@@ -20,7 +20,7 @@ extension UnidocDatabase.Graphs
 @available(*, unavailable)
 extension UnidocDatabase.Graphs.PositionView
 {
-    var edition:Unidoc.Zone { .init(package: self.package, version: self.version) }
+    var edition:Unidoc.Edition { .init(package: self.package, version: self.version) }
 }
 @available(*, unavailable)
 extension UnidocDatabase.Graphs.PositionView:BSONDocumentDecodable

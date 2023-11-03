@@ -17,7 +17,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.GraphUnlink:ProceduralEndpoint
 {
-    func perform(on server:Server, with _:[UInt8]) async throws -> ServerResponse
+    func perform(on server:Server, with _:[UInt8]) async throws -> HTTP.ServerResponse
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 

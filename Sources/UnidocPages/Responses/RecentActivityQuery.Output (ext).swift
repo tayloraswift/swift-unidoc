@@ -2,10 +2,10 @@ import HTTP
 import Media
 import UnidocQueries
 
-extension RecentActivityQuery.Output:ServerResponseFactory
+extension RecentActivityQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
     {
         let page:Site.RecentActivity = .init(
             repo: self.repo,

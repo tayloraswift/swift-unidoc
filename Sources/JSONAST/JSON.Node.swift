@@ -140,7 +140,7 @@ extension JSON.Node
     /// Promotes a `nil` result to a thrown ``TypecastError``.
     ///
     /// If `T` conforms to ``JSONDecodable``, prefer calling its throwing
-    /// ``JSONDecodable init(json:)`` to calling this method directly.
+    /// ``JSONDecodable/init(json:)`` to calling this method directly.
     ///
     /// >   Throws:
     ///     A ``TypecastError`` if the given closure returns [`nil`]().
@@ -166,7 +166,7 @@ extension JSON.Node
     /// Attempts to load an instance of ``Bool`` from this variant.
     ///
     /// -   Returns:
-    ///     The payload of this variant if it matches ``case bool(_:)``,
+    ///     The payload of this variant if it matches ``bool(_:) [case]``,
     ///     [`nil`]() otherwise.
     ///
     /// >   Complexity: O(1).
@@ -183,12 +183,12 @@ extension JSON.Node
     /// Attempts to load an instance of some ``SignedInteger`` from this variant.
     ///
     /// - Returns: A signed integer derived from the payload of this variant
-    ///     if it matches ``case number(_:)``, and it can be represented exactly
+    ///     if it matches ``number(_:) [case]``, and it can be represented exactly
     ///     by `T`; `nil` otherwise.
     ///
     /// This method reports failure in two ways — it returns `nil` on a type
     /// mismatch, and it throws an ``IntegerOverflowError`` if this variant
-    /// matches ``case number(_:)``, but it could not be represented exactly by `T`.
+    /// matches ``number(_:) [case]``, but it could not be represented exactly by `T`.
     ///
     /// >   Note:
     ///     This type conversion will fail if ``Number.places`` is non-zero, even if
@@ -218,12 +218,12 @@ extension JSON.Node
     /// Attempts to load an instance of some ``UnsignedInteger`` from this variant.
     ///
     /// - Returns: An unsigned integer derived from the payload of this variant
-    ///     if it matches ``case number(_:)``, and it can be represented exactly
+    ///     if it matches ``number(_:) [case]``, and it can be represented exactly
     ///     by `T`; `nil` otherwise.
     ///
     /// This method reports failure in two ways — it returns `nil` on a type
     /// mismatch, and it throws an ``IntegerOverflowError`` if this variant
-    /// matches ``case number(_:)``, but it could not be represented exactly by `T`.
+    /// matches ``number(_:) [case]``, but it could not be represented exactly by `T`.
     ///
     /// >   Note:
     ///     This type conversion will fail if ``Number.places`` is non-zero, even if
@@ -253,7 +253,7 @@ extension JSON.Node
     ///
     /// -   Returns:
     ///     The closest value of ``Float80`` to the payload of this variant if it matches
-    ///     ``case number(_:)``, `nil` otherwise.
+    ///     ``number(_:) [case]``, `nil` otherwise.
     @inlinable public
     func `as`(_:Float80.Type) -> Float80?
     {
@@ -264,7 +264,7 @@ extension JSON.Node
     ///
     /// -   Returns:
     ///     The closest value of ``Double`` to the payload of this variant if it matches
-    ///     ``case number(_:)``, `nil` otherwise.
+    ///     ``number(_:) [case]``, `nil` otherwise.
     @inlinable public
     func `as`(_:Double.Type) -> Double?
     {
@@ -274,7 +274,7 @@ extension JSON.Node
     ///
     /// -   Returns:
     ///     The closest value of ``Float`` to the payload of this variant if it matches
-    ///     ``case number(_:)``, `nil` otherwise.
+    ///     ``number(_:) [case]``, `nil` otherwise.
     @inlinable public
     func `as`(_:Float.Type) -> Float?
     {
@@ -283,7 +283,7 @@ extension JSON.Node
     /// Attempts to load an instance of ``Number`` from this variant.
     ///
     /// -   Returns:
-    ///     The payload of this variant, if it matches ``case number(_:)``,
+    ///     The payload of this variant, if it matches ``number(_:) [case]``,
     ///     `nil` otherwise.
     ///
     /// >   Complexity: O(1).
@@ -300,7 +300,7 @@ extension JSON.Node
     /// Attempts to load an instance of ``String`` from this variant.
     ///
     /// -   Returns:
-    ///     The payload of this variant, if it matches ``case string(_:)``,
+    ///     The payload of this variant, if it matches ``string(_:) [case]``,
     ///     `nil` otherwise.
     ///
     /// >   Complexity: O(1).
@@ -336,7 +336,7 @@ extension JSON.Node
     /// Attempts to unwrap an array from this variant.
     ///
     /// -   Returns:
-    ///     The payload of this variant if it matches ``case array(_:)``,
+    ///     The payload of this variant if it matches ``array(_:) [case]``,
     ///     `nil` otherwise.
     ///
     /// >   Complexity: O(1). This method does *not* perform any elementwise work.
@@ -351,9 +351,9 @@ extension JSON.Node
     }
     /// Attempts to unwrap an object from this variant.
     ///
-    /// - Returns: The payload of this variant if it matches ``case object(_:)``,
+    /// - Returns: The payload of this variant if it matches ``object(_:) [case]``,
     ///     the fields of the payload of this variant if it matches
-    ///     ``case number(_:)``, or `nil` otherwise.
+    ///     ``number(_:) [case]``, or `nil` otherwise.
     ///
     /// The order of the items reflects the order in which they appear in the
     /// source object. For more details about the payload, see the documentation
@@ -361,7 +361,7 @@ extension JSON.Node
     ///
     /// To facilitate interoperability with decimal types, this method will also
     /// return a pseudo-object containing the values of ``Number.units`` and
-    /// ``Number.places``, if this variant is a ``case number(_:)``. This function
+    /// ``Number.places``, if this variant is a ``number(_:) [case]``. This function
     /// creates the pseudo-object by calling ``Object.init(encoding:)``.
     ///
     /// >   Complexity:

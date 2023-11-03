@@ -5,16 +5,16 @@ import UnidocAutomation
 import UnidocQueries
 import URI
 
-extension PackageEditionsQuery.Output:ServerResponseFactory
+extension PackageEditionsQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as type:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as type:AcceptType?) throws -> HTTP.ServerResponse
     {
         switch type
         {
         case .application(.json):
             guard
-            let status:PackageBuildStatus = .init(from: self)
+            let status:UnidocAPI.PackageStatus = .init(from: self)
             else
             {
                 return .notFound(.init(content: .string(""),

@@ -12,20 +12,20 @@ extension Main
         var pretty:Bool
         var build:Bool
         var force:Bool
-        var output:String?
+        var input:String?
 
         private
         init(package:PackageIdentifier)
         {
             self.package = package
             self.cookie = ""
-            self.remote = "swiftinit.org"
-            self.port = 443
+            self.remote = "unidoc-local"
+            self.port = 8443
 
             self.pretty = false
             self.build = true
             self.force = false
-            self.output = nil
+            self.input = nil
         }
     }
 }
@@ -80,18 +80,22 @@ extension Main.Options
 
                 options.port = port
 
+            case "--swiftinit", "-S":
+                options.remote = "swiftinit.org"
+                options.port = 443
+
             case "--pretty", "-P":
                 options.pretty = true
 
-            case "--output", "-o":
+            case "--input", "-r":
                 guard
-                let output:String = arguments.popFirst()
+                let input:String = arguments.popFirst()
                 else
                 {
-                    fatalError("Expected output path after '\(option)'")
+                    fatalError("Expected project path after '\(option)'")
                 }
 
-                options.output = output
+                options.input = input
 
             case "--force", "-f":
                 options.force = true

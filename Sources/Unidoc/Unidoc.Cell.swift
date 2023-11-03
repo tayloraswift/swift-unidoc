@@ -16,9 +16,9 @@ extension Unidoc
 extension Unidoc.Cell
 {
     @inlinable public
-    var min:Unidoc.Zone { self + Int32.init(bitPattern: .min) }
+    var min:Unidoc.Edition { self + Int32.init(bitPattern: .min) }
     @inlinable public
-    var max:Unidoc.Zone { self + Int32.init(bitPattern: .max) }
+    var max:Unidoc.Edition { self + Int32.init(bitPattern: .max) }
 
     @inlinable public
     func contains(_ scalar:Unidoc.Scalar) -> Bool
@@ -26,15 +26,15 @@ extension Unidoc.Cell
         scalar.package == self.package
     }
     @inlinable public
-    func contains(_ zone:Unidoc.Zone) -> Bool
+    func contains(_ edition:Unidoc.Edition) -> Bool
     {
-        zone.package == self.package
+        edition.package == self.package
     }
 }
 extension Unidoc.Cell
 {
     @inlinable public static
-    func + (self:Self, version:Int32) -> Unidoc.Zone
+    func + (self:Self, version:Int32) -> Unidoc.Edition
     {
         .init(package: self.package, version: version)
     }

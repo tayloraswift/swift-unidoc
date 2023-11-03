@@ -13,7 +13,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Robots:PublicEndpoint
 {
-    func load(from server:Server) -> ServerResponse?
+    func load(from server:Server) -> HTTP.ServerResponse?
     {
         .ok("""
             User-agent: mauibot

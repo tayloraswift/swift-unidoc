@@ -15,7 +15,7 @@ class MarkdownTable:MarkdownBlock
         self.head = .init(alignments: columns, cells: head)
         self.body = body
     }
-    /// Recursively calls ``Block outline(by:)`` for each cell in this table.
+    /// Recursively calls ``Block/outline(by:)`` for each cell in this table.
     public override
     func outline(by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
     {

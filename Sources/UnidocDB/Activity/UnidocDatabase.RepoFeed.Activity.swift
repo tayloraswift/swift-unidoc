@@ -4,10 +4,10 @@ import ModuleGraphs
 import MongoQL
 import SymbolGraphs
 
-extension UnidocDatabase
+extension UnidocDatabase.RepoFeed
 {
     @frozen public
-    struct RepoActivity:Identifiable, Equatable, Sendable
+    struct Activity:Identifiable, Equatable, Sendable
     {
         public
         let id:BSON.Millisecond
@@ -32,7 +32,7 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.RepoActivity:MongoMasterCodingModel
+extension UnidocDatabase.RepoFeed.Activity:MongoMasterCodingModel
 {
     public
     enum CodingKey:String
@@ -44,7 +44,7 @@ extension UnidocDatabase.RepoActivity:MongoMasterCodingModel
         case origin = "O"
     }
 }
-extension UnidocDatabase.RepoActivity:BSONDocumentEncodable
+extension UnidocDatabase.RepoFeed.Activity:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -56,7 +56,7 @@ extension UnidocDatabase.RepoActivity:BSONDocumentEncodable
         bson[.origin] = self.origin
     }
 }
-extension UnidocDatabase.RepoActivity:BSONDocumentDecodable
+extension UnidocDatabase.RepoFeed.Activity:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

@@ -25,7 +25,22 @@ extension UnidocDatabase.DocsFeed:DatabaseCollection
     typealias ElementID = BSON.Millisecond
 
     static
-    var indexes:[Mongo.CreateIndexStatement] { [] }
+    let indexes:[Mongo.CreateIndexStatement] =
+    [
+        .init
+        {
+            $0[.collation] = SimpleCollation.spec
+
+            //  Cannot enforce this until the older schema fall off the front page.
+            // $0[.unique] = true
+
+            $0[.name] = "volume"
+            $0[.key] = .init
+            {
+                $0[Activity<Unidoc.Edition>[.volume]] = (+)
+            }
+        },
+    ]
 }
 extension UnidocDatabase.DocsFeed:DatabaseCollectionCapped
 {
@@ -36,9 +51,35 @@ extension UnidocDatabase.DocsFeed:DatabaseCollectionCapped
 extension UnidocDatabase.DocsFeed
 {
     public
-    func push(_ activity:UnidocDatabase.DocsActivity<Unidoc.Zone>,
-        with session:Mongo.Session) async throws
+    func push(_ activity:Activity<Unidoc.Edition>,
+        with session:Mongo.Session) async throws -> Bool
     {
-        try await self.insert(some: activity, with: session)
+        let (_, inserted):(Activity<Unidoc.Edition>, BSON.Millisecond?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Upserting<
+                    Activity<Unidoc.Edition>,
+                    BSON.Millisecond>>.init(
+                Self.name,
+                returning: .new)
+            {
+                $0[.hint] = .init
+                {
+                    $0[Activity<Unidoc.Edition>[.volume]] = (+)
+                }
+                $0[.query] = .init
+                {
+                    $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
+                }
+                $0[.update] = .init
+                {
+                    $0[.setOnInsert] = .init
+                    {
+                        $0[Activity<Unidoc.Edition>[.id]] = activity.id
+                        $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
+                    }
+                }
+            },
+            against: self.database)
+
+        return inserted != nil
     }
 }

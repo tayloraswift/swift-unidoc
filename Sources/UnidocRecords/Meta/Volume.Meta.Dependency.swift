@@ -16,12 +16,12 @@ extension Volume.Meta
         public
         var requirement:Repository.Requirement?
         public
-        var resolution:Unidoc.Zone?
+        var resolution:Unidoc.Edition?
 
         @inlinable public
         init(id:PackageIdentifier,
             requirement:Repository.Requirement? = nil,
-            resolution:Unidoc.Zone? = nil)
+            resolution:Unidoc.Edition? = nil)
         {
             self.id = id
             self.requirement = requirement

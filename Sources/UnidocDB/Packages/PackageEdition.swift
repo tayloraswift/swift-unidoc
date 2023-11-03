@@ -11,7 +11,7 @@ import UnidocRecords
 struct PackageEdition:Identifiable, Equatable, Sendable
 {
     public
-    let id:Unidoc.Zone
+    let id:Unidoc.Edition
 
     /// Whether or not this edition is a release.
     public
@@ -33,7 +33,7 @@ struct PackageEdition:Identifiable, Equatable, Sendable
     var lost:Bool
 
     @inlinable public
-    init(id:Unidoc.Zone,
+    init(id:Unidoc.Edition,
         release:Bool,
         patch:PatchVersion,
         name:String,

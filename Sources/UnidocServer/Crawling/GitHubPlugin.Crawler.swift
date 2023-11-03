@@ -139,7 +139,7 @@ extension GitHubPlugin.Crawler
 
             if  let interesting:String = release ?? prerelease
             {
-                let activity:UnidocDatabase.RepoActivity = .init(discovered: .now(),
+                let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
                     package: package.id,
                     refname: interesting,
                     origin: .github(response.repo.owner.login, response.repo.name))

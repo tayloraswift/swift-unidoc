@@ -303,9 +303,9 @@ extension UnidocDatabase
     func uplink(
         package:Int32,
         version:Int32,
-        with session:Mongo.Session) async throws -> Unidoc.Zone?
+        with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
-        var uplinked:Unidoc.Zone? = nil
+        var uplinked:Unidoc.Edition? = nil
 
         try await self.graphs.list(
             filter: (package: package, version: version),
@@ -323,7 +323,7 @@ extension UnidocDatabase
 
     public
     func uplink(volume:VolumeIdentifier,
-        with session:Mongo.Session) async throws -> Unidoc.Zone?
+        with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
         if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
                 with: session)
@@ -342,7 +342,7 @@ extension UnidocDatabase
     @discardableResult
     public
     func unlink(volume:VolumeIdentifier,
-        with session:Mongo.Session) async throws -> Unidoc.Zone?
+        with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
         if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
                 with: session)
@@ -398,7 +398,7 @@ extension UnidocDatabase
         {
             try await self.groups.insert(some: volume.groups, with: session)
         }
-        if  let latest:Unidoc.Zone = volume.latest
+        if  let latest:Unidoc.Edition = volume.latest
         {
             try await self.volumes.align(latest: latest, with: session)
             try await self.groups.align(latest: latest, with: session)
@@ -426,7 +426,7 @@ extension UnidocDatabase
             of: snapshot.package,
             with: session)
 
-        let latestRelease:Unidoc.Zone?
+        let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
 
         switch id.version.canonical

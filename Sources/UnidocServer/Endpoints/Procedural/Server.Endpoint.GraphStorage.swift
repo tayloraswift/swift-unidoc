@@ -13,7 +13,7 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.GraphStorage:ProceduralEndpoint
 {
-    func perform(on server:Server, with payload:[UInt8]) async throws -> ServerResponse
+    func perform(on server:Server, with payload:[UInt8]) async throws -> HTTP.ServerResponse
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 

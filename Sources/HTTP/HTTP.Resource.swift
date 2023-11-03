@@ -1,28 +1,35 @@
 import Media
 import MD5
 
-@frozen public
-struct ServerResource:Equatable, Sendable
-{
-    public
-    let headers:Headers
-    public
-    var content:Content
-    public
-    var type:MediaType
-    public
-    var hash:MD5?
+@available(*, deprecated, renamed: "HTTP.Resource")
+public
+typealias ServerResource = HTTP.Resource
 
-    @inlinable public
-    init(headers:Headers = .init(), content:Content, type:MediaType, hash:MD5? = nil)
+extension HTTP
+{
+    @frozen public
+    struct Resource:Equatable, Sendable
     {
-        self.headers = headers
-        self.content = content
-        self.type = type
-        self.hash = hash
+        public
+        let headers:Headers
+        public
+        var content:Content
+        public
+        var type:MediaType
+        public
+        var hash:MD5?
+
+        @inlinable public
+        init(headers:Headers = .init(), content:Content, type:MediaType, hash:MD5? = nil)
+        {
+            self.headers = headers
+            self.content = content
+            self.type = type
+            self.hash = hash
+        }
     }
 }
-extension ServerResource:ExpressibleByStringLiteral
+extension HTTP.Resource:ExpressibleByStringLiteral
 {
     @inlinable public
     init(stringLiteral:String)
@@ -30,7 +37,7 @@ extension ServerResource:ExpressibleByStringLiteral
         self.init(content: .string(stringLiteral), type: .text(.plain, charset: .utf8))
     }
 }
-extension ServerResource
+extension HTTP.Resource
 {
     /// Computes and populates the resource ``hash`` if it has not already been computed, and
     /// drops the payload if it matches the given ``tag``.

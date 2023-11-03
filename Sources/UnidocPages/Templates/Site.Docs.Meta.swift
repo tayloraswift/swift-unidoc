@@ -187,7 +187,7 @@ extension Site.Docs.Meta:VersionedPage
                                     }
                                 }
 
-                                if  let pin:Unidoc.Zone = dependency.resolution,
+                                if  let pin:Unidoc.Edition = dependency.resolution,
                                     let pin:Volume.Meta = self.context.volumes[pin]
                                 {
                                     $0[.td]
