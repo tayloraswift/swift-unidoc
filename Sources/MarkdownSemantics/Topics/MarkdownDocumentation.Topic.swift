@@ -44,9 +44,9 @@ extension MarkdownDocumentation.Topic
 }
 extension MarkdownDocumentation.Topic
 {
-    init?(_ blocks:__shared ArraySlice<MarkdownBlock>)
+    init?(_ blocks:borrowing ArraySlice<MarkdownBlock>)
     {
-        var blocks:ArraySlice<MarkdownBlock> = blocks
+        var blocks:ArraySlice<MarkdownBlock> = copy blocks
 
         guard
         case (let list as MarkdownBlock.UnorderedList)? = blocks.popLast()

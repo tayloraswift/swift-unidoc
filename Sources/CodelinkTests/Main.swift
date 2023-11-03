@@ -160,6 +160,14 @@ enum Main:SyncTests
                 tests.expect(link.path.visible ..? ["Color"])
                 tests.expect(link.suffix ==? .filter(.enum))
             }
+            if  let tests:TestGroup = tests / "FilterInterior",
+                let link:Codelink = tests.roundtrip("Sloth-swift.struct/Color")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Sloth", "Color"])
+                tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(nil: link.suffix)
+            }
             if  let tests:TestGroup = tests / "FilterLegacy",
                 let link:Codelink = tests.roundtrip("Sloth/Color-swift.class")
             {
