@@ -34,6 +34,9 @@ extension MarkdownInline:ParsableAsInlineMarkup
         case let span as Strong:
             self = .container(.init(from: span, in: id, as: .strong))
 
+        case let link as SymbolLink:
+            self = .code(.init(text: link.destination ?? ""))
+
         case let unsupported:
             self = .code(.init(text: "<unsupported markdown node '\(type(of: unsupported))'>"))
         }
