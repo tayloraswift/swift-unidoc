@@ -1,9 +1,10 @@
 # Unified codelinks
 
+This document describes the design of the unified codelink format.
+
 - author: **@tayloraswift**
 - status: **implemented in unidoc 0.3.14**
 
-This document describes the design of the unified codelink format.
 
 ## Motivation
 

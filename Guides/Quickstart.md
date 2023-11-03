@@ -10,23 +10,6 @@ You need to have [Docker](https://www.docker.com/) installed on your development
 
 It is theoretically possible to run Unidoc without Docker, but Docker makes it much easier to do so, because you will not need to (directly) manage a local [MongoDB](https://mongodb.com) deployment.
 
-## Differences between DocC and Unidoc
-
-To manage expectations, there are a few key differences between DocC and Unidoc workflows to keep in mind.
-
-### Shared database
-
-Unlike DocC, Unidoc is specifically designed for multi-project use cases.
-
-Although you *can* have a separate database for each project, it is usually easier to set up a single deployment per machine, with documentation that is added and updated as needed.
-
-### Not a package plugin
-
-DocC is a package plugin, which means you “install” it by adding it as a dependency to your `Package.swift` and invoke it through SPM. Unidoc is a toolchain and you invoke it directly on an SPM project, like `swift build`. Unlike DocC, Unidoc has no project footprint.
-
-### Not Swiftinit
-
-A local Unidoc server is not [Swiftinit](https://swiftinit.org) and it does not have access to Swiftinit’s package database. If you want to have a local Swiftinit-like experience, you need to populate your local Unidoc server with your packages and the packages they depend on.
 
 ## Setting up a local database
 
@@ -48,7 +31,7 @@ The `-d` flag tells Docker to run the container in the background, so it does no
 
 ### Initializing the database
 
-The mongod instance will create a `data` directory inside the `Local/Deployment` directory. The `data` directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its `data` directory.
+The mongod instance will create a `data/` directory inside the `Local/Deployment/` directory. The `data/` directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its `data/` directory.
 
 Initialize the replica set with:
 
@@ -56,7 +39,7 @@ Initialize the replica set with:
 $ docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 ```
 
-This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `data` directory.)
+This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `data/` directory.)
 
 ### Connecting to the database
 
@@ -65,13 +48,14 @@ The Docker compose configuration we provide contains a subnet named `unidoc-test
 >   Note:
 >   If you are also *developing* from a container, it is not strictly necessary for the development container to be connected to this network. However, it is often convenient to configure your development environment to be part of the `unidoc-test` network. Among other things, this allows you to run Unidoc tools from the development container instead of from a separate container.
 
+
 ## Starting a local documentation server
 
 Once you have a `unidoc-mongod-container` running in the background, you can start a documentation server.
 
 ### Generating certificates
 
-If you are starting the server for the first time, you likely need to populate the `Local/Server/Certificates` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
+If you are starting the server for the first time, you likely need to populate the `Local/Server/Certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
 
 ### Starting the documentation server
 
@@ -83,7 +67,8 @@ $ docker compose -f Local/Server/docker-compose.yml up
 
 The documentation server runs in a container called `unidoc-server-container` and binds to port 8443. From **other containers** connected to the `unidoc-test` network, it has the hostname `unidoc-local`.
 
-From the host machine, which is not connected to the `unidoc-test` network, you can only access the server through [`localhost:8443`](`https://localhost:8443`).
+From your host machine, which is not connected to the `unidoc-test` network, you can only access the server through [`localhost:8443`](https://localhost:8443).
+
 
 ## Populating a local documentation server
 
@@ -134,30 +119,48 @@ $ docker run -it --rm \
     tayloraswift/unidoc:latest
 ```
 
-Inside the container, run `unidoc-build`, and pass the path to the `/projects` directory to the `--input` option. Use `swift-nio` as the package name; this **must** match the name of project directory.
+Inside the container, run `unidoc-build`, and pass the path to the `/projects/` directory to the `--input` option. Use `swift-nio` as the package name; this **must** match the name of project directory.
 
 ```bash
 # unidoc-build swift-nio -f --input /projects
 ```
 
-Unidoc will then launch a `swift build` process, which could take a few minutes. It will then compile, upload, and link the documentation. When it is done, you should see a new documentation volume under **Recent docs** named *swift-nio*. Because the documentation is local, it will have the version number `0.0.0`.
+Unidoc will launch a `swift build` process, which could take a few minutes. It will then compile, upload, and link the documentation. When it is done, you should see a new documentation volume under **Recent docs** named *swift-nio*. Because the documentation is local, it will have the version number `0.0.0`.
 
 >   Note:
->   If you built the package locally before, your host-generated build artifacts will conflict with the container-generated build artifacts, and the build might fail. You can fix this by deleting the `.build` directory in the project directory.
+>   If you built the package locally before, your host-generated build artifacts could conflict with the container-generated build artifacts, and the build might fail. You can fix this by clearing the `.build` directory in the project directory.
+
+
+## Differences between DocC and Unidoc
+
+There are a few key differences between DocC and Unidoc workflows to keep in mind.
+
+### Shared database
+
+Unlike DocC, Unidoc is specifically designed for multi-project use cases.
+
+Although you *can* have a separate database for each project, it is usually easier to set up a single deployment per machine, with documentation that is added and updated as needed.
+
+### Not a package plugin
+
+DocC is a package plugin, which means you “install” it by adding it as a dependency to your `Package.swift` and invoke it through SPM. Unidoc is a toolchain and you invoke it directly on an SPM project, like `swift build`. Unlike DocC, Unidoc has no project footprint.
+
+### Not Swiftinit
+
+A local Unidoc server is not [Swiftinit](https://swiftinit.org) and it does not have access to Swiftinit’s package database. If you want to have a local Swiftinit-like experience, you need to populate your local Unidoc server with your packages and the packages they depend on.
+
 
 ## Advanced workflows
 
-Using the `unidoc` Docker image is great for getting started quickly, but it’s not a great workflow for iterating frequently, since the container builds will conflict with your incremental builds.
+Using the `unidoc` Docker image is great for getting started quickly, but it’s not a great workflow for iterating frequently, since the container builds will conflict with your incremental builds. Moreover, if your project depends on system libraries, the starter image might not have them installed.
 
-A better workflow is to connect your development environment to the `unidoc-test` network and run the Unidoc tools from your development environment.
+If you are [developing from a container](https://code.visualstudio.com/docs/devcontainers/containers), a far superior workflow is to connect your development environment to the `unidoc-test` network and run the Unidoc tools from your development environment.
 
----
+### Configuring your devcontainer
 
-TODO: explain what this means
+If you already know how to connect a container to a network, you can skip this section.
 
----
-
-Adding the following to your docker compose container entry:
+If you are launching your devcontainer with Docker compose, you will need to add the `unidoc-test` network to your devcontainer’s entry.
 
 ```yaml
         networks:
@@ -167,7 +170,7 @@ Adding the following to your docker compose container entry:
             - unidoc-test
 ```
 
-And the following at the end of your docker compose file:
+You will also need to declare the `unidoc-test` network as an external network at the end of your Docker compose file.
 
 ```yaml
 networks:
@@ -180,3 +183,9 @@ networks:
         name: unidoc-test
         external: true
 ```
+
+### Installing Unidoc
+
+Unidoc is written in swift and distributed as a swift package, so the easiest way to install it is almost certainly to compile it from source using `swift build -c release`. The binary products will appear in the usual `.build/release/` location, and you can do whatever you like with them.
+
+As long as your devcontainer is connected to the `unidoc-test` network, there are no significant differences between running Unidoc from your devcontainer and running it with the starter image.

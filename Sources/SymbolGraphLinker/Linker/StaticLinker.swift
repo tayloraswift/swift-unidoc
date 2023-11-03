@@ -441,6 +441,15 @@ extension StaticLinker
             throw InvalidAutolinkError<Int32>.init(expression: binding.text, context: context)
         }
 
+        //  A qualified codelink with a single component that matches the current
+        //  namespace is also a way to mark the primary article for that module.
+        if  case .qualified = codelink.base,
+            codelink.path.components.count == 1,
+            codelink.path.components[0] == "\(namespace)"
+        {
+            return nil
+        }
+
         let resolver:CodelinkResolver<Int32> = .init(table: self.codelinks, scope: .init(
             namespace: namespace))
 
