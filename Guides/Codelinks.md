@@ -1,7 +1,7 @@
 # Unified codelinks
 
-- author: @tayloraswift
-- status: **unimplemented**
+- author: **@tayloraswift**
+- status: **implemented in unidoc 0.3.14**
 
 This document describes the design of the unified codelink format.
 
@@ -271,9 +271,18 @@ The legacy disambiguators behave the same way they do in DocC. This means some l
 | `-swift.type.property` | no equivalent |
 | `-swift.type.subscript` | no equivalent |
 
-### Trailing parentheses
+#### Unrelated disambiguators
 
-The unified codelink format always ignores empty trailing parentheses. This means it is possible to refer to a property named `x` with a codelink spelled ` ``x()`` `, even though it could never be called that way in source code.
+For arcane historical reasons, XCode sometimes autofills interior path components with disambiguators. Today, this behavior is indistinguishable from a bug, but for backwards compatibility, the unified codelink format accepts and **ignores** all such disambiguators, as long as the next path component uses the `/` path separator.
+
+| Codelink | Allowed? |
+| --- | --- |
+| ` ``Sloth-swift.struct/color`` ` | yes |
+| ` ``Sloth-swift.struct.color`` ` | no |
+
+#### Trailing parentheses
+
+The unified codelink format always **ignores** empty trailing parentheses. This means it is possible to refer to a property named `x` with a codelink spelled ` ``x()`` `, even though it could never be called that way in source code.
 
 ### Namespacing
 

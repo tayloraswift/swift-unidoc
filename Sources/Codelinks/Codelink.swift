@@ -145,6 +145,17 @@ extension Codelink:LosslessStringConvertible
                 }
 
             case "-":
+                if  let slash:String.Index = string[i...].firstIndex(of: "/")
+                {
+                    //  This is an interior path component, so the disambiguator is
+                    //  meaningless. XCode generates these for historical reasons that
+                    //  are irrelevant and indistinguishable from a bug to us.
+                    i = string.index(after: slash)
+
+                    self.path.fold = self.path.components.endIndex
+                    continue
+                }
+
                 //  Parse a legacy DocC disambiguation suffix.
                 var filter:Suffix.Legacy.Filter? = nil
                 var hash:FNV24? = nil
