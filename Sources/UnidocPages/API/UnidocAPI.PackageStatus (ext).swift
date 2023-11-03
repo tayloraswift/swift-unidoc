@@ -2,7 +2,7 @@ import UnidocAutomation
 import UnidocDB
 import UnidocQueries
 
-extension PackageBuildStatus
+extension UnidocAPI.PackageStatus
 {
     init?(from output:PackageEditionsQuery.Output)
     {

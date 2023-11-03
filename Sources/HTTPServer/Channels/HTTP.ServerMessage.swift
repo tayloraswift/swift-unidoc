@@ -28,43 +28,16 @@ extension HTTP
 extension HTTP.ServerMessage
 {
     init(authority _:Authority.Type = Authority.self,
-        response:ServerResponse,
+        response:HTTP.ServerResponse,
         using allocator:__shared ByteBufferAllocator)
     {
         switch response
         {
-        case .ok(let resource):
-            self.init(200, copying: resource, using: allocator)
-
-        case .multiple(let resource):
-            self.init(300, copying: resource, using: allocator)
+        case .resource(let resource, status: let status):
+            self.init(status, copying: resource, using: allocator)
 
         case .redirect(let redirect, cookies: let cookies):
             self.init(redirect: redirect, cookies: cookies)
-
-        case .badRequest(let resource):
-            self.init(400, copying: resource, using: allocator)
-
-        case .unauthorized(let resource):
-            self.init(401, copying: resource, using: allocator)
-
-        case .forbidden(let resource):
-            self.init(403, copying: resource, using: allocator)
-
-        case .notFound(let resource):
-            self.init(404, copying: resource, using: allocator)
-
-        case .conflict(let resource):
-            self.init(409, copying: resource, using: allocator)
-
-        case .gone(let resource):
-            self.init(410, copying: resource, using: allocator)
-
-        case .error(let resource):
-            self.init(500, copying: resource, using: allocator)
-
-        case .unavailable(let resource):
-            self.init(503, copying: resource, using: allocator)
         }
     }
 
@@ -100,7 +73,7 @@ extension HTTP.ServerMessage
 
     private
     init(_ status:UInt,
-        copying resource:ServerResource,
+        copying resource:HTTP.Resource,
         using allocator:__shared ByteBufferAllocator)
     {
         let buffer:ByteBuffer?

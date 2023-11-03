@@ -13,10 +13,10 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.GraphUplink:ProceduralEndpoint
 {
-    func perform(on server:Server, with _:[UInt8]) async throws -> ServerResponse
+    func perform(on server:Server, with _:[UInt8]) async throws -> HTTP.ServerResponse
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let edition:Unidoc.Zone? = switch self
+        let edition:Unidoc.Edition? = switch self
         {
         case .coordinate(let package, let version):
             try await server.db.unidoc.uplink(
@@ -28,18 +28,22 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
             try await server.db.unidoc.uplink(volume: volume, with: session)
         }
 
-        if  let edition:Unidoc.Zone
-        {
-            try await server.db.unidoc.docsFeed.push(.init(
-                    discovered: .now(),
-                    volume: edition),
-                with: session)
-
-            return .ok("")
-        }
+        guard
+        let edition:Unidoc.Edition
         else
         {
             return .notFound("No such symbol graph.")
+        }
+        if  try await server.db.unidoc.docsFeed.push(.init(
+                    discovered: .now(),
+                    volume: edition),
+                with: session)
+        {
+            return .ok("Uplink successful, documentation feed updated.")
+        }
+        else
+        {
+            return .ok("Uplink successful, documentation feed not updated.")
         }
     }
 }

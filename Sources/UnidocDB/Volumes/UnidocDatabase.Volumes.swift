@@ -24,7 +24,7 @@ extension UnidocDatabase.Volumes:DatabaseCollection
     @inlinable public static
     var name:Mongo.Collection { "names" }
 
-    typealias ElementID = Unidoc.Zone
+    typealias ElementID = Unidoc.Edition
 
     static
     let indexes:[Mongo.CreateIndexStatement] =
@@ -178,7 +178,7 @@ extension UnidocDatabase.Volumes
 extension UnidocDatabase.Volumes
 {
     @discardableResult
-    func align(latest zone:Unidoc.Zone, with session:Mongo.Session) async throws -> Int
+    func align(latest zone:Unidoc.Edition, with session:Mongo.Session) async throws -> Int
     {
         let response:Mongo.UpdateResponse = try await session.run(
             command: self.align(latest: zone),
@@ -187,7 +187,7 @@ extension UnidocDatabase.Volumes
     }
 
     private
-    func align(latest zone:Unidoc.Zone) -> Mongo.Update<Mongo.Many, Unidoc.Zone>
+    func align(latest zone:Unidoc.Edition) -> Mongo.Update<Mongo.Many, Unidoc.Edition>
     {
         .init(Self.name,
             updates:

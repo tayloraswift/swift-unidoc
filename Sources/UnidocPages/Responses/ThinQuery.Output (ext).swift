@@ -4,10 +4,10 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension ThinQuery.Output:ServerResponseFactory
+extension ThinQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
     {
         if  LookupPredicate.self is Volume.Range.Type
         {

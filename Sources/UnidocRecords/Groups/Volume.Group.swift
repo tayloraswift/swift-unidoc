@@ -98,7 +98,7 @@ extension Volume.Group:BSONDocumentEncodable
         bson[.id] = self.id
         //  Don’t exclude the extension’s own zone, in case we ever want it
         //  to appear somewhere outside of that zone.
-        var zones:Unidoc.ZoneSet = .init()
+        var zones:Unidoc.EditionSet = .init()
 
         switch self
         {

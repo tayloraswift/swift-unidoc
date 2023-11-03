@@ -33,7 +33,8 @@ extension Main.Options.Authority
             certificateChain: certificates.map(NIOSSLCertificateSource.certificate(_:)),
             privateKey: .privateKey(privateKey))
 
-            configuration.applicationProtocols = ["h2", "http/1.1"]
+            // configuration.applicationProtocols = ["h2", "http/1.1"]
+            configuration.applicationProtocols = ["h2"]
 
         let niossl:NIOSSLContext = try .init(configuration: configuration)
 

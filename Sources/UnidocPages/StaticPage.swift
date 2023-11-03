@@ -22,7 +22,7 @@ extension StaticPage where Self:StaticRoot
 extension StaticPage where Self:RenderablePage
 {
     public
-    func resource(assets:StaticAssets) -> ServerResource
+    func resource(assets:StaticAssets) -> HTTP.Resource
     {
         let canonical:String? = self.canonicalURI?.description
         let location:String = "\(self.location)"

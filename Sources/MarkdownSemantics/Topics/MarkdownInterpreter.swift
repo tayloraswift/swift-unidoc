@@ -99,7 +99,7 @@ extension MarkdownInterpreter
             if  let next:Int = self.blocks[self.blocks.index(after: current)...].firstIndex(
                     where: h3(_:))
             {
-                if  let topic:MarkdownDocumentation.Topic = .init(self.blocks[current..<next])
+                if  let topic:MarkdownDocumentation.Topic = .init(self.blocks[current ..< next])
                 {
                     pending.append(topic)
                     current = next

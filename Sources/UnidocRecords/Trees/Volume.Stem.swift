@@ -44,8 +44,8 @@ extension Volume
     ///
     /// Stems support relatively efficient comparisons, because they are stored as strings
     /// rather than arrays of substrings. The sort ordering is unicode-aware, and sorts the
-    /// ``Unidoc.Decl.Orientation gay`` path orientation before the
-    /// ``Unidoc.Decl.Orientation straight`` orientation.
+    /// ``Unidoc.Decl.Orientation/gay`` path orientation before the
+    /// ``Unidoc.Decl.Orientation/straight`` orientation.
     ///
     /// >   Note:
     ///     If you have a collection of stems that all share a common prefix, it may be even

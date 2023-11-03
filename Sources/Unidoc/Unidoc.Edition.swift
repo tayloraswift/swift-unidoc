@@ -1,7 +1,13 @@
 extension Unidoc
 {
+    @available(*, deprecated, renamed: "Edition")
+    public
+    typealias Zone = Edition
+}
+extension Unidoc
+{
     @frozen public
-    struct Zone:Equatable, Hashable, Sendable
+    struct Edition:Equatable, Hashable, Sendable
     {
         public
         let package:Int32
@@ -16,7 +22,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Zone
+extension Unidoc.Edition
 {
     @inlinable public
     var global:Unidoc.Scalar { self + 0 * .global }
@@ -36,7 +42,7 @@ extension Unidoc.Zone
         scalar.version == self.version
     }
 }
-extension Unidoc.Zone
+extension Unidoc.Edition
 {
     /// A shorthand for `self + culture * .module`.
     @inlinable public static
@@ -51,7 +57,7 @@ extension Unidoc.Zone
         .init(package: self.package, version: self.version, citizen: citizen)
     }
 }
-extension Unidoc.Zone
+extension Unidoc.Edition
 {
     @inlinable public static
     func - (scalar:Unidoc.Scalar, self:Self) -> Int32?

@@ -20,7 +20,8 @@ extension Server.Endpoint
 }
 extension Server.Endpoint.Login:InteractiveEndpoint
 {
-    func load(from server:Server, with cookies:Server.Cookies) async throws -> ServerResponse?
+    func load(from server:Server,
+        with cookies:Server.Cookies) async throws -> HTTP.ServerResponse?
     {
         guard let oauth:GitHubClient<GitHubOAuth> = server.github?.oauth
         else
@@ -31,7 +32,7 @@ extension Server.Endpoint.Login:InteractiveEndpoint
         guard case self.state? = cookies.login
         else
         {
-            return .badRequest("Authentication failed: state mismatch")
+            return .resource("Authentication failed: state mismatch", status: 400)
         }
 
         let registration:Server.Endpoint.Register

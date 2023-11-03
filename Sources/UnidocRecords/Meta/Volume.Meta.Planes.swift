@@ -6,10 +6,10 @@ extension Volume.Meta
     struct Planes
     {
         public
-        let zone:Unidoc.Zone
+        let zone:Unidoc.Edition
 
         @inlinable public
-        init(zone:Unidoc.Zone)
+        init(zone:Unidoc.Edition)
         {
             self.zone = zone
         }

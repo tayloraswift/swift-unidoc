@@ -3,32 +3,32 @@ import Unidoc
 
 extension Unidoc
 {
-    struct ZoneSet:Equatable, Sendable
+    struct EditionSet:Equatable, Sendable
     {
         private(set)
-        var ordered:[Zone]
+        var ordered:[Edition]
         private
-        var seen:Set<Zone>
+        var seen:Set<Edition>
 
         private
-        init(ordered:[Zone], seen:Set<Zone>)
+        init(ordered:[Edition], seen:Set<Edition>)
         {
             self.ordered = ordered
             self.seen = seen
         }
     }
 }
-extension Unidoc.ZoneSet
+extension Unidoc.EditionSet
 {
-    init(except exclude:Unidoc.Zone? = nil)
+    init(except exclude:Unidoc.Edition? = nil)
     {
         self.init(ordered: [], seen: exclude.map { [$0] } ?? [])
     }
 }
-extension Unidoc.ZoneSet
+extension Unidoc.EditionSet
 {
     mutating
-    func update(with zone:Unidoc.Zone)
+    func update(with zone:Unidoc.Edition)
     {
         if  case nil = self.seen.update(with: zone)
         {
@@ -36,12 +36,12 @@ extension Unidoc.ZoneSet
         }
     }
 }
-extension Unidoc.ZoneSet
+extension Unidoc.EditionSet
 {
     mutating
-    func update(with zone:Unidoc.Zone?)
+    func update(with zone:Unidoc.Edition?)
     {
-        if  let zone:Unidoc.Zone = zone
+        if  let zone:Unidoc.Edition = zone
         {
             self.update(with: zone)
         }

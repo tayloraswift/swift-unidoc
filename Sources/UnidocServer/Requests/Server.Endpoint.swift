@@ -4,6 +4,7 @@ import MD5
 import ModuleGraphs
 import Multiparts
 import Symbols
+import UnidocAutomation
 import UnidocDB
 import UnidocPages
 import UnidocQueries
@@ -66,7 +67,7 @@ extension Server.Endpoint
         tag:MD5?) -> Self?
     {
         guard
-        let trunk:Site.API.Get = .init(trunk)
+        let trunk:UnidocAPI.Get = .init(trunk)
         else
         {
             return nil
@@ -271,7 +272,7 @@ extension Server.Endpoint
         type:ContentType) throws -> Self?
     {
         guard
-        let trunk:Site.API.Post = .init(trunk)
+        let trunk:UnidocAPI.Post = .init(trunk)
         else
         {
             return nil
@@ -335,7 +336,7 @@ extension Server.Endpoint
     func put(api trunk:String, type:ContentType) throws -> Self?
     {
         guard
-        let trunk:Site.API.Put = .init(trunk)
+        let trunk:UnidocAPI.Put = .init(trunk)
         else
         {
             return nil
@@ -343,8 +344,11 @@ extension Server.Endpoint
 
         switch (trunk, type)
         {
-        case (.symbolgraph, .media(.application(.bson, charset: nil))):
+        case (.snapshot, .media(.application(.bson, charset: nil))):
             return .procedural(Server.Endpoint.GraphStorage.put)
+
+        case (.graph, .media(.application(.bson, charset: nil))):
+            return .procedural(Server.Endpoint.GraphPlacement.put)
 
         case (_, _):
             return nil
