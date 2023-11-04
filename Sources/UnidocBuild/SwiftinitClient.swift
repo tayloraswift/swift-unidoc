@@ -23,9 +23,7 @@ extension SwiftinitClient
     {
         try await self.http2.connect(port: port)
         {
-            try await body(Connection.init(http2: $0,
-                cookie: self.cookie,
-                remote: self.http2.remote))
+            try await body(Connection.init(http2: $0, cookie: self.cookie))
         }
     }
 }

@@ -4,7 +4,7 @@ extension Server.Options
 {
     enum Mode
     {
-        case development(cache:Cache<StaticAsset>, port:Int)
+        case development(Cache<StaticAsset>, Development)
         case production
     }
 }

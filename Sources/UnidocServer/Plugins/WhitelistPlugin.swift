@@ -1,0 +1,6 @@
+struct WhitelistPlugin:Sendable
+{
+    init()
+    {
+    }
+}

@@ -1,5 +1,7 @@
 extension IP
 {
+    /// A native SwiftNIO ``IPv6Address`` is reference counted and resilient, and we
+    /// would rather pass around an inline value type.
     @frozen public
     struct V6:Equatable, Hashable, Sendable
     {
@@ -66,13 +68,7 @@ extension IP.V6
     @inlinable public
     init(v4:IP.V4)
     {
-        let c:UInt32 = 0x0000_ffff
-        let d:UInt32 = UInt32.init(v4.a) << 24
-            | UInt32.init(v4.b) << 16
-            | UInt32.init(v4.c) << 8
-            | UInt32.init(v4.d)
-
-        self.init(storage: (0, 0, c.bigEndian, d.bigEndian))
+        self.init(storage: (0, 0, (0x0000_ffff as UInt32).bigEndian, v4.storage))
     }
 }
 extension IP.V6
@@ -98,6 +94,11 @@ extension IP.V6
 
     @inlinable public static
     var ones:Self { .init(prefix: ~0, subnet: ~0) }
+}
+extension IP.V6:IP.Address
+{
+    @inlinable public static
+    var bitWidth:UInt8 { 128 }
 
     @inlinable public static
     func & (a:Self, b:Self) -> Self

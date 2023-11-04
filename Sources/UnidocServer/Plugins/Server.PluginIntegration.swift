@@ -23,6 +23,22 @@ extension Server
     }
 }
 
+extension Server.PluginIntegration<WhitelistPlugin>
+{
+    var crawler:WhitelistPlugin.Crawler
+    {
+        .init(
+            googlebot: .init(
+                threads: self.threads,
+                niossl: self.niossl,
+                remote: "developers.google.com"),
+            bingbot: .init(
+                threads: self.threads,
+                niossl: self.niossl,
+                remote: "www.bing.com"))
+    }
+}
+
 extension Server.PluginIntegration<GitHubPlugin>
 {
     func crawler(db:Server.DB) -> GitHubPlugin.Crawler

@@ -6,27 +6,25 @@ extension Main
     {
         var authority:Authority
         var certificates:String
-        /// Whether to enable CloudFront integration even if running in development mode.
-        /// Defaults to false, but is ignored if running in production mode.
-        var cloudfront:Bool
+
+        /// Options specific to development mode. These are ignored if the server is
+        /// bound to an authority besides ``Localhost``.
+        var development:Server.Options.Development
+
         var redirect:Bool
         /// Whether to enable GitHub integration if access keys are available.
         /// Defaults to false.
         var github:Bool
         var mongo:String
-        /// This is the port that the server binds to. It is not necessarily
-        /// the port that the server is accessed through.
-        var port:Int?
 
         init()
         {
             self.authority = .localhost
-            self.certificates = "TestCertificates"
-            self.cloudfront = false
+            self.certificates = "Local/Server/Certificates"
+            self.development = .init()
             self.redirect = false
             self.github = false
             self.mongo = "unidoc-mongod"
-            self.port = nil
         }
     }
 }
@@ -69,7 +67,10 @@ extension Main.Options
                 options.certificates = certificates
 
             case "--enable-cloudfront":
-                options.cloudfront = true
+                options.development.cloudfront = true
+
+            case "--enable-whitelists":
+                options.development.whitelists = true
 
             case "-r", "--redirect":
                 options.redirect = true
@@ -96,7 +97,7 @@ extension Main.Options
                     throw Main.OptionsError.invalidPort(port)
                 }
 
-                options.port = port
+                options.development.port = port
 
             case let unrecognized:
                 throw Main.OptionsError.unrecognized(unrecognized)

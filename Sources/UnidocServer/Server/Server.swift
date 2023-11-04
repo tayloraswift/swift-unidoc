@@ -12,6 +12,7 @@ import UnidocProfiling
 import UnidocQueries
 import UnidocRecords
 
+@dynamicMemberLookup
 final
 actor Server
 {
@@ -57,6 +58,7 @@ extension Server
         threads:MultiThreadedEventLoopGroup,
         mongodb:Mongo.SessionPool) async throws
     {
+        let whitelist:WhitelistPlugin? = options.whitelists ? .init() : nil
         let github:GitHubPlugin? = options.secrets.github.map
         {
             do
@@ -70,11 +72,15 @@ extension Server
             }
         } ?? nil
 
+        var configuration:TLSConfiguration = .makeClientConfiguration()
+            configuration.applicationProtocols = ["h2"]
+
         self.init(
             options: options,
             plugins: .init(
                 threads: threads,
-                niossl: try .init(configuration: .makeClientConfiguration()),
+                niossl: try .init(configuration: configuration),
+                whitelist: whitelist,
                 github: github),
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
@@ -101,9 +107,10 @@ extension Server
     }
 
     nonisolated
-    var github:PluginIntegration<GitHubPlugin>?
+    subscript<Plugin>(
+        dynamicMember keyPath:KeyPath<Plugins, Plugin?>) -> PluginIntegration<Plugin>?
     {
-        self.plugins.github.map
+        self.plugins[keyPath: keyPath].map
         {
             .init(threads: self.plugins.threads, niossl: self.plugins.niossl, plugin: $0)
         }
@@ -140,12 +147,18 @@ extension Server
                 try await self.update()
             }
 
-            if  let github:PluginIntegration<GitHubPlugin> = self.github
+            if  let plugin:PluginIntegration<GitHubPlugin> = self.github
             {
                 tasks.addTask
                 {
-                    let crawler:GitHubPlugin.Crawler = github.crawler(db: self.db)
-                    try await crawler.run(counters: self.count)
+                    try await plugin.crawler(db: self.db).run(counters: self.count)
+                }
+            }
+            if  let plugin:PluginIntegration<WhitelistPlugin> = self.whitelist
+            {
+                tasks.addTask
+                {
+                    try await plugin.crawler.run(counters: self.count)
                 }
             }
 
@@ -248,7 +261,7 @@ extension Server:HTTP.Server
             return .ok(stateless.resource(assets: self.assets))
 
         case .static(let request):
-            if  case .development(cache: let cache, port: _) = self.options.mode
+            if  case .development(let cache, _) = self.options.mode
             {
                 return try await cache.serve(request)
             }

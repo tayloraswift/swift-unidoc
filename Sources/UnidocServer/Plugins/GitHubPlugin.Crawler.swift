@@ -52,7 +52,7 @@ extension GitHubPlugin.Crawler
             }
             catch let error
             {
-                Log[.warning] = "Crawling error: \(error)"
+                Log[.warning] = "GitHub crawling error: \(error)"
                 counters.errorsCrawling.wrappingIncrement(ordering: .relaxed)
             }
 

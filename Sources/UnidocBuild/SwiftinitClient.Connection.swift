@@ -18,15 +18,12 @@ extension SwiftinitClient
         let http2:HTTP2Client.Connection
         @usableFromInline internal
         let cookie:String
-        @usableFromInline internal
-        let remote:String
 
         @inlinable internal
-        init(http2:HTTP2Client.Connection, cookie:String, remote:String)
+        init(http2:HTTP2Client.Connection, cookie:String)
         {
             self.http2 = http2
             self.cookie = cookie
-            self.remote = remote
         }
     }
 }
@@ -54,7 +51,7 @@ extension SwiftinitClient.Connection
         [
             ":method": method,
             ":scheme": "https",
-            ":authority": self.remote,
+            ":authority": self.http2.remote,
             ":path": endpoint,
 
             "user-agent": "UnidocBuild",
@@ -150,7 +147,7 @@ extension SwiftinitClient.Connection
             case 301?:
                 if  let location:String = response.headers?["location"].first
                 {
-                    endpoint = String.init(location.trimmingPrefix("https://\(self.remote)"))
+                    endpoint = .init(location.trimmingPrefix("https://\(self.http2.remote)"))
                     continue following
                 }
             case _:
@@ -161,6 +158,6 @@ extension SwiftinitClient.Connection
             break following
         }
 
-        throw SwiftinitClient.StatusError.init(code: status)
+        throw HTTP.StatusError.init(code: status)
     }
 }
