@@ -1,25 +1,38 @@
 extension IP
 {
+    /// A native SwiftNIO ``IPv4Address`` is reference counted and resilient, and we
+    /// would rather pass around an inline value type.
     @frozen public
     struct V4:Equatable, Hashable, Sendable
     {
+        /// The raw address, in big-endian byte order.
         public
-        var a:UInt8
-        public
-        var b:UInt8
-        public
-        var c:UInt8
-        public
-        var d:UInt8
+        var storage:UInt32
 
         @inlinable public
-        init(_ a:UInt8, _ b:UInt8, _ c:UInt8, _ d:UInt8)
+        init(storage:UInt32)
         {
-            self.a = a
-            self.b = b
-            self.c = c
-            self.d = d
+            self.storage = storage
         }
+    }
+}
+extension IP.V4:IP.Address
+{
+    @inlinable public static
+    var bitWidth:UInt8 { 32 }
+
+    @inlinable public static
+    func & (a:Self, b:Self) -> Self
+    {
+        .init(storage: a.storage & b.storage)
+    }
+
+    @inlinable public static
+    func / (self:Self, bits:UInt8) -> Self
+    {
+        let ones:UInt32 = ~0
+        let mask:UInt32 = ones << (32 - bits)
+        return .init(storage: self.storage & mask.bigEndian)
     }
 }
 extension IP.V4:CustomStringConvertible
@@ -27,7 +40,7 @@ extension IP.V4:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        "\(self.a).\(self.b).\(self.c).\(self.d)"
+        withUnsafeBytes(of: self.storage) { "\($0[0]).\($0[1]).\($0[2]).\($0[3])" }
     }
 }
 extension IP.V4:LosslessStringConvertible
@@ -72,6 +85,12 @@ extension IP.V4:LosslessStringConvertible
             return nil
         }
 
-        self.init(a, b, c, d)
+        let value:UInt32 =
+            UInt32.init(a) << 24 |
+            UInt32.init(b) << 16 |
+            UInt32.init(c) <<  8 |
+            UInt32.init(d)
+
+        self.init(storage: value.bigEndian)
     }
 }

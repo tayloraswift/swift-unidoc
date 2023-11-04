@@ -71,7 +71,7 @@ enum Main
             {
                 return try await connection.status(of: options.package)
             }
-            catch let error as SwiftinitClient.StatusError
+            catch let error as HTTP.StatusError
             {
                 guard
                 case 404? = error.code

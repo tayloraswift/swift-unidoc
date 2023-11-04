@@ -91,9 +91,9 @@ enum Main:SyncTests
             }
         }
 
-        if  let tests:TestGroup = tests / "Mapping"
+        if  let tests:TestGroup = tests / "Mapping",
+            let v4:IP.V4 = tests.expect(value: .init("1.2.3.4"))
         {
-            let v4:IP.V4 = .init(1, 2, 3, 4)
             let v6:IP.V6 = .init(v4: v4)
 
             tests.expect(v6 ==? .init(0, 0, 0, 0, 0, 0xffff, 0x0102, 0x0304))
