@@ -23,9 +23,9 @@ extension Server
     }
 }
 
-extension Server.PluginIntegration<WhitelistPlugin>
+extension Server.PluginIntegration<PolicyPlugin>
 {
-    var crawler:WhitelistPlugin.Crawler
+    var crawler:PolicyPlugin.Crawler
     {
         .init(
             googlebot: .init(
@@ -41,9 +41,9 @@ extension Server.PluginIntegration<WhitelistPlugin>
 
 extension Server.PluginIntegration<GitHubPlugin>
 {
-    func crawler(db:Server.DB) -> GitHubPlugin.Crawler
+    var crawler:GitHubPlugin.Crawler
     {
-        .init(api: self.api, pat: self.plugin.pat, db: db)
+        .init(api: self.api, pat: self.plugin.pat)
     }
 
     var oauth:GitHubClient<GitHubOAuth>

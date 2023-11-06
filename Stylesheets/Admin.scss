@@ -34,31 +34,39 @@ figure div.pie
 {
     > div.pie-color > svg g
     {
-        > *.agent.googlebot
+        > *.client.googlebot
         {
             fill: #5b82ff;
         }
-        > *.agent.major-search-engine
+        > *.client.bingbot
+        {
+            fill: #3e6bff;
+        }
+        > *.client.baiduspider
+        {
+            fill: #5c51ff;
+        }
+        > *.client.yandexbot
         {
             fill: #6953ff;
         }
-        > *.agent.minor-search-engine
+        > *.client.minor-search-engine
         {
             fill: #ae6aff;
         }
-        > *.agent.barbie
+        > *.client.barbie
         {
             fill: #ff73a1;
         }
-        > *.agent.bratz
+        > *.client.bratz
         {
             fill: #f2bbcd;
         }
-        > *.agent.robot
+        > *.client.scanner
         {
             fill: #e1e1e1;
         }
-        > *.agent.tool
+        > *.client.tooling
         {
             fill: #999;
         }

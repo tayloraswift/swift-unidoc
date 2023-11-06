@@ -24,7 +24,7 @@ extension Server.Cookies
 }
 extension Server.Cookies
 {
-    init(_ lines:[String])
+    init(header lines:[String])
     {
         self.init()
         for line:String in lines

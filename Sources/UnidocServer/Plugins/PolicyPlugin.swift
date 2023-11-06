@@ -1,0 +1,6 @@
+struct PolicyPlugin:Sendable
+{
+    init()
+    {
+    }
+}

@@ -237,7 +237,7 @@ extension Server.Endpoint
 {
     static
     func post(admin action:String, _ rest:ArraySlice<String>,
-        body:[UInt8],
+        body:consuming [UInt8],
         type:ContentType) throws -> Self?
     {
         if  let action:Site.Admin.Action = .init(rawValue: action),
@@ -268,7 +268,7 @@ extension Server.Endpoint
 
     static
     func post(api trunk:String,
-        body:[UInt8],
+        body:consuming [UInt8],
         type:ContentType) throws -> Self?
     {
         guard

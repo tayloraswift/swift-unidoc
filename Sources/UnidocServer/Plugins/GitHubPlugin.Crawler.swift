@@ -15,33 +15,31 @@ extension GitHubPlugin
         let api:GitHubClient<GitHub.API>
         private
         let pat:String
-        private
-        let db:Server.DB
 
-        init(api:GitHubClient<GitHub.API>, pat:String, db:Server.DB)
+        init(api:GitHubClient<GitHub.API>, pat:String)
         {
             self.api = api
             self.pat = pat
-            self.db = db
         }
     }
 }
 extension GitHubPlugin.Crawler
 {
-    func run(counters:borrowing Server.Counters) async throws
+    func run(updating db:Server.DB, counters:borrowing Server.Counters) async throws
     {
         while true
         {
             async
             let cooldown:Void = Task.sleep(for: .seconds(30))
 
-            let session:Mongo.Session = try await .init(from: self.db.sessions)
+            let session:Mongo.Session = try await .init(from: db.sessions)
             do
             {
                 try await self.api.connect
                 {
-                    try await self.refresh(updating: counters,
-                        stalest: 10,
+                    try await self.refresh(db,
+                        counters: counters,
+                        count: 10,
                         from: $0,
                         with: session)
                 }
@@ -61,12 +59,13 @@ extension GitHubPlugin.Crawler
     }
 
     private
-    func refresh(updating counters:borrowing Server.Counters,
-        stalest count:Int,
+    func refresh(_ db:Server.DB,
+        counters:borrowing Server.Counters,
+        count:Int,
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[PackageRecord] = try await self.db.unidoc.packages.stalest(count,
+        let stale:[PackageRecord] = try await db.unidoc.packages.stalest(count,
             with: session)
 
         for package:PackageRecord in stale
@@ -81,7 +80,7 @@ extension GitHubPlugin.Crawler
                 repo: old.name,
                 pat: self.pat)
 
-            switch try await self.db.unidoc.packages.update(record: .init(id: package.id,
+            switch try await db.unidoc.packages.update(record: .init(id: package.id,
                     cell: package.cell,
                     repo: .github(response.repo),
                     crawled: .now()),
@@ -116,7 +115,7 @@ extension GitHubPlugin.Crawler
                     continue
                 }
 
-                switch try await self.db.unidoc.editions.register(tag,
+                switch try await db.unidoc.editions.register(tag,
                     package: package.cell,
                     version: version,
                     with: session)
@@ -144,7 +143,7 @@ extension GitHubPlugin.Crawler
                     refname: interesting,
                     origin: .github(response.repo.owner.login, response.repo.name))
 
-                try await self.db.unidoc.repoFeed.push(activity, with: session)
+                try await db.unidoc.repoFeed.push(activity, with: session)
             }
         }
     }

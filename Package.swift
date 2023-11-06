@@ -198,6 +198,7 @@ let package:Package = .init(
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
+                .target(name: "UA"),
 
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -459,8 +460,7 @@ let package:Package = .init(
 
         .target(name: "UnidocProfiling", dependencies:
             [
-                .target(name: "HTTP"),
-                .target(name: "IP"),
+                .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UA"),
             ]),

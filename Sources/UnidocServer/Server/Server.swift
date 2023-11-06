@@ -1,6 +1,8 @@
+import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
+import IP
 import MongoDB
 import NIOCore
 import NIOPosix
@@ -58,7 +60,7 @@ extension Server
         threads:MultiThreadedEventLoopGroup,
         mongodb:Mongo.SessionPool) async throws
     {
-        let whitelist:WhitelistPlugin? = options.whitelists ? .init() : nil
+        let policy:PolicyPlugin? = options.whitelists ? .init() : nil
         let github:GitHubPlugin? = options.secrets.github.map
         {
             do
@@ -80,7 +82,7 @@ extension Server
             plugins: .init(
                 threads: threads,
                 niossl: try .init(configuration: configuration),
-                whitelist: whitelist,
+                policy: policy,
                 github: github),
             db: .init(sessions: mongodb,
                 account: await .setup(as: "accounts", in: mongodb),
@@ -103,7 +105,7 @@ extension Server
 
         //  Eventually, this should be dynamically configurable. But for now, we just
         //  hard-code the version number.
-        return .init(version: .v(1, 2))
+        return .init(version: .v(1, 3))
     }
 
     nonisolated
@@ -136,29 +138,32 @@ extension Server
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
 
+            let policies:ManagedAtomic<HTTP.Policylist> = .init(.init(v4: [], v6: []))
+
             tasks.addTask
             {
                 try await self.serve(from: ("::", self.options.port),
                     as: self.options.authority,
-                    on: self.plugins.threads)
+                    on: self.plugins.threads,
+                    policylist: policies)
             }
             tasks.addTask
             {
                 try await self.update()
             }
 
+            if  let plugin:PluginIntegration<PolicyPlugin> = self.policy
+            {
+                tasks.addTask
+                {
+                    try await plugin.crawler.run(updating: policies, counters: self.count)
+                }
+            }
             if  let plugin:PluginIntegration<GitHubPlugin> = self.github
             {
                 tasks.addTask
                 {
-                    try await plugin.crawler(db: self.db).run(counters: self.count)
-                }
-            }
-            if  let plugin:PluginIntegration<WhitelistPlugin> = self.whitelist
-            {
-                tasks.addTask
-                {
-                    try await plugin.crawler.run(counters: self.count)
+                    try await plugin.crawler.run(updating: self.db, counters: self.count)
                 }
             }
 
@@ -235,18 +240,17 @@ extension Server:HTTP.Server
         switch request.endpoint
         {
         case .interactive(let endpoint):
-            return try await self.response(endpoint: endpoint,
-                cookies: request.cookies,
-                profile: request.profile)
+            return try await self.response(endpoint: endpoint, metadata: request.metadata)
 
         case .procedural(let procedural):
-            if  let failure:HTTP.ServerResponse = try await self.clearance(by: request.cookies)
+            if  let failure:HTTP.ServerResponse = try await self.clearance(
+                    by: request.metadata.cookies)
             {
                 return failure
             }
             return try await withCheckedThrowingContinuation
             {
-                Log[.debug] = "enqueued request via \(request.profile.uri)"
+                Log[.debug] = "enqueued procedural request"
 
                 guard case .enqueued = self.updater.yield(.init(endpoint: procedural,
                     payload: [],
@@ -276,15 +280,16 @@ extension Server:HTTP.Server
 extension Server
 {
     private
-    func response(endpoint:any InteractiveEndpoint,
-        cookies:Cookies,
-        profile:ServerProfile.Sample) async throws -> HTTP.ServerResponse
+    func response(
+        endpoint:any InteractiveEndpoint,
+        metadata:IntegralRequest.Metadata) async throws -> HTTP.ServerResponse
     {
         try Task.checkCancellation()
 
         let initiated:ContinuousClock.Instant = .now
 
-        let response:HTTP.ServerResponse = try await endpoint.load(from: self, with: cookies)
+        let response:HTTP.ServerResponse = try await endpoint.load(from: self,
+            with: metadata.cookies)
             ?? .notFound(.init(
                 content: .string("not found"),
                 type: .text(.plain, charset: .utf8)))
@@ -292,65 +297,74 @@ extension Server
         let duration:Duration = .now - initiated
 
         //  Don’t count login requests.
-        if  endpoint is Server.Endpoint.Login
+        if  endpoint is Server.Endpoint.Bounce ||
+            endpoint is Server.Endpoint.Login ||
+            endpoint is Server.Endpoint.Admin
         {
             return response
         }
         //  Don’t increment stats from administrators,
         //  they will really skew the results.
-        if  case _? = cookies.session
+        if  case _? = metadata.cookies.session
         {
             return response
         }
 
-        if  self.tour.slowestQuery?.duration ?? .zero < duration
+        if  self.tour.slowestQuery?.time ?? .zero < duration
         {
-            self.tour.slowestQuery = .init(
-                duration: duration,
-                uri: profile.uri)
+            self.tour.slowestQuery = .init(time: duration, path: metadata.path)
         }
         if  duration > .seconds(1)
         {
             Log[.warning] = """
-            query '\(profile.uri)' took \(duration) to complete!
+            query '\(metadata.path)' took \(duration) to complete!
             """
         }
 
         let status:WritableKeyPath<ServerProfile.ByStatus, Int> = response.category
-        let agent:WritableKeyPath<ServerProfile.ByAgent, Int> = profile._agent
-        let http:WritableKeyPath<ServerProfile.ByProtocol, Int> = profile.http2 ?
-            \.http2 :
-            \.http1
-
-        self.tour.profile.requests.bytes[keyPath: agent] += response.size
-        self.tour.profile.requests.pages[keyPath: agent] += 1
-
-        switch agent
+        switch metadata.version
         {
-        case    \.likelyBarbie:
-            //  Only count languages for Barbies.
-            self.tour.profile.languages[keyPath: profile._language] += 1
-            self.tour.profile.responses.toBarbie[keyPath: status] += 1
-            self.tour.profile.protocols.toBarbie[keyPath: http] += 1
-
-            self.tour.lastImpression = profile
-
-        case    \.likelyBratz:
-            self.tour.profile.responses.toBratz[keyPath: status] += 1
-            self.tour.profile.protocols.toBratz[keyPath: http] += 1
-
-        case    \.likelyGooglebot,
-                \.likelyMajorSearchEngine,
-                \.likelyMinorSearchEngine:
-            self.tour.profile.responses.toSearch[keyPath: status] += 1
-            self.tour.profile.protocols.toSearch[keyPath: http] += 1
-
-        case    _:
-            self.tour.profile.responses.toOther[keyPath: status] += 1
-            self.tour.profile.protocols.toOther[keyPath: http] += 1
+        case .http2:    self.tour.profile.requests.http2[metadata.annotation] += 1
+        case .http1_1:  self.tour.profile.requests.http1[metadata.annotation] += 1
         }
 
-        self.tour.last = profile
+        self.tour.profile.requests.bytes[metadata.annotation] += response.size
+
+        switch metadata.annotation
+        {
+        case    .barbie(let language):
+            self.tour.profile.responses.toBarbie[keyPath: status] += 1
+            self.tour.profile.languages[language] += 1
+
+            self.tour.lastImpression = metadata.logged
+
+        case    .bratz:
+            self.tour.profile.responses.toBratz[keyPath: status] += 1
+
+        case    .robot(.googlebot):
+            self.tour.profile.responses.toGooglebot[keyPath: status] += 1
+            self.tour.lastSearchbot = metadata.logged
+
+        case    .robot(.bingbot):
+            self.tour.profile.responses.toBingbot[keyPath: status] += 1
+            self.tour.lastSearchbot = metadata.logged
+
+        case    .robot(.amazonbot),
+                .robot(.baiduspider),
+                .robot(.duckduckbot),
+                .robot(.quant),
+                .robot(.naver),
+                .robot(.petal),
+                .robot(.seznam),
+                .robot(.yandexbot):
+            self.tour.profile.responses.toOtherSearch[keyPath: status] += 1
+            self.tour.lastSearchbot = metadata.logged
+
+        case    _:
+            self.tour.profile.responses.toOtherRobots[keyPath: status] += 1
+        }
+
+        self.tour.lastRequest = metadata.logged
 
         return response
     }

@@ -23,9 +23,7 @@ extension Server
 }
 extension Server.StreamedRequest:HTTP.ServerStreamedRequest
 {
-    init?(put path:String,
-        headers:HPACKHeaders,
-        address _:IP.V6)
+    init?(put path:String, headers:HPACKHeaders)
     {
         guard let uri:URI = .init(path)
         else
@@ -45,7 +43,7 @@ extension Server.StreamedRequest:HTTP.ServerStreamedRequest
             return nil
         }
 
-        let cookies:Server.Cookies = .init(headers["cookie"])
+        let cookies:Server.Cookies = .init(header: headers["cookie"])
 
         let endpoint:Server.Endpoint?
 

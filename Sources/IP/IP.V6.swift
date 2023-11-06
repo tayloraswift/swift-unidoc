@@ -70,6 +70,30 @@ extension IP.V6
     {
         self.init(storage: (0, 0, (0x0000_ffff as UInt32).bigEndian, v4.storage))
     }
+
+    @inlinable public
+    var v4:IP.V4?
+    {
+        guard
+        self.prefix == 0
+        else
+        {
+            return nil
+        }
+
+        return withUnsafeBytes(of: self.subnet)
+        {
+            let subnet:(UInt32, UInt32) = $0.load(as: (UInt32, UInt32).self)
+            if  subnet.0 == (0x0000_ffff as UInt32).bigEndian
+            {
+                return .init(storage: subnet.1)
+            }
+            else
+            {
+                return nil
+            }
+        }
+    }
 }
 extension IP.V6
 {

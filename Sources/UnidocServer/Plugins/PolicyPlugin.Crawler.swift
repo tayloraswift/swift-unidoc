@@ -1,9 +1,10 @@
+import Atomics
 import HTTP
 import HTTPClient
 import HTTPServer
 import IP
 
-extension WhitelistPlugin
+extension PolicyPlugin
 {
     struct Crawler
     {
@@ -22,9 +23,11 @@ extension WhitelistPlugin
     }
 }
 
-extension WhitelistPlugin.Crawler
+extension PolicyPlugin.Crawler
 {
-    func run(counters:borrowing Server.Counters) async throws
+    func run(
+        updating policylist:ManagedAtomic<HTTP.Policylist>,
+        counters:borrowing Server.Counters) async throws
     {
         while true
         {
@@ -33,7 +36,7 @@ extension WhitelistPlugin.Crawler
 
             do
             {
-                try await self.refresh()
+                policylist.store(try await self.refresh(), ordering: .relaxed)
             }
             catch let error
             {
@@ -46,29 +49,27 @@ extension WhitelistPlugin.Crawler
     }
 
     private
-    func refresh() async throws -> IP.Table<HTTP.KnownPeer>
+    func refresh() async throws -> HTTP.Policylist
     {
-        var whitelist:IP.Table<HTTP.KnownPeer> = [:]
+        var v4:IP.BlockTable<IP.V4, IP.Service> = [:]
+        var v6:IP.BlockTable<IP.V6, IP.Service> = [:]
         try await self.googlebot.connect
         {
             let response:Response = try await $0.get(
                 from: "/static/search/apis/ipranges/googlebot.json")
 
-            for prefix:IP.Block<IP.V6> in response.prefixes
-            {
-                whitelist[prefix] = .googlebot
-            }
+            v4.update(blocks: response.v4, with: .googlebot)
+            v6.update(blocks: response.v6, with: .googlebot)
         }
         try await self.bingbot.connect
         {
             let response:Response = try await $0.get(
                 from: "/toolbox/bingbot.json")
 
-            for prefix:IP.Block<IP.V6> in response.prefixes
-            {
-                whitelist[prefix] = .bingbot
-            }
+            v4.update(blocks: response.v4, with: .bingbot)
+            v6.update(blocks: response.v6, with: .bingbot)
         }
-        return whitelist
+
+        return .init(v4: v4, v6: v6)
     }
 }
