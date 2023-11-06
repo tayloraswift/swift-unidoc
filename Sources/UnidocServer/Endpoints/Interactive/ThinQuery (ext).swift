@@ -60,6 +60,16 @@ extension ThinQuery<Volume.Shoot>
         else
         {
             package = .init(head)
+
+            if  let next:String = rest.first,
+                case true? = next.first?.isNumber
+            {
+                rest.removeFirst()
+
+                version = .init(next)
+                head = next
+            }
+
             stem = rest
         }
 

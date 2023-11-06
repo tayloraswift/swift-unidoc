@@ -59,6 +59,9 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
             page = .init(action: .lintUnidocEditions,
                 text: "Deleted \(deleted) editions!")
 
+        case .perform(.restart, _):
+            fatalError("Restarting server...")
+
         case .perform(.upload, let form?):
             var receipts:[SnapshotReceipt] = []
 

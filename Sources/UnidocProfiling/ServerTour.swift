@@ -1,3 +1,5 @@
+import HTTP
+
 @frozen public
 struct ServerTour
 {
@@ -5,10 +7,14 @@ struct ServerTour
     let started:ContinuousClock.Instant
     public
     var profile:ServerProfile
+
     public
-    var last:ServerProfile.Sample?
+    var lastImpression:Request?
     public
-    var lastImpression:ServerProfile.Sample?
+    var lastSearchbot:Request?
+    public
+    var lastRequest:Request?
+
     public
     var slowestQuery:SlowestQuery?
 
@@ -18,8 +24,9 @@ struct ServerTour
         self.started = started
         self.profile = .init()
 
-        self.last = nil
         self.lastImpression = nil
+        self.lastSearchbot = nil
+        self.lastRequest = nil
 
         self.slowestQuery = nil
     }

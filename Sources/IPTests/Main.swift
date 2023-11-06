@@ -88,6 +88,8 @@ enum Main:SyncTests
                     0x6789,
                     0x789a,
                     0x89ab))
+
+                tests.expect(nil: value.v4)
             }
         }
 
@@ -97,6 +99,7 @@ enum Main:SyncTests
             let v6:IP.V6 = .init(v4: v4)
 
             tests.expect(v6 ==? .init(0, 0, 0, 0, 0, 0xffff, 0x0102, 0x0304))
+            tests.expect(v6.v4 ==? v4)
         }
 
         if  let tests:TestGroup = tests / "Masking"

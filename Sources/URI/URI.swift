@@ -61,12 +61,13 @@ extension URI:ExpressibleByArrayLiteral
 extension URI:LosslessStringConvertible
 {
     @inlinable public
-    init?(_ description:String)
+    init?(_ description:borrowing String)
     {
-        self.init(description[...])
+        //  ???
+        self.init((copy description)[...])
     }
     public
-    init?(_ description:Substring)
+    init?(_ description:borrowing Substring)
     {
         do
         {

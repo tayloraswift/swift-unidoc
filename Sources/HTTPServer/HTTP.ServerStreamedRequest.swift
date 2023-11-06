@@ -18,23 +18,15 @@ typealias HTTPServerStreamedRequest = HTTP.ServerStreamedRequest
 public
 protocol _HTTPServerStreamedRequest:Sendable
 {
-    init?(put path:String,
-        headers:HPACKHeaders,
-        address:IP.V6)
+    init?(put path:String, headers:borrowing HPACKHeaders)
 
-    init?(put path:String,
-        headers:HTTPHeaders,
-        address:IP.V6)
+    init?(put path:String, headers:borrowing HTTPHeaders)
 }
 extension HTTP.ServerStreamedRequest
 {
     @inlinable public
-    init?(put path:String,
-        headers:HTTPHeaders,
-        address:IP.V6)
+    init?(put path:String, headers:borrowing HTTPHeaders)
     {
-        self.init(put: path,
-            headers: .init(httpHeaders: headers),
-            address: address)
+        self.init(put: path, headers: .init(httpHeaders: copy headers))
     }
 }

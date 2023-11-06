@@ -1,6 +1,6 @@
 import HTML
 
-extension ServerProfile.ByAgent
+extension ServerProfile.ByClient
 {
     @usableFromInline internal
     struct Stat:Sendable
@@ -25,19 +25,19 @@ extension ServerProfile.ByAgent
         }
     }
 }
-extension ServerProfile.ByAgent.Stat:Identifiable
+extension ServerProfile.ByClient.Stat:Identifiable
 {
     @inlinable internal
-    var id:String { "Likely \(self.name)" }
+    var id:String { self.name }
 }
-extension ServerProfile.ByAgent.Stat:PieSector
+extension ServerProfile.ByClient.Stat:PieSector
 {
     @usableFromInline internal
     func label(share:Double) -> String
     {
         """
         \(Self.format(share: share)) percent of the \
-        \(self.stratum) during this tour were likely to \(self.name)
+        \(self.stratum) during this tour were to \(self.name)
         """
     }
 }

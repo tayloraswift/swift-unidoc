@@ -17,51 +17,103 @@ extension Server
     struct IntegralRequest:Sendable
     {
         let endpoint:Endpoint
+        let metadata:Metadata
 
-        let cookies:Cookies
-        var profile:ServerProfile.Sample
-
-        init(endpoint:Endpoint, cookies:Cookies, profile:ServerProfile.Sample)
+        init(endpoint:Endpoint, metadata:Metadata)
         {
             self.endpoint = endpoint
-            self.cookies = cookies
-            self.profile = profile
+            self.metadata = metadata
         }
     }
 }
 extension Server.IntegralRequest:HTTP.ServerIntegralRequest
 {
     init?(get path:String,
-        headers:HTTPHeaders,
-        address:IP.V6)
+        headers:borrowing HTTPHeaders,
+        address:IP.V6,
+        service:IP.Service?)
     {
-        self.init(get: path,
-            headers: .init(httpHeaders: headers),
-            address: address)
+        let metadata:Metadata = .init(
+            headers: headers,
+            address: address,
+            service: service,
+            path: path)
 
-        //  None of the other methods support HTTP/1.1
-        self.profile.http2 = false
+        //  Only search engines are allowed to use HTTP/1.1. Bingbot never uses
+        //  HTTP/1.1, but we allow it anyway.
+        switch metadata.annotation
+        {
+        //  There is no legitimate reason for a doll, even a barbie, to use HTTP/1.1.
+        //  Such a doll is almost certainly a malicious bot that somehow passed the
+        //  barbie filter.
+        case .barbie(_):            return nil
+        case .bratz:                return nil
+        case .robot(.amazonbot):    break
+        case .robot(.baiduspider):  break
+        case .robot(.bingbot):      break
+        case .robot(.duckduckbot):  break
+        case .robot(.google):       break
+        case .robot(.googlebot):    break
+        case .robot(.quant):        break
+        case .robot(.naver):        break
+        case .robot(.petal):        break
+        case .robot(.seznam):       break
+        case .robot(.yandexbot):    break
+        case .robot(.unknown):      return nil
+        case .robot(.tool):         return nil
+        }
+
+        self.init(get: metadata, tag: .init(header: headers["if-none-match"]))
     }
 
     init?(get path:String,
-        headers:HPACKHeaders,
-        address:IP.V6)
+        headers:borrowing HPACKHeaders,
+        address:IP.V6,
+        service:IP.Service?)
     {
-        guard let uri:URI = .init(path)
+        let metadata:Metadata = .init(
+            headers: headers,
+            address: address,
+            service: service,
+            path: path)
+
+        self.init(get: metadata, tag: .init(header: headers["if-none-match"]))
+    }
+
+    init?(post path:String,
+        headers:borrowing HPACKHeaders,
+        address:IP.V6,
+        service:IP.Service?,
+        body:consuming [UInt8])
+    {
+        let metadata:Metadata = .init(
+            headers: headers,
+            address: address,
+            service: service,
+            path: path)
+
+        guard
+        let type:String = headers["content-type"].first,
+        let type:ContentType = .init(type)
         else
         {
             return nil
         }
 
-        let cookies:Server.Cookies = .init(headers["cookie"])
-
-        let profile:ServerProfile.Sample = .init(ip: address,
-            language: headers["accept-language"].first,
-            referer: headers["referer"].first,
-            agent: headers["user-agent"].last,
-            uri: path)
-
-        let tag:MD5? = headers.ifNoneMatch.first.flatMap(MD5.init(_:))
+        self.init(post: metadata, body: body, type: type)
+    }
+}
+extension Server.IntegralRequest
+{
+    private
+    init?(get metadata:consuming Metadata, tag:MD5?)
+    {
+        guard
+        let uri:URI = .init((copy metadata).path)
+        else
+        {
+            return nil
+        }
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
 
@@ -71,12 +123,12 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
         {
             let parameters:Server.Endpoint.PipelineParameters = .init(uri.query?.parameters)
 
-            self.init(endpoint: .interactive(Server.Endpoint.Pipeline<RecentActivityQuery>.init(
+            self.init(
+                endpoint: .interactive(Server.Endpoint.Pipeline<RecentActivityQuery>.init(
                     output: parameters.explain ? nil : .text(.html),
                     query: .init(limit: 16),
                     tag: tag)),
-                cookies: cookies,
-                profile: profile)
+                metadata: metadata)
 
             return
         }
@@ -102,7 +154,7 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
                 return nil
             }
 
-            self.init(endpoint: endpoint, cookies: cookies, profile: profile)
+            self.init(endpoint: endpoint, metadata: metadata)
             return
         }
 
@@ -167,39 +219,33 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: cookies, profile: profile)
+            self.init(endpoint: endpoint, metadata: metadata)
         }
         else
         {
             return nil
         }
     }
-    init?(post path:String,
-        headers:HPACKHeaders,
-        address:IP.V6,
-        body:[UInt8])
+
+    private
+    init?(post metadata:consuming Metadata, body:consuming [UInt8], type:ContentType)
     {
-        guard let uri:URI = .init(path)
+        guard
+        let uri:URI = .init((copy metadata).path)
         else
         {
             return nil
         }
-
-        let profile:ServerProfile.Sample = .init(ip: address, uri: path)
 
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
 
         guard
         let root:String = path.popFirst(),
-        let trunk:String = path.popFirst(),
-        let type:String = headers["content-type"].first,
-        let type:ContentType = .init(type)
+        let trunk:String = path.popFirst()
         else
         {
             return nil
         }
-
-        let cookies:Server.Cookies = .init(headers[canonicalForm: "cookie"])
 
         let endpoint:Server.Endpoint?
 
@@ -217,7 +263,7 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
 
         if  let endpoint:Server.Endpoint
         {
-            self.init(endpoint: endpoint, cookies: cookies, profile: profile)
+            self.init(endpoint: endpoint, metadata: metadata)
         }
         else
         {

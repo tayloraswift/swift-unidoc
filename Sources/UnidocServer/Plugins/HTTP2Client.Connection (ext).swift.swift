@@ -22,8 +22,6 @@ extension HTTP2Client.Connection
             "accept": "*/*",
         ]
 
-        print(request)
-
         let response:HTTP2Client.Facet = try await self.fetch(request)
 
         switch response.status

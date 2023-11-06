@@ -1,3 +1,4 @@
+import Atomics
 import HTTP
 import IP
 import NIOCore
@@ -48,7 +49,8 @@ extension HTTP.Server
     func serve<Authority>(
         from binding:(address:String, port:Int),
         as authority:Authority,
-        on threads:MultiThreadedEventLoopGroup) async throws
+        on threads:MultiThreadedEventLoopGroup,
+        policylist:ManagedAtomic<HTTP.Policylist>) async throws
         where Authority:ServerAuthority
     {
         let bootstrap:ServerBootstrap = .init(group: threads)
@@ -57,7 +59,19 @@ extension HTTP.Server
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
 
-        let listener:NIOAsyncChannel = try await bootstrap.bind(
+        let listener:
+            NIOAsyncChannel<
+                EventLoopFuture<NIONegotiatedHTTPVersion<
+                    NIOAsyncChannel<
+                        HTTPPart<HTTPRequestHead, ByteBuffer>,
+                        HTTPPart<HTTPResponseHead, ByteBuffer>>,
+                    (
+                        NIOAsyncChannel<HTTP2Frame, HTTP2Frame>,
+                        NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
+                            HTTP2Frame.FramePayload,
+                            HTTP2Frame.FramePayload>>
+                    )>>,
+                Never> = try await bootstrap.bind(
             host: binding.address,
             port: binding.port)
         {
@@ -119,6 +133,8 @@ extension HTTP.Server
             {
                 do
                 {
+                    let policylist:HTTP.Policylist = policylist.load(ordering: .relaxed)
+
                     switch try await $0.get()
                     {
                     case .http1_1(let connection):
@@ -131,6 +147,8 @@ extension HTTP.Server
                             try await connection.channel.close()
                             return
                         }
+
+                        let service:IP.Service? = policylist[address]
 
                         /// Reap connections after 3 seconds.
                         async
@@ -145,7 +163,8 @@ extension HTTP.Server
                         {
                             message = .init(
                                 response: try await self.respond(toH1: connection,
-                                    from: address,
+                                    address: address,
+                                    service: service,
                                     as: Authority.self),
                                 using: connection.channel.allocator)
                         }
@@ -170,6 +189,8 @@ extension HTTP.Server
                             return
                         }
 
+                        let service:IP.Service? = policylist[address]
+
                         /// Reap connections after one second of inactivity.
                         let cop:TimeCop = .init()
                         async
@@ -191,7 +212,8 @@ extension HTTP.Server
                             {
                                 message = .init(
                                     response: try await self.respond(toH2: stream,
-                                        from: address,
+                                        address: address,
+                                        service: service,
                                         with: cop,
                                         as: Authority.self),
                                     using: stream.channel.allocator)
@@ -225,12 +247,13 @@ extension HTTP.Server
         }
     }
 
-    private
+   @inlinable internal
     func respond<Authority>(
         toH1 stream:NIOAsyncChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
-        from address:IP.V6,
+        address:IP.V6,
+        service:IP.Service?,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
@@ -246,7 +269,8 @@ extension HTTP.Server
 
             if  let request:IntegralRequest = .init(get: head.uri,
                     headers: head.headers,
-                    address: address)
+                    address: address,
+                    service: service)
             {
                 return try await self.response(for: request)
             }
@@ -262,7 +286,8 @@ extension HTTP.Server
     private
     func respond<Authority>(
         toH2 stream:NIOAsyncChannel<HTTP2Frame.FramePayload, HTTP2Frame.FramePayload>,
-        from address:IP.V6,
+        address:IP.V6,
+        service:IP.Service?,
         with cop:borrowing TimeCop,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
@@ -296,7 +321,8 @@ extension HTTP.Server
         case "GET":
             if  let request:IntegralRequest = .init(get: path,
                     headers: headers,
-                    address: address)
+                    address: address,
+                    service: service)
             {
                 return try await self.response(for: request)
             }
@@ -316,8 +342,7 @@ extension HTTP.Server
 
             guard
             let request:StreamedRequest = .init(put: path,
-                headers: headers,
-                address: address)
+                headers: headers)
             else
             {
                 return .resource("Malformed request", status: 400)
@@ -403,7 +428,8 @@ extension HTTP.Server
             if  let request:IntegralRequest = .init(post: path,
                     headers: headers,
                     address: address,
-                    body: body)
+                    service: service,
+                    body: consume body)
             {
                 return try await self.response(for: request)
             }
