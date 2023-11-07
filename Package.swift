@@ -1,5 +1,6 @@
 // swift-tools-version:5.9
 import PackageDescription
+import CompilerPluginSupport
 
 let package:Package = .init(
     name: "swift-unidoc",
@@ -7,6 +8,10 @@ let package:Package = .init(
     products:
     [
         .library(name: "guides", targets: ["guides"]),
+
+
+        .library(name: "InlineASCII", targets: ["InlineASCII"]),
+
 
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
@@ -111,6 +116,21 @@ let package:Package = .init(
     targets:
     [
         .target(name: "guides", path: "Guides"),
+
+
+        .macro(name: "InlineValueMacros",
+            dependencies:
+            [
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+            ],
+            path: "Macros/InlineValueMacros"),
+
+        .target(name: "InlineASCII", dependencies:
+            [
+                .target(name: "InlineValueMacros"),
+            ],
+            path: "Macros/InlineASCII"),
 
 
         .target(name: "AvailabilityDomain"),
@@ -286,7 +306,10 @@ let package:Package = .init(
                 .target(name: "InlineBuffer"),
             ]),
 
-        .target(name: "Media"),
+        .target(name: "Media", dependencies:
+            [
+                .target(name: "InlineASCII"),
+            ]),
 
         .target(name: "ModuleGraphs", dependencies:
             [
