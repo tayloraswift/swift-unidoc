@@ -10,7 +10,7 @@ let package:Package = .init(
         .library(name: "guides", targets: ["guides"]),
 
 
-        .library(name: "InlineASCII", targets: ["InlineASCII"]),
+        .library(name: "IntegerEncodingMacros", targets: ["IntegerEncodingMacros"]),
 
 
         .library(name: "Availability", targets: ["Availability"]),
@@ -118,19 +118,25 @@ let package:Package = .init(
         .target(name: "guides", path: "Guides"),
 
 
-        .macro(name: "InlineValueMacros",
+        .macro(name: "UnidocMacros",
             dependencies:
             [
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
             ],
-            path: "Macros/InlineValueMacros"),
+            path: "Plugins/UnidocMacros"),
 
-        .target(name: "InlineASCII", dependencies:
+        .target(name: "DynamicLookupMacros", dependencies:
             [
-                .target(name: "InlineValueMacros"),
+                .target(name: "UnidocMacros"),
             ],
-            path: "Macros/InlineASCII"),
+            path: "Macros/DynamicLookupMacros"),
+
+        .target(name: "IntegerEncodingMacros", dependencies:
+            [
+                .target(name: "UnidocMacros"),
+            ],
+            path: "Macros/IntegerEncodingMacros"),
 
 
         .target(name: "AvailabilityDomain"),
@@ -186,7 +192,10 @@ let package:Package = .init(
                 .target(name: "HTMLStreaming"),
             ]),
 
-        .target(name: "HTMLDOM"),
+        .target(name: "HTMLDOM", dependencies:
+            [
+                .target(name: "DynamicLookupMacros"),
+            ]),
 
         .target(name: "HTMLStreaming", dependencies:
             [
@@ -308,7 +317,7 @@ let package:Package = .init(
 
         .target(name: "Media", dependencies:
             [
-                .target(name: "InlineASCII"),
+                .target(name: "IntegerEncodingMacros"),
             ]),
 
         .target(name: "ModuleGraphs", dependencies:

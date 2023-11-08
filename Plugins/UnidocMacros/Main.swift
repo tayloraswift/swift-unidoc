@@ -6,6 +6,7 @@ struct Main:CompilerPlugin
 {
     let providingMacros:[any Macro.Type] =
     [
-        InlineASCII.ConstructorMacro.self,
+        GenerateCasesByIntegerEncoding.self,
+        GenerateDynamicMemberFactory.self,
     ]
 }
