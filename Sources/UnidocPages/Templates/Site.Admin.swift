@@ -193,6 +193,7 @@ extension Site.Admin:AdministrativePage
             .lintUnidocEditions,
             .dropUnidocDB,
             .dropAccountDB,
+            .restart,
         ]
         {
             main[.hr]
@@ -218,46 +219,72 @@ extension Site.Admin:AdministrativePage
 
         main[.dl]
         {
-            $0[.dt] = "uptime"
+            $0[.dt] = "Uptime"
             $0[.dd] = "\(self.tour.started.duration(to: .now))"
 
-            $0[.dt] = "requests"
-            $0[.dd] = "\(self.tour.profile.requests.pages.total)"
+            let requests:Int =
+                self.tour.profile.requests.http1.total +
+                self.tour.profile.requests.http2.total
+            $0[.dt] = "Requests"
+            $0[.dd] = "\(requests)"
 
-            if  let last:ServerProfile.Sample = self.tour.last
+            $0[.dt] = "Requests (Barbies)"
+            $0[.dd] = "\(self.tour.profile.requests.http2.barbie)"
+
+
+            if  let last:ServerTour.Request = self.tour.lastImpression
             {
-                $0[.dt] = "last request, including bots"
-                $0[.dd] { $0[.a] { $0.href = last.uri } = last.uri }
+                $0[.h3] = "Last Impression"
 
-                $0[.dt] = "last user-agent, including bots"
-                $0[.dd] = last.agent ?? "none"
+                $0[.dt] = "Path"
+                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
+
+                $0[.dt] = "User Agent"
+                $0[.dd] = last.headers.userAgent ?? "none"
+
+                $0[.dt] = "IP address"
+                $0[.dd] = "\(last.address)"
+
+                $0[.dt] = "Accept Language"
+                $0[.dd] = last.headers.acceptLanguage ?? "none"
+
+                $0[.dt] = "Referrer"
+                $0[.dd] = last.headers.referer ?? "none"
+            }
+            if  let last:ServerTour.Request = self.tour.lastSearchbot
+            {
+                $0[.h3] = "Last Searchbot"
+
+                $0[.dt] = "Path"
+                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
+
+                $0[.dt] = "User Agent"
+                $0[.dd] = last.headers.userAgent ?? "none"
+
+                $0[.dt] = "IP address"
+                $0[.dd] = "\(last.address)"
+            }
+            if  let last:ServerTour.Request = self.tour.lastRequest
+            {
+                $0[.h3] = "Last Request"
+
+                $0[.dt] = "Path"
+                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
+
+                $0[.dt] = "User Agent"
+                $0[.dd] = last.headers.userAgent ?? "none"
+
+                $0[.dt] = "IP address"
+                $0[.dd] = "\(last.address)"
             }
 
-            if  let last:ServerProfile.Sample = self.tour.lastImpression
-            {
-                $0[.dt] = "last impression"
-                $0[.dd] { $0[.a] { $0.href = last.uri } = last.uri }
-
-                $0[.dt] = "last user-agent"
-                $0[.dd] = last.agent ?? "none"
-
-                $0[.dt] = "last IP address"
-                $0[.dd] = "\(last.ip)"
-
-                $0[.dt] = "last language"
-                $0[.dd] = last.language ?? "none"
-
-                $0[.dt] = "last referrer"
-                $0[.dd] = last.referer ?? "none"
-            }
-
-            if  let slowest:ServerTour.SlowestQuery = self.tour.slowestQuery
+            if  let query:ServerTour.SlowestQuery = self.tour.slowestQuery
             {
                 $0[.dt] = "slowest query"
                 $0[.dd]
                 {
-                    $0[.a] { $0.href = "\(slowest.uri)" } = slowest.uri
-                    $0 += " (\(slowest.duration))"
+                    $0[.a] { $0.href = "\(query.path)" } = query.path
+                    $0 += " (\(query.time))"
                 }
             }
 

@@ -1,5 +1,6 @@
 // swift-tools-version:5.9
 import PackageDescription
+import CompilerPluginSupport
 
 let package:Package = .init(
     name: "swift-unidoc",
@@ -7,6 +8,10 @@ let package:Package = .init(
     products:
     [
         .library(name: "guides", targets: ["guides"]),
+
+
+        .library(name: "IntegerEncodingMacros", targets: ["IntegerEncodingMacros"]),
+
 
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
@@ -113,6 +118,27 @@ let package:Package = .init(
         .target(name: "guides", path: "Guides"),
 
 
+        .macro(name: "UnidocMacros",
+            dependencies:
+            [
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+            ],
+            path: "Plugins/UnidocMacros"),
+
+        .target(name: "DynamicLookupMacros", dependencies:
+            [
+                .target(name: "UnidocMacros"),
+            ],
+            path: "Macros/DynamicLookupMacros"),
+
+        .target(name: "IntegerEncodingMacros", dependencies:
+            [
+                .target(name: "UnidocMacros"),
+            ],
+            path: "Macros/IntegerEncodingMacros"),
+
+
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability", dependencies:
@@ -166,7 +192,10 @@ let package:Package = .init(
                 .target(name: "HTMLStreaming"),
             ]),
 
-        .target(name: "HTMLDOM"),
+        .target(name: "HTMLDOM", dependencies:
+            [
+                .target(name: "DynamicLookupMacros"),
+            ]),
 
         .target(name: "HTMLStreaming", dependencies:
             [
@@ -198,6 +227,7 @@ let package:Package = .init(
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
+                .target(name: "UA"),
 
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -285,7 +315,10 @@ let package:Package = .init(
                 .target(name: "InlineBuffer"),
             ]),
 
-        .target(name: "Media"),
+        .target(name: "Media", dependencies:
+            [
+                .target(name: "IntegerEncodingMacros"),
+            ]),
 
         .target(name: "ModuleGraphs", dependencies:
             [
@@ -459,8 +492,7 @@ let package:Package = .init(
 
         .target(name: "UnidocProfiling", dependencies:
             [
-                .target(name: "HTTP"),
-                .target(name: "IP"),
+                .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UA"),
             ]),

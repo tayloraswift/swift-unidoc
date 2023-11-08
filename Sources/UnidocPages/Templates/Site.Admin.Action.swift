@@ -11,6 +11,8 @@ extension Site.Admin
 
         case lintUnidocEditions = "lint-unidoc-editions"
 
+        case restart = "restart"
+
         case upload = "upload"
     }
 }
@@ -23,6 +25,7 @@ extension Site.Admin.Action
         case .dropAccountDB:            return "Drop Account Database"
         case .dropUnidocDB:             return "Drop Unidoc Database"
         case .lintUnidocEditions:       return "Lint Editions"
+        case .restart:                  return "Restart Server"
         case .upload:                   return "Upload Snapshots"
         }
     }
@@ -41,6 +44,11 @@ extension Site.Admin.Action
         case .lintUnidocEditions:
             """
             This will delete all editions lacking a commit hash. Are you sure?
+            """
+
+        case .restart:
+            """
+            This will restart the server. Are you sure?
             """
 
         case .upload:

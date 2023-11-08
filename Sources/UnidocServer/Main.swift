@@ -11,9 +11,7 @@ enum Main
         let options:Options = try .parse()
         if  options.redirect
         {
-            try await options.authority.type.redirect(
-                from: ("::", options.port ?? 80),
-                on: threads)
+            try await options.authority.type.redirect(from: ("::", 80), on: threads)
             return
         }
 

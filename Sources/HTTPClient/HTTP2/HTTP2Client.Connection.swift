@@ -10,11 +10,15 @@ extension HTTP2Client
     {
         @usableFromInline internal
         let channel:any Channel
+        /// The hostname of the remote peer.
+        public
+        let remote:String
 
         @inlinable internal
-        init(channel:any Channel)
+        init(channel:any Channel, remote:String)
         {
             self.channel = channel
+            self.remote = remote
         }
     }
 }
