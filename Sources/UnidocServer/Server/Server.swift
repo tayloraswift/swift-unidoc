@@ -299,7 +299,7 @@ extension Server
         //  Don’t count login requests.
         if  endpoint is Server.Endpoint.Bounce ||
             endpoint is Server.Endpoint.Login ||
-            endpoint is Server.Endpoint.Admin
+            endpoint is Server.Endpoint.AdminDashboard
         {
             return response
         }

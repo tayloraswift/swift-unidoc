@@ -4,6 +4,8 @@ extension Server.ClientAnnotation
 {
     enum Robot:Equatable, Hashable, Sendable
     {
+        case ahrefsbot
+
         case amazonbot
 
         /// Crawler belonging to Baidu, a Chinese search engine.
@@ -32,7 +34,12 @@ extension Server.ClientAnnotation
         /// Crawler belonging to Yandex, a Russian search engine.
         case yandexbot
 
+        /// A bot whose provenance is unknown because our policylists are incomplete.
+        /// Don’t use this to represent a generic research bot; use ``other`` instead.
         case unknown
+
+        /// Some other bot.
+        case other
 
         case tool
     }
@@ -78,7 +85,7 @@ extension Server.ClientAnnotation.Robot
             ||  string.contains("crawler")
             ||  string.contains("spider")
         {
-            return .unknown
+            return .other
         }
         else
         {

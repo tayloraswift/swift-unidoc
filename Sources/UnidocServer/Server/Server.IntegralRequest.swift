@@ -48,6 +48,7 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
         //  barbie filter.
         case .barbie(_):            return nil
         case .bratz:                return nil
+        case .robot(.ahrefsbot):    return nil
         case .robot(.amazonbot):    break
         case .robot(.baiduspider):  break
         case .robot(.bingbot):      break
@@ -59,7 +60,8 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
         case .robot(.petal):        break
         case .robot(.seznam):       break
         case .robot(.yandexbot):    break
-        case .robot(.unknown):      return nil
+        case .robot(.unknown):      break
+        case .robot(.other):        return nil
         case .robot(.tool):         return nil
         }
 
