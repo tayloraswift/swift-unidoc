@@ -16,7 +16,9 @@ extension ServerProfile
         public
         var likelyMinorSearchEngine:Int
         public
-        var scanner:Int
+        var likelyAhrefsbot:Int
+        public
+        var otherRobot:Int
         public
         var tooling:Int
         public
@@ -31,7 +33,8 @@ extension ServerProfile
             likelyBaiduspider:Int = 0,
             likelyYandexbot:Int = 0,
             likelyMinorSearchEngine:Int = 0,
-            scanner:Int = 0,
+            likelyAhrefsbot:Int = 0,
+            otherRobot:Int = 0,
             tooling:Int = 0,
             barbie:Int = 0,
             bratz:Int = 0)
@@ -41,7 +44,8 @@ extension ServerProfile
             self.likelyBaiduspider = likelyBaiduspider
             self.likelyYandexbot = likelyYandexbot
             self.likelyMinorSearchEngine = likelyMinorSearchEngine
-            self.scanner = scanner
+            self.likelyAhrefsbot = likelyAhrefsbot
+            self.otherRobot = otherRobot
             self.tooling = tooling
             self.barbie = barbie
             self.bratz = bratz
@@ -67,7 +71,8 @@ extension ServerProfile.ByClient
             + self.likelyBaiduspider
             + self.likelyYandexbot
             + self.likelyMinorSearchEngine
-            + self.scanner
+            + self.likelyAhrefsbot
+            + self.otherRobot
             + self.tooling
             + self.barbie
             + self.bratz
@@ -93,18 +98,23 @@ extension ServerProfile.ByClient
             ),
             (
                 self.likelyBaiduspider,
-                "Possible Baiduspiders",
+                "Baiduspiders",
                 "baiduspider"
             ),
             (
                 self.likelyYandexbot,
-                "Possible Yandexbots",
+                "Yandexbots",
                 "yandexbot"
             ),
             (
                 self.likelyMinorSearchEngine,
-                "Possible Minor Search Engines",
+                "Minor Search Engines",
                 "minor-search-engine"
+            ),
+            (
+                self.likelyAhrefsbot,
+                "Ahrefsbots",
+                "ahrefsbot"
             ),
             (
                 self.barbie,
@@ -117,9 +127,9 @@ extension ServerProfile.ByClient
                 "bratz"
             ),
             (
-                self.scanner,
-                "Research Bots",
-                "scanner"
+                self.otherRobot,
+                "Other Robots",
+                "robot"
             ),
             (
                 self.tooling,

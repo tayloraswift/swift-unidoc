@@ -1,4 +1,4 @@
-protocol HTTPHeaderFormat
+protocol HTTPHeaderFormat:Sendable
 {
     init(authority:(some ServerAuthority).Type, status:UInt)
 

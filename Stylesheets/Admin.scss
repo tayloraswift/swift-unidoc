@@ -62,9 +62,13 @@ figure div.pie
         {
             fill: #f2bbcd;
         }
-        > *.client.scanner
+        > *.client.ahrefsbot
         {
             fill: #e1e1e1;
+        }
+        > *.client.robot
+        {
+            fill: #afafaf;
         }
         > *.client.tooling
         {

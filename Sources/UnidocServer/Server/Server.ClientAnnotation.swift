@@ -20,18 +20,20 @@ extension Server.ClientAnnotation
         {
         case .barbie:                   \.barbie
         case .bratz:                    \.bratz
+        case .robot(.ahrefsbot):        \.likelyAhrefsbot
         case .robot(.amazonbot):        \.likelyMinorSearchEngine
         case .robot(.baiduspider):      \.likelyBaiduspider
         case .robot(.bingbot):          \.verifiedBingbot
         case .robot(.duckduckbot):      \.likelyMinorSearchEngine
-        case .robot(.google):           \.scanner
+        case .robot(.google):           \.otherRobot
         case .robot(.googlebot):        \.verifiedGooglebot
         case .robot(.quant):            \.likelyMinorSearchEngine
         case .robot(.naver):            \.likelyMinorSearchEngine
         case .robot(.petal):            \.likelyMinorSearchEngine
         case .robot(.seznam):           \.likelyMinorSearchEngine
         case .robot(.yandexbot):        \.likelyYandexbot
-        case .robot(.unknown):          \.scanner
+        case .robot(.unknown):          \.otherRobot
+        case .robot(.other):            \.otherRobot
         case .robot(.tool):             \.tooling
         }
     }
@@ -93,12 +95,15 @@ extension Server.ClientAnnotation
                         {
                             return .robot(.baiduspider)
                         }
+                        else if url.contains("ahrefs")
+                        {
+                            return .robot(.ahrefsbot)
+                        }
 
-                        if      url.contains("ahrefs")
-                            ||  url.contains("censys")
+                        if      url.contains("censys")
                             ||  url.contains("semrush")
                         {
-                            return .robot(.unknown)
+                            return .robot(.other)
                         }
                     }
                     else if
@@ -121,7 +126,7 @@ extension Server.ClientAnnotation
         else
         {
             //  Didn’t send a language: definitely a bot.
-            return .robot(.unknown)
+            return .robot(.other)
         }
 
         //  Sent a referrer: might be a Barbie.
@@ -187,7 +192,7 @@ extension Server.ClientAnnotation
         {
         case Int.min ..<  0:    return .barbie(language)
         case 0       ... 10:    return .bratz
-        case _:                 return .robot(.unknown)
+        case _:                 return .robot(.other)
         }
     }
 }
