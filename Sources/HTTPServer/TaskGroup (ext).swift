@@ -1,6 +1,6 @@
 extension TaskGroup<Void>
 {
-    mutating
+    @inlinable internal mutating
     func iterate<Inbound>(_ inbound:Inbound,
         width:Int,
         with body:@Sendable @escaping (Inbound.Element) async -> (),

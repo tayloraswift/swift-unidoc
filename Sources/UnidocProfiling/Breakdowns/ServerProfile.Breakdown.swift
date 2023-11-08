@@ -8,53 +8,43 @@ extension ServerProfile
         private
         var languages:Pie<ByLanguage.Stat>
         private
-        var protocols:
-        (
-            toBarbie:Pie<ByProtocol.Stat>,
-            toBratz:Pie<ByProtocol.Stat>,
-            toSearch:Pie<ByProtocol.Stat>,
-            toOther:Pie<ByProtocol.Stat>
-        )
-        private
         var responses:
         (
             toBarbie:Pie<ByStatus.Stat>,
             toBratz:Pie<ByStatus.Stat>,
-            toSearch:Pie<ByStatus.Stat>,
-            toOther:Pie<ByStatus.Stat>
+            toGooglebot:Pie<ByStatus.Stat>,
+            toBingbot:Pie<ByStatus.Stat>,
+            toOtherSearch:Pie<ByStatus.Stat>,
+            toOtherRobots:Pie<ByStatus.Stat>
         )
         private
         var requests:
         (
-            pages:Pie<ByAgent.Stat>,
-            bytes:Pie<ByAgent.Stat>
+            http2:Pie<ByClient.Stat>,
+            http1:Pie<ByClient.Stat>,
+            bytes:Pie<ByClient.Stat>
         )
 
         private
         init(
             languages:Pie<ByLanguage.Stat>,
-            protocols:
-            (
-                toBarbie:Pie<ByProtocol.Stat>,
-                toBratz:Pie<ByProtocol.Stat>,
-                toSearch:Pie<ByProtocol.Stat>,
-                toOther:Pie<ByProtocol.Stat>
-            ),
             responses:
             (
                 toBarbie:Pie<ByStatus.Stat>,
                 toBratz:Pie<ByStatus.Stat>,
-                toSearch:Pie<ByStatus.Stat>,
-                toOther:Pie<ByStatus.Stat>
+                toGooglebot:Pie<ByStatus.Stat>,
+                toBingbot:Pie<ByStatus.Stat>,
+                toOtherSearch:Pie<ByStatus.Stat>,
+                toOtherRobots:Pie<ByStatus.Stat>
             ),
             requests:
             (
-                pages:Pie<ByAgent.Stat>,
-                bytes:Pie<ByAgent.Stat>
+                http2:Pie<ByClient.Stat>,
+                http1:Pie<ByClient.Stat>,
+                bytes:Pie<ByClient.Stat>
             ))
         {
             self.languages = languages
-            self.protocols = protocols
             self.responses = responses
             self.requests = requests
         }
@@ -67,31 +57,26 @@ extension ServerProfile.Breakdown
     {
         self.init(
             languages: stats.languages.chart(stratum: "Barbies served"),
-            protocols:
-            (
-                toBarbie: stats.protocols.toBarbie.chart(
-                    stratum: "requests made by Barbies"),
-                toBratz: stats.protocols.toBratz.chart(
-                    stratum: "requests made by Bratz"),
-                toSearch: stats.protocols.toSearch.chart(
-                    stratum: "requests made by Search Engines"),
-                toOther: stats.protocols.toOther.chart(
-                    stratum: "requests made by others")
-            ),
             responses:
             (
                 toBarbie: stats.responses.toBarbie.chart(
                     stratum: "responses to Barbies"),
                 toBratz: stats.responses.toBratz.chart(
                     stratum: "responses to Bratz"),
-                toSearch: stats.responses.toSearch.chart(
-                    stratum: "responses to Search Engines"),
-                toOther: stats.responses.toOther.chart(
-                    stratum: "responses to others")
+                toGooglebot: stats.responses.toGooglebot.chart(
+                    stratum: "responses to Googlebot"),
+                toBingbot: stats.responses.toBingbot.chart(
+                    stratum: "responses to Bingbot"),
+                toOtherSearch: stats.responses.toOtherSearch.chart(
+                    stratum: "responses to other search engines"),
+                toOtherRobots: stats.responses.toOtherRobots.chart(
+                    stratum: "responses to other robots")
             ),
             requests:
             (
-                pages: stats.requests.pages.chart(
+                http2: stats.requests.http2.chart(
+                    stratum: "pages served"),
+                http1: stats.requests.http1.chart(
                     stratum: "pages served"),
                 bytes: stats.requests.bytes.chart(
                     stratum: "bytes served")
@@ -103,11 +88,18 @@ extension ServerProfile.Breakdown:HyperTextOutputStreamable
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[.h3] = "Agents"
+        html[.h3] = "Clients (HTTP/2)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.requests.pages
-            $0[.figcaption] { $0[.dl] = self.requests.pages.legend }
+            $0[.div] { $0.class = "pie" } = self.requests.http2
+            $0[.figcaption] { $0[.dl] = self.requests.http2.legend }
+        }
+
+        html[.h3] = "Clients (HTTP/1.1)"
+        html[.figure, { $0.class = "chart" }]
+        {
+            $0[.div] { $0.class = "pie" } = self.requests.http1
+            $0[.figcaption] { $0[.dl] = self.requests.http1.legend }
         }
 
         html[.h3] = "Data Transfer"
@@ -138,46 +130,32 @@ extension ServerProfile.Breakdown:HyperTextOutputStreamable
             $0[.figcaption] { $0[.dl] = self.responses.toBratz.legend }
         }
 
-        html[.h3] = "Responses (Search Engines)"
+        html[.h3] = "Responses (Googlebot)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.responses.toSearch
-            $0[.figcaption] { $0[.dl] = self.responses.toSearch.legend }
+            $0[.div] { $0.class = "pie" } = self.responses.toGooglebot
+            $0[.figcaption] { $0[.dl] = self.responses.toGooglebot.legend }
         }
 
-        html[.h3] = "Responses (Others)"
+        html[.h3] = "Responses (Bingbot)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.responses.toOther
-            $0[.figcaption] { $0[.dl] = self.responses.toOther.legend }
+            $0[.div] { $0.class = "pie" } = self.responses.toBingbot
+            $0[.figcaption] { $0[.dl] = self.responses.toBingbot.legend }
         }
 
-        html[.h3] = "Protocols (Barbies)"
+        html[.h3] = "Responses (Other Search Engines)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.protocols.toBarbie
-            $0[.figcaption] { $0[.dl] = self.protocols.toBarbie.legend }
+            $0[.div] { $0.class = "pie" } = self.responses.toOtherSearch
+            $0[.figcaption] { $0[.dl] = self.responses.toOtherSearch.legend }
         }
 
-        html[.h3] = "Protocols (Bratz)"
+        html[.h3] = "Responses (Other Robots)"
         html[.figure, { $0.class = "chart" }]
         {
-            $0[.div] { $0.class = "pie" } = self.protocols.toBratz
-            $0[.figcaption] { $0[.dl] = self.protocols.toBratz.legend }
-        }
-
-        html[.h3] = "Protocols (Search Engines)"
-        html[.figure, { $0.class = "chart" }]
-        {
-            $0[.div] { $0.class = "pie" } = self.protocols.toSearch
-            $0[.figcaption] { $0[.dl] = self.protocols.toSearch.legend }
-        }
-
-        html[.h3] = "Protocols (Others)"
-        html[.figure, { $0.class = "chart" }]
-        {
-            $0[.div] { $0.class = "pie" } = self.protocols.toOther
-            $0[.figcaption] { $0[.dl] = self.protocols.toOther.legend }
+            $0[.div] { $0.class = "pie" } = self.responses.toOtherRobots
+            $0[.figcaption] { $0[.dl] = self.responses.toOtherRobots.legend }
         }
     }
 }

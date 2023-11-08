@@ -18,44 +18,52 @@ public
 protocol _HTTPServerIntegralRequest:Sendable
 {
     init?(get path:String,
-        headers:HPACKHeaders,
-        address:IP.V6)
+        headers:borrowing HPACKHeaders,
+        address:IP.V6,
+        service:IP.Service?)
 
     init?(get path:String,
-        headers:HTTPHeaders,
-        address:IP.V6)
+        headers:borrowing HTTPHeaders,
+        address:IP.V6,
+        service:IP.Service?)
 
     init?(post path:String,
-        headers:HPACKHeaders,
+        headers:borrowing HPACKHeaders,
         address:IP.V6,
-        body:[UInt8])
+        service:IP.Service?,
+        body:borrowing [UInt8])
 
     init?(post path:String,
-        headers:HTTPHeaders,
+        headers:borrowing HTTPHeaders,
         address:IP.V6,
-        body:[UInt8])
+        service:IP.Service?,
+        body:consuming [UInt8])
 }
 extension HTTP.ServerIntegralRequest
 {
     @inlinable public
     init?(get path:String,
-        headers:HTTPHeaders,
-        address:IP.V6)
+        headers:borrowing HTTPHeaders,
+        address:IP.V6,
+        service:IP.Service?)
     {
         self.init(get: path,
-            headers: .init(httpHeaders: headers),
-            address: address)
+            headers: .init(httpHeaders: copy headers),
+            address: address,
+            service: service)
     }
 
     @inlinable public
     init?(post path:String,
-        headers:HTTPHeaders,
+        headers:borrowing HTTPHeaders,
         address:IP.V6,
-        body:[UInt8])
+        service:IP.Service?,
+        body:consuming [UInt8])
     {
         self.init(post: path,
-            headers: .init(httpHeaders: headers),
+            headers: .init(httpHeaders: copy headers),
             address: address,
+            service: service,
             body: body)
     }
 }

@@ -7,7 +7,7 @@ import NIOHTTP2
 
 extension HTTP
 {
-    struct ServerMessage<Authority, Headers>
+    struct ServerMessage<Authority, Headers>:Sendable
         where Authority:ServerAuthority, Headers:HTTPHeaderFormat
     {
         let status:UInt

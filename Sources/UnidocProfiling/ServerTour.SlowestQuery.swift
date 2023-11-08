@@ -4,15 +4,15 @@ extension ServerTour
     struct SlowestQuery:Sendable
     {
         public
-        let duration:Duration
+        let time:Duration
         public
-        let uri:String
+        let path:String
 
         @inlinable public
-        init(duration:Duration, uri:String)
+        init(time:Duration, path:String)
         {
-            self.duration = duration
-            self.uri = uri
+            self.time = time
+            self.path = path
         }
     }
 }

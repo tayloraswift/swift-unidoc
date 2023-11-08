@@ -39,7 +39,7 @@ extension GitHubClient<GitHub.API>.Connection
             [
                 ":method": "POST",
                 ":scheme": "https",
-                ":authority": "api.github.com",
+                ":authority": self.http2.remote,
                 ":path": "/graphql",
 
                 "authorization": "Bearer \(token)",
@@ -78,7 +78,7 @@ extension GitHubClient<GitHub.API>.Connection
             }
 
         case _:
-            throw GitHubClient<GitHub.API>.StatusError.init(code: response.status)
+            throw HTTP.StatusError.init(code: response.status)
         }
     }
 
@@ -98,7 +98,7 @@ extension GitHubClient<GitHub.API>.Connection
             [
                 ":method": "GET",
                 ":scheme": "https",
-                ":authority": "api.github.com",
+                ":authority": self.http2.remote,
                 ":path": endpoint,
 
                 "authorization": token.map { "Bearer \($0)" } ??
@@ -126,7 +126,7 @@ extension GitHubClient<GitHub.API>.Connection
             case 301?:
                 if let location:String = response.headers?["location"].first
                 {
-                    endpoint = String.init(location.trimmingPrefix("https://api.github.com"))
+                    endpoint = .init(location.trimmingPrefix("https://\(self.http2.remote)"))
                     continue following
                 }
 
@@ -146,6 +146,6 @@ extension GitHubClient<GitHub.API>.Connection
             break following
         }
 
-        throw GitHubClient<GitHub.API>.StatusError.init(code: status)
+        throw HTTP.StatusError.init(code: status)
     }
 }

@@ -34,6 +34,8 @@ extension MarkdownInline:ParsableAsInlineMarkup
         case let span as Strong:
             self = .container(.init(from: span, in: id, as: .strong))
 
+        //  These can actually appear in link text; they should be interpreted as
+        //  normal code spans.
         case let link as SymbolLink:
             self = .code(.init(text: link.destination ?? ""))
 

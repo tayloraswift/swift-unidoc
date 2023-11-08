@@ -100,6 +100,6 @@ extension HTTP2Client
             channel.close(promise: nil)
         }
 
-        return try await body(Connection.init(channel: channel))
+        return try await body(Connection.init(channel: channel, remote: self.remote))
     }
 }

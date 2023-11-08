@@ -1,3 +1,5 @@
+import HTTP
+
 extension ServerProfile
 {
     @frozen public
@@ -77,6 +79,21 @@ extension ServerProfile.ByLanguage:ExpressibleByDictionaryLiteral
     init(dictionaryLiteral elements:(Never, Int)...)
     {
         self.init(ar: 0)
+    }
+}
+extension ServerProfile.ByLanguage
+{
+    @inlinable public
+    subscript(language:HTTP.AcceptLanguage) -> Int
+    {
+        _read
+        {
+            yield  self[keyPath: language.field]
+        }
+        _modify
+        {
+            yield  &self[keyPath: language.field]
+        }
     }
 }
 extension ServerProfile.ByLanguage
