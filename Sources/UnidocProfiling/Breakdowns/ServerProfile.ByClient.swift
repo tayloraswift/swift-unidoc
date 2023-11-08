@@ -112,11 +112,6 @@ extension ServerProfile.ByClient
                 "minor-search-engine"
             ),
             (
-                self.likelyAhrefsbot,
-                "Ahrefsbots",
-                "ahrefsbot"
-            ),
-            (
                 self.barbie,
                 "Barbies",
                 "barbie"
@@ -125,6 +120,11 @@ extension ServerProfile.ByClient
                 self.bratz,
                 "Bratz",
                 "bratz"
+            ),
+            (
+                self.likelyAhrefsbot,
+                "Ahrefsbots",
+                "ahrefsbot"
             ),
             (
                 self.otherRobot,
