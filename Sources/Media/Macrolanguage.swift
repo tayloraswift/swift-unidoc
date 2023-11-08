@@ -1,189 +1,6 @@
-import InlineASCII
+import IntegerEncodingMacros
 
-@RawRepresentableByIntegerEncoding(
-    "aa",
-    "ab",
-    "ae",
-    "af",
-    "ak",
-    "am",
-    "an",
-    "ar",
-    "as",
-    "av",
-    "ay",
-    "az",
-    "ba",
-    "be",
-    "bg",
-    "bi",
-    "bm",
-    "bn",
-    "bo",
-    "br",
-    "bs",
-    "ca",
-    "ce",
-    "ch",
-    "co",
-    "cr",
-    "cs",
-    "cu",
-    "cv",
-    "cy",
-    "da",
-    "de",
-    "dv",
-    "dz",
-    "ee",
-    "el",
-    "en",
-    "eo",
-    "es",
-    "et",
-    "eu",
-    "fa",
-    "ff",
-    "fi",
-    "fj",
-    "fo",
-    "fr",
-    "fy",
-    "ga",
-    "gd",
-    "gl",
-    "gn",
-    "gu",
-    "gv",
-    "ha",
-    "he",
-    "hi",
-    "ho",
-    "hr",
-    "ht",
-    "hu",
-    "hy",
-    "hz",
-    "ia",
-    "id",
-    "ie",
-    "ig",
-    "ii",
-    "ik",
-    "io",
-    "is",
-    "it",
-    "iu",
-    "ja",
-    "jv",
-    "ka",
-    "kg",
-    "ki",
-    "kj",
-    "kk",
-    "kl",
-    "km",
-    "kn",
-    "ko",
-    "kr",
-    "ks",
-    "ku",
-    "kv",
-    "kw",
-    "ky",
-    "la",
-    "lb",
-    "lg",
-    "li",
-    "ln",
-    "lo",
-    "lt",
-    "lu",
-    "lv",
-    "mg",
-    "mh",
-    "mi",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "na",
-    "nb",
-    "nd",
-    "ne",
-    "ng",
-    "nl",
-    "nn",
-    "no",
-    "nr",
-    "nv",
-    "ny",
-    "oc",
-    "oj",
-    "om",
-    "or",
-    "os",
-    "pa",
-    "pi",
-    "pl",
-    "ps",
-    "pt",
-    "qu",
-    "rm",
-    "rn",
-    "ro",
-    "ru",
-    "rw",
-    "sa",
-    "sc",
-    "sd",
-    "se",
-    "sg",
-    "si",
-    "sk",
-    "sl",
-    "sm",
-    "sn",
-    "so",
-    "sq",
-    "sr",
-    "ss",
-    "st",
-    "su",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "tg",
-    "th",
-    "ti",
-    "tk",
-    "tl",
-    "tn",
-    "to",
-    "tr",
-    "ts",
-    "tt",
-    "tw",
-    "ty",
-    "ug",
-    "uk",
-    "ur",
-    "uz",
-    "ve",
-    "vi",
-    "vo",
-    "wa",
-    "wo",
-    "xh",
-    "yi",
-    "yo",
-    "za",
-    "zh",
-    "zu")
+@GenerateCasesByIntegerEncoding
 @frozen public
 struct Macrolanguage:Equatable, Hashable, Sendable
 {
@@ -194,6 +11,194 @@ struct Macrolanguage:Equatable, Hashable, Sendable
     init(rawValue:UInt16)
     {
         self.rawValue = rawValue
+    }
+
+    private
+    enum AvailableCases
+    {
+        case aa
+        case ab
+        case ae
+        case af
+        case ak
+        case am
+        case an
+        case ar
+        case `as`
+        case av
+        case ay
+        case az
+        case ba
+        case be
+        case bg
+        case bi
+        case bm
+        case bn
+        case bo
+        case br
+        case bs
+        case ca
+        case ce
+        case ch
+        case co
+        case cr
+        case cs
+        case cu
+        case cv
+        case cy
+        case da
+        case de
+        case dv
+        case dz
+        case ee
+        case el
+        case en
+        case eo
+        case es
+        case et
+        case eu
+        case fa
+        case ff
+        case fi
+        case fj
+        case fo
+        case fr
+        case fy
+        case ga
+        case gd
+        case gl
+        case gn
+        case gu
+        case gv
+        case ha
+        case he
+        case hi
+        case ho
+        case hr
+        case ht
+        case hu
+        case hy
+        case hz
+        case ia
+        case id
+        case ie
+        case ig
+        case ii
+        case ik
+        case io
+        case `is`
+        case it
+        case iu
+        case ja
+        case jv
+        case ka
+        case kg
+        case ki
+        case kj
+        case kk
+        case kl
+        case km
+        case kn
+        case ko
+        case kr
+        case ks
+        case ku
+        case kv
+        case kw
+        case ky
+        case la
+        case lb
+        case lg
+        case li
+        case ln
+        case lo
+        case lt
+        case lu
+        case lv
+        case mg
+        case mh
+        case mi
+        case mk
+        case ml
+        case mn
+        case mr
+        case ms
+        case mt
+        case my
+        case na
+        case nb
+        case nd
+        case ne
+        case ng
+        case nl
+        case nn
+        case no
+        case nr
+        case nv
+        case ny
+        case oc
+        case oj
+        case om
+        case or
+        case os
+        case pa
+        case pi
+        case pl
+        case ps
+        case pt
+        case qu
+        case rm
+        case rn
+        case ro
+        case ru
+        case rw
+        case sa
+        case sc
+        case sd
+        case se
+        case sg
+        case si
+        case sk
+        case sl
+        case sm
+        case sn
+        case so
+        case sq
+        case sr
+        case ss
+        case st
+        case su
+        case sv
+        case sw
+        case ta
+        case te
+        case tg
+        case th
+        case ti
+        case tk
+        case tl
+        case tn
+        case to
+        case tr
+        case ts
+        case tt
+        case tw
+        case ty
+        case ug
+        case uk
+        case ur
+        case uz
+        case ve
+        case vi
+        case vo
+        case wa
+        case wo
+        case xh
+        case yi
+        case yo
+        case za
+        case zh
+        case zu
     }
 }
 extension Macrolanguage:RawRepresentableByIntegerEncoding

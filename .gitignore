@@ -8,6 +8,8 @@
 
 Assets/secrets/
 
+/crash*
+
 Local/Deployment/data/
 Local/Server/Certificates/*.pem
 
