@@ -36,7 +36,7 @@ struct StaticLinker
     var router:StaticRouter
 
     private
-    var supplements:[Int32: [MarkdownSupplement]]
+    var supplements:[Int32: Supplement]
 
     public private(set)
     var errors:[any StaticLinkerError]
@@ -320,25 +320,29 @@ extension StaticLinker
                     culture: namespace)
 
                 //  We pass a single-element array as the sources list, which relies
-                //  on the fact that ``MarkdownDocumentationSupplement`` uses `0` as
+                //  on the fact that ``MarkdownSupplement`` uses `0` as
                 //  the source id by default.
                 let sources:[MarkdownSource] = [article.source]
+                let file:Int32? = article.source.location?.file
 
                 if  let standalone:Int32 = article.standalone
                 {
                     self.symbolizer.graph.articles.nodes[standalone].body = outliner.link(
                         body: article.body,
-                        from: sources)
+                        from: sources,
+                        file: file)
                 }
                 else
                 {
                     //  This is the article for the module’s landing page.
                     self.symbolizer.graph.cultures[culture].article = outliner.link(
                         body: .init(
+                            metadata: article.body.metadata,
                             overview: article.body.overview,
                             details: article.body.details,
                             topics: []),
-                        from: sources)
+                        from: sources,
+                        file: file)
 
                     self.symbolizer.graph.cultures[culture].topics = outliner.link(
                         topics: article.body.topics,
@@ -391,7 +395,17 @@ extension StaticLinker
 
             if  let decl:Int32
             {
-                self.supplements[decl, default: []].append(supplement)
+                {
+                    if  case nil = $0
+                    {
+                        $0 = .init(parsed: supplement, source: source)
+                    }
+                    else
+                    {
+                        self.errors.append(SupplementError.multiple(location))
+                    }
+                } (&self.supplements[decl])
+
                 return nil
             }
             else
@@ -451,7 +465,8 @@ extension StaticLinker
         }
 
         let resolver:CodelinkResolver<Int32> = .init(table: self.codelinks, scope: .init(
-            namespace: namespace))
+            namespace: namespace,
+            imports: self.imports))
 
         switch resolver.resolve(codelink)
         {
@@ -528,7 +543,21 @@ extension StaticLinker
             {
                 self.symbolizer.intern($0)
             }
-            let article:SymbolGraph.Article? = decl.comment.map
+
+            let supplement:Supplement? = self.supplements.removeValue(forKey: scalar)
+            let comment:MarkdownSource? = decl.comment.map
+            {
+                .init(comment: $0, in: location?.file)
+            }
+
+            let article:SymbolGraph.Article?
+
+            if  case nil = supplement,
+                case nil = comment
+            {
+                article = nil
+            }
+            else
             {
                 var outliner:StaticOutliner = .init(
                     codelinks: self.codelinks,
@@ -543,9 +572,49 @@ extension StaticLinker
                     self.errors += outliner.errors
                 }
 
-                return outliner.link(comment: .init(from: $0, in: location?.file),
-                    parser: self.doccommentParser,
-                    adding: self.supplements.removeValue(forKey: scalar))
+                /// The file associated with the doccomment is always the same as
+                /// the file the declaration itself lives in, so we would only ever
+                /// care about the file associated with the supplement.
+                let file:Int32? = supplement?.source.location?.file
+
+                switch (comment, supplement)
+                {
+                case (nil, nil):
+                    fatalError("unreachable")
+
+                case (let comment?, nil):
+                    article = outliner.link(comment: comment, parser: self.doccommentParser)
+
+                case (let comment?, let supplement?):
+                    if  case .override? = supplement.parsed.body.metadata.merge
+                    {
+                        fallthrough
+                    }
+                    else if case nil = supplement.parsed.body.metadata.merge
+                    {
+                        self.errors.append(
+                            SupplementError.implicitConcatenation(location))
+                    }
+
+                    //  The supplements all get index 0 when they are loaded,
+                    //  so the doccomment appears at index 1 in the sources array.
+                    let sources:[MarkdownSource] = [supplement.source, comment]
+                    var body:MarkdownDocumentation = .init(parsing: comment.text,
+                        from: 1,
+                        with: self.doccommentParser,
+                        as: SwiftFlavoredMarkdownComment.self)
+
+                    body.merge(appending: supplement.parsed.body)
+
+                    article = outliner.link(body: body,
+                        from: sources,
+                        file: file)
+
+                case (nil, let supplement?):
+                    article = outliner.link(body: supplement.parsed.body,
+                        from: [supplement.source],
+                        file: file)
+                }
             }
 
             {
@@ -599,7 +668,7 @@ extension StaticLinker
                     }
                 }
             }
-            if  let comment
+            if  let comment:Compiler.Doccomment
             {
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
@@ -617,9 +686,9 @@ extension StaticLinker
                         culture: self.symbolizer.graph.namespaces[$0.culture],
                         scope: [String].init(`extension`.path))
 
-                    $0.article = outliner.link(
-                        comment: .init(from: comment, in: file),
-                        parser: parser)
+                    let comment:MarkdownSource = .init(comment: comment, in: file)
+
+                    $0.article = outliner.link(comment: comment, parser: parser)
 
                     self.errors += outliner.errors
 

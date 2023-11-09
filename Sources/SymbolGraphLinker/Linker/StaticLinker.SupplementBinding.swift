@@ -1,8 +1,8 @@
 import ModuleGraphs
 
-extension SupplementBindingError
+extension StaticLinker
 {
-    enum Resolution
+    enum SupplementBinding
     {
         case none(in:ModuleIdentifier)
         case vector(Int32, self:Int32)

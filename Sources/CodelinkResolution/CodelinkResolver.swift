@@ -62,6 +62,5 @@ extension CodelinkResolver
         case .qualified:
             return self.table.query(qualified: link.path.components, suffix: link.suffix)
         }
-
     }
 }
