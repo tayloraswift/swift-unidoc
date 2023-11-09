@@ -1,5 +1,9 @@
+@available(*, deprecated, renamed: "SourceReference")
+public
+typealias SourceText = SourceReference
+
 @frozen public
-struct SourceText<File>
+struct SourceReference<File>
 {
     public
     let range:Range<SourcePosition>
@@ -13,7 +17,7 @@ struct SourceText<File>
         self.file = file
     }
 }
-extension SourceText
+extension SourceReference
 {
     @inlinable public
     var start:SourceLocation<File>
@@ -26,19 +30,19 @@ extension SourceText
         .init(position: self.range.upperBound, file: self.file)
     }
 }
-extension SourceText:Equatable where File:Equatable
+extension SourceReference:Equatable where File:Equatable
 {
 }
-extension SourceText:Hashable where File:Hashable
+extension SourceReference:Hashable where File:Hashable
 {
 }
-extension SourceText:Sendable where File:Sendable
+extension SourceReference:Sendable where File:Sendable
 {
 }
-extension SourceText
+extension SourceReference
 {
     @inlinable public
-    func map<T>(_ transform:(File) throws -> T) rethrows -> SourceText<T>
+    func map<T>(_ transform:(File) throws -> T) rethrows -> SourceReference<T>
     {
         .init(range: self.range, file: try transform(file))
     }

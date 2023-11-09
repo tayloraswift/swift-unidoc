@@ -3,7 +3,7 @@ import UnidocDiagnostics
 
 extension Diagnostic.Context<Int32>
 {
-    init(of subject:SourceText<Int>, in sources:borrowing [MarkdownSource])
+    init(of subject:SourceReference<Int>, in sources:borrowing [MarkdownSource])
     {
         self.init(of: subject.range, in: sources[subject.file])
     }
