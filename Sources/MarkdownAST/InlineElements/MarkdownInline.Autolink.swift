@@ -7,7 +7,7 @@ extension MarkdownInline
     {
         /// Where in the markdown source text this autolink was parsed from, if known.
         public
-        let source:SourceText<Int>?
+        let source:SourceReference<Int>?
         /// Indicates if this autolink originated from an inline code span.
         public
         let code:Bool
@@ -16,7 +16,7 @@ extension MarkdownInline
         let text:String
 
         @inlinable public
-        init(_ text:String, code:Bool, source:SourceText<Int>?)
+        init(_ text:String, code:Bool, source:SourceReference<Int>?)
         {
             self.source = source
             self.code = code

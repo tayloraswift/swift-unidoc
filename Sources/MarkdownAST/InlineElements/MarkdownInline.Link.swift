@@ -22,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Link
 {
     @inlinable public
-    init(target:String?, elements:[MarkdownInline], source:SourceText<Int>?)
+    init(target:String?, elements:[MarkdownInline], source:SourceReference<Int>?)
     {
         guard let target:String
         else

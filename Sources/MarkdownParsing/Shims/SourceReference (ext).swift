@@ -1,7 +1,7 @@
 import Markdown
 import Sources
 
-extension SourceText
+extension SourceReference
 {
     init?(_ range:Range<Markdown.SourceLocation>?, in file:File, trimming trim:Int = 0)
     {

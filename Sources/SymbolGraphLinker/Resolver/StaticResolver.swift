@@ -29,7 +29,7 @@ extension StaticResolver
     func outline(expression:String,
         as doclink:Doclink,
         in sources:[MarkdownSource],
-        at source:SourceText<Int>?) -> SymbolGraph.Outline?
+        at source:SourceReference<Int>?) -> SymbolGraph.Outline?
     {
         self.doclinks.resolve(doclink).map
         {
@@ -40,7 +40,7 @@ extension StaticResolver
     func outline(expression:String,
         as codelink:Codelink,
         in sources:[MarkdownSource],
-        at source:SourceText<Int>?) -> SymbolGraph.Outline?
+        at source:SourceReference<Int>?) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
         {
