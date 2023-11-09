@@ -6,6 +6,15 @@ extension Barbie
     struct ID:Equatable
     {
         public
-        init() {}
+        let x:Int
+        public private(set)
+        var y:Int
+
+        public
+        init()
+        {
+            self.x = 0
+            self.y = 0
+        }
     }
 }

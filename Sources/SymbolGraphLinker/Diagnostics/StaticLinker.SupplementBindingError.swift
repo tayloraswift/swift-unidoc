@@ -3,28 +3,31 @@ import Codelinks
 import SymbolGraphs
 import UnidocDiagnostics
 
-struct SupplementBindingError:Error
+extension StaticLinker
 {
-    let resolution:Resolution
-
-    let codelink:Codelink
-    let context:Diagnostic.Context<Int32>
-
-    init(_ resolution:Resolution,
-        codelink:Codelink,
-        context:Diagnostic.Context<Int32>? = nil)
+    struct SupplementBindingError:Error
     {
-        self.resolution = resolution
-        self.codelink = codelink
-        self.context = context ?? .init()
+        let resolved:SupplementBinding
+
+        let codelink:Codelink
+        let context:Diagnostic.Context<Int32>
+
+        init(_ resolved:SupplementBinding,
+            codelink:Codelink,
+            context:Diagnostic.Context<Int32>? = nil)
+        {
+            self.resolved = resolved
+            self.codelink = codelink
+            self.context = context ?? .init()
+        }
     }
 }
-extension SupplementBindingError
+extension StaticLinker.SupplementBindingError
 {
     private
     var message:String
     {
-        switch self.resolution
+        switch self.resolved
         {
         case .none(in: let culture):
             return """
@@ -39,12 +42,12 @@ extension SupplementBindingError
         }
     }
 }
-extension SupplementBindingError:StaticLinkerError
+extension StaticLinker.SupplementBindingError:StaticLinkerError
 {
     func symbolicated(with symbolicator:StaticSymbolicator) -> [Diagnostic]
     {
         let diagnostics:[Diagnostic]
-        switch self.resolution
+        switch self.resolved
         {
         case .none(in: let culture):
             diagnostics =
