@@ -3,11 +3,11 @@ import UnidocDiagnostics
 
 extension Diagnostic.Context<Int32>
 {
-    init(of subject:SourceText<Int>, in sources:__shared [MarkdownSource])
+    init(of subject:SourceText<Int>, in sources:borrowing [MarkdownSource])
     {
         self.init(of: subject.range, in: sources[subject.file])
     }
-    init(of range:Range<SourcePosition>, in source:__shared MarkdownSource)
+    init(of range:Range<SourcePosition>, in source:borrowing MarkdownSource)
     {
         self.init(location: source.location.map { $0.translated(by: range.lowerBound) } ?? nil)
 

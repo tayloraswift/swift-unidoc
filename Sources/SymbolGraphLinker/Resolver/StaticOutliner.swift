@@ -156,10 +156,8 @@ extension StaticOutliner
 
     mutating
     func link(comment:MarkdownSource,
-        parser:SwiftFlavoredMarkdownParser,
-        adding extra:[MarkdownSupplement]? = nil) -> SymbolGraph.Article
+        parser:SwiftFlavoredMarkdownParser) -> SymbolGraph.Article
     {
-        //  TODO: use supplements
         let sources:[MarkdownSource] = [comment]
         //  Don’t include file scalar, it is the same as the source location of the decl.
         return self.link(body: .init(parsing: comment.text,
@@ -167,13 +165,13 @@ extension StaticOutliner
                 with: parser,
                 as: SwiftFlavoredMarkdownComment.self),
             from: sources,
-            file: false)
+            file: nil)
     }
 
     mutating
     func link(body:MarkdownDocumentation,
         from sources:[MarkdownSource],
-        file:Bool = true) -> SymbolGraph.Article
+        file:Int32?) -> SymbolGraph.Article
     {
         let overview:MarkdownBytecode = self.link(
             overview: body.overview,
@@ -187,8 +185,6 @@ extension StaticOutliner
             details: body.details,
             topics: body.topics,
             from: sources)
-
-        let file:Int32? = file && sources.count == 1 ? sources[0].location?.file : nil
 
         return .init(
             outlines: self.cache.clear(),
