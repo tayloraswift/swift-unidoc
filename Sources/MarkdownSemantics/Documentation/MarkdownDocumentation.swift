@@ -4,6 +4,8 @@ import MarkdownAST
 struct MarkdownDocumentation
 {
     public
+    var metadata:Metadata
+    public
     var overview:MarkdownBlock.Paragraph?
     public
     var details:Details
@@ -11,8 +13,13 @@ struct MarkdownDocumentation
     var topics:[Topic]
 
     @inlinable public
-    init(overview:MarkdownBlock.Paragraph?, details:Details, topics:[Topic])
+    init(
+        metadata:Metadata,
+        overview:MarkdownBlock.Paragraph?,
+        details:Details,
+        topics:[Topic])
     {
+        self.metadata = metadata
         self.overview = overview
         self.details = details
         self.topics = topics
@@ -33,7 +40,9 @@ extension MarkdownDocumentation
         var parameters:(discussion:[MarkdownBlock], list:[MarkdownBlock.Parameter]) = ([], [])
         var returns:[MarkdownBlock] = []
         var `throws`:[MarkdownBlock] = []
+
         var interpreter:MarkdownInterpreter = .init()
+        var metadata:Metadata = .init()
 
         for block:MarkdownBlock in blocks
         {
@@ -116,6 +125,18 @@ extension MarkdownDocumentation
                     interpreter.append(aside(quote.elements))
                 }
 
+            case let block as MarkdownBlock.Directive:
+                guard block.name == "Metadata"
+                else
+                {
+                    //  Don’t know how to handle these yet, so we just render them
+                    //  as code blocks.
+                    interpreter.append(block)
+                    continue
+                }
+
+                metadata.update(with: block.elements)
+
             case let block:
                 interpreter.append(block)
             }
@@ -137,12 +158,51 @@ extension MarkdownDocumentation
             overview = nil
         }
 
-        self.init(overview: overview, details: .init(
+        self.init(
+            metadata: metadata,
+            overview: overview,
+            details: .init(
                 parameters: parameters.discussion.isEmpty && parameters.list.isEmpty ?
                     nil : .init(parameters.discussion, list: parameters.list),
                 returns: returns.isEmpty ? nil : .init(returns),
                 throws: `throws`.isEmpty ? nil : .init(`throws`),
                 article: article),
             topics: topics)
+    }
+}
+extension MarkdownDocumentation
+{
+    /// Merges the given documentation into this documentation.
+    ///
+    /// If this documentation has no Parameters, Returns, or Throws sections,
+    /// then this function adds them from the new documentation, if it has them.
+    /// If the new documentation has such sections, but they are already present
+    /// in this documentation, then the new documentation’s sections are ignored.
+    ///
+    /// If the new documentation has an Overview section, then this function adds
+    /// it to this documentation Details section as a regular body paragraph, even
+    /// if this documentation lacks an Overview section of its own.
+    public mutating
+    func merge(appending body:MarkdownDocumentation)
+    {
+        if  let first:MarkdownBlock.Paragraph = body.overview
+        {
+            self.details.article.append(first)
+        }
+        if  case nil = self.details.parameters
+        {
+            self.details.parameters = body.details.parameters
+        }
+        if  case nil = self.details.returns
+        {
+            self.details.returns = body.details.returns
+        }
+        if  case nil = self.details.throws
+        {
+            self.details.throws = body.details.throws
+        }
+
+        self.details.article += body.details.article
+        self.topics += body.topics
     }
 }
