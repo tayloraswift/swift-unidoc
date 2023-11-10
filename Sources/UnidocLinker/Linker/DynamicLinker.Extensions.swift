@@ -3,6 +3,7 @@ import Signatures
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocDiagnostics
 import UnidocRecords
 
 extension DynamicLinker
@@ -87,7 +88,7 @@ extension DynamicLinker.Extensions
         extending s:Int32,
         context:DynamicContext,
         modules:[DynamicLinker.ModuleContext],
-        diagnostics:DynamicLinkerDiagnostics) -> ProtocolConformances<Int>
+        diagnostics:inout DiagnosticContext<DynamicSymbolicator>) -> ProtocolConformances<Int>
     {
         guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
                 let scope:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
@@ -95,8 +96,7 @@ extension DynamicLinker.Extensions
         {
             let type:Symbol.Decl = context.current.decls.symbols[s]
 
-            diagnostics.errors.append(DroppedExtensionsError.extending(type,
-                count: extensions.count))
+            diagnostics[nil] = DroppedExtensionsError.extending(type, count: extensions.count)
 
             return [:]
         }
@@ -110,9 +110,8 @@ extension DynamicLinker.Extensions
                 extends: s)
         }
 
-        let conformances:ProtocolConformances<Int> = .init(
-            context: context,
-            errors: &diagnostics.errors)
+        let conformances:ProtocolConformances<Int> = .init(context: context,
+            diagnostics: &diagnostics)
         {
             (conformances:inout ProtocolConformances<Int>) in
 
@@ -199,19 +198,18 @@ extension DynamicLinker.Extensions
                 guard case (nil, nil) = ($0.overview, $0.details)
                 else
                 {
-                    diagnostics.errors.append(DroppedPassagesError.fromExtension($0.id,
-                        of: s))
+                    diagnostics[nil] = DroppedPassagesError.fromExtension($0.id, of: s)
                     return
                 }
 
-                let resolver:DynamicResolver = .init(
-                    diagnostics: diagnostics,
+                ($0.overview, $0.details) = diagnostics.resolving(
                     namespace: context.current.namespaces[`extension`.namespace],
                     global: context,
                     module: modules[`extension`.culture],
                     scope: [String].init(scope.path))
-
-                ($0.overview, $0.details) = resolver.link(article: article)
+                {
+                    $0.link(article: article)
+                }
 
             } (&self[signature])
         }

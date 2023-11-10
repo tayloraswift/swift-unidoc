@@ -31,29 +31,24 @@ extension DroppedExtensionsError
         .init(affected: .decl(decl), count: count)
     }
 }
-extension DroppedExtensionsError:DynamicLinkerError
+extension DroppedExtensionsError:Diagnostic
 {
     public
-    func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
-    {
-        [
-            .init(.warning, context: .init(), message: self.message(symbolicator: symbolicator))
-        ]
-    }
+    typealias Symbolicator = DynamicSymbolicator
 
-    private
-    func message(symbolicator:DynamicSymbolicator) -> String
+    @inlinable public static
+    func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
         switch self.affected
         {
         case .decl(let decl):
-            return """
+            output[.warning] = """
             dropped \(self.count) extension(s) because the type they extend \
-            (\(symbolicator.signature(of: decl))) could not be loaded
+            (\(output.symbolicator.signature(of: decl))) could not be loaded
             """
 
         case .namespace(let namespace):
-            return """
+            output[.warning] = """
             dropped \(self.count) extension(s) because the namespace they extend \
             (\(namespace)) could not be loaded
             """

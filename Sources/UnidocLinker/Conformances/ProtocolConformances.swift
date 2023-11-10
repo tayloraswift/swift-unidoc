@@ -2,6 +2,7 @@ import ModuleGraphs
 import Signatures
 import SymbolGraphs
 import Unidoc
+import UnidocDiagnostics
 
 struct ProtocolConformances<Culture>
 {
@@ -48,7 +49,7 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
 extension ProtocolConformances<Int>
 {
     init(context:DynamicContext,
-        errors:inout [any DynamicLinkerError],
+        diagnostics:inout DiagnosticContext<DynamicSymbolicator>,
         with populate:(inout ProtocolConformances<Int>) throws -> Void) rethrows
     {
         var conformances:ProtocolConformances<Int> = [:]
@@ -168,8 +169,8 @@ extension ProtocolConformances<Int>
                 }
                 else
                 {
-                    errors.append(ConstraintReductionError.init(invalid: ordered,
-                        minimal: .init(reduced)))
+                    diagnostics[nil] = ConstraintReductionError.init(invalid: ordered,
+                        minimal: .init(reduced))
                     //  See note above about non-emptiness.
                     return shortest.first!
                 }
