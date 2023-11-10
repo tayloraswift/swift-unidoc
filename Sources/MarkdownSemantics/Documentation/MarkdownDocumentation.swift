@@ -126,16 +126,19 @@ extension MarkdownDocumentation
                 }
 
             case let block as MarkdownBlock.Directive:
-                guard block.name == "Metadata"
-                else
+                switch block.name
                 {
+                case "Comment":
+                    continue
+
+                case "Metadata":
+                    metadata.update(with: block.elements)
+
+                case _:
                     //  Don’t know how to handle these yet, so we just render them
                     //  as code blocks.
                     interpreter.append(block)
-                    continue
                 }
-
-                metadata.update(with: block.elements)
 
             case let block:
                 interpreter.append(block)
