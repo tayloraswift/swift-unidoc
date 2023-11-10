@@ -19,7 +19,7 @@ extension DroppedPassagesError:Diagnostic
         case .fromExtension(_, of: let type):
             output[.warning] = """
             dropped documentation due to coalescing multiple extensions of the same type \
-            (\(output.symbolicator.signature(of: type)))
+            (\(output.symbolicator[type]))
             """
         }
     }

@@ -25,6 +25,12 @@ extension UnidocPlane:Comparable
 }
 extension UnidocPlane
 {
+    @inlinable public
+    func contains(_ scalar:Int32) -> Bool
+    {
+        self.rawValue == .init(bitPattern: scalar) & 0xFF_000000
+    }
+
     @inlinable public static
     func of(_ scalar:Int32) -> Self?
     {

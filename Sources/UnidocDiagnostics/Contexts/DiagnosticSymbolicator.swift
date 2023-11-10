@@ -8,8 +8,9 @@ protocol DiagnosticSymbolicator<Address>
 {
     associatedtype Address
 
-    func loadDeclSymbol(_ address:Address) -> Symbol.Decl?
-    func loadFileSymbol(_ address:Address) -> Symbol.File?
+    subscript(article address:Address) -> Symbol.Article? { get }
+    subscript(decl address:Address) -> Symbol.Decl? { get }
+    subscript(file address:Address) -> Symbol.File? { get }
 
     var demangler:Demangler? { get }
     var root:Repository.Root? { get }
@@ -72,19 +73,32 @@ extension DiagnosticSymbolicator
     /// Returns the demangled signature of the scalar symbol referenced by the given
     /// scalar. The scalar must refer to a declaration and not an article.
     @inlinable public
-    func signature(of scalar:Address) -> String
+    subscript(address:Address) -> String
     {
-        if  let symbol:Symbol.Decl = self.loadDeclSymbol(scalar)
+        if  let symbol:Symbol.Article = self[article: address]
         {
-            return self.signature(of: symbol)
+            "'\(symbol.rawValue)'"
+        }
+        else if
+            let symbol:Symbol.Decl = self[decl: address]
+        {
+            self.demangle(symbol)
         }
         else
         {
-            return "<unavailable>"
+            "<unavailable>"
         }
     }
+
+    @available(*, deprecated, renamed: "subscript(_:)")
     @inlinable public
-    func signature(of symbol:Symbol.Decl) -> String
+    func signature(of scalar:Address) -> String
+    {
+        self[scalar]
+    }
+
+    @inlinable public
+    func demangle(_ symbol:Symbol.Decl) -> String
     {
         if  let demangled:String = self.demangler?.demangle(symbol)
         {
@@ -96,12 +110,13 @@ extension DiagnosticSymbolicator
             return symbol.rawValue
         }
     }
+
     /// Returns the absolute path of the file referenced by the given file scalar.
     @inlinable public
     func path(of scalar:Address) -> String?
     {
         if  let root:Repository.Root = self.root,
-            let file:Symbol.File = self.loadFileSymbol(scalar)
+            let file:Symbol.File = self[file: scalar]
         {
             return "\(root.path)/\(file)"
         }
@@ -121,7 +136,7 @@ extension DiagnosticSymbolicator where Address:Hashable
             switch $0
             {
             case    .where(let parameter, is: .equal, to: .nominal(let type?)):
-                return "\(parameter) == \(self.signature(of: type))"
+                return "\(parameter) == \(self[type])"
 
             case    .where(let parameter, is: .equal, to: .nominal(nil)):
                 return "\(parameter) == <unavailable>"
@@ -131,7 +146,7 @@ extension DiagnosticSymbolicator where Address:Hashable
 
             case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
                     .where(let parameter, is: .conformer, to: .nominal(let type?)):
-                return "\(parameter):\(self.signature(of: type))"
+                return "\(parameter):\(self[type])"
 
             case    .where(let parameter, is: .subclass, to: .nominal(nil)),
                     .where(let parameter, is: .conformer, to: .nominal(nil)):
