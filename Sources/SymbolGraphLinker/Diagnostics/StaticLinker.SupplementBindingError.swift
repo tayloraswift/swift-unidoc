@@ -1,6 +1,5 @@
 import CodelinkResolution
 import Codelinks
-import SymbolGraphs
 import UnidocDiagnostics
 
 extension StaticLinker
@@ -8,17 +7,13 @@ extension StaticLinker
     struct SupplementBindingError:Error
     {
         let resolved:SupplementBinding
-
         let codelink:Codelink
-        let context:Diagnostic.Context<Int32>
 
         init(_ resolved:SupplementBinding,
-            codelink:Codelink,
-            context:Diagnostic.Context<Int32>? = nil)
+            codelink:Codelink)
         {
             self.resolved = resolved
             self.codelink = codelink
-            self.context = context ?? .init()
         }
     }
 }
@@ -42,37 +37,37 @@ extension StaticLinker.SupplementBindingError
         }
     }
 }
-extension StaticLinker.SupplementBindingError:StaticLinkerError
+extension StaticLinker.SupplementBindingError:Diagnostic
 {
-    func symbolicated(with symbolicator:StaticSymbolicator) -> [Diagnostic]
+    typealias Symbolicator = StaticSymbolicator
+
+    static
+    func += (output:inout DiagnosticOutput<StaticSymbolicator>, self:Self)
     {
-        let diagnostics:[Diagnostic]
         switch self.resolved
         {
         case .none(in: let culture):
-            diagnostics =
-            [
-                .init(.warning, context: self.context.symbolicated(with: symbolicator),
-                    message: """
-                    article binding '\(self.codelink)' does not refer to a declaration \
-                    in its module, \(culture)
-                    """),
-            ]
+            output[.warning] = """
+            article binding '\(self.codelink)' does not refer to a declaration \
+            in its module, \(culture)
+            """
+
+        case .vector:
+            output[.warning] = """
+            article binding '\(self.codelink)' cannot refer to a vector symbol
+            """
+        }
+    }
+
+    var notes:[Note]
+    {
+        switch self.resolved
+        {
+        case .none(in: _):
+            return []
 
         case .vector(let feature, self: _):
-            diagnostics =
-            [
-                .init(.warning, context: self.context.symbolicated(with: symbolicator),
-                    message: """
-                    article binding '\(self.codelink)' cannot refer to a vector symbol
-                    """),
-
-                .init(.note, message: """
-                    did you mean to reference the protocol witness? \
-                    (\(symbolicator.signature(of: feature)))
-                    """)
-            ]
+            return [.init(suggested: feature)]
         }
-        return diagnostics
     }
 }

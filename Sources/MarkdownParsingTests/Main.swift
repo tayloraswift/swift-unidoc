@@ -163,7 +163,7 @@ enum Main:SyncTests
                     {
                         if case .autolink(let autolink) = element
                         {
-                            position = autolink.source?.range.lowerBound
+                            position = autolink.source.range?.lowerBound
                             break
                         }
                     }

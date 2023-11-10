@@ -7,7 +7,7 @@ extension MarkdownInline.Link
     {
         case outlined   (Int)
 
-        case safe       (String, SourceReference<Int>?)
+        case safe       (String, SourceReference<Int>)
         case unsafe     (String)
     }
 }

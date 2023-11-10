@@ -13,14 +13,14 @@ import UnidocDiagnostics
 
 /// A type that can outline autolinks from markdown documentation and
 /// statically-resolve some of the autolinks with caching.
-struct StaticOutliner
+struct StaticOutliner:~Copyable
 {
     private
     var resolver:StaticResolver
     private
     var cache:Cache
 
-    init(resolver:StaticResolver)
+    init(resolver:consuming StaticResolver)
     {
         self.resolver = resolver
         self.cache = .init()
@@ -28,32 +28,25 @@ struct StaticOutliner
 }
 extension StaticOutliner
 {
-    init(codelinks:CodelinkResolver<Int32>.Table,
-        doclinks:DoclinkResolver.Table,
-        imports:[ModuleIdentifier],
-        namespace:ModuleIdentifier? = nil,
-        culture:ModuleIdentifier,
-        scope:[String] = [])
+    consuming
+    func diagnostics() -> DiagnosticContext<StaticSymbolicator>
     {
-        self.init(resolver: .init(
-            codelinks: .init(table: codelinks, scope: .init(
-                namespace: namespace ?? culture,
-                imports: imports,
-                path: scope)),
-            doclinks: .init(table: doclinks, scope: .documentation(culture))))
-    }
-}
-extension StaticOutliner
-{
-    var errors:[any StaticLinkerError]
-    {
-        self.resolver.errors
+        (consume self).resolver.diagnostics
     }
 }
 extension StaticOutliner
 {
     private mutating
     func outline(autolink:MarkdownInline.Autolink, in sources:[MarkdownSource]) -> Int?
+    {
+        self.outline(autolink: .init(from: sources[autolink.source.file],
+            offset: autolink.source.range,
+            text: autolink.text,
+            code: autolink.code))
+    }
+
+    private mutating
+    func outline(autolink:StaticResolver.Autolink) -> Int?
     {
         self.cache(autolink.text)
         {
@@ -62,11 +55,8 @@ extension StaticOutliner
             {
                 if  let codelink:Codelink = .init(autolink.text)
                 {
-                    if  let outline:SymbolGraph.Outline = self.resolver.outline(
-                            expression: autolink.text,
-                            as: codelink,
-                            in: sources,
-                            at: autolink.source)
+                    if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
+                            as: codelink)
                     {
                         return outline
                     }
@@ -78,22 +68,16 @@ extension StaticOutliner
             }
             else if let doclink:Doclink = .init(doc: autolink.text[...])
             {
-                if  let outline:SymbolGraph.Outline = self.resolver.outline(
-                        expression: autolink.text,
-                        as: doclink,
-                        in: sources,
-                        at: autolink.source)
+                if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
+                        as: doclink)
                 {
                     return outline
                 }
                 //  Resolution might still succeed by reinterpreting the doclink as a codelink.
                 else if !doclink.absolute,
                     let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
-                    let outline:SymbolGraph.Outline = self.resolver.outline(
-                        expression: autolink.text,
-                        as: codelink,
-                        in: sources,
-                        at: autolink.source)
+                    let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
+                        as: codelink)
                 {
                     return outline
                 }
@@ -108,13 +92,13 @@ extension StaticOutliner
                 return .unresolved(.init(
                     link: autolink.text,
                     type: type,
-                    location: autolink.source?.start.translated(through: sources)))
+                    location: autolink.location))
             }
             else
             {
-                self.resolver.errors.append(InvalidAutolinkError<Int32>.init(
-                    expression: autolink.text,
-                    context: autolink.source.map { .init(of: $0, in: sources) }))
+                self.resolver.diagnostics[autolink] =
+                    InvalidAutolinkError<StaticSymbolicator>.init(expression: autolink.text)
+
                 return nil
             }
         }

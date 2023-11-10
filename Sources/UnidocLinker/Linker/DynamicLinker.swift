@@ -4,6 +4,7 @@ import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocDiagnostics
 import UnidocRecords
 
 public
@@ -17,9 +18,9 @@ struct DynamicLinker:~Copyable
     /// Protocol conformances for each declaration in the **current** snapshot.
     private
     let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>
-    private
-    let diagnostics:DynamicLinkerDiagnostics
 
+    public private(set)
+    var diagnostics:DiagnosticContext<DynamicSymbolicator>
     private
     var extensions:Extensions
 
@@ -45,7 +46,7 @@ struct DynamicLinker:~Copyable
     init(context:DynamicContext,
         modules:[ModuleContext],
         conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
-        diagnostics:DynamicLinkerDiagnostics,
+        diagnostics:DiagnosticContext<DynamicSymbolicator>,
         extensions:Extensions)
     {
         self.context = context
@@ -74,7 +75,7 @@ extension DynamicLinker
     {
         let modules:[ModuleContext] = context.modules()
 
-        let diagnostics:DynamicLinkerDiagnostics = .init()
+        var diagnostics:DiagnosticContext<DynamicSymbolicator> = .init()
         var extensions:Extensions = .init(zone: context.current.edition)
 
         let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>> =
@@ -84,7 +85,7 @@ extension DynamicLinker
                 extending: $0,
                 context: context,
                 modules: modules,
-                diagnostics: diagnostics)
+                diagnostics: &diagnostics)
         }
 
         self.init(
@@ -242,9 +243,6 @@ extension DynamicLinker
 }
 extension DynamicLinker
 {
-    public
-    var errors:[any DynamicLinkerError] { self.diagnostics.errors }
-
     var current:SnapshotObject { self.context.current }
 }
 extension DynamicLinker
@@ -304,8 +302,8 @@ extension DynamicLinker
                 let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
                 else
                 {
-                    self.diagnostics.errors.append(DroppedExtensionsError.extending(namespace,
-                        count: decls.range.count))
+                    self.diagnostics[nil] = DroppedExtensionsError.extending(namespace,
+                        count: decls.range.count)
                     continue
                 }
 
@@ -336,12 +334,6 @@ extension DynamicLinker
         with context:ModuleContext,
         from culture:(index:Int, id:ModuleIdentifier))
     {
-        let resolver:DynamicResolver = .init(
-            diagnostics: self.diagnostics,
-            namespace: culture.id,
-            global: self.context,
-            module: context)
-
         let n:Unidoc.Scalar = self.current.edition + culture.index
 
         for topic:SymbolGraph.Topic in topics
@@ -350,7 +342,13 @@ extension DynamicLinker
                 culture: n,
                 scope: n)
 
-            (record.overview, record.members) = resolver.link(topic: topic)
+            (record.overview, record.members) = self.diagnostics.resolving(
+                namespace: culture.id,
+                global: self.context,
+                module: context)
+            {
+                $0.link(topic: topic)
+            }
 
             self.groups.append(.topic(record))
 
@@ -372,12 +370,6 @@ extension DynamicLinker
         named name:ModuleIdentifier,
         at index:Int) -> Volume.Vertex.Culture
     {
-        let resolver:DynamicResolver = .init(
-            diagnostics: self.diagnostics,
-            namespace: name,
-            global: self.context,
-            module: self.modules[index])
-
         let scalar:Unidoc.Scalar = self.current.edition + index
         var vertex:Volume.Vertex.Culture = .init(id: scalar,
             module: culture.module,
@@ -386,7 +378,13 @@ extension DynamicLinker
         if  let article:SymbolGraph.Article = culture.article
         {
             vertex.readme = article.file.map { self.current.edition + $0 }
-            (vertex.overview, vertex.details) = resolver.link(article: article)
+
+            (vertex.overview, vertex.details) = self.diagnostics.resolving(namespace: name,
+                global: self.context,
+                module: self.modules[index])
+            {
+                $0.link(article: article)
+            }
         }
 
         return vertex
@@ -397,12 +395,6 @@ extension DynamicLinker
         with context:ModuleContext,
         from culture:(index:Int, id:ModuleIdentifier))
     {
-        let resolver:DynamicResolver = .init(
-            diagnostics: self.diagnostics,
-            namespace: culture.id,
-            global: self.context,
-            module: context)
-
         for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(
             self.current.articles.nodes[range].indices,
             self.current.articles.nodes[range])
@@ -415,7 +407,13 @@ extension DynamicLinker
                 headline: node.headline,
                 group: self.memberships.removeValue(forKey: a))
 
-            (vertex.overview, vertex.details) = resolver.link(article: node.body)
+            (vertex.overview, vertex.details) = self.diagnostics.resolving(
+                namespace: culture.id,
+                global: self.context,
+                module: context)
+            {
+                $0.link(article: node.body)
+            }
 
             self.articles.append(vertex)
         }
@@ -512,14 +510,14 @@ extension DynamicLinker
 
             if  let article:SymbolGraph.Article = decl.article
             {
-                let resolver:DynamicResolver = .init(
-                    diagnostics: self.diagnostics,
+                (vertex.overview, vertex.details) = self.diagnostics.resolving(
                     namespace: namespace.id,
                     global: self.context,
                     module: context,
                     scope: decl.phylum.scope(trimming: decl.path))
-
-                (vertex.overview, vertex.details) = resolver.link(article: article)
+                {
+                    $0.link(article: article)
+                }
             }
 
             self.decls.append(vertex)
