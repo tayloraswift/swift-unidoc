@@ -5,4 +5,9 @@
         backdrop-filter: blur(6px) saturate(180%);
         background-color: $light-background-translucent;
     }
+    @supports(-webkit-backdrop-filter: blur(6px) saturate(180%))
+    {
+        backdrop-filter: blur(6px) saturate(180%);
+        background-color: $light-background-translucent;
+    }
 }
