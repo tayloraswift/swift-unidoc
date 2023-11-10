@@ -26,13 +26,26 @@ struct DynamicSymbolicator:Sendable
 extension DynamicSymbolicator:DiagnosticSymbolicator
 {
     public
-    func loadDeclSymbol(_ scalar:Unidoc.Scalar) -> Symbol.Decl?
+    subscript(article scalar:Unidoc.Scalar) -> Symbol.Article?
     {
-        self.context[scalar.package]?.decls.symbols[scalar.citizen]
+        UnidocPlane.article.contains(scalar.citizen)
+            ? self.context[scalar.package]?.articles.symbols[scalar.citizen]
+            : nil
     }
+
     public
-    func loadFileSymbol(_ scalar:Unidoc.Scalar) -> Symbol.File?
+    subscript(decl scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
-        self.context[scalar.package]?.files[scalar.citizen]
+        UnidocPlane.decl.contains(scalar.citizen)
+            ? self.context[scalar.package]?.decls.symbols[scalar.citizen]
+            : nil
+    }
+
+    public
+    subscript(file scalar:Unidoc.Scalar) -> Symbol.File?
+    {
+        UnidocPlane.file.contains(scalar.citizen)
+            ? self.context[scalar.package]?.files[scalar.citizen]
+            : nil
     }
 }

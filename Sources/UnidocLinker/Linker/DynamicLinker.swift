@@ -287,7 +287,7 @@ extension DynamicLinker
                 from: (c, self.current.namespaces[c]))
         }
 
-        //  Second pass to create various master records, which reads from the ``topics``.
+        //  Second pass to create various vertex records, which reads from the ``topics``.
         for ((c, namespace, culture), context):
             ((Int, ModuleIdentifier, SymbolGraph.Culture), ModuleContext) in zip(
             self.current.modules,

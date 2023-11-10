@@ -44,7 +44,7 @@ extension DroppedExtensionsError:Diagnostic
         case .decl(let decl):
             output[.warning] = """
             dropped \(self.count) extension(s) because the type they extend \
-            (\(output.symbolicator.signature(of: decl))) could not be loaded
+            (\(output.symbolicator.demangle(decl))) could not be loaded
             """
 
         case .namespace(let namespace):
