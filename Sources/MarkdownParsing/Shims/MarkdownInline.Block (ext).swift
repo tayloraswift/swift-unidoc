@@ -40,9 +40,11 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                 elements: image.inlineChildren.map { MarkdownInline.init(from: $0, in: id) }))
 
         case let link as SymbolLink:
-            self = .autolink(.init(link.destination ?? "",
-                code: true, // exclude the backticks from the source range
-                source: .init(link.range, in: id, trimming: 2)))
+            // exclude the backticks from the source range
+            self = .autolink(.init(
+                source: .init(file: id, trimming: 2, from: link.range),
+                text: link.destination ?? "",
+                code: true))
 
         case let link as Link:
             let elements:[MarkdownInline] = link.inlineChildren.map
@@ -55,16 +57,18 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                     elements.count == 1,
                     elements[0] == .text(destination)
             {
+                // exclude the angle brackets from the source range
                 self = .autolink(.init(
-                    String.init(destination[destination.index(after: colon)...]),
-                    code: false, // exclude the angle brackets from the source range
-                    source: .init(link.range, in: id, trimming: 1)))
+                    source: .init(file: id, trimming: 1, from: link.range),
+                    text: String.init(destination[destination.index(after: colon)...]),
+                    code: false))
             }
             else
             {
-                self = .link(.init(target: link.destination,
-                    elements: elements,
-                    source: .init(link.range, in: id)))
+                self = .link(.init(
+                    source: .init(file: id, trimming: 1, from: link.range),
+                    target: link.destination,
+                    elements: elements))
             }
 
         case let unsupported:

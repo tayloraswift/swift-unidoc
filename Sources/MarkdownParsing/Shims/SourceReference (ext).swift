@@ -3,17 +3,17 @@ import Sources
 
 extension SourceReference
 {
-    init?(_ range:Range<Markdown.SourceLocation>?, in file:File, trimming trim:Int = 0)
+    init(file:File, trimming trim:Int = 0, from range:Range<Markdown.SourceLocation>?)
     {
-        if  let range,
+        if  let range:Range<Markdown.SourceLocation>,
             let start:SourcePosition = .init(range.lowerBound, offset: trim),
             let end:SourcePosition = .init(range.upperBound, offset: -trim)
         {
-            self.init(range: start ..< max(start, end), file: file)
+            self.init(file: file, range: start ..< max(start, end))
         }
         else
         {
-            return nil
+            self.init(file: file, range: nil)
         }
     }
 }

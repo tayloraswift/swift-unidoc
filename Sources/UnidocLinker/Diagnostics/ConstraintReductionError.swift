@@ -18,21 +18,20 @@ struct ConstraintReductionError:Error, Equatable, Sendable
         self.minimal = minimal
     }
 }
-extension ConstraintReductionError:DynamicLinkerError
+extension ConstraintReductionError:Diagnostic
 {
     public
-    func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
+    typealias Symbolicator = DynamicSymbolicator
+
+    @inlinable public static
+    func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
-        [
-            .init(.error, context: .init(),
-                message: """
-                Failed to reduce constraints: \
-                \(self.constraints.map { "where \(symbolicator.constraints($0)))" })
-                """),
-            .init(.note, context: .init(),
-                message: """
-                Minimal constraints: \(symbolicator.constraints(self.minimal))
-                """)
-        ]
+        output[.error] = """
+        failed to reduce constraints: \
+        \(self.constraints.map { "where \(output.symbolicator.constraints($0)))" })
+        """
+        output[.note] = """
+        minimal constraints: \(output.symbolicator.constraints(self.minimal))
+        """
     }
 }
