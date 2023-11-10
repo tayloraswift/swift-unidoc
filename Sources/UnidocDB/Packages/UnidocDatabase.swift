@@ -232,19 +232,9 @@ extension UnidocDatabase
             version = placement.coordinate
         }
         else if case .swift = docs.metadata.package,
-            let tagname:String = docs.metadata.commit?.refname
+            let tagname:String = docs.metadata.commit?.refname,
+            let semver:SemanticVersion = .init(swiftRelease: tagname)
         {
-            //  FIXME: we need a better way to handle this
-            let semver:SemanticVersion
-            switch tagname
-            {
-            case "swift-5.8.1-RELEASE": semver = .release(.v(5, 8, 1))
-            case "swift-5.9-RELEASE":   semver = .release(.v(5, 9, 0))
-            case "swift-5.9.1-RELEASE": semver = .release(.v(5, 9, 1))
-            case _:
-                fatalError("unimplemented")
-            }
-
             let placement:Editions.Placement = try await self.editions.register(
                 package: placement.coordinate,
                 version: semver,
@@ -274,7 +264,6 @@ extension UnidocDatabase
             repo: placement.repo)
     }
 }
-
 extension UnidocDatabase
 {
     public
