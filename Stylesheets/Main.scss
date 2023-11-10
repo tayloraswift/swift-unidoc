@@ -1,3 +1,4 @@
+@import 'BackdropBlur';
 @import 'Charts';
 @import 'Colors';
 @import 'CodeBlocks';
@@ -83,7 +84,7 @@ body nav
     min-height: 1.5rem;
     position: relative;
 
-    box-shadow: -1rem 0 0 $light-background;
+    @include backdrop-blur;
 
     padding: 0.25rem 0;
     display: flex;
