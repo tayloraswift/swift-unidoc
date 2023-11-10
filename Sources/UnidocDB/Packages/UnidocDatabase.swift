@@ -418,7 +418,7 @@ extension UnidocDatabase
             root: snapshot.metadata.root)
         let linker:DynamicLinker = .init(context: consume context)
 
-        (consume symbolicator).emit(linker.errors, colors: .enabled)
+        (consume symbolicator).symbolicate(printing: linker.diagnostics, colors: .enabled)
 
         let id:Snapshot.ID = snapshot.id
 

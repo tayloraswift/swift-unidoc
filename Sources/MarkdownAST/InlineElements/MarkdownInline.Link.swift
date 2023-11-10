@@ -22,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Link
 {
     @inlinable public
-    init(target:String?, elements:[MarkdownInline], source:SourceReference<Int>?)
+    init(source:SourceReference<Int>, target:String?, elements:[MarkdownInline])
     {
         guard let target:String
         else
@@ -49,9 +49,9 @@ extension MarkdownInline.Link
     /// Creates a link element using the given URL as both the link target and the
     /// link text.
     @inlinable public
-    init(url:String)
+    init(source:SourceReference<Int>, url:String)
     {
-        self.init(target: url, elements: [.text(url)], source: nil)
+        self.init(source: source, target: url, elements: [.text(url)])
     }
 }
 extension MarkdownInline.Link:MarkdownElement
@@ -60,7 +60,9 @@ extension MarkdownInline.Link:MarkdownElement
     func outline(by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
     {
         if  case .safe(let expression, let source)? = self.target,
-            let reference:Int = try register(.init(expression, code: false, source: source))
+            let reference:Int = try register(.init(source: source,
+                text: expression,
+                code: false))
         {
             self.target = .outlined(reference)
         }

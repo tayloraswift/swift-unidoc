@@ -5,6 +5,7 @@ import SymbolGraphCompiler
 import SymbolGraphLinker
 import SymbolGraphParts
 import SymbolGraphs
+import UnidocDiagnostics
 
 extension SymbolGraph
 {
@@ -75,15 +76,18 @@ extension SymbolGraph
                 linker.link(extensions: extensions, at: extensionPositions)
             }
 
-            let graph:SymbolGraph = try linker.finalize()
+            let diagnostics:DiagnosticContext<StaticSymbolicator>
+            let graph:SymbolGraph
+
+            (diagnostics, graph) = try linker.finalize()
+
+            let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)
+                symbolicator.symbolicate(printing: diagnostics, colors: .enabled)
 
             print("""
                 Linked documentation in \(time.linking)
                 symbols         : \(graph.decls.symbols.count)
                 """)
-
-            let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)
-            symbolicator.emit(linker.errors, colors: .enabled)
 
             return graph
         }

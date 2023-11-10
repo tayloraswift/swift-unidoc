@@ -7,40 +7,30 @@ import Sources
 import SymbolGraphs
 import UnidocDiagnostics
 
-struct StaticResolver
+struct StaticResolver:~Copyable
 {
+    var diagnostics:DiagnosticContext<StaticSymbolicator>
+
     private
     let codelinks:CodelinkResolver<Int32>
     private
     let doclinks:DoclinkResolver
 
-    var errors:[any StaticLinkerError]
-
-    init(codelinks:CodelinkResolver<Int32>, doclinks:DoclinkResolver)
+    init(
+        diagnostics:consuming DiagnosticContext<StaticSymbolicator>,
+        codelinks:CodelinkResolver<Int32>,
+        doclinks:DoclinkResolver)
     {
+        self.diagnostics = .init()
+
         self.codelinks = codelinks
         self.doclinks = doclinks
-        self.errors = []
     }
 }
 extension StaticResolver
 {
     mutating
-    func outline(expression:String,
-        as doclink:Doclink,
-        in sources:[MarkdownSource],
-        at source:SourceReference<Int>?) -> SymbolGraph.Outline?
-    {
-        self.doclinks.resolve(doclink).map
-        {
-            .scalar($0, text: doclink.path.last ?? "")
-        }
-    }
-    mutating
-    func outline(expression:String,
-        as codelink:Codelink,
-        in sources:[MarkdownSource],
-        at source:SourceReference<Int>?) -> SymbolGraph.Outline?
+    func outline(_ autolink:Autolink, as codelink:Codelink) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
         {
@@ -58,12 +48,19 @@ extension StaticResolver
         case .some(let overloads):
             if !overloads.isEmpty
             {
-                self.errors.append(InvalidCodelinkError<Int32>.init(
+                self.diagnostics[autolink] = InvalidCodelinkError<StaticSymbolicator>.init(
                     overloads: overloads,
-                    codelink: codelink,
-                    context: source.map { .init(of: $0, in: sources) }))
+                    codelink: codelink)
             }
             return nil
+        }
+    }
+    mutating
+    func outline(_ autolink:Autolink, as doclink:Doclink) -> SymbolGraph.Outline?
+    {
+        self.doclinks.resolve(doclink).map
+        {
+            .scalar($0, text: doclink.path.last ?? "")
         }
     }
 }

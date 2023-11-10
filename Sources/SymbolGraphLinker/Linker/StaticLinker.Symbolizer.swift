@@ -38,6 +38,25 @@ extension StaticLinker
 }
 extension StaticLinker.Symbolizer
 {
+    var importAll:[ModuleIdentifier]
+    {
+        .init(self.graph.namespaces[self.graph.cultures.indices])
+    }
+
+    func scopes(
+        namespace:ModuleIdentifier? = nil,
+        culture:ModuleIdentifier,
+        scope:[String] = []) -> StaticResolver.Scopes
+    {
+        .init(
+            codelink: .init(namespace: namespace ?? culture,
+                imports: self.importAll,
+                path: scope),
+            doclink: .documentation(culture))
+    }
+}
+extension StaticLinker.Symbolizer
+{
     /// Indexes the given article and appends it to the symbol graph, if an article
     /// with the same mangled name has not already been indexed. (This function checks
     /// for duplicates.)

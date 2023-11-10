@@ -6,23 +6,21 @@ enum DroppedPassagesError:Equatable, Error
 {
     case fromExtension(Unidoc.Scalar, of:Unidoc.Scalar)
 }
-extension DroppedPassagesError:DynamicLinkerError
+extension DroppedPassagesError:Diagnostic
 {
     public
-    func symbolicated(with symbolicator:DynamicSymbolicator) -> [Diagnostic]
+    typealias Symbolicator = DynamicSymbolicator
+
+    @inlinable public static
+    func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
-        let message:String
         switch self
         {
         case .fromExtension(_, of: let type):
-            message =
-            """
+            output[.warning] = """
             dropped documentation due to coalescing multiple extensions of the same type \
-            (\(symbolicator.signature(of: type)))
+            (\(output.symbolicator.signature(of: type)))
             """
         }
-
-        return [.init(.warning, context: .init(), message: message)]
     }
 }
-

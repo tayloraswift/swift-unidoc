@@ -8,17 +8,55 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-struct DynamicResolver
+extension DiagnosticContext<DynamicSymbolicator>
 {
-    private
-    let diagnostics:DynamicLinkerDiagnostics
+    private mutating
+    func resolving<Success>(
+        codelinks:CodelinkResolver<Unidoc.Scalar>,
+        context:DynamicContext,
+        with body:(inout DynamicResolver) throws -> Success) rethrows -> Success
+    {
+        var resolver:DynamicResolver = .init(
+            diagnostics: consume self,
+            codelinks: codelinks,
+            context: context)
+
+        defer
+        {
+            self = resolver.diagnostics
+        }
+
+        return try body(&resolver)
+    }
+
+    mutating
+    func resolving<Success>(
+        namespace:ModuleIdentifier,
+        global:DynamicContext,
+        module:DynamicLinker.ModuleContext,
+        scope:[String] = [],
+        with body:(inout DynamicResolver) throws -> Success) rethrows -> Success
+    {
+        try self.resolving(
+            codelinks: .init(table: module.codelinks, scope: .init(
+                namespace: namespace,
+                imports: module.imports,
+                path: scope)),
+            context: global,
+            with: body)
+    }
+}
+
+struct DynamicResolver:~Copyable
+{
+    var diagnostics:DiagnosticContext<DynamicSymbolicator>
+
     private
     let codelinks:CodelinkResolver<Unidoc.Scalar>
     private
     let context:DynamicContext
 
-    private
-    init(diagnostics:DynamicLinkerDiagnostics,
+    init(diagnostics:consuming DiagnosticContext<DynamicSymbolicator>,
         codelinks:CodelinkResolver<Unidoc.Scalar>,
         context:DynamicContext)
     {
@@ -29,29 +67,13 @@ struct DynamicResolver
 }
 extension DynamicResolver
 {
-    init(diagnostics:DynamicLinkerDiagnostics,
-        namespace:ModuleIdentifier,
-        global:DynamicContext,
-        module:DynamicLinker.ModuleContext,
-        scope:[String] = [])
-    {
-        self.init(
-            diagnostics: diagnostics,
-            codelinks: .init(table: module.codelinks, scope: .init(
-                namespace: namespace,
-                imports: module.imports,
-                path: scope)),
-            context: global)
-    }
-}
-extension DynamicResolver
-{
     private
     var current:SnapshotObject { self.context.current }
 }
 
 extension DynamicResolver
 {
+    mutating
     func link(article:SymbolGraph.Article) ->
     (
         overview:Volume.Passage?,
@@ -69,6 +91,7 @@ extension DynamicResolver
         return (overview, details)
     }
 
+    mutating
     func link(topic:SymbolGraph.Topic) -> (overview:Volume.Passage?, members:[Volume.Link])
     {
         let overview:Volume.Passage? = topic.overview.isEmpty ? nil : .init(
@@ -80,7 +103,7 @@ extension DynamicResolver
 }
 extension DynamicResolver
 {
-    private
+    private mutating
     func expand(_ outline:SymbolGraph.Outline) -> Volume.Outline
     {
         func words(in text:String) -> Int
@@ -153,7 +176,7 @@ extension DynamicResolver
         return .text("<unavailable>")
     }
 
-    private
+    private mutating
     func resolve(_ outline:SymbolGraph.Outline) -> Volume.Link
     {
         switch outline
@@ -203,70 +226,94 @@ extension DynamicResolver
         return .text("<unavailable>")
     }
 
-    private
+    private mutating
     func resolve(_ unresolved:SymbolGraph.Outline.Unresolved) ->
     (
         codelink:Codelink,
         resolved:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
     )?
     {
-        var context:Diagnostic.Context<Unidoc.Scalar>
-        {
-            .init(location: unresolved.location?.map { self.current.edition + $0 })
-        }
-
-        let codelink:Codelink?
-
-        switch unresolved.type
-        {
-        case .doc:
-            guard
-            let doclink:Doclink = .init(unresolved.link)
-            else
-            {
-                codelink = nil
-                break
-            }
-
-            codelink = .init(doclink.path.joined(separator: "/"))
-
-        case .ucf:
-            codelink = .init(unresolved.link)
-
-        case .unidocV3:
-            guard
-            let unidocV3:CodelinkV3 = .init(unresolved.link)
-            else
-            {
-                codelink = nil
-                break
-            }
-
-            codelink = .init(v3: unidocV3)
-        }
+        let autolink:Autolink = .init(unresolved,
+            location: unresolved.location?.map { self.current.edition + $0 })
 
         guard
-        let codelink:Codelink
+        let codelink:Codelink = autolink.parsed
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.diagnostics.errors.append(InvalidAutolinkError<Unidoc.Scalar>.init(
-                expression: unresolved.link,
-                context: context))
+            self.diagnostics[autolink] = InvalidAutolinkError<DynamicSymbolicator>.init(
+                expression: unresolved.link)
+
             return nil
         }
 
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.diagnostics.errors.append(InvalidCodelinkError<Unidoc.Scalar>.init(
+            self.diagnostics[autolink] = InvalidCodelinkError<DynamicSymbolicator>.init(
                 overloads: overloads,
-                codelink: codelink,
-                context: context))
+                codelink: codelink)
+
             return (codelink, nil)
 
         case .one(let overload):
             return (codelink, overload.target)
+        }
+    }
+}
+
+import Sources
+import SymbolGraphs
+import Unidoc
+import UnidocDiagnostics
+
+extension DynamicResolver
+{
+    struct Autolink
+    {
+        let unresolved:SymbolGraph.Outline.Unresolved
+        let location:SourceLocation<Unidoc.Scalar>?
+
+        init(_ unresolved:SymbolGraph.Outline.Unresolved,
+            location:SourceLocation<Unidoc.Scalar>?)
+        {
+            self.unresolved = unresolved
+            self.location = location
+        }
+    }
+}
+extension DynamicResolver.Autolink:DiagnosticSubject
+{
+    var context:SourceContext { .init() }
+}
+extension DynamicResolver.Autolink
+{
+    var parsed:Codelink?
+    {
+        switch self.unresolved.type
+        {
+        case .doc:
+            guard
+            let doclink:Doclink = .init(unresolved.link)
+            else
+            {
+                return nil
+            }
+
+            return .init(doclink.path.joined(separator: "/"))
+
+        case .ucf:
+            return .init(unresolved.link)
+
+        case .unidocV3:
+            guard
+            let unidocV3:CodelinkV3 = .init(unresolved.link)
+            else
+            {
+                return nil
+            }
+
+            return .init(v3: unidocV3)
         }
     }
 }
