@@ -39,7 +39,7 @@ extension DiagnosticSymbolicator
     public
     func symbolicate(_ diagnostics:consuming DiagnosticContext<Self>) -> [DiagnosticMessage]
     {
-        var output:DiagnosticOutput<Self> = .init(symbolicator: copy self)
+        var output:DiagnosticOutput<Self> = .init(symbolicator: self)
         for group:DiagnosticContext<Self>.Group in diagnostics.unsymbolicated
         {
             switch group
