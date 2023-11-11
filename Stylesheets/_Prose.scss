@@ -1,27 +1,6 @@
 @import 'Typefaces';
 @import 'Colors';
 
-h1, h2, h3, h4
-{
-    font-family: $typeface-sans;
-}
-h1
-{
-    font-size: 200%;
-}
-h2
-{
-    font-size: 150%;
-}
-h3
-{
-    font-size: 130%;
-}
-h4
-{
-    font-size: 110%;
-}
-
 kbd
 {
     background-color: $light-code-well;

@@ -1,0 +1,63 @@
+@import 'Typefaces';
+
+h1, h2, h3, h4, h5, h6
+{
+    font-family: $typeface-sans;
+}
+
+h1[id], h1[name],
+h2[id], h2[name],
+h3[id], h3[name]
+{
+    a
+    {
+        color: inherit;
+    }
+
+    a::before
+    {
+        content: '$';
+
+        position: absolute;
+        margin-left: -1em;
+
+        font-weight: 400;
+        font-family: $typeface-monospace;
+        font-size: 92.5%;
+
+        color: $light-foreground-semi;
+        opacity: 0.5;
+    }
+
+    a:hover::before
+    {
+        opacity: 1;
+    }
+}
+
+h1[id]:target::before, h1[name]:target::before,
+h2[id]:target::before, h2[name]:target::before,
+h3[id]:target::before, h3[name]:target::before
+{
+    content: '';
+    display: block;
+    height: 100px;
+    margin: -100px 0 0;
+}
+
+h1
+{
+    font-size: 200%;
+}
+h2
+{
+    font-size: 150%;
+}
+h3
+{
+    font-size: 130%;
+}
+h4, h5, h6
+{
+    font-size: 110%;
+}
