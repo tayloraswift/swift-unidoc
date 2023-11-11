@@ -4,7 +4,7 @@ import Unidoc
 
 extension GroupSections
 {
-    struct ExtensionHeader
+    struct ExtensionHeading
     {
         let inliner:VersionedPageContext
 
@@ -27,7 +27,7 @@ extension GroupSections
         }
     }
 }
-extension GroupSections.ExtensionHeader:HyperTextOutputStreamable
+extension GroupSections.ExtensionHeading:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
