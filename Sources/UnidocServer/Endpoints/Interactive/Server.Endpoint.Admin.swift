@@ -53,12 +53,6 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
 
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
-        case .perform(.lintUnidocEditions, _):
-            let deleted:Int = try await server.db.unidoc.editions._lint(with: session)
-
-            page = .init(action: .lintUnidocEditions,
-                text: "Deleted \(deleted) editions!")
-
         case .perform(.restart, _):
             fatalError("Restarting server...")
 
