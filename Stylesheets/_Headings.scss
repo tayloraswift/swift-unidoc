@@ -14,24 +14,27 @@ h3[id], h3[name]
         color: inherit;
     }
 
-    a::before
+    @media only screen and (min-width: 50rem)
     {
-        content: '$';
+        a::before
+        {
+            content: '$';
 
-        position: absolute;
-        margin-left: -1em;
+            position: absolute;
+            margin-left: -1em;
 
-        font-weight: 400;
-        font-family: $typeface-monospace;
-        font-size: 92.5%;
+            font-weight: 400;
+            font-family: $typeface-monospace;
+            font-size: 92.5%;
 
-        color: $light-foreground-semi;
-        opacity: 0.5;
-    }
+            color: $light-foreground-semi;
+            opacity: 0.5;
+        }
 
-    a:hover::before
-    {
-        opacity: 1;
+        a:hover::before
+        {
+            opacity: 1;
+        }
     }
 }
 
