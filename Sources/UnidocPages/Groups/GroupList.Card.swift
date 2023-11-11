@@ -7,13 +7,13 @@ extension GroupList
     {
         let overview:ProseSection?
 
-        let master:Volume.Vertex
+        let vertex:Volume.Vertex
         let target:String?
 
-        init(overview:ProseSection?, master:Volume.Vertex, target:String?)
+        init(overview:ProseSection?, vertex:Volume.Vertex, target:String?)
         {
             self.overview = overview
-            self.master = master
+            self.vertex = vertex
             self.target = target
         }
     }
@@ -23,29 +23,31 @@ extension GroupList.Card:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        switch self.master
+        switch self.vertex
         {
-        case .article(let master):
+        case .article(let vertex):
             html[.li, { $0.class = "article" }]
             {
-                $0[link: self.target] { $0[.h3] = master.headline.safe }
+                $0[link: self.target] { $0[.h3] = vertex.headline.safe }
                 $0 ?= self.overview
                 $0[link: self.target] { $0.class = "read-more" } = "Read More"
             }
 
-        case .culture(let master):
+        case .culture(let vertex):
             html[.li, { $0.class = "module" }]
             {
-                $0[link: self.target] = master.module.id
+                $0[link: self.target] = vertex.module.id
                 $0 ?= self.overview
             }
 
-        case .decl(let master):
-            html[.li, { $0.class = "decl" }]
+        case .decl(let vertex):
+            html[.li, { $0.class = "decl" ; $0.id = "\(vertex.symbol)" }]
             {
+                $0[.a] { $0.href = "#\(vertex.symbol)" }
+
                 //  There is no better way to compute the monospace width of markdown than
                 //  rendering it to plain text and performing grapheme breaking.
-                let width:Int = "\(master.signature.abridged.bytecode.safe)".count
+                let width:Int = "\(vertex.signature.abridged.bytecode.safe)".count
 
                 //  The em width of a single glyph of the IBM Plex Mono font is 600 / 1000,
                 //  or 0.6. We consider a signature to be “long” if it occupies more than
@@ -54,9 +56,9 @@ extension GroupList.Card:HyperTextOutputStreamable
                 {
                     $0[link: self.target]
                     {
-                        $0.class = master.signature.availability.isGenerallyRecommended ?
+                        $0.class = vertex.signature.availability.isGenerallyRecommended ?
                             nil : "discouraged"
-                    } = master.signature.abridged
+                    } = vertex.signature.abridged
                 }
 
                 $0 ?= self.overview

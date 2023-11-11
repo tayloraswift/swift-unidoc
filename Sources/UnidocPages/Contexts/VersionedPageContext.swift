@@ -85,7 +85,7 @@ extension VersionedPageContext
         self.cache[scalar].map
         {
             .init(overview: $0.overview.map(self.prose(overview:)),
-                master: $0,
+                vertex: $0,
                 target: $1)
         }
     }
