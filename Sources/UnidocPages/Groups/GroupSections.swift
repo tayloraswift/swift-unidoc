@@ -207,7 +207,7 @@ extension GroupSections:HyperTextOutputStreamable
 
                 $0[.h2] { $0.id = heading.id } = heading
 
-                guard group.members.count < 13
+                guard group.members.count > 12
                 else
                 {
                     $0[.ul]
