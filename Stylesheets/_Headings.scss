@@ -35,9 +35,7 @@ h3[id], h3[name]
     }
 }
 
-h1[id]:target::before, h1[name]:target::before,
-h2[id]:target::before, h2[name]:target::before,
-h3[id]:target::before, h3[name]:target::before
+*[id]:target::before, *[name]:target::before
 {
     content: '';
     display: block;
