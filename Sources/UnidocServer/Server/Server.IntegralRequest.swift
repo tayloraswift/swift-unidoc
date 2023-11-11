@@ -49,7 +49,8 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
         case .barbie(_):            return nil
         case .bratz:                return nil
         case .robot(.ahrefsbot):    return nil
-        case .robot(.amazonbot):    break
+        //  Crawls way too fast.
+        case .robot(.amazonbot):    return nil
         case .robot(.baiduspider):  break
         case .robot(.bingbot):      break
         case .robot(.duckduckbot):  break
