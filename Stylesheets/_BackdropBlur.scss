@@ -1,0 +1,10 @@
+@mixin backdrop-blur
+{
+    @supports (backdrop-filter: blur(6px) saturate(180%)) or
+        (-webkit-backdrop-filter: blur(6px) saturate(180%))
+    {
+        background-color: $light-background-translucent;
+        backdrop-filter: blur(6px) saturate(180%);
+        -webkit-backdrop-filter: blur(6px) saturate(180%);
+    }
+}

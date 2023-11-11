@@ -21,7 +21,7 @@ extension StaticLinker.SupplementBindingError.Note:DiagnosticNote
     {
         output[.note] = """
         did you mean to reference the protocol witness? \
-        (\(output.symbolicator.signature(of: self.suggested)))
+        (\(output.symbolicator[self.suggested]))
         """
     }
 }

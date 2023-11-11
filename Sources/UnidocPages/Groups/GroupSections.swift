@@ -16,11 +16,11 @@ struct GroupSections
     let superforms:[Unidoc.Scalar]?
 
     private
-    let extensions:[Volume.Group.Extension]
+    var extensions:[Volume.Group.Extension]
     private
-    let automatic:[Volume.Group.Automatic]
+    var topics:[Volume.Group.Topic]
     private
-    let topics:[Volume.Group.Topic]
+    var other:[(AutomaticHeading, [Unidoc.Scalar])]
 
     private
     let bias:Unidoc.Scalar?
@@ -31,9 +31,9 @@ struct GroupSections
     init(_ inliner:VersionedPageContext,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
-        extensions:[Volume.Group.Extension],
-        automatic:[Volume.Group.Automatic],
-        topics:[Volume.Group.Topic],
+        extensions:[Volume.Group.Extension] = [],
+        topics:[Volume.Group.Topic] = [],
+        other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
         bias:Unidoc.Scalar?,
         mode:Mode?)
     {
@@ -42,29 +42,33 @@ struct GroupSections
         self.requirements = requirements
         self.superforms = superforms
         self.extensions = extensions
-        self.automatic = automatic
         self.topics = topics
+        self.other = other
         self.bias = bias
         self.mode = mode
     }
 }
 extension GroupSections
 {
-    init(_ inliner:__owned VersionedPageContext,
-        requirements:__owned [Unidoc.Scalar] = [],
-        superforms:__owned [Unidoc.Scalar] = [],
-        generics:__shared [GenericParameter] = [],
-        groups:__shared [Volume.Group],
+    init(_ inliner:VersionedPageContext,
+        requirements:[Unidoc.Scalar] = [],
+        superforms:[Unidoc.Scalar] = [],
+        generics:[GenericParameter] = [],
+        groups:borrowing [Volume.Group],
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
         let generics:Generics = .init(generics)
 
-        var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
-        var automatic:[Volume.Group.Automatic] = []
-        var topics:[Volume.Group.Topic] = []
+        self.init(inliner,
+            requirements: requirements.isEmpty ? nil : requirements,
+            superforms: superforms.isEmpty ? nil : superforms,
+            bias: bias,
+            mode: mode)
 
-        for group:Volume.Group in groups
+        var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
+
+        for group:Volume.Group in copy groups
         {
             switch group
             {
@@ -82,10 +86,29 @@ extension GroupSections
                 extensions.append((group, partisanship, genericness))
 
             case .automatic(let group):
-                automatic.append(group)
+                //  Guess what kind of autogroup this is by looking at the bit pattern of
+                //  the first member of the group.
+                guard
+                let first:Unidoc.Scalar = group.members.first,
+                let first:UnidocPlane = .of(first.citizen)
+                else
+                {
+                    continue
+                }
+
+                let heading:AutomaticHeading
+
+                switch (first, self.mode)
+                {
+                case (.module, .meta):  heading = .allModules
+                case (.module, _):      heading = .otherModules
+                case (_, _):            heading = .miscellaneous
+                }
+
+                self.other.append((heading, group.members))
 
             case .topic(let group):
-                topics.append(group)
+                self.topics.append(group)
             }
         }
 
@@ -105,23 +128,15 @@ extension GroupSections
             ($0.1, $0.0.culture.citizen, $0.2, $0.0.id) <
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
-        automatic.sort { $0.id < $1.id }
-        topics.sort { $0.id < $1.id }
 
-        self.init(inliner,
-            requirements: requirements.isEmpty ? nil : requirements,
-            superforms: superforms.isEmpty ? nil : superforms,
-            extensions: extensions.map(\.0),
-            automatic: automatic,
-            topics: topics,
-            bias: bias,
-            mode: mode)
+        self.extensions = extensions.map(\.0)
+        self.topics.sort { $0.id < $1.id }
     }
 }
 extension GroupSections
 {
     private
-    func header(for extension:Volume.Group.Extension) -> ExtensionHeader
+    func heading(for extension:Volume.Group.Extension) -> ExtensionHeading
     {
         let display:String
         switch (self.bias, self.bias?.zone)
@@ -156,28 +171,17 @@ extension GroupSections:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        for group:Volume.Group.Automatic in self.automatic
-        {
-            html[.section, { $0.class = "group automatic" }]
-            {
-                $0[.h2] = self.mode == .meta ? "Modules" : "See Also"
-                $0[.ul]
-                {
-                    for member:Unidoc.Scalar in group.members
-                    {
-                        $0 ?= self.inliner.card(member)
-                    }
-                }
-            }
-        }
         for group:Volume.Group.Topic in self.topics
         {
-            html[.section, { $0.class = "group topic" }]
+            guard
+            let principal:Unidoc.Scalar = self.inliner.vertices.principal,
+                group.members.contains(.scalar(principal))
+            else
             {
-                guard
-                let principal:Unidoc.Scalar = self.inliner.vertices.principal,
-                    group.members.contains(.scalar(principal))
-                else
+                //  This is a topic group that doesn’t contain this page.
+                //  It is not a “See Also” section, and we should render
+                //  any prose associated with it.
+                html[.section, { $0.class = "group topic" }]
                 {
                     $0 ?= group.overview.map(self.inliner.prose(overview:))
 
@@ -185,46 +189,75 @@ extension GroupSections:HyperTextOutputStreamable
                     {
                         self.inliner.list(members: group.members, to: &$0)
                     }
-                    return
                 }
 
-                $0[.h2] = "See Also"
+                continue
+            }
 
-                if  group.members.count < 13
+            if  group.members.count == 1
+            {
+                //  This is a topic group that contains this page only.
+                //  A “See Also” section is not necessary.
+                continue
+            }
+
+            html[.section, { $0.class = "group topic" }]
+            {
+                let heading:AutomaticHeading = .seeAlso
+
+                $0[.h2] { $0.id = heading.id } = heading
+
+                guard group.members.count > 12
+                else
                 {
                     $0[.ul]
                     {
                         self.inliner.list(members: group.members, to: &$0)
                     }
+
+                    return
                 }
-                else
+
+                $0[.details]
                 {
-                    $0[.details]
+                    $0[.summary]
                     {
-                        $0[.summary]
+                        $0[.p] { $0.class = "view" } = "View members"
+
+                        $0[.p] { $0.class = "hide" } = "Hide members"
+
+                        $0[.p, { $0.class = "reason" }]
                         {
-                            $0[.p] { $0.class = "view" } = "View members"
+                            $0 += """
+                            This section is hidden by default because it contains too many \
 
-                            $0[.p] { $0.class = "hide" } = "Hide members"
+                            """
 
-                            $0[.p, { $0.class = "reason" }]
-                            {
-                                $0 += """
-                                This section is hidden by default because it contains too many \
+                            $0[.span] { $0.class = "count" } = "(\(group.members.count))"
 
-                                """
-
-                                $0[.span] { $0.class = "count" } = "(\(group.members.count))"
-
-                                $0 += """
-                                 members.
-                                """
-                            }
+                            $0 += """
+                                members.
+                            """
                         }
-                        $0[.ul]
-                        {
-                            self.inliner.list(members: group.members, to: &$0)
-                        }
+                    }
+                    $0[.ul]
+                    {
+                        self.inliner.list(members: group.members, to: &$0)
+                    }
+                }
+            }
+        }
+
+        for (heading, members):(AutomaticHeading, [Unidoc.Scalar]) in self.other
+        {
+            html[.section, { $0.class = "group automatic" }]
+            {
+                $0[.h2] { $0.id = heading.id } = heading
+                $0[.ul]
+                {
+                    for member:Unidoc.Scalar in members
+                    {
+                        $0 ?= self.inliner.card(member)
                     }
                 }
             }
@@ -240,27 +273,30 @@ extension GroupSections:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group superforms" }]
             {
+                let heading:AutomaticHeading
+
                 if      kinks[is: .required]
                 {
-                    $0[.h2] = "Restates"
+                    heading = .restatesRequirements
                 }
                 else if kinks[is: .intrinsicWitness]
                 {
-                    $0[.h2] = "Implements"
+                    heading = .implementsRequirements
                 }
                 else if kinks[is: .override]
                 {
-                    $0[.h2] = "Overrides"
+                    heading = .overrides
                 }
                 else if case .class = phylum
                 {
-                    $0[.h2] = "Superclasses"
+                    heading = .superclasses
                 }
                 else
                 {
-                    $0[.h2] = "Supertypes"
+                    heading = .supertypes
                 }
 
+                $0[.h2] { $0.id = heading.id } = heading
                 $0[.ul]
                 {
                     for superform:Unidoc.Scalar in superforms
@@ -275,7 +311,9 @@ extension GroupSections:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group requirements" }]
             {
-                $0[.h2] = "Requirements"
+                let heading:AutomaticHeading = .allRequirements
+
+                $0[.h2] { $0.id = heading.id } = heading
                 $0[.ul]
                 {
                     for requirement:Unidoc.Scalar in requirements
@@ -290,7 +328,7 @@ extension GroupSections:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group extension" }]
             {
-                $0 += self.header(for: group)
+                $0 += self.heading(for: group)
 
                 $0 ?= self.list(group.conformances, under: "Conformances")
                 $0 ?= self.list(group.nested, under: "Members")

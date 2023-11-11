@@ -30,7 +30,7 @@ extension InvalidCodelinkError.Note:DiagnosticNote
         case    .scalar(let scalar),
                 .vector(let scalar, self: _):
             output[.note] = """
-            did you mean '\(self.suggested)'? (\(output.symbolicator.signature(of: scalar)))
+            did you mean '\(self.suggested)'? (\(output.symbolicator[scalar]))
             """
         }
     }

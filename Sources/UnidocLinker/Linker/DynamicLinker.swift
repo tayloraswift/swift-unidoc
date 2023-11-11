@@ -54,7 +54,6 @@ struct DynamicLinker:~Copyable
 
         self.conformances = conformances
         self.diagnostics = diagnostics
-
         self.extensions = extensions
 
         self.memberships = [:]
@@ -261,7 +260,7 @@ extension DynamicLinker
             }
             .map
             {
-                self.current.edition + $0 * .module
+                self.current.edition + $0
             })
 
         self.groups.append(.automatic(cultures))
@@ -287,7 +286,7 @@ extension DynamicLinker
                 from: (c, self.current.namespaces[c]))
         }
 
-        //  Second pass to create various master records, which reads from the ``topics``.
+        //  Second pass to create various vertex records, which reads from the ``topics``.
         for ((c, namespace, culture), context):
             ((Int, ModuleIdentifier, SymbolGraph.Culture), ModuleContext) in zip(
             self.current.modules,
@@ -307,10 +306,20 @@ extension DynamicLinker
                     continue
                 }
 
-                self.link(decls: decls.range,
+                let miscellaneous:[Unidoc.Scalar] = self.link(decls: decls.range,
                     under: (n, namespace),
                     with: context,
                     from: c)
+
+                if  miscellaneous.isEmpty
+                {
+                    continue
+                }
+
+                //  Create top-level autogroup.
+                self.groups.append(.automatic(.init(id: self.next.autogroup.id(),
+                    scope: self.current.edition + c,
+                    members: self.context.sort(lexically: consume miscellaneous))))
             }
             //  Create article records.
             if  let articles:ClosedRange<Int32> = culture.articles
@@ -419,12 +428,15 @@ extension DynamicLinker
         }
     }
 
+    /// Returns a list of uncategorized top-level declarations.
     private mutating
     func link(decls range:ClosedRange<Int32>,
         under namespace:(scalar:Unidoc.Scalar, id:ModuleIdentifier),
         with context:ModuleContext,
-        from culture:Int)
+        from culture:Int) -> [Unidoc.Scalar]
     {
+        var miscellaneous:[Unidoc.Scalar] = []
+
         for (d, ((symbol, node), conformances)):
             (Int32, ((Symbol.Decl, SymbolGraph.DeclNode), ProtocolConformances<Int>))
             in zip(range, zip(zip(
@@ -432,25 +444,36 @@ extension DynamicLinker
                     self.current.decls.nodes[range]),
                 self.conformances[range]))
         {
+            /// Is this declaration a member of a topic?
             let group:Unidoc.Scalar? = self.memberships.removeValue(forKey: d)
+            /// Is this declaration a top-level member of its module?
+            /// (Being a top-level declaration is the only way this can be nil.)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
 
             //  Ceremonial unwraps, should always succeed since we are only iterating
             //  over module ranges.
-            guard   let decl:SymbolGraph.Decl = node.decl,
-                    let d:Unidoc.Scalar = self.current.scalars.decls[d]
+            guard
+            let decl:SymbolGraph.Decl = node.decl,
+            let d:Unidoc.Scalar = self.current.scalars.decls[d]
             else
             {
                 continue
             }
 
+            if  case nil = group,
+                case nil = scope,
+                // needed to avoid vacuuming up default implementations
+                decl.path.count == 1
+            {
+                miscellaneous.append(d)
+            }
 
             for f:Int32 in decl.features
             {
                 //  The feature might have been declared in a different package!
                 guard
-                    let f:Unidoc.Scalar = self.current.scalars.decls[f],
-                    let p:Unidoc.Scalar = self.context[f.package]?.scope(of: f)
+                let f:Unidoc.Scalar = self.current.scalars.decls[f],
+                let p:Unidoc.Scalar = self.context[f.package]?.scope(of: f)
                 else
                 {
                     continue
@@ -522,5 +545,7 @@ extension DynamicLinker
 
             self.decls.append(vertex)
         }
+
+        return miscellaneous
     }
 }

@@ -29,7 +29,7 @@ struct StaticLinker:~Copyable
     private
     var symbolizer:Symbolizer
     private
-    var router:StaticRouter
+    var router:Router
     private
     var tables:Tables
 
@@ -681,9 +681,9 @@ extension StaticLinker
         graph:SymbolGraph
     )
     {
-        for case .some(let path) in self.router.paths.values
+        for case (let path, .some(let members)) in self.router.paths
         {
-            for (hash, addresses):(FNV24?, InlineArray<Int32>) in path
+            for (hash, addresses):(FNV24?, InlineArray<Int32>) in members
             {
                 if  let hash:FNV24
                 {
@@ -693,24 +693,25 @@ extension StaticLinker
                         //  declaration node index.
                         self.symbolizer.graph.decls.nodes[stacked].decl?.route = .hashed
                     }
-                    if  case .some(let collisions) = addresses
+                    guard
+                    case .some(let collisions) = addresses
+                    else
                     {
-                        print("""
-                            WARNING: FNV-1 hash collision detected! (hash: \(hash), \
-                            symbols: \(collisions.map { self.symbolizer.graph.decls[$0] }))
-                            """)
+                        continue
                     }
+
+                    self.tables.diagnostics[nil] = RouteCollisionError.hash(hash, collisions)
                 }
                 else
                 {
-                    for stacked:Int32 in addresses
+                    let collisions:[Int32] =
+                    switch addresses
                     {
-                        print("""
-                            WARNING: Standalone article \
-                            (\(self.symbolizer.graph.articles.symbols[stacked])) \
-                            does not have a unique URL! (\(path))
-                            """)
+                    case .one(let scalar):  [scalar]
+                    case .some(let scalars): scalars
                     }
+
+                    self.tables.diagnostics[nil] = RouteCollisionError.path(path, collisions)
                 }
             }
         }
