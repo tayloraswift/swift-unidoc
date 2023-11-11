@@ -183,7 +183,9 @@ extension HTTP.Server
                 catch ChannelError.outputClosed
                 {
                 }
-
+                catch NIOSSLError.uncleanShutdown
+                {
+                }
                 catch let error
                 {
                     Log[.error] = "\(error)"
