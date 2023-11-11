@@ -12,6 +12,9 @@ extension Server.ClientAnnotation
         case baiduspider
         /// Crawler belonging to Bing, an American search engine.
         case bingbot
+
+        /// Amazon CloudFront.
+        case cloudfront
         /// Crawler belonging to DuckDuckGo, an American search engine. Only the favicon
         /// bot is active today.
         case duckduckbot
@@ -49,7 +52,11 @@ extension Server.ClientAnnotation.Robot
     static
     func match(in string:String) -> Self?
     {
-        if      string.contains("amazon")
+        if      string.contains("cloudfront")
+        {
+            return .cloudfront
+        }
+        if      string.contains("amazonbot")
         {
             return .amazonbot
         }

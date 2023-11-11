@@ -463,7 +463,9 @@ extension DynamicLinker
             if  case nil = group,
                 case nil = scope,
                 // needed to avoid vacuuming up default implementations
-                decl.path.count == 1
+                decl.path.count == 1,
+                // only display swift declarations
+                symbol.language == .s || decl.phylum.isTypelike
             {
                 miscellaneous.append(d)
             }
