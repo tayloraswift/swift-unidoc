@@ -8,6 +8,7 @@ extension GroupSections
         case otherModules
 
         case miscellaneous
+        case seeAlso
 
         case allRequirements
         case restatesRequirements
@@ -27,6 +28,7 @@ extension GroupSections.AutomaticHeading:Identifiable
         case .otherModules:             "section:other-modules"
 
         case .miscellaneous:            "section:miscellaneous"
+        case .seeAlso:                  "section:see-also"
 
         case .allRequirements:          "section:all-requirements"
         case .restatesRequirements:     "section:restates-requirements"
@@ -34,6 +36,7 @@ extension GroupSections.AutomaticHeading:Identifiable
         case .overrides:                "section:overrides"
         case .superclasses:             "section:superclasses"
         case .supertypes:               "section:supertypes"
+
         }
     }
 }
@@ -47,6 +50,7 @@ extension GroupSections.AutomaticHeading:CustomStringConvertible
         case .otherModules:             "Other Modules"
 
         case .miscellaneous:            "Miscellaneous"
+        case .seeAlso:                  "See Also"
 
         case .allRequirements:          "Requirements"
         case .restatesRequirements:     "Restates"

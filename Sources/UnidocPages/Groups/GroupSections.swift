@@ -203,7 +203,9 @@ extension GroupSections:HyperTextOutputStreamable
 
             html[.section, { $0.class = "group topic" }]
             {
-                $0[.h2] = "See Also"
+                let heading:AutomaticHeading = .seeAlso
+
+                $0[.h2] { $0.id = heading.id } = heading
 
                 guard group.members.count < 13
                 else
