@@ -22,6 +22,34 @@ extension Unidoc
 }
 extension Unidoc.Decl
 {
+    /// Indicates if the declaration is typelike. This is not the same as ``orientation``!
+    @inlinable public
+    var isTypelike:Bool
+    {
+        switch self
+        {
+        case    .actor,
+                .associatedtype,
+                .class,
+                .enum,
+                .macro,
+                .protocol,
+                .struct,
+                .typealias:
+            true
+
+        case    .case,
+                .deinitializer,
+                .func,
+                .initializer,
+                .operator,
+                .subscript,
+                .var:
+            false
+        }
+    }
+
+    /// The declaration’s orientation. This is not the same as ``isTypelike``!
     @inlinable public
     var orientation:Orientation
     {
