@@ -53,6 +53,7 @@ extension Server.IntegralRequest:HTTP.ServerIntegralRequest
         case .robot(.amazonbot):    return nil
         case .robot(.baiduspider):  break
         case .robot(.bingbot):      break
+        case .robot(.cloudfront):   break
         case .robot(.duckduckbot):  break
         case .robot(.google):       break
         case .robot(.googlebot):    break
