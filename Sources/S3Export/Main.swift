@@ -30,7 +30,7 @@ enum Main
             fatalError("could not load AWS access key!")
         }
 
-        let version:MinorVersion = .v(1, 3)
+        let version:MinorVersion = .v(2, 0)
 
         let s3:AWS.S3Client = .init(
             http1: .init(threads: threads,

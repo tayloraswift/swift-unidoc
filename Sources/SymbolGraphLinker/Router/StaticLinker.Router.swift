@@ -4,19 +4,22 @@ import ModuleGraphs
 import Symbols
 import Unidoc
 
-/// `StaticRouter` is responsible for detecting URL path collisions between routes in the
-/// same symbol graph.
-struct StaticRouter
+extension StaticLinker
 {
-    private(set)
-    var paths:[StaticRoute: InlineDictionary<FNV24?, InlineArray<Int32>>]
-
-    init()
+    /// A type responsible for detecting URL path collisions between routes in the
+    /// same symbol graph.
+    struct Router
     {
-        self.paths = [:]
+        private(set)
+        var paths:[Route: InlineDictionary<FNV24?, InlineArray<Int32>>]
+
+        init()
+        {
+            self.paths = [:]
+        }
     }
 }
-extension StaticRouter
+extension StaticLinker.Router
 {
     subscript(namespace:ModuleIdentifier,
         path:UnqualifiedPath,

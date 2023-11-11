@@ -105,7 +105,7 @@ extension Server
 
         //  Eventually, this should be dynamically configurable. But for now, we just
         //  hard-code the version number.
-        return .init(version: .v(1, 3))
+        return .init(version: .v(2, 0))
     }
 
     nonisolated

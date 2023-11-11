@@ -238,9 +238,9 @@ extension DynamicContext
         self[decl.package]?.priority(of: decl)
     }
 
-    func sort(lexically decls:[Unidoc.Scalar]) -> [Unidoc.Scalar]
+    func sort(lexically decls:consuming [Unidoc.Scalar]) -> [Unidoc.Scalar]
     {
-        decls.sorted
+        decls.sort
         {
             switch (self.priority(of: $0), self.priority(of: $1))
             {
@@ -250,5 +250,7 @@ extension DynamicContext
             case (let lhs?, let rhs?):  return lhs < rhs
             }
         }
+
+        return decls
     }
 }

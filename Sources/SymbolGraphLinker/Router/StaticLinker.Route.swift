@@ -4,12 +4,17 @@ import Symbols
 import Unidoc
 import URI
 
-enum StaticRoute:Equatable, Hashable, Sendable
+extension StaticLinker
 {
-    case main(String)
-    case tutorial(String)
+    enum Route:Equatable, Hashable, Sendable
+    {
+        case main(String)
+
+        @available(*, unavailable, message: "unimplemented")
+        case tutorial(String)
+    }
 }
-extension StaticRoute
+extension StaticLinker.Route
 {
     static
     func decl(_ namespace:ModuleIdentifier,
