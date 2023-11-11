@@ -180,13 +180,10 @@ extension HTTP.Server
                     }
                 }
                 //  Normal and expected.
-                catch ChannelError.alreadyClosed
+                catch ChannelError.outputClosed
                 {
                 }
-                //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
-                catch NIOSSLError.uncleanShutdown
-                {
-                }
+
                 catch let error
                 {
                     Log[.error] = "\(error)"
@@ -283,6 +280,10 @@ extension HTTP.Server
                         return
                     }
                 }
+            }
+            //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
+            catch NIOSSLError.uncleanShutdown
+            {
             }
             catch let error
             {
@@ -392,6 +393,9 @@ extension HTTP.Server
                     try await stream.outbound.send(message)
                     stream.outbound.finish()
                 }
+            }
+            catch NIOSSLError.uncleanShutdown
+            {
             }
             catch let error
             {
