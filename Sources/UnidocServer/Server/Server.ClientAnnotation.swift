@@ -24,6 +24,7 @@ extension Server.ClientAnnotation
         case .robot(.amazonbot):        \.likelyMinorSearchEngine
         case .robot(.baiduspider):      \.likelyBaiduspider
         case .robot(.bingbot):          \.verifiedBingbot
+        case .robot(.cloudfront):       \.tooling
         case .robot(.duckduckbot):      \.likelyMinorSearchEngine
         case .robot(.google):           \.otherRobot
         case .robot(.googlebot):        \.verifiedGooglebot
