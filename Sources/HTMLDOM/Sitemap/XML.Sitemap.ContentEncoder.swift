@@ -1,4 +1,4 @@
-extension SVG
+extension XML.Sitemap
 {
     @frozen public
     struct ContentEncoder:StreamingEncoder
@@ -14,15 +14,15 @@ extension SVG
     }
 }
 //  These cannot be factored into protocols due to mutation of ``utf8``.
-extension SVG.ContentEncoder
+extension XML.Sitemap.ContentEncoder
 {
     @inlinable internal mutating
     func emit(opening tag:some RawRepresentable<String>,
-        with yield:(inout SVG.AttributeEncoder) -> ())
+        with yield:(inout XML.Sitemap.AttributeEncoder) -> ())
     {
         self.utf8.append(0x3C) // '<'
         self.utf8.append(contentsOf: tag.rawValue.utf8)
-        yield(&self[as: SVG.AttributeEncoder.self])
+        yield(&self[as: XML.Sitemap.AttributeEncoder.self])
         self.utf8.append(0x3E) // '>'
     }
 
@@ -35,15 +35,15 @@ extension SVG.ContentEncoder
         self.utf8.append(0x3E) // '>'
     }
 }
-extension SVG.ContentEncoder
+extension XML.Sitemap.ContentEncoder
 {
-    /// Writes an opening SVG tag to the output stream.
+    /// Writes an opening sitemap tag to the output stream.
     ///
     /// This is a low-level interface. Prefer encoding with ``subscript(_:content:)``
     /// or ``subscript(_:_:content:)``.
     @inlinable public mutating
-    func open(_ tag:SVG.ContainerElement,
-        with yield:(inout SVG.AttributeEncoder) -> () = { _ in })
+    func open(_ tag:XML.Sitemap.Element,
+        with yield:(inout XML.Sitemap.AttributeEncoder) -> () = { _ in })
     {
         self.emit(opening: tag, with: yield)
     }
@@ -61,20 +61,20 @@ extension SVG.ContentEncoder
     {
         self.utf8 += DOM.UTF8.init(codeunit)
     }
-    /// Writes a closing SVG tag to the output stream.
+    /// Writes a closing sitemap tag to the output stream.
     ///
     /// This is a low-level interface. Prefer encoding with ``subscript(_:content:)``
     /// or ``subscript(_:_:content:)``.
     @inlinable public mutating
-    func close(_ tag:SVG.ContainerElement)
+    func close(_ tag:XML.Sitemap.Element)
     {
         self.emit(closing: tag)
     }
 }
-extension SVG.ContentEncoder
+extension XML.Sitemap.ContentEncoder
 {
     @inlinable public
-    subscript(_ tag:SVG.ContainerElement,
+    subscript(_ tag:XML.Sitemap.Element,
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
@@ -85,8 +85,8 @@ extension SVG.ContentEncoder
         }
     }
     @inlinable public
-    subscript(_ tag:SVG.ContainerElement,
-        attributes:(inout SVG.AttributeEncoder) -> (),
+    subscript(_ tag:XML.Sitemap.Element,
+        attributes:(inout XML.Sitemap.AttributeEncoder) -> (),
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
