@@ -193,7 +193,7 @@ extension Server.Endpoint
     func get(sitemaps trunk:String, tag:MD5?) -> Self
     {
         //  Ignore file extension.
-        .interactive(SiteMap.init(
+        .interactive(Sitemaps.init(
             package: .init(trunk.prefix { $0 != "." }),
             tag: tag))
     }

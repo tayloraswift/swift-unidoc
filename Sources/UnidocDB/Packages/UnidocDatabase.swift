@@ -389,7 +389,7 @@ extension UnidocDatabase
 
         if  volume.meta.latest
         {
-            try await self.siteMaps.upsert(some: volume.siteMap(), with: session)
+            try await self.siteMaps.upsert(some: volume.sitemap(), with: session)
             try await self.groups.insert(some: volume.groups(latest: true), with: session)
         }
         else
@@ -475,8 +475,8 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     public
-    func siteMap(package:consuming PackageIdentifier,
-        with session:Mongo.Session) async throws -> Volume.SiteMap<PackageIdentifier>?
+    func sitemap(package:consuming PackageIdentifier,
+        with session:Mongo.Session) async throws -> Volume.Sitemap<PackageIdentifier>?
     {
         try await self.siteMaps.find(by: package, with: session)
     }

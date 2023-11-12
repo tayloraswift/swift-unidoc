@@ -5,8 +5,14 @@ import URI
 
 extension Volume
 {
+    @available(*, deprecated,
+        renamed: "Sitemap",
+        message: "per sitemaps.org, the correct spelling is 'sitemap'")
+    public
+    typealias SiteMap = Sitemap
+
     @frozen public
-    struct SiteMap<ID>:Identifiable where ID:Hashable
+    struct Sitemap<ID>:Identifiable where ID:Hashable
     {
         public
         let id:ID
@@ -21,13 +27,13 @@ extension Volume
         }
     }
 }
-extension Volume.SiteMap:Equatable where ID:Equatable
+extension Volume.Sitemap:Equatable where ID:Equatable
 {
 }
-extension Volume.SiteMap:Sendable where ID:Sendable
+extension Volume.Sitemap:Sendable where ID:Sendable
 {
 }
-extension Volume.SiteMap
+extension Volume.Sitemap
 {
     @frozen public
     enum CodingKey:String
@@ -37,7 +43,7 @@ extension Volume.SiteMap
         case hash = "H"
     }
 }
-extension Volume.SiteMap:BSONDocumentEncodable, BSONEncodable
+extension Volume.Sitemap:BSONDocumentEncodable, BSONEncodable
     where ID:BSONEncodable
 {
     public
@@ -48,7 +54,7 @@ extension Volume.SiteMap:BSONDocumentEncodable, BSONEncodable
         bson[.hash] = MD5.init(hashing: self.lines)
     }
 }
-extension Volume.SiteMap:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension Volume.Sitemap:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
     where ID:BSONDecodable
 {
     @inlinable public
