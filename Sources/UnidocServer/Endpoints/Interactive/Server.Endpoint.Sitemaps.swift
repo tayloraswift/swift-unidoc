@@ -10,7 +10,7 @@ import URI
 
 extension Server.Endpoint
 {
-    struct SiteMap:Sendable
+    struct Sitemaps:Sendable
     {
         let package:PackageIdentifier
         let tag:MD5?
@@ -22,14 +22,14 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.SiteMap:PublicEndpoint
+extension Server.Endpoint.Sitemaps:PublicEndpoint
 {
     func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let siteMap:Volume.SiteMap<PackageIdentifier> = try await server.db.unidoc.siteMap(
+        let sitemap:Volume.Sitemap<PackageIdentifier> = try await server.db.unidoc.sitemap(
             package: self.package,
             with: session)
         else
@@ -39,13 +39,13 @@ extension Server.Endpoint.SiteMap:PublicEndpoint
 
         let prefix:String = "https://swiftinit.org/\(Site.Docs.root)/\(self.package)"
         var string:String = ""
-        var i:Int = siteMap.lines.startIndex
+        var i:Int = sitemap.lines.startIndex
 
-        while let j:Int = siteMap.lines[i...].firstIndex(of: 0x0A)
+        while let j:Int = sitemap.lines[i...].firstIndex(of: 0x0A)
         {
-            defer { i = siteMap.lines.index(after: j) }
+            defer { i = sitemap.lines.index(after: j) }
 
-            let shoot:Volume.Shoot = .deserialize(from: siteMap.lines[i..<j])
+            let shoot:Volume.Shoot = .deserialize(from: sitemap.lines[i..<j])
             var uri:URI = [] ; uri.path += shoot.stem ; uri["hash"] = shoot.hash?.description
 
             string += "\(prefix)\(uri)\n"

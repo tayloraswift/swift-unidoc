@@ -55,7 +55,7 @@ extension Volume
     }
 
     public
-    func siteMap() -> SiteMap<PackageIdentifier>
+    func sitemap() -> Sitemap<PackageIdentifier>
     {
         var lines:[UInt8] = []
         //  Reverse, because C modules tend to appear in the beginning of the list, and
