@@ -101,7 +101,7 @@ extension Compiler.Decl
             phylum: phylum,
             path: description.path)
 
-        self.kinks[is: .open] = description.visibility == .open
+        self.kinks[is: .open] = description.acl == .open
 
         if  let doccomment:SymbolDescription.Doccomment = description.doccomment
         {
