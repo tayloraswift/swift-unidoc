@@ -1,8 +1,9 @@
 import BSONDecoding
 import BSONEncoding
 import Symbols
+import UnidocRecords
 
-extension PackageRepo
+extension Realm.Repo
 {
     @frozen public
     enum Origin:Equatable, Hashable, Sendable
@@ -11,7 +12,7 @@ extension PackageRepo
         case github(String)
     }
 }
-extension PackageRepo.Origin
+extension Realm.Repo.Origin
 {
     @inlinable public static
     func github(_ owner:String, _ repo:String) -> Self
@@ -32,7 +33,7 @@ extension PackageRepo.Origin
         }
     }
 }
-extension PackageRepo.Origin:CustomStringConvertible
+extension Realm.Repo.Origin:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -43,7 +44,7 @@ extension PackageRepo.Origin:CustomStringConvertible
         }
     }
 }
-extension PackageRepo.Origin:LosslessStringConvertible
+extension Realm.Repo.Origin:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -60,6 +61,6 @@ extension PackageRepo.Origin:LosslessStringConvertible
         }
     }
 }
-extension PackageRepo.Origin:BSONStringDecodable, BSONStringEncodable
+extension Realm.Repo.Origin:BSONStringDecodable, BSONStringEncodable
 {
 }

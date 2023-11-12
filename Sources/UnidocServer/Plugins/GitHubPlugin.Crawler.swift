@@ -5,6 +5,7 @@ import JSON
 import MongoDB
 import SemanticVersions
 import UnidocDB
+import UnidocRecords
 import UnixTime
 
 extension GitHubPlugin
@@ -65,10 +66,10 @@ extension GitHubPlugin.Crawler
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[PackageRecord] = try await db.unidoc.packages.stalest(count,
+        let stale:[Realm.Package] = try await db.unidoc.packages.stalest(count,
             with: session)
 
-        for package:PackageRecord in stale
+        for package:Realm.Package in stale
         {
             guard case .github(let old) = package.repo
             else
@@ -81,7 +82,8 @@ extension GitHubPlugin.Crawler
                 pat: self.pat)
 
             switch try await db.unidoc.packages.update(record: .init(id: package.id,
-                    cell: package.cell,
+                    coordinate: package.coordinate,
+                    realm: package.realm,
                     repo: .github(response.repo),
                     crawled: .now()),
                 with: session)
@@ -116,7 +118,7 @@ extension GitHubPlugin.Crawler
                 }
 
                 switch try await db.unidoc.editions.register(tag,
-                    package: package.cell,
+                    package: package.coordinate,
                     version: version,
                     with: session)
                 {

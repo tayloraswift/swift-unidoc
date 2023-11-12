@@ -40,8 +40,8 @@ extension UnidocDatabase.Editions:DatabaseCollection
             $0[.name] = "package,name"
             $0[.key] = .init
             {
-                $0[PackageEdition[.package]] = (+)
-                $0[PackageEdition[.name]] = (+)
+                $0[Realm.Edition[.package]] = (+)
+                $0[Realm.Edition[.name]] = (+)
             }
         },
         .init
@@ -50,8 +50,8 @@ extension UnidocDatabase.Editions:DatabaseCollection
             $0[.name] = "package,version"
             $0[.key] = .init
             {
-                $0[PackageEdition[.package]] = (-)
-                $0[PackageEdition[.version]] = (-)
+                $0[Realm.Edition[.package]] = (-)
+                $0[Realm.Edition[.version]] = (-)
             }
         },
         .init
@@ -60,16 +60,16 @@ extension UnidocDatabase.Editions:DatabaseCollection
             $0[.name] = "package,patch,version (release:false)"
             $0[.key] = .init
             {
-                $0[PackageEdition[.package]] = (-)
-                $0[PackageEdition[.patch]] = (-)
-                $0[PackageEdition[.version]] = (-)
+                $0[Realm.Edition[.package]] = (-)
+                $0[Realm.Edition[.patch]] = (-)
+                $0[Realm.Edition[.version]] = (-)
             }
 
             $0[.partialFilterExpression] = .init
             {
-                $0[PackageEdition[.release]] = .init { $0[.eq] = false }
-                $0[PackageEdition[.release]] = .init { $0[.exists] = true }
-                $0[PackageEdition[.patch]] = .init { $0[.exists] = true }
+                $0[Realm.Edition[.release]] = .init { $0[.eq] = false }
+                $0[Realm.Edition[.release]] = .init { $0[.exists] = true }
+                $0[Realm.Edition[.patch]] = .init { $0[.exists] = true }
             }
         },
         .init
@@ -78,16 +78,16 @@ extension UnidocDatabase.Editions:DatabaseCollection
             $0[.name] = "package,patch,version (release:true)"
             $0[.key] = .init
             {
-                $0[PackageEdition[.package]] = (-)
-                $0[PackageEdition[.patch]] = (-)
-                $0[PackageEdition[.version]] = (-)
+                $0[Realm.Edition[.package]] = (-)
+                $0[Realm.Edition[.patch]] = (-)
+                $0[Realm.Edition[.version]] = (-)
             }
 
             $0[.partialFilterExpression] = .init
             {
-                $0[PackageEdition[.release]] = .init { $0[.eq] = true }
-                $0[PackageEdition[.release]] = .init { $0[.exists] = true }
-                $0[PackageEdition[.patch]] = .init { $0[.exists] = true }
+                $0[Realm.Edition[.release]] = .init { $0[.eq] = true }
+                $0[Realm.Edition[.release]] = .init { $0[.exists] = true }
+                $0[Realm.Edition[.patch]] = .init { $0[.exists] = true }
             }
         },
     ]
@@ -97,7 +97,7 @@ extension UnidocDatabase.Editions:RecodableCollection
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: PackageEdition.self,
+        try await self.recode(through: Realm.Edition.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
     }
@@ -132,7 +132,7 @@ extension UnidocDatabase.Editions
             refname: refname,
             with: session)
 
-        let edition:PackageEdition = .init(id: .init(
+        let edition:Realm.Edition = .init(id: .init(
                 package: package,
                 version: placement.coordinate),
             release: version.release,
@@ -179,7 +179,7 @@ extension UnidocDatabase.Editions
             {
                 $0[.match] = .init
                 {
-                    $0[PackageEdition[.package]] = package
+                    $0[Realm.Edition[.package]] = package
                 }
             }
             $0.stage
@@ -192,7 +192,7 @@ extension UnidocDatabase.Editions
                         {
                             $0[.match] = .init
                             {
-                                $0[PackageEdition[.name]] = refname
+                                $0[Realm.Edition[.name]] = refname
                             }
                         }
 
@@ -200,8 +200,8 @@ extension UnidocDatabase.Editions
                         {
                             $0[.replaceWith] = .init
                             {
-                                $0[Placement[.coordinate]] = PackageEdition[.version]
-                                $0[Placement[.sha1]] = PackageEdition[.sha1]
+                                $0[Placement[.coordinate]] = Realm.Edition[.version]
+                                $0[Placement[.sha1]] = Realm.Edition[.sha1]
                                 $0[Placement[.new]] = false
                             }
                         }
@@ -212,7 +212,7 @@ extension UnidocDatabase.Editions
                         {
                             $0[.sort] = .init
                             {
-                                $0[PackageEdition[.version]] = (-)
+                                $0[Realm.Edition[.version]] = (-)
                             }
                         }
                         $0.stage
@@ -225,7 +225,7 @@ extension UnidocDatabase.Editions
                             {
                                 $0[Placement[.coordinate]] = .expr
                                 {
-                                    $0[.add] = (PackageEdition[.version], 1)
+                                    $0[.add] = (Realm.Edition[.version], 1)
                                 }
                                 $0[Placement[.new]] = true
                             }

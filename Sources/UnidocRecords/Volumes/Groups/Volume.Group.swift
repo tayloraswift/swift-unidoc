@@ -69,7 +69,7 @@ extension Volume.Group
 
         /// A database-internal flag indicating if this group originates from the latest
         /// release version of its package. Practically, this determines if extensions are
-        /// visible outside of its native zone.
+        /// visible outside of their native volume.
         ///
         /// ``Volume.Group`` doesn’t encode this directly, the ``Records.Groups.Element``
         /// view abstraction adds it after delegating to ``Volume.Group``’s ``encode(to:)``

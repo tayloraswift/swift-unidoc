@@ -94,17 +94,17 @@ extension UnidocDatabase
     }
 
     func _editions(of package:PackageIdentifier,
-        with session:Mongo.Session) async throws -> [PackageEdition]
+        with session:Mongo.Session) async throws -> [Realm.Edition]
     {
         try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<PackageEdition>>.init(Packages.name,
+            command: Mongo.Aggregate<Mongo.Cursor<Realm.Edition>>.init(Packages.name,
                 pipeline: .init
                 {
                     $0.stage
                     {
                         $0[.match] = .init
                         {
-                            $0[PackageRecord[.id]] = package
+                            $0[Realm.Package[.id]] = package
                         }
                     }
 
@@ -115,8 +115,8 @@ extension UnidocDatabase
                         $0[.lookup] = .init
                         {
                             $0[.from] = Editions.name
-                            $0[.localField] = PackageRecord[.cell]
-                            $0[.foreignField] = PackageEdition[.package]
+                            $0[.localField] = Realm.Package[.coordinate]
+                            $0[.foreignField] = Realm.Edition[.package]
                             $0[.as] = editions
                         }
                     }
@@ -130,7 +130,7 @@ extension UnidocDatabase
                             $0[.from] = Graphs.name
                             $0[.let] = .init
                             {
-                                $0[let: cell] = PackageRecord[.cell]
+                                $0[let: cell] = Realm.Package[.coordinate]
                             }
                             $0[.pipeline] = .init
                             {
@@ -211,8 +211,7 @@ extension UnidocDatabase
     func store(docs:SymbolGraphArchive,
         with session:Mongo.Session) async throws -> SnapshotReceipt
     {
-        let placement:Packages.Placement = try await self.packages.register(
-            docs.metadata.package,
+        let package:Realm.Package = try await self.packages.register(docs.metadata.package,
             updating: self.meta,
             tracking: nil,
             with: session)
@@ -223,7 +222,7 @@ extension UnidocDatabase
             let semver:SemanticVersion = .init(refname: commit.refname)
         {
             let placement:Editions.Placement = try await self.editions.register(
-                package: placement.coordinate,
+                package: package.coordinate,
                 version: semver,
                 refname: commit.refname,
                 sha1: commit.hash,
@@ -236,7 +235,7 @@ extension UnidocDatabase
             let semver:SemanticVersion = .init(swiftRelease: tagname)
         {
             let placement:Editions.Placement = try await self.editions.register(
-                package: placement.coordinate,
+                package: package.coordinate,
                 version: semver,
                 refname: tagname,
                 sha1: nil,
@@ -250,7 +249,7 @@ extension UnidocDatabase
         }
 
         let snapshot:Snapshot = .init(
-            package: placement.coordinate,
+            package: package.coordinate,
             version: version,
             metadata: docs.metadata,
             graph: docs.graph)
@@ -260,8 +259,8 @@ extension UnidocDatabase
 
         return .init(id: snapshot.id,
             edition: snapshot.edition,
-            type: upsert,
-            repo: placement.repo)
+            realm: package.realm,
+            type: upsert)
     }
 }
 extension UnidocDatabase
@@ -277,6 +276,7 @@ extension UnidocDatabase
                 version: receipt.version,
                 metadata: docs.metadata,
                 graph: docs.graph),
+            realm: receipt.realm,
             with: session)
 
         _ = consume docs
@@ -294,13 +294,22 @@ extension UnidocDatabase
         version:Int32,
         with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
+        guard
+        let record:Realm.Package = try await self.packages.find(by: package, with: session)
+        else
+        {
+            return nil
+        }
+
         var uplinked:Unidoc.Edition? = nil
 
         try await self.graphs.list(
             filter: (package: package, version: version),
             with: session)
         {
-            try await self.fill(volume: try await self.link($0, with: session),
+            try await self.fill(volume: try await self.link($0,
+                    realm: record.realm,
+                    with: session),
                 clear: true,
                 with: session)
 
@@ -395,7 +404,8 @@ extension UnidocDatabase
     }
 
     private
-    func link(_ snapshot:__owned Snapshot,
+    func link(_ snapshot:Snapshot,
+        realm:Realm,
         with session:Mongo.Session) async throws -> Volume
     {
         let context:DynamicContext = .init(snapshot,
@@ -447,6 +457,7 @@ extension UnidocDatabase
             commit: snapshot.metadata.commit?.hash,
             symbol: id.volume,
             latest: snapshot.edition == latestRelease,
+            realm: realm,
             patch: thisRelease,
             link: mesh.meta,
             tree: mesh.tree)

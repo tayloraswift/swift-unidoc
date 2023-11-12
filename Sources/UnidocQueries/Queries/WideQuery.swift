@@ -65,7 +65,7 @@ extension WideQuery:VolumeLookupQuery
             {
                 $0[.from] = UnidocDatabase.Packages.name
                 $0[.localField] = Output.Principal[.volume] / Volume.Meta[.cell]
-                $0[.foreignField] = PackageRecord[.cell]
+                $0[.foreignField] = Realm.Package[.coordinate]
                 $0[.as] = Output.Principal[.repo]
             }
         }
@@ -81,7 +81,7 @@ extension WideQuery:VolumeLookupQuery
         {
             $0[.set] = .init
             {
-                $0[Output.Principal[.repo]] = Output.Principal[.repo] / PackageRecord[.repo]
+                $0[Output.Principal[.repo]] = Output.Principal[.repo] / Realm.Package[.repo]
             }
         }
 
@@ -343,6 +343,7 @@ extension WideQuery:VolumeLookupQuery
                                     .tree,
 
                                     .latest,
+                                    .realm,
                                     .api
                                 ]
                                 {

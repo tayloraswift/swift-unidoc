@@ -48,6 +48,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     version: "5.9.1",
                     triple: toolchain.triple),
                 edition: .init(package: 0, version: 0),
+                realm: .united,
                 type: .insert))
 
         tests.expect(try await unidoc.publish(consume example, with: session) ==?
@@ -55,6 +56,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     version: "0.0.0",
                     triple: toolchain.triple),
                 edition: .init(package: 1, version: -1),
+                realm: .united,
                 type: .insert))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.

@@ -1,5 +1,5 @@
 import BSONDecoding
-import Unidoc
+import UnidocRecords
 
 extension UnidocDatabase.Editions
 {
@@ -17,7 +17,7 @@ extension UnidocDatabase.Editions
 @available(*, unavailable)
 extension UnidocDatabase.Editions.VersionView:BSONDocumentDecodable
 {
-    typealias CodingKey = PackageEdition.CodingKey
+    typealias CodingKey = Realm.Edition.CodingKey
 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
