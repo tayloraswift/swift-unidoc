@@ -10,7 +10,7 @@ import URI
 
 extension Server.Endpoint
 {
-    struct Sitemaps:Sendable
+    struct Sitemap:Sendable
     {
         let package:PackageIdentifier
         let tag:MD5?
@@ -22,7 +22,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.Sitemaps:PublicEndpoint
+extension Server.Endpoint.Sitemap:PublicEndpoint
 {
     func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
