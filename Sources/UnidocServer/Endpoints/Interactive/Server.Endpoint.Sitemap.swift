@@ -10,6 +10,11 @@ import URI
 
 extension Server.Endpoint
 {
+    /// Generates a plain text sitemap for the given package.
+    ///
+    /// We don’t have granular enough `<lastmod>` information to motivate generating XML
+    /// sitemaps, and all other XML sitemap features (like `<priority>`) are irrelevant to us,
+    /// since Google ignores them. Therefore, we use the plain text format.
     struct Sitemap:Sendable
     {
         let package:PackageIdentifier
@@ -46,7 +51,10 @@ extension Server.Endpoint.Sitemap:PublicEndpoint
             defer { i = sitemap.lines.index(after: j) }
 
             let shoot:Volume.Shoot = .deserialize(from: sitemap.lines[i..<j])
-            var uri:URI = [] ; uri.path += shoot.stem ; uri["hash"] = shoot.hash?.description
+            var uri:URI = []
+
+            uri.path += shoot.stem
+            uri["hash"] = shoot.hash?.description
 
             string += "\(prefix)\(uri)\n"
         }
