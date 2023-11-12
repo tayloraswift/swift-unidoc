@@ -13,30 +13,28 @@ extension HTML
         }
     }
 }
-//  These cannot be factored into protocols due to mutation of ``utf8``.
-extension HTML.ContentEncoder
+extension HTML.ContentEncoder:DOM.ContentEncoder
 {
-    @inlinable internal mutating
-    func emit(opening tag:some RawRepresentable<String>,
-        with yield:(inout HTML.AttributeEncoder) -> ())
-    {
-        self.utf8.append(0x3C) // '<'
-        self.utf8.append(contentsOf: tag.rawValue.utf8)
-        yield(&self[as: HTML.AttributeEncoder.self])
-        self.utf8.append(0x3E) // '>'
-    }
+    @usableFromInline internal
+    typealias AttributeEncoder = HTML.AttributeEncoder
 
-    @inlinable internal mutating
-    func emit(closing tag:some RawRepresentable<String>)
+    /// Appends a *raw* UTF-8 code unit to the output stream.
+    @inlinable public mutating
+    func append(escaped codeunit:UInt8)
     {
-        self.utf8.append(0x3C) // '<'
-        self.utf8.append(0x2F) // '/'
-        self.utf8.append(contentsOf: tag.rawValue.utf8)
-        self.utf8.append(0x3E) // '>'
+        self.utf8.append(codeunit)
     }
 }
 extension HTML.ContentEncoder
 {
+    /// Appends an *unescaped* UTF-8 code unit to the output stream.
+    /// If the code unit is one of the ASCII characters `&` `<`, or `>`,
+    /// this function replaces it with the corresponding HTML entity.
+    @inlinable public mutating
+    func append(unescaped codeunit:UInt8)
+    {
+        self.utf8 += DOM.UTF8.init(codeunit)
+    }
     /// Writes an opening HTML tag to the output stream.
     ///
     /// This is a low-level interface. Prefer encoding with ``subscript(_:content:)``
@@ -46,20 +44,6 @@ extension HTML.ContentEncoder
         with yield:(inout HTML.AttributeEncoder) -> () = { _ in })
     {
         self.emit(opening: tag, with: yield)
-    }
-    /// Appends a *raw* UTF-8 code unit to the output stream.
-    @inlinable public mutating
-    func append(escaped codeunit:UInt8)
-    {
-        self.utf8.append(codeunit)
-    }
-    /// Appends an *unescaped* UTF-8 code unit to the output stream.
-    /// If the code unit is one of the ASCII characters `&` `<`, or `>`,
-    /// this function replaces it with the corresponding HTML entity.
-    @inlinable public mutating
-    func append(unescaped codeunit:UInt8)
-    {
-        self.utf8 += DOM.UTF8.init(codeunit)
     }
     /// Writes a closing HTML tag to the output stream.
     ///
