@@ -1,5 +1,6 @@
 import Unidoc
 import UnidocLinker
+import UnidocRecords
 
 @frozen public
 struct SnapshotReceipt:Equatable, Sendable
@@ -9,17 +10,20 @@ struct SnapshotReceipt:Equatable, Sendable
     public
     let edition:Unidoc.Edition
     public
-    var type:Upsert
+    let realm:Realm
     public
-    var repo:PackageRepo?
+    var type:Upsert
 
     @inlinable public
-    init(id:Snapshot.ID, edition:Unidoc.Edition, type:Upsert, repo:PackageRepo? = nil)
+    init(id:Snapshot.ID,
+        edition:Unidoc.Edition,
+        realm:Realm,
+        type:Upsert)
     {
         self.id = id
         self.edition = edition
+        self.realm = realm
         self.type = type
-        self.repo = repo
     }
 }
 extension SnapshotReceipt

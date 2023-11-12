@@ -30,7 +30,7 @@ extension WideQuery.Output
         let volumeOfLatest:Volume.Meta?
 
         public
-        let repo:PackageRepo?
+        let repo:Realm.Repo?
 
         public
         let tree:Volume.TypeTree?
@@ -43,7 +43,7 @@ extension WideQuery.Output
             groups:[Volume.Group],
             volume:Volume.Meta,
             volumeOfLatest:Volume.Meta?,
-            repo:PackageRepo?,
+            repo:Realm.Repo?,
             tree:Volume.TypeTree?)
         {
             self.matches = matches

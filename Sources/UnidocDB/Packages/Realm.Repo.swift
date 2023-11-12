@@ -4,12 +4,19 @@ import GitHubAPI
 import MongoQL
 import UnidocRecords
 
-@frozen public
-enum PackageRepo:Equatable, Sendable
+@available(*, deprecated, renamed: "Realm.Repo")
+public
+typealias PackageRepo = Realm.Repo
+
+extension Realm
 {
-    case github(GitHub.Repo)
+    @frozen public
+    enum Repo:Equatable, Sendable
+    {
+        case github(GitHub.Repo)
+    }
 }
-extension PackageRepo
+extension Realm.Repo
 {
     @inlinable public
     var origin:Origin
@@ -20,7 +27,7 @@ extension PackageRepo
         }
     }
 }
-extension PackageRepo:MongoMasterCodingModel
+extension Realm.Repo:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String
@@ -49,7 +56,7 @@ extension PackageRepo:MongoMasterCodingModel
         case github_pushed = "hP"
     }
 }
-extension PackageRepo:BSONDocumentEncodable
+extension Realm.Repo:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -79,7 +86,7 @@ extension PackageRepo:BSONDocumentEncodable
         }
     }
 }
-extension PackageRepo:BSONDocumentDecodable
+extension Realm.Repo:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

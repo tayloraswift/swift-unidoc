@@ -28,6 +28,8 @@ extension Volume
         public
         var latest:Bool
         public
+        var realm:Realm
+        public
         var patch:PatchVersion?
 
         public
@@ -47,6 +49,7 @@ extension Volume
             commit:SHA1? = nil,
             symbol:VolumeIdentifier,
             latest:Bool,
+            realm:Realm,
             patch:PatchVersion? = nil,
             link:LinkDetails? = nil,
             tree:[Noun] = [])
@@ -60,6 +63,7 @@ extension Volume
             self.commit = commit
             self.symbol = symbol
             self.latest = latest
+            self.realm = realm
             self.patch = patch
             self.link = link
             self.tree = tree
@@ -101,7 +105,7 @@ extension Volume.Meta
         case version = "V"
         case display = "D"
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
-        /// to match (and duplicate) the refname in the associated ``PackageEdition`` record.
+        /// to match (and duplicate) the refname in the associated ``Realm.Edition`` record.
         case refname = "G"
         case commit = "H"
         case patch = "S"
@@ -119,11 +123,13 @@ extension Volume.Meta
 
         case planes_max = "Z"
 
-        /// Indicates if this zone contains records from the latest release
-        /// version of its package. This flag is non-authoritative and only
-        /// exists as a query optimization. It is computed and aligned within
-        /// the database according to the value of the ``patch`` field.
+        /// Indicates if this zone contains records from the latest release version of its
+        /// package. It is computed and aligned within the database according to the value of
+        /// the ``patch`` field.
+        ///
+        /// This field currently only exists in order to compute the volume ``selector``.
         case latest = "L"
+        case realm = "R"
 
         case api = "I"
     }
@@ -145,6 +151,7 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.commit] = self.commit
 
         bson[.latest] = self.latest ? true : nil
+        bson[.realm] = self.realm
         bson[.patch] = self.patch
         bson[.link] = self.link
         bson[.tree] = Volume.NounTable.init(eliding: self.tree)
@@ -177,6 +184,8 @@ extension Volume.Meta:BSONDocumentDecodable
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,
+            //  TODO: make this non-optional after migration
+            realm: try bson[.realm]?.decode() ?? .united,
             patch: try bson[.patch]?.decode(),
             link: try bson[.link]?.decode(),
             tree: try bson[.tree]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
