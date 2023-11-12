@@ -13,6 +13,7 @@ extension HTML
         }
     }
 }
+//  These cannot be factored into protocols due to mutation of ``utf8``.
 extension HTML.ContentEncoder
 {
     @inlinable internal mutating
@@ -58,18 +59,7 @@ extension HTML.ContentEncoder
     @inlinable public mutating
     func append(unescaped codeunit:UInt8)
     {
-        switch codeunit
-        {
-        case 0x26: // '&'
-            self.utf8 += "&amp;".utf8
-        case 0x3C: // '<'
-            self.utf8 += "&lt;".utf8
-        case 0x3E: // '>'
-            self.utf8 += "&gt;".utf8
-
-        case let literal:
-            self.utf8.append(literal)
-        }
+        self.utf8 += DOM.UTF8.init(codeunit)
     }
     /// Writes a closing HTML tag to the output stream.
     ///
