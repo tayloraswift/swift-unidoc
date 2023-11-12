@@ -8,7 +8,7 @@ do
     swift symbolgraph-extract -I TestModules/.build/debug \
         -target x86_64-unknown-linux-gnu \
         -minimum-access-level internal \
-        -output-dir TestModules/Symbolgraphs \
+        -output-dir TestModules/SymbolGraphs \
         -skip-inherited-docs \
         -emit-extension-block-symbols \
         -include-spi-symbols \
