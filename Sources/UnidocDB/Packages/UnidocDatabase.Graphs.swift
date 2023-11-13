@@ -60,7 +60,7 @@ extension UnidocDatabase.Graphs
 {
     public
     func upsert(_ graph:__owned Snapshot,
-        with session:Mongo.Session) async throws -> SnapshotReceipt.Upsert
+        with session:Mongo.Session) async throws -> Upsert
     {
         switch try await self.upsert(some: graph, with: session)
         {

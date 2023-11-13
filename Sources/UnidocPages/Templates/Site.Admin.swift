@@ -190,7 +190,6 @@ extension Site.Admin:AdministrativePage
         //  Destructive actions.
         for action:Action in
         [
-            .lintUnidocEditions,
             .dropUnidocDB,
             .dropAccountDB,
             .restart,

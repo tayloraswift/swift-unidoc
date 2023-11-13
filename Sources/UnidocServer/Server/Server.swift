@@ -264,6 +264,9 @@ extension Server:HTTP.Server
         case .stateless(let stateless):
             return .ok(stateless.resource(assets: self.assets))
 
+        case .redirect(let target):
+            return .redirect(.permanent(target))
+
         case .static(let request):
             if  case .development(let cache, _) = self.options.mode
             {

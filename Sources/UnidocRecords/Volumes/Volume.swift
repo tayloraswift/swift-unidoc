@@ -55,29 +55,24 @@ extension Volume
     }
 
     public
-    func siteMap() -> SiteMap<PackageIdentifier>
+    func sitemap() -> Realm.Sitemap
     {
-        var lines:[UInt8] = []
+        var elements:Realm.Sitemap.Elements = []
         //  Reverse, because C modules tend to appear in the beginning of the list, and
         //  we want to prioritize Swift modules.
         for vertex:Vertex in self.vertices.reversed()
         {
             switch vertex
             {
-            case .culture(let vertex):
-                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
-
-            case .article(let vertex):
-                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
-
-            case .decl(let vertex):
-                vertex.shoot.serialize(into: &lines) ; lines.append(0x0A)
-
-            case .file, .foreign, .global:
-                continue
+            case .culture(let vertex):  elements.append(vertex.shoot)
+            case .article(let vertex):  elements.append(vertex.shoot)
+            case .decl(let vertex):     elements.append(vertex.shoot)
+            case .file:                 continue
+            case .foreign:              continue
+            case .global:               continue
             }
         }
 
-        return .init(id: self.meta.symbol.package, lines: lines)
+        return .init(id: self.meta.symbol.package, elements: elements)
     }
 }

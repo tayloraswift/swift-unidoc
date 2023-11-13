@@ -9,14 +9,14 @@ extension PackageEditionsQuery
     struct Facet:Equatable, Sendable
     {
         public
-        var edition:PackageEdition
+        var edition:Realm.Edition
         public
         var graphs:Graphs?
         public
         var volume:Volume.Meta?
 
         @inlinable public
-        init(edition:PackageEdition, graphs:Graphs? = nil, volume:Volume.Meta? = nil)
+        init(edition:Realm.Edition, graphs:Graphs? = nil, volume:Volume.Meta? = nil)
         {
             self.edition = edition
             self.graphs = graphs

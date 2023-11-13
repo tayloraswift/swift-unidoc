@@ -34,7 +34,8 @@ struct PackageVersions:MongoTestBattery
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
                 id: .init(package: .swift, version: "5.8.1", triple: triple),
                 edition: .init(package: 0, version: 0),
-                type: .insert))
+                realm: .united,
+                graph: .insert))
         }
         do
         {
@@ -46,7 +47,8 @@ struct PackageVersions:MongoTestBattery
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
                 id: .init(package: "swift-not-named-swift", version: "0.0.0", triple: triple),
                 edition: .init(package: 1, version: -1),
-                type: .insert))
+                realm: .united,
+                graph: .insert))
         }
         do
         {
@@ -58,7 +60,8 @@ struct PackageVersions:MongoTestBattery
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
                 id: .init(package: "swift-not-named-swift", version: "1.2.3", triple: triple),
                 edition: .init(package: 1, version: 0),
-                type: .insert))
+                realm: .united,
+                graph: .insert))
         }
         do
         {
@@ -73,7 +76,8 @@ struct PackageVersions:MongoTestBattery
                     version: "2.0.0-beta1",
                     triple: triple),
                 edition: .init(package: 1, version: 1),
-                type: .insert))
+                realm: .united,
+                graph: .insert))
         }
         do
         {
@@ -84,7 +88,8 @@ struct PackageVersions:MongoTestBattery
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
                 id: .init(package: "swift-not-named-swift", version: "0.0.0", triple: triple),
                 edition: .init(package: 1, version: -1),
-                type: .update))
+                realm: .united,
+                graph: .update))
         }
         do
         {
@@ -99,7 +104,8 @@ struct PackageVersions:MongoTestBattery
                     version: "2.0.0-beta1",
                     triple: triple),
                 edition: .init(package: 1, version: 1),
-                type: .update))
+                realm: .united,
+                graph: .update))
         }
         do
         {
@@ -111,7 +117,8 @@ struct PackageVersions:MongoTestBattery
             tests.expect(try await database.store(docs: docs, with: session) ==? .init(
                 id: .init(package: "swift-not-named-swift", version: "1.2.3", triple: triple),
                 edition: .init(package: 1, version: 0),
-                type: .update))
+                realm: .united,
+                graph: .update))
         }
     }
 }

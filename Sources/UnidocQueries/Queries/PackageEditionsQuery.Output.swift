@@ -1,6 +1,7 @@
 import BSONDecoding
 import MongoQL
 import UnidocDB
+import UnidocRecords
 
 extension PackageEditionsQuery
 {
@@ -12,14 +13,14 @@ extension PackageEditionsQuery
         public
         var releases:[Facet]
         public
-        var record:PackageRecord
+        var package:Realm.Package
 
         @inlinable public
-        init(prereleases:[Facet], releases:[Facet], record:PackageRecord)
+        init(prereleases:[Facet], releases:[Facet], package:Realm.Package)
         {
             self.prereleases = prereleases
             self.releases = releases
-            self.record = record
+            self.package = package
         }
     }
 }
@@ -30,7 +31,7 @@ extension PackageEditionsQuery.Output:MongoMasterCodingModel
     {
         case prereleases
         case releases
-        case record
+        case package
     }
 }
 extension PackageEditionsQuery.Output:BSONDocumentDecodable
@@ -41,6 +42,6 @@ extension PackageEditionsQuery.Output:BSONDocumentDecodable
         self.init(
             prereleases: try bson[.prereleases].decode(),
             releases: try bson[.releases].decode(),
-            record: try bson[.record].decode())
+            package: try bson[.package].decode())
     }
 }

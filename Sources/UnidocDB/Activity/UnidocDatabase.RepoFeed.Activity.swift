@@ -3,6 +3,7 @@ import BSONEncoding
 import ModuleGraphs
 import MongoQL
 import SymbolGraphs
+import UnidocRecords
 
 extension UnidocDatabase.RepoFeed
 {
@@ -17,13 +18,13 @@ extension UnidocDatabase.RepoFeed
         public
         let refname:String
         public
-        let origin:PackageRepo.Origin
+        let origin:Realm.Repo.Origin
 
         @inlinable public
         init(discovered id:BSON.Millisecond,
             package:PackageIdentifier,
             refname:String,
-            origin:PackageRepo.Origin)
+            origin:Realm.Repo.Origin)
         {
             self.id = id
             self.package = package
