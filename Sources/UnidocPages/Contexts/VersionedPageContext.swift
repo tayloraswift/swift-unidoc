@@ -19,10 +19,10 @@ class VersionedPageContext
     private
     var cache:Cache
 
-    let repo:PackageRepo?
+    let repo:Realm.Repo?
 
     private
-    init(cache:Cache, repo:PackageRepo?)
+    init(cache:Cache, repo:Realm.Repo?)
     {
         self.outlines = []
         self.cache = cache
@@ -45,7 +45,7 @@ extension VersionedPageContext
 extension VersionedPageContext
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, volume:Volume.Meta, repo:PackageRepo?)
+    init(principal scalar:Unidoc.Scalar, volume:Volume.Meta, repo:Realm.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
@@ -53,7 +53,7 @@ extension VersionedPageContext
             repo: repo)
     }
     convenience
-    init(principal volume:Volume.Meta, repo:PackageRepo?)
+    init(principal volume:Volume.Meta, repo:Realm.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),
@@ -136,7 +136,7 @@ extension VersionedPageContext
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
     {
-        if  let origin:PackageRepo.Origin = self.repo?.origin,
+        if  let origin:Realm.Repo.Origin = self.repo?.origin,
             let refname:String = self.volumes[file.zone]?.refname,
             let file:Volume.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)

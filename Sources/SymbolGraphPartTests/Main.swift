@@ -12,9 +12,9 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
-        if  let tests:TestGroup = tests / "phyla",
+        if  let tests:TestGroup = tests / "Phyla",
             let part:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/Phyla.symbols.json")
+                part: "TestModules/SymbolGraphs/Phyla.symbols.json")
         {
             for (symbol, phylum):([String], Unidoc.Decl) in
             [
@@ -74,9 +74,9 @@ enum Main:SyncTests
                 tests.expect(nil: part.symbols.first { $0.phylum == .decl(.deinitializer) })
             }
         }
-        if  let tests:TestGroup = tests / "phyla" / "extension",
+        if  let tests:TestGroup = tests / "Phyla" / "Extension",
             let part:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/Phyla@Swift.symbols.json")
+                part: "TestModules/SymbolGraphs/Phyla@Swift.symbols.json")
         {
             for (symbol, phylum):([String], Unidoc.Phylum) in
             [
@@ -90,9 +90,26 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "spi",
+        if  let tests:TestGroup = tests / "ACLs",
             let part:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/SPI.symbols.json")
+                part: "TestModules/SymbolGraphs/ACL.symbols.json")
+        {
+            for (symbol, level):([String], SymbolDescription.ACL?) in
+            [
+                (["Public"],    .public),
+                (["Package"],   .package),
+                (["Internal"],  .internal),
+            ]
+            {
+                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                {
+                    tests.expect(symbol.acl ==? level)
+                }
+            }
+        }
+        if  let tests:TestGroup = tests / "SPIs",
+            let part:SymbolGraphPart = tests.load(
+                part: "TestModules/SymbolGraphs/SPI.symbols.json")
         {
             for (symbol, interfaces):([String], [String]?) in
             [
@@ -106,9 +123,9 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "internal-documentation-inheritance",
+        if  let tests:TestGroup = tests / "InternalDocumentationInheritance",
             let part:SymbolGraphPart = tests.load(
-                part: "TestModules/Symbolgraphs/DocumentationInheritance.symbols.json")
+                part: "TestModules/SymbolGraphs/DocumentationInheritance.symbols.json")
         {
             for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
             [
@@ -279,9 +296,9 @@ enum Main:SyncTests
                 ])
             }
         }
-        if  let tests:TestGroup = tests / "external-documentation-inheritance",
+        if  let tests:TestGroup = tests / "ExternalDocumentationInheritance",
             let part:SymbolGraphPart = tests.load(part: """
-                TestModules/Symbolgraphs/DocumentationInheritanceFromSwift.symbols.json
+                TestModules/SymbolGraphs/DocumentationInheritanceFromSwift.symbols.json
                 """)
         {
             for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
@@ -356,9 +373,9 @@ enum Main:SyncTests
             }
         }
 
-        if  let tests:TestGroup = tests / "internal-extension-constraints",
+        if  let tests:TestGroup = tests / "InternalExtensionConstraints",
             let part:SymbolGraphPart = tests.load(part: """
-                TestModules/Symbolgraphs/InternalExtensionsWithConstraints.symbols.json
+                TestModules/SymbolGraphs/InternalExtensionsWithConstraints.symbols.json
                 """)
         {
             for (symbol, conditions):([String], [GenericConstraint<Symbol.Decl>]) in
@@ -384,9 +401,9 @@ enum Main:SyncTests
                 }
             }
         }
-        if  let tests:TestGroup = tests / "external-extension-constraints",
+        if  let tests:TestGroup = tests / "ExternalExtensionConstraints",
             let part:SymbolGraphPart = tests.load(part: """
-                TestModules/Symbolgraphs/\
+                TestModules/SymbolGraphs/\
                 ExternalExtensionsWithConstraints@\
                 ExtendableTypesWithConstraints.symbols.json
                 """)

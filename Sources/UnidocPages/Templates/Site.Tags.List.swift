@@ -2,6 +2,7 @@ import GitHubAPI
 import HTML
 import UnidocDB
 import UnidocQueries
+import UnidocRecords
 import UnixTime
 import URI
 
@@ -10,11 +11,11 @@ extension Site.Tags
     struct List
     {
         private
-        let package:PackageRecord
+        let package:Realm.Package
         private
         var page:[Item]
 
-        init(package:PackageRecord, page:[Item])
+        init(package:Realm.Package, page:[Item])
         {
             self.package = package
             self.page = page
@@ -51,7 +52,7 @@ extension Site.Tags.List
         items += prereleases
         items += releases
 
-        self.init(package: output.record, page: items)
+        self.init(package: output.package, page: items)
     }
 }
 extension Site.Tags.List:RenderablePage
@@ -73,7 +74,7 @@ extension Site.Tags.List:ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:PackageRepo = self.package.repo
+            if  let repo:Realm.Repo = self.package.repo
             {
                 $0[.h2] = "Package Repository"
 

@@ -6,7 +6,7 @@ public
 struct Compiler
 {
     private
-    let threshold:SymbolDescription.Visibility
+    let threshold:SymbolDescription.ACL
 
     public private(set)
     var declarations:Declarations
@@ -14,7 +14,7 @@ struct Compiler
     var extensions:Extensions
 
     public
-    init(root:Repository.Root?, threshold:SymbolDescription.Visibility = .public)
+    init(root:Repository.Root?, threshold:SymbolDescription.ACL = .public)
     {
         self.threshold = threshold
 
@@ -60,7 +60,7 @@ extension Compiler
             {
                 do
                 {
-                    switch (symbol.usr, excluded: symbol.visibility < self.threshold)
+                    switch (symbol.usr, excluded: symbol.acl < self.threshold)
                     {
                     case (.vector, excluded: true):
                         //  We do not care about vectors materialized for internal

@@ -196,8 +196,9 @@ extension Server.IntegralRequest
                 with: .init(uri.query?.parameters),
                 tag: tag)
 
+        //  Deprecated route.
         case "sitemaps":
-            endpoint = .get(sitemaps: trunk, tag: tag)
+            endpoint = .redirect("/\(Site.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols")
 
         case Site.Tags.root:
             endpoint = .get(tags: trunk,

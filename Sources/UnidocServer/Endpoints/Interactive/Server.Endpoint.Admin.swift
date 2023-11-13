@@ -53,24 +53,19 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
 
             page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
 
-        case .perform(.lintUnidocEditions, _):
-            let deleted:Int = try await server.db.unidoc.editions._lint(with: session)
-
-            page = .init(action: .lintUnidocEditions,
-                text: "Deleted \(deleted) editions!")
-
         case .perform(.restart, _):
             fatalError("Restarting server...")
 
         case .perform(.upload, let form?):
-            var receipts:[SnapshotReceipt] = []
+            var receipts:[UnidocDatabase.Uploaded] = []
 
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                let documentation:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:SnapshotReceipt = try await server.db.unidoc.publish(documentation,
-                    with: session)
+                let archive:SymbolGraphArchive = try .init(buffer: item.value)
+                let receipt:UnidocDatabase.Uploaded = try await server.db.unidoc.publish(
+                    docs: archive,
+                    with: session).0
 
                 receipts.append(receipt)
             }

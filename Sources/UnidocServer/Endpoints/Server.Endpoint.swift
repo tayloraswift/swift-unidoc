@@ -19,6 +19,7 @@ extension Server
         case interactive(any InteractiveEndpoint)
         case procedural(any ProceduralEndpoint)
         case stateless(any RenderablePage & Sendable)
+        case redirect(String)
         case `static`(Cache<StaticAsset>.Request)
     }
 }
@@ -139,12 +140,25 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Pipeline<WideQuery>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(
-                volume: .init(trunk),
-                lookup: .init(stem: stem, hash: parameters.hash)),
-            tag: tag))
+        let volume:Volume.Selector = .init(trunk)
+
+        //  Special sitemap route.
+        //  The '-' in the name means it will never collide with a decl.
+        if  case nil = volume.version,
+            case "all-symbols"? = stem.first,
+            case stem.endIndex = stem.index(after: stem.startIndex)
+        {
+            return .interactive(Sitemap.init(package: volume.package, tag: tag))
+        }
+        else
+        {
+            let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
+
+            return .interactive(Pipeline<WideQuery>.init(
+                output: parameters.explain ? nil : .text(.html),
+                query: .init(volume: volume, lookup: shoot),
+                tag: tag))
+        }
     }
 
     static
@@ -187,15 +201,6 @@ extension Server.Endpoint
         }
 
         return nil
-    }
-
-    static
-    func get(sitemaps trunk:String, tag:MD5?) -> Self
-    {
-        //  Ignore file extension.
-        .interactive(SiteMap.init(
-            package: .init(trunk.prefix { $0 != "." }),
-            tag: tag))
     }
 
     static

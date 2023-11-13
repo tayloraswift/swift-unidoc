@@ -33,7 +33,7 @@ extension PackageEditionsQuery:DatabaseQuery
     {
         .init
         {
-            $0[PackageRecord[.id]] = (+)
+            $0[Realm.Package[.id]] = (+)
         }
     }
 
@@ -44,7 +44,7 @@ extension PackageEditionsQuery:DatabaseQuery
         {
             $0[.match] = .init
             {
-                $0[PackageRecord[.id]] = self.package
+                $0[Realm.Package[.id]] = self.package
             }
         }
         pipeline.stage
@@ -55,7 +55,7 @@ extension PackageEditionsQuery:DatabaseQuery
         {
             $0[.replaceWith] = .init
             {
-                $0[Output[.record]] = Mongo.Pipeline.ROOT
+                $0[Output[.package]] = Mongo.Pipeline.ROOT
             }
         }
         for release:Bool in [true, false]
@@ -69,7 +69,7 @@ extension PackageEditionsQuery:DatabaseQuery
                     $0[.from] = UnidocDatabase.Editions.name
                     $0[.let] = .init
                     {
-                        $0[let: package] = Output[.record] / PackageRecord[.cell]
+                        $0[let: package] = Output[.package] / Realm.Package[.coordinate]
                     }
                     $0[.pipeline] = .init
                     {
@@ -79,7 +79,7 @@ extension PackageEditionsQuery:DatabaseQuery
                             {
                                 $0[.expr] = .expr
                                 {
-                                    $0[.eq] = (PackageEdition[.package], package)
+                                    $0[.eq] = (Realm.Edition[.package], package)
                                 }
                             }
                         }
@@ -87,12 +87,12 @@ extension PackageEditionsQuery:DatabaseQuery
                         {
                             $0[.match] = .init
                             {
-                                $0[PackageEdition[.release]] = release
-                                $0[PackageEdition[.release]] = .init
+                                $0[Realm.Edition[.release]] = release
+                                $0[Realm.Edition[.release]] = .init
                                 {
                                     $0[.exists] = true
                                 }
-                                $0[PackageEdition[.patch]] = .init
+                                $0[Realm.Edition[.patch]] = .init
                                 {
                                     $0[.exists] = true
                                 }
@@ -102,8 +102,8 @@ extension PackageEditionsQuery:DatabaseQuery
                         {
                             $0[.sort] = .init
                             {
-                                $0[PackageEdition[.patch]] = (-)
-                                $0[PackageEdition[.version]] = (-)
+                                $0[Realm.Edition[.patch]] = (-)
+                                $0[Realm.Edition[.version]] = (-)
                             }
                         }
                         $0.stage
@@ -124,7 +124,7 @@ extension PackageEditionsQuery:DatabaseQuery
                             $0[.lookup] = .init
                             {
                                 $0[.from] = UnidocDatabase.Volumes.name
-                                $0[.localField] = Facet[.edition] / PackageEdition[.id]
+                                $0[.localField] = Facet[.edition] / Realm.Edition[.id]
                                 $0[.foreignField] = Volume.Meta[.id]
                                 $0[.as] = Facet[.volume]
                             }
@@ -141,7 +141,7 @@ extension PackageEditionsQuery:DatabaseQuery
                                 $0[.let] = .init
                                 {
                                     $0[let: version] =
-                                        Facet[.edition] / PackageEdition[.version]
+                                        Facet[.edition] / Realm.Edition[.version]
                                 }
                                 $0[.pipeline] = .init
                                 {

@@ -8,11 +8,11 @@ extension Site.Tags.List
 {
     struct Item
     {
-        let edition:PackageEdition
+        let edition:Realm.Edition
         let volume:Volume.Meta?
         let graphs:Int
 
-        init(edition:PackageEdition, volume:Volume.Meta?, graphs:Int)
+        init(edition:Realm.Edition, volume:Volume.Meta?, graphs:Int)
         {
             self.edition = edition
             self.volume = volume

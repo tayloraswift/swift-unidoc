@@ -17,7 +17,7 @@ enum Main:SyncTests
             {
                 var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
 
-                let directory:FilePath = "TestModules/Symbolgraphs"
+                let directory:FilePath = "TestModules/SymbolGraphs"
                 for culture:[FilePath] in
                 [
                     [

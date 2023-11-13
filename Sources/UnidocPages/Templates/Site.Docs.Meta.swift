@@ -32,7 +32,7 @@ extension Site.Docs
 extension Site.Docs.Meta
 {
     private
-    var repo:PackageRepo? { self.context.repo }
+    var repo:Realm.Repo? { self.context.repo }
 }
 extension Site.Docs.Meta:RenderablePage
 {
@@ -117,7 +117,7 @@ extension Site.Docs.Meta:VersionedPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:PackageRepo = self.repo
+            if  let repo:Realm.Repo = self.repo
             {
                 $0[.h2] = "Package Repository"
 

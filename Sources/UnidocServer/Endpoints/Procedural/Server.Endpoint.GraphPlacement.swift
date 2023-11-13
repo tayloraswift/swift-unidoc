@@ -25,11 +25,11 @@ extension Server.Endpoint.GraphPlacement:ProceduralEndpoint
             let docs:SymbolGraphArchive = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
-            let spot:SnapshotReceipt = try await server.db.unidoc.store(
+            let uploaded:UnidocDatabase.Uploaded = try await server.db.unidoc.store(
                 docs: consume docs,
                 with: session)
 
-            let json:JSON = .encode(UnidocAPI.Placement.init(edition: spot.edition))
+            let json:JSON = .encode(UnidocAPI.Placement.init(edition: uploaded.edition))
 
             return .ok(.init(content: .binary(json.utf8),
                 type: .application(.json, charset: .utf8)))

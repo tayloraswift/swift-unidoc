@@ -2,6 +2,10 @@ import NIOCore
 import NIOHPACK
 import NIOHTTP2
 
+extension ChannelHandlerContext:@unchecked Sendable
+{
+}
+
 extension HTTP2Client
 {
     /// An HTTP/2 handler whose sole purpose is to initiate HTTP/2 streams in parallel by

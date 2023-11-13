@@ -12,12 +12,12 @@ struct SymbolDescription:Equatable, Sendable
     public
     let usr:Symbol
     public
+    let acl:ACL
+    public
     let phylum:Unidoc.Phylum
 
     public
     let doccomment:Doccomment?
-    public
-    let visibility:Visibility
     public
     let `extension`:ExtensionContext
     public
@@ -31,35 +31,35 @@ struct SymbolDescription:Equatable, Sendable
     let path:UnqualifiedPath
 
     private
-    init(_ usr:Symbol,
+    init(
+        usr:Symbol,
+        acl:ACL,
         phylum:Unidoc.Phylum,
         doccomment:Doccomment?,
-        visibility:Visibility,
         extension:ExtensionContext,
         signature:Signature<Symbol.Decl>,
         location:SourceLocation<String>?,
         path:UnqualifiedPath)
     {
+        self.usr = usr
+        self.acl = acl
+        self.phylum = phylum
         self.doccomment = doccomment
-        self.visibility = visibility
         self.extension = `extension`
         self.signature = signature
-
         self.location = location
-        self.phylum = phylum
         self.path = path
-        self.usr = usr
     }
 }
 extension SymbolDescription
 {
     private
-    init(_ usr:Symbol,
+    init(usr:Symbol,
+        acl:ACL,
         phylum:Unidoc.Phylum,
         availability:Availability,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
-        visibility:Visibility,
         extension:ExtensionContext,
         fragments:__owned [Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
@@ -131,10 +131,11 @@ extension SymbolDescription
             simplified = path
         }
 
-        self.init(usr,
+        self.init(
+            usr: usr,
+            acl: acl,
             phylum: phylum,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
-            visibility: visibility,
             extension: `extension`,
             signature: signature,
             location: location,
@@ -146,6 +147,7 @@ extension SymbolDescription:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
+        case acl = "accessLevel"
         case availability
 
         case declaration = "declarationFragments"
@@ -185,17 +187,17 @@ extension SymbolDescription:JSONObjectDecodable
                 case column = "character"
             }
         }
-
-        case visibility = "accessLevel"
     }
 
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(try json[.identifier].decode(using: CodingKey.Identifier.self)
+        self.init(
+            usr: try json[.identifier].decode(using: CodingKey.Identifier.self)
             {
                 try $0[.precise].decode()
             },
+            acl: try json[.acl].decode(),
             phylum: try json[.kind].decode(using: CodingKey.Kind.self)
             {
                 try $0[.identifier].decode()
@@ -203,7 +205,6 @@ extension SymbolDescription:JSONObjectDecodable
             availability: try json[.availability]?.decode() ?? .init(),
             doccomment: try json[.doccomment]?.decode(),
             interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
-            visibility: try json[.visibility].decode(),
             extension: try json[.extension]?.decode() ?? .init(),
             fragments: try json[.declaration].decode(),
             generics: try json[.generics]?.decode() ?? .init(),

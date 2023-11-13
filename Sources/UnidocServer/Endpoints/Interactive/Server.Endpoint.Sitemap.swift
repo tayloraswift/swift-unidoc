@@ -10,7 +10,12 @@ import URI
 
 extension Server.Endpoint
 {
-    struct SiteMap:Sendable
+    /// Generates a plain text sitemap for the given package.
+    ///
+    /// We don’t have granular enough `<lastmod>` information to motivate generating XML
+    /// sitemaps, and all other XML sitemap features (like `<priority>`) are irrelevant to us,
+    /// since Google ignores them. Therefore, we use the plain text format.
+    struct Sitemap:Sendable
     {
         let package:PackageIdentifier
         let tag:MD5?
@@ -22,15 +27,14 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint.SiteMap:PublicEndpoint
+extension Server.Endpoint.Sitemap:PublicEndpoint
 {
     func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let siteMap:Volume.SiteMap<PackageIdentifier> = try await server.db.unidoc.siteMap(
-            package: self.package,
+        let sitemap:Realm.Sitemap = try await server.db.unidoc.sitemaps.find(by: self.package,
             with: session)
         else
         {
@@ -39,20 +43,20 @@ extension Server.Endpoint.SiteMap:PublicEndpoint
 
         let prefix:String = "https://swiftinit.org/\(Site.Docs.root)/\(self.package)"
         var string:String = ""
-        var i:Int = siteMap.lines.startIndex
 
-        while let j:Int = siteMap.lines[i...].firstIndex(of: 0x0A)
+        for page:Volume.Shoot in sitemap.elements
         {
-            defer { i = siteMap.lines.index(after: j) }
+            var uri:URI = []
 
-            let shoot:Volume.Shoot = .deserialize(from: siteMap.lines[i..<j])
-            var uri:URI = [] ; uri.path += shoot.stem ; uri["hash"] = shoot.hash?.description
+            uri.path += page.stem
+            uri["hash"] = page.hash?.description
 
             string += "\(prefix)\(uri)\n"
         }
 
         var resource:HTTP.Resource = .init(content: .string(string),
-            type: .text(.plain, charset: .utf8))
+            type: .text(.plain, charset: .utf8),
+            hash: sitemap.hash)
 
         resource.optimize(tag: self.tag)
 
