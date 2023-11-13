@@ -24,18 +24,18 @@ extension GroupSections.AutomaticHeading:Identifiable
     {
         switch self
         {
-        case .allModules:               "section:all-modules"
-        case .otherModules:             "section:other-modules"
+        case .allModules:               "ss:all-modules"
+        case .otherModules:             "ss:other-modules"
 
-        case .miscellaneous:            "section:miscellaneous"
-        case .seeAlso:                  "section:see-also"
+        case .miscellaneous:            "ss:misc"
+        case .seeAlso:                  "ss:see-also"
 
-        case .allRequirements:          "section:all-requirements"
-        case .restatesRequirements:     "section:restates-requirements"
-        case .implementsRequirements:   "section:implements-requirements"
-        case .overrides:                "section:overrides"
-        case .superclasses:             "section:superclasses"
-        case .supertypes:               "section:supertypes"
+        case .allRequirements:          "ss:requirements"
+        case .restatesRequirements:     "ss:requirements-restated"
+        case .implementsRequirements:   "ss:requirements-implemented"
+        case .overrides:                "ss:overrides"
+        case .superclasses:             "ss:superclasses"
+        case .supertypes:               "ss:supertypes"
 
         }
     }
