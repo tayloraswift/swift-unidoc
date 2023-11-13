@@ -43,21 +43,21 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await unidoc.publish(consume swift, with: session) ==?
+        tests.expect(try await unidoc.publish(docs: consume swift, with: session).0 ==?
             .init(id: .init(package: .swift,
                     version: "5.9.1",
                     triple: toolchain.triple),
                 edition: .init(package: 0, version: 0),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
 
-        tests.expect(try await unidoc.publish(consume example, with: session) ==?
+        tests.expect(try await unidoc.publish(docs: consume example, with: session).0 ==?
             .init(id: .init(package: "swift-malibu",
                     version: "0.0.0",
                     triple: toolchain.triple),
                 edition: .init(package: 1, version: -1),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
