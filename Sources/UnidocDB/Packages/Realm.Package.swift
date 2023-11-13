@@ -81,8 +81,7 @@ extension Realm.Package:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             coordinate: try bson[.coordinate].decode(),
-            //  TODO: remove this default after migrating all the packages
-            realm: try bson[.realm]?.decode() ?? .united,
+            realm: try bson[.realm].decode(),
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)
     }
