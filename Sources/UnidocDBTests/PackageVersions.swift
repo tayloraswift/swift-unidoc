@@ -35,7 +35,7 @@ struct PackageVersions:MongoTestBattery
                 id: .init(package: .swift, version: "5.8.1", triple: triple),
                 edition: .init(package: 0, version: 0),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
         }
         do
         {
@@ -48,7 +48,7 @@ struct PackageVersions:MongoTestBattery
                 id: .init(package: "swift-not-named-swift", version: "0.0.0", triple: triple),
                 edition: .init(package: 1, version: -1),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
         }
         do
         {
@@ -61,7 +61,7 @@ struct PackageVersions:MongoTestBattery
                 id: .init(package: "swift-not-named-swift", version: "1.2.3", triple: triple),
                 edition: .init(package: 1, version: 0),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
         }
         do
         {
@@ -77,7 +77,7 @@ struct PackageVersions:MongoTestBattery
                     triple: triple),
                 edition: .init(package: 1, version: 1),
                 realm: .united,
-                type: .insert))
+                graph: .insert))
         }
         do
         {
@@ -89,7 +89,7 @@ struct PackageVersions:MongoTestBattery
                 id: .init(package: "swift-not-named-swift", version: "0.0.0", triple: triple),
                 edition: .init(package: 1, version: -1),
                 realm: .united,
-                type: .update))
+                graph: .update))
         }
         do
         {
@@ -105,7 +105,7 @@ struct PackageVersions:MongoTestBattery
                     triple: triple),
                 edition: .init(package: 1, version: 1),
                 realm: .united,
-                type: .update))
+                graph: .update))
         }
         do
         {
@@ -118,7 +118,7 @@ struct PackageVersions:MongoTestBattery
                 id: .init(package: "swift-not-named-swift", version: "1.2.3", triple: triple),
                 edition: .init(package: 1, version: 0),
                 realm: .united,
-                type: .update))
+                graph: .update))
         }
     }
 }

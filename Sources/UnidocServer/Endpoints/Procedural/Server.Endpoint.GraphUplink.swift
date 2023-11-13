@@ -1,4 +1,5 @@
 import HTTP
+import HTTPServer
 import MongoDB
 import UnidocDB
 import UnidocRecords
@@ -16,7 +17,7 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
     func perform(on server:Server, with _:[UInt8]) async throws -> HTTP.ServerResponse
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let edition:Unidoc.Edition? = switch self
+        let updated:UnidocDatabase.Uplinked? = switch self
         {
         case .coordinate(let package, let version):
             try await server.db.unidoc.uplink(
@@ -29,14 +30,23 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
         }
 
         guard
-        let edition:Unidoc.Edition
+        let updated:UnidocDatabase.Uplinked
         else
         {
             return .notFound("No such symbol graph.")
         }
+
+        if  let pages:Realm.Sitemap.Delta = updated.sitemap
+        {
+            Log[.debug] = """
+            Sitemap (\(updated.edition.package)) lost \(pages.deletions.count) pages \
+            and gained \(pages.additions) pages.
+            """
+        }
+
         if  try await server.db.unidoc.docsFeed.push(.init(
                     discovered: .now(),
-                    volume: edition),
+                    volume: updated.edition),
                 with: session)
         {
             return .ok("Uplink successful, documentation feed updated.")

@@ -34,8 +34,7 @@ extension Server.Endpoint.Sitemap:PublicEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let sitemap:Volume.Sitemap<PackageIdentifier> = try await server.db.unidoc.sitemap(
-            package: self.package,
+        let sitemap:Realm.Sitemap = try await server.db.unidoc.sitemaps.find(by: self.package,
             with: session)
         else
         {
@@ -44,23 +43,20 @@ extension Server.Endpoint.Sitemap:PublicEndpoint
 
         let prefix:String = "https://swiftinit.org/\(Site.Docs.root)/\(self.package)"
         var string:String = ""
-        var i:Int = sitemap.lines.startIndex
 
-        while let j:Int = sitemap.lines[i...].firstIndex(of: 0x0A)
+        for page:Volume.Shoot in sitemap.elements
         {
-            defer { i = sitemap.lines.index(after: j) }
-
-            let shoot:Volume.Shoot = .deserialize(from: sitemap.lines[i..<j])
             var uri:URI = []
 
-            uri.path += shoot.stem
-            uri["hash"] = shoot.hash?.description
+            uri.path += page.stem
+            uri["hash"] = page.hash?.description
 
             string += "\(prefix)\(uri)\n"
         }
 
         var resource:HTTP.Resource = .init(content: .string(string),
-            type: .text(.plain, charset: .utf8))
+            type: .text(.plain, charset: .utf8),
+            hash: sitemap.hash)
 
         resource.optimize(tag: self.tag)
 

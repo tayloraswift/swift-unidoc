@@ -26,6 +26,8 @@ extension UnidocDatabase
     var policies:Policies { .init() }
 
     @inlinable public
+    var sitemaps:Sitemaps { .init(database: self.id) }
+    @inlinable public
     var packages:Packages { .init(database: self.id) }
     @inlinable public
     var editions:Editions { .init(database: self.id) }
@@ -41,7 +43,6 @@ extension UnidocDatabase
     var groups:Groups { .init(database: self.id) }
     var search:Search { .init(database: self.id) }
     var trees:Trees { .init(database: self.id) }
-    var siteMaps:SiteMaps { .init(database: self.id) }
 
     @inlinable public
     var repoFeed:RepoFeed { .init(database: self.id) }
@@ -65,6 +66,7 @@ extension UnidocDatabase:DatabaseModel
         try await self.repoFeed.setup(with: session)
         try await self.docsFeed.setup(with: session)
 
+        try await self.sitemaps.setup(with: session)
         try await self.packages.setup(with: session)
         try await self.editions.setup(with: session)
         try await self.graphs.setup(with: session)
@@ -75,7 +77,6 @@ extension UnidocDatabase:DatabaseModel
         try await self.groups.setup(with: session)
         try await self.search.setup(with: session)
         try await self.trees.setup(with: session)
-        try await self.siteMaps.setup(with: session)
     }
 }
 
@@ -90,7 +91,7 @@ extension UnidocDatabase
         try await self.groups.replace(with: session)
         try await self.search.replace(with: session)
         try await self.trees.replace(with: session)
-        try await self.siteMaps.replace(with: session)
+        try await self.sitemaps.replace(with: session)
     }
 
     func _editions(of package:PackageIdentifier,
@@ -209,7 +210,7 @@ extension UnidocDatabase
 
     public
     func store(docs:SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> SnapshotReceipt
+        with session:Mongo.Session) async throws -> Uploaded
     {
         let package:Realm.Package = try await self.packages.register(docs.metadata.package,
             updating: self.meta,
@@ -254,45 +255,45 @@ extension UnidocDatabase
             metadata: docs.metadata,
             graph: docs.graph)
 
-        let upsert:SnapshotReceipt.Upsert = try await self.graphs.upsert(snapshot,
+        let upsert:Graphs.Upsert = try await self.graphs.upsert(snapshot,
             with: session)
 
         return .init(id: snapshot.id,
             edition: snapshot.edition,
             realm: package.realm,
-            type: upsert)
+            graph: upsert)
     }
 }
 extension UnidocDatabase
 {
     public
-    func publish(_ docs:__owned SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> SnapshotReceipt
+    func publish(docs:SymbolGraphArchive,
+        with session:Mongo.Session) async throws -> (Uploaded, Uplinked)
     {
-        let receipt:SnapshotReceipt = try await self.store(docs: docs, with: session)
+        let uploaded:Uploaded = try await self.store(docs: docs, with: session)
 
         let volume:Volume = try await self.link(.init(
-                package: receipt.package,
-                version: receipt.version,
+                package: uploaded.package,
+                version: uploaded.version,
                 metadata: docs.metadata,
                 graph: docs.graph),
-            realm: receipt.realm,
+            realm: uploaded.realm,
             with: session)
 
-        _ = consume docs
+        let uplinked:Uplinked = .init(
+            edition: uploaded.edition,
+            sitemap: try await self.fill(volume: consume volume,
+                clear: uploaded.graph == .update,
+                with: session))
 
-        try await self.fill(volume: consume volume,
-            clear: receipt.type == .update,
-            with: session)
-
-        return receipt
+        return (uploaded, uplinked)
     }
 
     public
     func uplink(
         package:Int32,
         version:Int32,
-        with session:Mongo.Session) async throws -> Unidoc.Edition?
+        with session:Mongo.Session) async throws -> Uplinked?
     {
         guard
         let record:Realm.Package = try await self.packages.find(by: package, with: session)
@@ -301,19 +302,19 @@ extension UnidocDatabase
             return nil
         }
 
-        var uplinked:Unidoc.Edition? = nil
+        var uplinked:Uplinked?
 
         try await self.graphs.list(
             filter: (package: package, version: version),
             with: session)
         {
-            try await self.fill(volume: try await self.link($0,
-                    realm: record.realm,
-                    with: session),
-                clear: true,
-                with: session)
-
-            uplinked = .init(package: package, version: version)
+            uplinked = .init(
+                edition: $0.edition,
+                sitemap: try await self.fill(volume: try await self.link($0,
+                        realm: record.realm,
+                        with: session),
+                    clear: true,
+                    with: session))
         }
 
         return uplinked
@@ -321,7 +322,7 @@ extension UnidocDatabase
 
     public
     func uplink(volume:VolumeIdentifier,
-        with session:Mongo.Session) async throws -> Unidoc.Edition?
+        with session:Mongo.Session) async throws -> Uplinked?
     {
         if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
                 with: session)
@@ -367,7 +368,7 @@ extension UnidocDatabase
     private
     func fill(volume:consuming Volume,
         clear:Bool = true,
-        with session:Mongo.Session) async throws
+        with session:Mongo.Session) async throws -> Realm.Sitemap.Delta?
     {
         if  clear
         {
@@ -387,13 +388,16 @@ extension UnidocDatabase
         try await self.trees.insert(some: volume.trees, with: session)
         try await self.search.insert(some: volume.search, with: session)
 
+        let delta:Realm.Sitemap.Delta?
+
         if  volume.meta.latest
         {
-            try await self.siteMaps.upsert(some: volume.sitemap(), with: session)
+            delta = try await self.sitemaps.update(volume.sitemap(), with: session)
             try await self.groups.insert(some: volume.groups(latest: true), with: session)
         }
         else
         {
+            delta = nil
             try await self.groups.insert(some: volume.groups, with: session)
         }
         if  let latest:Unidoc.Edition = volume.latest
@@ -401,6 +405,8 @@ extension UnidocDatabase
             try await self.volumes.align(latest: latest, with: session)
             try await self.groups.align(latest: latest, with: session)
         }
+
+        return delta
     }
 
     private
@@ -470,14 +476,5 @@ extension UnidocDatabase
             meta: meta)
 
         return volume
-    }
-}
-extension UnidocDatabase
-{
-    public
-    func sitemap(package:consuming PackageIdentifier,
-        with session:Mongo.Session) async throws -> Volume.Sitemap<PackageIdentifier>?
-    {
-        try await self.siteMaps.find(by: package, with: session)
     }
 }
