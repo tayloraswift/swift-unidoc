@@ -107,6 +107,64 @@ extension StaticOutliner
 extension StaticOutliner
 {
     mutating
+    func link(attached body:MarkdownDocumentation,
+        from sources:[MarkdownSource],
+        file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])
+    {
+        let overview:MarkdownBytecode = self.link(
+            overview: body.overview,
+            from: sources)
+
+        let fold:Int = self.cache.fold
+
+        let details:MarkdownBytecode = self.link(
+            details: body.details,
+            topics: [],
+            from: sources)
+
+        let article:SymbolGraph.Article = .init(
+            outlines: self.cache.clear(),
+            overview: overview,
+            details: details,
+            fold: fold,
+            file: file)
+
+        let topics:[SymbolGraph.Topic] = self.link(
+            topics: body.topics,
+            from: sources)
+
+        return (article, topics)
+    }
+
+    mutating
+    func link(article body:MarkdownDocumentation,
+        from sources:[MarkdownSource],
+        file:Int32?) -> SymbolGraph.Article
+    {
+        let overview:MarkdownBytecode = self.link(
+            overview: body.overview,
+            from: sources)
+
+        let fold:Int = self.cache.fold
+
+        //  We don’t support topics lists in standalone documentation.
+        //  So we just render them into the article as lists of links.
+        let details:MarkdownBytecode = self.link(
+            details: body.details,
+            topics: body.topics,
+            from: sources)
+
+        return .init(
+            outlines: self.cache.clear(),
+            overview: overview,
+            details: details,
+            fold: fold,
+            file: file)
+    }
+}
+extension StaticOutliner
+{
+    private mutating
     func link(topics:[MarkdownDocumentation.Topic],
         from sources:[MarkdownSource]) -> [SymbolGraph.Topic]
     {
@@ -138,48 +196,6 @@ extension StaticOutliner
         }
     }
 
-    mutating
-    func link(comment:MarkdownSource,
-        parser:SwiftFlavoredMarkdownParser) -> SymbolGraph.Article
-    {
-        let sources:[MarkdownSource] = [comment]
-        //  Don’t include file scalar, it is the same as the source location of the decl.
-        return self.link(body: .init(parsing: comment.text,
-                from: sources.startIndex,
-                with: parser,
-                as: SwiftFlavoredMarkdownComment.self),
-            from: sources,
-            file: nil)
-    }
-
-    mutating
-    func link(body:MarkdownDocumentation,
-        from sources:[MarkdownSource],
-        file:Int32?) -> SymbolGraph.Article
-    {
-        let overview:MarkdownBytecode = self.link(
-            overview: body.overview,
-            from: sources)
-
-        let fold:Int = self.cache.fold
-
-        //  We don’t support topics lists in non-module documentation.
-        //  So we just render them into the article as lists of links.
-        let details:MarkdownBytecode = self.link(
-            details: body.details,
-            topics: body.topics,
-            from: sources)
-
-        return .init(
-            outlines: self.cache.clear(),
-            overview: overview,
-            details: details,
-            fold: fold,
-            file: file)
-    }
-}
-extension StaticOutliner
-{
     private mutating
     func link(overview:MarkdownBlock.Paragraph?,
         from sources:[MarkdownSource]) -> MarkdownBytecode

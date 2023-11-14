@@ -120,7 +120,7 @@ extension StaticLinker
 extension StaticLinker
 {
     /// Allocates and binds addresses for the declarations stored in the given array
-    /// of compiled namespaces. Binding consists of populating the aperture and
+    /// of compiled namespaces. Binding consists of populating the full name and
     /// phylum of a declaration. This function also exposes each of the declarations
     /// for codelink resolution.
     ///
@@ -194,7 +194,7 @@ extension StaticLinker
 extension StaticLinker
 {
     /// Allocates addresses for the given array of compiled extensions.
-    /// This function also exposes any features conceived by the extensions for
+    /// This function also exposes any features manifested by the extensions for
     /// codelink resolution.
     ///
     /// -   Returns:
@@ -311,25 +311,19 @@ extension StaticLinker
                     if  let standalone:Int32 = article.standalone
                     {
                         self.symbolizer.graph.articles.nodes[standalone].body = $0.link(
-                            body: article.body,
+                            article: article.body,
                             from: sources,
                             file: file)
                     }
                     else
                     {
                         //  This is the article for the module’s landing page.
-                        self.symbolizer.graph.cultures[culture].article = $0.link(
-                            body: .init(
-                                metadata: article.body.metadata,
-                                overview: article.body.overview,
-                                details: article.body.details,
-                                topics: []),
+                        (
+                            self.symbolizer.graph.cultures[culture].article,
+                            self.symbolizer.graph.cultures[culture].topics
+                        ) = $0.link(attached: article.body,
                             from: sources,
                             file: file)
-
-                        self.symbolizer.graph.cultures[culture].topics = $0.link(
-                            topics: article.body.topics,
-                            from: sources)
                     }
                 }
             }
@@ -494,7 +488,9 @@ extension StaticLinker
                 destinations),
             self.symbolizer.graph.namespaces)
         {
-            for (source, destination) in zip(sources, destinations)
+            for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in zip(
+                sources,
+                destinations)
             {
                 self.link(decls: source.decls,
                     at: destination.range,
@@ -509,102 +505,122 @@ extension StaticLinker
         of culture:ModuleIdentifier,
         in namespace:ModuleIdentifier)
     {
-        for (scalar, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
+        for (address, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
         {
-            let signature:Signature<Int32> = decl.signature.map
-            {
-                self.symbolizer.intern($0)
-            }
+            self.link(decl: decl, at: address, of: culture, in: namespace)
+        }
+    }
+    private mutating
+    func link(decl:Compiler.Decl,
+        at address:Int32,
+        of culture:ModuleIdentifier,
+        in namespace:ModuleIdentifier)
+    {
+        let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
 
-            //  Sort for deterministic addresses.
-            let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
-            let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
-            let features:[Int32] = self.addresses(of: decl.features.sorted())
-            let origin:Int32? = self.address(of: decl.origin)
+        //  Sort for deterministic addresses.
+        let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
+        let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
+        let features:[Int32] = self.addresses(of: decl.features.sorted())
+        let origin:Int32? = self.address(of: decl.origin)
 
-            let location:SourceLocation<Int32>? = decl.location?.map
-            {
-                self.symbolizer.intern($0)
-            }
+        let location:SourceLocation<Int32>? = decl.location?.map
+        {
+            self.symbolizer.intern($0)
+        }
 
-            let supplement:Supplement? = self.supplements.removeValue(forKey: scalar)
-            let comment:MarkdownSource? = decl.comment.map
-            {
-                .init(comment: $0, in: location?.file)
-            }
+        let supplement:Supplement? = self.supplements.removeValue(forKey: address)
+        let comment:MarkdownSource? = decl.comment.map
+        {
+            .init(comment: $0, in: location?.file)
+        }
 
+        let markdown:
+        (
+            sources:[MarkdownSource],
+            parsed:MarkdownDocumentation,
+            file:Int32?
+        )?
+
+        switch (comment, supplement)
+        {
+        case (nil, nil):
+            markdown = nil
+
+        case (let comment?, nil):
             /// The file associated with the doccomment is always the same as
             /// the file the declaration itself lives in, so we would only ever
             /// care about the file associated with the supplement.
-            let file:Int32? = supplement?.source.location?.file
-            var scopes:StaticResolver.Scopes
-            {
-                self.symbolizer.scopes(
-                    namespace: namespace,
-                    culture: culture,
-                    scope: decl.phylum.scope(trimming: decl.path))
-            }
-
-            let article:SymbolGraph.Article?
-
-            switch (comment, supplement)
-            {
-            case (nil, nil):
-                article = nil
-
-            case (let comment?, nil):
-                article = self.tables.with(scopes: scopes)
-                {
-                    $0.link(comment: comment, parser: self.doccommentParser)
-                }
-
-            case (let comment?, let supplement?):
-                if  case .override? = supplement.parsed.body.metadata.merge
-                {
-                    fallthrough
-                }
-                else if case nil = supplement.parsed.body.metadata.merge
-                {
-                    self.tables.diagnostics[supplement.source] =
-                        SupplementError.implicitConcatenation
-                }
-
-                //  The supplements all get index 0 when they are loaded,
-                //  so the doccomment appears at index 1 in the sources array.
-                let sources:[MarkdownSource] = [supplement.source, comment]
-                var body:MarkdownDocumentation = .init(parsing: comment.text,
-                    from: 1,
+            markdown =
+            (
+                sources: [comment],
+                parsed: .init(parsing: comment.text,
+                    from: 0,
                     with: self.doccommentParser,
-                    as: SwiftFlavoredMarkdownComment.self)
+                    as: SwiftFlavoredMarkdownComment.self),
+                file: nil
+            )
 
-                body.merge(appending: supplement.parsed.body)
-
-                article = self.tables.with(scopes: scopes)
-                {
-                    $0.link(body: body, from: sources, file: file)
-                }
-
-            case (nil, let supplement?):
-                article = self.tables.with(scopes: scopes)
-                {
-                    $0.link(body: supplement.parsed.body,
-                        from: [supplement.source],
-                        file: file)
-                }
+        case (let comment?, let supplement?):
+            if  case .override? = supplement.parsed.body.metadata.merge
+            {
+                fallthrough
+            }
+            else if case nil = supplement.parsed.body.metadata.merge
+            {
+                self.tables.diagnostics[supplement.source] =
+                    SupplementError.implicitConcatenation
             }
 
-            {
-                $0?.signature = signature
-                $0?.location = location
-                $0?.article = article
+            //  The supplements all get index 0 when they are loaded,
+            //  so the doccomment appears at index 1 in the sources array.
+            let body:MarkdownDocumentation = .init(parsing: comment.text,
+                from: 1,
+                with: self.doccommentParser,
+                as: SwiftFlavoredMarkdownComment.self)
 
-                $0?.requirements = requirements
-                $0?.superforms = superforms
-                $0?.features = features
-                $0?.origin = origin
+            markdown =
+            (
+                sources: [supplement.source, comment],
+                parsed: body.merged(appending: supplement.parsed.body),
+                file: supplement.source.location?.file
+            )
 
-            } (&self.symbolizer.graph.decls.nodes[scalar].decl)
+        case (nil, let supplement?):
+            markdown =
+            (
+                sources: [supplement.source],
+                parsed: supplement.parsed.body,
+                file: supplement.source.location?.file
+            )
         }
+
+        let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])? = markdown.map
+        {
+            let (sources, parsed, file):([MarkdownSource], MarkdownDocumentation, Int32?) = $0
+            let scopes:StaticResolver.Scopes = self.symbolizer.scopes(
+                namespace: namespace,
+                culture: culture,
+                scope: decl.phylum.scope(trimming: decl.path))
+
+            return self.tables.with(scopes: scopes)
+            {
+                $0.link(attached: parsed, from: sources, file: file)
+            }
+        }
+
+        {
+            $0?.requirements = requirements
+            $0?.superforms = superforms
+            $0?.features = features
+            $0?.origin = origin
+
+            $0?.signature = signature
+            $0?.location = location
+            $0?.article = linked?.article
+            $0?.topics = linked?.topics ?? []
+
+        } (&self.symbolizer.graph.decls.nodes[address].decl)
     }
 }
 extension StaticLinker
@@ -646,12 +662,17 @@ extension StaticLinker
             }
             if  let comment:Compiler.Doccomment
             {
+                //  Only intern the file path for the extension block with the longest comment
+                let comment:MarkdownSource = .init(comment: comment,
+                    in: file.map { self.symbolizer.intern($0) })
+
+                let parsed:MarkdownDocumentation = .init(parsing: comment.text,
+                    from: 0,
+                    with: self.doccommentParser,
+                    as: SwiftFlavoredMarkdownComment.self)
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
-                let parser:SwiftFlavoredMarkdownParser = self.doccommentParser
-                let importAll:[ModuleIdentifier] = self.symbolizer.importAll
-                //  Only intern the file path for the extension block with the longest comment
-                let file:Int32? = file.map { self.symbolizer.intern($0) }
+                let importAll:[ModuleIdentifier] = self.symbolizer.importAll ;
 
                 {
                     let scopes:StaticResolver.Scopes = .init(
@@ -663,8 +684,7 @@ extension StaticLinker
 
                     $0.article = self.tables.with(scopes: scopes)
                     {
-                        let comment:MarkdownSource = .init(comment: comment, in: file)
-                        return $0.link(comment: comment, parser: parser)
+                        $0.link(article: parsed, from: [comment], file: comment.location?.file)
                     }
 
                 } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])

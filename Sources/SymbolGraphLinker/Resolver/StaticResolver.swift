@@ -21,7 +21,7 @@ struct StaticResolver:~Copyable
         codelinks:CodelinkResolver<Int32>,
         doclinks:DoclinkResolver)
     {
-        self.diagnostics = .init()
+        self.diagnostics = diagnostics
 
         self.codelinks = codelinks
         self.doclinks = doclinks
