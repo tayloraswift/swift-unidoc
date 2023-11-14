@@ -61,7 +61,8 @@ extension UnidocDatabase.Sitemaps
                     $0[Realm.Sitemap[.id]] = (+)
                 }
             },
-            against: self.database)
+            against: self.database,
+            by: .now.advanced(by: .seconds(10)))
         {
             for try await batch:[MetadataView] in $0
             {

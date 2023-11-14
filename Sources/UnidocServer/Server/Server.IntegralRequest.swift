@@ -154,6 +154,9 @@ extension Server.IntegralRequest
             case "robots.txt":
                 endpoint = .interactive(Server.Endpoint.Robots.init())
 
+            case "sitemap.xml":
+                endpoint = .interactive(Server.Endpoint.SitemapIndex.init(tag: tag))
+
             case _:
                 return nil
             }
