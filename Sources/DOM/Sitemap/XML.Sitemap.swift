@@ -26,19 +26,16 @@ extension XML.Sitemap
         try encode(&self.encoder)
     }
 }
-extension XML.Sitemap
+extension XML.Sitemap:ExpressibleByStringLiteral
 {
-    /// Encodes an XML document with the provided closure, which includes
-    /// the prefixed `<?xml version="1.0" encoding="UTF-8"?>` declaration.
-    @inlinable public static
-    func document(with encode:(inout ContentEncoder) throws -> ()) rethrows -> Self
+    /// Creates a sitemap document containing the **exact** contents of the given
+    /// string literal.
+    ///
+    /// Use this with caution. This initializer performs no escaping or validation!
+    @inlinable public
+    init(stringLiteral:String)
     {
-        var xml:Self = .init
-        {
-            $0.utf8 += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".utf8
-        }
-        try encode(&xml.encoder)
-        return xml
+        self.init { $0.utf8 = [UInt8].init(stringLiteral.utf8) }
     }
 }
 extension XML.Sitemap

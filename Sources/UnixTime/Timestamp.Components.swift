@@ -122,33 +122,43 @@ extension Timestamp.Components
     @inlinable public
     var yyyymmdd:String
     {
-        let mm:String = self.month < 10 ? "0\(self.month)" : "\(self.month)"
-        let dd:String = self.day   < 10 ? "0\(self.day)"   : "\(self.day)"
-        return "\(self.year)\(mm)\(dd)"
+        "\(self.year)\(self.MM)\(self.DD)"
+    }
+
+    @inlinable public
+    var MM:String
+    {
+        self.month < 10 ? "0\(self.month)" : "\(self.month)"
+    }
+
+    @inlinable public
+    var DD:String
+    {
+        self.day < 10 ? "0\(self.day)" : "\(self.day)"
     }
 
     @inlinable public
     var hh:String
     {
-        return self.hour < 10 ? "0\(self.hour)" : "\(self.hour)"
+        self.hour < 10 ? "0\(self.hour)" : "\(self.hour)"
     }
 
     @inlinable public
     var mm:String
     {
-        return self.minute < 10 ? "0\(self.minute)" : "\(self.minute)"
+        self.minute < 10 ? "0\(self.minute)" : "\(self.minute)"
     }
 
     @inlinable public
     var ss:String
     {
-        return self.second < 10 ? "0\(self.second)" : "\(self.second)"
+        self.second < 10 ? "0\(self.second)" : "\(self.second)"
     }
 
     @inlinable public
     var yyyymmddThhmmssZ:String
     {
-        return "\(self.yyyymmdd)T\(self.hh)\(self.mm)\(self.ss)Z"
+        "\(self.yyyymmdd)T\(self.hh)\(self.mm)\(self.ss)Z"
     }
 }
 extension Timestamp.Components

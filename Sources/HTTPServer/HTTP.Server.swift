@@ -180,10 +180,9 @@ extension HTTP.Server
                     }
                 }
                 //  Normal and expected.
-                catch ChannelError.outputClosed
-                {
-                }
-                catch NIOSSLError.uncleanShutdown
+                catch   ChannelError.alreadyClosed,
+                        ChannelError.outputClosed,
+                        NIOSSLError.uncleanShutdown
                 {
                 }
                 catch let error
@@ -258,6 +257,8 @@ extension HTTP.Server
                         }
                         catch let error
                         {
+                            Log[.error] = "(application) \(error)"
+
                             return .init(
                                 redacting: error,
                                 using: connection.channel.allocator)
@@ -289,7 +290,7 @@ extension HTTP.Server
             }
             catch let error
             {
-                Log[.error] = "\(error) (HTTP/1.1)"
+                Log[.error] = "(HTTP/1.1) \(error)"
             }
         }
     }
@@ -379,6 +380,8 @@ extension HTTP.Server
                         }
                         catch let error
                         {
+                            Log[.error] = "(application) \(error)"
+
                             return .init(
                                 redacting: error,
                                 using: stream.channel.allocator)
@@ -401,7 +404,7 @@ extension HTTP.Server
             }
             catch let error
             {
-                Log[.error] = "\(error) (HTTP/2)"
+                Log[.error] = "(HTTP/2) \(error)"
             }
         }
     }

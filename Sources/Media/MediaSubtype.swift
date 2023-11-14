@@ -24,6 +24,7 @@ enum MediaSubtype:String, Equatable, Hashable, Sendable
     case webp
     case woff
     case woff2
+    case xml
 
     case x_icon = "x-icon"
     case x_www_form_urlencoded = "x-www-form-urlencoded"
@@ -97,6 +98,7 @@ extension MediaSubtype
         case .webp:                     return "webp"
         case .woff:                     return "woff"
         case .woff2:                    return "woff2"
+        case .xml:                      return "xml"
         case .x_icon:                   return "ico"
         case .x_www_form_urlencoded:    return "txt"
         }

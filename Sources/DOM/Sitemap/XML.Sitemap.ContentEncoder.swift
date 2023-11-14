@@ -13,6 +13,27 @@ extension XML.Sitemap
         }
     }
 }
+extension XML.Sitemap.ContentEncoder
+{
+    /// Writes a string or substring to the output stream, escaping spcial characters as needed.
+    ///
+    /// Unlike the HTML/SVG encoder, there is no dedicated protocol for things that can be
+    /// written to a sitemap output.
+    @inlinable public static
+    func += (self:inout Self, string:some StringProtocol)
+    {
+        self.utf8 += string.utf8
+    }
+
+    @inlinable internal static
+    func += (self:inout Self, utf8:some Sequence<UInt8>)
+    {
+        for codeunit:UInt8 in utf8
+        {
+            self.append(unescaped: codeunit)
+        }
+    }
+}
 //  These cannot be factored into protocols due to mutation of ``utf8``.
 extension XML.Sitemap.ContentEncoder:DOM.ContentEncoder
 {

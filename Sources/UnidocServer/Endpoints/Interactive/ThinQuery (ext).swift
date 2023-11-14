@@ -43,6 +43,16 @@ extension ThinQuery<Volume.Shoot>
             //  owner, so we just convert those to unversioned queries.
             version = .init(head)
             head = next
+
+            switch version
+            {
+            //  We don’t have any symbol graphs for these versions of swift.
+            case .major(.v(5))?, .minor(.v(5, 6)), .patch(.v(5, 6, 1)), .patch(.v(5, 6, 2)):
+                version = nil
+
+            case _:
+                break
+            }
         }
 
         let stem:ArraySlice<String>
