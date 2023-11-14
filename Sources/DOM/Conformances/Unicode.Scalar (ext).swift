@@ -1,5 +1,3 @@
-import HTMLDOM
-
 extension Unicode.Scalar:HyperTextOutputStreamable
 {
     @inlinable public static

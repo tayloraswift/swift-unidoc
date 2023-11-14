@@ -1,5 +1,3 @@
-import HTMLDOM
-
 extension Never:HyperTextOutputStreamable
 {
     @inlinable public static
