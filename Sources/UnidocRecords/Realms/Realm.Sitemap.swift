@@ -30,6 +30,7 @@ extension Realm
         public
         let elements:Elements
 
+        /// See ``CodingKey.modified``.
         public
         var modified:BSON.Millisecond?
         public
@@ -66,6 +67,8 @@ extension Realm.Sitemap
     {
         case id = "_id"
         case elements = "L"
+        /// When this sitemap was last modified. This field only appears if the sitemap has
+        /// changed at least once since it was created.
         case modified = "M"
         case hash = "H"
     }

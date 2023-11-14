@@ -23,19 +23,16 @@ extension HTML
         try encode(&self.encoder)
     }
 }
-extension HTML
+extension HTML:ExpressibleByStringLiteral
 {
-    /// Encodes an HTML document with the provided closure, which includes
-    /// the prefixed `<!DOCTYPE html>` declaration.
-    @inlinable public static
-    func document(with encode:(inout ContentEncoder) throws -> ()) rethrows -> Self
+    /// Creates an HTML document containing the **exact** contents of the given
+    /// string literal.
+    ///
+    /// Use this with caution. This initializer performs no escaping or validation!
+    @inlinable public
+    init(stringLiteral:String)
     {
-        var html:Self = .init
-        {
-            $0.utf8 += "<!DOCTYPE html>".utf8
-        }
-        try encode(&html.encoder)
-        return html
+        self.init { $0.utf8 = [UInt8].init(stringLiteral.utf8) }
     }
 }
 extension HTML

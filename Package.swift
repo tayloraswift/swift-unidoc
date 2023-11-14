@@ -53,6 +53,7 @@ let package:Package = .init(
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
         .library(name: "Signatures", targets: ["Signatures"]),
+        .library(name: "Sitemaps", targets: ["Sitemaps"]),
         .library(name: "Sources", targets: ["Sources"]),
 
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
@@ -188,18 +189,12 @@ let package:Package = .init(
 
         .target(name: "HTML", dependencies:
             [
-                .target(name: "HTMLDOM"),
-                .target(name: "HTMLStreaming"),
+                .target(name: "DOM"),
             ]),
 
-        .target(name: "HTMLDOM", dependencies:
+        .target(name: "DOM", dependencies:
             [
                 .target(name: "DynamicLookupMacros"),
-            ]),
-
-        .target(name: "HTMLStreaming", dependencies:
-            [
-                .target(name: "HTMLDOM"),
             ]),
 
         .target(name: "HTTP", dependencies:
@@ -343,14 +338,14 @@ let package:Package = .init(
                 .target(name: "PackageGraphs"),
             ]),
 
-        .target(name: "SemanticVersions"),
-
         .target(name: "S3", dependencies:
             [
                 .target(name: "HTTPClient"),
                 .target(name: "UnixTime"),
                 .product(name: "SHA2", package: "swift-hash"),
             ]),
+
+        .target(name: "SemanticVersions"),
 
         .target(name: "SHA1", dependencies:
             [
@@ -361,6 +356,11 @@ let package:Package = .init(
             [
                 .target(name: "Availability"),
                 .target(name: "MarkdownABI")
+            ]),
+
+        .target(name: "Sitemaps", dependencies:
+            [
+                .target(name: "DOM"),
             ]),
 
         .target(name: "Sources"),
@@ -554,6 +554,7 @@ let package:Package = .init(
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
+                .target(name: "Sitemaps"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocPages"),
             ]),

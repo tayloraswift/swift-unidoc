@@ -184,8 +184,7 @@ extension Volume.Meta:BSONDocumentDecodable
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,
-            //  TODO: make this non-optional after migration
-            realm: try bson[.realm]?.decode() ?? .united,
+            realm: try bson[.realm].decode(),
             patch: try bson[.patch]?.decode(),
             link: try bson[.link]?.decode(),
             tree: try bson[.tree]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
