@@ -78,7 +78,7 @@ extension Site.Docs.Foreign:VersionedPage
 {
     var sidebar:[Volume.Noun]? { self.context.volumes.principal.tree }
 
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.section, { $0.class = "introduction" }]
         {

@@ -29,7 +29,7 @@ extension Site.Admin.Action.Complete:StaticPage
 extension Site.Admin.Action.Complete:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.p] = self.text
     }
