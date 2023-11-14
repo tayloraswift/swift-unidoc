@@ -1,5 +1,3 @@
-import HTMLDOM
-
 extension Character:HyperTextOutputStreamable
 {
     @inlinable public static

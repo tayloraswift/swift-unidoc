@@ -1,5 +1,3 @@
-import HTMLDOM
-
 extension Optional where Wrapped:HyperTextOutputStreamable
 {
     @inlinable public static

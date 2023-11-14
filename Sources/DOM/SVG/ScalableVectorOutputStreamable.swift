@@ -1,5 +1,3 @@
-import HTMLDOM
-
 public
 protocol ScalableVectorOutputStreamable
 {
