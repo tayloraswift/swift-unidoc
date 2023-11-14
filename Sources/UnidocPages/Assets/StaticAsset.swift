@@ -3,6 +3,8 @@ import SemanticVersions
 @frozen public
 enum StaticAsset:String, CaseIterable, Hashable, Sendable
 {
+    case error404_jpg       = "error404.jpg"
+
     case favicon_ico        = "favicon.ico"
     case favicon_png        = "favicon.png"
 
@@ -32,7 +34,8 @@ extension StaticAsset
     {
         switch self
         {
-        case    .favicon_ico,
+        case    .error404_jpg,
+                .favicon_ico,
                 .favicon_png,
                 .literata45_woff2,
                 .literata47_woff2,

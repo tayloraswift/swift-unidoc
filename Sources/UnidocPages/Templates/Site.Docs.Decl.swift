@@ -95,7 +95,7 @@ extension Site.Docs.Decl:ApplicationPage
 }
 extension Site.Docs.Decl:VersionedPage
 {
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let groups:GroupSections = .init(self.context,
             requirements: self.vertex.requirements,

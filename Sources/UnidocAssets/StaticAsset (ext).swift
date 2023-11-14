@@ -9,6 +9,7 @@ extension StaticAsset
     {
         switch self
         {
+        case .error404_jpg:     return ["icons", "error404.jpg"]
         case .favicon_ico:      return ["icons", "favicon.ico"]
         case .favicon_png:      return ["icons", "favicon.png"]
         case .literata45_woff2: return ["woff2", "Literata_24pt-Regular.woff2"]
@@ -29,6 +30,7 @@ extension StaticAsset
     {
         switch self
         {
+        case    .error404_jpg:      return .image(.jpeg)
         case    .favicon_ico:       return .image(.x_icon)
         case    .favicon_png:       return .image(.png)
         case    .literata45_woff2,

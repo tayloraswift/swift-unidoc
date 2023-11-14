@@ -50,7 +50,7 @@ extension VersionedPage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder)
+    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let sidebar:ModuleSidebar? = self.sidebar.map { .init(self.context, nouns: $0) }
 
@@ -114,7 +114,7 @@ extension VersionedPage
         }
         body[.div]
         {
-            $0[.main, { $0.class = "content" }, content: self.main(_:)]
+            $0[.main, { $0.class = "content" }] { self.main(&$0, assets: assets) }
             $0[.div] { $0.class = "sidebar" } = sidebar
         }
     }

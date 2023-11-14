@@ -40,7 +40,7 @@ extension Site.Blog.Article:StaticPage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder)
+    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         body[.header]
         {

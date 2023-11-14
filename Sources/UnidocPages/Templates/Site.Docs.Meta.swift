@@ -68,7 +68,7 @@ extension Site.Docs.Meta:VersionedPage
             : self.context.volumes.principal.tree
     }
 
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let groups:GroupSections = .init(context,
             groups: self.groups,

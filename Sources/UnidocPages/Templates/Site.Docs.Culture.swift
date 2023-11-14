@@ -69,7 +69,7 @@ extension Site.Docs.Culture:ApplicationPage
 }
 extension Site.Docs.Culture:VersionedPage
 {
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let groups:GroupSections = .init(context,
             groups: self.groups,

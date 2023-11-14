@@ -8,7 +8,7 @@ protocol ApplicationPage<Navigator>:RenderablePage
     associatedtype Navigator:HyperTextOutputStreamable
     var navigator:Navigator { get }
 
-    func main(_:inout HTML.ContentEncoder)
+    func main(_:inout HTML.ContentEncoder, assets:StaticAssets)
 }
 extension ApplicationPage<HTML.Logo>
 {
@@ -23,7 +23,7 @@ extension ApplicationPage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder)
+    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         body[.header, { $0.class = "app" }]
         {
@@ -64,7 +64,7 @@ extension ApplicationPage
         }
         body[.div]
         {
-            $0[.main, { $0.class = "content" }, content: self.main(_:)]
+            $0[.main, { $0.class = "content" }] { self.main(&$0, assets: assets) }
         }
     }
 }

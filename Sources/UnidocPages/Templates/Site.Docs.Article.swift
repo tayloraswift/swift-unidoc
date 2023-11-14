@@ -58,7 +58,7 @@ extension Site.Docs.Article:ApplicationPage
 }
 extension Site.Docs.Article:VersionedPage
 {
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         let groups:GroupSections = .init(context,
             groups: self.groups,

@@ -28,7 +28,7 @@ extension Site.Docs.NotFound:VersionedPage
 {
     var canonical:CanonicalVersion? { nil }
 
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.section]
         {
@@ -37,6 +37,14 @@ extension Site.Docs.NotFound:VersionedPage
                 $0 += "Symbol not found. Try a search, or return to the documentation for "
                 $0[.a] { $0.href = "\(Site.Docs[self.volume])" } = self.volume.title
                 $0 += "."
+            }
+
+            $0[.img]
+            {
+                $0.width = "400"
+                $0.src = "\(assets[.error404_jpg])"
+                $0.title = "This usually happens when package authors rename symbols."
+                $0.alt = "margot robbie as barbie laying sideways on artificial grass"
             }
         }
     }
