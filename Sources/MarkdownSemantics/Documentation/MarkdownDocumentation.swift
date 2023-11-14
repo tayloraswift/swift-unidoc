@@ -186,7 +186,7 @@ extension MarkdownDocumentation
     /// it to this documentation Details section as a regular body paragraph, even
     /// if this documentation lacks an Overview section of its own.
     public mutating
-    func merge(appending body:MarkdownDocumentation)
+    func merge(appending body:Self)
     {
         if  let first:MarkdownBlock.Paragraph = body.overview
         {
@@ -207,5 +207,13 @@ extension MarkdownDocumentation
 
         self.details.article += body.details.article
         self.topics += body.topics
+    }
+
+    @_documentation(metadata: "see: merge(appending:)")
+    public consuming
+    func merged(appending body:MarkdownDocumentation) -> MarkdownDocumentation
+    {
+        self.merge(appending: body)
+        return self
     }
 }
