@@ -10,7 +10,7 @@ protocol RenderablePage
     var title:String { get }
 
     func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
-    func body(_          body:inout HTML.ContentEncoder)
+    func body(_          body:inout HTML.ContentEncoder, assets:StaticAssets)
 
     func resource(assets:StaticAssets) -> HTTP.Resource
 }
@@ -98,10 +98,7 @@ extension RenderablePage
                 self.head(augmenting: &$0, assets: assets)
             }
 
-            $0[.body]
-            {
-                self.body(&$0)
-            }
+            $0[.body] { self.body(&$0, assets: assets) }
         }
     }
 }

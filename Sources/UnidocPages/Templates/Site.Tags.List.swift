@@ -65,7 +65,7 @@ extension Site.Tags.List:StaticPage
 }
 extension Site.Tags.List:ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.section, { $0.class = "introduction" }]
         {

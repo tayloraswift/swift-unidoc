@@ -63,7 +63,7 @@ extension Site.Docs.MultipleFound:VersionedPage
     var canonical:CanonicalVersion? { nil }
     var sidebar:[Volume.Noun]? { nil }
 
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.section, { $0.class = "introduction" }]
         {

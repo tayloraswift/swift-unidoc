@@ -4,7 +4,7 @@ import URI
 public
 protocol AdministrativePage:StaticPage
 {
-    func main(_:inout HTML.ContentEncoder)
+    func main(_:inout HTML.ContentEncoder, assets:StaticAssets)
 }
 extension AdministrativePage
 {
@@ -19,7 +19,7 @@ extension AdministrativePage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder)
+    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         body[.header, { $0.class = "app" }]
         {
@@ -27,7 +27,7 @@ extension AdministrativePage
         }
         body[.div]
         {
-            $0[.main, { $0.class = "content" }, content: self.main(_:)]
+            $0[.main, { $0.class = "content" }] { self.main(&$0, assets: assets) }
         }
     }
 }
