@@ -15,6 +15,7 @@ extension Volume.Meta
         project[Volume.Meta[.refname]] = true
         project[Volume.Meta[.display]] = true
         project[Volume.Meta[.latest]] = true
+        project[Volume.Meta[.realm]] = true
         project[Volume.Meta[.patch]] = true
         project[Volume.Meta[.api]] = true
     }
