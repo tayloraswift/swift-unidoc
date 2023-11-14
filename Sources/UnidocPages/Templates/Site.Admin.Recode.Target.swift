@@ -50,7 +50,7 @@ extension Site.Admin.Recode.Target:StaticPage
 extension Site.Admin.Recode.Target:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder)
+    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         main[.form]
         {

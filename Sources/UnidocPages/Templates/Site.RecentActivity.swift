@@ -38,7 +38,7 @@ extension Site.RecentActivity:RenderablePage
         head[unsafe: .script] = assets.script(volumes: nil)
     }
 
-    func body(_ body:inout HTML.ContentEncoder)
+    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
         //  This div centers the content.
         body[.div]
