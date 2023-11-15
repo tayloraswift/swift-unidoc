@@ -103,6 +103,15 @@ extension SymbolGraph.Decl
 }
 extension SymbolGraph.Decl
 {
+    /// See ``Unidoc.Decl.scope(trimming:)``.
+    @inlinable public
+    var scope:[String]
+    {
+        self.phylum.scope(trimming: self.path)
+    }
+}
+extension SymbolGraph.Decl
+{
     @frozen public
     enum CodingKey:String
     {

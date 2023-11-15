@@ -13,7 +13,7 @@ struct DynamicLinker:~Copyable
     private
     let context:DynamicContext
     private
-    let modules:[ModuleContext]
+    let modules:[SymbolGraph.ModuleContext]
 
     /// Protocol conformances for each declaration in the **current** snapshot.
     private
@@ -44,7 +44,7 @@ struct DynamicLinker:~Copyable
 
     private
     init(context:DynamicContext,
-        modules:[ModuleContext],
+        modules:[SymbolGraph.ModuleContext],
         conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
         diagnostics:DiagnosticContext<DynamicSymbolicator>,
         extensions:Extensions)
@@ -72,7 +72,7 @@ extension DynamicLinker
     public
     init(context:DynamicContext)
     {
-        let modules:[ModuleContext] = context.modules()
+        let modules:[SymbolGraph.ModuleContext] = context.modules()
 
         var diagnostics:DiagnosticContext<DynamicSymbolicator> = .init()
         var extensions:Extensions = .init(zone: context.current.edition)
@@ -243,6 +243,14 @@ extension DynamicLinker
 extension DynamicLinker
 {
     var current:SnapshotObject { self.context.current }
+
+    var cultures:SymbolGraph.ModuleView
+    {
+        .init(namespaces: self.current.namespaces,
+            cultures: self.current.cultures,
+            contexts: self.modules,
+            edition: self.current.edition)
+    }
 }
 extension DynamicLinker
 {
@@ -270,46 +278,89 @@ extension DynamicLinker
             self.memberships[c * .module] = cultures.id
         }
     }
+
+    private mutating
+    func populate(scope:Unidoc.Scalar, with members:[Volume.Link])
+    {
+        for case .scalar(let member) in members
+        {
+            //  This may replace a synthesized topic.
+            if  let local:Int32 = member - self.current.edition
+            {
+                self.memberships[local] = scope
+            }
+        }
+    }
+
     private mutating
     func link() -> [Volume.Vertex.Culture]
     {
         //  First pass to create the topic records, which also populates topic memberships.
-        for ((c, culture), context):((Int, SymbolGraph.Culture), ModuleContext)
-            in zip(zip(
-                self.current.cultures.indices,
-                self.current.cultures),
-            self.modules)
+        for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
+            self.cultures
         {
-            //  Create topic records.
-            self.link(topics: culture.topics,
-                with: context,
-                from: (c, self.current.namespaces[c]))
+            //  Create topic records for the culture.
+            self.link(topics: culture.topics, under: namespace, owner: namespace.culture)
+
+            //  Create topic records for the decls.
+            for decls:SymbolGraph.Namespace in culture.namespaces
+            {
+                let namespace:SymbolGraph.NamespaceContext<Void> = .init(
+                    context: namespace.context,
+                    culture: namespace.culture,
+                    module: self.current.namespaces[decls.index])
+
+                for (d, node):(Int32, SymbolGraph.DeclNode) in zip(decls.range,
+                    self.current.decls.nodes[decls.range])
+                {
+                    //  Should always succeed!
+                    guard
+                    let owner:Unidoc.Scalar = self.current.scalars.decls[d],
+                    let decl:SymbolGraph.Decl = node.decl
+                    else
+                    {
+                        continue
+                    }
+                    //  Optimization
+                    if  decl.topics.isEmpty
+                    {
+                        continue
+                    }
+
+                    self.link(topics: decl.topics,
+                        under: namespace,
+                        scope: decl.scope,
+                        owner: owner)
+                }
+            }
         }
 
         //  Second pass to create various vertex records, which reads from the ``topics``.
-        for ((c, namespace, culture), context):
-            ((Int, ModuleIdentifier, SymbolGraph.Culture), ModuleContext) in zip(
-            self.current.modules,
-            self.modules)
+        for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
+            self.cultures
         {
             //  Create decl records.
             for decls:SymbolGraph.Namespace in culture.namespaces
             {
-                let namespace:ModuleIdentifier = self.current.namespaces[decls.index]
+                let module:ModuleIdentifier = self.current.namespaces[decls.index]
 
                 guard
-                let n:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
+                let scalar:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
                 else
                 {
-                    self.diagnostics[nil] = DroppedExtensionsError.extending(namespace,
+                    self.diagnostics[nil] = DroppedExtensionsError.extending(module,
                         count: decls.range.count)
                     continue
                 }
 
+                let namespace:SymbolGraph.NamespaceContext<Unidoc.Scalar> = .init(
+                    context: namespace.context,
+                    culture: namespace.culture,
+                    module: module,
+                    id: scalar)
+
                 let miscellaneous:[Unidoc.Scalar] = self.link(decls: decls.range,
-                    under: (n, namespace),
-                    with: context,
-                    from: c)
+                    under: namespace)
 
                 if  miscellaneous.isEmpty
                 {
@@ -318,21 +369,19 @@ extension DynamicLinker
 
                 //  Create top-level autogroup.
                 self.groups.append(.automatic(.init(id: self.next.autogroup.id(),
-                    scope: self.current.edition + c,
+                    scope: namespace.culture,
                     members: self.context.sort(lexically: consume miscellaneous))))
             }
             //  Create article records.
             if  let articles:ClosedRange<Int32> = culture.articles
             {
-                self.link(articles: articles,
-                    with: context,
-                    from: (c, namespace))
+                self.link(articles: articles, under: namespace)
             }
         }
 
-        return self.current.modules.map
+        return self.cultures.map
         {
-            self.link(culture: $0.culture, named: $0.name, at: $0.index)
+            self.link(culture: $0.culture, under: $0.namespace)
         }
     }
 }
@@ -340,35 +389,27 @@ extension DynamicLinker
 {
     private mutating
     func link(topics:[SymbolGraph.Topic],
-        with context:ModuleContext,
-        from culture:(index:Int, id:ModuleIdentifier))
+        under namespace:SymbolGraph.NamespaceContext<Void>,
+        scope:[String] = [],
+        owner:Unidoc.Scalar)
     {
-        let n:Unidoc.Scalar = self.current.edition + culture.index
-
         for topic:SymbolGraph.Topic in topics
         {
             var record:Volume.Group.Topic = .init(id: self.next.topic.id(),
-                culture: n,
-                scope: n)
+                culture: namespace.culture,
+                scope: owner)
 
             (record.overview, record.members) = self.diagnostics.resolving(
-                namespace: culture.id,
+                namespace: namespace.module,
+                module: namespace.context,
                 global: self.context,
-                module: context)
+                scope: scope)
             {
                 $0.link(topic: topic)
             }
 
+            self.populate(scope: record.id, with: record.members)
             self.groups.append(.topic(record))
-
-            for case .scalar(let master) in record.members
-            {
-                //  This may replace a synthesized topic.
-                if  let local:Int32 = master - self.current.edition
-                {
-                    self.memberships[local] = record.id
-                }
-            }
         }
     }
 }
@@ -376,21 +417,20 @@ extension DynamicLinker
 {
     private mutating
     func link(culture:SymbolGraph.Culture,
-        named name:ModuleIdentifier,
-        at index:Int) -> Volume.Vertex.Culture
+        under namespace:SymbolGraph.NamespaceContext<Void>) -> Volume.Vertex.Culture
     {
-        let scalar:Unidoc.Scalar = self.current.edition + index
-        var vertex:Volume.Vertex.Culture = .init(id: scalar,
+        var vertex:Volume.Vertex.Culture = .init(id: namespace.culture,
             module: culture.module,
-            group: self.memberships.removeValue(forKey: scalar.citizen))
+            group: self.memberships.removeValue(forKey: namespace.culture.citizen))
 
         if  let article:SymbolGraph.Article = culture.article
         {
             vertex.readme = article.file.map { self.current.edition + $0 }
 
-            (vertex.overview, vertex.details) = self.diagnostics.resolving(namespace: name,
-                global: self.context,
-                module: self.modules[index])
+            (vertex.overview, vertex.details) = self.diagnostics.resolving(
+                namespace: namespace.module,
+                module: namespace.context,
+                global: self.context)
             {
                 $0.link(article: article)
             }
@@ -401,8 +441,7 @@ extension DynamicLinker
 
     private mutating
     func link(articles range:ClosedRange<Int32>,
-        with context:ModuleContext,
-        from culture:(index:Int, id:ModuleIdentifier))
+        under namespace:SymbolGraph.NamespaceContext<Void>)
     {
         for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(
             self.current.articles.nodes[range].indices,
@@ -410,16 +449,16 @@ extension DynamicLinker
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
             var vertex:Volume.Vertex.Article = .init(id: self.current.edition + a,
-                stem: .init(culture.id, symbol.name),
-                culture: self.current.edition + culture.index,
+                stem: .init(namespace.module, symbol.name),
+                culture: namespace.culture,
                 file: node.body.file.map { self.current.edition + $0 },
                 headline: node.headline,
                 group: self.memberships.removeValue(forKey: a))
 
             (vertex.overview, vertex.details) = self.diagnostics.resolving(
-                namespace: culture.id,
-                global: self.context,
-                module: context)
+                namespace: namespace.module,
+                module: namespace.context,
+                global: self.context)
             {
                 $0.link(article: node.body)
             }
@@ -431,9 +470,7 @@ extension DynamicLinker
     /// Returns a list of uncategorized top-level declarations.
     private mutating
     func link(decls range:ClosedRange<Int32>,
-        under namespace:(scalar:Unidoc.Scalar, id:ModuleIdentifier),
-        with context:ModuleContext,
-        from culture:Int) -> [Unidoc.Scalar]
+        under namespace:SymbolGraph.NamespaceContext<Unidoc.Scalar>) -> [Unidoc.Scalar]
     {
         var miscellaneous:[Unidoc.Scalar] = []
 
@@ -510,7 +547,7 @@ extension DynamicLinker
             for s:Unidoc.Scalar in superforms
             {
                 let implicit:ExtensionSignature = .init(conditions: [],
-                    culture: culture,
+                    culture: namespace.c,
                     extends: s)
 
                 self.extensions[implicit].subforms.append(d)
@@ -523,11 +560,11 @@ extension DynamicLinker
                     route: decl.route),
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
-                stem: .init(namespace.id, decl.path, orientation: decl.phylum.orientation),
+                stem: .init(namespace.module, decl.path, orientation: decl.phylum.orientation),
                 requirements: self.context.sort(lexically: requirements),
                 superforms: self.context.sort(lexically: superforms),
-                namespace: namespace.scalar,
-                culture: self.current.edition + culture,
+                namespace: namespace.id,
+                culture: namespace.culture,
                 scope: scope.map { self.context.expand($0) } ?? [],
                 file: decl.location.map { self.current.edition + $0.file },
                 position: decl.location?.position,
@@ -536,10 +573,10 @@ extension DynamicLinker
             if  let article:SymbolGraph.Article = decl.article
             {
                 (vertex.overview, vertex.details) = self.diagnostics.resolving(
-                    namespace: namespace.id,
+                    namespace: namespace.module,
+                    module: namespace.context,
                     global: self.context,
-                    module: context,
-                    scope: decl.phylum.scope(trimming: decl.path))
+                    scope: decl.scope)
                 {
                     $0.link(article: article)
                 }

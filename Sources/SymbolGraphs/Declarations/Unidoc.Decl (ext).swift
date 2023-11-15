@@ -16,7 +16,7 @@ extension Unidoc.Decl
                 .protocol,
                 .struct,
                 .macro(.attached):
-            return path.map { $0 }
+            path.map { $0 }
 
         case    .associatedtype,
                 .case,
@@ -28,7 +28,7 @@ extension Unidoc.Decl
                 .typealias,
                 .var,
                 .macro(.freestanding):
-            return path.prefix
+            path.prefix
         }
     }
 }
