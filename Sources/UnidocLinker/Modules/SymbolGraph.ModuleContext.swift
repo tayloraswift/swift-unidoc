@@ -5,7 +5,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-extension DynamicLinker
+extension SymbolGraph
 {
     /// Abstracts over linker tables that are shared between package cultures
     /// that depend on the same set of upstream package products.
@@ -39,8 +39,7 @@ extension DynamicLinker
         }
     }
 }
-
-extension DynamicLinker.ModuleContext
+extension SymbolGraph.ModuleContext
 {
     init(nodes:Slice<SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>>)
     {
@@ -56,7 +55,7 @@ extension DynamicLinker.ModuleContext
             })
     }
 }
-extension DynamicLinker.ModuleContext
+extension SymbolGraph.ModuleContext
 {
     private mutating
     func remember(conforms t:Unidoc.Scalar, to p:Unidoc.Scalar)
@@ -68,7 +67,7 @@ extension DynamicLinker.ModuleContext
         self.conformances.contains(.init(sub: t, dom: p))
     }
 }
-extension DynamicLinker.ModuleContext
+extension SymbolGraph.ModuleContext
 {
     mutating
     func add(snapshot:SnapshotObject,
