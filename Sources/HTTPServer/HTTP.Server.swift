@@ -92,7 +92,7 @@ extension HTTP.Server
                         return try NIOAsyncChannel<
                             HTTPPart<HTTPRequestHead, ByteBuffer>,
                             HTTPPart<HTTPResponseHead, ByteBuffer>>.init(
-                            synchronouslyWrapping: connection,
+                            wrappingChannelSynchronously: connection,
                             configuration: .init())
                     }
                 }
@@ -102,8 +102,8 @@ extension HTTP.Server
 
                     connection.eventLoop.makeCompletedFuture
                     {
-                        try NIOAsyncChannel<HTTP2Frame, HTTP2Frame>(
-                            synchronouslyWrapping: connection,
+                        try NIOAsyncChannel<HTTP2Frame, HTTP2Frame>.init(
+                            wrappingChannelSynchronously: connection,
                             configuration: .init())
                     }
                 }
@@ -116,7 +116,7 @@ extension HTTP.Server
                         try NIOAsyncChannel<
                             HTTP2Frame.FramePayload,
                             HTTP2Frame.FramePayload>.init(
-                            synchronouslyWrapping: stream,
+                            wrappingChannelSynchronously: stream,
                             configuration: .init())
                     }
                 }
@@ -125,11 +125,10 @@ extension HTTP.Server
 
         Log[.debug] = "bound to \(binding.address):\(binding.port)"
 
-        await withTaskGroup(of: Void.self)
-        {
-            (tasks:inout TaskGroup<Void>) in
 
-            await tasks.iterate(listener.inbound, width: 60)
+        try await listener.executeThenClose
+        {
+            try await $0.iterate(concurrently: 60)
             {
                 do
                 {
@@ -190,10 +189,6 @@ extension HTTP.Server
                     Log[.error] = "\(error)"
                 }
             }
-                else:
-            {
-                Log[.error] = "\($0)"
-            }
         }
     }
 }
@@ -233,54 +228,57 @@ extension HTTP.Server
 
             do
             {
-                for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in connection.inbound
+                try await connection.executeThenClose
                 {
-                    guard
-                    case .head(let part) = part
-                    else
+                    for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in $0
                     {
-                        //  Ignore.
-                        continue
-                    }
-
-                    tasks.addTask
-                    {
-                        do
+                        guard
+                        case .head(let part) = part
+                        else
                         {
-                            return .init(
-                                response: try await self.respond(to: part,
-                                    address: address,
-                                    service: service,
-                                    with: cop,
-                                    as: Authority.self),
-                                using: connection.channel.allocator)
+                            //  Ignore.
+                            continue
                         }
-                        catch let error
+
+                        tasks.addTask
                         {
-                            Log[.error] = "(application) \(error)"
+                            do
+                            {
+                                return .init(
+                                    response: try await self.respond(to: part,
+                                        address: address,
+                                        service: service,
+                                        with: cop,
+                                        as: Authority.self),
+                                    using: connection.channel.allocator)
+                            }
+                            catch let error
+                            {
+                                Log[.error] = "(application) \(error)"
 
-                            return .init(
-                                redacting: error,
-                                using: connection.channel.allocator)
+                                return .init(
+                                    redacting: error,
+                                    using: connection.channel.allocator)
+                            }
                         }
-                    }
 
-                    //  If `cop.active` is false, then the other task has already begun
-                    //  closing the connection.
-                    guard
-                    case let message?? = await completed.next(), cop.active
-                    else
-                    {
-                        return
-                    }
+                        //  If `cop.active` is false, then the other task has already begun
+                        //  closing the connection.
+                        guard
+                        case let message?? = await completed.next(), cop.active
+                        else
+                        {
+                            return
+                        }
 
-                    try await connection.outbound.send(message)
+                        try await $1.send(message)
 
-                    guard part.isKeepAlive
-                    else
-                    {
-                        connection.outbound.finish()
-                        return
+                        guard part.isKeepAlive
+                        else
+                        {
+                            $1.finish()
+                            return
+                        }
                     }
                 }
             }
@@ -366,37 +364,45 @@ extension HTTP.Server
                     HTTP2Frame.FramePayload,
                     HTTP2Frame.FramePayload> in streams.inbound
                 {
-                    tasks.addTask
+                    try await stream.executeThenClose
                     {
-                        do
+                        (
+                            remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+                            writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
+                        )   in
+
+                        tasks.addTask
                         {
-                            return .init(
-                                response: try await self.respond(to: stream,
-                                    address: address,
-                                    service: service,
-                                    with: cop,
-                                    as: Authority.self),
-                                using: stream.channel.allocator)
+                            do
+                            {
+                                return .init(
+                                    response: try await self.respond(to: remote,
+                                        address: address,
+                                        service: service,
+                                        with: cop,
+                                        as: Authority.self),
+                                    using: stream.channel.allocator)
+                            }
+                            catch let error
+                            {
+                                Log[.error] = "(application) \(error)"
+
+                                return .init(
+                                    redacting: error,
+                                    using: stream.channel.allocator)
+                            }
                         }
-                        catch let error
+
+                        guard
+                        case let message?? = await completed.next(), cop.active
+                        else
                         {
-                            Log[.error] = "(application) \(error)"
-
-                            return .init(
-                                redacting: error,
-                                using: stream.channel.allocator)
+                            return
                         }
-                    }
 
-                    guard
-                    case let message?? = await completed.next(), cop.active
-                    else
-                    {
-                        return
+                        try await writer.send(message)
+                        writer.finish()
                     }
-
-                    try await stream.outbound.send(message)
-                    stream.outbound.finish()
                 }
             }
             catch NIOSSLError.uncleanShutdown
@@ -410,9 +416,7 @@ extension HTTP.Server
     }
 
     private
-    func respond<Authority>(to h2:NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>,
+    func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
         address:IP.V6,
         service:IP.Service?,
         with cop:borrowing TimeCop,
@@ -420,7 +424,7 @@ extension HTTP.Server
         where Authority:ServerAuthority
     {
         var inbound:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>.AsyncIterator =
-            h2.inbound.makeAsyncIterator()
+            h2.makeAsyncIterator()
 
         var headers:HPACKHeaders? = nil
         while let payload:HTTP2Frame.FramePayload = try await inbound.next()
