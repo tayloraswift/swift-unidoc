@@ -28,7 +28,7 @@ extension UnidocDatabase.Packages.Placement
 }
 extension UnidocDatabase.Packages.Placement:MongoMasterCodingModel
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case coordinate
         case realm

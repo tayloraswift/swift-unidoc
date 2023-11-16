@@ -24,7 +24,7 @@ extension ThinQuery
 extension ThinQuery.Output:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String, CaseIterable
+    enum CodingKey:String, CaseIterable, Sendable
     {
         case matches = "M"
         case volume = "Z"

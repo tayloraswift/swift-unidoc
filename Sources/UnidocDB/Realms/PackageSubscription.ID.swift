@@ -34,7 +34,7 @@ extension PackageSubscription.ID:MongoMasterCodingModel
     /// but it means we can build sub-indexes on the individual components instead of having
     /// to duplicate information in the `_id` field.
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case dependency = "D"
         case dependent = "P"

@@ -22,7 +22,7 @@ extension Volume
 extension Volume.Census
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case unweighted = "U"
         case weighted = "W"

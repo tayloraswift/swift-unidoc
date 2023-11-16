@@ -111,7 +111,7 @@ extension SymbolGraphMetadata
 extension SymbolGraphMetadata
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case abi
         case package

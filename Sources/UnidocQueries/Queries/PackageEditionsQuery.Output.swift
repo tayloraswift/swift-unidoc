@@ -27,7 +27,7 @@ extension PackageEditionsQuery
 extension PackageEditionsQuery.Output:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case prereleases
         case releases

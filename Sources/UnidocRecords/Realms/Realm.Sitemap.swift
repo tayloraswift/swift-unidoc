@@ -63,7 +63,7 @@ extension Realm.Sitemap
 extension Realm.Sitemap
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
         case elements = "L"

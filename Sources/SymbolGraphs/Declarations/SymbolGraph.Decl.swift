@@ -113,7 +113,7 @@ extension SymbolGraph.Decl
 extension SymbolGraph.Decl
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case flags = "X"
         case path = "P"

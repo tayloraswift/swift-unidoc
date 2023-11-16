@@ -20,7 +20,7 @@ extension GenericConstraint
     ///
     /// The complex (`C`) field is always a string.
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case generic = "G"
         case nominal = "N"

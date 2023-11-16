@@ -46,7 +46,7 @@ extension SymbolGraph.DeclNode
 extension SymbolGraph.DeclNode
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case extensions = "E"
         case decl = "V"

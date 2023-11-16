@@ -22,7 +22,7 @@ extension Volume
 extension Volume.Stats
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case coverage = "C"
         case decls = "D"
