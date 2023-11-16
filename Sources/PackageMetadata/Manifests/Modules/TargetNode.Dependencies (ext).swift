@@ -12,7 +12,7 @@ extension TargetNode.Dependencies:JSONDecodable
         let array:JSON.Array = try .init(json: json)
         for json:JSON.ExplicitField<Int> in array
         {
-            enum CodingKey:String
+            enum CodingKey:String, Sendable
             {
                 case byName
                 case target

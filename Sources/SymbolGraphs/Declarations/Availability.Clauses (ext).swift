@@ -5,7 +5,7 @@ import BSONEncoding
 extension Availability.Clauses
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case unavailable = "U"
         case deprecated = "D"

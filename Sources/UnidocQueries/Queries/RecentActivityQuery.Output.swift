@@ -26,7 +26,7 @@ extension RecentActivityQuery
 extension RecentActivityQuery.Output:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case repo = "R"
         case docs = "D"

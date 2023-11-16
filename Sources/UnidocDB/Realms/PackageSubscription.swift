@@ -31,7 +31,7 @@ struct PackageSubscription
 extension PackageSubscription:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
         case from = "L"

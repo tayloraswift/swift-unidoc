@@ -18,7 +18,7 @@ extension Repository.Pin
 extension Repository.Pin.V1:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         //  this field is completely useless!
         //  case id = "package"

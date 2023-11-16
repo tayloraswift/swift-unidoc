@@ -64,7 +64,7 @@ extension WideQuery.Output
 extension WideQuery.Output.Principal:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String, CaseIterable
+    enum CodingKey:String, CaseIterable, Sendable
     {
         case matches = "A"
         case vertex = "M"

@@ -34,7 +34,7 @@ extension SymbolGraphMetadata
 extension SymbolGraphMetadata.Dependency
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case package = "P"
         case requirement_lower = "L"

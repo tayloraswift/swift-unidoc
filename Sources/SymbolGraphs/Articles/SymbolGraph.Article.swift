@@ -45,7 +45,7 @@ extension SymbolGraph
 extension SymbolGraph.Article
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case outlines = "L"
         case overview = "O"

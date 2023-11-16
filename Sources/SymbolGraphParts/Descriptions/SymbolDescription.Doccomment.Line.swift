@@ -18,7 +18,7 @@ extension SymbolDescription.Doccomment
 extension SymbolDescription.Doccomment.Line:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case text
 

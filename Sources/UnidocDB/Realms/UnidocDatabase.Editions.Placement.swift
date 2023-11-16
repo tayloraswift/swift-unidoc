@@ -26,7 +26,7 @@ extension UnidocDatabase.Editions.Placement
 }
 extension UnidocDatabase.Editions.Placement:MongoMasterCodingModel
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case coordinate
         case sha1

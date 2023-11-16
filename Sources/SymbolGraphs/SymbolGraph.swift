@@ -85,7 +85,7 @@ extension SymbolGraph
 extension SymbolGraph
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case namespaces
         case cultures

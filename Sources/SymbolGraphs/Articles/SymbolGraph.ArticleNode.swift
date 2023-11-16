@@ -44,7 +44,7 @@ extension SymbolGraph.ArticleNode:SymbolGraphNode
 extension SymbolGraph.ArticleNode
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case headline = "H"
         case article = "B"

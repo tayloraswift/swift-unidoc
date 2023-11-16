@@ -50,7 +50,7 @@ extension SymbolGraphPart
     private
     init(json:JSON.Object, id:ID) throws
     {
-        enum CodingKey:String
+        enum CodingKey:String, Sendable
         {
             case metadata
 

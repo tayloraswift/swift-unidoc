@@ -28,7 +28,7 @@ extension SymbolGraph
 extension SymbolGraph.Topic
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case outlines = "L"
         case overview = "O"

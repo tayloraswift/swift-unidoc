@@ -37,7 +37,7 @@ extension SearchIndex<Never?>
 extension SearchIndex
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
         /// Contains JSON, encoded as a UTF-8 string.
