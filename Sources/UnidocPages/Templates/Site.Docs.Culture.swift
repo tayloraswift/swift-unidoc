@@ -18,13 +18,13 @@ extension Site.Docs
         private
         let vertex:Volume.Vertex.Culture
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
         init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Culture,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -71,11 +71,6 @@ extension Site.Docs.Culture:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let groups:GroupSections = .init(context,
-            groups: self.groups,
-            bias: self.vertex.id,
-            mode: nil)
-
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
@@ -136,6 +131,6 @@ extension Site.Docs.Culture:VersionedPage
             $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
         }
 
-        main += groups
+        main += self.groups
     }
 }

@@ -16,12 +16,12 @@ extension Site.Docs
         private
         let vertex:Volume.Vertex.Foreign
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
         init(_ context:VersionedPageContext,
             canonical:CanonicalVersion?,
             vertex:Volume.Vertex.Foreign,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -133,9 +133,6 @@ extension Site.Docs.Foreign:VersionedPage
             }
         }
 
-        main += GroupSections.init(self.context,
-            groups: self.groups,
-            bias: nil,
-            mode: .decl(self.vertex.flags.phylum, self.vertex.flags.kinks))
+        main += self.groups
     }
 }
