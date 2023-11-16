@@ -1,5 +1,4 @@
 import Sources
-import UnidocDiagnostics
 
 /// An object representing some markdown source text.
 ///
