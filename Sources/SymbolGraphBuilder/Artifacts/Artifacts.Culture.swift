@@ -1,6 +1,5 @@
 import MarkdownABI
-import MarkdownParsing
-import MarkdownSemantics
+import MarkdownAST
 import ModuleGraphs
 import SymbolGraphLinker
 import SymbolGraphParts
@@ -39,7 +38,7 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    func loadArticles(root:Repository.Root) throws -> [MarkdownFile]
+    func loadArticles(root:Repository.Root) throws -> [MarkdownSourceFile]
     {
         //  Compute this once, since it’s used in the loop below.
         let bundle:ModuleIdentifier = self.module.id

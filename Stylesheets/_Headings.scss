@@ -5,18 +5,29 @@ h1, h2, h3, h4, h5, h6
     font-family: $typeface-sans;
 }
 
+dt[id], dt[name]
+{
+    > a
+    {
+        color: inherit;
+    }
+}
+
 h1[id], h1[name],
 h2[id], h2[name],
-h3[id], h3[name]
+h3[id], h3[name],
+h4[id], h4[name],
+h5[id], h5[name],
+h6[id], h6[name]
 {
-    a
+    > a
     {
         color: inherit;
     }
 
     @media only screen and (min-width: 50rem)
     {
-        a::before
+        > a::before
         {
             content: '$';
 
@@ -31,14 +42,20 @@ h3[id], h3[name]
             opacity: 0.5;
         }
 
-        a:hover::before
+        > a:hover::before
         {
             opacity: 1;
         }
     }
 }
 
-*[id]:target::before, *[name]:target::before
+h1[id]:target::before, h1[name]:target::before,
+h2[id]:target::before, h2[name]:target::before,
+h3[id]:target::before, h3[name]:target::before,
+h4[id]:target::before, h4[name]:target::before,
+h5[id]:target::before, h5[name]:target::before,
+h6[id]:target::before, h6[name]:target::before,
+dt[id]:target::before, dt[name]:target::before
 {
     content: '';
     display: block;

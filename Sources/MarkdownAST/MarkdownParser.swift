@@ -1,5 +1,5 @@
 public
 protocol MarkdownParser
 {
-    func parse(_ string:String, from id:Int) -> [MarkdownBlock]
+    func parse(_ source:borrowing MarkdownSource) -> [MarkdownBlock]
 }

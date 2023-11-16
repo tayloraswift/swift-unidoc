@@ -6,7 +6,7 @@ protocol PercentEncodingSet
 }
 extension PercentEncodingSet
 {
-    static
+    @inlinable internal static
     func encode(_ string:String) -> String
     {
         func hex(uppercasing value:UInt8) -> UInt8

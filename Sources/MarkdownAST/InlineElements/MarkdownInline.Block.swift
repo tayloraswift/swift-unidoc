@@ -80,31 +80,38 @@ extension MarkdownInline.Block:MarkdownElement
 }
 extension MarkdownInline.Block:MarkdownText
 {
-    @inlinable public
-    var text:String
+    @inlinable public static
+    func += (text:inout String, self:Self)
     {
         switch self
         {
-        case .autolink(let autolink):
-            return autolink.text
-
-        case .container(let container):
-            return container.text
-
-        case .code(let code):
-            return code.text
-
-        case .html, .reference:
-            return ""
-
-        case .image(let image):
-            return image.text
-
-        case .link(let link):
-            return link.text
-
-        case .text(let text):
-            return text
+        case .autolink(let autolink):   text += autolink.text
+        case .container(let container): text += container
+        case .code(let code):           text += code
+        case .html:                     return
+        case .image(let image):         text += image
+        case .link(let link):           text += link
+        case .reference:                return
+        case .text(let part):           text += part
+        }
+    }
+}
+extension MarkdownInline.Block
+{
+    /// Returns true if this element can appear as link text.
+    @inlinable internal
+    var anchorable:Bool
+    {
+        switch self
+        {
+        case .autolink:                 false
+        case .container(let container): container.anchorable
+        case .code:                     true
+        case .html:                     false
+        case .image:                    false
+        case .link:                     false
+        case .reference:                false
+        case .text:                     true
         }
     }
 }

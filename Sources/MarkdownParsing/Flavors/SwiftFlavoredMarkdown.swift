@@ -4,7 +4,7 @@ import MarkdownAST
 enum SwiftFlavoredMarkdown:MarkdownFlavor
 {
     /// Does nothing.
-    public static
+    @inlinable public static
     func transform(blocks _:inout [MarkdownBlock])
     {
     }
