@@ -169,6 +169,7 @@ let package:Package = .init(
         .target(name: "DoclinkResolution", dependencies:
             [
                 .target(name: "Doclinks"),
+                .target(name: "ModuleGraphs"),
             ]),
 
         .target(name: "FNV1"),
