@@ -333,6 +333,24 @@ extension DynamicLinker
                         owner: owner)
                 }
             }
+            //  Create topic records for the articles.
+            if  let range:ClosedRange<Int32> = culture.articles
+            {
+                for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(range,
+                    self.current.articles.nodes[range])
+                {
+                    if  node.topics.isEmpty
+                    {
+                        continue
+                    }
+
+                    let owner:Unidoc.Scalar = self.current.edition + a
+
+                    self.link(topics: node.topics,
+                        under: namespace,
+                        owner: owner)
+                }
+            }
         }
 
         //  Second pass to create various vertex records, which reads from the ``topics``.
@@ -443,15 +461,16 @@ extension DynamicLinker
     func link(articles range:ClosedRange<Int32>,
         under namespace:SymbolGraph.NamespaceContext<Void>)
     {
-        for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(
-            self.current.articles.nodes[range].indices,
+        for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(range,
             self.current.articles.nodes[range])
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
-            var vertex:Volume.Vertex.Article = .init(id: self.current.edition + a,
+            let scalar:Unidoc.Scalar = self.current.edition + a
+
+            var vertex:Volume.Vertex.Article = .init(id: scalar,
                 stem: .init(namespace.module, symbol.name),
                 culture: namespace.culture,
-                file: node.body.file.map { self.current.edition + $0 },
+                file: node.article.file.map { self.current.edition + $0 },
                 headline: node.headline,
                 group: self.memberships.removeValue(forKey: a))
 
@@ -460,7 +479,7 @@ extension DynamicLinker
                 module: namespace.context,
                 global: self.context)
             {
-                $0.link(article: node.body)
+                $0.link(article: node.article)
             }
 
             self.articles.append(vertex)

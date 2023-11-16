@@ -300,13 +300,14 @@ extension StaticLinker
             let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
             for article:Article in articles
             {
-                self.tables.with(scopes: self.symbolizer.scopes(culture: namespace))
+                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
                 {
                     if  let standalone:Int32 = article.standalone
                     {
-                        self.symbolizer.graph.articles.nodes[standalone].body = $0.link(
-                            article: article.body,
-                            file: article.file)
+                        (
+                            self.symbolizer.graph.articles.nodes[standalone].article,
+                            self.symbolizer.graph.articles.nodes[standalone].topics
+                        ) = $0.link(attached: article.body, file: article.file)
                     }
                     else
                     {
@@ -578,7 +579,7 @@ extension StaticLinker
                 culture: culture,
                 scope: decl.phylum.scope(trimming: decl.path))
 
-            return self.tables.with(scopes: scopes)
+            return self.tables.resolving(with: scopes)
             {
                 $0.link(attached: parsed, file: file)
             }
@@ -657,7 +658,7 @@ extension StaticLinker
                             path: [String].init(`extension`.path)),
                         doclink: .documentation(self.symbolizer.graph.namespaces[$0.culture]))
 
-                    $0.article = self.tables.with(scopes: scopes)
+                    $0.article = self.tables.resolving(with: scopes)
                     {
                         $0.link(article: parsed, file: comment.location?.file)
                     }

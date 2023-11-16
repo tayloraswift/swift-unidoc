@@ -11,7 +11,7 @@ protocol UnidocDatabaseTestBattery:MongoTestBattery
         unidoc:UnidocDatabase,
         pool:Mongo.SessionPool) async throws
 }
-extension UnidocDatabaseTestBattery
+extension UnidocDatabaseTestBattery where Self:Sendable
 {
     func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {

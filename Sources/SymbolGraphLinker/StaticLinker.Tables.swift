@@ -24,7 +24,7 @@ extension StaticLinker
 extension StaticLinker.Tables
 {
     mutating
-    func with<Success>(scopes:StaticResolver.Scopes,
+    func resolving<Success>(with scopes:StaticResolver.Scopes,
         do body:(inout StaticOutliner) throws -> Success) rethrows -> Success
     {
         let codelinks:CodelinkResolver<Int32>.Table = self.codelinks
