@@ -1,39 +1,12 @@
 import Sources
-import SymbolGraphCompiler
+import MarkdownAST
 import UnidocDiagnostics
 
-struct MarkdownSource
-{
-    /// The absolute location of the markdown source within a larger source file,
-    /// if known. If the markdown source was a standalone markdown file, this is
-    /// ``SourceLocation/zero``.
-    let location:SourceLocation<Int32>?
-    /// The unparsed markdown source text.
-    let text:String
-
-    init(location:SourceLocation<Int32>?, text:String)
-    {
-        self.location = location
-        self.text = text
-    }
-}
 extension MarkdownSource
 {
-    init(comment:borrowing Compiler.Doccomment, in file:Int32?)
-    {
-        if  let position:SourcePosition = comment.start,
-            let file:Int32
-        {
-            self.init(location: .init(position: position, file: file), text: comment.text)
-        }
-        else
-        {
-            self.init(location: nil, text: comment.text)
-        }
-    }
-}
-extension MarkdownSource
-{
+    /// Extracts a source context for the given source range. This subscript interprets the
+    /// range bounds as offsets from ``location``, not the beginning of whatever larger file
+    /// the markdown source originated from.
     subscript(range:Range<SourcePosition>) -> SourceContext
     {
         var context:SourceContext = []
@@ -63,6 +36,7 @@ extension MarkdownSource
 extension MarkdownSource:DiagnosticSubject
 {
     /// TODO: include text snippet
+    public
     var context:SourceContext
     {
         .init()

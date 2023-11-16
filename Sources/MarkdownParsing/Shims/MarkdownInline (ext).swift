@@ -3,9 +3,9 @@ import MarkdownAST
 
 extension MarkdownInline:ParsableAsInlineMarkup
 {
-    init(from markup:any InlineMarkup, in id:Int)
+    init(from markup:borrowing any InlineMarkup, in source:borrowing MarkdownSource)
     {
-        switch markup
+        switch copy markup
         {
         case is LineBreak:
             self = .text("\n")
@@ -26,13 +26,13 @@ extension MarkdownInline:ParsableAsInlineMarkup
             self = .code(.init(text: span.code))
 
         case let span as Emphasis:
-            self = .container(.init(from: span, in: id, as: .em))
+            self = .container(.init(from: span, in: source, as: .em))
 
         case let span as Strikethrough:
-            self = .container(.init(from: span, in: id, as: .s))
+            self = .container(.init(from: span, in: source, as: .s))
 
         case let span as Strong:
-            self = .container(.init(from: span, in: id, as: .strong))
+            self = .container(.init(from: span, in: source, as: .strong))
 
         //  These can actually appear in link text; they should be interpreted as
         //  normal code spans.

@@ -2,8 +2,12 @@ import ModuleGraphs
 import Symbols
 import URI
 
+@available(*, deprecated, renamed: "MarkdownSourceFile")
+public
+typealias MarkdownFile = MarkdownSourceFile
+
 @frozen public
-struct MarkdownFile:Equatable, Sendable
+struct MarkdownSourceFile:Equatable, Sendable
 {
     /// An identifier that can be used to link this file across package boundaries.
     /// Like ``id``, this identifier is only unique across a single file type, but
@@ -23,7 +27,7 @@ struct MarkdownFile:Equatable, Sendable
         self.text = text
     }
 }
-extension MarkdownFile
+extension MarkdownSourceFile
 {
     public
     init(bundle:__shared ModuleIdentifier, path:__owned Symbol.File, text:__owned String)
@@ -36,7 +40,7 @@ extension MarkdownFile
         self.init(symbol: .init(bundle, id), path: path, text: text)
     }
 }
-extension MarkdownFile:Identifiable
+extension MarkdownSourceFile:Identifiable
 {
     /// The mangled stem of the filename. This string is case-sensitive, but has all
     /// url-incompatible characters replaced with hyphens (`-`).

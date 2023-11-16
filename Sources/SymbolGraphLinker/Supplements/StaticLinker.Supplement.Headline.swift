@@ -1,6 +1,6 @@
 import MarkdownAST
 
-extension MarkdownSupplement
+extension StaticLinker.Supplement
 {
     @frozen public
     enum Headline
@@ -9,7 +9,7 @@ extension MarkdownSupplement
         case heading(MarkdownBlock.Heading)
     }
 }
-extension MarkdownSupplement.Headline
+extension StaticLinker.Supplement.Headline
 {
     @inlinable public
     var binding:MarkdownInline.Autolink?
@@ -21,7 +21,7 @@ extension MarkdownSupplement.Headline
         }
     }
 }
-extension MarkdownSupplement.Headline
+extension StaticLinker.Supplement.Headline
 {
     init(_ heading:MarkdownBlock.Heading)
     {

@@ -274,6 +274,7 @@ let package:Package = .init(
             [
                 .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "MarkdownAST", dependencies:
@@ -303,6 +304,8 @@ let package:Package = .init(
             [
                 .target(name: "Codelinks"),
                 .target(name: "MarkdownAST"),
+                .target(name: "Sources"),
+                .target(name: "UnidocDiagnostics"),
             ]),
 
         .target(name: "MD5", dependencies:
@@ -603,14 +606,6 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownSemanticsTests", dependencies:
-            [
-                .target(name: "MarkdownParsing"),
-                .target(name: "MarkdownRendering"),
-                .target(name: "MarkdownSemantics"),
-                .product(name: "Testing", package: "swift-grammar"),
-            ]),
-
         .executableTarget(name: "MD5Tests", dependencies:
             [
                 .target(name: "MD5"),
@@ -646,6 +641,14 @@ let package:Package = .init(
             [
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "SymbolGraphLinkerTests", dependencies:
+            [
+                .target(name: "HTML"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "SymbolGraphLinker"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

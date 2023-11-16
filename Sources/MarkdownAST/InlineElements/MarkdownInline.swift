@@ -31,15 +31,15 @@ extension MarkdownInline:MarkdownElement
 }
 extension MarkdownInline:MarkdownText
 {
-    @inlinable public
-    var text:String
+    @inlinable public static
+    func += (text:inout String, self:Self)
     {
         switch self
         {
-        case .container(let container): return container.text
-        case .code(let code):           return code.text
-        case .html:                     return ""
-        case .text(let text):           return text
+        case .container(let container): text += container
+        case .code(let code):           text += code
+        case .html:                     return
+        case .text(let part):           text += part
         }
     }
 }

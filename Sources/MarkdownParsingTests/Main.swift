@@ -9,9 +9,11 @@ enum Main:SyncTests
     static
     func run(tests:Tests)
     {
+        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
+
         if  let tests:TestGroup = tests / "ParameterLists"
         {
-            for (shape, string):(String, String) in
+            for (shape, source):(String, MarkdownSource) in
             [
                 (
                     "Tight",
@@ -51,9 +53,7 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string,
-                    with: SwiftFlavoredMarkdownParser.init(),
-                    as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init { parser.parse(source) }
                 if  let tests:TestGroup = tests / shape,
 
                     tests.expect(tree.blocks.count ==? 1),
@@ -80,7 +80,7 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "Doclinks"
         {
-            for (name, string, expected):(String, String, String) in
+            for (name, source, expected):(String, MarkdownSource, String) in
             [
                 (
                     "Basic",
@@ -99,9 +99,7 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string,
-                    with: SwiftFlavoredMarkdownParser.init(),
-                    as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init { parser.parse(source) }
                 if  let tests:TestGroup = tests / name,
                     let paragraph:MarkdownBlock.Paragraph = tests.expect(
                         value: tree.blocks.first as? MarkdownBlock.Paragraph),
@@ -122,7 +120,7 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "SourcePositions"
         {
-            for (name, string, expected):(String, String, (line:Int, column:Int)) in
+            for (name, source, expected):(String, MarkdownSource, (line:Int, column:Int)) in
             [
                 (
                     "ZeroZero",
@@ -148,9 +146,7 @@ enum Main:SyncTests
                 ),
             ]
             {
-                let tree:MarkdownTree = .init(parsing: string,
-                    with: SwiftFlavoredMarkdownParser.init(),
-                    as: SwiftFlavoredMarkdown.self)
+                let tree:MarkdownTree = .init { parser.parse(source) }
                 if  let tests:TestGroup = tests / name,
                     let expected:SourcePosition = tests.expect(value: .init(
                         line: expected.line,

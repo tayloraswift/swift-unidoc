@@ -1,21 +1,28 @@
 import HTML
 import MarkdownABI
+import MarkdownAST
 import MarkdownParsing
 import MarkdownRendering
 import MarkdownSemantics
+import UnidocDiagnostics
+
+@_spi(testable)
+import SymbolGraphLinker
 import Testing
 
 @main
 enum Main:SyncTests
 {
     private static
-    func run(tests:TestGroup, markdown:String, expected:String, topics:[Int] = [])
+    func run(tests:TestGroup, markdown:MarkdownSource, expected:String, topics:[Int] = [])
     {
+        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment> = .init()
+        var ignore:DiagnosticContext<StaticSymbolicator> = .init()
+
         tests.do
         {
-            let documentation:MarkdownDocumentation = .init(parsing: markdown,
-                with: SwiftFlavoredMarkdownParser.init(),
-                as: SwiftFlavoredMarkdown.self)
+            let documentation:MarkdownDocumentation = markdown.parse(using: parser,
+                with: &ignore)
             let overview:MarkdownBinary? = documentation.overview.map
             {
                 .init(bytecode: .init(with: $0.emit(into:)))
@@ -101,9 +108,9 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -128,13 +135,13 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
-                    <dt>second</dt>\
+                    <dt id='sp:second'><a href='#sp:second'>second</a></dt>\
                     <dd><p>Description for second parameter</p></dd>\
-                    <dt>third</dt>\
+                    <dt id='sp:third'><a href='#sp:third'>third</a></dt>\
                     <dd><p>Description for third parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -158,9 +165,9 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -184,9 +191,9 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -216,13 +223,13 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
-                    <dt>second</dt>\
+                    <dt id='sp:second'><a href='#sp:second'>second</a></dt>\
                     <dd><p>Description for second parameter</p></dd>\
-                    <dt>third</dt>\
+                    <dt id='sp:third'><a href='#sp:third'>third</a></dt>\
                     <dd><p>Description for third parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -249,11 +256,11 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <p>Discussion about parameters in general</p>\
                     <p>More discussion about parameters in general</p>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -282,13 +289,13 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <p>Discussion about parameters in general</p>\
                     <p>More discussion about parameters in general</p>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
-                    <dt>second</dt>\
+                    <dt id='sp:second'><a href='#sp:second'>second</a></dt>\
                     <dd><p>Description for second parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -315,12 +322,12 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <p>Discussion about parameters in general</p>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for first parameter</p></dd>\
-                    <dt>second</dt>\
+                    <dt id='sp:second'><a href='#sp:second'>second</a></dt>\
                     <dd><p>Description for second parameter</p></dd>\
                     </dl>\
                     </section>\
@@ -591,7 +598,7 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <p>Discussion about parameters in general.</p>\
                     </section>\
                     <p>Details details details</p>
@@ -613,9 +620,9 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>parameter</dt>\
+                    <dt id='sp:parameter'><a href='#sp:parameter'>parameter</a></dt>\
                     <dd><p>Description for <code>parameter</code></p></dd>\
                     </dl>\
                     </section>\
@@ -643,11 +650,11 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>first</dt>\
+                    <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
                     <dd><p>Description for <code>first</code></p></dd>\
-                    <dt>second</dt>\
+                    <dt id='sp:second'><a href='#sp:second'>second</a></dt>\
                     <dd><p>Description for <code>second</code></p></dd>\
                     </dl>\
                     </section>\
@@ -671,9 +678,9 @@ enum Main:SyncTests
                     <p>Overview overview overview</p>\
 
                     <section class='parameters'>\
-                    <h2>Parameters</h2>\
+                    <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                     <dl>\
-                    <dt>parameter</dt>\
+                    <dt id='sp:parameter'><a href='#sp:parameter'>parameter</a></dt>\
                     <dd><p>Description for <code>parameter</code></p></dd>\
                     </dl>\
                     </section>\
@@ -688,15 +695,15 @@ enum Main:SyncTests
             <p>Overview overview overview</p>\
 
             <section class='parameters'>\
-            <h2>Parameters</h2>\
+            <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
             <p>Discussion about parameters in general.</p>\
             <dl>\
-            <dt>first</dt>\
+            <dt id='sp:first'><a href='#sp:first'>first</a></dt>\
             <dd><p>Description for first parameter</p></dd>\
             </dl>\
             </section>\
             <section class='returns'>\
-            <h2>Returns</h2>\
+            <h2 id='ss:returns'><a href='#ss:returns'>Returns</a></h2>\
             <p>Discussion about return value.</p>\
             </section>\
             <aside class='warning'>\
@@ -922,27 +929,30 @@ enum Main:SyncTests
         }
         if  let tests:TestGroup = tests / "Bindings"
         {
+            let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
+            var ignore:DiagnosticContext<StaticSymbolicator> = .init()
+
             if  let tests:TestGroup = tests / "Basic"
             {
-                let documentation:MarkdownSupplement = .init(parsing: """
-                    # ``Taylor``
+                let markdown:MarkdownSource = """
+                # ``Taylor``
 
-                    I think for me, um.
-                    """,
-                    with: SwiftFlavoredMarkdownParser.init(),
-                    as: SwiftFlavoredMarkdown.self)
+                I think for me, um.
+                """
+                let documentation:StaticLinker.Supplement = markdown.parse(using: parser,
+                    with: &ignore)
 
                 tests.expect(documentation.headline?.binding?.text ==? "Taylor")
             }
             if  let tests:TestGroup = tests / "TrailingComment"
             {
-                let documentation:MarkdownSupplement = .init(parsing: """
-                    # ``Taylor`` <!-- Allison -->
+                let markdown:MarkdownSource = """
+                # ``Taylor`` <!-- Allison -->
 
-                    I think for me, um.
-                    """,
-                    with: SwiftFlavoredMarkdownParser.init(),
-                    as: SwiftFlavoredMarkdown.self)
+                I think for me, um.
+                """
+                let documentation:StaticLinker.Supplement = markdown.parse(using: parser,
+                    with: &ignore)
 
                 tests.expect(documentation.headline?.binding?.text ==? "Taylor")
             }

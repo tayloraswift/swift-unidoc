@@ -3,6 +3,10 @@ import MarkdownABI
 
 enum MarkdownElementContext
 {
+    /// An anchorable context, which generates an HTML container element
+    /// with an `a` element inside of it that links to the outer container’s
+    /// fragment `id`.
+    case anchorable(HTML.ContainerElement)
     /// A normal HTML container element.
     case container(HTML.ContainerElement)
     /// A syntax highlight, which generates an `a` or `span` element,
@@ -26,21 +30,27 @@ enum MarkdownElementContext
 extension MarkdownElementContext
 {
     private static
-    func highlight(_ type:MarkdownSyntaxHighlight, attributes:inout AttributeContext) -> Self
+    func heading(_ type:HTML.ContainerElement, attributes:borrowing AttributeList) -> Self
     {
-        let container:HTML.ContainerElement = attributes.contains(.href) ? .a : .span
+        attributes.id == nil ? .container(type) : .anchorable(type)
+    }
+
+    private static
+    func highlight(_ type:MarkdownSyntaxHighlight, attributes:inout AttributeList) -> Self
+    {
+        let container:HTML.ContainerElement = attributes.href == nil ? .span : .a
         attributes.append(class: type)
         return .highlight(.init(container: container, type: type))
     }
 
     private static
-    func section(_ type:Section, attributes:inout AttributeContext) -> Self
+    func section(_ type:Section, attributes:inout AttributeList) -> Self
     {
         attributes.append(class: type)
         return .section(type)
     }
     private static
-    func signage(_ type:Signage, attributes:inout AttributeContext) -> Self
+    func signage(_ type:Signage, attributes:inout AttributeList) -> Self
     {
         attributes.append(class: type)
         return .signage(type)
@@ -48,7 +58,7 @@ extension MarkdownElementContext
 }
 extension MarkdownElementContext
 {
-    init(from markdown:MarkdownBytecode.Context, attributes:inout AttributeContext)
+    init(from markdown:MarkdownBytecode.Context, attributes:inout AttributeList)
     {
         switch markdown
         {
@@ -59,15 +69,15 @@ extension MarkdownElementContext
         case .code:             self = .container(.code)
         case .dd:               self = .container(.dd)
         case .dl:               self = .container(.dl)
-        case .dt:               self = .container(.dt)
+        case .dt:               self = .heading(.dt,                attributes: attributes)
         case .em:               self = .container(.em)
         case .li:               self = .container(.li)
-        case .h1:               self = .container(.h1)
-        case .h2:               self = .container(.h2)
-        case .h3:               self = .container(.h3)
-        case .h4:               self = .container(.h4)
-        case .h5:               self = .container(.h5)
-        case .h6:               self = .container(.h6)
+        case .h1:               self = .heading(.h1,                attributes: attributes)
+        case .h2:               self = .heading(.h2,                attributes: attributes)
+        case .h3:               self = .heading(.h3,                attributes: attributes)
+        case .h4:               self = .heading(.h4,                attributes: attributes)
+        case .h5:               self = .heading(.h5,                attributes: attributes)
+        case .h6:               self = .heading(.h6,                attributes: attributes)
         case .ol:               self = .container(.ol)
         case .p:                self = .container(.p)
         case .pre:              self = .container(.pre)

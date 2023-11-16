@@ -59,9 +59,30 @@ extension MarkdownInline.Container:MarkdownElement
 }
 extension MarkdownInline.Container:MarkdownText
 {
-    @inlinable public
-    var text:String
+    @inlinable public static
+    func += (text:inout String, self:Self)
     {
-        self.elements.lazy.map(\.text).joined()
+        for element:Element in self.elements
+        {
+            text += element
+        }
+    }
+}
+extension MarkdownInline.Container<MarkdownInline.Block>
+{
+    /// Returns true if this element list can appear as link text.
+    @inlinable internal
+    var anchorable:Bool
+    {
+        for element:MarkdownInline.Block in self.elements
+        {
+            guard element.anchorable
+            else
+            {
+                return false
+            }
+        }
+
+        return true
     }
 }

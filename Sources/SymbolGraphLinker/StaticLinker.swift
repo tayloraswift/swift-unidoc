@@ -20,9 +20,9 @@ public
 struct StaticLinker:~Copyable
 {
     private
-    let doccommentParser:SwiftFlavoredMarkdownParser
+    let doccommentParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>
     private
-    let markdownParser:SwiftFlavoredMarkdownParser
+    let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>
     private
     let nominations:Compiler.Nominations
 
@@ -245,7 +245,7 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[MarkdownFile]])
+    func attach(supplements:[[MarkdownSourceFile]])
     {
         let articles:[[Article]] = zip(supplements.indices, supplements).map
         {
@@ -254,7 +254,7 @@ extension StaticLinker
             var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
 
-            for file:MarkdownFile in $0.1
+            for file:MarkdownSourceFile in $0.1
             {
                 if  let article:Article = self.attach(supplement: file, in: namespace)
                 {
@@ -302,18 +302,11 @@ extension StaticLinker
             {
                 self.tables.with(scopes: self.symbolizer.scopes(culture: namespace))
                 {
-                    //  We pass a single-element array as the sources list, which relies
-                    //  on the fact that ``MarkdownSupplement`` uses `0` as
-                    //  the source id by default.
-                    let sources:[MarkdownSource] = [article.source]
-                    let file:Int32? = article.source.location?.file
-
                     if  let standalone:Int32 = article.standalone
                     {
                         self.symbolizer.graph.articles.nodes[standalone].body = $0.link(
                             article: article.body,
-                            from: sources,
-                            file: file)
+                            file: article.file)
                     }
                     else
                     {
@@ -321,9 +314,7 @@ extension StaticLinker
                         (
                             self.symbolizer.graph.cultures[culture].article,
                             self.symbolizer.graph.cultures[culture].topics
-                        ) = $0.link(attached: article.body,
-                            from: sources,
-                            file: file)
+                        ) = $0.link(attached: article.body, file: article.file)
                     }
                 }
             }
@@ -333,19 +324,20 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement article:MarkdownFile, in namespace:ModuleIdentifier) -> Article?
+    func attach(supplement article:MarkdownSourceFile,
+        in namespace:ModuleIdentifier) -> Article?
     {
-        let supplement:MarkdownSupplement = .init(parsing: article.text,
-            with: self.markdownParser,
-            as: SwiftFlavoredMarkdown.self)
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
-        let source:MarkdownSource = .init(location: .init(
-                position: .zero,
-                file: self.symbolizer.intern(article.path)),
+        let file:Int32 = self.symbolizer.intern(article.path)
+        let source:MarkdownSource = .init(
+            location: .init(position: .zero, file: file),
             text: article.text)
 
-        guard let headline:MarkdownSupplement.Headline = supplement.headline
+        let supplement:Supplement = source.parse(using: self.markdownParser,
+            with: &self.tables.diagnostics)
+
+        guard let headline:Supplement.Headline = supplement.headline
         else
         {
             self.tables.diagnostics[source] = SupplementError.untitled
@@ -362,11 +354,6 @@ extension StaticLinker
             }
             catch let diagnosis as any Diagnostic<StaticSymbolicator>
             {
-                let binding:StaticResolver.Autolink = .init(from: source,
-                    offset: binding.source.range,
-                    text: binding.text,
-                    code: binding.code)
-
                 self.tables.diagnostics[binding] = diagnosis
                 return nil
             }
@@ -380,11 +367,11 @@ extension StaticLinker
                 {
                     if  case nil = $0
                     {
-                        $0 = .init(parsed: supplement, source: source)
+                        $0 = supplement
                     }
                     else
                     {
-                        self.tables.diagnostics[source] = SupplementError.multiple
+                        self.tables.diagnostics[binding] = SupplementError.multiple
                     }
                 } (&self.supplements[decl])
 
@@ -392,7 +379,7 @@ extension StaticLinker
             }
             else
             {
-                return .init(standalone: nil, source: source, body: supplement.body)
+                return .init(standalone: nil, file: file, body: supplement.parsed)
             }
 
         case .heading(let heading):
@@ -404,7 +391,7 @@ extension StaticLinker
                 self.tables.doclinks[.documentation(namespace), id] = scalar
                 //  Assign the standalone article a URI.
                 self.router[namespace, id][nil, default: []].append(scalar)
-                return .init(standalone: scalar, source: source, body: supplement.body)
+                return .init(standalone: scalar, file: file, body: supplement.parsed)
             }
             else
             {
@@ -535,12 +522,7 @@ extension StaticLinker
             .init(comment: $0, in: location?.file)
         }
 
-        let markdown:
-        (
-            sources:[MarkdownSource],
-            parsed:MarkdownDocumentation,
-            file:Int32?
-        )?
+        let markdown:(parsed:MarkdownDocumentation, file:Int32?)?
 
         switch (comment, supplement)
         {
@@ -553,51 +535,44 @@ extension StaticLinker
             /// care about the file associated with the supplement.
             markdown =
             (
-                sources: [comment],
-                parsed: .init(parsing: comment.text,
-                    from: 0,
-                    with: self.doccommentParser,
-                    as: SwiftFlavoredMarkdownComment.self),
+                parsed: comment.parse(
+                    using: self.doccommentParser,
+                    with: &self.tables.diagnostics),
                 file: nil
             )
 
         case (let comment?, let supplement?):
-            if  case .override? = supplement.parsed.body.metadata.merge
+            if  case .override? = supplement.parsed.metadata.merge
             {
                 fallthrough
             }
-            else if case nil = supplement.parsed.body.metadata.merge
+            else if case nil = supplement.parsed.metadata.merge
             {
                 self.tables.diagnostics[supplement.source] =
                     SupplementError.implicitConcatenation
             }
 
-            //  The supplements all get index 0 when they are loaded,
-            //  so the doccomment appears at index 1 in the sources array.
-            let body:MarkdownDocumentation = .init(parsing: comment.text,
-                from: 1,
-                with: self.doccommentParser,
-                as: SwiftFlavoredMarkdownComment.self)
+            let body:MarkdownDocumentation = comment.parse(
+                using: self.doccommentParser,
+                with: &self.tables.diagnostics)
 
             markdown =
             (
-                sources: [supplement.source, comment],
-                parsed: body.merged(appending: supplement.parsed.body),
+                parsed: body.merged(appending: supplement.parsed),
                 file: supplement.source.location?.file
             )
 
         case (nil, let supplement?):
             markdown =
             (
-                sources: [supplement.source],
-                parsed: supplement.parsed.body,
+                parsed: supplement.parsed,
                 file: supplement.source.location?.file
             )
         }
 
         let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])? = markdown.map
         {
-            let (sources, parsed, file):([MarkdownSource], MarkdownDocumentation, Int32?) = $0
+            let (parsed, file):(MarkdownDocumentation, Int32?) = $0
             let scopes:StaticResolver.Scopes = self.symbolizer.scopes(
                 namespace: namespace,
                 culture: culture,
@@ -605,7 +580,7 @@ extension StaticLinker
 
             return self.tables.with(scopes: scopes)
             {
-                $0.link(attached: parsed, from: sources, file: file)
+                $0.link(attached: parsed, file: file)
             }
         }
 
@@ -666,10 +641,10 @@ extension StaticLinker
                 let comment:MarkdownSource = .init(comment: comment,
                     in: file.map { self.symbolizer.intern($0) })
 
-                let parsed:MarkdownDocumentation = .init(parsing: comment.text,
-                    from: 0,
-                    with: self.doccommentParser,
-                    as: SwiftFlavoredMarkdownComment.self)
+                let parsed:MarkdownDocumentation = comment.parse(
+                    using: self.doccommentParser,
+                    with: &self.tables.diagnostics)
+
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
                 let importAll:[ModuleIdentifier] = self.symbolizer.importAll ;
@@ -684,7 +659,7 @@ extension StaticLinker
 
                     $0.article = self.tables.with(scopes: scopes)
                     {
-                        $0.link(article: parsed, from: [comment], file: comment.location?.file)
+                        $0.link(article: parsed, file: comment.location?.file)
                     }
 
                 } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])

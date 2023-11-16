@@ -25,4 +25,9 @@ extension MarkdownInline.Code:MarkdownElement
 }
 extension MarkdownInline.Code:MarkdownText
 {
+    @inlinable public static
+    func += (text:inout String, self:Self)
+    {
+        text += self.text
+    }
 }

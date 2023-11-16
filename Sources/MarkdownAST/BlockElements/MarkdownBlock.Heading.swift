@@ -7,11 +7,15 @@ extension MarkdownBlock
     {
         public
         var level:Int
+        public
+        var id:String?
 
         @inlinable public
-        init(level:Int, elements:[MarkdownInline.Block])
+        init(level:Int, id:String? = nil, elements:[MarkdownInline.Block])
         {
             self.level = level
+            self.id = id
+
             super.init(elements)
         }
 
@@ -19,7 +23,7 @@ extension MarkdownBlock
         public override
         func emit(into binary:inout MarkdownBinaryEncoder)
         {
-            binary[.h(self.level)] { super.emit(into: &$0) }
+            binary[.h(self.level), { $0[.id] = self.id }] { super.emit(into: &$0) }
         }
     }
 }
@@ -32,5 +36,27 @@ extension MarkdownBlock.Heading
     func clip(to level:Int)
     {
         self.level = min(max(self.level, level), 6)
+    }
+
+    /// Adds an ``id`` to the heading if it does not already have one and it only contains
+    /// anchorable elements. The identifier is **not** percent-encoded.
+    @inlinable public
+    func anchor()
+    {
+        guard
+        case nil = self.id,
+        self.elements.allSatisfy(\.anchorable)
+        else
+        {
+            return
+        }
+
+        var id:String = ""
+        for element:MarkdownInline.Block in self.elements
+        {
+            id += element
+        }
+
+        self.id = id
     }
 }
