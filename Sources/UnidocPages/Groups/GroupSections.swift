@@ -54,7 +54,7 @@ extension GroupSections
         requirements:[Unidoc.Scalar] = [],
         superforms:[Unidoc.Scalar] = [],
         generics:[GenericParameter] = [],
-        groups:borrowing [Volume.Group],
+        groups:consuming [Volume.Group],
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
@@ -67,6 +67,7 @@ extension GroupSections
             mode: mode)
 
         var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
+        var curated:Set<Unidoc.Scalar> = []
 
         for group:Volume.Group in copy groups
         {
@@ -108,6 +109,11 @@ extension GroupSections
                 self.other.append((heading, group.members))
 
             case .topic(let group):
+                for case .scalar(let scalar) in group.members
+                {
+                    curated.insert(scalar)
+                }
+
                 self.topics.append(group)
             }
         }
@@ -129,7 +135,8 @@ extension GroupSections
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
 
-        self.extensions = extensions.map(\.0)
+        self.extensions = extensions.map { $0.0.subtracting(curated) }
+
         self.topics.sort { $0.id < $1.id }
     }
 }
