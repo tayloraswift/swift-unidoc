@@ -775,7 +775,7 @@ enum Main:SyncTests
             let html:String =
             """
             <p>Overview overview overview</p>
-            <h2>Discussion</h2>\
+            <h2 id='Discussion'><a href='#Discussion'>Discussion</a></h2>\
             <p>Details details details</p>
             """
             if  let tests:TestGroup = tests / "OneList" / "OneTopic" / "Middle"
