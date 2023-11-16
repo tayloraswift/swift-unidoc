@@ -101,14 +101,11 @@ extension StaticOutliner
     func link(attached body:MarkdownDocumentation,
         file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])
     {
-        let overview:MarkdownBytecode = self.link(
-            overview: body.overview)
+        let overview:MarkdownBytecode = self.link(overview: body.overview)
 
         let fold:Int = self.cache.fold
 
-        let details:MarkdownBytecode = self.link(
-            details: body.details,
-            topics: [])
+        let details:MarkdownBytecode = self.link(details: body.details)
 
         let article:SymbolGraph.Article = .init(
             outlines: self.cache.clear(),
@@ -192,7 +189,7 @@ extension StaticOutliner
     private mutating
     func link(
         details:MarkdownDocumentation.Details,
-        topics:[MarkdownDocumentation.Topic]) -> MarkdownBytecode
+        topics:[MarkdownDocumentation.Topic] = []) -> MarkdownBytecode
     {
         .init
         {
