@@ -3,9 +3,9 @@ import MarkdownAST
 
 extension MarkdownInline:ParsableAsInlineMarkup
 {
-    init(from markup:borrowing any InlineMarkup, in source:borrowing MarkdownSource)
+    init(from markup:/* borrowing */ any InlineMarkup, in source:borrowing MarkdownSource)
     {
-        switch copy markup
+        switch /* copy */ markup
         {
         case is LineBreak:
             self = .text("\n")
