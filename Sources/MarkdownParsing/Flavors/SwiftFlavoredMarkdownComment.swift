@@ -13,5 +13,8 @@ enum SwiftFlavoredMarkdownComment:MarkdownFlavor
         {
             heading.clip(to: 2)
         }
+
+        //  Anything ``SwiftFlavoredMarkdown`` can do, we can do better
+        SwiftFlavoredMarkdown.transform(blocks: &blocks)
     }
 }
