@@ -45,7 +45,7 @@ extension MarkdownElementContext.AttributeList
         case .right:    self.others.append((.align, "right"))
 
         case .alt:      self.others.append((.alt, value))
-        case .class:    self.others.append((.class, value))
+        case .class:    self.classes.append(value)
         case .checked:  self.others.append((.checked, value))
         case .disabled: self.others.append((.disabled, value))
         case .href:     self.href = value
