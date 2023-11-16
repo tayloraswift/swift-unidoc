@@ -54,10 +54,10 @@ extension SwiftFlavoredMarkdownParser
 {
     private
     func block(
-        from markup:borrowing any BlockMarkup,
+        from markup:/* borrowing */ any BlockMarkup,
         in source:borrowing MarkdownSource) -> MarkdownBlock?
     {
-        switch copy markup
+        switch /* copy */ markup
         {
         case let block as Markdown.BlockQuote:
             return MarkdownBlock.Quote.init(block.blockChildren.compactMap
@@ -172,12 +172,12 @@ extension SwiftFlavoredMarkdownParser
 
     private
     func item(
-        from markup:borrowing ListItem,
+        from markup:/* borrowing */ ListItem,
         in source:borrowing MarkdownSource) -> MarkdownBlock.Item
     {
         .init(
-            checkbox: (copy markup).checkbox.flatMap { $0 == .checked ? .checked : nil },
-            elements: (copy markup).blockChildren.compactMap
+            checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },
+            elements: markup.blockChildren.compactMap
             {
                 self.block(from: $0, in: source)
             })
