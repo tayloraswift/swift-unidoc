@@ -27,7 +27,7 @@ struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicat
 extension MarkdownInterpreter
 {
     private mutating
-    func append(_ block:consuming MarkdownBlock)
+    func append(_ block:MarkdownBlock)
     {
         defer
         {
@@ -36,7 +36,7 @@ extension MarkdownInterpreter
 
         //  Only h2 headings are interesting, but if we encounter a stray h1, that can
         //  also terminate a topics list.
-        guard case (let heading as MarkdownBlock.Heading) = copy block, heading.level <= 2
+        guard case (let heading as MarkdownBlock.Heading) = block, heading.level <= 2
         else
         {
             return
