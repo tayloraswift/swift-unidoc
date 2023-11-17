@@ -88,7 +88,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.8.6")),
+            from: "0.8.7")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -169,6 +169,7 @@ let package:Package = .init(
         .target(name: "DoclinkResolution", dependencies:
             [
                 .target(name: "Doclinks"),
+                .target(name: "ModuleGraphs"),
             ]),
 
         .target(name: "FNV1"),
@@ -274,6 +275,7 @@ let package:Package = .init(
             [
                 .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "MarkdownAST", dependencies:
@@ -303,6 +305,8 @@ let package:Package = .init(
             [
                 .target(name: "Codelinks"),
                 .target(name: "MarkdownAST"),
+                .target(name: "Sources"),
+                .target(name: "UnidocDiagnostics"),
             ]),
 
         .target(name: "MD5", dependencies:
@@ -603,14 +607,6 @@ let package:Package = .init(
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownSemanticsTests", dependencies:
-            [
-                .target(name: "MarkdownParsing"),
-                .target(name: "MarkdownRendering"),
-                .target(name: "MarkdownSemantics"),
-                .product(name: "Testing", package: "swift-grammar"),
-            ]),
-
         .executableTarget(name: "MD5Tests", dependencies:
             [
                 .target(name: "MD5"),
@@ -646,6 +642,14 @@ let package:Package = .init(
             [
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
+                .product(name: "Testing", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "SymbolGraphLinkerTests", dependencies:
+            [
+                .target(name: "HTML"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "SymbolGraphLinker"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

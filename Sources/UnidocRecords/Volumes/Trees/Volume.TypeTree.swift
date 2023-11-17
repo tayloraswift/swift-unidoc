@@ -23,7 +23,7 @@ extension Volume
 extension Volume.TypeTree
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
         case table = "T"

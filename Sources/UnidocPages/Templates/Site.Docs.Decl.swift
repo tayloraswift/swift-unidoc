@@ -13,7 +13,7 @@ extension Site.Docs
 {
     struct Decl
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:[Volume.Noun]?
@@ -21,13 +21,13 @@ extension Site.Docs
         private
         let vertex:Volume.Vertex.Decl
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Decl,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -78,12 +78,12 @@ extension Site.Docs.Decl:StaticPage
 }
 extension Site.Docs.Decl:ApplicationPage
 {
-    var navigator:Breadcrumbs
+    var navigator:HTML.Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
+                    nil : self.context.vector(self.vertex.scope, display: scope),
                 last: last)
         }
         else
@@ -97,14 +97,6 @@ extension Site.Docs.Decl:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let groups:GroupSections = .init(self.context,
-            requirements: self.vertex.requirements,
-            superforms: self.vertex.superforms,
-            generics: self.vertex.signature.generics.parameters,
-            groups: self.groups,
-            bias: self.vertex.culture,
-            mode: .decl(self.vertex.phylum, self.vertex.kinks))
-
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
@@ -237,6 +229,6 @@ extension Site.Docs.Decl:VersionedPage
         main[.section] { $0.class = "details" } =
             (self.vertex.details?.markdown).map(self.context.prose(_:))
 
-        main += groups
+        main += self.groups
     }
 }

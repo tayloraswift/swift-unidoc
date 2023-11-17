@@ -19,7 +19,7 @@ extension PackageEditionsQuery.Facet
 extension PackageEditionsQuery.Facet.Graphs:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case count
     }

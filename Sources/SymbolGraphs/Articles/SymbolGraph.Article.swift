@@ -4,6 +4,14 @@ import MarkdownABI
 
 extension SymbolGraph
 {
+    /// An article is a unit of prose that can be attached to a symbol in a symbol graph.
+    ///
+    /// An instance of `Article` has no identity of its own. To model a standalone article,
+    /// see ``ArticleNode``.
+    ///
+    /// Instances of `Article` do not contain ``Topic``s, although articles are frequently
+    /// stored alongside lists of topics. Articles associated with ``Extension``s are an
+    /// exception; extensions can have articles, but they cannot have topics.
     @frozen public
     struct Article:Equatable, Sendable
     {
@@ -37,7 +45,7 @@ extension SymbolGraph
 extension SymbolGraph.Article
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case outlines = "L"
         case overview = "O"

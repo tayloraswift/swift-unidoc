@@ -80,7 +80,7 @@ extension ServerAuthority
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
 
-        let listener:NIOAsyncChannel = try await bootstrap.bind(
+        let listener:NIOAsyncChannel<any Channel, Never> = try await bootstrap.bind(
             host: binding.address,
             port: binding.port)
         {
@@ -100,11 +100,9 @@ extension ServerAuthority
 
         Log[.debug] = "bound to \(binding.address):\(binding.port)"
 
-        await withTaskGroup(of: Void.self)
+        try await listener.executeThenClose
         {
-            (tasks:inout TaskGroup<Void>) in
-
-            await tasks.iterate(listener.inbound, width: 20)
+            try await $0.iterate(concurrently: 20)
             {
                 (connection:any Channel) in
 
@@ -124,10 +122,6 @@ extension ServerAuthority
                 {
                     Log[.error] = "\(error)"
                 }
-            }
-                else:
-            {
-                Log[.error] = "\($0)"
             }
         }
     }

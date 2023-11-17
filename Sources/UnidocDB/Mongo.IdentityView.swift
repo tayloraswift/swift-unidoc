@@ -25,7 +25,7 @@ extension Mongo.IdentityView:Identifiable where ID:Hashable
 extension Mongo.IdentityView:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
     }

@@ -29,7 +29,7 @@ extension WideQuery
 extension WideQuery.Output:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case principal
         case vertices

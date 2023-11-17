@@ -18,7 +18,7 @@ extension Volume
 extension Volume.Group
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         /// Always present.
         case id = "_id"

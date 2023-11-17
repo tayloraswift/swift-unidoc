@@ -16,7 +16,7 @@ extension SymbolGraph
 extension SymbolGraph.Outline
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case unresolved_doc = "D"
         case unresolved_ucf = "U"

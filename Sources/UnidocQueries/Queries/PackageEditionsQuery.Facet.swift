@@ -27,7 +27,7 @@ extension PackageEditionsQuery
 extension PackageEditionsQuery.Facet:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case edition
         case graphs

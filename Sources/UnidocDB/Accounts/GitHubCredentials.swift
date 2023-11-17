@@ -29,7 +29,7 @@ extension GitHubCredentials
 @available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case refresh = "R"
         case access = "A"

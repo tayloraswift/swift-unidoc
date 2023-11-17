@@ -36,7 +36,7 @@ extension Volume.Stats.Coverage:ExpressibleByDictionaryLiteral
 extension Volume.Stats.Coverage
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case undocumented = "U"
         case indirect = "I"

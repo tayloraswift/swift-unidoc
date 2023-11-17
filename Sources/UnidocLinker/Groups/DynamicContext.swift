@@ -146,7 +146,7 @@ extension DynamicContext
         return dependencies
     }
 
-    func modules() -> [DynamicLinker.ModuleContext]
+    func modules() -> [SymbolGraph.ModuleContext]
     {
         //  Some cultures might share the same set of upstream product dependencies.
         //  So, as an optimization, we group cultures together that use the same
@@ -172,7 +172,7 @@ extension DynamicContext
         {
             for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
             {
-                var shared:DynamicLinker.ModuleContext = .init(
+                var shared:SymbolGraph.ModuleContext = .init(
                     nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
 
                 if  let swift:SnapshotObject = self[dynamic: .swift]

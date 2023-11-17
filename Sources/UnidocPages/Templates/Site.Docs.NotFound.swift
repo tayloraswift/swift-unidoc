@@ -6,10 +6,10 @@ extension Site.Docs
 {
     struct NotFound
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Never?>
         let sidebar:[Volume.Noun]?
 
-        init(_ context:VersionedPageContext, sidebar:[Volume.Noun]?)
+        init(_ context:IdentifiablePageContext<Never?>, sidebar:[Volume.Noun]?)
         {
             self.context = context
             self.sidebar = sidebar

@@ -14,15 +14,19 @@ extension MarkdownElementContext
         case `throws`
     }
 }
+extension MarkdownElementContext.Section:Identifiable
+{
+    var id:String { "ss:\(self.rawValue)" }
+}
 extension MarkdownElementContext.Section:CustomStringConvertible
 {
     var description:String
     {
         switch self
         {
-        case .parameters:   return "Parameters"
-        case .returns:      return "Returns"
-        case .throws:       return "Throws"
+        case .parameters:   "Parameters"
+        case .returns:      "Returns"
+        case .throws:       "Throws"
         }
     }
 }

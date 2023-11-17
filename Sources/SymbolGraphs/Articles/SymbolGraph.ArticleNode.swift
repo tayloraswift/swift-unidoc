@@ -6,19 +6,28 @@ import Unidoc
 
 extension SymbolGraph
 {
+    /// An article node models a standalone article, which includes the ``article`` content
+    /// itself, a ``headline``, and a list of ``topics``.
+    ///
+    /// The name of the type was chosen for symmetry with ``DeclNode``, but the shape of the
+    /// type is more similar to that of ``Decl``. Because declarations can contain ``Article``s
+    /// of their own, we use the name `ArticleNode` to emphasize their first-class nature.
     @frozen public
     struct ArticleNode:Equatable, Sendable
     {
         public
         var headline:MarkdownBytecode
         public
-        var body:Article
+        var article:Article
+        public
+        var topics:[Topic]
 
         @inlinable public
-        init(headline:MarkdownBytecode, body:Article = .init())
+        init(headline:MarkdownBytecode, article:Article = .init(), topics:[Topic] = [])
         {
             self.headline = headline
-            self.body = body
+            self.article = article
+            self.topics = topics
         }
     }
 }
@@ -35,10 +44,11 @@ extension SymbolGraph.ArticleNode:SymbolGraphNode
 extension SymbolGraph.ArticleNode
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case headline = "H"
-        case body = "B"
+        case article = "B"
+        case topics = "T"
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentEncodable
@@ -47,7 +57,8 @@ extension SymbolGraph.ArticleNode:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.headline] = self.headline
-        bson[.body] = self.body
+        bson[.article] = self.article
+        bson[.topics] = self.topics.isEmpty ? nil : self.topics
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentDecodable
@@ -57,6 +68,7 @@ extension SymbolGraph.ArticleNode:BSONDocumentDecodable
     {
         self.init(
             headline: try bson[.headline].decode(),
-            body: try bson[.body].decode())
+            article: try bson[.article].decode(),
+            topics: try bson[.topics]?.decode() ?? [])
     }
 }

@@ -32,7 +32,7 @@ extension GitHubCredential<BSON.Millisecond>
 }
 extension GitHubCredential
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case expires = "E"
         case token = "T"

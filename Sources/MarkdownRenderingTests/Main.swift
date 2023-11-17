@@ -267,7 +267,7 @@ enum Main:SyncTests
                 expecting: """
                 <h1 class='a'>\
                 <em class='b'>go to</em>\
-                <a href='swift.org' class='c'>\
+                <a class='c' href='swift.org'>\
                 <em class='d'>swift website</em>\
                 </a>\
                 <em class='e'>.</em>\
@@ -320,7 +320,7 @@ enum Main:SyncTests
             self.run(tests: tests,
                 expecting: """
                 <section class='custom parameters'>\
-                <h2>Parameters</h2>\
+                <h2 id='ss:parameters'><a href='#ss:parameters'>Parameters</a></h2>\
                 <dl>\
                 <dt>name</dt><dd>documentation</dd>\
                 </dl>\
@@ -467,7 +467,7 @@ enum Main:SyncTests
                     <pre><code>\
                     <span class='xk'>let</span> \
                     <span class='xv'>x</span>:\
-                    <a href='swiftinit.org' class='xt'>Int</a>\
+                    <a class='xt' href='swiftinit.org'>Int</a>\
                     </code></pre>
                     """)
             }

@@ -3,7 +3,7 @@ import MarkdownABI
 import MarkdownAST
 
 @frozen public
-struct SwiftFlavoredMarkdownParser
+struct SwiftFlavoredMarkdownParser<Flavor> where Flavor:MarkdownFlavor
 {
     private
     let plugins:[String: any MarkdownCodeLanguageType]
@@ -32,27 +32,37 @@ extension SwiftFlavoredMarkdownParser
 extension SwiftFlavoredMarkdownParser:MarkdownParser
 {
     public
-    func parse(_ string:String, from id:Int) -> [MarkdownBlock]
+    func parse(_ source:borrowing MarkdownSource) -> [MarkdownBlock]
     {
-        let document:Document = .init(parsing: string, options:
+        let document:Document = .init(parsing: source.text, options:
         [
             .parseBlockDirectives,
             .parseSymbolLinks,
         ])
-        return document.blockChildren.compactMap { self.block(from: $0, in: id) }
+
+        var blocks:[MarkdownBlock] = document.blockChildren.compactMap
+        {
+            self.block(from: $0, in: source)
+        }
+
+        Flavor.transform(blocks: &blocks)
+
+        return blocks
     }
 }
 extension SwiftFlavoredMarkdownParser
 {
     private
-    func block(from markup:any BlockMarkup, in id:Int) -> MarkdownBlock?
+    func block(
+        from markup:/* borrowing */ any BlockMarkup,
+        in source:borrowing MarkdownSource) -> MarkdownBlock?
     {
-        switch markup
+        switch /* copy */ markup
         {
         case let block as Markdown.BlockQuote:
             return MarkdownBlock.Quote.init(block.blockChildren.compactMap
                 {
-                    self.block(from: $0, in: id)
+                    self.block(from: $0, in: source)
                 })
 
         case let block as Markdown.BlockDirective:
@@ -63,7 +73,7 @@ extension SwiftFlavoredMarkdownParser
                 },
                 elements: block.blockChildren.compactMap
                 {
-                    self.block(from: $0, in: id)
+                    self.block(from: $0, in: source)
                 })
 
         case let block as Markdown.CodeBlock:
@@ -85,7 +95,7 @@ extension SwiftFlavoredMarkdownParser
             return MarkdownBlock.Heading.init(level: block.level,
                 elements: block.inlineChildren.map
                 {
-                    MarkdownInline.Block.init(from: $0, in: id)
+                    MarkdownInline.Block.init(from: $0, in: source)
                 })
 
         case let block as Markdown.HTMLBlock:
@@ -101,7 +111,7 @@ extension SwiftFlavoredMarkdownParser
         case let block as Markdown.Paragraph:
             return MarkdownBlock.Paragraph.init(block.inlineChildren.map
                 {
-                    MarkdownInline.Block.init(from: $0, in: id)
+                    MarkdownInline.Block.init(from: $0, in: source)
                 })
 
         case let table as Markdown.Table:
@@ -119,7 +129,7 @@ extension SwiftFlavoredMarkdownParser
                 {
                     .init($0.inlineChildren.map
                     {
-                        MarkdownInline.Block.init(from: $0, in: id)
+                        MarkdownInline.Block.init(from: $0, in: source)
                     })
                 },
                 body: table.body.rows.map
@@ -128,24 +138,24 @@ extension SwiftFlavoredMarkdownParser
                     {
                         .init($0.inlineChildren.map
                         {
-                            MarkdownInline.Block.init(from: $0, in: id)
+                            MarkdownInline.Block.init(from: $0, in: source)
                         })
                     }
                 })
 
         case let block as Markdown.ListItem:
-            return self.item(from: block, in: id)
+            return self.item(from: block, in: source)
 
         case let block as Markdown.OrderedList:
             return MarkdownBlock.OrderedList.init(block.listItems.map
                 {
-                    self.item(from: $0, in: id)
+                    self.item(from: $0, in: source)
                 })
 
         case let block as Markdown.UnorderedList:
             return MarkdownBlock.UnorderedList.init(block.listItems.map
                 {
-                    self.item(from: $0, in: id)
+                    self.item(from: $0, in: source)
                 })
 
         case is Markdown.ThematicBreak:
@@ -161,10 +171,15 @@ extension SwiftFlavoredMarkdownParser
     }
 
     private
-    func item(from markup:ListItem, in id:Int) -> MarkdownBlock.Item
+    func item(
+        from markup:/* borrowing */ ListItem,
+        in source:borrowing MarkdownSource) -> MarkdownBlock.Item
     {
         .init(
             checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },
-            elements: markup.blockChildren.compactMap { self.block(from: $0, in: id) })
+            elements: markup.blockChildren.compactMap
+            {
+                self.block(from: $0, in: source)
+            })
     }
 }

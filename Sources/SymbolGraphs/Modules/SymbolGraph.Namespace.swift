@@ -24,7 +24,7 @@ extension SymbolGraph
 extension SymbolGraph.Namespace
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case index = "I"
         case first = "F"

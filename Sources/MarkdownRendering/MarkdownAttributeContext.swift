@@ -9,9 +9,6 @@ protocol MarkdownAttributeContext
 {
     init()
 
-    mutating
-    func append(value:__owned String, as instruction:MarkdownBytecode.Attribute)
-
     /// Appends a single UTF-8 code unit to the current attribute, returning `nil` if and only
     /// if there is no current attribute.
     mutating

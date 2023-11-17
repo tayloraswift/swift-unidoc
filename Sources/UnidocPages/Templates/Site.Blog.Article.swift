@@ -1,5 +1,6 @@
 import HTML
 import MarkdownRendering
+import Unidoc
 import UnidocSelectors
 import UnidocRecords
 import URI
@@ -9,12 +10,12 @@ extension Site.Blog
     struct Article
     {
         private
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         private
         let vertex:Volume.Vertex.Article
 
-        init(_ context:VersionedPageContext, vertex:Volume.Vertex.Article)
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Volume.Vertex.Article)
         {
             self.context = context
             self.vertex = vertex

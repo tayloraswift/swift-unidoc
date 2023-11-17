@@ -22,7 +22,7 @@ extension MarkdownInline
 extension MarkdownInline.Link
 {
     @inlinable public
-    init(source:SourceReference<Int>, target:String?, elements:[MarkdownInline])
+    init(source:SourceReference<MarkdownSource>, target:String?, elements:[MarkdownInline])
     {
         guard let target:String
         else
@@ -49,7 +49,7 @@ extension MarkdownInline.Link
     /// Creates a link element using the given URL as both the link target and the
     /// link text.
     @inlinable public
-    init(source:SourceReference<Int>, url:String)
+    init(source:SourceReference<MarkdownSource>, url:String)
     {
         self.init(source: source, target: url, elements: [.text(url)])
     }
@@ -92,9 +92,12 @@ extension MarkdownInline.Link:MarkdownElement
 }
 extension MarkdownInline.Link:MarkdownText
 {
-    @inlinable public
-    var text:String
+    @inlinable public static
+    func += (text:inout String, self:Self)
     {
-        self.elements.lazy.map(\.text).joined()
+        for element:MarkdownInline in self.elements
+        {
+            text += element
+        }
     }
 }

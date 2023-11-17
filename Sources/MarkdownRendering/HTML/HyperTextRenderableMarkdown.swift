@@ -77,14 +77,14 @@ extension HyperTextRenderableMarkdown
 
                 if  let value:String = self.load(reference, for: attribute)
                 {
-                    attributes.append(value: value, as: attribute)
+                    attributes.list.append(value: value, as: attribute)
                 }
 
             case .emit(let element):
                 attributes.flush()
 
                 html.emit(newlines: &newlines)
-                html.emit(element: element, with: attributes)
+                html.emit(element: element, with: attributes.list)
 
                 attributes.clear()
 
@@ -96,10 +96,10 @@ extension HyperTextRenderableMarkdown
                 attributes.flush()
 
                 let context:MarkdownElementContext = .init(from: element,
-                    attributes: &attributes)
+                    attributes: &attributes.list)
 
                 html.emit(newlines: &newlines)
-                html.open(context: context, with: attributes)
+                html.open(context: context, with: attributes.list)
 
                 attributes.clear()
                 stack.append(context)

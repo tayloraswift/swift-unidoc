@@ -10,6 +10,6 @@ extension URI.Query.EncodingSet:PercentEncodingSet
     @inlinable public static
     func contains(_ byte:UInt8) -> Bool
     {
-        byte == 0x3f ? false : URI.Path.Component.EncodingSet.contains(byte)
+        byte == 0x2f ? false : URI.Path.Component.EncodingSet.contains(byte)
     }
 }

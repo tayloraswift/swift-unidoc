@@ -5,6 +5,8 @@ import Unidoc
 
 extension SymbolGraph
 {
+    /// A declaration node holds an optional ``Decl`` and a list of ``Extension``s.
+    /// It abstracts over local and external declarations.
     @frozen public
     struct DeclNode:Equatable, Sendable
     {
@@ -28,6 +30,7 @@ extension SymbolGraph.DeclNode:SymbolGraphNode
     public
     typealias ID = Symbol.Decl
 
+    /// A declaration node is a citizen of its symbol graph if and only if ``decl`` is non-nil.
     @inlinable public
     var isCitizen:Bool { self.decl != nil }
 }
@@ -43,7 +46,7 @@ extension SymbolGraph.DeclNode
 extension SymbolGraph.DeclNode
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case extensions = "E"
         case decl = "V"

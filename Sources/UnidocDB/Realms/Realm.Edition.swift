@@ -67,7 +67,7 @@ extension Realm.Edition
 extension Realm.Edition:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
 

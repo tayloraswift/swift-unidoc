@@ -122,7 +122,7 @@ extension Volume.Stats.Decl:ExpressibleByDictionaryLiteral
 extension Volume.Stats.Decl
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case typealiases = "T"
         case structures = "V"

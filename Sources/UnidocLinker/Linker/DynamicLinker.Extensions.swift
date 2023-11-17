@@ -87,7 +87,7 @@ extension DynamicLinker.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
         context:DynamicContext,
-        modules:[DynamicLinker.ModuleContext],
+        modules:[SymbolGraph.ModuleContext],
         diagnostics:inout DiagnosticContext<DynamicSymbolicator>) -> ProtocolConformances<Int>
     {
         guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
@@ -120,7 +120,7 @@ extension DynamicLinker.Extensions
                 extensions,
                 signatures)
             {
-                let module:DynamicLinker.ModuleContext = modules[`extension`.culture]
+                let module:SymbolGraph.ModuleContext = modules[`extension`.culture]
                 for p:Int32 in `extension`.conformances
                 {
                     //  Only track conformances that were declared by modules in
@@ -204,8 +204,8 @@ extension DynamicLinker.Extensions
 
                 ($0.overview, $0.details) = diagnostics.resolving(
                     namespace: context.current.namespaces[`extension`.namespace],
-                    global: context,
                     module: modules[`extension`.culture],
+                    global: context,
                     scope: [String].init(scope.path))
                 {
                     $0.link(article: article)

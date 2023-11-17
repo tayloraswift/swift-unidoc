@@ -15,7 +15,7 @@ extension Symbol.AnyRelationship
 }
 extension Symbol.AnyRelationship.SourceOrigin:JSONObjectDecodable
 {
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case identifier
     }

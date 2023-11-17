@@ -36,7 +36,7 @@ extension UnidocDatabase.RepoFeed
 extension UnidocDatabase.RepoFeed.Activity:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
 

@@ -4,9 +4,9 @@ import Sources
 
 extension MarkdownInline.Block:ParsableAsInlineMarkup
 {
-    init(from markup:any InlineMarkup, in id:Int)
+    init(from markup:/* borrowing */ any InlineMarkup, in source:borrowing MarkdownSource)
     {
-        switch markup
+        switch /* copy */ markup
         {
         case is LineBreak:
             self = .text("\n")
@@ -27,29 +27,33 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
             self = .code(.init(text: span.code))
 
         case let span as Emphasis:
-            self = .container(.init(from: span, in: id, as: .em))
+            self = .container(.init(from: span, in: source, as: .em))
 
         case let span as Strikethrough:
-            self = .container(.init(from: span, in: id, as: .s))
+            self = .container(.init(from: span, in: source, as: .s))
 
         case let span as Strong:
-            self = .container(.init(from: span, in: id, as: .strong))
+            self = .container(.init(from: span, in: source, as: .strong))
 
         case let image as Image:
-            self = .image(.init(target: image.source, title: image.title,
-                elements: image.inlineChildren.map { MarkdownInline.init(from: $0, in: id) }))
+            self = .image(.init(target: image.source,
+                title: image.title,
+                elements: image.inlineChildren.map
+                {
+                    MarkdownInline.init(from: $0, in: source)
+                }))
 
         case let link as SymbolLink:
             // exclude the backticks from the source range
             self = .autolink(.init(
-                source: .init(file: id, trimming: 2, from: link.range),
+                source: .init(file: copy source, trimming: 2, from: link.range),
                 text: link.destination ?? "",
                 code: true))
 
         case let link as Link:
             let elements:[MarkdownInline] = link.inlineChildren.map
             {
-                MarkdownInline.init(from: $0, in: id)
+                MarkdownInline.init(from: $0, in: source)
             }
             if  let destination:String = link.destination,
                 let colon:String.Index = destination.firstIndex(of: ":"),
@@ -59,14 +63,14 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
             {
                 // exclude the angle brackets from the source range
                 self = .autolink(.init(
-                    source: .init(file: id, trimming: 1, from: link.range),
+                    source: .init(file: copy source, trimming: 1, from: link.range),
                     text: String.init(destination[destination.index(after: colon)...]),
                     code: false))
             }
             else
             {
                 self = .link(.init(
-                    source: .init(file: id, trimming: 1, from: link.range),
+                    source: .init(file: copy source, trimming: 1, from: link.range),
                     target: link.destination,
                     elements: elements))
             }

@@ -37,7 +37,7 @@ extension Volume.Meta
 extension Volume.Meta.LinkDetails
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case abi = "B"
         case requirements = "O"

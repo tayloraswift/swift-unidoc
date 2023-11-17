@@ -18,7 +18,7 @@ extension MarkdownBlock
         public override
         func emit(into binary:inout MarkdownBinaryEncoder)
         {
-            binary[.dt] = self.name
+            binary[.dt] { $0[.id] = "sp:\(self.name)" } = self.name
             binary[.dd]
             {
                 super.emit(into: &$0)

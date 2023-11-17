@@ -13,15 +13,15 @@ extension Site.Docs
 {
     struct Meta
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -70,10 +70,6 @@ extension Site.Docs.Meta:VersionedPage
 
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let groups:GroupSections = .init(context,
-            groups: self.groups,
-            mode: .meta)
-
         main[.section]
         {
             $0.class = "introduction"
@@ -278,6 +274,6 @@ extension Site.Docs.Meta:VersionedPage
             }
         }
 
-        main += groups
+        main += self.groups
     }
 }
