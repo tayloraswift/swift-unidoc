@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-grammar",
       "state" : {
-        "branch" : "unify-test-protocols",
-        "revision" : "cbbcb795c7946b0a79ad8b0d87baa93fb9bc8090"
+        "revision" : "6db3dd8912fc7acb821021cd96677b2e0eeb09f0",
+        "version" : "0.3.4"
       }
     },
     {
