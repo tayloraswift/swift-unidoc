@@ -8,12 +8,12 @@ extension Site.Guides
 {
     struct Feed
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Never?>
 
         let scalars:[Unidoc.Scalar]
 
         private
-        init(_ context:VersionedPageContext, scalars:[Unidoc.Scalar])
+        init(_ context:IdentifiablePageContext<Never?>, scalars:[Unidoc.Scalar])
         {
             self.context = context
             self.scalars = scalars
@@ -22,7 +22,8 @@ extension Site.Guides
 }
 extension Site.Guides.Feed
 {
-    init(_ context:__owned VersionedPageContext, vertices:__shared [Volume.Vertex])
+    init(_ context:consuming IdentifiablePageContext<Never?>,
+        vertices:borrowing [Volume.Vertex])
     {
         self.init(context, scalars: vertices.map(\.id))
     }

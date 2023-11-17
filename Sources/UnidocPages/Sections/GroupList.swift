@@ -3,14 +3,16 @@ import Unidoc
 
 struct GroupList
 {
-    let inliner:VersionedPageContext
+    let context:IdentifiablePageContext<Unidoc.Scalar>
 
     let heading:String?
     let scalars:[Unidoc.Scalar]
 
-    init(_ inliner:VersionedPageContext, heading:String?, scalars:[Unidoc.Scalar])
+    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        heading:String?,
+        scalars:[Unidoc.Scalar])
     {
-        self.inliner = inliner
+        self.context = context
         self.heading = heading
         self.scalars = scalars
     }
@@ -28,7 +30,7 @@ extension GroupList:HyperTextOutputStreamable
         {
             for scalar:Unidoc.Scalar in self.scalars
             {
-                $0 ?= self.inliner.card(scalar)
+                $0 ?= self.context.card(scalar)
             }
         }
     }

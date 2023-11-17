@@ -8,7 +8,7 @@ import UnidocRecords
 
 struct GroupSections
 {
-    let inliner:VersionedPageContext
+    let context:IdentifiablePageContext<Unidoc.Scalar>
 
     private
     let requirements:[Unidoc.Scalar]?
@@ -28,7 +28,7 @@ struct GroupSections
     let mode:Mode?
 
     private
-    init(_ inliner:VersionedPageContext,
+    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
         extensions:[Volume.Group.Extension] = [],
@@ -37,7 +37,7 @@ struct GroupSections
         bias:Unidoc.Scalar?,
         mode:Mode?)
     {
-        self.inliner = inliner
+        self.context = context
 
         self.requirements = requirements
         self.superforms = superforms
@@ -50,7 +50,7 @@ struct GroupSections
 }
 extension GroupSections
 {
-    init(_ inliner:VersionedPageContext,
+    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar] = [],
         superforms:[Unidoc.Scalar] = [],
         generics:[GenericParameter] = [],
@@ -60,7 +60,7 @@ extension GroupSections
     {
         let generics:Generics = .init(generics)
 
-        self.init(inliner,
+        self.init(context,
             requirements: requirements.isEmpty ? nil : requirements,
             superforms: superforms.isEmpty ? nil : superforms,
             bias: bias,
@@ -74,7 +74,7 @@ extension GroupSections
             switch group
             {
             case .extension(let group):
-                let partisanship:Partisanship = inliner.volumes.secondary[group.id.zone].map
+                let partisanship:Partisanship = context.volumes.secondary[group.id.zone].map
                 {
                     .third($0.symbol.package)
                 } ?? .first
@@ -91,15 +91,22 @@ extension GroupSections
                 //  the first member of the group.
                 guard
                 let first:Unidoc.Scalar = group.members.first,
-                let first:UnidocPlane = .of(first.citizen)
+                let plane:UnidocPlane = .of(first.citizen)
                 else
                 {
                     continue
                 }
 
+                if  first == self.context.id,
+                    group.members.count == 1
+                {
+                    //  This is an automatic group that contains this page only.
+                    continue
+                }
+
                 let heading:AutomaticHeading
 
-                switch (first, self.mode)
+                switch (plane, self.mode)
                 {
                 case (.module, .meta):  heading = .allModules
                 case (.module, _):      heading = .otherModules
@@ -153,7 +160,7 @@ extension GroupSections
         case (_,                    _): display = "Extension in "
         }
 
-        return .init(self.inliner,
+        return .init(self.context,
             display: display,
             culture: `extension`.culture,
             where: `extension`.conditions)
@@ -168,7 +175,7 @@ extension GroupSections
         }
         else
         {
-            return .init(self.inliner, heading: heading, scalars: scalars)
+            return .init(self.context, heading: heading, scalars: scalars)
         }
     }
 }
@@ -180,9 +187,7 @@ extension GroupSections:HyperTextOutputStreamable
     {
         for group:Volume.Group.Topic in self.topics
         {
-            guard
-            let principal:Unidoc.Scalar = self.inliner.vertices.principal,
-                group.members.contains(.scalar(principal))
+            guard group.members.contains(.scalar(self.context.id))
             else
             {
                 //  This is a topic group that doesn’t contain this page.
@@ -190,11 +195,11 @@ extension GroupSections:HyperTextOutputStreamable
                 //  any prose associated with it.
                 html[.section, { $0.class = "group topic" }]
                 {
-                    $0 ?= group.overview.map(self.inliner.prose(overview:))
+                    $0 ?= group.overview.map(self.context.prose(overview:))
 
                     $0[.ul]
                     {
-                        self.inliner.list(members: group.members, to: &$0)
+                        self.context.list(members: group.members, to: &$0)
                     }
                 }
 
@@ -219,7 +224,7 @@ extension GroupSections:HyperTextOutputStreamable
                 {
                     $0[.ul]
                     {
-                        self.inliner.list(members: group.members, to: &$0)
+                        self.context.list(members: group.members, to: &$0)
                     }
 
                     return
@@ -249,7 +254,7 @@ extension GroupSections:HyperTextOutputStreamable
                     }
                     $0[.ul]
                     {
-                        self.inliner.list(members: group.members, to: &$0)
+                        self.context.list(members: group.members, to: &$0)
                     }
                 }
             }
@@ -264,7 +269,7 @@ extension GroupSections:HyperTextOutputStreamable
                 {
                     for member:Unidoc.Scalar in members
                     {
-                        $0 ?= self.inliner.card(member)
+                        $0 ?= self.context.card(member)
                     }
                 }
             }
@@ -308,7 +313,7 @@ extension GroupSections:HyperTextOutputStreamable
                 {
                     for superform:Unidoc.Scalar in superforms
                     {
-                        $0 ?= self.inliner.card(superform)
+                        $0 ?= self.context.card(superform)
                     }
                 }
             }
@@ -325,7 +330,7 @@ extension GroupSections:HyperTextOutputStreamable
                 {
                     for requirement:Unidoc.Scalar in requirements
                     {
-                        $0 ?= self.inliner.card(requirement)
+                        $0 ?= self.context.card(requirement)
                     }
                 }
             }
@@ -356,7 +361,7 @@ extension GroupSections:HyperTextOutputStreamable
                             group.subforms.reduce(into: ([], []))
                         {
                             if  case true? =
-                                self.inliner.vertices[$1]?.decl?.kinks[is: .intrinsicWitness]
+                                self.context.vertices[$1]?.decl?.kinks[is: .intrinsicWitness]
                             {
                                 $0.1.append($1)
                             }

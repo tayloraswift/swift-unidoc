@@ -11,13 +11,13 @@ struct CodeSection
     private
     let scalars:[Unidoc.Scalar?]
     private
-    let inliner:VersionedPageContext
+    let context:any VersionedPageContext
 
-    init(_ inliner:VersionedPageContext, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
+    init(_ context:any VersionedPageContext, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
     {
         self.bytecode = bytecode
         self.scalars = scalars
-        self.inliner = inliner
+        self.context = context
     }
 }
 extension CodeSection:HyperTextRenderableMarkdown
@@ -30,7 +30,7 @@ extension CodeSection:HyperTextRenderableMarkdown
             if  self.scalars.indices.contains(reference),
                 let target:Unidoc.Scalar = self.scalars[reference]
             {
-                return self.inliner.url(target)
+                return self.context.url(target)
             }
             else
             {

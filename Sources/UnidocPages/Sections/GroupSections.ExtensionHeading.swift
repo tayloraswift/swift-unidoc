@@ -6,7 +6,7 @@ extension GroupSections
 {
     struct ExtensionHeading
     {
-        let inliner:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         private
         let display:String
@@ -15,12 +15,12 @@ extension GroupSections
         private
         let `where`:[GenericConstraint<Unidoc.Scalar?>]
 
-        init(_ inliner:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             display:String,
             culture:Unidoc.Scalar,
             where:[GenericConstraint<Unidoc.Scalar?>])
         {
-            self.inliner = inliner
+            self.context = context
             self.display = display
             self.culture = culture
             self.where = `where`
@@ -35,7 +35,7 @@ extension GroupSections.ExtensionHeading:HyperTextOutputStreamable
         html[.h2]
         {
             $0 += self.display
-            $0 ?= self.inliner.link(module: self.culture)
+            $0 ?= self.context.link(module: self.culture)
         }
         if  self.where.isEmpty
         {
@@ -75,7 +75,7 @@ extension GroupSections.ExtensionHeading:HyperTextOutputStreamable
 
                     case .nominal(let scalar):
                         if  let scalar:Unidoc.Scalar,
-                            let link:HTML.Link<String> = self.inliner.link(
+                            let link:HTML.Link<String> = self.context.link(
                                 decl: scalar)
                         {
                             $0 += link

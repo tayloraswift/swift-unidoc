@@ -10,7 +10,7 @@ extension Site.Docs
 {
     struct Culture
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:[Volume.Noun]?
@@ -20,7 +20,7 @@ extension Site.Docs
         private
         let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Culture,

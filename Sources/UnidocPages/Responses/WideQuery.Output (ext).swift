@@ -1,5 +1,6 @@
 import HTTP
 import Media
+import Unidoc
 import UnidocQueries
 import UnidocRecords
 import URI
@@ -21,7 +22,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
         let vertex:Volume.Vertex = principal.vertex
         else
         {
-            let context:VersionedPageContext = .init(
+            let context:IdentifiablePageContext<Never?> = .init(
                 principal: principal.volume,
                 repo: principal.repo)
 
@@ -43,7 +44,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
             }
         }
 
-        let context:VersionedPageContext = .init(principal: vertex.id,
+        let context:IdentifiablePageContext<Unidoc.Scalar> = .init(principal: vertex.id,
             volume: principal.volume,
             repo: principal.repo)
         ;
