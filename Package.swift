@@ -83,8 +83,11 @@ let package:Package = .init(
     ],
     dependencies:
     [
-        .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
-            from: "0.3.2")),
+        //.package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
+        //    from: "0.3.2")),
+        .package(url: "https://github.com/tayloraswift/swift-grammar",
+            branch: "unify-test-protocols"),
+
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(

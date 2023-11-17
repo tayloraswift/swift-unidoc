@@ -3,10 +3,10 @@ import NIOPosix
 import Testing
 
 @main
-enum Main:AsyncTests
+enum Main:TestMain, TestBattery
 {
     static
-    func run(tests:Tests) async
+    func run(tests:TestGroup) async
     {
         let executors:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let mongodb:Mongo.DriverBootstrap = MongoDB / ["unidoc-mongod"] /?

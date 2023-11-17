@@ -7,10 +7,10 @@ import Testing
 import Unidoc
 
 @main
-enum Main:SyncTests
+enum Main:TestMain, TestBattery
 {
     static
-    func run(tests:Tests)
+    func run(tests:TestGroup)
     {
         if  let tests:TestGroup = tests / "Phyla",
             let part:SymbolGraphPart = tests.load(
