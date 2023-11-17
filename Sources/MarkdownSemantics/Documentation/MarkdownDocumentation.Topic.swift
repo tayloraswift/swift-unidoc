@@ -44,7 +44,7 @@ extension MarkdownDocumentation.Topic
 }
 extension MarkdownDocumentation.Topic
 {
-    init?(heading:inout MarkdownBlock?, body blocks:borrowing ArraySlice<MarkdownBlock>)
+    init?(heading:MarkdownBlock?, body blocks:ArraySlice<MarkdownBlock>)
     {
         var blocks:ArraySlice<MarkdownBlock> = copy blocks
 
@@ -76,11 +76,6 @@ extension MarkdownDocumentation.Topic
         for case (let heading as MarkdownBlock.Heading) in blocks
         {
             heading.level -= 1
-        }
-
-        defer
-        {
-            heading = nil
         }
 
         if  let heading:MarkdownBlock
