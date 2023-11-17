@@ -166,7 +166,7 @@ extension Main.Parameters:MarkdownTestBattery
 
                     -   third    :
 
-                            Description for third parameter
+                          Description for third parameter
 
                 Details details details
                 """,
