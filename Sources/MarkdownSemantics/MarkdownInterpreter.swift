@@ -27,7 +27,7 @@ struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicat
 extension MarkdownInterpreter
 {
     private mutating
-    func append(_ block:consuming MarkdownBlock)
+    func append(_ block:MarkdownBlock)
     {
         defer
         {
@@ -36,7 +36,7 @@ extension MarkdownInterpreter
 
         //  Only h2 headings are interesting, but if we encounter a stray h1, that can
         //  also terminate a topics list.
-        guard case (let heading as MarkdownBlock.Heading) = copy block, heading.level <= 2
+        guard case (let heading as MarkdownBlock.Heading) = block, heading.level <= 2
         else
         {
             return
@@ -101,15 +101,17 @@ extension MarkdownInterpreter
             return
         }
 
-        //  If the first block isn’t a level 3 heading, use the *Topics* block itself.
+        /// If the topics list doesn’t begin with an h3 heading, use the topics header
+        /// itself as the first topic heading.
         var heading:MarkdownBlock? = h3(self.blocks[current]) ? nil : self.blocks[start]
+
         while true
         {
             if  let next:Int = self.blocks[self.blocks.index(after: current)...].firstIndex(
                     where: h3(_:))
             {
                 guard
-                let topic:MarkdownDocumentation.Topic = .init(heading: &heading,
+                let topic:MarkdownDocumentation.Topic = .init(heading: heading,
                     body: self.blocks[current ..< next])
                 else
                 {
@@ -118,10 +120,11 @@ extension MarkdownInterpreter
 
                 pending.append(topic)
                 current = next
+                heading = nil
                 continue
             }
             else if
-                let topic:MarkdownDocumentation.Topic = .init(heading: &heading,
+                let topic:MarkdownDocumentation.Topic = .init(heading: heading,
                     body: self.blocks[current...])
             {
                 self.topics += pending
