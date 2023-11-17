@@ -9,7 +9,7 @@ extension Site.Docs
 {
     struct Foreign
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
 
@@ -18,7 +18,7 @@ extension Site.Docs
         private
         let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             vertex:Volume.Vertex.Foreign,
             groups:GroupSections)
@@ -59,12 +59,12 @@ extension Site.Docs.Foreign:StaticPage
 }
 extension Site.Docs.Foreign:ApplicationPage
 {
-    var navigator:Breadcrumbs
+    var navigator:HTML.Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
+                    nil : self.context.vector(self.vertex.scope, display: scope),
                 last: last)
         }
         else

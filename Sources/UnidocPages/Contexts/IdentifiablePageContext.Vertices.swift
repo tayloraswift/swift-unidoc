@@ -1,16 +1,16 @@
 import Unidoc
 import UnidocRecords
 
-extension VersionedPageContext
+extension IdentifiablePageContext
 {
     struct Vertices
     {
-        let principal:Unidoc.Scalar?
+        let principal:ID
         private(set)
         var secondary:[Unidoc.Scalar: Volume.Vertex]
 
         init(
-            principal:Unidoc.Scalar?,
+            principal:ID,
             secondary:[Unidoc.Scalar: Volume.Vertex] = [:])
         {
             self.principal = principal
@@ -18,22 +18,19 @@ extension VersionedPageContext
         }
     }
 }
-extension VersionedPageContext.Vertices
+extension IdentifiablePageContext.Vertices where ID:VersionedPageIdentifier
 {
     mutating
     func add(_ masters:[Volume.Vertex])
     {
-        for master:Volume.Vertex in masters where
-            master.id != self.principal
+        for master:Volume.Vertex in masters where self.principal != master.id
         {
             self.secondary[master.id] = master
         }
     }
-}
-extension VersionedPageContext.Vertices
-{
+
     subscript(_ scalar:Unidoc.Scalar) -> Volume.Vertex?
     {
-        self.principal == scalar ? nil : self.secondary[scalar]
+        self.principal != scalar ? self.secondary[scalar] : nil
     }
 }

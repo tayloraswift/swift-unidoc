@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension VersionedPageContext
+extension IdentifiablePageContext
 {
     struct Volumes:Sendable
     {
@@ -18,7 +18,7 @@ extension VersionedPageContext
         }
     }
 }
-extension VersionedPageContext.Volumes
+extension IdentifiablePageContext.Volumes
 {
     mutating
     func add(_ names:[Volume.Meta])
@@ -30,7 +30,7 @@ extension VersionedPageContext.Volumes
         }
     }
 }
-extension VersionedPageContext.Volumes
+extension IdentifiablePageContext.Volumes
 {
     subscript(zone:Unidoc.Edition) -> Volume.Meta?
     {

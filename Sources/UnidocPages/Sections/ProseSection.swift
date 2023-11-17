@@ -7,14 +7,14 @@ import UnidocRecords
 struct ProseSection
 {
     private
-    let inliner:VersionedPageContext
+    let context:any VersionedPageContext
 
     let bytecode:MarkdownBytecode
     let outlines:[Volume.Outline]
 
-    init(_ inliner:VersionedPageContext, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
+    init(_ context:any VersionedPageContext, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
     {
-        self.inliner = inliner
+        self.context = context
 
         self.bytecode = bytecode
         self.outlines = outlines
@@ -38,7 +38,7 @@ extension ProseSection:HyperTextRenderableMarkdown
         case .path(_, let scalars):
             if  let target:Unidoc.Scalar = scalars.last
             {
-                return self.inliner.url(target)
+                return self.context.url(target)
             }
             else
             {
@@ -64,9 +64,8 @@ extension ProseSection:HyperTextRenderableMarkdown
             //  Take the suffix of the stem, because it may include a module namespace,
             //  and we never render the module namespace, even if it was written in the
             //  codelink text.
-            html[.code] = self.inliner.vectorLink(
-                components: stem.split(separator: " ").suffix(scalars.count),
-                to: scalars)
+            html[.code] = self.context.vector(scalars,
+                display: stem.split(separator: " ").suffix(scalars.count))
         }
     }
 }

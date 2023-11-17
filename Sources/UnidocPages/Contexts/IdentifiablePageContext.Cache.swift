@@ -3,7 +3,7 @@ import UnidocDB
 import UnidocRecords
 import URI
 
-extension VersionedPageContext
+extension IdentifiablePageContext
 {
     struct Cache
     {
@@ -21,7 +21,7 @@ extension VersionedPageContext
         }
     }
 }
-extension VersionedPageContext.Cache
+extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
     mutating
     func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Meta) -> URI?) -> String?
@@ -46,7 +46,7 @@ extension VersionedPageContext.Cache
         } (&self.uris[scalar])
     }
 }
-extension VersionedPageContext.Cache
+extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
     subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Article, url:String?)?
     {

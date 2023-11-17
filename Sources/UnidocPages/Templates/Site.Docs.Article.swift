@@ -9,7 +9,7 @@ extension Site.Docs
 {
     struct Article
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:[Volume.Noun]?
@@ -20,7 +20,7 @@ extension Site.Docs
         let groups:GroupSections
 
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Article,

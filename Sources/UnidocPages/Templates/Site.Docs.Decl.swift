@@ -13,7 +13,7 @@ extension Site.Docs
 {
     struct Decl
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:[Volume.Noun]?
@@ -23,7 +23,7 @@ extension Site.Docs
         private
         let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Decl,
@@ -78,12 +78,12 @@ extension Site.Docs.Decl:StaticPage
 }
 extension Site.Docs.Decl:ApplicationPage
 {
-    var navigator:Breadcrumbs
+    var navigator:HTML.Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
+                    nil : self.context.vector(self.vertex.scope, display: scope),
                 last: last)
         }
         else

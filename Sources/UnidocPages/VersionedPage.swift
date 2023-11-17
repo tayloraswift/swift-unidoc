@@ -7,10 +7,12 @@ import URI
 public
 protocol VersionedPage:ApplicationPage
 {
+    associatedtype Context:VersionedPageContext
+
     var canonical:CanonicalVersion? { get }
     var sidebar:[Volume.Noun]? { get }
 
-    var context:VersionedPageContext { get }
+    var context:Context { get }
 }
 extension VersionedPage where Self:StaticPage
 {
@@ -19,7 +21,7 @@ extension VersionedPage where Self:StaticPage
 }
 extension VersionedPage
 {
-    var volume:Volume.Meta { self.context.volumes.principal }
+    var volume:Volume.Meta { self.context.volume }
 
     public
     func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
@@ -35,7 +37,7 @@ extension VersionedPage
             for dependency:Volume.Meta.Dependency in self.volume.dependencies
             {
                 if  let resolution:Unidoc.Edition = dependency.resolution,
-                    let dependency:Volume.Meta = self.context.volumes[resolution]
+                    let dependency:Volume.Meta = self.context[resolution]
                 {
                     $0[+, Any.self]
                     {
