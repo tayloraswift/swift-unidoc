@@ -9,19 +9,19 @@ extension Site.Docs
 {
     struct Foreign
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
 
         private
         let vertex:Volume.Vertex.Foreign
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             vertex:Volume.Vertex.Foreign,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -59,12 +59,12 @@ extension Site.Docs.Foreign:StaticPage
 }
 extension Site.Docs.Foreign:ApplicationPage
 {
-    var navigator:Breadcrumbs
+    var navigator:HTML.Breadcrumbs
     {
         if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
         {
             .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vectorLink(components: scope, to: self.vertex.scope),
+                    nil : self.context.vector(self.vertex.scope, display: scope),
                 last: last)
         }
         else
@@ -133,9 +133,6 @@ extension Site.Docs.Foreign:VersionedPage
             }
         }
 
-        main += GroupSections.init(self.context,
-            groups: self.groups,
-            bias: nil,
-            mode: .decl(self.vertex.flags.phylum, self.vertex.flags.kinks))
+        main += self.groups
     }
 }

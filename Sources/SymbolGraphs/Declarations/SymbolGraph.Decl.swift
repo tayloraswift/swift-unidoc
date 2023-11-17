@@ -57,6 +57,9 @@ extension SymbolGraph
         public
         var origin:Int32?
 
+        public
+        var topics:[Topic]
+
         @inlinable internal
         init(
             phylum:Unidoc.Decl,
@@ -69,7 +72,8 @@ extension SymbolGraph
             requirements:[Int32] = [],
             superforms:[Int32] = [],
             features:[Int32] = [],
-            origin:Int32? = nil)
+            origin:Int32? = nil,
+            topics:[Topic] = [])
         {
             self.phylum = phylum
             self.kinks = kinks
@@ -84,6 +88,8 @@ extension SymbolGraph
             self.superforms = superforms
             self.features = features
             self.origin = origin
+
+            self.topics = topics
         }
     }
 }
@@ -97,8 +103,17 @@ extension SymbolGraph.Decl
 }
 extension SymbolGraph.Decl
 {
+    /// See ``Unidoc.Decl.scope(trimming:)``.
+    @inlinable public
+    var scope:[String]
+    {
+        self.phylum.scope(trimming: self.path)
+    }
+}
+extension SymbolGraph.Decl
+{
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case flags = "X"
         case path = "P"
@@ -118,6 +133,7 @@ extension SymbolGraph.Decl
 
         case location = "L"
         case article = "A"
+        case topics = "T"
     }
 }
 extension SymbolGraph.Decl:BSONDocumentEncodable
@@ -162,6 +178,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
 
         bson[.location] = self.location
         bson[.article] = self.article
+        bson[.topics] = self.topics.isEmpty ? nil : self.topics
     }
 }
 extension SymbolGraph.Decl:BSONDocumentDecodable
@@ -197,6 +214,7 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             features: try bson[.features]?.decode(
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
-            origin: try bson[.origin]?.decode())
+            origin: try bson[.origin]?.decode(),
+            topics: try bson[.topics]?.decode() ?? [])
     }
 }

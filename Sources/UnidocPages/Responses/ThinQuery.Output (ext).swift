@@ -11,8 +11,10 @@ extension ThinQuery.Output:HTTP.ServerResponseFactory
     {
         if  LookupPredicate.self is Volume.Range.Type
         {
-            let context:VersionedPageContext = .init(principal: self.volume, repo: nil)
-                context.vertices.add(self.matches)
+            let context:IdentifiablePageContext<Never?> = .init(principal: self.volume,
+                repo: nil)
+
+            context.vertices.add(self.matches)
 
             let feed:Site.Guides.Feed = .init(context, vertices: self.matches)
 
@@ -24,8 +26,10 @@ extension ThinQuery.Output:HTTP.ServerResponseFactory
         }
         else
         {
-            let context:VersionedPageContext = .init(principal: self.volume, repo: nil)
-                context.vertices.add(self.matches)
+            let context:IdentifiablePageContext<Never?> = .init(principal: self.volume,
+                repo: nil)
+
+            context.vertices.add(self.matches)
 
             let display:Site.Docs.NotFound = .init(context, sidebar: nil)
             //  We return 410 Gone instead of 404 Not Found so that search engines and

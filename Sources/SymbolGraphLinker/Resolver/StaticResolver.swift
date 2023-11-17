@@ -2,6 +2,7 @@ import CodelinkResolution
 import Codelinks
 import DoclinkResolution
 import Doclinks
+import MarkdownAST
 import ModuleGraphs
 import Sources
 import SymbolGraphs
@@ -21,7 +22,7 @@ struct StaticResolver:~Copyable
         codelinks:CodelinkResolver<Int32>,
         doclinks:DoclinkResolver)
     {
-        self.diagnostics = .init()
+        self.diagnostics = diagnostics
 
         self.codelinks = codelinks
         self.doclinks = doclinks
@@ -30,7 +31,8 @@ struct StaticResolver:~Copyable
 extension StaticResolver
 {
     mutating
-    func outline(_ autolink:Autolink, as codelink:Codelink) -> SymbolGraph.Outline?
+    func outline(_ autolink:MarkdownInline.Autolink,
+        as codelink:Codelink) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
         {
@@ -56,7 +58,8 @@ extension StaticResolver
         }
     }
     mutating
-    func outline(_ autolink:Autolink, as doclink:Doclink) -> SymbolGraph.Outline?
+    func outline(_ autolink:MarkdownInline.Autolink,
+        as doclink:Doclink) -> SymbolGraph.Outline?
     {
         self.doclinks.resolve(doclink).map
         {

@@ -18,7 +18,7 @@ extension Repository.Pin
 extension Repository.Pin.V2:JSONObjectDecodable
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "identity"
         case location

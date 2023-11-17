@@ -61,7 +61,7 @@ extension StaticLinker.Symbolizer
     /// with the same mangled name has not already been indexed. (This function checks
     /// for duplicates.)
     mutating
-    func allocate(article:Symbol.Article, title:__owned MarkdownBlock.Heading) -> Int32?
+    func allocate(article:Symbol.Article, title:consuming MarkdownBlock.Heading) -> Int32?
     {
         {
             if  case nil = $0

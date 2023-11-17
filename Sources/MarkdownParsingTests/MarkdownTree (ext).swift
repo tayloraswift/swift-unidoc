@@ -1,6 +1,6 @@
 import MarkdownAST
 
-extension MarkdownTree:MarkdownModel
+extension MarkdownTree
 {
     func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
     {

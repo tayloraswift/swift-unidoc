@@ -5,7 +5,7 @@ extension HTML.ContentEncoder
 {
     mutating
     func emit(element:MarkdownBytecode.Emission,
-        with attributes:MarkdownElementContext.AttributeContext)
+        with attributes:MarkdownElementContext.AttributeList)
     {
         let html:HTML.VoidElement
 
@@ -40,16 +40,20 @@ extension HTML.ContentEncoder
 {
     private mutating
     func open(_ element:HTML.ContainerElement,
-        with attributes:MarkdownElementContext.AttributeContext)
+        with attributes:MarkdownElementContext.AttributeList)
     {
         self.open(element) { attributes.encode(to: &$0) }
     }
     mutating
     func open(context:MarkdownElementContext,
-        with attributes:MarkdownElementContext.AttributeContext)
+        with attributes:MarkdownElementContext.AttributeList)
     {
         switch context
         {
+        case .anchorable(let element):
+            self.open(element, with: attributes)
+            self.open(.a) { $0.href = attributes.id?.description }
+
         case .container(let element):
             self.open(element, with: attributes)
 
@@ -58,11 +62,14 @@ extension HTML.ContentEncoder
 
         case .section(let section):
             self.open(.section, with: attributes)
-            self[.h2] = section.description
+            self[.h2, { $0.id = section.id }]
+            {
+                $0[.a] { $0.href = "#\(section.id)" } = "\(section)"
+            }
 
         case .signage(let signage):
             self.open(.aside, with: attributes)
-            self[.h3] = signage.description
+            self[.h3] = "\(signage)"
 
         case .snippet:
             self.open(.pre) { $0.class = "snippet" }
@@ -81,6 +88,10 @@ extension HTML.ContentEncoder
     {
         switch context
         {
+        case .anchorable(let element):
+            self.close(.a)
+            self.close(element)
+
         case .container(let element):
             self.close(element)
 

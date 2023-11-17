@@ -1,4 +1,5 @@
 import MarkdownABI
+import MarkdownAST
 import MarkdownPluginSwift
 import ModuleGraphs
 import SymbolGraphCompiler
@@ -50,7 +51,7 @@ extension SymbolGraph
         }
         do
         {
-            let supplements:[[MarkdownFile]]? = try artifacts.root.map
+            let supplements:[[MarkdownSourceFile]]? = try artifacts.root.map
             {
                 (root:Repository.Root) in try artifacts.cultures.map
                 {

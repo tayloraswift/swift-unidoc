@@ -5,13 +5,13 @@ import URI
 struct ModuleSidebar
 {
     private
-    let inliner:VersionedPageContext
+    let context:any VersionedPageContext
 
     let nouns:[Volume.Noun]
 
-    init(_ inliner:VersionedPageContext, nouns:[Volume.Noun])
+    init(_ context:any VersionedPageContext, nouns:[Volume.Noun])
     {
-        self.inliner = inliner
+        self.context = context
 
         self.nouns = nouns
     }
@@ -50,7 +50,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
                 previous = noun.shoot.stem
                 depth = indents
 
-                var uri:URI { Site.Docs[self.inliner.volumes.principal, noun.shoot] }
+                var uri:URI { Site.Docs[self.context.volume, noun.shoot] }
 
                 switch noun.style
                 {
@@ -61,7 +61,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
                     //  The URI is only valid if the principal volume API version is at
                     //  least 1.0!
                     if  case .foreign = citizenship,
-                        self.inliner.volumes.principal.api < .v(1, 0)
+                        self.context.volume.api < .v(1, 0)
                     {
                         $0[.span] = name
                     }

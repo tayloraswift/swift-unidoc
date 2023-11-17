@@ -14,7 +14,7 @@ extension Volume
 extension Volume.Outline
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case display = "T"
         case scalars = "s"

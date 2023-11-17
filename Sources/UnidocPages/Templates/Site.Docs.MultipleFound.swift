@@ -8,7 +8,7 @@ extension Site.Docs
 {
     struct MultipleFound
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Never?>
 
         let identity:Volume.Stem
 
@@ -16,7 +16,7 @@ extension Site.Docs
         let matches:[Unidoc.Scalar]
 
         private
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Never?>,
             identity:Volume.Stem,
             matches:[Unidoc.Scalar])
         {
@@ -29,7 +29,7 @@ extension Site.Docs
 }
 extension Site.Docs.MultipleFound
 {
-    init?(_ context:__owned VersionedPageContext,
+    init?(_ context:consuming IdentifiablePageContext<Never?>,
         matches:__shared [Volume.Vertex])
     {
         if  let stem:Volume.Stem = matches.first?.shoot?.stem

@@ -30,7 +30,7 @@ extension UnidocDatabase.DocsFeed
 extension UnidocDatabase.DocsFeed.Activity:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
         case volume = "V"

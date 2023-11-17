@@ -53,7 +53,7 @@ extension SymbolGraph
 extension SymbolGraph.Extension
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case conditions = "S"
         case namespace = "M"

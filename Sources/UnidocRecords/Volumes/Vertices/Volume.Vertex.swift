@@ -140,7 +140,7 @@ extension Volume.Vertex
 extension Volume.Vertex
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         /// Always present.
         case id = "_id"

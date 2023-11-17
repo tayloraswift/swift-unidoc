@@ -5,7 +5,7 @@ import ModuleGraphs
 extension ModuleDetails
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case name = "N"
         case type = "T"

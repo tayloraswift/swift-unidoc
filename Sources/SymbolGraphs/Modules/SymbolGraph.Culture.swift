@@ -63,7 +63,7 @@ extension SymbolGraph.Culture
 extension SymbolGraph.Culture
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case module = "M"
 

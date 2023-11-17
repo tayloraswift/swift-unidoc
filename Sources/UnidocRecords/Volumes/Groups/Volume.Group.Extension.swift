@@ -17,20 +17,20 @@ extension Volume.Group
         let scope:Unidoc.Scalar
 
         public
-        let conformances:[Unidoc.Scalar]
+        var conformances:[Unidoc.Scalar]
         public
-        let features:[Unidoc.Scalar]
+        var features:[Unidoc.Scalar]
         public
-        let nested:[Unidoc.Scalar]
+        var nested:[Unidoc.Scalar]
         public
-        let subforms:[Unidoc.Scalar]
+        var subforms:[Unidoc.Scalar]
 
         /// Additional scalars to prefetch when this extension is loaded.
         /// This is used to obtain the masters for passage referents in the
         /// overview passages of the actual declarations in this extension
         /// without having to perform an additional lookup phase.
         public
-        let prefetch:[Unidoc.Scalar]
+        var prefetch:[Unidoc.Scalar]
 
         public
         var overview:Volume.Passage?
@@ -66,5 +66,18 @@ extension Volume.Group
             self.overview = overview
             self.details = details
         }
+    }
+}
+extension Volume.Group.Extension
+{
+    public consuming
+    func subtracting(_ members:Set<Unidoc.Scalar>) -> Self
+    {
+        self.conformances.removeAll(where: members.contains(_:))
+        self.features.removeAll(where: members.contains(_:))
+        self.nested.removeAll(where: members.contains(_:))
+        self.subforms.removeAll(where: members.contains(_:))
+
+        return self
     }
 }

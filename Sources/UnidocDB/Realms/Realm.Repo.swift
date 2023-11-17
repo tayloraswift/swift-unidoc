@@ -30,7 +30,7 @@ extension Realm.Repo
 extension Realm.Repo:MongoMasterCodingModel
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         /// The repo’s default branch.
         case master = "M"

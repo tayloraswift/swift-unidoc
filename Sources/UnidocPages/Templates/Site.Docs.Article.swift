@@ -9,7 +9,7 @@ extension Site.Docs
 {
     struct Article
     {
-        let context:VersionedPageContext
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:[Volume.Noun]?
@@ -17,14 +17,14 @@ extension Site.Docs
         private
         let vertex:Volume.Vertex.Article
         private
-        let groups:[Volume.Group]
+        let groups:GroupSections
 
 
-        init(_ context:VersionedPageContext,
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:[Volume.Noun]?,
             vertex:Volume.Vertex.Article,
-            groups:[Volume.Group])
+            groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
@@ -60,11 +60,6 @@ extension Site.Docs.Article:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let groups:GroupSections = .init(context,
-            groups: self.groups,
-            bias: self.vertex.id,
-            mode: nil)
-
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
@@ -103,6 +98,6 @@ extension Site.Docs.Article:VersionedPage
         main[.section, { $0.class = "details" }] =
             (self.vertex.details?.markdown).map(self.context.prose(_:))
 
-        main += groups
+        main += self.groups
     }
 }

@@ -40,7 +40,7 @@ extension Account
 extension Account:MongoMasterCodingModel
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case id = "_id"
 

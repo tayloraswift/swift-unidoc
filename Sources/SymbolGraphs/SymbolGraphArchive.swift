@@ -23,7 +23,7 @@ struct SymbolGraphArchive:Equatable, Sendable
 extension SymbolGraphArchive
 {
     public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case metadata
         case graph

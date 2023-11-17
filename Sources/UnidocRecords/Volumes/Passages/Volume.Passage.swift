@@ -24,7 +24,7 @@ extension Volume
 extension Volume.Passage
 {
     @frozen public
-    enum CodingKey:String
+    enum CodingKey:String, Sendable
     {
         case outlines = "o"
         case markdown = "M"

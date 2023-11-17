@@ -16,11 +16,6 @@ extension MarkdownTextContext
 }
 extension MarkdownTextContext.AttributeContext:MarkdownAttributeContext
 {
-    mutating
-    func append(value _:String, as _:MarkdownBytecode.Attribute)
-    {
-    }
-
     func buffer(utf8 codeunit:UInt8) -> Void?
     {
         self.current

@@ -204,8 +204,14 @@ section.parameters
 
             font-family: $typeface-monospace;
             font-weight: 700;
+
+            > a
+            {
+                color: inherit;
+            }
         }
-        dt:before
+        dt:not([id])::before, // backwards compatibility with older symbol graphs
+        dt > a::before
         {
             content: '$' counter(parameter-index);
             display: inline-block;

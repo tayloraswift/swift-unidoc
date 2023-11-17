@@ -36,16 +36,22 @@ extension MarkdownInline.Image:MarkdownElement
 }
 extension MarkdownInline.Image:MarkdownText
 {
+    @inlinable public static
+    func += (text:inout String, self:Self)
+    {
+        for element:MarkdownInline in self.elements
+        {
+            text += element
+        }
+    }
+}
+extension MarkdownInline.Image
+{
     /// Returns ``text`` if it is not empty.
     @inlinable public
     var alt:String?
     {
         let alt:String = self.text
         return alt.isEmpty ? nil : alt
-    }
-    @inlinable public
-    var text:String
-    {
-        self.elements.lazy.map(\.text).joined()
     }
 }
