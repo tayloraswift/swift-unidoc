@@ -17,6 +17,26 @@ extension Main.Topics:MarkdownTestBattery
         <h2 id='Discussion'><a href='#Discussion'>Discussion</a></h2>\
         <p>Details details details</p>
         """
+        if  let tests:TestGroup = tests / "OneList" / "ImplicitTopic"
+        {
+            Self.run(tests: tests,
+                markdown:
+                """
+                Overview overview overview
+
+                ## Topics
+
+                -   ``StopIt``
+                -   ``DropIt``
+                -   <doc:GetAnotherTopic>
+
+                ## Discussion
+
+                Details details details
+                """,
+                expected: html,
+                topics: [3])
+        }
         if  let tests:TestGroup = tests / "OneList" / "OneTopic" / "Middle"
         {
             Self.run(tests: tests,
