@@ -2,10 +2,10 @@ import SemanticVersions
 import Testing
 
 @main
-enum Main:SyncTests
+enum Main:TestMain, TestBattery
 {
     static
-    func run(tests:Tests)
+    func run(tests:TestGroup)
     {
         if  let tests:TestGroup = tests / "SemanticVersion" / "Release"
         {

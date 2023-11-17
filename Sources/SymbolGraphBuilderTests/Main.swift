@@ -6,10 +6,10 @@ import System
 import Testing
 
 @main
-enum Main:AsyncTests
+enum Main:TestMain, TestBattery
 {
     static
-    func run(tests:Tests) async
+    func run(tests:TestGroup) async
     {
         guard   let workspace:Workspace =
                     await (tests ! "workspace").do({ try await .create(at: ".testing") }),
