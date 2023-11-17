@@ -26,8 +26,8 @@ struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicat
 }
 extension MarkdownInterpreter
 {
-    mutating
-    func append(_ block:__owned MarkdownBlock)
+    private mutating
+    func append(_ block:consuming MarkdownBlock)
     {
         defer
         {
@@ -36,7 +36,7 @@ extension MarkdownInterpreter
 
         //  Only h2 headings are interesting, but if we encounter a stray h1, that can
         //  also terminate a topics list.
-        guard case (let heading as MarkdownBlock.Heading) = block, heading.level <= 2
+        guard case (let heading as MarkdownBlock.Heading) = copy block, heading.level <= 2
         else
         {
             return
@@ -56,7 +56,7 @@ extension MarkdownInterpreter
         }
     }
 
-    mutating
+    private mutating
     func load() -> (article:[MarkdownBlock], topics:[MarkdownDocumentation.Topic])
     {
         defer
@@ -86,7 +86,8 @@ extension MarkdownInterpreter
             }
         }
 
-        guard let start:Int = self.topicsHeading
+        guard
+        let start:Int = self.topicsHeading
         else
         {
             return
@@ -94,27 +95,34 @@ extension MarkdownInterpreter
 
         var pending:[MarkdownDocumentation.Topic] = []
         var current:Int = self.blocks.index(after: start)
-        while current < self.blocks.endIndex
-        {
-            //  If this is the first iteration, we need to ensure the topics list
-            //  began with an h3 heading.
-            guard !pending.isEmpty || h3(self.blocks[current])
-            else
-            {
-                return
-            }
 
+        if  current == self.blocks.endIndex
+        {
+            return
+        }
+
+        //  If the first block isn’t a level 3 heading, use the *Topics* block itself.
+        var heading:MarkdownBlock? = h3(self.blocks[current]) ? nil : self.blocks[start]
+        while true
+        {
             if  let next:Int = self.blocks[self.blocks.index(after: current)...].firstIndex(
                     where: h3(_:))
             {
-                if  let topic:MarkdownDocumentation.Topic = .init(self.blocks[current ..< next])
+                guard
+                let topic:MarkdownDocumentation.Topic = .init(heading: &heading,
+                    body: self.blocks[current ..< next])
+                else
                 {
-                    pending.append(topic)
-                    current = next
-                    continue
+                    return
                 }
+
+                pending.append(topic)
+                current = next
+                continue
             }
-            else if let topic:MarkdownDocumentation.Topic = .init(self.blocks[current...])
+            else if
+                let topic:MarkdownDocumentation.Topic = .init(heading: &heading,
+                    body: self.blocks[current...])
             {
                 self.topics += pending
                 self.topics.append(topic)
