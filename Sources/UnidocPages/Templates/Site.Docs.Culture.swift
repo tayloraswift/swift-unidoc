@@ -13,7 +13,7 @@ extension Site.Docs
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
-        let sidebar:[Volume.Noun]?
+        let sidebar:HTML.Sidebar<Site.Docs>?
 
         private
         let vertex:Volume.Vertex.Culture
@@ -22,7 +22,7 @@ extension Site.Docs
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            sidebar:[Volume.Noun]?,
+            sidebar:HTML.Sidebar<Site.Docs>?,
             vertex:Volume.Vertex.Culture,
             groups:GroupSections)
         {

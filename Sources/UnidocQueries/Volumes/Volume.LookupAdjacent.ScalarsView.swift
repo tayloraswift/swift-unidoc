@@ -5,10 +5,10 @@ import Unidoc
 import UnidocRecords
 import UnidocSelectors
 
-extension WideQuery
+extension Volume.LookupAdjacent
 {
     /// A type that binds a ``Volume.Vertex`` and knows how to extract its adjacent scalars.
-    struct AdjacentScalarsView
+    struct ScalarsView
     {
         let path:Mongo.KeyPath
 
@@ -18,7 +18,7 @@ extension WideQuery
         }
     }
 }
-extension WideQuery.AdjacentScalarsView
+extension Volume.LookupAdjacent.ScalarsView
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)

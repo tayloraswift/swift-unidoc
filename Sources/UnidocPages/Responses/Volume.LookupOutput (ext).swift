@@ -1,3 +1,4 @@
+import HTML
 import HTTP
 import Media
 import Unidoc
@@ -5,12 +6,13 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension WideQuery.Output:HTTP.ServerResponseFactory
+extension Volume.LookupOutput:HTTP.ServerResponseFactory
 {
     public consuming
     func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
     {
-        guard let principal:WideQuery.Output.Principal = (copy self).principal
+        guard
+        let principal:Principal = (copy self).principal
         else
         {
             return .notFound(.init(
@@ -38,7 +40,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
                 //  We currently don’t have any actual means of obtaining a type tree in this
                 //  situation, but in theory, we could.
                 let display:Site.Docs.NotFound = .init(context,
-                    sidebar: principal.tree?.rows)
+                    sidebar: .module(from: principal))
 
                 return .notFound(display.resource(assets: assets))
             }
@@ -71,9 +73,6 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
         }
 
         let canonical:CanonicalVersion? = .init(principal: principal)
-        let sidebar:[Volume.Noun]? = principal.tree?.rows
-
-
         let resource:HTTP.Resource
 
         //  Note: noun tree won’t exist if the module contains no declarations.
@@ -81,6 +80,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
         switch vertex
         {
         case .article(let vertex):
+            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
             let groups:GroupSections = .init(context,
                 groups: principal.groups,
                 bias: vertex.id,
@@ -93,6 +93,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
             resource = page.resource(assets: assets)
 
         case .culture(let vertex):
+            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
             let groups:GroupSections = .init(context,
                 groups: principal.groups,
                 bias: vertex.id,
@@ -105,6 +106,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
             resource = page.resource(assets: assets)
 
         case .decl(let vertex):
+            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
             let groups:GroupSections = .init(context,
                 requirements: vertex.requirements,
                 superforms: vertex.superforms,
@@ -121,7 +123,7 @@ extension WideQuery.Output:HTTP.ServerResponseFactory
 
         case .file:
             //  We should never get this as principal output!
-            throw WideQuery.OutputError.malformed
+            throw Volume.LookupOutputError.malformed
 
         case .foreign(let vertex):
             let groups:GroupSections = .init(context,

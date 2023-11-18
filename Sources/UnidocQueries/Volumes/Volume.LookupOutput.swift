@@ -3,10 +3,10 @@ import MongoSchema
 import UnidocRecords
 import UnidocSelectors
 
-extension WideQuery
+extension Volume
 {
     @frozen public
-    struct Output:Equatable, Sendable
+    struct LookupOutput:Equatable, Sendable
     {
         public
         let principal:Principal?
@@ -26,7 +26,7 @@ extension WideQuery
         }
     }
 }
-extension WideQuery.Output:MongoMasterCodingModel
+extension Volume.LookupOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -36,7 +36,7 @@ extension WideQuery.Output:MongoMasterCodingModel
         case volumes
     }
 }
-extension WideQuery.Output:BSONDocumentDecodable
+extension Volume.LookupOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

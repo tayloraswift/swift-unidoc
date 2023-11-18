@@ -76,7 +76,7 @@ extension Site.Docs.Foreign:ApplicationPage
 }
 extension Site.Docs.Foreign:VersionedPage
 {
-    var sidebar:[Volume.Noun]? { self.context.volumes.principal.tree }
+    var sidebar:HTML.Sidebar<Site.Docs>? { .package(volume: self.context.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {

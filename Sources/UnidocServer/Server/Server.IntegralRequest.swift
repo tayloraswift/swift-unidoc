@@ -189,11 +189,6 @@ extension Server.IntegralRequest
                 with: .init(uri.query?.parameters),
                 tag: tag)
 
-        case Site.Guides.root:
-            endpoint = .get(guides: trunk,
-                with: .init(uri.query?.parameters),
-                tag: tag)
-
         case "lunr":
             endpoint = .get(lunr: trunk,
                 with: .init(uri.query?.parameters),

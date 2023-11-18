@@ -1,8 +1,9 @@
 import FNV1
 import UnidocQueries
+import UnidocRecords
 import UnidocSelectors
 
-extension WideQuery
+extension Volume.LookupQuery
 {
     init(_ trunk:String, _ stem:ArraySlice<String>, hash:FNV24? = nil)
     {

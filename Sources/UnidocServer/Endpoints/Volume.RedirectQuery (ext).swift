@@ -3,7 +3,7 @@ import SemanticVersions
 import UnidocQueries
 import UnidocRecords
 
-extension ThinQuery<Volume.Shoot>
+extension Volume.RedirectQuery<Volume.Shoot>
 {
     static
     func legacy(

@@ -3,13 +3,20 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-public
-protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
+extension Volume
 {
-    associatedtype LookupPredicate:VolumeLookupPredicate
+    public
+    typealias VertexQuery = _VolumeVertexQuery
+}
+
+/// The name of this protocol is ``Volume.VertexQuery``.
+public
+protocol _VolumeVertexQuery:DatabaseQuery where Collation == VolumeCollation
+{
+    associatedtype VertexPredicate:Volume.VertexPredicate
 
     var volume:Volume.Selector { get }
-    var lookup:LookupPredicate { get }
+    var vertex:VertexPredicate { get }
 
     /// The field to store the ``Volume.Meta`` of the **latest stable release**
     /// (relative to the current volume) in.
@@ -29,12 +36,12 @@ protocol VolumeLookupQuery:DatabaseQuery where Collation == VolumeCollation
 
     func extend(pipeline:inout Mongo.Pipeline)
 }
-extension VolumeLookupQuery
+extension Volume.VertexQuery
 {
     @inlinable public static
     var volumeOfLatest:Mongo.KeyPath? { nil }
 }
-extension VolumeLookupQuery
+extension Volume.VertexQuery
 {
     @inlinable public
     var origin:Mongo.Collection { UnidocDatabase.Volumes.name }
@@ -154,7 +161,7 @@ extension VolumeLookupQuery
 
         pipeline.stage
         {
-            self.lookup.stage(&$0, input: Self.volume, output: Self.input)
+            self.vertex.stage(&$0, input: Self.volume, output: Self.input)
         }
     }
 }

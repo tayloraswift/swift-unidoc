@@ -8,9 +8,10 @@ public
 protocol VersionedPage:ApplicationPage
 {
     associatedtype Context:VersionedPageContext
+    associatedtype Sidebar:HyperTextOutputStreamable
 
     var canonical:CanonicalVersion? { get }
-    var sidebar:[Volume.Noun]? { get }
+    var sidebar:Sidebar? { get }
 
     var context:Context { get }
 }
@@ -54,7 +55,7 @@ extension VersionedPage
     public
     func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let sidebar:ModuleSidebar? = self.sidebar.map { .init(self.context, nouns: $0) }
+        let sidebar:Sidebar? = self.sidebar
 
         body[.header, { $0.class = "app" }]
         {
