@@ -30,14 +30,14 @@ extension Site.Docs:VolumeRoot
         switch vertex
         {
         case .article(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(volume: context.page.volume,
+            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 groups: consume groups,
                 bias: vertex.id,
                 mode: nil)
 
-            let page:Site.Docs.Article = .init(context.page,
+            let page:Article = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -45,13 +45,13 @@ extension Site.Docs:VolumeRoot
             resource = page.resource(assets: context.assets)
 
         case .culture(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(volume: context.page.volume,
+            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 groups: consume groups,
                 bias: vertex.id,
                 mode: nil)
-            let page:Site.Docs.Culture = .init(context.page,
+            let page:Module = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -59,7 +59,7 @@ extension Site.Docs:VolumeRoot
             resource = page.resource(assets: context.assets)
 
         case .decl(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(volume: context.page.volume,
+            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 requirements: vertex.requirements,
@@ -68,7 +68,7 @@ extension Site.Docs:VolumeRoot
                 groups: consume groups,
                 bias: vertex.culture,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Site.Docs.Decl = .init(context.page,
+            let page:Decl = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -84,7 +84,7 @@ extension Site.Docs:VolumeRoot
                 groups: consume groups,
                 bias: nil,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Site.Docs.Foreign = .init(context.page,
+            let page:Foreign = .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
@@ -95,7 +95,7 @@ extension Site.Docs:VolumeRoot
                 groups: consume groups,
                 bias: vertex.id,
                 mode: .meta)
-            let page:Site.Docs.Meta = .init(context.page,
+            let page:Landing = .init(context.page,
                 canonical: context.canonical,
                 groups: groups)
             resource = page.resource(assets: context.assets)
