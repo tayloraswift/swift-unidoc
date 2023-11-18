@@ -11,7 +11,7 @@ import URI
 
 extension Site.Docs
 {
-    struct Meta
+    struct Landing
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -29,12 +29,12 @@ extension Site.Docs
         }
     }
 }
-extension Site.Docs.Meta
+extension Site.Docs.Landing
 {
     private
     var repo:Realm.Repo? { self.context.repo }
 }
-extension Site.Docs.Meta:RenderablePage
+extension Site.Docs.Landing:RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
@@ -51,15 +51,15 @@ extension Site.Docs.Meta:RenderablePage
         """
     }
 }
-extension Site.Docs.Meta:StaticPage
+extension Site.Docs.Landing:StaticPage
 {
     var location:URI { Site.Docs[self.volume] }
 }
-extension Site.Docs.Meta:ApplicationPage
+extension Site.Docs.Landing:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Site.Docs.Meta:VersionedPage
+extension Site.Docs.Landing:VersionedPage
 {
     var sidebar:HTML.Sidebar<Site.Docs>? { .package(volume: self.context.volume) }
 

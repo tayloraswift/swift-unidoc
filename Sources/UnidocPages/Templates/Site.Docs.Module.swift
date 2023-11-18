@@ -8,7 +8,7 @@ import URI
 
 extension Site.Docs
 {
-    struct Culture
+    struct Module
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -34,12 +34,12 @@ extension Site.Docs
         }
     }
 }
-extension Site.Docs.Culture
+extension Site.Docs.Module
 {
     private
     var name:String { self.vertex.module.name }
 }
-extension Site.Docs.Culture:RenderablePage
+extension Site.Docs.Module:RenderablePage
 {
     var title:String { "\(self.name) - \(self.volume.title) Documentation" }
 
@@ -59,15 +59,15 @@ extension Site.Docs.Culture:RenderablePage
         }
     }
 }
-extension Site.Docs.Culture:StaticPage
+extension Site.Docs.Module:StaticPage
 {
     var location:URI { Site.Docs[self.volume, self.vertex.shoot] }
 }
-extension Site.Docs.Culture:ApplicationPage
+extension Site.Docs.Module:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Site.Docs.Culture:VersionedPage
+extension Site.Docs.Module:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
