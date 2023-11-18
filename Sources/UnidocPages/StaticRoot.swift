@@ -18,29 +18,6 @@ extension StaticRoot
     @inlinable public static
     var uri:URI { [.push(self.root)] }
 }
-extension StaticRoot
-{
-    static
-    subscript(names:Volume.Meta) -> URI
-    {
-        var uri:URI = Self.uri
-
-        uri.path.append("\(names.selector)")
-
-        return uri
-    }
-
-    static
-    subscript(names:Volume.Meta, shoot:Volume.Shoot) -> URI
-    {
-        var uri:URI = Self[names]
-
-        uri.path += shoot.stem
-        uri["hash"] = shoot.hash?.description
-
-        return uri
-    }
-}
 extension StaticRoot where Get:StaticAPI
 {
     static

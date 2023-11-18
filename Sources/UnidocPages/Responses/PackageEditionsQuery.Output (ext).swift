@@ -8,7 +8,7 @@ import URI
 extension PackageEditionsQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as type:AcceptType?) throws -> HTTP.ServerResponse
+    func response(with assets:StaticAssets, as type:AcceptType) throws -> HTTP.ServerResponse
     {
         switch type
         {

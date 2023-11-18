@@ -6,7 +6,7 @@ import URI
 extension HTML
 {
     @frozen public
-    struct Sidebar<Root> where Root:StaticRoot
+    struct Sidebar<Root> where Root:VolumeRoot
     {
         private
         let volume:Volume.Meta
@@ -30,16 +30,16 @@ extension HTML.Sidebar
     }
 
     static
-    func module(from principal:Volume.LookupOutput.Principal) -> Self?
+    func module(volume:Volume.Meta, tree:Volume.TypeTree?) -> Self?
     {
         guard
-        let nouns:[Volume.Noun] = principal.tree?.rows
+        let nouns:[Volume.Noun] = tree?.rows
         else
         {
             return nil
         }
 
-        return .init(volume: principal.volume, nouns: nouns)
+        return .init(volume: volume, nouns: nouns)
     }
 }
 extension HTML.Sidebar:HyperTextOutputStreamable

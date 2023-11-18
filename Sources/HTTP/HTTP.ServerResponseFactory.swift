@@ -16,5 +16,5 @@ protocol _HTTPServerResponseFactory<Assets>
 {
     associatedtype Assets
 
-    func response(with assets:Assets, as type:AcceptType?) throws -> HTTP.ServerResponse
+    func response(with assets:Assets, as type:AcceptType) throws -> HTTP.ServerResponse
 }

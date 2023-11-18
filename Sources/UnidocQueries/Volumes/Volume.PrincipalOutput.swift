@@ -8,10 +8,10 @@ import UnidocDB
 import UnidocSelectors
 import UnidocRecords
 
-extension Volume.LookupOutput
+extension Volume
 {
     @frozen public
-    struct Principal:Equatable, Sendable
+    struct PrincipalOutput:Equatable, Sendable
     {
         public
         let matches:[Volume.Vertex]
@@ -61,7 +61,7 @@ extension Volume.LookupOutput
         }
     }
 }
-extension Volume.LookupOutput.Principal:MongoMasterCodingModel
+extension Volume.PrincipalOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable
@@ -76,7 +76,7 @@ extension Volume.LookupOutput.Principal:MongoMasterCodingModel
         case tree = "T"
     }
 }
-extension Volume.LookupOutput.Principal:BSONDocumentDecodable
+extension Volume.PrincipalOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
