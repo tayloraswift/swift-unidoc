@@ -7,7 +7,7 @@ import URI
 extension Volume.RedirectOutput:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType) throws -> HTTP.ServerResponse
     {
         if  let redirect:URI = self.redirect
         {

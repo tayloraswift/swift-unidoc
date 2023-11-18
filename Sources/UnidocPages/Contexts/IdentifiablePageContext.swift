@@ -7,7 +7,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-final
+@usableFromInline internal final
 class IdentifiablePageContext<ID> where ID:Hashable
 {
     /// Shared outlines, valid for the overview and details passages.
@@ -28,6 +28,7 @@ class IdentifiablePageContext<ID> where ID:Hashable
 }
 extension IdentifiablePageContext:Identifiable
 {
+    @usableFromInline internal
     var id:ID { self.vertices.principal }
 }
 extension IdentifiablePageContext
@@ -147,6 +148,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext:VersionedPageContext where ID:VersionedPageIdentifier
 {
+    @usableFromInline internal
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>
         where Vector:Sequence<Unidoc.Scalar>
@@ -154,13 +156,16 @@ extension IdentifiablePageContext:VersionedPageContext where ID:VersionedPageIde
         .init(self, display: display, scalars: vector)
     }
 
+    @usableFromInline internal
     func url(_ scalar:Unidoc.Scalar) -> String?
     {
         self.cache[scalar]?.url
     }
 
+    @usableFromInline internal
     var volume:Volume.Meta { self.volumes.principal }
 
+    @usableFromInline internal
     subscript(edition:Unidoc.Edition) -> Volume.Meta?
     {
         self.volumes[edition]

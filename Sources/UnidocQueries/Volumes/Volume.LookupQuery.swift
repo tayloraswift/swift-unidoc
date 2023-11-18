@@ -11,8 +11,13 @@ typealias WideQuery = Volume.LookupQuery
 
 extension Volume
 {
+    /// Performs a vertex query within a volume, with additional lookups as determined by
+    /// the specialized `Context`.
+    ///
+    /// The `Type` parameter allows you to transmit type information to the ``LookupOutput``.
+    /// If no type information is needed, use `Any`.
     @frozen public
-    struct LookupQuery<Context>:Equatable, Hashable, Sendable
+    struct LookupQuery<Context, Type>:Equatable, Hashable, Sendable
         where Context:Volume.LookupContext
     {
         public
@@ -31,17 +36,17 @@ extension Volume
 extension Volume.LookupQuery:DatabaseQuery
 {
     public
-    typealias Output = Volume.LookupOutput
+    typealias Output = Volume.LookupOutput<Type>
 }
 extension Volume.LookupQuery:Volume.VertexQuery
 {
     @inlinable public static
-    var volumeOfLatest:Mongo.KeyPath? { Output.Principal[.volumeOfLatest] }
+    var volumeOfLatest:Mongo.KeyPath? { Volume.PrincipalOutput[.volumeOfLatest] }
     @inlinable public static
-    var volume:Mongo.KeyPath { Output.Principal[.volume] }
+    var volume:Mongo.KeyPath { Volume.PrincipalOutput[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Output.Principal[.matches] }
+    var input:Mongo.KeyPath { Volume.PrincipalOutput[.matches] }
 
     public
     func extend(pipeline:inout Mongo.Pipeline)
@@ -53,7 +58,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
             //  we are only going to generate a disambiguation page.
             $0[.set] = .init
             {
-                $0[Output.Principal[.vertex]] = .expr
+                $0[Volume.PrincipalOutput[.vertex]] = .expr
                 {
                     $0[.cond] =
                     (
@@ -61,10 +66,10 @@ extension Volume.LookupQuery:Volume.VertexQuery
                         {
                             $0[.eq] =
                             (
-                                1, .expr { $0[.size] = Output.Principal[.matches] }
+                                1, .expr { $0[.size] = Volume.PrincipalOutput[.matches] }
                             )
                         },
-                        then: .expr { $0[.first] = Output.Principal[.matches] },
+                        then: .expr { $0[.first] = Volume.PrincipalOutput[.matches] },
                         else: Never??.some(nil)
                     )
                 }
@@ -77,9 +82,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
             $0[.lookup] = .init
             {
                 $0[.from] = UnidocDatabase.Packages.name
-                $0[.localField] = Output.Principal[.volume] / Volume.Meta[.cell]
+                $0[.localField] = Volume.PrincipalOutput[.volume] / Volume.Meta[.cell]
                 $0[.foreignField] = Realm.Package[.coordinate]
-                $0[.as] = Output.Principal[.repo]
+                $0[.as] = Volume.PrincipalOutput[.repo]
             }
         }
         //  Unbox single-element array and access element field.
@@ -87,14 +92,18 @@ extension Volume.LookupQuery:Volume.VertexQuery
         {
             $0[.set] = .init
             {
-                $0[Output.Principal[.repo]] = .expr { $0[.first] = Output.Principal[.repo] }
+                $0[Volume.PrincipalOutput[.repo]] = .expr
+                {
+                    $0[.first] = Volume.PrincipalOutput[.repo]
+                }
             }
         }
         pipeline.stage
         {
             $0[.set] = .init
             {
-                $0[Output.Principal[.repo]] = Output.Principal[.repo] / Realm.Package[.repo]
+                $0[Volume.PrincipalOutput[.repo]] =
+                    Volume.PrincipalOutput[.repo] / Realm.Package[.repo]
             }
         }
 
@@ -120,7 +129,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                     {
                         $0[.coalesce] =
                         (
-                            Output.Principal[.vertex] / Volume.Vertex[.symbol],
+                            Volume.PrincipalOutput[.vertex] / Volume.Vertex[.symbol],
                             BSON.Max.init()
                         )
                     }
@@ -128,14 +137,16 @@ extension Volume.LookupQuery:Volume.VertexQuery
                     {
                         $0[.coalesce] =
                         (
-                            Output.Principal[.vertex] / Volume.Vertex[.hash],
+                            Volume.PrincipalOutput[.vertex] / Volume.Vertex[.hash],
                             BSON.Max.init()
                         )
                     }
                     //  ``volumeOfLatest`` is always non-nil, so we don’t need to worry about
                     //  degenerate index behavior.
-                    $0[let: min] = Output.Principal[.volumeOfLatest] / Volume.Meta[.planes_min]
-                    $0[let: max] = Output.Principal[.volumeOfLatest] / Volume.Meta[.planes_max]
+                    $0[let: min] =
+                        Volume.PrincipalOutput[.volumeOfLatest] / Volume.Meta[.planes_min]
+                    $0[let: max] =
+                        Volume.PrincipalOutput[.volumeOfLatest] / Volume.Meta[.planes_max]
                 }
                 $0[.pipeline] = .init
                 {
@@ -186,7 +197,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                         ]
                     }
                 }
-                $0[.as] = Output.Principal[.vertexInLatest]
+                $0[.as] = Volume.PrincipalOutput[.vertexInLatest]
             }
         }
         //  Unbox single-element array.
@@ -194,9 +205,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
         {
             $0[.set] = .init
             {
-                $0[Output.Principal[.vertexInLatest]] = .expr
+                $0[Volume.PrincipalOutput[.vertexInLatest]] = .expr
                 {
-                    $0[.first] = Output.Principal[.vertexInLatest]
+                    $0[.first] = Volume.PrincipalOutput[.vertexInLatest]
                 }
             }
         }
@@ -205,9 +216,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
         pipeline.stage
         {
             Context.groups(&$0,
-                volume: Output.Principal[.volume],
-                vertex: Output.Principal[.vertex],
-                output: Output.Principal[.groups])
+                volume: Volume.PrincipalOutput[.volume],
+                vertex: Volume.PrincipalOutput[.vertex],
+                output: Volume.PrincipalOutput[.groups])
         }
 
         //  Extract (and de-duplicate) the scalars and volumes mentioned by the extensions.
@@ -217,9 +228,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
         pipeline.stage
         {
             Context.edges(&$0,
-                volume: Output.Principal[.volume],
-                vertex: Output.Principal[.vertex],
-                groups: Output.Principal[.groups],
+                volume: Volume.PrincipalOutput[.volume],
+                vertex: Volume.PrincipalOutput[.vertex],
+                groups: Volume.PrincipalOutput[.groups],
                 output: edges)
         }
 
@@ -235,7 +246,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                     {
                         $0[.project] = .init
                         {
-                            for key:Output.Principal.CodingKey in
+                            for key:Volume.PrincipalOutput.CodingKey in
                             [
                                 .matches,
                                 .vertex,
@@ -244,9 +255,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
                                 .repo,
                             ]
                             {
-                                $0[Output.Principal[key]] = true
+                                $0[Volume.PrincipalOutput[key]] = true
                             }
-                            for volume:Output.Principal.CodingKey in
+                            for volume:Volume.PrincipalOutput.CodingKey in
                             [
                                 .volume,
                                 .volumeOfLatest,
@@ -275,7 +286,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                                     .api
                                 ]
                                 {
-                                    $0[Output.Principal[volume] / Volume.Meta[key]] = true
+                                    $0[Volume.PrincipalOutput[volume] / Volume.Meta[key]] = true
                                 }
                             }
                         }
@@ -298,8 +309,10 @@ extension Volume.LookupQuery:Volume.VertexQuery
                                     //  not a culture.
                                     $0[.coalesce] =
                                     (
-                                        Output.Principal[.vertex] / Volume.Vertex[.culture],
-                                        Output.Principal[.vertex] / Volume.Vertex[.id],
+                                        Volume.PrincipalOutput[.vertex] /
+                                            Volume.Vertex[.culture],
+                                        Volume.PrincipalOutput[.vertex] /
+                                            Volume.Vertex[.id],
                                         BSON.Max.init()
                                     )
                                 }
@@ -317,7 +330,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                                     }
                                 }
                             }
-                            $0[.as] = Output.Principal[.tree]
+                            $0[.as] = Volume.PrincipalOutput[.tree]
                         }
                     }
                     $0.stage
@@ -325,9 +338,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
                         //  Unbox single-element array.
                         $0[.set] = .init
                         {
-                            $0[Output.Principal[.tree]] = .expr
+                            $0[Volume.PrincipalOutput[.tree]] = .expr
                             {
-                                $0[.first] = Output.Principal[.tree]
+                                $0[.first] = Volume.PrincipalOutput[.tree]
                             }
                         }
                     }
@@ -398,7 +411,8 @@ extension Volume.LookupQuery:Volume.VertexQuery
                                 {
                                     $0[edges.volumes] = .init
                                     {
-                                        $0[.ne] = Output.Principal[.volume] / Volume.Meta[.id]
+                                        $0[.ne] =
+                                            Volume.PrincipalOutput[.volume] / Volume.Meta[.id]
                                     }
                                 }
                             }

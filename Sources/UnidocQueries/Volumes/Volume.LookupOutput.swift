@@ -6,17 +6,17 @@ import UnidocSelectors
 extension Volume
 {
     @frozen public
-    struct LookupOutput:Equatable, Sendable
+    struct LookupOutput<T>:Equatable, Sendable
     {
         public
-        let principal:Principal?
+        let principal:PrincipalOutput?
         public
         let vertices:[Volume.Vertex]
         public
         let volumes:[Volume.Meta]
 
         @inlinable public
-        init(principal:Principal?,
+        init(principal:PrincipalOutput?,
             vertices:[Volume.Vertex],
             volumes:[Volume.Meta])
         {

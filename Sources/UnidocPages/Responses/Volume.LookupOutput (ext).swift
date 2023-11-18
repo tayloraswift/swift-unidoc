@@ -6,13 +6,78 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Volume.LookupOutput:HTTP.ServerResponseFactory
+
+@frozen public
+struct IdentifiableResponseContext
+{
+    let page:IdentifiablePageContext<Unidoc.Scalar>
+
+    let canonical:CanonicalVersion?
+    let assets:StaticAssets
+    let accept:AcceptType
+
+    init(
+        _ page:IdentifiablePageContext<Unidoc.Scalar>,
+        canonical:CanonicalVersion?,
+        assets:StaticAssets,
+        accept:AcceptType)
+    {
+        self.page = page
+        self.canonical = canonical
+        self.assets = assets
+        self.accept = accept
+    }
+}
+
+
+import HTTP
+import Media
+import UnidocQueries
+import UnidocRecords
+import UnidocSelectors
+import URI
+
+public
+protocol VolumeRoot:StaticRoot
+{
+    static
+    func response(
+        vertex:consuming Volume.Vertex,
+        groups:consuming [Volume.Group],
+        tree:consuming Volume.TypeTree?,
+        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+}
+extension VolumeRoot
+{
+    static
+    subscript(names:Volume.Meta) -> URI
+    {
+        var uri:URI = Self.uri
+
+        uri.path.append("\(names.selector)")
+
+        return uri
+    }
+
+    static
+    subscript(names:Volume.Meta, shoot:Volume.Shoot) -> URI
+    {
+        var uri:URI = Self[names]
+
+        uri.path += shoot.stem
+        uri["hash"] = shoot.hash?.description
+
+        return uri
+    }
+}
+
+extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
 {
     public consuming
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
+    func response(with assets:StaticAssets, as accept:AcceptType) throws -> HTTP.ServerResponse
     {
         guard
-        let principal:Principal = (copy self).principal
+        let principal:Volume.PrincipalOutput = (copy self).principal
         else
         {
             return .notFound(.init(
@@ -40,7 +105,7 @@ extension Volume.LookupOutput:HTTP.ServerResponseFactory
                 //  We currently don’t have any actual means of obtaining a type tree in this
                 //  situation, but in theory, we could.
                 let display:Site.Docs.NotFound = .init(context,
-                    sidebar: .module(from: principal))
+                    sidebar: .module(volume: principal.volume, tree: principal.tree))
 
                 return .notFound(display.resource(assets: assets))
             }
@@ -64,89 +129,19 @@ extension Volume.LookupOutput:HTTP.ServerResponseFactory
             context.outlines += $0.outlines
         }
 
-        //  Special case for Swiftinit blog posts.
-        if  case .article(let vertex) = vertex,
-            principal.volume.symbol.package == "__swiftinit"
-        {
-            let page:Site.Blog.Article = .init(context, vertex: vertex)
-            return .ok(page.resource(assets: assets))
-        }
+        let groups:[Volume.Group] = principal.groups
+        let tree:Volume.TypeTree? = principal.tree
 
-        let canonical:CanonicalVersion? = .init(principal: principal)
-        let resource:HTTP.Resource
+        let canonical:CanonicalVersion? = .init(principal: consume principal)
 
         //  Note: noun tree won’t exist if the module contains no declarations.
         //  (For example, an `@_exported` shim.)
-        switch vertex
-        {
-        case .article(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
-            let groups:GroupSections = .init(context,
-                groups: principal.groups,
-                bias: vertex.id,
-                mode: nil)
-            let page:Site.Docs.Article = .init(context,
+        return try T.response(vertex: consume vertex,
+            groups: consume groups,
+            tree: consume tree,
+            with: .init(context,
                 canonical: canonical,
-                sidebar: sidebar,
-                vertex: vertex,
-                groups: groups)
-            resource = page.resource(assets: assets)
-
-        case .culture(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
-            let groups:GroupSections = .init(context,
-                groups: principal.groups,
-                bias: vertex.id,
-                mode: nil)
-            let page:Site.Docs.Culture = .init(context,
-                canonical: canonical,
-                sidebar: sidebar,
-                vertex: vertex,
-                groups: groups)
-            resource = page.resource(assets: assets)
-
-        case .decl(let vertex):
-            let sidebar:HTML.Sidebar<Site.Docs>? = .module(from: principal)
-            let groups:GroupSections = .init(context,
-                requirements: vertex.requirements,
-                superforms: vertex.superforms,
-                generics: vertex.signature.generics.parameters,
-                groups: principal.groups,
-                bias: vertex.culture,
-                mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Site.Docs.Decl = .init(context,
-                canonical: canonical,
-                sidebar: sidebar,
-                vertex: vertex,
-                groups: groups)
-            resource = page.resource(assets: assets)
-
-        case .file:
-            //  We should never get this as principal output!
-            throw Volume.LookupOutputError.malformed
-
-        case .foreign(let vertex):
-            let groups:GroupSections = .init(context,
-                groups: principal.groups,
-                bias: nil,
-                mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Site.Docs.Foreign = .init(context,
-                canonical: canonical,
-                vertex: vertex,
-                groups: groups)
-            resource = page.resource(assets: assets)
-
-        case .global:
-            let groups:GroupSections = .init(context,
-                groups: principal.groups,
-                bias: vertex.id,
-                mode: .meta)
-            let page:Site.Docs.Meta = .init(context,
-                canonical: canonical,
-                groups: groups)
-            resource = page.resource(assets: assets)
-        }
-
-        return .ok(resource)
+                assets: assets,
+                accept: accept))
     }
 }

@@ -29,7 +29,7 @@ struct CanonicalVersion
 }
 extension CanonicalVersion
 {
-    init?(principal:borrowing Volume.LookupOutput.Principal)
+    init?(principal:Volume.PrincipalOutput)
     {
         guard
         let volume:Volume.Meta = principal.volumeOfLatest,

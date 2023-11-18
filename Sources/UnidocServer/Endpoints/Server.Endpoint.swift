@@ -126,7 +126,7 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Pipeline<Volume.LookupQuery<Volume.LookupAdjacent>>.init(
+        .interactive(Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Blog>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -154,7 +154,8 @@ extension Server.Endpoint
         {
             let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
 
-            return .interactive(Pipeline<Volume.LookupQuery<Volume.LookupAdjacent>>.init(
+            return .interactive(
+                Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Docs>>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(volume: volume, lookup: shoot),
                 tag: tag))
@@ -188,6 +189,22 @@ extension Server.Endpoint
         }
 
         return nil
+    }
+
+    static
+    func get(stats trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self
+    {
+        let volume:Volume.Selector = .init(trunk)
+        let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
+
+        return .interactive(
+            Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Stats>>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(volume: volume, lookup: shoot),
+            tag: tag))
     }
 
     static
