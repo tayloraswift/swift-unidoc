@@ -61,7 +61,7 @@ extension Site.Docs.MultipleFound:ApplicationPage
 extension Site.Docs.MultipleFound:VersionedPage
 {
     var canonical:CanonicalVersion? { nil }
-    var sidebar:[Volume.Noun]? { nil }
+    var sidebar:Never? { nil }
 
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {

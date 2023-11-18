@@ -8,7 +8,7 @@ import UnidocDB
 import UnidocSelectors
 import UnidocRecords
 
-extension WideQuery.Output
+extension Volume.LookupOutput
 {
     @frozen public
     struct Principal:Equatable, Sendable
@@ -61,7 +61,7 @@ extension WideQuery.Output
         }
     }
 }
-extension WideQuery.Output.Principal:MongoMasterCodingModel
+extension Volume.LookupOutput.Principal:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable
@@ -76,7 +76,7 @@ extension WideQuery.Output.Principal:MongoMasterCodingModel
         case tree = "T"
     }
 }
-extension WideQuery.Output.Principal:BSONDocumentDecodable
+extension Volume.LookupOutput.Principal:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

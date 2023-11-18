@@ -3,10 +3,10 @@ import MongoSchema
 import UnidocSelectors
 import UnidocRecords
 
-extension ThinQuery
+extension Volume
 {
     @frozen public
-    struct Output:Equatable, Sendable
+    struct RedirectOutput:Equatable, Sendable
     {
         public
         let matches:[Volume.Vertex]
@@ -21,7 +21,7 @@ extension ThinQuery
         }
     }
 }
-extension ThinQuery.Output:MongoMasterCodingModel
+extension Volume.RedirectOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable
@@ -30,7 +30,7 @@ extension ThinQuery.Output:MongoMasterCodingModel
         case volume = "Z"
     }
 }
-extension ThinQuery.Output:BSONDocumentDecodable
+extension Volume.RedirectOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

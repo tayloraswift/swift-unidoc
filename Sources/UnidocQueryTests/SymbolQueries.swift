@@ -62,11 +62,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
         {
-            let query:WideQuery = .init("swift", ["swift", "dictionary", "keys"])
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift", ["swift", "dictionary", "keys"])
             await tests.do
             {
 
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let vertex:Volume.Vertex.Decl = tests.expect(
                         value: output.principal?.vertex?.decl)
@@ -79,13 +80,14 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to get multiple results back for an ambiguous query.
         if  let tests:TestGroup = tests / "Int" / "init"
         {
-            let query:WideQuery = .init("swift", ["swift", "int.init(_:)"])
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift", ["swift", "int.init(_:)"])
             await tests.do
             {
 
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let principal:WideQuery.Output.Principal = tests.expect(
+                    let principal:Volume.LookupOutput.Principal = tests.expect(
                         value: output.principal),
                     tests.expect(principal.matches.count >? 1),
                     tests.expect(nil: principal.vertex)
@@ -97,14 +99,15 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to disambiguate the previous query with an FNV-1 hash.
         if  let tests:TestGroup = tests / "Int" / "init" / "hashed"
         {
-            let query:WideQuery = .init("swift", ["swift", "int.init(_:)"],
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift", ["swift", "int.init(_:)"],
                 hash: .init("8VBWO"))
             await tests.do
             {
 
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let principal:WideQuery.Output.Principal = tests.expect(
+                    let principal:Volume.LookupOutput.Principal = tests.expect(
                         value: output.principal),
                     let _:Volume.Vertex = tests.expect(value: principal.vertex)
                 {
@@ -115,13 +118,13 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to use a mangled decl identifier to obtain a redirect.
         if  let tests:TestGroup = tests / "Int" / "init" / "overload"
         {
-            let query:ThinQuery<Symbol.Decl> = .init(
+            let query:Volume.RedirectQuery<Symbol.Decl> = .init(
                 volume: .init(package: "swift", version: nil),
                 lookup: .init(.s, ascii: "Si10bitPatternSiSO_tcfc"))
 
             await tests.do
             {
-                if  let output:ThinQuery<Symbol.Decl>.Output = tests.expect(
+                if  let output:Volume.RedirectOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let vertex:Volume.Vertex.Decl = tests.expect(
                         value: output.matches.first?.decl)
@@ -133,7 +136,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         if  let tests:TestGroup = tests / "Parentheses"
         {
-            for (name, query):(String, WideQuery) in
+            for (name, query):(String, Volume.LookupQuery<Volume.LookupAdjacent>) in
             [
                 (
                     "None",
@@ -147,14 +150,15 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 guard
                     let tests:TestGroup = tests / name,
-                    let query:WideQuery = tests.expect(value: query)
+                    let query:Volume.LookupQuery<Volume.LookupAdjacent> = tests.expect(
+                        value: query)
                 else
                 {
                     continue
                 }
                 await tests.do
                 {
-                    if  let output:WideQuery.Output = tests.expect(
+                    if  let output:Volume.LookupOutput = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
                         let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
                     {
@@ -165,10 +169,11 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         if  let tests:TestGroup = tests / "BarbieCore"
         {
-            let query:WideQuery = .init("swift-malibu", ["barbiecore"])
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift-malibu", ["barbiecore"])
             await tests.do
             {
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let vertex:Volume.Vertex.Culture = tests.expect(
                         value: output.principal?.vertex?.culture),
@@ -194,10 +199,11 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// namespace.
         if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
         {
-            let query:WideQuery = .init("swift-malibu", ["barbiecore", "barbie", "dreamhouse"])
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift-malibu", ["barbiecore", "barbie", "dreamhouse"])
             await tests.do
             {
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let vertex:Volume.Vertex = tests.expect(
                         value: output.principal?.vertex),
@@ -259,11 +265,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
-            let query:WideQuery = .init("swift-malibu", ["barbiecore", "getting-started"])
+            let query:Volume.LookupQuery<Volume.LookupAdjacent> = .init(
+                "swift-malibu", ["barbiecore", "getting-started"])
             await tests.do
             {
 
-                if  let output:WideQuery.Output = tests.expect(
+                if  let output:Volume.LookupOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
                     let _:Volume.Vertex = tests.expect(
                         value: output.principal?.vertex)
@@ -282,7 +289,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// conformances within the same package.
         if  let tests:TestGroup = tests / "Deduplication"
         {
-            for (name, query):(String, WideQuery) in
+            for (name, query):(String, Volume.LookupQuery<Volume.LookupAdjacent>) in
             [
                 (
                     "Upstream",
@@ -296,7 +303,8 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 guard
                     let tests:TestGroup = tests / name,
-                    let query:WideQuery = tests.expect(value: query)
+                    let query:Volume.LookupQuery<Volume.LookupAdjacent> = tests.expect(
+                        value: query)
                 else
                 {
                     continue
@@ -304,7 +312,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 await tests.do
                 {
 
-                    if  let output:WideQuery.Output = tests.expect(
+                    if  let output:Volume.LookupOutput = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
                         let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
                     {

@@ -4,23 +4,12 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension ThinQuery.Output:HTTP.ServerResponseFactory
+extension Volume.RedirectOutput:HTTP.ServerResponseFactory
 {
     public
     func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
     {
-        if  LookupPredicate.self is Volume.Range.Type
-        {
-            let context:IdentifiablePageContext<Never?> = .init(principal: self.volume,
-                repo: nil)
-
-            context.vertices.add(self.matches)
-
-            let feed:Site.Guides.Feed = .init(context, vertices: self.matches)
-
-            return .ok(feed.resource(assets: assets))
-        }
-        else if let redirect:URI = self.redirect
+        if  let redirect:URI = self.redirect
         {
             return .redirect(.permanent("\(redirect)"))
         }

@@ -7,9 +7,9 @@ extension Site.Docs
     struct NotFound
     {
         let context:IdentifiablePageContext<Never?>
-        let sidebar:[Volume.Noun]?
+        let sidebar:HTML.Sidebar<Site.Docs>?
 
-        init(_ context:IdentifiablePageContext<Never?>, sidebar:[Volume.Noun]?)
+        init(_ context:IdentifiablePageContext<Never?>, sidebar:HTML.Sidebar<Site.Docs>?)
         {
             self.context = context
             self.sidebar = sidebar

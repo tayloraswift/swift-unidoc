@@ -5,22 +5,35 @@ import UnidocDB
 import UnidocRecords
 import UnidocSelectors
 
-@frozen public
-struct WideQuery:Equatable, Hashable, Sendable
-{
-    public
-    let volume:Volume.Selector
-    public
-    let lookup:Volume.Shoot
+@available(*, deprecated, renamed: "Volume.LookupQuery")
+public
+typealias WideQuery = Volume.LookupQuery
 
-    @inlinable public
-    init(volume:Volume.Selector, lookup:Volume.Shoot)
+extension Volume
+{
+    @frozen public
+    struct LookupQuery<Context>:Equatable, Hashable, Sendable
+        where Context:Volume.LookupContext
     {
-        self.volume = volume
-        self.lookup = lookup
+        public
+        let volume:Volume.Selector
+        public
+        let vertex:Volume.Shoot
+
+        @inlinable public
+        init(volume:Volume.Selector, lookup vertex:Volume.Shoot)
+        {
+            self.volume = volume
+            self.vertex = vertex
+        }
     }
 }
-extension WideQuery:VolumeLookupQuery
+extension Volume.LookupQuery:DatabaseQuery
+{
+    public
+    typealias Output = Volume.LookupOutput
+}
+extension Volume.LookupQuery:Volume.VertexQuery
 {
     @inlinable public static
     var volumeOfLatest:Mongo.KeyPath? { Output.Principal[.volumeOfLatest] }
@@ -188,113 +201,28 @@ extension WideQuery:VolumeLookupQuery
             }
         }
 
-        let extendee:AdjacentScalar = .init(
-            in: Output.Principal[.vertex] / Volume.Vertex[.extendee])
-
         //  Gather all the extensions to the principal vertex.
         pipeline.stage
         {
-            $0[.lookup] = .init
-            {
-                let global:Mongo.Variable<Unidoc.Scalar> = "global"
-                let local:Mongo.Variable<Unidoc.Scalar> = "local"
-                let topic:Mongo.Variable<Unidoc.Scalar> = "topic"
-
-                let min:Mongo.Variable<Unidoc.Scalar> = "min"
-                let max:Mongo.Variable<Unidoc.Scalar> = "max"
-
-                $0[.from] = UnidocDatabase.Groups.name
-                $0[.let] = .init
-                {
-                    $0[let: global] = .expr
-                    {
-                        $0[.cond] =
-                        (
-                            if: extendee.missing,
-                            then: .expr
-                            {
-                                $0[.coalesce] =
-                                (
-                                    Output.Principal[.vertex] / Volume.Vertex[.id],
-                                    BSON.Max.init()
-                                )
-                            },
-                            else: BSON.Max.init()
-                        )
-                    }
-                    $0[let: local] = .expr
-                    {
-                        $0[.coalesce] =
-                        (
-                            Output.Principal[.vertex] / Volume.Vertex[.extendee],
-                            Output.Principal[.vertex] / Volume.Vertex[.id],
-                            BSON.Max.init()
-                        )
-                    }
-                    $0[let: topic] = .expr
-                    {
-                        //  `BSON.max` is a safe choice for a group `_id` that will never
-                        //  match anything.
-                        $0[.coalesce] =
-                        (
-                            Output.Principal[.vertex] / Volume.Vertex[.group],
-                            BSON.Max.init()
-                        )
-                    }
-                    $0[let: min] = Output.Principal[.volume] / Volume.Meta[.planes_autogroup]
-                    $0[let: max] = Output.Principal[.volume] / Volume.Meta[.planes_max]
-                }
-                $0[.pipeline] = .init
-                {
-                    $0.stage
-                    {
-                        //  Matches groups that have the same `_id` as `topic`, or that have
-                        //  the same `scope` as `local` and are in the range `min` to `max`, or
-                        //  that have the same `scope` as `global` and are marked as `latest`.
-                        $0[.match] = .groups(id: topic,
-                            or: (scope: local, min: min, max: max),
-                            or: (scope: global, latest: true))
-                    }
-                }
-                $0[.as] = Output.Principal[.groups]
-            }
+            Context.groups(&$0,
+                volume: Output.Principal[.volume],
+                vertex: Output.Principal[.vertex],
+                output: Output.Principal[.groups])
         }
 
-        //  Extract (and de-duplicate) the scalars mentioned by the extensions.
-        //  Store them in this temporary field:
-        let scalars:Mongo.KeyPath = "scalars"
+        //  Extract (and de-duplicate) the scalars and volumes mentioned by the extensions.
         //  The extensions have precomputed volume ids for MongoDB’s convenience.
-        let volumes:Mongo.KeyPath = "volumes"
+        let edges:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath) = ("scalars", "volumes")
 
         pipeline.stage
         {
-            $0[.set] = .init
-            {
-                let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
-                    in: Output.Principal[.volume] / Volume.Meta[.dependencies])
-                let extensions:Mongo.List<Volume.Group, Mongo.KeyPath> = .init(
-                    in: Output.Principal[.groups])
-                let adjacent:AdjacentScalarsView = .init(
-                    in: Output.Principal[.vertex])
-
-                $0[volumes] = .expr
-                {
-                    $0[.setUnion] = .init
-                    {
-                        $0.expr { $0[.reduce] = extensions.flatMap(\.zones) }
-                        $0.expr { $0[.map] = dependencies.map { $0[.resolution] } }
-                    }
-                }
-                $0[scalars] = .expr
-                {
-                    $0[.setUnion] = .init
-                    {
-                        $0.expr { $0[.reduce] = extensions.flatMap(\.scalars) }
-                        $0 += adjacent
-                    }
-                }
-            }
+            Context.edges(&$0,
+                volume: Output.Principal[.volume],
+                vertex: Output.Principal[.vertex],
+                groups: Output.Principal[.groups],
+                output: edges)
         }
+
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
         pipeline.stage
@@ -410,13 +338,13 @@ extension WideQuery:VolumeLookupQuery
 
                     $0.stage
                     {
-                        $0[.unwind] = scalars
+                        $0[.unwind] = edges.scalars
                     }
                     $0.stage
                     {
                         $0[.match] = .init
                         {
-                            $0[scalars] = .init { $0[.ne] = Never??.some(nil) }
+                            $0[edges.scalars] = .init { $0[.ne] = Never??.some(nil) }
                         }
                     }
                     $0.stage
@@ -424,7 +352,7 @@ extension WideQuery:VolumeLookupQuery
                         $0[.lookup] = .init
                         {
                             $0[.from] = UnidocDatabase.Vertices.name
-                            $0[.localField] = scalars
+                            $0[.localField] = edges.scalars
                             $0[.foreignField] = Volume.Vertex[.id]
                             $0[.as] = results
                         }
@@ -454,7 +382,7 @@ extension WideQuery:VolumeLookupQuery
 
                     $0.stage
                     {
-                        $0[.unwind] = volumes
+                        $0[.unwind] = edges.volumes
                     }
                     $0.stage
                     {
@@ -464,11 +392,11 @@ extension WideQuery:VolumeLookupQuery
                             {
                                 $0.append
                                 {
-                                    $0[volumes] = .init { $0[.ne] = .some(nil as Never?) }
+                                    $0[edges.volumes] = .init { $0[.ne] = .some(nil as Never?) }
                                 }
                                 $0.append
                                 {
-                                    $0[volumes] = .init
+                                    $0[edges.volumes] = .init
                                     {
                                         $0[.ne] = Output.Principal[.volume] / Volume.Meta[.id]
                                     }
@@ -481,7 +409,7 @@ extension WideQuery:VolumeLookupQuery
                         $0[.lookup] = .init
                         {
                             $0[.from] = UnidocDatabase.Volumes.name
-                            $0[.localField] = volumes
+                            $0[.localField] = edges.volumes
                             $0[.foreignField] = Volume.Meta[.id]
                             $0[.as] = results
                         }

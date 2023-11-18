@@ -1,24 +1,50 @@
 import HTML
+import UnidocQueries
 import UnidocRecords
 import URI
 
-struct ModuleSidebar
+extension HTML
 {
-    private
-    let context:any VersionedPageContext
-
-    let nouns:[Volume.Noun]
-
-    init(_ context:any VersionedPageContext, nouns:[Volume.Noun])
+    @frozen public
+    struct Sidebar<Root> where Root:StaticRoot
     {
-        self.context = context
+        private
+        let volume:Volume.Meta
+        private
+        let nouns:[Volume.Noun]
 
-        self.nouns = nouns
+        private
+        init(volume:Volume.Meta, nouns:[Volume.Noun])
+        {
+            self.volume = volume
+            self.nouns = nouns
+        }
     }
 }
-extension ModuleSidebar:HyperTextOutputStreamable
+extension HTML.Sidebar
 {
     static
+    func package(volume:Volume.Meta) -> Self
+    {
+        .init(volume: volume, nouns: volume.tree)
+    }
+
+    static
+    func module(from principal:Volume.LookupOutput.Principal) -> Self?
+    {
+        guard
+        let nouns:[Volume.Noun] = principal.tree?.rows
+        else
+        {
+            return nil
+        }
+
+        return .init(volume: principal.volume, nouns: nouns)
+    }
+}
+extension HTML.Sidebar:HyperTextOutputStreamable
+{
+    public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         //  Unfortunately, this cannot be a proper `ul`, because `ul` cannot contain another
@@ -50,7 +76,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
                 previous = noun.shoot.stem
                 depth = indents
 
-                var uri:URI { Site.Docs[self.context.volume, noun.shoot] }
+                var uri:URI { Root[self.volume, noun.shoot] }
 
                 switch noun.style
                 {
@@ -61,7 +87,7 @@ extension ModuleSidebar:HyperTextOutputStreamable
                     //  The URI is only valid if the principal volume API version is at
                     //  least 1.0!
                     if  case .foreign = citizenship,
-                        self.context.volume.api < .v(1, 0)
+                        self.volume.api < .v(1, 0)
                     {
                         $0[.span] = name
                     }
