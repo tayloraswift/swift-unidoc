@@ -71,14 +71,24 @@ extension MarkdownInline.Link:MarkdownElement
     public
     func emit(into binary:inout MarkdownBinaryEncoder)
     {
+        guard
+        let target:Target = self.target
+        else
+        {
+            for element:MarkdownInline in self.elements
+            {
+                element.emit(into: &binary)
+            }
+            return
+        }
+
         binary[.a]
         {
-            switch self.target
+            switch target
             {
-            case .outlined(let reference)?: $0[.href] = reference
-            case .safe(let url, _)?:        $0[.href] = url
-            case .unsafe(let url)?:         $0[.external] = url
-            case nil:                       return
+            case .outlined(let reference):  $0[.href] = reference
+            case .safe(let url, _):         $0[.href] = url
+            case .unsafe(let url):          $0[.external] = url
             }
         }
             content:
