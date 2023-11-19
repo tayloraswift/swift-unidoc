@@ -33,8 +33,7 @@ extension Site.Stats:VolumeRoot
             throw Volume.LookupOutputError.malformed
 
         case .culture(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
-                tree: tree)
+            let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
             let page:Module = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
