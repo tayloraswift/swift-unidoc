@@ -97,6 +97,12 @@ extension UnidocDatabase.Packages
     }
 
     public
+    func find(id:PackageIdentifier, with session:Mongo.Session) async throws -> Realm.Package?
+    {
+        try await self.find(by: id, with: session)
+    }
+
+    public
     func find(by coordinate:Int32, with session:Mongo.Session) async throws -> Realm.Package?
     {
         try await self.find(by: Realm.Package[.coordinate], of: coordinate, with: session)

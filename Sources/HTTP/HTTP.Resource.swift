@@ -29,7 +29,7 @@ extension HTTP
         }
     }
 }
-extension HTTP.Resource:ExpressibleByStringLiteral
+extension HTTP.Resource:ExpressibleByStringLiteral, ExpressibleByStringInterpolation
 {
     @inlinable public
     init(stringLiteral:String)

@@ -4,10 +4,33 @@ import JSON
 
 extension GitHubClient<GitHub.API>.Connection
 {
+    func inspect(tag:String,
+        owner:String,
+        repo:String,
+        pat:String) async throws -> GitHubPlugin.TagResponse
+    {
+        let query:JSON = .object
+        {
+            $0["query"] = """
+            query
+            {
+                repository(owner: "\(owner)", name: "\(repo)")
+                {
+                    ref(qualifiedName: "\(tag)")
+                    {
+                        name, commit: target { sha: oid }
+                    }
+                }
+            }
+            """
+        }
+        return try await self.post(query: "\(query)", with: pat)
+    }
+
     func crawl(
         owner:String,
         repo:String,
-        pat:String) async throws -> GitHubPlugin.Crawler.Response
+        pat:String) async throws -> GitHubPlugin.CrawlerResponse
     {
         let query:JSON = .object
         {

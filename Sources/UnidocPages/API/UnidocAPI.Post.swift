@@ -5,7 +5,8 @@ extension UnidocAPI
     @frozen public
     enum Post:String
     {
-        case index
+        case indexRepo = "index-repo"
+        case indexRepoTag = "index-repo-tag"
         case uplink
         case unlink
     }

@@ -77,7 +77,8 @@ extension GitHubPlugin.Crawler
                 fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            let response:Response = try await github.crawl(owner: old.owner.login,
+            let response:GitHubPlugin.CrawlerResponse = try await github.crawl(
+                owner: old.owner.login,
                 repo: old.name,
                 pat: self.pat)
 
