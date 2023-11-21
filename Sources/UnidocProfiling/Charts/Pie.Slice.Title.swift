@@ -1,6 +1,6 @@
 import HTML
 
-extension PieSlice
+extension Pie.Slice
 {
     @frozen @usableFromInline internal
     struct Title
@@ -15,7 +15,7 @@ extension PieSlice
         }
     }
 }
-extension PieSlice.Title:ScalableVectorOutputStreamable
+extension Pie.Slice.Title:ScalableVectorOutputStreamable
 {
     @inlinable internal static
     func += (svg:inout SVG.ContentEncoder, self:Self)

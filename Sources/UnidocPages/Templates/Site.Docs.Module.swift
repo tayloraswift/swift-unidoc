@@ -38,6 +38,9 @@ extension Site.Docs.Module
 {
     private
     var name:String { self.vertex.module.name }
+
+    private
+    var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Module:RenderablePage
 {
@@ -76,7 +79,18 @@ extension Site.Docs.Module:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module"
-                $0[.span] { $0.class = "domain" } = self.volume.domain
+                $0[.span, { $0.class = "domain" }]
+                {
+                    $0[.span, { $0.class = "volume" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Docs[self.volume])"
+                        } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
+                    }
+
+                    $0[.span] { $0.class = "jump" } = self.stem.first
+                }
             }
 
             $0[.h1] = self.name
@@ -99,7 +113,7 @@ extension Site.Docs.Module:VersionedPage
                 {
                     $0[.span] { $0.highlight = .keyword } = "import"
                     $0 += " "
-                    $0[.span] { $0.highlight = .identifier } = self.vertex.module.id
+                    $0[.span] { $0.highlight = .identifier } = self.stem.first
                 }
             }
         }
@@ -110,22 +124,37 @@ extension Site.Docs.Module:VersionedPage
         }
             content:
         {
-            $0[.div, { $0.class = "stats"}]
+            // $0[.h2] = "Module Information"
+
+            $0[.div, { $0.class = "more" }]
             {
-                $0[.h2] = "Interface Breakdown"
+                $0[.div, { $0.class = "charts" }]
+                {
+                    $0[.figure]
+                    {
+                        $0.class = "chart decl"
+                    } = self.vertex.census.unweighted.decls.pie
+                    {
+                        """
+                        \($1) percent of the declarations in \(self.name) are \($0.name)
+                        """
+                    }
 
-                $0 += Unidoc.StatsBreakdown.init(
-                    unweighted: self.vertex.census.unweighted.decls,
-                    weighted: self.vertex.census.weighted.decls,
-                    domain: "this module").condensed
+                    $0[.figure]
+                    {
+                        $0.class = "chart coverage"
+                    } = self.vertex.census.unweighted.coverage.pie
+                    {
+                        """
+                        \($1) percent of the declarations in \(self.name) are \($0.name)
+                        """
+                    }
+                }
 
-
-                $0[.h2] = "Doc Coverage"
-
-                $0 += Unidoc.StatsBreakdown.init(
-                    unweighted: self.vertex.census.unweighted.coverage,
-                    weighted: self.vertex.census.weighted.coverage,
-                    domain: "this module").condensed
+                $0[.a]
+                {
+                    $0.href = "\(Site.Stats[self.volume, self.vertex.shoot])"
+                } = "Module stats and coverage details"
             }
 
             $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))

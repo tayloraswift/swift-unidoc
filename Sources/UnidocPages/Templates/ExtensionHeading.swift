@@ -2,32 +2,29 @@ import HTML
 import Signatures
 import Unidoc
 
-extension GroupSections
+struct ExtensionHeading
 {
-    struct ExtensionHeading
+    let context:IdentifiablePageContext<Unidoc.Scalar>
+
+    private
+    let display:String
+    private
+    let culture:Unidoc.Scalar
+    private
+    let `where`:[GenericConstraint<Unidoc.Scalar?>]
+
+    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        display:String,
+        culture:Unidoc.Scalar,
+        where:[GenericConstraint<Unidoc.Scalar?>])
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
-
-        private
-        let display:String
-        private
-        let culture:Unidoc.Scalar
-        private
-        let `where`:[GenericConstraint<Unidoc.Scalar?>]
-
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-            display:String,
-            culture:Unidoc.Scalar,
-            where:[GenericConstraint<Unidoc.Scalar?>])
-        {
-            self.context = context
-            self.display = display
-            self.culture = culture
-            self.where = `where`
-        }
+        self.context = context
+        self.display = display
+        self.culture = culture
+        self.where = `where`
     }
 }
-extension GroupSections.ExtensionHeading:HyperTextOutputStreamable
+extension ExtensionHeading:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

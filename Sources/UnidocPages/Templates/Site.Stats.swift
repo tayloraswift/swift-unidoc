@@ -51,8 +51,11 @@ extension Site.Stats:VolumeRoot
             throw Volume.LookupOutputError.malformed
 
         case .global(_):
-            //  TODO: implement me
-            throw Volume.LookupOutputError.malformed
+            let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
+            let page:Package = .init(context.page,
+                canonical: context.canonical,
+                sidebar: sidebar)
+            resource = page.resource(assets: context.assets)
         }
 
         return .ok(resource)

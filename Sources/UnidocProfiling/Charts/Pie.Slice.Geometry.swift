@@ -1,31 +1,34 @@
 import HTML
 
-@frozen @usableFromInline internal
-struct PieSlice
+extension Pie.Slice
 {
-    @usableFromInline internal
-    let share:Double
-    @usableFromInline internal
-    let startArc:SVG.Point<Double>
-    @usableFromInline internal
-    let endArc:SVG.Point<Double>
-    /// The end of the slice, in radians.
-    @usableFromInline internal
-    let end:Double
-
-    @inlinable internal
-    init(share:Double,
-        startArc:SVG.Point<Double>,
-        endArc:SVG.Point<Double>,
-        end:Double)
+    @frozen @usableFromInline internal
+    struct Geometry
     {
-        self.share = share
-        self.startArc = startArc
-        self.endArc = endArc
-        self.end = end
+        @usableFromInline internal
+        let share:Double
+        @usableFromInline internal
+        let startArc:SVG.Point<Double>
+        @usableFromInline internal
+        let endArc:SVG.Point<Double>
+        /// The end of the slice, in radians.
+        @usableFromInline internal
+        let end:Double
+
+        @inlinable internal
+        init(share:Double,
+            startArc:SVG.Point<Double>,
+            endArc:SVG.Point<Double>,
+            end:Double)
+        {
+            self.share = share
+            self.startArc = startArc
+            self.endArc = endArc
+            self.end = end
+        }
     }
 }
-extension PieSlice
+extension Pie.Slice.Geometry
 {
     @inlinable internal
     init(share:Double, from start:SVG.Point<Double>, to end:Double)
@@ -36,7 +39,7 @@ extension PieSlice
             end: end)
     }
 }
-extension PieSlice
+extension Pie.Slice.Geometry
 {
     @usableFromInline internal
     var d:String

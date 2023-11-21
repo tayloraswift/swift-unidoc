@@ -95,7 +95,7 @@ extension Site.Docs:VolumeRoot
                 groups: consume groups,
                 bias: vertex.id,
                 mode: .meta)
-            let page:Landing = .init(context.page,
+            let page:Package = .init(context.page,
                 canonical: context.canonical,
                 groups: groups)
             resource = page.resource(assets: context.assets)

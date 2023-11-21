@@ -309,7 +309,7 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = "\(self.tagsUpdated)"
         }
 
-        main += ServerProfile.Breakdown.init(self.tour.profile)
+        main += self.tour.profile
 
         main[.hr]
 

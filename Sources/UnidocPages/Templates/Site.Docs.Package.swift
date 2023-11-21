@@ -5,13 +5,14 @@ import ModuleGraphs
 import SHA1
 import Unidoc
 import UnidocDB
+import UnidocProfiling
 import UnidocRecords
 import UnixTime
 import URI
 
 extension Site.Docs
 {
-    struct Landing
+    struct Package
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -29,12 +30,12 @@ extension Site.Docs
         }
     }
 }
-extension Site.Docs.Landing
+extension Site.Docs.Package
 {
     private
     var repo:Realm.Repo? { self.context.repo }
 }
-extension Site.Docs.Landing:RenderablePage
+extension Site.Docs.Package:RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
@@ -51,15 +52,15 @@ extension Site.Docs.Landing:RenderablePage
         """
     }
 }
-extension Site.Docs.Landing:StaticPage
+extension Site.Docs.Package:StaticPage
 {
     var location:URI { Site.Docs[self.volume] }
 }
-extension Site.Docs.Landing:ApplicationPage
+extension Site.Docs.Package:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Site.Docs.Landing:VersionedPage
+extension Site.Docs.Package:VersionedPage
 {
     var sidebar:HTML.Sidebar<Site.Docs>? { .package(volume: self.context.volume) }
 
@@ -77,7 +78,20 @@ extension Site.Docs.Landing:VersionedPage
                     "Standard Library" :
                     "Package"
 
-                $0[.span, { $0.class = "domain" }] = self.volume.symbol.version
+                $0[.span, { $0.class = "domain" }]
+                {
+                    $0[.span] { $0.class = "volume" } = """
+                    \(self.volume.symbol.package) \(self.volume.symbol.version)
+                    """
+
+                    $0[.span, { $0.class = "jump" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Site.Tags[self.volume.symbol.package])"
+                        } = "all tags"
+                    }
+                }
             }
 
             $0[.h1] = self.title
@@ -110,7 +124,8 @@ extension Site.Docs.Landing:VersionedPage
         {
             if  let repo:Realm.Repo = self.repo
             {
-                $0[.h2] = "Package Repository"
+                let heading:AutomaticHeading = .packageRepository
+                $0[.h2] { $0.id = heading.id } = heading
 
                 $0[.dl]
                 {
@@ -131,6 +146,13 @@ extension Site.Docs.Landing:VersionedPage
                             $0[.dt] = "Keywords"
                             $0[.dd] = repo.topics.joined(separator: ", ")
                         }
+
+                        //  If the repo belongs to a person, show the owner.
+                        if  repo.owner.login != "apple"
+                        {
+                            $0[.dt] = "Owner"
+                            $0[.dd] = repo.owner
+                        }
                     }
                 }
 
@@ -145,7 +167,8 @@ extension Site.Docs.Landing:VersionedPage
 
             if !self.volume.dependencies.isEmpty
             {
-                $0[.h2] = "Package Dependencies"
+                let heading:AutomaticHeading = .packageDependencies
+                $0[.h2] { $0.id = heading.id } = heading
 
                 $0[.table, { $0.class = "dependencies" }]
                 {
@@ -208,10 +231,14 @@ extension Site.Docs.Landing:VersionedPage
 
             if !details.requirements.isEmpty
             {
-                $0[.h2] = "Platform Requirements"
+                let heading:AutomaticHeading = .platformRequirements
+                $0[.h2] { $0.id = heading.id } = heading
 
-                $0[.dl]
+                $0[.dl, { $0.class = "platforms" }]
                 {
+                    $0[.dt] = "linux"
+                    $0[.dd]
+
                     for platform:PlatformRequirement in details.requirements
                     {
                         $0[.dt] = "\(platform.id)"
@@ -220,23 +247,11 @@ extension Site.Docs.Landing:VersionedPage
                 }
             }
 
-            $0[.h2] = "Interface Breakdown"
-
-            $0 += Unidoc.StatsBreakdown.init(
-                unweighted: details.census.unweighted.decls,
-                weighted: details.census.weighted.decls,
-                domain: "this package")
-
-
-            $0[.h2] = "Documentation Coverage"
-
-            $0 += Unidoc.StatsBreakdown.init(
-                unweighted: details.census.unweighted.coverage,
-                weighted: details.census.weighted.coverage,
-                domain: "this package")
-
-
-            $0[.h2] = "Snapshot Information"
+            do
+            {
+                let heading:AutomaticHeading = .snapshotInformation
+                $0[.h2] { $0.id = heading.id } = heading
+            }
 
             $0[.dl]
             {
@@ -266,6 +281,56 @@ extension Site.Docs.Landing:VersionedPage
                         } = "\(commit)"
                     }
                 }
+            }
+
+
+            $0[.div, { $0.class = "more" }]
+            {
+                let url:String = "\(Site.Stats[self.volume])"
+
+                $0[.div, { $0.class = "charts" }]
+                {
+                    $0[.div, { $0.class = "" }]
+                    {
+                        $0[.p]
+                        {
+                            let target:AutomaticHeading = .interfaceBreakdown
+                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
+                        }
+
+                        $0[.figure]
+                        {
+                            $0.class = "chart decl"
+                        } = details.census.unweighted.decls.pie
+                        {
+                            """
+                            \($1) percent of the declarations in \
+                            \(self.volume.title) are \($0.name)
+                            """
+                        }
+                    }
+                    $0[.div, { $0.class = "" }]
+                    {
+                        let target:AutomaticHeading = .documentationCoverage
+                        $0[.p]
+                        {
+                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
+                        }
+
+                        $0[.figure]
+                        {
+                            $0.class = "chart coverage"
+                        } = details.census.unweighted.coverage.pie
+                        {
+                            """
+                            \($1) percent of the declarations in \
+                            \(self.volume.title) are \($0.name)
+                            """
+                        }
+                    }
+                }
+
+                $0[.a] { $0.href = url } = "Package stats and coverage details"
             }
         }
 
