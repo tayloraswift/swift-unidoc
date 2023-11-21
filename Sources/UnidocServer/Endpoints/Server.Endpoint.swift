@@ -298,13 +298,19 @@ extension Server.Endpoint
 
             switch trunk
             {
-            case .index:
+            case .indexRepo:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]
                 {
-                    return .interactive(_SyncRepository.init(
-                        owner: owner,
-                        repo: repo))
+                    return .interactive(IndexRepo.init(owner: owner, repo: repo))
+                }
+
+            case .indexRepoTag:
+                if  let package:String = form["package"],
+                    let tag:String = form["tag"]
+                {
+                    let package:PackageIdentifier = .init(package)
+                    return .interactive(IndexRepoTag.init(package: package, tag: tag))
                 }
 
             case .uplink:

@@ -8,7 +8,7 @@ import UnidocDB
 
 extension Server.Endpoint
 {
-    struct _SyncRepository:Sendable
+    struct IndexRepo:Sendable
     {
         let owner:String
         let repo:String
@@ -20,7 +20,7 @@ extension Server.Endpoint
         }
     }
 }
-extension Server.Endpoint._SyncRepository:RestrictedEndpoint
+extension Server.Endpoint.IndexRepo:RestrictedEndpoint
 {
     func load(from server:Server) async throws -> HTTP.ServerResponse?
     {
@@ -31,7 +31,7 @@ extension Server.Endpoint._SyncRepository:RestrictedEndpoint
             return nil
         }
 
-        let response:GitHubPlugin.Crawler.Response = try await github.api.connect
+        let response:GitHubPlugin.CrawlerResponse = try await github.api.connect
         {
             try await $0.crawl(owner: self.owner,
                 repo: self.repo,

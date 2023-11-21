@@ -1,10 +1,10 @@
 import GitHubAPI
 import JSON
 
-extension GitHubPlugin.Crawler
+extension GitHubPlugin
 {
     /// Models a GraphQL crawler response.
-    struct Response
+    struct CrawlerResponse
     {
         var repo:GitHub.Repo
         var tags:[GitHub.Tag]
@@ -16,7 +16,7 @@ extension GitHubPlugin.Crawler
         }
     }
 }
-extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
+extension GitHubPlugin.CrawlerResponse:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {
