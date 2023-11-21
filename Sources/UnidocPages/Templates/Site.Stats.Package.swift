@@ -8,86 +8,78 @@ import URI
 
 extension Site.Stats
 {
-    struct Module
+    struct Package
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
         let sidebar:HTML.Sidebar<Site.Stats>?
 
-        private
-        let vertex:Volume.Vertex.Culture
-
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            sidebar:HTML.Sidebar<Site.Stats>?,
-            vertex:Volume.Vertex.Culture)
+            sidebar:HTML.Sidebar<Site.Stats>?)
         {
             self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
-            self.vertex = vertex
         }
     }
 }
-extension Site.Stats.Module
+extension Site.Stats.Package:RenderablePage
 {
-    private
-    var name:String { self.vertex.module.name }
-
-    private
-    var stem:Volume.Stem { self.vertex.stem }
-}
-extension Site.Stats.Module:RenderablePage
-{
-    var title:String { "\(self.name) - \(self.volume.title) Statistics" }
+    var title:String { "\(self.volume.title) Statistics" }
 
     var description:String?
     {
         self.volume.symbol.package == .swift ?
         """
-        View statistics and coverage data for \(self.name), \
-        a module in the Swift standard library.
+        View statistics and coverage data for the Swift standard library.
         """ :
         """
-        View statistics and coverage data for \(self.name), \
-        a module in the \(self.volume.title) package.
+        View statistics and coverage data for the \(self.volume.title) package.
         """
     }
 }
-extension Site.Stats.Module:StaticPage
+extension Site.Stats.Package:StaticPage
 {
-    var location:URI { Site.Stats[self.volume, self.vertex.shoot] }
+    var location:URI { Site.Stats[self.volume] }
 }
-extension Site.Stats.Module:ApplicationPage
+extension Site.Stats.Package:ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Site.Stats.Module:VersionedPage
+extension Site.Stats.Package:VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
-        let back:String = "\(Site.Docs[self.volume, self.vertex.shoot])"
+        let back:String = "\(Site.Docs[self.volume])"
 
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = "Module details"
-                $0[.span] { $0.class = "domain" } = self.context.subdomain(self.vertex.shoot)
+                $0[.span] { $0.class = "phylum" } = "Package details"
+                $0[.span, { $0.class = "domain" }] = self.context.domain
             }
 
-            $0[.h1] = "\(self.name) metrics"
+            $0[.h1] = "\(self.volume.title) metrics"
 
             $0[.p]
             {
                 $0 += "Statistics and coverage details for the "
-                $0[.code] { $0[.a] { $0.href = back } = self.name }
-                $0 += " module."
+                $0[.a] { $0.href = back } = self.volume.title
+                $0 += " package."
             }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
+
+        guard
+        let details:Volume.Meta.LinkDetails = self.volume.link
+        else
+        {
+            return
+        }
 
         main[.section]
         {
@@ -95,16 +87,17 @@ extension Site.Stats.Module:VersionedPage
         }
             content:
         {
-            $0[.h2] = "Interface Breakdown"
+            let breakdown:AutomaticHeading = .interfaceBreakdown
+            $0[.h2] { $0.id = breakdown.id } = breakdown
 
             $0[.h3] = "Declarations"
             $0[.figure]
             {
                 $0.class = "chart decl"
-            } = self.vertex.census.unweighted.decls.chart
+            } = details.census.unweighted.decls.chart
             {
                 """
-                \($1) percent of the declarations in \(self.name) are \($0.name)
+                \($1) percent of the declarations in \(self.volume.title) are \($0.name)
                 """
             }
 
@@ -112,23 +105,24 @@ extension Site.Stats.Module:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart decl"
-            } = self.vertex.census.weighted.decls.chart
+            } = details.census.weighted.decls.chart
             {
                 """
-                \($1) percent of the symbols in \(self.name) are \($0.name)
+                \($1) percent of the symbols in \(self.volume.title) are \($0.name)
                 """
             }
 
-            $0[.h2] = "Documentation Coverage"
+            let coverage:AutomaticHeading = .documentationCoverage
+            $0[.h2] { $0.id = coverage.id } = coverage
 
             $0[.h3] = "Declarations"
             $0[.figure]
             {
                 $0.class = "chart coverage"
-            } = self.vertex.census.unweighted.coverage.chart
+            } = details.census.unweighted.coverage.chart
             {
                 """
-                \($1) percent of the declarations in \(self.name) are \($0.name)
+                \($1) percent of the declarations in \(self.volume.title) are \($0.name)
                 """
             }
 
@@ -136,10 +130,10 @@ extension Site.Stats.Module:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart coverage"
-            } = self.vertex.census.weighted.coverage.chart
+            } = details.census.weighted.coverage.chart
             {
                 """
-                \($1) percent of the symbols in \(self.name) are \($0.name)
+                \($1) percent of the symbols in \(self.volume.title) are \($0.name)
                 """
             }
         }

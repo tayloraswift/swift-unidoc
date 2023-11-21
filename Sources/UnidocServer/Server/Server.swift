@@ -337,7 +337,7 @@ extension Server
         {
         case    .barbie(let language):
             self.tour.profile.responses.toBarbie[keyPath: status] += 1
-            self.tour.profile.languages[language] += 1
+            self.tour.profile.languages[language.dominant] += 1
 
             self.tour.lastImpression = metadata.logged
 

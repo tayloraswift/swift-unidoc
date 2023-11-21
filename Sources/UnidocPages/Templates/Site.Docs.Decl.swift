@@ -117,42 +117,9 @@ extension Site.Docs.Decl:VersionedPage
                     }
                 }
 
-                $0[.span, { $0.class = "domain" }]
-                {
-                    if  self.vertex.namespace != self.vertex.culture
-                    {
-                        $0[.span] { $0.class = "culture" } = self.context.link(
-                            module: self.vertex.culture)
-
-                        $0[.span, { $0.class = "volume" }]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "\(Site.Docs[self.volume])"
-                            } = self.volume.symbol.version
-                        }
-
-                        $0[.span, { $0.class = "namespace" }]
-                        {
-                            $0[link: self.context.url(self.vertex.namespace)] = self.stem.first
-                        }
-                    }
-                    else
-                    {
-                        $0[.span, { $0.class = "culture" }]
-                        {
-                            $0[link: self.context.url(self.vertex.namespace)] = self.stem.first
-                        }
-
-                        $0[.span, { $0.class = "volume" }]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "\(Site.Docs[self.volume])"
-                            } = self.volume.symbol.version
-                        }
-                    }
-                }
+                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.first,
+                    namespace: self.vertex.namespace,
+                    culture: self.vertex.culture)
             }
 
             $0[.h1] = self.stem.last

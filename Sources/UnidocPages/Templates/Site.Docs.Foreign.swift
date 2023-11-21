@@ -85,7 +85,7 @@ extension Site.Docs.Foreign:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Extension (\(self.demonym.title))"
-                $0[.span] { $0.class = "domain" } = self.volume.domain
+                $0[.span] { $0.class = "domain" } = self.context.domain
             }
 
             $0[.h1] = "\(self.stem.last) (ext)"

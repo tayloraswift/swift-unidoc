@@ -6,8 +6,6 @@ div.searchbar-container
 
     label.checkbox
     {
-        background-color: $light-background;
-
         @include backdrop-blur;
 
         max-width: 20rem;
@@ -44,7 +42,8 @@ div.searchbar
 
     padding: 0.25rem 0.5rem 0.25rem 1rem;
 
-    background-color: $light-background-pink;
+    @include backdrop-blur-pink;
+
     border-radius: 0.5rem;
 }
 div.searchbar,
@@ -81,10 +80,10 @@ div.searchbar,
     display: flex;
     flex-flow: column nowrap;
 
+    @include backdrop-blur-pink;
+
     li
     {
-        background-color: $light-background-pink;
-
         a
         {
             display: flex;
@@ -128,6 +127,9 @@ div.searchbar,
             }
         }
     }
+
+    //  Needed to get the backdrop blur corners to line up with the list items.
+    border-radius: 0.5rem;
 
     li:first-child
     {

@@ -51,25 +51,24 @@ section.introduction
 
         span.domain
         {
-            span.namespace::before
+            span.extends
             {
-                content: "->";
+                display: inline-block;
                 padding: 0 0.35em;
                 font-family: $typeface-serif;
             }
 
-            span.package:after,
-            span.volume:before,
-            span.volume:after
+            span.jump:before,
+            span.jump:after
             {
                 margin: 0 0.2rem;
             }
 
-            span.volume:before
+            span.jump:before
             {
                 content: '(';
             }
-            span.volume:after
+            span.jump:after
             {
                 content: ')';
             }
