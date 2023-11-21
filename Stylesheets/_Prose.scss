@@ -37,6 +37,8 @@ section.details
             color: $light-foreground-semi;
             border-bottom: 2px solid $light-foreground-semi;
         }
+
+        border-bottom: 2px solid $light-foreground-semi;
     }
     aside.important,
     aside.warning
@@ -46,6 +48,13 @@ section.details
             color: $light-accent-hot-pink;
             border-color: $light-accent-hot-pink;
         }
+
+        border-color: $light-accent-hot-pink;
+    }
+
+    aside:last-child
+    {
+        border-bottom: none;
     }
 }
 section.details
