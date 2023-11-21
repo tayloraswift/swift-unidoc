@@ -4,7 +4,7 @@ public
 protocol PieValues<Sectors, SectorKey>
 {
     associatedtype SectorKey:PieSectorKey
-    associatedtype Sectors:BidirectionalCollection<(key:SectorKey, value:Int)>
+    associatedtype Sectors:Sequence<(key:SectorKey, value:Int)>
 
     var sectors:Sectors { get }
 }
@@ -22,7 +22,7 @@ extension PieValues
     func pie(title:(SectorKey, SectorKey.ShareFormat) throws -> String)
         rethrows -> Pie<SectorKey>
     {
-        let sectors:Sectors = self.sectors
+        let sectors:[(key:SectorKey, value:Int)] = self.sectors.filter { $0.value > 0 }
 
         guard sectors.startIndex < sectors.endIndex
         else
@@ -31,7 +31,7 @@ extension PieValues
         }
 
         let divisor:Double = .init(sectors.reduce(into: 0) { $0 += $1.value })
-        let last:Sectors.Index = sectors.index(before: sectors.endIndex)
+        let last:Int = sectors.index(before: sectors.endIndex)
 
         var start:SVG.Point<Double> = .init(1, 0)
         var w:Int = 0
@@ -39,7 +39,7 @@ extension PieValues
         var slices:[Pie<SectorKey>.Slice] = []
             slices.reserveCapacity(sectors.count)
 
-        for (key, value):(SectorKey, Int) in sectors[..<last] where value > 0
+        for (key, value):(SectorKey, Int) in sectors[..<last]
         {
             w += value
 
@@ -58,8 +58,8 @@ extension PieValues
         }
 
         let (key, value):(SectorKey, Int) = sectors[last]
-        if  value > 0,
-            w > 0
+
+        if  w > 0
         {
             let share:Double = Double.init(value) / divisor
             let slice:Pie<SectorKey>.Slice = .init(geometry: .init(share: share,
