@@ -95,18 +95,7 @@ extension Server
     var secured:Bool { self.options.mode.secured }
 
     nonisolated
-    var assets:StaticAssets
-    {
-        guard self.options.cloudfront
-        else
-        {
-            return .init(version: nil)
-        }
-
-        //  Eventually, this should be dynamically configurable. But for now, we just
-        //  hard-code the version number.
-        return .init(version: .v(2, 0))
-    }
+    var assets:StaticAssets { self.options.cloudfront ? .cloudfront : .local }
 
     nonisolated
     subscript<Plugin>(
