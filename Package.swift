@@ -499,6 +499,7 @@ let package:Package = .init(
             [
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
+                .target(name: "Media"),
                 .target(name: "UA"),
             ]),
 

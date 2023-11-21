@@ -1,4 +1,5 @@
 import HTTP
+import Media
 
 extension HTTP
 {
@@ -6,10 +7,10 @@ extension HTTP
     struct AcceptLanguage:Equatable, Hashable, Sendable
     {
         public
-        let dominant:Substring
+        let dominant:Macrolanguage
 
         @inlinable public
-        init(dominant:Substring)
+        init(dominant:Macrolanguage)
         {
             self.dominant = dominant
         }
@@ -66,36 +67,13 @@ extension HTTP.AcceptLanguage
             }
         }
 
-        if  dominant.subtag.isEmpty
+        guard
+        let macrolanguage:Macrolanguage = .init(dominant.subtag)
+        else
         {
             return nil
         }
 
-        self.init(dominant: dominant.subtag)
-    }
-}
-extension HTTP.AcceptLanguage
-{
-    @inlinable internal
-    var field:WritableKeyPath<ServerProfile.ByLanguage, Int>
-    {
-        switch self.dominant
-        {
-        case "ar":  return \.ar
-        case "bn":  return \.bn
-        case "de":  return \.de
-        case "en":  return \.en
-        case "es":  return \.es
-        case "fr":  return \.fr
-        case "hi":  return \.hi
-        case "it":  return \.it
-        case "ja":  return \.ja
-        case "ko":  return \.ko
-        case "pt":  return \.pt
-        case "ru":  return \.ru
-        case "vi":  return \.vi
-        case "zh":  return \.zh
-        case _:     return \.other
-        }
+        self.init(dominant: macrolanguage)
     }
 }

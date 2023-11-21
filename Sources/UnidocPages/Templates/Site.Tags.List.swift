@@ -107,14 +107,7 @@ extension Site.Tags.List:ApplicationPage
                         }
 
                         $0[.dt] = "Owner"
-                        $0[.dd]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "https://github.com/\(repo.owner.login)"
-                                $0.target = "_blank"
-                            } = "@\(repo.owner.login)"
-                        }
+                        $0[.dd] = repo.owner
 
                         $0[.dt] = "Watchers"
                         $0[.dd] = "\(repo.watchers)"

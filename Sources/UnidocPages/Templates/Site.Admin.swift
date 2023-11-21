@@ -105,7 +105,7 @@ extension Site.Admin:AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(UnidocAPI[.index])"
+            $0.action = "\(UnidocAPI[.indexRepo])"
             $0.method = "post"
         }
             content:
@@ -133,6 +133,36 @@ extension Site.Admin:AdministrativePage
             $0[.p]
             {
                 $0[.button] { $0.type = "submit" } = "Index GitHub Repository"
+            }
+        }
+
+        main[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(UnidocAPI[.indexRepoTag])"
+            $0.method = "post"
+        }
+            content:
+        {
+            $0[.p]
+            {
+                $0[.input]
+                {
+                    $0.type = "text"
+                    $0.name = "package"
+                    $0.placeholder = "package"
+                }
+
+                $0[.input]
+                {
+                    $0.type = "text"
+                    $0.name = "tag"
+                    $0.placeholder = "tag"
+                }
+            }
+            $0[.p]
+            {
+                $0[.button] { $0.type = "submit" } = "Index GitHub Tag"
             }
         }
 
@@ -309,7 +339,7 @@ extension Site.Admin:AdministrativePage
             $0[.dd] = "\(self.tagsUpdated)"
         }
 
-        main += ServerProfile.Breakdown.init(self.tour.profile)
+        main += self.tour.profile
 
         main[.hr]
 

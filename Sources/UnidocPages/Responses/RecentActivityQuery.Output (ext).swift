@@ -5,7 +5,7 @@ import UnidocQueries
 extension RecentActivityQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType?) throws -> HTTP.ServerResponse
+    func response(with assets:StaticAssets, as _:AcceptType) throws -> HTTP.ServerResponse
     {
         let page:Site.RecentActivity = .init(
             repo: self.repo,

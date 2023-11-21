@@ -6,8 +6,6 @@ div.searchbar-container
 
     label.checkbox
     {
-        background-color: $light-background;
-
         @include backdrop-blur;
 
         max-width: 20rem;
@@ -44,7 +42,8 @@ div.searchbar
 
     padding: 0.25rem 0.5rem 0.25rem 1rem;
 
-    background-color: $light-background-pink;
+    @include backdrop-blur-pink;
+
     border-radius: 0.5rem;
 }
 div.searchbar,
@@ -83,8 +82,6 @@ div.searchbar,
 
     li
     {
-        background-color: $light-background-pink;
-
         a
         {
             display: flex;
@@ -129,6 +126,9 @@ div.searchbar,
         }
     }
 
+    //  Needed to get the backdrop blur corners to line up with the list items.
+    border-radius: 0.5rem;
+
     li:first-child
     {
         border-top-left-radius: 0.5rem;
@@ -170,6 +170,19 @@ div.searchbar,
     div.search-tool:focus-within #search-results,
     header:focus-within #search-results
     {
-        display: inherit;
+        display: flex;
+    }
+}
+#search-results
+{
+    background-color: $light-background-pink;
+
+    //  Backdrop filter on iOS Safari is broken, it only works for elements that are visible
+    //  on page load. The search results list is not visible unless it contains at least one
+    //  list item, so we have to use an opaque background instead.
+    @supports (backdrop-filter: blur(10px) saturate(180%))
+    {
+        background-color: $light-background-pink-translucent;
+        backdrop-filter: blur(10px) saturate(180%);
     }
 }

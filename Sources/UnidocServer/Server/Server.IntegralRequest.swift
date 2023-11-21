@@ -179,18 +179,13 @@ extension Server.IntegralRequest
             endpoint = .get(auth: trunk,
                 with: .init(uri.query?.parameters))
 
-        case "articles":
+        case Site.Blog.root:
             endpoint = .get(articles: trunk,
                 with: .init(uri.query?.parameters),
                 tag: tag)
 
         case Site.Docs.root:
             endpoint = .get(docs: trunk, path,
-                with: .init(uri.query?.parameters),
-                tag: tag)
-
-        case Site.Guides.root:
-            endpoint = .get(guides: trunk,
                 with: .init(uri.query?.parameters),
                 tag: tag)
 
@@ -202,6 +197,11 @@ extension Server.IntegralRequest
         //  Deprecated route.
         case "sitemaps":
             endpoint = .redirect("/\(Site.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols")
+
+        case Site.Stats.root:
+            endpoint = .get(stats: trunk, path,
+                with: .init(uri.query?.parameters),
+                tag: tag)
 
         case Site.Tags.root:
             endpoint = .get(tags: trunk,

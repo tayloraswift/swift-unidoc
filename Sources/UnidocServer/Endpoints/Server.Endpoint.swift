@@ -126,7 +126,7 @@ extension Server.Endpoint
         with parameters:PipelineParameters,
         tag:MD5?) -> Self
     {
-        .interactive(Pipeline<WideQuery>.init(
+        .interactive(Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Blog>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -154,24 +154,12 @@ extension Server.Endpoint
         {
             let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
 
-            return .interactive(Pipeline<WideQuery>.init(
+            return .interactive(
+                Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Docs>>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(volume: volume, lookup: shoot),
                 tag: tag))
         }
-    }
-
-    static
-    func get(guides trunk:String,
-        with parameters:PipelineParameters,
-        tag:MD5?) -> Self
-    {
-        .interactive(Pipeline<ThinQuery<Volume.Range>>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(
-                volume: .init(trunk),
-                lookup: .articles),
-            tag: tag))
     }
 
     static
@@ -204,6 +192,22 @@ extension Server.Endpoint
     }
 
     static
+    func get(stats trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:PipelineParameters,
+        tag:MD5?) -> Self
+    {
+        let volume:Volume.Selector = .init(trunk)
+        let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
+
+        return .interactive(
+            Pipeline<Volume.LookupQuery<Volume.LookupAdjacent, Site.Stats>>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(volume: volume, lookup: shoot),
+            tag: tag))
+    }
+
+    static
     func get(tags trunk:String, with parameters:PipelineParameters, tag:MD5?) -> Self
     {
         .interactive(Pipeline<PackageEditionsQuery>.init(
@@ -218,19 +222,19 @@ extension Server.Endpoint
         _ stem:ArraySlice<String>,
         with parameters:LegacyParameters) -> Self
     {
-        let query:ThinQuery<Volume.Shoot> = .legacy(head: trunk,
+        let query:Volume.RedirectQuery<Volume.Shoot> = .legacy(head: trunk,
             rest: stem,
             from: parameters.from)
 
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .interactive(Pipeline<ThinQuery<Symbol.Decl>>.init(
+            return .interactive(Pipeline<Volume.RedirectQuery<Symbol.Decl>>.init(
                 output: .text(.html),
                 query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
-            return .interactive(Pipeline<ThinQuery<Volume.Shoot>>.init(
+            return .interactive(Pipeline<Volume.RedirectQuery<Volume.Shoot>>.init(
                 output: .text(.html),
                 query: query))
         }
@@ -294,13 +298,19 @@ extension Server.Endpoint
 
             switch trunk
             {
-            case .index:
+            case .indexRepo:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]
                 {
-                    return .interactive(_SyncRepository.init(
-                        owner: owner,
-                        repo: repo))
+                    return .interactive(IndexRepo.init(owner: owner, repo: repo))
+                }
+
+            case .indexRepoTag:
+                if  let package:String = form["package"],
+                    let tag:String = form["tag"]
+                {
+                    let package:PackageIdentifier = .init(package)
+                    return .interactive(IndexRepoTag.init(package: package, tag: tag))
                 }
 
             case .uplink:

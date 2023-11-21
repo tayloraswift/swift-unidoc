@@ -201,6 +201,11 @@ struct Macrolanguage:Equatable, Hashable, Sendable
         case zu
     }
 }
+extension Macrolanguage:Comparable
+{
+    @inlinable public static
+    func < (a:Self, b:Self) -> Bool { a.rawValue < b.rawValue }
+}
 extension Macrolanguage:RawRepresentableByIntegerEncoding
 {
 }

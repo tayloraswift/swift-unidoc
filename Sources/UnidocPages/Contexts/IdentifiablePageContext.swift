@@ -7,7 +7,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-final
+@usableFromInline internal final
 class IdentifiablePageContext<ID> where ID:Hashable
 {
     /// Shared outlines, valid for the overview and details passages.
@@ -28,6 +28,7 @@ class IdentifiablePageContext<ID> where ID:Hashable
 }
 extension IdentifiablePageContext:Identifiable
 {
+    @usableFromInline internal
     var id:ID { self.vertices.principal }
 }
 extension IdentifiablePageContext
@@ -112,6 +113,56 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext where ID:VersionedPageIdentifier
 {
+    /// Generates a subdomain header for a module using its shoot.
+    func subdomain(_ module:Volume.Shoot) -> Volume.Meta.Subdomain?
+    {
+        let module:HTML.Link<Substring> = .init(display: module.stem.first,
+            target: "\(Site.Docs[self.volume, module])")
+        return .init(self.volume, culture: .original(module))
+    }
+
+    /// Generates a subdomain header for a module which is **not** the current principal vertex.
+    ///
+    /// This function returns nil is `culture` is the current principal vertex. To generate a
+    /// subdomain header for the current principal vertex, use ``subdomain(_:)`` instead.
+    func subdomain(_ module:Substring,
+        culture:Unidoc.Scalar) -> Volume.Meta.Subdomain?
+    {
+        guard
+        let url:String = self.url(culture)
+        else
+        {
+            return nil
+        }
+
+        let module:HTML.Link<Substring> = .init(display: module, target: url)
+        return .init(self.volume, culture: .original(module))
+    }
+
+    func subdomain(_ module:Substring,
+        namespace:Unidoc.Scalar,
+        culture:Unidoc.Scalar) -> Volume.Meta.Subdomain?
+    {
+        guard culture != namespace
+        else
+        {
+            return self.subdomain(module, culture: culture)
+        }
+
+        guard
+        let namespace:String = self.url(namespace),
+        let culture:HTML.Link<ModuleIdentifier> = self.link(module: culture)
+        else
+        {
+            return nil
+        }
+
+        let module:HTML.Link<Substring> = .init(display: module, target: namespace)
+        return .init(self.volume, culture: .colonial(module, culture))
+    }
+
+    var domain:Volume.Meta.Domain { .init(self.volume) }
+
     func link(module:Unidoc.Scalar) -> HTML.Link<ModuleIdentifier>?
     {
         self.cache[culture: module].map
@@ -147,6 +198,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext:VersionedPageContext where ID:VersionedPageIdentifier
 {
+    @usableFromInline internal
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>
         where Vector:Sequence<Unidoc.Scalar>
@@ -154,13 +206,16 @@ extension IdentifiablePageContext:VersionedPageContext where ID:VersionedPageIde
         .init(self, display: display, scalars: vector)
     }
 
+    @usableFromInline internal
     func url(_ scalar:Unidoc.Scalar) -> String?
     {
         self.cache[scalar]?.url
     }
 
+    @usableFromInline internal
     var volume:Volume.Meta { self.volumes.principal }
 
+    @usableFromInline internal
     subscript(edition:Unidoc.Edition) -> Volume.Meta?
     {
         self.volumes[edition]

@@ -53,70 +53,21 @@ extension ServerProfile.ByStatus:ExpressibleByDictionaryLiteral
         self.init(ok: 0)
     }
 }
-extension ServerProfile.ByStatus
+extension ServerProfile.ByStatus:PieValues
 {
-    func chart(stratum:String) -> Pie<Stat>
+    @inlinable public
+    var sectors:KeyValuePairs<SectorKey, Int>
     {
-        var chart:Pie<Stat> = []
-
-        for (value, name, style):(Int, String, String) in
         [
-            (
-                self.multipleChoices,
-                "Multiple Choices",
-                "multiple-choices"
-            ),
-            (
-                self.notModified,
-                "Not Modified",
-                "not-modified"
-            ),
-            (
-                self.ok,
-                "OK",
-                "ok"
-            ),
-            (
-                self.redirectedPermanently,
-                "Redirected Permanently",
-                "redirected-permanently"
-            ),
-            (
-                self.redirectedTemporarily,
-                "Redirected Temporarily",
-                "redirected-temporarily"
-            ),
-            (
-                self.notFound,
-                "Not Found",
-                "not-found"
-            ),
-            (
-                self.gone,
-                "Gone",
-                "gone"
-            ),
-            (
-                self.errored,
-                "Errored",
-                "errored"
-            ),
-            (
-                self.unauthorized,
-                "Unauthorized",
-                "unauthorized"
-            ),
+            .ok:                    self.ok,
+            .notModified:           self.notModified,
+            .redirectedPermanently: self.redirectedPermanently,
+            .redirectedTemporarily: self.redirectedTemporarily,
+            .notFound:              self.notFound,
+            .gone:                  self.gone,
+            .errored:               self.errored,
+            .unauthorized:          self.unauthorized,
+            .multipleChoices:       self.multipleChoices,
         ]
-        {
-            if  value > 0
-            {
-                chart.append(.init(name,
-                    stratum: stratum,
-                    value: value,
-                    class: "status \(style)"))
-            }
-        }
-
-        return chart
     }
 }

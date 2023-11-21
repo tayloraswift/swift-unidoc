@@ -1,3 +1,86 @@
+figure.decl div.pie-color > svg g
+{
+    > *
+    {
+        fill: rgb(255, 255, 255);
+    }
+    > *.function
+    {
+        fill: rgb(255, 103, 103);
+    }
+    > *.operator
+    {
+        fill: rgb(255, 50, 111);
+    }
+    > *.constructor
+    {
+        fill: rgb(255, 103, 141);
+    }
+    > *.method
+    {
+        fill: rgb(255, 170, 196);
+    }
+    > *.subscript
+    {
+        fill: rgb(250, 104, 255);
+    }
+    > *.functor
+    {
+        fill: rgb(198, 112, 255);
+    }
+    > *.protocol
+    {
+        fill: rgb(82, 206, 255);
+    }
+    > *.requirement
+    {
+        fill: rgb(130, 255, 249);
+    }
+    > *.witness
+    {
+        fill: rgb(171, 255, 244);
+    }
+    > *.macro.attached
+    {
+        fill: rgb(61, 255, 103);
+    }
+    > *.macro.freestanding
+    {
+        fill: rgb(132, 255, 159);
+    }
+    > *.structure
+    {
+        fill: rgb(255, 244, 94);
+    }
+    > *.class
+    {
+        fill: rgb(255, 212, 72);
+    }
+    > *.actor
+    {
+        fill: rgb(255, 197, 39);
+    }
+    > *.typealias
+    {
+        fill: rgb(255, 154, 38);
+    }
+}
+figure.coverage div.pie-color > svg g
+{
+    > *.undocumented
+    {
+        fill: rgb(238, 238, 238);
+    }
+    > *.indirect
+    {
+        fill: rgb(255, 170, 196);
+    }
+    > *.direct
+    {
+        fill: rgb(255, 103, 141);
+    }
+}
+
 figure div.pie
 {
     > div.pie-color
@@ -33,87 +116,6 @@ figure div.pie
             inset 0 -0.5em 1.5em -0.75em rgba(255, 255, 255, 0.5),
             inset 0 -0.4em 0.5px   0.1em rgba(0,0,0,0.18),
             inset 0 -1.3em 5em     0.1em rgba(0,0,0,0.11);
-    }
-
-    > div.pie-color > svg g
-    {
-        > *
-        {
-            fill: rgb(255, 255, 255);
-        }
-        > *.function
-        {
-            fill: rgb(255, 103, 103);
-        }
-        > *.operator
-        {
-            fill: rgb(255, 50, 111);
-        }
-        > *.constructor
-        {
-            fill: rgb(255, 103, 141);
-        }
-        > *.method
-        {
-            fill: rgb(255, 170, 196);
-        }
-        > *.subscript
-        {
-            fill: rgb(250, 104, 255);
-        }
-        > *.functor
-        {
-            fill: rgb(198, 112, 255);
-        }
-        > *.protocol
-        {
-            fill: rgb(82, 206, 255);
-        }
-        > *.requirement
-        {
-            fill: rgb(130, 255, 249);
-        }
-        > *.witness
-        {
-            fill: rgb(171, 255, 244);
-        }
-        > *.macro.attached
-        {
-            fill: rgb(61, 255, 103);
-        }
-        > *.macro.freestanding
-        {
-            fill: rgb(132, 255, 159);
-        }
-        > *.structure
-        {
-            fill: rgb(255, 244, 94);
-        }
-        > *.class
-        {
-            fill: rgb(255, 212, 72);
-        }
-        > *.actor
-        {
-            fill: rgb(255, 197, 39);
-        }
-        > *.typealias
-        {
-            fill: rgb(255, 154, 38);
-        }
-
-        > *.coverage.undocumented
-        {
-            fill: rgb(238, 238, 238);
-        }
-        > *.coverage.indirect
-        {
-            fill: rgb(255, 170, 196);
-        }
-        > *.coverage.direct
-        {
-            fill: rgb(255, 103, 141);
-        }
     }
 }
 figure.chart

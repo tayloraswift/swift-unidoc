@@ -27,32 +27,34 @@ section.details
     {
         position: relative;
         margin: 2rem 0;
-        left: -1rem;
-
-        > *
-        {
-            margin-left: 1rem;
-        }
 
         h3
         {
-            border-radius: 0.2rem;
             margin: 0;
-            padding: 0.5rem 1.0rem;
+            padding: 0.5rem 0;
             font-size: inherit;
 
-            background: $light-foreground-semi;
-            color: $light-background;
+            color: $light-foreground-semi;
+            border-bottom: 2px solid $light-foreground-semi;
         }
+
+        border-bottom: 2px solid $light-foreground-semi;
     }
     aside.important,
     aside.warning
     {
         h3
         {
-            background: $light-accent-hot-pink;
-            color: $light-background;
+            color: $light-accent-hot-pink;
+            border-color: $light-accent-hot-pink;
         }
+
+        border-color: $light-accent-hot-pink;
+    }
+
+    aside:last-child
+    {
+        border-bottom: none;
     }
 }
 section.details
@@ -77,22 +79,20 @@ section.details
         margin: 2rem 0;
 
         text-align: center;
-        font-family: $typeface-sans;
 
-        a
+        > a
         {
+            font-family: $typeface-sans;
             font-weight: 700;
             font-size: 120%;
         }
     }
 
-    div.stats
+    div.more div.charts
     {
-        width: 14rem;
-        float: right;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;
+        justify-content: center;
 
         h2, h3
         {
