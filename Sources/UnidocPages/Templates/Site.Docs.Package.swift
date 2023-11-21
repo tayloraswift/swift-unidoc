@@ -229,20 +229,37 @@ extension Site.Docs.Package:VersionedPage
                 return
             }
 
-            if !details.requirements.isEmpty
+            do
             {
                 let heading:AutomaticHeading = .platformRequirements
                 $0[.h2] { $0.id = heading.id } = heading
+            }
 
-                $0[.dl, { $0.class = "platforms" }]
+            $0[.table, { $0.class = "platforms" }]
+            {
+                $0[.thead]
                 {
-                    $0[.dt] = "linux"
-                    $0[.dd]
-
+                    $0[.tr]
+                    {
+                        $0[.th] = "Platform"
+                        $0[.th] = "Minimum Version"
+                    }
+                }
+                $0[.tbody]
+                {
+                    //  Every package on Swiftinit supports Linux.
+                    $0[.tr]
+                    {
+                        $0[.td] = "linux"
+                        $0[.td] = "none"
+                    }
                     for platform:PlatformRequirement in details.requirements
                     {
-                        $0[.dt] = "\(platform.id)"
-                        $0[.dd] = "\(platform.min)"
+                        $0[.tr]
+                        {
+                            $0[.td] = "\(platform.id)"
+                            $0[.td] = "\(platform.min)"
+                        }
                     }
                 }
             }
@@ -290,7 +307,7 @@ extension Site.Docs.Package:VersionedPage
 
                 $0[.div, { $0.class = "charts" }]
                 {
-                    $0[.div, { $0.class = "" }]
+                    $0[.div]
                     {
                         $0[.p]
                         {
@@ -309,7 +326,7 @@ extension Site.Docs.Package:VersionedPage
                             """
                         }
                     }
-                    $0[.div, { $0.class = "" }]
+                    $0[.div]
                     {
                         let target:AutomaticHeading = .documentationCoverage
                         $0[.p]

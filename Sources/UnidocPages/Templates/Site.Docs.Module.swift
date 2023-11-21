@@ -128,33 +128,50 @@ extension Site.Docs.Module:VersionedPage
 
             $0[.div, { $0.class = "more" }]
             {
+                let url:String = "\(Site.Stats[self.volume, self.vertex.shoot])"
+
                 $0[.div, { $0.class = "charts" }]
                 {
-                    $0[.figure]
+                    $0[.div]
                     {
-                        $0.class = "chart decl"
-                    } = self.vertex.census.unweighted.decls.pie
-                    {
-                        """
-                        \($1) percent of the declarations in \(self.name) are \($0.name)
-                        """
+                        $0[.p]
+                        {
+                            let target:AutomaticHeading = .interfaceBreakdown
+                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
+                        }
+
+                        $0[.figure]
+                        {
+                            $0.class = "chart decl"
+                        } = self.vertex.census.unweighted.decls.pie
+                        {
+                            """
+                            \($1) percent of the declarations in \(self.name) are \($0.name)
+                            """
+                        }
                     }
 
-                    $0[.figure]
+                    $0[.div]
                     {
-                        $0.class = "chart coverage"
-                    } = self.vertex.census.unweighted.coverage.pie
-                    {
-                        """
-                        \($1) percent of the declarations in \(self.name) are \($0.name)
-                        """
+                        $0[.p]
+                        {
+                            let target:AutomaticHeading = .documentationCoverage
+                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
+                        }
+
+                        $0[.figure]
+                        {
+                            $0.class = "chart coverage"
+                        } = self.vertex.census.unweighted.coverage.pie
+                        {
+                            """
+                            \($1) percent of the declarations in \(self.name) are \($0.name)
+                            """
+                        }
                     }
                 }
 
-                $0[.a]
-                {
-                    $0.href = "\(Site.Stats[self.volume, self.vertex.shoot])"
-                } = "Module stats and coverage details"
+                $0[.a] { $0.href = url } = "Module stats and coverage details"
             }
 
             $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
