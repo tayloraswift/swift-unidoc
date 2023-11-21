@@ -13,10 +13,10 @@ struct PackageIdentifier:Equatable, Hashable, Sendable
 extension PackageIdentifier
 {
     @inlinable public static
-    var swift:Self
-    {
-        .init(canonical: "swift")
-    }
+    var swift:Self { .init(canonical: "swift") }
+
+    @inlinable public static
+    var swiftPM:Self { .init(canonical: "swift-package-manager") }
 }
 extension PackageIdentifier:Comparable
 {

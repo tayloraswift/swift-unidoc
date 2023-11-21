@@ -75,6 +75,83 @@ figure.client div.pie-color > svg g
 }
 figure.language div.pie-color > svg g
 {
+    > *.bn
+    {
+        fill: #d88f5f;
+    }
+
+    > *.ar
+    {
+        fill: #2ba720;
+    }
+    > *.de
+    {
+        fill: #645551;
+    }
+    > *.en
+    {
+        fill: #fd74a2;
+    }
+    > *.es
+    {
+        fill: #ffb62f;
+    }
+    > *.fi
+    {
+        fill: #ebf9ff;
+    }
+    > *.fr
+    {
+        fill: #4e6cae;
+    }
+    > *.he
+    {
+        fill: #5398ff;
+    }
+    > *.hi
+    {
+        fill: #ffb686;
+    }
+    > *.it
+    {
+        fill: #6edf7d;
+    }
+    > *.ja
+    {
+        fill: #ffc3cb;
+    }
+    > *.ko
+    {
+        fill: #e75568;
+    }
+    > *.nl
+    {
+        fill: #ff8921;
+    }
+    > *.pl
+    {
+        fill: #ffcf73;
+    }
+    > *.pt
+    {
+        fill: #38db7c;
+    }
+    > *.ru
+    {
+        fill: #007a3d;
+    }
+    > *.sr
+    {
+        fill: #ce6170;
+    }
+    > *.tr
+    {
+        fill: #f22e53;
+    }
+    > *.uk
+    {
+        fill: #7fa25d;
+    }
     > *.vi
     {
         fill: #d85518;
@@ -82,62 +159,6 @@ figure.language div.pie-color > svg g
     > *.zh
     {
         fill: #c7001b;
-    }
-    > *.ko
-    {
-        fill: #e75568;
-    }
-    > *.ja
-    {
-        fill: #ffc3cb;
-    }
-    > *.es
-    {
-        fill: #ffb62f;
-    }
-    > *.pt
-    {
-        fill: #38db7c;
-    }
-    > *.it
-    {
-        fill: #6edf7d;
-    }
-    > *.de
-    {
-        fill: #1f1f1f;
-    }
-    > *.fr
-    {
-        fill: #83aaff;
-    }
-    > *.en
-    {
-        fill: #fd74a2;
-    }
-    > *.ar
-    {
-        fill: #2ba720;
-    }
-    > *.hi
-    {
-        fill: #ffb686;
-    }
-    > *.bn
-    {
-        fill: #d88f5f;
-    }
-    > *.ru
-    {
-        fill: #007a3d;
-    }
-    > *.other
-    {
-        fill: #999;
-    }
-    > *.none
-    {
-        fill: #5a5a5a;
     }
 }
 figure.status div.pie-color > svg g

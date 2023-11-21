@@ -25,12 +25,10 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// The swift toolchain the relevant documentation was generated with, which is used to
     /// select a version of the standard library to link against.
     ///
-    /// Because standard library symbol graphs lack a commit hash, this is the **only** way to
-    /// distinguish between symbol graphs for different versions of the standard library.
     /// This became mandatory for standard library symbol graphs in version 8 of the metadata
     /// format.
     public
-    var swift:AnyVersion?
+    var swift:AnyVersion
 
     /// The platform requirements of the relevant package. This field is
     /// informative only.
@@ -57,7 +55,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     init(package:PackageIdentifier,
         commit:Commit?,
         triple:Triple,
-        swift:AnyVersion?,
+        swift:AnyVersion,
         requirements:[PlatformRequirement] = [],
         dependencies:[Dependency] = [],
         products:[ProductDetails] = [],
@@ -167,7 +165,7 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
                 .init(try bson[.commit_hash]?.decode(), refname: $0)
             },
             triple: try bson[.triple].decode(),
-            swift: try bson[.swift]?.decode(),
+            swift: try bson[.swift].decode(),
             requirements: try bson[.requirements]?.decode() ?? [],
             dependencies: try bson[.dependencies]?.decode() ?? [],
             products: try bson[.products].decode(),

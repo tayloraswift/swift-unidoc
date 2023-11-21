@@ -6,18 +6,15 @@ extension SymbolGraphMetadata
     /// A suitable filename for the associated symbol graph archive.
     var filename:String
     {
-        switch (self.package, self.swift, self.commit?.refname)
+        switch (self.package, self.commit?.refname)
         {
-        case (.swift, nil, _):
-            return "swift.bson"
+        case (.swift, _):
+            return "swift@\(self.swift).bson"
 
-        case (.swift, let version?, _):
-            return "swift@\(version).bson"
-
-        case (let package, _, nil):
+        case (let package, nil):
             return "\(package).bson"
 
-        case (let package, _, let refname?):
+        case (let package, let refname?):
             return "\(package)@\(refname).bson"
         }
     }

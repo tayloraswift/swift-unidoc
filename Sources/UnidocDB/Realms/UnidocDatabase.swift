@@ -220,26 +220,13 @@ extension UnidocDatabase
         let version:Int32
 
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
-            let semver:SemanticVersion = .init(refname: commit.refname)
+            let semver:SemanticVersion = docs.metadata.package.version(tag: commit.refname)
         {
             let placement:Editions.Placement = try await self.editions.register(
                 package: package.coordinate,
                 version: semver,
                 refname: commit.refname,
                 sha1: commit.hash,
-                with: session)
-
-            version = placement.coordinate
-        }
-        else if case .swift = docs.metadata.package,
-            let tagname:String = docs.metadata.commit?.refname,
-            let semver:SemanticVersion = .init(swiftRelease: tagname)
-        {
-            let placement:Editions.Placement = try await self.editions.register(
-                package: package.coordinate,
-                version: semver,
-                refname: tagname,
-                sha1: nil,
                 with: session)
 
             version = placement.coordinate
@@ -426,7 +413,17 @@ extension UnidocDatabase
 
         (consume symbolicator).symbolicate(printing: linker.diagnostics, colors: .enabled)
 
-        let id:Snapshot.ID = snapshot.id
+        let version:SemanticVersion?
+
+        if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit,
+            let semver:SemanticVersion = snapshot.metadata.package.version(tag: commit.refname)
+        {
+            version = semver
+        }
+        else
+        {
+            version = nil
+        }
 
         let formerRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
             of: snapshot.package,
@@ -435,11 +432,10 @@ extension UnidocDatabase
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
 
-        switch id.version.canonical
+        if  case .release(let version, build: _)? = version
         {
-        case .stable(.release(let patch, build: _)):
             if  let formerRelease:Volumes.PatchView,
-                    formerRelease.patch > patch
+                    formerRelease.patch > version
             {
                 latestRelease = formerRelease.id
             }
@@ -448,9 +444,10 @@ extension UnidocDatabase
                 latestRelease = snapshot.edition
             }
 
-            thisRelease = patch
-
-        case _:
+            thisRelease = version
+        }
+        else
+        {
             latestRelease = formerRelease?.id
             thisRelease = nil
         }
@@ -462,7 +459,12 @@ extension UnidocDatabase
             display: snapshot.metadata.display,
             refname: snapshot.metadata.commit?.refname,
             commit: snapshot.metadata.commit?.hash,
-            symbol: id.volume,
+            symbol: .init(
+                //  We want the version component of the volume symbol to be stable,
+                //  so we only encode the patch version, even if the symbol graph is
+                //  from a prerelease tag.
+                package: snapshot.metadata.package,
+                version: "\(version?.patch ?? .v(0, 0, 0))"),
             latest: snapshot.edition == latestRelease,
             realm: realm,
             patch: thisRelease,

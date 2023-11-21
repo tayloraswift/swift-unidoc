@@ -65,7 +65,7 @@ extension Server.Endpoint.IndexRepoTag:RestrictedEndpoint
         }
 
         guard
-        let version:SemanticVersion = .init(refname: tag.name) ?? .init(swiftRelease: tag.name)
+        let version:SemanticVersion = package.id.version(tag: tag.name)
         else
         {
             return .ok("Ignored tag '\(tag.name)': not a semantic or swift version")
