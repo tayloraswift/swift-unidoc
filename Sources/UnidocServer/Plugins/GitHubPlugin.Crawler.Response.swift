@@ -21,21 +21,27 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
     enum CodingKey:String, Sendable
     {
         case repository
-        enum Repository:String
+        enum Repository:String, Sendable
         {
             case id
             case owner
             case name
+
             case license
+            enum License:String, Sendable
+            {
+                case id
+                case name
+            }
 
             case topics
-            enum Topics:String
+            enum Topics:String, Sendable
             {
                 case nodes
-                enum Node:String
+                enum Node:String, Sendable
                 {
                     case topic
-                    enum Topic:String
+                    enum Topic:String, Sendable
                     {
                         case name
                     }
@@ -43,13 +49,13 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
             }
 
             case master
-            enum Master:String
+            enum Master:String, Sendable
             {
                 case name
             }
 
             case watchers
-            enum Watchers:String
+            enum Watchers:String, Sendable
             {
                 case count
             }
@@ -70,7 +76,7 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
             case pushed
 
             case refs
-            enum Refs:String
+            enum Refs:String, Sendable
             {
                 case nodes
             }
@@ -84,7 +90,7 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
             let repo:GitHub.Repo = .init(id: try $0[.id].decode(),
                 owner: try $0[.owner].decode(),
                 name: try $0[.name].decode(),
-                license: try $0[.license].decode(using: GitHub.Repo.License.CodingKey.self)
+                license: try $0[.license].decode(using: CodingKey.Repository.License.self)
                 {
                     //  The GraphQL API is slightly different from the REST API. The license
                     //  field is always present, but the license id is not. For consistency,
