@@ -314,7 +314,8 @@ extension UnidocDatabase
                         realm: record.realm,
                         with: session),
                     clear: true,
-                    with: session))
+                    with: session),
+                visibleInFeed: record.repo?.visibleInFeed ?? true)
         }
 
         return uplinked

@@ -138,7 +138,8 @@ extension GitHubPlugin.Crawler
                 }
             }
 
-            if  let interesting:String = release ?? prerelease
+            if  let interesting:String = release ?? prerelease,
+                    response.repo.visibleInFeed
             {
                 let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
                     package: package.id,

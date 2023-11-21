@@ -6,8 +6,8 @@ extension GitHubPlugin.Crawler
     /// Models a GraphQL crawler response.
     struct Response
     {
-        let repo:GitHub.Repo
-        let tags:[GitHub.Tag]
+        var repo:GitHub.Repo
+        var tags:[GitHub.Tag]
 
         init(repo:GitHub.Repo, tags:[GitHub.Tag])
         {
@@ -90,14 +90,21 @@ extension GitHubPlugin.Crawler.Response:JSONObjectDecodable
             let repo:GitHub.Repo = .init(id: try $0[.id].decode(),
                 owner: try $0[.owner].decode(),
                 name: try $0[.name].decode(),
-                license: try $0[.license].decode(using: CodingKey.Repository.License.self)
+                license: try $0[.license].decode(
+                    as: JSON.ObjectDecoder<CodingKey.Repository.License>?.self)
                 {
+                    guard
+                    let json:JSON.ObjectDecoder<CodingKey.Repository.License> = $0
+                    else
+                    {
+                        return nil
+                    }
                     //  The GraphQL API is slightly different from the REST API. The license
                     //  field is always present, but the license id is not. For consistency,
                     //  we consider the license to be nil if the id is nil.
-                    if  let id:String = try $0[.id]?.decode()
+                    if  let id:String = try json[.id]?.decode()
                     {
-                        return .init(id: id, name: try $0[.name].decode())
+                        return .init(id: id, name: try json[.name].decode())
                     }
                     else
                     {
