@@ -70,24 +70,7 @@ extension Site.Docs.MultipleFound:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
-                $0[.span, { $0.class = "domain" }]
-                {
-                    $0[.span, { $0.class = "package" }]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Site.Tags[self.volume.symbol.package])"
-                        } = "\(self.volume.symbol.package)"
-                    }
-
-                    $0[.span, { $0.class = "volume" }]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Site.Docs[self.volume])"
-                        } = self.volume.symbol.version
-                    }
-                }
+                $0[.span, { $0.class = "domain" }] = self.context.domain
             }
 
             var path:URI.Path = []
