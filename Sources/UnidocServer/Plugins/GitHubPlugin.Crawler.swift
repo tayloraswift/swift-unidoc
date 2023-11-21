@@ -77,7 +77,8 @@ extension GitHubPlugin.Crawler
                 fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            let response:Response = try await github.crawl(owner: old.owner.login,
+            let response:GitHubPlugin.CrawlerResponse = try await github.crawl(
+                owner: old.owner.login,
                 repo: old.name,
                 pat: self.pat)
 
@@ -138,7 +139,8 @@ extension GitHubPlugin.Crawler
                 }
             }
 
-            if  let interesting:String = release ?? prerelease
+            if  let interesting:String = release ?? prerelease,
+                    response.repo.visibleInFeed
             {
                 let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
                     package: package.id,

@@ -76,7 +76,7 @@ extension Site.Docs.Foreign:ApplicationPage
 }
 extension Site.Docs.Foreign:VersionedPage
 {
-    var sidebar:[Volume.Noun]? { self.context.volumes.principal.tree }
+    var sidebar:HTML.Sidebar<Site.Docs>? { .package(volume: self.context.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
     {
@@ -85,7 +85,7 @@ extension Site.Docs.Foreign:VersionedPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Extension (\(self.demonym.title))"
-                $0[.span] { $0.class = "domain" } = self.volume.domain
+                $0[.span] { $0.class = "domain" } = self.context.domain
             }
 
             $0[.h1] = "\(self.stem.last) (ext)"

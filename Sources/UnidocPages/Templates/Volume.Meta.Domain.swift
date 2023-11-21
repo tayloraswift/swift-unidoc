@@ -19,20 +19,20 @@ extension Volume.Meta.Domain:HyperTextOutputStreamable
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
-        span[.span, { $0.class = "package" }]
-        {
-            $0[.a]
-            {
-                $0.href = "\(Site.Tags[self.volume.symbol.package])"
-            } = "\(self.volume.symbol.package)"
-        }
-
         span[.span, { $0.class = "volume" }]
         {
             $0[.a]
             {
                 $0.href = "\(Site.Docs[self.volume])"
-            } = self.volume.symbol.version
+            } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
+        }
+
+        span[.span, { $0.class = "jump" }]
+        {
+            $0[.a]
+            {
+                $0.href = "\(Site.Tags[self.volume.symbol.package])"
+            } = "all tags"
         }
     }
 }

@@ -5,7 +5,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Symbol.Decl:VolumeLookupPredicate
+extension Symbol.Decl:Volume.VertexPredicate
 {
     public
     func stage(_ stage:inout Mongo.PipelineStage, input:Mongo.KeyPath, output:Mongo.KeyPath)

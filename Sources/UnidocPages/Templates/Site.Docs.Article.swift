@@ -12,7 +12,7 @@ extension Site.Docs
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
-        let sidebar:[Volume.Noun]?
+        let sidebar:HTML.Sidebar<Site.Docs>?
 
         private
         let vertex:Volume.Vertex.Article
@@ -22,7 +22,7 @@ extension Site.Docs
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            sidebar:[Volume.Noun]?,
+            sidebar:HTML.Sidebar<Site.Docs>?,
             vertex:Volume.Vertex.Article,
             groups:GroupSections)
         {
@@ -66,21 +66,8 @@ extension Site.Docs.Article:VersionedPage
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
 
-                $0[.span, { $0.class = "domain" }]
-                {
-                    $0[.span, { $0.class = "culture" }]
-                    {
-                        $0[link: self.context.url(self.vertex.culture)] = self.stem.first
-                    }
-
-                    $0[.span, { $0.class = "volume" }]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Site.Docs[self.volume])"
-                        } = self.volume.symbol.version
-                    }
-                }
+                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.first,
+                    culture: self.vertex.culture)
             }
 
             $0[.h1] = self.vertex.headline.safe

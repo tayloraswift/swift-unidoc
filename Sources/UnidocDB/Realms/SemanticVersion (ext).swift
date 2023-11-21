@@ -15,6 +15,14 @@ extension SemanticVersion
             return nil
         }
 
-        self = .release(v)
+        if  string[..<i] == "swift",
+            string[j...] == "-RELEASE"
+        {
+            self = .release(v)
+        }
+        else
+        {
+            return nil
+        }
     }
 }

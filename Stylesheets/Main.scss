@@ -37,17 +37,22 @@ body
         {
             display: none;
         }
+    }
 
-        > *.content
-        {
-            flex: 0 1 48rem;
+    header.app div.content,
+    main.content
+    {
+        flex: 0 1 48rem;
 
-            padding-left: 1rem;
-            padding-right: 1rem;
+        overflow: hidden;
+        overflow-wrap: break-word;
+    }
 
-            overflow: hidden;
-            overflow-wrap: break-word;
-        }
+    header.app div.content > *,
+    main.content
+    {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     main
@@ -70,17 +75,22 @@ body
             flex: 0 0 16rem;
             width: 16rem;
         }
+    }
 
-        > *.content
-        {
-            padding-left: 4rem;
-        }
+    body header.app div.content
+    {
+        //  48rem + 4 rem + 1 rem = 53rem
+        flex: 0 1 53rem;
+    }
+    body header.app div.content > *,
+    body main.content
+    {
+        padding-left: 4rem;
     }
 }
 
 body nav
 {
-    background-color: $light-background;
     width: 100%;
     min-height: 1.5rem;
     position: relative;

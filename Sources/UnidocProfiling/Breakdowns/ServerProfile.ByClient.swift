@@ -78,75 +78,22 @@ extension ServerProfile.ByClient
             + self.bratz
     }
 }
-extension ServerProfile.ByClient
+extension ServerProfile.ByClient:PieValues
 {
-    func chart(stratum:String) -> Pie<Stat>
+    @inlinable public
+    var sectors:KeyValuePairs<SectorKey, Int>
     {
-        var chart:Pie<Stat> = []
-
-        for (value, name, style):(Int, String, String) in
         [
-            (
-                self.verifiedGooglebot,
-                "Verified Googlebots",
-                "googlebot"
-            ),
-            (
-                self.verifiedBingbot,
-                "Verified Bingbots",
-                "bingbot"
-            ),
-            (
-                self.likelyBaiduspider,
-                "Baiduspiders",
-                "baiduspider"
-            ),
-            (
-                self.likelyYandexbot,
-                "Yandexbots",
-                "yandexbot"
-            ),
-            (
-                self.likelyMinorSearchEngine,
-                "Minor Search Engines",
-                "minor-search-engine"
-            ),
-            (
-                self.barbie,
-                "Barbies",
-                "barbie"
-            ),
-            (
-                self.bratz,
-                "Bratz",
-                "bratz"
-            ),
-            (
-                self.likelyAhrefsbot,
-                "Ahrefsbots",
-                "ahrefsbot"
-            ),
-            (
-                self.otherRobot,
-                "Other Robots",
-                "robot"
-            ),
-            (
-                self.tooling,
-                "Tooling",
-                "tooling"
-            ),
+            .verifiedGooglebot:            self.verifiedGooglebot,
+            .verifiedBingbot:              self.verifiedBingbot,
+            .likelyBaiduspider:            self.likelyBaiduspider,
+            .likelyYandexbot:              self.likelyYandexbot,
+            .likelyMinorSearchEngine:      self.likelyMinorSearchEngine,
+            .barbie:                       self.barbie,
+            .bratz:                        self.bratz,
+            .likelyAhrefsbot:              self.likelyAhrefsbot,
+            .otherRobot:                   self.otherRobot,
+            .tooling:                      self.tooling,
         ]
-        {
-            if  value > 0
-            {
-                chart.append(.init(name,
-                    stratum: stratum,
-                    value: value,
-                    class: "client \(style)"))
-            }
-        }
-
-        return chart
     }
 }

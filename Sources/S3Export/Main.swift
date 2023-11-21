@@ -30,8 +30,6 @@ enum Main
             fatalError("could not load AWS access key!")
         }
 
-        let version:MinorVersion = .v(2, 0)
-
         let s3:AWS.S3Client = .init(
             http1: .init(threads: threads,
                 niossl: niossl,
@@ -46,7 +44,7 @@ enum Main
             for asset:StaticAsset in StaticAsset.allCases
             {
                 let content:[UInt8] = try assets.appending(asset.source).read()
-                let path:String = asset.path(prepending: version)
+                let path:String = asset.path(prepending: StaticAssets.version)
 
                 print("Uploading \(path)...")
 

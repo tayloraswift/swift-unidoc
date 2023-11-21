@@ -5,16 +5,13 @@ extension Pie
     @frozen public
     struct Legend
     {
-        public
-        let sectors:[Sector]
-        public
-        let total:Int
+        @usableFromInline internal
+        let shape:Shape
 
-        @inlinable public
-        init(sectors:[Sector], total:Int)
+        @inlinable internal
+        init(shape:Shape)
         {
-            self.sectors = sectors
-            self.total = total
+            self.shape = shape
         }
     }
 }
@@ -23,10 +20,16 @@ extension Pie.Legend:HyperTextOutputStreamable
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        let divisor:Double = .init(self.total)
-        for sector:Sector in self.sectors
+        switch self.shape
         {
-            sector.legend(&html, share: Double.init(sector.value) / divisor)
+        case .circle(let key, _):
+            key.legend(&html, share: 1.0)
+
+        case .slices(let slices):
+            for slice:Pie<Key>.Slice in slices
+            {
+                slice.key.legend(&html, share: .init(slice.geometry.share))
+            }
         }
     }
 }

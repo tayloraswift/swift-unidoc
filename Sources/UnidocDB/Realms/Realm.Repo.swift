@@ -26,6 +26,14 @@ extension Realm.Repo
         case .github(let repo): return .github(repo.owner.login, repo.name)
         }
     }
+
+    var visibleInFeed:Bool
+    {
+        switch self
+        {
+        case .github(let repo): repo.visibleInFeed
+        }
+    }
 }
 extension Realm.Repo:MongoMasterCodingModel
 {

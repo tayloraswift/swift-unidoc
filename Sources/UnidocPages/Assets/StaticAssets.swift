@@ -2,29 +2,28 @@ import JSON
 import SemanticVersions
 
 @frozen public
-struct StaticAssets:Sendable
+enum StaticAssets:Sendable
+{
+    case cloudfront
+    case local
+}
+extension StaticAssets
 {
     /// Specifies the version numbers of the static assets, if served from Cloudfront. If
     /// nil, then assets will be loaded from the local server.
     ///
     /// To reduce cache churn, not all assets are versioned. For example, the fonts and
     /// the favicon do not use the version numbers.
-    public
-    let version:MinorVersion?
-
-    @inlinable public
-    init(version:MinorVersion?)
-    {
-        self.version = version
-    }
+    @inlinable public static
+    var version:MinorVersion { .v(3, 0) }
 }
 extension StaticAssets
 {
     subscript(asset:StaticAsset) -> String
     {
-        if  let version:MinorVersion = self.version
+        if  case .cloudfront = self
         {
-            "https://static.swiftinit.org\(asset.path(prepending: version))"
+            "https://static.swiftinit.org\(asset.path(prepending: Self.version))"
         }
         else
         {
@@ -34,7 +33,7 @@ extension StaticAssets
 
     func script(volumes:JSON?) -> String
     {
-        let host:String = self.version == nil ? "" : "https://static.swiftinit.org"
+        let host:String = self == .local ? "" : "https://static.swiftinit.org"
         if  let volumes:JSON
         {
             return "const host = '\(host)'; const volumes = \(volumes);"

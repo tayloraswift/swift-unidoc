@@ -84,7 +84,7 @@ extension RenderablePage
                 if  let location:String
                 {
                     $0[unsafe: .script] = """
-                    history.replaceState(null, "", "\(location)");
+                    history.replaceState(null, "", "\(location)" + window.location.hash);
                     """
                 }
 
