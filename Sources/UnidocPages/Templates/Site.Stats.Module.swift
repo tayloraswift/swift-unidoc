@@ -95,7 +95,8 @@ extension Site.Stats.Module:VersionedPage
         }
             content:
         {
-            $0[.h2] = "Interface Breakdown"
+            let breakdown:AutomaticHeading = .interfaceBreakdown
+            $0[.h2] { $0.id = breakdown.id } = breakdown
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -119,7 +120,8 @@ extension Site.Stats.Module:VersionedPage
                 """
             }
 
-            $0[.h2] = "Documentation Coverage"
+            let coverage:AutomaticHeading = .documentationCoverage
+            $0[.h2] { $0.id = coverage.id } = coverage
 
             $0[.h3] = "Declarations"
             $0[.figure]
