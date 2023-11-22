@@ -32,15 +32,15 @@ extension CanonicalVersion
     init?(principal:Volume.PrincipalOutput)
     {
         guard
-        let volume:Volume.Meta = principal.volumeOfLatest,
-        let patch:PatchVersion = volume.patch
+        let volumeOfLatest:Volume.Meta = principal.volumeOfLatest,
+        let patchOfLatest:PatchVersion = volumeOfLatest.patch
         else
         {
             return nil
         }
 
         //  This can happen if you visit the latest stable release explicitly in the URL bar.
-        if  principal.volume.id == volume.id
+        if  principal.volume.id == volumeOfLatest.id
         {
             return nil
         }
@@ -48,7 +48,7 @@ extension CanonicalVersion
         let relationship:Relationship
         if  let origin:PatchVersion = principal.volume.patch
         {
-            relationship = origin < patch ? .later : .earlier
+            relationship = origin < patchOfLatest ? .later : .earlier
         }
         else
         {
@@ -61,30 +61,41 @@ extension CanonicalVersion
         {
             switch vertex
             {
-            case .article(let vertex):  target = .article(Site.Docs[volume, vertex.shoot])
-            case .culture(let vertex):  target = .culture(Site.Docs[volume, vertex.shoot])
-            case .decl(let vertex):     target = .decl(Site.Docs[volume, vertex.shoot])
-            case .file:                 return   nil
-            case .foreign(let vertex):  target = .foreign(Site.Docs[volume, vertex.shoot])
-            case .global:               target = .global
+            case .article(let vertex):
+                target = .article(Site.Docs[volumeOfLatest, vertex.shoot])
+
+            case .culture(let vertex):
+                target = .culture(Site.Docs[volumeOfLatest, vertex.shoot])
+
+            case .decl(let vertex):
+                target = .decl(Site.Docs[volumeOfLatest, vertex.shoot])
+
+            case .file:
+                return nil
+
+            case .foreign(let vertex):
+                target = .foreign(Site.Docs[volumeOfLatest, vertex.shoot])
+
+            case .global:
+                target = .global
             }
         }
         else
         {
             switch principal.vertex
             {
-            case .article?:             target = .article(nil)
-            case .culture?:             target = .culture(nil)
-            case .decl?:                target = .decl(nil)
-            case .file?, nil:           return   nil
-            case .foreign?:             target = .foreign(nil)
-            case .global?:              target = .global
+            case .article?:     target = .article(nil)
+            case .culture?:     target = .culture(nil)
+            case .decl?:        target = .decl(nil)
+            case .file?, nil:   return   nil
+            case .foreign?:     target = .foreign(nil)
+            case .global?:      target = .global
             }
         }
 
         self.init(relationship: relationship,
-            package: volume.title,
-            volume: Site.Docs[volume],
+            package: volumeOfLatest.title,
+            volume: Site.Docs[volumeOfLatest],
             target: target)
     }
 }

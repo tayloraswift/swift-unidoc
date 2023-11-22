@@ -192,8 +192,27 @@ extension Toolchain
             """)
 
         //  Don’t parrot the `swift build` output to the terminal
-        let log:FilePath = build.output.path / "build.log"
-        try await log.open(.writeOnly,
+        let resolutionLog:FilePath = build.output.path / "resolution.log"
+        try await resolutionLog.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            try await SystemProcess.init(command: "swift",
+                "package",
+                "resolve",
+                "--package-path", "\(build.root)",
+                stdout: $0)()
+        }
+
+        //  Don’t parrot the `swift build` output to the terminal
+        let buildLog:FilePath = build.output.path / "build.log"
+
+        print("""
+            Building package: '\(build.id.package)', \
+            streaming output to '\(buildLog)'
+            """)
+
+        try await buildLog.open(.writeOnly,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {

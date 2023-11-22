@@ -22,6 +22,9 @@ extension DiagnosticContext
 }
 extension DiagnosticContext
 {
+    @inlinable public
+    var count:Int { self.unsymbolicated.count }
+
     @inlinable public static
     func += (self:inout Self, other:consuming Self)
     {

@@ -24,7 +24,7 @@ extension Snapshot
     /// If a symbol graph lacks a git refname, and is not a standard library symbol graph,
     /// its effective version name is `0.0.0`.
     ///
-    /// Refnames that are not semantic versions normalized to their lowercase form. As git
+    /// Refnames that are not semantic versions normalize to their lowercase form. As git
     /// refnames are case-sensitive, this can also produce collisions.
     @frozen public
     struct ID:Equatable, Hashable, Sendable
@@ -53,16 +53,6 @@ extension Snapshot.ID
         self.init(package: package,
             version: refname.map(AnyVersion.init(_:)) ?? .stable(.release(.v(0, 0, 0))),
             triple: triple)
-    }
-}
-extension Snapshot.ID
-{
-    @inlinable public
-    var volume:VolumeIdentifier
-    {
-        .init(
-            package: self.package,
-            version: self.version.stable?.patch.description ?? "\(self.version)")
     }
 }
 extension Snapshot.ID:CustomStringConvertible
