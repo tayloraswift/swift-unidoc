@@ -415,43 +415,49 @@ extension UnidocDatabase
 
         let mesh:DynamicLinker.Mesh = linker.finalize()
 
-        let version:SemanticVersion?
-
-        if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit,
-            let semver:SemanticVersion = snapshot.metadata.package.version(tag: commit.refname)
-        {
-            version = semver
-        }
-        else
-        {
-            version = nil
-        }
-
-        let formerRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
-            of: snapshot.package,
-            with: session)
-
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
+        let version:String
 
-        if  case .release(let version, build: _)? = version
+        if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit
         {
-            if  let formerRelease:Volumes.PatchView,
-                    formerRelease.patch > version
-            {
-                latestRelease = formerRelease.id
-            }
-            else
-            {
-                latestRelease = snapshot.edition
-            }
+            let formerRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
+                of: snapshot.package,
+                with: session)
 
-            thisRelease = version
+            switch snapshot.metadata.package.version(tag: commit.refname)
+            {
+            case .release(let patch, build: _)?:
+                if  let formerRelease:Volumes.PatchView,
+                        formerRelease.patch > patch
+                {
+                    latestRelease = formerRelease.id
+                }
+                else
+                {
+                    latestRelease = snapshot.edition
+                }
+
+                thisRelease = patch
+                version = "\(patch)"
+
+            case .prerelease(let patch, _, build: _)?:
+                latestRelease = formerRelease?.id
+                thisRelease = nil
+                version = "\(patch)"
+
+            case nil:
+                latestRelease = formerRelease?.id
+                thisRelease = nil
+                version = "0.0.0"
+            }
         }
         else
         {
-            latestRelease = formerRelease?.id
-            thisRelease = nil
+            //  Local packages are always considered release versions.
+            latestRelease = snapshot.edition
+            thisRelease = .v(0, 0, 0)
+            version = "0.0.0"
         }
 
         let meta:Volume.Meta = .init(id: snapshot.edition,
@@ -464,7 +470,7 @@ extension UnidocDatabase
                 //  so we only encode the patch version, even if the symbol graph is
                 //  from a prerelease tag.
                 package: snapshot.metadata.package,
-                version: "\(version?.patch ?? .v(0, 0, 0))"),
+                version: version),
             latest: snapshot.edition == latestRelease,
             realm: realm,
             patch: thisRelease,

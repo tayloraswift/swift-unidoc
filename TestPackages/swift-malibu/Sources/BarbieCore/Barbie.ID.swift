@@ -2,6 +2,10 @@ extension Barbie
 {
     /// Do you think we’re
     /// getting in? ``It looks like me, right?``
+    ///
+    /// ## Topics
+    /// ### Comparing IDs
+    /// -   ``!=(_:_:)``
     public
     struct ID:Equatable
     {
