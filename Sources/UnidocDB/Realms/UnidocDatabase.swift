@@ -413,6 +413,8 @@ extension UnidocDatabase
 
         (consume symbolicator).symbolicate(printing: linker.diagnostics, colors: .enabled)
 
+        let mesh:DynamicLinker.Mesh = linker.finalize()
+
         let version:SemanticVersion?
 
         if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit,
@@ -451,8 +453,6 @@ extension UnidocDatabase
             latestRelease = formerRelease?.id
             thisRelease = nil
         }
-
-        let mesh:DynamicLinker.Mesh = linker.link()
 
         let meta:Volume.Meta = .init(id: snapshot.edition,
             dependencies: dependencies,
