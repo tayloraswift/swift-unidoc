@@ -470,15 +470,44 @@ extension StaticLinker
     func link(namespaces sources:[[Compiler.Namespace]],
         at destinations:[[SymbolGraph.Namespace]])
     {
+        //  First pass: expose and link unqualified features.
+        for (sources, destinations):
+            ([Compiler.Namespace], [SymbolGraph.Namespace]) in zip(sources, destinations)
+        {
+            for (source, destination):
+                (Compiler.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
+            {
+                let qualifier:ModuleIdentifier =
+                    self.symbolizer.graph.namespaces[destination.index]
+
+                for (address, decl):(Int32, Compiler.Decl) in zip(
+                    destination.range,
+                    source.decls)
+                {
+                    if  decl.features.isEmpty
+                    {
+                        continue
+                    }
+
+                    let features:[Int32] = self.addresses(exposing: decl.features.sorted(),
+                        prefixed: (qualifier, decl.path),
+                        of: decl.id,
+                        at: address)
+
+                    self.symbolizer.graph.decls.nodes[address].decl?.features = features
+                }
+            }
+        }
+
+        //  Second pass: link everything else.
         for ((sources, destinations), culture):
             (([Compiler.Namespace], [SymbolGraph.Namespace]), ModuleIdentifier) in zip(zip(
                 sources,
                 destinations),
             self.symbolizer.graph.namespaces)
         {
-            for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in zip(
-                sources,
-                destinations)
+            for (source, destination):
+                (Compiler.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
             {
                 self.link(decls: source.decls,
                     at: destination.range,
@@ -487,6 +516,7 @@ extension StaticLinker
             }
         }
     }
+
     public mutating
     func link(decls:[Compiler.Decl],
         at addresses:ClosedRange<Int32>,
@@ -498,6 +528,7 @@ extension StaticLinker
             self.link(decl: decl, at: address, of: culture, in: namespace)
         }
     }
+
     private mutating
     func link(decl:Compiler.Decl,
         at address:Int32,
@@ -509,7 +540,6 @@ extension StaticLinker
         //  Sort for deterministic addresses.
         let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
         let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
-        let features:[Int32] = self.addresses(of: decl.features.sorted())
         let origin:Int32? = self.address(of: decl.origin)
 
         let location:SourceLocation<Int32>? = decl.location?.map
@@ -547,10 +577,18 @@ extension StaticLinker
             {
                 fallthrough
             }
-            else if case nil = supplement.parsed.metadata.merge
+
+            diagnostic:
+            if  case nil = supplement.parsed.metadata.merge
             {
-                self.tables.diagnostics[supplement.source] =
-                    SupplementError.implicitConcatenation
+                guard
+                case nil = supplement.parsed.overview, supplement.parsed.details.isEmpty
+                else
+                {
+                    self.tables.diagnostics[supplement.source] =
+                        SupplementError.implicitConcatenation
+                    break diagnostic
+                }
             }
 
             let body:MarkdownDocumentation = comment.parse(
@@ -588,7 +626,6 @@ extension StaticLinker
         {
             $0?.requirements = requirements
             $0?.superforms = superforms
-            $0?.features = features
             $0?.origin = origin
 
             $0?.signature = signature

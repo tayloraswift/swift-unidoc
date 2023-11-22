@@ -127,7 +127,7 @@ extension StaticOutliner
 
         let fold:Int = self.cache.fold
 
-        //  We don’t support topics lists in standalone documentation.
+        //  We don’t support topics lists in extension documentation.
         //  So we just render them into the article as lists of links.
         let details:MarkdownBytecode = self.link(
             details: body.details,

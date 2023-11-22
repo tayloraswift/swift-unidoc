@@ -7,15 +7,12 @@ extension SymbolGraphMetadata
     public
     var pin:Snapshot.ID
     {
-        switch (self.package, self.swift, self.commit?.refname)
+        switch (self.package, self.commit?.refname)
         {
-        case (.swift, let version?, _):
-            return .init(package: .swift, version: version, triple: self.triple)
+        case (.swift, _):
+            return .init(package: .swift, version: self.swift, triple: self.triple)
 
-        case (.swift, nil, _):
-            return .init(package: .swift, refname: nil, triple: self.triple)
-
-        case (let package, _, let refname):
+        case (let package, let refname):
             return .init(package: package, refname: refname, triple: self.triple)
         }
     }
@@ -32,11 +29,10 @@ extension SymbolGraphMetadata
         }
 
         var pins:[Snapshot.ID] = []
-        if  let version:AnyVersion = self.swift
-        {
             pins.reserveCapacity(self.dependencies.count + 1)
-            pins.append(.init(package: .swift, version: version, triple: self.triple))
-        }
+
+        pins.append(.init(package: .swift, version: self.swift, triple: self.triple))
+
         for dependency:Dependency in self.dependencies
         {
             pins.append(.init(
