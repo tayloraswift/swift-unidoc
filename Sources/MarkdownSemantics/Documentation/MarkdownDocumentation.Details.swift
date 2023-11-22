@@ -30,6 +30,17 @@ extension MarkdownDocumentation
 }
 extension MarkdownDocumentation.Details
 {
+    @inlinable public
+    var isEmpty:Bool
+    {
+        self.parameters == nil &&
+        self.returns == nil &&
+        self.throws == nil &&
+        self.article.isEmpty
+    }
+}
+extension MarkdownDocumentation.Details
+{
     /// Calls ``yield`` once for each block in the structure.
     ///
     /// This coroutine visits the ``parameters``, then the ``returns``, then the ``throws``,

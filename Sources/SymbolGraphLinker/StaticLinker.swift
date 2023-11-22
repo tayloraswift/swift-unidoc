@@ -547,10 +547,18 @@ extension StaticLinker
             {
                 fallthrough
             }
-            else if case nil = supplement.parsed.metadata.merge
+
+            diagnostic:
+            if  case nil = supplement.parsed.metadata.merge
             {
-                self.tables.diagnostics[supplement.source] =
-                    SupplementError.implicitConcatenation
+                guard
+                case nil = supplement.parsed.overview, supplement.parsed.details.isEmpty
+                else
+                {
+                    self.tables.diagnostics[supplement.source] =
+                        SupplementError.implicitConcatenation
+                    break diagnostic
+                }
             }
 
             let body:MarkdownDocumentation = comment.parse(
