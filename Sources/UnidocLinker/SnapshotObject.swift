@@ -1,4 +1,3 @@
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -118,7 +117,7 @@ extension SnapshotObject
         }
     }
 
-    func namespace(of declaration:Unidoc.Scalar) -> ModuleIdentifier?
+    func namespace(of declaration:Unidoc.Scalar) -> Symbol.Module?
     {
         (declaration - self.edition).map(self.namespace(of:)) ?? nil
     }
@@ -127,7 +126,7 @@ extension SnapshotObject
     ///
     /// This returns nil if the requested declaration is a top-level declaration, of if it
     /// is not a citizen of this snapshot.
-    func namespace(of declaration:Int32) -> ModuleIdentifier?
+    func namespace(of declaration:Int32) -> Symbol.Module?
     {
         self.qualifiers[declaration].map { self.namespaces[$0] }
     }

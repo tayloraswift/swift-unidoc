@@ -1,4 +1,4 @@
-import ModuleGraphs
+import SymbolGraphs
 import Unidoc
 
 extension Volume.Vertex
@@ -10,7 +10,7 @@ extension Volume.Vertex
         let id:Unidoc.Scalar
 
         public
-        let module:ModuleDetails
+        let module:SymbolGraph.Module
         public
         var readme:Unidoc.Scalar?
         public
@@ -25,7 +25,7 @@ extension Volume.Vertex
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            module:ModuleDetails,
+            module:SymbolGraph.Module,
             readme:Unidoc.Scalar? = nil,
             census:Volume.Census = .init(),
             overview:Volume.Passage? = nil,

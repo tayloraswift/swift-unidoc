@@ -1,8 +1,8 @@
 import MarkdownABI
 import MarkdownAST
-import ModuleGraphs
 import SymbolGraphLinker
 import SymbolGraphParts
+import SymbolGraphs
 import Symbols
 import System
 
@@ -10,13 +10,13 @@ extension Artifacts
 {
     struct Culture
     {
-        let module:ModuleDetails
+        let module:SymbolGraph.Module
 
         let articles:[FilePath]
         let artifacts:FilePath
         let parts:[SymbolGraphPart.ID]
 
-        init(_ module:ModuleDetails,
+        init(_ module:SymbolGraph.Module,
             articles:[FilePath],
             artifacts:FilePath,
             parts:[SymbolGraphPart.ID])
@@ -31,17 +31,17 @@ extension Artifacts
 }
 extension Artifacts.Culture:Identifiable
 {
-    var id:ModuleIdentifier
+    var id:Symbol.Module
     {
         self.module.id
     }
 }
 extension Artifacts.Culture
 {
-    func loadArticles(root:Repository.Root) throws -> [MarkdownSourceFile]
+    func loadArticles(root:Symbol.FileBase) throws -> [MarkdownSourceFile]
     {
         //  Compute this once, since it’s used in the loop below.
-        let bundle:ModuleIdentifier = self.module.id
+        let bundle:Symbol.Module = self.module.id
         let root:FilePath = .init(root.path).lexicallyNormalized()
 
         return try self.articles.sorted

@@ -1,6 +1,6 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
+import Symbols
 
 extension SymbolGraph
 {
@@ -8,7 +8,7 @@ extension SymbolGraph
     struct Culture:Equatable, Sendable
     {
         public
-        let module:ModuleDetails
+        let module:Module
 
         /// The namespaces that contain this module’s scalars, if it declares any.
         /// The ranges must be contiguous and non-overlapping.
@@ -25,7 +25,7 @@ extension SymbolGraph
         var topics:[Topic]
 
         @inlinable public
-        init(module:ModuleDetails)
+        init(module:Module)
         {
             self.module = module
 
@@ -39,7 +39,7 @@ extension SymbolGraph
 extension SymbolGraph.Culture:Identifiable
 {
     @inlinable public
-    var id:ModuleIdentifier
+    var id:Symbol.Module
     {
         self.module.id
     }

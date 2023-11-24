@@ -26,6 +26,7 @@ let package:Package = .init(
 
         .library(name: "HTML", targets: ["HTML"]),
 
+        .library(name: "HTTP", targets: ["HTTP"]),
         .library(name: "HTTPClient", targets: ["HTTPClient"]),
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
@@ -33,16 +34,14 @@ let package:Package = .init(
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
+        .library(name: "MarkdownAST", targets: ["MarkdownAST"]),
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
         .library(name: "MarkdownRendering", targets: ["MarkdownRendering"]),
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
-        .library(name: "MarkdownAST", targets: ["MarkdownAST"]),
 
         .library(name: "Media", targets: ["Media"]),
 
         .library(name: "MD5", targets: ["MD5"]),
-
-        .library(name: "ModuleGraphs", targets: ["ModuleGraphs"]),
 
         .library(name: "Multiparts", targets: ["Multiparts"]),
 
@@ -97,7 +96,7 @@ let package:Package = .init(
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.61.0"),
+            from: "2.62.0"),
         /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
         /// major-only version requirement.
         .package(url: "https://github.com/apple/swift-nio-ssl",
@@ -113,7 +112,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "509.0.1"),
+            exact: "509.0.2"),
     ],
     targets:
     [
@@ -158,7 +157,7 @@ let package:Package = .init(
         .target(name: "CodelinkResolution", dependencies:
             [
                 .target(name: "Codelinks"),
-                .target(name: "ModuleGraphs"),
+                .target(name: "Symbols"),
                 .target(name: "Unidoc"),
             ]),
 
@@ -170,7 +169,7 @@ let package:Package = .init(
         .target(name: "DoclinkResolution", dependencies:
             [
                 .target(name: "Doclinks"),
-                .target(name: "ModuleGraphs"),
+                .target(name: "Symbols"),
             ]),
 
         .target(name: "FNV1"),
@@ -320,12 +319,6 @@ let package:Package = .init(
                 .target(name: "IntegerEncodingMacros"),
             ]),
 
-        .target(name: "ModuleGraphs", dependencies:
-            [
-                .target(name: "SemanticVersions"),
-                .target(name: "SHA1"),
-            ]),
-
         .target(name: "Multiparts", dependencies:
             [
                 .target(name: "Media"),
@@ -334,7 +327,7 @@ let package:Package = .init(
 
         .target(name: "PackageGraphs", dependencies:
             [
-                .target(name: "ModuleGraphs"),
+                .target(name: "SymbolGraphs"),
             ]),
 
         .target(name: "PackageMetadata", dependencies:
@@ -396,8 +389,8 @@ let package:Package = .init(
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
-                .target(name: "ModuleGraphs"),
-                .target(name: "PackageMetadata"),
+                .target(name: "SemanticVersions"),
+                .target(name: "SHA1"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
@@ -410,7 +403,6 @@ let package:Package = .init(
                 .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
                 .target(name: "MarkdownPluginSwift"),
-                .target(name: "ModuleGraphs"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
@@ -419,7 +411,8 @@ let package:Package = .init(
         .target(name: "SymbolGraphs", dependencies:
             [
                 .target(name: "LexicalPaths"),
-                .target(name: "ModuleGraphs"),
+                .target(name: "SemanticVersions"),
+                .target(name: "SHA1"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),

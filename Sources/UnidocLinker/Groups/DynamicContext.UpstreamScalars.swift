@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Symbols
 import Unidoc
 
@@ -9,7 +8,7 @@ extension DynamicContext
 {
     struct UpstreamScalars
     {
-        var cultures:[ModuleIdentifier: Unidoc.Scalar]
+        var cultures:[Symbol.Module: Unidoc.Scalar]
         var citizens:[Symbol.Decl: Unidoc.Scalar]
 
         init()

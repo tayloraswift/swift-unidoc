@@ -6,7 +6,6 @@ import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
-import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphs
 import UnidocDiagnostics

@@ -1,5 +1,4 @@
 import CodelinkResolution
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -9,7 +8,7 @@ import UnidocRecords
 struct DynamicContext
 {
     private
-    let byPackageIdentifier:[PackageIdentifier: SnapshotObject]
+    let byPackageIdentifier:[Symbol.Package: SnapshotObject]
     private
     let byPackage:[Int32: SnapshotObject]
 
@@ -17,7 +16,7 @@ struct DynamicContext
 
     private
     init(
-        byPackageIdentifier:[PackageIdentifier: SnapshotObject],
+        byPackageIdentifier:[Symbol.Package: SnapshotObject],
         byPackage:[Int32: SnapshotObject],
         current:SnapshotObject)
     {
@@ -42,7 +41,7 @@ extension DynamicContext
             {
                 upstream.citizens[symbol] = snapshot.edition + citizen
             }
-            for (culture, symbol):(Int, ModuleIdentifier) in zip(
+            for (culture, symbol):(Int, Symbol.Module) in zip(
                 snapshot.graph.cultures.indices,
                 snapshot.graph.namespaces)
             {
@@ -51,7 +50,7 @@ extension DynamicContext
         }
 
         //  Build two indexes for fast lookup by package identifier and package number.
-        var byPackageIdentifier:[PackageIdentifier: SnapshotObject] = .init(
+        var byPackageIdentifier:[Symbol.Package: SnapshotObject] = .init(
             minimumCapacity: dependencies.count)
 
         var byPackage:[Int32: SnapshotObject] = .init(
@@ -76,12 +75,12 @@ extension DynamicContext
 extension DynamicContext
 {
     private
-    subscript(dynamic package:PackageIdentifier) -> SnapshotObject?
+    subscript(dynamic package:Symbol.Package) -> SnapshotObject?
     {
         self.current.snapshot.metadata.package == package ?
         nil : self.byPackageIdentifier[package]
     }
-    subscript(package:PackageIdentifier) -> SnapshotObject?
+    subscript(package:Symbol.Package) -> SnapshotObject?
     {
         self.current.snapshot.metadata.package == package ?
         self.current : self.byPackageIdentifier[package]
@@ -151,7 +150,7 @@ extension DynamicContext
         //  Some cultures might share the same set of upstream product dependencies.
         //  So, as an optimization, we group cultures together that use the same
         //  resolution tables.
-        var groups:[[PackageIdentifier: Set<String>]: [Int]] = [:]
+        var groups:[[Symbol.Package: Set<String>]: [Int]] = [:]
         for (c, culture):(Int, SymbolGraph.Culture) in zip(
             self.current.cultures.indices,
             self.current.cultures)
@@ -159,8 +158,8 @@ extension DynamicContext
             print("\(culture.module.id): \(culture.module.dependencies)")
 
             //  This dictionary is a dictionary key itself! Be not afraid.
-            var products:[PackageIdentifier: Set<String>] = [:]
-            for product:ProductIdentifier in culture.module.dependencies.products
+            var products:[Symbol.Package: Set<String>] = [:]
+            for product:Symbol.Product in culture.module.dependencies.products
             {
                 products[product.package, default: []].update(with: product.name)
             }
@@ -170,7 +169,7 @@ extension DynamicContext
 
         return .init(unsafeUninitializedCapacity: self.current.cultures.count)
         {
-            for (dependencies, cultures):([PackageIdentifier: Set<String>], [Int]) in groups
+            for (dependencies, cultures):([Symbol.Package: Set<String>], [Int]) in groups
             {
                 var shared:SymbolGraph.ModuleContext = .init(
                     nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
@@ -179,7 +178,7 @@ extension DynamicContext
                 {
                     shared.add(snapshot: swift, context: self, filter: nil)
                 }
-                for (package, products):(PackageIdentifier, Set<String>) in
+                for (package, products):(Symbol.Package, Set<String>) in
                     dependencies.sorted(by: { $0.key < $1.key })
                 {
                     guard let object:SnapshotObject = self[dynamic: package]
@@ -189,8 +188,8 @@ extension DynamicContext
                     }
 
                     var filter:Set<Int> = []
-                    for product:ProductDetails in object.snapshot.metadata.products where
-                        products.contains(product.name)
+                    for product:SymbolGraphMetadata.Product in object.snapshot.metadata.products
+                        where products.contains(product.name)
                     {
                         filter.formUnion(product.cultures)
                     }

@@ -1,6 +1,3 @@
-import ModuleGraphs
-import SemanticVersions
-import SHA1
 import Unidoc
 
 extension Volume.Vertex

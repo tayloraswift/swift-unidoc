@@ -3,7 +3,6 @@ import BSONDecoding
 import BSONEncoding
 import FNV1
 import MarkdownABI
-import ModuleGraphs
 import Signatures
 import SymbolGraphs
 import Symbols
@@ -288,7 +287,7 @@ extension Volume.Vertex:BSONDocumentEncodable
 
         case .culture(let self):
             //  Save this because it is computed by mangling a target name.
-            let module:ModuleIdentifier = self.module.id
+            let module:Symbol.Module = self.module.id
             //  This allows us to correlate modules identifiers across different versions.
             bson[.symbol] = module
             bson[.hash] = FNV24.Extended.init(hashing: "s:m:\(module)")

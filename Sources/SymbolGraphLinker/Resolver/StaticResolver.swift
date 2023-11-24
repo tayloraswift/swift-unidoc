@@ -3,7 +3,6 @@ import Codelinks
 import DoclinkResolution
 import Doclinks
 import MarkdownAST
-import ModuleGraphs
 import Sources
 import SymbolGraphs
 import UnidocDiagnostics

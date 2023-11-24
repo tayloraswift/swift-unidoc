@@ -7,7 +7,6 @@ import MarkdownABI
 import MarkdownSemantics
 import MarkdownParsing
 import MarkdownAST
-import ModuleGraphs
 import Signatures
 import Sources
 import SymbolGraphCompiler
@@ -38,7 +37,7 @@ struct StaticLinker:~Copyable
 
     public
     init(nominations:Compiler.Nominations,
-        modules:[ModuleDetails],
+        modules:[SymbolGraph.Module],
         plugins:[any MarkdownCodeLanguageType] = [])
     {
         //  If we were given a plugin that says it can highlight swift,
@@ -96,7 +95,7 @@ extension StaticLinker
     /// two passes.
     private mutating
     func addresses(exposing features:[Symbol.Decl],
-        prefixed prefix:(ModuleIdentifier, UnqualifiedPath),
+        prefixed prefix:(Symbol.Module, UnqualifiedPath),
         of extended:Symbol.Decl,
         at scalar:Int32) -> [Int32]
     {
@@ -149,7 +148,7 @@ extension StaticLinker
             for (source, destination):(Compiler.Namespace, SymbolGraph.Namespace) in
                 zip(sources, destinations)
             {
-                let qualifier:ModuleIdentifier =
+                let qualifier:Symbol.Module =
                     self.symbolizer.graph.namespaces[destination.index]
                 for (scalar, decl) in zip(destination.range, source.decls)
                 {
@@ -214,7 +213,7 @@ extension StaticLinker
         return zip(addresses, extensions).map
         {
             let namespace:Int = self.symbolizer.intern($0.1.signature.extended.namespace)
-            let qualifier:ModuleIdentifier = self.symbolizer.graph.namespaces[namespace]
+            let qualifier:Symbol.Module = self.symbolizer.graph.namespaces[namespace]
 
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[Int32] = self.addresses(
@@ -249,7 +248,7 @@ extension StaticLinker
     {
         let articles:[[Article]] = zip(supplements.indices, supplements).map
         {
-            let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[$0.0]
+            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[$0.0]
 
             var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
@@ -285,7 +284,7 @@ extension StaticLinker
         //  Now that standalone articles have all been exposed for doclink resolution,
         //  we can link them. But before doing that, we need to register all known namespaces
         //  for codelink resolution.
-        for (n, namespace):(Int, ModuleIdentifier) in zip(
+        for (n, namespace):(Int, Symbol.Module) in zip(
             self.symbolizer.graph.namespaces.indices,
             self.symbolizer.graph.namespaces)
         {
@@ -297,7 +296,7 @@ extension StaticLinker
 
         for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
         {
-            let namespace:ModuleIdentifier = self.symbolizer.graph.namespaces[culture]
+            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
             for article:Article in articles
             {
                 self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
@@ -326,7 +325,7 @@ extension StaticLinker
     /// altogether, it is considered a standalone article.
     private mutating
     func attach(supplement article:MarkdownSourceFile,
-        in namespace:ModuleIdentifier) -> Article?
+        in namespace:Symbol.Module) -> Article?
     {
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
@@ -404,7 +403,7 @@ extension StaticLinker
 
     private
     func resolve(decl binding:MarkdownInline.Autolink,
-        in namespace:ModuleIdentifier) throws -> Int32?
+        in namespace:Symbol.Module) throws -> Int32?
     {
         //  Special rule for article bindings: if the text of the codelink matches
         //  the current namespace, then the article is the primary article for
@@ -477,7 +476,7 @@ extension StaticLinker
             for (source, destination):
                 (Compiler.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
             {
-                let qualifier:ModuleIdentifier =
+                let qualifier:Symbol.Module =
                     self.symbolizer.graph.namespaces[destination.index]
 
                 for (address, decl):(Int32, Compiler.Decl) in zip(
@@ -501,7 +500,7 @@ extension StaticLinker
 
         //  Second pass: link everything else.
         for ((sources, destinations), culture):
-            (([Compiler.Namespace], [SymbolGraph.Namespace]), ModuleIdentifier) in zip(zip(
+            (([Compiler.Namespace], [SymbolGraph.Namespace]), Symbol.Module) in zip(zip(
                 sources,
                 destinations),
             self.symbolizer.graph.namespaces)
@@ -520,8 +519,8 @@ extension StaticLinker
     public mutating
     func link(decls:[Compiler.Decl],
         at addresses:ClosedRange<Int32>,
-        of culture:ModuleIdentifier,
-        in namespace:ModuleIdentifier)
+        of culture:Symbol.Module,
+        in namespace:Symbol.Module)
     {
         for (address, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
         {
@@ -532,8 +531,8 @@ extension StaticLinker
     private mutating
     func link(decl:Compiler.Decl,
         at address:Int32,
-        of culture:ModuleIdentifier,
-        in namespace:ModuleIdentifier)
+        of culture:Symbol.Module,
+        in namespace:Symbol.Module)
     {
         let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
 
@@ -685,7 +684,7 @@ extension StaticLinker
 
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
-                let importAll:[ModuleIdentifier] = self.symbolizer.importAll ;
+                let importAll:[Symbol.Module] = self.symbolizer.importAll ;
 
                 {
                     let scopes:StaticResolver.Scopes = .init(

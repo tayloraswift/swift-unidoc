@@ -1,5 +1,4 @@
 import LexicalPaths
-import ModuleGraphs
 import Symbols
 import SymbolGraphParts
 
@@ -9,13 +8,13 @@ extension Compiler
     struct Declarations
     {
         private
-        var cultures:[ModuleIdentifier: Int]
+        var cultures:[Symbol.Module: Int]
         private
         var entries:[Symbol.Decl: Entry]
         private
-        let root:Repository.Root?
+        let root:Symbol.FileBase?
 
-        init(root:Repository.Root?)
+        init(root:Symbol.FileBase?)
         {
             self.cultures = [:]
             self.entries = [:]
@@ -77,7 +76,7 @@ extension Compiler.Declarations
 extension Compiler.Declarations
 {
     mutating
-    func include(culture:ModuleIdentifier) throws -> Compiler.Culture
+    func include(culture:Symbol.Module) throws -> Compiler.Culture
     {
         let next:Int = self.cultures.count
 
@@ -99,37 +98,37 @@ extension Compiler.Declarations
 extension Compiler.Declarations
 {
     mutating
-    func include(vector resolution:Symbol.Decl.Vector,
-        with description:SymbolDescription) throws
+    func include(vector symbol:Symbol.Decl.Vector,
+        with vertex:SymbolGraphPart.Vertex) throws
     {
-        if  case .decl(let phylum) = description.phylum
+        if  case .decl(let phylum) = vertex.phylum
         {
-            { _ in }(&self.entries[resolution.feature,
-                default: .nominated(.init(description.path.last, phylum: phylum))])
+            { _ in }(&self.entries[symbol.feature,
+                default: .nominated(.init(vertex.path.last, phylum: phylum))])
         }
         else
         {
-            throw Compiler.UnexpectedSymbolError.vector(resolution)
+            throw Compiler.UnexpectedSymbolError.vector(symbol)
         }
     }
     mutating
-    func include(scalar resolution:Symbol.Decl,
-        namespace:__owned Compiler.Namespace.ID,
-        with description:SymbolDescription,
+    func include(scalar symbol:Symbol.Decl,
+        namespace:consuming Compiler.Namespace.ID,
+        with vertex:SymbolGraphPart.Vertex,
         in culture:Compiler.Culture) throws
     {
-        try self.update(resolution, with: .included(.init(
-            conditions: description.extension.conditions,
+        try self.update(symbol, with: .included(.init(
+            conditions: vertex.extension.conditions,
             namespace: namespace,
             culture: culture.index,
-            value: .init(from: description,
-                as: resolution,
+            value: .init(from: vertex,
+                as: symbol,
                 in: culture))))
     }
     mutating
-    func exclude(scalar resolution:Symbol.Decl) throws
+    func exclude(scalar symbol:Symbol.Decl) throws
     {
-        try self.update(resolution, with: .excluded)
+        try self.update(symbol, with: .excluded)
     }
 
     private mutating
@@ -159,7 +158,7 @@ extension Compiler.Declarations
 }
 extension Compiler.Declarations
 {
-    subscript(namespace namespace:ModuleIdentifier) -> Compiler.Namespace.ID
+    subscript(namespace namespace:Symbol.Module) -> Compiler.Namespace.ID
     {
         self.cultures[namespace].map(Compiler.Namespace.ID.index(_:)) ?? .nominated(namespace)
     }

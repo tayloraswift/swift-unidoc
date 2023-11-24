@@ -1,7 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
+import SymbolGraphs
+import Symbols
 import UnidocRecords
 
 extension Snapshot
@@ -30,14 +31,14 @@ extension Snapshot
     struct ID:Equatable, Hashable, Sendable
     {
         public
-        let package:PackageIdentifier
+        let package:Symbol.Package
         public
         let version:AnyVersion
         public
         let triple:Triple
 
         @inlinable public
-        init(package:PackageIdentifier, version:AnyVersion, triple:Triple)
+        init(package:Symbol.Package, version:AnyVersion, triple:Triple)
         {
             self.package = package
             self.version = version
@@ -48,7 +49,7 @@ extension Snapshot
 extension Snapshot.ID
 {
     @inlinable public
-    init(package:PackageIdentifier, refname:String? = nil, triple:Triple)
+    init(package:Symbol.Package, refname:String? = nil, triple:Triple)
     {
         self.init(package: package,
             version: refname.map(AnyVersion.init(_:)) ?? .stable(.release(.v(0, 0, 0))),

@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Symbols
 import Unidoc
 import UnidocDiagnostics
@@ -9,13 +8,13 @@ struct DynamicSymbolicator:Sendable
     public
     let demangler:Demangler?
     public
-    let root:Repository.Root?
+    let root:Symbol.FileBase?
 
     @usableFromInline internal
     let context:DynamicContext
 
     @inlinable public
-    init(context:DynamicContext, root:Repository.Root?)
+    init(context:DynamicContext, root:Symbol.FileBase?)
     {
         self.demangler = .init()
         self.root = root

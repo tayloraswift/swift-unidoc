@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Symbols
 import UnidocDiagnostics
 
@@ -19,14 +18,14 @@ struct DroppedExtensionsError:Equatable, Error
 }
 extension DroppedExtensionsError
 {
-    @inlinable public
-    static func extending(_ namespace:ModuleIdentifier, count:Int) -> Self
+    @inlinable public static
+    func extending(_ namespace:Symbol.Module, count:Int) -> Self
     {
         .init(affected: .namespace(namespace), count: count)
     }
 
-    @inlinable public
-    static func extending(_ decl:Symbol.Decl, count:Int) -> Self
+    @inlinable public static
+    func extending(_ decl:Symbol.Decl, count:Int) -> Self
     {
         .init(affected: .decl(decl), count: count)
     }

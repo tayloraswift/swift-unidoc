@@ -9,14 +9,14 @@ extension Symbol
         public
         let conditions:[GenericConstraint<Symbol.Decl>]
         public
-        let source:Symbol
+        let source:Symbol.USR
         public
         let target:Symbol.Decl
         public
         let origin:Symbol.Decl?
 
         @inlinable public
-        init(of source:Symbol,
+        init(of source:Symbol.USR,
             to target:Symbol.Decl,
             where conditions:[GenericConstraint<Symbol.Decl>]?,
             origin:Symbol.Decl? = nil)

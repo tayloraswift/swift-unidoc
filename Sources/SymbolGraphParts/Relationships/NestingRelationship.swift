@@ -4,7 +4,7 @@ import Unidoc
 public
 protocol NestingRelationship:SymbolRelationship
 {
-    var scope:Symbol { get }
+    var scope:Symbol.USR { get }
 
     var kinks:Unidoc.Decl.Kinks { get }
 

@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 import Unidoc
 import SHA1
 
@@ -82,7 +82,7 @@ extension Volume.Meta
 
     @available(*, deprecated)
     @inlinable public
-    var package:PackageIdentifier { self.symbol.package }
+    var package:Symbol.Package { self.symbol.package }
 
     @available(*, deprecated)
     @inlinable public

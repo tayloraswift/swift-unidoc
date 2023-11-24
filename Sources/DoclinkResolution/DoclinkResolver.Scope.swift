@@ -1,12 +1,12 @@
-import ModuleGraphs
+import Symbols
 
 extension DoclinkResolver
 {
     @frozen public
     enum Scope
     {
-        case documentation(ModuleIdentifier)
-        case tutorials(ModuleIdentifier)
+        case documentation(Symbol.Module)
+        case tutorials(Symbol.Module)
     }
 }
 extension DoclinkResolver.Scope:RandomAccessCollection

@@ -6,6 +6,6 @@ extension Compiler.SemanticError
     enum Counterpart:Equatable, Sendable
     {
         case origin(Symbol.Decl)
-        case scope(Symbol)
+        case scope(Symbol.USR)
     }
 }

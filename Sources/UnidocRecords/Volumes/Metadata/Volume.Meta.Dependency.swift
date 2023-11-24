@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 import Unidoc
 
 extension Volume.Meta
@@ -11,16 +11,16 @@ extension Volume.Meta
     struct Dependency:Identifiable, Equatable, Sendable
     {
         public
-        let id:PackageIdentifier
+        let id:Symbol.Package
 
         public
-        var requirement:Repository.Requirement?
+        var requirement:SymbolGraphMetadata.DependencyRequirement?
         public
         var resolution:Unidoc.Edition?
 
         @inlinable public
-        init(id:PackageIdentifier,
-            requirement:Repository.Requirement? = nil,
+        init(id:Symbol.Package,
+            requirement:SymbolGraphMetadata.DependencyRequirement? = nil,
             resolution:Unidoc.Edition? = nil)
         {
             self.id = id
@@ -68,7 +68,7 @@ extension Volume.Meta.Dependency:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let requirement:Repository.Requirement?
+        let requirement:SymbolGraphMetadata.DependencyRequirement?
         switch
         (
             try bson[.requirement_lower]?.decode(to: PatchVersion.self),

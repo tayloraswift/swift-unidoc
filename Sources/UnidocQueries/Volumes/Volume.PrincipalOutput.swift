@@ -1,5 +1,4 @@
 import BSONDecoding
-import ModuleGraphs
 import MongoSchema
 import SemanticVersions
 import SymbolGraphs
