@@ -1,6 +1,5 @@
 import HTML
 import MarkdownRendering
-import ModuleGraphs
 import Unidoc
 import UnidocRecords
 import URI

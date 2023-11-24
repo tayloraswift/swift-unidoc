@@ -1,11 +1,11 @@
-import ModuleGraphs
+import Symbols
 
 extension Compiler
 {
     public
     enum DuplicateModuleError:Equatable, Error, Sendable
     {
-        case culture(ModuleIdentifier)
+        case culture(Symbol.Module)
     }
 }
 extension Compiler.DuplicateModuleError:CustomStringConvertible

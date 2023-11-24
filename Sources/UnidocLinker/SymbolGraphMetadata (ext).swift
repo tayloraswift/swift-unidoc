@@ -1,4 +1,3 @@
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
 

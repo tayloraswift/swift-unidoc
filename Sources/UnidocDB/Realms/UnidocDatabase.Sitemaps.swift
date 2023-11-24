@@ -1,7 +1,7 @@
 import BSON
-import ModuleGraphs
 import MongoDB
 import MongoQL
+import Symbols
 import UnidocRecords
 import UnixTime
 
@@ -27,7 +27,7 @@ extension UnidocDatabase.Sitemaps:DatabaseCollection
     var name:Mongo.Collection { "siteMaps" }
 
     public
-    typealias ElementID = PackageIdentifier
+    typealias ElementID = Symbol.Package
 
     public static
     var indexes:[Mongo.CreateIndexStatement] { [] }
@@ -36,7 +36,7 @@ extension UnidocDatabase.Sitemaps:DatabaseCollection
 extension UnidocDatabase.Sitemaps
 {
     public
-    func find(by package:PackageIdentifier,
+    func find(by package:Symbol.Package,
         with session:Mongo.Session) async throws -> Realm.Sitemap?
     {
         try await self.find(Realm.Sitemap.self, by: package, with: session)

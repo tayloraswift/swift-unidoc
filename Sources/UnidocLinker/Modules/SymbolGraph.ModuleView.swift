@@ -1,17 +1,17 @@
-import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import Unidoc
 
 extension SymbolGraph
 {
     struct ModuleView
     {
-        let namespaces:[ModuleIdentifier]
+        let namespaces:[Symbol.Module]
         let cultures:[Culture]
         let contexts:[ModuleContext]
         let edition:Unidoc.Edition
 
-        init(namespaces:[ModuleIdentifier],
+        init(namespaces:[Symbol.Module],
             cultures:[Culture],
             contexts:[ModuleContext],
             edition:Unidoc.Edition)

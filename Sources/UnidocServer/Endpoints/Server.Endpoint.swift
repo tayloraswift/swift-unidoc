@@ -1,7 +1,6 @@
 import FNV1
 import HTTP
 import MD5
-import ModuleGraphs
 import Multiparts
 import Symbols
 import UnidocAutomation
@@ -309,7 +308,7 @@ extension Server.Endpoint
                 if  let package:String = form["package"],
                     let tag:String = form["tag"]
                 {
-                    let package:PackageIdentifier = .init(package)
+                    let package:Symbol.Package = .init(package)
                     return .interactive(IndexRepoTag.init(package: package, tag: tag))
                 }
 

@@ -1,8 +1,8 @@
 import GitHubAPI
 import HTML
 import MarkdownRendering
-import ModuleGraphs
 import SHA1
+import SymbolGraphs
 import Unidoc
 import UnidocDB
 import UnidocProfiling
@@ -253,7 +253,7 @@ extension Site.Docs.Package:VersionedPage
                         $0[.td] = "linux"
                         $0[.td] = "none"
                     }
-                    for platform:PlatformRequirement in details.requirements
+                    for platform:SymbolGraphMetadata.PlatformRequirement in details.requirements
                     {
                         $0[.tr]
                         {

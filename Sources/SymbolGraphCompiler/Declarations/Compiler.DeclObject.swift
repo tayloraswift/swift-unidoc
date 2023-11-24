@@ -21,7 +21,7 @@ extension Compiler
         var superforms:(any SuperformRelationship.Type)?
         /// The symbol this scalar is lexically-nested in. This may
         /// be an extension block symbol.
-        var scope:Symbol?
+        var scope:Symbol.USR?
 
         private(set)
         var value:Decl
@@ -80,7 +80,7 @@ extension Compiler.DeclObject
 
         //  Allowed to restate the exact same nesting relationship multiple times.
         //  This sometimes happens when compiling C modules.
-        if  let scope:Symbol = self.scope,
+        if  let scope:Symbol.USR = self.scope,
                 scope != relationship.scope
         {
             throw Compiler.SemanticError.already(has: .scope(scope))

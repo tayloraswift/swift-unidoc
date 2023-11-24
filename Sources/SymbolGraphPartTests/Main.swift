@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Signatures
 import SymbolGraphParts
 import Symbols
@@ -31,7 +30,7 @@ enum Main:TestMain, TestBattery
             {
                 if  let name:String = symbol.last?.lowercased(),
                     let tests:TestGroup = tests / name,
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                    let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.phylum ==? .decl(phylum))
                 }
@@ -63,7 +62,7 @@ enum Main:TestMain, TestBattery
             ]
             {
                 if  let tests:TestGroup = tests / name,
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                    let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.phylum ==? .decl(phylum))
                 }
@@ -71,7 +70,7 @@ enum Main:TestMain, TestBattery
 
             if  let tests:TestGroup = tests / "deinit"
             {
-                tests.expect(nil: part.symbols.first { $0.phylum == .decl(.deinitializer) })
+                tests.expect(nil: part.vertices.first { $0.phylum == .decl(.deinitializer) })
             }
         }
         if  let tests:TestGroup = tests / "Phyla" / "Extension",
@@ -84,7 +83,7 @@ enum Main:TestMain, TestBattery
                 (["Int", "AssociatedType"], .decl(.typealias)),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                if  let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.phylum ==? phylum)
                 }
@@ -94,14 +93,14 @@ enum Main:TestMain, TestBattery
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/SymbolGraphs/ACL.symbols.json")
         {
-            for (symbol, level):([String], SymbolDescription.ACL?) in
+            for (symbol, level):([String], SymbolGraphPart.Vertex.ACL?) in
             [
                 (["Public"],    .public),
                 (["Package"],   .package),
                 (["Internal"],  .internal),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                if  let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.acl ==? level)
                 }
@@ -117,7 +116,7 @@ enum Main:TestMain, TestBattery
                 (["SPI"], []),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                if  let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.signature.spis ==? interfaces)
                 }
@@ -127,7 +126,7 @@ enum Main:TestMain, TestBattery
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/SymbolGraphs/DocumentationInheritance.symbols.json")
         {
-            for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
+            for (symbol, culture, comment):([String], Symbol.Module?, String?) in
             [
                 (
                     ["Protocol", "everywhere"],
@@ -224,7 +223,7 @@ enum Main:TestMain, TestBattery
             ]
             {
                 if  let tests:TestGroup = tests / symbol.joined(separator: "-").lowercased(),
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                    let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.doccomment?.culture ==? culture)
                     tests.expect(symbol.doccomment?.text ==? comment)
@@ -301,7 +300,7 @@ enum Main:TestMain, TestBattery
                 TestModules/SymbolGraphs/DocumentationInheritanceFromSwift.symbols.json
                 """)
         {
-            for (symbol, culture, comment):([String], ModuleIdentifier?, String?) in
+            for (symbol, culture, comment):([String], Symbol.Module?, String?) in
             [
                 (
                     ["Documented", "id"],
@@ -316,7 +315,7 @@ enum Main:TestMain, TestBattery
             ]
             {
                 if  let tests:TestGroup = tests / symbol[0].lowercased(),
-                    let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                    let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.doccomment?.culture ==? culture)
                     tests.expect(symbol.doccomment?.text ==? comment)
@@ -395,7 +394,7 @@ enum Main:TestMain, TestBattery
                 ),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                if  let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.extension.conditions ..? conditions)
                 }
@@ -438,7 +437,7 @@ enum Main:TestMain, TestBattery
                 ),
             ]
             {
-                if  let symbol:SymbolDescription = tests.expect(symbol: symbol, in: part)
+                if  let symbol:SymbolGraphPart.Vertex = tests.expect(symbol: symbol, in: part)
                 {
                     tests.expect(symbol.extension.conditions ..? conditions)
                 }

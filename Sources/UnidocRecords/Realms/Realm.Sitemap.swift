@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
 import MD5
-import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import URI
 
 extension Volume
@@ -26,7 +26,7 @@ extension Realm
     struct Sitemap:Identifiable, Equatable, Sendable
     {
         public
-        let id:PackageIdentifier
+        let id:Symbol.Package
         public
         let elements:Elements
 
@@ -37,7 +37,7 @@ extension Realm
         let hash:MD5
 
         @inlinable internal
-        init(id:PackageIdentifier,
+        init(id:Symbol.Package,
             elements:Elements,
             modified:BSON.Millisecond?,
             hash:MD5)
@@ -52,7 +52,7 @@ extension Realm
 extension Realm.Sitemap
 {
     @inlinable public
-    init(id:PackageIdentifier, elements:Elements)
+    init(id:Symbol.Package, elements:Elements)
     {
         self.init(id: id,
             elements: elements,

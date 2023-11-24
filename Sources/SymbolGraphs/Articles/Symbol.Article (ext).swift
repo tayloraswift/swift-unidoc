@@ -1,6 +1,5 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import Symbols
 
 /// Uses the ``RawRepresentable`` conformance.
@@ -10,7 +9,7 @@ extension Symbol.Article:BSONDecodable, BSONEncodable
 extension Symbol.Article
 {
     @inlinable public
-    init(_ bundle:ModuleIdentifier, _ name:String)
+    init(_ bundle:borrowing Symbol.Module, _ name:borrowing String)
     {
         self.init(rawValue: "\(bundle) \(name)")
     }

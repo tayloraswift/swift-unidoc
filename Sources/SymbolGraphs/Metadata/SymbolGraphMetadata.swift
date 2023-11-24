@@ -1,7 +1,7 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
+import Symbols
 import SHA1
 
 @frozen public
@@ -12,7 +12,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
 
     /// A package identifier to associate with this symbol graph.
     public
-    var package:PackageIdentifier
+    var package:Symbol.Package
     /// A git commit to associate with the relevant symbol graph.
     ///
     /// This is nil for local package symbol graphs.
@@ -43,24 +43,24 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// The products in this list contain references to packages named in ``dependencies``.
     /// This list is used to filter other documentation objects to link against.
     public
-    var products:[ProductDetails]
+    var products:[Product]
     /// An optional string containing the marketing name for the package.
     public
     var display:String?
     /// An optional prefix to append to file paths when printing diagnostics.
     public
-    var root:Repository.Root?
+    var root:Symbol.FileBase?
 
     @inlinable public
-    init(package:PackageIdentifier,
+    init(package:Symbol.Package,
         commit:Commit?,
         triple:Triple,
         swift:AnyVersion,
         requirements:[PlatformRequirement] = [],
         dependencies:[Dependency] = [],
-        products:[ProductDetails] = [],
+        products:[Product] = [],
         display:String? = nil,
-        root:Repository.Root? = nil)
+        root:Symbol.FileBase? = nil)
     {
         self.abi = SymbolGraphABI.version
 
@@ -82,7 +82,7 @@ extension SymbolGraphMetadata
     func swift(_ swift:AnyVersion,
         tagname:String,
         triple:Triple,
-        products:[ProductDetails]) -> Self
+        products:[Product]) -> Self
     {
         let display:String
         switch swift.canonical

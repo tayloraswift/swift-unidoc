@@ -1,12 +1,12 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
+import Symbols
 
 @frozen public
 struct VolumeIdentifier:Equatable, Hashable, Sendable
 {
     public
-    var package:PackageIdentifier
+    var package:Symbol.Package
     /// A string identifying the package version within the database.
     /// If the ``refname`` is a `v`-prefixed semantic version, this
     /// string encodes the version without the `v` prefix.
@@ -14,7 +14,7 @@ struct VolumeIdentifier:Equatable, Hashable, Sendable
     var version:String
 
     @inlinable public
-    init(package:PackageIdentifier, version:String)
+    init(package:Symbol.Package, version:String)
     {
         self.package = package
         self.version = version

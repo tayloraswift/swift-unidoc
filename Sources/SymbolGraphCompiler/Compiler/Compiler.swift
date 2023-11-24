@@ -1,12 +1,11 @@
 import SymbolGraphParts
 import Symbols
-import ModuleGraphs
 
 public
 struct Compiler
 {
     private
-    let threshold:SymbolDescription.ACL
+    let threshold:SymbolGraphPart.Vertex.ACL
 
     public private(set)
     var declarations:Declarations
@@ -14,7 +13,7 @@ struct Compiler
     var extensions:Extensions
 
     public
-    init(root:Repository.Root?, threshold:SymbolDescription.ACL = .public)
+    init(root:Symbol.FileBase?, threshold:SymbolGraphPart.Vertex.ACL = .public)
     {
         self.threshold = threshold
 
@@ -25,7 +24,7 @@ struct Compiler
 extension Compiler
 {
     public mutating
-    func compile(culture:ModuleIdentifier, parts:[SymbolGraphPart]) throws
+    func compile(culture:Symbol.Module, parts:[SymbolGraphPart]) throws
     {
         for part:SymbolGraphPart in parts where part.culture != culture
         {
@@ -56,11 +55,11 @@ extension Compiler
 
             //  Map extension block names to extended type identifiers.
             let extensions:ExtendedTypes = try .init(indexing: part)
-            for symbol:SymbolDescription in part.symbols
+            for vertex:SymbolGraphPart.Vertex in part.vertices
             {
                 do
                 {
-                    switch (symbol.usr, excluded: symbol.acl < self.threshold)
+                    switch (vertex.usr, excluded: vertex.acl < self.threshold)
                     {
                     case (.vector, excluded: true):
                         //  We do not care about vectors materialized for internal
@@ -72,14 +71,14 @@ extension Compiler
                         //  not tell us anything useful their generic/extension contexts.)
                         //  But we need to remember their names to perform codelink
                         //  resolution.
-                        try self.declarations.include(vector: vector, with: symbol)
+                        try self.declarations.include(vector: vector, with: vertex)
 
                     case (.scalar(let scalar), excluded: let excluded):
                         excluded ?
                         try self.declarations.exclude(scalar: scalar) :
                         try self.declarations.include(scalar: scalar,
                             namespace: namespace,
-                            with: symbol,
+                            with: vertex,
                             in: culture)
 
                     case (.block(let block), excluded: true):
@@ -95,13 +94,13 @@ extension Compiler
                         try self.extensions.include(block: block,
                             extending: try extensions.extendee(of: block),
                             namespace: namespace,
-                            with: symbol,
+                            with: vertex,
                             in: culture)
                     }
                 }
                 catch let error
                 {
-                    throw VertexError.init(underlying: error, in: symbol)
+                    throw VertexError.init(underlying: error, in: vertex)
                 }
             }
         }

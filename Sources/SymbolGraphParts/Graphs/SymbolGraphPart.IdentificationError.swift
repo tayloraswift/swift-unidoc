@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 
 extension SymbolGraphPart
 {
@@ -6,7 +6,7 @@ extension SymbolGraphPart
     enum IdentificationError:Error, Equatable, Sendable
     {
         case filename(String)
-        case culture(ID, expected:ModuleIdentifier)
+        case culture(ID, expected:Symbol.Module)
     }
 }
 extension SymbolGraphPart.IdentificationError:CustomStringConvertible

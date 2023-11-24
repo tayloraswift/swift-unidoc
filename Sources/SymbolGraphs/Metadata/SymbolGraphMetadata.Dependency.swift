@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
 import SHA1
+import Symbols
 
 extension SymbolGraphMetadata
 {
@@ -10,17 +10,17 @@ extension SymbolGraphMetadata
     struct Dependency:Equatable, Sendable
     {
         public
-        let package:PackageIdentifier
+        let package:Symbol.Package
         public
-        let requirement:Repository.Requirement?
+        let requirement:DependencyRequirement?
         public
         let revision:SHA1
         public
         let version:AnyVersion
 
         @inlinable public
-        init(package:PackageIdentifier,
-            requirement:Repository.Requirement?,
+        init(package:Symbol.Package,
+            requirement:DependencyRequirement?,
             revision:SHA1,
             version:AnyVersion)
         {
@@ -72,7 +72,7 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let requirement:Repository.Requirement?
+        let requirement:SymbolGraphMetadata.DependencyRequirement?
         switch
         (
             try bson[.requirement_lower]?.decode(to: PatchVersion.self),

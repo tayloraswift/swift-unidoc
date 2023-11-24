@@ -1,11 +1,11 @@
 import MarkdownABI
 import MarkdownAST
 import MarkdownPluginSwift
-import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphLinker
 import SymbolGraphParts
 import SymbolGraphs
+import Symbols
 import UnidocDiagnostics
 
 extension SymbolGraph
@@ -53,7 +53,7 @@ extension SymbolGraph
         {
             let supplements:[[MarkdownSourceFile]]? = try artifacts.root.map
             {
-                (root:Repository.Root) in try artifacts.cultures.map
+                (root:Symbol.FileBase) in try artifacts.cultures.map
                 {
                     try $0.loadArticles(root: root)
                 }

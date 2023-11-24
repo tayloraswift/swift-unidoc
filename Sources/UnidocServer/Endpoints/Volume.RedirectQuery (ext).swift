@@ -1,5 +1,5 @@
-import ModuleGraphs
 import SemanticVersions
+import Symbols
 import UnidocQueries
 import UnidocRecords
 
@@ -28,7 +28,7 @@ extension Volume.RedirectQuery<Volume.Shoot>
             }
         }
 
-        var package:PackageIdentifier = .swift
+        var package:Symbol.Package = .swift
         var version:NumericVersion? = nil
 
         var head:String = head

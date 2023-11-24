@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 import URI
 
 extension Site
@@ -11,7 +11,7 @@ extension Site
 extension Site.Tags
 {
     static
-    subscript(package:PackageIdentifier) -> URI
+    subscript(package:Symbol.Package) -> URI
     {
         var uri:URI = Self.uri
 

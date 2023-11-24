@@ -1,6 +1,5 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
 
@@ -16,7 +15,7 @@ extension Volume.Meta
         /// Platform requirements read from the symbol graph, which in turn got them from a
         /// `Package.swift` manifest.
         public
-        var requirements:[PlatformRequirement]
+        var requirements:[SymbolGraphMetadata.PlatformRequirement]
         /// Top-level linker statistics.
         public
         var census:Volume.Census
@@ -25,7 +24,7 @@ extension Volume.Meta
 
         @inlinable public
         init(abi:MinorVersion,
-            requirements:[PlatformRequirement],
+            requirements:[SymbolGraphMetadata.PlatformRequirement],
             census:Volume.Census = .init())
         {
             self.abi = abi

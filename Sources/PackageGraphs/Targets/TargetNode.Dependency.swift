@@ -1,4 +1,4 @@
-import ModuleGraphs
+import SymbolGraphs
 
 extension TargetNode
 {
@@ -8,10 +8,10 @@ extension TargetNode
         public
         let id:ID
         public
-        let platforms:[PlatformIdentifier]
+        let platforms:[SymbolGraphMetadata.Platform]
 
         @inlinable public
-        init(id:ID, platforms:[PlatformIdentifier] = [])
+        init(id:ID, platforms:[SymbolGraphMetadata.Platform] = [])
         {
             self.id = id
             self.platforms = platforms

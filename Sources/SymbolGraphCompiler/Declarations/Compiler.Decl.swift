@@ -85,25 +85,25 @@ extension Compiler
 }
 extension Compiler.Decl
 {
-    init(from description:__shared SymbolDescription,
-        as resolution:__owned Symbol.Decl,
-        in culture:__shared Compiler.Culture) throws
+    init(from vertex:borrowing SymbolGraphPart.Vertex,
+        as symbol:consuming Symbol.Decl,
+        in culture:borrowing Compiler.Culture) throws
     {
-        guard case .decl(let phylum) = description.phylum
+        guard case .decl(let phylum) = vertex.phylum
         else
         {
-            throw Compiler.UnexpectedSymbolError.scalar(resolution)
+            throw Compiler.UnexpectedSymbolError.scalar(symbol)
         }
 
-        self.init(resolution,
-            signature: description.signature,
-            location: try description.location?.map(culture.resolve(uri:)),
+        self.init(symbol,
+            signature: vertex.signature,
+            location: try vertex.location?.map(culture.resolve(uri:)),
             phylum: phylum,
-            path: description.path)
+            path: vertex.path)
 
-        self.kinks[is: .open] = description.acl == .open
+        self.kinks[is: .open] = vertex.acl == .open
 
-        if  let doccomment:SymbolDescription.Doccomment = description.doccomment
+        if  let doccomment:SymbolGraphPart.Vertex.Doccomment = vertex.doccomment
         {
             self.comment = culture.filter(doccomment: doccomment)
         }

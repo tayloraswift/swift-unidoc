@@ -1,6 +1,5 @@
 import FNV1
 import LexicalPaths
-import ModuleGraphs
 import Symbols
 import Unidoc
 
@@ -21,7 +20,7 @@ extension StaticLinker
 }
 extension StaticLinker.Router
 {
-    subscript(namespace:ModuleIdentifier,
+    subscript(namespace:Symbol.Module,
         path:UnqualifiedPath,
         phylum:Unidoc.Decl) -> InlineDictionary<FNV24?, InlineArray<Int32>>
     {
@@ -34,7 +33,7 @@ extension StaticLinker.Router
             yield &self.paths[.decl(namespace, path, phylum), default: [:]]
         }
     }
-    subscript(namespace:ModuleIdentifier,
+    subscript(namespace:Symbol.Module,
         name:String) -> InlineDictionary<FNV24?, InlineArray<Int32>>
     {
         _read

@@ -1,4 +1,3 @@
-import ModuleGraphs
 import SymbolGraphs
 import Unidoc
 
@@ -20,7 +19,7 @@ extension SnapshotObject
 }
 extension SnapshotObject.Scalars
 {
-    init(snapshot:__shared Snapshot, upstream:__shared DynamicContext.UpstreamScalars)
+    init(snapshot:borrowing Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
     {
         let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> =
             snapshot.graph.decls.link

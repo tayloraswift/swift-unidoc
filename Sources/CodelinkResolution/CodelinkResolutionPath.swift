@@ -1,5 +1,5 @@
 import LexicalPaths
-import ModuleGraphs
+import Symbols
 
 @frozen @usableFromInline internal
 struct CodelinkResolutionPath:Equatable, Hashable, Sendable
@@ -16,18 +16,18 @@ struct CodelinkResolutionPath:Equatable, Hashable, Sendable
 extension CodelinkResolutionPath
 {
     @inlinable internal
-    init(_ namespace:ModuleIdentifier)
+    init(_ namespace:Symbol.Module)
     {
         self.init(string: "\(namespace)")
     }
 
     @inlinable internal static
-    func join(_ namespace:ModuleIdentifier, _ path:UnqualifiedPath, _ last:String) -> Self
+    func join(_ namespace:Symbol.Module, _ path:UnqualifiedPath, _ last:String) -> Self
     {
         .init(string: "\(namespace).\(path.joined(separator: ".")).\(last)")
     }
     @inlinable internal static
-    func join(_ namespace:ModuleIdentifier, _ path:UnqualifiedPath) -> Self
+    func join(_ namespace:Symbol.Module, _ path:UnqualifiedPath) -> Self
     {
         .init(string: "\(namespace).\(path.joined(separator: "."))")
     }

@@ -1,7 +1,7 @@
 import GitHubAPI
 import JSONEncoding
-import ModuleGraphs
 import MongoDB
+import Symbols
 import UnidocRecords
 
 extension UnidocDatabase
@@ -22,7 +22,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Packages:DatabaseCollection
 {
     public
-    typealias ElementID = PackageIdentifier
+    typealias ElementID = Symbol.Package
 
     @inlinable public static
     var name:Mongo.Collection { "packages" }
@@ -97,7 +97,7 @@ extension UnidocDatabase.Packages
     }
 
     public
-    func find(id:PackageIdentifier, with session:Mongo.Session) async throws -> Realm.Package?
+    func find(id:Symbol.Package, with session:Mongo.Session) async throws -> Realm.Package?
     {
         try await self.find(by: id, with: session)
     }
@@ -115,7 +115,7 @@ extension UnidocDatabase.Packages
     ///
     /// This function can be expensive. It only makes one query if the package is already
     /// registered, but can take two round trips to intern the identifier otherwise.
-    func register(_ package:PackageIdentifier,
+    func register(_ package:Symbol.Package,
         updating meta:UnidocDatabase.Meta,
         tracking repo:consuming Realm.Repo?,
         with session:Mongo.Session) async throws -> Realm.Package
@@ -144,7 +144,7 @@ extension UnidocDatabase.Packages
         return package
     }
 
-    func place(package:PackageIdentifier, with session:Mongo.Session) async throws -> Placement
+    func place(package:Symbol.Package, with session:Mongo.Session) async throws -> Placement
     {
         //  This used to be a transaction, but we cannot use `$unionWith` in a transaction,
         //  and transactions aren’t going to scale for what we need to do afterwards.

@@ -1,19 +1,19 @@
 import BSONDecoding
 import BSONEncoding
 import LexicalPaths
-import ModuleGraphs
+import Symbols
 import Unidoc
 
 extension Volume
 {
     /// A stem is a special representation of a master record’s lexical name within a snapshot.
-    /// A stem always begins with a ``ModuleIdentifier``.
+    /// A stem always begins with a ``Symbol.Module``.
     ///
     /// ## Empty stems
     ///
     /// By definition, a stem always contains at least one lexical component, even if its
     /// storage contains the empty string. In such a case, we define the first stem component
-    /// to be an empty ``ModuleIdentifier``.
+    /// to be an empty ``Symbol.Module``.
     ///
     /// ## Whitewashing
     ///
@@ -274,18 +274,18 @@ extension Volume.Stem
 extension Volume.Stem
 {
     @inlinable internal
-    init(_ namespace:ModuleIdentifier)
+    init(_ namespace:Symbol.Module)
     {
         self.init(rawValue: "\(namespace)")
     }
     @inlinable public
-    init(_ namespace:ModuleIdentifier, _ name:Substring)
+    init(_ namespace:Symbol.Module, _ name:Substring)
     {
         self.init(rawValue: "\(namespace) \(name)")
     }
     public
     init(
-        _ namespace:ModuleIdentifier,
+        _ namespace:Symbol.Module,
         _ path:UnqualifiedPath,
         orientation:Unidoc.Decl.Orientation)
     {

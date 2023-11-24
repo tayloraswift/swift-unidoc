@@ -1,7 +1,7 @@
 import Codelinks
 import FNV1
 import LexicalPaths
-import ModuleGraphs
+import Symbols
 
 extension CodelinkResolver
 {
@@ -24,7 +24,7 @@ extension CodelinkResolver.Table:Sendable where Scalar:Sendable
 extension CodelinkResolver.Table
 {
     @inlinable public
-    subscript(namespace:ModuleIdentifier) -> CodelinkResolver<Scalar>.Overloads
+    subscript(namespace:Symbol.Module) -> CodelinkResolver<Scalar>.Overloads
     {
         _read
         {
@@ -36,7 +36,7 @@ extension CodelinkResolver.Table
         }
     }
     @inlinable public
-    subscript(namespace:ModuleIdentifier,
+    subscript(namespace:Symbol.Module,
         path:UnqualifiedPath) -> CodelinkResolver<Scalar>.Overloads
     {
         _read
@@ -49,7 +49,7 @@ extension CodelinkResolver.Table
         }
     }
     @inlinable public
-    subscript(namespace:ModuleIdentifier,
+    subscript(namespace:Symbol.Module,
         path:UnqualifiedPath,
         last:String) -> CodelinkResolver<Scalar>.Overloads
     {

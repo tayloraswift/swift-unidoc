@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 
 extension Compiler.Namespace
 {
@@ -6,7 +6,7 @@ extension Compiler.Namespace
     enum ID:Equatable, Hashable, Comparable, Sendable
     {
         case index(Int)
-        case nominated(ModuleIdentifier)
+        case nominated(Symbol.Module)
     }
 }
 extension Compiler.Namespace.ID

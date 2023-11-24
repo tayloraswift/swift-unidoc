@@ -1,8 +1,8 @@
-import ModuleGraphs
 import PackageGraphs
 import PackageMetadata
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 import System
 
 @frozen public
@@ -223,10 +223,10 @@ extension Toolchain
                 stdout: $0)()
         }
 
-        let pins:[Repository.Pin]
+        let pins:[PackageManifest.DependencyPin]
         do
         {
-            let resolutions:PackageResolutions = try .init(
+            let resolutions:PackageManifest.DependencyResolutions = try .init(
                 parsing: try (build.root / "Package.resolved").read())
             pins = resolutions.pins
         }
@@ -235,7 +235,7 @@ extension Toolchain
             pins = []
         }
 
-        let platform:PlatformIdentifier = try self.platform()
+        let platform:SymbolGraphMetadata.Platform = try self.platform()
         let sink:PackageNode = try .libraries(as: build.id.package,
             flattening: manifest,
             platform: platform)
@@ -245,7 +245,7 @@ extension Toolchain
         [
             .init(manifest.root.path) / ".build" / "\(build.configuration)"
         ]
-        for pin:Repository.Pin in pins
+        for pin:PackageManifest.DependencyPin in pins
         {
             let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.location.name)"
 
@@ -256,7 +256,7 @@ extension Toolchain
             let upstream:PackageNode = try .libraries(as: pin.id,
                 flattening: manifest,
                 platform: platform)
-            let sources:PackageSources = try .init(scanning: upstream)
+            let sources:PackageBuild.Sources = try .init(scanning: upstream)
 
             sources.yield(include: &include)
             dependencies.append(upstream)
@@ -270,10 +270,9 @@ extension Toolchain
             pretty: pretty)
 
         let commit:SymbolGraphMetadata.Commit?
-        if  case .versioned(let pin, let ref) = build.id,
-            case .sha1(let sha1) = pin.revision
+        if  case .versioned(let pin, let ref) = build.id
         {
-            commit = .init(sha1, refname: ref)
+            commit = .init(pin.revision, refname: ref)
         }
         else
         {
@@ -296,7 +295,7 @@ extension Toolchain
 extension Toolchain
 {
     private
-    func platform() throws -> PlatformIdentifier
+    func platform() throws -> SymbolGraphMetadata.Platform
     {
         if      self.triple.os.starts(with: "linux")
         {

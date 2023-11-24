@@ -1,7 +1,7 @@
 import BSONEncoding
-import ModuleGraphs
 import MongoDB
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocLinker
 
@@ -116,7 +116,7 @@ extension UnidocDatabase.Graphs
 {
     @available(*, unavailable, message: "unused")
     func metadata(
-        package:PackageIdentifier,
+        package:Symbol.Package,
         limit:Int = 1,
         with session:Mongo.Session) async throws -> [SymbolGraphMetadata]
     {

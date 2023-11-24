@@ -1,4 +1,5 @@
-import ModuleGraphs
+import Symbols
+import PackageMetadata
 
 extension PackageBuild
 {
@@ -6,16 +7,16 @@ extension PackageBuild
     enum ID:Hashable, Sendable
     {
         /// An unversioned root package build.
-        case unversioned(PackageIdentifier)
+        case unversioned(Symbol.Package)
         /// A versioned root package build.
-        case versioned(Repository.Pin, refname:String)
+        case versioned(PackageManifest.DependencyPin, refname:String)
         /// A versioned dependency build.
-        case upstream(Repository.Pin)
+        case upstream(PackageManifest.DependencyPin)
     }
 }
 extension PackageBuild.ID
 {
-    var package:PackageIdentifier
+    var package:Symbol.Package
     {
         switch self
         {
@@ -24,7 +25,7 @@ extension PackageBuild.ID
                 .upstream(let pin):     return pin.id
         }
     }
-    var pin:Repository.Pin?
+    var pin:PackageManifest.DependencyPin?
     {
         switch self
         {

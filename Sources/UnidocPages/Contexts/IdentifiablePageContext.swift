@@ -1,8 +1,8 @@
 import HTML
 import LexicalPaths
 import MarkdownABI
-import ModuleGraphs
 import Signatures
+import Symbols
 import Unidoc
 import UnidocDB
 import UnidocRecords
@@ -151,7 +151,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 
         guard
         let namespace:String = self.url(namespace),
-        let culture:HTML.Link<ModuleIdentifier> = self.link(module: culture)
+        let culture:HTML.Link<Symbol.Module> = self.link(module: culture)
         else
         {
             return nil
@@ -163,7 +163,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 
     var domain:Volume.Meta.Domain { .init(self.volume) }
 
-    func link(module:Unidoc.Scalar) -> HTML.Link<ModuleIdentifier>?
+    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {
         self.cache[culture: module].map
         {

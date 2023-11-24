@@ -1,5 +1,5 @@
-import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import Unidoc
 
 extension SymbolGraph
@@ -8,12 +8,12 @@ extension SymbolGraph
     {
         let context:SymbolGraph.ModuleContext
         let culture:Unidoc.Scalar
-        let module:ModuleIdentifier
+        let module:Symbol.Module
         let id:ID
 
         init(context:SymbolGraph.ModuleContext,
             culture:Unidoc.Scalar,
-            module:ModuleIdentifier,
+            module:Symbol.Module,
             id:ID)
         {
             self.context = context
@@ -27,7 +27,7 @@ extension SymbolGraph.NamespaceContext<Void>
 {
     init(context:SymbolGraph.ModuleContext,
         culture:Unidoc.Scalar,
-        module:ModuleIdentifier)
+        module:Symbol.Module)
     {
         self.init(context: context, culture: culture, module: module, id: ())
     }

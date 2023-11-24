@@ -1,4 +1,3 @@
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -10,13 +9,13 @@ struct StaticSymbolicator:Sendable
     public
     let demangler:Demangler?
     public
-    let root:Repository.Root?
+    let root:Symbol.FileBase?
 
     private
     let graph:SymbolGraph
 
     public
-    init(graph:SymbolGraph, root:Repository.Root?)
+    init(graph:SymbolGraph, root:Symbol.FileBase?)
     {
         self.demangler = .init()
         self.root = root

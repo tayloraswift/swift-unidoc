@@ -1,7 +1,6 @@
 import CodelinkResolution
 import Codelinks
 import Doclinks
-import ModuleGraphs
 import Sources
 import SymbolGraphs
 import Unidoc

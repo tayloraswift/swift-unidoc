@@ -1,5 +1,4 @@
 import JSON
-import ModuleGraphs
 import Unidoc
 
 @frozen public

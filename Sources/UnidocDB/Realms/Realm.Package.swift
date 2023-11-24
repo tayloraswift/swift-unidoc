@@ -1,8 +1,8 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import MongoQL
 import SymbolGraphs
+import Symbols
 import UnidocRecords
 import UnixTime
 
@@ -16,7 +16,7 @@ extension Realm
     struct Package:Identifiable, Equatable, Sendable
     {
         public
-        let id:PackageIdentifier
+        let id:Symbol.Package
 
         /// The cell-number this package was assigned. Cell numbers can be positive or negative,
         /// but packages that track remote repositories will always have positive cell numbers.
@@ -36,7 +36,7 @@ extension Realm
         var crawled:BSON.Millisecond
 
         @inlinable public
-        init(id:PackageIdentifier,
+        init(id:Symbol.Package,
             coordinate:Int32,
             realm:Realm,
             repo:Repo? = nil,
