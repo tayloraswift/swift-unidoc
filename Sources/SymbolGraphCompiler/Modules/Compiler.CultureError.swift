@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 import TraceableErrors
 
 extension Compiler
@@ -9,10 +9,10 @@ extension Compiler
         public
         let underlying:any Error
         public
-        let culture:ModuleIdentifier
+        let culture:Symbol.Module
 
         public
-        init(underlying:any Error, culture:ModuleIdentifier)
+        init(underlying:any Error, culture:Symbol.Module)
         {
             self.underlying = underlying
             self.culture = culture

@@ -1,12 +1,12 @@
 import HTML
+import Symbols
 import UnidocRecords
-import ModuleGraphs
 
 extension Volume.Meta.Subdomain
 {
     enum Culture
     {
-        case colonial(HTML.Link<Substring>, HTML.Link<ModuleIdentifier>)
+        case colonial(HTML.Link<Substring>, HTML.Link<Symbol.Module>)
         case original(HTML.Link<Substring>)
     }
 }

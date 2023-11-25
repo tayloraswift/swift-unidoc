@@ -1,6 +1,5 @@
 import JSONDecoding
 import JSONParsing
-import ModuleGraphs
 import Symbols
 
 @frozen public
@@ -9,26 +8,27 @@ struct SymbolGraphPart:Equatable, Sendable
     public
     let metadata:Metadata
     public
-    let culture:ModuleIdentifier
+    let culture:Symbol.Module
     public
-    let colony:ModuleIdentifier?
+    let colony:Symbol.Module?
+
     public
-    let symbols:[SymbolDescription]
+    var relationships:[Symbol.AnyRelationship]
     public
-    let relationships:[Symbol.AnyRelationship]
+    var vertices:[Vertex]
 
     private
     init(metadata:Metadata,
-        culture:ModuleIdentifier,
-        colony:ModuleIdentifier?,
-        symbols:[SymbolDescription],
-        relationships:[Symbol.AnyRelationship])
+        culture:Symbol.Module,
+        colony:Symbol.Module?,
+        relationships:[Symbol.AnyRelationship],
+        vertices:[Vertex])
     {
         self.metadata = metadata
         self.culture = culture
         self.colony = colony
-        self.symbols = symbols
         self.relationships = relationships
+        self.vertices = vertices
     }
 }
 extension SymbolGraphPart:Identifiable
@@ -60,7 +60,7 @@ extension SymbolGraphPart
                 case name
             }
 
-            case symbols
+            case vertices = "symbols"
             case relationships
         }
 
@@ -72,8 +72,8 @@ extension SymbolGraphPart
                 try $0[.name].decode()
             },
             colony: id.colony,
-            symbols: try json[.symbols].decode(),
-            relationships: try json[.relationships].decode())
+            relationships: try json[.relationships].decode(),
+            vertices: try json[.vertices].decode())
 
         if  self.culture != id.culture
         {

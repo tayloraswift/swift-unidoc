@@ -1,17 +1,18 @@
-import ModuleGraphs
 import PackageGraphs
 import PackageMetadata
 import SymbolGraphParts
+import SymbolGraphs
+import Symbols
 import System
 
 public
 struct Artifacts
 {
     let cultures:[Culture]
-    let root:Repository.Root?
+    let root:Symbol.FileBase?
 
     private
-    init(cultures:[Culture], root:Repository.Root? = nil)
+    init(cultures:[Culture], root:Symbol.FileBase? = nil)
     {
         self.cultures = cultures
         self.root = root
@@ -30,8 +31,9 @@ extension Artifacts
     {
         //  Note: the manifest root is the root we want; the repository root may
         //  be a relative path.
-        let sources:PackageSources = try .init(scanning: package)
-        return .init(cultures: try await Self.dump(modules: sources.modules,
+        let sources:PackageBuild.Sources = try .init(scanning: package)
+        return .init(cultures: try await Self.dump(
+                modules: sources.modules,
                 include: &include,
                 output: output,
                 triple: triple,
@@ -41,13 +43,14 @@ extension Artifacts
     /// Dumps the symbols for the given targets, using this workspace as the
     /// output directory.
     public static
-    func dump(modules:[ModuleDetails],
+    func dump(modules:[SymbolGraph.Module],
         output:Workspace,
         triple:Triple,
         pretty:Bool = false) async throws -> Self
     {
         var include:[FilePath] = []
-        return .init(cultures: try await Self.dump(modules: modules.map(ModuleSources.init(_:)),
+        return .init(cultures: try await Self.dump(
+                modules: modules.map(PackageBuild.Sources.Module.init(_:)),
                 include: &include,
                 output: output,
                 triple: triple,
@@ -55,13 +58,13 @@ extension Artifacts
     }
 
     private static
-    func dump(modules:[ModuleSources],
+    func dump(modules:[PackageBuild.Sources.Module],
         include:inout [FilePath],
         output:Workspace,
         triple:Triple,
         pretty:Bool) async throws -> [Culture]
     {
-        for sources:ModuleSources in modules
+        for sources:PackageBuild.Sources.Module in modules
         {
             include += sources.include
 
@@ -113,7 +116,7 @@ extension Artifacts
             try await SystemProcess.init(command: "swift", arguments: arguments)()
         }
 
-        var parts:[ModuleIdentifier: [SymbolGraphPart.ID]] = [:]
+        var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
         for part:Result<FilePath.Component, any Error> in output.path.directory
         {
             //  We don’t want to *parse* the JSON yet to discover the culture,

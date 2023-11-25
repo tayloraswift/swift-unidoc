@@ -1,7 +1,6 @@
 import HTML
 import MarkdownABI
 import MarkdownRendering
-import ModuleGraphs
 import UnidocRecords
 import Unidoc
 import URI

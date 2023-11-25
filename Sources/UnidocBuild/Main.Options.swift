@@ -1,10 +1,10 @@
-import ModuleGraphs
+import Symbols
 
 extension Main
 {
     struct Options:Sendable
     {
-        var package:PackageIdentifier
+        var package:Symbol.Package
         var cookie:String
         var remote:String
         var port:Int
@@ -15,7 +15,7 @@ extension Main
         var input:String?
 
         private
-        init(package:PackageIdentifier)
+        init(package:Symbol.Package)
         {
             self.package = package
             self.cookie = ""

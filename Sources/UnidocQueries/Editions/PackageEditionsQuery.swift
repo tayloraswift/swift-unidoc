@@ -1,5 +1,5 @@
-import ModuleGraphs
 import MongoQL
+import Symbols
 import Unidoc
 import UnidocDB
 import UnidocLinker
@@ -9,12 +9,12 @@ import UnidocRecords
 struct PackageEditionsQuery:Equatable, Hashable, Sendable
 {
     public
-    let package:PackageIdentifier
+    let package:Symbol.Package
     public
     let limit:Int
 
     @inlinable public
-    init(package:PackageIdentifier, limit:Int = 12)
+    init(package:Symbol.Package, limit:Int = 12)
     {
         self.package = package
         self.limit = limit

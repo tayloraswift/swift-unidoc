@@ -2,7 +2,6 @@ import Availability
 import HTML
 import LexicalPaths
 import MarkdownABI
-import ModuleGraphs
 import Signatures
 import Sources
 import Unidoc

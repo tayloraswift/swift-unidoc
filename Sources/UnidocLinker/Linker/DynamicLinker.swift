@@ -1,6 +1,5 @@
 import CodelinkResolution
 import JSON
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -366,7 +365,7 @@ extension DynamicLinker
             //  Create decl records.
             for decls:SymbolGraph.Namespace in culture.namespaces
             {
-                let module:ModuleIdentifier = self.current.namespaces[decls.index]
+                let module:Symbol.Module = self.current.namespaces[decls.index]
 
                 guard
                 let scalar:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]

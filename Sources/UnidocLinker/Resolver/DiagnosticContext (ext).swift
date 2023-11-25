@@ -1,6 +1,6 @@
 import CodelinkResolution
-import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocDiagnostics
 
@@ -27,7 +27,7 @@ extension DiagnosticContext<DynamicSymbolicator>
 
     mutating
     func resolving<Success>(
-        namespace:ModuleIdentifier,
+        namespace:Symbol.Module,
         module:SymbolGraph.ModuleContext,
         global:DynamicContext,
         scope:[String] = [],

@@ -1,6 +1,5 @@
 import CodelinkResolution
 import LexicalPaths
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -21,7 +20,7 @@ extension SymbolGraph
         private(set)
         var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
         private(set)
-        var imports:[ModuleIdentifier]
+        var imports:[Symbol.Module]
 
         private
         let nodes:Set<Unidoc.Scalar>
@@ -29,7 +28,7 @@ extension SymbolGraph
         private
         init(conformances:Set<Unidoc.Vector>,
             codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
-            imports:[ModuleIdentifier],
+            imports:[Symbol.Module],
             nodes:Set<Unidoc.Scalar>)
         {
             self.conformances = conformances
@@ -78,7 +77,7 @@ extension SymbolGraph.ModuleContext
             snapshot.cultures.indices,
             snapshot.cultures) where filter?.contains(c) ?? true
         {
-            let module:ModuleIdentifier = snapshot.namespaces[c]
+            let module:Symbol.Module = snapshot.namespaces[c]
 
             self.imports.append(module)
 
@@ -105,7 +104,7 @@ extension SymbolGraph.ModuleContext
         context:DynamicContext,
         filter:Set<Int>?)
     {
-        let qualifier:ModuleIdentifier = snapshot.namespaces[namespace.index]
+        let qualifier:Symbol.Module = snapshot.namespaces[namespace.index]
         for s:Int32 in namespace.range
         {
             let node:SymbolGraph.DeclNode = snapshot.decls.nodes[s]
@@ -179,7 +178,7 @@ extension SymbolGraph.ModuleContext
             }
 
             //  This can be completely different from the namespace of the extended type!
-            let qualifier:ModuleIdentifier = snapshot.namespaces[`extension`.namespace]
+            let qualifier:Symbol.Module = snapshot.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features
             {
                 let symbol:Symbol.Decl.Vector = .init(snapshot.decls.symbols[f],

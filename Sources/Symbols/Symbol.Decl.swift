@@ -4,7 +4,7 @@ extension Symbol
     @frozen public
     struct Decl:Sendable
     {
-        /// The symbol’s string, without an interior colon.
+        /// The symbol’s string value, without an interior colon.
         public
         let rawValue:String
 

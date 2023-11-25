@@ -1,7 +1,6 @@
 import BSONDecoding
 import BSONEncoding
 import MarkdownABI
-import ModuleGraphs
 import Symbols
 import Unidoc
 
@@ -12,7 +11,7 @@ struct SymbolGraph:Equatable, Sendable
     /// ``cultures`` array, because ``Culture`` values derive module names from
     /// unmangled package manifest names.
     public
-    var namespaces:[ModuleIdentifier]
+    var namespaces:[Symbol.Module]
     public
     var cultures:[Culture]
 
@@ -25,7 +24,7 @@ struct SymbolGraph:Equatable, Sendable
     var files:Plane<UnidocPlane.File, Symbol.File>
 
     @inlinable internal
-    init(namespaces:[ModuleIdentifier],
+    init(namespaces:[Symbol.Module],
         cultures:[Culture],
         articles:Layer<ArticleNode> = .init(),
         decls:Layer<DeclNode> = .init(),
@@ -42,7 +41,7 @@ struct SymbolGraph:Equatable, Sendable
 extension SymbolGraph
 {
     public
-    init(modules:[ModuleDetails])
+    init(modules:[Module])
     {
         self.init(namespaces: modules.map(\.id),
             cultures: modules.map(SymbolGraph.Culture.init(module:)))
@@ -54,7 +53,7 @@ extension SymbolGraph
     /// for duplicates, and it doesn’t check if the module name is already associated
     /// with a culture.
     @inlinable public mutating
-    func append(namespace:ModuleIdentifier) -> Int
+    func append(namespace:Symbol.Module) -> Int
     {
         defer { self.namespaces.append(namespace) }
         return self.namespaces.endIndex
@@ -66,7 +65,7 @@ extension SymbolGraph
     @inlinable public
     func link<T>(
         static transform:(Int32) throws -> T,
-        dynamic link:(ModuleIdentifier) throws -> T) rethrows -> [T]
+        dynamic link:(Symbol.Module) throws -> T) rethrows -> [T]
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.namespaces.count)
 
@@ -74,7 +73,7 @@ extension SymbolGraph
         {
             elements.append(try transform(index * .module))
         }
-        for colony:ModuleIdentifier in self.namespaces[self.cultures.endIndex...]
+        for colony:Symbol.Module in self.namespaces[self.cultures.endIndex...]
         {
             elements.append(try link(colony))
         }

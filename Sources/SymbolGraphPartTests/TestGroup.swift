@@ -5,9 +5,9 @@ import Testing
 
 extension TestGroup
 {
-    func expect(symbol path:[String], in part:SymbolGraphPart) -> SymbolDescription?
+    func expect(symbol path:[String], in part:SymbolGraphPart) -> SymbolGraphPart.Vertex?
     {
-        self.expect(value: part.symbols.first
+        self.expect(value: part.vertices.first
         {
             switch $0.usr
             {

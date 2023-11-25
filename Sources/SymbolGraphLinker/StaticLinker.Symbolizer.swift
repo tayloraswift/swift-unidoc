@@ -1,7 +1,6 @@
 import CodelinkResolution
 import MarkdownABI
 import MarkdownAST
-import ModuleGraphs
 import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
@@ -13,7 +12,7 @@ extension StaticLinker
         /// Interned module names. This only contains modules that
         /// are not included in the symbol graph being linked.
         private
-        var modules:[ModuleIdentifier: Int]
+        var modules:[Symbol.Module: Int]
 
         private
         var articles:[Symbol.Article: Int32]
@@ -24,7 +23,7 @@ extension StaticLinker
 
         var graph:SymbolGraph
 
-        init(modules:[ModuleDetails])
+        init(modules:[SymbolGraph.Module])
         {
             self.modules = [:]
 
@@ -38,14 +37,14 @@ extension StaticLinker
 }
 extension StaticLinker.Symbolizer
 {
-    var importAll:[ModuleIdentifier]
+    var importAll:[Symbol.Module]
     {
         .init(self.graph.namespaces[self.graph.cultures.indices])
     }
 
     func scopes(
-        namespace:ModuleIdentifier? = nil,
-        culture:ModuleIdentifier,
+        namespace:Symbol.Module? = nil,
+        culture:Symbol.Module,
         scope:[String] = []) -> StaticResolver.Scopes
     {
         .init(
@@ -173,7 +172,7 @@ extension StaticLinker.Symbolizer
     }
 
     mutating
-    func intern(_ id:ModuleIdentifier) -> Int
+    func intern(_ id:Symbol.Module) -> Int
     {
         {
             switch $0

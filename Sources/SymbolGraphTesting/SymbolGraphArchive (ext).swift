@@ -1,14 +1,14 @@
 import BSON
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 import System
 import Testing
 
 extension SymbolGraphArchive
 {
     public static
-    func load(package:PackageIdentifier,
+    func load(package:Symbol.Package,
         at version:AnyVersion? = nil,
         in directory:FilePath) throws -> Self
     {

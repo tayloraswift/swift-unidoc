@@ -36,7 +36,7 @@ extension Symbol.RequirementRelationship:NestingRelationship
     }
 
     @inlinable public
-    var scope:Symbol
+    var scope:Symbol.USR
     {
         .scalar(self.target)
     }

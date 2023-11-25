@@ -1,6 +1,5 @@
 import JSON
 import MarkdownRendering
-import ModuleGraphs
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -76,7 +75,7 @@ extension DynamicLinker.TreeMapper
             fatalError("scalar \(foreign) is not from a package in this context!")
         }
         guard
-        let namespace:ModuleIdentifier = package.namespace(of: foreign),
+        let namespace:Symbol.Module = package.namespace(of: foreign),
         let node:Int32 = foreign - package.edition,
         let decl:SymbolGraph.Decl = package.decls.nodes[node].decl
         else
@@ -126,7 +125,7 @@ extension DynamicLinker.TreeMapper
     consuming
     func build(cultures:[Volume.Vertex.Culture]) -> (trees:[Volume.TypeTree], index:JSON)
     {
-        let cultures:[Unidoc.Scalar: ModuleIdentifier] = cultures.reduce(into: [:])
+        let cultures:[Unidoc.Scalar: Symbol.Module] = cultures.reduce(into: [:])
         {
             $0[$1.id] = $1.module.id
         }
@@ -140,7 +139,7 @@ extension DynamicLinker.TreeMapper
                 by: { $0.key < $1.key })
             {
                 guard
-                let culture:ModuleIdentifier = cultures[id]
+                let culture:Symbol.Module = cultures[id]
                 else
                 {
                     continue

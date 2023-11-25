@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Symbols
 
 extension DroppedExtensionsError
@@ -7,6 +6,6 @@ extension DroppedExtensionsError
     enum AffectedExtensions:Equatable, Sendable
     {
         case decl(Symbol.Decl)
-        case namespace(ModuleIdentifier)
+        case namespace(Symbol.Module)
     }
 }

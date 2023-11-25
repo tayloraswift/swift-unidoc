@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 
 extension Volume
 {
@@ -6,12 +6,12 @@ extension Volume
     struct Selector:Equatable, Hashable, Sendable
     {
         public
-        var package:PackageIdentifier
+        var package:Symbol.Package
         public
         var version:Substring?
 
         @inlinable public
-        init(package:PackageIdentifier, version:Substring?)
+        init(package:Symbol.Package, version:Substring?)
         {
             self.package = package
             self.version = version

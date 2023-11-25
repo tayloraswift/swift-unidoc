@@ -1,4 +1,4 @@
-import ModuleGraphs
+import SymbolGraphs
 
 public
 enum ToolchainError:Error, Equatable, Sendable

@@ -1,7 +1,6 @@
 import GitHubClient
 import GitHubAPI
 import HTTP
-import ModuleGraphs
 import MongoDB
 import SymbolGraphs
 import UnidocDB

@@ -1,4 +1,5 @@
-import ModuleGraphs
+import SymbolGraphs
+import Symbols
 
 extension DigraphExplorer
 {
@@ -57,7 +58,7 @@ extension DigraphExplorer<TargetNode>.Nodes
     /// by the given target. This function is aware of platform conditionals.
     public
     func included(by target:TargetNode,
-        on platform:PlatformIdentifier) throws -> Set<String>
+        on platform:SymbolGraphMetadata.Platform) throws -> Set<String>
     {
         var explorer:DigraphExplorer<TargetNode> = .init(nodes: self)
             explorer.explore(node: target)
@@ -75,15 +76,15 @@ extension DigraphExplorer<ProductNode>.Nodes
 {
     /// Returns *all* nodes in the index that are included, directly or indirectly,
     /// by any of the given products. Each element in the returned array is unique.
-    func included(by products:[ProductIdentifier],
-        cache:inout [ProductIdentifier: [ProductIdentifier]]) throws -> [ProductIdentifier]
+    func included(by products:[Symbol.Product],
+        cache:inout [Symbol.Product: [Symbol.Product]]) throws -> [Symbol.Product]
     {
-        var included:Set<ProductIdentifier> = []
-        for id:ProductIdentifier in products
+        var included:Set<Symbol.Product> = []
+        for id:Symbol.Product in products
         {
             try
             {
-                let products:[ProductIdentifier] = try $0 ?? self.included(by: id)
+                let products:[Symbol.Product] = try $0 ?? self.included(by: id)
                 included.formUnion(products)
                 $0 = products
             } (&cache[id])
@@ -91,15 +92,15 @@ extension DigraphExplorer<ProductNode>.Nodes
         return included.sorted()
     }
     private
-    func included(by product:ProductIdentifier) throws -> [ProductIdentifier]
+    func included(by product:Symbol.Product) throws -> [Symbol.Product]
     {
         var explorer:DigraphExplorer<Node> = .init(nodes: self)
         try explorer.explore(node: product)
         let included:[Node.ID: Node] = try explorer.conquer
         {
-            for predecessor:Node.Predecessor in $1.predecessors
+            for predecessor:Node.ID in $1.predecessors
             {
-                try $0.explore(node: predecessor.id)
+                try $0.explore(node: predecessor)
             }
         }
         return .init(included.keys)

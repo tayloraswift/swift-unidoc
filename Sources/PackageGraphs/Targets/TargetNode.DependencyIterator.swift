@@ -1,4 +1,4 @@
-import ModuleGraphs
+import SymbolGraphs
 
 extension TargetNode
 {
@@ -6,12 +6,13 @@ extension TargetNode
     struct DependencyIterator<Element> where Element:Hashable
     {
         @usableFromInline internal
-        let platform:PlatformIdentifier
+        let platform:SymbolGraphMetadata.Platform
         @usableFromInline internal
         var base:IndexingIterator<[Dependency<Element>]>
 
         @inlinable internal
-        init(platform:PlatformIdentifier, base:IndexingIterator<[Dependency<Element>]>)
+        init(platform:SymbolGraphMetadata.Platform,
+            base:IndexingIterator<[Dependency<Element>]>)
         {
             self.platform = platform
             self.base = base

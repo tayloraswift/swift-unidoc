@@ -1,5 +1,7 @@
-import ModuleGraphs
+import PackageMetadata
 import SemanticVersions
+import SHA1
+import Symbols
 import System
 
 @frozen public
@@ -49,7 +51,7 @@ extension PackageBuild
     ///         The directory in which this function will create a location to
     ///         dump build artifacts to.
     public static
-    func local(package:PackageIdentifier,
+    func local(package:Symbol.Package,
         from packages:FilePath,
         in shared:Workspace,
         clean:Bool = false) async throws -> Self
@@ -74,7 +76,7 @@ extension PackageBuild
     ///     -   shared:
     ///         The directory in which this function will create folders.
     public static
-    func remote(package:PackageIdentifier,
+    func remote(package:Symbol.Package,
         from repository:String,
         at refname:String,
         in shared:Workspace,
@@ -123,9 +125,9 @@ extension PackageBuild
             try readable.read(into: .init($0))
         }
 
-        if  let revision:Repository.Revision = .init(stdout.prefix(while: \.isHexDigit))
+        if  let revision:SHA1 = .init(stdout.prefix(while: \.isHexDigit))
         {
-            let pin:Repository.Pin = .init(id: package,
+            let pin:PackageManifest.DependencyPin = .init(id: package,
                 location: .remote(url: repository),
                 revision: revision,
                 version: version)

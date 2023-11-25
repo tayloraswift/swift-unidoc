@@ -1,4 +1,4 @@
-import ModuleGraphs
+import Symbols
 
 extension SymbolGraphPart
 {
@@ -6,12 +6,12 @@ extension SymbolGraphPart
     struct ID:Equatable, Hashable, Sendable
     {
         public
-        let culture:ModuleIdentifier
+        let culture:Symbol.Module
         public
-        let colony:ModuleIdentifier?
+        let colony:Symbol.Module?
 
         @inlinable public
-        init(culture:ModuleIdentifier, colony:ModuleIdentifier? = nil)
+        init(culture:Symbol.Module, colony:Symbol.Module? = nil)
         {
             self.culture = culture
             self.colony = colony
@@ -34,7 +34,7 @@ extension SymbolGraphPart.ID
     }
 
     @inlinable public
-    var namespace:ModuleIdentifier
+    var namespace:Symbol.Module
     {
         self.colony ?? self.culture
     }

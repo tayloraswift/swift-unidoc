@@ -1,5 +1,4 @@
-import ModuleGraphs
-import LexicalPaths
+import Symbols
 
 extension CodelinkResolver
 {
@@ -7,14 +6,14 @@ extension CodelinkResolver
     struct Scope
     {
         public
-        let namespace:ModuleIdentifier
+        let namespace:Symbol.Module
         public
-        let imports:[ModuleIdentifier]
+        let imports:[Symbol.Module]
         public
         let path:[String]
 
         @inlinable public
-        init(namespace:ModuleIdentifier, imports:[ModuleIdentifier] = [], path:[String] = [])
+        init(namespace:Symbol.Module, imports:[Symbol.Module] = [], path:[String] = [])
         {
             self.namespace = namespace
             self.imports = imports

@@ -1,4 +1,4 @@
-import ModuleGraphs
+import SymbolGraphs
 
 @frozen public
 struct TargetNode:Equatable, Sendable
@@ -6,7 +6,7 @@ struct TargetNode:Equatable, Sendable
     public
     let name:String
     public
-    let type:ModuleType
+    let type:SymbolGraph.ModuleType
     public
     let dependencies:Dependencies
     /// Paths of excluded files, relative to the target source directory.
@@ -18,7 +18,7 @@ struct TargetNode:Equatable, Sendable
     let path:String?
 
     @inlinable public
-    init(name:String, type:ModuleType = .regular,
+    init(name:String, type:SymbolGraph.ModuleType = .regular,
         dependencies:Dependencies = .init(),
         exclude:[String] = [],
         path:String? = nil)
@@ -38,7 +38,8 @@ extension TargetNode:Identifiable
 }
 extension TargetNode:DigraphNode
 {
-    /// Same as `dependencies.targets`.
+    /// Returns a lazy wrapper around `dependencies.targets` that functions as a collection
+    /// of target dependency names.
     @inlinable public
-    var predecessors:[Dependency<String>] { self.dependencies.targets }
+    var predecessors:Predecessors { .init(self.dependencies.targets) }
 }
