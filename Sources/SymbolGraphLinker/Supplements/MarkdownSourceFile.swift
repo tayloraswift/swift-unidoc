@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Symbols
 import URI
 
@@ -30,7 +29,7 @@ struct MarkdownSourceFile:Equatable, Sendable
 extension MarkdownSourceFile
 {
     public
-    init(bundle:__shared ModuleIdentifier, path:__owned Symbol.File, text:__owned String)
+    init(bundle:borrowing Symbol.Module, path:__owned Symbol.File, text:__owned String)
     {
         let stem:Substring = path.last.prefix { $0 != "." }
         let id:String = .init(

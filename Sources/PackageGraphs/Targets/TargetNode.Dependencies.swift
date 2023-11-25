@@ -1,4 +1,5 @@
-import ModuleGraphs
+import SymbolGraphs
+import Symbols
 
 extension TargetNode
 {
@@ -6,13 +7,13 @@ extension TargetNode
     struct Dependencies:Equatable, Sendable
     {
         public
-        var products:[Dependency<ProductIdentifier>]
+        var products:[Dependency<Symbol.Product>]
         public
         var targets:[Dependency<String>]
 
         @inlinable public
         init(
-            products:[Dependency<ProductIdentifier>] = [],
+            products:[Dependency<Symbol.Product>] = [],
             targets:[Dependency<String>] = [])
         {
             self.products = products
@@ -23,14 +24,14 @@ extension TargetNode
 extension TargetNode.Dependencies
 {
     @inlinable public
-    func products(on platform:PlatformIdentifier)
-        -> TargetNode.DependencyView<ProductIdentifier>
+    func products(
+        on platform:SymbolGraphMetadata.Platform) -> TargetNode.DependencyView<Symbol.Product>
     {
         .init(platform: platform, base: self.products)
     }
     @inlinable public
-    func targets(on platform:PlatformIdentifier)
-        -> TargetNode.DependencyView<String>
+    func targets(
+        on platform:SymbolGraphMetadata.Platform) -> TargetNode.DependencyView<String>
     {
         .init(platform: platform, base: self.targets)
     }

@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Signatures
 import SymbolGraphs
 import Unidoc
@@ -69,7 +68,7 @@ extension ProtocolConformances<Int>
             let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = $0.reduce(
                 into: [:])
             {
-                let module:ModuleDetails = context.current.cultures[$1.culture].module
+                let module:SymbolGraph.Module = context.current.cultures[$1.culture].module
                 for c:Int in module.dependencies.modules where
                     c != $1.culture && extancy.contains(c)
                 {

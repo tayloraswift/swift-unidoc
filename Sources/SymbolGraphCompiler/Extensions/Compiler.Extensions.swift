@@ -35,13 +35,13 @@ extension Compiler.Extensions
 extension Compiler.Extensions
 {
     mutating
-    func include(block:__owned Symbol.Block,
-        extending type:__owned Symbol.Decl,
-        namespace:__owned Compiler.Namespace.ID,
-        with description:SymbolDescription,
+    func include(block:consuming Symbol.Block,
+        extending type:consuming Symbol.Decl,
+        namespace:consuming Compiler.Namespace.ID,
+        with vertex:SymbolGraphPart.Vertex,
         in culture:Compiler.Culture) throws
     {
-        guard case .block = description.phylum
+        guard case .block = vertex.phylum
         else
         {
             //  One way of looking at this is the symbol has the wrong phylum.
@@ -53,12 +53,12 @@ extension Compiler.Extensions
         let `extension`:Compiler.ExtensionObject = self(culture.index, .init(
                 namespace: namespace,
                 type: type),
-            where: description.extension.conditions,
-            path: description.path)
+            where: vertex.extension.conditions,
+            path: vertex.path)
 
         if  let block:Compiler.Extension.Block = .init(
-                location: try description.location?.map(culture.resolve(uri:)),
-                comment: description.doccomment.flatMap(culture.filter(doccomment:)))
+                location: try vertex.location?.map(culture.resolve(uri:)),
+                comment: vertex.doccomment.flatMap(culture.filter(doccomment:)))
         {
             `extension`.append(block: block)
         }

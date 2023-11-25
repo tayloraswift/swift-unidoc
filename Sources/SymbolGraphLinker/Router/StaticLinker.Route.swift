@@ -1,4 +1,3 @@
-import ModuleGraphs
 import LexicalPaths
 import Symbols
 import Unidoc
@@ -17,7 +16,7 @@ extension StaticLinker
 extension StaticLinker.Route
 {
     static
-    func decl(_ namespace:ModuleIdentifier,
+    func decl(_ namespace:Symbol.Module,
         _ path:UnqualifiedPath,
         _ phylum:Unidoc.Decl) -> Self
     {
@@ -36,7 +35,7 @@ extension StaticLinker.Route
         return .main("\(stem)".lowercased())
     }
     static
-    func article(_ namespace:ModuleIdentifier, _ name:String) -> Self
+    func article(_ namespace:Symbol.Module, _ name:String) -> Self
     {
         .main("/\(namespace)/\(name)".lowercased())
     }

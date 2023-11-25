@@ -1,12 +1,12 @@
-import ModuleGraphs
 import PackageGraphs
+import SymbolGraphs
 
 extension DigraphExplorer<TargetNode>.Nodes
 {
     /// Returns *all* targets in the index that are included, directly or indirectly,
     /// by the given product.
     func included(by product:PackageManifest.Product,
-        on platform:PlatformIdentifier) throws -> Set<String>
+        on platform:SymbolGraphMetadata.Platform) throws -> Set<String>
     {
         var explorer:DigraphExplorer<TargetNode> = .init(nodes: self)
         for name:String in product.targets
@@ -27,7 +27,7 @@ extension DigraphExplorer<TargetNode>.Nodes
     /// their internal dependency relationships; targets that appear later in the list
     /// depend only on targets that appear before them in the list.
     func included(by products:[PackageManifest.Product],
-        on platform:PlatformIdentifier) throws -> [TargetNode]
+        on platform:SymbolGraphMetadata.Platform) throws -> [TargetNode]
     {
         var explorer:DigraphExplorer<TargetNode> = .init(nodes: self)
 

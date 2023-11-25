@@ -1,6 +1,6 @@
 import BSONDecoding
-import ModuleGraphs
 import SymbolGraphs
+import Symbols
 import UnidocRecords
 
 extension UnidocDatabase.Sitemaps
@@ -11,12 +11,12 @@ extension UnidocDatabase.Sitemaps
     struct MetadataView
     {
         public
-        let id:PackageIdentifier
+        let id:Symbol.Package
         public
         let modified:BSON.Millisecond?
 
         @inlinable internal
-        init(id:PackageIdentifier, modified:BSON.Millisecond?)
+        init(id:Symbol.Package, modified:BSON.Millisecond?)
         {
             self.id = id
             self.modified = modified

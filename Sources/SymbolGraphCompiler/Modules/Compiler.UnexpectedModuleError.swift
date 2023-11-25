@@ -1,12 +1,12 @@
-import ModuleGraphs
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {
     public
     enum UnexpectedModuleError:Error, Equatable, Sendable
     {
-        case culture(ModuleIdentifier, in:SymbolGraphPart.ID)
+        case culture(Symbol.Module, in:SymbolGraphPart.ID)
     }
 }
 extension Compiler.UnexpectedModuleError:CustomStringConvertible

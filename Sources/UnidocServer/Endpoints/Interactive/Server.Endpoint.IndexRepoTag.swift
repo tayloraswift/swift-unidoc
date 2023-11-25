@@ -1,9 +1,9 @@
 import GitHubClient
 import GitHubAPI
 import HTTP
-import ModuleGraphs
 import MongoDB
 import SemanticVersions
+import Symbols
 import UnidocDB
 import UnidocRecords
 
@@ -11,10 +11,10 @@ extension Server.Endpoint
 {
     struct IndexRepoTag:Sendable
     {
-        let package:PackageIdentifier
+        let package:Symbol.Package
         let tag:String
 
-        init(package:PackageIdentifier, tag:String)
+        init(package:Symbol.Package, tag:String)
         {
             self.package = package
             self.tag = tag

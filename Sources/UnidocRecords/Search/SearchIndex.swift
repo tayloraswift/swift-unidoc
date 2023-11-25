@@ -2,7 +2,6 @@ import BSONDecoding
 import BSONEncoding
 import JSON
 import MD5
-import ModuleGraphs
 import SymbolGraphs
 import Unidoc
 

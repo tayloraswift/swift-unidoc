@@ -1,6 +1,5 @@
 import Codelinks
-import LexicalPaths
-import ModuleGraphs
+import Symbols
 import Unidoc
 
 @frozen public
@@ -43,7 +42,7 @@ extension CodelinkResolver
                     return overloads
                 }
             }
-            for namespace:ModuleIdentifier in self.scope.imports where
+            for namespace:Symbol.Module in self.scope.imports where
                 namespace != self.scope.namespace
             {
                 let overloads:Overloads = self.table.query(

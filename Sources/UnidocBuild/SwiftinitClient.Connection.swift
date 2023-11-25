@@ -2,9 +2,9 @@ import BSON
 import HTTPClient
 import JSON
 import Media
-import ModuleGraphs
 import NIOCore
 import NIOHPACK
+import Symbols
 import UnidocAutomation
 import UnidocRecords
 import URI
@@ -30,7 +30,7 @@ extension SwiftinitClient
 
 extension SwiftinitClient.Connection
 {
-    func status(of package:PackageIdentifier) async throws -> UnidocAPI.PackageStatus
+    func status(of package:Symbol.Package) async throws -> UnidocAPI.PackageStatus
     {
         try await self.get(from: "/api/build/\(package)")
     }

@@ -1,5 +1,4 @@
 import MongoDB
-import ModuleGraphs
 import MongoTesting
 import SemanticVersions
 import SymbolGraphs

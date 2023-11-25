@@ -1,6 +1,5 @@
 import HTML
 import LexicalPaths
-import ModuleGraphs
 import MarkdownRendering
 import Signatures
 import Unidoc

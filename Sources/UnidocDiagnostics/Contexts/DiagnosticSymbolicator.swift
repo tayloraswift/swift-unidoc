@@ -1,4 +1,3 @@
-import ModuleGraphs
 import Signatures
 import Symbols
 import Sources
@@ -13,7 +12,7 @@ protocol DiagnosticSymbolicator<Address>
     subscript(file address:Address) -> Symbol.File? { get }
 
     var demangler:Demangler? { get }
-    var root:Repository.Root? { get }
+    var root:Symbol.FileBase? { get }
 }
 extension DiagnosticSymbolicator
 {
@@ -115,7 +114,7 @@ extension DiagnosticSymbolicator
     @inlinable public
     func path(of scalar:Address) -> String?
     {
-        if  let root:Repository.Root = self.root,
+        if  let root:Symbol.FileBase = self.root,
             let file:Symbol.File = self[file: scalar]
         {
             return "\(root.path)/\(file)"

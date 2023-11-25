@@ -1,4 +1,5 @@
-import ModuleGraphs
+import SymbolGraphs
+import Symbols
 
 /// A package node is a flattened representation of a package manifest.
 /// Creating one involves assigning an identity to a package manifest
@@ -7,27 +8,27 @@ import ModuleGraphs
 struct PackageNode:Identifiable
 {
     public
-    let id:PackageIdentifier
+    let id:Symbol.Package
     public
-    let dependencies:[Dependency]
+    var dependencies:[any Identifiable<Symbol.Package>]
 
     public
-    let products:[ProductDetails]
+    var products:[SymbolGraphMetadata.Product]
     public
-    let modules:[ModuleDetails]
+    var modules:[SymbolGraph.Module]
     /// Lists of excluded sources, one per target node.
     public
-    let exclude:[[String]]
+    var exclude:[[String]]
     public
-    let root:Repository.Root
+    var root:Symbol.FileBase
 
     @inlinable public
-    init(id:PackageIdentifier,
-        dependencies:[Dependency],
-        products:[ProductDetails],
-        modules:[ModuleDetails],
+    init(id:Symbol.Package,
+        dependencies:[any Identifiable<Symbol.Package>],
+        products:[SymbolGraphMetadata.Product],
+        modules:[SymbolGraph.Module],
         exclude:[[String]],
-        root:Repository.Root)
+        root:Symbol.FileBase)
     {
         self.id = id
         self.dependencies = dependencies
@@ -40,32 +41,39 @@ struct PackageNode:Identifiable
 extension PackageNode:DigraphNode
 {
     @inlinable public
-    var predecessors:[Dependency] { self.dependencies }
+    var predecessors:Predecessors { .init(self.dependencies) }
 }
 extension PackageNode
 {
-    public __consuming
+    public consuming
     func flattened(dependencies:[PackageNode]) throws -> Self
+    {
+        try self.flatten(dependencies: dependencies)
+        return self
+    }
+
+    mutating
+    func flatten(dependencies:[PackageNode]) throws
     {
         var nodes:DigraphExplorer<ProductNode>.Nodes = .init()
         for package:PackageNode in dependencies
         {
-            for product:ProductDetails in package.products
+            for product:SymbolGraphMetadata.Product in package.products
             {
                 try nodes.index(.init(id: .init(name: product.name, package: package.id),
                     predecessors: product.dependencies))
             }
         }
 
-        var cache:[ProductIdentifier: [ProductIdentifier]] = [:]
+        var cache:[Symbol.Product: [Symbol.Product]] = [:]
 
-        let products:[ProductDetails] = try self.products.map
+        self.products = try self.products.map
         {
             .init(name: $0.name, type: $0.type,
                 dependencies: try nodes.included(by: $0.dependencies, cache: &cache),
                 cultures: $0.cultures)
         }
-        let modules:[ModuleDetails] = try self.modules.map
+        self.modules = try self.modules.map
         {
             .init(name: $0.name, type: $0.type, dependencies: .init(
                     products: try nodes.included(by: $0.dependencies.products,
@@ -74,28 +82,22 @@ extension PackageNode
                 location: $0.location)
         }
 
-        let dependencies:[Dependency] = try self.order(dependencies: dependencies)
-        //  Lint unused dependencies
-        let used:Set<PackageIdentifier> = .init(cache.values.joined().lazy.map(\.package))
+        let declared:[Symbol.Package: any Identifiable<Symbol.Package>] =
+            self.dependencies.reduce(into: [:]) { $0[$1.id] = $1 }
 
-        return .init(id: self.id,
-            dependencies: dependencies.filter { used.contains($0.id) },
-            products: products,
-            modules: modules,
-            exclude: self.exclude,
-            root: self.root)
-    }
-    private
-    func order(dependencies:[PackageNode]) throws -> [Dependency]
-    {
-        var direct:[PackageIdentifier: Dependency] = [:]
-        for dependency:Dependency in self.dependencies
+        let actuallyUsed:Set<Symbol.Package> = cache.values.reduce(into: [])
         {
-            direct[dependency.id] = dependency
+            for product:Symbol.Product in $1
+            {
+                $0.insert(product.package)
+            }
         }
-        return try PackageNode.order(topologically: dependencies).map
+
+        self.dependencies = try Self.order(topologically: dependencies).compactMap
         {
-            direct[$0.id] ?? .transitive($0.id)
+            actuallyUsed.contains($0.id)
+                ? declared[$0.id] ?? TransitiveDependency.init(id: $0.id)
+                : nil
         }
     }
 }

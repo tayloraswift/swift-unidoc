@@ -1,9 +1,9 @@
 public
 protocol DigraphNode:Identifiable where ID:Comparable & Sendable
 {
-    associatedtype Predecessor:Identifiable<ID>
+    associatedtype Predecessors:Sequence<ID>
 
-    var predecessors:[Predecessor] { get }
+    var predecessors:Predecessors { get }
 }
 extension DigraphNode
 {
@@ -18,7 +18,7 @@ extension DigraphNode
             {
                 throw DigraphNodeError<Self>.duplicate(node.id)
             }
-            for predecessor:ID in node.predecessors.map(\.id).sorted()
+            for predecessor:ID in node.predecessors.sorted()
             {
                 consumers[predecessor, default: []].append(node)
             }
@@ -42,10 +42,7 @@ extension DigraphNode
         {
             //  If `Self` is ``PackageNode``, it is expected for edges to sometimes point
             //  to non-existent nodes.
-            let predecessors:[Predecessor] = $0.predecessors.filter
-            {
-                nodes.keys.contains($0.id)
-            }
+            let predecessors:[ID] = $0.predecessors.filter(nodes.keys.contains(_:))
             if  predecessors.isEmpty
             {
                 sources.append($0)
@@ -53,7 +50,7 @@ extension DigraphNode
             }
             else
             {
-                return .init(predecessors.lazy.map(\.id))
+                return .init(predecessors)
             }
         }
 

@@ -1,7 +1,7 @@
 import HTTP
 import MD5
-import ModuleGraphs
 import MongoDB
+import Symbols
 import UnidocDB
 import UnidocPages
 import UnidocRecords
@@ -17,10 +17,10 @@ extension Server.Endpoint
     /// since Google ignores them. Therefore, we use the plain text format.
     struct Sitemap:Sendable
     {
-        let package:PackageIdentifier
+        let package:Symbol.Package
         let tag:MD5?
 
-        init(package:PackageIdentifier, tag:MD5?)
+        init(package:Symbol.Package, tag:MD5?)
         {
             self.package = package
             self.tag = tag

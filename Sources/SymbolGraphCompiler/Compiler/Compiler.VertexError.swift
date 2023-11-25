@@ -11,12 +11,12 @@ extension Compiler
         public
         let underlying:any Error
         public
-        let symbol:Symbol
+        let symbol:Symbol.USR
         public
         let phylum:Unidoc.Phylum
 
         public
-        init(underlying:any Error, symbol:Symbol, phylum:Unidoc.Phylum)
+        init(underlying:any Error, symbol:Symbol.USR, phylum:Unidoc.Phylum)
         {
             self.underlying = underlying
             self.symbol = symbol
@@ -26,7 +26,7 @@ extension Compiler
 }
 extension Compiler.VertexError
 {
-    init(underlying:any Error, in description:SymbolDescription)
+    init(underlying:any Error, in description:SymbolGraphPart.Vertex)
     {
         self.init(underlying: underlying, symbol: description.usr, phylum: description.phylum)
     }

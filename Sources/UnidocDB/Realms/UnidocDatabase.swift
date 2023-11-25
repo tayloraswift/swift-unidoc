@@ -1,7 +1,6 @@
 import FNV1
 import GitHubAPI
 import MongoDB
-import ModuleGraphs
 import SemanticVersions
 import SymbolGraphs
 import Symbols
@@ -94,7 +93,7 @@ extension UnidocDatabase
         try await self.sitemaps.replace(with: session)
     }
 
-    func _editions(of package:PackageIdentifier,
+    func _editions(of package:Symbol.Package,
         with session:Mongo.Session) async throws -> [Realm.Edition]
     {
         try await session.run(
@@ -189,7 +188,7 @@ extension UnidocDatabase
 {
     @_spi(testable)
     public
-    func track(package:PackageIdentifier,
+    func track(package:Symbol.Package,
         with session:Mongo.Session) async throws -> Int32
     {
         try await self.packages.register(package,

@@ -1,6 +1,5 @@
 import BSONDecoding
 import BSONEncoding
-import ModuleGraphs
 import MongoQL
 import SemanticVersions
 import SymbolGraphs
