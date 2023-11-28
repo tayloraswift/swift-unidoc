@@ -11,5 +11,5 @@ extension Volume
 public
 protocol _VolumeVertexPredicate:Equatable, Hashable, Sendable
 {
-    func stage(_:inout Mongo.PipelineStage, input:Mongo.KeyPath, output:Mongo.KeyPath)
+    func extend(pipeline:inout Mongo.PipelineEncoder, input:Mongo.KeyPath, output:Mongo.KeyPath)
 }

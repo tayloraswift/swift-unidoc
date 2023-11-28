@@ -1,8 +1,8 @@
 import MongoDB
 import MongoTesting
-
-@_spi(testable)
+import Symbols
 import UnidocDB
+import UnidocRecords
 
 struct PackageNumbers:MongoTestBattery
 {
@@ -11,14 +11,24 @@ struct PackageNumbers:MongoTestBattery
         let database:UnidocDatabase = await .setup(as: database, in: pool)
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await database.track(package: "a", with: session) ==? 0)
-        tests.expect(try await database.track(package: "a", with: session) ==? 0)
-        tests.expect(try await database.track(package: "b", with: session) ==? 1)
-        tests.expect(try await database.track(package: "a", with: session) ==? 0)
-        tests.expect(try await database.track(package: "b", with: session) ==? 1)
-        tests.expect(try await database.track(package: "c", with: session) ==? 2)
-        tests.expect(try await database.track(package: "c", with: session) ==? 2)
-        tests.expect(try await database.track(package: "a", with: session) ==? 0)
-        tests.expect(try await database.track(package: "b", with: session) ==? 1)
+        for expected:(symbol:Symbol.Package, id:Int32, new:Bool) in
+        [
+            ("a", 0, true),
+            ("b", 1, true),
+            ("a", 0, false),
+            ("b", 1, false),
+            ("c", 2, true),
+            ("c", 2, false),
+            ("a", 0, false),
+            ("b", 1, false),
+        ]
+        {
+            let (package, new):(Realm.Package, Bool) = try await database.register(
+                expected.symbol,
+                with: session)
+
+            tests.expect(package.id ==? expected.id)
+            tests.expect(new ==? expected.new)
+        }
     }
 }

@@ -1,6 +1,7 @@
 import HTTP
 import HTTPServer
 import MongoDB
+import Unidoc
 import UnidocDB
 import UnidocRecords
 
@@ -8,7 +9,7 @@ extension Server.Endpoint
 {
     enum GraphUplink:Sendable
     {
-        case coordinate(Int32, Int32)
+        case coordinate(Unidoc.Edition)
         case identifier(VolumeIdentifier)
     }
 }
@@ -21,11 +22,8 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
 
         switch self
         {
-        case .coordinate(let package, let version):
-            updated = try await server.db.unidoc.uplink(
-                package: package,
-                version: version,
-                with: session)
+        case .coordinate(let edition):
+            updated = try await server.db.unidoc.uplink(edition, with: session)
 
         case .identifier(let volume):
             updated = try await server.db.unidoc.uplink(volume: volume, with: session)

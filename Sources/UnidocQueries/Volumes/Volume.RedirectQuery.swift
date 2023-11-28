@@ -1,3 +1,4 @@
+import MongoDB
 import MongoQL
 import Unidoc
 import UnidocDB
@@ -26,21 +27,21 @@ extension Volume
         }
     }
 }
-extension Volume.RedirectQuery:DatabaseQuery
+extension Volume.RedirectQuery:Mongo.PipelineQuery
 {
     public
-    typealias Output = Volume.RedirectOutput
+    typealias Iteration = Mongo.Single<Volume.RedirectOutput>
 }
 extension Volume.RedirectQuery:Volume.VertexQuery
 {
     @inlinable public static
-    var volume:Mongo.KeyPath { Output[.volume] }
+    var volume:Mongo.KeyPath { Volume.RedirectOutput[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Output[.matches] }
+    var input:Mongo.KeyPath { Volume.RedirectOutput[.matches] }
 
     @inlinable public
-    func extend(pipeline:inout Mongo.Pipeline)
+    func extend(pipeline:inout Mongo.PipelineEncoder)
     {
     }
 }

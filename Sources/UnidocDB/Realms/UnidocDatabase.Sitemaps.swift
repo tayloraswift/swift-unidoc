@@ -20,27 +20,26 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Sitemaps:DatabaseCollection
+extension UnidocDatabase.Sitemaps:Mongo.CollectionModel
 {
-    //  TODO: rename collection to `sitemap`.
     @inlinable public static
-    var name:Mongo.Collection { "siteMaps" }
+    var name:Mongo.Collection { "Sitemaps" }
 
     public
-    typealias ElementID = Symbol.Package
+    typealias ElementID = Int32
 
     public static
-    var indexes:[Mongo.CreateIndexStatement] { [] }
+    var indexes:[Mongo.CollectionIndex] { [] }
 }
 
 extension UnidocDatabase.Sitemaps
 {
-    public
-    func find(by package:Symbol.Package,
-        with session:Mongo.Session) async throws -> Realm.Sitemap?
-    {
-        try await self.find(Realm.Sitemap.self, by: package, with: session)
-    }
+    // public
+    // func find(by package:Symbol.Package,
+    //     with session:Mongo.Session) async throws -> Realm.Sitemap?
+    // {
+    //     try await self.find(Realm.Sitemap.self, by: package, with: session)
+    // }
 
     public
     func list(with session:Mongo.Session, _ yield:([MetadataView]) throws -> Void) async throws

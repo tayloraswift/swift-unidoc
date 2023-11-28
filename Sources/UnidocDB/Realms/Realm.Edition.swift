@@ -22,8 +22,9 @@ extension Realm
         /// Whether or not this edition is a release.
         public
         var release:Bool
-        /// The patch version associated with this edition. This might not be trivially-computable
-        /// from the ``name`` property, for example, `5.9.0` from `swift-5.9-RELEASE`.
+        /// The patch version associated with this edition. This might not be
+        /// trivially-computable from the ``name`` property, for example, `5.9.0` from
+        /// `swift-5.9-RELEASE`.
         public
         var patch:PatchVersion
 
@@ -33,18 +34,13 @@ extension Realm
         /// The SHA-1 hash of the git commit associated with this edition.
         public
         var sha1:SHA1?
-        /// Indicates if the repository host has published a tag of the same name with a different
-        /// ``sha1`` hash.
-        public
-        var lost:Bool
 
         @inlinable public
         init(id:Unidoc.Edition,
             release:Bool,
             patch:PatchVersion,
             name:String,
-            sha1:SHA1?,
-            lost:Bool = false)
+            sha1:SHA1?)
         {
             self.id = id
 
@@ -53,7 +49,6 @@ extension Realm
 
             self.name = name
             self.sha1 = sha1
-            self.lost = lost
         }
     }
 }
@@ -71,15 +66,14 @@ extension Realm.Edition:MongoMasterCodingModel
     {
         case id = "_id"
 
-        case package = "P"
-        case version = "V"
+        case package = "p"
+        case version = "v"
 
         case release = "R"
         case patch = "A"
 
         case name = "T"
         case sha1 = "S"
-        case lost = "L"
     }
 }
 extension Realm.Edition:BSONDocumentEncodable
@@ -97,7 +91,6 @@ extension Realm.Edition:BSONDocumentEncodable
 
         bson[.name] = self.name
         bson[.sha1] = self.sha1
-        bson[.lost] = self.lost ? true : nil
     }
 }
 extension Realm.Edition:BSONDocumentDecodable
@@ -109,7 +102,6 @@ extension Realm.Edition:BSONDocumentDecodable
             release: try bson[.release].decode(),
             patch: try bson[.patch].decode(),
             name: try bson[.name].decode(),
-            sha1: try bson[.sha1]?.decode(),
-            lost: try bson[.lost]?.decode() ?? false)
+            sha1: try bson[.sha1]?.decode())
     }
 }

@@ -1,3 +1,4 @@
+import MongoDB
 import MongoQL
 import Unidoc
 import UnidocDB
@@ -15,10 +16,12 @@ struct RecentActivityQuery:Equatable, Hashable, Sendable
         self.limit = limit
     }
 }
-extension RecentActivityQuery:DatabaseQuery
+extension RecentActivityQuery:Mongo.PipelineQuery
 {
     public
     typealias Collation = SimpleCollation
+    public
+    typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
     var origin:Mongo.Collection { UnidocDatabase.DocsFeed.name }
@@ -27,88 +30,61 @@ extension RecentActivityQuery:DatabaseQuery
     var hint:Mongo.SortDocument? { nil }
 
     public
-    func build(pipeline:inout Mongo.Pipeline)
+    func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline.stage
+        //  Cannot use $natural sort in an aggregation pipeline.
+        pipeline[.sort] = .init
         {
-            //  Cannot use $natural sort in an aggregation pipeline.
-            $0[.sort] = .init
-            {
-                $0[UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.id]] = (-)
-            }
-        }
-        pipeline.stage
-        {
-            $0[.limit] = self.limit
+            $0[UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.id]] = (-)
         }
 
-        pipeline.stage
+        pipeline[.limit] = self.limit
+
+        pipeline[.facet] = .init
         {
-            $0[.facet] = .init
+            $0[Output[.docs]] = .init
             {
-                $0[Output[.docs]] = .init
+                $0[.lookup] = .init
                 {
-                    $0.stage
-                    {
-                        $0[.lookup] = .init
-                        {
-                            let id:Mongo.Variable<Unidoc.Edition> = "id"
+                    let id:Mongo.Variable<Unidoc.Edition> = "id"
 
-                            $0[.from] = UnidocDatabase.Volumes.name
-                            $0[.let] = .init
-                            {
-                                $0[let: id] =
-                                    UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.volume]
-                            }
-                            $0[.pipeline] = .init
-                            {
-                                $0.stage
-                                {
-                                    $0[.match] = .init
-                                    {
-                                        $0[.expr] = .expr
-                                        {
-                                            $0[.eq] = (Volume.Meta[.id], id)
-                                        }
-                                    }
-                                }
-                                $0.stage
-                                {
-                                    $0[.project] = .init(with: Volume.Meta.names(_:))
-                                }
-                            }
-                            $0[.as] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
-                        }
-                    }
-                    $0.stage
+                    $0[.from] = UnidocDatabase.Volumes.name
+                    $0[.let] = .init
                     {
-                        $0[.unwind] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
+                        $0[let: id] = UnidocDatabase.DocsFeed.Activity<Unidoc.Edition>[.volume]
                     }
+                    $0[.pipeline] = .init
+                    {
+                        $0[.match] = .init
+                        {
+                            $0[.expr] = .expr
+                            {
+                                $0[.eq] = (Volume.Meta[.id], id)
+                            }
+                        }
+
+                        $0[.project] = .init(with: Volume.Meta.names(_:))
+                    }
+                    $0[.as] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
                 }
+
+                $0[.unwind] = UnidocDatabase.DocsFeed.Activity<Volume.Meta>[.volume]
             }
         }
 
-        pipeline.stage
+        pipeline[.lookup] = .init
         {
-            $0[.lookup] = .init
+            $0[.from] = UnidocDatabase.RepoFeed.name
+            $0[.pipeline] = .init
             {
-                $0[.from] = UnidocDatabase.RepoFeed.name
-                $0[.pipeline] = .init
+                $0[.sort] = .init
                 {
-                    $0.stage
-                    {
-                        $0[.sort] = .init
-                        {
-                            $0[UnidocDatabase.RepoFeed.Activity[.id]] = (-)
-                        }
-                    }
-                    $0.stage
-                    {
-                        $0[.limit] = self.limit
-                    }
+                    $0[UnidocDatabase.RepoFeed.Activity[.id]] = (-)
                 }
-                $0[.as] = Output[.repo]
+
+                $0[.limit] = self.limit
             }
+            $0[.as] = Output[.repo]
         }
     }
 }

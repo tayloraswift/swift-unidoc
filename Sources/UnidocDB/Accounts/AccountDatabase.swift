@@ -17,7 +17,7 @@ extension AccountDatabase
     @inlinable public
     var users:Users { .init(database: self.id) }
 }
-extension AccountDatabase:DatabaseModel
+extension AccountDatabase:Mongo.DatabaseModel
 {
     public
     func setup(with session:Mongo.Session) async throws

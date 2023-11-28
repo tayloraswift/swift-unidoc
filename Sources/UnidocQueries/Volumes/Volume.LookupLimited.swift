@@ -14,12 +14,12 @@ extension Volume.LookupLimited:Volume.LookupContext
 {
     /// Sets the `output` to an empty array.
     public static
-    func groups(_ stage:inout Mongo.PipelineStage,
+    func groups(_ pipeline:inout Mongo.PipelineEncoder,
         volume _:Mongo.KeyPath,
         vertex _:Mongo.KeyPath,
         output:Mongo.KeyPath)
     {
-        stage[.set] = .init
+        pipeline[.set] = .init
         {
             $0[output] = [] as [Never]
         }
@@ -28,13 +28,13 @@ extension Volume.LookupLimited:Volume.LookupContext
     /// Stores the editions of the current volume’s dependencies in `output.volumes`, and
     /// sets `output.scalars` to an empty array.
     public static
-    func edges(_ stage:inout Mongo.PipelineStage,
+    func edges(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex _:Mongo.KeyPath,
         groups _:Mongo.KeyPath,
         output:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath))
     {
-        stage[.set] = .init
+        pipeline[.set] = .init
         {
             let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
                 in: volume / Volume.Meta[.dependencies])

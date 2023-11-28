@@ -1,5 +1,6 @@
 import BSON
 import MongoDB
+import SymbolGraphs
 import UnidocRecords
 
 extension UnidocDatabase
@@ -17,35 +18,25 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.DocsFeed:DatabaseCollection
+extension UnidocDatabase.DocsFeed:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "docs_feed" }
+    var name:Mongo.Collection { "DocsFeed" }
 
     typealias ElementID = BSON.Millisecond
 
     static
-    let indexes:[Mongo.CreateIndexStatement] =
+    let indexes:[Mongo.CollectionIndex] =
     [
-        .init
+        .init("Volume",
+            collation: SimpleCollation.spec,
+            unique: true)
         {
-            $0[.collation] = SimpleCollation.spec
-
-            //  Cannot enforce this until the older schema fall off the front page.
-            // $0[.unique] = true
-
-            $0[.name] = "volume"
-            $0[.key] = .init
-            {
-                $0[Activity<Unidoc.Edition>[.volume]] = (+)
-            }
+            $0[Activity<Unidoc.Edition>[.volume]] = (+)
         },
     ]
-}
-extension UnidocDatabase.DocsFeed:DatabaseCollectionCapped
-{
+
     /// 1 MB ought to be enough for anybody.
-    static
     var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
 extension UnidocDatabase.DocsFeed

@@ -15,14 +15,14 @@ extension Volume
 extension Volume.LookupAdjacent:Volume.LookupContext
 {
     public static
-    func groups(_ stage:inout Mongo.PipelineStage,
+    func groups(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
     {
         let extendee:Scalar = .init(in: vertex / Volume.Vertex[.extendee])
 
-        stage[.lookup] = .init
+        pipeline[.lookup] = .init
         {
             let global:Mongo.Variable<Unidoc.Scalar> = "global"
             let local:Mongo.Variable<Unidoc.Scalar> = "local"
@@ -70,28 +70,25 @@ extension Volume.LookupAdjacent:Volume.LookupContext
             }
             $0[.pipeline] = .init
             {
-                $0.stage
-                {
-                    //  Matches groups that have the same `_id` as `topic`, or that have
-                    //  the same `scope` as `local` and are in the range `min` to `max`, or
-                    //  that have the same `scope` as `global` and are marked as `latest`.
-                    $0[.match] = .groups(id: topic,
-                        or: (scope: local, min: min, max: max),
-                        or: (scope: global, latest: true))
-                }
+                //  Matches groups that have the same `_id` as `topic`, or that have
+                //  the same `scope` as `local` and are in the range `min` to `max`, or
+                //  that have the same `scope` as `global` and are marked as `latest`.
+                $0[.match] = .groups(id: topic,
+                    or: (scope: local, min: min, max: max),
+                    or: (scope: global, latest: true))
             }
             $0[.as] = output
         }
     }
 
     public static
-    func edges(_ stage:inout Mongo.PipelineStage,
+    func edges(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
         groups:Mongo.KeyPath,
         output:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath))
     {
-        stage[.set] = .init
+        pipeline[.set] = .init
         {
             let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
                 in: volume / Volume.Meta[.dependencies])

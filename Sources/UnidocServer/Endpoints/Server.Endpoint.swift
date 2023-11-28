@@ -78,7 +78,7 @@ extension Server.Endpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .interactive(Pipeline<PackageEditionsQuery>.init(
+                return .interactive(Pipeline<Realm.EditionsQuery>.init(
                     output: parameters.explain ? nil : .application(.json),
                     query: .init(package: .init(package), limit: 1),
                     tag: tag))
@@ -147,7 +147,10 @@ extension Server.Endpoint
             case "all-symbols"? = stem.first,
             case stem.endIndex = stem.index(after: stem.startIndex)
         {
-            return .interactive(Sitemap.init(package: volume.package, tag: tag))
+            return .interactive(Pipeline<Realm.SitemapQuery>.init(
+                output: parameters.explain ? nil : .text(.html),
+                query: .init(package: volume.package),
+                tag: tag))
         }
         else
         {
@@ -181,7 +184,7 @@ extension Server.Endpoint
             return .interactive(Pipeline<SearchIndexQuery<Int32>>.init(
                 output: parameters.explain ? nil : .application(.json),
                 query: .init(
-                    from: UnidocDatabase.Meta.name,
+                    from: UnidocDatabase.Metadata.name,
                     tag: tag,
                     id: 0),
                 tag: tag))
@@ -209,9 +212,9 @@ extension Server.Endpoint
     static
     func get(tags trunk:String, with parameters:PipelineParameters, tag:MD5?) -> Self
     {
-        .interactive(Pipeline<PackageEditionsQuery>.init(
+        .interactive(Pipeline<Realm.EditionsQuery>.init(
             output: parameters.explain ? nil : .text(.html),
-            query: .init(package: .init(trunk)),
+            query: .init(package: .init(trunk), limit: 12),
             tag: tag))
     }
 
@@ -318,7 +321,9 @@ extension Server.Endpoint
                     let version:String = form["version"],
                     let version:Int32 = .init(version)
                 {
-                    return .procedural(GraphUplink.coordinate(package, version))
+                    return .procedural(GraphUplink.coordinate(.init(
+                        package: package,
+                        version: version)))
                 }
                 else if
                     let volume:String = form["volume"],

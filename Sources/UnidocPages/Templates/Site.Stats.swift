@@ -50,11 +50,12 @@ extension Site.Stats:VolumeRoot
         case .foreign:
             throw Volume.LookupOutputError.malformed
 
-        case .global(_):
+        case .global(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
             let page:Package = .init(context.page,
                 canonical: context.canonical,
-                sidebar: sidebar)
+                sidebar: sidebar,
+                vertex: vertex)
             resource = page.resource(assets: context.assets)
         }
 

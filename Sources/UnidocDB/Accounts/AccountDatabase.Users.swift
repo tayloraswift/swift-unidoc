@@ -16,15 +16,15 @@ extension AccountDatabase
         }
     }
 }
-extension AccountDatabase.Users:DatabaseCollection
+extension AccountDatabase.Users:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "users" }
+    var name:Mongo.Collection { "Users" }
 
     typealias ElementID = Account.ID
 
     static
-    let indexes:[Mongo.CreateIndexStatement] = []
+    let indexes:[Mongo.CollectionIndex] = []
 }
 extension AccountDatabase.Users
 {

@@ -12,24 +12,16 @@ extension UnidocDatabase
     struct Uploaded:Equatable, Sendable
     {
         public
-        let id:Snapshot.ID
-        public
         let edition:Unidoc.Edition
+        /// Indicates if the uploaded snapshot replaced an existing snapshot.
         public
-        let realm:Realm
-        public
-        var graph:UnidocDatabase.Graphs.Upsert
+        let updated:Bool
 
         @inlinable public
-        init(id:Snapshot.ID,
-            edition:Unidoc.Edition,
-            realm:Realm,
-            graph:UnidocDatabase.Graphs.Upsert)
+        init(edition:Unidoc.Edition, updated:Bool)
         {
-            self.id = id
             self.edition = edition
-            self.realm = realm
-            self.graph = graph
+            self.updated = updated
         }
     }
 }

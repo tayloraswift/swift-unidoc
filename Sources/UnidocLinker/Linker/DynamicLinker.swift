@@ -60,8 +60,8 @@ struct DynamicLinker:~Copyable
 
         self.memberships = [:]
 
-        self.next.autogroup = .init(zone: global.current.edition)
-        self.next.topic = .init(zone: global.current.edition)
+        self.next.autogroup = .init(zone: global.current.id)
+        self.next.topic = .init(zone: global.current.id)
 
         self.cultures = []
         self.articles = []
@@ -78,7 +78,7 @@ extension DynamicLinker
         let modules:[SymbolGraph.ModuleContext] = context.modules()
 
         var diagnostics:DiagnosticContext<DynamicSymbolicator> = .init()
-        var extensions:Extensions = .init(zone: context.current.edition)
+        var extensions:Extensions = .init(zone: context.current.id)
 
         let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>> =
             context.current.decls.nodes.map
@@ -112,9 +112,7 @@ extension DynamicLinker
             + self.decls.count
             + 1)
 
-        vertices.append(.global(.init(id: self.current.edition.global)))
-
-        var mapper:TreeMapper = .init(zone: self.current.edition)
+        var mapper:TreeMapper = .init(zone: self.current.id)
         for vertex:Volume.Vertex.Article in self.articles
         {
             vertices.append(.article(vertex))
@@ -129,7 +127,7 @@ extension DynamicLinker
         let extensions:Extensions = self.extensions
         let global:DynamicContext = self.global
 
-        var meta:Volume.Meta.LinkDetails = .init(abi: self.current.metadata.abi,
+        var snapshot:Volume.SnapshotDetails = .init(abi: self.current.metadata.abi,
             requirements: self.current.metadata.requirements)
 
         var groups:[Volume.Group] = self.groups
@@ -167,14 +165,14 @@ extension DynamicLinker
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
 
-                    meta.census.unweighted.coverage[keyPath: coverage] += 1
-                    meta.census.unweighted.decls[keyPath: decl] += 1
+                    snapshot.census.unweighted.coverage[keyPath: coverage] += 1
+                    snapshot.census.unweighted.decls[keyPath: decl] += 1
                 }
             }
         }
 
         //  Create extension records, and compute weighted stats.
-        meta.census.weighted = meta.census.unweighted
+        snapshot.census.weighted = snapshot.census.unweighted
         for c:Int in cultures.indices
         {
             cultures[c].census.weighted = cultures[c].census.unweighted
@@ -190,7 +188,7 @@ extension DynamicLinker
                     let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
 
                     cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
-                    meta.census.weighted.decls[keyPath: bin] += 1
+                    snapshot.census.weighted.decls[keyPath: bin] += 1
                 }
             }
 
@@ -219,7 +217,7 @@ extension DynamicLinker
             global.current.files.indices,
             global.current.files)
         {
-            vertices.append(.file(.init(id: global.current.edition + f, symbol: file)))
+            vertices.append(.file(.init(id: global.current.id + f, symbol: file)))
         }
         //  Move culture vertices to the combined buffer.
         for culture:Volume.Vertex.Culture in cultures
@@ -229,7 +227,10 @@ extension DynamicLinker
 
         let (trees, index):([Volume.TypeTree], JSON) = mapper.build(cultures: cultures)
 
-        return .init(vertices: vertices,
+        vertices.append(.global(.init(id: global.current.id.global, snapshot: snapshot)))
+
+        return .init(
+            vertices: vertices,
             groups: groups,
             index: index,
             trees: trees,
@@ -240,13 +241,12 @@ extension DynamicLinker
                 .sorted
             {
                 $0.shoot < $1.shoot
-            },
-            meta: meta)
+            })
     }
 }
 extension DynamicLinker
 {
-    var current:SnapshotObject { self.global.current }
+    var current:DynamicContext.Snapshot { self.global.current }
 
     private
     var modules:SymbolGraph.ModuleView
@@ -254,7 +254,7 @@ extension DynamicLinker
         .init(namespaces: self.current.namespaces,
             cultures: self.current.cultures,
             contexts: self.contexts,
-            edition: self.current.edition)
+            edition: self.current.id)
     }
 }
 extension DynamicLinker
@@ -265,7 +265,7 @@ extension DynamicLinker
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
         let cultures:Volume.Group.Automatic = .init(id: self.next.autogroup.id(),
-            scope: self.current.edition.global,
+            scope: self.current.id.global,
             members: self.current.cultures.indices.sorted
             {
                 self.current.namespaces[$0] <
@@ -273,7 +273,7 @@ extension DynamicLinker
             }
             .map
             {
-                self.current.edition + $0
+                self.current.id + $0
             })
 
         self.groups.append(.automatic(cultures))
@@ -290,7 +290,7 @@ extension DynamicLinker
         for case .scalar(let member) in members
         {
             //  This may replace a synthesized topic.
-            if  let local:Int32 = member - self.current.edition
+            if  let local:Int32 = member - self.current.id
             {
                 self.memberships[local] = scope
             }
@@ -349,7 +349,7 @@ extension DynamicLinker
                         continue
                     }
 
-                    let owner:Unidoc.Scalar = self.current.edition + a
+                    let owner:Unidoc.Scalar = self.current.id + a
 
                     self.link(topics: node.topics,
                         under: namespace,
@@ -448,7 +448,7 @@ extension DynamicLinker
 
         if  let article:SymbolGraph.Article = culture.article
         {
-            vertex.readme = article.file.map { self.current.edition + $0 }
+            vertex.readme = article.file.map { self.current.id + $0 }
 
             (vertex.overview, vertex.details) = self.diagnostics.resolving(
                 namespace: namespace.module,
@@ -470,12 +470,12 @@ extension DynamicLinker
             self.current.articles.nodes[range])
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
-            let scalar:Unidoc.Scalar = self.current.edition + a
+            let scalar:Unidoc.Scalar = self.current.id + a
 
             var vertex:Volume.Vertex.Article = .init(id: scalar,
                 stem: .init(namespace.module, symbol.name),
                 culture: namespace.culture,
-                file: node.article.file.map { self.current.edition + $0 },
+                file: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,
                 group: self.memberships.removeValue(forKey: a))
 
@@ -590,7 +590,7 @@ extension DynamicLinker
                 namespace: namespace.id,
                 culture: namespace.culture,
                 scope: scope.map { self.global.expand($0) } ?? [],
-                file: decl.location.map { self.current.edition + $0.file },
+                file: decl.location.map { self.current.id + $0.file },
                 position: decl.location?.position,
                 group: group)
 
