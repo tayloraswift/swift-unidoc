@@ -75,7 +75,10 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.4.0")
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let uploaded:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs,
+                with: session)
+
+            print(uploaded)
         }
 
         if  let tests:TestGroup = tests / "AllPackages"
