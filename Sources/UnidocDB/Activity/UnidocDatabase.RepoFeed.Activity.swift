@@ -18,13 +18,13 @@ extension UnidocDatabase.RepoFeed
         public
         let refname:String
         public
-        let origin:Realm.Repo.Origin
+        let origin:Realm.Package.Repo.Origin
 
         @inlinable public
         init(discovered id:BSON.Millisecond,
             package:Symbol.Package,
             refname:String,
-            origin:Realm.Repo.Origin)
+            origin:Realm.Package.Repo.Origin)
         {
             self.id = id
             self.package = package

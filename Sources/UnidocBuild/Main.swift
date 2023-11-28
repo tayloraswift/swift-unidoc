@@ -109,10 +109,11 @@ enum Main
             let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
                 pretty: options.pretty)
 
-            let bson:BSON.Document = .init(encoding: Snapshot.init(
-                package: package.coordinate,
-                version: edition.coordinate,
-                archive: consume archive))
+            let bson:BSON.Document = .init(encoding: Realm.Snapshot.init(id: .init(
+                    package: package.coordinate,
+                    version: edition.coordinate),
+                metadata: archive.metadata,
+                graph: archive.graph))
 
             try await swiftinit.connect(port: options.port)
             {

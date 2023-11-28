@@ -159,6 +159,9 @@ extension Volume.Vertex
         /// empty string.
         case stem = "U"
 
+        /// Appears in ``Global`` only.
+        case snapshot = "O"
+
         /// Appears in ``Culture`` only.
         case census = "S"
 
@@ -311,11 +314,12 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.hash] = self.hash
             bson[.stem] = self.stem
 
-        case .global:
+        case .global(let self):
             //  This must have a value, otherwise it would get lost among all the file
             //  vertices, and queries for it would be very slow.
             bson[.hash] = 0
             bson[.stem] = ""
+            bson[.snapshot] = self.snapshot
         }
     }
 }
@@ -388,7 +392,7 @@ extension Volume.Vertex:BSONDocumentDecodable
                 hash: try bson[.hash].decode()))
 
         case _:
-            self = .global(.init(id: id))
+            self = .global(.init(id: id, snapshot: try bson[.snapshot].decode()))
         }
     }
 }

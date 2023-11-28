@@ -1,7 +1,7 @@
 import MongoDB
 
 @frozen public
-struct VolumeCollation:DatabaseCollation
+struct VolumeCollation:Mongo.CollationType
 {
     @inlinable public static
     var spec:Mongo.Collation

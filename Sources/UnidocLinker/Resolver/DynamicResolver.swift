@@ -28,7 +28,7 @@ struct DynamicResolver:~Copyable
 extension DynamicResolver
 {
     private
-    var current:SnapshotObject { self.context.current }
+    var current:DynamicContext.Snapshot { self.context.current }
 }
 
 extension DynamicResolver
@@ -86,7 +86,7 @@ extension DynamicResolver
             }
             else if let _:Int = scalar / .article
             {
-                return .path(text, [self.current.edition + scalar])
+                return .path(text, [self.current.id + scalar])
             }
             else if let _:Int = scalar / .file
             {
@@ -155,7 +155,7 @@ extension DynamicResolver
             else
             {
                 //  The rest of the planes don’t cross packages... yet...
-                return .scalar(self.current.edition + scalar)
+                return .scalar(self.current.id + scalar)
             }
 
         case    .vector(let feature, self: _, text: _):
@@ -194,7 +194,7 @@ extension DynamicResolver
     )?
     {
         let autolink:Autolink = .init(unresolved,
-            location: unresolved.location?.map { self.current.edition + $0 })
+            location: unresolved.location?.map { self.current.id + $0 })
 
         guard
         let codelink:Codelink = autolink.parsed

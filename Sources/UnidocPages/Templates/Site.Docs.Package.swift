@@ -17,15 +17,20 @@ extension Site.Docs
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
+
+        private
+        let vertex:Volume.Vertex.Global
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
+            vertex:Volume.Vertex.Global,
             groups:GroupSections)
         {
             self.context = context
             self.canonical = canonical
+            self.vertex = vertex
             self.groups = groups
         }
     }
@@ -33,7 +38,7 @@ extension Site.Docs
 extension Site.Docs.Package
 {
     private
-    var repo:Realm.Repo? { self.context.repo }
+    var repo:Realm.Package.Repo? { self.context.repo }
 }
 extension Site.Docs.Package:RenderablePage
 {
@@ -122,7 +127,7 @@ extension Site.Docs.Package:VersionedPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Realm.Repo = self.repo
+            if  let repo:Realm.Package.Repo = self.repo
             {
                 let heading:AutomaticHeading = .packageRepository
                 $0[.h2] { $0.id = heading.id } = heading
@@ -222,13 +227,6 @@ extension Site.Docs.Package:VersionedPage
                 }
             }
 
-            guard
-            let details:Volume.Meta.LinkDetails = self.volume.link
-            else
-            {
-                return
-            }
-
             do
             {
                 let heading:AutomaticHeading = .platformRequirements
@@ -253,7 +251,8 @@ extension Site.Docs.Package:VersionedPage
                         $0[.td] = "linux"
                         $0[.td] = "none"
                     }
-                    for platform:SymbolGraphMetadata.PlatformRequirement in details.requirements
+                    for platform:SymbolGraphMetadata.PlatformRequirement in
+                        self.vertex.snapshot.requirements
                     {
                         $0[.tr]
                         {
@@ -273,7 +272,7 @@ extension Site.Docs.Package:VersionedPage
             $0[.dl]
             {
                 $0[.dt] = "Symbol Graph ABI"
-                $0[.dd] = "\(details.abi)"
+                $0[.dd] = "\(self.vertex.snapshot.abi)"
 
                 if  let commit:SHA1 = self.volume.commit
                 {
@@ -318,7 +317,7 @@ extension Site.Docs.Package:VersionedPage
                         $0[.figure]
                         {
                             $0.class = "chart decl"
-                        } = details.census.unweighted.decls.pie
+                        } = self.vertex.snapshot.census.unweighted.decls.pie
                         {
                             """
                             \($1) percent of the declarations in \
@@ -337,7 +336,7 @@ extension Site.Docs.Package:VersionedPage
                         $0[.figure]
                         {
                             $0.class = "chart coverage"
-                        } = details.census.unweighted.coverage.pie
+                        } = self.vertex.snapshot.census.unweighted.coverage.pie
                         {
                             """
                             \($1) percent of the declarations in \

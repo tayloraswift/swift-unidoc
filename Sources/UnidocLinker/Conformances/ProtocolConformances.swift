@@ -127,7 +127,7 @@ extension ProtocolConformances<Int>
 
                     case .where(let parameter, is: let what, to: let type):
                         if  case .nominal(let type?) = type,
-                            let snapshot:SnapshotObject = context[type.package],
+                            let snapshot:DynamicContext.Snapshot = context[type.package],
                             let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
                         {
                             for local:Int32 in local

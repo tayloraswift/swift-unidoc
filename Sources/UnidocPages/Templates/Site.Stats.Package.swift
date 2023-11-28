@@ -14,13 +14,18 @@ extension Site.Stats
         let canonical:CanonicalVersion?
         let sidebar:HTML.Sidebar<Site.Stats>?
 
+        private
+        let vertex:Volume.Vertex.Global
+
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            sidebar:HTML.Sidebar<Site.Stats>?)
+            sidebar:HTML.Sidebar<Site.Stats>?,
+            vertex:Volume.Vertex.Global)
         {
             self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
+            self.vertex = vertex
         }
     }
 }
@@ -73,13 +78,6 @@ extension Site.Stats.Package:VersionedPage
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        guard
-        let details:Volume.Meta.LinkDetails = self.volume.link
-        else
-        {
-            return
-        }
-
         main[.section]
         {
             $0.class = "details"
@@ -93,7 +91,7 @@ extension Site.Stats.Package:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart decl"
-            } = details.census.unweighted.decls.chart
+            } = self.vertex.snapshot.census.unweighted.decls.chart
             {
                 """
                 \($1) percent of the declarations in \(self.volume.title) are \($0.name)
@@ -104,7 +102,7 @@ extension Site.Stats.Package:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart decl"
-            } = details.census.weighted.decls.chart
+            } = self.vertex.snapshot.census.weighted.decls.chart
             {
                 """
                 \($1) percent of the symbols in \(self.volume.title) are \($0.name)
@@ -118,7 +116,7 @@ extension Site.Stats.Package:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart coverage"
-            } = details.census.unweighted.coverage.chart
+            } = self.vertex.snapshot.census.unweighted.coverage.chart
             {
                 """
                 \($1) percent of the declarations in \(self.volume.title) are \($0.name)
@@ -129,7 +127,7 @@ extension Site.Stats.Package:VersionedPage
             $0[.figure]
             {
                 $0.class = "chart coverage"
-            } = details.census.weighted.coverage.chart
+            } = self.vertex.snapshot.census.weighted.coverage.chart
             {
                 """
                 \($1) percent of the symbols in \(self.volume.title) are \($0.name)

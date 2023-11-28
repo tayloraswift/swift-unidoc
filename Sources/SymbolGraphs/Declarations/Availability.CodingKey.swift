@@ -3,7 +3,7 @@ import Availability
 extension Availability
 {
     /// Represents an ``Availability.AnyDomain`` in the BSON ABI. This has a
-    /// single-character raw value, for storage efficiency, and not intended
+    /// single-character raw value, for storage efficiency, and is not intended
     /// to be human-readable.
     @frozen public
     struct CodingKey:Equatable, Hashable, Sendable

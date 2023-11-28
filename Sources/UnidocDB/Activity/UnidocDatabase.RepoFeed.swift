@@ -16,20 +16,17 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.RepoFeed:DatabaseCollection
+extension UnidocDatabase.RepoFeed:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "repo_feed" }
+    var name:Mongo.Collection { "RepoFeed" }
 
     typealias ElementID = BSON.Millisecond
 
     static
-    var indexes:[Mongo.CreateIndexStatement] { [] }
-}
-extension UnidocDatabase.RepoFeed:DatabaseCollectionCapped
-{
+    var indexes:[Mongo.CollectionIndex] { [] }
+
     /// 1 MB ought to be enough for anybody.
-    static
     var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
 extension UnidocDatabase.RepoFeed

@@ -97,6 +97,7 @@ extension Site.Docs:VolumeRoot
                 mode: .meta)
             let page:Package = .init(context.page,
                 canonical: context.canonical,
+                vertex: vertex,
                 groups: groups)
             resource = page.resource(assets: context.assets)
         }
