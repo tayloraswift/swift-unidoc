@@ -3,7 +3,7 @@ import Unidoc
 import UnidocDiagnostics
 
 @frozen public
-struct DynamicSymbolicator:Sendable
+struct DynamicSymbolicator
 {
     public
     let demangler:Demangler?

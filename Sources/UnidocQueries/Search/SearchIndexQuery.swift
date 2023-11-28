@@ -2,6 +2,7 @@
 import BSONDecoding
 import BSONEncoding
 import MD5
+import MongoDB
 import MongoQL
 import UnidocDB
 import UnidocRecords
@@ -28,23 +29,23 @@ struct SearchIndexQuery<ID>:Equatable, Hashable, Sendable
         self.id = id
     }
 }
-extension SearchIndexQuery:DatabaseQuery
+extension SearchIndexQuery:Mongo.PipelineQuery
 {
     public
     typealias Collation = VolumeCollation
+
+    public
+    typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
     var hint:Mongo.SortDocument? { nil }
 
     public
-    func build(pipeline:inout Mongo.Pipeline)
+    func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline.stage
+        pipeline[.match] = .init
         {
-            $0[.match] = .init
-            {
-                $0[SearchIndex<ID>[.id]] = self.id
-            }
+            $0[SearchIndex<ID>[.id]] = self.id
         }
 
         guard let tag:MD5 = self.tag
@@ -53,22 +54,19 @@ extension SearchIndexQuery:DatabaseQuery
             return
         }
 
-        pipeline.stage
+        pipeline[.set] = .init
         {
-            $0[.set] = .init
+            $0[SearchIndex<ID>[.json]] = .expr
             {
-                $0[SearchIndex<ID>[.json]] = .expr
-                {
-                    $0[.cond] =
-                    (
-                        if: .expr { $0[.eq] = (tag, SearchIndex<ID>[.hash]) },
-                        then: .expr
-                        {
-                            $0[.binarySize] = SearchIndex<ID>[.json]
-                        },
-                        else: SearchIndex<ID>[.json]
-                    )
-                }
+                $0[.cond] =
+                (
+                    if: .expr { $0[.eq] = (tag, SearchIndex<ID>[.hash]) },
+                    then: .expr
+                    {
+                        $0[.binarySize] = SearchIndex<ID>[.json]
+                    },
+                    else: SearchIndex<ID>[.json]
+                )
             }
         }
     }

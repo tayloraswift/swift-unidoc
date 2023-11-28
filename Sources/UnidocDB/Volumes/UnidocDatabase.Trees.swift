@@ -15,13 +15,13 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Trees:DatabaseCollection
+extension UnidocDatabase.Trees:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "trees" }
+    var name:Mongo.Collection { "VolumeTrees" }
 
     typealias ElementID = Unidoc.Scalar
 
     static
-    var indexes:[Mongo.CreateIndexStatement] { [] }
+    var indexes:[Mongo.CollectionIndex] { [] }
 }

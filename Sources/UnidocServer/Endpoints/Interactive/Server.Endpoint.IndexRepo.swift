@@ -3,7 +3,9 @@ import GitHubAPI
 import HTTP
 import MongoDB
 import SymbolGraphs
+import Symbols
 import UnidocDB
+import UnidocRecords
 
 extension Server.Endpoint
 {
@@ -37,16 +39,25 @@ extension Server.Endpoint.IndexRepo:RestrictedEndpoint
                 pat: github.plugin.pat)
         }
 
+        //  Discard the tags for now, we want them to get indexed by the crawler.
+        let repo:GitHub.Repo = (consume response).repo
+
+        guard repo.owner.login.allSatisfy({ $0 != "." })
+        else
+        {
+            return .ok("Cannot index a repo with a dot in the owner’s name.")
+        }
+
+        let symbol:Symbol.Package = .init("\(repo.owner.login).\(repo.name)")
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let package:Int32 = try await server.db.unidoc.track(repo: response.repo,
+
+        let (package, new):(Realm.Package, Bool) = try await server.db.unidoc.register(symbol,
+            tracking: .github(repo),
             with: session)
 
-        //  Discard the tags for now, we want them to get indexed by the crawler.
-
-        return .ok(.init(
-            content: .string("""
-                Cell: \(package)
-                """),
-            type: .text(.plain, charset: .utf8)))
+        return .ok("""
+            Cell: \(package.id)
+            New: \(new)
+            """)
     }
 }

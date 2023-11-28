@@ -72,6 +72,6 @@ extension Volume
             }
         }
 
-        return .init(id: self.meta.symbol.package, elements: elements)
+        return .init(id: self.meta.id.package, elements: elements)
     }
 }

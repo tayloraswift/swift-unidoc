@@ -12,13 +12,13 @@ public
 protocol _VolumeLookupContext
 {
     static
-    func groups(_:inout Mongo.PipelineStage,
+    func groups(_:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
 
     static
-    func edges(_:inout Mongo.PipelineStage,
+    func edges(_:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
         groups:Mongo.KeyPath,

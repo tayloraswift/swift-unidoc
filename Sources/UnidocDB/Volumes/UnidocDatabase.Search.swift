@@ -15,13 +15,13 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Search:DatabaseCollection
+extension UnidocDatabase.Search:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "search" }
+    var name:Mongo.Collection { "VolumeSearch" }
 
     typealias ElementID = VolumeIdentifier
 
     static
-    var indexes:[Mongo.CreateIndexStatement] { [] }
+    var indexes:[Mongo.CollectionIndex] { [] }
 }

@@ -22,7 +22,7 @@ extension Site.Tags.List
 }
 extension Site.Tags.List.Item
 {
-    init(facet:PackageEditionsQuery.Facet)
+    init(facet:Realm.EditionsQuery.Facet)
     {
         self.init(
             edition: facet.edition,

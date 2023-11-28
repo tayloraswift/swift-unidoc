@@ -5,11 +5,11 @@ import UnidocRecords
 
 extension UnidocAPI.PackageStatus
 {
-    init?(from output:PackageEditionsQuery.Output)
+    init?(from output:Realm.EditionsQuery.Output)
     {
         guard
-        let repo:Realm.Repo = output.package.repo,
-        let release:PackageEditionsQuery.Facet = output.releases.first,
+        let repo:Realm.Package.Repo = output.package.repo,
+        let release:Realm.EditionsQuery.Facet = output.releases.first,
         let release:Edition = .init(from: release)
         else
         {
@@ -17,7 +17,7 @@ extension UnidocAPI.PackageStatus
         }
 
         self.init(
-            coordinate: output.package.coordinate,
+            coordinate: output.package.id,
             repo: "https://\(repo.origin)",
             release: release,
             prerelease: output.prereleases.first.flatMap(Edition.init(from:)))

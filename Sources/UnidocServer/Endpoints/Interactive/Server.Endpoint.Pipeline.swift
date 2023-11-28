@@ -9,7 +9,10 @@ import URI
 extension Server.Endpoint
 {
     struct Pipeline<Query>:Sendable
-        where Query:DatabaseQuery, Query.Output:HTTP.ServerResponseFactory<StaticAssets>
+        where   Query:Mongo.PipelineQuery,
+                Query.Iteration.Stride == Never?,
+                Query.Iteration.Batch == Query.Iteration.BatchElement?,
+                Query.Iteration.BatchElement:HTTP.ServerResponseFactory<StaticAssets>
     {
         /// If nil, the query will be explained instead of executed. If non-nil, this field
         /// will be passed to the query’s output type, which may influence the response it
@@ -48,7 +51,7 @@ extension Server.Endpoint.Pipeline:PublicEndpoint
         }
 
         guard
-        let output:Query.Output = try await server.db.unidoc.execute(
+        let output:Query.Iteration.BatchElement = try await server.db.unidoc.execute(
             query: self.query,
             with: session)
         else

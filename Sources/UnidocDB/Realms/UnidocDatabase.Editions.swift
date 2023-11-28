@@ -21,78 +21,58 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Editions:DatabaseCollection
+extension UnidocDatabase.Editions:Mongo.CollectionModel
 {
     public
     typealias ElementID = Unidoc.Edition
 
     @inlinable public static
-    var name:Mongo.Collection { "editions" }
+    var name:Mongo.Collection { "Editions" }
 
     public static
-    let indexes:[Mongo.CreateIndexStatement] =
+    let indexes:[Mongo.CollectionIndex] =
     [
-        .init
+        .init("EditionName",
+            collation: SimpleCollation.spec,
+            unique: true)
         {
-            $0[.collation] = SimpleCollation.spec
-
-            $0[.unique] = true
-            $0[.name] = "package,name"
-            $0[.key] = .init
-            {
-                $0[Realm.Edition[.package]] = (+)
-                $0[Realm.Edition[.name]] = (+)
-            }
+            $0[Realm.Edition[.package]] = (+)
+            $0[Realm.Edition[.name]] = (+)
         },
-        .init
-        {
-            $0[.unique] = true
-            $0[.name] = "package,version"
-            $0[.key] = .init
-            {
-                $0[Realm.Edition[.package]] = (-)
-                $0[Realm.Edition[.version]] = (-)
-            }
-        },
-        .init
-        {
-            $0[.unique] = true
-            $0[.name] = "package,patch,version (release:false)"
-            $0[.key] = .init
-            {
-                $0[Realm.Edition[.package]] = (-)
-                $0[Realm.Edition[.patch]] = (-)
-                $0[Realm.Edition[.version]] = (-)
-            }
 
-            $0[.partialFilterExpression] = .init
-            {
-                $0[Realm.Edition[.release]] = .init { $0[.eq] = false }
-                $0[Realm.Edition[.release]] = .init { $0[.exists] = true }
-                $0[Realm.Edition[.patch]] = .init { $0[.exists] = true }
-            }
-        },
-        .init
+        .init("EditionCoordinate",
+            unique: true)
         {
-            $0[.unique] = true
-            $0[.name] = "package,patch,version (release:true)"
-            $0[.key] = .init
-            {
-                $0[Realm.Edition[.package]] = (-)
-                $0[Realm.Edition[.patch]] = (-)
-                $0[Realm.Edition[.version]] = (-)
-            }
+            $0[Realm.Edition[.package]] = (-)
+            $0[Realm.Edition[.version]] = (-)
+        },
 
-            $0[.partialFilterExpression] = .init
-            {
-                $0[Realm.Edition[.release]] = .init { $0[.eq] = true }
-                $0[Realm.Edition[.release]] = .init { $0[.exists] = true }
-                $0[Realm.Edition[.patch]] = .init { $0[.exists] = true }
-            }
+        .init("Nonreleases",
+            unique: true)
+        {
+            $0[Realm.Edition[.package]] = (-)
+            $0[Realm.Edition[.patch]] = (-)
+            $0[Realm.Edition[.version]] = (-)
+        }
+            where:
+        {
+            $0[Realm.Edition[.release]] = .init { $0[.eq] = false }
+        },
+
+        .init("Releases",
+            unique: true)
+        {
+            $0[Realm.Edition[.package]] = (-)
+            $0[Realm.Edition[.patch]] = (-)
+            $0[Realm.Edition[.version]] = (-)
+        }
+            where:
+        {
+            $0[Realm.Edition[.release]] = .init { $0[.eq] = true }
         },
     ]
 }
-extension UnidocDatabase.Editions:RecodableCollection
+extension UnidocDatabase.Editions:Mongo.RecodableModel
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
@@ -100,165 +80,5 @@ extension UnidocDatabase.Editions:RecodableCollection
         try await self.recode(through: Realm.Edition.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
-    }
-}
-extension UnidocDatabase.Editions
-{
-    public
-    func register(_ tag:__owned GitHub.Tag,
-        package:Int32,
-        version:SemanticVersion,
-        with session:Mongo.Session) async throws -> Int32?
-    {
-        let placement:Placement = try await self.register(package: package,
-            version: version,
-            refname: tag.name,
-            sha1: tag.hash,
-            with: session)
-
-        return placement.new ? placement.coordinate : nil
-    }
-
-    func register(
-        package:Int32,
-        version:SemanticVersion,
-        refname:String,
-        sha1:SHA1?,
-        with session:Mongo.Session) async throws -> Placement
-    {
-        //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Placement = try await self.place(
-            package: package,
-            refname: refname,
-            with: session)
-
-        let edition:Realm.Edition = .init(id: .init(
-                package: package,
-                version: placement.coordinate),
-            release: version.release,
-            patch: version.patch,
-            name: refname,
-            sha1: sha1)
-
-        if  placement.new
-        {
-            //  This can fail if we race with another process.
-            try await self.insert(some: edition, with: session)
-        }
-        else if let sha1:SHA1
-        {
-            switch placement.sha1
-            {
-            case sha1?:
-                //  Nothing to do.
-                break
-
-            case _:
-                try await self.update(some: edition, with: session)
-            }
-        }
-
-        return placement
-    }
-}
-extension UnidocDatabase.Editions
-{
-    private
-    func place(
-        package:Int32,
-        refname:String,
-        with session:Mongo.Session) async throws -> Placement
-    {
-        let pipeline:Mongo.Pipeline = .init
-        {
-            let new:Mongo.KeyPath = "new"
-            let old:Mongo.KeyPath = "old"
-            let all:Mongo.KeyPath = "all"
-
-            $0.stage
-            {
-                $0[.match] = .init
-                {
-                    $0[Realm.Edition[.package]] = package
-                }
-            }
-            $0.stage
-            {
-                $0[.facet] = .init
-                {
-                    $0[old] = .init
-                    {
-                        $0.stage
-                        {
-                            $0[.match] = .init
-                            {
-                                $0[Realm.Edition[.name]] = refname
-                            }
-                        }
-
-                        $0.stage
-                        {
-                            $0[.replaceWith] = .init
-                            {
-                                $0[Placement[.coordinate]] = Realm.Edition[.version]
-                                $0[Placement[.sha1]] = Realm.Edition[.sha1]
-                                $0[Placement[.new]] = false
-                            }
-                        }
-                    }
-                    $0[new] = .init
-                    {
-                        $0.stage
-                        {
-                            $0[.sort] = .init
-                            {
-                                $0[Realm.Edition[.version]] = (-)
-                            }
-                        }
-                        $0.stage
-                        {
-                            $0[.limit] = 1
-                        }
-                        $0.stage
-                        {
-                            $0[.replaceWith] = .init
-                            {
-                                $0[Placement[.coordinate]] = .expr
-                                {
-                                    $0[.add] = (Realm.Edition[.version], 1)
-                                }
-                                $0[Placement[.new]] = true
-                            }
-                        }
-                    }
-                }
-            }
-            $0.stage
-            {
-                $0[.set] = .init
-                {
-                    $0[all] = .expr { $0[.concatArrays] = (old, new) }
-                }
-            }
-            $0.stage
-            {
-                $0[.unwind] = all
-            }
-            $0.stage
-            {
-                $0[.replaceWith] = all
-            }
-            $0.stage
-            {
-                $0[.limit] = 1
-            }
-        }
-
-        let placement:[Placement] = try await session.run(
-            command: Mongo.Aggregate<Mongo.SingleBatch<Placement>>.init(Self.name,
-                pipeline: pipeline),
-            against: self.database)
-
-        return placement.first ?? .first
     }
 }

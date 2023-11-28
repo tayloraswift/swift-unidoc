@@ -15,35 +15,25 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Groups:DatabaseCollection
+extension UnidocDatabase.Groups:Mongo.CollectionModel
 {
     @inlinable public static
-    var name:Mongo.Collection { "groups" }
+    var name:Mongo.Collection { "VolumeGroups" }
 
     typealias ElementID = Unidoc.Scalar
 
     static
-    let indexes:[Mongo.CreateIndexStatement] =
+    let indexes:[Mongo.CollectionIndex] =
     [
-        .init
+        .init("ScopeLatest")
         {
-            $0[.unique] = false
-            $0[.name] = "scope,latest"
-            $0[.key] = .init
-            {
-                $0[Volume.Group[.scope]] = (+)
-                $0[Volume.Group[.latest]] = (-)
-            }
+            $0[Volume.Group[.scope]] = (+)
+            $0[Volume.Group[.latest]] = (-)
         },
-        .init
+        .init("Scope", unique: true)
         {
-            $0[.unique] = true
-            $0[.name] = "scope,id"
-            $0[.key] = .init
-            {
-                $0[Volume.Group[.scope]] = (+)
-                $0[Volume.Group[.id]] = (+)
-            }
+            $0[Volume.Group[.scope]] = (+)
+            $0[Volume.Group[.id]] = (+)
         },
     ]
 }

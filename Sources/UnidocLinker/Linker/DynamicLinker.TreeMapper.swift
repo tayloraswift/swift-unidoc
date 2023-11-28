@@ -69,29 +69,30 @@ extension DynamicLinker.TreeMapper
     func register(foreign:Unidoc.Scalar, with context:DynamicContext) -> Volume.Vertex.Foreign
     {
         guard
-        let package:SnapshotObject = context[foreign.package]
+        let snapshot:DynamicContext.Snapshot = context[foreign.package]
         else
         {
             fatalError("scalar \(foreign) is not from a package in this context!")
         }
         guard
-        let namespace:Symbol.Module = package.namespace(of: foreign),
-        let node:Int32 = foreign - package.edition,
-        let decl:SymbolGraph.Decl = package.decls.nodes[node].decl
+        let namespace:Symbol.Module = snapshot.namespace(of: foreign),
+        let node:Int32 = foreign - snapshot.id,
+        let decl:SymbolGraph.Decl = snapshot.decls.nodes[node].decl
         else
         {
             fatalError("""
-                scalar \(foreign) is either not a decl, or not from \(package.snapshot.id)!
+                scalar \(foreign) is either not a decl, or not from \
+                \(snapshot.metadata.package)!
                 """)
         }
 
-        let symbol:Symbol.Decl = package.decls.symbols[node]
+        let symbol:Symbol.Decl = snapshot.decls.symbols[node]
         /// Our policy for hashing out-of-package types is to hash if the type uses a
         /// hash suffix in its home package, even if the type would not require any
         /// disambiguation in this package.
         let vertex:Volume.Vertex.Foreign = .init(id: self.next.id(),
             extendee: foreign,
-            scope: package.scope(of: node).map { context.expand($0) } ?? [],
+            scope: snapshot.scope(of: node).map { context.expand($0) } ?? [],
             flags: .init(
                 phylum: decl.phylum,
                 kinks: decl.kinks,

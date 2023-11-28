@@ -81,7 +81,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
         if  let tests:TestGroup = tests / "AllPackages"
         {
             let query:SearchIndexQuery<Int32> = .init(
-                from: UnidocDatabase.Meta.name,
+                from: UnidocDatabase.Metadata.name,
                 tag: nil,
                 id: 0)
 

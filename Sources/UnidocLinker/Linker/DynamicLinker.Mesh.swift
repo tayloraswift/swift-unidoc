@@ -16,22 +16,18 @@ extension DynamicLinker
         var trees:[Volume.TypeTree]
         public
         var tree:[Volume.Noun]
-        public
-        var meta:Volume.Meta.LinkDetails
 
         init(vertices:[Volume.Vertex],
             groups:[Volume.Group],
             index:JSON,
             trees:[Volume.TypeTree],
-            tree:[Volume.Noun],
-            meta:Volume.Meta.LinkDetails)
+            tree:[Volume.Noun])
         {
             self.vertices = vertices
             self.groups = groups
             self.index = index
             self.trees = trees
             self.tree = tree
-            self.meta = meta
         }
     }
 }

@@ -15,35 +15,44 @@ extension Realm
     @frozen public
     struct Package:Identifiable, Equatable, Sendable
     {
+        /// The coordinate this package was assigned. All package coordinates are currently
+        /// positive.
+        ///
+        /// Package coordinates cannot be used to distinguish any package characteristic that
+        /// can change, because the coordinate can never change. Tracking a remote GitHub repo
+        /// counts as something that can change.
         public
-        let id:Symbol.Package
+        let id:Int32
 
-        /// The cell-number this package was assigned. Cell numbers can be positive or negative,
-        /// but packages that track remote repositories will always have positive cell numbers.
+        /// The current preferred name for this package. A package may have multiple names,
+        /// and the preferred name can change.
         public
-        let coordinate:Int32
-        /// The realm this package belongs to. All packages currently belong to the
-        /// “``Realm/united``” realm.
-        public
-        let realm:Realm
+        var symbol:Symbol.Package
 
-        /// The repo this package tracks. Currently only GitHub repos are supported.
+        /// The current realm this package belongs to. A package can change realms.
+        public
+        var realm:Realm
+
+        /// The remote git repo this package tracks.
+        ///
+        /// Currently only GitHub repos are supported.
         public
         var repo:Repo?
-        /// When this package *record* was last crawled. This is different from the time when the
-        /// package itself was last updated.
+
+        /// When this package *record* was last crawled. This is different from the time when
+        /// the package itself was last updated.
         public
         var crawled:BSON.Millisecond
 
         @inlinable public
-        init(id:Symbol.Package,
-            coordinate:Int32,
+        init(id:Int32,
+            symbol:Symbol.Package,
             realm:Realm,
             repo:Repo? = nil,
             crawled:BSON.Millisecond = 0)
         {
             self.id = id
-            self.coordinate = coordinate
+            self.symbol = symbol
             self.realm = realm
             self.repo = repo
             self.crawled = crawled
@@ -56,7 +65,7 @@ extension Realm.Package:MongoMasterCodingModel
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case coordinate = "P"
+        case symbol = "Y"
         case realm = "r"
         case repo = "R"
         case crawled = "T"
@@ -68,7 +77,7 @@ extension Realm.Package:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.coordinate] = self.coordinate
+        bson[.symbol] = self.symbol
         bson[.realm] = self.realm
         bson[.repo] = self.repo
         bson[.crawled] = self.crawled
@@ -80,7 +89,7 @@ extension Realm.Package:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
-            coordinate: try bson[.coordinate].decode(),
+            symbol: try bson[.symbol].decode(),
             realm: try bson[.realm].decode(),
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)

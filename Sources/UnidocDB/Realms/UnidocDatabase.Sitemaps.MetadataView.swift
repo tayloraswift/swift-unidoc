@@ -11,12 +11,12 @@ extension UnidocDatabase.Sitemaps
     struct MetadataView
     {
         public
-        let id:Symbol.Package
+        let id:Int32
         public
         let modified:BSON.Millisecond?
 
         @inlinable internal
-        init(id:Symbol.Package, modified:BSON.Millisecond?)
+        init(id:Int32, modified:BSON.Millisecond?)
         {
             self.id = id
             self.modified = modified

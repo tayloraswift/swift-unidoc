@@ -83,7 +83,7 @@ extension GitHubPlugin.Crawler
                 pat: self.pat)
 
             switch try await db.unidoc.packages.update(record: .init(id: package.id,
-                    coordinate: package.coordinate,
+                    symbol: package.symbol,
                     realm: package.realm,
                     repo: .github(response.repo),
                     crawled: .now()),
@@ -118,23 +118,25 @@ extension GitHubPlugin.Crawler
                     continue
                 }
 
-                switch try await db.unidoc.editions.register(tag,
-                    package: package.coordinate,
+                switch try await db.unidoc.register(
+                    package: package.id,
                     version: version,
+                    refname: tag.name,
+                    sha1: tag.hash,
                     with: session)
                 {
-                case _?:
+                case (let edition, new: true):
                     counters.tagsUpdated.wrappingIncrement(ordering: .relaxed)
 
                     switch version
                     {
-                    case .prerelease:   prerelease = tag.name
-                    case .release:      release = tag.name
+                    case .prerelease:   prerelease = edition.name
+                    case .release:      release = edition.name
                     }
 
                     fallthrough
 
-                case nil:
+                case (_, new: false):
                     counters.tagsCrawled.wrappingIncrement(ordering: .relaxed)
                 }
             }
@@ -143,7 +145,7 @@ extension GitHubPlugin.Crawler
                     response.repo.visibleInFeed
             {
                 let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
-                    package: package.id,
+                    package: package.symbol,
                     refname: interesting,
                     origin: .github(response.repo.owner.login, response.repo.name))
 

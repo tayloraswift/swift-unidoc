@@ -26,7 +26,7 @@ extension Realm
     struct Sitemap:Identifiable, Equatable, Sendable
     {
         public
-        let id:Symbol.Package
+        let id:Int32
         public
         let elements:Elements
 
@@ -37,7 +37,7 @@ extension Realm
         let hash:MD5
 
         @inlinable internal
-        init(id:Symbol.Package,
+        init(id:Int32,
             elements:Elements,
             modified:BSON.Millisecond?,
             hash:MD5)
@@ -52,7 +52,7 @@ extension Realm
 extension Realm.Sitemap
 {
     @inlinable public
-    init(id:Symbol.Package, elements:Elements)
+    init(id:Int32, elements:Elements)
     {
         self.init(id: id,
             elements: elements,

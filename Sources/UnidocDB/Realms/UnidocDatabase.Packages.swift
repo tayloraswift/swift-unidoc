@@ -1,7 +1,5 @@
-import GitHubAPI
-import JSONEncoding
+import JSON
 import MongoDB
-import Symbols
 import UnidocRecords
 
 extension UnidocDatabase
@@ -19,43 +17,28 @@ extension UnidocDatabase
         }
     }
 }
-extension UnidocDatabase.Packages:DatabaseCollection
+extension UnidocDatabase.Packages:Mongo.CollectionModel
 {
     public
-    typealias ElementID = Symbol.Package
+    typealias ElementID = Int32
 
     @inlinable public static
-    var name:Mongo.Collection { "packages" }
+    var name:Mongo.Collection { "Packages" }
 
     public static
-    let indexes:[Mongo.CreateIndexStatement] =
+    let indexes:[Mongo.CollectionIndex] =
     [
-        .init
+        .init("LastCrawled")
         {
-            $0[.unique] = true
-            $0[.name] = "cell"
-            $0[.key] = .init
-            {
-                $0[Realm.Package[.coordinate]] = (+)
-            }
-        },
-        .init
+            $0[Realm.Package[.crawled]] = (+)
+        }
+            where:
         {
-            $0[.unique] = false
-            $0[.name] = "crawled"
-            $0[.key] = .init
-            {
-                $0[Realm.Package[.crawled]] = (+)
-            }
-
-            $0[.partialFilterExpression] = .init
-            {
-                $0[Realm.Package[.repo]] = .init { $0[.exists] = true }
-            }
+            $0[Realm.Package[.repo]] = .init { $0[.exists] = true }
         },
     ]
 }
-extension UnidocDatabase.Packages:RecodableCollection
+extension UnidocDatabase.Packages:Mongo.RecodableModel
 {
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
@@ -67,6 +50,18 @@ extension UnidocDatabase.Packages:RecodableCollection
 }
 extension UnidocDatabase.Packages
 {
+    public
+    func find(id:Int32, with session:Mongo.Session) async throws -> Realm.Package?
+    {
+        try await self.find(by: id, with: session)
+    }
+
+    public
+    func update(record:Realm.Package, with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(some: record, with: session)
+    }
+
     public
     func stalest(_ limit:Int, with session:Mongo.Session) async throws -> [Realm.Package]
     {
@@ -89,144 +84,9 @@ extension UnidocDatabase.Packages
             },
             against: self.database)
     }
-
-    public
-    func update(record:Realm.Package, with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(some: record, with: session)
-    }
-
-    public
-    func find(id:Symbol.Package, with session:Mongo.Session) async throws -> Realm.Package?
-    {
-        try await self.find(by: id, with: session)
-    }
-
-    public
-    func find(by coordinate:Int32, with session:Mongo.Session) async throws -> Realm.Package?
-    {
-        try await self.find(by: Realm.Package[.coordinate], of: coordinate, with: session)
-    }
 }
 extension UnidocDatabase.Packages
 {
-    /// Registers the given package identifier in the database, returning its package
-    /// coordinate. This is really just a glorified string internment system.
-    ///
-    /// This function can be expensive. It only makes one query if the package is already
-    /// registered, but can take two round trips to intern the identifier otherwise.
-    func register(_ package:Symbol.Package,
-        updating meta:UnidocDatabase.Meta,
-        tracking repo:consuming Realm.Repo?,
-        with session:Mongo.Session) async throws -> Realm.Package
-    {
-        //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Placement = try await self.place(package: package, with: session)
-        let package:Realm.Package = .init(id: package,
-            coordinate: placement.coordinate,
-            realm: placement.realm ?? .united,
-            repo: repo)
-
-        if  placement.new
-        {
-            //  This can fail if we race with another process.
-            try await self.insert(some: package, with: session)
-            //  Regenerate the JSON list of all packages.
-            try await meta.upsert(some: try await self.scan(with: session), with: session)
-        }
-        else if
-            let repo:Realm.Repo = package.repo,
-                repo != placement.repo
-        {
-            try await self.update(some: package, with: session)
-        }
-
-        return package
-    }
-
-    func place(package:Symbol.Package, with session:Mongo.Session) async throws -> Placement
-    {
-        //  This used to be a transaction, but we cannot use `$unionWith` in a transaction,
-        //  and transactions aren’t going to scale for what we need to do afterwards.
-        //  (e.g. regenerating the all-package search index.)
-        let pipeline:Mongo.Pipeline = .init
-        {
-            $0.stage
-            {
-                $0[.match] = .init
-                {
-                    $0[Realm.Package[.id]] = package
-                }
-            }
-            $0.stage
-            {
-                $0[.replaceWith] = .init
-                {
-                    $0[Placement[.coordinate]] = Realm.Package[.coordinate]
-                    //  After we migrate the schema, `new` will become redundant, and we
-                    //  can use the existence of `realm` to indicate newness.
-                    $0[Placement[.realm]] = Realm.Package[.realm]
-                    $0[Placement[.repo]] = Realm.Package[.repo]
-                    $0[Placement[.new]] = false
-                }
-            }
-            $0.stage
-            {
-                $0[.unionWith] = .init
-                {
-                    $0[.collection] = Self.name
-                    $0[.pipeline] = .init
-                    {
-                        $0.stage
-                        {
-                            $0[.sort] = .init
-                            {
-                                $0[Realm.Package[.coordinate]] = (-)
-                            }
-                        }
-                        $0.stage
-                        {
-                            $0[.limit] = 1
-                        }
-                        $0.stage
-                        {
-                            $0[.replaceWith] = .init
-                            {
-                                $0[Placement[.coordinate]] = .expr
-                                {
-                                    $0[.add] = (Realm.Package[.coordinate], 1)
-                                }
-                                $0[Placement[.new]] = true
-                            }
-                        }
-                    }
-                }
-            }
-            //  Prefer existing registrations, if any.
-            $0.stage
-            {
-                $0[.sort] = .init
-                {
-                    $0[Placement[.coordinate]] = (+)
-                }
-            }
-            $0.stage
-            {
-                $0[.limit] = 1
-            }
-        }
-
-        let placement:[Placement] = try await session.run(
-            command: Mongo.Aggregate<Mongo.SingleBatch<Placement>>.init(Self.name,
-                pipeline: pipeline),
-            against: self.database)
-
-        //  If there are no results, the collection is completely uninitialized,
-        //  and we should start the count from zero.
-        return placement.first ?? .first
-    }
-
-    private
     func scan(with session:Mongo.Session) async throws -> SearchIndex<Int32>
     {
         //  TODO: this should project the `_id`
@@ -242,7 +102,7 @@ extension UnidocDatabase.Packages
                 {
                     for cell:Realm.Package in batch
                     {
-                        json[+] = "\(cell.id)"
+                        json[+] = "\(cell.symbol)"
                     }
                 }
             }

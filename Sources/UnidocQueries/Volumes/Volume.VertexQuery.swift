@@ -11,7 +11,7 @@ extension Volume
 
 /// The name of this protocol is ``Volume.VertexQuery``.
 public
-protocol _VolumeVertexQuery:DatabaseQuery where Collation == VolumeCollation
+protocol _VolumeVertexQuery:Mongo.PipelineQuery where Collation == VolumeCollation
 {
     associatedtype VertexPredicate:Volume.VertexPredicate
 
@@ -34,7 +34,7 @@ protocol _VolumeVertexQuery:DatabaseQuery where Collation == VolumeCollation
     static
     var input:Mongo.KeyPath { get }
 
-    func extend(pipeline:inout Mongo.Pipeline)
+    func extend(pipeline:inout Mongo.PipelineEncoder)
 }
 extension Volume.VertexQuery
 {
@@ -69,10 +69,11 @@ extension Volume.VertexQuery
     }
 
     public
-    func build(pipeline:inout Mongo.Pipeline)
+    func build(pipeline:inout Mongo.PipelineEncoder)
     {
         defer
         {
+            self.vertex.extend(pipeline: &pipeline, input: Self.volume, output: Self.input)
             self.extend(pipeline: &pipeline)
         }
 
@@ -84,41 +85,31 @@ extension Volume.VertexQuery
             //
             //  This works a lot like ``Database.Names.latest(of:with:)``, except it queries the
             //  package by name instead of id.
-            pipeline.stage
+            pipeline[.match] = .init
             {
-                $0[.match] = .init
-                {
-                    $0[Volume.Meta[.package]] = self.volume.package
-                    $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
-                }
+                $0[Volume.Meta[.package]] = self.volume.package
+                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
             }
             //  We use the patch number instead of the latest-flag because
             //  it is closer to the ground-truth, and the latest-flag doesn’t
             //  have a unique (compound) index with the package name, since
             //  it experiences rolling alignments.
-            pipeline.stage
+            pipeline[.sort] = .init
             {
-                $0[.sort] = .init
-                {
-                    $0[Volume.Meta[.patch]] = (-)
-                }
+                $0[Volume.Meta[.patch]] = (-)
             }
-            pipeline.stage
-            {
-                $0[.limit] = 1
-            }
-            pipeline.stage
-            {
-                $0[.replaceWith] = .init
-                {
-                    $0[Self.volume] = Mongo.Pipeline.ROOT
 
-                    //  ``Volume.Meta`` is complex but not that large, and duplicating this
-                    //  makes the rest of the query a lot simpler.
-                    if  let volume:Mongo.KeyPath = Self.volumeOfLatest
-                    {
-                        $0[volume] = Mongo.Pipeline.ROOT
-                    }
+            pipeline[.limit] = 1
+
+            pipeline[.replaceWith] = .init
+            {
+                $0[Self.volume] = Mongo.Pipeline.ROOT
+
+                //  ``Volume.Meta`` is complex but not that large, and duplicating this
+                //  makes the rest of the query a lot simpler.
+                if  let volume:Mongo.KeyPath = Self.volumeOfLatest
+                {
+                    $0[volume] = Mongo.Pipeline.ROOT
                 }
             }
 
@@ -126,23 +117,17 @@ extension Volume.VertexQuery
             //  If a version string was provided, use that to filter between
             //  multiple versions of the same package.
             //  This index is unique, so we don’t need a sort or a limit.
-            pipeline.stage
+            pipeline[.match] = .init
             {
-                $0[.match] = .init
-                {
-                    $0[Volume.Meta[.package]] = self.volume.package
-                    $0[Volume.Meta[.version]] = version
-                }
+                $0[Volume.Meta[.package]] = self.volume.package
+                $0[Volume.Meta[.version]] = version
             }
             //  ``Volume.Meta`` has many keys. to simplify the output schema
             //  and allow re-use of the earlier pipeline stages, we demote
             //  the zone fields to a subdocument.
-            pipeline.stage
+            pipeline[.replaceWith] = .init
             {
-                $0[.replaceWith] = .init
-                {
-                    $0[Self.volume] = Mongo.Pipeline.ROOT
-                }
+                $0[Self.volume] = Mongo.Pipeline.ROOT
             }
 
             guard
@@ -151,50 +136,32 @@ extension Volume.VertexQuery
             {
                 break
             }
-            pipeline.stage
+
+            pipeline[.lookup] = .init
             {
-                $0[.lookup] = .init
+                $0[.from] = self.origin
+                $0[.pipeline] = .init
                 {
-                    $0[.from] = self.origin
-                    $0[.pipeline] = .init
+                    $0[.match] = .init
                     {
-                        $0.stage
-                        {
-                            $0[.match] = .init
-                            {
-                                $0[Volume.Meta[.package]] = self.volume.package
-                                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
-                            }
-                        }
-                        $0.stage
-                        {
-                            $0[.sort] = .init
-                            {
-                                $0[Volume.Meta[.patch]] = (-)
-                            }
-                        }
-                        $0.stage
-                        {
-                            $0[.limit] = 1
-                        }
+                        $0[Volume.Meta[.package]] = self.volume.package
+                        $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
                     }
-                    $0[.as] = volumeOfLatest
+                    $0[.sort] = .init
+                    {
+                        $0[Volume.Meta[.patch]] = (-)
+                    }
+
+                    $0[.limit] = 1
                 }
+                $0[.as] = volumeOfLatest
             }
             //  Unbox the single-element array. It must contain at least one element for the
             //  query to have been successful, so we can simply use an `$unwind`.
             //
             //  One of the implications of this is that it is *impossible* to access unreleased
             //  documentation if the package does not have at least one release in the database.
-            pipeline.stage
-            {
-                $0[.unwind] = volumeOfLatest
-            }
-        }
-
-        pipeline.stage
-        {
-            self.vertex.stage(&$0, input: Self.volume, output: Self.input)
+            pipeline[.unwind] = volumeOfLatest
         }
     }
 }

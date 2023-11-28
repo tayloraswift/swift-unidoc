@@ -1,7 +1,7 @@
 import MongoDB
 
 @frozen public
-struct SimpleCollation:DatabaseCollation
+struct SimpleCollation:Mongo.CollationType
 {
     @inlinable public static
     var spec:Mongo.Collation

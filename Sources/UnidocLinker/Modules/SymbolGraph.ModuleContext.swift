@@ -69,7 +69,7 @@ extension SymbolGraph.ModuleContext
 extension SymbolGraph.ModuleContext
 {
     mutating
-    func add(snapshot:SnapshotObject,
+    func add(snapshot:DynamicContext.Snapshot,
         context:DynamicContext,
         filter:Set<Int>?)
     {
@@ -100,7 +100,7 @@ extension SymbolGraph.ModuleContext
     }
     private mutating
     func add(namespace:SymbolGraph.Namespace,
-        snapshot:SnapshotObject,
+        snapshot:DynamicContext.Snapshot,
         context:DynamicContext,
         filter:Set<Int>?)
     {
@@ -147,7 +147,7 @@ extension SymbolGraph.ModuleContext
             symbol:Symbol.Decl,
             path:UnqualifiedPath
         ),
-        snapshot:SnapshotObject,
+        snapshot:DynamicContext.Snapshot,
         context:DynamicContext,
         filter:Set<Int>?)
     {

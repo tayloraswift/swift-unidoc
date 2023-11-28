@@ -24,7 +24,7 @@ extension Site.Tags
 }
 extension Site.Tags.List
 {
-    init(from output:PackageEditionsQuery.Output)
+    init(from output:Realm.EditionsQuery.Output)
     {
         var prereleases:ArraySlice<Item> = output.prereleases.map(Item.init(facet:))[...]
         var releases:ArraySlice<Item> = output.releases.map(Item.init(facet:))[...]
@@ -57,11 +57,11 @@ extension Site.Tags.List
 }
 extension Site.Tags.List:RenderablePage
 {
-    var title:String { "Git Tags - \(self.package.id)" }
+    var title:String { "Git Tags - \(self.package.symbol)" }
 }
 extension Site.Tags.List:StaticPage
 {
-    var location:URI { Site.Tags[self.package.id] }
+    var location:URI { Site.Tags[self.package.symbol] }
 }
 extension Site.Tags.List:ApplicationPage
 {
@@ -69,12 +69,12 @@ extension Site.Tags.List:ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.h1] = "\(self.package.id)"
+            $0[.h1] = "\(self.package.symbol)"
         }
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Realm.Repo = self.package.repo
+            if  let repo:Realm.Package.Repo = self.package.repo
             {
                 $0[.h2] = "Package Repository"
 

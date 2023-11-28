@@ -6,7 +6,7 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
 {
     static
     func classify(_ decl:SymbolGraph.Decl,
-        from object:SnapshotObject,
+        from snapshot:DynamicContext.Snapshot,
         at local:Int32) -> WritableKeyPath<Volume.Stats.Coverage, Int>
     {
         if  case _? = decl.article
@@ -36,9 +36,9 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
             break
         }
 
-        if  let scope:Unidoc.Scalar = object.scope(of: local),
-            let scope:Int32 = scope - object.edition,
-            case _? = object.decls[scope]?.decl?.article
+        if  let scope:Unidoc.Scalar = snapshot.scope(of: local),
+            let scope:Int32 = scope - snapshot.id,
+            case _? = snapshot.decls[scope]?.decl?.article
         {
             return \.indirect
         }

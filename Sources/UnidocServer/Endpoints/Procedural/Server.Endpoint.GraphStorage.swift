@@ -2,7 +2,7 @@ import BSONDecoding
 import HTTP
 import MongoDB
 import UnidocDB
-import UnidocLinker
+import UnidocRecords
 
 extension Server.Endpoint
 {
@@ -20,17 +20,14 @@ extension Server.Endpoint.GraphStorage:ProceduralEndpoint
         switch self
         {
         case .put:
-            let snapshot:Snapshot = try .init(
+            let snapshot:Realm.Snapshot = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
-            switch try await server.db.unidoc.graphs.upsert(snapshot, with: session)
-            {
-            case .insert:
-                return .ok("Inserted")
+            let uploaded:UnidocDatabase.Uploaded = try await server.db.unidoc.snapshots.upsert(
+                snapshot: snapshot,
+                with: session)
 
-            case .update:
-                return .ok("Updated")
-            }
+            return .ok(uploaded.updated ? "Updated" : "Inserted")
         }
     }
 }

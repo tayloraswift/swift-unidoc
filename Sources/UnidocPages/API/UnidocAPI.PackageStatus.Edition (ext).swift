@@ -1,9 +1,10 @@
 import UnidocAutomation
 import UnidocQueries
+import UnidocRecords
 
 extension UnidocAPI.PackageStatus.Edition
 {
-    init?(from output:PackageEditionsQuery.Facet)
+    init?(from output:Realm.EditionsQuery.Facet)
     {
         self.init(coordinate: output.edition.version,
             graphs: output.graphs?.count ?? 0,

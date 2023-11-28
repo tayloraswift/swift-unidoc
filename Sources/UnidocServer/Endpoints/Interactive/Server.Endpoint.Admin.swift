@@ -25,7 +25,7 @@ extension Server.Endpoint.Admin:RestrictedEndpoint
         switch self
         {
         case .recode(let target):
-            let collection:any RecodableCollection
+            let collection:any Mongo.RecodableModel
 
             switch target
             {

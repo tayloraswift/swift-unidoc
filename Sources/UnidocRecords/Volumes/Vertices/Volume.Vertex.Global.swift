@@ -8,10 +8,14 @@ extension Volume.Vertex
         public
         let id:Unidoc.Scalar
 
+        public
+        var snapshot:Volume.SnapshotDetails
+
         @inlinable public
-        init(id:Unidoc.Scalar)
+        init(id:Unidoc.Scalar, snapshot:Volume.SnapshotDetails)
         {
             self.id = id
+            self.snapshot = snapshot
         }
     }
 }

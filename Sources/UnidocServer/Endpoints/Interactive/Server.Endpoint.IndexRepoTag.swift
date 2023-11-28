@@ -35,12 +35,15 @@ extension Server.Endpoint.IndexRepoTag:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let package:Realm.Package = try await server.db.unidoc.packages.find(id: self.package,
+        let output:Realm.EditionsQuery.Output = try await server.db.unidoc.execute(
+            query: Realm.EditionsQuery.init(package: self.package, limit: 0),
             with: session)
         else
         {
             return .notFound("No such package")
         }
+
+        let package:Realm.Package = (consume output).package
 
         guard
         case .github(let repo) = package.repo
@@ -65,21 +68,22 @@ extension Server.Endpoint.IndexRepoTag:RestrictedEndpoint
         }
 
         guard
-        let version:SemanticVersion = package.id.version(tag: tag.name)
+        let version:SemanticVersion = package.symbol.version(tag: tag.name)
         else
         {
             return .ok("Ignored tag '\(tag.name)': not a semantic or swift version")
         }
-        if  let coordinate:Int32 = try await server.db.unidoc.editions.register(tag,
-                package: package.coordinate,
-                version: version,
-                with: session)
-        {
-            return .ok("Created tag '\(tag.name)' as '\(version)' (version = \(coordinate))")
-        }
-        else
-        {
-            return .ok("Updated tag '\(tag.name)' as '\(version)'")
-        }
+
+        let (edition, new):(Realm.Edition, Bool) = try await server.db.unidoc.register(
+            package: package.id,
+            version: version,
+            refname: tag.name,
+            sha1: tag.hash,
+            with: session)
+
+        return .ok("""
+            \(new ? "Created" : "Updated") tag '\(edition.name)' as '\(version)' \
+            (version = \(edition.id))
+            """)
     }
 }
