@@ -44,7 +44,7 @@ extension Mongo.CollectionIndex
     {
         self.init(id: id,
             collation: collation,
-            unique: true,
+            unique: unique,
             fields: .init(with: fields),
             filter: filter.map { .init(with: $0) })
     }

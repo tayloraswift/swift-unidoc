@@ -101,10 +101,11 @@ extension UnidocDatabase
                 realm: .united,
                 repo: repo)
 
+            try await self.packages.insert(some: package, with: session)
+
             //  Regenerate the JSON list of all packages.
             let index:SearchIndex<Int32> = try await self.packages.scan(with: session)
 
-            try await self.packages.insert(some: package, with: session)
             try await self.metadata.upsert(some: index, with: session)
 
             return (package, true)
