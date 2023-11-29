@@ -33,6 +33,19 @@ protocol _MongoPipelineQuery<Collation, Iteration>:Sendable
     /// The key specification for an index to use.
     var hint:Mongo.SortDocument? { get }
 }
+extension Mongo.PipelineQuery where Iteration.Stride == Int
+{
+    func command(stride:Int) -> Mongo.Aggregate<Iteration>
+    {
+        .init(self.origin,
+            pipeline: .init(with: self.build(pipeline:)),
+            stride: stride)
+        {
+            $0[.collation] = Collation.spec
+            $0[.hint] = self.hint
+        }
+    }
+}
 extension Mongo.PipelineQuery where Iteration.Stride == Never?
 {
     @inlinable public

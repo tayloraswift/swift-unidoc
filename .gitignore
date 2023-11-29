@@ -1,9 +1,6 @@
 .build
-.binaries
-.massbuild
 .swiftinit
 .testing
-.unidoc
 .vscode
 
 Assets/secrets/
@@ -13,6 +10,8 @@ Assets/icons/*.jpg
 
 Local/Deployment/data/
 Local/Server/Certificates/*.pem
+
+Migrations/symbolgraphs.json
 
 node_modules/
 

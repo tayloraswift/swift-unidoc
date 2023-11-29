@@ -149,8 +149,8 @@ extension Site.Tags.List:ApplicationPage
                         $0[.th] = "Tag"
                         $0[.th] = "Commit"
                         $0[.th] = "Release?"
-                        $0[.th] = "Documentation"
-                        $0[.th] = "Symbol Graphs"
+                        $0[.th] = "Docs"
+                        $0[.th] = "Symbol Graph"
                     }
                 }
 

@@ -5,6 +5,7 @@ import MongoDB
 import Sitemaps
 import UnidocDB
 import UnidocPages
+import UnidocRecords
 import UnixTime
 
 extension Server.Endpoint
@@ -31,12 +32,12 @@ extension Server.Endpoint.SitemapIndex:PublicEndpoint
 
             try await server.db.unidoc.sitemaps.list(with: session)
             {
-                for sitemap:UnidocDatabase.Sitemaps.MetadataView in $0
+                for sitemap:Realm.SitemapIndexEntry in $0
                 {
                     xml[.sitemap]
                     {
                         $0[.loc] = """
-                        https://swiftinit.org/\(Site.Docs.root)/\(sitemap.id)/all-symbols
+                        https://swiftinit.org/\(Site.Docs.root)/\(sitemap.symbol)/all-symbols
                         """
 
                         guard

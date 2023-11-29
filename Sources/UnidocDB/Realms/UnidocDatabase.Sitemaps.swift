@@ -42,28 +42,14 @@ extension UnidocDatabase.Sitemaps
     // }
 
     public
-    func list(with session:Mongo.Session, _ yield:([MetadataView]) throws -> Void) async throws
+    func list(with session:Mongo.Session,
+        _ yield:([Realm.SitemapIndexEntry]) throws -> Void) async throws
     {
-        try await session.run(command: Mongo.Find<Mongo.Cursor<MetadataView>>.init(Self.name,
-                stride: 4096)
-            {
-                $0[.projection] = .init
-                {
-                    $0[Realm.Sitemap[.modified]] = true
-                }
-                $0[.sort] = .init
-                {
-                    $0[Realm.Sitemap[.id]] = (+)
-                }
-                $0[.hint] = .init
-                {
-                    $0[Realm.Sitemap[.id]] = (+)
-                }
-            },
+        try await session.run(command: Realm.SitemapIndexQuery.list.command(stride: 4096),
             against: self.database,
             by: .now.advanced(by: .seconds(10)))
         {
-            for try await batch:[MetadataView] in $0
+            for try await batch:[Realm.SitemapIndexEntry] in $0
             {
                 try yield(batch)
             }

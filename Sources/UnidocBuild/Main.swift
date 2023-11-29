@@ -31,6 +31,8 @@ enum Main
 
         let niossl:NIOSSLContext = try .init(configuration: configuration)
 
+        print("Connecting to \(options.remote):\(options.port)...")
+
         let http2:HTTP2Client = .init(
             threads: threads,
             niossl: niossl,

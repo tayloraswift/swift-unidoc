@@ -32,7 +32,6 @@ extension Realm.SitemapQuery:Realm.PackageQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-
         pipeline[.lookup] = .init
         {
             $0[.from] = UnidocDatabase.Sitemaps.name
