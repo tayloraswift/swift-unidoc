@@ -1,4 +1,5 @@
 import MongoDB
+import SymbolGraphs
 import Symbols
 import UnidocRecords
 
@@ -20,7 +21,7 @@ extension UnidocDatabase
 extension UnidocDatabase.PackageAliases:Mongo.CollectionModel
 {
     public
-    typealias ElementID = Symbol.Package
+    typealias Element = Realm.PackageAlias
 
     @inlinable public static
     var name:Mongo.Collection { "PackageAliases" }

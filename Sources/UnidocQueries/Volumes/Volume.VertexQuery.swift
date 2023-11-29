@@ -49,13 +49,12 @@ extension Volume.VertexQuery
     public
     var hint:Mongo.SortDocument?
     {
-        if  case nil = Self.volumeOfLatest,
-            case _?  = self.volume.version
+        if  case nil  = self.volume.version
         {
             .init
             {
                 $0[Volume.Meta[.package]] = (+)
-                $0[Volume.Meta[.version]] = (+)
+                $0[Volume.Meta[.patch]] = (-)
             }
         }
         else
@@ -63,7 +62,7 @@ extension Volume.VertexQuery
             .init
             {
                 $0[Volume.Meta[.package]] = (+)
-                $0[Volume.Meta[.patch]] = (-)
+                $0[Volume.Meta[.version]] = (+)
             }
         }
     }

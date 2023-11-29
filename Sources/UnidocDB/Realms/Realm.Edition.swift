@@ -32,6 +32,13 @@ extension Realm
         public
         var name:String
         /// The SHA-1 hash of the git commit associated with this edition.
+        ///
+        /// In production, this is virtually never nil, but the field is still nullable to
+        /// support local use cases. The most common situation where this would be nil is when
+        /// initializing the database with documentation for the standard library. The standard
+        /// library is considered version-controlled (to support linking against it as a
+        /// dependency), but its symbol graph can be generated without ever interacting with the
+        /// official `/apple/swift` git repository.
         public
         var sha1:SHA1?
 

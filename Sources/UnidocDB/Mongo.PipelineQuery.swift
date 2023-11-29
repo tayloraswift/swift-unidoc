@@ -25,6 +25,8 @@ protocol _MongoPipelineQuery<Collation, Iteration>:Sendable
     /// ``Mongo.SingleBatch``.
     associatedtype Iteration:MongoReadEffect
 
+    //associatedtype Origin:Mongo.CollectionModel
+
     /// Constructs a pipeline by adding stages to the given encoder.
     func build(pipeline:inout Mongo.PipelineEncoder)
 
