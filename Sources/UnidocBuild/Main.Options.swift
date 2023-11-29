@@ -2,6 +2,15 @@ import Symbols
 
 extension Main
 {
+    enum Tool
+    {
+        case build
+        case uplink
+        case uplinkMultiple
+    }
+}
+extension Main
+{
     struct Options:Sendable
     {
         var package:Symbol.Package
@@ -10,9 +19,10 @@ extension Main
         var port:Int
 
         var pretty:Bool
-        var build:Bool
         var force:Bool
         var input:String?
+
+        var tool:Tool
 
         private
         init(package:Symbol.Package)
@@ -23,9 +33,10 @@ extension Main
             self.port = 8443
 
             self.pretty = false
-            self.build = true
             self.force = false
             self.input = nil
+
+            self.tool = .build
         }
     }
 }
@@ -101,7 +112,10 @@ extension Main.Options
                 options.force = true
 
             case "--uplink-only", "-u":
-                options.build = false
+                options.tool = .uplink
+
+            case "--uplink-multi":
+                options.tool = .uplinkMultiple
 
             case let option:
                 fatalError("Unknown option '\(option)'")
