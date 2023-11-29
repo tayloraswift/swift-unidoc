@@ -18,6 +18,38 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Vertices
+{
+    public static
+    let indexStem:Mongo.CollectionIndex = .init("Stem",
+        collation: VolumeCollation.spec,
+        unique: true)
+    {
+        //  If a snapshot contains a hash collision, insertion will fail.
+        //  Because the index is prefixed with the stem, we expect this to be
+        //  extraordinarily rare.
+        //  See:
+        //  forums.swift.org/t/how-does-docc-mitigate-fnv-1-hash-collisions/65673
+        $0[Volume.Vertex[.zone]] = (+)
+        $0[Volume.Vertex[.stem]] = (+)
+        $0[Volume.Vertex[.hash]] = (+)
+    }
+        where:
+    {
+        //  This limits the index to vertices with a stem. This is all of them,
+        //  except for ``Volume.Vertex.File``.
+        $0[Volume.Vertex[.stem]] = .init { $0[.exists] = true }
+    }
+
+    public static
+    let indexHash:Mongo.CollectionIndex = .init("Hash",
+        collation: VolumeCollation.spec,
+        unique: true)
+    {
+        $0[Volume.Vertex[.hash]] = (+)
+        $0[Volume.Vertex[.id]] = (+)
+    }
+}
 extension UnidocDatabase.Vertices:Mongo.CollectionModel
 {
     public
@@ -26,37 +58,8 @@ extension UnidocDatabase.Vertices:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "VolumeVertices" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("Stem",
-            collation: VolumeCollation.spec,
-            unique: true)
-        {
-            //  If a snapshot contains a hash collision, insertion will fail.
-            //  Because the index is prefixed with the stem, we expect this to be
-            //  extraordinarily rare.
-            //  See:
-            //  forums.swift.org/t/how-does-docc-mitigate-fnv-1-hash-collisions/65673
-            $0[Volume.Vertex[.zone]] = (+)
-            $0[Volume.Vertex[.stem]] = (+)
-            $0[Volume.Vertex[.hash]] = (+)
-        }
-            where:
-        {
-            //  This limits the index to masters with a stem. This is all of them,
-            //  except for ``Volume.Vertex.File``.
-            $0[Volume.Vertex[.stem]] = .init { $0[.exists] = true }
-        },
-
-        .init("Hash",
-            collation: VolumeCollation.spec,
-            unique: true)
-        {
-            $0[Volume.Vertex[.hash]] = (+)
-            $0[Volume.Vertex[.id]] = (+)
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexStem, Self.indexHash ] }
 }
 extension UnidocDatabase.Vertices:Mongo.RecodableModel
 {

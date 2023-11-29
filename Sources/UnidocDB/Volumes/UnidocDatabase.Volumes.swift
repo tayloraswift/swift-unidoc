@@ -18,6 +18,50 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Volumes
+{
+    public static
+    let indexCoordinateLatest:Mongo.CollectionIndex = .init("CoordinateLatest",
+        unique: true)
+    {
+        $0[Volume.Meta[.id]] = (+)
+        $0[Volume.Meta[.latest]] = (-)
+    }
+
+    public static
+    let indexCoordinatePatch:Mongo.CollectionIndex = .init("CoordinatePatch",
+        unique: true)
+    {
+        $0[Volume.Meta[.id]] = (+)
+        $0[Volume.Meta[.patch]] = (-)
+    }
+        where:
+    {
+        $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
+    }
+
+    public static
+    let indexSymbolicPatch:Mongo.CollectionIndex = .init("SymbolicPatch",
+        collation: VolumeCollation.spec,
+        unique: true)
+    {
+        $0[Volume.Meta[.package]] = (+)
+        $0[Volume.Meta[.patch]] = (-)
+    }
+        where:
+    {
+        $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
+    }
+
+    public static
+    let indexSymbolic:Mongo.CollectionIndex = .init("Symbolic",
+        collation: VolumeCollation.spec,
+        unique: true)
+    {
+        $0[Volume.Meta[.package]] = (+)
+        $0[Volume.Meta[.version]] = (+)
+    }
+}
 extension UnidocDatabase.Volumes:Mongo.CollectionModel
 {
     public
@@ -26,47 +70,16 @@ extension UnidocDatabase.Volumes:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "Volumes" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("CoordinateLatest",
-            unique: true)
-        {
-            $0[Volume.Meta[.id]] = (+)
-            $0[Volume.Meta[.latest]] = (-)
-        },
-
-        .init("CoordinatePatch",
-            unique: true)
-        {
-            $0[Volume.Meta[.id]] = (+)
-            $0[Volume.Meta[.patch]] = (-)
-        }
-            where:
-        {
-            $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
-        },
-
-        .init("SymbolicPatch",
-            collation: VolumeCollation.spec,
-            unique: true)
-        {
-            $0[Volume.Meta[.package]] = (+)
-            $0[Volume.Meta[.patch]] = (-)
-        }
-            where:
-        {
-            $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
-        },
-
-        .init("Symbolic",
-            collation: VolumeCollation.spec,
-            unique: true)
-        {
-            $0[Volume.Meta[.package]] = (+)
-            $0[Volume.Meta[.version]] = (+)
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexCoordinateLatest,
+            Self.indexCoordinatePatch,
+            Self.indexSymbolicPatch,
+            Self.indexSymbolic,
+        ]
+    }
 }
 extension UnidocDatabase.Volumes:Mongo.RecodableModel
 {

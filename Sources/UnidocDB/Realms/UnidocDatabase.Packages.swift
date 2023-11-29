@@ -20,6 +20,18 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Packages
+{
+    public static
+    let indexLastCrawled:Mongo.CollectionIndex = .init("LastCrawled")
+    {
+        $0[Realm.Package[.crawled]] = (+)
+    }
+        where:
+    {
+        $0[Realm.Package[.repo]] = .init { $0[.exists] = true }
+    }
+}
 extension UnidocDatabase.Packages:Mongo.CollectionModel
 {
     public
@@ -28,18 +40,8 @@ extension UnidocDatabase.Packages:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "Packages" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("LastCrawled")
-        {
-            $0[Realm.Package[.crawled]] = (+)
-        }
-            where:
-        {
-            $0[Realm.Package[.repo]] = .init { $0[.exists] = true }
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexLastCrawled ] }
 }
 extension UnidocDatabase.Packages:Mongo.RecodableModel
 {

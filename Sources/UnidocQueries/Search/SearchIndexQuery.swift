@@ -8,23 +8,17 @@ import UnidocDB
 import UnidocRecords
 
 @frozen public
-struct SearchIndexQuery<ID>:Equatable, Hashable, Sendable
-    where   ID:Hashable,
-            ID:Sendable,
-            ID:BSONDecodable,
-            ID:BSONEncodable
+struct SearchIndexQuery<CollectionOrigin>:Equatable, Hashable, Sendable
+    where CollectionOrigin:Mongo.CollectionModel
 {
-    public
-    let origin:Mongo.Collection
     public
     let tag:MD5?
     public
-    let id:ID
+    let id:CollectionOrigin.Element.ID
 
     @inlinable public
-    init(from origin:Mongo.Collection, tag:MD5?, id:ID)
+    init(tag:MD5?, id:CollectionOrigin.Element.ID)
     {
-        self.origin = origin
         self.tag = tag
         self.id = id
     }
@@ -38,14 +32,14 @@ extension SearchIndexQuery:Mongo.PipelineQuery
     typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         pipeline[.match] = .init
         {
-            $0[SearchIndex<ID>[.id]] = self.id
+            $0[SearchIndex<CollectionOrigin.Element.ID>[.id]] = self.id
         }
 
         guard let tag:MD5 = self.tag
@@ -56,16 +50,19 @@ extension SearchIndexQuery:Mongo.PipelineQuery
 
         pipeline[.set] = .init
         {
-            $0[SearchIndex<ID>[.json]] = .expr
+            $0[SearchIndex<CollectionOrigin.Element.ID>[.json]] = .expr
             {
                 $0[.cond] =
                 (
-                    if: .expr { $0[.eq] = (tag, SearchIndex<ID>[.hash]) },
+                    if: .expr
+                    {
+                        $0[.eq] = (tag, SearchIndex<CollectionOrigin.Element.ID>[.hash])
+                    },
                     then: .expr
                     {
-                        $0[.binarySize] = SearchIndex<ID>[.json]
+                        $0[.binarySize] = SearchIndex<CollectionOrigin.Element.ID>[.json]
                     },
-                    else: SearchIndex<ID>[.json]
+                    else: SearchIndex<CollectionOrigin.Element.ID>[.json]
                 )
             }
         }

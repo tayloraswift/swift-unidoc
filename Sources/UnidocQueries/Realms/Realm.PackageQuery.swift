@@ -12,7 +12,8 @@ extension Realm
 
 /// The name of this protocol is ``Realm.PackageQuery``.
 public
-protocol _RealmPackageQuery:Mongo.PipelineQuery where Collation == SimpleCollation
+protocol _RealmPackageQuery:Mongo.PipelineQuery<UnidocDatabase.PackageAliases>
+    where Collation == SimpleCollation
 {
     /// The field to store the ``Realm.Package`` document in.
     static
@@ -25,16 +26,7 @@ protocol _RealmPackageQuery:Mongo.PipelineQuery where Collation == SimpleCollati
 extension Realm.PackageQuery
 {
     @inlinable public
-    var origin:Mongo.Collection { UnidocDatabase.PackageAliases.name }
-
-    @inlinable public
-    var hint:Mongo.SortDocument?
-    {
-        .init
-        {
-            $0[Realm.PackageAlias[.id]] = (+)
-        }
-    }
+    var hint:Mongo.CollectionIndex? { nil }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)

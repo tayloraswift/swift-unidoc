@@ -18,6 +18,15 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.PackageAliases
+{
+    public static
+    let indexCoordinate:Mongo.CollectionIndex = .init("Coordinate",
+        unique: false)
+    {
+        $0[Realm.PackageAlias[.coordinate]] = (+)
+    }
+}
 extension UnidocDatabase.PackageAliases:Mongo.CollectionModel
 {
     public
@@ -26,12 +35,6 @@ extension UnidocDatabase.PackageAliases:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "PackageAliases" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("Coordinate")
-        {
-            $0[Realm.PackageAlias[.coordinate]] = (+)
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexCoordinate ] }
 }

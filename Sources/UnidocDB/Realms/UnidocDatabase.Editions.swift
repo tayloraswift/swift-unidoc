@@ -21,6 +21,51 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Editions
+{
+    public static
+    let indexEditionName:Mongo.CollectionIndex = .init("EditionName",
+        collation: SimpleCollation.spec,
+        unique: true)
+    {
+        $0[Realm.Edition[.package]] = (+)
+        $0[Realm.Edition[.name]] = (+)
+    }
+
+    public static
+    let indexEditionCoordinate:Mongo.CollectionIndex = .init("EditionCoordinate",
+        unique: true)
+    {
+        $0[Realm.Edition[.package]] = (-)
+        $0[Realm.Edition[.version]] = (-)
+    }
+
+    public static
+    let indexNonreleases:Mongo.CollectionIndex = .init("Nonreleases",
+        unique: true)
+    {
+        $0[Realm.Edition[.package]] = (-)
+        $0[Realm.Edition[.patch]] = (-)
+        $0[Realm.Edition[.version]] = (-)
+    }
+        where:
+    {
+        $0[Realm.Edition[.release]] = .init { $0[.eq] = false }
+    }
+
+    public static
+    let indexReleases:Mongo.CollectionIndex = .init("Releases",
+        unique: true)
+    {
+        $0[Realm.Edition[.package]] = (-)
+        $0[Realm.Edition[.patch]] = (-)
+        $0[Realm.Edition[.version]] = (-)
+    }
+        where:
+    {
+        $0[Realm.Edition[.release]] = .init { $0[.eq] = true }
+    }
+}
 extension UnidocDatabase.Editions:Mongo.CollectionModel
 {
     public
@@ -29,48 +74,16 @@ extension UnidocDatabase.Editions:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "Editions" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("EditionName",
-            collation: SimpleCollation.spec,
-            unique: true)
-        {
-            $0[Realm.Edition[.package]] = (+)
-            $0[Realm.Edition[.name]] = (+)
-        },
-
-        .init("EditionCoordinate",
-            unique: true)
-        {
-            $0[Realm.Edition[.package]] = (-)
-            $0[Realm.Edition[.version]] = (-)
-        },
-
-        .init("Nonreleases",
-            unique: true)
-        {
-            $0[Realm.Edition[.package]] = (-)
-            $0[Realm.Edition[.patch]] = (-)
-            $0[Realm.Edition[.version]] = (-)
-        }
-            where:
-        {
-            $0[Realm.Edition[.release]] = .init { $0[.eq] = false }
-        },
-
-        .init("Releases",
-            unique: true)
-        {
-            $0[Realm.Edition[.package]] = (-)
-            $0[Realm.Edition[.patch]] = (-)
-            $0[Realm.Edition[.version]] = (-)
-        }
-            where:
-        {
-            $0[Realm.Edition[.release]] = .init { $0[.eq] = true }
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexEditionName,
+            Self.indexEditionCoordinate,
+            Self.indexNonreleases,
+            Self.indexReleases,
+        ]
+    }
 }
 extension UnidocDatabase.Editions:Mongo.RecodableModel
 {

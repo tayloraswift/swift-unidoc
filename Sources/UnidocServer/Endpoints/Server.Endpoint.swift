@@ -171,20 +171,18 @@ extension Server.Endpoint
     {
         if  let id:VolumeIdentifier = .init(trunk)
         {
-            return .interactive(Pipeline<SearchIndexQuery<VolumeIdentifier>>.init(
+            return .interactive(Pipeline<SearchIndexQuery<UnidocDatabase.Search>>.init(
                 output: parameters.explain ? nil : .application(.json),
                 query: .init(
-                    from: UnidocDatabase.Search.name,
                     tag: tag,
                     id: id),
                 tag: tag))
         }
         else if trunk == "packages.json"
         {
-            return .interactive(Pipeline<SearchIndexQuery<Int32>>.init(
+            return .interactive(Pipeline<SearchIndexQuery<UnidocDatabase.Metadata>>.init(
                 output: parameters.explain ? nil : .application(.json),
                 query: .init(
-                    from: UnidocDatabase.Metadata.name,
                     tag: tag,
                     id: 0),
                 tag: tag))

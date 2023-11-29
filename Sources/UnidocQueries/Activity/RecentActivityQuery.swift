@@ -19,15 +19,14 @@ struct RecentActivityQuery:Equatable, Hashable, Sendable
 extension RecentActivityQuery:Mongo.PipelineQuery
 {
     public
+    typealias CollectionOrigin = UnidocDatabase.DocsFeed
+    public
     typealias Collation = SimpleCollation
     public
     typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
-    var origin:Mongo.Collection { UnidocDatabase.DocsFeed.name }
-
-    @inlinable public
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
