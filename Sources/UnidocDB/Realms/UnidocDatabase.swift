@@ -360,6 +360,16 @@ extension UnidocDatabase
     func pin(_ snapshot:inout Realm.Snapshot,
         with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
+        print("pinning dependencies for \(snapshot.metadata.package)...")
+
+        //  Important: all snapshots start off with an empty pin list, so we might need to
+        //  extend the array to match the number of dependencies in the metadata.
+        let unallocated:Int = snapshot.metadata.dependencies.count - snapshot.pins.count
+        if  unallocated > 0
+        {
+            snapshot.pins += repeatElement(nil, count: unallocated)
+        }
+
         guard
         let query:PinDependenciesQuery = .init(for: snapshot)
         else

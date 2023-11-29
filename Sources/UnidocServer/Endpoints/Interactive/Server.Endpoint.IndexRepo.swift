@@ -48,7 +48,8 @@ extension Server.Endpoint.IndexRepo:RestrictedEndpoint
             return .ok("Cannot index a repo with a dot in the owner’s name.")
         }
 
-        let symbol:Symbol.Package = .init("\(repo.owner.login).\(repo.name)")
+        // let symbol:Symbol.Package = .init("\(repo.owner.login).\(repo.name)")
+        let symbol:Symbol.Package = .init(repo.name)
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         let (package, new):(Realm.Package, Bool) = try await server.db.unidoc.register(symbol,
