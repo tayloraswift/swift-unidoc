@@ -44,11 +44,11 @@ extension PinDependenciesQuery
 }
 extension PinDependenciesQuery:Mongo.PipelineQuery
 {
+    typealias CollectionOrigin = UnidocDatabase.PackageAliases
     typealias Collation = SimpleCollation
     typealias Iteration = Mongo.SingleBatch<Symbol.PackageDependency<Unidoc.Edition>>
 
-    var origin:Mongo.Collection { UnidocDatabase.PackageAliases.name }
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {

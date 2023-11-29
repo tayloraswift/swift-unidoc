@@ -17,11 +17,11 @@ struct PlacePackageQuery:Sendable
 //  (e.g. regenerating the all-package search index.)
 extension PlacePackageQuery:Mongo.PipelineQuery
 {
+    typealias CollectionOrigin = UnidocDatabase.PackageAliases
     typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Realm.PackagePlacement>
 
-    var origin:Mongo.Collection { UnidocDatabase.PackageAliases.name }
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
@@ -44,7 +44,7 @@ extension PlacePackageQuery:Mongo.PipelineQuery
         }
         pipeline[.unionWith] = .init
         {
-            $0[.collection] = self.origin
+            $0[.collection] = CollectionOrigin.name
             $0[.pipeline] = .init
             {
                 $0[.sort] = .init

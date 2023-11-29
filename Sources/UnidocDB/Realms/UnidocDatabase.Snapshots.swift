@@ -21,6 +21,19 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Snapshots
+{
+    public static
+    let indexSwiftReleases:Mongo.CollectionIndex = .init("SwiftReleases",
+        unique: true)
+    {
+        $0[Realm.Snapshot[.swift]] = (-)
+    }
+        where:
+    {
+        $0[Realm.Snapshot[.swift]] = .init { $0[.exists] = true }
+    }
+}
 extension UnidocDatabase.Snapshots:Mongo.CollectionModel
 {
     public
@@ -29,18 +42,8 @@ extension UnidocDatabase.Snapshots:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "Snapshots" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("SwiftReleases", unique: true)
-        {
-            $0[Realm.Snapshot[.swift]] = (-)
-        }
-            where:
-        {
-            $0[Realm.Snapshot[.swift]] = .init { $0[.exists] = true }
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexSwiftReleases ] }
 }
 extension UnidocDatabase.Snapshots
 {

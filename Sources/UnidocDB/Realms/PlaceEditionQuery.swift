@@ -16,11 +16,11 @@ struct PlaceEditionQuery:Sendable
 }
 extension PlaceEditionQuery:Mongo.PipelineQuery
 {
+    typealias CollectionOrigin = UnidocDatabase.Editions
     typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Realm.EditionPlacement>
 
-    var origin:Mongo.Collection { UnidocDatabase.Editions.name }
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {

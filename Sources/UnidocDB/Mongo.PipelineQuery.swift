@@ -1,11 +1,6 @@
 import BSONDecoding
 import MongoDB
 
-@available(*, deprecated, renamed: "Mongo.PipelineQuery")
-public
-typealias DatabaseQuery<Output> = Mongo.PipelineQuery<Mongo.Collation, Mongo.Single<Output>>
-    where Output:BSONDecodable
-
 extension Mongo
 {
     public
@@ -14,8 +9,12 @@ extension Mongo
 
 /// The name of this protocol is ``Mongo.PipelineQuery``.
 public
-protocol _MongoPipelineQuery<Collation, Iteration>:Sendable
+protocol _MongoPipelineQuery<CollectionOrigin>:Sendable
 {
+    /// The collection the pipeline draws its input documents from.
+    associatedtype CollectionOrigin:Mongo.CollectionModel
+    /// Specifies the collation to use for the query. This should match any collation specified
+    /// in the index ``hint``, if provided.
     associatedtype Collation:Mongo.CollationType
     /// Specifies the iteration mode for the pipeline’s expected output.
     ///
@@ -25,26 +24,22 @@ protocol _MongoPipelineQuery<Collation, Iteration>:Sendable
     /// ``Mongo.SingleBatch``.
     associatedtype Iteration:MongoReadEffect
 
-    //associatedtype Origin:Mongo.CollectionModel
-
     /// Constructs a pipeline by adding stages to the given encoder.
     func build(pipeline:inout Mongo.PipelineEncoder)
 
-    /// The collection the pipeline draws its input documents from.
-    var origin:Mongo.Collection { get }
-    /// The key specification for an index to use.
-    var hint:Mongo.SortDocument? { get }
+    /// The index to use.
+    var hint:Mongo.CollectionIndex? { get }
 }
 extension Mongo.PipelineQuery where Iteration.Stride == Int
 {
     func command(stride:Int) -> Mongo.Aggregate<Iteration>
     {
-        .init(self.origin,
+        .init(CollectionOrigin.name,
             pipeline: .init(with: self.build(pipeline:)),
             stride: stride)
         {
             $0[.collation] = Collation.spec
-            $0[.hint] = self.hint
+            $0[.hint] = self.hint?.fields
         }
     }
 }
@@ -53,10 +48,10 @@ extension Mongo.PipelineQuery where Iteration.Stride == Never?
     @inlinable public
     var command:Mongo.Aggregate<Iteration>
     {
-        .init(self.origin, pipeline: .init(with: self.build(pipeline:)))
+        .init(CollectionOrigin.name, pipeline: .init(with: self.build(pipeline:)))
         {
             $0[.collation] = Collation.spec
-            $0[.hint] = self.hint
+            $0[.hint] = self.hint?.fields
         }
     }
 }
