@@ -4,9 +4,10 @@ import UnidocRecords
 
 extension UnidocDatabase
 {
-    public
+    @frozen public
     struct Search
     {
+        public
         let database:Mongo.Database
 
         init(database:Mongo.Database)
@@ -17,11 +18,12 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Search:Mongo.CollectionModel
 {
+    public
+    typealias Element = SearchIndex<VolumeIdentifier>
+
     @inlinable public static
     var name:Mongo.Collection { "VolumeSearch" }
 
-    typealias ElementID = VolumeIdentifier
-
-    static
+    @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 }

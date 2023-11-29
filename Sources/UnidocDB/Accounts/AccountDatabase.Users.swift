@@ -18,13 +18,14 @@ extension AccountDatabase
 }
 extension AccountDatabase.Users:Mongo.CollectionModel
 {
+    public
+    typealias Element = Account
+
     @inlinable public static
     var name:Mongo.Collection { "Users" }
 
-    typealias ElementID = Account.ID
-
-    static
-    let indexes:[Mongo.CollectionIndex] = []
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [] }
 }
 extension AccountDatabase.Users
 {

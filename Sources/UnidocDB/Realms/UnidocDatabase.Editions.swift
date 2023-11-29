@@ -24,7 +24,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Editions:Mongo.CollectionModel
 {
     public
-    typealias ElementID = Unidoc.Edition
+    typealias Element = Realm.Edition
 
     @inlinable public static
     var name:Mongo.Collection { "Editions" }
@@ -80,13 +80,5 @@ extension UnidocDatabase.Editions:Mongo.RecodableModel
         try await self.recode(through: Realm.Edition.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
-    }
-}
-extension UnidocDatabase.Editions
-{
-    public
-    func find(id:Unidoc.Edition, with session:Mongo.Session) async throws -> Realm.Edition?
-    {
-        try await self.find(by: id, with: session)
     }
 }

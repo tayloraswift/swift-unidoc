@@ -4,9 +4,10 @@ import UnidocRecords
 
 extension UnidocDatabase
 {
-    public
+    @frozen public
     struct Trees
     {
+        public
         let database:Mongo.Database
 
         init(database:Mongo.Database)
@@ -17,11 +18,12 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Trees:Mongo.CollectionModel
 {
+    public
+    typealias Element = Volume.TypeTree
+
     @inlinable public static
     var name:Mongo.Collection { "VolumeTrees" }
 
-    typealias ElementID = Unidoc.Scalar
-
-    static
+    @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 }

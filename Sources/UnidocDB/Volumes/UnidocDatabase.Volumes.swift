@@ -20,12 +20,13 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Volumes:Mongo.CollectionModel
 {
+    public
+    typealias Element = Volume.Meta
+
     @inlinable public static
     var name:Mongo.Collection { "Volumes" }
 
-    typealias ElementID = Unidoc.Edition
-
-    static
+    public static
     let indexes:[Mongo.CollectionIndex] =
     [
         .init("CoordinateLatest",
@@ -82,8 +83,8 @@ extension UnidocDatabase.Volumes
     func find(named symbol:VolumeIdentifier,
         with session:Mongo.Session) async throws -> Volume.Meta?
     {
-        let response:[Volume.Meta] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Volume.Meta>>.init(Self.name,
+        try await session.run(
+            command: Mongo.Find<Mongo.Single<Volume.Meta>>.init(Self.name,
                 limit: 1)
             {
                 $0[.collation] = VolumeCollation.spec
@@ -100,8 +101,6 @@ extension UnidocDatabase.Volumes
                 }
             },
             against: self.database)
-
-        return response.first
     }
 }
 extension UnidocDatabase.Volumes

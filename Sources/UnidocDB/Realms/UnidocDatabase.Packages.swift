@@ -1,3 +1,6 @@
+import BSON
+import BSONDecoding
+import BSONEncoding
 import JSON
 import MongoDB
 import UnidocRecords
@@ -20,7 +23,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Packages:Mongo.CollectionModel
 {
     public
-    typealias ElementID = Int32
+    typealias Element = Realm.Package
 
     @inlinable public static
     var name:Mongo.Collection { "Packages" }
@@ -50,12 +53,6 @@ extension UnidocDatabase.Packages:Mongo.RecodableModel
 }
 extension UnidocDatabase.Packages
 {
-    public
-    func find(id:Int32, with session:Mongo.Session) async throws -> Realm.Package?
-    {
-        try await self.find(by: id, with: session)
-    }
-
     public
     func update(record:Realm.Package, with session:Mongo.Session) async throws -> Bool?
     {

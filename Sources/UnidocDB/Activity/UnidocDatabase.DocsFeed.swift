@@ -1,4 +1,6 @@
 import BSON
+import BSONDecoding
+import BSONEncoding
 import MongoDB
 import SymbolGraphs
 import UnidocRecords
@@ -20,12 +22,13 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.DocsFeed:Mongo.CollectionModel
 {
+    public
+    typealias Element = Activity<Unidoc.Edition>
+
     @inlinable public static
     var name:Mongo.Collection { "DocsFeed" }
 
-    typealias ElementID = BSON.Millisecond
-
-    static
+    public static
     let indexes:[Mongo.CollectionIndex] =
     [
         .init("Volume",
@@ -37,6 +40,7 @@ extension UnidocDatabase.DocsFeed:Mongo.CollectionModel
     ]
 
     /// 1 MB ought to be enough for anybody.
+    @inlinable public
     var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
 extension UnidocDatabase.DocsFeed

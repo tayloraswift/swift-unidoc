@@ -293,14 +293,14 @@ extension UnidocDatabase
         if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
                 with: session)
         {
-            try await self.vertices.clear(volume.id, with: session)
-            try await self.groups.clear(volume.id, with: session)
-            try await self.trees.clear(volume.id, with: session)
+            try await self.vertices.clear(range: volume.id, with: session)
+            try await self.groups.clear(range: volume.id, with: session)
+            try await self.trees.clear(range: volume.id, with: session)
 
-            try await self.search.delete(volume.symbol, with: session)
+            try await self.search.delete(id: volume.symbol, with: session)
             //  Delete this last, otherwise if one of the other steps fails, we won’t
             //  have an easy way to clean up the remaining documents.
-            try await self.volumes.delete(volume.id, with: session)
+            try await self.volumes.delete(id: volume.id, with: session)
 
             return volume.id
         }
@@ -319,12 +319,12 @@ extension UnidocDatabase
     {
         if  clear
         {
-            try await self.vertices.clear(volume.edition, with: session)
-            try await self.groups.clear(volume.edition, with: session)
-            try await self.trees.clear(volume.edition, with: session)
+            try await self.vertices.clear(range: volume.edition, with: session)
+            try await self.groups.clear(range: volume.edition, with: session)
+            try await self.trees.clear(range: volume.edition, with: session)
 
-            try await self.search.delete(volume.id, with: session)
-            try await self.volumes.delete(volume.edition, with: session)
+            try await self.search.delete(id: volume.id, with: session)
+            try await self.volumes.delete(id: volume.edition, with: session)
         }
         //  If there is a volume generated from a prerelease with the same patch number,
         //  we need to delete that too.

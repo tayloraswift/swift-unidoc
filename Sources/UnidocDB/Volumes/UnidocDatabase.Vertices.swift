@@ -20,12 +20,13 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Vertices:Mongo.CollectionModel
 {
+    public
+    typealias Element = Volume.Vertex
+
     @inlinable public static
     var name:Mongo.Collection { "VolumeVertices" }
 
-    typealias ElementID = Unidoc.Scalar
-
-    static
+    public static
     let indexes:[Mongo.CollectionIndex] =
     [
         .init("Stem",
