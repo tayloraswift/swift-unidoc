@@ -82,3 +82,11 @@ extension UnidocDatabase.Editions:Mongo.RecodableModel
             by: .now.advanced(by: .seconds(60)))
     }
 }
+extension UnidocDatabase.Editions
+{
+    public
+    func find(id:Unidoc.Edition, with session:Mongo.Session) async throws -> Realm.Edition?
+    {
+        try await self.find(by: id, with: session)
+    }
+}
