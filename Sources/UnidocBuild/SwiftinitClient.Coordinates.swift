@@ -14,6 +14,18 @@ extension SwiftinitClient
         }
     }
 }
+extension SwiftinitClient.Coordinates:Comparable
+{
+    static
+    func < (a:Self, b:Self) -> Bool
+    {
+        (a.package, a.version) < (b.package, b.version)
+    }
+}
+extension SwiftinitClient.Coordinates:CustomStringConvertible
+{
+    var description:String { "(\(self.package), \(self.version))" }
+}
 extension SwiftinitClient.Coordinates:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable

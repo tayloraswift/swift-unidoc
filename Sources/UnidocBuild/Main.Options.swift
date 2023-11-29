@@ -2,15 +2,6 @@ import Symbols
 
 extension Main
 {
-    enum Tool
-    {
-        case build
-        case uplink
-        case uplinkMultiple
-    }
-}
-extension Main
-{
     struct Options:Sendable
     {
         var package:Symbol.Package

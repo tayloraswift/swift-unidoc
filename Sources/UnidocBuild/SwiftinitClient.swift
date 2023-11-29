@@ -53,15 +53,24 @@ extension SwiftinitClient
     {
         let json:JSON = .init(utf8: try editions.read())
         let coordinates:[Coordinates] = try json.decode()
-        for coordinates:Coordinates in coordinates
+        for coordinates:Coordinates in coordinates.sorted()
         {
             try await self.connect
             {
                 @Sendable (connection:SwiftinitClient.Connection) in
 
-                try await connection.uplink(
-                    package: coordinates.package,
-                    version: coordinates.version)
+                do
+                {
+                    try await connection.uplink(
+                        package: coordinates.package,
+                        version: coordinates.version)
+
+                    print("Successfully uplinked symbol graph \(coordinates)")
+                }
+                catch let error
+                {
+                    print("Failed to uplink \(coordinates): \(error)")
+                }
             }
         }
     }
