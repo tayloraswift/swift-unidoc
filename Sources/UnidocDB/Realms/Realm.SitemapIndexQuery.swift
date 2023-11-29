@@ -10,11 +10,11 @@ extension Realm
 }
 extension Realm.SitemapIndexQuery:Mongo.PipelineQuery
 {
+    typealias CollectionOrigin = UnidocDatabase.Sitemaps
     typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Cursor<Realm.SitemapIndexEntry>
 
-    var origin:Mongo.Collection { UnidocDatabase.Sitemaps.name }
-    var hint:Mongo.SortDocument? { nil }
+    var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {

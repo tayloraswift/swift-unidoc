@@ -16,6 +16,24 @@ extension UnidocDatabase
         }
     }
 }
+extension UnidocDatabase.Groups
+{
+    public static
+    let indexScopeLatest:Mongo.CollectionIndex = .init("ScopeLatest",
+        unique: false)
+    {
+        $0[Volume.Group[.scope]] = (+)
+        $0[Volume.Group[.latest]] = (-)
+    }
+
+    public static
+    let indexScope:Mongo.CollectionIndex = .init("Scope",
+        unique: true)
+    {
+        $0[Volume.Group[.scope]] = (+)
+        $0[Volume.Group[.id]] = (+)
+    }
+}
 extension UnidocDatabase.Groups:Mongo.CollectionModel
 {
     public
@@ -24,20 +42,8 @@ extension UnidocDatabase.Groups:Mongo.CollectionModel
     @inlinable public static
     var name:Mongo.Collection { "VolumeGroups" }
 
-    public static
-    let indexes:[Mongo.CollectionIndex] =
-    [
-        .init("ScopeLatest")
-        {
-            $0[Volume.Group[.scope]] = (+)
-            $0[Volume.Group[.latest]] = (-)
-        },
-        .init("Scope", unique: true)
-        {
-            $0[Volume.Group[.scope]] = (+)
-            $0[Volume.Group[.id]] = (+)
-        },
-    ]
+    @inlinable public static
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexScopeLatest, Self.indexScope ] }
 }
 extension UnidocDatabase.Groups
 {

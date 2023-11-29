@@ -11,7 +11,8 @@ extension Volume
 
 /// The name of this protocol is ``Volume.VertexQuery``.
 public
-protocol _VolumeVertexQuery:Mongo.PipelineQuery where Collation == VolumeCollation
+protocol _VolumeVertexQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
+    where Collation == VolumeCollation
 {
     associatedtype VertexPredicate:Volume.VertexPredicate
 
@@ -43,28 +44,12 @@ extension Volume.VertexQuery
 }
 extension Volume.VertexQuery
 {
-    @inlinable public
-    var origin:Mongo.Collection { UnidocDatabase.Volumes.name }
-
     public
-    var hint:Mongo.SortDocument?
+    var hint:Mongo.CollectionIndex?
     {
-        if  case nil  = self.volume.version
-        {
-            .init
-            {
-                $0[Volume.Meta[.package]] = (+)
-                $0[Volume.Meta[.patch]] = (-)
-            }
-        }
-        else
-        {
-            .init
-            {
-                $0[Volume.Meta[.package]] = (+)
-                $0[Volume.Meta[.version]] = (+)
-            }
-        }
+        self.volume.version == nil
+            ? UnidocDatabase.Volumes.indexSymbolicPatch
+            : UnidocDatabase.Volumes.indexSymbolic
     }
 
     public
@@ -138,7 +123,7 @@ extension Volume.VertexQuery
 
             pipeline[.lookup] = .init
             {
-                $0[.from] = self.origin
+                $0[.from] = CollectionOrigin.name
                 $0[.pipeline] = .init
                 {
                     $0[.match] = .init
