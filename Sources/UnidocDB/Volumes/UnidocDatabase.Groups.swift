@@ -4,9 +4,10 @@ import UnidocRecords
 
 extension UnidocDatabase
 {
-    public
+    @frozen public
     struct Groups
     {
+        public
         let database:Mongo.Database
 
         init(database:Mongo.Database)
@@ -17,12 +18,13 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Groups:Mongo.CollectionModel
 {
+    public
+    typealias Element = Volume.Group
+
     @inlinable public static
     var name:Mongo.Collection { "VolumeGroups" }
 
-    typealias ElementID = Unidoc.Scalar
-
-    static
+    public static
     let indexes:[Mongo.CollectionIndex] =
     [
         .init("ScopeLatest")

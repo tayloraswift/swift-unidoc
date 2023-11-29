@@ -6,15 +6,21 @@ import UnidocRecords
 
 extension Mongo
 {
+    public
     typealias CollectionModel = _MongoCollectionModel
 }
 
 @available(*, deprecated, renamed: "Mongo.CollectionModel")
 typealias DatabaseCollection = Mongo.CollectionModel
 
-protocol _MongoCollectionModel<ElementID>
+public
+protocol _MongoCollectionModel<Element>
 {
-    associatedtype ElementID:BSONDecodable, BSONEncodable, Sendable
+    associatedtype Element:Identifiable, Sendable where
+        Element.ID:BSONDecodable,
+        Element.ID:BSONEncodable,
+        Element.ID:Sendable
+
     associatedtype Capacity
 
     static
@@ -31,8 +37,10 @@ protocol _MongoCollectionModel<ElementID>
 }
 extension Mongo.CollectionModel where Capacity == Never
 {
+    @inlinable public
     var capacity:Never { fatalError() }
 
+    public
     func setup(with session:Mongo.Session) async throws
     {
         try await self.setupIndexes(with: session)
@@ -40,6 +48,7 @@ extension Mongo.CollectionModel where Capacity == Never
 }
 extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
 {
+    public
     func setup(with session:Mongo.Session) async throws
     {
         try await self.setupCapacity(with: session)
@@ -149,16 +158,17 @@ extension Mongo.CollectionModel
         try await self.setup(with: session)
     }
 }
-extension Mongo.CollectionModel
+extension Mongo.CollectionModel where Element:BSONDocumentDecodable
 {
-    func find<Decodable>(_:Decodable.Type = Decodable.self,
-        by id:ElementID,
-        with session:Mongo.Session) async throws -> Decodable?
-        where Decodable:BSONDocumentDecodable & Sendable
+    @inlinable public
+    func find(id:Element.ID, with session:Mongo.Session) async throws -> Element?
     {
         try await self.find(by: "_id", of: id, with: session)
     }
-
+}
+extension Mongo.CollectionModel
+{
+    @inlinable internal
     func find<Decodable>(_:Decodable.Type = Decodable.self,
         by index:Mongo.KeyPath,
         of key:__owned some BSONEncodable,
@@ -194,7 +204,7 @@ extension Mongo.CollectionModel
         by deadline:ContinuousClock.Instant) async throws -> (modified:Int, of:Int)
         where   Master:BSONDocumentDecodable,
                 Master:BSONDocumentEncodable,
-                Master:Identifiable<ElementID>,
+                Master:Identifiable<Element.ID>,
                 Master:Sendable
     {
         var modified:Int = 0
@@ -208,7 +218,7 @@ extension Mongo.CollectionModel
         {
             for try await batch:[Master] in $0
             {
-                let updates:Mongo.Updates<ElementID> = try await self.update(some: batch,
+                let updates:Mongo.Updates<Element.ID> = try await self.update(some: batch,
                     with: session)
 
                 modified += updates.modified
@@ -227,7 +237,7 @@ extension Mongo.CollectionModel
         _ migrate:(inout Master) async throws -> ()) async throws -> (modified:Int, of:Int)
         where   Master:BSONDocumentDecodable,
                 Master:BSONDocumentEncodable,
-                Master:Identifiable<ElementID>,
+                Master:Identifiable<Element.ID>,
                 Master:Sendable
     {
         var modified:Int = 0
@@ -268,7 +278,7 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel
 {
     func insert(
-        some elements:some Collection<some BSONDocumentEncodable & Identifiable<ElementID>>,
+        some elements:some Collection<some BSONDocumentEncodable & Identifiable<Element.ID>>,
         with session:Mongo.Session) async throws
     {
         if  elements.isEmpty
@@ -290,7 +300,7 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel
 {
     func insert(
-        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
+        some element:some BSONDocumentEncodable & Identifiable<Element.ID>,
         with session:Mongo.Session) async throws
     {
         let response:Mongo.InsertResponse = try await session.run(
@@ -306,11 +316,11 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel
 {
     func upsert(
-        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
-        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
+        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<Element.ID>>,
+        with session:Mongo.Session) async throws -> Mongo.Updates<Element.ID>
     {
-        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
-            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
                 updates: elements.map { .upsert($0) }),
             against: self.database)
 
@@ -319,15 +329,15 @@ extension Mongo.CollectionModel
 
     @discardableResult
     func upsert(
-        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
-        with session:Mongo.Session) async throws -> ElementID?
+        some element:some BSONDocumentEncodable & Identifiable<Element.ID>,
+        with session:Mongo.Session) async throws -> Element.ID?
     {
-        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
-            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
                 updates: [.upsert(element)]),
             against: self.database)
 
-        let updates:Mongo.Updates<ElementID> = try response.updates()
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.upserted.first?.id
     }
 }
@@ -335,11 +345,11 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel
 {
     func update(
-        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<ElementID>>,
-        with session:Mongo.Session) async throws -> Mongo.Updates<ElementID>
+        some elements:some Sequence<some BSONDocumentEncodable & Identifiable<Element.ID>>,
+        with session:Mongo.Session) async throws -> Mongo.Updates<Element.ID>
     {
-        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
-            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
                 updates: elements.map { .replace($0) }),
             against: self.database)
 
@@ -350,15 +360,15 @@ extension Mongo.CollectionModel
     /// was not modified, and nil if the document was not found.
     @discardableResult
     func update(
-        some element:some BSONDocumentEncodable & Identifiable<ElementID>,
+        some element:some BSONDocumentEncodable & Identifiable<Element.ID>,
         with session:Mongo.Session) async throws -> Bool?
     {
-        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
-            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
                 updates: [.replace(element)]),
             against: self.database)
 
-        let updates:Mongo.Updates<ElementID> = try response.updates()
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.selected == 0 ? nil : updates.modified == 1
     }
 
@@ -367,7 +377,7 @@ extension Mongo.CollectionModel
     /// and nil if the document was not found.
     @discardableResult
     func update(field:Mongo.KeyPath,
-        of target:ElementID,
+        of target:Element.ID,
         to value:__owned some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
@@ -380,8 +390,8 @@ extension Mongo.CollectionModel
         to value:__owned some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
-        let response:Mongo.UpdateResponse<ElementID> = try await session.run(
-            command: Mongo.Update<Mongo.One, ElementID>.init(Self.name,
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
                 updates:
                 [
                     .init
@@ -393,7 +403,7 @@ extension Mongo.CollectionModel
                 ]),
             against: self.database)
 
-        let updates:Mongo.Updates<ElementID> = try response.updates()
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.selected == 0 ? nil : updates.modified == 1
     }
 }
@@ -403,14 +413,13 @@ extension Mongo.CollectionModel
     /// Deletes up to one document having the specified identifier, returning true if a
     /// document was deleted.
     @discardableResult
-    func delete(_ id:ElementID, with session:Mongo.Session) async throws -> Bool
+    @inlinable public
+    func delete(id:Element.ID, with session:Mongo.Session) async throws -> Bool
     {
-        try await self.delete(with: session)
-        {
-            $0[Mongo.IdentityView<ElementID>[.id]] = id
-        }
+        try await self.delete(with: session) { $0["_id"] = id }
     }
 
+    @inlinable internal
     func delete(with session:Mongo.Session,
         matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Bool
     {
@@ -452,7 +461,7 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel<Unidoc.Scalar>
 {
     /// Deletes all records from the collection within the specified zone.
-    func clear(_ zone:Unidoc.Edition, with session:Mongo.Session) async throws
+    func clear(range:Unidoc.Edition, with session:Mongo.Session) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name,
@@ -469,14 +478,14 @@ extension Mongo.CollectionModel<Unidoc.Scalar>
                                 {
                                     $0["_id"] = .init
                                     {
-                                        $0[.gte] = zone.min
+                                        $0[.gte] = range.min
                                     }
                                 }
                                 $0.append
                                 {
                                     $0["_id"] = .init
                                     {
-                                        $0[.lte] = zone.max
+                                        $0[.lte] = range.max
                                     }
                                 }
                             }

@@ -1,4 +1,6 @@
 import BSON
+import BSONDecoding
+import BSONEncoding
 import MongoDB
 import MongoQL
 import Symbols
@@ -22,25 +24,18 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Sitemaps:Mongo.CollectionModel
 {
+    public
+    typealias Element = Realm.Sitemap
+
     @inlinable public static
     var name:Mongo.Collection { "Sitemaps" }
 
-    public
-    typealias ElementID = Int32
-
-    public static
+    @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 }
 
 extension UnidocDatabase.Sitemaps
 {
-    // public
-    // func find(by package:Symbol.Package,
-    //     with session:Mongo.Session) async throws -> Realm.Sitemap?
-    // {
-    //     try await self.find(Realm.Sitemap.self, by: package, with: session)
-    // }
-
     public
     func list(with session:Mongo.Session,
         _ yield:([Realm.SitemapIndexEntry]) throws -> Void) async throws
@@ -60,7 +55,7 @@ extension UnidocDatabase.Sitemaps
         with session:Mongo.Session) async throws -> Realm.Sitemap.Delta?
     {
         var new:Realm.Sitemap = sitemap
-        let old:Realm.Sitemap? = try await self.find(by: new.id, with: session)
+        let old:Realm.Sitemap? = try await self.find(id: new.id, with: session)
 
         let update:Realm.Sitemap.Delta?
         if  let old:Realm.Sitemap

@@ -24,7 +24,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Snapshots:Mongo.CollectionModel
 {
     public
-    typealias ElementID = Unidoc.Edition
+    typealias Element = Realm.Snapshot
 
     @inlinable public static
     var name:Mongo.Collection { "Snapshots" }
@@ -44,12 +44,6 @@ extension UnidocDatabase.Snapshots:Mongo.CollectionModel
 }
 extension UnidocDatabase.Snapshots
 {
-    public
-    func find(id:Unidoc.Edition, with session:Mongo.Session) async throws -> Realm.Snapshot?
-    {
-        try await self.find(by: id, with: session)
-    }
-
     public
     func upsert(snapshot:Realm.Snapshot,
         with session:Mongo.Session) async throws -> UnidocDatabase.Uploaded

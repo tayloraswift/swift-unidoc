@@ -1,3 +1,6 @@
+import BSON
+import BSONDecoding
+import BSONEncoding
 import MongoQL
 import Unidoc
 import UnidocRecords
@@ -20,11 +23,12 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.Metadata:Mongo.CollectionModel
 {
+    public
+    typealias Element = SearchIndex<Int32>
+
     @inlinable public static
     var name:Mongo.Collection { "Metadata" }
 
-    typealias ElementID = Int32
-
-    static
+    @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 }

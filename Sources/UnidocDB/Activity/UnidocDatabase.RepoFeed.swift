@@ -1,4 +1,6 @@
 import BSON
+import BSONDecoding
+import BSONEncoding
 import MongoDB
 
 extension UnidocDatabase
@@ -18,15 +20,17 @@ extension UnidocDatabase
 }
 extension UnidocDatabase.RepoFeed:Mongo.CollectionModel
 {
+    public
+    typealias Element = Activity
+
     @inlinable public static
     var name:Mongo.Collection { "RepoFeed" }
 
-    typealias ElementID = BSON.Millisecond
-
-    static
+    @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 
     /// 1 MB ought to be enough for anybody.
+    @inlinable public
     var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
 extension UnidocDatabase.RepoFeed
