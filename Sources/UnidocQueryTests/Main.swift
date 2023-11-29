@@ -22,6 +22,7 @@ enum Main:TestMain, TestBattery
 
         await mongodb.run(tests,
             PackageQueries.init(),
+            VolumeQueries.init(),
             SymbolQueries.init())
     }
 }
