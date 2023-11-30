@@ -66,7 +66,7 @@ extension HTTP.Server
                         HTTPPart<HTTPRequestHead, ByteBuffer>,
                         HTTPPart<HTTPResponseHead, ByteBuffer>>,
                     (
-                        NIOAsyncChannel<HTTP2Frame, HTTP2Frame>,
+                        any Channel,
                         NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
                             HTTP2Frame.FramePayload,
                             HTTP2Frame.FramePayload>>
@@ -100,12 +100,7 @@ extension HTTP.Server
                 {
                     (connection:any Channel) in
 
-                    connection.eventLoop.makeCompletedFuture
-                    {
-                        try NIOAsyncChannel<HTTP2Frame, HTTP2Frame>.init(
-                            wrappingChannelSynchronously: connection,
-                            configuration: .init())
-                    }
+                    connection.eventLoop.makeCompletedFuture { connection }
                 }
                     http2StreamInitializer:
                 {
@@ -156,26 +151,26 @@ extension HTTP.Server
 
                         try await connection.channel.close()
 
-                    case .http2((let connection, let streams)):
+                    case .http2((let channel, let streams)):
                         guard
-                        let address:SocketAddress = connection.channel.remoteAddress,
+                        let address:SocketAddress = channel.remoteAddress,
                         let address:IP.V6 = .init(address)
                         else
                         {
                             // What to do here?
-                            try await connection.channel.close()
+                            try await channel.close()
                             return
                         }
 
                         let service:IP.Service? = policylist[address]
 
-                        await self.handle(connection: connection,
+                        await self.handle(connection: channel,
                             streams: streams,
                             address: address,
                             service: service,
                             as: Authority.self)
 
-                        try await connection.channel.close()
+                        try await channel.close()
                     }
                 }
                 //  Normal and expected.
@@ -333,7 +328,7 @@ extension HTTP.Server
 {
     private
     func handle<Authority>(
-        connection:NIOAsyncChannel<HTTP2Frame, HTTP2Frame>,
+        connection:any Channel,
         streams:NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
             HTTP2Frame.FramePayload,
             HTTP2Frame.FramePayload>>,
@@ -355,7 +350,7 @@ extension HTTP.Server
                 try? await cop.start(beat: .milliseconds(1000))
                 //  We must close the connection, otherwise we will continue to wait for
                 //  the next inbound stream.
-                connection.channel.close(promise: nil)
+                connection.close(promise: nil)
                 return nil
             }
 
