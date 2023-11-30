@@ -55,12 +55,18 @@ h3[id]:target::before, h3[name]:target::before,
 h4[id]:target::before, h4[name]:target::before,
 h5[id]:target::before, h5[name]:target::before,
 h6[id]:target::before, h6[name]:target::before,
-dt[id]:target::before, dt[name]:target::before
+dt[id]:target::before, dt[name]:target::before,
+li[id]:target::before
 {
     content: '';
     display: block;
     height: 100px;
     margin: -100px 0 0;
+}
+
+li[id].decl:target code a
+{
+    background-color: rgba(255, 238, 0, 0.25);
 }
 
 h1
