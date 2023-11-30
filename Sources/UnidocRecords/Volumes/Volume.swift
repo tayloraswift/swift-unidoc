@@ -68,6 +68,7 @@ extension Volume
                 elements.append(vertex.shoot)
 
             case .decl(let vertex):
+                //  TODO: this still doesn’t filter out all C declarations...
                 guard case .s = vertex.symbol.language
                 else
                 {
