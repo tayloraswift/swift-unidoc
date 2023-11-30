@@ -19,22 +19,25 @@ extension TimeCop
     private static
     var deadbit:UInt { UInt.init(bitPattern: Int.min) }
 
-    var active:Bool
-    {
-        Self.deadbit & self.epoch.load(ordering: .relaxed) == 0
-    }
-
     func reset()
     {
         self.epoch.wrappingIncrement(by: 2, ordering: .relaxed)
     }
 
-    func pause<Success>(while body:() async throws -> Success) async rethrows -> Success
+    func pause<Success>(while body:() async throws -> Success) async throws -> Success
     {
-        self.epoch.wrappingIncrement(by: 1, ordering: .relaxed)
-        let value:Success = try await body()
-        self.epoch.wrappingIncrement(by: 1, ordering: .relaxed)
-        return value
+        let epoch:UInt = self.epoch.wrappingIncrementThenLoad(ordering: .relaxed)
+        if  epoch & Self.deadbit == 0
+        {
+            let value:Success = try await body()
+            self.epoch.wrappingIncrement(ordering: .relaxed)
+            return value
+        }
+        else
+        {
+            self.epoch.wrappingDecrement(ordering: .relaxed)
+            throw CancellationError.init()
+        }
     }
 
     func start(beat interval:Duration = .milliseconds(1000)) async throws
