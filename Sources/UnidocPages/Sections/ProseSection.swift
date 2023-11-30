@@ -12,7 +12,9 @@ struct ProseSection
     let bytecode:MarkdownBytecode
     let outlines:[Volume.Outline]
 
-    init(_ context:any VersionedPageContext, bytecode:MarkdownBytecode, outlines:[Volume.Outline])
+    init(_ context:any VersionedPageContext,
+        bytecode:MarkdownBytecode,
+        outlines:[Volume.Outline])
     {
         self.context = context
 

@@ -33,7 +33,7 @@ extension Site.Docs:VolumeRoot
             let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
-                groups: consume groups,
+                organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
 
@@ -48,7 +48,7 @@ extension Site.Docs:VolumeRoot
             let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
-                groups: consume groups,
+                organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
             let page:Module = .init(context.page,
@@ -62,10 +62,8 @@ extension Site.Docs:VolumeRoot
             let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
-                requirements: vertex.requirements,
-                superforms: vertex.superforms,
-                generics: vertex.signature.generics.parameters,
-                groups: consume groups,
+                organizing: consume groups,
+                vertex: vertex,
                 bias: vertex.culture,
                 mode: .decl(vertex.phylum, vertex.kinks))
             let page:Decl = .init(context.page,
@@ -81,7 +79,7 @@ extension Site.Docs:VolumeRoot
 
         case .foreign(let vertex):
             let groups:GroupSections = .init(context.page,
-                groups: consume groups,
+                organizing: consume groups,
                 bias: nil,
                 mode: .decl(vertex.phylum, vertex.kinks))
             let page:Foreign = .init(context.page,
@@ -92,7 +90,7 @@ extension Site.Docs:VolumeRoot
 
         case .global(let vertex):
             let groups:GroupSections = .init(context.page,
-                groups: consume groups,
+                organizing: consume groups,
                 bias: vertex.id,
                 mode: .meta)
             let page:Package = .init(context.page,

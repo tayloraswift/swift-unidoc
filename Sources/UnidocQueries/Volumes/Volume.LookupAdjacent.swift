@@ -24,17 +24,27 @@ extension Volume.LookupAdjacent:Volume.LookupContext
 
         pipeline[.lookup] = .init
         {
-            let global:Mongo.Variable<Unidoc.Scalar> = "global"
-            let local:Mongo.Variable<Unidoc.Scalar> = "local"
-            let topic:Mongo.Variable<Unidoc.Scalar> = "topic"
+            let `extension`:Group = .init(id: "extension")
+            let topic:Group = .init(id: "topic")
 
-            let min:Mongo.Variable<Unidoc.Scalar> = "min"
-            let max:Mongo.Variable<Unidoc.Scalar> = "max"
+            let local:LockedExtensions = .init(scope: "local", min: "min", max: "max")
+            let realm:LatestExtensions = .init(scope: "realm")
 
             $0[.from] = UnidocDatabase.Groups.name
             $0[.let] = .init
             {
-                $0[let: global] = .expr
+                $0[let: `extension`.id] = .expr
+                {
+                    //  `BSON.max` is a safe choice for a group `_id` that will never
+                    //  match anything.
+                    $0[.coalesce] = (vertex / Volume.Vertex[.extension], BSON.Max.init())
+                }
+                $0[let: topic.id] = .expr
+                {
+                    $0[.coalesce] = (vertex / Volume.Vertex[.group], BSON.Max.init())
+                }
+
+                $0[let: realm.scope] = .expr
                 {
                     $0[.cond] =
                     (
@@ -46,7 +56,7 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                         else: BSON.Max.init()
                     )
                 }
-                $0[let: local] = .expr
+                $0[let: local.scope] = .expr
                 {
                     $0[.coalesce] =
                     (
@@ -55,27 +65,26 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                         BSON.Max.init()
                     )
                 }
-                $0[let: topic] = .expr
-                {
-                    //  `BSON.max` is a safe choice for a group `_id` that will never
-                    //  match anything.
-                    $0[.coalesce] =
-                    (
-                        vertex / Volume.Vertex[.group],
-                        BSON.Max.init()
-                    )
-                }
-                $0[let: min] = volume / Volume.Meta[.planes_autogroup]
-                $0[let: max] = volume / Volume.Meta[.planes_max]
+                //  We probably don’t need this, the `Groups` collection doesn’t overlap
+                //  with the `Vertices` collection.
+                $0[let: local.min] = volume / Volume.Meta[.planes_autogroup]
+                $0[let: local.max] = volume / Volume.Meta[.planes_max]
             }
             $0[.pipeline] = .init
             {
-                //  Matches groups that have the same `_id` as `topic`, or that have
-                //  the same `scope` as `local` and are in the range `min` to `max`, or
-                //  that have the same `scope` as `global` and are marked as `latest`.
-                $0[.match] = .groups(id: topic,
-                    or: (scope: local, min: min, max: max),
-                    or: (scope: global, latest: true))
+                $0[.match] = .init
+                {
+                    $0[.expr] = .expr
+                    {
+                        $0[.or] = .init
+                        {
+                            $0 += `extension`
+                            $0 += topic
+                            $0 += local
+                            $0 += realm
+                        }
+                    }
+                }
             }
             $0[.as] = output
         }

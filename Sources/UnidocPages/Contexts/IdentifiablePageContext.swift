@@ -66,6 +66,13 @@ extension IdentifiablePageContext<Never?>
             repo: repo)
     }
 }
+extension IdentifiablePageContext<Unidoc.Scalar>
+{
+    func constraints(_ constraints:[GenericConstraint<Unidoc.Scalar?>]) -> ConstraintsList?
+    {
+        .init(self, constraints: constraints)
+    }
+}
 extension IdentifiablePageContext where ID:VersionedPageIdentifier
 {
     func prose(overview passage:Volume.Passage) -> ProseSection
