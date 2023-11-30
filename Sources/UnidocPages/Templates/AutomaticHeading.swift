@@ -12,8 +12,11 @@ enum AutomaticHeading
 
     case miscellaneous
     case otherModules
+    case otherMembers
 
     case seeAlso
+
+    case genericContext
 
     case allRequirements
     case restatesRequirements
@@ -41,8 +44,11 @@ extension AutomaticHeading:Identifiable
 
         case .miscellaneous:            "ss:misc"
         case .otherModules:             "ss:other-modules"
+        case .otherMembers:             "ss:other-members"
 
         case .seeAlso:                  "ss:see-also"
+
+        case .genericContext:           "ss:generic-context"
 
         case .allRequirements:          "ss:requirements"
         case .restatesRequirements:     "ss:requirements-restated"
@@ -71,8 +77,11 @@ extension AutomaticHeading:CustomStringConvertible
 
         case .miscellaneous:            "Miscellaneous"
         case .otherModules:             "Other Modules"
+        case .otherMembers:             "Other Members in Extension"
 
         case .seeAlso:                  "See Also"
+
+        case .genericContext:           "Generic Context"
 
         case .allRequirements:          "Requirements"
         case .restatesRequirements:     "Restates"

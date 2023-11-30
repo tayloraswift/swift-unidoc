@@ -23,9 +23,16 @@ struct DynamicLinker:~Copyable
     private
     var extensions:Extensions
 
-    /// Maps vertices to groups.
+    /// A table mapping nested declarations to their enclosing extensions.
+    ///
+    /// This is immutable even though ``extensions`` is mutable, because we never introduce
+    /// new nested declarations after building the initial ``extensions`` structure.
     private
-    var memberships:[Int32: Unidoc.Scalar]
+    let extensionContainingNested:[Int32: Unidoc.Scalar]
+    /// A table maping vertices to topics or autogroups.
+    private
+    var groupContainingMember:[Int32: Unidoc.Scalar]
+
     private
     var next:
     (
@@ -58,7 +65,8 @@ struct DynamicLinker:~Copyable
         self.diagnostics = diagnostics
         self.extensions = extensions
 
-        self.memberships = [:]
+        self.extensionContainingNested = extensions.byNested()
+        self.groupContainingMember = [:]
 
         self.next.autogroup = .init(zone: global.current.id)
         self.next.topic = .init(zone: global.current.id)
@@ -280,20 +288,7 @@ extension DynamicLinker
 
         for c:Int in self.current.cultures.indices
         {
-            self.memberships[c * .module] = cultures.id
-        }
-    }
-
-    private mutating
-    func populate(scope:Unidoc.Scalar, with members:[Volume.Link])
-    {
-        for case .scalar(let member) in members
-        {
-            //  This may replace a synthesized topic.
-            if  let local:Int32 = member - self.current.id
-            {
-                self.memberships[local] = scope
-            }
+            self.groupContainingMember[c * .module] = cultures.id
         }
     }
 
@@ -315,8 +310,11 @@ extension DynamicLinker
                     culture: namespace.culture,
                     module: self.current.namespaces[decls.index])
 
-                for (d, node):(Int32, SymbolGraph.DeclNode) in zip(decls.range,
-                    self.current.decls.nodes[decls.range])
+                for (d, (node, conformances)):
+                    (Int32, (SymbolGraph.DeclNode, ProtocolConformances<Int>)) in zip(
+                    decls.range,
+                    zip(self.current.decls.nodes[decls.range],
+                        self.conformances[decls.range]))
                 {
                     //  Should always succeed!
                     guard
@@ -326,6 +324,35 @@ extension DynamicLinker
                     {
                         continue
                     }
+
+                    for f:Int32 in decl.features
+                    {
+                        //  The feature might have been declared in a different package!
+                        guard
+                        let f:Unidoc.Scalar = self.current.scalars.decls[f],
+                        let p:Unidoc.Scalar = self.global[f.package]?.scope(of: f)
+                        else
+                        {
+                            continue
+                        }
+
+                        //  Now that we know the address of the feature’s original protocol,
+                        //  we can look up the constraints for the conformance(s) that
+                        //  conceived it.
+                        //
+                        //  This drops the feature if it belongs to a protocol whose
+                        //  conformance was not declared by any culture of the current
+                        //  package.
+                        for conformance:ProtocolConformance<Int> in conformances[to: p]
+                        {
+                            let signature:ExtensionSignature = .init(
+                                conditions: conformance.conditions,
+                                culture: conformance.culture,
+                                extends: owner)
+                            self.extensions[signature].features.append(f)
+                        }
+                    }
+
                     //  Optimization
                     if  decl.topics.isEmpty
                     {
@@ -431,8 +458,16 @@ extension DynamicLinker
                 $0.link(topic: topic)
             }
 
-            self.populate(scope: record.id, with: record.members)
             self.groups.append(.topic(record))
+
+            for case .scalar(let member) in record.members
+            {
+                //  This may replace a synthesized topic.
+                if  let local:Int32 = member - self.current.id
+                {
+                    self.groupContainingMember[local] = record.id
+                }
+            }
         }
     }
 }
@@ -444,7 +479,7 @@ extension DynamicLinker
     {
         var vertex:Volume.Vertex.Culture = .init(id: namespace.culture,
             module: culture.module,
-            group: self.memberships.removeValue(forKey: namespace.culture.citizen))
+            group: self.groupContainingMember[namespace.culture.citizen])
 
         if  let article:SymbolGraph.Article = culture.article
         {
@@ -477,7 +512,7 @@ extension DynamicLinker
                 culture: namespace.culture,
                 file: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,
-                group: self.memberships.removeValue(forKey: a))
+                group: self.groupContainingMember[a])
 
             (vertex.overview, vertex.details) = self.diagnostics.resolving(
                 namespace: namespace.module,
@@ -498,15 +533,15 @@ extension DynamicLinker
     {
         var miscellaneous:[Unidoc.Scalar] = []
 
-        for (d, ((symbol, node), conformances)):
-            (Int32, ((Symbol.Decl, SymbolGraph.DeclNode), ProtocolConformances<Int>))
-            in zip(range, zip(zip(
-                    self.current.decls.symbols[range],
-                    self.current.decls.nodes[range]),
-                self.conformances[range]))
+        for (d, (symbol, node)):
+            (Int32, (Symbol.Decl, SymbolGraph.DeclNode)) in zip(range, zip(
+            self.current.decls.symbols[range],
+            self.current.decls.nodes[range]))
         {
+            /// Is this declaration contained in an extension?
+            let `extension`:Unidoc.Scalar? = self.extensionContainingNested[d]
             /// Is this declaration a member of a topic?
-            let group:Unidoc.Scalar? = self.memberships.removeValue(forKey: d)
+            let group:Unidoc.Scalar? = self.groupContainingMember[d]
             /// Is this declaration a top-level member of its module?
             /// (Being a top-level declaration is the only way this can be nil.)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
@@ -525,38 +560,10 @@ extension DynamicLinker
                 case nil = scope,
                 // needed to avoid vacuuming up default implementations
                 decl.path.count == 1,
-                // only display swift declarations
+                // only display swift declarations, or sufficiently typelike c declarations
                 symbol.language == .s || decl.phylum.isTypelike
             {
                 miscellaneous.append(d)
-            }
-
-            for f:Int32 in decl.features
-            {
-                //  The feature might have been declared in a different package!
-                guard
-                let f:Unidoc.Scalar = self.current.scalars.decls[f],
-                let p:Unidoc.Scalar = self.global[f.package]?.scope(of: f)
-                else
-                {
-                    continue
-                }
-
-                //  Now that we know the address of the feature’s original protocol,
-                //  we can look up the constraints for the conformance(s) that
-                //  conceived it.
-                //
-                //  This drops the feature if it belongs to a protocol whose
-                //  conformance was not declared by any culture of the current
-                //  package.
-                for conformance:ProtocolConformance<Int> in conformances[to: p]
-                {
-                    let signature:ExtensionSignature = .init(
-                        conditions: conformance.conditions,
-                        culture: conformance.culture,
-                        extends: d)
-                    self.extensions[signature].features.append(f)
-                }
             }
 
             let requirements:[Unidoc.Scalar] = decl.requirements.compactMap
@@ -592,6 +599,7 @@ extension DynamicLinker
                 scope: scope.map { self.global.expand($0) } ?? [],
                 file: decl.location.map { self.current.id + $0.file },
                 position: decl.location?.position,
+                extension: `extension`,
                 group: group)
 
             if  let article:SymbolGraph.Article = decl.article
