@@ -13,7 +13,9 @@ struct CodeSection
     private
     let context:any VersionedPageContext
 
-    init(_ context:any VersionedPageContext, bytecode:MarkdownBytecode, scalars:[Unidoc.Scalar?])
+    init(_ context:any VersionedPageContext,
+        bytecode:MarkdownBytecode,
+        scalars:[Unidoc.Scalar?])
     {
         self.bytecode = bytecode
         self.scalars = scalars

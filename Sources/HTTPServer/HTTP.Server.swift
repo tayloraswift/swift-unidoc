@@ -400,10 +400,14 @@ extension HTTP.Server
                             return
                         }
 
-                        try await writer.send(message)
                         writer.finish()
+                        try await writer.send(message)
                     }
                 }
+            }
+            catch let error as NIOAsyncWriterError
+            {
+                Log[.error] = "(HTTP/2) writer error: \(error)"
             }
             catch NIOSSLError.uncleanShutdown
             {

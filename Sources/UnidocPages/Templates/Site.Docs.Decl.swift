@@ -192,6 +192,18 @@ extension Site.Docs.Decl:VersionedPage
             }
         }
 
+        if  let containing:Volume.Group.Extension = self.groups.containing,
+            let constraints:ConstraintsList = self.context.constraints(containing.conditions)
+        {
+            main[.section, { $0.class = "generic-context" }]
+            {
+                let heading:AutomaticHeading = .genericContext
+                $0[.h2] { $0.id = heading.id } = heading
+
+                $0[.code] { $0.class = "constraints" } = constraints
+            }
+        }
+
         main[.section] { $0.class = "details" } =
             (self.vertex.details?.markdown).map(self.context.prose(_:))
 

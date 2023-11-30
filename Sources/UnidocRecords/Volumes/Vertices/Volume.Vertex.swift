@@ -196,6 +196,7 @@ extension Volume.Vertex
         case culture = "c"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
+
         /// Can appear in ``Article``, ``Culture``, or ``Decl``.
         /// The field contains a scalar. In ``Culture``, it points to the readme
         /// article for the module.
@@ -215,8 +216,10 @@ extension Volume.Vertex
         /// each of which may contain a scalar.
         case details = "d"
 
+        /// Only appears in ``Decl``. The field contains a *group* scalar.
+        case `extension` = "y"
         /// Can appear in any master record except a ``File``.
-        /// The field contains a *group* scalar. (Not a master scalar!)
+        /// The field contains a *group* scalar. (Not a vertex scalar!)
         case group = "t"
 
         /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
@@ -286,6 +289,8 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.position] = self.position
             bson[.overview] = self.overview
             bson[.details] = self.details
+
+            bson[.extension] = self.extension
             bson[.group] = self.group
 
         case .culture(let self):
@@ -368,6 +373,7 @@ extension Volume.Vertex:BSONDocumentDecodable
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
+                extension: try bson[.extension]?.decode(),
                 group: try bson[.group]?.decode()))
 
         case .article?:

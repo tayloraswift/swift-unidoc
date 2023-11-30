@@ -70,6 +70,19 @@ extension Volume.Group
 }
 extension Volume.Group.Extension
 {
+    /// Returns true if and only if this extension contains no conformances, features, nested
+    /// declarations, subforms, or written documentation. The extension constraints are ignored.
+    @inlinable public
+    var isEmpty:Bool
+    {
+        self.conformances.isEmpty &&
+        self.features.isEmpty &&
+        self.nested.isEmpty &&
+        self.subforms.isEmpty &&
+        self.overview == nil &&
+        self.details == nil
+    }
+
     public consuming
     func subtracting(_ members:Set<Unidoc.Scalar>) -> Self
     {

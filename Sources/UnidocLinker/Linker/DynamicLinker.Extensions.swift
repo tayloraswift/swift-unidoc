@@ -217,3 +217,16 @@ extension DynamicLinker.Extensions
         return conformances
     }
 }
+extension DynamicLinker.Extensions
+{
+    func byNested() -> [Int32: Unidoc.Scalar]
+    {
+        self.table.values.reduce(into: [:])
+        {
+            for nested:Unidoc.Scalar in $1.nested
+            {
+                $0[nested.citizen] = $1.id
+            }
+        }
+    }
+}

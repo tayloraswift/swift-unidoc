@@ -32,8 +32,7 @@ extension Volume.Vertex
         let culture:Unidoc.Scalar
         public
         let scope:[Unidoc.Scalar]
-        public
-        var group:Unidoc.Scalar?
+
         public
         var file:Unidoc.Scalar?
         //  TODO: consider combining this into flags.
@@ -43,6 +42,11 @@ extension Volume.Vertex
         var overview:Volume.Passage?
         public
         var details:Volume.Passage?
+
+        public
+        var `extension`:Unidoc.Scalar?
+        public
+        var group:Unidoc.Scalar?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -59,6 +63,7 @@ extension Volume.Vertex
             position:SourcePosition? = nil,
             overview:Volume.Passage? = nil,
             details:Volume.Passage? = nil,
+            extension:Unidoc.Scalar? = nil,
             group:Unidoc.Scalar? = nil)
         {
             self.id = id
@@ -73,12 +78,13 @@ extension Volume.Vertex
             self.namespace = namespace
             self.culture = culture
             self.scope = scope
+            self.extension = `extension`
+            self.group = group
             self.file = file
 
             self.position = position
             self.overview = overview
             self.details = details
-            self.group = group
         }
     }
 }

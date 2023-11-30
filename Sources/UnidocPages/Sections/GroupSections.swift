@@ -14,6 +14,8 @@ struct GroupSections
     private
     let superforms:[Unidoc.Scalar]?
 
+    private(set)
+    var containing:Volume.Group.Extension?
     private
     var extensions:[Volume.Group.Extension]
     private
@@ -30,6 +32,7 @@ struct GroupSections
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
+        containing:Volume.Group.Extension? = nil,
         extensions:[Volume.Group.Extension] = [],
         topics:[Volume.Group.Topic] = [],
         other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
@@ -40,6 +43,8 @@ struct GroupSections
 
         self.requirements = requirements
         self.superforms = superforms
+
+        self.containing = containing
         self.extensions = extensions
         self.topics = topics
         self.other = other
@@ -50,30 +55,52 @@ struct GroupSections
 extension GroupSections
 {
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-        requirements:[Unidoc.Scalar] = [],
-        superforms:[Unidoc.Scalar] = [],
-        generics:[GenericParameter] = [],
-        groups:consuming [Volume.Group],
+        organizing groups:/*consuming*/ [Volume.Group],
+        vertex:borrowing Volume.Vertex.Decl? = nil,
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
-        let generics:Generics = .init(generics)
+        let container:Unidoc.Scalar?
+        let generics:Generics
+        if  let vertex:Volume.Vertex.Decl = copy vertex
+        {
+            self.init(consume context,
+                requirements: vertex.requirements.isEmpty ? nil : vertex.requirements,
+                superforms: vertex.superforms.isEmpty ? nil : vertex.superforms,
+                bias: bias,
+                mode: mode)
 
-        self.init(context,
-            requirements: requirements.isEmpty ? nil : requirements,
-            superforms: superforms.isEmpty ? nil : superforms,
-            bias: bias,
-            mode: mode)
+            container = vertex.extension
+            generics = .init(vertex.signature.generics.parameters)
+        }
+        else
+        {
+            self.init(consume context,
+                requirements: nil,
+                superforms: nil,
+                bias: bias,
+                mode: mode)
+
+            container = nil
+            generics = .init([])
+        }
 
         var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
-        var curated:Set<Unidoc.Scalar> = []
+        var curated:Set<Unidoc.Scalar> = [self.context.id]
 
-        for group:Volume.Group in copy groups
+        for group:Volume.Group in groups
         {
             switch group
             {
             case .extension(let group):
-                let partisanship:Partisanship = context.volumes.secondary[group.id.zone].map
+                if  case group.id? = container
+                {
+                    self.containing = group
+                    continue
+                }
+
+                let partisanship:Partisanship = self.context.volumes.secondary[group.id.zone]
+                    .map
                 {
                     .third($0.symbol.package)
                 } ?? .first
@@ -141,6 +168,7 @@ extension GroupSections
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
 
+        self.containing = self.containing.map { $0.subtracting(curated) }
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
         self.topics.sort { $0.id < $1.id }
@@ -335,7 +363,24 @@ extension GroupSections:HyperTextOutputStreamable
             }
         }
 
-        for group:Volume.Group.Extension in self.extensions
+        if  let sisters:Volume.Group.Extension = self.containing, !sisters.nested.isEmpty
+        {
+            html[.section, { $0.class = "group sisters" }]
+            {
+                let heading:AutomaticHeading = .otherMembers
+
+                $0[.h2] { $0.id = heading.id } = heading
+                $0[.ul]
+                {
+                    for sister:Unidoc.Scalar in sisters.nested
+                    {
+                        $0 ?= self.context.card(sister)
+                    }
+                }
+            }
+        }
+
+        for group:Volume.Group.Extension in self.extensions where !group.isEmpty
         {
             html[.section, { $0.class = "group extension" }]
             {
