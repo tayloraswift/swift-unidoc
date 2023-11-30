@@ -57,18 +57,28 @@ extension Volume
     func sitemap() -> Realm.Sitemap
     {
         var elements:Realm.Sitemap.Elements = []
-        //  Reverse, because C modules tend to appear in the beginning of the list, and
-        //  we want to prioritize Swift modules.
-        for vertex:Vertex in self.vertices.reversed()
+        for vertex:Vertex in self.vertices
         {
             switch vertex
             {
-            case .culture(let vertex):  elements.append(vertex.shoot)
-            case .article(let vertex):  elements.append(vertex.shoot)
-            case .decl(let vertex):     elements.append(vertex.shoot)
-            case .file:                 continue
-            case .foreign:              continue
-            case .global:               continue
+            case .culture(let vertex):
+                elements.append(vertex.shoot)
+
+            case .article(let vertex):
+                elements.append(vertex.shoot)
+
+            case .decl(let vertex):
+                guard case .s = vertex.symbol.language
+                else
+                {
+                    //  Skip C and C++ declarations.
+                    continue
+                }
+
+                elements.append(vertex.shoot)
+
+            case _:
+                continue
             }
         }
 
