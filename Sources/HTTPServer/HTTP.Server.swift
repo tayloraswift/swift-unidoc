@@ -230,7 +230,14 @@ extension HTTP.Server
             {
                 try await connection.executeThenClose
                 {
-                    for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in $0
+                    (
+                        remote:NIOAsyncChannelInboundStream<
+                            HTTPPart<HTTPRequestHead, ByteBuffer>>,
+                        writer:NIOAsyncChannelOutboundWriter<
+                            HTTPPart<HTTPResponseHead, ByteBuffer>>
+                    )   in
+
+                    for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in remote
                     {
                         guard
                         case .head(let part) = part
@@ -265,18 +272,17 @@ extension HTTP.Server
                         //  If `cop.active` is false, then the other task has already begun
                         //  closing the connection.
                         guard
-                        case let message?? = await completed.next(), cop.active
+                        case let message?? = await completed.next()
                         else
                         {
                             return
                         }
 
-                        try await $1.send(message)
+                        try await cop.pause { try await writer.send(message) }
 
                         guard part.isKeepAlive
                         else
                         {
-                            $1.finish()
                             return
                         }
                     }
@@ -394,20 +400,15 @@ extension HTTP.Server
                         }
 
                         guard
-                        case let message?? = await completed.next(), cop.active
+                        case let message?? = await completed.next()
                         else
                         {
                             return
                         }
 
-                        writer.finish()
-                        try await writer.send(message)
+                        try await cop.pause { try await writer.send(message) }
                     }
                 }
-            }
-            catch let error as NIOAsyncWriterError
-            {
-                Log[.error] = "(HTTP/2) writer error: \(error)"
             }
             catch NIOSSLError.uncleanShutdown
             {
