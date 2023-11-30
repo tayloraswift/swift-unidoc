@@ -124,7 +124,7 @@ actor Actor
 }
 
 @attached(extension) public
-macro Macro<T>(_:T.Type) = ModuleName.MacroName
+macro Macro<T>(_:T.Type) = #externalMacro(module: "ModuleName", type: "MacroName")
 
 extension Int:Protocol
 {

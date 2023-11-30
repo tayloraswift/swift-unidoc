@@ -19,3 +19,5 @@ node_modules/
 *.profraw
 
 Package.swift.json
+
+Snippets/_Crashes/*
