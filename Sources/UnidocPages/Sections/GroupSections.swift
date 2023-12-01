@@ -226,7 +226,17 @@ extension GroupSections:HyperTextOutputStreamable
 
                     $0[.ul]
                     {
-                        self.context.list(members: group.members, to: &$0)
+                        for member:Volume.Link in group.members
+                        {
+                            switch member
+                            {
+                            case .scalar(let scalar):
+                                $0 ?= self.context.card(scalar)
+
+                            case .text(let text):
+                                $0[.li] { $0[.span] { $0[.code] = text } }
+                            }
+                        }
                     }
                 }
 
@@ -242,46 +252,17 @@ extension GroupSections:HyperTextOutputStreamable
 
             html[.section, { $0.class = "group topic" }]
             {
-                let heading:AutomaticHeading = .seeAlso
-
-                $0[.h2] { $0.id = heading.id } = heading
-
-                guard group.members.count > 12
-                else
+                AutomaticHeading.seeAlso.window(&$0,
+                    listing: group.members,
+                    limit: 12)
                 {
-                    $0[.ul]
+                    switch $1
                     {
-                        self.context.list(members: group.members, to: &$0)
-                    }
+                    case .scalar(let scalar):
+                        $0 ?= self.context.card(scalar)
 
-                    return
-                }
-
-                $0[.details]
-                {
-                    $0[.summary]
-                    {
-                        $0[.p] { $0.class = "view" } = "View members"
-
-                        $0[.p] { $0.class = "hide" } = "Hide members"
-
-                        $0[.p, { $0.class = "reason" }]
-                        {
-                            $0 += """
-                            This section is hidden by default because it contains too many \
-
-                            """
-
-                            $0[.span] { $0.class = "count" } = "(\(group.members.count))"
-
-                            $0 += """
-                                members.
-                            """
-                        }
-                    }
-                    $0[.ul]
-                    {
-                        self.context.list(members: group.members, to: &$0)
+                    case .text(let text):
+                        $0[.li] { $0[.span] { $0[.code] = text } }
                     }
                 }
             }
@@ -367,15 +348,12 @@ extension GroupSections:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group sisters" }]
             {
-                let heading:AutomaticHeading = .otherMembers
-
-                $0[.h2] { $0.id = heading.id } = heading
-                $0[.ul]
+                AutomaticHeading.otherMembers.window(&$0,
+                    listing: sisters.nested,
+                    limit: 12,
+                    open: self.extensions.allSatisfy(\.isEmpty))
                 {
-                    for sister:Unidoc.Scalar in sisters.nested
-                    {
-                        $0 ?= self.context.card(sister)
-                    }
+                    $0 ?= self.context.card($1)
                 }
             }
         }

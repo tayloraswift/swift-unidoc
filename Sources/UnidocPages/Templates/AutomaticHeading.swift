@@ -103,3 +103,57 @@ extension AutomaticHeading:HyperTextOutputStreamable
         hx[.a] { $0.href = "#\(self.id)" } = "\(self)"
     }
 }
+extension AutomaticHeading
+{
+    func window<T>(_ section:inout HTML.ContentEncoder,
+        listing items:[T],
+        limit:Int,
+        open:Bool = false,
+        with yield:(inout HTML.ContentEncoder, T) -> ())
+    {
+        section[.h2] { $0.id = self.id } = self
+
+        guard limit < items.count
+        else
+        {
+            return section[.ul]
+            {
+                for item:T in items
+                {
+                    yield(&$0, item)
+                }
+            }
+        }
+
+        section[.details, { $0.open = open }]
+        {
+            $0[.summary]
+            {
+                $0[.p] { $0.class = "view" } = "View members"
+
+                $0[.p] { $0.class = "hide" } = "Hide members"
+
+                $0[.p, { $0.class = "reason" }]
+                {
+                    $0 += """
+                    This section is hidden by default because it contains too many \
+
+                    """
+
+                    $0[.span] { $0.class = "count" } = "(\(items.count))"
+
+                    $0 += """
+                        members.
+                    """
+                }
+            }
+            $0[.ul]
+            {
+                for item:T in items
+                {
+                    yield(&$0, item)
+                }
+            }
+        }
+    }
+}
