@@ -103,23 +103,6 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext where ID:VersionedPageIdentifier
 {
-    func list(members:[Volume.Link], to list:inout HTML.ContentEncoder)
-    {
-        for member:Volume.Link in members
-        {
-            switch member
-            {
-            case .scalar(let scalar):
-                list ?= self.card(scalar)
-
-            case .text(let text):
-                list[.li] { $0[.span] { $0[.code] = text } }
-            }
-        }
-    }
-}
-extension IdentifiablePageContext where ID:VersionedPageIdentifier
-{
     /// Generates a subdomain header for a module using its shoot.
     func subdomain(_ module:Volume.Shoot) -> Volume.Meta.Subdomain?
     {

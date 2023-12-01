@@ -70,7 +70,7 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
                 },
                 against: self.database)
         }
-        catch is Mongo.NamespaceError
+        catch let error as Mongo.ServerError where error.code == 26
         {
             try await session.run(
                 command: Mongo.Create<Mongo.Collection>.init(Self.name)
