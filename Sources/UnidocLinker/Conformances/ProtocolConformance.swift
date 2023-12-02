@@ -1,9 +1,10 @@
 import Signatures
 import Unidoc
 
-/// Conditions under which a type’s conformance to a protocol exists.
+/// Describes a type’s conformance to a protocol.
 struct ProtocolConformance<Culture>
 {
+    /// The conditions under which the conformance exists.
     let conditions:[GenericConstraint<Unidoc.Scalar?>]
     /// The module that declared the conformance.
     let culture:Culture
