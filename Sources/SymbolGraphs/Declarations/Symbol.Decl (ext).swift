@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Symbols
 
 extension Symbol.Decl:BSONEncodable
@@ -9,7 +8,7 @@ extension Symbol.Decl:BSONEncodable
     /// to exempt it from string collation. This is important because mangled symbol identifiers
     /// are always case-sensitive.
     @inlinable public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         var suffix:Substring = self.suffix
             suffix.withUTF8

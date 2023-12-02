@@ -1,11 +1,10 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import MarkdownABI
 
 extension MarkdownBytecode:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         let view:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, slice: self.bytes)
         view.encode(to: &field)

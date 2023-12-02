@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 extension Volume
 {
@@ -33,7 +32,7 @@ extension Volume.NounTable
 extension Volume.NounTable:BSONEncodable
 {
     @usableFromInline internal
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         var buffer:[UInt8] = []
         for row:Volume.Noun in self.rows

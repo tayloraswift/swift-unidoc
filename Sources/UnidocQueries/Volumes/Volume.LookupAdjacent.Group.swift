@@ -1,5 +1,5 @@
 import BSON
-import BSONEncoding
+import BSON
 import MongoQL
 import Unidoc
 import UnidocRecords

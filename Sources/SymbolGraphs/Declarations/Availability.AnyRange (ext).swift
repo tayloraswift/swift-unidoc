@@ -1,6 +1,5 @@
 import Availability
-import BSONDecoding
-import BSONEncoding
+import BSON
 import SemanticVersions
 
 extension Availability.AnyRange:BSONDecodable
@@ -21,7 +20,7 @@ extension Availability.AnyRange:BSONDecodable
 extension Availability.AnyRange:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         switch self
         {

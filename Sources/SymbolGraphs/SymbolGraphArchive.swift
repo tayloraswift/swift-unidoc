@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 @available(*, deprecated, renamed: "SymbolGraphArchive")
 public typealias Documentation = SymbolGraphArchive

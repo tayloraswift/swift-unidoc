@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 @frozen public
 struct Realm:RawRepresentable, Equatable, Hashable, Sendable

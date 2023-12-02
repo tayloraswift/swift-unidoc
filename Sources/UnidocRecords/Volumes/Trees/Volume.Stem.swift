@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import LexicalPaths
 import Symbols
 import Unidoc

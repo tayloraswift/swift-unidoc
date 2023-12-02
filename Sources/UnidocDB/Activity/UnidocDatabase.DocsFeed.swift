@@ -1,6 +1,5 @@
 import BSON
-import BSONDecoding
-import BSONEncoding
+import BSON
 import MongoDB
 import SymbolGraphs
 import UnidocRecords

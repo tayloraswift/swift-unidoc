@@ -1,6 +1,5 @@
 import GitHubAPI
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 struct GitHubCredential<Instant>:Sendable where Instant:Sendable
 {

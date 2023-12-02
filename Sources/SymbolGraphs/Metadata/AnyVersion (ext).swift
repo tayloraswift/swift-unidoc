@@ -1,12 +1,11 @@
 
-import BSONDecoding
-import BSONEncoding
+import BSON
 import SemanticVersions
 
 extension AnyVersion:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         switch self.canonical
         {

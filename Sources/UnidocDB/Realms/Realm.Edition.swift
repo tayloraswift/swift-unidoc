@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import MongoQL
 import SemanticVersions
 import SHA1

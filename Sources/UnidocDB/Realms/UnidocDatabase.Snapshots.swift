@@ -1,4 +1,4 @@
-import BSONEncoding
+import BSON
 import MongoDB
 import SymbolGraphs
 import Symbols

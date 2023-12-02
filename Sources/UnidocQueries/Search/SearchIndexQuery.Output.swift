@@ -1,4 +1,4 @@
-import BSONDecoding
+import BSON
 import MD5
 import UnidocDB
 import UnidocRecords

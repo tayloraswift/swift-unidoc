@@ -1,6 +1,5 @@
 import Availability
-import BSONDecoding
-import BSONEncoding
+import BSON
 import LexicalPaths
 import Signatures
 import Sources

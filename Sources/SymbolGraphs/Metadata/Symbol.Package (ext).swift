@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Symbols
 
 extension Symbol.Package:BSONStringDecodable, BSONStringEncodable

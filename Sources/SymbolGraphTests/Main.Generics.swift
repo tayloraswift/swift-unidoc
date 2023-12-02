@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Signatures
 import SymbolGraphs
 import Testing

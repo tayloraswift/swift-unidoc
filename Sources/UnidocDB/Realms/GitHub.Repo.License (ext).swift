@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import GitHubAPI
 
 extension GitHub.Repo.License:BSONDocumentEncodable

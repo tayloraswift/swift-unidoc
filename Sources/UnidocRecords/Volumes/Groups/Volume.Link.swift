@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Unidoc
 
 extension Volume
@@ -14,7 +13,7 @@ extension Volume
 extension Volume.Link:BSONEncodable
 {
     @inlinable public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         switch self
         {

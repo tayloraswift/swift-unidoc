@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import GitHubAPI
 
 @available(*, unavailable, message: "Not needed yet.")
