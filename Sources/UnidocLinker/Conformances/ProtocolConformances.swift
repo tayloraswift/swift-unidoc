@@ -21,8 +21,8 @@ extension ProtocolConformances:Sendable where Culture:Sendable
 }
 extension ProtocolConformances
 {
-    /// Yields all conformances to the specified protocol. This subscript returns an empty list
-    /// if no conformances are known to exist. It can also return more than one conformance
+    /// Yields all known conformances to the specified protocol. This subscript returns an empty
+    /// list if no conformances are known to exist. It can also return more than one conformance
     /// if multiple modules declare conformances to the same protocol.
     subscript(to protocol:Unidoc.Scalar) -> [ProtocolConformance<Culture>]
     {
