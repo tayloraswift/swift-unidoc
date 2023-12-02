@@ -45,8 +45,18 @@ extension DiagnosticSymbolicator
             switch group
             {
             case .contextual(let diagnostic, location: let location, context: let context):
-                if  let location:SourceLocation<Self.Address> = location,
-                    let file:String = self.path(of: location.file)
+                defer
+                {
+                    output.append(diagnostic, with: context)
+                }
+                guard
+                let location:SourceLocation<Self.Address> = location
+                else
+                {
+                    continue
+                }
+
+                if  let file:String = self.path(of: location.file)
                 {
                     output.messages.append(.sourceLocation(.init(
                         position: location.position,
@@ -56,8 +66,6 @@ extension DiagnosticSymbolicator
                 {
                     output.messages.append(.sourceLocation(nil))
                 }
-
-                output.append(diagnostic, with: context)
 
             case .general(let diagnostic):
                 output.append(diagnostic, with: .init())

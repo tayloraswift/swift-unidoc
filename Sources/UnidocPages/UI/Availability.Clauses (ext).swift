@@ -9,12 +9,7 @@ extension Availability.Clauses<Availability.UniversalDomain>
         {
             return nil
         }
-        if  let name:String = self.renamed
-        {
-            return "This declaration is deprecated. It has been renamed to \(name)."
-        }
-        else if
-            let message:String = self.message
+        if  let message:String = self.message
         {
             return "This declaration is deprecated: \(message)"
         }
@@ -44,12 +39,7 @@ extension Availability.Clauses<Availability.AgnosticDomain>
             return nil
         }
 
-        if  let name:String = self.renamed
-        {
-            prose += ". It has been renamed to \(name)."
-        }
-        else if
-            let message:String = self.message
+        if  let message:String = self.message
         {
             prose += ": \(message)"
         }

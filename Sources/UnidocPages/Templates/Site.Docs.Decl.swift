@@ -142,6 +142,28 @@ extension Site.Docs.Decl:VersionedPage
         }
 
         let availability:Availability = self.vertex.signature.availability
+        if  let renamed:Unidoc.Scalar = self.vertex.renamed,
+            let link:HTML.Link<String> = self.context.link(decl: renamed)
+        {
+            main[.section, { $0.class = "notice deprecation renamed" }]
+            {
+                $0[.p]
+                {
+                    $0 += "This declaration has been renamed to "
+                    $0 += link
+                    $0 += "."
+                }
+            }
+        }
+        else if
+            let renamed:String = availability.renamed
+        {
+            main[.section, { $0.class = "notice deprecation renamed" }]
+            {
+                $0[.p] = "This declaration has been renamed to \(renamed)."
+            }
+        }
+
         if  let notice:String = availability.notice
         {
             main[.section, { $0.class = "notice deprecation" }] { $0[.p] = notice }
