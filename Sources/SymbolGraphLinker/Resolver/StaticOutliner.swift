@@ -2,10 +2,12 @@ import CodelinkResolution
 import Codelinks
 import DoclinkResolution
 import Doclinks
+import LexicalPaths
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
+import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
 import UnidocDiagnostics
@@ -94,8 +96,96 @@ extension StaticOutliner
         }
     }
 }
+extension StaticLinker
+{
+    struct RenameParsingError:Error, Equatable
+    {
+        let redirect:UnqualifiedPath
+        let target:String
+
+        init(redirect:UnqualifiedPath, target:String)
+        {
+            self.redirect = redirect
+            self.target = target
+        }
+    }
+}
+extension StaticLinker.RenameParsingError:Diagnostic
+{
+    typealias Symbolicator = StaticSymbolicator
+
+    static
+    func += (output:inout DiagnosticOutput<StaticSymbolicator>, self:Self)
+    {
+        output[.warning] += """
+        rename target '\(self.target)' for '\(self.redirect)' could not be parsed
+        """
+    }
+}
+
+extension StaticLinker
+{
+    struct RenameTargetError:Error
+    {
+        let overloads:[CodelinkResolver<Int32>.Overload]
+        let redirect:UnqualifiedPath
+        let target:Codelink
+
+        init(overloads:[CodelinkResolver<Int32>.Overload],
+            redirect:UnqualifiedPath,
+            target:Codelink)
+        {
+            self.overloads = overloads
+            self.redirect = redirect
+            self.target = target
+        }
+    }
+}
+extension StaticLinker.RenameTargetError:Diagnostic
+{
+    typealias Symbolicator = StaticSymbolicator
+
+    static
+    func += (output:inout DiagnosticOutput<StaticSymbolicator>, self:Self)
+    {
+        if  self.overloads.isEmpty
+        {
+            output[.warning] += """
+            rename target '\(self.target)' for '\(self.redirect)' \
+            does not refer to any known declarations
+            """
+        }
+        else
+        {
+            output[.warning] += """
+            rename target '\(self.target)' for '\(self.redirect)' is ambiguous
+            """
+        }
+    }
+
+    var notes:[InvalidCodelinkError<StaticSymbolicator>.Note]
+    {
+        self.overloads.map
+        {
+            .init(suggested: .init(
+                    base: self.target.base,
+                    path: self.target.path,
+                    suffix: .hash($0.hash)),
+                target: $0.target)
+        }
+    }
+}
+
 extension StaticOutliner
 {
+    mutating
+    func follow(rename renamed:String,
+        of redirect:UnqualifiedPath,
+        at location:SourceLocation<Int32>?) -> Int32?
+    {
+        self.resolver.resolve(rename: renamed, of: redirect, at: location)
+    }
+
     mutating
     func link(attached body:MarkdownDocumentation,
         file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])

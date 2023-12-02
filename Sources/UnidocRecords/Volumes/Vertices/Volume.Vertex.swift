@@ -196,6 +196,8 @@ extension Volume.Vertex
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
 
+        /// Only appears in ``Decl``. The field contains a scalar.
+        case renamed = "a"
         /// Can appear in ``Article``, ``Culture``, or ``Decl``.
         /// The field contains a scalar. In ``Culture``, it points to the readme
         /// article for the module.
@@ -283,6 +285,7 @@ extension Volume.Vertex:BSONDocumentEncodable
             bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
             bson[.culture] = self.culture
             bson[.scope] = self.scope.isEmpty ? nil : self.scope
+            bson[.renamed] = self.renamed
             bson[.file] = self.file
 
             bson[.position] = self.position
@@ -368,6 +371,7 @@ extension Volume.Vertex:BSONDocumentDecodable
                 namespace: try bson[.namespace]?.decode() ?? culture,
                 culture: culture,
                 scope: try bson[.scope]?.decode() ?? [],
+                renamed: try bson[.renamed]?.decode(),
                 file: try bson[.file]?.decode(),
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),

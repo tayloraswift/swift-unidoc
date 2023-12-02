@@ -608,23 +608,42 @@ extension StaticLinker
             )
         }
 
-        let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])? = markdown.map
+        let renamed:String? = signature.availability.universal?.renamed
+            ?? signature.availability.agnostic[.swift]?.renamed
+            ?? signature.availability.agnostic[.swiftPM]?.renamed
+
+        let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])?
+        let rename:Int32?
+
+        if  markdown != nil || renamed != nil
         {
-            let (parsed, file):(MarkdownDocumentation, Int32?) = $0
             let scopes:StaticResolver.Scopes = self.symbolizer.scopes(
                 namespace: namespace,
                 culture: culture,
                 scope: decl.phylum.scope(trimming: decl.path))
 
-            return self.tables.resolving(with: scopes)
+            (linked, rename) = self.tables.resolving(with: scopes)
             {
-                $0.link(attached: parsed, file: file)
+                (outliner:inout StaticOutliner) in
+                (
+                    markdown.map { outliner.link(attached: $0.parsed, file: $0.file) },
+                    renamed.map
+                    {
+                        outliner.follow(rename: $0, of: decl.path, at: location)
+                    } ?? nil
+                )
             }
+        }
+        else
+        {
+            linked = nil
+            rename = nil
         }
 
         {
             $0?.requirements = requirements
             $0?.superforms = superforms
+            $0?.renamed = rename
             $0?.origin = origin
 
             $0?.signature = signature

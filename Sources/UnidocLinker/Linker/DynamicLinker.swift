@@ -597,6 +597,7 @@ extension DynamicLinker
                 namespace: namespace.id,
                 culture: namespace.culture,
                 scope: scope.map { self.global.expand($0) } ?? [],
+                renamed: decl.renamed.map { self.current.scalars.decls[$0] } ?? nil,
                 file: decl.location.map { self.current.id + $0.file },
                 position: decl.location?.position,
                 extension: `extension`,
