@@ -3,6 +3,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
 
+/// Describes all of a single type’s protocol conformances.
 struct ProtocolConformances<Culture>
 {
     private
@@ -19,6 +20,9 @@ extension ProtocolConformances:Sendable where Culture:Sendable
 }
 extension ProtocolConformances
 {
+    /// Yields all conformances to the specified protocol. This subscript returns an empty list
+    /// if no conformances are known to exist. It can also return more than one conformance
+    /// if multiple modules declare conformances to the same protocol.
     subscript(to protocol:Unidoc.Scalar) -> [ProtocolConformance<Culture>]
     {
         _read
@@ -33,9 +37,9 @@ extension ProtocolConformances
 }
 extension ProtocolConformances:Sequence
 {
-    func makeIterator() -> Iterator
+    func makeIterator() -> Dictionary<Unidoc.Scalar, [ProtocolConformance<Culture>]>.Iterator
     {
-        .init(self.table.makeIterator())
+        self.table.makeIterator()
     }
 }
 extension ProtocolConformances:ExpressibleByDictionaryLiteral
@@ -47,7 +51,7 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
 }
 extension ProtocolConformances<Int>
 {
-    init(context:DynamicContext,
+    init(context:borrowing DynamicContext,
         diagnostics:inout DiagnosticContext<DynamicSymbolicator>,
         with populate:(inout ProtocolConformances<Int>) throws -> Void) rethrows
     {
