@@ -6,15 +6,10 @@ extension PackageBuild.Sources
     /// Stores information about the source files for a module.
     struct Module
     {
-        let module:SymbolGraph.Module
+        var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
-        let path:FilePath?
+        var path:FilePath?
 
-        /// Indicates if the relevant target contains `.swift` sources only.
-        /// This is false if the target contains at least one `.c`, `.h`,
-        /// `.cpp`, `.hpp` file.
-        private(set)
-        var language:PackageBuild.SourceLanguage
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
         private(set)
@@ -30,7 +25,6 @@ extension PackageBuild.Sources
             self.module = module
             self.path = path
 
-            self.language = .swift
             self.articles = []
             self.include = []
         }
@@ -58,12 +52,14 @@ extension PackageBuild.Sources.Module
     {
         let exclude:Set<FilePath> = exclude.reduce(into: []) { $0.insert(path / $1) }
         var include:Set<FilePath> = []
+        var language:SymbolGraph.ModuleLanguage = module.language ?? .swift
 
         self.init(module, path: path)
         defer
         {
-            self.include = include.sorted   { $0.string < $1.string }
             self.articles.sort              { $0.string < $1.string }
+            self.include = include.sorted   { $0.string < $1.string }
+            self.module.language = language
         }
         try path.directory.walk
         {
@@ -91,7 +87,7 @@ extension PackageBuild.Sources.Module
                 fallthrough
 
             case    ("c",   excluded: false):
-                self.language |= .c
+                language |= .c
 
             case    ("hpp", excluded: false),
                     ("hxx", excluded: false):
@@ -100,7 +96,7 @@ extension PackageBuild.Sources.Module
 
             case    ("cpp", excluded: false),
                     ("cxx", excluded: false):
-                self.language |= .cpp
+                language |= .cpp
 
             case _:
                 break

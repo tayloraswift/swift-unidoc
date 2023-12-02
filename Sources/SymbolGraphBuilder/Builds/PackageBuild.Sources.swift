@@ -17,7 +17,7 @@ extension PackageBuild
 }
 extension PackageBuild.Sources
 {
-    init(scanning package:__shared PackageNode) throws
+    init(scanning package:borrowing PackageNode) throws
     {
         let root:FilePath = .init(package.root.path)
         self.init(modules: try package.modules.indices.map

@@ -56,6 +56,15 @@ extension Volume
     public
     func sitemap() -> Realm.Sitemap
     {
+        let ignoredModules:Set<Unidoc.Scalar> = self.vertices.reduce(into: [])
+        {
+            switch $1.culture?.module.language
+            {
+            case nil, .swift?:  return
+            case _?:            $0.insert($1.id)
+            }
+         }
+
         var elements:Realm.Sitemap.Elements = []
         for vertex:Vertex in self.vertices
         {
@@ -68,11 +77,11 @@ extension Volume
                 elements.append(vertex.shoot)
 
             case .decl(let vertex):
-                //  TODO: this still doesn’t filter out all C declarations...
-                guard case .s = vertex.symbol.language
+                //  Skip C and C++ declarations.
+                guard !ignoredModules.contains(vertex.culture),
+                case .s = vertex.symbol.language
                 else
                 {
-                    //  Skip C and C++ declarations.
                     continue
                 }
 
