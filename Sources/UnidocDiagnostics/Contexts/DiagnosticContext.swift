@@ -56,7 +56,7 @@ extension DiagnosticContext
         }
     }
     @inlinable public
-    subscript(node:Never?) -> (any Diagnostic<Symbolicator>)?
+    subscript(node:SourceLocation<Symbolicator.Address>?) -> (any Diagnostic<Symbolicator>)?
     {
         get
         {
@@ -71,7 +71,16 @@ extension DiagnosticContext
                 return
             }
 
-            self.unsymbolicated.append(.general(value))
+            if  let node:SourceLocation<Symbolicator.Address>
+            {
+                self.unsymbolicated.append(.contextual(value,
+                    location: node,
+                    context: []))
+            }
+            else
+            {
+                self.unsymbolicated.append(.general(value))
+            }
         }
     }
 }

@@ -51,6 +51,10 @@ extension SymbolGraph
         /// This field only exists because of an upstream bug in SymbolGraphGen.
         public
         var features:[Int32]
+        /// If this symbol has been renamed, this points to the symbol referenced by the
+        /// availability annotation.
+        public
+        var renamed:Int32?
         /// The address of a scalar that has documentation that is relevant,
         /// but less specific to this scalar.
         public
@@ -71,6 +75,7 @@ extension SymbolGraph
             requirements:[Int32] = [],
             superforms:[Int32] = [],
             features:[Int32] = [],
+            renamed:Int32? = nil,
             origin:Int32? = nil,
             topics:[Topic] = [])
         {
@@ -86,6 +91,7 @@ extension SymbolGraph
             self.requirements = requirements
             self.superforms = superforms
             self.features = features
+            self.renamed = renamed
             self.origin = origin
 
             self.topics = topics
@@ -128,6 +134,7 @@ extension SymbolGraph.Decl
         case requirements = "R"
         case superforms = "S"
         case features = "F"
+        case renamed = "N"
         case origin = "O"
 
         case location = "L"
@@ -173,6 +180,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
         bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
         bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
 
+        bson[.renamed] = self.renamed
         bson[.origin] = self.origin
 
         bson[.location] = self.location
@@ -213,6 +221,7 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
             features: try bson[.features]?.decode(
                 as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+            renamed: try bson[.renamed]?.decode(),
             origin: try bson[.origin]?.decode(),
             topics: try bson[.topics]?.decode() ?? [])
     }

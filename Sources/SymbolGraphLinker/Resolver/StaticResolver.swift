@@ -2,6 +2,7 @@ import CodelinkResolution
 import Codelinks
 import DoclinkResolution
 import Doclinks
+import LexicalPaths
 import MarkdownAST
 import Sources
 import SymbolGraphs
@@ -29,6 +30,39 @@ struct StaticResolver:~Copyable
 }
 extension StaticResolver
 {
+    mutating
+    func resolve(rename renamed:String,
+        of redirect:UnqualifiedPath,
+        at location:SourceLocation<Int32>?) -> Int32?
+    {
+        guard
+        let codelink:Codelink = .init(renamed)
+        else
+        {
+            self.diagnostics[location] = StaticLinker.RenameParsingError.init(
+                redirect: redirect,
+                target: renamed)
+            return nil
+        }
+
+        switch self.codelinks.resolve(codelink)
+        {
+        case .one(let overload):
+            return switch overload.target
+            {
+            case .scalar(let address):          address
+            case .vector(let address, self: _): address
+            }
+
+        case .some(let overloads):
+            self.diagnostics[location] = StaticLinker.RenameTargetError.init(
+                overloads: overloads,
+                redirect: redirect,
+                target: codelink)
+            return nil
+        }
+    }
+
     mutating
     func outline(_ autolink:MarkdownInline.Autolink,
         as codelink:Codelink) -> SymbolGraph.Outline?
