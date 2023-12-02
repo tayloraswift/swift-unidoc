@@ -136,8 +136,7 @@ extension DynamicLinker.Extensions
             }
         }
 
-        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Int>]) in
-            conformances
+        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Int>]) in conformances
         {
             for conformance:ProtocolConformance<Int> in conformances
             {
