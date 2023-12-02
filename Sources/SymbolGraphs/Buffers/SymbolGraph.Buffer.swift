@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Unidoc
 
 extension SymbolGraph
@@ -40,7 +39,7 @@ extension SymbolGraph.Buffer
 extension SymbolGraph.Buffer:BSONEncodable
 {
     @usableFromInline internal
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         let bson:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, slice: .init(
             unsafeUninitializedCapacity: self.elements.count * 3)

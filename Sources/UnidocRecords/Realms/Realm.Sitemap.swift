@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import MD5
 import SymbolGraphs
 import Symbols

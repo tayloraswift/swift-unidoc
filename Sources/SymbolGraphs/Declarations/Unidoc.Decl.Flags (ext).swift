@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Unidoc
 
 extension Unidoc.Decl.Flags:BSONDecodable, BSONEncodable

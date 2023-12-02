@@ -1,6 +1,5 @@
 import Availability
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 extension Availability.EternalRange:BSONDecodable
 {
@@ -14,7 +13,7 @@ extension Availability.EternalRange:BSONDecodable
 extension Availability.EternalRange:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         BSON.Min.init().encode(to: &field)
     }

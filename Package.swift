@@ -418,8 +418,7 @@ let package:Package = .init(
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
 
-                .product(name: "BSONDecoding", package: "swift-mongodb"),
-                .product(name: "BSONEncoding", package: "swift-mongodb"),
+                .product(name: "BSON", package: "swift-mongodb"),
             ],
             exclude:
             [

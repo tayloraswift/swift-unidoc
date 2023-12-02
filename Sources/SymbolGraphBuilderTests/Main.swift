@@ -1,4 +1,4 @@
-import BSONDecoding
+import BSON
 import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting

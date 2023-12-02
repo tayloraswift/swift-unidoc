@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 extension Realm.Sitemap
 {
@@ -48,7 +47,7 @@ extension Realm.Sitemap.Elements:Sequence
 extension Realm.Sitemap.Elements:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: self.bytes).encode(to: &field)
     }

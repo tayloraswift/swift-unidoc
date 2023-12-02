@@ -1,11 +1,10 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import MD5
 
 extension MD5:BSONEncodable
 {
     @inlinable public
-    func encode(to bson:inout BSON.Field)
+    func encode(to bson:inout BSON.FieldEncoder)
     {
         BSON.BinaryView<Self>.init(subtype: .md5, slice: self).encode(to: &bson)
     }

@@ -1,6 +1,5 @@
 import Availability
-import BSONDecoding
-import BSONEncoding
+import BSON
 import FNV1
 import MarkdownABI
 import Signatures
