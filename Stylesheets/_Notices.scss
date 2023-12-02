@@ -63,9 +63,16 @@ section.spi::before
 section.deprecation::before
 {
     font-size: 150%;
+    font-family: $typeface-monospace;
     background-color: $light-coral-elevated;
     box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
     content: '!';
+}
+section.deprecation.renamed::before
+{
+    background-color: $light-accent-aqua;
+    box-shadow: 0 0.25rem 0 0 $light-accent-aqua-shadow;
+    content: '→';
 }
 section.spi > p,
 section.deprecation > p

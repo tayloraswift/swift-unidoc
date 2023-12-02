@@ -23,7 +23,7 @@ extension DiagnosticMessage
         switch self
         {
         case .diagnostic(let severity, let message):
-             "\(colors.bold("\(severity):", severity.color)) \(message)\n"
+             "\(colors.bold("\(severity):", severity.color)) \(colors.bold(message))\n"
 
         case .sourceContext(let context):
             "\(context.description(colors: colors))\n"
