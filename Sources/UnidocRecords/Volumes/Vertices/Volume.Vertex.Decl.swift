@@ -34,6 +34,8 @@ extension Volume.Vertex
         let scope:[Unidoc.Scalar]
 
         public
+        var renamed:Unidoc.Scalar?
+        public
         var file:Unidoc.Scalar?
         //  TODO: consider combining this into flags.
         public
@@ -59,6 +61,7 @@ extension Volume.Vertex
             namespace:Unidoc.Scalar,
             culture:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
+            renamed:Unidoc.Scalar? = nil,
             file:Unidoc.Scalar? = nil,
             position:SourcePosition? = nil,
             overview:Volume.Passage? = nil,
@@ -80,6 +83,8 @@ extension Volume.Vertex
             self.scope = scope
             self.extension = `extension`
             self.group = group
+
+            self.renamed = renamed
             self.file = file
 
             self.position = position
