@@ -1,4 +1,4 @@
-import BSONDecoding
+import BSON
 import HTTP
 import MongoDB
 import UnidocDB

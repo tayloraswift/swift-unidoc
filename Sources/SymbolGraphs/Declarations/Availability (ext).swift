@@ -1,6 +1,5 @@
 import Availability
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 extension Availability:BSONDocumentDecodable
 {
@@ -9,7 +8,7 @@ extension Availability:BSONDocumentDecodable
     {
         self.init()
 
-        for field:BSON.ExplicitField<CodingKey, Bytes.SubSequence> in bson
+        for field:BSON.FieldDecoder<CodingKey, Bytes.SubSequence> in bson
         {
             switch field.key.domain
             {

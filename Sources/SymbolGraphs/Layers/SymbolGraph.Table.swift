@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 
 extension SymbolGraph
 {
@@ -131,7 +130,7 @@ extension SymbolGraph.Table
 extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
 {
     @usableFromInline internal
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         self.elements.encode(to: &field)
     }

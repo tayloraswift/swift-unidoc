@@ -1,4 +1,4 @@
-import BSONDecoding
+import BSON
 import SemanticVersions
 import Unidoc
 import UnidocRecords

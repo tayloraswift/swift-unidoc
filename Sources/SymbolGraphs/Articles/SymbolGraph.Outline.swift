@@ -1,6 +1,5 @@
 
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Sources
 
 extension SymbolGraph

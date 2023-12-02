@@ -1,4 +1,4 @@
-import BSONDecoding
+import BSON
 import MongoQL
 import UnidocDB
 import UnidocRecords

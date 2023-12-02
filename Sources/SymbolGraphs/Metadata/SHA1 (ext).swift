@@ -1,11 +1,10 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import SHA1
 
 extension SHA1:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         let view:BSON.BinaryView<SHA1> = .init(subtype: .generic, slice: self)
             view.encode(to: &field)

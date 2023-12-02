@@ -1,5 +1,4 @@
-import BSONDecoding
-import BSONEncoding
+import BSON
 import Unidoc
 
 extension SymbolGraph
@@ -111,7 +110,7 @@ extension SymbolGraph.Plane:RandomAccessCollection
 extension SymbolGraph.Plane:BSONEncodable where Element:BSONEncodable
 {
     public
-    func encode(to field:inout BSON.Field)
+    func encode(to field:inout BSON.FieldEncoder)
     {
         self.table.encode(to: &field)
     }
