@@ -11,23 +11,33 @@ extension SymbolGraph
         let name:String
         /// The type of the module.
         public
-        let type:ModuleType
+        var type:ModuleType
         public
-        let dependencies:ModuleDependencies
+        var dependencies:ModuleDependencies
+        /// The language of the module. This doesn’t necessarily match the languages of all the
+        /// individual symbols in the module.
+        ///
+        /// New in 8.8; absent in 8.7 or earlier.
+        ///
+        /// This field is nil if the symbol graph was not generated from a swift package.
+        public
+        var language:ModuleLanguage?
         /// The path to the module’s source directory, relative to the
         /// package root. If nil, the path is just [`"Sources/\(self.name)"`]().
         public
-        let location:String?
+        var location:String?
 
         @inlinable public
         init(name:String,
             type:ModuleType = .regular,
             dependencies:ModuleDependencies = .init(),
+            language:ModuleLanguage? = nil,
             location:String? = nil)
         {
             self.name = name
             self.type = type
             self.dependencies = dependencies
+            self.language = language
             self.location = location
         }
     }
@@ -50,6 +60,7 @@ extension SymbolGraph.Module
         case type = "T"
         case dependencies_products = "P"
         case dependencies_modules = "D"
+        case language = "G"
         case location = "L"
     }
 }
@@ -66,6 +77,7 @@ extension SymbolGraph.Module:BSONDocumentEncodable
         bson[.dependencies_modules] =
             self.dependencies.modules.isEmpty ? nil :
             self.dependencies.modules
+        bson[.language] = self.language
         bson[.location] = self.location
     }
 }
@@ -80,6 +92,7 @@ extension SymbolGraph.Module:BSONDocumentDecodable
             dependencies: .init(
                 products: try bson[.dependencies_products]?.decode() ?? [],
                 modules: try bson[.dependencies_modules]?.decode() ?? []),
+            language: try bson[.language]?.decode(),
             location: try bson[.location]?.decode())
     }
 }

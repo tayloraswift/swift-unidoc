@@ -32,8 +32,7 @@ extension PackageBuild
     public
     func removePackageResolved() async throws
     {
-        try await SystemProcess.init(command: "rm", "-f",
-            "\(self.root / "Package.resolved")")()
+        try await SystemProcess.init(command: "rm", "-f", "\(self.root / "Package.resolved")")()
     }
 }
 extension PackageBuild

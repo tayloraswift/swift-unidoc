@@ -68,16 +68,9 @@ extension Artifacts
         {
             include += sources.include
 
-            let label:String
-
-            switch sources.language
-            {
-            case .swift:
-                label = "swift module, \(sources.module.type)"
-
-            case let language:
-                label = "\(language) module"
-            }
+            let label:String = """
+            \(sources.module.language?.description ?? "?") module, \(sources.module.type)
+            """
 
             switch sources.module.id
             {
