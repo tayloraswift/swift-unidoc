@@ -90,22 +90,34 @@ extension DynamicLinker.Extensions
         modules:[SymbolGraph.ModuleContext],
         diagnostics:inout DiagnosticContext<DynamicSymbolicator>) -> ProtocolConformances<Int>
     {
-        guard   let s:Unidoc.Scalar = context.current.scalars.decls[s],
-                let scope:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
+        guard
+        let s:Unidoc.Scalar = context.current.scalars.decls[s],
+        let scope:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
         else
         {
-            let type:Symbol.Decl = context.current.decls.symbols[s]
-
-            diagnostics[nil] = DroppedExtensionsError.extending(type, count: extensions.count)
-
+            let symbol:Symbol.Decl = context.current.decls.symbols[s]
+            diagnostics[nil] = DroppedExtensionsError.extending(symbol, count: extensions.count)
             return [:]
         }
 
+        let universal:Set<GenericConstraint<Unidoc.Scalar?>> =
+            scope.signature.generics.constraints.reduce(into: [])
+        {
+            $0.insert($1.map { context.current.scalars.decls[$0] })
+        }
         /// Cache these signatures, since we need to perform two passes.
         let signatures:[DynamicLinker.ExtensionSignature] = extensions.map
         {
             .init(
-                conditions: $0.conditions.map { $0.map { context.current.scalars.decls[$0] } },
+                /// Remove constraints that are already present in the base declaration.
+                conditions: $0.conditions.compactMap
+                {
+                    let constraint:GenericConstraint<Unidoc.Scalar?> = $0.map
+                    {
+                        context.current.scalars.decls[$0]
+                    }
+                    return universal.contains(constraint) ? nil : constraint
+                },
                 culture: $0.culture,
                 extends: s)
         }
@@ -189,7 +201,8 @@ extension DynamicLinker.Extensions
                     }
                 }
 
-                guard   let article:SymbolGraph.Article = `extension`.article
+                guard
+                let article:SymbolGraph.Article = `extension`.article
                 else
                 {
                     return
