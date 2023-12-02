@@ -3,7 +3,8 @@ import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
 
-/// Describes all of a single type’s protocol conformances.
+/// Describes a single type’s protocol conformances. Depending on how the type is being used,
+/// the lists may or may not be exhaustive.
 struct ProtocolConformances<Culture>
 {
     private

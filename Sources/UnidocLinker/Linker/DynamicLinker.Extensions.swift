@@ -75,7 +75,7 @@ extension DynamicLinker.Extensions
     /// Because ``Optional`` does not “naturally” conform to ``Sequence``, we would retain all
     /// of those additional features, even though the current package did not declare them.
     ///
-    /// Ideally, we would also want to retain features if feature itself were declared in a
+    /// Ideally, we would also want to retain features if the feature itself were declared in a
     /// culture of the current package. For example, we could extend ``Sequence`` with an
     /// additional member, and we would want that member to appear as a feature of every type
     /// that conforms to ``Sequence``, including those with conformances declared in other
