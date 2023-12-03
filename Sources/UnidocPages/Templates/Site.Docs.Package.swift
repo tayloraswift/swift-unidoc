@@ -243,7 +243,7 @@ extension Site.Docs.Package:VersionedPage
                                 else if
                                     let version:PatchVersion = dependency.resolution
                                 {
-                                    $0[.td] = "\(version) (unavailable)"
+                                    $0[.td] = "\(version)"
                                 }
                                 else
                                 {
