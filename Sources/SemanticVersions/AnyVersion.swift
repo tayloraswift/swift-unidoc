@@ -24,8 +24,18 @@ extension AnyVersion
     {
         switch self.canonical
         {
-        case .stable(let version):  return version
-        case .unstable:             return nil
+        case .stable(let version):  version
+        case .unstable:             nil
+        }
+    }
+
+    @inlinable public
+    var release:PatchVersion?
+    {
+        switch self.canonical
+        {
+        case .stable(.release(let version, build: _)):  version
+        case _:                                         nil
         }
     }
 }

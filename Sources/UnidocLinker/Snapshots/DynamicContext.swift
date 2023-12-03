@@ -1,4 +1,5 @@
 import CodelinkResolution
+import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -125,21 +126,25 @@ extension DynamicContext
 extension DynamicContext
 {
     public
-    func dependencies() -> [Volume.Meta.Dependency]
+    func dependencies() -> [Volume.Metadata.Dependency]
     {
-        var dependencies:[Volume.Meta.Dependency] = []
+        var dependencies:[Volume.Metadata.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package != .swift,
-            let resolution:Unidoc.Edition = self[.swift]?.id
+            let swift:Snapshot = self[.swift]
         {
-            dependencies.append(.init(id: .swift, requirement: nil, resolution: resolution))
+            dependencies.append(.init(symbol: .swift,
+                requirement: nil,
+                resolution: nil,
+                pinned: swift.id))
         }
         for dependency:SymbolGraphMetadata.Dependency in self.current.metadata.dependencies
         {
-            dependencies.append(.init(id: dependency.package,
+            dependencies.append(.init(symbol: dependency.package,
                 requirement: dependency.requirement,
-                resolution: self[dependency.package]?.id))
+                resolution: dependency.version.release,
+                pinned: self[dependency.package]?.id))
         }
 
         return dependencies

@@ -10,11 +10,11 @@ extension Site
     struct RecentActivity
     {
         let repo:[UnidocDatabase.RepoFeed.Activity]
-        let docs:[UnidocDatabase.DocsFeed.Activity<Volume.Meta>]
+        let docs:[UnidocDatabase.DocsFeed.Activity<Volume.Metadata>]
 
         init(
             repo:[UnidocDatabase.RepoFeed.Activity],
-            docs:[UnidocDatabase.DocsFeed.Activity<Volume.Meta>])
+            docs:[UnidocDatabase.DocsFeed.Activity<Volume.Metadata>])
         {
             self.repo = repo
             self.docs = docs
@@ -117,7 +117,7 @@ extension Site.RecentActivity:RenderablePage
                         $0[.ol]
                         {
                             let now:UnixInstant = .now()
-                            for item:UnidocDatabase.DocsFeed.Activity<Volume.Meta> in self.docs
+                            for item:UnidocDatabase.DocsFeed.Activity<Volume.Metadata> in self.docs
                             {
                                 $0[.li]
                                 {

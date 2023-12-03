@@ -78,7 +78,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
         pipeline[.lookup] = .init
         {
             $0[.from] = UnidocDatabase.Packages.name
-            $0[.localField] = Volume.PrincipalOutput[.volume] / Volume.Meta[.cell]
+            $0[.localField] = Volume.PrincipalOutput[.volume] / Volume.Metadata[.cell]
             $0[.foreignField] = Realm.Package[.id]
             $0[.as] = Volume.PrincipalOutput[.repo]
         }
@@ -132,9 +132,9 @@ extension Volume.LookupQuery:Volume.VertexQuery
                 //  ``volumeOfLatest`` is always non-nil, so we don’t need to worry about
                 //  degenerate index behavior.
                 $0[let: min] =
-                    Volume.PrincipalOutput[.volumeOfLatest] / Volume.Meta[.planes_min]
+                    Volume.PrincipalOutput[.volumeOfLatest] / Volume.Metadata[.planes_min]
                 $0[let: max] =
-                    Volume.PrincipalOutput[.volumeOfLatest] / Volume.Meta[.planes_max]
+                    Volume.PrincipalOutput[.volumeOfLatest] / Volume.Metadata[.planes_max]
             }
             $0[.pipeline] = .init
             {
@@ -231,7 +231,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                     ]
                     {
                         //  Do not return computed fields.
-                        for key:Volume.Meta.CodingKey in
+                        for key:Volume.Metadata.CodingKey in
                         [
                             .id,
                             .dependencies,
@@ -251,7 +251,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                             .api
                         ]
                         {
-                            $0[Volume.PrincipalOutput[volume] / Volume.Meta[key]] = true
+                            $0[Volume.PrincipalOutput[volume] / Volume.Metadata[key]] = true
                         }
                     }
                 }
@@ -343,7 +343,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
                         {
                             $0[edges.volumes] = .init
                             {
-                                $0[.ne] = Volume.PrincipalOutput[.volume] / Volume.Meta[.id]
+                                $0[.ne] = Volume.PrincipalOutput[.volume] / Volume.Metadata[.id]
                             }
                         }
                     }
@@ -352,12 +352,12 @@ extension Volume.LookupQuery:Volume.VertexQuery
                 {
                     $0[.from] = UnidocDatabase.Volumes.name
                     $0[.localField] = edges.volumes
-                    $0[.foreignField] = Volume.Meta[.id]
+                    $0[.foreignField] = Volume.Metadata[.id]
                     $0[.as] = results
                 }
                 $0[.unwind] = results
                 $0[.replaceWith] = results
-                $0[.project] = .init(with: Volume.Meta.names(_:))
+                $0[.project] = .init(with: Volume.Metadata.names(_:))
             }
         }
         //  Unbox single-element arrays.

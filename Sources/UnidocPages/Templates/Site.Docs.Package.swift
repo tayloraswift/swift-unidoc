@@ -2,7 +2,9 @@ import GitHubAPI
 import HTML
 import MarkdownRendering
 import SHA1
+import SemanticVersions
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocDB
 import UnidocProfiling
@@ -79,9 +81,9 @@ extension Site.Docs.Package:VersionedPage
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = self.volume.symbol.package == .swift ?
-                    "Standard Library" :
-                    "Package"
+                $0[.span] { $0.class = "phylum" } = self.volume.symbol.package == .swift
+                    ? "Standard Library"
+                    : "Package"
 
                 $0[.span, { $0.class = "domain" }]
                 {
@@ -188,11 +190,33 @@ extension Site.Docs.Package:VersionedPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Volume.Meta.Dependency in self.volume.dependencies
+                        for dependency:Volume.Metadata.Dependency in self.volume.dependencies
                         {
                             $0[.tr]
                             {
-                                $0[.td] = "\(dependency.id)"
+                                let pinned:Volume.Metadata?
+
+                                if  let pin:Unidoc.Edition = dependency.pinned
+                                {
+                                    pinned = self.context.volumes[pin]
+
+                                    $0[.td]
+                                    {
+                                        let symbol:Symbol.Package = pinned?.symbol.package
+                                            ?? dependency.symbol
+
+                                        $0[.a]
+                                        {
+                                            $0.href = "\(Site.Tags[symbol])"
+                                        } = "\(symbol)"
+                                    }
+                                }
+                                else
+                                {
+                                    pinned = nil
+
+                                    $0[.td] = "\(dependency.symbol)"
+                                }
 
                                 switch dependency.requirement
                                 {
@@ -206,20 +230,24 @@ extension Site.Docs.Package:VersionedPage
                                     }
                                 }
 
-                                if  let pin:Unidoc.Edition = dependency.resolution,
-                                    let pin:Volume.Meta = self.context.volumes[pin]
+                                if  let pinned:Volume.Metadata
                                 {
                                     $0[.td]
                                     {
                                         $0[.a]
                                         {
-                                            $0.href = "\(Site.Docs[pin])"
-                                        } = pin.symbol.version
+                                            $0.href = "\(Site.Docs[pinned])"
+                                        } = pinned.symbol.version
                                     }
+                                }
+                                else if
+                                    let version:PatchVersion = dependency.resolution
+                                {
+                                    $0[.td] = "\(version) (unavailable)"
                                 }
                                 else
                                 {
-                                    $0[.td] = "unavailable"
+                                    $0[.td]
                                 }
                             }
                         }

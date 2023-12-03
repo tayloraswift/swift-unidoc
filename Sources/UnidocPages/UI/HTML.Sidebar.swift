@@ -9,12 +9,12 @@ extension HTML
     struct Sidebar<Root> where Root:VolumeRoot
     {
         private
-        let volume:Volume.Meta
+        let volume:Volume.Metadata
         private
         let nouns:[Volume.Noun]
 
         private
-        init(volume:Volume.Meta, nouns:[Volume.Noun])
+        init(volume:Volume.Metadata, nouns:[Volume.Noun])
         {
             self.volume = volume
             self.nouns = nouns
@@ -24,13 +24,13 @@ extension HTML
 extension HTML.Sidebar
 {
     static
-    func package(volume:Volume.Meta) -> Self
+    func package(volume:Volume.Metadata) -> Self
     {
         .init(volume: volume, nouns: volume.tree)
     }
 
     static
-    func module(volume:Volume.Meta, tree:Volume.TypeTree?) -> Self?
+    func module(volume:Volume.Metadata, tree:Volume.TypeTree?) -> Self?
     {
         guard
         let nouns:[Volume.Noun] = tree?.rows

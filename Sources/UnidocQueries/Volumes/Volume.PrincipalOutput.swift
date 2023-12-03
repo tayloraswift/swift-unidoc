@@ -24,9 +24,9 @@ extension Volume
         let groups:[Volume.Group]
 
         public
-        let volume:Volume.Meta
+        let volume:Volume.Metadata
         public
-        let volumeOfLatest:Volume.Meta?
+        let volumeOfLatest:Volume.Metadata?
 
         public
         let repo:Realm.Package.Repo?
@@ -40,8 +40,8 @@ extension Volume
             vertex:Volume.Vertex?,
             vertexInLatest:Volume.Vertex?,
             groups:[Volume.Group],
-            volume:Volume.Meta,
-            volumeOfLatest:Volume.Meta?,
+            volume:Volume.Metadata,
+            volumeOfLatest:Volume.Metadata?,
             repo:Realm.Package.Repo?,
             tree:Volume.TypeTree?)
         {

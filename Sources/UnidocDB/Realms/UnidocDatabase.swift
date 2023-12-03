@@ -274,7 +274,7 @@ extension UnidocDatabase
     func uplink(volume:VolumeIdentifier,
         with session:Mongo.Session) async throws -> Uplinked?
     {
-        if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
+        if  let volume:Volume.Metadata = try await self.volumes.find(named: volume,
                 with: session)
         {
             try await self.uplink(volume.id, with: session)
@@ -290,7 +290,7 @@ extension UnidocDatabase
     func unlink(volume:VolumeIdentifier,
         with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
-        if  let volume:Volume.Meta = try await self.volumes.find(named: volume,
+        if  let volume:Volume.Metadata = try await self.volumes.find(named: volume,
                 with: session)
         {
             try await self.vertices.clear(range: volume.id, with: session)
@@ -417,7 +417,7 @@ extension UnidocDatabase
             pins: pins,
             with: session)
 
-        let dependencies:[Volume.Meta.Dependency] = context.dependencies()
+        let dependencies:[Volume.Metadata.Dependency] = context.dependencies()
         let symbolicator:DynamicSymbolicator = .init(context: context,
             root: snapshot.metadata.root)
         let linker:DynamicLinker = .init(context: consume context)
@@ -471,7 +471,7 @@ extension UnidocDatabase
             version = "0.0.0"
         }
 
-        let meta:Volume.Meta = .init(id: snapshot.id,
+        let meta:Volume.Metadata = .init(id: snapshot.id,
             dependencies: dependencies,
             display: snapshot.metadata.display,
             refname: snapshot.metadata.commit?.refname,
