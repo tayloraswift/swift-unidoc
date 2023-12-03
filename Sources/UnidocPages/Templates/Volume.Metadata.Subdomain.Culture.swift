@@ -2,7 +2,7 @@ import HTML
 import Symbols
 import UnidocRecords
 
-extension Volume.Meta.Subdomain
+extension Volume.Metadata.Subdomain
 {
     enum Culture
     {

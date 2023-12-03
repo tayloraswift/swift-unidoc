@@ -36,14 +36,14 @@ extension Volume.LookupLimited:Volume.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
-                in: volume / Volume.Meta[.dependencies])
+            let dependencies:Mongo.List<Volume.Metadata.Dependency, Mongo.KeyPath> = .init(
+                in: volume / Volume.Metadata[.dependencies])
 
             $0[output.volumes] = .expr
             {
                 $0[.setUnion] = .init
                 {
-                    $0.expr { $0[.map] = dependencies.map { $0[.resolution] } }
+                    $0.expr { $0[.map] = dependencies.map { $0[.pinned] } }
                 }
             }
             $0[output.scalars] = [] as [Never]

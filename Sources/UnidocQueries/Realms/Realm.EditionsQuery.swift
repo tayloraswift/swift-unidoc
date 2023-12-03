@@ -87,7 +87,7 @@ extension Realm.EditionsQuery:Realm.PackageQuery
                     {
                         $0[.from] = UnidocDatabase.Volumes.name
                         $0[.localField] = Facet[.edition] / Realm.Edition[.id]
-                        $0[.foreignField] = Volume.Meta[.id]
+                        $0[.foreignField] = Volume.Metadata[.id]
                         $0[.as] = Facet[.volume]
                     }
 

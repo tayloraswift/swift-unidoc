@@ -11,10 +11,10 @@ extension Volume
         public
         let matches:[Volume.Vertex]
         public
-        let volume:Volume.Meta
+        let volume:Volume.Metadata
 
         @inlinable internal
-        init(matches:[Volume.Vertex], volume:Volume.Meta)
+        init(matches:[Volume.Vertex], volume:Volume.Metadata)
         {
             self.matches = matches
             self.volume = volume

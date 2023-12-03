@@ -25,7 +25,7 @@ extension Site.Blog
 extension Site.Blog.Article
 {
     private
-    var volume:Volume.Meta { self.context.volumes.principal }
+    var volume:Volume.Metadata { self.context.volumes.principal }
 }
 extension Site.Blog.Article:RenderablePage
 {

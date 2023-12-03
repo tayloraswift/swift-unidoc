@@ -13,10 +13,10 @@ extension Realm.EditionsQuery
         public
         var graphs:Graphs?
         public
-        var volume:Volume.Meta?
+        var volume:Volume.Metadata?
 
         @inlinable public
-        init(edition:Realm.Edition, graphs:Graphs? = nil, volume:Volume.Meta? = nil)
+        init(edition:Realm.Edition, graphs:Graphs? = nil, volume:Volume.Metadata? = nil)
         {
             self.edition = edition
             self.graphs = graphs

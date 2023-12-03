@@ -91,7 +91,7 @@ extension Site.Docs.Foreign:VersionedPage
         }
 
         let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Volume.Meta = self.context.volumes[self.vertex.extendee.zone]
+        if  let other:Volume.Metadata = self.context.volumes[self.vertex.extendee.zone]
         {
             main[.section, { $0.class = "notice extendee" }]
             {

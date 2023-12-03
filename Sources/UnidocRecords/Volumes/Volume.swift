@@ -16,7 +16,7 @@ struct Volume:~Copyable
     public
     var trees:[TypeTree]
     public
-    var meta:Meta
+    var meta:Metadata
 
     @inlinable public
     init(latest:Unidoc.Edition?,
@@ -24,7 +24,7 @@ struct Volume:~Copyable
         groups:[Group],
         index:JSON,
         trees:[TypeTree],
-        meta:Meta)
+        meta:Metadata)
     {
         self.latest = latest
 

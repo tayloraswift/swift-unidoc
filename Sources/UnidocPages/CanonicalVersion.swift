@@ -32,7 +32,7 @@ extension CanonicalVersion
     init?(principal:Volume.PrincipalOutput)
     {
         guard
-        let volumeOfLatest:Volume.Meta = principal.volumeOfLatest,
+        let volumeOfLatest:Volume.Metadata = principal.volumeOfLatest,
         let patchOfLatest:PatchVersion = volumeOfLatest.patch
         else
         {

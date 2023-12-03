@@ -7,8 +7,12 @@ import SHA1
 
 extension Volume
 {
+    @available(*, deprecated, renamed: "Metadata")
+    public
+    typealias Meta = Metadata
+
     @frozen public
-    struct Meta:Identifiable, Equatable, Sendable
+    struct Metadata:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Edition
@@ -65,7 +69,7 @@ extension Volume
         }
     }
 }
-extension Volume.Meta
+extension Volume.Metadata
 {
     @inlinable public
     var selector:Volume.Selector
@@ -86,7 +90,7 @@ extension Volume.Meta
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
 }
-extension Volume.Meta
+extension Volume.Metadata
 {
     @frozen public
     enum CodingKey:String, Equatable, Hashable, Sendable
@@ -128,7 +132,7 @@ extension Volume.Meta
         case api = "I"
     }
 }
-extension Volume.Meta:BSONDocumentEncodable
+extension Volume.Metadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -163,7 +167,7 @@ extension Volume.Meta:BSONDocumentEncodable
         bson[.api] = self.api
     }
 }
-extension Volume.Meta:BSONDocumentDecodable
+extension Volume.Metadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

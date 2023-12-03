@@ -25,7 +25,7 @@ extension PinDependenciesQuery
         for case (nil, let dependency) in zip(snapshot.pins, snapshot.metadata.dependencies)
         {
             guard
-            case .stable(.release(let version, build: _)) = dependency.version.canonical
+            let version:PatchVersion = dependency.version.release
             else
             {
                 return nil

@@ -24,7 +24,7 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
     mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Meta) -> URI?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Metadata) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -32,7 +32,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                 return target
             }
             else if
-                let volume:Volume.Meta = self.volumes[scalar.zone],
+                let volume:Volume.Metadata = self.volumes[scalar.zone],
                 let uri:URI = uri(volume)
             {
                 let target:String = "\(uri)"

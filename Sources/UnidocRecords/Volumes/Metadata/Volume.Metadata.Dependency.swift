@@ -4,47 +4,52 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-extension Volume.Meta
+extension Volume.Metadata
 {
     @frozen public
-    struct Dependency:Identifiable, Equatable, Sendable
+    struct Dependency:Equatable, Sendable
     {
         public
-        let id:Symbol.Package
+        let symbol:Symbol.Package
 
         public
         var requirement:SymbolGraphMetadata.DependencyRequirement?
         public
-        var resolution:Unidoc.Edition?
+        var resolution:PatchVersion?
+        public
+        var pinned:Unidoc.Edition?
 
         @inlinable public
-        init(id:Symbol.Package,
-            requirement:SymbolGraphMetadata.DependencyRequirement? = nil,
-            resolution:Unidoc.Edition? = nil)
+        init(symbol:Symbol.Package,
+            requirement:SymbolGraphMetadata.DependencyRequirement?,
+            resolution:PatchVersion?,
+            pinned:Unidoc.Edition?)
         {
-            self.id = id
+            self.symbol = symbol
             self.requirement = requirement
             self.resolution = resolution
+            self.pinned = pinned
         }
     }
 }
-extension Volume.Meta.Dependency
+extension Volume.Metadata.Dependency
 {
     public
     enum CodingKey:String, Sendable
     {
-        case id = "_id"
+        case symbol = "_id"
         case requirement_lower = "L"
         case requirement_upper = "U"
-        case resolution = "p"
+        case resolution = "S"
+        case pinned = "p"
     }
 }
-extension Volume.Meta.Dependency:BSONDocumentEncodable
+extension Volume.Metadata.Dependency:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.id] = self.id
+        bson[.symbol] = self.symbol
 
         switch self.requirement
         {
@@ -60,9 +65,10 @@ extension Volume.Meta.Dependency:BSONDocumentEncodable
         }
 
         bson[.resolution] = self.resolution
+        bson[.pinned] = self.pinned
     }
 }
-extension Volume.Meta.Dependency:BSONDocumentDecodable
+extension Volume.Metadata.Dependency:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
@@ -84,8 +90,9 @@ extension Volume.Meta.Dependency:BSONDocumentDecodable
             requirement = upper < lower ? nil : .range(lower ..< upper)
         }
 
-        self.init(id: try bson[.id].decode(),
+        self.init(symbol: try bson[.symbol].decode(),
             requirement: requirement,
-            resolution: try bson[.resolution]?.decode())
+            resolution: try bson[.resolution]?.decode(),
+            pinned: try bson[.pinned]?.decode())
     }
 }
