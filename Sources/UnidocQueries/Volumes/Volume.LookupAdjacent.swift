@@ -67,8 +67,8 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                 }
                 //  We probably don’t need this, the `Groups` collection doesn’t overlap
                 //  with the `Vertices` collection.
-                $0[let: local.min] = volume / Volume.Meta[.planes_autogroup]
-                $0[let: local.max] = volume / Volume.Meta[.planes_max]
+                $0[let: local.min] = volume / Volume.Metadata[.planes_autogroup]
+                $0[let: local.max] = volume / Volume.Metadata[.planes_max]
             }
             $0[.pipeline] = .init
             {
@@ -99,8 +99,8 @@ extension Volume.LookupAdjacent:Volume.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Volume.Meta.Dependency, Mongo.KeyPath> = .init(
-                in: volume / Volume.Meta[.dependencies])
+            let dependencies:Mongo.List<Volume.Metadata.Dependency, Mongo.KeyPath> = .init(
+                in: volume / Volume.Metadata[.dependencies])
             let extensions:Mongo.List<Volume.Group, Mongo.KeyPath> = .init(
                 in: groups)
             let adjacent:ScalarsView = .init(
@@ -111,7 +111,7 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                 $0[.setUnion] = .init
                 {
                     $0.expr { $0[.reduce] = extensions.flatMap(\.zones) }
-                    $0.expr { $0[.map] = dependencies.map { $0[.resolution] } }
+                    $0.expr { $0[.map] = dependencies.map { $0[.pinned] } }
                 }
             }
             $0[output.scalars] = .expr

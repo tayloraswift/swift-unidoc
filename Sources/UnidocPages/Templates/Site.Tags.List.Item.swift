@@ -9,10 +9,10 @@ extension Site.Tags.List
     struct Item
     {
         let edition:Realm.Edition
-        let volume:Volume.Meta?
+        let volume:Volume.Metadata?
         let graphs:Int
 
-        init(edition:Realm.Edition, volume:Volume.Meta?, graphs:Int)
+        init(edition:Realm.Edition, volume:Volume.Metadata?, graphs:Int)
         {
             self.edition = edition
             self.volume = volume
@@ -42,7 +42,7 @@ extension Site.Tags.List.Item:HyperTextOutputStreamable
         tr[.td] { $0.class = "release" } = self.edition.release ? "yes" : "no"
         tr[.td, { $0.class = "version" }]
         {
-            if  let volume:Volume.Meta = self.volume
+            if  let volume:Volume.Metadata = self.volume
             {
                 $0[.a] { $0.href = "\(Site.Docs[volume])" } = "\(self.edition.patch)"
             }

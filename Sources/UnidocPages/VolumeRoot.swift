@@ -18,7 +18,7 @@ protocol VolumeRoot:StaticRoot
 extension VolumeRoot
 {
     static
-    subscript(names:Volume.Meta) -> URI
+    subscript(names:Volume.Metadata) -> URI
     {
         var uri:URI = Self.uri
 
@@ -28,7 +28,7 @@ extension VolumeRoot
     }
 
     static
-    subscript(names:Volume.Meta, shoot:Volume.Shoot) -> URI
+    subscript(names:Volume.Metadata, shoot:Volume.Shoot) -> URI
     {
         var uri:URI = Self[names]
 

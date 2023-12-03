@@ -5,13 +5,13 @@ extension IdentifiablePageContext
 {
     struct Volumes:Sendable
     {
-        let principal:Volume.Meta
+        let principal:Volume.Metadata
         private(set)
-        var secondary:[Unidoc.Edition: Volume.Meta]
+        var secondary:[Unidoc.Edition: Volume.Metadata]
 
         init(
-            principal:Volume.Meta,
-            secondary:[Unidoc.Edition: Volume.Meta] = [:])
+            principal:Volume.Metadata,
+            secondary:[Unidoc.Edition: Volume.Metadata] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -21,9 +21,9 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext.Volumes
 {
     mutating
-    func add(_ names:[Volume.Meta])
+    func add(_ names:[Volume.Metadata])
     {
-        for names:Volume.Meta in names where
+        for names:Volume.Metadata in names where
             names.id != self.principal.id
         {
             self.secondary[names.id] = names
@@ -32,7 +32,7 @@ extension IdentifiablePageContext.Volumes
 }
 extension IdentifiablePageContext.Volumes
 {
-    subscript(zone:Unidoc.Edition) -> Volume.Meta?
+    subscript(zone:Unidoc.Edition) -> Volume.Metadata?
     {
         self.principal.id == zone ? self.principal : self.secondary[zone]
     }

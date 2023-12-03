@@ -1,23 +1,23 @@
 import HTML
 import UnidocRecords
 
-extension Volume.Meta
+extension Volume.Metadata
 {
     struct Subdomain
     {
         private
-        let volume:Volume.Meta
+        let volume:Volume.Metadata
         private
         let culture:Culture
 
-        init(_ volume:Volume.Meta, culture:Culture)
+        init(_ volume:Volume.Metadata, culture:Culture)
         {
             self.volume = volume
             self.culture = culture
         }
     }
 }
-extension Volume.Meta.Subdomain:HyperTextOutputStreamable
+extension Volume.Metadata.Subdomain:HyperTextOutputStreamable
 {
     static
     func += (span:inout HTML.ContentEncoder, self:Self)

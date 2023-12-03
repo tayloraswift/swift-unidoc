@@ -13,12 +13,12 @@ extension Volume
         public
         let vertices:[Volume.Vertex]
         public
-        let volumes:[Volume.Meta]
+        let volumes:[Volume.Metadata]
 
         @inlinable public
         init(principal:PrincipalOutput?,
             vertices:[Volume.Vertex],
-            volumes:[Volume.Meta])
+            volumes:[Volume.Metadata])
         {
             self.principal = principal
             self.vertices = vertices

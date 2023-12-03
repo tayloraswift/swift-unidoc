@@ -19,14 +19,14 @@ protocol _VolumeVertexQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
     var volume:Volume.Selector { get }
     var vertex:VertexPredicate { get }
 
-    /// The field to store the ``Volume.Meta`` of the **latest stable release**
+    /// The field to store the ``Volume.Metadata`` of the **latest stable release**
     /// (relative to the current volume) in.
     ///
     /// If nil, the query will still look up the latest stable release, but the result will
     /// be discarded.
     static
     var volumeOfLatest:Mongo.KeyPath? { get }
-    /// The field to store the ``Volume.Meta`` of the **requested snapshot** in.
+    /// The field to store the ``Volume.Metadata`` of the **requested snapshot** in.
     static
     var volume:Mongo.KeyPath { get }
 
@@ -71,8 +71,8 @@ extension Volume.VertexQuery
             //  package by name instead of id.
             pipeline[.match] = .init
             {
-                $0[Volume.Meta[.package]] = self.volume.package
-                $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
+                $0[Volume.Metadata[.package]] = self.volume.package
+                $0[Volume.Metadata[.patch]] = .init { $0[.exists] = true }
             }
             //  We use the patch number instead of the latest-flag because
             //  it is closer to the ground-truth, and the latest-flag doesn’t
@@ -80,7 +80,7 @@ extension Volume.VertexQuery
             //  it experiences rolling alignments.
             pipeline[.sort] = .init
             {
-                $0[Volume.Meta[.patch]] = (-)
+                $0[Volume.Metadata[.patch]] = (-)
             }
 
             pipeline[.limit] = 1
@@ -89,7 +89,7 @@ extension Volume.VertexQuery
             {
                 $0[Self.volume] = Mongo.Pipeline.ROOT
 
-                //  ``Volume.Meta`` is complex but not that large, and duplicating this
+                //  ``Volume.Metadata`` is complex but not that large, and duplicating this
                 //  makes the rest of the query a lot simpler.
                 if  let volume:Mongo.KeyPath = Self.volumeOfLatest
                 {
@@ -103,10 +103,10 @@ extension Volume.VertexQuery
             //  This index is unique, so we don’t need a sort or a limit.
             pipeline[.match] = .init
             {
-                $0[Volume.Meta[.package]] = self.volume.package
-                $0[Volume.Meta[.version]] = version
+                $0[Volume.Metadata[.package]] = self.volume.package
+                $0[Volume.Metadata[.version]] = version
             }
-            //  ``Volume.Meta`` has many keys. to simplify the output schema
+            //  ``Volume.Metadata`` has many keys. to simplify the output schema
             //  and allow re-use of the earlier pipeline stages, we demote
             //  the zone fields to a subdocument.
             pipeline[.replaceWith] = .init
@@ -128,12 +128,12 @@ extension Volume.VertexQuery
                 {
                     $0[.match] = .init
                     {
-                        $0[Volume.Meta[.package]] = self.volume.package
-                        $0[Volume.Meta[.patch]] = .init { $0[.exists] = true }
+                        $0[Volume.Metadata[.package]] = self.volume.package
+                        $0[Volume.Metadata[.patch]] = .init { $0[.exists] = true }
                     }
                     $0[.sort] = .init
                     {
-                        $0[Volume.Meta[.patch]] = (-)
+                        $0[Volume.Metadata[.patch]] = (-)
                     }
 
                     $0[.limit] = 1
