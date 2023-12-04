@@ -92,7 +92,8 @@ extension DynamicLinker.Extensions
     {
         guard
         let s:Unidoc.Scalar = context.current.scalars.decls[s],
-        let scope:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
+        let extendedSnapshot:DynamicContext.Snapshot = context[s.package],
+        let extendedDecl:SymbolGraph.Decl = extendedSnapshot.decls[s.citizen]?.decl
         else
         {
             let symbol:Symbol.Decl = context.current.decls.symbols[s]
@@ -101,9 +102,9 @@ extension DynamicLinker.Extensions
         }
 
         let universal:Set<GenericConstraint<Unidoc.Scalar?>> =
-            scope.signature.generics.constraints.reduce(into: [])
+            extendedDecl.signature.generics.constraints.reduce(into: [])
         {
-            $0.insert($1.map { context.current.scalars.decls[$0] })
+            $0.insert($1.map { extendedSnapshot.scalars.decls[$0] })
         }
         /// Cache these signatures, since we need to perform two passes.
         let signatures:[DynamicLinker.ExtensionSignature] = extensions.map
@@ -218,7 +219,7 @@ extension DynamicLinker.Extensions
                     namespace: context.current.namespaces[`extension`.namespace],
                     module: modules[`extension`.culture],
                     global: context,
-                    scope: [String].init(scope.path))
+                    scope: [String].init(extendedDecl.path))
                 {
                     $0.link(article: article)
                 }
