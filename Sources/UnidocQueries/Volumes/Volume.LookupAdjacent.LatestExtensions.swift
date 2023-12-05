@@ -9,10 +9,12 @@ extension Volume.LookupAdjacent
     struct LatestExtensions
     {
         let scope:Mongo.Variable<Unidoc.Scalar>
+        let id:Mongo.Variable<Realm>
 
-        init(scope:Mongo.Variable<Unidoc.Scalar>)
+        init(scope:Mongo.Variable<Unidoc.Scalar>, id:Mongo.Variable<Realm>)
         {
             self.scope = scope
+            self.id = id
         }
     }
 }
@@ -31,7 +33,7 @@ extension Volume.LookupAdjacent.LatestExtensions
                 }
                 $0.expr
                 {
-                    $0[.eq] = (Volume.Group[.latest], true)
+                    $0[.eq] = (Volume.Group[.realm], self.id)
                 }
             }
         }
