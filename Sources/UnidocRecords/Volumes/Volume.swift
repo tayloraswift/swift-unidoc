@@ -8,9 +8,9 @@ struct Volume:~Copyable
     var latest:Unidoc.Edition?
 
     public
-    var vertices:[Vertex]
+    var vertices:Vertices
     public
-    var groups:[Group]
+    var groups:Groups
     public
     var index:JSON
     public
@@ -20,8 +20,8 @@ struct Volume:~Copyable
 
     @inlinable public
     init(latest:Unidoc.Edition?,
-        vertices:[Vertex],
-        groups:[Group],
+        vertices:Vertices,
+        groups:Groups,
         index:JSON,
         trees:[TypeTree],
         meta:Metadata)
@@ -56,9 +56,9 @@ extension Volume
     public
     func sitemap() -> Realm.Sitemap
     {
-        let ignoredModules:Set<Unidoc.Scalar> = self.vertices.reduce(into: [])
+        let ignoredModules:Set<Unidoc.Scalar> = self.vertices.cultures.reduce(into: [])
         {
-            switch $1.culture?.module.language
+            switch $1.module.language
             {
             case nil, .swift?:  return
             case _?:            $0.insert($1.id)
@@ -66,30 +66,25 @@ extension Volume
          }
 
         var elements:Realm.Sitemap.Elements = []
-        for vertex:Vertex in self.vertices
+        for vertex:Vertex.Culture in self.vertices.cultures
         {
-            switch vertex
+            elements.append(vertex.shoot)
+        }
+        for vertex:Vertex.Article in self.vertices.articles
+        {
+            elements.append(vertex.shoot)
+        }
+        for vertex:Vertex.Decl in self.vertices.decls
+        {
+            //  Skip C and C++ declarations.
+            guard !ignoredModules.contains(vertex.culture),
+            case .s = vertex.symbol.language
+            else
             {
-            case .culture(let vertex):
-                elements.append(vertex.shoot)
-
-            case .article(let vertex):
-                elements.append(vertex.shoot)
-
-            case .decl(let vertex):
-                //  Skip C and C++ declarations.
-                guard !ignoredModules.contains(vertex.culture),
-                case .s = vertex.symbol.language
-                else
-                {
-                    continue
-                }
-
-                elements.append(vertex.shoot)
-
-            case _:
                 continue
             }
+
+            elements.append(vertex.shoot)
         }
 
         return .init(id: self.meta.id.package, elements: elements)

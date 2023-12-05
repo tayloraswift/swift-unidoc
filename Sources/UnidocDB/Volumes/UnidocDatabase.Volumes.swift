@@ -136,7 +136,7 @@ extension UnidocDatabase.Volumes
             {
                 $0[.and] = .init
                 {
-                    let cell:Unidoc.Cell = .init(package: package)
+                    let cell:ClosedRange<Unidoc.Edition> = .package(package)
 
                     $0.append
                     {
@@ -144,11 +144,11 @@ extension UnidocDatabase.Volumes
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.gte] = cell.min }
+                        $0[Volume.Metadata[.id]] = .init { $0[.gte] = cell.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.lte] = cell.max }
+                        $0[Volume.Metadata[.id]] = .init { $0[.lte] = cell.upperBound }
                     }
                 }
             }
@@ -166,88 +166,6 @@ extension UnidocDatabase.Volumes
                 $0[Volume.Metadata[.id]] = true
                 $0[Volume.Metadata[.patch]] = true
             }
-        }
-    }
-}
-extension UnidocDatabase.Volumes
-{
-    @discardableResult
-    func align(latest zone:Unidoc.Edition, with session:Mongo.Session) async throws -> Int
-    {
-        let response:Mongo.UpdateResponse = try await session.run(
-            command: self.align(latest: zone),
-            against: self.database)
-        return response.selected
-    }
-
-    private
-    func align(latest zone:Unidoc.Edition) -> Mongo.Update<Mongo.Many, Unidoc.Edition>
-    {
-        .init(Self.name,
-            updates:
-            [
-                //  If the record for `zone.id` doesn’t have the latest-flag, add it.
-                .init
-                {
-                    $0[.multi] = false
-                    $0[.hint] = .init
-                    {
-                        $0[Volume.Metadata[.id]] = (+)
-                        $0[Volume.Metadata[.latest]] = (-)
-                    }
-                    $0[.q] = .init
-                    {
-                        $0[Volume.Metadata[.id]] = zone
-                        $0[Volume.Metadata[.latest]] = .init { $0[.ne] = true }
-                    }
-                    $0[.u] = .init
-                    {
-                        $0[.set] = .init
-                        {
-                            $0[Volume.Metadata[.latest]] = true
-                        }
-                    }
-                },
-                //  If any records within the same cell besides the one for `zone.id`
-                //  have the latest-flag, remove it from them.
-                .init
-                {
-                    $0[.multi] = true
-                    $0[.hint] = .init
-                    {
-                        $0[Volume.Metadata[.id]] = (+)
-                        $0[Volume.Metadata[.latest]] = (-)
-                    }
-                    $0[.q] = .init
-                    {
-                        $0[.and] = .init
-                        {
-                            $0.append
-                            {
-                                $0[Volume.Metadata[.id]] = .init { $0[.gte] = zone.cell.min }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Metadata[.id]] = .init { $0[.lte] = zone.cell.max }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Metadata[.id]] = .init { $0[.ne] = zone }
-                                $0[Volume.Metadata[.latest]] = .init { $0[.exists] = true }
-                            }
-                        }
-                    }
-                    $0[.u] = .init
-                    {
-                        $0[.unset] = .init
-                        {
-                            $0[Volume.Metadata[.latest]] = ()
-                        }
-                    }
-                }
-            ])
-        {
-            $0[.ordered] = false
         }
     }
 }

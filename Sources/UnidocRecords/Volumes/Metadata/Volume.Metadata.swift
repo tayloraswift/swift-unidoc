@@ -138,7 +138,7 @@ extension Volume.Metadata:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.cell] = self.id.cell.package
+        bson[.cell] = self.id.package
 
         bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
         bson[.package] = self.symbol.package

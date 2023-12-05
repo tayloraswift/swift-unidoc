@@ -23,6 +23,12 @@ extension Main.Parsing:TestBattery
     static
     func run(tests:TestGroup)
     {
+        //  TODO
+        let _:String = """
+        Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) \
+        AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1
+        """
+
         if  let tests:TestGroup = tests / "SafariWithPrivacyGuard"
         {
             Self.run(tests,

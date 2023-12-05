@@ -48,7 +48,7 @@ struct DynamicLinker:~Copyable
     var decls:[Volume.Vertex.Decl]
 
     private
-    var groups:[Volume.Group]
+    var groups:Volume.Groups
 
     private
     init(
@@ -75,7 +75,7 @@ struct DynamicLinker:~Copyable
         self.articles = []
         self.decls = []
 
-        self.groups = []
+        self.groups = .init()
     }
 }
 extension DynamicLinker
@@ -112,144 +112,21 @@ extension DynamicLinker
     public consuming
     func finalize() -> Mesh
     {
-        var vertices:[Volume.Vertex] = []
-
-        vertices.reserveCapacity(self.current.files.count
-            + self.cultures.count
-            + self.articles.count
-            + self.decls.count
-            + 1)
-
-        var mapper:TreeMapper = .init(zone: self.current.id)
-        for vertex:Volume.Vertex.Article in self.articles
-        {
-            vertices.append(.article(vertex))
-            mapper.add(vertex)
-        }
-        for vertex:Volume.Vertex.Decl in self.decls
-        {
-            vertices.append(.decl(vertex))
-            mapper.add(vertex)
-        }
+        let articles:[Volume.Vertex.Article] = self.articles
+        let cultures:[Volume.Vertex.Culture] = self.cultures
+        let decls:[Volume.Vertex.Decl] = self.decls
 
         let extensions:Extensions = self.extensions
         let global:DynamicContext = self.global
 
-        var snapshot:Volume.SnapshotDetails = .init(abi: self.current.metadata.abi,
-            requirements: self.current.metadata.requirements)
+        let groups:Volume.Groups = (consume self).groups
 
-        var groups:[Volume.Group] = self.groups
-        var cultures:[Volume.Vertex.Culture] = (consume self).cultures
-
-        //  Compute shoots for out-of-package extended types.
-        for d:Int32 in global.current.decls.nodes.indices
-        {
-            if  case nil = global.current.decls.nodes[d].decl,
-                let foreign:Unidoc.Scalar = global.current.scalars.decls[d]
-            {
-                vertices.append(.foreign(mapper.register(foreign: foreign, with: global)))
-            }
-        }
-
-        //  Compute unweighted stats
-        for (c, culture):(Int, SymbolGraph.Culture) in zip(cultures.indices,
-            global.current.cultures)
-        {
-            guard let range:ClosedRange<Int32> = culture.decls
-            else
-            {
-                continue
-            }
-            for d:Int32 in range
-            {
-                if  let decl:SymbolGraph.Decl = global.current.decls.nodes[d].decl
-                {
-                    let coverage:WritableKeyPath<Volume.Stats.Coverage, Int> = .classify(decl,
-                        from: global.current,
-                        at: d)
-
-                    let decl:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
-
-                    cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
-                    cultures[c].census.unweighted.decls[keyPath: decl] += 1
-
-                    snapshot.census.unweighted.coverage[keyPath: coverage] += 1
-                    snapshot.census.unweighted.decls[keyPath: decl] += 1
-                }
-            }
-        }
-
-        //  Create extension records, and compute weighted stats.
-        snapshot.census.weighted = snapshot.census.unweighted
-        for c:Int in cultures.indices
-        {
-            cultures[c].census.weighted = cultures[c].census.unweighted
-        }
-
-        for (signature, `extension`):(ExtensionSignature, Extension) in extensions.sorted()
-            where !`extension`.isEmpty
-        {
-            for f:Unidoc.Scalar in `extension`.features
-            {
-                if  let decl:SymbolGraph.Decl = global[f.package]?.decls[f.citizen]?.decl
-                {
-                    let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
-
-                    cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
-                    snapshot.census.weighted.decls[keyPath: bin] += 1
-                }
-            }
-
-            let assembled:Volume.Group.Extension = global.assemble(
-                extension: `extension`,
-                signature: signature)
-
-            defer
-            {
-                groups.append(.extension(assembled))
-            }
-
-            //  Extensions that only contain subforms are not interesting.
-            if  assembled.nested.isEmpty,
-                assembled.features.isEmpty,
-                assembled.conformances.isEmpty
-            {
-                continue
-            }
-
-            mapper.update(with: assembled)
-        }
-
-        //  Create file vertices.
-        for (f, file):(Int32, Symbol.File) in zip(
-            global.current.files.indices,
-            global.current.files)
-        {
-            vertices.append(.file(.init(id: global.current.id + f, symbol: file)))
-        }
-        //  Move culture vertices to the combined buffer.
-        for culture:Volume.Vertex.Culture in cultures
-        {
-            vertices.append(.culture(culture))
-        }
-
-        let (trees, index):([Volume.TypeTree], JSON) = mapper.build(cultures: cultures)
-
-        vertices.append(.global(.init(id: global.current.id.global, snapshot: snapshot)))
-
-        return .init(
-            vertices: vertices,
+        return .init(extensions: extensions,
+            articles: articles,
+            cultures: cultures,
+            decls: decls,
             groups: groups,
-            index: index,
-            trees: trees,
-            tree: cultures.map
-            {
-                .init(shoot: $0.shoot, style: .stem(.package))
-            }
-                .sorted
-            {
-                $0.shoot < $1.shoot
-            })
+            context: global)
     }
 }
 extension DynamicLinker
@@ -284,7 +161,7 @@ extension DynamicLinker
                 self.current.id + $0
             })
 
-        self.groups.append(.automatic(cultures))
+        self.groups.autogroups.append(cultures)
 
         for c:Int in self.current.cultures.indices
         {
@@ -418,9 +295,9 @@ extension DynamicLinker
                 }
 
                 //  Create top-level autogroup.
-                self.groups.append(.automatic(.init(id: self.next.autogroup.id(),
+                self.groups.autogroups.append(.init(id: self.next.autogroup.id(),
                     scope: namespace.culture,
-                    members: self.global.sort(lexically: consume miscellaneous))))
+                    members: self.global.sort(lexically: consume miscellaneous)))
             }
             //  Create article records.
             if  let articles:ClosedRange<Int32> = culture.articles
@@ -458,7 +335,7 @@ extension DynamicLinker
                 $0.link(topic: topic)
             }
 
-            self.groups.append(.topic(record))
+            self.groups.topics.append(record)
 
             for case .scalar(let member) in record.members
             {

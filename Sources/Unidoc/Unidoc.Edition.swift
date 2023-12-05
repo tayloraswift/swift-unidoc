@@ -22,6 +22,26 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.Edition:RawRepresentable
+{
+    @inlinable public
+    init(rawValue:Int64)
+    {
+        self.init(
+            package: Int32.init(rawValue >> 32),
+            version: Int32.init(truncatingIfNeeded: rawValue))
+    }
+    @inlinable public
+    var rawValue:Int64
+    {
+        Int64.init(self.package) << 32 | Int64.init(UInt32.init(bitPattern: self.version))
+    }
+}
+extension Unidoc.Edition:Comparable
+{
+    @inlinable public static
+    func < (a:Self, b:Self) -> Bool { a.rawValue < b.rawValue }
+}
 extension Unidoc.Edition
 {
     @inlinable public
@@ -31,9 +51,6 @@ extension Unidoc.Edition
     var min:Unidoc.Scalar { self + Int32.init(bitPattern: .min) }
     @inlinable public
     var max:Unidoc.Scalar { self + Int32.init(bitPattern: .max) }
-
-    @inlinable public
-    var cell:Unidoc.Cell { .init(package: self.package) }
 
     @inlinable public
     func contains(_ scalar:Unidoc.Scalar) -> Bool
