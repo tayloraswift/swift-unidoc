@@ -1,3 +1,4 @@
+import HTTPServer
 import MongoDB
 import NIOPosix
 
@@ -26,16 +27,24 @@ enum Main
             try? threads.syncShutdownGracefully()
         }
 
-        try await mongodb.withSessionPool
+        do
         {
-            @Sendable (pool:Mongo.SessionPool) in
+            try await mongodb.withSessionPool
+            {
+                @Sendable (pool:Mongo.SessionPool) in
 
-            let server:Server = try await .init(
-                options: try .init(from: options),
-                threads: threads,
-                mongodb: pool)
+                let server:Server = try await .init(
+                    options: try .init(from: options),
+                    threads: threads,
+                    mongodb: pool)
 
-            try await server.run()
+                try await server.run()
+            }
+        }
+        catch let error
+        {
+            //  Temporary workaround for bypassing backtrace collection.
+            Log[.error] = "(top-level) \(error)"
         }
     }
 }
