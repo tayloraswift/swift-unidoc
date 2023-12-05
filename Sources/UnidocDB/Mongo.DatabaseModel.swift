@@ -86,3 +86,22 @@ extension Mongo.DatabaseModel
         try await session.run(command: query.command, against: self.id)
     }
 }
+extension Mongo.DatabaseModel
+{
+    public
+    func explain(update:consuming some Mongo.UpdateQuery,
+        with session:Mongo.Session) async throws -> String
+    {
+        try await self.explain(command: update.command, with: session)
+    }
+
+    @discardableResult
+    @inlinable public
+    func execute<Query>(update:consuming Query,
+        with session:Mongo.Session)
+        async throws -> Mongo.UpdateResponse<Query.Target.Element.ID>
+        where Query:Mongo.UpdateQuery
+    {
+        try await session.run(command: update.command, against: self.id)
+    }
+}

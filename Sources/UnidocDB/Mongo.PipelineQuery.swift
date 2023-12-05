@@ -45,7 +45,7 @@ extension Mongo.PipelineQuery where Iteration.Stride == Int
 }
 extension Mongo.PipelineQuery where Iteration.Stride == Never?
 {
-    @inlinable public
+    @inlinable internal
     var command:Mongo.Aggregate<Iteration>
     {
         .init(CollectionOrigin.name, pipeline: .init(with: self.build(pipeline:)))

@@ -1,28 +1,28 @@
 import BSON
 import MongoDB
 
-extension Mongo.UpdateStatement
+extension Mongo.UpdateEncoder
 {
-    @inlinable public static
+    @inlinable public mutating
     func replace(
-        _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>) -> Self
+        _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>)
     {
-        .update(element, upsert: false)
+        self.update(element, upsert: false)
     }
 
-    @inlinable public static
+    @inlinable public mutating
     func upsert(
-        _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>) -> Self
+        _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>)
     {
-        .update(element, upsert: true)
+        self.update(element, upsert: true)
     }
 
-    @inlinable internal static
+    @inlinable internal mutating
     func update(
         _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>,
-        upsert:Bool) -> Self
+        upsert:Bool)
     {
-        .init
+        self
         {
             $0[.upsert] = upsert
             $0[.q] = .init { $0["_id"] = element.id }

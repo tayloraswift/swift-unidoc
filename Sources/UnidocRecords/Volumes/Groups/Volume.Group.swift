@@ -74,6 +74,7 @@ extension Volume.Group
         /// view abstraction adds it after delegating to ``Volume.Group``’s ``encode(to:)``
         /// witness.
         case latest = "L"
+        case realm = "R"
     }
 }
 extension Volume.Group:Identifiable

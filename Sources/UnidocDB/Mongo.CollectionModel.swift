@@ -319,8 +319,13 @@ extension Mongo.CollectionModel
         with session:Mongo.Session) async throws -> Mongo.Updates<Element.ID>
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
-                updates: elements.map { .upsert($0) }),
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                for element:some BSONDocumentEncodable & Identifiable<Element.ID> in elements
+                {
+                    $0.upsert(element)
+                }
+            },
             against: self.database)
 
         return try response.updates()
@@ -332,8 +337,10 @@ extension Mongo.CollectionModel
         with session:Mongo.Session) async throws -> Element.ID?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
-                updates: [.upsert(element)]),
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                $0.upsert(element)
+            },
             against: self.database)
 
         let updates:Mongo.Updates<Element.ID> = try response.updates()
@@ -348,8 +355,13 @@ extension Mongo.CollectionModel
         with session:Mongo.Session) async throws -> Mongo.Updates<Element.ID>
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
-                updates: elements.map { .replace($0) }),
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                for element:some BSONDocumentEncodable & Identifiable<Element.ID> in elements
+                {
+                    $0.replace(element)
+                }
+            },
             against: self.database)
 
         return try response.updates()
@@ -363,8 +375,10 @@ extension Mongo.CollectionModel
         with session:Mongo.Session) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
-                updates: [.replace(element)]),
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                $0.replace(element)
+            },
             against: self.database)
 
         let updates:Mongo.Updates<Element.ID> = try response.updates()
@@ -390,16 +404,15 @@ extension Mongo.CollectionModel
         with session:Mongo.Session) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name,
-                updates:
-                [
-                    .init
-                    {
-                        $0[.hint] = .init { $0[index] = (+) }
-                        $0[.q] = .init { $0[index] = key }
-                        $0[.u] = .init { $0[.set] = .init { $0[field] = value } }
-                    },
-                ]),
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                $0
+                {
+                    $0[.hint] = .init { $0[index] = (+) }
+                    $0[.q] = .init { $0[index] = key }
+                    $0[.u] = .init { $0[.set] = .init { $0[field] = value } }
+                }
+            },
             against: self.database)
 
         let updates:Mongo.Updates<Element.ID> = try response.updates()
@@ -423,15 +436,14 @@ extension Mongo.CollectionModel
         matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.One>.init(Self.name,
-                deletes:
-                [
-                    try .init
-                    {
-                        $0[.limit] = .one
-                        $0[.q] = try .init(with: predicate)
-                    },
-                ]),
+            command: Mongo.Delete<Mongo.One>.init(Self.name)
+            {
+                try $0
+                {
+                    $0[.limit] = .one
+                    $0[.q] = try .init(with: predicate)
+                }
+            },
             against: self.database)
 
         let deletions:Mongo.Deletions = try response.deletions()
@@ -442,15 +454,14 @@ extension Mongo.CollectionModel
         matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Int
     {
         let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.Many>.init(Self.name,
-                deletes:
-                [
-                    try .init
-                    {
-                        $0[.limit] = .unlimited
-                        $0[.q] = try .init(with: predicate)
-                    },
-                ]),
+            command: Mongo.Delete<Mongo.Many>.init(Self.name)
+            {
+                try $0
+                {
+                    $0[.limit] = .unlimited
+                    $0[.q] = try .init(with: predicate)
+                }
+            },
             against: self.database)
 
         let deletions:Mongo.Deletions = try response.deletions()
@@ -463,34 +474,33 @@ extension Mongo.CollectionModel<Unidoc.Scalar>
     func clear(range:Unidoc.Edition, with session:Mongo.Session) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.Many>.init(Self.name,
-                deletes:
-                [
-                    .init
+            command: Mongo.Delete<Mongo.Many>.init(Self.name)
+            {
+                $0
+                {
+                    $0[.limit] = .unlimited
+                    $0[.q] = .init
                     {
-                        $0[.limit] = .unlimited
-                        $0[.q] = .init
+                        $0[.and] = .init
                         {
-                            $0[.and] = .init
+                            $0.append
                             {
-                                $0.append
+                                $0["_id"] = .init
                                 {
-                                    $0["_id"] = .init
-                                    {
-                                        $0[.gte] = range.min
-                                    }
+                                    $0[.gte] = range.min
                                 }
-                                $0.append
+                            }
+                            $0.append
+                            {
+                                $0["_id"] = .init
                                 {
-                                    $0["_id"] = .init
-                                    {
-                                        $0[.lte] = range.max
-                                    }
+                                    $0[.lte] = range.max
                                 }
                             }
                         }
-                    },
-                ]),
+                    }
+                }
+            },
             against: self.database)
 
         let _:Mongo.Deletions = try response.deletions()

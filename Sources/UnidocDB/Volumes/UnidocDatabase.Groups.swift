@@ -1,4 +1,5 @@
 import MongoDB
+import MongoQL
 import Unidoc
 import UnidocRecords
 
@@ -27,6 +28,14 @@ extension UnidocDatabase.Groups
     }
 
     public static
+    let indexScopeRealm:Mongo.CollectionIndex = .init("ScopeRealm",
+        unique: false)
+    {
+        $0[Volume.Group[.scope]] = (+)
+        $0[Volume.Group[.realm]] = (+)
+    }
+
+    public static
     let indexScope:Mongo.CollectionIndex = .init("Scope",
         unique: true)
     {
@@ -43,116 +52,54 @@ extension UnidocDatabase.Groups:Mongo.CollectionModel
     var name:Mongo.Collection { "VolumeGroups" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexScopeLatest, Self.indexScope ] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexScopeLatest,
+            Self.indexScopeRealm,
+            Self.indexScope,
+        ]
+    }
 }
 extension UnidocDatabase.Groups
 {
-    func align(latest zone:Unidoc.Edition,
-        with session:Mongo.Session,
-        explain:()) async throws -> String
-    {
-        try await session.run(
-            command: Mongo.Explain<Mongo.Update<Mongo.Many, Unidoc.Scalar>>.init(
-                verbosity: .executionStats,
-                command: self.align(latest: zone)),
-            against: self.database)
-    }
     @discardableResult
-    func align(latest zone:Unidoc.Edition, with session:Mongo.Session) async throws -> Int
+    func insert(_ groups:Volume.Groups,
+        realm:Realm?,
+        with session:Mongo.Session) async throws -> Mongo.Insertions
     {
-        let response:Mongo.UpdateResponse = try await session.run(
-            command: self.align(latest: zone),
-            against: self.database)
-        return response.selected
-    }
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority)
+            {
+                $0[.ordered] = false
+            }
+                documents:
+            {
+                $0 += groups.autogroups.lazy.map(Volume.Group.automatic(_:))
+                $0 += groups.topics.lazy.map(Volume.Group.topic(_:))
 
-    private
-    func align(latest zone:Unidoc.Edition) -> Mongo.Update<Mongo.Many, Unidoc.Scalar>
-    {
-        .init(Self.name,
-            updates:
-            [
-                //  If any records within the specified zone lack the latest-flag,
-                //  add it to them.
-                .init
+                guard
+                let realm:Realm
+                else
                 {
-                    $0[.multi] = true
-                    $0[.q] = .init
-                    {
-                        $0[.and] = .init
-                        {
-                            $0.append
-                            {
-                                $0[Volume.Group[.id]] = .init { $0[.gte] = zone.min }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Group[.id]] = .init { $0[.lte] = zone.max }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Group[.latest]] = .init { $0[.ne] = true }
-                            }
-                        }
-                    }
-                    $0[.u] = .init
-                    {
-                        $0[.set] = .init
-                        {
-                            $0[Volume.Group[.latest]] = true
-                        }
-                    }
-                },
-                //  If any records within the same cell but not within the specified zone
-                //  have the latest-flag, remove it from them.
-                .init
-                {
-                    $0[.multi] = true
-                    $0[.q] = .init
-                    {
-                        $0[.and] = .init
-                        {
-                            let cell:Unidoc.Cell = zone.cell
+                    $0 += groups.extensions.lazy.map(Volume.Group.extension(_:))
+                    return
+                }
 
-                            $0.append
-                            {
-                                $0[Volume.Group[.id]] = .init { $0[.gte] = cell.min.min }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Group[.id]] = .init { $0[.lte] = cell.max.max }
-                            }
-                            $0.append
-                            {
-                                $0[.or] = .init
-                                {
-                                    $0.append
-                                    {
-                                        $0[Volume.Group[.id]] = .init { $0[.lt] = zone.min }
-                                    }
-                                    $0.append
-                                    {
-                                        $0[Volume.Group[.id]] = .init { $0[.gt] = zone.max }
-                                    }
-                                }
-                            }
-                            $0.append
-                            {
-                                $0[Volume.Group[.latest]] = .init { $0[.exists] = true }
-                            }
-                        }
-                    }
-                    $0[.u] = .init
+                for e:Volume.Group.Extension in groups.extensions
+                {
+                    $0[Volume.Group.CodingKey.self]
                     {
-                        $0[.unset] = .init
-                        {
-                            $0[Volume.Group[.latest]] = ()
-                        }
+                        Volume.Group.extension(e).encode(to: &$0)
+
+                        $0[.latest] = true
+                        $0[.realm] = realm
                     }
                 }
-            ])
-        {
-            $0[.ordered] = false
-        }
+            },
+            against: self.database)
+
+        return try response.insertions()
     }
 }
