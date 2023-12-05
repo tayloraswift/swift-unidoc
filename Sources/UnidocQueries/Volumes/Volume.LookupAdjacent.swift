@@ -28,7 +28,7 @@ extension Volume.LookupAdjacent:Volume.LookupContext
             let topic:Group = .init(id: "topic")
 
             let local:LockedExtensions = .init(scope: "local", min: "min", max: "max")
-            let realm:LatestExtensions = .init(scope: "realm")
+            let realm:LatestExtensions = .init(scope: "scope", id: "realm")
 
             $0[.from] = UnidocDatabase.Groups.name
             $0[.let] = .init
@@ -44,6 +44,15 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                     $0[.coalesce] = (vertex / Volume.Vertex[.group], BSON.Max.init())
                 }
 
+                $0[let: local.scope] = .expr
+                {
+                    $0[.coalesce] =
+                    (
+                        vertex / Volume.Vertex[.extendee],
+                        vertex / Volume.Vertex[.id],
+                        BSON.Max.init()
+                    )
+                }
                 $0[let: realm.scope] = .expr
                 {
                     $0[.cond] =
@@ -56,19 +65,12 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                         else: BSON.Max.init()
                     )
                 }
-                $0[let: local.scope] = .expr
-                {
-                    $0[.coalesce] =
-                    (
-                        vertex / Volume.Vertex[.extendee],
-                        vertex / Volume.Vertex[.id],
-                        BSON.Max.init()
-                    )
-                }
                 //  We probably don’t need this, the `Groups` collection doesn’t overlap
                 //  with the `Vertices` collection.
                 $0[let: local.min] = volume / Volume.Metadata[.planes_autogroup]
                 $0[let: local.max] = volume / Volume.Metadata[.planes_max]
+
+                $0[let: realm.id] = volume / Volume.Metadata[.realm]
             }
             $0[.pipeline] = .init
             {

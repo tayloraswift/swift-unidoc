@@ -1,4 +1,4 @@
-db = connect('mongodb://test.swiftinit.org:27017/unidoc');
+db = connect('mongodb://swiftinit.org:27017/unidoc');
 
 var migrateEditions = {
     aggregate: '_editions',
@@ -127,8 +127,26 @@ var migrateSnapshots = {
     cursor: { batchSize: 200 }
 }
 
+var migrateGroups = {
+    update: 'VolumeGroups',
+    updates: [
+        {
+            multi: true,
+            q: {
+                L: true
+            },
+            u: {
+                $set: {
+                    R: 0,
+                }
+            }
+        },
+    ]
+}
+
 
 //  console.log(db.runCommand(migrateEditions));
 //  console.log(db.runCommand(migratePackages));
 //  console.log(db.runCommand(migratePackageAliases));
 //  console.log(db.runCommand(migrateSnapshots));
+console.log(db.runCommand(migrateGroups));

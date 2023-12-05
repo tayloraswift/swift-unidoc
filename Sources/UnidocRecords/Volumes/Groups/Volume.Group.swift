@@ -73,6 +73,7 @@ extension Volume.Group
         /// ``Volume.Group`` doesn’t encode this directly, the ``Records.Groups.Element``
         /// view abstraction adds it after delegating to ``Volume.Group``’s ``encode(to:)``
         /// witness.
+        @available(*, unavailable)
         case latest = "L"
         case realm = "R"
     }
