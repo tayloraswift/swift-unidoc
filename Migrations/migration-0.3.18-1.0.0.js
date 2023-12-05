@@ -138,6 +138,9 @@ var migrateGroups = {
             u: {
                 $set: {
                     R: 0,
+                },
+                $unset: {
+                    L: '',
                 }
             }
         },
