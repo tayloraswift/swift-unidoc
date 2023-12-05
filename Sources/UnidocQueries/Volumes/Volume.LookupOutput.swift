@@ -1,5 +1,5 @@
 import BSON
-import MongoSchema
+import MongoQL
 import UnidocRecords
 import UnidocSelectors
 

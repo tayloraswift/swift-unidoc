@@ -331,26 +331,27 @@ extension UnidocDatabase
         try await self.unlink(volume: volume.id, with: session)
 
         try await self.volumes.insert(some: volume.meta, with: session)
-        try await self.vertices.insert(some: volume.vertices, with: session)
-        try await self.trees.insert(some: volume.trees, with: session)
         try await self.search.insert(some: volume.search, with: session)
+        try await self.trees.insert(some: volume.trees, with: session)
 
-        let delta:Realm.Sitemap.Delta?
+        try await self.vertices.insert(volume.vertices, with: session)
+        try await self.groups.insert(volume.groups,
+            realm: volume.meta.latest ? volume.meta.realm : nil,
+            with: session)
 
-        if  volume.meta.latest
-        {
-            delta = try await self.sitemaps.update(volume.sitemap(), with: session)
-            try await self.groups.insert(some: volume.groups(latest: true), with: session)
-        }
-        else
-        {
-            delta = nil
-            try await self.groups.insert(some: volume.groups, with: session)
-        }
+        let delta:Realm.Sitemap.Delta? = volume.meta.latest
+            ? try await self.sitemaps.update(volume.sitemap(), with: session)
+            : nil
+
         if  let latest:Unidoc.Edition = volume.latest
         {
-            try await self.volumes.align(latest: latest, with: session)
-            try await self.groups.align(latest: latest, with: session)
+            try await self.execute(
+                update: Volumes.AlignLatest.init(to: latest),
+                with: session)
+
+            try await self.execute(
+                update: Groups.AlignLatest.init(to: latest, in: volume.meta.realm),
+                with: session)
         }
 
         return delta

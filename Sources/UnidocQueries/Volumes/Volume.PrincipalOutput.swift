@@ -1,5 +1,5 @@
 import BSON
-import MongoSchema
+import MongoQL
 import SemanticVersions
 import SymbolGraphs
 import Unidoc

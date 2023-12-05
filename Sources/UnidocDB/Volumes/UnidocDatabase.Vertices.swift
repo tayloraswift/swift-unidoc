@@ -71,3 +71,30 @@ extension UnidocDatabase.Vertices:Mongo.RecodableModel
             by: .now.advanced(by: .seconds(60)))
     }
 }
+extension UnidocDatabase.Vertices
+{
+    @discardableResult
+    func insert(_ vertices:Volume.Vertices,
+        with session:Mongo.Session) async throws -> Mongo.Insertions
+    {
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority)
+            {
+                $0[.ordered] = false
+            }
+                documents:
+            {
+                $0 += vertices.articles.lazy.map(Volume.Vertex.article(_:))
+                $0 += vertices.cultures.lazy.map(Volume.Vertex.culture(_:))
+                $0 += vertices.decls.lazy.map(Volume.Vertex.decl(_:))
+                $0 += vertices.files.lazy.map(Volume.Vertex.file(_:))
+                $0 += vertices.foreign.lazy.map(Volume.Vertex.foreign(_:))
+
+                $0.append(Volume.Vertex.global(vertices.global))
+            },
+            against: self.database)
+
+        return try response.insertions()
+    }
+}
