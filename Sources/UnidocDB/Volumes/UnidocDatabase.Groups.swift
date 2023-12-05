@@ -20,11 +20,11 @@ extension UnidocDatabase
 extension UnidocDatabase.Groups
 {
     public static
-    let indexScopeLatest:Mongo.CollectionIndex = .init("ScopeLatest",
-        unique: false)
+    let indexRealm:Mongo.CollectionIndex = .init("Realm",
+        unique: true)
     {
-        $0[Volume.Group[.scope]] = (+)
-        $0[Volume.Group[.latest]] = (-)
+        $0[Volume.Group[.id]] = (+)
+        $0[Volume.Group[.realm]] = (+)
     }
 
     public static
@@ -55,7 +55,7 @@ extension UnidocDatabase.Groups:Mongo.CollectionModel
     var indexes:[Mongo.CollectionIndex]
     {
         [
-            Self.indexScopeLatest,
+            Self.indexRealm,
             Self.indexScopeRealm,
             Self.indexScope,
         ]
@@ -93,7 +93,6 @@ extension UnidocDatabase.Groups
                     {
                         Volume.Group.extension(e).encode(to: &$0)
 
-                        $0[.latest] = true
                         $0[.realm] = realm
                     }
                 }
