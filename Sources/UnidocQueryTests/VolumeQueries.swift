@@ -33,8 +33,9 @@ struct VolumeQueries:UnidocDatabaseTestBattery
 
             empty.roundtrip(for: tests, in: workspace.path)
 
+            let v:Unidoc.Version = .init(rawValue: i)
             tests.expect(try await unidoc.publish(docs: empty, with: session).0 ==? .init(
-                edition: .init(package: 0, version: i),
+                edition: .init(package: 0, version: v),
                 updated: false))
         }
 

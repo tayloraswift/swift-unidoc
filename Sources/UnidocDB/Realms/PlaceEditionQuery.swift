@@ -1,14 +1,15 @@
 import MongoQL
+import Unidoc
 import UnidocRecords
 
 struct PlaceEditionQuery:Sendable
 {
     private
-    let package:Int32
+    let package:Unidoc.Package
     private
     let refname:String
 
-    init(package:Int32, refname:String)
+    init(package:Unidoc.Package, refname:String)
     {
         self.package = package
         self.refname = refname

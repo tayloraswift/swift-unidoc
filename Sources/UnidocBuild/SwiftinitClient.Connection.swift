@@ -7,6 +7,7 @@ import NIOHPACK
 import Symbols
 import UnidocAutomation
 import UnidocRecords
+import Unidoc
 import URI
 
 extension SwiftinitClient
@@ -35,7 +36,7 @@ extension SwiftinitClient.Connection
         try await self.get(from: "/api/build/\(package)")
     }
 
-    func uplink(package:Int32, version:Int32) async throws
+    func uplink(package:Unidoc.Package, version:Unidoc.Version) async throws
     {
         try await self.post(
             urlencoded: "package=\(package)&version=\(version)",

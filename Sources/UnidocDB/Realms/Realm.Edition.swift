@@ -61,9 +61,9 @@ extension Realm
 extension Realm.Edition
 {
     @inlinable public
-    var package:Int32 { self.id.package }
+    var package:Unidoc.Package { self.id.package }
     @inlinable public
-    var version:Int32 { self.id.version }
+    var version:Unidoc.Version { self.id.version }
 }
 extension Realm.Edition:MongoMasterCodingModel
 {

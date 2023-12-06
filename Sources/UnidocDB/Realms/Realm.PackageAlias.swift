@@ -2,6 +2,7 @@ import BSON
 import MongoQL
 import SymbolGraphs
 import Symbols
+import Unidoc
 import UnidocRecords
 
 extension Realm
@@ -12,10 +13,10 @@ extension Realm
         public
         let id:Symbol.Package
         public
-        let coordinate:Int32
+        let coordinate:Unidoc.Package
 
         @inlinable public
-        init(id:Symbol.Package, coordinate:Int32)
+        init(id:Symbol.Package, coordinate:Unidoc.Package)
         {
             self.id = id
             self.coordinate = coordinate
