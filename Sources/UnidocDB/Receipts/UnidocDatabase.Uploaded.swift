@@ -28,8 +28,8 @@ extension UnidocDatabase
 extension UnidocDatabase.Uploaded
 {
     @inlinable public
-    var package:Int32 { self.edition.package }
+    var package:Unidoc.Package { self.edition.package }
 
     @inlinable public
-    var version:Int32 { self.edition.version }
+    var version:Unidoc.Version { self.edition.version }
 }

@@ -4,14 +4,14 @@ extension Unidoc
     struct Scalar:Equatable, Hashable, Sendable
     {
         public
-        let package:Int32
+        let package:Package
         public
-        let version:Int32
+        let version:Version
         public
         let citizen:Int32
 
         @inlinable public
-        init(package:Int32, version:Int32, citizen:Int32)
+        init(package:Package, version:Version, citizen:Int32)
         {
             self.package = package
             self.version = version
@@ -34,18 +34,18 @@ extension Unidoc.Scalar:CustomStringConvertible
 extension Unidoc.Scalar:Comparable
 {
     @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool
+    func < (a:Self, b:Self) -> Bool
     {
         (
-            UInt32.init(bitPattern: lhs.package),
-            UInt32.init(bitPattern: lhs.version),
-            UInt32.init(bitPattern: lhs.citizen)
+            a.package.bits,
+            a.version.bits,
+            UInt32.init(bitPattern: a.citizen)
         )
         <
         (
-            UInt32.init(bitPattern: rhs.package),
-            UInt32.init(bitPattern: rhs.version),
-            UInt32.init(bitPattern: rhs.citizen)
+            b.package.bits,
+            b.version.bits,
+            UInt32.init(bitPattern: b.citizen)
         )
     }
 }

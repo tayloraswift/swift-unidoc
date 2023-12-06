@@ -11,14 +11,14 @@ struct DynamicContext
     private
     let byPackageIdentifier:[Symbol.Package: Snapshot]
     private
-    let byPackage:[Int32: Snapshot]
+    let byPackage:[Unidoc.Package: Snapshot]
 
     let current:Snapshot
 
     private
     init(
         byPackageIdentifier:[Symbol.Package: Snapshot],
-        byPackage:[Int32: Snapshot],
+        byPackage:[Unidoc.Package: Snapshot],
         current:Snapshot)
     {
         self.byPackageIdentifier = byPackageIdentifier
@@ -54,7 +54,7 @@ extension DynamicContext
         var byPackageIdentifier:[Symbol.Package: Snapshot] = .init(
             minimumCapacity: dependencies.count)
 
-        var byPackage:[Int32: Snapshot] = .init(
+        var byPackage:[Unidoc.Package: Snapshot] = .init(
             minimumCapacity: dependencies.count)
 
         for snapshot:Realm.Snapshot in copy dependencies
@@ -86,7 +86,7 @@ extension DynamicContext
         self.current.metadata.package == package ?
         self.current : self.byPackageIdentifier[package]
     }
-    subscript(package:Int32) -> Snapshot?
+    subscript(package:Unidoc.Package) -> Snapshot?
     {
         self.current.id.package == package ?
         self.current : self.byPackage[package]

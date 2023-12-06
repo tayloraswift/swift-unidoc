@@ -1,4 +1,5 @@
 import JSON
+import Unidoc
 
 extension UnidocAPI.PackageStatus
 {
@@ -6,14 +7,14 @@ extension UnidocAPI.PackageStatus
     struct Edition:Equatable, Sendable
     {
         public
-        let coordinate:Int32
+        let coordinate:Unidoc.Version
         public
         let graphs:Int
         public
         let tag:String
 
         @inlinable public
-        init(coordinate:Int32, graphs:Int, tag:String)
+        init(coordinate:Unidoc.Version, graphs:Int, tag:String)
         {
             self.coordinate = coordinate
             self.graphs = graphs
