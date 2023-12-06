@@ -78,7 +78,7 @@ extension Server.Endpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .interactive(Pipeline<Realm.EditionsQuery>.init(
+                return .interactive(Pipeline<Unidex.EditionsQuery>.init(
                     output: parameters.explain ? nil : .application(.json),
                     query: .init(package: .init(package), limit: 1),
                     tag: tag))
@@ -147,7 +147,7 @@ extension Server.Endpoint
             case "all-symbols"? = stem.first,
             case stem.endIndex = stem.index(after: stem.startIndex)
         {
-            return .interactive(Pipeline<Realm.SitemapQuery>.init(
+            return .interactive(Pipeline<Unidex.SitemapQuery>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(package: volume.package),
                 tag: tag))
@@ -210,7 +210,7 @@ extension Server.Endpoint
     static
     func get(tags trunk:String, with parameters:PipelineParameters, tag:MD5?) -> Self
     {
-        .interactive(Pipeline<Realm.EditionsQuery>.init(
+        .interactive(Pipeline<Unidex.EditionsQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(package: .init(trunk), limit: 12),
             tag: tag))

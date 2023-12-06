@@ -8,11 +8,11 @@ extension Site.Tags.List
 {
     struct Item
     {
-        let edition:Realm.Edition
+        let edition:Unidex.Edition
         let volume:Volume.Metadata?
         let graphs:Int
 
-        init(edition:Realm.Edition, volume:Volume.Metadata?, graphs:Int)
+        init(edition:Unidex.Edition, volume:Volume.Metadata?, graphs:Int)
         {
             self.edition = edition
             self.volume = volume
@@ -22,7 +22,7 @@ extension Site.Tags.List
 }
 extension Site.Tags.List.Item
 {
-    init(facet:Realm.EditionsQuery.Facet)
+    init(facet:Unidex.EditionsQuery.Facet)
     {
         self.init(
             edition: facet.edition,

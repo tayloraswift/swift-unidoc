@@ -20,7 +20,7 @@ extension Server.Endpoint.GraphStorage:ProceduralEndpoint
         switch self
         {
         case .put:
-            let snapshot:Realm.Snapshot = try .init(
+            let snapshot:Unidex.Snapshot = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
             let uploaded:UnidocDatabase.Uploaded = try await server.db.unidoc.snapshots.upsert(

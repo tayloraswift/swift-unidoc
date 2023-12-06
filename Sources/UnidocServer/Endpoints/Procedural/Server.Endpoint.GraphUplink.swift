@@ -36,7 +36,7 @@ extension Server.Endpoint.GraphUplink:ProceduralEndpoint
             return .notFound("No such symbol graph.")
         }
 
-        if  let pages:Realm.Sitemap.Delta = updated.sitemap
+        if  let pages:Unidex.Sitemap.Delta = updated.sitemap
         {
             Log[.debug] = """
             Sitemap (\(updated.edition.package)) lost \(pages.deletions.count) pages \

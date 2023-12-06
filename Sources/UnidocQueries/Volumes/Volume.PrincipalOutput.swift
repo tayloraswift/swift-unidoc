@@ -29,7 +29,7 @@ extension Volume
         let volumeOfLatest:Volume.Metadata?
 
         public
-        let repo:Realm.Package.Repo?
+        let repo:Unidex.Package.Repo?
 
         public
         let tree:Volume.TypeTree?
@@ -42,7 +42,7 @@ extension Volume
             groups:[Volume.Group],
             volume:Volume.Metadata,
             volumeOfLatest:Volume.Metadata?,
-            repo:Realm.Package.Repo?,
+            repo:Unidex.Package.Repo?,
             tree:Volume.TypeTree?)
         {
             self.matches = matches

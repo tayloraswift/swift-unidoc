@@ -11,11 +11,11 @@ extension Site.Tags
     struct List
     {
         private
-        let package:Realm.Package
+        let package:Unidex.Package
         private
         var page:[Item]
 
-        init(package:Realm.Package, page:[Item])
+        init(package:Unidex.Package, page:[Item])
         {
             self.package = package
             self.page = page
@@ -24,7 +24,7 @@ extension Site.Tags
 }
 extension Site.Tags.List
 {
-    init(from output:Realm.EditionsQuery.Output)
+    init(from output:Unidex.EditionsQuery.Output)
     {
         var prereleases:ArraySlice<Item> = output.prereleases.map(Item.init(facet:))[...]
         var releases:ArraySlice<Item> = output.releases.map(Item.init(facet:))[...]
@@ -74,7 +74,7 @@ extension Site.Tags.List:ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Realm.Package.Repo = self.package.repo
+            if  let repo:Unidex.Package.Repo = self.package.repo
             {
                 $0[.h2] = "Package Repository"
 

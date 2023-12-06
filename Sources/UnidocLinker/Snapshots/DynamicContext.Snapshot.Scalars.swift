@@ -20,7 +20,7 @@ extension DynamicContext.Snapshot
 }
 extension DynamicContext.Snapshot.Scalars
 {
-    init(snapshot:borrowing Realm.Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
+    init(snapshot:borrowing Unidex.Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
     {
         let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> =
             snapshot.graph.decls.link

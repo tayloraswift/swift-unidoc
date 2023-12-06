@@ -23,7 +23,7 @@ struct PackageNumbers:MongoTestBattery
             ("b", 1, false),
         ]
         {
-            let (package, new):(Realm.Package, Bool) = try await database.register(
+            let (package, new):(Unidex.Package, Bool) = try await database.register(
                 expected.symbol,
                 with: session)
 

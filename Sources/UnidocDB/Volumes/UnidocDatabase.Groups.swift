@@ -20,7 +20,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Groups
 {
     public static
-    let indexRealm:Mongo.CollectionIndex = .init("Realm",
+    let indexRealm:Mongo.CollectionIndex = .init("Unidex",
         unique: true)
     {
         $0[Volume.Group[.id]] = (+)
@@ -65,7 +65,7 @@ extension UnidocDatabase.Groups
 {
     @discardableResult
     func insert(_ groups:Volume.Groups,
-        realm:Realm?,
+        realm:Unidex?,
         with session:Mongo.Session) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
@@ -80,7 +80,7 @@ extension UnidocDatabase.Groups
                 $0 += groups.topics.lazy.map(Volume.Group.topic(_:))
 
                 guard
-                let realm:Realm
+                let realm:Unidex
                 else
                 {
                     $0 += groups.extensions.lazy.map(Volume.Group.extension(_:))
