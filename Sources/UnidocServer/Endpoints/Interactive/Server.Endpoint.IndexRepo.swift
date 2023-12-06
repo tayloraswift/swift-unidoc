@@ -52,8 +52,9 @@ extension Server.Endpoint.IndexRepo:RestrictedEndpoint
         let symbol:Symbol.Package = .init(repo.name)
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-        let (package, new):(Unidex.Package, Bool) = try await server.db.unidoc.register(symbol,
-            tracking: .github(repo),
+        let (package, new):(Unidex.Package, Bool) = try await server.db.unidoc.alias(
+            package: symbol,
+            repo: .github(repo),
             with: session)
 
         return .ok("""

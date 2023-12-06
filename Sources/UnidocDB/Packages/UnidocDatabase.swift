@@ -26,6 +26,10 @@ extension UnidocDatabase
     var policies:Policies { .init() }
 
     @inlinable public
+    var realmAliases:RealmAliases { .init(database: self.id) }
+    @inlinable public
+    var realms:Realms { .init(database: self.id) }
+    @inlinable public
     var packageAliases:PackageAliases { .init(database: self.id) }
     @inlinable public
     var packages:Packages { .init(database: self.id) }
@@ -58,6 +62,8 @@ extension UnidocDatabase:Mongo.DatabaseModel
         try await self.repoFeed.setup(with: session)
         try await self.docsFeed.setup(with: session)
 
+        try await self.realmAliases.setup(with: session)
+        try await self.realms.setup(with: session)
         try await self.packageAliases.setup(with: session)
         try await self.packages.setup(with: session)
         try await self.editions.setup(with: session)
@@ -75,27 +81,55 @@ extension UnidocDatabase:Mongo.DatabaseModel
 
 extension UnidocDatabase
 {
+    /// Registers an **alias** of a package realm.
     public
-    func register(_ package:Symbol.Package,
-        tracking repo:consuming Unidex.Package.Repo? = nil,
-        with session:Mongo.Session) async throws -> (package:Unidex.Package, new:Bool)
+    func alias(realm:String,
+        with session:Mongo.Session) async throws -> (realm:Unidex.Realm, new:Bool)
     {
-        //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Unidex.PackagePlacement = try await self.execute(
-            query: PlacePackageQuery.init(package: package),
+        let autoincrement:Unidex.Autoincrement<Unidex.Realm> = try await self.execute(
+            query: Unidex.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm),
             with: session) ?? .first
 
-        switch consume placement
+        switch consume autoincrement
         {
         case .new(let id):
-            let package:Unidex.PackageAlias = .init(id: package, coordinate: id)
+            let realm:Unidex.RealmAlias = .init(id: realm, coordinate: id)
             //  This can fail if we race with another process.
-            try await self.packageAliases.insert(some: package, with: session)
+            try await self.realmAliases.insert(some: realm, with: session)
             fallthrough
 
         case .old(let id, nil):
             //  Edge case: the most likely reason for this is that we successfully inserted
-            //  the ``PackageAlias`` document, but failed to insert the ``Package`` document.
+            //  the ``Unidex.RealmAlias`` document, but failed to insert the ``Unidex.Realm``
+            //  document.
+            let realm:Unidex.Realm = .init(id: id, symbol: realm)
+            try await self.realms.insert(some: realm, with: session)
+            return (realm, true)
+
+        case .old(_, let realm?):
+            return (realm, false)
+        }
+    }
+
+    /// Registers an **alias** of a package.
+    public
+    func alias(package:Symbol.Package,
+        repo:consuming Unidex.Package.Repo? = nil,
+        with session:Mongo.Session) async throws -> (package:Unidex.Package, new:Bool)
+    {
+        //  Placement involves autoincrement, which is why this cannot be done in an update.
+        let autoincrement:Unidex.Autoincrement<Unidex.Package> = try await self.execute(
+            query: Unidex.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package),
+            with: session) ?? .first
+
+        switch consume autoincrement
+        {
+        case .new(let id):
+            let package:Unidex.PackageAlias = .init(id: package, coordinate: id)
+            try await self.packageAliases.insert(some: package, with: session)
+            fallthrough
+
+        case .old(let id, nil):
             let package:Unidex.Package = .init(id: id,
                 symbol: package,
                 realm: nil,
@@ -122,6 +156,7 @@ extension UnidocDatabase
         }
     }
 
+    /// Registers an **edition** of a package.
     public
     func register(
         package:Unidoc.Package,
@@ -132,7 +167,7 @@ extension UnidocDatabase
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
         let placement:Unidex.EditionPlacement = try await self.execute(
-            query: PlaceEditionQuery.init(
+            query: Unidex.EditionPlacementQuery.init(
                 package: package,
                 refname: refname),
             with: session) ?? .first
@@ -185,8 +220,9 @@ extension UnidocDatabase
         )
     {
         let docs:SymbolGraphArchive = docs
-        let (package, _):(Unidex.Package, Bool) = try await self.register(docs.metadata.package,
-            tracking: nil,
+        let (package, _):(Unidex.Package, Bool) = try await self.alias(
+            package: docs.metadata.package,
+            repo: nil,
             with: session)
 
         //  Is this a version-controlled package?
@@ -384,7 +420,7 @@ extension UnidocDatabase
         }
 
         guard
-        let query:PinDependenciesQuery = .init(for: snapshot)
+        let query:Unidex.PinDependenciesQuery = .init(for: snapshot)
         else
         {
             return snapshot.pins.compactMap { $0 }

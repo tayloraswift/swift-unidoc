@@ -16,6 +16,11 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.Realm:ExpressibleByIntegerLiteral
+{
+    @inlinable public
+    init(integerLiteral:Int32) { self.init(rawValue: integerLiteral) }
+}
 extension Unidoc.Realm
 {
     @inlinable public static
