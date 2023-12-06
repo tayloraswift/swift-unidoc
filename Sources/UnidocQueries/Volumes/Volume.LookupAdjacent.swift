@@ -70,7 +70,10 @@ extension Volume.LookupAdjacent:Volume.LookupContext
                 $0[let: local.min] = volume / Volume.Metadata[.planes_autogroup]
                 $0[let: local.max] = volume / Volume.Metadata[.planes_max]
 
-                $0[let: realm.id] = volume / Volume.Metadata[.realm]
+                $0[let: realm.id] = .expr
+                {
+                    $0[.coalesce] = (vertex / Volume.Metadata[.realm], BSON.Max.init())
+                }
             }
             $0[.pipeline] = .init
             {

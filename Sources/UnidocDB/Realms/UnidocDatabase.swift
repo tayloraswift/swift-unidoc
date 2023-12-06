@@ -98,7 +98,7 @@ extension UnidocDatabase
             //  the ``PackageAlias`` document, but failed to insert the ``Package`` document.
             let package:Realm.Package = .init(id: id,
                 symbol: package,
-                realm: .united,
+                realm: nil,
                 repo: repo)
 
             try await self.packages.insert(some: package, with: session)
@@ -170,7 +170,7 @@ extension UnidocDatabase
     func store(docs:consuming SymbolGraphArchive,
         with session:Mongo.Session) async throws -> Uploaded
     {
-        let (snapshot, _):(Realm.Snapshot, Realm) = try await self.label(docs: docs,
+        let (snapshot, _):(Realm.Snapshot, Realm?) = try await self.label(docs: docs,
             with: session)
 
         return try await self.snapshots.upsert(snapshot: snapshot, with: session)
@@ -178,7 +178,7 @@ extension UnidocDatabase
 
     private
     func label(docs:consuming SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> (snapshot:Realm.Snapshot, realm:Realm)
+        with session:Mongo.Session) async throws -> (snapshot:Realm.Snapshot, realm:Realm?)
     {
         let docs:SymbolGraphArchive = docs
         let (package, _):(Realm.Package, Bool) = try await self.register(docs.metadata.package,
@@ -220,7 +220,7 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (Uploaded, Uplinked)
     {
         var snapshot:Realm.Snapshot
-        let realm:Realm
+        let realm:Realm?
 
         (snapshot, realm) = try await self.label(docs: docs, with: session)
 
@@ -343,14 +343,22 @@ extension UnidocDatabase
             ? try await self.sitemaps.update(volume.sitemap(), with: session)
             : nil
 
+        alignment:
         if  let latest:Unidoc.Edition = volume.latest
         {
             try await self.execute(
                 update: Volumes.AlignLatest.init(to: latest),
                 with: session)
 
+            guard
+            let realm:Realm = volume.meta.realm
+            else
+            {
+                break alignment
+            }
+
             try await self.execute(
-                update: Groups.AlignLatest.init(to: latest, in: volume.meta.realm),
+                update: Groups.AlignLatest.init(to: latest, in: realm),
                 with: session)
         }
 
@@ -410,7 +418,7 @@ extension UnidocDatabase
 
     private
     func link(_ snapshot:inout Realm.Snapshot,
-        realm:Realm,
+        realm:Realm?,
         with session:Mongo.Session) async throws -> Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)

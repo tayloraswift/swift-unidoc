@@ -8,9 +8,9 @@ extension UnidocDatabase.Volumes
     struct AlignRealm
     {
         let range:ClosedRange<Unidoc.Edition>
-        let realm:Realm
+        let realm:Realm?
 
-        init(range:ClosedRange<Unidoc.Edition>, to realm:Realm)
+        init(range:ClosedRange<Unidoc.Edition>, to realm:Realm?)
         {
             self.range = range
             self.realm = realm
@@ -43,15 +43,32 @@ extension UnidocDatabase.Volumes.AlignRealm:Mongo.UpdateQuery
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.realm]] = .init { $0[.ne] = self.realm }
+                        if  let realm:Realm = self.realm
+                        {
+                            $0[Volume.Metadata[.realm]] = .init { $0[.ne] = realm }
+                        }
+                        else
+                        {
+                            $0[Volume.Metadata[.realm]] = .init { $0[.exists] = true }
+                        }
                     }
                 }
             }
             $0[.u] = .init
             {
-                $0[.set] = .init
+                if  let realm:Realm = self.realm
                 {
-                    $0[Volume.Metadata[.realm]] = self.realm
+                    $0[.set] = .init
+                    {
+                        $0[Volume.Metadata[.realm]] = realm
+                    }
+                }
+                else
+                {
+                    $0[.unset] = .init
+                    {
+                        $0[Volume.Metadata[.realm]] = ()
+                    }
                 }
             }
         }
