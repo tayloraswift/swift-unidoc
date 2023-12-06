@@ -1,4 +1,5 @@
 import BSON
+import Unidoc
 
 extension Unidex
 {
