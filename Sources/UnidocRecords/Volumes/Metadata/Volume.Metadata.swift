@@ -31,7 +31,7 @@ extension Volume
         public
         var latest:Bool
         public
-        var realm:Unidex?
+        var realm:Unidoc.Realm?
         public
         var patch:PatchVersion?
 
@@ -50,7 +50,7 @@ extension Volume
             commit:SHA1? = nil,
             symbol:VolumeIdentifier,
             latest:Bool,
-            realm:Unidex?,
+            realm:Unidoc.Realm?,
             patch:PatchVersion? = nil,
             tree:[Noun] = [])
         {

@@ -170,7 +170,7 @@ extension UnidocDatabase
     func store(docs:consuming SymbolGraphArchive,
         with session:Mongo.Session) async throws -> Uploaded
     {
-        let (snapshot, _):(Unidex.Snapshot, Unidex?) = try await self.label(docs: docs,
+        let (snapshot, _):(Unidex.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
             with: session)
 
         return try await self.snapshots.upsert(snapshot: snapshot, with: session)
@@ -178,7 +178,11 @@ extension UnidocDatabase
 
     private
     func label(docs:consuming SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> (snapshot:Unidex.Snapshot, realm:Unidex?)
+        with session:Mongo.Session) async throws ->
+        (
+            snapshot:Unidex.Snapshot,
+            realm:Unidoc.Realm?
+        )
     {
         let docs:SymbolGraphArchive = docs
         let (package, _):(Unidex.Package, Bool) = try await self.register(docs.metadata.package,
@@ -220,7 +224,7 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (Uploaded, Uplinked)
     {
         var snapshot:Unidex.Snapshot
-        let realm:Unidex?
+        let realm:Unidoc.Realm?
 
         (snapshot, realm) = try await self.label(docs: docs, with: session)
 
@@ -351,7 +355,7 @@ extension UnidocDatabase
                 with: session)
 
             guard
-            let realm:Unidex = volume.meta.realm
+            let realm:Unidoc.Realm = volume.meta.realm
             else
             {
                 break alignment
@@ -418,7 +422,7 @@ extension UnidocDatabase
 
     private
     func link(_ snapshot:inout Unidex.Snapshot,
-        realm:Unidex?,
+        realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)

@@ -5,22 +5,22 @@ import UnidocRecords
 extension Unidex
 {
     @frozen public
-    struct MetadataAlias:Identifiable, Equatable, Sendable
+    struct RealmAlias:Identifiable, Equatable, Sendable
     {
         public
         let id:String
         public
-        let realm:Unidex
+        let realm:Realm
 
         @inlinable public
-        init(id:String, realm:Unidex)
+        init(id:String, realm:Realm)
         {
             self.id = id
             self.realm = realm
         }
     }
 }
-extension Unidex.MetadataAlias:MongoMasterCodingModel
+extension Unidex.RealmAlias:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -29,7 +29,7 @@ extension Unidex.MetadataAlias:MongoMasterCodingModel
         case realm = "r"
     }
 }
-extension Unidex.MetadataAlias:BSONDocumentEncodable
+extension Unidex.RealmAlias:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -38,7 +38,7 @@ extension Unidex.MetadataAlias:BSONDocumentEncodable
         bson[.realm] = self.realm
     }
 }
-extension Unidex.MetadataAlias:BSONDocumentDecodable
+extension Unidex.RealmAlias:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
