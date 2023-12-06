@@ -8,9 +8,9 @@ extension UnidocDatabase.Groups
     struct AlignLatest
     {
         let latest:Unidoc.Edition
-        let realm:Unidex
+        let realm:Unidoc.Realm
 
-        init(to latest:Unidoc.Edition, in realm:Unidex)
+        init(to latest:Unidoc.Edition, in realm:Unidoc.Realm)
         {
             self.latest = latest
             self.realm = realm

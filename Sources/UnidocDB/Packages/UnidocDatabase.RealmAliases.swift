@@ -19,16 +19,16 @@ extension UnidocDatabase
 extension UnidocDatabase.RealmAliases
 {
     public static
-    let indexRealm:Mongo.CollectionIndex = .init("Unidex",
+    let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: false)
     {
-        $0[Unidex.MetadataAlias[.realm]] = (+)
+        $0[Unidex.RealmAlias[.realm]] = (+)
     }
 }
 extension UnidocDatabase.RealmAliases
 {
     public
-    typealias Element = Unidex.MetadataAlias
+    typealias Element = Unidex.RealmAlias
 
     @inlinable public static
     var name:Mongo.Collection { "RealmAliases" }

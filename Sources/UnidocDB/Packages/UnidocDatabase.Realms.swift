@@ -19,7 +19,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Realms:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.Metadata
+    typealias Element = Unidex.Realm
 
     @inlinable public static
     var name:Mongo.Collection { "Realms" }

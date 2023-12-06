@@ -31,7 +31,7 @@ extension Unidex
 
         /// The current realm this package belongs to. A package can change realms.
         public
-        var realm:Unidex?
+        var realm:Unidoc.Realm?
 
         /// The remote git repo this package tracks.
         ///
@@ -47,7 +47,7 @@ extension Unidex
         @inlinable public
         init(id:Unidoc.Package,
             symbol:Symbol.Package,
-            realm:Unidex?,
+            realm:Unidoc.Realm?,
             repo:Repo? = nil,
             crawled:BSON.Millisecond = 0)
         {
