@@ -30,7 +30,7 @@ extension Realm
 
         /// The current realm this package belongs to. A package can change realms.
         public
-        var realm:Realm
+        var realm:Realm?
 
         /// The remote git repo this package tracks.
         ///
@@ -46,7 +46,7 @@ extension Realm
         @inlinable public
         init(id:Int32,
             symbol:Symbol.Package,
-            realm:Realm,
+            realm:Realm?,
             repo:Repo? = nil,
             crawled:BSON.Millisecond = 0)
         {
@@ -89,7 +89,7 @@ extension Realm.Package:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             symbol: try bson[.symbol].decode(),
-            realm: try bson[.realm].decode(),
+            realm: try bson[.realm]?.decode(),
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)
     }

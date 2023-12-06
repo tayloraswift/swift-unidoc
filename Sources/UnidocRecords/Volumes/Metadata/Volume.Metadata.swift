@@ -31,7 +31,7 @@ extension Volume
         public
         var latest:Bool
         public
-        var realm:Realm
+        var realm:Realm?
         public
         var patch:PatchVersion?
 
@@ -50,7 +50,7 @@ extension Volume
             commit:SHA1? = nil,
             symbol:VolumeIdentifier,
             latest:Bool,
-            realm:Realm,
+            realm:Realm?,
             patch:PatchVersion? = nil,
             tree:[Noun] = [])
         {
@@ -181,7 +181,7 @@ extension Volume.Metadata:BSONDocumentDecodable
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
             latest: try bson[.latest]?.decode() ?? false,
-            realm: try bson[.realm].decode(),
+            realm: try bson[.realm]?.decode(),
             patch: try bson[.patch]?.decode(),
             tree: try bson[.tree]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
 
