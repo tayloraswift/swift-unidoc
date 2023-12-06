@@ -52,7 +52,7 @@ extension Server.Endpoint.IndexRepo:RestrictedEndpoint
         let symbol:Symbol.Package = .init(repo.name)
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-        let (package, new):(Realm.Package, Bool) = try await server.db.unidoc.register(symbol,
+        let (package, new):(Unidex.Package, Bool) = try await server.db.unidoc.register(symbol,
             tracking: .github(repo),
             with: session)
 

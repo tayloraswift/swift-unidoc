@@ -40,7 +40,7 @@ extension Site.Docs
 extension Site.Docs.Package
 {
     private
-    var repo:Realm.Package.Repo? { self.context.repo }
+    var repo:Unidex.Package.Repo? { self.context.repo }
 }
 extension Site.Docs.Package:RenderablePage
 {
@@ -129,7 +129,7 @@ extension Site.Docs.Package:VersionedPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Realm.Package.Repo = self.repo
+            if  let repo:Unidex.Package.Repo = self.repo
             {
                 let heading:AutomaticHeading = .packageRepository
                 $0[.h2] { $0.id = heading.id } = heading

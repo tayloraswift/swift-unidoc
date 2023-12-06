@@ -9,13 +9,13 @@ extension UnidocDatabase
         public
         let edition:Unidoc.Edition
         public
-        let sitemap:Realm.Sitemap.Delta?
+        let sitemap:Unidex.Sitemap.Delta?
         public
         let visibleInFeed:Bool
 
         @inlinable public
         init(edition:Unidoc.Edition,
-            sitemap:Realm.Sitemap.Delta?,
+            sitemap:Unidex.Sitemap.Delta?,
             visibleInFeed:Bool = false)
         {
             self.edition = edition

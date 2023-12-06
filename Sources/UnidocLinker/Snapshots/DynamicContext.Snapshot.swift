@@ -53,7 +53,7 @@ extension DynamicContext.Snapshot
 extension DynamicContext.Snapshot
 {
     convenience
-    init(snapshot:Realm.Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
+    init(snapshot:Unidex.Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
     {
         let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
 

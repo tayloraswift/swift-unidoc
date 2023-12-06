@@ -721,6 +721,7 @@ for target:PackageDescription.Target in package.targets
         settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
         settings.append(.enableUpcomingFeature("ConciseMagicFile"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
+        settings.append(.enableExperimentalFeature("NestedProtocols"))
         settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))

@@ -54,7 +54,7 @@ extension Volume
     }
 
     public
-    func sitemap() -> Realm.Sitemap
+    func sitemap() -> Unidex.Sitemap
     {
         let ignoredModules:Set<Unidoc.Scalar> = self.vertices.cultures.reduce(into: [])
         {
@@ -65,7 +65,7 @@ extension Volume
             }
          }
 
-        var elements:Realm.Sitemap.Elements = []
+        var elements:Unidex.Sitemap.Elements = []
         for vertex:Vertex.Culture in self.vertices.cultures
         {
             elements.append(vertex.shoot)

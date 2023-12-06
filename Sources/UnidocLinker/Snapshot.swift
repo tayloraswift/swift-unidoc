@@ -1,5 +1,5 @@
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Realm.Snapshot")
+@available(*, deprecated, renamed: "Unidex.Snapshot")
 public
-typealias Snapshot = Realm.Snapshot
+typealias Snapshot = Unidex.Snapshot

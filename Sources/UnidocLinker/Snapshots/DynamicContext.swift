@@ -29,14 +29,14 @@ struct DynamicContext
 extension DynamicContext
 {
     public
-    init(_ currentSnapshot:Realm.Snapshot, dependencies:borrowing [Realm.Snapshot])
+    init(_ currentSnapshot:Unidex.Snapshot, dependencies:borrowing [Unidex.Snapshot])
     {
         //  Build a combined lookup table mapping upstream symbols to scalars.
         //  Because module names are unique within a build tree, there should
         //  be no collisions among mangled symbols.
         var upstream:UpstreamScalars = .init()
 
-        for snapshot:Realm.Snapshot in copy dependencies
+        for snapshot:Unidex.Snapshot in copy dependencies
         {
             for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.decls.citizens
             {
@@ -57,7 +57,7 @@ extension DynamicContext
         var byPackage:[Unidoc.Package: Snapshot] = .init(
             minimumCapacity: dependencies.count)
 
-        for snapshot:Realm.Snapshot in copy dependencies
+        for snapshot:Unidex.Snapshot in copy dependencies
         {
             let snapshot:Snapshot = .init(snapshot: snapshot, upstream: upstream)
 

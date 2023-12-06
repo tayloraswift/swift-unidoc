@@ -32,7 +32,7 @@ extension Server.Endpoint.SitemapIndex:PublicEndpoint
 
             try await server.db.unidoc.sitemaps.list(with: session)
             {
-                for sitemap:Realm.SitemapIndexEntry in $0
+                for sitemap:Unidex.SitemapIndexEntry in $0
                 {
                     xml[.sitemap]
                     {

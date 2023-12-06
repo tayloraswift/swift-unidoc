@@ -31,7 +31,7 @@ extension Volume
         public
         var latest:Bool
         public
-        var realm:Realm?
+        var realm:Unidex?
         public
         var patch:PatchVersion?
 
@@ -50,7 +50,7 @@ extension Volume
             commit:SHA1? = nil,
             symbol:VolumeIdentifier,
             latest:Bool,
-            realm:Realm?,
+            realm:Unidex?,
             patch:PatchVersion? = nil,
             tree:[Noun] = [])
         {
@@ -104,7 +104,7 @@ extension Volume.Metadata
         case version = "V"
         case display = "D"
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
-        /// to match (and duplicate) the refname in the associated ``Realm.Edition`` record.
+        /// to match (and duplicate) the refname in the associated ``Unidex.Edition`` record.
         case refname = "G"
         case commit = "H"
         case patch = "S"

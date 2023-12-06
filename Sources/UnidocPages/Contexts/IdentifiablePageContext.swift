@@ -16,10 +16,10 @@ class IdentifiablePageContext<ID> where ID:Hashable
     private
     var cache:Cache
 
-    let repo:Realm.Package.Repo?
+    let repo:Unidex.Package.Repo?
 
     private
-    init(cache:Cache, repo:Realm.Package.Repo?)
+    init(cache:Cache, repo:Unidex.Package.Repo?)
     {
         self.outlines = []
         self.cache = cache
@@ -47,7 +47,7 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext<Unidoc.Scalar>
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, volume:Volume.Metadata, repo:Realm.Package.Repo?)
+    init(principal scalar:Unidoc.Scalar, volume:Volume.Metadata, repo:Unidex.Package.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
@@ -58,7 +58,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
 extension IdentifiablePageContext<Never?>
 {
     convenience
-    init(principal volume:Volume.Metadata, repo:Realm.Package.Repo?)
+    init(principal volume:Volume.Metadata, repo:Unidex.Package.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),
@@ -170,7 +170,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
     {
-        if  let origin:Realm.Package.Repo.Origin = self.repo?.origin,
+        if  let origin:Unidex.Package.Repo.Origin = self.repo?.origin,
             let refname:String = self.volumes[file.zone]?.refname,
             let file:Volume.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
