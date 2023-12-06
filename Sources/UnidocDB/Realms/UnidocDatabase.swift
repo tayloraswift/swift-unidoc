@@ -124,7 +124,7 @@ extension UnidocDatabase
 
     public
     func register(
-        package:Int32,
+        package:Unidoc.Package,
         version:SemanticVersion,
         refname:String,
         sha1:SHA1?,
@@ -186,7 +186,7 @@ extension UnidocDatabase
             with: session)
 
         //  Is this a version-controlled package?
-        let version:Int32
+        let version:Unidoc.Version
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
             let semver:SemanticVersion = docs.metadata.package.version(tag: commit.refname)
         {

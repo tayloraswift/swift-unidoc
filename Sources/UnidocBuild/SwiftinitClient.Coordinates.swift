@@ -1,13 +1,14 @@
 import JSON
+import Unidoc
 
 extension SwiftinitClient
 {
     struct Coordinates:Sendable
     {
-        var package:Int32
-        var version:Int32
+        var package:Unidoc.Package
+        var version:Unidoc.Version
 
-        init(package:Int32, version:Int32)
+        init(package:Unidoc.Package, version:Unidoc.Version)
         {
             self.package = package
             self.version = version
@@ -19,7 +20,7 @@ extension SwiftinitClient.Coordinates:Comparable
     static
     func < (a:Self, b:Self) -> Bool
     {
-        (a.package, a.version) < (b.package, b.version)
+        (a.package.rawValue, a.version.bits) < (b.package.rawValue, b.version.bits)
     }
 }
 extension SwiftinitClient.Coordinates:CustomStringConvertible

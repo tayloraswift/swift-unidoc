@@ -119,7 +119,8 @@ extension UnidocDatabase.Volumes
 extension UnidocDatabase.Volumes
 {
     /// Returns the latest release version of the specified package, if one exists.
-    func latestRelease(of package:Int32, with session:Mongo.Session) async throws -> PatchView?
+    func latestRelease(of package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> PatchView?
     {
         let results:[PatchView] = try await session.run(
             command: self.latestRelease(of: package),
@@ -128,7 +129,7 @@ extension UnidocDatabase.Volumes
     }
 
     private
-    func latestRelease(of package:Int32) -> Mongo.Find<Mongo.SingleBatch<PatchView>>
+    func latestRelease(of package:Unidoc.Package) -> Mongo.Find<Mongo.SingleBatch<PatchView>>
     {
         .init(Self.name, limit: 1)
         {

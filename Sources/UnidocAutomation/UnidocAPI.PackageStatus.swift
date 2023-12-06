@@ -1,4 +1,5 @@
 import JSON
+import Unidoc
 
 extension UnidocAPI
 {
@@ -6,7 +7,7 @@ extension UnidocAPI
     struct PackageStatus
     {
         public
-        let coordinate:Int32
+        let coordinate:Unidoc.Package
         public
         let repo:String
 
@@ -16,7 +17,7 @@ extension UnidocAPI
         var prerelease:Edition?
 
         @inlinable public
-        init(coordinate:Int32, repo:String, release:Edition, prerelease:Edition? = nil)
+        init(coordinate:Unidoc.Package, repo:String, release:Edition, prerelease:Edition? = nil)
         {
             self.coordinate = coordinate
             self.repo = repo

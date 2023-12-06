@@ -1,13 +1,14 @@
 import BSON
 import MongoQL
+import Unidoc
 import UnidocRecords
 
 extension Realm
 {
     enum PackagePlacement
     {
-        case new(Int32)
-        case old(Int32, Package?)
+        case new(Unidoc.Package)
+        case old(Unidoc.Package, Package?)
     }
 }
 extension Realm.PackagePlacement
@@ -27,7 +28,7 @@ extension Realm.PackagePlacement:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let coordinate:Int32 = try bson[.coordinate].decode()
+        let coordinate:Unidoc.Package = try bson[.coordinate].decode()
 
         if  let package:[Realm.Package] = try bson[.package]?.decode()
         {

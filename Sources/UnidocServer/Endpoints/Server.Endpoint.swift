@@ -315,9 +315,9 @@ extension Server.Endpoint
 
             case .uplink:
                 if  let package:String = form["package"],
-                    let package:Int32 = .init(package),
+                    let package:Unidoc.Package = .init(package),
                     let version:String = form["version"],
-                    let version:Int32 = .init(version)
+                    let version:Unidoc.Version = .init(version)
                 {
                     return .procedural(GraphUplink.coordinate(.init(
                         package: package,

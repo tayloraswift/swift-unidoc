@@ -1,13 +1,14 @@
 import BSON
 import MongoQL
 import SHA1
+import Unidoc
 import UnidocRecords
 
 extension Realm
 {
     enum EditionPlacement
     {
-        case new(Int32)
+        case new(Unidoc.Version)
         case old(Edition)
     }
 }

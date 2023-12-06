@@ -2,6 +2,7 @@ import BSON
 import MongoQL
 import SymbolGraphs
 import Symbols
+import Unidoc
 import UnidocRecords
 import UnixTime
 
@@ -21,7 +22,7 @@ extension Realm
         /// can change, because the coordinate can never change. Tracking a remote GitHub repo
         /// counts as something that can change.
         public
-        let id:Int32
+        let id:Unidoc.Package
 
         /// The current preferred name for this package. A package may have multiple names,
         /// and the preferred name can change.
@@ -44,7 +45,7 @@ extension Realm
         var crawled:BSON.Millisecond
 
         @inlinable public
-        init(id:Int32,
+        init(id:Unidoc.Package,
             symbol:Symbol.Package,
             realm:Realm?,
             repo:Repo? = nil,

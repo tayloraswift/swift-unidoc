@@ -10,12 +10,12 @@ extension Unidoc
     struct Edition:Equatable, Hashable, Sendable
     {
         public
-        let package:Int32
+        let package:Package
         public
-        let version:Int32
+        let version:Version
 
         @inlinable public
-        init(package:Int32, version:Int32)
+        init(package:Package, version:Version)
         {
             self.package = package
             self.version = version
@@ -28,13 +28,13 @@ extension Unidoc.Edition:RawRepresentable
     init(rawValue:Int64)
     {
         self.init(
-            package: Int32.init(rawValue >> 32),
-            version: Int32.init(truncatingIfNeeded: rawValue))
+            package: .init(rawValue: Int32.init(rawValue >> 32)),
+            version: .init(rawValue: Int32.init(truncatingIfNeeded: rawValue)))
     }
     @inlinable public
     var rawValue:Int64
     {
-        Int64.init(self.package) << 32 | Int64.init(UInt32.init(bitPattern: self.version))
+        Int64.init(self.package.rawValue) << 32 | Int64.init(self.version.bits)
     }
 }
 extension Unidoc.Edition:Comparable

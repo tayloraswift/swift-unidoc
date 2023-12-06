@@ -11,7 +11,7 @@ struct PackageNumbers:MongoTestBattery
         let database:UnidocDatabase = await .setup(as: database, in: pool)
         let session:Mongo.Session = try await .init(from: pool)
 
-        for expected:(symbol:Symbol.Package, id:Int32, new:Bool) in
+        for expected:(symbol:Symbol.Package, id:Unidoc.Package, new:Bool) in
         [
             ("a", 0, true),
             ("b", 1, true),
