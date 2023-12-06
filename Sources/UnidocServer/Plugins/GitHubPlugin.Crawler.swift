@@ -66,10 +66,10 @@ extension GitHubPlugin.Crawler
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[Realm.Package] = try await db.unidoc.packages.stalest(count,
+        let stale:[Unidex.Package] = try await db.unidoc.packages.stalest(count,
             with: session)
 
-        for package:Realm.Package in stale
+        for package:Unidex.Package in stale
         {
             guard case .github(let old) = package.repo
             else

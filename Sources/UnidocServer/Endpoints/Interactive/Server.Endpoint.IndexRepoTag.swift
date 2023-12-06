@@ -35,15 +35,15 @@ extension Server.Endpoint.IndexRepoTag:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let output:Realm.EditionsQuery.Output = try await server.db.unidoc.execute(
-            query: Realm.EditionsQuery.init(package: self.package, limit: 0),
+        let output:Unidex.EditionsQuery.Output = try await server.db.unidoc.execute(
+            query: Unidex.EditionsQuery.init(package: self.package, limit: 0),
             with: session)
         else
         {
             return .notFound("No such package")
         }
 
-        let package:Realm.Package = (consume output).package
+        let package:Unidex.Package = (consume output).package
 
         guard
         case .github(let repo) = package.repo
@@ -74,7 +74,7 @@ extension Server.Endpoint.IndexRepoTag:RestrictedEndpoint
             return .ok("Ignored tag '\(tag.name)': not a semantic or swift version")
         }
 
-        let (edition, new):(Realm.Edition, Bool) = try await server.db.unidoc.register(
+        let (edition, new):(Unidex.Edition, Bool) = try await server.db.unidoc.register(
             package: package.id,
             version: version,
             refname: tag.name,
