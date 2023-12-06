@@ -23,8 +23,8 @@ struct PackageNumbers:MongoTestBattery
             ("b", 1, false),
         ]
         {
-            let (package, new):(Unidex.Package, Bool) = try await database.register(
-                expected.symbol,
+            let (package, new):(Unidex.Package, Bool) = try await database.alias(
+                package: expected.symbol,
                 with: session)
 
             tests.expect(package.id ==? expected.id)

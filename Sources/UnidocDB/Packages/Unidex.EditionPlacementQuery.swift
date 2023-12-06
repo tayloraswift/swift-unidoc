@@ -2,20 +2,23 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-struct PlaceEditionQuery:Sendable
+extension Unidex
 {
-    private
-    let package:Unidoc.Package
-    private
-    let refname:String
-
-    init(package:Unidoc.Package, refname:String)
+    struct EditionPlacementQuery:Sendable
     {
-        self.package = package
-        self.refname = refname
+        private
+        let package:Unidoc.Package
+        private
+        let refname:String
+
+        init(package:Unidoc.Package, refname:String)
+        {
+            self.package = package
+            self.refname = refname
+        }
     }
 }
-extension PlaceEditionQuery:Mongo.PipelineQuery
+extension Unidex.EditionPlacementQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = UnidocDatabase.Editions
     typealias Collation = SimpleCollation

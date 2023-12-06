@@ -5,18 +5,21 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-struct PinDependenciesQuery:Sendable
+extension Unidex
 {
-    private
-    let patches:[Symbol.PackageDependency<PatchVersion>]
-
-    private
-    init(patches:[Symbol.PackageDependency<PatchVersion>])
+    struct PinDependenciesQuery:Sendable
     {
-        self.patches = patches
+        private
+        let patches:[Symbol.PackageDependency<PatchVersion>]
+
+        private
+        init(patches:[Symbol.PackageDependency<PatchVersion>])
+        {
+            self.patches = patches
+        }
     }
 }
-extension PinDependenciesQuery
+extension Unidex.PinDependenciesQuery
 {
     init?(for snapshot:borrowing Unidex.Snapshot)
     {
@@ -42,7 +45,7 @@ extension PinDependenciesQuery
         self.init(patches: patches)
     }
 }
-extension PinDependenciesQuery:Mongo.PipelineQuery
+extension Unidex.PinDependenciesQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = UnidocDatabase.PackageAliases
     typealias Collation = SimpleCollation
