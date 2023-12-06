@@ -1,5 +1,7 @@
 import BSON
+import MongoQL
 import Unidoc
+import UnidocRecords
 
 extension Unidex
 {
@@ -11,26 +13,22 @@ extension Unidex
 
         public
         var symbol:String
-        public
-        var hidden:Bool
 
         @inlinable public
-        init(id:Unidoc.Realm, symbol:String, hidden:Bool)
+        init(id:Unidoc.Realm, symbol:String)
         {
             self.id = id
             self.symbol = symbol
-            self.hidden = hidden
         }
     }
 }
-extension Unidex.Realm
+extension Unidex.Realm:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
     {
         case id = "_id"
         case symbol = "symbol"
-        case hidden = "hidden"
     }
 }
 extension Unidex.Realm:BSONDocumentEncodable
@@ -40,7 +38,6 @@ extension Unidex.Realm:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.symbol] = self.symbol
-        bson[.hidden] = self.hidden
     }
 }
 extension Unidex.Realm:BSONDocumentDecodable
@@ -49,7 +46,6 @@ extension Unidex.Realm:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
-            symbol: try bson[.symbol].decode(),
-            hidden: try bson[.hidden].decode())
+            symbol: try bson[.symbol].decode())
     }
 }

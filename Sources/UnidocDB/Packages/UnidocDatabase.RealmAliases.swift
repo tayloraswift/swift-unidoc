@@ -1,3 +1,4 @@
+import BSON
 import MongoDB
 import UnidocRecords
 
@@ -19,13 +20,13 @@ extension UnidocDatabase
 extension UnidocDatabase.RealmAliases
 {
     public static
-    let indexRealm:Mongo.CollectionIndex = .init("Realm",
+    let indexCoordinate:Mongo.CollectionIndex = .init("Coordinate",
         unique: false)
     {
-        $0[Unidex.RealmAlias[.realm]] = (+)
+        $0[Unidex.RealmAlias[.coordinate]] = (+)
     }
 }
-extension UnidocDatabase.RealmAliases
+extension UnidocDatabase.RealmAliases:Mongo.CollectionModel
 {
     public
     typealias Element = Unidex.RealmAlias
@@ -34,5 +35,5 @@ extension UnidocDatabase.RealmAliases
     var name:Mongo.Collection { "RealmAliases" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [Self.indexRealm] }
+    var indexes:[Mongo.CollectionIndex] { [Self.indexCoordinate] }
 }
