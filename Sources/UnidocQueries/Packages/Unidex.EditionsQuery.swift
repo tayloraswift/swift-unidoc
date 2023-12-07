@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import SymbolGraphs
 import Symbols
 import UnidocDB
 import UnidocRecords
@@ -10,14 +11,14 @@ extension Unidex
     struct EditionsQuery:Equatable, Hashable, Sendable
     {
         public
-        let package:Symbol.Package
+        let symbol:Symbol.Package
         public
         let limit:Int
 
         @inlinable public
-        init(package:Symbol.Package, limit:Int)
+        init(package symbol:Symbol.Package, limit:Int)
         {
-            self.package = package
+            self.symbol = symbol
             self.limit = limit
         }
     }
@@ -27,10 +28,15 @@ extension Unidex.EditionsQuery:Mongo.PipelineQuery
     public
     typealias Iteration = Mongo.Single<Output>
 }
-extension Unidex.EditionsQuery:Unidex.PackageQuery
+extension Unidex.EditionsQuery:Unidex.AliasingQuery
 {
+    public
+    typealias CollectionOrigin = UnidocDatabase.PackageAliases
+    public
+    typealias CollectionTarget = UnidocDatabase.Packages
+
     @inlinable public static
-    var package:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.KeyPath { Output[.package] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
@@ -50,7 +56,7 @@ extension Unidex.EditionsQuery:Unidex.PackageQuery
                 $0[.from] = UnidocDatabase.Editions.name
                 $0[.let] = .init
                 {
-                    $0[let: package] = Output[.package] / Unidex.Package[.id]
+                    $0[let: package] = Self.target / Unidex.Package[.id]
                 }
                 $0[.pipeline] = .init
                 {
