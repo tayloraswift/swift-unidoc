@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import SymbolGraphs
 import Symbols
 import UnidocDB
 import UnidocRecords
@@ -10,12 +11,12 @@ extension Unidex
     struct SitemapQuery:Equatable, Hashable, Sendable
     {
         public
-        let package:Symbol.Package
+        let symbol:Symbol.Package
 
         @inlinable public
-        init(package:Symbol.Package)
+        init(package symbol:Symbol.Package)
         {
-            self.package = package
+            self.symbol = symbol
         }
     }
 }
@@ -24,10 +25,15 @@ extension Unidex.SitemapQuery:Mongo.PipelineQuery
     public
     typealias Iteration = Mongo.Single<Output>
 }
-extension Unidex.SitemapQuery:Unidex.PackageQuery
+extension Unidex.SitemapQuery:Unidex.AliasingQuery
 {
+    public
+    typealias CollectionOrigin = UnidocDatabase.PackageAliases
+    public
+    typealias CollectionTarget = UnidocDatabase.Packages
+
     @inlinable public static
-    var package:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.KeyPath { Output[.package] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
@@ -35,7 +41,7 @@ extension Unidex.SitemapQuery:Unidex.PackageQuery
         pipeline[.lookup] = .init
         {
             $0[.from] = UnidocDatabase.Sitemaps.name
-            $0[.localField] = Output[.package] / Unidex.Package[.id]
+            $0[.localField] = Self.target / Unidex.Package[.id]
             $0[.foreignField] = Unidex.Sitemap[.id]
             $0[.as] = Output[.sitemap]
         }
@@ -44,7 +50,7 @@ extension Unidex.SitemapQuery:Unidex.PackageQuery
 
         pipeline[.set] = .init
         {
-            $0[Output[.package]] = Output[.package] / Unidex.Package[.symbol]
+            $0[Output[.package]] = Self.target / Unidex.Package[.symbol]
         }
     }
 }
