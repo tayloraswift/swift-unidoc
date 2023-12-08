@@ -1,3 +1,4 @@
+import LexicalPaths
 import SymbolGraphParts
 import Symbols
 
@@ -47,6 +48,9 @@ extension Compiler
     private mutating
     func compile(parts:[SymbolGraphPart], in culture:Culture) throws
     {
+        /// We use this to look up protocols by name instead of symbol. This is needed in order
+        /// to work around some bizarre lib/SymbolGraphGen bugs.
+        var protocols:[UnqualifiedPath: Symbol.Decl] = [:]
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SymbolGraphPart in parts
         {
@@ -62,26 +66,31 @@ extension Compiler
                     switch (vertex.usr, excluded: vertex.acl < self.threshold)
                     {
                     case (.vector, excluded: true):
-                        //  We do not care about vectors materialized for internal
-                        //  types, or vectors materialized from internal scalars.
+                        //  We do not care about vectors materialized for internal types, or
+                        //  vectors materialized from internal scalars.
                         continue
 
-                    case (.vector(let vector), excluded: false):
-                        //  Compound symbol descriptions are mostly useless. (They do
-                        //  not tell us anything useful their generic/extension contexts.)
-                        //  But we need to remember their names to perform codelink
-                        //  resolution.
-                        try self.declarations.include(vector: vector, with: vertex)
+                    case (.vector(let symbol), excluded: false):
+                        //  Compound symbol descriptions are mostly useless. (They do not tell
+                        //  us anything useful their generic/extension contexts.) But we need to
+                        //  remember their names to perform codelink resolution.
+                        try self.declarations.include(vector: symbol, with: vertex)
 
-                    case (.scalar(let scalar), excluded: let excluded):
-                        excluded ?
-                        try self.declarations.exclude(scalar: scalar) :
-                        try self.declarations.include(scalar: scalar,
+                    case (.scalar(let symbol), excluded: false):
+                        try self.declarations.include(scalar: symbol,
                             namespace: namespace,
                             with: vertex,
                             in: culture)
 
-                    case (.block(let block), excluded: true):
+                        if  case .decl(.protocol) = vertex.phylum
+                        {
+                            protocols[vertex.path] = symbol
+                        }
+
+                    case (.scalar(let symbol), excluded: true):
+                        try self.declarations.exclude(scalar: symbol)
+
+                    case (.block(let symbol), excluded: true):
                         //  We *do* in fact care about extension blocks that only contain
                         //  internal/private members, because they might contain a conformance
                         //  to an internal protocol that inherits from a public protocol.
@@ -90,9 +99,9 @@ extension Compiler
                         fallthrough
                         //  continue
 
-                    case (.block(let block), excluded: false):
-                        try self.extensions.include(block: block,
-                            extending: try extensions.extendee(of: block),
+                    case (.block(let symbol), excluded: false):
+                        try self.extensions.include(block: symbol,
+                            extending: try extensions.extendee(of: symbol),
                             namespace: namespace,
                             with: vertex,
                             in: culture)
@@ -161,6 +170,28 @@ extension Compiler
                     throw EdgeError.init(underlying: error, in: relationship)
                 }
             }
+        }
+        //  SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
+        //  implementation of a protocol requirement. Because the requirement might be a
+        //  requirement from a different protocol than the protocol containing the default
+        //  implementation, this means we need to use lexical name lookup to resolve the true
+        //  parent of the default implementation.
+        //
+        //  Luckily for us, this lib/SymbolGraphGen bug only seems to affect default
+        //  implementations that implement requirements from protocols in the current module.
+        for (parent, orphan):(UnqualifiedPath, Symbol.Decl) in self.declarations.orphans()
+        {
+            guard
+            let parent:Symbol.Decl = protocols[parent]
+            else
+            {
+                continue
+            }
+
+            let inferred:Symbol.MemberRelationship = .init(.scalar(orphan),
+                in: .scalar(parent))
+
+            try self.assign(inferred, by: culture.index)
         }
     }
 }

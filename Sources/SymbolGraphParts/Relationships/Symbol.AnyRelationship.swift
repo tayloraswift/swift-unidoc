@@ -22,13 +22,13 @@ extension Symbol.AnyRelationship
     {
         switch self
         {
-        case .conformance           (let relationship): return relationship
-        case .intrinsicWitness      (let relationship): return relationship
-        case .extension             (let relationship): return relationship
-        case .inheritance           (let relationship): return relationship
-        case .member                (let relationship): return relationship
-        case .override              (let relationship): return relationship
-        case .requirement           (let relationship): return relationship
+        case .conformance           (let relationship): relationship
+        case .intrinsicWitness      (let relationship): relationship
+        case .extension             (let relationship): relationship
+        case .inheritance           (let relationship): relationship
+        case .member                (let relationship): relationship
+        case .override              (let relationship): relationship
+        case .requirement           (let relationship): relationship
         }
     }
 
