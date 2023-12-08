@@ -72,7 +72,7 @@ extension Volume.LookupAdjacent:Volume.LookupContext
 
                 $0[let: realm.id] = .expr
                 {
-                    $0[.coalesce] = (vertex / Volume.Metadata[.realm], BSON.Max.init())
+                    $0[.coalesce] = (volume / Volume.Metadata[.realm], BSON.Max.init())
                 }
             }
             $0[.pipeline] = .init
