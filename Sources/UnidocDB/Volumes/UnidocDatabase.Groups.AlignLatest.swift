@@ -19,13 +19,16 @@ extension UnidocDatabase.Groups
 }
 extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
 {
-    typealias Target = UnidocDatabase.Volumes
+    typealias Target = UnidocDatabase.Groups
     typealias Effect = Mongo.Many
 
     var ordered:Bool { true }
 
     func build(updates:inout Mongo.UpdateEncoder<Mongo.Many>)
     {
+        let latest:ClosedRange<Unidoc.Scalar> = .edition(self.latest)
+        let all:ClosedRange<Unidoc.Scalar> = .package(self.latest.package)
+
         updates
         {
             $0[.multi] = true
@@ -33,13 +36,14 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
             {
                 $0[.and] = .init
                 {
+
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.gte] = self.latest.min }
+                        $0[Volume.Group[.id]] = .init { $0[.gte] = latest.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.lte] = self.latest.max }
+                        $0[Volume.Group[.id]] = .init { $0[.lte] = latest.upperBound }
                     }
                     $0.append
                     {
@@ -56,8 +60,6 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
             }
         }
 
-        let cell:ClosedRange<Unidoc.Edition> = .package(self.latest.package)
-
         updates
         {
             $0[.multi] = true
@@ -66,13 +68,14 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
             {
                 $0[.and] = .init
                 {
+
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.gte] = cell.lowerBound.min }
+                        $0[Volume.Group[.id]] = .init { $0[.gte] = all.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.lte] = cell.upperBound.max }
+                        $0[Volume.Group[.id]] = .init { $0[.lte] = all.upperBound }
                     }
                     $0.append
                     {
@@ -80,11 +83,11 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
                         {
                             $0.append
                             {
-                                $0[Volume.Group[.id]] = .init { $0[.lt] = self.latest.min }
+                                $0[Volume.Group[.id]] = .init { $0[.lt] = latest.lowerBound }
                             }
                             $0.append
                             {
-                                $0[Volume.Group[.id]] = .init { $0[.gt] = self.latest.max }
+                                $0[Volume.Group[.id]] = .init { $0[.gt] = latest.upperBound }
                             }
                         }
                     }
