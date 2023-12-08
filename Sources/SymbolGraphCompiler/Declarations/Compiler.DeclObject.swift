@@ -78,8 +78,8 @@ extension Compiler.DeclObject
             throw Compiler.SemanticError.cannot(have: .scope, as: self.value.phylum)
         }
 
-        //  Allowed to restate the exact same nesting relationship multiple times.
-        //  This sometimes happens when compiling C modules.
+        //  It is okay to restate the exact same nesting relationship multiple times. This
+        //  sometimes happens when compiling C modules.
         if  let scope:Symbol.USR = self.scope,
                 scope != relationship.scope
         {

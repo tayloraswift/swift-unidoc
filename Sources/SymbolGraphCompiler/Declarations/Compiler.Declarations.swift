@@ -8,11 +8,12 @@ extension Compiler
     struct Declarations
     {
         private
+        let root:Symbol.FileBase?
+
+        private
         var cultures:[Symbol.Module: Int]
         private
         var entries:[Symbol.Decl: Entry]
-        private
-        let root:Symbol.FileBase?
 
         init(root:Symbol.FileBase?)
         {
@@ -197,6 +198,24 @@ extension Compiler.Declarations
             return nil
         case .nominated?, nil:
             throw Compiler.UndefinedSymbolError.scalar(resolution)
+        }
+    }
+}
+extension Compiler.Declarations
+{
+    func orphans() -> [(parent:UnqualifiedPath, symbol:Symbol.Decl)]
+    {
+        self.entries.compactMap
+        {
+            if  case .included(let decl) = $0.value,
+                let parent:UnqualifiedPath = .init(decl.value.path.prefix)
+            {
+                (parent, decl.id)
+            }
+            else
+            {
+                nil
+            }
         }
     }
 }
