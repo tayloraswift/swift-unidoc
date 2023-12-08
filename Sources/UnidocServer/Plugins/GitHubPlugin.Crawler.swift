@@ -26,20 +26,21 @@ extension GitHubPlugin
 }
 extension GitHubPlugin.Crawler
 {
-    func run(updating db:Server.DB, counters:borrowing Server.Counters) async throws
+    func run(alongside server:Swiftinit.ServerLoop) async throws
     {
         while true
         {
             async
             let cooldown:Void = Task.sleep(for: .seconds(30))
 
-            let session:Mongo.Session = try await .init(from: db.sessions)
             do
             {
+                let session:Mongo.Session = try await .init(from: server.db.sessions)
+
                 try await self.api.connect
                 {
-                    try await self.refresh(db,
-                        counters: counters,
+                    try await self.refresh(server.db,
+                        counters: server.atomics,
                         count: 10,
                         from: $0,
                         with: session)
@@ -52,7 +53,7 @@ extension GitHubPlugin.Crawler
             catch let error
             {
                 Log[.warning] = "GitHub crawling error: \(error)"
-                counters.errorsCrawling.wrappingIncrement(ordering: .relaxed)
+                server.atomics.errorsCrawling.wrappingIncrement(ordering: .relaxed)
             }
 
             try await cooldown
@@ -60,8 +61,8 @@ extension GitHubPlugin.Crawler
     }
 
     private
-    func refresh(_ db:Server.DB,
-        counters:borrowing Server.Counters,
+    func refresh(_ db:Swiftinit.DB,
+        counters:borrowing Swiftinit.Counters,
         count:Int,
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws

@@ -25,9 +25,8 @@ extension PolicyPlugin
 
 extension PolicyPlugin.Crawler
 {
-    func run(
-        updating policylist:ManagedAtomic<HTTP.Policylist>,
-        counters:borrowing Server.Counters) async throws
+    func run(alongside server:Swiftinit.ServerLoop,
+        updating policylist:ManagedAtomic<HTTP.Policylist>) async throws
     {
         while true
         {
@@ -41,7 +40,7 @@ extension PolicyPlugin.Crawler
             catch let error
             {
                 Log[.warning] = "Whitelist fetch error: \(error)"
-                counters.errorsCrawling.wrappingIncrement(ordering: .relaxed)
+                server.atomics.errorsCrawling.wrappingIncrement(ordering: .relaxed)
             }
 
             try await cooldown

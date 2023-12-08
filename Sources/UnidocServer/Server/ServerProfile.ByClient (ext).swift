@@ -2,7 +2,7 @@ import UnidocProfiling
 
 extension ServerProfile.ByClient
 {
-    subscript(annotation:Server.ClientAnnotation) -> Int
+    subscript(annotation:Swiftinit.ClientAnnotation) -> Int
     {
         _read
         {

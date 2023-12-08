@@ -4,5 +4,6 @@ import UnidocDB
 
 protocol ProceduralEndpoint:Sendable
 {
-    func perform(on server:Server, with payload:[UInt8]) async throws -> HTTP.ServerResponse
+    func perform(on server:borrowing Swiftinit.Server,
+        with payload:[UInt8]) async throws -> HTTP.ServerResponse
 }
