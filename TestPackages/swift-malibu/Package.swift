@@ -7,6 +7,8 @@ let package:Package = .init(name: "Swift Malibu",
         .library(name: "BarbieCore", targets: ["BarbieCore"]),
         .library(name: "BarbieHousing", targets: ["BarbieHousing"]),
         .library(name: "BarbieAddressing", targets: ["BarbieAddressing"]),
+
+        .library(name: "DefaultImplementations", targets: ["DefaultImplementations"]),
     ],
     targets:
     [
@@ -40,6 +42,8 @@ let package:Package = .init(name: "Swift Malibu",
             [
                 .target(name: "BarbieHousing"),
             ]),
+
+        .target(name: "DefaultImplementations"),
 
         .target(name: "DollhouseSecurity"),
     ])
