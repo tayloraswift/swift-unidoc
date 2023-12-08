@@ -9,7 +9,7 @@ protocol RestrictedEndpoint:InteractiveEndpoint
     static
     func admit(_ role:Account.Role) -> Bool
 
-    func load(from server:isolated Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
 }
 extension RestrictedEndpoint
 {
@@ -19,8 +19,8 @@ extension RestrictedEndpoint
         role == .administrator
     }
 
-    func load(from server:Server,
-        with cookies:Server.Cookies) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
     {
         if  server.secured
         {

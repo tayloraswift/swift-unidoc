@@ -20,6 +20,9 @@ enum Main
         {
             $0.executors = .shared(threads)
             $0.appname = "Unidoc Server"
+
+            $0.connectionTimeout = .seconds(5)
+            $0.monitorInterval = .seconds(5)
         }
 
         defer
@@ -27,24 +30,24 @@ enum Main
             try? threads.syncShutdownGracefully()
         }
 
-        do
+        await mongodb.withSessionPool
         {
-            try await mongodb.withSessionPool
-            {
-                @Sendable (pool:Mongo.SessionPool) in
+            @Sendable (pool:Mongo.SessionPool) in
 
-                let server:Server = try await .init(
+            do
+            {
+                let server:Swiftinit.ServerLoop = try await .init(
                     options: try .init(from: options),
                     threads: threads,
                     mongodb: pool)
 
                 try await server.run()
             }
-        }
-        catch let error
-        {
-            //  Temporary workaround for bypassing backtrace collection.
-            Log[.error] = "(top-level) \(error)"
+            catch let error
+            {
+                //  Temporary workaround for bypassing backtrace collection.
+                Log[.error] = "(top-level) \(error)"
+            }
         }
     }
 }
