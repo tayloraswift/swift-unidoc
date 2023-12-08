@@ -321,7 +321,6 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 }
                 await tests.do
                 {
-
                     if  let output:Volume.LookupOutput<Any> = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
                         let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
