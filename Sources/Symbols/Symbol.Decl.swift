@@ -133,3 +133,10 @@ extension Symbol.Decl:LosslessStringConvertible
         }
     }
 }
+
+@_spi(testable)
+extension Symbol.Decl:ExpressibleByStringLiteral
+{
+    @inlinable public
+    init(stringLiteral:String) { self.init(unchecked: stringLiteral) }
+}
