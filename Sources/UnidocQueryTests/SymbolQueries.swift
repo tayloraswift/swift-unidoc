@@ -271,6 +271,8 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             }
         }
 
+
+
         /// The ``BarbieHousing`` module vends an extension on ``Array`` that
         /// conforms it to the ``DollhouseSecurity.DollhouseKeychain`` protocol.
         /// The database should return this conformance as an extension on ``Array``,
@@ -281,6 +283,22 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// conformances within the same package.
         if  let tests:TestGroup = tests / "Deduplication"
         {
+            /// The test won’t work until we join the two packages in a realm.
+            let setup:TestGroup = tests ! "RealmSetup"
+            await setup.do
+            {
+                let (realm, new):(Unidex.Realm, Bool) = try await unidoc.alias(
+                    realm: "barbieland",
+                    with: session)
+
+                setup.expect(true: new)
+                setup.expect(realm.id ==? 0)
+                setup.expect(realm.symbol ==? "barbieland")
+
+                try await unidoc.align(package: 0, realm: realm.id, with: session)
+                try await unidoc.align(package: 1, realm: realm.id, with: session)
+            }
+
             for (name, query):(String, Volume.LookupQuery<Volume.LookupAdjacent, Any>) in
             [
                 (
@@ -294,9 +312,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             ]
             {
                 guard
-                    let tests:TestGroup = tests / name,
-                    let query:Volume.LookupQuery<Volume.LookupAdjacent, Any> = tests.expect(
-                        value: query)
+                let tests:TestGroup = tests / name,
+                let query:Volume.LookupQuery<Volume.LookupAdjacent, Any> = tests.expect(
+                    value: query)
                 else
                 {
                     continue
