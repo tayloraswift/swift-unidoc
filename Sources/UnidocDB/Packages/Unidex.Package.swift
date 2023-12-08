@@ -29,6 +29,10 @@ extension Unidex
         public
         var symbol:Symbol.Package
 
+        /// Indicates whether this package is hidden from the public.
+        public
+        var hidden:Bool
+
         /// The current realm this package belongs to. A package can change realms.
         public
         var realm:Unidoc.Realm?
@@ -47,12 +51,14 @@ extension Unidex
         @inlinable public
         init(id:Unidoc.Package,
             symbol:Symbol.Package,
-            realm:Unidoc.Realm?,
+            hidden:Bool = false,
+            realm:Unidoc.Realm? = nil,
             repo:Repo? = nil,
             crawled:BSON.Millisecond = 0)
         {
             self.id = id
             self.symbol = symbol
+            self.hidden = hidden
             self.realm = realm
             self.repo = repo
             self.crawled = crawled
@@ -66,6 +72,7 @@ extension Unidex.Package:MongoMasterCodingModel
     {
         case id = "_id"
         case symbol = "Y"
+        case hidden = "H"
         case realm = "r"
         case repo = "R"
         case crawled = "T"
@@ -78,6 +85,7 @@ extension Unidex.Package:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.symbol] = self.symbol
+        bson[.hidden] = self.hidden ? true : nil
         bson[.realm] = self.realm
         bson[.repo] = self.repo
         bson[.crawled] = self.crawled
@@ -90,6 +98,7 @@ extension Unidex.Package:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             symbol: try bson[.symbol].decode(),
+            hidden: try bson[.hidden]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)

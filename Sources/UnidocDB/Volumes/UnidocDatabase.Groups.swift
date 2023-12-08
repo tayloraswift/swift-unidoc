@@ -20,7 +20,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Groups
 {
     public static
-    let indexRealm:Mongo.CollectionIndex = .init("Unidex",
+    let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: true)
     {
         $0[Volume.Group[.id]] = (+)

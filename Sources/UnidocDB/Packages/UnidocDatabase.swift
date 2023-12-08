@@ -546,3 +546,34 @@ extension UnidocDatabase
         return volume
     }
 }
+extension UnidocDatabase
+{
+    public
+    func align(
+        package:Unidoc.Package,
+        realm:Unidoc.Realm?,
+        with session:Mongo.Session) async throws
+    {
+        try await self.execute(
+            update: Volumes.AlignRealm.init(range: .package(package), to: realm),
+            with: session)
+
+        guard
+        let realm:Unidoc.Realm = realm
+        else
+        {
+            try await self.execute(
+                update: Groups.ClearLatest.init(from: package),
+                with: session)
+            return
+        }
+
+        if  let latest:Volumes.PatchView = try await self.volumes.latestRelease(of: package,
+                with: session)
+        {
+            try await self.execute(
+                update: Groups.AlignLatest.init(to: latest.id, in: realm),
+                with: session)
+        }
+    }
+}
