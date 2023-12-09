@@ -12,6 +12,10 @@ struct PatchVersion:VectorVersion, Equatable, Hashable, Comparable, Sendable
 }
 extension PatchVersion
 {
+    /// Returns a semantic version with ``UInt16.max`` in each component.
+    @inlinable public static
+    var max:Self { .v(.max, .max, .max) }
+
     /// Creates a semantic version with the given components.
     @inlinable public static
     func v(_ major:UInt16, _ minor:UInt16, _ patch:UInt16) -> Self
