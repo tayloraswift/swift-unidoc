@@ -53,11 +53,19 @@ enum Main
             try await swiftinit.uplink(package: options.package)
 
         case .build:
-            try await swiftinit.build(
-                package: options.package,
-                pretty: options.pretty,
-                force: options.force,
-                input: options.input.map(FilePath.init(_:)))
+            if  options.package != .swift,
+                options.input == nil
+            {
+                try await swiftinit.build(remote: options.package,
+                    pretty: options.pretty,
+                    force: options.force)
+            }
+            else
+            {
+                try await swiftinit.build(local: options.package,
+                    search: options.input.map(FilePath.init(_:)),
+                    pretty: options.pretty)
+            }
         }
     }
 }
