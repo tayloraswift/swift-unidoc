@@ -51,6 +51,7 @@ extension Compiler
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
         var protocols:[UnqualifiedPath: Symbol.Decl] = [:]
+        var others:[DeclObject] = []
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SymbolGraphPart in parts
         {
@@ -77,7 +78,7 @@ extension Compiler
                         try self.declarations.include(vector: symbol, with: vertex)
 
                     case (.scalar(let symbol), excluded: false):
-                        try self.declarations.include(scalar: symbol,
+                        let decl:DeclObject = try self.declarations.include(scalar: symbol,
                             namespace: namespace,
                             with: vertex,
                             in: culture)
@@ -85,6 +86,10 @@ extension Compiler
                         if  case .decl(.protocol) = vertex.phylum
                         {
                             protocols[vertex.path] = symbol
+                        }
+                        else
+                        {
+                            others.append(decl)
                         }
 
                     case (.scalar(let symbol), excluded: true):
@@ -179,16 +184,17 @@ extension Compiler
         //
         //  Luckily for us, this lib/SymbolGraphGen bug only seems to affect default
         //  implementations that implement requirements from protocols in the current module.
-        for (parent, orphan):(UnqualifiedPath, Symbol.Decl) in self.declarations.orphans()
+        for decl:DeclObject in others
         {
-            guard
+            guard case nil = decl.scope,
+            let parent:UnqualifiedPath = .init(decl.value.path.prefix),
             let parent:Symbol.Decl = protocols[parent]
             else
             {
                 continue
             }
 
-            let inferred:Symbol.MemberRelationship = .init(.scalar(orphan),
+            let inferred:Symbol.MemberRelationship = .init(.scalar(decl.id),
                 in: .scalar(parent))
 
             try self.assign(inferred, by: culture.index)
