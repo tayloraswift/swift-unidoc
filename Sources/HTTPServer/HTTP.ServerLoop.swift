@@ -287,6 +287,13 @@ extension HTTP.ServerLoop
             catch NIOSSLError.uncleanShutdown
             {
             }
+            catch let error as IOError
+            {
+                if  error.errnoCode != 104
+                {
+                    Log[.error] = "(HTTP/1.1) \(error)"
+                }
+            }
             catch let error
             {
                 Log[.error] = "(HTTP/1.1) \(error)"
