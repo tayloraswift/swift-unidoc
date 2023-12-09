@@ -4,14 +4,14 @@ extension PatchVersion
     struct Components:Equatable, Hashable, Sendable
     {
         public
-        var major:UInt16
+        var major:Int16
         public
         var minor:UInt16
         public
         var patch:UInt16
 
         @inlinable internal
-        init(major:UInt16, minor:UInt16, patch:UInt16)
+        init(major:Int16, minor:UInt16, patch:UInt16)
         {
             self.major = major
             self.minor = minor
@@ -39,7 +39,7 @@ extension PatchVersion.Components:RawRepresentable
     @inlinable public
     init(rawValue:Int64)
     {
-        let major:UInt16 = .init(truncatingIfNeeded: rawValue >> 48)
+        let major:Int16 = .init(truncatingIfNeeded: rawValue >> 48)
         let minor:UInt16 = .init(truncatingIfNeeded: rawValue >> 32)
         let patch:UInt16 = .init(truncatingIfNeeded: rawValue >> 16)
         self.init(major: major, minor: minor, patch: patch)
@@ -77,7 +77,7 @@ extension PatchVersion.Components:LosslessStringConvertible, VectorVersionCompon
     @inlinable internal
     init?(_ components:(Substring, Substring, Substring))
     {
-        if  let major:UInt16 = .init(components.0),
+        if  let major:Int16 = .init(components.0),
             let minor:UInt16 = .init(components.1),
             let patch:UInt16 = .init(components.2)
         {

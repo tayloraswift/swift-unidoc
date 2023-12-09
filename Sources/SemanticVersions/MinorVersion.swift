@@ -13,7 +13,7 @@ struct MinorVersion:VectorVersion, Equatable, Hashable, Comparable, Sendable
 extension MinorVersion
 {
     @inlinable public static
-    func v(_ major:UInt16, _ minor:UInt16) -> Self
+    func v(_ major:Int16, _ minor:UInt16) -> Self
     {
         self.init(components: .init(major: major, minor: minor))
     }
