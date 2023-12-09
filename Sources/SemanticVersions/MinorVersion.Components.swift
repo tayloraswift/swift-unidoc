@@ -4,12 +4,12 @@ extension MinorVersion
     struct Components:Equatable, Hashable, Sendable
     {
         public
-        var major:UInt16
+        var major:Int16
         public
         var minor:UInt16
 
         @inlinable internal
-        init(major:UInt16, minor:UInt16)
+        init(major:Int16, minor:UInt16)
         {
             self.major = major
             self.minor = minor
@@ -35,7 +35,7 @@ extension MinorVersion.Components:RawRepresentable
     @inlinable public
     init(rawValue:Int64)
     {
-        let major:UInt16 = .init(truncatingIfNeeded: rawValue >> 48)
+        let major:Int16 = .init(truncatingIfNeeded: rawValue >> 48)
         let minor:UInt16 = .init(truncatingIfNeeded: rawValue >> 32)
         self.init(major: major, minor: minor)
     }
@@ -69,7 +69,7 @@ extension MinorVersion.Components:LosslessStringConvertible, VectorVersionCompon
     @inlinable internal
     init?(_ components:(Substring, Substring))
     {
-        if  let major:UInt16 = .init(components.0),
+        if  let major:Int16 = .init(components.0),
             let minor:UInt16 = .init(components.1)
         {
             self.init(major: major, minor: minor)

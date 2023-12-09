@@ -2,10 +2,10 @@
 struct MajorVersion:Equatable, Hashable, Sendable
 {
     public
-    var number:UInt16
+    var number:Int16
 
     @inlinable internal
-    init(number:UInt16)
+    init(number:Int16)
     {
         self.number = number
     }
@@ -13,7 +13,7 @@ struct MajorVersion:Equatable, Hashable, Sendable
 extension MajorVersion
 {
     @inlinable public static
-    func v(_ number:UInt16) -> Self
+    func v(_ number:Int16) -> Self
     {
         self.init(number: number)
     }
@@ -36,7 +36,7 @@ extension MajorVersion:RawRepresentable
     @inlinable public
     init(rawValue:Int64)
     {
-        let major:UInt16 = .init(truncatingIfNeeded: rawValue >> 48)
+        let major:Int16 = .init(truncatingIfNeeded: rawValue >> 48)
         self = .v(major)
     }
 }
@@ -55,7 +55,7 @@ extension MajorVersion:LosslessStringConvertible
     @inlinable public
     init?(_ string:Substring)
     {
-        if  let number:UInt16 = .init(string)
+        if  let number:Int16 = .init(string)
         {
             self.init(number: number)
         }

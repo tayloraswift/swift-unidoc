@@ -8,7 +8,7 @@ enum NumericVersion:Equatable, Hashable, Comparable, Sendable
 extension NumericVersion
 {
     @inlinable public
-    init(_ major:UInt16, _ minor:UInt16?, _ patch:@autoclosure () throws -> UInt16?) rethrows
+    init(_ major:Int16, _ minor:UInt16?, _ patch:@autoclosure () throws -> UInt16?) rethrows
     {
         if  let minor:UInt16
         {
@@ -72,7 +72,7 @@ extension NumericVersion:LosslessStringConvertible
         let components:[String.SubSequence] = string.split(separator: ".", maxSplits: 2,
             omittingEmptySubsequences: false)
 
-        guard components.count > 0, let major:UInt16 = .init(components[0])
+        guard components.count > 0, let major:Int16 = .init(components[0])
         else
         {
             return nil
