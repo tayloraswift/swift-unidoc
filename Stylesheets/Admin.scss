@@ -75,14 +75,17 @@ figure.client div.pie-color > svg g
 }
 figure.language div.pie-color > svg g
 {
+    > *.ar
+    {
+        fill: #2ba720;
+    }
     > *.bn
     {
         fill: #d88f5f;
     }
-
-    > *.ar
+    > *.ca
     {
-        fill: #2ba720;
+        fill: #ff8d61;
     }
     > *.da
     {
@@ -144,6 +147,10 @@ figure.language div.pie-color > svg g
     {
         fill: #ff8921;
     }
+    > *.nn
+    {
+        fill: #4721ff;
+    }
     > *.pl
     {
         fill: #ffcf73;
@@ -155,6 +162,10 @@ figure.language div.pie-color > svg g
     > *.ru
     {
         fill: #007a3d;
+    }
+    > *.sk
+    {
+        fill: #e3e3e3;
     }
     > *.sr
     {
