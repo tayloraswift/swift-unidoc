@@ -1,4 +1,3 @@
-import LexicalPaths
 import Symbols
 import SymbolGraphParts
 
@@ -99,6 +98,22 @@ extension Compiler.Declarations
 extension Compiler.Declarations
 {
     mutating
+    func include(scalar symbol:Symbol.Decl,
+        namespace:consuming Compiler.Namespace.ID,
+        with vertex:SymbolGraphPart.Vertex,
+        in culture:Compiler.Culture) throws -> Compiler.DeclObject
+    {
+        let decl:Compiler.DeclObject = .init(
+            conditions: vertex.extension.conditions,
+            namespace: namespace,
+            culture: culture.index,
+            value: try .init(from: vertex,
+                as: symbol,
+                in: culture))
+        try self.update(symbol, with: .included(decl))
+        return decl
+    }
+    mutating
     func include(vector symbol:Symbol.Decl.Vector,
         with vertex:SymbolGraphPart.Vertex) throws
     {
@@ -111,20 +126,6 @@ extension Compiler.Declarations
         {
             throw Compiler.UnexpectedSymbolError.vector(symbol)
         }
-    }
-    mutating
-    func include(scalar symbol:Symbol.Decl,
-        namespace:consuming Compiler.Namespace.ID,
-        with vertex:SymbolGraphPart.Vertex,
-        in culture:Compiler.Culture) throws
-    {
-        try self.update(symbol, with: .included(.init(
-            conditions: vertex.extension.conditions,
-            namespace: namespace,
-            culture: culture.index,
-            value: .init(from: vertex,
-                as: symbol,
-                in: culture))))
     }
     mutating
     func exclude(scalar symbol:Symbol.Decl) throws
@@ -198,24 +199,6 @@ extension Compiler.Declarations
             return nil
         case .nominated?, nil:
             throw Compiler.UndefinedSymbolError.scalar(resolution)
-        }
-    }
-}
-extension Compiler.Declarations
-{
-    func orphans() -> [(parent:UnqualifiedPath, symbol:Symbol.Decl)]
-    {
-        self.entries.compactMap
-        {
-            if  case .included(let decl) = $0.value,
-                let parent:UnqualifiedPath = .init(decl.value.path.prefix)
-            {
-                (parent, decl.id)
-            }
-            else
-            {
-                nil
-            }
         }
     }
 }
