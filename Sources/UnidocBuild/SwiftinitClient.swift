@@ -91,18 +91,65 @@ extension SwiftinitClient
         }
     }
 
-    func build(
-        package symbol:Symbol.Package,
+    func build(local symbol:Symbol.Package,
+        search:FilePath?,
+        pretty:Bool) async throws
+    {
+        let toolchain:Toolchain = try await .detect()
+        let workspace:Workspace = try await .create(at: ".swiftinit")
+
+        let archive:SymbolGraphArchive
+        if  symbol == .swift
+        {
+            let build:ToolchainBuild = try await .swift(in: workspace,
+                clean: true)
+
+            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+        }
+        else if
+            let search:FilePath
+        {
+            let build:PackageBuild = try await .local(package: symbol,
+                from: search,
+                in: workspace,
+                clean: true)
+
+            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+        }
+        else
+        {
+            fatalError("No package search path specified.")
+        }
+
+        let bson:BSON.Document = .init(encoding: consume archive)
+
+        try await self.connect
+        {
+            @Sendable (connection:SwiftinitClient.Connection) in
+
+            print("Uploading symbol graph...")
+
+            let placement:UnidocAPI.Placement = try await connection.put(bson: bson,
+                to: "/api/symbolgraph")
+
+            print("Successfully uploaded symbol graph!")
+
+            try await connection.uplink(
+                package: placement.edition.package,
+                version: placement.edition.version)
+
+            print("Successfully uplinked symbol graph!")
+        }
+    }
+
+    func build(remote symbol:Symbol.Package,
         pretty:Bool,
-        force:Bool,
-        input:FilePath?) async throws
+        force:Bool) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
         //  connection open.
-        let package:UnidocAPI.PackageStatus? = symbol == .swift
-            ? nil
-            : try await self.connect
+        let package:UnidocAPI.PackageStatus? = try await self.connect
         {
             @Sendable (connection:SwiftinitClient.Connection) in
 
@@ -123,106 +170,62 @@ extension SwiftinitClient
             }
         }
 
+        guard
+        let package:UnidocAPI.PackageStatus
+        else
+        {
+            print("Not a buildable package.")
+            return
+        }
+
         let toolchain:Toolchain = try await .detect()
         let workspace:Workspace = try await .create(at: ".swiftinit")
 
-        if  let package:UnidocAPI.PackageStatus
-        {
-            guard
-            let edition:UnidocAPI.PackageStatus.Edition = package.choose(force: force)
-            else
-            {
-                print("No new documentation to build.")
-                return
-            }
-
-            let build:PackageBuild = try await .remote(
-                package: symbol,
-                from: package.repo,
-                at: edition.tag,
-                in: workspace,
-                clean: true)
-
-            //  Remove the `Package.resolved` file to force a new resolution.
-            try await build.removePackageResolved()
-
-            let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
-                pretty: pretty)
-
-            let bson:BSON.Document = .init(encoding: Unidex.Snapshot.init(id: .init(
-                    package: package.coordinate,
-                    version: edition.coordinate),
-                metadata: archive.metadata,
-                graph: archive.graph))
-
-            try await self.connect
-            {
-                @Sendable (connection:SwiftinitClient.Connection) in
-
-                print("Uploading symbol graph...")
-
-                try await connection.put(bson: bson, to: "/api/snapshot")
-
-                print("Successfully uploaded symbol graph!")
-
-                try await connection.uplink(
-                    package: package.coordinate,
-                    version: edition.coordinate)
-
-                print("Successfully uplinked symbol graph!")
-            }
-        }
-        else if force
-        {
-            let archive:SymbolGraphArchive
-            if  symbol == .swift
-            {
-                let build:ToolchainBuild = try await .swift(in: workspace,
-                    clean: true)
-
-                archive = try await toolchain.generateDocs(for: build, pretty: pretty)
-            }
-            else if
-                let project:FilePath = input
-            {
-                let build:PackageBuild = try await .local(package: symbol,
-                    from: project,
-                    in: workspace,
-                    clean: true)
-
-                archive = try await toolchain.generateDocs(for: build, pretty: pretty)
-            }
-            else
-            {
-                fatalError("No project path specified.")
-            }
-
-            let bson:BSON.Document = .init(encoding: consume archive)
-
-            try await self.connect
-            {
-                @Sendable (connection:SwiftinitClient.Connection) in
-
-                print("Uploading symbol graph...")
-
-                let placement:UnidocAPI.Placement = try await connection.put(bson: bson,
-                    to: "/api/symbolgraph")
-
-                print("Successfully uploaded symbol graph!")
-
-                try await connection.uplink(
-                    package: placement.edition.package,
-                    version: placement.edition.version)
-
-                print("Successfully uplinked symbol graph!")
-            }
-        }
+        guard
+        let edition:UnidocAPI.PackageStatus.Edition = package.choose(force: force)
         else
         {
             print("""
                 No new documentation to build, run with -f to force upload of \
                 unindexed documentation.
                 """)
+            return
+        }
+
+        let build:PackageBuild = try await .remote(
+            package: symbol,
+            from: package.repo,
+            at: edition.tag,
+            in: workspace,
+            clean: true)
+
+        //  Remove the `Package.resolved` file to force a new resolution.
+        try await build.removePackageResolved()
+
+        let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
+            pretty: pretty)
+
+        let bson:BSON.Document = .init(encoding: Unidex.Snapshot.init(id: .init(
+                package: package.coordinate,
+                version: edition.coordinate),
+            metadata: archive.metadata,
+            graph: archive.graph))
+
+        try await self.connect
+        {
+            @Sendable (connection:SwiftinitClient.Connection) in
+
+            print("Uploading symbol graph...")
+
+            try await connection.put(bson: bson, to: "/api/snapshot")
+
+            print("Successfully uploaded symbol graph!")
+
+            try await connection.uplink(
+                package: package.coordinate,
+                version: edition.coordinate)
+
+            print("Successfully uplinked symbol graph!")
         }
     }
 }

@@ -516,8 +516,8 @@ extension UnidocDatabase
         {
             //  Local packages are always considered release versions.
             latestRelease = snapshot.id
-            thisRelease = .v(0, 0, 0)
-            version = "0.0.0"
+            thisRelease = .max
+            version = "__max"
         }
 
         let meta:Volume.Metadata = .init(id: snapshot.id,
