@@ -77,20 +77,7 @@ extension Site.Docs.Decl:StaticPage
 }
 extension Site.Docs.Decl:ApplicationPage
 {
-    var navigator:HTML.Breadcrumbs
-    {
-        if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
-        {
-            .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vector(self.vertex.scope, display: scope),
-                last: last)
-        }
-        else
-        {
-            .init(scope: nil,
-                last: self.stem.last)
-        }
-    }
+    typealias Navigator = HTML.Logo
 }
 extension Site.Docs.Decl:VersionedPage
 {
@@ -121,7 +108,18 @@ extension Site.Docs.Decl:VersionedPage
                     culture: self.vertex.culture)
             }
 
-            $0[.h1] = self.stem.last
+            if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
+            {
+                $0[.nav]
+                {
+                    $0.class = scope.reduce(scope.count - 1) { $0 + $1.count } > 80
+                        ? "breadcrumbs multiline"
+                        : "breadcrumbs"
+                } = self.vertex.scope.isEmpty ? nil : self.context.vector(self.vertex.scope,
+                    display: scope)
+
+                $0[.h1] = last
+            }
 
             $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 

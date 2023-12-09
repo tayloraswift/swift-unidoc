@@ -7,8 +7,6 @@ pre
 // line numbers
 pre.snippet code
 {
-    color: $light-swift;
-
     counter-set: line 0;
 
     span.newline
@@ -27,4 +25,8 @@ pre.snippet code
         direction: rtl;
         word-wrap: normal;
     }
+}
+pre.snippet code.language-swift
+{
+    color: $light-swift;
 }
