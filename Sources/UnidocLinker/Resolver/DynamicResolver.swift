@@ -9,18 +9,14 @@ import UnidocRecords
 
 struct DynamicResolver:~Copyable
 {
-    var diagnostics:DiagnosticContext<DynamicSymbolicator>
-
     private
     let codelinks:CodelinkResolver<Unidoc.Scalar>
-    private
-    let context:DynamicContext
+    private(set)
+    var context:DynamicLinker
 
-    init(diagnostics:consuming DiagnosticContext<DynamicSymbolicator>,
-        codelinks:CodelinkResolver<Unidoc.Scalar>,
-        context:DynamicContext)
+    init(codelinks:CodelinkResolver<Unidoc.Scalar>,
+        context:consuming DynamicLinker)
     {
-        self.diagnostics = diagnostics
         self.codelinks = codelinks
         self.context = context
     }
@@ -28,7 +24,7 @@ struct DynamicResolver:~Copyable
 extension DynamicResolver
 {
     private
-    var current:DynamicContext.Snapshot { self.context.current }
+    var current:DynamicLinker.Snapshot { self.context.current }
 }
 
 extension DynamicResolver
@@ -201,7 +197,7 @@ extension DynamicResolver
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.diagnostics[autolink] = InvalidAutolinkError<DynamicSymbolicator>.init(
+            self.context.diagnostics[autolink] = InvalidAutolinkError<DynamicSymbolicator>.init(
                 expression: unresolved.link)
 
             return nil
@@ -210,7 +206,7 @@ extension DynamicResolver
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.diagnostics[autolink] = InvalidCodelinkError<DynamicSymbolicator>.init(
+            self.context.diagnostics[autolink] = InvalidCodelinkError<DynamicSymbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 

@@ -1,4 +1,4 @@
-extension DynamicContext
+extension DynamicLinker
 {
     enum SortPriority:Equatable, Comparable
     {

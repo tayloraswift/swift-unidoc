@@ -2,19 +2,18 @@ import Symbols
 import Unidoc
 import UnidocDiagnostics
 
-@frozen public
-struct DynamicSymbolicator
+@usableFromInline final
+class DynamicSymbolicator
 {
-    public
+    @usableFromInline
     let demangler:Demangler?
-    public
+    @usableFromInline
     let root:Symbol.FileBase?
 
-    @usableFromInline internal
-    let context:DynamicContext
+    private
+    let context:DynamicLinker
 
-    @inlinable public
-    init(context:DynamicContext, root:Symbol.FileBase?)
+    init(context:consuming DynamicLinker, root:Symbol.FileBase?)
     {
         self.demangler = .init()
         self.root = root
@@ -24,7 +23,7 @@ struct DynamicSymbolicator
 }
 extension DynamicSymbolicator:DiagnosticSymbolicator
 {
-    public
+    @usableFromInline
     subscript(article scalar:Unidoc.Scalar) -> Symbol.Article?
     {
         UnidocPlane.article.contains(scalar.citizen)
@@ -32,7 +31,7 @@ extension DynamicSymbolicator:DiagnosticSymbolicator
             : nil
     }
 
-    public
+    @usableFromInline
     subscript(decl scalar:Unidoc.Scalar) -> Symbol.Decl?
     {
         UnidocPlane.decl.contains(scalar.citizen)
@@ -40,7 +39,7 @@ extension DynamicSymbolicator:DiagnosticSymbolicator
             : nil
     }
 
-    public
+    @usableFromInline
     subscript(file scalar:Unidoc.Scalar) -> Symbol.File?
     {
         UnidocPlane.file.contains(scalar.citizen)

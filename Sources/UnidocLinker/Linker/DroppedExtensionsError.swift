@@ -1,15 +1,11 @@
 import Symbols
 import UnidocDiagnostics
 
-@frozen public
 struct DroppedExtensionsError:Equatable, Error
 {
-    public
     let affected:AffectedExtensions
-    public
     let count:Int
 
-    @inlinable internal
     init(affected:AffectedExtensions, count:Int)
     {
         self.affected = affected
@@ -18,13 +14,13 @@ struct DroppedExtensionsError:Equatable, Error
 }
 extension DroppedExtensionsError
 {
-    @inlinable public static
+    static
     func extending(_ namespace:Symbol.Module, count:Int) -> Self
     {
         .init(affected: .namespace(namespace), count: count)
     }
 
-    @inlinable public static
+    static
     func extending(_ decl:Symbol.Decl, count:Int) -> Self
     {
         .init(affected: .decl(decl), count: count)
@@ -32,10 +28,9 @@ extension DroppedExtensionsError
 }
 extension DroppedExtensionsError:Diagnostic
 {
-    public
     typealias Symbolicator = DynamicSymbolicator
 
-    @inlinable public static
+    static
     func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
         switch self.affected

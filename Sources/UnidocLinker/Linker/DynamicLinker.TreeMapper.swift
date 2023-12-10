@@ -66,10 +66,11 @@ extension DynamicLinker.TreeMapper
 extension DynamicLinker.TreeMapper
 {
     mutating
-    func register(foreign:Unidoc.Scalar, with context:DynamicContext) -> Volume.Vertex.Foreign
+    func register(foreign:Unidoc.Scalar,
+        with context:borrowing DynamicLinker) -> Volume.Vertex.Foreign
     {
         guard
-        let snapshot:DynamicContext.Snapshot = context[foreign.package]
+        let snapshot:DynamicLinker.Snapshot = context[foreign.package]
         else
         {
             fatalError("scalar \(foreign) is not from a package in this context!")

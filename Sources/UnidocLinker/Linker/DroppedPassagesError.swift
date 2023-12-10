@@ -1,17 +1,15 @@
 import Unidoc
 import UnidocDiagnostics
 
-@frozen public
 enum DroppedPassagesError:Equatable, Error
 {
     case fromExtension(Unidoc.Scalar, of:Unidoc.Scalar)
 }
 extension DroppedPassagesError:Diagnostic
 {
-    public
     typealias Symbolicator = DynamicSymbolicator
 
-    @inlinable public static
+    static
     func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
         switch self

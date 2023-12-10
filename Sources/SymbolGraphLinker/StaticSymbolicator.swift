@@ -3,7 +3,7 @@ import Symbols
 import Unidoc
 import UnidocDiagnostics
 
-public
+@_spi(testable) public
 struct StaticSymbolicator:Sendable
 {
     public
@@ -14,7 +14,6 @@ struct StaticSymbolicator:Sendable
     private
     let graph:SymbolGraph
 
-    public
     init(graph:SymbolGraph, root:Symbol.FileBase?)
     {
         self.demangler = .init()
@@ -23,6 +22,7 @@ struct StaticSymbolicator:Sendable
         self.graph = graph
     }
 }
+@_spi(testable)
 extension StaticSymbolicator:DiagnosticSymbolicator
 {
     public

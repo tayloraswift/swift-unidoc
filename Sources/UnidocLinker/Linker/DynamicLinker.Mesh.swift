@@ -43,7 +43,7 @@ extension DynamicLinker.Mesh
         cultures:consuming [Volume.Vertex.Culture],
         decls:consuming [Volume.Vertex.Decl],
         groups:consuming Volume.Groups,
-        context:borrowing DynamicContext)
+        context:borrowing DynamicLinker)
     {
         var cultures:[Volume.Vertex.Culture] = cultures
 

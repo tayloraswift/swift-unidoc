@@ -86,18 +86,18 @@ extension DynamicLinker.Extensions
     mutating
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
-        context:DynamicContext,
         modules:[SymbolGraph.ModuleContext],
-        diagnostics:inout DiagnosticContext<DynamicSymbolicator>) -> ProtocolConformances<Int>
+        context:inout DynamicLinker) -> ProtocolConformances<Int>
     {
         guard
         let s:Unidoc.Scalar = context.current.scalars.decls[s],
-        let extendedSnapshot:DynamicContext.Snapshot = context[s.package],
+        let extendedSnapshot:DynamicLinker.Snapshot = context[s.package],
         let extendedDecl:SymbolGraph.Decl = extendedSnapshot.decls[s.citizen]?.decl
         else
         {
             let symbol:Symbol.Decl = context.current.decls.symbols[s]
-            diagnostics[nil] = DroppedExtensionsError.extending(symbol, count: extensions.count)
+            context.diagnostics[nil] = DroppedExtensionsError.extending(symbol,
+                count: extensions.count)
             return [:]
         }
 
@@ -123,31 +123,11 @@ extension DynamicLinker.Extensions
                 extends: s)
         }
 
-        let conformances:ProtocolConformances<Int> = .init(context: context,
-            diagnostics: &diagnostics)
-        {
-            (conformances:inout ProtocolConformances<Int>) in
-
-            for (`extension`, signature):
-                (SymbolGraph.Extension, DynamicLinker.ExtensionSignature) in zip(
-                extensions,
-                signatures)
-            {
-                let module:SymbolGraph.ModuleContext = modules[`extension`.culture]
-                for p:Int32 in `extension`.conformances
-                {
-                    //  Only track conformances that were declared by modules in
-                    //  the current package.
-                    if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
-                        case false = module.already(conforms: s, to: p)
-                    {
-                        conformances[to: p].append(.init(
-                            conditions: signature.conditions,
-                            culture: `extension`.culture))
-                    }
-                }
-            }
-        }
+        let conformances:ProtocolConformances<Int> = .init(of: s,
+            signatures: signatures,
+            extensions: extensions,
+            modules: modules,
+            context: &context)
 
         for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Int>]) in conformances
         {
@@ -211,14 +191,13 @@ extension DynamicLinker.Extensions
                 guard case (nil, nil) = ($0.overview, $0.details)
                 else
                 {
-                    diagnostics[nil] = DroppedPassagesError.fromExtension($0.id, of: s)
+                    context.diagnostics[nil] = DroppedPassagesError.fromExtension($0.id, of: s)
                     return
                 }
 
-                ($0.overview, $0.details) = diagnostics.resolving(
+                ($0.overview, $0.details) = context.resolving(
                     namespace: context.current.namespaces[`extension`.namespace],
                     module: modules[`extension`.culture],
-                    global: context,
                     scope: [String].init(extendedDecl.path))
                 {
                     $0.link(article: article)

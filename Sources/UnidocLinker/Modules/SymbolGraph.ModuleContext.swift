@@ -69,8 +69,8 @@ extension SymbolGraph.ModuleContext
 extension SymbolGraph.ModuleContext
 {
     mutating
-    func add(snapshot:DynamicContext.Snapshot,
-        context:DynamicContext,
+    func add(snapshot:DynamicLinker.Snapshot,
+        context:borrowing DynamicLinker,
         filter:Set<Int>?)
     {
         for (c, culture):(Int, SymbolGraph.Culture) in zip(
@@ -100,8 +100,8 @@ extension SymbolGraph.ModuleContext
     }
     private mutating
     func add(namespace:SymbolGraph.Namespace,
-        snapshot:DynamicContext.Snapshot,
-        context:DynamicContext,
+        snapshot:DynamicLinker.Snapshot,
+        context:borrowing DynamicLinker,
         filter:Set<Int>?)
     {
         let qualifier:Symbol.Module = snapshot.namespaces[namespace.index]
@@ -147,8 +147,8 @@ extension SymbolGraph.ModuleContext
             symbol:Symbol.Decl,
             path:UnqualifiedPath
         ),
-        snapshot:DynamicContext.Snapshot,
-        context:DynamicContext,
+        snapshot:DynamicLinker.Snapshot,
+        context:borrowing DynamicLinker,
         filter:Set<Int>?)
     {
         for `extension`:SymbolGraph.Extension in extensions where

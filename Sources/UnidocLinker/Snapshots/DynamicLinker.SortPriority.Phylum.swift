@@ -2,7 +2,7 @@
 import Sources
 import Unidoc
 
-extension DynamicContext.SortPriority
+extension DynamicLinker.SortPriority
 {
     enum Phylum:Equatable, Comparable
     {
@@ -26,7 +26,7 @@ extension DynamicContext.SortPriority
         case  macro
     }
 }
-extension DynamicContext.SortPriority.Phylum
+extension DynamicLinker.SortPriority.Phylum
 {
     init(_ phylum:Unidoc.Decl, position:SourcePosition? = nil)
     {

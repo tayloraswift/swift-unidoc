@@ -1,13 +1,21 @@
 import CodelinkResolution
 import SemanticVersions
+import Signatures
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocDiagnostics
 import UnidocRecords
 
+@available(*, deprecated, renamed: "DynamicLinker")
+public
+typealias DynamicContext = DynamicLinker
+
 @frozen public
-struct DynamicContext
+struct DynamicLinker:~Copyable
 {
+    var diagnostics:DiagnosticContext<DynamicSymbolicator>
+
     private
     let byPackageIdentifier:[Symbol.Package: Snapshot]
     private
@@ -24,9 +32,11 @@ struct DynamicContext
         self.byPackageIdentifier = byPackageIdentifier
         self.byPackage = byPackage
         self.current = current
+
+        self.diagnostics = .init()
     }
 }
-extension DynamicContext
+extension DynamicLinker
 {
     public
     init(_ currentSnapshot:Unidex.Snapshot, dependencies:borrowing [Unidex.Snapshot])
@@ -73,7 +83,41 @@ extension DynamicContext
                 upstream: upstream))
     }
 }
-extension DynamicContext
+extension DynamicLinker
+{
+    public mutating
+    func link() -> Mesh
+    {
+        var tables:Tables = .init(context: consume self)
+
+        let cultures:[Volume.Vertex.Culture] = tables.link()
+
+        let articles:[Volume.Vertex.Article] = tables.articles
+        let decls:[Volume.Vertex.Decl] = tables.decls
+        let groups:Volume.Groups = tables.groups
+        let extensions:Extensions = tables.extensions
+
+        self = (consume tables).context
+
+        return .init(extensions: extensions,
+            articles: articles,
+            cultures: cultures,
+            decls: decls,
+            groups: groups,
+            context: self)
+    }
+
+    public consuming
+    func status() -> some Diagnostics
+    {
+        let diagnostics:DiagnosticContext<DynamicSymbolicator> = self.diagnostics
+        let symbols:DynamicSymbolicator = .init(context: self,
+            root: self.current.metadata.root)
+
+        return diagnostics.with(symbolicator: symbols)
+    }
+}
+extension DynamicLinker
 {
     private
     subscript(dynamic package:Symbol.Package) -> Snapshot?
@@ -92,7 +136,7 @@ extension DynamicContext
         self.current : self.byPackage[package]
     }
 }
-extension DynamicContext
+extension DynamicLinker
 {
     func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:Int) -> [Unidoc.Scalar]
     {
@@ -123,7 +167,7 @@ extension DynamicContext
         return path.reversed()
     }
 }
-extension DynamicContext
+extension DynamicLinker
 {
     public
     func dependencies() -> [Volume.Metadata.Dependency]
@@ -213,11 +257,176 @@ extension DynamicContext
         }
     }
 }
-extension DynamicContext
+extension DynamicLinker
 {
-    func assemble(
-        extension:DynamicLinker.Extension,
-        signature:DynamicLinker.ExtensionSignature) -> Volume.Group.Extension
+    mutating
+    func simplify(conformances:inout [ProtocolConformance<Int>],
+        of subject:Unidoc.Scalar,
+        to protocol:Unidoc.Scalar)
+    {
+        /// The set of local package cultures in which this protocol conformance
+        /// exists, either conditionally or unconditionally.
+        ///
+        /// It is valid (but totally demented) for a package to declare the same
+        /// conformance in multiple modules, as long as they never intersect in
+        /// a build tree.
+        let extancy:Set<Int> = conformances.reduce(into: []) { $0.insert($1.culture) }
+
+        //  Group conformances to this protocol by culture.
+        let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = conformances.reduce(
+            into: [:])
+        {
+            let module:SymbolGraph.Module = self.current.cultures[$1.culture].module
+            for c:Int in module.dependencies.modules where
+                c != $1.culture && extancy.contains(c)
+            {
+                //  Another module in this package already declares this
+                //  conformance, and the `$1.culture` depends on it!
+                return
+            }
+
+            $0[$1.culture, default: []].append($1.conditions)
+        }
+
+        //  A type can only conform to a protocol once in a culture,
+        //  so we need to pick the most general set of generic constraints.
+        //
+        //  For example, `Optional<T>` conforms to `Equatable` where
+        //  `T:Equatable`, but it also conforms to `Equatable` where
+        //  `T:Hashable`, because if `T` is ``Hashable`` then it is also
+        //  ``Equatable``. So that conformance is redundant.
+        let reduced:[Int: [GenericConstraint<Unidoc.Scalar?>]] = segregated.mapValues
+        {
+            //  Swift does not have conditional disjunctions for protocol
+            //  conformances. So the most general constraint list must be
+            //  (one of) the shortest.
+            var shortest:[[GenericConstraint<Unidoc.Scalar?>]] = []
+            var length:Int = .max
+            for constraints:[GenericConstraint<Unidoc.Scalar?>] in $0
+            {
+                if      constraints.count <  length
+                {
+                    shortest = [constraints]
+                    length = constraints.count
+                }
+                else if constraints.count == length
+                {
+                    shortest.append(constraints)
+                }
+            }
+            //  The array is always non-empty because `$0` itself is always
+            //  non-empty, because it was created by appending to
+            //  ``Dictionary.subscript(_:default:)``.
+            if  shortest.count == 1
+            {
+                return shortest[0]
+            }
+
+            let constraints:Set<GenericConstraint<Unidoc.Scalar?>> = .init(
+                shortest.joined())
+            let reduced:Set<GenericConstraint<Unidoc.Scalar?>> = constraints.filter
+            {
+                switch $0
+                {
+                case .where(_,             is: .equal,   to: _):
+                    //  Same-type constraints are never redundant.
+                    return true
+
+                case .where(let parameter, is: let what, to: let type):
+                    if  case .nominal(let type?) = type,
+                        let snapshot:Snapshot = self[type.package],
+                        let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
+                    {
+                        for local:Int32 in local
+                        {
+                            //  If the constraint is `T:Hashable`, `Hashable:Equatable`,
+                            //  and `T:Equatable` exists in the constraint set, then this
+                            //  constraint is redundant.
+                            if  let supertype:Unidoc.Scalar = snapshot.scalars.decls[local],
+                                    supertype != type,
+                                    constraints.contains(.where(parameter,
+                                        is: what,
+                                        to: .nominal(supertype)))
+                            {
+                                return false
+                            }
+                        }
+                    }
+                    return true
+                }
+            }
+            //  We shouldn’t have fewer total constraints than we started with,
+            //  otherwise that means some of the constraint lists had redundancies
+            //  within themselves, and the Swift compiler should have already
+            //  removed those.
+            //
+            //  By the same reasoning, at least one of the constraint lists should
+            //  contain exactly the same constraints as the reduced set. We don’t
+            //  return the set itself, because this implementation does not know
+            //  anything about canonical constraint ordering.
+            let ordered:[[GenericConstraint<Unidoc.Scalar?>]] = shortest.filter
+            {
+                $0.allSatisfy(reduced.contains(_:))
+            }
+            if  ordered.count >= 1,
+                ordered[1...].allSatisfy({ $0 == ordered[0] })
+            {
+                return ordered[0]
+            }
+            else
+            {
+                diagnostics[nil] = ConstraintReductionError.init(invalid: ordered,
+                    minimal: [_].init(reduced),
+                    subject: subject,
+                    protocol: `protocol`)
+                //  See note above about non-emptiness.
+                return shortest.first!
+            }
+        }
+
+        //  Conformances should now be unique per culture.
+        conformances = reduced.map
+        {
+            .init(conditions: $0.value, culture: $0.key)
+        }
+
+        conformances.sort
+        {
+            $0.culture < $1.culture
+        }
+    }
+
+    mutating
+    func resolving<Success>(
+        namespace:Symbol.Module,
+        module:SymbolGraph.ModuleContext,
+        scope:[String] = [],
+        with yield:(inout DynamicResolver) throws -> Success) rethrows -> Success
+    {
+        var resolver:DynamicResolver = .init(
+            codelinks: .init(table: module.codelinks, scope: .init(
+                namespace: namespace,
+                imports: module.imports,
+                path: scope)),
+            context: consume self)
+
+        do
+        {
+            let success:Success = try yield(&resolver)
+            self = (consume resolver).context
+            return success
+        }
+        catch let error
+        {
+            self = (consume resolver).context
+            throw error
+        }
+    }
+}
+
+extension DynamicLinker
+{
+    func assemble(extension:Extension, signature:ExtensionSignature) -> Volume.Group.Extension
     {
         let prefetch:[Unidoc.Scalar] = []
         //  TODO: compute tertiary scalars
@@ -235,7 +444,7 @@ extension DynamicContext
             details: `extension`.details)
     }
 }
-extension DynamicContext
+extension DynamicLinker
 {
     /// Get the sort-priority of a declaration.
     func priority(of decl:Unidoc.Scalar) -> SortPriority?

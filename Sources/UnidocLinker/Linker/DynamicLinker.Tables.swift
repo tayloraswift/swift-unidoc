@@ -6,132 +6,96 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-public
-struct DynamicLinker:~Copyable
-{
-    private
-    let contexts:[SymbolGraph.ModuleContext]
-    private
-    let global:DynamicContext
-
-    /// Protocol conformances for each declaration in the **current** snapshot.
-    private
-    let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>
-
-    public private(set)
-    var diagnostics:DiagnosticContext<DynamicSymbolicator>
-    private
-    var extensions:Extensions
-
-    /// A table mapping nested declarations to their enclosing extensions.
-    ///
-    /// This is immutable even though ``extensions`` is mutable, because we never introduce
-    /// new nested declarations after building the initial ``extensions`` structure.
-    private
-    let extensionContainingNested:[Int32: Unidoc.Scalar]
-    /// A table maping vertices to topics or autogroups.
-    private
-    var groupContainingMember:[Int32: Unidoc.Scalar]
-
-    private
-    var next:
-    (
-        autogroup:Unidoc.Counter<UnidocPlane.Autogroup>,
-        topic:Unidoc.Counter<UnidocPlane.Topic>
-    )
-
-    private
-    var cultures:[Volume.Vertex.Culture]
-    private
-    var articles:[Volume.Vertex.Article]
-    private
-    var decls:[Volume.Vertex.Decl]
-
-    private
-    var groups:Volume.Groups
-
-    private
-    init(
-        contexts:[SymbolGraph.ModuleContext],
-        global:DynamicContext,
-        conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
-        diagnostics:DiagnosticContext<DynamicSymbolicator>,
-        extensions:Extensions)
-    {
-        self.contexts = contexts
-        self.global = global
-
-        self.conformances = conformances
-        self.diagnostics = diagnostics
-        self.extensions = extensions
-
-        self.extensionContainingNested = extensions.byNested()
-        self.groupContainingMember = [:]
-
-        self.next.autogroup = .init(zone: global.current.id)
-        self.next.topic = .init(zone: global.current.id)
-
-        self.cultures = []
-        self.articles = []
-        self.decls = []
-
-        self.groups = .init()
-    }
-}
 extension DynamicLinker
 {
-    public
-    init(context:DynamicContext)
+    struct Tables:~Copyable
+    {
+        private
+        let contexts:[SymbolGraph.ModuleContext]
+        private(set)
+        var context:DynamicLinker
+
+        /// Protocol conformances for each declaration in the **current** snapshot.
+        private
+        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>
+
+        /// A table mapping nested declarations to their enclosing extensions.
+        ///
+        /// This is immutable even though ``extensions`` is mutable, because we never introduce
+        /// new nested declarations after building the initial ``extensions`` structure.
+        private
+        let extensionContainingNested:[Int32: Unidoc.Scalar]
+        /// A table maping vertices to topics or autogroups.
+        private
+        var groupContainingMember:[Int32: Unidoc.Scalar]
+
+        private
+        var next:
+        (
+            autogroup:Unidoc.Counter<UnidocPlane.Autogroup>,
+            topic:Unidoc.Counter<UnidocPlane.Topic>
+        )
+
+        private(set)
+        var extensions:Extensions
+        var articles:[Volume.Vertex.Article]
+        var decls:[Volume.Vertex.Decl]
+
+        var groups:Volume.Groups
+
+        private
+        init(
+            contexts:consuming [SymbolGraph.ModuleContext],
+            context:consuming DynamicLinker,
+            conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
+            extensions:Extensions)
+        {
+            self.contexts = contexts
+            self.context = context
+
+            self.conformances = conformances
+
+            self.extensionContainingNested = extensions.byNested()
+            self.groupContainingMember = [:]
+
+            self.next.autogroup = .init(zone: self.context.current.id)
+            self.next.topic = .init(zone: self.context.current.id)
+
+            self.extensions = extensions
+            self.articles = []
+            self.decls = []
+
+            self.groups = .init()
+        }
+    }
+}
+extension DynamicLinker.Tables
+{
+    init(context:consuming DynamicLinker)
     {
         let modules:[SymbolGraph.ModuleContext] = context.modules()
 
-        var diagnostics:DiagnosticContext<DynamicSymbolicator> = .init()
-        var extensions:Extensions = .init(zone: context.current.id)
+        var extensions:DynamicLinker.Extensions = .init(zone: context.current.id)
 
         let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>> =
             context.current.decls.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
                 extending: $0,
-                context: context,
                 modules: modules,
-                diagnostics: &diagnostics)
+                context: &context)
         }
 
         self.init(
             contexts: modules,
-            global: context,
+            context: context,
             conformances: conformances,
-            diagnostics: diagnostics,
             extensions: extensions)
-
-        self.autogroup()
-        self.cultures = self.link()
-    }
-
-    public consuming
-    func finalize() -> Mesh
-    {
-        let articles:[Volume.Vertex.Article] = self.articles
-        let cultures:[Volume.Vertex.Culture] = self.cultures
-        let decls:[Volume.Vertex.Decl] = self.decls
-
-        let extensions:Extensions = self.extensions
-        let global:DynamicContext = self.global
-
-        let groups:Volume.Groups = (consume self).groups
-
-        return .init(extensions: extensions,
-            articles: articles,
-            cultures: cultures,
-            decls: decls,
-            groups: groups,
-            context: global)
     }
 }
-extension DynamicLinker
+extension DynamicLinker.Tables
 {
-    var current:DynamicContext.Snapshot { self.global.current }
+    var current:DynamicLinker.Snapshot { self.context.current }
 
     private
     var modules:SymbolGraph.ModuleView
@@ -142,7 +106,7 @@ extension DynamicLinker
             edition: self.current.id)
     }
 }
-extension DynamicLinker
+extension DynamicLinker.Tables
 {
     private mutating
     func autogroup()
@@ -169,9 +133,11 @@ extension DynamicLinker
         }
     }
 
-    private mutating
+    mutating
     func link() -> [Volume.Vertex.Culture]
     {
+        self.autogroup()
+
         //  First pass to create the topic records, which also populates topic memberships.
         for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
             self.modules
@@ -207,7 +173,7 @@ extension DynamicLinker
                         //  The feature might have been declared in a different package!
                         guard
                         let f:Unidoc.Scalar = self.current.scalars.decls[f],
-                        let p:Unidoc.Scalar = self.global[f.package]?.scope(of: f)
+                        let p:Unidoc.Scalar = self.context[f.package]?.scope(of: f)
                         else
                         {
                             continue
@@ -222,7 +188,7 @@ extension DynamicLinker
                         //  package.
                         for conformance:ProtocolConformance<Int> in conformances[to: p]
                         {
-                            let signature:ExtensionSignature = .init(
+                            let signature:DynamicLinker.ExtensionSignature = .init(
                                 conditions: conformance.conditions,
                                 culture: conformance.culture,
                                 extends: owner)
@@ -275,7 +241,7 @@ extension DynamicLinker
                 let scalar:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
                 else
                 {
-                    self.diagnostics[nil] = DroppedExtensionsError.extending(module,
+                    self.context.diagnostics[nil] = DroppedExtensionsError.extending(module,
                         count: decls.range.count)
                     continue
                 }
@@ -297,7 +263,7 @@ extension DynamicLinker
                 //  Create top-level autogroup.
                 self.groups.autogroups.append(.init(id: self.next.autogroup.id(),
                     scope: namespace.culture,
-                    members: self.global.sort(lexically: consume miscellaneous)))
+                    members: self.context.sort(lexically: consume miscellaneous)))
             }
             //  Create article records.
             if  let articles:ClosedRange<Int32> = culture.articles
@@ -312,7 +278,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker
+extension DynamicLinker.Tables
 {
     private mutating
     func link(topics:[SymbolGraph.Topic],
@@ -326,10 +292,9 @@ extension DynamicLinker
                 culture: namespace.culture,
                 scope: owner)
 
-            (record.overview, record.members) = self.diagnostics.resolving(
+            (record.overview, record.members) = self.context.resolving(
                 namespace: namespace.module,
                 module: namespace.context,
-                global: self.global,
                 scope: scope)
             {
                 $0.link(topic: topic)
@@ -348,7 +313,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker
+extension DynamicLinker.Tables
 {
     private mutating
     func link(culture:SymbolGraph.Culture,
@@ -362,10 +327,9 @@ extension DynamicLinker
         {
             vertex.readme = article.file.map { self.current.id + $0 }
 
-            (vertex.overview, vertex.details) = self.diagnostics.resolving(
+            (vertex.overview, vertex.details) = self.context.resolving(
                 namespace: namespace.module,
-                module: namespace.context,
-                global: self.global)
+                module: namespace.context)
             {
                 $0.link(article: article)
             }
@@ -391,10 +355,9 @@ extension DynamicLinker
                 headline: node.headline,
                 group: self.groupContainingMember[a])
 
-            (vertex.overview, vertex.details) = self.diagnostics.resolving(
+            (vertex.overview, vertex.details) = self.context.resolving(
                 namespace: namespace.module,
-                module: namespace.context,
-                global: self.global)
+                module: namespace.context)
             {
                 $0.link(article: node.article)
             }
@@ -454,7 +417,7 @@ extension DynamicLinker
 
             for s:Unidoc.Scalar in superforms
             {
-                let implicit:ExtensionSignature = .init(conditions: [],
+                let implicit:DynamicLinker.ExtensionSignature = .init(conditions: [],
                     culture: namespace.c,
                     extends: s)
 
@@ -469,11 +432,11 @@ extension DynamicLinker
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
                 stem: .init(namespace.module, decl.path, orientation: decl.phylum.orientation),
-                requirements: self.global.sort(lexically: requirements),
-                superforms: self.global.sort(lexically: superforms),
+                requirements: self.context.sort(lexically: requirements),
+                superforms: self.context.sort(lexically: superforms),
                 namespace: namespace.id,
                 culture: namespace.culture,
-                scope: scope.map { self.global.expand($0) } ?? [],
+                scope: scope.map { self.context.expand($0) } ?? [],
                 renamed: decl.renamed.map { self.current.scalars.decls[$0] } ?? nil,
                 file: decl.location.map { self.current.id + $0.file },
                 position: decl.location?.position,
@@ -482,10 +445,9 @@ extension DynamicLinker
 
             if  let article:SymbolGraph.Article = decl.article
             {
-                (vertex.overview, vertex.details) = self.diagnostics.resolving(
+                (vertex.overview, vertex.details) = self.context.resolving(
                     namespace: namespace.module,
                     module: namespace.context,
-                    global: self.global,
                     scope: decl.scope)
                 {
                     $0.link(article: article)
