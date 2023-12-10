@@ -16,7 +16,7 @@ extension SymbolGraphMetadata.ProductType:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let json:JSON.ExplicitField<CodingKey> = try json.single()
+        let json:JSON.FieldDecoder<CodingKey> = try json.single()
         switch json.key
         {
         case .library:      self = .library(try json.decode(as: JSON.Array.self)

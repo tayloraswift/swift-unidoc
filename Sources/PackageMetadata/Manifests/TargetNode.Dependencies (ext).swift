@@ -9,7 +9,7 @@ extension TargetNode.Dependencies:JSONDecodable
         self.init()
 
         let array:JSON.Array = try .init(json: json)
-        for json:JSON.ExplicitField<Int> in array
+        for json:JSON.FieldDecoder<Int> in array
         {
             enum CodingKey:String, Sendable
             {
@@ -20,7 +20,7 @@ extension TargetNode.Dependencies:JSONDecodable
 
             try json.decode(using: CodingKey.self)
             {
-                let json:JSON.ExplicitField<CodingKey> = try $0.single()
+                let json:JSON.FieldDecoder<CodingKey> = try $0.single()
 
                 enum Platforms:String
                 {

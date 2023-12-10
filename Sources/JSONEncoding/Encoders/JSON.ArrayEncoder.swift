@@ -39,7 +39,7 @@ extension JSON.ArrayEncoder:JSONEncoder
 extension JSON.ArrayEncoder
 {
     @inlinable internal
-    subscript(_:(Index) -> Void) -> JSON
+    subscript(with _:(Index) -> Void) -> JSON
     {
         _read
         {
@@ -64,25 +64,25 @@ extension JSON.ArrayEncoder
 {
     @inlinable public
     subscript(_:(Index) -> Void,
-        with encode:(inout Self) -> ()) -> Void
+        yield:(inout Self) -> ()) -> Void
     {
         mutating
-        get { encode(&self[+][as: Self.self]) }
+        get { yield(&self[with: +][as: Self.self]) }
     }
 
     @inlinable public
     subscript<CodingKey>(_:(Index) -> Void,
         _:CodingKey.Type = CodingKey.self,
-        with encode:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
     {
         mutating
-        get { encode(&self[+][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        get { yield(&self[with: +][as: JSON.ObjectEncoder<CodingKey>.self]) }
     }
 
     @inlinable public
     subscript<Encodable>(_:(Index) -> Void) -> Encodable? where Encodable:JSONEncodable
     {
         get { nil }
-        set (value) { value?.encode(to: &self[+]) }
+        set (value) { value?.encode(to: &self[with: +]) }
     }
 }
