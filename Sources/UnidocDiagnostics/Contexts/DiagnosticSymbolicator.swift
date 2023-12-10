@@ -16,27 +16,6 @@ protocol DiagnosticSymbolicator<Address>
 }
 extension DiagnosticSymbolicator
 {
-    public
-    func symbolicate(
-        printing diagnostics:consuming DiagnosticContext<Self>,
-        colors:TerminalColors = .disabled)
-    {
-        var first:Bool = true
-        for message:DiagnosticMessage in self.symbolicate(diagnostics)
-        {
-            if  first
-            {
-                first = false
-            }
-            else if case .sourceLocation = message
-            {
-                print()
-            }
-
-            print(message.description(colors: colors))
-        }
-    }
-    public
     func symbolicate(_ diagnostics:consuming DiagnosticContext<Self>) -> [DiagnosticMessage]
     {
         var output:DiagnosticOutput<Self> = .init(symbolicator: self)

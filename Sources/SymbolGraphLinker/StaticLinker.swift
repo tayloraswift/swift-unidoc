@@ -725,12 +725,8 @@ extension StaticLinker
 }
 extension StaticLinker
 {
-    public consuming
-    func finalize() throws ->
-    (
-        diagnostics:DiagnosticContext<StaticSymbolicator>,
-        graph:SymbolGraph
-    )
+    public mutating
+    func load() throws -> SymbolGraph
     {
         for case (let path, .some(let members)) in self.router.paths
         {
@@ -766,6 +762,15 @@ extension StaticLinker
                 }
             }
         }
-        return (self.tables.diagnostics, self.symbolizer.graph)
+
+        return self.symbolizer.graph
+    }
+
+    public consuming
+    func status(root:Symbol.FileBase?) -> some Diagnostics
+    {
+        self.tables.diagnostics.with(symbolicator: .init(
+            graph: self.symbolizer.graph,
+            root: root))
     }
 }

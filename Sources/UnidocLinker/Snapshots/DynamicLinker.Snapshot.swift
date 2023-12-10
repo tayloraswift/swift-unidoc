@@ -3,7 +3,7 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension DynamicContext
+extension DynamicLinker
 {
     @dynamicMemberLookup
     @usableFromInline internal final
@@ -43,17 +43,17 @@ extension DynamicContext
         }
     }
 }
-extension DynamicContext.Snapshot
+extension DynamicLinker.Snapshot
 {
     subscript<T>(dynamicMember keyPath:KeyPath<SymbolGraph, T>) -> T
     {
         self.graph[keyPath: keyPath]
     }
 }
-extension DynamicContext.Snapshot
+extension DynamicLinker.Snapshot
 {
     convenience
-    init(snapshot:Unidex.Snapshot, upstream:borrowing DynamicContext.UpstreamScalars)
+    init(snapshot:Unidex.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
     {
         let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
 
@@ -108,14 +108,14 @@ extension DynamicContext.Snapshot
             graph: snapshot.graph)
     }
 }
-extension DynamicContext.Snapshot
+extension DynamicLinker.Snapshot
 {
-    func priority(of decl:Unidoc.Scalar) -> DynamicContext.SortPriority?
+    func priority(of decl:Unidoc.Scalar) -> DynamicLinker.SortPriority?
     {
         if  let local:Int32 = decl - self.id,
             let decl:SymbolGraph.Decl = self.decls[local]?.decl
         {
-            let phylum:DynamicContext.SortPriority.Phylum = .init(decl.phylum,
+            let phylum:DynamicLinker.SortPriority.Phylum = .init(decl.phylum,
                 position: decl.location?.position)
             return decl.signature.availability.isGenerallyRecommended ?
                 .available(phylum, decl.path.last, local) :

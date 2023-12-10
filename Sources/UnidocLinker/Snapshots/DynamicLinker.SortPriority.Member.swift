@@ -1,4 +1,4 @@
-extension DynamicContext.SortPriority
+extension DynamicLinker.SortPriority
 {
     enum Member:Equatable, Comparable
     {

@@ -52,145 +52,38 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
 }
 extension ProtocolConformances<Int>
 {
-    init(context:borrowing DynamicContext,
-        diagnostics:inout DiagnosticContext<DynamicSymbolicator>,
-        with populate:(inout ProtocolConformances<Int>) throws -> Void) rethrows
+    init(of subject:Unidoc.Scalar,
+        signatures:borrowing [DynamicLinker.ExtensionSignature],
+        extensions:borrowing [SymbolGraph.Extension],
+        modules:borrowing [SymbolGraph.ModuleContext],
+        context:inout DynamicLinker)
     {
-        var conformances:ProtocolConformances<Int> = [:]
-        try populate(&conformances)
-        let deduplicated:[Unidoc.Scalar: [ProtocolConformance<Int>]] =
-            conformances.table.mapValues
+        self = [:]
+
+        for (`extension`, signature):(SymbolGraph.Extension, DynamicLinker.ExtensionSignature)
+            in zip(extensions, signatures)
         {
-            /// The set of local package cultures in which this protocol conformance
-            /// exists, either conditionally or unconditionally.
-            ///
-            /// It is valid (but totally demented) for a package to declare the same
-            /// conformance in multiple modules, as long as they never intersect in
-            /// a build tree.
-            let extancy:Set<Int> = $0.reduce(into: []) { $0.insert($1.culture) }
-
-            //  Group conformances to this protocol by culture.
-            let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = $0.reduce(
-                into: [:])
+            let module:SymbolGraph.ModuleContext = modules[`extension`.culture]
+            for p:Int32 in `extension`.conformances
             {
-                let module:SymbolGraph.Module = context.current.cultures[$1.culture].module
-                for c:Int in module.dependencies.modules where
-                    c != $1.culture && extancy.contains(c)
+                //  Only track conformances that were declared by modules in
+                //  the current package.
+                if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
+                    case false = module.already(conforms: subject, to: p)
                 {
-                    //  Another module in this package already declares this
-                    //  conformance, and the `$1.culture` depends on it!
-                    return
+                    self[to: p].append(.init(
+                        conditions: signature.conditions,
+                        culture: `extension`.culture))
                 }
-
-                $0[$1.culture, default: []].append($1.conditions)
-            }
-
-            //  A type can only conform to a protocol once in a culture,
-            //  so we need to pick the most general set of generic constraints.
-            //
-            //  For example, `Optional<T>` conforms to `Equatable` where
-            //  `T:Equatable`, but it also conforms to `Equatable` where
-            //  `T:Hashable`, because if `T` is ``Hashable`` then it is also
-            //  ``Equatable``. So that conformance is redundant.
-            let reduced:[Int: [GenericConstraint<Unidoc.Scalar?>]] =
-                segregated.mapValues
-            {
-                //  Swift does not have conditional disjunctions for protocol
-                //  conformances. So the most general constraint list must be
-                //  (one of) the shortest.
-                var shortest:[[GenericConstraint<Unidoc.Scalar?>]] = []
-                var length:Int = .max
-                for constraints:[GenericConstraint<Unidoc.Scalar?>] in $0
-                {
-                    if      constraints.count <  length
-                    {
-                        shortest = [constraints]
-                        length = constraints.count
-                    }
-                    else if constraints.count == length
-                    {
-                        shortest.append(constraints)
-                    }
-                }
-                //  The array is always non-empty because `$0` itself is always
-                //  non-empty, because it was created by appending to
-                //  ``Dictionary.subscript(_:default:)``.
-                if  shortest.count == 1
-                {
-                    return shortest[0]
-                }
-
-                let constraints:Set<GenericConstraint<Unidoc.Scalar?>> = .init(
-                    shortest.joined())
-                let reduced:Set<GenericConstraint<Unidoc.Scalar?>> = constraints.filter
-                {
-                    switch $0
-                    {
-                    case .where(_,             is: .equal,   to: _):
-                        //  Same-type constraints are never redundant.
-                        break
-
-                    case .where(let parameter, is: let what, to: let type):
-                        if  case .nominal(let type?) = type,
-                            let snapshot:DynamicContext.Snapshot = context[type.package],
-                            let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
-                        {
-                            for local:Int32 in local
-                            {
-                                //  If the constraint is `T:Hashable`, `Hashable:Equatable`,
-                                //  and `T:Equatable` exists in the constraint set, then this
-                                //  constraint is redundant.
-                                if  let supertype:Unidoc.Scalar = snapshot.scalars.decls[local],
-                                        supertype != type,
-                                        constraints.contains(.where(parameter,
-                                            is: what,
-                                            to: .nominal(supertype)))
-                                {
-                                    return false
-                                }
-                            }
-                        }
-                    }
-
-                    return true
-                }
-                //  We shouldn’t have fewer total constraints than we started with,
-                //  otherwise that means some of the constraint lists had redundancies
-                //  within themselves, and the Swift compiler should have already
-                //  removed those.
-                //
-                //  By the same reasoning, at least one of the constraint lists should
-                //  contain exactly the same constraints as the reduced set. We don’t
-                //  return the set itself, because this implementation does not know
-                //  anything about canonical constraint ordering.
-                let ordered:[[GenericConstraint<Unidoc.Scalar?>]] = shortest.filter
-                {
-                    $0.allSatisfy(reduced.contains(_:))
-                }
-                if  ordered.count == 1
-                {
-                    return ordered[0]
-                }
-                else
-                {
-                    diagnostics[nil] = ConstraintReductionError.init(invalid: ordered,
-                        minimal: .init(reduced))
-                    //  See note above about non-emptiness.
-                    return shortest.first!
-                }
-            }
-
-            //  Conformances should now be unique per culture.
-            return reduced.map
-            {
-                .init(conditions: $0.value, culture: $0.key)
-            }
-            .sorted
-            {
-                $0.culture < $1.culture
             }
         }
 
-        self.init(table: deduplicated)
+        for i:Dictionary<Unidoc.Scalar, [ProtocolConformance<Int>]>.Index in self.table.indices
+        {
+            let `protocol`:Unidoc.Scalar = self.table.keys[i]
+            context.simplify(conformances: &self.table.values[i],
+                of: subject,
+                to: `protocol`)
+        }
     }
 }
