@@ -2,36 +2,42 @@ import Signatures
 import Unidoc
 import UnidocDiagnostics
 
-@frozen public
 struct ConstraintReductionError:Error, Equatable, Sendable
 {
-    public
     let constraints:[[GenericConstraint<Unidoc.Scalar?>]]
-    public
     let minimal:[GenericConstraint<Unidoc.Scalar?>]
+    let subject:Unidoc.Scalar
+    let `protocol`:Unidoc.Scalar
 
-    @inlinable public
     init(invalid constraints:[[GenericConstraint<Unidoc.Scalar?>]],
-        minimal:[GenericConstraint<Unidoc.Scalar?>])
+        minimal:[GenericConstraint<Unidoc.Scalar?>],
+        subject:Unidoc.Scalar,
+        `protocol`:Unidoc.Scalar)
     {
         self.constraints = constraints
         self.minimal = minimal
+        self.subject = subject
+        self.protocol = `protocol`
     }
 }
 extension ConstraintReductionError:Diagnostic
 {
-    public
     typealias Symbolicator = DynamicSymbolicator
 
-    @inlinable public static
+    static
     func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
     {
         output[.error] = """
         failed to reduce constraints: \
-        \(self.constraints.map { "where \(output.symbolicator.constraints($0)))" })
+        \(self.constraints.map { "where \(output.symbolicator.constraints($0))" })
         """
         output[.note] = """
         minimal constraints: \(output.symbolicator.constraints(self.minimal))
+        """
+        output[.note] = """
+        in conformance of \
+        \(output.symbolicator[self.subject]) to \
+        \(output.symbolicator[self.protocol])
         """
     }
 }

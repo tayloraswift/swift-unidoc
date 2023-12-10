@@ -6,6 +6,7 @@ import SHA1
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocDiagnostics
 import UnidocLinker
 import UnidocRecords
 
@@ -462,18 +463,14 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)
-        let context:DynamicContext = try await self.snapshots.load(for: snapshot,
+        var linker:DynamicLinker = try await self.snapshots.load(for: snapshot,
             pins: pins,
             with: session)
 
-        let dependencies:[Volume.Metadata.Dependency] = context.dependencies()
-        let symbolicator:DynamicSymbolicator = .init(context: context,
-            root: snapshot.metadata.root)
-        let linker:DynamicLinker = .init(context: consume context)
+        let dependencies:[Volume.Metadata.Dependency] = linker.dependencies()
+        let mesh:DynamicLinker.Mesh = linker.link()
 
-        (consume symbolicator).symbolicate(printing: linker.diagnostics, colors: .enabled)
-
-        let mesh:DynamicLinker.Mesh = linker.finalize()
+        linker.status().emit(colors: .enabled)
 
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?

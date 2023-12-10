@@ -6,7 +6,7 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
 {
     static
     func classify(_ decl:SymbolGraph.Decl,
-        from snapshot:DynamicContext.Snapshot,
+        from snapshot:DynamicLinker.Snapshot,
         at local:Int32) -> WritableKeyPath<Volume.Stats.Coverage, Int>
     {
         if  case _? = decl.article

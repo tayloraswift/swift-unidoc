@@ -77,13 +77,9 @@ extension SymbolGraph
                 linker.link(extensions: extensions, at: extensionPositions)
             }
 
-            let diagnostics:DiagnosticContext<StaticSymbolicator>
-            let graph:SymbolGraph
+            let graph:SymbolGraph = try linker.load()
 
-            (diagnostics, graph) = try linker.finalize()
-
-            let symbolicator:StaticSymbolicator = .init(graph: graph, root: artifacts.root)
-                symbolicator.symbolicate(printing: diagnostics, colors: .enabled)
+            linker.status(root: artifacts.root).emit(colors: .enabled)
 
             print("""
                 Linked documentation in \(time.linking)

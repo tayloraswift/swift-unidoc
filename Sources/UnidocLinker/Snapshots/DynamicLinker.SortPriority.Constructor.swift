@@ -1,6 +1,6 @@
 import Sources
 
-extension DynamicContext.SortPriority
+extension DynamicLinker.SortPriority
 {
     enum Constructor:Equatable, Comparable
     {

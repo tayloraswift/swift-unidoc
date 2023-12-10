@@ -62,7 +62,7 @@ extension UnidocDatabase.Snapshots
 {
     func load(for snapshot:Unidex.Snapshot,
         pins:[Unidoc.Edition],
-        with session:Mongo.Session) async throws -> DynamicContext
+        with session:Mongo.Session) async throws -> DynamicLinker
     {
         var dependencies:[Unidex.Snapshot] = try await self.load(pins, with: session)
 

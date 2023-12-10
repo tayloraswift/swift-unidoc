@@ -84,3 +84,11 @@ extension DiagnosticContext
         }
     }
 }
+extension DiagnosticContext
+{
+    public consuming
+    func with(symbolicator:Symbolicator) -> some Diagnostics
+    {
+        Symbolicated.init(symbolicator: symbolicator, diagnostics: self)
+    }
+}
