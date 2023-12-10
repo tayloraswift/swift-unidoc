@@ -87,9 +87,8 @@ let package:Package = .init(
 
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
-        // .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-        //     from: "0.8.9")),
-        .package(url: "https://github.com/tayloraswift/swift-mongodb", branch: "0.8.10"),
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
+            from: "0.9.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
