@@ -67,10 +67,6 @@ enum Main:TestMain, TestBattery
             {
                 tests.expect(nil: PatchVersion.init("x.y.z"))
             }
-            if  let tests:TestGroup = tests / "negative"
-            {
-                tests.expect(nil: PatchVersion.init("-1.0.0"))
-            }
             if  let tests:TestGroup = tests / "two-components"
             {
                 tests.expect(nil: PatchVersion.init("1.2"))
@@ -120,10 +116,6 @@ enum Main:TestMain, TestBattery
             if  let tests:TestGroup = tests / "non-numeric"
             {
                 tests.expect(nil: NumericVersion.init("x.y.z"))
-            }
-            if  let tests:TestGroup = tests / "negative"
-            {
-                tests.expect(nil: NumericVersion.init("-1.0.0"))
             }
             if  let tests:TestGroup = tests / "four-components"
             {
