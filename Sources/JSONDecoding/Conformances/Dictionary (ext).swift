@@ -12,7 +12,7 @@ extension Dictionary:JSONDecodable where Key == String, Value:JSONDecodable
     init(json:JSON.Object) throws
     {
         self.init(minimumCapacity: json.count)
-        for field:JSON.ExplicitField<String> in json
+        for field:JSON.FieldDecoder<String> in json
         {
             if case _? = self.updateValue(try field.decode(to: Value.self), forKey: field.key)
             {

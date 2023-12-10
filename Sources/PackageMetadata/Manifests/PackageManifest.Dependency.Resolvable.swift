@@ -69,7 +69,7 @@ extension PackageManifest.Dependency.Resolvable:JSONObjectDecodable
         self.init(id: try json[.id].decode(),
             requirement: try json[.requirement].decode(using: CodingKey.Requirement.self)
             {
-                let json:JSON.ExplicitField<CodingKey.Requirement> = try $0.single()
+                let json:JSON.FieldDecoder<CodingKey.Requirement> = try $0.single()
                 switch json.key
                 {
                 case .branch:
@@ -104,7 +104,7 @@ extension PackageManifest.Dependency.Resolvable:JSONObjectDecodable
             },
             location: try json[.location].decode(using: CodingKey.Location.self)
             {
-                let json:JSON.ExplicitField<CodingKey.Location> = try $0.single()
+                let json:JSON.FieldDecoder<CodingKey.Location> = try $0.single()
                 switch json.key
                 {
                 case .local:

@@ -11,7 +11,7 @@ extension JSON.Object:RandomAccessCollection
         self.fields.endIndex
     }
     @inlinable public
-    subscript(index:Int) -> JSON.ExplicitField<String>
+    subscript(index:Int) -> JSON.FieldDecoder<String>
     {
         let field:(key:JSON.Key, value:JSON.Node) = self.fields[index]
         return .init(key: field.key.rawValue, value: field.value)

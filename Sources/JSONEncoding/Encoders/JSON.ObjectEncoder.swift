@@ -39,7 +39,7 @@ extension JSON.ObjectEncoder:JSONEncoder
 extension JSON.ObjectEncoder
 {
     @inlinable internal
-    subscript(key:String) -> JSON
+    subscript(with key:String) -> JSON
     {
         _read
         {
@@ -67,51 +67,51 @@ extension JSON.ObjectEncoder<Any>
 {
     @inlinable public
     subscript(key:String,
-        with encode:(inout JSON.ArrayEncoder) -> ()) -> Void
+        yield:(inout JSON.ArrayEncoder) -> ()) -> Void
     {
         mutating
-        get { encode(&self[key][as: JSON.ArrayEncoder.self]) }
+        get { yield(&self[with: key][as: JSON.ArrayEncoder.self]) }
     }
 
     @inlinable public
     subscript<CodingKey>(key:String,
-        encoding _:CodingKey.Type = CodingKey.self,
-        with encode:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+        _:CodingKey.Type = CodingKey.self,
+        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
     {
         mutating
-        get { encode(&self[key][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        get { yield(&self[with: key][as: JSON.ObjectEncoder<CodingKey>.self]) }
     }
 
     @inlinable public
     subscript<Encodable>(key:String) -> Encodable? where Encodable:JSONEncodable
     {
         get { nil }
-        set (value) { value?.encode(to: &self[key]) }
+        set (value) { value?.encode(to: &self[with: key]) }
     }
 }
 extension JSON.ObjectEncoder where Key:RawRepresentable<String>
 {
     @inlinable public
     subscript(key:Key,
-        with encode:(inout JSON.ArrayEncoder) -> ()) -> Void
+        yield:(inout JSON.ArrayEncoder) -> ()) -> Void
     {
         mutating
-        get { encode(&self[key.rawValue][as: JSON.ArrayEncoder.self]) }
+        get { yield(&self[with: key.rawValue][as: JSON.ArrayEncoder.self]) }
     }
 
     @inlinable public
     subscript<CodingKey>(key:Key,
         _:CodingKey.Type = CodingKey.self,
-        with encode:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
     {
         mutating
-        get { encode(&self[key.rawValue][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        get { yield(&self[with: key.rawValue][as: JSON.ObjectEncoder<CodingKey>.self]) }
     }
 
     @inlinable public
     subscript<Encodable>(key:Key) -> Encodable? where Encodable:JSONEncodable
     {
         get { nil }
-        set (value) { value?.encode(to: &self[key.rawValue]) }
+        set (value) { value?.encode(to: &self[with: key.rawValue]) }
     }
 }

@@ -19,7 +19,7 @@ extension JSON.Array:RandomAccessCollection
         self.elements.endIndex
     }
     @inlinable public
-    subscript(index:Int) -> JSON.ExplicitField<Int>
+    subscript(index:Int) -> JSON.FieldDecoder<Int>
     {
         .init(key: index, value: self.elements[index])
     }

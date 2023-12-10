@@ -33,10 +33,10 @@ extension PolicyPlugin.Crawler.Response:JSONObjectDecodable
 
         try json[.prefixes].decode(as: JSON.Array.self)
         {
-            for object:JSON.ExplicitField<Int> in $0
+            for object:JSON.FieldDecoder<Int> in $0
             {
                 let object:JSON.ObjectDecoder<CodingKey.Prefix> = try object.decode()
-                let prefix:JSON.ExplicitField<CodingKey.Prefix> = try object.single()
+                let prefix:JSON.FieldDecoder<CodingKey.Prefix> = try object.single()
 
                 switch prefix.key
                 {

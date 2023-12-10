@@ -50,7 +50,7 @@ extension PackageManifest.Dependency:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let json:JSON.ExplicitField<CodingKey> = try json.single()
+        let json:JSON.FieldDecoder<CodingKey> = try json.single()
         switch json.key
         {
         case .filesystem:
