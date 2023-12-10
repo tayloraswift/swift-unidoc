@@ -7,7 +7,7 @@ extension Set:JSONDecodable where Element:JSONDecodable
 
         self.init()
         self.reserveCapacity(array.count)
-        for field:JSON.ExplicitField<Int> in array
+        for field:JSON.FieldDecoder<Int> in array
         {
             self.update(with: try field.decode(to: Element.self))
         }

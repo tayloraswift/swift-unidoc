@@ -5,7 +5,7 @@ extension JSON
     /// is useful for obtaining structured diagnostics for “key-not-found”
     /// scenarios.
     @frozen public
-    struct ImplicitField<Key> where Key:Sendable
+    struct OptionalDecoder<Key> where Key:Sendable
     {
         public
         let key:Key
@@ -20,7 +20,7 @@ extension JSON
         }
     }
 }
-extension JSON.ImplicitField
+extension JSON.OptionalDecoder
 {
     @inlinable public static
     func ?? (lhs:Self, rhs:@autoclosure () -> Self) -> Self
@@ -35,7 +35,7 @@ extension JSON.ImplicitField
         }
     }
 }
-extension JSON.ImplicitField
+extension JSON.OptionalDecoder
 {
     /// Gets the value of this key, throwing a ``JSON.ObjectKeyError``
     /// if it is [`nil`](). This is a distinct condition from an explicit
@@ -53,7 +53,7 @@ extension JSON.ImplicitField
         }
     }
 }
-extension JSON.ImplicitField:JSONScope
+extension JSON.OptionalDecoder:JSON.TraceableDecoder
 {
     /// Decodes the value of this implicit field with the given decoder, throwing a
     /// ``JSON/ObjectKeyError`` if it does not exist. Throws a

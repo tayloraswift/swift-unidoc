@@ -1,7 +1,7 @@
 extension JSON
 {
     @frozen public
-    struct ExplicitField<Key> where Key:Sendable
+    struct FieldDecoder<Key> where Key:Sendable
     {
         public
         let key:Key
@@ -16,7 +16,7 @@ extension JSON
         }
     }
 }
-extension JSON.ExplicitField:JSONScope
+extension JSON.FieldDecoder:JSON.TraceableDecoder
 {
     /// Decodes the value of this field with the given decoder.
     /// Throws a ``JSON.DecodingError`` wrapping the underlying
