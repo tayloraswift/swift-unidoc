@@ -114,7 +114,23 @@ extension UnidocDatabase
 
     /// Registers an **alias** of a package.
     public
-    func alias(package:Symbol.Package,
+    func alias(
+        existing package:Symbol.Package,
+        package alias:Symbol.Package,
+        with session:Mongo.Session) async throws
+    {
+        guard
+        let query:Unidex.AliasQuery<PackageAliases> = .init(symbol: package, alias: alias)
+        else
+        {
+            //  Symbols are the same.
+            return
+        }
+        let _:Never? = try await self.execute(query: query, with: session)
+    }
+
+    public
+    func index(package:Symbol.Package,
         repo:consuming Unidex.Package.Repo? = nil,
         with session:Mongo.Session) async throws -> (package:Unidex.Package, new:Bool)
     {
@@ -221,7 +237,7 @@ extension UnidocDatabase
         )
     {
         let docs:SymbolGraphArchive = docs
-        let (package, _):(Unidex.Package, Bool) = try await self.alias(
+        let (package, _):(Unidex.Package, Bool) = try await self.index(
             package: docs.metadata.package,
             repo: nil,
             with: session)

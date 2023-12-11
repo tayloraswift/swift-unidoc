@@ -4,7 +4,10 @@ import UnidocDB
 
 struct DatabaseSetup:MongoTestBattery
 {
-    func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
+    typealias Configuration = Main.Configuration
+
+    static
+    func run(tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
         //  We should be able to reinitialize the database as many times as we want.
         //  (Initialization should be idempotent.)

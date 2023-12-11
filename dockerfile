@@ -18,6 +18,4 @@ COPY .build/x86_64-unknown-linux-gnu/release/UnidocBuild /bin/unidoc-build
 RUN chmod +x /bin/unidoc-server
 RUN chmod +x /bin/unidoc-build
 
-RUN setcap CAP_NET_BIND_SERVICE=+eip /bin/unidoc-server
-
 CMD swift --version
