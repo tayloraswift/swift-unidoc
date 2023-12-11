@@ -18,6 +18,14 @@ extension Volume
         }
     }
 }
+extension Volume.Shoot
+{
+    public
+    init(path:borrowing ArraySlice<String>, hash:FNV24? = nil)
+    {
+        self.init(stem: .init(path: path), hash: hash)
+    }
+}
 extension Volume.Shoot:Comparable
 {
     @inlinable public static

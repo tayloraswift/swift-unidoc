@@ -274,7 +274,6 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         }
 
 
-
         /// The ``BarbieHousing`` module vends an extension on ``Array`` that
         /// conforms it to the ``DollhouseSecurity.DollhouseKeychain`` protocol.
         /// The database should return this conformance as an extension on ``Array``,

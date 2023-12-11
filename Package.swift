@@ -74,7 +74,6 @@ let package:Package = .init(
         .library(name: "UnidocPages", targets: ["UnidocPages"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
-        .library(name: "UnidocSelectors", targets: ["UnidocSelectors"]),
         .library(name: "URI", targets: ["URI"]),
 
         .executable(name: "UnidocBuild", targets: ["UnidocBuild"]),
@@ -502,7 +501,7 @@ let package:Package = .init(
         .target(name: "UnidocQueries", dependencies:
             [
                 .target(name: "UnidocDB"),
-                .target(name: "UnidocSelectors"),
+                .target(name: "UnidocRecords"),
             ]),
 
         .target(name: "UnidocRecords", dependencies:
@@ -511,12 +510,6 @@ let package:Package = .init(
                 .target(name: "JSON"),
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
-            ]),
-
-        .target(name: "UnidocSelectors", dependencies:
-            [
-                .target(name: "UnidocRecords"),
-                .target(name: "URI"),
             ]),
 
         .target(name: "UnixTime"),
