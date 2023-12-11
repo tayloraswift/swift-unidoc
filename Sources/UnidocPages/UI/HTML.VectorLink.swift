@@ -22,6 +22,10 @@ extension HTML
         }
     }
 }
+extension HTML.VectorLink where Display:Collection, Display.Element:StringProtocol
+{
+    var width:Int { self.display.reduce(self.display.count - 1) { $0 + $1.count } }
+}
 extension HTML.VectorLink:HyperTextOutputStreamable
     where Display.Element:HyperTextOutputStreamable
 {

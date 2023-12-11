@@ -22,17 +22,22 @@ extension Site.Docs
         private
         let groups:GroupSections
 
+        private
+        let stem:Volume.StemComponents
+
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Docs>?,
             vertex:Volume.Vertex.Decl,
-            groups:GroupSections)
+            groups:GroupSections) throws
         {
             self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
             self.vertex = vertex
             self.groups = groups
+
+            self.stem = try .init(vertex.stem)
         }
     }
 }
@@ -43,9 +48,6 @@ extension Site.Docs.Decl
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
-
-    private
-    var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Decl:RenderablePage
 {
@@ -103,23 +105,15 @@ extension Site.Docs.Decl:VersionedPage
                     }
                 }
 
-                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.first,
+                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.namespace,
                     namespace: self.vertex.namespace,
                     culture: self.vertex.culture)
             }
 
-            if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
-            {
-                $0[.nav]
-                {
-                    $0.class = scope.reduce(scope.count - 1) { $0 + $1.count } > 80
-                        ? "breadcrumbs multiline"
-                        : "breadcrumbs"
-                } = self.vertex.scope.isEmpty ? nil : self.context.vector(self.vertex.scope,
-                    display: scope)
+            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
+                display: self.stem.scope)
 
-                $0[.h1] = last
-            }
+            $0[.h1] = self.stem.last
 
             $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 

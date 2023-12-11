@@ -132,7 +132,7 @@ extension Swiftinit.AnyEndpoint
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
-                lookup: .init(stem: ["Articles", trunk], hash: nil)),
+                lookup: .init(path: ["Articles", trunk], hash: nil)),
             tag: tag))
     }
 
@@ -157,7 +157,7 @@ extension Swiftinit.AnyEndpoint
         }
         else
         {
-            let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
+            let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
 
             return .interactive(
                 Swiftinit.PipelineEndpoint<Volume.LookupQuery<
@@ -205,7 +205,7 @@ extension Swiftinit.AnyEndpoint
         tag:MD5?) -> Self
     {
         let volume:Volume.Selector = .init(trunk)
-        let shoot:Volume.Shoot = .init(stem: stem, hash: parameters.hash)
+        let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
 
         return .interactive(
             Swiftinit.PipelineEndpoint<Volume.LookupQuery<

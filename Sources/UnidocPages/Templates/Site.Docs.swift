@@ -66,7 +66,7 @@ extension Site.Docs:VolumeRoot
                 vertex: vertex,
                 bias: vertex.culture,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Decl = .init(context.page,
+            let page:Decl = try .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -74,15 +74,14 @@ extension Site.Docs:VolumeRoot
             resource = page.resource(assets: context.assets)
 
         case .file:
-            //  We should never get this as principal output!
-            throw Volume.LookupOutputError.malformed
+            throw Volume.VertexTypeError.file
 
         case .foreign(let vertex):
             let groups:GroupSections = .init(context.page,
                 organizing: consume groups,
                 bias: nil,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Foreign = .init(context.page,
+            let page:Foreign = try .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)

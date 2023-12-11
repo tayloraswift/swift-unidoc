@@ -30,7 +30,7 @@ extension Site.Stats:VolumeRoot
         switch vertex
         {
         case .article:
-            throw Volume.LookupOutputError.malformed
+            throw Volume.VertexTypeError.article
 
         case .culture(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
@@ -41,14 +41,13 @@ extension Site.Stats:VolumeRoot
             resource = page.resource(assets: context.assets)
 
         case .decl:
-            throw Volume.LookupOutputError.malformed
+            throw Volume.VertexTypeError.decl
 
         case .file:
-            //  We should never get this as principal output!
-            throw Volume.LookupOutputError.malformed
+            throw Volume.VertexTypeError.file
 
         case .foreign:
-            throw Volume.LookupOutputError.malformed
+            throw Volume.VertexTypeError.foreign
 
         case .global(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)

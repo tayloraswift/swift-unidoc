@@ -284,8 +284,8 @@ extension Volume.Stem
     }
     public
     init(
-        _ namespace:Symbol.Module,
-        _ path:UnqualifiedPath,
+        _ namespace:borrowing Symbol.Module,
+        _ path:borrowing UnqualifiedPath,
         orientation:Unidoc.Decl.Orientation)
     {
         self.init(rawValue: "\(namespace)")
@@ -297,6 +297,32 @@ extension Volume.Stem
         {
         case .straight: self.append(straight: path.last)
         case .gay:      self.append(gay: path.last)
+        }
+    }
+    public
+    init(path compounds:borrowing ArraySlice<String>)
+    {
+        self.init()
+        for compound:String in copy compounds
+        {
+            if  let dot:String.Index = compound.firstIndex(of: ".")
+            {
+                var last:Substring = compound[compound.index(after: dot)...]
+                if  let i:String.Index = last.index(last.endIndex,
+                        offsetBy: -2,
+                        limitedBy: last.startIndex),
+                    last[i...] == "()"
+                {
+                    last = last[..<i]
+                }
+
+                self.append(straight: compound[..<dot])
+                self.append(gay: last)
+            }
+            else
+            {
+                self.append(straight: compound)
+            }
         }
     }
 }
