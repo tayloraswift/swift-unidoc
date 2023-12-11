@@ -8,7 +8,6 @@ import Unidoc
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
-import UnidocSelectors
 
 struct SymbolQueries:UnidocDatabaseTestBattery
 {
@@ -52,6 +51,21 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         tests.expect(try await unidoc.publish(docs: consume example, with: session).0 ==? .init(
             edition: .init(package: 1, version: -1),
             updated: false))
+
+        try await Self.run(decls: tests / "Decls",
+            session: session,
+            unidoc: unidoc)
+    }
+
+    private static
+    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:UnidocDatabase) async throws
+    {
+        guard
+        let tests:TestGroup
+        else
+        {
+            return
+        }
 
         /// We should be able to resolve the ``Dictionary.Keys`` type without hashes.
         if  let tests:TestGroup = tests / "Dictionary" / "Keys"
@@ -273,6 +287,25 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             }
         }
 
+        if  let tests:TestGroup = tests / "SeeAlso"
+        {
+            if  let test:TestCase = .init(tests / "GeneratedFromTopics",
+                    package: "swift-malibu",
+                    path: ["barbiecore", "barbie", "plastickeychain.startindex"],
+                    expecting:
+                    [
+                        "endIndex",
+                        "startIndex",
+                    ],
+                    except:
+                    [
+                        "subscript(_:)",
+                    ],
+                    filter: .topics)
+            {
+                await test.run(on: unidoc, with: session)
+            }
+        }
 
         /// The ``BarbieHousing`` module vends an extension on ``Array`` that
         /// conforms it to the ``DollhouseSecurity.DollhouseKeychain`` protocol.
@@ -284,82 +317,165 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// conformances within the same package.
         if  let tests:TestGroup = tests / "Deduplication"
         {
-            /// The test won’t work until we join the two packages in a realm.
-            let setup:TestGroup = tests ! "RealmSetup"
-            await setup.do
+            if  let test:TestCase = .init(tests / "Array",
+                    package: "swift",
+                    path: ["swift", "array"],
+                    expecting:
+                    [
+                        "Sequence",
+                        "Collection",
+                        "BidirectionalCollection",
+                        "RandomAccessCollection",
+                        "suffix(from:)",
+                    ],
+                    except:
+                    [
+                        "DollhouseKeychain",
+                        "find(for:)",
+                    ],
+                    filter: .extensions)
             {
-                let (realm, new):(Unidex.Realm, Bool) = try await unidoc.alias(
-                    realm: "barbieland",
-                    with: session)
-
-                setup.expect(true: new)
-                setup.expect(realm.id ==? 0)
-                setup.expect(realm.symbol ==? "barbieland")
-
-                try await unidoc.align(package: 0, realm: realm.id, with: session)
-                try await unidoc.align(package: 1, realm: realm.id, with: session)
+                await test.run(on: unidoc, with: session)
             }
+            if  let test:TestCase = .init(tests / "PlasticKeychain",
+                    package: "swift-malibu",
+                    path: ["barbiecore", "barbie", "plastickeychain"],
+                    expecting:
+                    [
+                        "Sequence",
+                        "Collection",
+                        "BidirectionalCollection",
+                        "RandomAccessCollection",
+                        "suffix(from:)",
 
-            for (name, query):(String, Volume.LookupQuery<Volume.LookupAdjacent, Any>) in
-            [
-                (
-                    "Upstream",
-                    .init("swift", ["swift", "array"])
-                ),
-                (
-                    "Local",
-                    .init("swift-malibu", ["barbiecore", "barbie", "plastickeychain"])
-                ),
-            ]
+                        "DollhouseKeychain",
+                        "find(for:)",
+                    ],
+                    filter: .extensions)
             {
-                guard
-                let tests:TestGroup = tests / name,
-                let query:Volume.LookupQuery<Volume.LookupAdjacent, Any> = tests.expect(
-                    value: query)
-                else
-                {
-                    continue
-                }
-                await tests.do
-                {
-                    if  let output:Volume.LookupOutput<Any> = tests.expect(
-                            value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
-                    {
-                        let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(
-                            into: [:])
-                        {
-                            $0[$1.id] = $1.shoot?.stem.last
-                        }
-                        var counts:[Substring: Int] = [:]
-                        for case .extension(let `extension`) in output.principal?.groups ?? []
-                        {
-                            for p:Unidoc.Scalar in `extension`.conformances
-                            {
-                                counts[secondaries[p] ?? "", default: 0] += 1
-                            }
-                            for f:Unidoc.Scalar in `extension`.features
-                            {
-                                counts[secondaries[f] ?? "", default: 0] += 1
-                            }
-                        }
-
-                        for name:String in
-                        [
-                            "Sequence",
-                            "Collection",
-                            "BidirectionalCollection",
-                            "RandomAccessCollection",
-                            "DollhouseKeychain",
-                            "suffix(from:)",
-                            "find(for:)",
-                        ]
-                        {
-                            (tests / name)?.expect(counts[name[...], default: 0] ==? 1)
-                        }
-                    }
-                }
+                await test.run(on: unidoc, with: session)
             }
+        }
+
+        /// These tests are destructive, so we run them last.
+        guard
+        let tests:TestGroup = tests / "Realms"
+        else
+        {
+            return
+        }
+
+        let setup:TestGroup = tests ! "Setup"
+        let realm:Unidoc.Realm? = await setup.do
+        {
+            let (realm, new):(Unidex.Realm, Bool) = try await unidoc.alias(
+                realm: "barbieland",
+                with: session)
+
+            setup.expect(true: new)
+            setup.expect(realm.id ==? 0)
+            setup.expect(realm.symbol ==? "barbieland")
+
+            return realm.id
+        }
+        _ = consume setup
+
+        guard
+        let realm:Unidoc.Realm
+        else
+        {
+            return
+        }
+
+        if  let test:TestCase = .init(tests / "RealmContainingBoth",
+                package: "swift",
+                path: ["swift", "array"],
+                expecting:
+                [
+                    "Sequence",
+                    "Collection",
+                    "BidirectionalCollection",
+                    "RandomAccessCollection",
+                    "suffix(from:)",
+
+                    "DollhouseKeychain",
+                    "find(for:)",
+                ],
+                filter: .extensions)
+        {
+            try await unidoc.align(package: 0, realm: realm, with: session)
+            try await unidoc.align(package: 1, realm: realm, with: session)
+
+            await test.run(on: unidoc, with: session)
+        }
+        if  let test:TestCase = .init(tests / "RealmContainingStandardLibrary",
+                package: "swift",
+                path: ["swift", "array"],
+                expecting:
+                [
+                    "Sequence",
+                    "Collection",
+                    "BidirectionalCollection",
+                    "RandomAccessCollection",
+                    "suffix(from:)",
+                ],
+                except:
+                [
+                    "DollhouseKeychain",
+                    "find(for:)",
+                ],
+                filter: .extensions)
+        {
+            try await unidoc.align(package: 0, realm: realm, with: session)
+            try await unidoc.align(package: 1, realm: nil, with: session)
+
+            await test.run(on: unidoc, with: session)
+        }
+        if  let test:TestCase = .init(tests / "RealmContainingPackage",
+                package: "swift",
+                path: ["swift", "array"],
+                expecting:
+                [
+                    "Sequence",
+                    "Collection",
+                    "BidirectionalCollection",
+                    "RandomAccessCollection",
+                    "suffix(from:)",
+                ],
+                except:
+                [
+                    "DollhouseKeychain",
+                    "find(for:)",
+                ],
+                filter: .extensions)
+        {
+            try await unidoc.align(package: 0, realm: nil, with: session)
+            try await unidoc.align(package: 1, realm: realm, with: session)
+
+            await test.run(on: unidoc, with: session)
+        }
+        if  let test:TestCase = .init(tests / "RealmContainingNeither",
+                package: "swift",
+                path: ["swift", "array"],
+                expecting:
+                [
+                    "Sequence",
+                    "Collection",
+                    "BidirectionalCollection",
+                    "RandomAccessCollection",
+                    "suffix(from:)",
+                ],
+                except:
+                [
+                    "DollhouseKeychain",
+                    "find(for:)",
+                ],
+                filter: .extensions)
+        {
+            try await unidoc.align(package: 0, realm: nil, with: session)
+            try await unidoc.align(package: 1, realm: nil, with: session)
+
+            await test.run(on: unidoc, with: session)
         }
     }
 }

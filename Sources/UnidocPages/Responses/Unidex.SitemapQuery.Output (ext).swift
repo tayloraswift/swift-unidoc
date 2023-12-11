@@ -2,7 +2,6 @@ import HTTP
 import Media
 import UnidocQueries
 import UnidocRecords
-import UnidocSelectors
 import URI
 
 extension Unidex.SitemapQuery.Output:HTTP.ServerResponseFactory

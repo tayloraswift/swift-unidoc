@@ -4,7 +4,6 @@ import SemanticVersions
 import SymbolGraphs
 import Unidoc
 import UnidocDB
-import UnidocSelectors
 import UnidocRecords
 
 extension Volume
