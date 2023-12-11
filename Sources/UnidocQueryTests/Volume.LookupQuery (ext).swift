@@ -1,7 +1,6 @@
 import FNV1
 import UnidocQueries
 import UnidocRecords
-import UnidocSelectors
 
 extension Volume.LookupQuery
 {

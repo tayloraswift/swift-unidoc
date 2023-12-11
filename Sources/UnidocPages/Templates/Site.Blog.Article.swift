@@ -1,7 +1,6 @@
 import HTML
 import MarkdownRendering
 import Unidoc
-import UnidocSelectors
 import UnidocRecords
 import URI
 

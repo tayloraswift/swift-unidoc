@@ -1,6 +1,5 @@
 import FNV1
 import HTML
-import UnidocSelectors
 import UnidocRecords
 import URI
 
