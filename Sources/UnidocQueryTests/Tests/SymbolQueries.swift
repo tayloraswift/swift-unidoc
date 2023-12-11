@@ -12,10 +12,12 @@ import UnidocSelectors
 
 struct SymbolQueries:UnidocDatabaseTestBattery
 {
-    func run(_ tests:TestGroup,
-        accounts:AccountDatabase,
-        unidoc:UnidocDatabase,
-        pool:Mongo.SessionPool) async throws
+    typealias Configuration = Main.Configuration
+
+    static
+    func run(tests:TestGroup,
+        pool:Mongo.SessionPool,
+        unidoc:UnidocDatabase) async throws
     {
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
