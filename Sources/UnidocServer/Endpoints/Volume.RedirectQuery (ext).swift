@@ -102,7 +102,7 @@ extension Volume.RedirectQuery<Volume.Shoot>
                 package: package,
                 version: version.map { "\(PatchVersion.init(padding: $0))" }),
             lookup: .init(
-                stem: stem,
+                path: stem,
                 hash: nil))
     }
 }

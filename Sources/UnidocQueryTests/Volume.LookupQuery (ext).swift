@@ -7,6 +7,6 @@ extension Volume.LookupQuery
 {
     init(_ trunk:String, _ stem:ArraySlice<String>, hash:FNV24? = nil)
     {
-        self.init(volume: .init(trunk), lookup: .init(stem: stem, hash: hash))
+        self.init(volume: .init(trunk), lookup: .init(path: stem, hash: hash))
     }
 }

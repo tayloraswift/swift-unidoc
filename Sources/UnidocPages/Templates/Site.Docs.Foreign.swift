@@ -17,15 +17,20 @@ extension Site.Docs
         private
         let groups:GroupSections
 
+        private
+        let stem:Volume.StemComponents
+
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             vertex:Volume.Vertex.Foreign,
-            groups:GroupSections)
+            groups:GroupSections) throws
         {
             self.context = context
             self.canonical = canonical
             self.vertex = vertex
             self.groups = groups
+
+            self.stem = try .init(vertex.stem)
         }
     }
 }
@@ -36,9 +41,6 @@ extension Site.Docs.Foreign
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
-
-    private
-    var stem:Volume.Stem { self.vertex.stem }
 }
 extension Site.Docs.Foreign:RenderablePage
 {
@@ -47,7 +49,7 @@ extension Site.Docs.Foreign:RenderablePage
     var description:String?
     {
         """
-        \(self.stem.last), \(self.demonym.phrase) from \(self.stem.first), has extensions \
+        \(self.stem.last), \(self.demonym.phrase) from \(self.stem.namespace), has extensions \
         available in the package \(self.volume.title)").
         """
     }
@@ -58,20 +60,7 @@ extension Site.Docs.Foreign:StaticPage
 }
 extension Site.Docs.Foreign:ApplicationPage
 {
-    var navigator:HTML.Breadcrumbs
-    {
-        if  let (_, scope, last):(Substring, [Substring], Substring) = self.stem.split()
-        {
-            .init(scope: self.vertex.scope.isEmpty ?
-                    nil : self.context.vector(self.vertex.scope, display: scope),
-                last: last)
-        }
-        else
-        {
-            .init(scope: nil,
-                last: self.stem.last)
-        }
-    }
+    typealias Navigator = HTML.Logo
 }
 extension Site.Docs.Foreign:VersionedPage
 {
@@ -86,6 +75,9 @@ extension Site.Docs.Foreign:VersionedPage
                 $0[.span] { $0.class = "phylum" } = "Extension (\(self.demonym.title))"
                 $0[.span] { $0.class = "domain" } = self.context.domain
             }
+
+            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
+                display: self.stem.scope)
 
             $0[.h1] = "\(self.stem.last) (ext)"
         }
