@@ -4,9 +4,12 @@ import SemanticVersions
 import SymbolGraphs
 import UnidocDB
 
-struct PackageVersions:MongoTestBattery
+struct SymbolGraphs:MongoTestBattery
 {
-    func run(_ tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
+    typealias Configuration = Main.Configuration
+
+    static
+    func run(tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
         let database:UnidocDatabase = await .setup(as: database, in: pool)
 
