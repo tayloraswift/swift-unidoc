@@ -1,7 +1,6 @@
 import MongoQL
 import Unidoc
 import UnidocDB
-import UnidocSelectors
 import UnidocRecords
 
 extension Volume.Range:Volume.VertexPredicate

@@ -4,7 +4,6 @@ import MongoQL
 import Unidoc
 import UnidocDB
 import UnidocRecords
-import UnidocSelectors
 
 @available(*, deprecated, renamed: "Volume.LookupQuery")
 public

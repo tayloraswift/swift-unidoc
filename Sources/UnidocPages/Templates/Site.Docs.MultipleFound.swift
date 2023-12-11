@@ -1,6 +1,5 @@
 import HTML
 import Unidoc
-import UnidocSelectors
 import UnidocRecords
 import URI
 

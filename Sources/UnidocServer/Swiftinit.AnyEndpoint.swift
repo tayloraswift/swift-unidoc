@@ -7,7 +7,6 @@ import UnidocAutomation
 import UnidocDB
 import UnidocPages
 import UnidocQueries
-import UnidocSelectors
 import UnidocRecords
 import URI
 

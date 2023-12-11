@@ -3,7 +3,6 @@ import MongoQL
 import Signatures
 import Unidoc
 import UnidocRecords
-import UnidocSelectors
 
 extension Volume.LookupAdjacent
 {

@@ -1,7 +1,6 @@
 import BSON
 import MongoQL
 import UnidocRecords
-import UnidocSelectors
 
 extension Volume
 {
