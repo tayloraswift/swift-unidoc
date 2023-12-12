@@ -1,13 +1,15 @@
-extension Account.ID
+import UnidocRecords
+
+extension Unidex.User
 {
     @frozen @usableFromInline internal
-    enum Namespace:Int64
+    enum AccountType:Int64
     {
         case machine = 0
         case github = 1
     }
 }
-extension Account.ID.Namespace
+extension Unidex.User.AccountType
 {
     @inlinable internal
     subscript(scalar:Int32) -> Int64

@@ -1,7 +1,8 @@
 import MongoDB
 import MongoQL
+import UnidocRecords
 
-extension AccountDatabase
+extension UnidocDatabase
 {
     @frozen public
     struct Users
@@ -16,10 +17,10 @@ extension AccountDatabase
         }
     }
 }
-extension AccountDatabase.Users:Mongo.CollectionModel
+extension UnidocDatabase.Users:Mongo.CollectionModel
 {
     public
-    typealias Element = Account
+    typealias Element = Unidex.User
 
     @inlinable public static
     var name:Mongo.Collection { "Users" }
@@ -27,32 +28,33 @@ extension AccountDatabase.Users:Mongo.CollectionModel
     @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [] }
 }
-extension AccountDatabase.Users
+extension UnidocDatabase.Users
 {
     public
-    func validate(cookie credential:Account.Cookie,
-        with session:Mongo.Session) async throws -> Account.Role?
+    func validate(cookie credential:Unidex.Cookie,
+        with session:Mongo.Session) async throws -> (Unidex.User.ID, Unidex.User.Level)?
     {
-        let matches:[RoleView] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<RoleView>>.init(Self.name, limit: 1)
+        let matches:[LevelView] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
             {
                 $0[.hint] = .init
                 {
-                    $0[Account[.id]] = (+)
+                    $0[Element[.id]] = (+)
                 }
                 $0[.filter] = .init
                 {
-                    $0[Account[.id]] = credential.id
-                    $0[Account[.cookie]] = credential.cookie
+                    $0[Element[.id]] = credential.id
+                    $0[Element[.cookie]] = credential.cookie
                 }
                 $0[.projection] = .init
                 {
-                    $0[Account[.role]] = true
+                    $0[Element[.id]] = true
+                    $0[Element[.level]] = true
                 }
             },
             against: self.database)
 
-        return matches.first?.role
+        return matches.first.map { ($0.id, $0.level) }
     }
 
     /// Upserts the given account into the database, returning a new, randomly-generated
@@ -63,39 +65,34 @@ extension AccountDatabase.Users
     /// thread while it waits for the system to generate a random number. This cookie is only
     /// secure if the system's random number generator is secure.
     public
-    func update(account:__owned Account,
-        with session:Mongo.Session) async throws -> Account.Cookie
+    func update(user:Unidex.User,
+        with session:Mongo.Session) async throws -> Unidex.Cookie
     {
-        let (upserted, _):(Account.Cookie, Account.ID?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Upserting<Account.Cookie, Account.ID>>.init(
+        let (upserted, _):(Unidex.Cookie, Unidex.User.ID?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Upserting<Unidex.Cookie, Unidex.User.ID>>.init(
                 Self.name,
                 returning: .new)
             {
                 $0[.hint] = .init
                 {
-                    $0[Account[.id]] = (+)
+                    $0[Element[.id]] = (+)
                 }
                 $0[.query] = .init
                 {
-                    $0[Account[.id]] = account.id
+                    $0[Element[.id]] = user.id
                 }
                 $0[.update] = .init
                 {
-                    $0[.set] = .init
-                    {
-                        $0[Account[.id]] = account.id
-                        $0[Account[.role]] = account.role
-                        $0[Account[.user]] = account.user
-                    }
+                    $0[.set] = user
                     $0[.setOnInsert] = .init
                     {
-                        $0[Account[.cookie]] = Int64.random(in: .min ... .max)
+                        $0[Element[.cookie]] = Int64.random(in: .min ... .max)
                     }
                 }
                 $0[.fields] = .init
                 {
-                    $0[Account[.id]] = true
-                    $0[Account[.cookie]] = true
+                    $0[Element[.id]] = true
+                    $0[Element[.cookie]] = true
                 }
             },
             against: self.database)
@@ -103,38 +100,37 @@ extension AccountDatabase.Users
         return upserted
     }
 }
-extension AccountDatabase.Users
+extension UnidocDatabase.Users
 {
-    /// Scrambles the cookie for the given account, returning the new cookie. Returns nil if
-    /// the account does not exist.
+    /// Scrambles the cookie for the given user, returning the new cookie. Returns nil if
+    /// the user does not exist.
     public
-    func scramble(account:Account.ID,
-        with session:Mongo.Session) async throws -> Account.Cookie?
+    func scramble(user:Unidex.User.ID,
+        with session:Mongo.Session) async throws -> Unidex.Cookie?
     {
-        let (updated, _):(Account.Cookie?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Account.Cookie>>.init(
-                Self.name,
+        let (updated, _):(Unidex.Cookie?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidex.Cookie>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint] = .init
                 {
-                    $0[Account[.id]] = (+)
+                    $0[Element[.id]] = (+)
                 }
                 $0[.query] = .init
                 {
-                    $0[Account[.id]] = account
+                    $0[Element[.id]] = user
                 }
                 $0[.update] = .init
                 {
                     $0[.set] = .init
                     {
-                        $0[Account[.cookie]] = Int64.random(in: .min ... .max)
+                        $0[Element[.cookie]] = Int64.random(in: .min ... .max)
                     }
                 }
                 $0[.fields] = .init
                 {
-                    $0[Account[.id]] = true
-                    $0[Account[.cookie]] = true
+                    $0[Element[.id]] = true
+                    $0[Element[.cookie]] = true
                 }
             },
             against: self.database)

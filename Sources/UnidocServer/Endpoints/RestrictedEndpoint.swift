@@ -2,21 +2,22 @@ import MongoDB
 import HTTP
 import UnidocDB
 import UnidocPages
+import UnidocRecords
 
-/// Endpoints that require administrator access.
+/// Endpoints that require privileged access.
 protocol RestrictedEndpoint:InteractiveEndpoint
 {
     static
-    func admit(_ role:Account.Role) -> Bool
+    func admit(user:Unidex.User.ID, level:Unidex.User.Level) -> Bool
 
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
 }
 extension RestrictedEndpoint
 {
     static
-    func admit(_ role:Account.Role) -> Bool
+    func admit(user:Unidex.User.ID, level:Unidex.User.Level) -> Bool
     {
-        role == .administrator
+        level == .administratrix
     }
 
     func load(from server:borrowing Swiftinit.Server,
@@ -25,18 +26,20 @@ extension RestrictedEndpoint
         if  server.secured
         {
             guard
-            let cookie:Account.Cookie = cookies.session
+            let cookie:Unidex.Cookie = cookies.session
             else
             {
                 return .redirect(.temporary("\(Site.Login.uri)"))
             }
 
             let session:Mongo.Session = try await .init(from: server.db.sessions)
-            let role:Account.Role? = try await server.db.account.users.validate(
-                cookie: cookie,
-                with: session)
 
-            guard case true? = role.map(Self.admit(_:))
+            guard
+            let (id, level):(Unidex.User.ID, Unidex.User.Level) =
+                try await server.db.users.validate(
+                    cookie: cookie,
+                    with: session),
+                Self.admit(user: id, level: level)
             else
             {
                 return .forbidden("Regrettably, you are not a mighty It Girl.")
