@@ -32,7 +32,7 @@ extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
         {
             (xml:inout XML.Sitemap.ContentEncoder) in
 
-            try await db.unidoc.sitemaps.list(with: session)
+            try await db.sitemaps.list(with: session)
             {
                 for sitemap:Unidex.SitemapIndexEntry in $0
                 {

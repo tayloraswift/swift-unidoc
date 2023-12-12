@@ -51,7 +51,7 @@ extension Swiftinit.GraphUplinkEndpoint:ProceduralEndpoint
             return .ok("Uplink successful, repo is invisible.")
         }
 
-        if  try await server.db.unidoc.docsFeed.push(.init(
+        if  try await server.db.docsFeed.push(.init(
                     discovered: .now(),
                     volume: updated.edition),
                 with: session)

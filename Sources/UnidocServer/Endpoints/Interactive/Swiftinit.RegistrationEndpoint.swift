@@ -4,6 +4,7 @@ import HTTP
 import MongoDB
 import UnidocDB
 import UnidocPages
+import UnidocRecords
 
 extension Swiftinit
 {
@@ -28,19 +29,15 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
             return nil
         }
 
-        let user:GitHub.User = try await github.connect
+        let user:Unidex.User = try await github.connect
         {
-            try await $0.get(from: "/user", with: self.token)
+            let user:GitHub.User = try await $0.get(from: "/user", with: self.token)
+            return .init(account: .github(user),
+                level: user.id == 2556986 ? .administratrix : .human)
         }
-        let account:Account = .github(user: user,
-            //  Are you a mighty It Girl?
-            role: user.id == 2556986 ? .administrator : .human)
 
-        let db:Swiftinit.DB = server.db
-
-        let session:Mongo.Session = try await .init(from: db.sessions)
-        let cookie:Account.Cookie = try await db.account.users.update(
-            account: account,
+        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        let cookie:Unidex.Cookie = try await server.db.users.update(user: user,
             with: session)
 
         return .redirect(.temporary("\(Site.Admin.uri)"),

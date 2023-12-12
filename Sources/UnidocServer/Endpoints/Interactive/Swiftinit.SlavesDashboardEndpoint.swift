@@ -2,6 +2,7 @@ import HTTP
 import MongoDB
 import UnidocDB
 import UnidocPages
+import UnidocRecords
 
 extension Swiftinit
 {
@@ -16,14 +17,14 @@ extension Swiftinit.SlavesDashboardEndpoint:RestrictedEndpoint
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:Account.Cookie
+        let cookie:Unidex.Cookie
 
         switch self
         {
         case .scramble:
             guard
-            let changed:Account.Cookie = try await server.db.account.users.scramble(
-                account: .machine(0),
+            let changed:Unidex.Cookie = try await server.db.users.scramble(
+                user: .machine(0),
                 with: session)
             else
             {
@@ -35,8 +36,8 @@ extension Swiftinit.SlavesDashboardEndpoint:RestrictedEndpoint
             cookie = changed
 
         case .status:
-            cookie = try await server.db.account.users.update(
-                account: .machine(0),
+            cookie = try await server.db.users.update(
+                user: .machine(0),
                 with: session)
         }
 

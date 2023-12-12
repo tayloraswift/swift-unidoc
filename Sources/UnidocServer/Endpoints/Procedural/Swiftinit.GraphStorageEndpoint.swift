@@ -24,7 +24,7 @@ extension Swiftinit.GraphStorageEndpoint:ProceduralEndpoint
             let snapshot:Unidex.Snapshot = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
-            let uploaded:UnidocDatabase.Uploaded = try await server.db.unidoc.snapshots.upsert(
+            let uploaded:UnidocDatabase.Uploaded = try await server.db.snapshots.upsert(
                 snapshot: snapshot,
                 with: session)
 

@@ -29,10 +29,10 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
 
             switch target
             {
-            case .packages:    collection = server.db.unidoc.packages
-            case .editions:    collection = server.db.unidoc.editions
-            case .vertices:    collection = server.db.unidoc.vertices
-            case .volumes:     collection = server.db.unidoc.volumes
+            case .packages:    collection = server.db.packages
+            case .editions:    collection = server.db.editions
+            case .vertices:    collection = server.db.vertices
+            case .volumes:     collection = server.db.volumes
             }
 
             let (modified, selected):(Int, Int) = try await collection.recode(with: session)
@@ -42,11 +42,6 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
                 target: target)
 
             return .ok(complete.resource(assets: server.assets))
-
-        case .perform(.dropAccountDB, _):
-            try await server.db.account.drop(with: session)
-
-            page = .init(action: .dropAccountDB, text: "Reinitialized Account database!")
 
         case .perform(.dropUnidocDB, _):
             try await server.db.unidoc.drop(with: session)

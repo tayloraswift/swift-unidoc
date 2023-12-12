@@ -27,6 +27,11 @@ extension UnidocDatabase
     var policies:Policies { .init() }
 
     @inlinable public
+    var repoFeed:RepoFeed { .init(database: self.id) }
+    @inlinable public
+    var docsFeed:DocsFeed { .init(database: self.id) }
+
+    @inlinable public
     var realmAliases:RealmAliases { .init(database: self.id) }
     @inlinable public
     var realms:Realms { .init(database: self.id) }
@@ -51,9 +56,7 @@ extension UnidocDatabase
     var trees:Trees { .init(database: self.id) }
 
     @inlinable public
-    var repoFeed:RepoFeed { .init(database: self.id) }
-    @inlinable public
-    var docsFeed:DocsFeed { .init(database: self.id) }
+    var users:Users { .init(database: self.id) }
 }
 extension UnidocDatabase:Mongo.DatabaseModel
 {
@@ -77,6 +80,8 @@ extension UnidocDatabase:Mongo.DatabaseModel
         try await self.groups.setup(with: session)
         try await self.search.setup(with: session)
         try await self.trees.setup(with: session)
+
+        try await self.users.setup(with: session)
     }
 }
 

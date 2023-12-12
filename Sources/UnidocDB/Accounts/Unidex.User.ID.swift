@@ -1,6 +1,7 @@
 import BSON
+import UnidocRecords
 
-extension Account
+extension Unidex.User
 {
     @frozen public
     enum ID:Equatable, Hashable, Sendable
@@ -9,14 +10,14 @@ extension Account
         case github(Int32)
     }
 }
-extension Account.ID:RawRepresentable
+extension Unidex.User.ID:RawRepresentable
 {
     @inlinable public
     init?(rawValue:Int64)
     {
         let scalar:Int32 = .init(truncatingIfNeeded: rawValue)
 
-        switch Namespace.init(rawValue: rawValue >> 32)
+        switch Unidex.User.AccountType.init(rawValue: rawValue >> 32)
         {
         case .machine?: self = .machine(scalar)
         case .github?:  self = .github(scalar)
@@ -29,15 +30,15 @@ extension Account.ID:RawRepresentable
     {
         switch self
         {
-        case .machine(let scalar): return Namespace.machine[scalar]
-        case .github(let scalar):  return Namespace.github[scalar]
+        case .machine(let scalar): Unidex.User.AccountType.machine[scalar]
+        case .github(let scalar):  Unidex.User.AccountType.github[scalar]
         }
     }
 }
-extension Account.ID:BSONDecodable, BSONEncodable
+extension Unidex.User.ID:BSONDecodable, BSONEncodable
 {
 }
-extension Account.ID:CustomStringConvertible
+extension Unidex.User.ID:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -45,7 +46,7 @@ extension Account.ID:CustomStringConvertible
         "\(UInt64.init(bitPattern: self.rawValue))"
     }
 }
-extension Account.ID:LosslessStringConvertible
+extension Unidex.User.ID:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:some StringProtocol)
