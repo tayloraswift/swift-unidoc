@@ -67,7 +67,7 @@ extension GitHubPlugin.Crawler
         from github:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[Unidex.Package] = try await db.unidoc.packages.stalest(count,
+        let stale:[Unidex.Package] = try await db.packages.stalest(count,
             with: session)
 
         for package:Unidex.Package in stale
@@ -83,7 +83,7 @@ extension GitHubPlugin.Crawler
                 repo: old.name,
                 pat: self.pat)
 
-            switch try await db.unidoc.packages.update(record: .init(id: package.id,
+            switch try await db.packages.update(record: .init(id: package.id,
                     symbol: package.symbol,
                     realm: package.realm,
                     repo: .github(response.repo),
@@ -150,7 +150,7 @@ extension GitHubPlugin.Crawler
                     refname: interesting,
                     origin: .github(response.repo.owner.login, response.repo.name))
 
-                try await db.unidoc.repoFeed.push(activity, with: session)
+                try await db.repoFeed.push(activity, with: session)
             }
         }
     }

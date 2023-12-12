@@ -1,36 +1,37 @@
 import BSON
 import MongoQL
+import UnidocRecords
 
-extension Account
+extension Unidex
 {
     @frozen public
     struct Cookie:Equatable, Hashable, Sendable
     {
         @usableFromInline internal
-        let id:Account.ID
+        let id:User.ID
         @usableFromInline internal
         let cookie:Int64
 
         @inlinable internal
-        init(id:Account.ID, cookie:Int64)
+        init(id:User.ID, cookie:Int64)
         {
             self.id = id
             self.cookie = cookie
         }
     }
 }
-extension Account.Cookie:CustomStringConvertible
+extension Unidex.Cookie:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "\(self.id):\(UInt64.init(bitPattern: self.cookie))" }
+    var description:String { "\(self.id)_\(UInt64.init(bitPattern: self.cookie))" }
 }
-extension Account.Cookie:LosslessStringConvertible
+extension Unidex.Cookie:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:some StringProtocol)
     {
-        if  let colon:String.Index = description.firstIndex(of: ":"),
-            let id:Account.ID = .init(description[..<colon]),
+        if  let colon:String.Index = description.firstIndex(of: "_"),
+            let id:Unidex.User.ID = .init(description[..<colon]),
             let cookie:UInt64 = .init(description[description.index(after: colon)...])
         {
             self.init(id: id, cookie: .init(bitPattern: cookie))
@@ -41,10 +42,10 @@ extension Account.Cookie:LosslessStringConvertible
         }
     }
 }
-extension Account.Cookie:BSONDocumentDecodable
+extension Unidex.Cookie:BSONDocumentDecodable
 {
     public
-    typealias CodingKey = Account.CodingKey
+    typealias CodingKey = Unidex.User.CodingKey
 
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

@@ -85,7 +85,6 @@ extension Swiftinit.ServerLoop
                 threads: threads,
                 niossl: try .init(configuration: configuration)),
             db: .init(sessions: mongodb,
-                account: await .setup(as: "accounts", in: mongodb),
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
     }
 }
@@ -108,8 +107,7 @@ extension Swiftinit.ServerLoop
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Account.Cookie = try await self.db.account.users.update(
-            account: .machine(0),
+        let _:Unidex.Cookie = try await self.db.users.update(user: .machine(0),
             with: session)
 
         _ = consume session
@@ -166,7 +164,7 @@ extension Swiftinit.ServerLoop
         }
 
         guard
-        let cookie:Account.Cookie = cookies.session
+        let cookie:Unidex.Cookie = cookies.session
         else
         {
             return .unauthorized("")
@@ -174,13 +172,11 @@ extension Swiftinit.ServerLoop
 
         let session:Mongo.Session = try await .init(from: self.db.sessions)
 
-        switch try await db.account.users.validate(cookie: cookie, with: session)
+        switch try await self.db.users.validate(cookie: cookie, with: session)
         {
-        case .administrator?, .machine?:
-            return nil
-
-        case .human?, nil:
-            return .forbidden("")
+        case (_, .administratrix)?: return nil
+        case (_, .machine)?:        return nil
+        default:                    return .forbidden("")
         }
     }
 }

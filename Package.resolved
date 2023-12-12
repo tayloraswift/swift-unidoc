@@ -21,7 +21,7 @@
     {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-collections",
+      "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
         "revision" : "a902f1823a7ff3c9ab2fba0f992396b948eda307",
         "version" : "1.0.5"
@@ -60,13 +60,13 @@
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
         "branch" : "0.9.1",
-        "revision" : "c61b8abe3029e81e9083c417a4f84ae0e626cd24"
+        "revision" : "90e0b3b485afc84b597176cdd0de6595c113e7bf"
       }
     },
     {
       "identity" : "swift-nio",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-nio",
+      "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
         "revision" : "702cd7c56d5d44eeba73fdf83918339b26dc855c",
         "version" : "2.62.0"

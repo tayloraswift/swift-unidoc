@@ -1,10 +1,11 @@
 import UnidocDB
+import UnidocRecords
 
 extension Swiftinit
 {
     struct Cookies:Equatable, Hashable, Sendable
     {
-        var session:Account.Cookie?
+        var session:Unidex.Cookie?
         var login:String?
 
         init()
