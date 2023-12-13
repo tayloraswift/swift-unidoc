@@ -1,6 +1,5 @@
 import BSON
 import MarkdownABI
-import Unidoc
 
 extension SymbolGraph
 {

@@ -1,6 +1,12 @@
 import BSON
+import SymbolGraphs
 import Unidoc
 
+extension Unidoc.Scalar
+{
+    @inlinable public
+    var plane:SymbolGraph.Plane? { .of(self.citizen) }
+}
 extension Unidoc.Scalar:BSONRepresentable
 {
     @inlinable public

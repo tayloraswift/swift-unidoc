@@ -4,14 +4,14 @@ extension SymbolGraph
     struct Layer<Node> where Node:SymbolGraphNode
     {
         public
-        var symbols:Plane<Node.Plane, Node.ID>
+        var symbols:Table<Node.Plane, Node.ID>
         public
-        var nodes:Plane<Node.Plane, Node>
+        var nodes:Table<Node.Plane, Node>
 
         @inlinable internal
         init(
-            symbols:Plane<Node.Plane, Node.ID> = [],
-            nodes:Plane<Node.Plane, Node> = [])
+            symbols:Table<Node.Plane, Node.ID> = [],
+            nodes:Table<Node.Plane, Node> = [])
         {
             self.symbols = symbols
             self.nodes = nodes
@@ -63,7 +63,7 @@ extension SymbolGraph.Layer
     @inlinable public
     func link<T>(
         static transform:(Int32) throws -> T,
-        dynamic link:(Node.ID) throws -> T) rethrows -> SymbolGraph.Plane<Node.Plane, T>
+        dynamic link:(Node.ID) throws -> T) rethrows -> SymbolGraph.Table<Node.Plane, T>
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.symbols.count)
 
@@ -73,6 +73,6 @@ extension SymbolGraph.Layer
                 try link(self.symbols[index]))
         }
 
-        return .init(table: .init(elements: elements))
+        return .init(storage: .init(elements: elements))
     }
 }

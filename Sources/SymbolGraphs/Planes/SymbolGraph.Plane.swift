@@ -1,21 +1,24 @@
-@frozen public
-enum UnidocPlane:UInt32, Hashable, Equatable, Sendable
+extension SymbolGraph
 {
-    case  module        = 0x00_000000
-    case  decl          = 0x01_000000
+    @frozen public
+    enum Plane:UInt32, Hashable, Equatable, Sendable
+    {
+        case  module        = 0x00_000000
+        case  decl          = 0x01_000000
 
-    case  article       = 0x80_000000
-    case  file          = 0x81_000000
+        case  article       = 0x80_000000
+        case  file          = 0x81_000000
 
-    //  Used to identify groups in the Unidoc database; never appear in a symbol graph.
-    case  autogroup     = 0xC0_000000
-    case `extension`    = 0xC2_000000
-    case  topic         = 0xC3_000000
+        //  Used to identify groups in the Unidoc database; never appear in a symbol graph.
+        case  autogroup     = 0xC0_000000
+        case `extension`    = 0xC2_000000
+        case  topic         = 0xC3_000000
 
-    case  foreign       = 0xFE_000000
-    case  global        = 0xFF_000000
+        case  foreign       = 0xFE_000000
+        case  global        = 0xFF_000000
+    }
 }
-extension UnidocPlane:Comparable
+extension SymbolGraph.Plane:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -23,7 +26,7 @@ extension UnidocPlane:Comparable
         lhs.rawValue < rhs.rawValue
     }
 }
-extension UnidocPlane
+extension SymbolGraph.Plane
 {
     @inlinable public
     func contains(_ scalar:Int32) -> Bool
@@ -43,7 +46,7 @@ extension UnidocPlane
         .init(bitPattern: self.rawValue) | significand
     }
 }
-extension UnidocPlane
+extension SymbolGraph.Plane
 {
     @inlinable public static
     func * (significand:Int, self:Self) -> Int32

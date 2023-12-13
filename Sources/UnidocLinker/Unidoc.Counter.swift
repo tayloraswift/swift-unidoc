@@ -1,7 +1,9 @@
+import SymbolGraphs
+import Unidoc
+
 extension Unidoc
 {
-    @frozen public
-    struct Counter<Plane>:Hashable, Equatable, Sendable where Plane:UnidocPlaneType
+    struct Counter<Plane>:Hashable, Equatable, Sendable where Plane:SymbolGraph.PlaneType
     {
         public
         let zone:Edition
@@ -18,7 +20,7 @@ extension Unidoc
 }
 extension Unidoc.Counter
 {
-    @inlinable public mutating
+    mutating
     func id() -> Unidoc.Scalar
     {
         precondition(0 ... 0x00_ff_ff_ff ~= self.next)

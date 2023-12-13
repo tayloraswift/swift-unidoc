@@ -1,6 +1,5 @@
 import BSON
 import Symbols
-import Unidoc
 
 extension SymbolGraph
 {
@@ -25,7 +24,7 @@ extension SymbolGraph
 extension SymbolGraph.DeclNode:SymbolGraphNode
 {
     public
-    typealias Plane = UnidocPlane.Decl
+    typealias Plane = SymbolGraph.Plane.Decl
     public
     typealias ID = Symbol.Decl
 

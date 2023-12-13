@@ -1,9 +1,8 @@
 import BSON
-import Unidoc
 
 extension SymbolGraph
 {
-    /// A type that can serialize an array of ``UnidocPlane.Decl`` scalars
+    /// A type that can serialize an array of ``SymbolGraph.Plane.Decl`` scalars
     /// much more compactly than a native BSON list.
     ///
     /// Empirically, this type reduces symbol graph archive size by around

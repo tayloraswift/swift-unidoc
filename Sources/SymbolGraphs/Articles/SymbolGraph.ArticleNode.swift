@@ -1,7 +1,6 @@
 import BSON
 import MarkdownABI
 import Symbols
-import Unidoc
 
 extension SymbolGraph
 {
@@ -33,7 +32,7 @@ extension SymbolGraph
 extension SymbolGraph.ArticleNode:SymbolGraphNode
 {
     public
-    typealias Plane = UnidocPlane.Article
+    typealias Plane = SymbolGraph.Plane.Article
     public
     typealias ID = Symbol.Article
 

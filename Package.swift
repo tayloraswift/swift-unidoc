@@ -438,10 +438,7 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "Unidoc", dependencies:
-            [
-                .target(name: "UnidocPlanes"),
-            ]),
+        .target(name: "Unidoc"),
 
         .target(name: "UnidocAssets", dependencies:
             [
@@ -495,8 +492,6 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "UA"),
             ]),
-
-        .target(name: "UnidocPlanes"),
 
         .target(name: "UnidocQueries", dependencies:
             [
