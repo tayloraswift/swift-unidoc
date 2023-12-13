@@ -1,6 +1,5 @@
 import SymbolGraphs
 import Symbols
-import Unidoc
 import UnidocDiagnostics
 
 @_spi(testable) public
@@ -28,7 +27,7 @@ extension StaticSymbolicator:DiagnosticSymbolicator
     public
     subscript(article scalar:Int32) -> Symbol.Article?
     {
-        UnidocPlane.article.contains(scalar)
+        SymbolGraph.Plane.article.contains(scalar)
             ? self.graph.articles.symbols[scalar]
             : nil
     }
@@ -36,7 +35,7 @@ extension StaticSymbolicator:DiagnosticSymbolicator
     public
     subscript(decl scalar:Int32) -> Symbol.Decl?
     {
-        UnidocPlane.decl.contains(scalar)
+        SymbolGraph.Plane.decl.contains(scalar)
             ? self.graph.decls.symbols[scalar]
             : nil
     }
@@ -44,7 +43,7 @@ extension StaticSymbolicator:DiagnosticSymbolicator
     public
     subscript(file scalar:Int32) -> Symbol.File?
     {
-        UnidocPlane.file.contains(scalar)
+        SymbolGraph.Plane.file.contains(scalar)
             ? self.graph.files[scalar]
             : nil
     }

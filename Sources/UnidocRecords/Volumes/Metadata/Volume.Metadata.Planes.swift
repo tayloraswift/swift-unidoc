@@ -1,3 +1,4 @@
+import SymbolGraphs
 import Unidoc
 
 extension Volume.Metadata

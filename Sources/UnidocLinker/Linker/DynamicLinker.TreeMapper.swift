@@ -23,7 +23,7 @@ extension DynamicLinker
         var trees:[Unidoc.Scalar: TreeMembers]
 
         private
-        var next:Unidoc.Counter<UnidocPlane.Foreign>
+        var next:Unidoc.Counter<SymbolGraph.Plane.Foreign>
 
         init(zone:Unidoc.Edition)
         {

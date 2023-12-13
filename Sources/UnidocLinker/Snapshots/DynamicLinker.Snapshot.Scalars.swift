@@ -7,11 +7,11 @@ extension DynamicLinker.Snapshot
     struct Scalars
     {
         let namespaces:[Unidoc.Scalar?]
-        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>
+        let decls:SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?>
 
         private
         init(namespaces:[Unidoc.Scalar?],
-            decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>)
+            decls:SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?>)
         {
             self.namespaces = namespaces
             self.decls = decls
@@ -22,7 +22,7 @@ extension DynamicLinker.Snapshot.Scalars
 {
     init(snapshot:borrowing Unidoc.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
     {
-        let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> =
+        let decls:SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?> =
             snapshot.graph.decls.link
         {
             snapshot.id + $0

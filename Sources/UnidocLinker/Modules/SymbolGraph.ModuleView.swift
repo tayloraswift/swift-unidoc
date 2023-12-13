@@ -1,6 +1,7 @@
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocRecords
 
 extension SymbolGraph
 {

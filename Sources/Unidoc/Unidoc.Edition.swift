@@ -45,9 +45,6 @@ extension Unidoc.Edition:Comparable
 extension Unidoc.Edition
 {
     @inlinable public
-    var global:Unidoc.Scalar { self + 0 * .global }
-
-    @inlinable public
     var min:Unidoc.Scalar { self + Int32.init(bitPattern: .min) }
     @inlinable public
     var max:Unidoc.Scalar { self + Int32.init(bitPattern: .max) }
@@ -61,29 +58,15 @@ extension Unidoc.Edition
 }
 extension Unidoc.Edition
 {
-    /// A shorthand for `self + culture * .module`.
-    @inlinable public static
-    func + (self:Self, culture:Int) -> Unidoc.Scalar
-    {
-        self + culture * .module
-    }
-
     @inlinable public static
     func + (self:Self, citizen:Int32) -> Unidoc.Scalar
     {
         .init(package: self.package, version: self.version, citizen: citizen)
     }
-}
-extension Unidoc.Edition
-{
+
     @inlinable public static
     func - (scalar:Unidoc.Scalar, self:Self) -> Int32?
     {
         self.contains(scalar) ? scalar.citizen : nil
-    }
-    @inlinable public static
-    func - (scalar:(value:Unidoc.Scalar, as:UnidocPlane), self:Self) -> Int?
-    {
-        self.contains(scalar.value) ? (scalar.value.citizen / scalar.as) : nil
     }
 }
