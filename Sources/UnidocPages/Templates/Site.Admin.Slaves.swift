@@ -38,7 +38,7 @@ extension Site.Admin.Slaves:StaticPage
 extension Site.Admin.Slaves:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Manage Slaves"
 

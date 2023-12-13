@@ -2,7 +2,7 @@ import Media
 import System
 import UnidocPages
 
-extension StaticAsset
+extension Unidoc.RenderAsset
 {
     public
     var source:[FilePath.Component]

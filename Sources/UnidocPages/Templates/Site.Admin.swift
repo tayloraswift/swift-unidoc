@@ -78,7 +78,7 @@ extension Site.Admin:RenderablePage
 extension Site.Admin:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Welcome Empress!"
 

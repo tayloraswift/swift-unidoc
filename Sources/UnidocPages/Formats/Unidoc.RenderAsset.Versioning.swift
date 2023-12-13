@@ -1,4 +1,4 @@
-extension StaticAsset
+extension Unidoc.RenderAsset
 {
     @frozen public
     enum Versioning:Comparable, Sendable

@@ -64,7 +64,7 @@ extension Site.Stats.Module:ApplicationPage
 }
 extension Site.Stats.Module:VersionedPage
 {
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let back:String = "\(Site.Docs[self.volume, self.vertex.shoot])"
 
