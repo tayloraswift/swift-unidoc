@@ -35,7 +35,7 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let package:Unidex.Package = try await server.db.unidoc.execute(
+        let package:Unidoc.PackageMetadata = try await server.db.unidoc.execute(
             query: Unidex.PackageQuery.init(symbol: self.package),
             with: session)
         else
@@ -72,7 +72,7 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
             return .ok("Ignored tag '\(tag.name)': not a semantic or swift version")
         }
 
-        let (edition, new):(Unidex.Edition, Bool) = try await server.db.unidoc.register(
+        let (edition, new):(Unidoc.EditionMetadata, Bool) = try await server.db.unidoc.register(
             package: package.id,
             version: version,
             refname: tag.name,

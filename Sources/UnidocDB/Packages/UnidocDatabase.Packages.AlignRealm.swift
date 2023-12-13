@@ -37,26 +37,26 @@ extension UnidocDatabase.Packages.AlignRealm:Mongo.UpdateQuery
             switch self
             {
             case .aligning(let package):
-                $0[.q] = .init { $0[Unidex.Package[.id]] = package }
+                $0[.q] = .init { $0[Unidoc.PackageMetadata[.id]] = package }
                 $0[.u] = .init
                 {
                     $0[.set] = .init
                     {
-                        $0[Unidex.Package[.realmAligning]] = true
+                        $0[Unidoc.PackageMetadata[.realmAligning]] = true
                     }
                 }
 
             case .aligned(let package, let realm):
-                $0[.q] = .init { $0[Unidex.Package[.id]] = package }
+                $0[.q] = .init { $0[Unidoc.PackageMetadata[.id]] = package }
                 $0[.u] = .init
                 {
                     $0[.unset] = .init
                     {
-                        $0[Unidex.Package[.realmAligning]] = ()
+                        $0[Unidoc.PackageMetadata[.realmAligning]] = ()
                     }
                     $0[.set] = .init
                     {
-                        $0[Unidex.Package[.realm]] = realm as Unidoc.Realm??
+                        $0[Unidoc.PackageMetadata[.realm]] = realm as Unidoc.Realm??
                     }
                 }
             }

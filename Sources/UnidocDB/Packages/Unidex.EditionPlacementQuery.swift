@@ -34,7 +34,7 @@ extension Unidex.EditionPlacementQuery:Mongo.PipelineQuery
 
         pipeline[.match] = .init
         {
-            $0[Unidex.Edition[.package]] = package
+            $0[Unidoc.EditionMetadata[.package]] = package
         }
         pipeline[.facet] = .init
         {
@@ -42,7 +42,7 @@ extension Unidex.EditionPlacementQuery:Mongo.PipelineQuery
             {
                 $0[.match] = .init
                 {
-                    $0[Unidex.Edition[.name]] = refname
+                    $0[Unidoc.EditionMetadata[.name]] = refname
                 }
 
                 $0[.replaceWith] = .init
@@ -54,7 +54,7 @@ extension Unidex.EditionPlacementQuery:Mongo.PipelineQuery
             {
                 $0[.sort] = .init
                 {
-                    $0[Unidex.Edition[.version]] = (-)
+                    $0[Unidoc.EditionMetadata[.version]] = (-)
                 }
 
                 $0[.limit] = 1
@@ -63,7 +63,7 @@ extension Unidex.EditionPlacementQuery:Mongo.PipelineQuery
                 {
                     $0[Unidex.EditionPlacement[.coordinate]] = .expr
                     {
-                        $0[.add] = (Unidex.Edition[.version], 1)
+                        $0[.add] = (Unidoc.EditionMetadata[.version], 1)
                     }
                 }
             }
