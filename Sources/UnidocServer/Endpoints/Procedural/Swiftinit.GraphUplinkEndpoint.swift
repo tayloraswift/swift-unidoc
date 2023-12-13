@@ -13,12 +13,12 @@ extension Swiftinit
         case identifier(VolumeIdentifier)
     }
 }
-extension Swiftinit.GraphUplinkEndpoint:ProceduralEndpoint
+extension Swiftinit.GraphUplinkEndpoint:BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
-        with _:[UInt8]) async throws -> HTTP.ServerResponse
+        payload _:consuming [UInt8],
+        session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
         let updated:UnidocDatabase.Uplinked?
 
         switch self

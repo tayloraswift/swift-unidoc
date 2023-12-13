@@ -110,10 +110,10 @@ extension Swiftinit.IntegralRequest:HTTP.ServerIntegralRequest
 extension Swiftinit.IntegralRequest
 {
     private
-    init?(get metadata:consuming Metadata, tag:MD5?)
+    init?(get metadata:Metadata, tag:MD5?)
     {
         guard
-        let uri:URI = .init((copy metadata).path)
+        let uri:URI = .init(metadata.path)
         else
         {
             return nil
@@ -181,18 +181,15 @@ extension Swiftinit.IntegralRequest
 
         case Site.Blog.root:
             endpoint = .get(articles: trunk,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters, tag: tag))
 
         case Site.Docs.root:
             endpoint = .get(docs: trunk, path,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters, tag: tag))
 
         case "lunr":
             endpoint = .get(lunr: trunk,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters, tag: tag))
 
         //  Deprecated route.
         case "sitemaps":
@@ -200,18 +197,17 @@ extension Swiftinit.IntegralRequest
 
         case Site.Stats.root:
             endpoint = .get(stats: trunk, path,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters, tag: tag))
 
         case Site.Tags.root:
             endpoint = .get(tags: trunk,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters,
+                    user: metadata.cookies.session?.user,
+                    tag: tag))
 
         case UnidocAPI.root:
             endpoint = .get(api: trunk, path,
-                with: .init(uri.query?.parameters),
-                tag: tag)
+                with: .init(uri.query?.parameters, tag: tag))
 
         case "reference":
             endpoint = .get(legacy: trunk, path,
@@ -236,10 +232,10 @@ extension Swiftinit.IntegralRequest
     }
 
     private
-    init?(post metadata:consuming Metadata, body:consuming [UInt8], type:ContentType)
+    init?(post metadata:Metadata, body:consuming [UInt8], type:ContentType)
     {
         guard
-        let uri:URI = .init((copy metadata).path)
+        let uri:URI = .init(metadata.path)
         else
         {
             return nil

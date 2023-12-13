@@ -35,15 +35,13 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let output:Unidex.EditionsQuery.Output = try await server.db.unidoc.execute(
-            query: Unidex.EditionsQuery.init(package: self.package, limit: 0),
+        let package:Unidex.Package = try await server.db.unidoc.execute(
+            query: Unidex.PackageQuery.init(symbol: self.package),
             with: session)
         else
         {
             return .notFound("No such package")
         }
-
-        let package:Unidex.Package = (consume output).package
 
         guard
         case .github(let repo) = package.repo

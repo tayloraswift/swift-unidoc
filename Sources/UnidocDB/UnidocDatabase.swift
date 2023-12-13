@@ -89,7 +89,7 @@ extension UnidocDatabase
 {
     /// Registers an **alias** of a package realm.
     public
-    func alias(realm:String,
+    func index(realm:String,
         with session:Mongo.Session) async throws -> (realm:Unidex.Realm, new:Bool)
     {
         let autoincrement:Unidex.Autoincrement<Unidex.Realm> = try await self.execute(
@@ -573,25 +573,37 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws
     {
         try await self.execute(
-            update: Volumes.AlignRealm.init(range: .package(package), to: realm),
+            update: UnidocDatabase.Packages.AlignRealm.aligning(package),
             with: session)
 
-        guard
-        let realm:Unidoc.Realm = realm
+        groups:
+        if  let realm:Unidoc.Realm
+        {
+            guard
+            let latest:Volumes.PatchView = try await self.volumes.latestRelease(of: package,
+                with: session)
+            else
+            {
+                break groups
+            }
+
+            try await self.execute(
+                update: Groups.AlignLatest.init(to: latest.id, in: realm),
+                with: session)
+        }
         else
         {
             try await self.execute(
                 update: Groups.ClearLatest.init(from: package),
                 with: session)
-            return
         }
 
-        if  let latest:Volumes.PatchView = try await self.volumes.latestRelease(of: package,
-                with: session)
-        {
-            try await self.execute(
-                update: Groups.AlignLatest.init(to: latest.id, in: realm),
-                with: session)
-        }
+        try await self.execute(
+            update: Volumes.AlignRealm.init(range: .package(package), to: realm),
+            with: session)
+
+        try await self.execute(
+            update: UnidocDatabase.Packages.AlignRealm.aligned(package, to: realm),
+            with: session)
     }
 }

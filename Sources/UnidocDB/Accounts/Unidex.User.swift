@@ -5,7 +5,7 @@ import UnidocRecords
 extension Unidex
 {
     @frozen public
-    struct User:Sendable
+    struct User:Equatable, Sendable
     {
         public
         var account:Account

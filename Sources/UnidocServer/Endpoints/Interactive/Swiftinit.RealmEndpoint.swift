@@ -25,7 +25,7 @@ extension Swiftinit.RealmEndpoint:RestrictedEndpoint
         switch self.operation
         {
         case .create:
-            switch try await server.db.unidoc.alias(realm: self.realm, with: session)
+            switch try await server.db.unidoc.index(realm: self.realm, with: session)
             {
             case (let realm, new: false):
                 return .ok("Realm already exists (\(realm.id))")

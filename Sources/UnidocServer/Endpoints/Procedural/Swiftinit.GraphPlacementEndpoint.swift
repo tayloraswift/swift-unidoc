@@ -13,12 +13,12 @@ extension Swiftinit
         case put
     }
 }
-extension Swiftinit.GraphPlacementEndpoint:ProceduralEndpoint
+extension Swiftinit.GraphPlacementEndpoint:BlockingEndpoint
 {
-    func perform(on server:borrowing Swiftinit.Server, with payload:[UInt8]) async throws -> HTTP.ServerResponse
+    func perform(on server:borrowing Swiftinit.Server,
+        payload:consuming [UInt8],
+        session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-
         switch self
         {
         case .put:

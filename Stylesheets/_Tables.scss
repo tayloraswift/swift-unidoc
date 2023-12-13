@@ -44,30 +44,27 @@ section.details table.tags
         font-weight: 700;
     }
 
-    td.graphs
+    td.graph
     {
         font-weight: 700;
-    }
-    td.graphs:before
-    {
-        margin-right: 0.5rem;
-    }
-
-    td.graphs:not(:empty)
-    {
-        color: $light-accent-barbie-pink;
-    }
-    td.graphs:not(:empty):before
-    {
-        content: '✓';
-    }
-
-    td.graphs:empty
-    {
         color: $light-foreground-semi;
+
+        span.kb
+        {
+            font-weight: normal;
+        }
     }
-    td.graphs:empty:before
+
+    td.graph > span:first-child::before
     {
         content: '✗';
+        color: $light-foreground-semi;
+        margin-right: 0.5rem;
+    }
+    td.graph > .abi:first-child::before
+    {
+        content: '✓';
+        color: $light-accent-barbie-pink;
+        margin-right: 0.5rem;
     }
 }

@@ -9,7 +9,7 @@ extension Volume
     {
         /// The ABI version of the symbol graph this volume was linked from.
         public
-        var abi:MinorVersion
+        var abi:PatchVersion
 
         /// Platform requirements read from the symbol graph, which in turn got them from a
         /// `Package.swift` manifest.
@@ -22,7 +22,7 @@ extension Volume
         //  We don’t currently store linker errors, but if we did, they would go here.
 
         @inlinable public
-        init(abi:MinorVersion,
+        init(abi:PatchVersion,
             requirements:[SymbolGraphMetadata.PlatformRequirement],
             census:Volume.Census = .init())
         {

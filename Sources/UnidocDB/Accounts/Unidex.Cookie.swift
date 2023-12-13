@@ -7,15 +7,15 @@ extension Unidex
     @frozen public
     struct Cookie:Equatable, Hashable, Sendable
     {
-        @usableFromInline internal
-        let id:User.ID
+        public
+        let user:User.ID
         @usableFromInline internal
         let cookie:Int64
 
         @inlinable internal
-        init(id:User.ID, cookie:Int64)
+        init(user:User.ID, cookie:Int64)
         {
-            self.id = id
+            self.user = user
             self.cookie = cookie
         }
     }
@@ -23,7 +23,7 @@ extension Unidex
 extension Unidex.Cookie:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "\(self.id)_\(UInt64.init(bitPattern: self.cookie))" }
+    var description:String { "\(self.user)_\(UInt64.init(bitPattern: self.cookie))" }
 }
 extension Unidex.Cookie:LosslessStringConvertible
 {
@@ -31,10 +31,10 @@ extension Unidex.Cookie:LosslessStringConvertible
     init?(_ description:some StringProtocol)
     {
         if  let colon:String.Index = description.firstIndex(of: "_"),
-            let id:Unidex.User.ID = .init(description[..<colon]),
+            let user:Unidex.User.ID = .init(description[..<colon]),
             let cookie:UInt64 = .init(description[description.index(after: colon)...])
         {
-            self.init(id: id, cookie: .init(bitPattern: cookie))
+            self.init(user: user, cookie: .init(bitPattern: cookie))
         }
         else
         {
@@ -50,6 +50,6 @@ extension Unidex.Cookie:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(id: try bson[.id].decode(), cookie: try bson[.cookie].decode())
+        self.init(user: try bson[.id].decode(), cookie: try bson[.cookie].decode())
     }
 }

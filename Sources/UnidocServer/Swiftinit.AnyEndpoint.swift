@@ -62,8 +62,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(api trunk:String,
         _ stem:ArraySlice<String>,
-        with parameters:Swiftinit.PipelineParameters,
-        tag:MD5?) -> Self?
+        with parameters:Swiftinit.PipelineParameters) -> Self?
     {
         guard
         let trunk:UnidocAPI.Get = .init(trunk)
@@ -80,7 +79,7 @@ extension Swiftinit.AnyEndpoint
                 return .interactive(Swiftinit.PipelineEndpoint<Unidex.EditionsQuery>.init(
                     output: parameters.explain ? nil : .application(.json),
                     query: .init(package: .init(package), limit: 1),
-                    tag: tag))
+                    tag: parameters.tag))
             }
         }
 
@@ -121,8 +120,7 @@ extension Swiftinit.AnyEndpoint
 
     static
     func get(articles trunk:String,
-        with parameters:Swiftinit.PipelineParameters,
-        tag:MD5?) -> Self
+        with parameters:Swiftinit.PipelineParameters) -> Self
     {
         .interactive(
             Swiftinit.PipelineEndpoint<Volume.LookupQuery<
@@ -132,14 +130,13 @@ extension Swiftinit.AnyEndpoint
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
                 lookup: .init(path: ["Articles", trunk], hash: nil)),
-            tag: tag))
+            tag: parameters.tag))
     }
 
     static
     func get(docs trunk:String,
         _ stem:ArraySlice<String>,
-        with parameters:Swiftinit.PipelineParameters,
-        tag:MD5?) -> Self
+        with parameters:Swiftinit.PipelineParameters) -> Self
     {
         let volume:Volume.Selector = .init(trunk)
 
@@ -152,7 +149,7 @@ extension Swiftinit.AnyEndpoint
             return .interactive(Swiftinit.PipelineEndpoint<Unidex.SitemapQuery>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(package: volume.package),
-                tag: tag))
+                tag: parameters.tag))
         }
         else
         {
@@ -164,34 +161,29 @@ extension Swiftinit.AnyEndpoint
                     Site.Docs>>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(volume: volume, lookup: shoot),
-                tag: tag))
+                tag: parameters.tag))
         }
     }
 
     static
     func get(lunr trunk:String,
-        with parameters:Swiftinit.PipelineParameters,
-        tag:MD5?) -> Self?
+        with parameters:Swiftinit.PipelineParameters) -> Self?
     {
         if  let id:VolumeIdentifier = .init(trunk)
         {
             return .interactive(
                 Swiftinit.PipelineEndpoint<SearchIndexQuery<UnidocDatabase.Search>>.init(
                 output: parameters.explain ? nil : .application(.json),
-                query: .init(
-                    tag: tag,
-                    id: id),
-                tag: tag))
+                query: .init(tag: parameters.tag, id: id),
+                tag: parameters.tag))
         }
         else if trunk == "packages.json"
         {
             return .interactive(
                 Swiftinit.PipelineEndpoint<SearchIndexQuery<UnidocDatabase.Metadata>>.init(
                 output: parameters.explain ? nil : .application(.json),
-                query: .init(
-                    tag: tag,
-                    id: 0),
-                tag: tag))
+                query: .init(tag: parameters.tag, id: 0),
+                tag: parameters.tag))
         }
 
         return nil
@@ -200,8 +192,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(stats trunk:String,
         _ stem:ArraySlice<String>,
-        with parameters:Swiftinit.PipelineParameters,
-        tag:MD5?) -> Self
+        with parameters:Swiftinit.PipelineParameters) -> Self
     {
         let volume:Volume.Selector = .init(trunk)
         let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
@@ -212,16 +203,16 @@ extension Swiftinit.AnyEndpoint
                 Site.Stats>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(volume: volume, lookup: shoot),
-            tag: tag))
+            tag: parameters.tag))
     }
 
     static
-    func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters, tag:MD5?) -> Self
+    func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
         .interactive(Swiftinit.PipelineEndpoint<Unidex.EditionsQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(package: .init(trunk), limit: 12),
-            tag: tag))
+            tag: parameters.tag))
     }
 
     static
@@ -308,6 +299,15 @@ extension Swiftinit.AnyEndpoint
 
             switch trunk
             {
+            case .alignPackage:
+                if  let package:String = form["package"]
+                {
+                    return .procedural(Swiftinit.PackageAlignEndpoint.init(
+                        package: .init(package),
+                        realm: form["realm"],
+                        force: form["force"] == "true"))
+                }
+
             case .indexRepo:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]

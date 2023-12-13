@@ -3,45 +3,47 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Unidex.EditionsQuery
+extension Unidex
 {
     @frozen public
-    struct Facet:Equatable, Sendable
+    struct EditionOutput:Equatable, Sendable
     {
         public
         var edition:Unidex.Edition
-        public
-        var graphs:Graphs?
+
         public
         var volume:Volume.Metadata?
+        public
+        var graph:Graph?
 
         @inlinable public
-        init(edition:Unidex.Edition, graphs:Graphs? = nil, volume:Volume.Metadata? = nil)
+        init(edition:Unidex.Edition,
+            volume:Volume.Metadata?,
+            graph:Graph?)
         {
             self.edition = edition
-            self.graphs = graphs
             self.volume = volume
+            self.graph = graph
         }
     }
 }
-extension Unidex.EditionsQuery.Facet:MongoMasterCodingModel
+extension Unidex.EditionOutput:MongoMasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
     {
         case edition
-        case graphs
         case volume
+        case graph
     }
 }
-extension Unidex.EditionsQuery.Facet:BSONDocumentDecodable
+extension Unidex.EditionOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(
-            edition: try bson[.edition].decode(),
-            graphs: try bson[.graphs]?.decode(),
-            volume: try bson[.volume]?.decode())
+        self.init(edition: try bson[.edition].decode(),
+            volume: try bson[.volume]?.decode(),
+            graph: try bson[.graph]?.decode())
     }
 }
