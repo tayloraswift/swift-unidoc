@@ -5,7 +5,7 @@ extension Swiftinit
 {
     struct Cookies:Equatable, Hashable, Sendable
     {
-        var session:Unidex.Cookie?
+        var session:Unidoc.Cookie?
         var login:String?
 
         init()

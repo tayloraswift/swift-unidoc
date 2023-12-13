@@ -13,16 +13,16 @@ extension Site.Tags
         private
         let package:Unidoc.PackageMetadata
         private
-        let editions:[Unidex.EditionOutput]
+        let editions:[Unidoc.EditionOutput]
         private
         let realm:Unidoc.RealmMetadata?
         private
-        let user:Unidex.User?
+        let user:Unidoc.User?
 
         init(package:Unidoc.PackageMetadata,
-            editions:[Unidex.EditionOutput],
+            editions:[Unidoc.EditionOutput],
             realm:Unidoc.RealmMetadata?,
-            user:Unidex.User?)
+            user:Unidoc.User?)
         {
             self.package = package
             self.editions = editions
@@ -33,17 +33,17 @@ extension Site.Tags
 }
 extension Site.Tags.List
 {
-    init(from output:Unidex.EditionsQuery.Output)
+    init(from output:Unidoc.EditionsQuery.Output)
     {
-        var prereleases:ArraySlice<Unidex.EditionOutput> = output.prereleases[...]
-        var releases:ArraySlice<Unidex.EditionOutput> = output.releases[...]
+        var prereleases:ArraySlice<Unidoc.EditionOutput> = output.prereleases[...]
+        var releases:ArraySlice<Unidoc.EditionOutput> = output.releases[...]
 
         //  Merge the two pre-sorted arrays into a single sorted array.
-        var editions:[Unidex.EditionOutput] = []
+        var editions:[Unidoc.EditionOutput] = []
             editions.reserveCapacity(prereleases.count + releases.count)
         while
-            let prerelease:Unidex.EditionOutput = prereleases.first,
-            let release:Unidex.EditionOutput = releases.first
+            let prerelease:Unidoc.EditionOutput = prereleases.first,
+            let release:Unidoc.EditionOutput = releases.first
         {
             if  release.edition.patch < prerelease.edition.patch
             {
@@ -169,7 +169,7 @@ extension Site.Tags.List:ApplicationPage
                 $0[.tbody]
                 {
                     var modern:(prerelease:Bool, release:Bool) = (true, true)
-                    for output:Unidex.EditionOutput in self.editions
+                    for output:Unidoc.EditionOutput in self.editions
                     {
                         let item:Item = .init(name: output.edition.name,
                             sha1: output.edition.sha1?.description,

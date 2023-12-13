@@ -205,7 +205,7 @@ extension SwiftinitClient
         let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
             pretty: pretty)
 
-        let bson:BSON.Document = .init(encoding: Unidex.Snapshot.init(id: .init(
+        let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: .init(
                 package: package.coordinate,
                 version: edition.coordinate),
             metadata: archive.metadata,

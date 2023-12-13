@@ -1,4 +1,0 @@
-@frozen public
-enum Unidex
-{
-}

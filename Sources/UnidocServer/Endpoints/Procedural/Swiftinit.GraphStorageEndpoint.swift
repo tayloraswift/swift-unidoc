@@ -20,7 +20,7 @@ extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
         switch self
         {
         case .put:
-            let snapshot:Unidex.Snapshot = try .init(
+            let snapshot:Unidoc.Snapshot = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
             let uploaded:UnidocDatabase.Uploaded = try await server.db.snapshots.upsert(

@@ -20,7 +20,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Users:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.User
+    typealias Element = Unidoc.User
 
     @inlinable public static
     var name:Mongo.Collection { "Users" }
@@ -31,8 +31,8 @@ extension UnidocDatabase.Users:Mongo.CollectionModel
 extension UnidocDatabase.Users
 {
     public
-    func validate(cookie credential:Unidex.Cookie,
-        with session:Mongo.Session) async throws -> (Unidex.User.ID, Unidex.User.Level)?
+    func validate(cookie credential:Unidoc.Cookie,
+        with session:Mongo.Session) async throws -> (Unidoc.User.ID, Unidoc.User.Level)?
     {
         let matches:[LevelView] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
@@ -65,11 +65,11 @@ extension UnidocDatabase.Users
     /// thread while it waits for the system to generate a random number. This cookie is only
     /// secure if the system's random number generator is secure.
     public
-    func update(user:Unidex.User,
-        with session:Mongo.Session) async throws -> Unidex.Cookie
+    func update(user:Unidoc.User,
+        with session:Mongo.Session) async throws -> Unidoc.Cookie
     {
-        let (upserted, _):(Unidex.Cookie, Unidex.User.ID?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Upserting<Unidex.Cookie, Unidex.User.ID>>.init(
+        let (upserted, _):(Unidoc.Cookie, Unidoc.User.ID?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Upserting<Unidoc.Cookie, Unidoc.User.ID>>.init(
                 Self.name,
                 returning: .new)
             {
@@ -105,11 +105,11 @@ extension UnidocDatabase.Users
     /// Scrambles the cookie for the given user, returning the new cookie. Returns nil if
     /// the user does not exist.
     public
-    func scramble(user:Unidex.User.ID,
-        with session:Mongo.Session) async throws -> Unidex.Cookie?
+    func scramble(user:Unidoc.User.ID,
+        with session:Mongo.Session) async throws -> Unidoc.Cookie?
     {
-        let (updated, _):(Unidex.Cookie?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidex.Cookie>>.init(Self.name,
+        let (updated, _):(Unidoc.Cookie?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.Cookie>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint] = .init

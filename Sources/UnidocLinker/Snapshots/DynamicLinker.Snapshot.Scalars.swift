@@ -20,7 +20,7 @@ extension DynamicLinker.Snapshot
 }
 extension DynamicLinker.Snapshot.Scalars
 {
-    init(snapshot:borrowing Unidex.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
+    init(snapshot:borrowing Unidoc.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
     {
         let decls:SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?> =
             snapshot.graph.decls.link

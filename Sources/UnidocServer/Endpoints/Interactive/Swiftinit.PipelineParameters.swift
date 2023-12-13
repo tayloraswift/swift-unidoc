@@ -9,11 +9,11 @@ extension Swiftinit
         var explain:Bool
         var hash:FNV24?
 
-        let user:Unidex.User.ID?
+        let user:Unidoc.User.ID?
         let tag:MD5?
 
         private
-        init(user:Unidex.User.ID?, tag:MD5?)
+        init(user:Unidoc.User.ID?, tag:MD5?)
         {
             self.explain = false
             self.hash = nil
@@ -26,7 +26,7 @@ extension Swiftinit
 extension Swiftinit.PipelineParameters
 {
     init(_ parameters:[(key:String, value:String)]?,
-        user:Unidex.User.ID? = nil,
+        user:Unidoc.User.ID? = nil,
         tag:MD5? = nil)
     {
         self.init(user: user, tag: tag)

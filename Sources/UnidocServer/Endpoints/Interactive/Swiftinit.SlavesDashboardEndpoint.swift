@@ -17,13 +17,13 @@ extension Swiftinit.SlavesDashboardEndpoint:RestrictedEndpoint
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:Unidex.Cookie
+        let cookie:Unidoc.Cookie
 
         switch self
         {
         case .scramble:
             guard
-            let changed:Unidex.Cookie = try await server.db.users.scramble(
+            let changed:Unidoc.Cookie = try await server.db.users.scramble(
                 user: .machine(0),
                 with: session)
             else

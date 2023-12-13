@@ -53,7 +53,7 @@ extension DynamicLinker.Snapshot
 extension DynamicLinker.Snapshot
 {
     convenience
-    init(snapshot:Unidex.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
+    init(snapshot:Unidoc.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
     {
         let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
 

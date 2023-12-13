@@ -36,7 +36,7 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
 
         guard
         let package:Unidoc.PackageMetadata = try await server.db.unidoc.execute(
-            query: Unidex.PackageQuery.init(symbol: self.package),
+            query: Unidoc.PackageQuery.init(symbol: self.package),
             with: session)
         else
         {

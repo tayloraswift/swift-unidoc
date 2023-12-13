@@ -10,7 +10,7 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
         try await self.execute(
-            query: Unidex.PackageQuery.init(symbol: symbol),
+            query: Unidoc.PackageQuery.init(symbol: symbol),
             with: session)
     }
     public
@@ -18,7 +18,7 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> Unidoc.RealmMetadata?
     {
         try await self.execute(
-            query: Unidex.RealmQuery.init(symbol: symbol),
+            query: Unidoc.RealmQuery.init(symbol: symbol),
             with: session)
     }
 }
