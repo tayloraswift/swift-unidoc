@@ -24,7 +24,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Sitemaps:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.Sitemap
+    typealias Element = Unidoc.Sitemap
 
     @inlinable public static
     var name:Mongo.Collection { "Sitemaps" }
@@ -37,27 +37,27 @@ extension UnidocDatabase.Sitemaps
 {
     public
     func list(with session:Mongo.Session,
-        _ yield:([Unidex.SitemapIndexEntry]) throws -> Void) async throws
+        _ yield:([Unidoc.SitemapIndexEntry]) throws -> Void) async throws
     {
-        try await session.run(command: Unidex.SitemapIndexQuery.list.command(stride: 4096),
+        try await session.run(command: Unidoc.SitemapIndexQuery.list.command(stride: 4096),
             against: self.database,
             by: .now.advanced(by: .seconds(10)))
         {
-            for try await batch:[Unidex.SitemapIndexEntry] in $0
+            for try await batch:[Unidoc.SitemapIndexEntry] in $0
             {
                 try yield(batch)
             }
         }
     }
 
-    func update(_ sitemap:consuming Unidex.Sitemap,
-        with session:Mongo.Session) async throws -> Unidex.Sitemap.Delta?
+    func update(_ sitemap:consuming Unidoc.Sitemap,
+        with session:Mongo.Session) async throws -> Unidoc.Sitemap.Delta?
     {
-        var new:Unidex.Sitemap = sitemap
-        let old:Unidex.Sitemap? = try await self.find(id: new.id, with: session)
+        var new:Unidoc.Sitemap = sitemap
+        let old:Unidoc.Sitemap? = try await self.find(id: new.id, with: session)
 
-        let update:Unidex.Sitemap.Delta?
-        if  let old:Unidex.Sitemap
+        let update:Unidoc.Sitemap.Delta?
+        if  let old:Unidoc.Sitemap
         {
             //  Compute sitemap delta.
             var deletions:Set<Volume.Shoot> = .init(old.elements)
@@ -71,7 +71,7 @@ extension UnidocDatabase.Sitemaps
                 }
             }
 
-            let delta:Unidex.Sitemap.Delta = .init(
+            let delta:Unidoc.Sitemap.Delta = .init(
                 deletions: deletions.sorted(),
                 additions: additions)
 

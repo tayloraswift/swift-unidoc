@@ -39,14 +39,14 @@ struct DynamicLinker:~Copyable
 extension DynamicLinker
 {
     public
-    init(_ currentSnapshot:Unidex.Snapshot, dependencies:borrowing [Unidex.Snapshot])
+    init(_ currentSnapshot:Unidoc.Snapshot, dependencies:borrowing [Unidoc.Snapshot])
     {
         //  Build a combined lookup table mapping upstream symbols to scalars.
         //  Because module names are unique within a build tree, there should
         //  be no collisions among mangled symbols.
         var upstream:UpstreamScalars = .init()
 
-        for snapshot:Unidex.Snapshot in copy dependencies
+        for snapshot:Unidoc.Snapshot in copy dependencies
         {
             for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.decls.citizens
             {
@@ -67,7 +67,7 @@ extension DynamicLinker
         var byPackage:[Unidoc.Package: Snapshot] = .init(
             minimumCapacity: dependencies.count)
 
-        for snapshot:Unidex.Snapshot in copy dependencies
+        for snapshot:Unidoc.Snapshot in copy dependencies
         {
             let snapshot:Snapshot = .init(snapshot: snapshot, upstream: upstream)
 

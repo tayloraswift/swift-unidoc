@@ -13,7 +13,7 @@ extension Site.Tags.List
         let release:Bool
         let version:PatchVersion
         let volume:Volume.Metadata?
-        let graph:Unidex.EditionOutput.Graph?
+        let graph:Unidoc.EditionOutput.Graph?
     }
 }
 extension Site.Tags.List.Item:HyperTextOutputStreamable
@@ -46,7 +46,7 @@ extension Site.Tags.List.Item:HyperTextOutputStreamable
         }
         tr[.td, { $0.class = "graph" }]
         {
-            if  let graph:Unidex.EditionOutput.Graph = self.graph
+            if  let graph:Unidoc.EditionOutput.Graph = self.graph
             {
                 $0[.span] { $0.class = "abi" } = "\(graph.abi)"
                 $0 += " "

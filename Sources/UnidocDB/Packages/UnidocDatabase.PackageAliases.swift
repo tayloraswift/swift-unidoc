@@ -24,13 +24,13 @@ extension UnidocDatabase.PackageAliases
     let indexCoordinate:Mongo.CollectionIndex = .init("Coordinate",
         unique: false)
     {
-        $0[Unidex.PackageAlias[.coordinate]] = (+)
+        $0[Unidoc.PackageAlias[.coordinate]] = (+)
     }
 }
 extension UnidocDatabase.PackageAliases:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.PackageAlias
+    typealias Element = Unidoc.PackageAlias
 
     @inlinable public static
     var name:Mongo.Collection { "PackageAliases" }

@@ -92,21 +92,21 @@ extension UnidocDatabase
     func index(realm:String,
         with session:Mongo.Session) async throws -> (realm:Unidoc.RealmMetadata, new:Bool)
     {
-        let autoincrement:Unidex.Autoincrement<Unidoc.RealmMetadata> = try await self.execute(
-            query: Unidex.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm),
+        let autoincrement:Unidoc.Autoincrement<Unidoc.RealmMetadata> = try await self.execute(
+            query: Unidoc.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm),
             with: session) ?? .first
 
         switch consume autoincrement
         {
         case .new(let id):
-            let realm:Unidex.RealmAlias = .init(id: realm, coordinate: id)
+            let realm:Unidoc.RealmAlias = .init(id: realm, coordinate: id)
             //  This can fail if we race with another process.
             try await self.realmAliases.insert(some: realm, with: session)
             fallthrough
 
         case .old(let id, nil):
             //  Edge case: the most likely reason for this is that we successfully inserted
-            //  the ``Unidex.RealmAlias`` document, but failed to insert the
+            //  the ``Unidoc.RealmAlias`` document, but failed to insert the
             //  ``Unidoc.RealmMetadata`` document.
             let realm:Unidoc.RealmMetadata = .init(id: id, symbol: realm)
             try await self.realms.insert(some: realm, with: session)
@@ -125,7 +125,7 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws
     {
         guard
-        let query:Unidex.AliasQuery<PackageAliases> = .init(symbol: package, alias: alias)
+        let query:Unidoc.AliasQuery<PackageAliases> = .init(symbol: package, alias: alias)
         else
         {
             //  Symbols are the same.
@@ -140,14 +140,14 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let autoincrement:Unidex.Autoincrement<Unidoc.PackageMetadata> = try await self.execute(
-            query: Unidex.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package),
+        let autoincrement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await self.execute(
+            query: Unidoc.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package),
             with: session) ?? .first
 
         switch consume autoincrement
         {
         case .new(let id):
-            let package:Unidex.PackageAlias = .init(id: package, coordinate: id)
+            let package:Unidoc.PackageAlias = .init(id: package, coordinate: id)
             try await self.packageAliases.insert(some: package, with: session)
             fallthrough
 
@@ -188,8 +188,8 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Unidex.EditionPlacement = try await self.execute(
-            query: Unidex.EditionPlacementQuery.init(
+        let placement:Unidoc.EditionPlacement = try await self.execute(
+            query: Unidoc.EditionPlacementQuery.init(
                 package: package,
                 refname: refname),
             with: session) ?? .first
@@ -227,7 +227,7 @@ extension UnidocDatabase
     func store(docs:consuming SymbolGraphArchive,
         with session:Mongo.Session) async throws -> Uploaded
     {
-        let (snapshot, _):(Unidex.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
+        let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
             with: session)
 
         return try await self.snapshots.upsert(snapshot: snapshot, with: session)
@@ -237,7 +237,7 @@ extension UnidocDatabase
     func label(docs:consuming SymbolGraphArchive,
         with session:Mongo.Session) async throws ->
         (
-            snapshot:Unidex.Snapshot,
+            snapshot:Unidoc.Snapshot,
             realm:Unidoc.Realm?
         )
     {
@@ -266,7 +266,7 @@ extension UnidocDatabase
             version = -1
         }
 
-        let snapshot:Unidex.Snapshot = .init(id: .init(
+        let snapshot:Unidoc.Snapshot = .init(id: .init(
                 package: package.id,
                 version: version),
             metadata: docs.metadata,
@@ -281,7 +281,7 @@ extension UnidocDatabase
     func publish(docs:SymbolGraphArchive,
         with session:Mongo.Session) async throws -> (Uploaded, Uplinked)
     {
-        var snapshot:Unidex.Snapshot
+        var snapshot:Unidoc.Snapshot
         let realm:Unidoc.Realm?
 
         (snapshot, realm) = try await self.label(docs: docs, with: session)
@@ -309,14 +309,14 @@ extension UnidocDatabase
         guard
         let package:Unidoc.PackageMetadata = try await self.packages.find(id: id.package,
             with: session),
-        let stored:Unidex.Snapshot = try await self.snapshots.find(id: id,
+        let stored:Unidoc.Snapshot = try await self.snapshots.find(id: id,
             with: session)
         else
         {
             return nil
         }
 
-        var snapshot:Unidex.Snapshot = stored
+        var snapshot:Unidoc.Snapshot = stored
         let volume:Volume = try await self.link(&snapshot,
             realm: package.realm,
             with: session)
@@ -379,7 +379,7 @@ extension UnidocDatabase
     private
     func fill(volume:consuming Volume,
         clear:Bool = true,
-        with session:Mongo.Session) async throws -> Unidex.Sitemap.Delta?
+        with session:Mongo.Session) async throws -> Unidoc.Sitemap.Delta?
     {
         if  clear
         {
@@ -403,7 +403,7 @@ extension UnidocDatabase
             realm: volume.meta.latest ? volume.meta.realm : nil,
             with: session)
 
-        let delta:Unidex.Sitemap.Delta? = volume.meta.latest
+        let delta:Unidoc.Sitemap.Delta? = volume.meta.latest
             ? try await self.sitemaps.update(volume.sitemap(), with: session)
             : nil
 
@@ -430,7 +430,7 @@ extension UnidocDatabase
     }
 
     private
-    func pin(_ snapshot:inout Unidex.Snapshot,
+    func pin(_ snapshot:inout Unidoc.Snapshot,
         with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
         print("pinning dependencies for \(snapshot.metadata.package)...")
@@ -444,7 +444,7 @@ extension UnidocDatabase
         }
 
         guard
-        let query:Unidex.PinDependenciesQuery = .init(for: snapshot)
+        let query:Unidoc.PinDependenciesQuery = .init(for: snapshot)
         else
         {
             return snapshot.pins.compactMap { $0 }
@@ -481,7 +481,7 @@ extension UnidocDatabase
     }
 
     private
-    func link(_ snapshot:inout Unidex.Snapshot,
+    func link(_ snapshot:inout Unidoc.Snapshot,
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Volume
     {

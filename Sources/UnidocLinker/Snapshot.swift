@@ -1,5 +1,5 @@
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidex.Snapshot")
+@available(*, deprecated, renamed: "Unidoc.Snapshot")
 public
-typealias Snapshot = Unidex.Snapshot
+typealias Snapshot = Unidoc.Snapshot

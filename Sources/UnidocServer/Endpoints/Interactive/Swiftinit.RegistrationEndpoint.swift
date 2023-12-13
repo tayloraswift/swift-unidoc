@@ -29,7 +29,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
             return nil
         }
 
-        let user:Unidex.User = try await github.connect
+        let user:Unidoc.User = try await github.connect
         {
             let user:GitHub.User = try await $0.get(from: "/user", with: self.token)
             return .init(account: .github(user),
@@ -37,7 +37,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:Unidex.Cookie = try await server.db.users.update(user: user,
+        let cookie:Unidoc.Cookie = try await server.db.users.update(user: user,
             with: session)
 
         return .redirect(.temporary("\(Site.Admin.uri)"),

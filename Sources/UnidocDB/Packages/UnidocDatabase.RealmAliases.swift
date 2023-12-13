@@ -23,13 +23,13 @@ extension UnidocDatabase.RealmAliases
     let indexCoordinate:Mongo.CollectionIndex = .init("Coordinate",
         unique: false)
     {
-        $0[Unidex.RealmAlias[.coordinate]] = (+)
+        $0[Unidoc.RealmAlias[.coordinate]] = (+)
     }
 }
 extension UnidocDatabase.RealmAliases:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.RealmAlias
+    typealias Element = Unidoc.RealmAlias
 
     @inlinable public static
     var name:Mongo.Collection { "RealmAliases" }

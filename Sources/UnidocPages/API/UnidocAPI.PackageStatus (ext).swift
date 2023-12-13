@@ -5,11 +5,11 @@ import UnidocRecords
 
 extension UnidocAPI.PackageStatus
 {
-    init?(from output:Unidex.EditionsQuery.Output)
+    init?(from output:Unidoc.EditionsQuery.Output)
     {
         guard
         let repo:Unidoc.PackageMetadata.Repo = output.package.repo,
-        let release:Unidex.EditionOutput = output.releases.first,
+        let release:Unidoc.EditionOutput = output.releases.first,
         let release:Edition = .init(from: release)
         else
         {
