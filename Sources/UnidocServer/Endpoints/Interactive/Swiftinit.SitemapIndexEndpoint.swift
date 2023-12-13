@@ -34,7 +34,7 @@ extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
 
             try await db.sitemaps.list(with: session)
             {
-                for sitemap:Unidex.SitemapIndexEntry in $0
+                for sitemap:Unidoc.SitemapIndexEntry in $0
                 {
                     xml[.sitemap]
                     {

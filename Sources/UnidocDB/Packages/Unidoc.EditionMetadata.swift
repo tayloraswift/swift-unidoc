@@ -6,12 +6,6 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-extension Unidex
-{
-    @available(*, deprecated, renamed: "Unidoc.EditionMetadata")
-    public
-    typealias Edition = Unidoc.EditionMetadata
-}
 extension Unidoc
 {
     @frozen public

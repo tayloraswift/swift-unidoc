@@ -3,12 +3,6 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Unidex
-{
-    @available(*, deprecated, renamed: "Unidoc.RealmMetadata")
-    public
-    typealias Realm = Unidoc.RealmMetadata
-}
 extension Unidoc
 {
     @frozen public

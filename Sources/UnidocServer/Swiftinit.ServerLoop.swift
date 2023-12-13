@@ -107,7 +107,7 @@ extension Swiftinit.ServerLoop
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidex.Cookie = try await self.db.users.update(user: .machine(0),
+        let _:Unidoc.Cookie = try await self.db.users.update(user: .machine(0),
             with: session)
 
         _ = consume session
@@ -164,7 +164,7 @@ extension Swiftinit.ServerLoop
         }
 
         guard
-        let cookie:Unidex.Cookie = cookies.session
+        let cookie:Unidoc.Cookie = cookies.session
         else
         {
             return .unauthorized("")

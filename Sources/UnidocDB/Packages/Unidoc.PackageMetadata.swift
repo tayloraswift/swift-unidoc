@@ -6,12 +6,6 @@ import Unidoc
 import UnidocRecords
 import UnixTime
 
-extension Unidex
-{
-    @available(*, deprecated, renamed: "Unidoc.PackageMetadata")
-    public
-    typealias Package = Unidoc.PackageMetadata
-}
 extension Unidoc
 {
     @frozen public
