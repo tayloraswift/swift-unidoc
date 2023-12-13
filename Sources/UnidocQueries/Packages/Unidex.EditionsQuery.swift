@@ -12,14 +12,18 @@ extension Unidex
     {
         public
         let symbol:Symbol.Package
-        public
+
+        @usableFromInline
         let limit:Int
+        @usableFromInline
+        let user:Unidex.User.ID?
 
         @inlinable public
-        init(package symbol:Symbol.Package, limit:Int)
+        init(package symbol:Symbol.Package, limit:Int, user:Unidex.User.ID? = nil)
         {
             self.symbol = symbol
             self.limit = limit
+            self.user = user
         }
     }
 }
@@ -41,38 +45,56 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        guard self.limit > 0
-        else
+        if  let user:Unidex.User.ID = self.user
         {
-            return
+            pipeline[.lookup] = .init
+            {
+                $0[.from] = UnidocDatabase.Users.name
+                $0[.pipeline] = .init
+                {
+                    $0[.match] = .init
+                    {
+                        $0[Unidex.User[.id]] = user
+                    }
+                }
+                $0[.as] = Output[.user]
+            }
+
+            //  Unbox single-element array.
+            pipeline[.set] = .init
+            {
+                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
+            }
+        }
+
+        //  Lookup the associated realm.
+        pipeline[.lookup] = .init
+        {
+            $0[.from] = UnidocDatabase.Realms.name
+            $0[.localField] = Self.target / Unidex.Package[.realm]
+            $0[.foreignField] = Unidex.Realm[.id]
+            $0[.as] = Output[.realm]
+        }
+
+        //  Unbox single-element array.
+        pipeline[.set] = .init
+        {
+            $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
         }
 
         for release:Bool in [true, false]
         {
             pipeline[.lookup] = Mongo.LookupDocument.init
             {
-                let package:Mongo.Variable<Int32> = "package"
-
                 $0[.from] = UnidocDatabase.Editions.name
-                $0[.let] = .init
-                {
-                    $0[let: package] = Self.target / Unidex.Package[.id]
-                }
+                $0[.localField] = Self.target / Unidex.Package[.id]
+                $0[.foreignField] = Unidex.Edition[.package]
                 $0[.pipeline] = .init
                 {
                     $0[.match] = .init
                     {
-                        $0[.expr] = .expr
-                        {
-                            $0[.eq] = (Unidex.Edition[.package], package)
-                        }
-                    }
-
-                    $0[.match] = .init
-                    {
                         $0[Unidex.Edition[.release]] = release
                         $0[Unidex.Edition[.release]] = .init { $0[.exists] = true }
-                        $0[Unidex.Edition[.patch]] = .init { $0[.exists] = true }
                     }
 
                     $0[.sort] = .init
@@ -85,53 +107,51 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
 
                     $0[.replaceWith] = .init
                     {
-                        $0[Facet[.edition]] = Mongo.Pipeline.ROOT
+                        $0[Unidex.EditionOutput[.edition]] = Mongo.Pipeline.ROOT
                     }
 
                     //  Check if a volume has been created for this edition.
                     $0[.lookup] = .init
                     {
                         $0[.from] = UnidocDatabase.Volumes.name
-                        $0[.localField] = Facet[.edition] / Unidex.Edition[.id]
+                        $0[.localField] = Unidex.EditionOutput[.edition] / Unidex.Edition[.id]
                         $0[.foreignField] = Volume.Metadata[.id]
-                        $0[.as] = Facet[.volume]
+                        $0[.as] = Unidex.EditionOutput[.volume]
                     }
 
-                    //  Count symbol graphs.
+                    //  Check if a symbol graph has been uploaded for this edition.
                     $0[.lookup] = Mongo.LookupDocument.init
                     {
-                        let edition:Mongo.Variable<Unidoc.Edition> = "edition"
-
                         $0[.from] = UnidocDatabase.Snapshots.name
-                        $0[.let] = .init
-                        {
-                            $0[let: edition] = Facet[.edition] / Unidex.Edition[.id]
-                        }
+                        $0[.localField] = Unidex.EditionOutput[.edition] / Unidex.Edition[.id]
+                        $0[.foreignField] = Unidex.Snapshot[.id]
                         $0[.pipeline] = .init
                         {
-                            $0[.match] = .init
+                            $0[.replaceWith] = .init
                             {
-                                $0[.expr] = .expr
+                                $0[Unidex.EditionOutput.Graph[.abi]] =
+                                    Unidex.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
+
+                                $0[Unidex.EditionOutput.Graph[.bytes]] = .expr
                                 {
-                                    $0[.eq] = (Unidex.Snapshot[.id], edition)
+                                    $0[.objectSize] = Unidex.Snapshot[.graph]
                                 }
                             }
-
-                            $0[.count] = Facet.Graphs[.count]
-
-                            $0[.project] = .init
-                            {
-                                $0[Facet.Graphs[.count]] = true
-                            }
                         }
-                        $0[.as] = Facet[.graphs]
+                        $0[.as] = Unidex.EditionOutput[.graph]
                     }
 
                     //  Unbox single-element arrays.
                     $0[.set] = .init
                     {
-                        $0[Facet[.volume]] = .expr { $0[.first] = Facet[.volume] }
-                        $0[Facet[.graphs]] = .expr { $0[.first] = Facet[.graphs] }
+                        $0[Unidex.EditionOutput[.volume]] = .expr
+                        {
+                            $0[.first] = Unidex.EditionOutput[.volume]
+                        }
+                        $0[Unidex.EditionOutput[.graph]] = .expr
+                        {
+                            $0[.first] = Unidex.EditionOutput[.graph]
+                        }
                     }
                 }
                 $0[.as] = Output[release ? .releases : .prereleases]

@@ -7,7 +7,7 @@ import SHA1
 struct SymbolGraphMetadata:Equatable, Sendable
 {
     public
-    var abi:MinorVersion
+    var abi:PatchVersion
 
     /// A package identifier to associate with this symbol graph.
     public

@@ -36,6 +36,9 @@ extension Unidex
         /// The current realm this package belongs to. A package can change realms.
         public
         var realm:Unidoc.Realm?
+        /// Indicates if this package is currently undergoing realm alignment.
+        public
+        var realmAligning:Bool
 
         /// The remote git repo this package tracks.
         ///
@@ -53,6 +56,7 @@ extension Unidex
             symbol:Symbol.Package,
             hidden:Bool = false,
             realm:Unidoc.Realm? = nil,
+            realmAligning:Bool = false,
             repo:Repo? = nil,
             crawled:BSON.Millisecond = 0)
         {
@@ -60,6 +64,7 @@ extension Unidex
             self.symbol = symbol
             self.hidden = hidden
             self.realm = realm
+            self.realmAligning = realmAligning
             self.repo = repo
             self.crawled = crawled
         }
@@ -74,6 +79,7 @@ extension Unidex.Package:MongoMasterCodingModel
         case symbol = "Y"
         case hidden = "H"
         case realm = "r"
+        case realmAligning = "A"
         case repo = "R"
         case crawled = "T"
     }
@@ -87,6 +93,7 @@ extension Unidex.Package:BSONDocumentEncodable
         bson[.symbol] = self.symbol
         bson[.hidden] = self.hidden ? true : nil
         bson[.realm] = self.realm
+        bson[.realmAligning] = self.realmAligning ? true : nil
         bson[.repo] = self.repo
         bson[.crawled] = self.crawled
     }
@@ -100,6 +107,7 @@ extension Unidex.Package:BSONDocumentDecodable
             symbol: try bson[.symbol].decode(),
             hidden: try bson[.hidden]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
+            realmAligning: try bson[.realmAligning]?.decode() ?? false,
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)
     }

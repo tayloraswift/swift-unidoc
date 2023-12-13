@@ -356,16 +356,12 @@ extension Swiftinit.ServerLoop
         {
             try Task.checkCancellation()
 
-            do
-            {
-                update.promise.resume(returning: try await update.endpoint.perform(
-                    on: .init(self, tour: self.tour),
-                    with: update.payload))
-            }
-            catch let error
-            {
-                update.promise.resume(throwing: error)
-            }
+            let promise:CheckedContinuation<HTTP.ServerResponse, any Error> = update.promise
+            let payload:[UInt8] = update.payload
+
+            await (consume update).endpoint.perform(on: .init(self, tour: self.tour),
+                payload: payload,
+                request: promise)
         }
     }
 }

@@ -43,7 +43,7 @@ extension UnidocDatabase.Users
                 }
                 $0[.filter] = .init
                 {
-                    $0[Element[.id]] = credential.id
+                    $0[Element[.id]] = credential.user
                     $0[Element[.cookie]] = credential.cookie
                 }
                 $0[.projection] = .init
