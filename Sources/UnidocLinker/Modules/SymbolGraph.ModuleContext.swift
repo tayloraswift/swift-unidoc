@@ -40,7 +40,7 @@ extension SymbolGraph
 }
 extension SymbolGraph.ModuleContext
 {
-    init(nodes:Slice<SymbolGraph.Plane<UnidocPlane.Decl, Unidoc.Scalar?>>)
+    init(nodes:Slice<SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?>>)
     {
         self.init(conformances: [],
             codelinks: .init(),

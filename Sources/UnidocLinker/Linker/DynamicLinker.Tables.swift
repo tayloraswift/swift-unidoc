@@ -17,7 +17,7 @@ extension DynamicLinker
 
         /// Protocol conformances for each declaration in the **current** snapshot.
         private
-        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>
+        let conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>>
 
         /// A table mapping nested declarations to their enclosing extensions.
         ///
@@ -32,8 +32,8 @@ extension DynamicLinker
         private
         var next:
         (
-            autogroup:Unidoc.Counter<UnidocPlane.Autogroup>,
-            topic:Unidoc.Counter<UnidocPlane.Topic>
+            autogroup:Unidoc.Counter<SymbolGraph.Plane.Autogroup>,
+            topic:Unidoc.Counter<SymbolGraph.Plane.Topic>
         )
 
         private(set)
@@ -47,7 +47,7 @@ extension DynamicLinker
         init(
             contexts:consuming [SymbolGraph.ModuleContext],
             context:consuming DynamicLinker,
-            conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>>,
+            conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>>,
             extensions:Extensions)
         {
             self.contexts = contexts
@@ -77,7 +77,7 @@ extension DynamicLinker.Tables
 
         var extensions:DynamicLinker.Extensions = .init(zone: context.current.id)
 
-        let conformances:SymbolGraph.Plane<UnidocPlane.Decl, ProtocolConformances<Int>> =
+        let conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>> =
             context.current.decls.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,

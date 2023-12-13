@@ -2,6 +2,7 @@ import HTML
 import LexicalPaths
 import MarkdownRendering
 import Signatures
+import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
@@ -117,7 +118,7 @@ extension GroupSections
                 //  the first member of the group.
                 guard
                 let first:Unidoc.Scalar = group.members.first,
-                let plane:UnidocPlane = .of(first.citizen)
+                let plane:SymbolGraph.Plane = .of(first.citizen)
                 else
                 {
                     continue

@@ -1,4 +1,4 @@
-extension UnidocPlane
+extension SymbolGraph.Plane
 {
     @frozen public
     enum Significand:Hashable, Equatable, Sendable
@@ -6,7 +6,7 @@ extension UnidocPlane
         case significand
     }
 }
-extension UnidocPlane.Significand
+extension SymbolGraph.Plane.Significand
 {
     @inlinable public static
     func & (scalar:Int32, self:Self) -> Int32

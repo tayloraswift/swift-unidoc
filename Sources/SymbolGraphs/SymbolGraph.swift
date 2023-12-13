@@ -1,7 +1,6 @@
 import BSON
 import MarkdownABI
 import Symbols
-import Unidoc
 
 @frozen public
 struct SymbolGraph:Equatable, Sendable
@@ -20,14 +19,14 @@ struct SymbolGraph:Equatable, Sendable
     var decls:Layer<DeclNode>
 
     public
-    var files:Plane<UnidocPlane.File, Symbol.File>
+    var files:Table<SymbolGraph.Plane.File, Symbol.File>
 
     @inlinable internal
     init(namespaces:[Symbol.Module],
         cultures:[Culture],
         articles:Layer<ArticleNode> = .init(),
         decls:Layer<DeclNode> = .init(),
-        files:Plane<UnidocPlane.File, Symbol.File> = [])
+        files:Table<SymbolGraph.Plane.File, Symbol.File> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures

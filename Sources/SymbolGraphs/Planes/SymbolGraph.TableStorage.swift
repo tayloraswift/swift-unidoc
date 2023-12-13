@@ -5,7 +5,7 @@ extension SymbolGraph
     /// A wrapper around an array that statically guarantees that its
     /// indices are representable in 24 bits, and can be indexed with ``Int32``.
     @frozen @usableFromInline internal
-    struct Table<Element>
+    struct TableStorage<Element>
     {
         @usableFromInline internal
         var elements:[Element]
@@ -17,16 +17,16 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.Table:Equatable where Element:Equatable
+extension SymbolGraph.TableStorage:Equatable where Element:Equatable
 {
 }
-extension SymbolGraph.Table:Hashable where Element:Hashable
+extension SymbolGraph.TableStorage:Hashable where Element:Hashable
 {
 }
-extension SymbolGraph.Table:Sendable where Element:Sendable
+extension SymbolGraph.TableStorage:Sendable where Element:Sendable
 {
 }
-extension SymbolGraph.Table
+extension SymbolGraph.TableStorage
 {
     @inlinable internal mutating
     func reserveCapacity(_ capacity:Int)
@@ -46,11 +46,11 @@ extension SymbolGraph.Table
         }
         else
         {
-            fatalError("SymbolGraph.Table index overflow (\(next) elements)")
+            fatalError("SymbolGraph.TableStorage index overflow (\(next) elements)")
         }
     }
 }
-extension SymbolGraph.Table:ExpressibleByArrayLiteral
+extension SymbolGraph.TableStorage:ExpressibleByArrayLiteral
 {
     @inlinable internal
     init(arrayLiteral:Element...)
@@ -61,11 +61,11 @@ extension SymbolGraph.Table:ExpressibleByArrayLiteral
         }
         else
         {
-            fatalError("SymbolGraph.Table index overflow (\(arrayLiteral.count) elements)")
+            fatalError("SymbolGraph.TableStorage index overflow (\(arrayLiteral.count) elements)")
         }
     }
 }
-extension SymbolGraph.Table:Sequence
+extension SymbolGraph.TableStorage:Sequence
 {
     @inlinable internal
     func withContiguousStorageIfAvailable<Success>(
@@ -79,7 +79,7 @@ extension SymbolGraph.Table:Sequence
         self.elements.count
     }
 }
-extension SymbolGraph.Table:RandomAccessCollection
+extension SymbolGraph.TableStorage:RandomAccessCollection
 {
     @_semantics("array.get_count")
     @inlinable internal
@@ -112,7 +112,7 @@ extension SymbolGraph.Table:RandomAccessCollection
         }
     }
 }
-extension SymbolGraph.Table
+extension SymbolGraph.TableStorage
 {
     @inlinable internal
     subscript(index:Int) -> Element
@@ -127,7 +127,7 @@ extension SymbolGraph.Table
         }
     }
 }
-extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
+extension SymbolGraph.TableStorage:BSONEncodable where Element:BSONEncodable
 {
     @usableFromInline internal
     func encode(to field:inout BSON.FieldEncoder)
@@ -135,7 +135,7 @@ extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
         self.elements.encode(to: &field)
     }
 }
-extension SymbolGraph.Table:BSONDecodable where Element:BSONDecodable
+extension SymbolGraph.TableStorage:BSONDecodable where Element:BSONDecodable
 {
     @inlinable internal
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
