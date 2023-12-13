@@ -6,17 +6,19 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidex.Edition")
-public
-typealias PackageEdition = Unidex.Edition
-
 extension Unidex
 {
+    @available(*, deprecated, renamed: "Unidoc.EditionMetadata")
+    public
+    typealias Edition = Unidoc.EditionMetadata
+}
+extension Unidoc
+{
     @frozen public
-    struct Edition:Identifiable, Equatable, Sendable
+    struct EditionMetadata:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Edition
+        let id:Edition
 
         /// Whether or not this edition is a release.
         public
@@ -42,7 +44,7 @@ extension Unidex
         var sha1:SHA1?
 
         @inlinable public
-        init(id:Unidoc.Edition,
+        init(id:Edition,
             release:Bool,
             patch:PatchVersion,
             name:String,
@@ -58,14 +60,14 @@ extension Unidex
         }
     }
 }
-extension Unidex.Edition
+extension Unidoc.EditionMetadata
 {
     @inlinable public
     var package:Unidoc.Package { self.id.package }
     @inlinable public
     var version:Unidoc.Version { self.id.version }
 }
-extension Unidex.Edition:MongoMasterCodingModel
+extension Unidoc.EditionMetadata:MongoMasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -82,7 +84,7 @@ extension Unidex.Edition:MongoMasterCodingModel
         case sha1 = "S"
     }
 }
-extension Unidex.Edition:BSONDocumentEncodable
+extension Unidoc.EditionMetadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -99,7 +101,7 @@ extension Unidex.Edition:BSONDocumentEncodable
         bson[.sha1] = self.sha1
     }
 }
-extension Unidex.Edition:BSONDocumentDecodable
+extension Unidoc.EditionMetadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

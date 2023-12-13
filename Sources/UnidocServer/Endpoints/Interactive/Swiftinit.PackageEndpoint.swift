@@ -28,7 +28,7 @@ extension Swiftinit.PackageEndpoint:RestrictedEndpoint
         {
         case .update(let update):
             guard
-            let package:Unidex.Package = try await server.db.unidoc.execute(
+            let package:Unidoc.PackageMetadata = try await server.db.unidoc.execute(
                 query: Unidex.PackageQuery.init(symbol: self.package),
                 with: session)
             else
@@ -40,7 +40,7 @@ extension Swiftinit.PackageEndpoint:RestrictedEndpoint
             {
             case .realm(let realm?):
                 guard
-                let realm:Unidex.Realm = try await server.db.unidoc.execute(
+                let realm:Unidoc.RealmMetadata = try await server.db.unidoc.execute(
                     query: Unidex.RealmQuery.init(symbol: realm),
                     with: session)
                 else

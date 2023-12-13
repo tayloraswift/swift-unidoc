@@ -28,48 +28,48 @@ extension UnidocDatabase.Editions
         collation: SimpleCollation.spec,
         unique: true)
     {
-        $0[Unidex.Edition[.package]] = (+)
-        $0[Unidex.Edition[.name]] = (+)
+        $0[Unidoc.EditionMetadata[.package]] = (+)
+        $0[Unidoc.EditionMetadata[.name]] = (+)
     }
 
     public static
     let indexEditionCoordinate:Mongo.CollectionIndex = .init("EditionCoordinate",
         unique: true)
     {
-        $0[Unidex.Edition[.package]] = (-)
-        $0[Unidex.Edition[.version]] = (-)
+        $0[Unidoc.EditionMetadata[.package]] = (-)
+        $0[Unidoc.EditionMetadata[.version]] = (-)
     }
 
     public static
     let indexNonreleases:Mongo.CollectionIndex = .init("Nonreleases",
         unique: true)
     {
-        $0[Unidex.Edition[.package]] = (-)
-        $0[Unidex.Edition[.patch]] = (-)
-        $0[Unidex.Edition[.version]] = (-)
+        $0[Unidoc.EditionMetadata[.package]] = (-)
+        $0[Unidoc.EditionMetadata[.patch]] = (-)
+        $0[Unidoc.EditionMetadata[.version]] = (-)
     }
         where:
     {
-        $0[Unidex.Edition[.release]] = .init { $0[.eq] = false }
+        $0[Unidoc.EditionMetadata[.release]] = .init { $0[.eq] = false }
     }
 
     public static
     let indexReleases:Mongo.CollectionIndex = .init("Releases",
         unique: true)
     {
-        $0[Unidex.Edition[.package]] = (-)
-        $0[Unidex.Edition[.patch]] = (-)
-        $0[Unidex.Edition[.version]] = (-)
+        $0[Unidoc.EditionMetadata[.package]] = (-)
+        $0[Unidoc.EditionMetadata[.patch]] = (-)
+        $0[Unidoc.EditionMetadata[.version]] = (-)
     }
         where:
     {
-        $0[Unidex.Edition[.release]] = .init { $0[.eq] = true }
+        $0[Unidoc.EditionMetadata[.release]] = .init { $0[.eq] = true }
     }
 }
 extension UnidocDatabase.Editions:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidex.Edition
+    typealias Element = Unidoc.EditionMetadata
 
     @inlinable public static
     var name:Mongo.Collection { "Editions" }
@@ -90,7 +90,7 @@ extension UnidocDatabase.Editions:Mongo.RecodableModel
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: Unidex.Edition.self,
+        try await self.recode(through: Unidoc.EditionMetadata.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
     }

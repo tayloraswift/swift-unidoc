@@ -71,8 +71,8 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
         pipeline[.lookup] = .init
         {
             $0[.from] = UnidocDatabase.Realms.name
-            $0[.localField] = Self.target / Unidex.Package[.realm]
-            $0[.foreignField] = Unidex.Realm[.id]
+            $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
+            $0[.foreignField] = Unidoc.RealmMetadata[.id]
             $0[.as] = Output[.realm]
         }
 
@@ -87,20 +87,20 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
             pipeline[.lookup] = Mongo.LookupDocument.init
             {
                 $0[.from] = UnidocDatabase.Editions.name
-                $0[.localField] = Self.target / Unidex.Package[.id]
-                $0[.foreignField] = Unidex.Edition[.package]
+                $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
+                $0[.foreignField] = Unidoc.EditionMetadata[.package]
                 $0[.pipeline] = .init
                 {
                     $0[.match] = .init
                     {
-                        $0[Unidex.Edition[.release]] = release
-                        $0[Unidex.Edition[.release]] = .init { $0[.exists] = true }
+                        $0[Unidoc.EditionMetadata[.release]] = release
+                        $0[Unidoc.EditionMetadata[.release]] = .init { $0[.exists] = true }
                     }
 
                     $0[.sort] = .init
                     {
-                        $0[Unidex.Edition[.patch]] = (-)
-                        $0[Unidex.Edition[.version]] = (-)
+                        $0[Unidoc.EditionMetadata[.patch]] = (-)
+                        $0[Unidoc.EditionMetadata[.version]] = (-)
                     }
 
                     $0[.limit] = self.limit
@@ -114,7 +114,8 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
                     $0[.lookup] = .init
                     {
                         $0[.from] = UnidocDatabase.Volumes.name
-                        $0[.localField] = Unidex.EditionOutput[.edition] / Unidex.Edition[.id]
+                        $0[.localField] =
+                            Unidex.EditionOutput[.edition] / Unidoc.EditionMetadata[.id]
                         $0[.foreignField] = Volume.Metadata[.id]
                         $0[.as] = Unidex.EditionOutput[.volume]
                     }
@@ -123,7 +124,8 @@ extension Unidex.EditionsQuery:Unidex.AliasingQuery
                     $0[.lookup] = Mongo.LookupDocument.init
                     {
                         $0[.from] = UnidocDatabase.Snapshots.name
-                        $0[.localField] = Unidex.EditionOutput[.edition] / Unidex.Edition[.id]
+                        $0[.localField] =
+                            Unidex.EditionOutput[.edition] / Unidoc.EditionMetadata[.id]
                         $0[.foreignField] = Unidex.Snapshot[.id]
                         $0[.pipeline] = .init
                         {

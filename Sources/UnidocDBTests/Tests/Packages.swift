@@ -31,9 +31,8 @@ struct Packages:MongoTestBattery
                     ("b", 1, false),
                 ]
                 {
-                    let (package, new):(Unidex.Package, Bool) = try await database.index(
-                        package: expected.symbol,
-                        with: session)
+                    let (package, new):(Unidoc.PackageMetadata, Bool) =
+                        try await database.index(package: expected.symbol, with: session)
 
                     tests.expect(package.id ==? expected.id)
                     tests.expect(new ==? expected.new)
@@ -74,7 +73,7 @@ struct Packages:MongoTestBattery
                 ("cc", ("c", 2)),
             ]
             {
-                let (package, new):(Unidex.Package, Bool) = try await database.index(
+                let (package, new):(Unidoc.PackageMetadata, Bool) = try await database.index(
                     package: queried,
                     with: session)
 

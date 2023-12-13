@@ -29,7 +29,7 @@ extension Unidex.EditionPlacement:BSONDocumentDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        if  let edition:Unidex.Edition = try bson[.edition]?.decode()
+        if  let edition:Unidoc.EditionMetadata = try bson[.edition]?.decode()
         {
             self = .old(edition)
         }

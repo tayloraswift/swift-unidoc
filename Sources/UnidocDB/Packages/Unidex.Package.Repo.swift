@@ -3,17 +3,17 @@ import GitHubAPI
 import MongoQL
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidex.Package.Repo")
+@available(*, deprecated, renamed: "Unidoc.PackageMetadata.Repo")
 public
-typealias PackageRepo = Unidex.Package.Repo
+typealias PackageRepo = Unidoc.PackageMetadata.Repo
 
 extension Unidex
 {
-    @available(*, deprecated, renamed: "Unidex.Package.Repo")
+    @available(*, deprecated, renamed: "Unidoc.PackageMetadata.Repo")
     public
     typealias Repo = Package.Repo
 }
-extension Unidex.Package
+extension Unidoc.PackageMetadata
 {
     @frozen public
     enum Repo:Equatable, Sendable
@@ -21,7 +21,7 @@ extension Unidex.Package
         case github(GitHub.Repo)
     }
 }
-extension Unidex.Package.Repo
+extension Unidoc.PackageMetadata.Repo
 {
     @inlinable public
     var origin:Origin
@@ -40,7 +40,7 @@ extension Unidex.Package.Repo
         }
     }
 }
-extension Unidex.Package.Repo:MongoMasterCodingModel
+extension Unidoc.PackageMetadata.Repo:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -69,7 +69,7 @@ extension Unidex.Package.Repo:MongoMasterCodingModel
         case github_pushed = "hP"
     }
 }
-extension Unidex.Package.Repo:BSONDocumentEncodable
+extension Unidoc.PackageMetadata.Repo:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -99,7 +99,7 @@ extension Unidex.Package.Repo:BSONDocumentEncodable
         }
     }
 }
-extension Unidex.Package.Repo:BSONDocumentDecodable
+extension Unidoc.PackageMetadata.Repo:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

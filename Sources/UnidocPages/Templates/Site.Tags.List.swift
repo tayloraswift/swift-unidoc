@@ -11,17 +11,17 @@ extension Site.Tags
     struct List
     {
         private
-        let package:Unidex.Package
+        let package:Unidoc.PackageMetadata
         private
         let editions:[Unidex.EditionOutput]
         private
-        let realm:Unidex.Realm?
+        let realm:Unidoc.RealmMetadata?
         private
         let user:Unidex.User?
 
-        init(package:Unidex.Package,
+        init(package:Unidoc.PackageMetadata,
             editions:[Unidex.EditionOutput],
-            realm:Unidex.Realm?,
+            realm:Unidoc.RealmMetadata?,
             user:Unidex.User?)
         {
             self.package = package
@@ -86,7 +86,7 @@ extension Site.Tags.List:ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Unidex.Package.Repo = self.package.repo
+            if  let repo:Unidoc.PackageMetadata.Repo = self.package.repo
             {
                 $0[.h2] = "Package Repository"
 

@@ -23,7 +23,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
 
         if  let symbol:String = self.realm
         {
-            let target:Unidex.Realm?
+            let target:Unidoc.RealmMetadata?
             if  self.force
             {
                 (target, _) = try await server.db.unidoc.index(realm: symbol, with: session)
@@ -34,7 +34,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
             }
 
             guard
-            let target:Unidex.Realm
+            let target:Unidoc.RealmMetadata
             else
             {
                 return .noSuchRealm
@@ -48,7 +48,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
         }
 
         guard
-        let package:Unidex.Package = try await server.db.unidoc.package(
+        let package:Unidoc.PackageMetadata = try await server.db.unidoc.package(
             named: self.package,
             with: session)
         else

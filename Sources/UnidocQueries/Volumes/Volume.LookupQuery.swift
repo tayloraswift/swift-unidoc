@@ -78,7 +78,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
         {
             $0[.from] = UnidocDatabase.Packages.name
             $0[.localField] = Volume.PrincipalOutput[.volume] / Volume.Metadata[.cell]
-            $0[.foreignField] = Unidex.Package[.id]
+            $0[.foreignField] = Unidoc.PackageMetadata[.id]
             $0[.as] = Volume.PrincipalOutput[.repo]
         }
 
@@ -93,7 +93,7 @@ extension Volume.LookupQuery:Volume.VertexQuery
         pipeline[.set] = .init
         {
             $0[Volume.PrincipalOutput[.repo]] =
-                Volume.PrincipalOutput[.repo] / Unidex.Package[.repo]
+                Volume.PrincipalOutput[.repo] / Unidoc.PackageMetadata[.repo]
         }
 
         //  Look up the vertex in the volume of the latest stable release of its home package.

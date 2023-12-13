@@ -6,14 +6,16 @@ import Unidoc
 import UnidocRecords
 import UnixTime
 
-@available(*, deprecated, renamed: "Unidex.Package")
-public
-typealias PackageRecord = Unidex.Package
-
 extension Unidex
 {
+    @available(*, deprecated, renamed: "Unidoc.PackageMetadata")
+    public
+    typealias Package = Unidoc.PackageMetadata
+}
+extension Unidoc
+{
     @frozen public
-    struct Package:Identifiable, Equatable, Sendable
+    struct PackageMetadata:Identifiable, Equatable, Sendable
     {
         /// The coordinate this package was assigned. All package coordinates are currently
         /// positive.
@@ -22,7 +24,7 @@ extension Unidex
         /// can change, because the coordinate can never change. Tracking a remote GitHub repo
         /// counts as something that can change.
         public
-        let id:Unidoc.Package
+        let id:Package
 
         /// The current preferred name for this package. A package may have multiple names,
         /// and the preferred name can change.
@@ -35,7 +37,7 @@ extension Unidex
 
         /// The current realm this package belongs to. A package can change realms.
         public
-        var realm:Unidoc.Realm?
+        var realm:Realm?
         /// Indicates if this package is currently undergoing realm alignment.
         public
         var realmAligning:Bool
@@ -70,7 +72,7 @@ extension Unidex
         }
     }
 }
-extension Unidex.Package:MongoMasterCodingModel
+extension Unidoc.PackageMetadata:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -84,7 +86,7 @@ extension Unidex.Package:MongoMasterCodingModel
         case crawled = "T"
     }
 }
-extension Unidex.Package:BSONDocumentEncodable
+extension Unidoc.PackageMetadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -98,7 +100,7 @@ extension Unidex.Package:BSONDocumentEncodable
         bson[.crawled] = self.crawled
     }
 }
-extension Unidex.Package:BSONDocumentDecodable
+extension Unidoc.PackageMetadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

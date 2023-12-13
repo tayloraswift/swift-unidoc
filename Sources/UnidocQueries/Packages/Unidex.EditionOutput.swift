@@ -9,7 +9,7 @@ extension Unidex
     struct EditionOutput:Equatable, Sendable
     {
         public
-        var edition:Unidex.Edition
+        var edition:Unidoc.EditionMetadata
 
         public
         var volume:Volume.Metadata?
@@ -17,7 +17,7 @@ extension Unidex
         var graph:Graph?
 
         @inlinable public
-        init(edition:Unidex.Edition,
+        init(edition:Unidoc.EditionMetadata,
             volume:Volume.Metadata?,
             graph:Graph?)
         {

@@ -13,17 +13,17 @@ extension Unidex.EditionsQuery
         public
         var releases:[Unidex.EditionOutput]
         public
-        var package:Unidex.Package
+        var package:Unidoc.PackageMetadata
         public
-        var realm:Unidex.Realm?
+        var realm:Unidoc.RealmMetadata?
         public
         var user:Unidex.User?
 
         @inlinable public
         init(prereleases:[Unidex.EditionOutput],
             releases:[Unidex.EditionOutput],
-            package:Unidex.Package,
-            realm:Unidex.Realm?,
+            package:Unidoc.PackageMetadata,
+            realm:Unidoc.RealmMetadata?,
             user:Unidex.User?)
         {
             self.prereleases = prereleases

@@ -5,5 +5,5 @@ import UnidocRecords
 extension Unidex
 {
     public
-    typealias PackageAlias = Alias<Symbol.Package, Unidex.Package>
+    typealias PackageAlias = Alias<Symbol.Package, Unidoc.PackageMetadata>
 }

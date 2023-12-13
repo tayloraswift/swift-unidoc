@@ -17,13 +17,13 @@ extension UnidocDatabase.RepoFeed
         public
         let refname:String
         public
-        let origin:Unidex.Package.Repo.Origin
+        let origin:Unidoc.PackageMetadata.Repo.Origin
 
         @inlinable public
         init(discovered id:BSON.Millisecond,
             package:Symbol.Package,
             refname:String,
-            origin:Unidex.Package.Repo.Origin)
+            origin:Unidoc.PackageMetadata.Repo.Origin)
         {
             self.id = id
             self.package = package

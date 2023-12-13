@@ -52,7 +52,7 @@ extension Swiftinit.IndexRepoEndpoint:RestrictedEndpoint
         let symbol:Symbol.Package = .init(repo.name)
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-        let (package, new):(Unidex.Package, Bool) = try await server.db.unidoc.index(
+        let (package, new):(Unidoc.PackageMetadata, Bool) = try await server.db.unidoc.index(
             package: symbol,
             repo: .github(repo),
             with: session)

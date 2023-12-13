@@ -90,9 +90,9 @@ extension UnidocDatabase
     /// Registers an **alias** of a package realm.
     public
     func index(realm:String,
-        with session:Mongo.Session) async throws -> (realm:Unidex.Realm, new:Bool)
+        with session:Mongo.Session) async throws -> (realm:Unidoc.RealmMetadata, new:Bool)
     {
-        let autoincrement:Unidex.Autoincrement<Unidex.Realm> = try await self.execute(
+        let autoincrement:Unidex.Autoincrement<Unidoc.RealmMetadata> = try await self.execute(
             query: Unidex.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm),
             with: session) ?? .first
 
@@ -106,9 +106,9 @@ extension UnidocDatabase
 
         case .old(let id, nil):
             //  Edge case: the most likely reason for this is that we successfully inserted
-            //  the ``Unidex.RealmAlias`` document, but failed to insert the ``Unidex.Realm``
-            //  document.
-            let realm:Unidex.Realm = .init(id: id, symbol: realm)
+            //  the ``Unidex.RealmAlias`` document, but failed to insert the
+            //  ``Unidoc.RealmMetadata`` document.
+            let realm:Unidoc.RealmMetadata = .init(id: id, symbol: realm)
             try await self.realms.insert(some: realm, with: session)
             return (realm, true)
 
@@ -136,11 +136,11 @@ extension UnidocDatabase
 
     public
     func index(package:Symbol.Package,
-        repo:consuming Unidex.Package.Repo? = nil,
-        with session:Mongo.Session) async throws -> (package:Unidex.Package, new:Bool)
+        repo:consuming Unidoc.PackageMetadata.Repo? = nil,
+        with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let autoincrement:Unidex.Autoincrement<Unidex.Package> = try await self.execute(
+        let autoincrement:Unidex.Autoincrement<Unidoc.PackageMetadata> = try await self.execute(
             query: Unidex.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package),
             with: session) ?? .first
 
@@ -152,7 +152,7 @@ extension UnidocDatabase
             fallthrough
 
         case .old(let id, nil):
-            let package:Unidex.Package = .init(id: id,
+            let package:Unidoc.PackageMetadata = .init(id: id,
                 symbol: package,
                 realm: nil,
                 repo: repo)
@@ -167,7 +167,7 @@ extension UnidocDatabase
             return (package, true)
 
         case .old(_, var package?):
-            if  let repo:Unidex.Package.Repo,
+            if  let repo:Unidoc.PackageMetadata.Repo,
                     repo != package.repo
             {
                 package.repo = repo
@@ -185,7 +185,7 @@ extension UnidocDatabase
         version:SemanticVersion,
         refname:String,
         sha1:SHA1?,
-        with session:Mongo.Session) async throws -> (edition:Unidex.Edition, new:Bool)
+        with session:Mongo.Session) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
         let placement:Unidex.EditionPlacement = try await self.execute(
@@ -197,7 +197,7 @@ extension UnidocDatabase
         switch consume placement
         {
         case .new(let id):
-            let edition:Unidex.Edition = .init(id: .init(
+            let edition:Unidoc.EditionMetadata = .init(id: .init(
                     package: package,
                     version: id),
                 release: version.release,
@@ -242,7 +242,7 @@ extension UnidocDatabase
         )
     {
         let docs:SymbolGraphArchive = docs
-        let (package, _):(Unidex.Package, Bool) = try await self.index(
+        let (package, _):(Unidoc.PackageMetadata, Bool) = try await self.index(
             package: docs.metadata.package,
             repo: nil,
             with: session)
@@ -252,7 +252,7 @@ extension UnidocDatabase
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
             let semver:SemanticVersion = docs.metadata.package.version(tag: commit.refname)
         {
-            let (edition, _):(Unidex.Edition, Bool) = try await self.register(
+            let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.register(
                 package: package.id,
                 version: semver,
                 refname: commit.refname,
@@ -307,8 +307,10 @@ extension UnidocDatabase
     func uplink(_ id:Unidoc.Edition, with session:Mongo.Session) async throws -> Uplinked?
     {
         guard
-        let package:Unidex.Package = try await self.packages.find(id: id.package, with: session),
-        let stored:Unidex.Snapshot = try await self.snapshots.find(id: id, with: session)
+        let package:Unidoc.PackageMetadata = try await self.packages.find(id: id.package,
+            with: session),
+        let stored:Unidex.Snapshot = try await self.snapshots.find(id: id,
+            with: session)
         else
         {
             return nil
