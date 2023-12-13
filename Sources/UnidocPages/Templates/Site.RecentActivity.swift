@@ -33,12 +33,12 @@ extension Site.RecentActivity:RenderablePage
     var title:String { "Recent Activity" }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        head[unsafe: .script] = assets.script(volumes: nil)
+        head[unsafe: .script] = format.assets.script(volumes: nil)
     }
 
-    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         //  This div centers the content.
         body[.div]
@@ -117,7 +117,8 @@ extension Site.RecentActivity:RenderablePage
                         $0[.ol]
                         {
                             let now:UnixInstant = .now()
-                            for item:UnidocDatabase.DocsFeed.Activity<Volume.Metadata> in self.docs
+                            for item:UnidocDatabase.DocsFeed.Activity<Volume.Metadata> in
+                                self.docs
                             {
                                 $0[.li]
                                 {

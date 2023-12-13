@@ -5,7 +5,7 @@ import UnidocPages
 
 protocol NonblockingEndpoint:ProceduralEndpoint
 {
-    associatedtype Status:HTTP.ServerResponseFactory<StaticAssets>
+    associatedtype Status:HTTP.ServerResponseFactory<Unidoc.RenderFormat>
 
     func enqueue(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],
@@ -29,9 +29,7 @@ extension NonblockingEndpoint
             status = try await self.enqueue(on: server,
                 payload: payload,
                 session: session)
-            request.resume(returning: try status.response(
-                with: server.assets,
-                as: .text(.html)))
+            request.resume(returning: try status.response(as: .init(assets: server.assets)))
         }
         catch
         {

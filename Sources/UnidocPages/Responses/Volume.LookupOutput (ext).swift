@@ -9,7 +9,7 @@ import URI
 extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
 {
     public consuming
-    func response(with assets:StaticAssets, as accept:AcceptType) throws -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         guard
         let principal:Volume.PrincipalOutput = (copy self).principal
@@ -33,7 +33,7 @@ extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
             if  let choices:Site.Docs.MultipleFound = .init(context,
                     matches: principal.matches)
             {
-                return .multiple(choices.resource(assets: assets))
+                return .multiple(choices.resource(format: format))
             }
             else
             {
@@ -42,7 +42,7 @@ extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
                 let display:Site.Docs.NotFound = .init(context,
                     sidebar: .module(volume: principal.volume, tree: principal.tree))
 
-                return .notFound(display.resource(assets: assets))
+                return .notFound(display.resource(format: format))
             }
         }
 
@@ -76,7 +76,6 @@ extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
             tree: consume tree,
             with: .init(context,
                 canonical: canonical,
-                assets: assets,
-                accept: accept))
+                format: format))
     }
 }

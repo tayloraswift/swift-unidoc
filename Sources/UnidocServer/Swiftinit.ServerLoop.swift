@@ -95,7 +95,7 @@ extension Swiftinit.ServerLoop
     var secured:Bool { self.options.mode.secured }
 
     nonisolated
-    var assets:StaticAssets { self.options.cloudfront ? .cloudfront : .local }
+    var assets:Unidoc.RenderFormat.Assets { self.options.cloudfront ? .cloudfront : .local }
 }
 
 extension Swiftinit.ServerLoop
@@ -238,7 +238,7 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
             }
 
         case .stateless(let stateless):
-            return .ok(stateless.resource(assets: self.assets))
+            return .ok(stateless.resource(format: .init(assets: self.assets)))
 
         case .redirect(let target):
             return .redirect(.permanent(target))

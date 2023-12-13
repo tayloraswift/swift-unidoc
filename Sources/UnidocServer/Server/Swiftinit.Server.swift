@@ -24,7 +24,7 @@ extension Swiftinit.Server
     }
 
     var secured:Bool { self.loop.secured }
-    var assets:StaticAssets { self.loop.assets }
+    var assets:Unidoc.RenderFormat.Assets { self.loop.assets }
 
     var plugins:Swiftinit.Plugins { self.loop.plugins }
     var db:Swiftinit.DB { self.loop.db }

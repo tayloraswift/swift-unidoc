@@ -42,7 +42,7 @@ extension Site.Docs:VolumeRoot
                 sidebar: sidebar,
                 vertex: vertex,
                 groups: groups)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
 
         case .culture(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
@@ -56,7 +56,7 @@ extension Site.Docs:VolumeRoot
                 sidebar: sidebar,
                 vertex: vertex,
                 groups: groups)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
 
         case .decl(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
@@ -71,7 +71,7 @@ extension Site.Docs:VolumeRoot
                 sidebar: sidebar,
                 vertex: vertex,
                 groups: groups)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
 
         case .file:
             throw Volume.VertexTypeError.file
@@ -85,7 +85,7 @@ extension Site.Docs:VolumeRoot
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
 
         case .global(let vertex):
             let groups:GroupSections = .init(context.page,
@@ -96,7 +96,7 @@ extension Site.Docs:VolumeRoot
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
         }
 
         return .ok(resource)

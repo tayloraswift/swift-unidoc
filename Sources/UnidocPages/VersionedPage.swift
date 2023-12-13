@@ -25,7 +25,7 @@ extension VersionedPage
     var volume:Volume.Metadata { self.context.volume }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let json:JSON = .array
         {
@@ -49,11 +49,11 @@ extension VersionedPage
             }
         }
 
-        head[unsafe: .script] = assets.script(volumes: json)
+        head[unsafe: .script] = format.assets.script(volumes: json)
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let sidebar:Sidebar? = self.sidebar
 
@@ -117,7 +117,7 @@ extension VersionedPage
         }
         body[.div]
         {
-            $0[.main, { $0.class = "content" }] { self.main(&$0, assets: assets) }
+            $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
             $0[.div] { $0.class = "sidebar" } = sidebar
         }
     }

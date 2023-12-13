@@ -12,7 +12,7 @@ extension Swiftinit
         where   Query:Mongo.PipelineQuery,
                 Query.Iteration.Stride == Never?,
                 Query.Iteration.Batch == Query.Iteration.BatchElement?,
-                Query.Iteration.BatchElement:HTTP.ServerResponseFactory<StaticAssets>
+                Query.Iteration.BatchElement:HTTP.ServerResponseFactory<Unidoc.RenderFormat>
     {
         /// If nil, the query will be explained instead of executed. If non-nil, this field
         /// will be passed to the query’s output type, which may influence the response it
@@ -59,7 +59,7 @@ extension Swiftinit.PipelineEndpoint:PublicEndpoint
             return nil
         }
 
-        switch try output.response(with: server.assets, as: accept)
+        switch try output.response(as: .init(assets: server.assets, accept: accept))
         {
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)

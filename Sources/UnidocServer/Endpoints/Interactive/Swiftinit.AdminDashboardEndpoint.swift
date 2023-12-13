@@ -32,6 +32,6 @@ extension Swiftinit.AdminDashboardEndpoint:RestrictedEndpoint
                 real: server.secured)
         } (server.atomics)
 
-        return .ok(page.resource(assets: server.assets))
+        return .ok(page.resource(format: .init(assets: server.assets)))
     }
 }

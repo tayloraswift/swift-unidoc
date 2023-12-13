@@ -41,10 +41,10 @@ enum Main
         {
             @Sendable (connection:AWS.S3Client.Connection) in
 
-            for asset:StaticAsset in StaticAsset.allCases
+            for asset:Unidoc.RenderAsset in Unidoc.RenderAsset.allCases
             {
                 let content:[UInt8] = try assets.appending(asset.source).read()
-                let path:String = asset.path(prepending: StaticAssets.version)
+                let path:String = asset.path(prepending: Unidoc.RenderFormat.Assets.version)
 
                 print("Uploading \(path)...")
 

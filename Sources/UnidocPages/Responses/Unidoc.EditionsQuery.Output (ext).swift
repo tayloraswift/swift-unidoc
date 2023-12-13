@@ -8,9 +8,9 @@ import UnidocRecords
 extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as type:AcceptType) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
-        switch type
+        switch format.accept
         {
         case .application(.json):
             guard
@@ -29,7 +29,7 @@ extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
 
         case _:
             let list:Site.Tags.List = .init(from: self)
-            return .ok(list.resource(assets: assets))
+            return .ok(list.resource(format: format))
         }
     }
 }

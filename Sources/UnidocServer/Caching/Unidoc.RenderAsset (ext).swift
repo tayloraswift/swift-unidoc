@@ -1,7 +1,7 @@
 import UnidocAssets
 import UnidocPages
 
-extension StaticAsset:CacheKey
+extension Unidoc.RenderAsset:CacheKey
 {
     /// Indicates if the asset will be reloaded from disk when hot-reloading is enabled.
     /// (Some assets will never be reloaded, such as the favicon.)

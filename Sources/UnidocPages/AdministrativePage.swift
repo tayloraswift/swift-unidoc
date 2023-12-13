@@ -4,22 +4,22 @@ import URI
 public
 protocol AdministrativePage:StaticPage
 {
-    func main(_:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
 }
 extension AdministrativePage
 {
     public
-    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         head[.link]
         {
-            $0.href = "\(assets[.admin_css])"
+            $0.href = "\(format.assets[.admin_css])"
             $0.rel = .stylesheet
         }
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, assets:StaticAssets)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         body[.header, { $0.class = "app" }]
         {
@@ -27,7 +27,7 @@ extension AdministrativePage
         }
         body[.div]
         {
-            $0[.main, { $0.class = "content" }] { self.main(&$0, assets: assets) }
+            $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
         }
     }
 }
