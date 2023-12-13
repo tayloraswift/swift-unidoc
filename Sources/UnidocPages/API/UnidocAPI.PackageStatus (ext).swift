@@ -8,7 +8,7 @@ extension UnidocAPI.PackageStatus
     init?(from output:Unidex.EditionsQuery.Output)
     {
         guard
-        let repo:Unidex.Package.Repo = output.package.repo,
+        let repo:Unidoc.PackageMetadata.Repo = output.package.repo,
         let release:Unidex.EditionOutput = output.releases.first,
         let release:Edition = .init(from: release)
         else

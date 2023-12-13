@@ -2,7 +2,7 @@ import BSON
 import Symbols
 import UnidocRecords
 
-extension Unidex.Package.Repo
+extension Unidoc.PackageMetadata.Repo
 {
     @frozen public
     enum Origin:Equatable, Hashable, Sendable
@@ -11,7 +11,7 @@ extension Unidex.Package.Repo
         case github(String)
     }
 }
-extension Unidex.Package.Repo.Origin
+extension Unidoc.PackageMetadata.Repo.Origin
 {
     @inlinable public static
     func github(_ owner:String, _ repo:String) -> Self
@@ -32,7 +32,7 @@ extension Unidex.Package.Repo.Origin
         }
     }
 }
-extension Unidex.Package.Repo.Origin:CustomStringConvertible
+extension Unidoc.PackageMetadata.Repo.Origin:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -43,7 +43,7 @@ extension Unidex.Package.Repo.Origin:CustomStringConvertible
         }
     }
 }
-extension Unidex.Package.Repo.Origin:LosslessStringConvertible
+extension Unidoc.PackageMetadata.Repo.Origin:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -60,6 +60,6 @@ extension Unidex.Package.Repo.Origin:LosslessStringConvertible
         }
     }
 }
-extension Unidex.Package.Repo.Origin:BSONStringDecodable, BSONStringEncodable
+extension Unidoc.PackageMetadata.Repo.Origin:BSONStringDecodable, BSONStringEncodable
 {
 }

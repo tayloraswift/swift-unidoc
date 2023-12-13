@@ -112,7 +112,7 @@ extension Unidex.PinDependenciesQuery:Mongo.PipelineQuery
                         {
                             $0[.expr] = .expr
                             {
-                                $0[.eq] = (Unidex.Edition[.package], p)
+                                $0[.eq] = (Unidoc.EditionMetadata[.package], p)
                             }
                         }
 
@@ -120,13 +120,13 @@ extension Unidex.PinDependenciesQuery:Mongo.PipelineQuery
                         {
                             $0[.expr] = .expr
                             {
-                                $0[.eq] = (Unidex.Edition[.patch], v)
+                                $0[.eq] = (Unidoc.EditionMetadata[.patch], v)
                             }
                         }
 
                         $0.append
                         {
-                            $0[Unidex.Edition[.release]] = true
+                            $0[Unidoc.EditionMetadata[.release]] = true
                         }
                     }
                 }
@@ -139,7 +139,7 @@ extension Unidex.PinDependenciesQuery:Mongo.PipelineQuery
         pipeline[.set] = .init
         {
             $0[Symbol.PackageDependency<Unidoc.Edition>[.version]] =
-                edition / Unidex.Edition[.id]
+                edition / Unidoc.EditionMetadata[.id]
         }
 
         //  Lint temporary variables.

@@ -104,7 +104,8 @@ extension Volume.Metadata
         case version = "V"
         case display = "D"
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
-        /// to match (and duplicate) the refname in the associated ``Unidex.Edition`` record.
+        /// to match (and duplicate) the refname in the associated ``Unidoc.EditionMetadata``
+        /// record.
         case refname = "G"
         case commit = "H"
         case patch = "S"

@@ -27,7 +27,7 @@ extension Unidex.SitemapIndexQuery:Mongo.PipelineQuery
         {
             $0[.from] = UnidocDatabase.Packages.name
             $0[.localField] = Unidex.Sitemap[.id]
-            $0[.foreignField] = Unidex.Package[.id]
+            $0[.foreignField] = Unidoc.PackageMetadata[.id]
             $0[.as] = Unidex.SitemapIndexEntry[.symbol]
         }
 
@@ -37,7 +37,7 @@ extension Unidex.SitemapIndexQuery:Mongo.PipelineQuery
         {
             $0[Unidex.SitemapIndexEntry[.modified]] = Unidex.Sitemap[.modified]
             $0[Unidex.SitemapIndexEntry[.symbol]] =
-                Unidex.SitemapIndexEntry[.symbol] / Unidex.Package[.symbol]
+                Unidex.SitemapIndexEntry[.symbol] / Unidoc.PackageMetadata[.symbol]
         }
     }
 }
