@@ -4,7 +4,7 @@ extension Swiftinit.Options
 {
     enum Mode
     {
-        case development(Cache<StaticAsset>, Development)
+        case development(Cache<Unidoc.RenderAsset>, Development)
         case production
     }
 }

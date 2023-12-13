@@ -32,7 +32,7 @@ extension Site.Login:RenderablePage
 extension Site.Login:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.p] = """
         Log in with GitHub to manage package documentation. You must have write access to the

@@ -22,12 +22,12 @@ extension StaticPage where Self:StaticRoot
 extension StaticPage where Self:RenderablePage
 {
     public
-    func resource(assets:StaticAssets) -> HTTP.Resource
+    func resource(format:Unidoc.RenderFormat) -> HTTP.Resource
     {
         let canonical:String? = self.canonicalURI?.description
         let location:String = "\(self.location)"
 
-        let html:HTML = self.rendered(canonical: canonical, location: location, assets: assets)
+        let html:HTML = self.rendered(canonical: canonical, location: location, format: format)
 
         return .init(
             headers: .init(canonical: canonical ?? location),

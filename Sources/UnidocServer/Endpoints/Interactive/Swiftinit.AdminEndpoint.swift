@@ -41,7 +41,7 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
                 modified: modified,
                 target: target)
 
-            return .ok(complete.resource(assets: server.assets))
+            return .ok(complete.resource(format: .init(assets: server.assets)))
 
         case .perform(.dropUnidocDB, _):
             try await server.db.unidoc.drop(with: session)
@@ -71,6 +71,6 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
             return nil
         }
 
-        return .ok(page.resource(assets: server.assets))
+        return .ok(page.resource(format: .init(assets: server.assets)))
     }
 }

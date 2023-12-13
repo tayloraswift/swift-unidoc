@@ -58,7 +58,7 @@ extension Site.Docs.Article:ApplicationPage
 }
 extension Site.Docs.Article:VersionedPage
 {
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

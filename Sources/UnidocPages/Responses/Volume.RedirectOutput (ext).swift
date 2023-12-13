@@ -7,7 +7,7 @@ import URI
 extension Volume.RedirectOutput:HTTP.ServerResponseFactory
 {
     public
-    func response(with assets:StaticAssets, as _:AcceptType) throws -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         if  let redirect:URI = self.redirect
         {
@@ -24,7 +24,7 @@ extension Volume.RedirectOutput:HTTP.ServerResponseFactory
             //  We return 410 Gone instead of 404 Not Found so that search engines and
             //  research bots will stop crawling this URL. But the page appears the same
             //  to the user.
-            return .gone(display.resource(assets: assets))
+            return .gone(display.resource(format: format))
         }
     }
 

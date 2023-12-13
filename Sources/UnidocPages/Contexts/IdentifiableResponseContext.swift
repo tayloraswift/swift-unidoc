@@ -7,18 +7,14 @@ struct IdentifiableResponseContext
     let page:IdentifiablePageContext<Unidoc.Scalar>
 
     let canonical:CanonicalVersion?
-    let assets:StaticAssets
-    let accept:AcceptType
+    let format:Unidoc.RenderFormat
 
-    init(
-        _ page:IdentifiablePageContext<Unidoc.Scalar>,
+    init(_ page:IdentifiablePageContext<Unidoc.Scalar>,
         canonical:CanonicalVersion?,
-        assets:StaticAssets,
-        accept:AcceptType)
+        format:Unidoc.RenderFormat)
     {
         self.page = page
         self.canonical = canonical
-        self.assets = assets
-        self.accept = accept
+        self.format = format
     }
 }

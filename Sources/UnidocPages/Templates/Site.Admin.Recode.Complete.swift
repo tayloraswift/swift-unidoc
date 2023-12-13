@@ -35,7 +35,7 @@ extension Site.Admin.Recode.Complete:StaticPage
 extension Site.Admin.Recode.Complete:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.p] = "Modified \(self.modified) of \(self.selected) vertices!"
     }

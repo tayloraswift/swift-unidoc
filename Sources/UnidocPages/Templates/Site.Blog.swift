@@ -30,7 +30,7 @@ extension Site.Blog:VolumeRoot
         if  case .article(let vertex) = vertex
         {
             let page:Site.Blog.Article = .init(context.page, vertex: vertex)
-            return .ok(page.resource(assets: context.assets))
+            return .ok(page.resource(format: context.format))
         }
         else
         {

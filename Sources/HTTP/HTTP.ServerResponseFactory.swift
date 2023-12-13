@@ -12,9 +12,9 @@ extension HTTP
 
 /// The name of this protocol is ``HTTP.ServerResponseFactory``.
 public
-protocol _HTTPServerResponseFactory<Assets>
+protocol _HTTPServerResponseFactory<Format>
 {
-    associatedtype Assets
+    associatedtype Format
 
-    func response(with assets:Assets, as type:AcceptType) throws -> HTTP.ServerResponse
+    func response(as format:Format) throws -> HTTP.ServerResponse
 }

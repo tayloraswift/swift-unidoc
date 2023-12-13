@@ -66,7 +66,7 @@ extension Site.Docs.Foreign:VersionedPage
 {
     var sidebar:HTML.Sidebar<Site.Docs>? { .package(volume: self.context.volume) }
 
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

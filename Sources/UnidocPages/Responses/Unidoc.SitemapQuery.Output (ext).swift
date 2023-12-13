@@ -12,7 +12,7 @@ extension Unidoc.SitemapQuery.Output:HTTP.ServerResponseFactory
     /// sitemaps, and all other XML sitemap features (like `<priority>`) are irrelevant to us,
     /// since Google ignores them. Therefore, we use the plain text format.
     public
-    func response(with assets:StaticAssets, as _:AcceptType) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         let prefix:String = "https://swiftinit.org/\(Site.Docs.root)/\(self.package)"
         var string:String = ""

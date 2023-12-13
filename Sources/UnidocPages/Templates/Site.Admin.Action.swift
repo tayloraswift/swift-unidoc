@@ -59,7 +59,7 @@ extension Site.Admin.Action:StaticPage
 extension Site.Admin.Action:AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.form]
         {

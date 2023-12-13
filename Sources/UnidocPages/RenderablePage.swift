@@ -9,10 +9,10 @@ protocol RenderablePage
     var description:String? { get }
     var title:String { get }
 
-    func head(augmenting head:inout HTML.ContentEncoder, assets:StaticAssets)
-    func body(_          body:inout HTML.ContentEncoder, assets:StaticAssets)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
+    func body(_          body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
 
-    func resource(assets:StaticAssets) -> HTTP.Resource
+    func resource(format:Unidoc.RenderFormat) -> HTTP.Resource
 }
 extension RenderablePage
 {
@@ -20,7 +20,7 @@ extension RenderablePage
     var description:String? { nil }
 
     @inlinable public
-    func head(augmenting    _:inout HTML.ContentEncoder, assets:StaticAssets)
+    func head(augmenting    _:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
     }
 }
@@ -29,14 +29,14 @@ extension RenderablePage
     func rendered(
         canonical:String? = nil,
         location:String? = nil,
-        assets:StaticAssets) -> HTML
+        format:Unidoc.RenderFormat) -> HTML
     {
         .document
         {
             self.render(to: &$0,
                 canonical: canonical,
                 location: location,
-                assets: assets)
+                format: format)
         }
     }
 
@@ -44,7 +44,7 @@ extension RenderablePage
     func render(to html:inout HTML.ContentEncoder,
         canonical:String?,
         location:String?,
-        assets:StaticAssets)
+        format:Unidoc.RenderFormat)
     {
         html[.html, { $0.lang = "en" }]
         {
@@ -59,13 +59,13 @@ extension RenderablePage
                 }
                 $0[.link]
                 {
-                    $0.href = "\(assets[.favicon_png])"
+                    $0.href = "\(format.assets[.favicon_png])"
                     $0.type = "\(MediaType.image(.png))"
                     $0.rel = .icon
                 }
                 $0[.link]
                 {
-                    $0.href = "\(assets[.main_css])"
+                    $0.href = "\(format.assets[.main_css])"
                     $0.rel = .stylesheet
                 }
                 if  let canonical:String = canonical ?? location
@@ -79,7 +79,7 @@ extension RenderablePage
                 //  Inlining this saves the client a round-trip to the google fonts API.
                 //  It is only about 1.87 KB, which is less than 5 percent of the total
                 //  size of a typical page.
-                $0[unsafe: .style] = assets.fontfaces
+                $0[unsafe: .style] = format.assets.fontfaces
 
                 if  let location:String
                 {
@@ -88,17 +88,17 @@ extension RenderablePage
                     """
                 }
 
-                $0[.script] { $0.src = "\(assets[.main_js])" ; $0.defer = true }
+                $0[.script] { $0.src = "\(format.assets[.main_js])" ; $0.defer = true }
 
                 if  let description:String = self.description
                 {
                     $0[.meta] { $0.name = "description" ; $0.content  = description }
                 }
 
-                self.head(augmenting: &$0, assets: assets)
+                self.head(augmenting: &$0, format: format)
             }
 
-            $0[.body] { self.body(&$0, assets: assets) }
+            $0[.body] { self.body(&$0, format: format) }
         }
     }
 }

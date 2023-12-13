@@ -18,7 +18,7 @@ extension Swiftinit
         case procedural(any ProceduralEndpoint)
         case stateless(any RenderablePage & Sendable)
         case redirect(String)
-        case `static`(Cache<StaticAsset>.Request)
+        case `static`(Cache<Unidoc.RenderAsset>.Request)
     }
 }
 //  GET endpoints
@@ -89,7 +89,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(asset trunk:String, tag:MD5?) -> Self?
     {
-        let asset:StaticAsset? = .init(trunk)
+        let asset:Unidoc.RenderAsset? = .init(trunk)
         return asset.map { .static(.init($0, tag: tag)) }
     }
 

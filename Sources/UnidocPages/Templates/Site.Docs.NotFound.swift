@@ -28,7 +28,7 @@ extension Site.Docs.NotFound:VersionedPage
 {
     var canonical:CanonicalVersion? { nil }
 
-    func main(_ main:inout HTML.ContentEncoder, assets:StaticAssets)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]
         {
@@ -42,7 +42,7 @@ extension Site.Docs.NotFound:VersionedPage
             $0[.img]
             {
                 $0.width = "400"
-                $0.src = "\(assets[.error404_jpg])"
+                $0.src = "\(format.assets[.error404_jpg])"
                 $0.title = "This usually happens when package authors rename symbols."
                 $0.alt = "margot robbie as barbie laying sideways on artificial grass"
             }

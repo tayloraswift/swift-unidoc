@@ -1,13 +1,20 @@
 import JSON
 import SemanticVersions
 
-@frozen public
-enum StaticAssets:Sendable
+@available(*, deprecated, renamed: "Unidoc.RenderFormat.Assets")
+public
+typealias StaticAssets = Unidoc.RenderFormat.Assets
+
+extension Unidoc.RenderFormat
 {
-    case cloudfront
-    case local
+    @frozen public
+    enum Assets:Sendable
+    {
+        case cloudfront
+        case local
+    }
 }
-extension StaticAssets
+extension Unidoc.RenderFormat.Assets
 {
     /// Specifies the version numbers of the static assets, if served from Cloudfront. If
     /// nil, then assets will be loaded from the local server.
@@ -17,9 +24,9 @@ extension StaticAssets
     @inlinable public static
     var version:MinorVersion { .v(7, 0) }
 }
-extension StaticAssets
+extension Unidoc.RenderFormat.Assets
 {
-    subscript(asset:StaticAsset) -> String
+    subscript(asset:Unidoc.RenderAsset) -> String
     {
         if  case .cloudfront = self
         {
@@ -44,7 +51,7 @@ extension StaticAssets
         }
     }
 }
-extension StaticAssets
+extension Unidoc.RenderFormat.Assets
 {
     /// Minified from:
     /// https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Literata:ital,wght@0,400;0,700;1,400;1,700&display=swap

@@ -38,7 +38,7 @@ extension Site.Stats:VolumeRoot
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
 
         case .decl:
             throw Volume.VertexTypeError.decl
@@ -55,7 +55,7 @@ extension Site.Stats:VolumeRoot
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)
-            resource = page.resource(assets: context.assets)
+            resource = page.resource(format: context.format)
         }
 
         return .ok(resource)
