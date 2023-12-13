@@ -9,7 +9,7 @@ extension UnidocAPI.PackageStatus
     {
         guard
         let repo:Unidex.Package.Repo = output.package.repo,
-        let release:Unidex.EditionsQuery.Facet = output.releases.first,
+        let release:Unidex.EditionOutput = output.releases.first,
         let release:Edition = .init(from: release)
         else
         {

@@ -13,12 +13,21 @@ extension Site.Tags
         private
         let package:Unidex.Package
         private
-        var page:[Item]
+        let editions:[Unidex.EditionOutput]
+        private
+        let realm:Unidex.Realm?
+        private
+        let user:Unidex.User?
 
-        init(package:Unidex.Package, page:[Item])
+        init(package:Unidex.Package,
+            editions:[Unidex.EditionOutput],
+            realm:Unidex.Realm?,
+            user:Unidex.User?)
         {
             self.package = package
-            self.page = page
+            self.editions = editions
+            self.realm = realm
+            self.user = user
         }
     }
 }
@@ -26,33 +35,36 @@ extension Site.Tags.List
 {
     init(from output:Unidex.EditionsQuery.Output)
     {
-        var prereleases:ArraySlice<Item> = output.prereleases.map(Item.init(facet:))[...]
-        var releases:ArraySlice<Item> = output.releases.map(Item.init(facet:))[...]
+        var prereleases:ArraySlice<Unidex.EditionOutput> = output.prereleases[...]
+        var releases:ArraySlice<Unidex.EditionOutput> = output.releases[...]
 
         //  Merge the two pre-sorted arrays into a single sorted array.
-        var items:[Item] = []
-            items.reserveCapacity(prereleases.count + releases.count)
+        var editions:[Unidex.EditionOutput] = []
+            editions.reserveCapacity(prereleases.count + releases.count)
         while
-            let prerelease:Item = prereleases.first,
-            let release:Item = releases.first
+            let prerelease:Unidex.EditionOutput = prereleases.first,
+            let release:Unidex.EditionOutput = releases.first
         {
             if  release.edition.patch < prerelease.edition.patch
             {
-                items.append(prerelease)
+                editions.append(prerelease)
                 prereleases.removeFirst()
             }
             else
             {
-                items.append(release)
+                editions.append(release)
                 releases.removeFirst()
             }
         }
 
         //  Append any remaining items.
-        items += prereleases
-        items += releases
+        editions += prereleases
+        editions += releases
 
-        self.init(package: output.package, page: items)
+        self.init(package: output.package,
+            editions: editions,
+            realm: output.realm,
+            user: output.user)
     }
 }
 extension Site.Tags.List:RenderablePage
@@ -157,9 +169,16 @@ extension Site.Tags.List:ApplicationPage
                 $0[.tbody]
                 {
                     var modern:(prerelease:Bool, release:Bool) = (true, true)
-                    for item:Item in self.page
+                    for output:Unidex.EditionOutput in self.editions
                     {
-                        if  item.edition.release
+                        let item:Item = .init(name: output.edition.name,
+                            sha1: output.edition.sha1?.description,
+                            release: output.edition.release,
+                            version: output.edition.patch,
+                            volume: output.volume,
+                            graph: output.graph)
+
+                        if  output.edition.release
                         {
                             $0[.tr] { $0.class = modern.release ? "modern" : nil } = item
 
@@ -173,6 +192,24 @@ extension Site.Tags.List:ApplicationPage
                         }
                     }
                 }
+            }
+
+            $0[.h2] = "Package Settings"
+
+            $0[.dl]
+            {
+                $0[.dt] = "Realm"
+                $0[.dd]
+                {
+                    $0.class = self.realm.map { _ in "realm" }
+                } = self.realm?.symbol ?? "none"
+            }
+
+            guard
+            case .administratrix? = self.user?.level
+            else
+            {
+                return
             }
         }
     }

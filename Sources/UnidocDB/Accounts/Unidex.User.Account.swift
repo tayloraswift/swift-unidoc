@@ -4,7 +4,7 @@ import UnidocRecords
 extension Unidex.User
 {
     @frozen public
-    enum Account:Sendable
+    enum Account:Equatable, Sendable
     {
         case machine(Int32)
         case github(GitHub.User)

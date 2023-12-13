@@ -4,6 +4,7 @@ import NIOHPACK
 import NIOHTTP1
 import UA
 import UnidocProfiling
+import UnidocRecords
 
 extension Swiftinit.IntegralRequest
 {

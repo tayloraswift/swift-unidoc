@@ -368,7 +368,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         let setup:TestGroup = tests ! "Setup"
         let realm:Unidoc.Realm? = await setup.do
         {
-            let (realm, new):(Unidex.Realm, Bool) = try await unidoc.alias(
+            let (realm, new):(Unidex.Realm, Bool) = try await unidoc.index(
                 realm: "barbieland",
                 with: session)
 

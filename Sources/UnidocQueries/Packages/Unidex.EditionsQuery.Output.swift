@@ -9,18 +9,28 @@ extension Unidex.EditionsQuery
     struct Output:Equatable, Sendable
     {
         public
-        var prereleases:[Facet]
+        var prereleases:[Unidex.EditionOutput]
         public
-        var releases:[Facet]
+        var releases:[Unidex.EditionOutput]
         public
         var package:Unidex.Package
+        public
+        var realm:Unidex.Realm?
+        public
+        var user:Unidex.User?
 
         @inlinable public
-        init(prereleases:[Facet], releases:[Facet], package:Unidex.Package)
+        init(prereleases:[Unidex.EditionOutput],
+            releases:[Unidex.EditionOutput],
+            package:Unidex.Package,
+            realm:Unidex.Realm?,
+            user:Unidex.User?)
         {
             self.prereleases = prereleases
             self.releases = releases
             self.package = package
+            self.realm = realm
+            self.user = user
         }
     }
 }
@@ -32,6 +42,8 @@ extension Unidex.EditionsQuery.Output:MongoMasterCodingModel
         case prereleases
         case releases
         case package
+        case realm
+        case user
     }
 }
 extension Unidex.EditionsQuery.Output:BSONDocumentDecodable
@@ -42,6 +54,8 @@ extension Unidex.EditionsQuery.Output:BSONDocumentDecodable
         self.init(
             prereleases: try bson[.prereleases]?.decode() ?? [],
             releases: try bson[.releases]?.decode() ?? [],
-            package: try bson[.package].decode())
+            package: try bson[.package].decode(),
+            realm: try bson[.realm]?.decode(),
+            user: try bson[.user]?.decode())
     }
 }

@@ -61,6 +61,17 @@ extension UnidocDatabase.Volumes
         $0[Volume.Metadata[.package]] = (+)
         $0[Volume.Metadata[.version]] = (+)
     }
+
+    public static
+    let indexRealm:Mongo.CollectionIndex = .init("Realm",
+        unique: false)
+    {
+        $0[Volume.Metadata[.realm]] = (+)
+    }
+        where:
+    {
+        $0[Volume.Metadata[.realm]] = .init { $0[.exists] = true }
+    }
 }
 extension UnidocDatabase.Volumes:Mongo.CollectionModel
 {
@@ -78,6 +89,7 @@ extension UnidocDatabase.Volumes:Mongo.CollectionModel
             Self.indexCoordinatePatch,
             Self.indexSymbolicPatch,
             Self.indexSymbolic,
+            Self.indexRealm,
         ]
     }
 }

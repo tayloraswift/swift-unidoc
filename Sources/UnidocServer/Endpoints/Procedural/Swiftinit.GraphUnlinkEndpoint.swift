@@ -15,13 +15,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.GraphUnlinkEndpoint:ProceduralEndpoint
+extension Swiftinit.GraphUnlinkEndpoint:BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
-        with _:[UInt8]) async throws -> HTTP.ServerResponse
+        payload _:consuming [UInt8],
+        session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-
         switch try await server.db.unidoc.unlink(volume: self.volume, with: session)
         {
         case  _?:   return .ok("")

@@ -1,4 +1,6 @@
 import FNV1
+import MD5
+import UnidocRecords
 
 extension Swiftinit
 {
@@ -7,19 +9,27 @@ extension Swiftinit
         var explain:Bool
         var hash:FNV24?
 
+        let user:Unidex.User.ID?
+        let tag:MD5?
+
         private
-        init()
+        init(user:Unidex.User.ID?, tag:MD5?)
         {
             self.explain = false
             self.hash = nil
+
+            self.user = user
+            self.tag = tag
         }
     }
 }
 extension Swiftinit.PipelineParameters
 {
-    init(_ parameters:[(key:String, value:String)]?)
+    init(_ parameters:[(key:String, value:String)]?,
+        user:Unidex.User.ID? = nil,
+        tag:MD5? = nil)
     {
-        self.init()
+        self.init(user: user, tag: tag)
 
         guard
         let parameters:[(key:String, value:String)]

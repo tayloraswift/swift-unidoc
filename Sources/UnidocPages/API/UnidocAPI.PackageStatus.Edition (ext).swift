@@ -4,10 +4,10 @@ import UnidocRecords
 
 extension UnidocAPI.PackageStatus.Edition
 {
-    init?(from output:Unidex.EditionsQuery.Facet)
+    init?(from output:Unidex.EditionOutput)
     {
         self.init(coordinate: output.edition.version,
-            graphs: output.graphs?.count ?? 0,
+            graphs: output.graph != nil ? 1 : 0,
             tag: output.edition.name)
     }
 }
