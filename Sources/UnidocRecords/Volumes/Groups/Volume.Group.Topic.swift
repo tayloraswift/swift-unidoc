@@ -23,7 +23,7 @@ extension Unidoc.Group
         public
         var overview:Volume.Passage?
         public
-        var members:[Volume.Link]
+        var members:[Unidoc.VertexLink]
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -31,7 +31,7 @@ extension Unidoc.Group
             scope:Unidoc.Scalar? = nil,
             prefetch:[Unidoc.Scalar] = [],
             overview:Volume.Passage? = nil,
-            members:[Volume.Link] = [])
+            members:[Unidoc.VertexLink] = [])
         {
             self.id = id
 
