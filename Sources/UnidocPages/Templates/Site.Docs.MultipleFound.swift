@@ -9,14 +9,14 @@ extension Site.Docs
     {
         let context:IdentifiablePageContext<Never?>
 
-        let identity:Volume.Stem
+        let identity:Unidoc.Stem
 
         private
         let matches:[Unidoc.Scalar]
 
         private
         init(_ context:IdentifiablePageContext<Never?>,
-            identity:Volume.Stem,
+            identity:Unidoc.Stem,
             matches:[Unidoc.Scalar])
         {
             self.context = context
@@ -29,9 +29,9 @@ extension Site.Docs
 extension Site.Docs.MultipleFound
 {
     init?(_ context:consuming IdentifiablePageContext<Never?>,
-        matches:__shared [Volume.Vertex])
+        matches:__shared [Unidoc.Vertex])
     {
-        if  let stem:Volume.Stem = matches.first?.shoot?.stem
+        if  let stem:Unidoc.Stem = matches.first?.shoot?.stem
         {
             self.init(context, identity: stem, matches: matches.map(\.id))
         }

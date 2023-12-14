@@ -12,37 +12,37 @@ extension Unidoc
     struct PrincipalOutput:Equatable, Sendable
     {
         public
-        let matches:[Volume.Vertex]
+        let matches:[Unidoc.Vertex]
 
         public
-        let vertex:Volume.Vertex?
+        let vertex:Unidoc.Vertex?
         public
-        let vertexInLatest:Volume.Vertex?
+        let vertexInLatest:Unidoc.Vertex?
 
         public
-        let groups:[Volume.Group]
+        let groups:[Unidoc.Group]
 
         public
-        let volume:Volume.Metadata
+        let volume:Unidoc.VolumeMetadata
         public
-        let volumeOfLatest:Volume.Metadata?
+        let volumeOfLatest:Unidoc.VolumeMetadata?
 
         public
         let repo:PackageMetadata.Repo?
 
         public
-        let tree:Volume.TypeTree?
+        let tree:Unidoc.TypeTree?
 
         @inlinable internal
         init(
-            matches:[Volume.Vertex],
-            vertex:Volume.Vertex?,
-            vertexInLatest:Volume.Vertex?,
-            groups:[Volume.Group],
-            volume:Volume.Metadata,
-            volumeOfLatest:Volume.Metadata?,
+            matches:[Unidoc.Vertex],
+            vertex:Unidoc.Vertex?,
+            vertexInLatest:Unidoc.Vertex?,
+            groups:[Unidoc.Group],
+            volume:Unidoc.VolumeMetadata,
+            volumeOfLatest:Unidoc.VolumeMetadata?,
             repo:PackageMetadata.Repo?,
-            tree:Volume.TypeTree?)
+            tree:Unidoc.TypeTree?)
         {
             self.matches = matches
 

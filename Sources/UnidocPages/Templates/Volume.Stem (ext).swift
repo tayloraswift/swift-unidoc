@@ -1,7 +1,7 @@
 import UnidocRecords
 import URI
 
-extension Volume.Stem
+extension Unidoc.Stem
 {
     public static
     func += (uri:inout URI.Path, self:Self)

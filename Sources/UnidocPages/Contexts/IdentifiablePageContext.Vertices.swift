@@ -7,11 +7,11 @@ extension IdentifiablePageContext
     {
         let principal:ID
         private(set)
-        var secondary:[Unidoc.Scalar: Volume.Vertex]
+        var secondary:[Unidoc.Scalar: Unidoc.Vertex]
 
         init(
             principal:ID,
-            secondary:[Unidoc.Scalar: Volume.Vertex] = [:])
+            secondary:[Unidoc.Scalar: Unidoc.Vertex] = [:])
         {
             self.principal = principal
             self.secondary = secondary
@@ -21,15 +21,15 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext.Vertices where ID:VersionedPageIdentifier
 {
     mutating
-    func add(_ masters:[Volume.Vertex])
+    func add(_ masters:[Unidoc.Vertex])
     {
-        for master:Volume.Vertex in masters where self.principal != master.id
+        for master:Unidoc.Vertex in masters where self.principal != master.id
         {
             self.secondary[master.id] = master
         }
     }
 
-    subscript(_ scalar:Unidoc.Scalar) -> Volume.Vertex?
+    subscript(_ scalar:Unidoc.Scalar) -> Unidoc.Vertex?
     {
         self.principal != scalar ? self.secondary[scalar] : nil
     }

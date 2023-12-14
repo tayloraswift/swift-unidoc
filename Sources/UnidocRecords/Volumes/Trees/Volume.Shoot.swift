@@ -1,24 +1,24 @@
 import FNV1
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct Shoot:Equatable, Hashable, Sendable
     {
         public
-        let stem:Volume.Stem
+        let stem:Stem
         public
         let hash:FNV24?
 
         @inlinable public
-        init(stem:Volume.Stem, hash:FNV24? = nil)
+        init(stem:Stem, hash:FNV24? = nil)
         {
             self.stem = stem
             self.hash = hash
         }
     }
 }
-extension Volume.Shoot
+extension Unidoc.Shoot
 {
     public
     init(path:borrowing ArraySlice<String>, hash:FNV24? = nil)
@@ -26,7 +26,7 @@ extension Volume.Shoot
         self.init(stem: .init(path: path), hash: hash)
     }
 }
-extension Volume.Shoot:Comparable
+extension Unidoc.Shoot:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -34,12 +34,12 @@ extension Volume.Shoot:Comparable
         (lhs.stem, lhs.hash?.value ?? 0) < (rhs.stem, rhs.hash?.value ?? 0)
     }
 }
-extension Volume.Shoot
+extension Unidoc.Shoot
 {
     @inlinable public static
     func deserialize<Bytes>(from bytes:Bytes) -> Self where Bytes:RandomAccessCollection<UInt8>
     {
-        let stem:Volume.Stem
+        let stem:Unidoc.Stem
         let hash:FNV24?
         if  let question:Bytes.Index = bytes.lastIndex(of: 0x00)
         {
@@ -71,7 +71,7 @@ extension Volume.Shoot
         }
     }
 }
-extension Volume.Shoot
+extension Unidoc.Shoot
 {
     func description(_ indent:String = "    ") -> String
     {
@@ -79,7 +79,7 @@ extension Volume.Shoot
         return "\(indent)\(self.stem.last)"
     }
 }
-extension Volume.Shoot:CustomDebugStringConvertible
+extension Unidoc.Shoot:CustomDebugStringConvertible
 {
     public
     var debugDescription:String

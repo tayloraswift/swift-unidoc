@@ -19,7 +19,7 @@ extension Unidoc.Sitemap.Elements
 extension Unidoc.Sitemap.Elements.Iterator:IteratorProtocol
 {
     @inlinable public mutating
-    func next() -> Volume.Shoot?
+    func next() -> Unidoc.Shoot?
     {
         guard
         let i:Int = self.bytes[self.index...].firstIndex(of: 0x0A)

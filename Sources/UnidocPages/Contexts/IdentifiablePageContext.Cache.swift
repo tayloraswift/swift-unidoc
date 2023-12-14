@@ -24,7 +24,7 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
     mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Volume.Metadata) -> URI?) -> String?
+    func load(_ scalar:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -32,7 +32,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                 return target
             }
             else if
-                let volume:Volume.Metadata = self.volumes[scalar.zone],
+                let volume:Unidoc.VolumeMetadata = self.volumes[scalar.zone],
                 let uri:URI = uri(volume)
             {
                 let target:String = "\(uri)"
@@ -48,7 +48,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
-    subscript(article scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Article, url:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Article, url:String?)?
     {
         mutating get
         {
@@ -63,7 +63,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         }
     }
 
-    subscript(culture scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Culture, url:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Culture, url:String?)?
     {
         mutating get
         {
@@ -78,7 +78,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (master:Volume.Vertex.Decl, url:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Decl, url:String?)?
     {
         mutating get
         {
@@ -94,13 +94,13 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
     }
 
     /// Returns the URL for the given scalar, as long as it does not point to a file.
-    subscript(scalar:Unidoc.Scalar) -> (vertex:Volume.Vertex, url:String?)?
+    subscript(scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex, url:String?)?
     {
         mutating get
         {
             self.vertices[scalar].map
             {
-                (vertex:Volume.Vertex) in
+                (vertex:Unidoc.Vertex) in
 
                 let url:String? = self.load(scalar)
                 {

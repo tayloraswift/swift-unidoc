@@ -36,8 +36,8 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Volume.Metadata.Dependency, Mongo.KeyPath> = .init(
-                in: volume / Volume.Metadata[.dependencies])
+            let dependencies:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
+                in: volume / Unidoc.VolumeMetadata[.dependencies])
 
             $0[output.volumes] = .expr
             {

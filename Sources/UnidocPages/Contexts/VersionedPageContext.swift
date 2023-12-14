@@ -12,8 +12,8 @@ protocol VersionedPageContext:AnyObject
     func url(_ scalar:Unidoc.Scalar) -> String?
 
     /// Returns the principal volume metadata for the associated page.
-    var volume:Volume.Metadata { get }
+    var volume:Unidoc.VolumeMetadata { get }
 
     /// Returns the volume metadata for the specified edition, if available.
-    subscript(edition:Unidoc.Edition) -> Volume.Metadata? { get }
+    subscript(edition:Unidoc.Edition) -> Unidoc.VolumeMetadata? { get }
 }

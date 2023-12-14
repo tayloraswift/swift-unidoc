@@ -15,14 +15,14 @@ extension Site.Docs
         let sidebar:HTML.Sidebar<Site.Docs>?
 
         private
-        let vertex:Volume.Vertex.Culture
+        let vertex:Unidoc.Vertex.Culture
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Docs>?,
-            vertex:Volume.Vertex.Culture,
+            vertex:Unidoc.Vertex.Culture,
             groups:GroupSections)
         {
             self.context = context
@@ -39,7 +39,7 @@ extension Site.Docs.Module
     var name:String { self.vertex.module.name }
 
     private
-    var stem:Volume.Stem { self.vertex.stem }
+    var stem:Unidoc.Stem { self.vertex.stem }
 }
 extension Site.Docs.Module:RenderablePage
 {

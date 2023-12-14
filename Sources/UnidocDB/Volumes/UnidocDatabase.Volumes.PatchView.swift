@@ -20,7 +20,7 @@ extension UnidocDatabase.Volumes
 }
 extension UnidocDatabase.Volumes.PatchView:BSONDocumentDecodable
 {
-    typealias CodingKey = Volume.Metadata.CodingKey
+    typealias CodingKey = Unidoc.VolumeMetadata.CodingKey
 
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {

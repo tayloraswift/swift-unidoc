@@ -4,7 +4,7 @@ import Sources
 import Symbols
 import Unidoc
 
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     struct Decl:Identifiable, Equatable, Sendable
@@ -20,7 +20,7 @@ extension Volume.Vertex
         public
         let symbol:Symbol.Decl
         public
-        let stem:Volume.Stem
+        let stem:Unidoc.Stem
 
         public
         let requirements:[Unidoc.Scalar]
@@ -55,7 +55,7 @@ extension Volume.Vertex
             flags:Unidoc.Decl.Flags,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
-            stem:Volume.Stem,
+            stem:Unidoc.Stem,
             requirements:[Unidoc.Scalar] = [],
             superforms:[Unidoc.Scalar] = [],
             namespace:Unidoc.Scalar,
@@ -93,7 +93,7 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex.Decl
+extension Unidoc.Vertex.Decl
 {
     @inlinable public
     var location:SourceLocation<Unidoc.Scalar>?
@@ -122,7 +122,7 @@ extension Volume.Vertex.Decl
     }
 
     @inlinable public
-    var shoot:Volume.Shoot
+    var shoot:Unidoc.Shoot
     {
         .init(
             stem: self.stem,

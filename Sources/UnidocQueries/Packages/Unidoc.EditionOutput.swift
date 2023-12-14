@@ -12,13 +12,13 @@ extension Unidoc
         var edition:Unidoc.EditionMetadata
 
         public
-        var volume:Volume.Metadata?
+        var volume:Unidoc.VolumeMetadata?
         public
         var graph:Graph?
 
         @inlinable public
         init(edition:Unidoc.EditionMetadata,
-            volume:Volume.Metadata?,
+            volume:Unidoc.VolumeMetadata?,
             graph:Graph?)
         {
             self.edition = edition

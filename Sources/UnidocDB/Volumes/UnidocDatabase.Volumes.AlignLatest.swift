@@ -30,14 +30,14 @@ extension UnidocDatabase.Volumes.AlignLatest:Mongo.UpdateQuery
             $0[.multi] = false
             $0[.q] = .init
             {
-                $0[Volume.Metadata[.id]] = self.latest
-                $0[Volume.Metadata[.latest]] = .init { $0[.ne] = true }
+                $0[Unidoc.VolumeMetadata[.id]] = self.latest
+                $0[Unidoc.VolumeMetadata[.latest]] = .init { $0[.ne] = true }
             }
             $0[.u] = .init
             {
                 $0[.set] = .init
                 {
-                    $0[Volume.Metadata[.latest]] = true
+                    $0[Unidoc.VolumeMetadata[.latest]] = true
                 }
             }
         }
@@ -55,16 +55,16 @@ extension UnidocDatabase.Volumes.AlignLatest:Mongo.UpdateQuery
 
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.gte] = cell.lowerBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.gte] = cell.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.lte] = cell.upperBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.lte] = cell.upperBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.ne] = self.latest }
-                        $0[Volume.Metadata[.latest]] = .init { $0[.exists] = true }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.ne] = self.latest }
+                        $0[Unidoc.VolumeMetadata[.latest]] = .init { $0[.exists] = true }
                     }
                 }
             }
@@ -72,7 +72,7 @@ extension UnidocDatabase.Volumes.AlignLatest:Mongo.UpdateQuery
             {
                 $0[.unset] = .init
                 {
-                    $0[Volume.Metadata[.latest]] = ()
+                    $0[Unidoc.VolumeMetadata[.latest]] = ()
                 }
             }
         }

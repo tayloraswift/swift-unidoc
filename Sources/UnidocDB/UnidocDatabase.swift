@@ -286,7 +286,7 @@ extension UnidocDatabase
 
         (snapshot, realm) = try await self.label(docs: docs, with: session)
 
-        let volume:Volume = try await self.link(&snapshot,
+        let volume:Unidoc.Volume = try await self.link(&snapshot,
             realm: realm,
             with: session)
 
@@ -317,7 +317,7 @@ extension UnidocDatabase
         }
 
         var snapshot:Unidoc.Snapshot = stored
-        let volume:Volume = try await self.link(&snapshot,
+        let volume:Unidoc.Volume = try await self.link(&snapshot,
             realm: package.realm,
             with: session)
 
@@ -338,7 +338,7 @@ extension UnidocDatabase
     func uplink(volume:VolumeIdentifier,
         with session:Mongo.Session) async throws -> Uplinked?
     {
-        if  let volume:Volume.Metadata = try await self.volumes.find(named: volume,
+        if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
                 with: session)
         {
             try await self.uplink(volume.id, with: session)
@@ -354,7 +354,7 @@ extension UnidocDatabase
     func unlink(volume:VolumeIdentifier,
         with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
-        if  let volume:Volume.Metadata = try await self.volumes.find(named: volume,
+        if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
                 with: session)
         {
             try await self.vertices.clear(range: volume.id, with: session)
@@ -377,7 +377,7 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     private
-    func fill(volume:consuming Volume,
+    func fill(volume:consuming Unidoc.Volume,
         clear:Bool = true,
         with session:Mongo.Session) async throws -> Unidoc.Sitemap.Delta?
     {
@@ -394,16 +394,16 @@ extension UnidocDatabase
         //  we need to delete that too.
         try await self.unlink(volume: volume.id, with: session)
 
-        try await self.volumes.insert(some: volume.meta, with: session)
+        try await self.volumes.insert(some: volume.metadata, with: session)
         try await self.search.insert(some: volume.search, with: session)
         try await self.trees.insert(some: volume.trees, with: session)
 
         try await self.vertices.insert(volume.vertices, with: session)
         try await self.groups.insert(volume.groups,
-            realm: volume.meta.latest ? volume.meta.realm : nil,
+            realm: volume.metadata.latest ? volume.metadata.realm : nil,
             with: session)
 
-        let delta:Unidoc.Sitemap.Delta? = volume.meta.latest
+        let delta:Unidoc.Sitemap.Delta? = volume.metadata.latest
             ? try await self.sitemaps.update(volume.sitemap(), with: session)
             : nil
 
@@ -415,7 +415,7 @@ extension UnidocDatabase
                 with: session)
 
             guard
-            let realm:Unidoc.Realm = volume.meta.realm
+            let realm:Unidoc.Realm = volume.metadata.realm
             else
             {
                 break alignment
@@ -483,14 +483,14 @@ extension UnidocDatabase
     private
     func link(_ snapshot:inout Unidoc.Snapshot,
         realm:Unidoc.Realm?,
-        with session:Mongo.Session) async throws -> Volume
+        with session:Mongo.Session) async throws -> Unidoc.Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)
         var linker:DynamicLinker = try await self.snapshots.load(for: snapshot,
             pins: pins,
             with: session)
 
-        let dependencies:[Volume.Metadata.Dependency] = linker.dependencies()
+        let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies()
         let mesh:DynamicLinker.Mesh = linker.link()
 
         linker.status().emit(colors: .enabled)
@@ -540,7 +540,7 @@ extension UnidocDatabase
             version = "__max"
         }
 
-        let meta:Volume.Metadata = .init(id: snapshot.id,
+        let metadata:Unidoc.VolumeMetadata = .init(id: snapshot.id,
             dependencies: dependencies,
             display: snapshot.metadata.display,
             refname: snapshot.metadata.commit?.refname,
@@ -556,12 +556,12 @@ extension UnidocDatabase
             patch: thisRelease,
             tree: mesh.tree)
 
-        let volume:Volume = .init(latest: latestRelease,
+        let volume:Unidoc.Volume = .init(latest: latestRelease,
+            metadata: metadata,
             vertices: mesh.vertices,
             groups: mesh.groups,
             index: mesh.index,
-            trees: mesh.trees,
-            meta: meta)
+            trees: mesh.trees)
 
         return volume
     }

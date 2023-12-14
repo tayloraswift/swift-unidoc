@@ -7,7 +7,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     enum Vertex:Equatable, Sendable
@@ -20,7 +20,7 @@ extension Volume
         case global(Global)
     }
 }
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @inlinable public
     var article:Article?
@@ -77,7 +77,7 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex:Identifiable
+extension Unidoc.Vertex:Identifiable
 {
     @inlinable public
     var id:Unidoc.Scalar
@@ -93,7 +93,7 @@ extension Volume.Vertex:Identifiable
         }
     }
 }
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @inlinable public
     var overview:Volume.Passage?
@@ -122,7 +122,7 @@ extension Volume.Vertex
         }
     }
     @inlinable public
-    var shoot:Volume.Shoot?
+    var shoot:Unidoc.Shoot?
     {
         switch self
         {
@@ -135,7 +135,7 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -228,7 +228,7 @@ extension Volume.Vertex
         case hash = "H"
     }
 }
-extension Volume.Vertex:BSONDocumentEncodable
+extension Unidoc.Vertex:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -330,7 +330,7 @@ extension Volume.Vertex:BSONDocumentEncodable
         }
     }
 }
-extension Volume.Vertex:BSONDocumentDecodable
+extension Unidoc.Vertex:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

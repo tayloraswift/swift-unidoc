@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     struct Global:Identifiable, Equatable, Sendable

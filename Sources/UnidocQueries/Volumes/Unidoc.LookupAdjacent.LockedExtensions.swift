@@ -33,15 +33,15 @@ extension Unidoc.LookupAdjacent.LockedExtensions
             {
                 $0.expr
                 {
-                    $0[.eq] = (Volume.Group[.scope], self.scope)
+                    $0[.eq] = (Unidoc.Group[.scope], self.scope)
                 }
                 $0.expr
                 {
-                    $0[.gte] = (Volume.Group[.id], self.min)
+                    $0[.gte] = (Unidoc.Group[.id], self.min)
                 }
                 $0.expr
                 {
-                    $0[.lte] = (Volume.Group[.id], self.max)
+                    $0[.lte] = (Unidoc.Group[.id], self.max)
                 }
             }
         }

@@ -16,11 +16,11 @@ struct GroupSections
     let superforms:[Unidoc.Scalar]?
 
     private(set)
-    var containing:Volume.Group.Extension?
+    var containing:Unidoc.Group.Extension?
     private
-    var extensions:[Volume.Group.Extension]
+    var extensions:[Unidoc.Group.Extension]
     private
-    var topics:[Volume.Group.Topic]
+    var topics:[Unidoc.Group.Topic]
     private
     var other:[(AutomaticHeading, [Unidoc.Scalar])]
 
@@ -33,9 +33,9 @@ struct GroupSections
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
-        containing:Volume.Group.Extension? = nil,
-        extensions:[Volume.Group.Extension] = [],
-        topics:[Volume.Group.Topic] = [],
+        containing:Unidoc.Group.Extension? = nil,
+        extensions:[Unidoc.Group.Extension] = [],
+        topics:[Unidoc.Group.Topic] = [],
         other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
         bias:Unidoc.Scalar?,
         mode:Mode?)
@@ -56,14 +56,14 @@ struct GroupSections
 extension GroupSections
 {
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-        organizing groups:/*consuming*/ [Volume.Group],
-        vertex:borrowing Volume.Vertex.Decl? = nil,
+        organizing groups:/*consuming*/ [Unidoc.Group],
+        vertex:borrowing Unidoc.Vertex.Decl? = nil,
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
         let container:Unidoc.Scalar?
         let generics:Generics
-        if  let vertex:Volume.Vertex.Decl = copy vertex
+        if  let vertex:Unidoc.Vertex.Decl = copy vertex
         {
             self.init(consume context,
                 requirements: vertex.requirements.isEmpty ? nil : vertex.requirements,
@@ -86,10 +86,10 @@ extension GroupSections
             generics = .init([])
         }
 
-        var extensions:[(Volume.Group.Extension, Partisanship, Genericness)] = []
+        var extensions:[(Unidoc.Group.Extension, Partisanship, Genericness)] = []
         var curated:Set<Unidoc.Scalar> = [self.context.id]
 
-        for group:Volume.Group in groups
+        for group:Unidoc.Group in groups
         {
             switch group
             {
@@ -178,7 +178,7 @@ extension GroupSections
 extension GroupSections
 {
     private
-    func heading(for extension:Volume.Group.Extension) -> ExtensionHeading
+    func heading(for extension:Unidoc.Group.Extension) -> ExtensionHeading
     {
         let display:String
         switch (self.bias, self.bias?.zone)
@@ -213,7 +213,7 @@ extension GroupSections:HyperTextOutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        for group:Volume.Group.Topic in self.topics
+        for group:Unidoc.Group.Topic in self.topics
         {
             guard group.members.contains(.scalar(self.context.id))
             else
@@ -345,7 +345,7 @@ extension GroupSections:HyperTextOutputStreamable
             }
         }
 
-        if  let sisters:Volume.Group.Extension = self.containing, !sisters.nested.isEmpty
+        if  let sisters:Unidoc.Group.Extension = self.containing, !sisters.nested.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
             {
@@ -359,7 +359,7 @@ extension GroupSections:HyperTextOutputStreamable
             }
         }
 
-        for group:Volume.Group.Extension in self.extensions where !group.isEmpty
+        for group:Unidoc.Group.Extension in self.extensions where !group.isEmpty
         {
             html[.section, { $0.class = "group extension" }]
             {

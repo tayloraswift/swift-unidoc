@@ -4,7 +4,7 @@ import Signatures
 import SymbolGraphs
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     enum Group:Equatable, Sendable
@@ -14,7 +14,7 @@ extension Volume
         case  topic(Topic)
     }
 }
-extension Volume.Group
+extension Unidoc.Group
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -70,15 +70,15 @@ extension Volume.Group
         /// release version of its package. Practically, this determines if extensions are
         /// visible outside of their native volume.
         ///
-        /// ``Volume.Group`` doesn’t encode this directly, the ``Records.Groups.Element``
-        /// view abstraction adds it after delegating to ``Volume.Group``’s ``encode(to:)``
+        /// ``Unidoc.Group`` doesn’t encode this directly, the ``Records.Groups.Element``
+        /// view abstraction adds it after delegating to ``Unidoc.Group``’s ``encode(to:)``
         /// witness.
         @available(*, unavailable)
         case latest = "L"
         case realm = "R"
     }
 }
-extension Volume.Group:Identifiable
+extension Unidoc.Group:Identifiable
 {
     @inlinable public
     var id:Unidoc.Scalar
@@ -91,7 +91,7 @@ extension Volume.Group:Identifiable
         }
     }
 }
-extension Volume.Group:BSONDocumentEncodable
+extension Unidoc.Group:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -152,7 +152,7 @@ extension Volume.Group:BSONDocumentEncodable
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
-extension Volume.Group:BSONDocumentDecodable
+extension Unidoc.Group:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
