@@ -123,8 +123,8 @@ extension Swiftinit.AnyEndpoint
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
         .interactive(
-            Swiftinit.PipelineEndpoint<Volume.LookupQuery<
-                Volume.LookupAdjacent,
+            Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
+                Unidoc.LookupAdjacent,
                 Site.Blog>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
@@ -156,8 +156,8 @@ extension Swiftinit.AnyEndpoint
             let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
 
             return .interactive(
-                Swiftinit.PipelineEndpoint<Volume.LookupQuery<
-                    Volume.LookupAdjacent,
+                Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
+                    Unidoc.LookupAdjacent,
                     Site.Docs>>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(volume: volume, lookup: shoot),
@@ -198,8 +198,8 @@ extension Swiftinit.AnyEndpoint
         let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
 
         return .interactive(
-            Swiftinit.PipelineEndpoint<Volume.LookupQuery<
-                Volume.LookupAdjacent,
+            Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
+                Unidoc.LookupAdjacent,
                 Site.Stats>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(volume: volume, lookup: shoot),
@@ -221,21 +221,21 @@ extension Swiftinit.AnyEndpoint
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.LegacyParameters) -> Self
     {
-        let query:Volume.RedirectQuery<Volume.Shoot> = .legacy(head: trunk,
+        let query:Unidoc.RedirectQuery<Volume.Shoot> = .legacy(head: trunk,
             rest: stem,
             from: parameters.from)
 
         if  let overload:Symbol.Decl = parameters.overload
         {
             return .interactive(
-                Swiftinit.PipelineEndpoint<Volume.RedirectQuery<Symbol.Decl>>.init(
+                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Symbol.Decl>>.init(
                 output: .text(.html),
                 query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
             return .interactive(
-                Swiftinit.PipelineEndpoint<Volume.RedirectQuery<Volume.Shoot>>.init(
+                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Volume.Shoot>>.init(
                 output: .text(.html),
                 query: query))
         }

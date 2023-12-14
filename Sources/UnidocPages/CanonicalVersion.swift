@@ -29,7 +29,7 @@ struct CanonicalVersion
 }
 extension CanonicalVersion
 {
-    init?(principal:Volume.PrincipalOutput)
+    init?(principal:Unidoc.PrincipalOutput)
     {
         guard
         let volumeOfLatest:Volume.Metadata = principal.volumeOfLatest,

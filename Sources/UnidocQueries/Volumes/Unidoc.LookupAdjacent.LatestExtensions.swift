@@ -4,7 +4,7 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Volume.LookupAdjacent
+extension Unidoc.LookupAdjacent
 {
     struct LatestExtensions
     {
@@ -18,7 +18,7 @@ extension Volume.LookupAdjacent
         }
     }
 }
-extension Volume.LookupAdjacent.LatestExtensions
+extension Unidoc.LookupAdjacent.LatestExtensions
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)

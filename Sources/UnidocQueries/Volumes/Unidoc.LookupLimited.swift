@@ -2,7 +2,7 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     /// A context mode that looks up volumes for the current volume’s dependencies only.
     @frozen public
@@ -10,7 +10,7 @@ extension Volume
     {
     }
 }
-extension Volume.LookupLimited:Volume.LookupContext
+extension Unidoc.LookupLimited:Unidoc.LookupContext
 {
     /// Sets the `output` to an empty array.
     public static

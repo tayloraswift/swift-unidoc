@@ -4,7 +4,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Volume.LookupAdjacent
+extension Unidoc.LookupAdjacent
 {
     /// A type that binds a ``Volume.Vertex`` and knows how to extract its adjacent scalars.
     struct ScalarsView
@@ -17,7 +17,7 @@ extension Volume.LookupAdjacent
         }
     }
 }
-extension Volume.LookupAdjacent.ScalarsView
+extension Unidoc.LookupAdjacent.ScalarsView
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)
