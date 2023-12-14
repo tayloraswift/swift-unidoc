@@ -1,4 +1,4 @@
-import Unidoc
+import Symbols
 
 extension Compiler
 {

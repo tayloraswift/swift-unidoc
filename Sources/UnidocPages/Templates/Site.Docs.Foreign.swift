@@ -1,5 +1,6 @@
 import HTML
 import MarkdownRendering
+import Symbols
 import Unidoc
 import UnidocRecords
 import URI
