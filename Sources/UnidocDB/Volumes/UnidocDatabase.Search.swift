@@ -1,5 +1,5 @@
 import MongoQL
-import Unidoc
+import Symbols
 import UnidocRecords
 
 extension UnidocDatabase
@@ -19,7 +19,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Search:Mongo.CollectionModel
 {
     public
-    typealias Element = SearchIndex<VolumeIdentifier>
+    typealias Element = SearchIndex<Symbol.Edition>
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeSearch" }

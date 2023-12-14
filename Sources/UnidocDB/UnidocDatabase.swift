@@ -335,7 +335,7 @@ extension UnidocDatabase
     }
 
     public
-    func uplink(volume:VolumeIdentifier,
+    func uplink(volume:Symbol.Edition,
         with session:Mongo.Session) async throws -> Uplinked?
     {
         if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
@@ -351,7 +351,7 @@ extension UnidocDatabase
 
     @discardableResult
     public
-    func unlink(volume:VolumeIdentifier,
+    func unlink(volume:Symbol.Edition,
         with session:Mongo.Session) async throws -> Unidoc.Edition?
     {
         if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,

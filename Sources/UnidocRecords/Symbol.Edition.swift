@@ -1,0 +1,53 @@
+import BSON
+import Symbols
+
+@available(*, deprecated, renamed: "Symbol.Edition")
+public
+typealias VolumeIdentidier = Symbol.Edition
+
+extension Symbol
+{
+    @frozen public
+    struct Edition:Equatable, Hashable, Sendable
+    {
+        public
+        var package:Package
+        /// A string identifying the package version within the database.
+        /// If the ``refname`` is a `v`-prefixed semantic version, this
+        /// string encodes the version without the `v` prefix.
+        public
+        var version:String
+
+        @inlinable public
+        init(package:Package, version:String)
+        {
+            self.package = package
+            self.version = version
+        }
+    }
+}
+extension Symbol.Edition:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { "\(self.package):\(self.version)" }
+}
+extension Symbol.Edition:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:some StringProtocol)
+    {
+        if  let colon:String.Index = description.firstIndex(of: ":")
+        {
+            self.init(
+                package: .init(description[..<colon]),
+                version: .init(description[description.index(after: colon)...]))
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
+extension Symbol.Edition:BSONStringEncodable, BSONStringDecodable
+{
+}
