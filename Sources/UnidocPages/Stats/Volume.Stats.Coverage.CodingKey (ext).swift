@@ -1,7 +1,7 @@
 import UnidocProfiling
 import UnidocRecords
 
-extension Volume.Stats.Coverage.CodingKey:Identifiable
+extension Unidoc.Stats.Coverage.CodingKey:Identifiable
 {
     public
     var id:String
@@ -14,7 +14,7 @@ extension Volume.Stats.Coverage.CodingKey:Identifiable
         }
     }
 }
-extension Volume.Stats.Coverage.CodingKey:PieSectorKey
+extension Unidoc.Stats.Coverage.CodingKey:PieSectorKey
 {
     public
     var name:String

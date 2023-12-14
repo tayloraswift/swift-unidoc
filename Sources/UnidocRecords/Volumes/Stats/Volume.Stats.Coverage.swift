@@ -1,6 +1,6 @@
 import BSON
 
-extension Volume.Stats
+extension Unidoc.Stats
 {
     @frozen public
     struct Coverage:Equatable, Sendable
@@ -24,7 +24,7 @@ extension Volume.Stats
         }
     }
 }
-extension Volume.Stats.Coverage:ExpressibleByDictionaryLiteral
+extension Unidoc.Stats.Coverage:ExpressibleByDictionaryLiteral
 {
     @inlinable public
     init(dictionaryLiteral elements:(Never, Int)...)
@@ -32,7 +32,7 @@ extension Volume.Stats.Coverage:ExpressibleByDictionaryLiteral
         self.init(undocumented: 0, indirect: 0, direct: 0)
     }
 }
-extension Volume.Stats.Coverage
+extension Unidoc.Stats.Coverage
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -42,7 +42,7 @@ extension Volume.Stats.Coverage
         case direct = "D"
     }
 }
-extension Volume.Stats.Coverage:BSONDocumentEncodable
+extension Unidoc.Stats.Coverage:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -52,7 +52,7 @@ extension Volume.Stats.Coverage:BSONDocumentEncodable
         bson[.direct] = self.direct != 0 ? self.direct : nil
     }
 }
-extension Volume.Stats.Coverage:BSONDocumentDecodable
+extension Unidoc.Stats.Coverage:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

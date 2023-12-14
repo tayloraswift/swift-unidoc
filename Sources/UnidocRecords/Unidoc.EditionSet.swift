@@ -71,7 +71,7 @@ extension Unidoc.EditionSet
         }
     }
     mutating
-    func update(with outlines:[Volume.Outline])
+    func update(with outlines:[Unidoc.Outline])
     {
         for case .path(_, let scalars) in outlines
         {

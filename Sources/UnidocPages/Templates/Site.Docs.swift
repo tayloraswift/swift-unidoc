@@ -74,7 +74,7 @@ extension Site.Docs:VolumeRoot
             resource = page.resource(format: context.format)
 
         case .file:
-            throw Volume.VertexTypeError.file
+            throw Unidoc.VertexTypeError.file
 
         case .foreign(let vertex):
             let groups:GroupSections = .init(context.page,

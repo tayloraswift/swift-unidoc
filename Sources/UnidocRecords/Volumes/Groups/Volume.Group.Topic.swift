@@ -21,7 +21,7 @@ extension Unidoc.Group
         let prefetch:[Unidoc.Scalar]
 
         public
-        var overview:Volume.Passage?
+        var overview:Unidoc.Passage?
         public
         var members:[Unidoc.VertexLink]
 
@@ -30,7 +30,7 @@ extension Unidoc.Group
             culture:Unidoc.Scalar? = nil,
             scope:Unidoc.Scalar? = nil,
             prefetch:[Unidoc.Scalar] = [],
-            overview:Volume.Passage? = nil,
+            overview:Unidoc.Passage? = nil,
             members:[Unidoc.VertexLink] = [])
         {
             self.id = id

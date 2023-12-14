@@ -9,10 +9,10 @@ extension Unidoc.Vertex
         let id:Unidoc.Scalar
 
         public
-        var snapshot:Volume.SnapshotDetails
+        var snapshot:Unidoc.SnapshotDetails
 
         @inlinable public
-        init(id:Unidoc.Scalar, snapshot:Volume.SnapshotDetails)
+        init(id:Unidoc.Scalar, snapshot:Unidoc.SnapshotDetails)
         {
             self.id = id
             self.snapshot = snapshot

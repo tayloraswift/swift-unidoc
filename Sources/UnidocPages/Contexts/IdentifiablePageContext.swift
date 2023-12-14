@@ -11,7 +11,7 @@ import UnidocRecords
 class IdentifiablePageContext<ID> where ID:Hashable
 {
     /// Shared outlines, valid for the overview and details passages.
-    var outlines:[Volume.Outline]
+    var outlines:[Unidoc.Outline]
 
     private
     var cache:Cache
@@ -75,7 +75,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
 }
 extension IdentifiablePageContext where ID:VersionedPageIdentifier
 {
-    func prose(overview passage:Volume.Passage) -> ProseSection
+    func prose(overview passage:Unidoc.Passage) -> ProseSection
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
     }

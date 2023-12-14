@@ -41,9 +41,9 @@ extension Unidoc.Vertex
         public
         var position:SourcePosition?
         public
-        var overview:Volume.Passage?
+        var overview:Unidoc.Passage?
         public
-        var details:Volume.Passage?
+        var details:Unidoc.Passage?
 
         public
         var `extension`:Unidoc.Scalar?
@@ -64,8 +64,8 @@ extension Unidoc.Vertex
             renamed:Unidoc.Scalar? = nil,
             file:Unidoc.Scalar? = nil,
             position:SourcePosition? = nil,
-            overview:Volume.Passage? = nil,
-            details:Volume.Passage? = nil,
+            overview:Unidoc.Passage? = nil,
+            details:Unidoc.Passage? = nil,
             extension:Unidoc.Scalar? = nil,
             group:Unidoc.Scalar? = nil)
         {

@@ -2,12 +2,12 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-extension WritableKeyPath<Volume.Stats.Coverage, Int>
+extension WritableKeyPath<Unidoc.Stats.Coverage, Int>
 {
     static
     func classify(_ decl:SymbolGraph.Decl,
         from snapshot:DynamicLinker.Snapshot,
-        at local:Int32) -> WritableKeyPath<Volume.Stats.Coverage, Int>
+        at local:Int32) -> WritableKeyPath<Unidoc.Stats.Coverage, Int>
     {
         if  case _? = decl.article
         {
@@ -48,10 +48,10 @@ extension WritableKeyPath<Volume.Stats.Coverage, Int>
         }
     }
 }
-extension WritableKeyPath<Volume.Stats.Decl, Int>
+extension WritableKeyPath<Unidoc.Stats.Decl, Int>
 {
     static
-    func classify(_ decl:SymbolGraph.Decl) -> WritableKeyPath<Volume.Stats.Decl, Int>
+    func classify(_ decl:SymbolGraph.Decl) -> WritableKeyPath<Unidoc.Stats.Decl, Int>
     {
         if  decl.kinks[is: .required]
         {

@@ -1,4 +1,4 @@
-extension Volume.NounTable
+extension Unidoc.NounTable
 {
     /// A tag byte used to delimit nouns within a binary-encoded noun table.
     ///

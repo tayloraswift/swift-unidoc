@@ -148,7 +148,7 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
         bson[.latest] = self.latest ? true : nil
         bson[.realm] = self.realm
         bson[.patch] = self.patch
-        bson[.tree] = Volume.NounTable.init(eliding: self.tree)
+        bson[.tree] = Unidoc.NounTable.init(eliding: self.tree)
 
         bson[.planes_min] = self.planes.min
 
@@ -180,7 +180,7 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
             latest: try bson[.latest]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             patch: try bson[.patch]?.decode(),
-            tree: try bson[.tree]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
+            tree: try bson[.tree]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])
 
         self.api = try bson[.api]?.decode() ?? .v(0, 1)
     }
