@@ -6,7 +6,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct PrincipalOutput:Equatable, Sendable
@@ -28,7 +28,7 @@ extension Volume
         let volumeOfLatest:Volume.Metadata?
 
         public
-        let repo:Unidoc.PackageMetadata.Repo?
+        let repo:PackageMetadata.Repo?
 
         public
         let tree:Volume.TypeTree?
@@ -41,7 +41,7 @@ extension Volume
             groups:[Volume.Group],
             volume:Volume.Metadata,
             volumeOfLatest:Volume.Metadata?,
-            repo:Unidoc.PackageMetadata.Repo?,
+            repo:PackageMetadata.Repo?,
             tree:Volume.TypeTree?)
         {
             self.matches = matches
@@ -59,7 +59,7 @@ extension Volume
         }
     }
 }
-extension Volume.PrincipalOutput:MongoMasterCodingModel
+extension Unidoc.PrincipalOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable
@@ -74,7 +74,7 @@ extension Volume.PrincipalOutput:MongoMasterCodingModel
         case tree = "T"
     }
 }
-extension Volume.PrincipalOutput:BSONDocumentDecodable
+extension Unidoc.PrincipalOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

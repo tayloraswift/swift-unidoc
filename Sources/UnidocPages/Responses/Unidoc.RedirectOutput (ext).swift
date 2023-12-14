@@ -4,7 +4,7 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Volume.RedirectOutput:HTTP.ServerResponseFactory
+extension Unidoc.RedirectOutput:HTTP.ServerResponseFactory
 {
     public
     func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse

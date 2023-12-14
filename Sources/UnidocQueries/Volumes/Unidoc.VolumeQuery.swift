@@ -3,18 +3,18 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     public
-    typealias VertexQuery = _VolumeVertexQuery
+    typealias VolumeQuery = _UnidocVolumeQuery
 }
 
-/// The name of this protocol is ``Volume.VertexQuery``.
+/// The name of this protocol is ``Volume.VolumeQuery``.
 public
-protocol _VolumeVertexQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
+protocol _UnidocVolumeQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
     where Collation == VolumeCollation
 {
-    associatedtype VertexPredicate:Volume.VertexPredicate
+    associatedtype VertexPredicate:Unidoc.VertexPredicate
 
     var volume:Volume.Selector { get }
     var vertex:VertexPredicate { get }
@@ -37,12 +37,12 @@ protocol _VolumeVertexQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
 
     func extend(pipeline:inout Mongo.PipelineEncoder)
 }
-extension Volume.VertexQuery
+extension Unidoc.VolumeQuery
 {
     @inlinable public static
     var volumeOfLatest:Mongo.KeyPath? { nil }
 }
-extension Volume.VertexQuery
+extension Unidoc.VolumeQuery
 {
     public
     var hint:Mongo.CollectionIndex?

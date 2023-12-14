@@ -4,15 +4,15 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Volume.RedirectQuery")
+@available(*, deprecated, renamed: "Unidoc.RedirectQuery")
 public
-typealias ThinQuery = Volume.RedirectQuery
+typealias ThinQuery = Unidoc.RedirectQuery
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct RedirectQuery<VertexPredicate>:Equatable, Hashable, Sendable
-        where VertexPredicate:Volume.VertexPredicate
+        where VertexPredicate:Unidoc.VertexPredicate
     {
         public
         let volume:Volume.Selector
@@ -27,18 +27,18 @@ extension Volume
         }
     }
 }
-extension Volume.RedirectQuery:Mongo.PipelineQuery
+extension Unidoc.RedirectQuery:Mongo.PipelineQuery
 {
     public
-    typealias Iteration = Mongo.Single<Volume.RedirectOutput>
+    typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 }
-extension Volume.RedirectQuery:Volume.VertexQuery
+extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
 {
     @inlinable public static
-    var volume:Mongo.KeyPath { Volume.RedirectOutput[.volume] }
+    var volume:Mongo.KeyPath { Unidoc.RedirectOutput[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Volume.RedirectOutput[.matches] }
+    var input:Mongo.KeyPath { Unidoc.RedirectOutput[.matches] }
 
     @inlinable public
     func extend(pipeline:inout Mongo.PipelineEncoder)

@@ -2,7 +2,7 @@ import BSON
 import MongoQL
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct RedirectOutput:Equatable, Sendable
@@ -20,7 +20,7 @@ extension Volume
         }
     }
 }
-extension Volume.RedirectOutput:MongoMasterCodingModel
+extension Unidoc.RedirectOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable
@@ -29,7 +29,7 @@ extension Volume.RedirectOutput:MongoMasterCodingModel
         case volume = "Z"
     }
 }
-extension Volume.RedirectOutput:BSONDocumentDecodable
+extension Unidoc.RedirectOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

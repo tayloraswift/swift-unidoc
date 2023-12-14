@@ -1,15 +1,15 @@
 import MongoQL
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     public
-    typealias LookupContext = _VolumeLookupContext
+    typealias LookupContext = _UnidocLookupContext
 }
 
-/// The name of this protocol is ``Volume.LookupContext``.
+/// The name of this protocol is ``Unidoc.LookupContext``.
 public
-protocol _VolumeLookupContext
+protocol _UnidocLookupContext
 {
     static
     func groups(_:inout Mongo.PipelineEncoder,

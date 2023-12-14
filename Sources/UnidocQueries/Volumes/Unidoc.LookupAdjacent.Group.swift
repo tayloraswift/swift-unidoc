@@ -4,7 +4,7 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Volume.LookupAdjacent
+extension Unidoc.LookupAdjacent
 {
     struct Group
     {
@@ -16,7 +16,7 @@ extension Volume.LookupAdjacent
         }
     }
 }
-extension Volume.LookupAdjacent.Group
+extension Unidoc.LookupAdjacent.Group
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)

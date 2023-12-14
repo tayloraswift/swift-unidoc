@@ -4,7 +4,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     /// A context mode that looks up all adjacent scalars and volumes.
     @frozen public
@@ -12,7 +12,7 @@ extension Volume
     {
     }
 }
-extension Volume.LookupAdjacent:Volume.LookupContext
+extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
     public static
     func groups(_ pipeline:inout Mongo.PipelineEncoder,

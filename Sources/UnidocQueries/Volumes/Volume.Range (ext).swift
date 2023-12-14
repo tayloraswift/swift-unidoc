@@ -3,7 +3,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Volume.Range:Volume.VertexPredicate
+extension Volume.Range:Unidoc.VertexPredicate
 {
     public
     func extend(pipeline:inout Mongo.PipelineEncoder, input:Mongo.KeyPath, output:Mongo.KeyPath)

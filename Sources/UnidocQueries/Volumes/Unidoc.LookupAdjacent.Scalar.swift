@@ -1,7 +1,7 @@
 import MongoQL
 import UnidocRecords
 
-extension Volume.LookupAdjacent
+extension Unidoc.LookupAdjacent
 {
     /// A type that binds an optional ``Unidoc.Scalar``.
     struct Scalar
@@ -14,7 +14,7 @@ extension Volume.LookupAdjacent
         }
     }
 }
-extension Volume.LookupAdjacent.Scalar
+extension Unidoc.LookupAdjacent.Scalar
 {
     /// Generates an expression that evaluates to `true` if the field is null or does not exist,
     /// and something that is not `true` otherwise. This expression is suitable for use as a
