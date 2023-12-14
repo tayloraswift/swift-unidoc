@@ -4,6 +4,7 @@ import LexicalPaths
 import MarkdownABI
 import Signatures
 import Sources
+import Symbols
 import Unidoc
 import UnidocRecords
 import URI

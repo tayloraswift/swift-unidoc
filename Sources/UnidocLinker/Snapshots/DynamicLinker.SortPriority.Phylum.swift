@@ -1,6 +1,6 @@
 
 import Sources
-import Unidoc
+import Symbols
 
 extension DynamicLinker.SortPriority
 {

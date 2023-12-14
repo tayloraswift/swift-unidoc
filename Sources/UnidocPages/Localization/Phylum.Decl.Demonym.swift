@@ -1,5 +1,5 @@
 import HTML
-import Unidoc
+import Symbols
 
 extension Phylum.Decl
 {
