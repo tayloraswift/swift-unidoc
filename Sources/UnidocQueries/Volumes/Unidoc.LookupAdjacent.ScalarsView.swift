@@ -57,8 +57,8 @@ extension Unidoc.LookupAdjacent.ScalarsView
         {
             list.expr
             {
-                let outlines:Mongo.List<Volume.Outline, Mongo.KeyPath> = .init(
-                    in: self.path / Unidoc.Vertex[passage] / Volume.Passage[.outlines])
+                let outlines:Mongo.List<Unidoc.Outline, Mongo.KeyPath> = .init(
+                    in: self.path / Unidoc.Vertex[passage] / Unidoc.Passage[.outlines])
 
                 $0[.reduce] = outlines.flatMap(\.scalars)
             }

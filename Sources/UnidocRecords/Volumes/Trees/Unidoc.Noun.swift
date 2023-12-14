@@ -26,7 +26,7 @@ extension Unidoc.Noun
         self.init(shoot: .init(stem: stem, hash: hash), style: .text(text))
     }
     @inlinable public
-    init(stem:Unidoc.Stem, hash:FNV24? = nil, from citizenship:Volume.Citizenship = .culture)
+    init(stem:Unidoc.Stem, hash:FNV24? = nil, from citizenship:Unidoc.Citizenship = .culture)
     {
         self.init(shoot: .init(stem: stem, hash: hash), style: .stem(citizenship))
     }

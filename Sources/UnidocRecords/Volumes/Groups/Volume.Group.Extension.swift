@@ -33,9 +33,9 @@ extension Unidoc.Group
         var prefetch:[Unidoc.Scalar]
 
         public
-        var overview:Volume.Passage?
+        var overview:Unidoc.Passage?
         public
-        var details:Volume.Passage?
+        var details:Unidoc.Passage?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -47,8 +47,8 @@ extension Unidoc.Group
             nested:[Unidoc.Scalar] = [],
             subforms:[Unidoc.Scalar] = [],
             prefetch:[Unidoc.Scalar] = [],
-            overview:Volume.Passage? = nil,
-            details:Volume.Passage? = nil)
+            overview:Unidoc.Passage? = nil,
+            details:Unidoc.Passage? = nil)
         {
             self.id = id
 

@@ -60,7 +60,7 @@ extension DynamicLinker.Mesh
             mapper.add(vertex)
         }
 
-        var snapshot:Volume.SnapshotDetails = .init(abi: context.current.metadata.abi,
+        var snapshot:Unidoc.SnapshotDetails = .init(abi: context.current.metadata.abi,
             requirements: context.current.metadata.requirements)
         var foreign:[Unidoc.Vertex.Foreign] = []
 
@@ -87,11 +87,11 @@ extension DynamicLinker.Mesh
             {
                 if  let decl:SymbolGraph.Decl = context.current.decls.nodes[d].decl
                 {
-                    let coverage:WritableKeyPath<Volume.Stats.Coverage, Int> = .classify(decl,
+                    let coverage:WritableKeyPath<Unidoc.Stats.Coverage, Int> = .classify(decl,
                         from: context.current,
                         at: d)
 
-                    let decl:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
+                    let decl:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
 
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
@@ -117,7 +117,7 @@ extension DynamicLinker.Mesh
             {
                 if  let decl:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
                 {
-                    let bin:WritableKeyPath<Volume.Stats.Decl, Int> = .classify(decl)
+                    let bin:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
 
                     cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
                     snapshot.census.weighted.decls[keyPath: bin] += 1

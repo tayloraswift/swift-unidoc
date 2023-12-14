@@ -2,7 +2,7 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct SnapshotDetails:Equatable, Sendable
@@ -17,14 +17,14 @@ extension Volume
         var requirements:[SymbolGraphMetadata.PlatformRequirement]
         /// Top-level linker statistics.
         public
-        var census:Volume.Census
+        var census:Unidoc.Census
 
         //  We don’t currently store linker errors, but if we did, they would go here.
 
         @inlinable public
         init(abi:PatchVersion,
             requirements:[SymbolGraphMetadata.PlatformRequirement],
-            census:Volume.Census = .init())
+            census:Unidoc.Census = .init())
         {
             self.abi = abi
             self.requirements = requirements
@@ -32,7 +32,7 @@ extension Volume
         }
     }
 }
-extension Volume.SnapshotDetails
+extension Unidoc.SnapshotDetails
 {
     public
     enum CodingKey:String, Sendable
@@ -42,7 +42,7 @@ extension Volume.SnapshotDetails
         case census = "C"
     }
 }
-extension Volume.SnapshotDetails:BSONDocumentEncodable
+extension Unidoc.SnapshotDetails:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -52,7 +52,7 @@ extension Volume.SnapshotDetails:BSONDocumentEncodable
         bson[.census] = self.census
     }
 }
-extension Volume.SnapshotDetails:BSONDocumentDecodable
+extension Unidoc.SnapshotDetails:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

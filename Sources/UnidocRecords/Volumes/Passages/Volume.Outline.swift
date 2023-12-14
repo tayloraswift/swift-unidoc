@@ -1,7 +1,7 @@
 import BSON
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     enum Outline:Equatable, Sendable
@@ -10,7 +10,7 @@ extension Volume
         case text(String)
     }
 }
-extension Volume.Outline
+extension Unidoc.Outline
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -19,7 +19,7 @@ extension Volume.Outline
         case scalars = "s"
     }
 }
-extension Volume.Outline:BSONDocumentEncodable
+extension Unidoc.Outline:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -35,7 +35,7 @@ extension Volume.Outline:BSONDocumentEncodable
         }
     }
 }
-extension Volume.Outline:BSONDocumentDecodable
+extension Unidoc.Outline:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

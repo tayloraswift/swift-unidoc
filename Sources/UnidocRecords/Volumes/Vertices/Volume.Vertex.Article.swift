@@ -20,9 +20,9 @@ extension Unidoc.Vertex
         public
         var headline:MarkdownBytecode
         public
-        var overview:Volume.Passage?
+        var overview:Unidoc.Passage?
         public
-        var details:Volume.Passage?
+        var details:Unidoc.Passage?
         public
         var group:Unidoc.Scalar?
 
@@ -32,8 +32,8 @@ extension Unidoc.Vertex
             culture:Unidoc.Scalar,
             file:Unidoc.Scalar? = nil,
             headline:MarkdownBytecode = [],
-            overview:Volume.Passage? = nil,
-            details:Volume.Passage? = nil,
+            overview:Unidoc.Passage? = nil,
+            details:Unidoc.Passage? = nil,
             group:Unidoc.Scalar? = nil)
         {
             self.id = id

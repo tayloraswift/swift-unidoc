@@ -23,7 +23,7 @@ extension Site.Docs
         let groups:GroupSections
 
         private
-        let stem:Volume.StemComponents
+        let stem:Unidoc.StemComponents
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,

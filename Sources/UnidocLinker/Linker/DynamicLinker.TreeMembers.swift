@@ -4,14 +4,14 @@ extension DynamicLinker
 {
     struct TreeMembers
     {
-        var articles:[Volume.Noun]
+        var articles:[Unidoc.Noun]
         var procs:[Unidoc.Shoot]
-        var types:[Unidoc.Shoot: Volume.Citizenship]
+        var types:[Unidoc.Shoot: Unidoc.Citizenship]
 
         private
-        init(articles:[Volume.Noun],
+        init(articles:[Unidoc.Noun],
             procs:[Unidoc.Shoot],
-            types:[Unidoc.Shoot: Volume.Citizenship])
+            types:[Unidoc.Shoot: Unidoc.Citizenship])
         {
             self.articles = articles
             self.procs = procs

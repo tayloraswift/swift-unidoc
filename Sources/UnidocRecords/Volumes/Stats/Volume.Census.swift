@@ -1,6 +1,6 @@
 import BSON
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct Census:Equatable, Sendable
@@ -18,7 +18,7 @@ extension Volume
         }
     }
 }
-extension Volume.Census
+extension Unidoc.Census
 {
     public
     enum CodingKey:String, Sendable
@@ -27,7 +27,7 @@ extension Volume.Census
         case weighted = "W"
     }
 }
-extension Volume.Census:BSONDocumentEncodable
+extension Unidoc.Census:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -36,7 +36,7 @@ extension Volume.Census:BSONDocumentEncodable
         bson[.weighted] = self.weighted
     }
 }
-extension Volume.Census:BSONDocumentDecodable
+extension Unidoc.Census:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

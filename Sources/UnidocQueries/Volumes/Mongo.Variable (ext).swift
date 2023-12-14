@@ -4,7 +4,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Mongo.Variable<Volume.Outline>
+extension Mongo.Variable<Unidoc.Outline>
 {
     var scalars:Mongo.Expression
     {
@@ -49,13 +49,13 @@ extension Mongo.Variable<Unidoc.Group>
 
                 for passage:Mongo.KeyPath in
                 [
-                    self[.overview] / Volume.Passage[.outlines],
-                    self[.details] / Volume.Passage[.outlines],
+                    self[.overview] / Unidoc.Passage[.outlines],
+                    self[.details] / Unidoc.Passage[.outlines],
                 ]
                 {
                     $0.expr
                     {
-                        let outlines:Mongo.List<Volume.Outline, Mongo.KeyPath> = .init(
+                        let outlines:Mongo.List<Unidoc.Outline, Mongo.KeyPath> = .init(
                             in: passage)
 
                         $0[.reduce] = outlines.flatMap(\.scalars)

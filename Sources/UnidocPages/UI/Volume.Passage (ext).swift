@@ -6,7 +6,7 @@ import UnidocRecords
     The 'outlines' array is copied from a slice, and indexing it directly without \
     a contextual offset is not correct.
     """)
-extension Volume.Passage:HyperTextRenderableMarkdown
+extension Unidoc.Passage:HyperTextRenderableMarkdown
 {
     public
     var bytecode:MarkdownBytecode { [] }

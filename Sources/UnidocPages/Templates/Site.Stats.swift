@@ -30,7 +30,7 @@ extension Site.Stats:VolumeRoot
         switch vertex
         {
         case .article:
-            throw Volume.VertexTypeError.article
+            throw Unidoc.VertexTypeError.article
 
         case .culture(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
@@ -41,13 +41,13 @@ extension Site.Stats:VolumeRoot
             resource = page.resource(format: context.format)
 
         case .decl:
-            throw Volume.VertexTypeError.decl
+            throw Unidoc.VertexTypeError.decl
 
         case .file:
-            throw Volume.VertexTypeError.file
+            throw Unidoc.VertexTypeError.file
 
         case .foreign:
-            throw Volume.VertexTypeError.foreign
+            throw Unidoc.VertexTypeError.foreign
 
         case .global(let vertex):
             let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)

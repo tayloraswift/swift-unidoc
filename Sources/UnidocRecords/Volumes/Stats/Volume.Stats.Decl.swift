@@ -3,7 +3,7 @@ import LexicalPaths
 import SymbolGraphs
 import Unidoc
 
-extension Volume.Stats
+extension Unidoc.Stats
 {
     @frozen public
     struct Decl:Equatable, Sendable
@@ -95,7 +95,7 @@ extension Volume.Stats
         }
     }
 }
-extension Volume.Stats.Decl:ExpressibleByDictionaryLiteral
+extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
 {
     @inlinable public
     init(dictionaryLiteral elements:(Never, Int)...)
@@ -118,7 +118,7 @@ extension Volume.Stats.Decl:ExpressibleByDictionaryLiteral
             attachedMacros: 0)
     }
 }
-extension Volume.Stats.Decl
+extension Unidoc.Stats.Decl
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -140,7 +140,7 @@ extension Volume.Stats.Decl
         case attachedMacros = "Z"
     }
 }
-extension Volume.Stats.Decl:BSONDocumentEncodable
+extension Unidoc.Stats.Decl:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -165,7 +165,7 @@ extension Volume.Stats.Decl:BSONDocumentEncodable
             self.attachedMacros != 0 ? self.attachedMacros : nil
     }
 }
-extension Volume.Stats.Decl:BSONDocumentDecodable
+extension Unidoc.Stats.Decl:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

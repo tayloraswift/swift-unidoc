@@ -2,7 +2,7 @@ import BSON
 import MarkdownABI
 import SymbolGraphs
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct Passage:Equatable, Sendable
@@ -20,7 +20,7 @@ extension Volume
         }
     }
 }
-extension Volume.Passage
+extension Unidoc.Passage
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -29,7 +29,7 @@ extension Volume.Passage
         case markdown = "M"
     }
 }
-extension Volume.Passage:BSONDocumentEncodable
+extension Unidoc.Passage:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -38,7 +38,7 @@ extension Volume.Passage:BSONDocumentEncodable
         bson[.markdown] = self.markdown
     }
 }
-extension Volume.Passage:BSONDocumentDecodable
+extension Unidoc.Passage:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

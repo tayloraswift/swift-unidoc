@@ -168,7 +168,7 @@ extension DynamicLinker.TreeMapper
                     $0["c"] = "\(culture)"
                     $0["n"]
                     {
-                        for noun:Volume.Noun in tree.rows
+                        for noun:Unidoc.Noun in tree.rows
                         {
                             if  case .stem(let citizenship) = noun.style,
                                 citizenship != .culture

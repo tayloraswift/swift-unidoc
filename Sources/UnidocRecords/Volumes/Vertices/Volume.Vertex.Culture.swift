@@ -14,12 +14,12 @@ extension Unidoc.Vertex
         public
         var readme:Unidoc.Scalar?
         public
-        var census:Volume.Census
+        var census:Unidoc.Census
 
         public
-        var overview:Volume.Passage?
+        var overview:Unidoc.Passage?
         public
-        var details:Volume.Passage?
+        var details:Unidoc.Passage?
         public
         var group:Unidoc.Scalar?
 
@@ -27,9 +27,9 @@ extension Unidoc.Vertex
         init(id:Unidoc.Scalar,
             module:SymbolGraph.Module,
             readme:Unidoc.Scalar? = nil,
-            census:Volume.Census = .init(),
-            overview:Volume.Passage? = nil,
-            details:Volume.Passage? = nil,
+            census:Unidoc.Census = .init(),
+            overview:Unidoc.Passage? = nil,
+            details:Unidoc.Passage? = nil,
             group:Unidoc.Scalar? = nil)
         {
             self.id = id

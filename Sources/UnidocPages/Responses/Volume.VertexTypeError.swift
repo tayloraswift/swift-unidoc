@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     enum VertexTypeError:Error, Equatable, Sendable
     {
@@ -12,7 +12,7 @@ extension Volume
         case global
     }
 }
-extension Volume.VertexTypeError:CustomStringConvertible
+extension Unidoc.VertexTypeError:CustomStringConvertible
 {
     var description:String
     {

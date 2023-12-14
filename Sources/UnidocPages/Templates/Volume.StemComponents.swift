@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     struct StemComponents
     {
@@ -16,7 +16,7 @@ extension Volume
         }
     }
 }
-extension Volume.StemComponents
+extension Unidoc.StemComponents
 {
     init(_ stem:Unidoc.Stem) throws
     {
@@ -24,7 +24,7 @@ extension Volume.StemComponents
         let (namespace, scope, last):(Substring, [Substring], Substring) = stem.split()
         else
         {
-            throw Volume.StemComponentError.empty
+            throw Unidoc.StemComponentError.empty
         }
 
         self.init(namespace: namespace, scope: scope, last: last)
