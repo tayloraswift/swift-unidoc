@@ -11,10 +11,10 @@ extension HTML
         private
         let volume:Unidoc.VolumeMetadata
         private
-        let nouns:[Volume.Noun]
+        let nouns:[Unidoc.Noun]
 
         private
-        init(volume:Unidoc.VolumeMetadata, nouns:[Volume.Noun])
+        init(volume:Unidoc.VolumeMetadata, nouns:[Unidoc.Noun])
         {
             self.volume = volume
             self.nouns = nouns
@@ -33,7 +33,7 @@ extension HTML.Sidebar
     func module(volume:Unidoc.VolumeMetadata, tree:Unidoc.TypeTree?) -> Self?
     {
         guard
-        let nouns:[Volume.Noun] = tree?.rows
+        let nouns:[Unidoc.Noun] = tree?.rows
         else
         {
             return nil
@@ -54,7 +54,7 @@ extension HTML.Sidebar:HyperTextOutputStreamable
             var previous:Unidoc.Stem = ""
             var depth:Int = 1
 
-            for noun:Volume.Noun in self.nouns
+            for noun:Unidoc.Noun in self.nouns
             {
                 let (name, indents):(Substring, Int) = noun.shoot.stem.relative(to: previous)
 

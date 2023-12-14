@@ -9,7 +9,7 @@ extension Unidoc
     typealias VolumeQuery = _UnidocVolumeQuery
 }
 
-/// The name of this protocol is ``Volume.VolumeQuery``.
+/// The name of this protocol is ``Unidoc.VolumeQuery``.
 public
 protocol _UnidocVolumeQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
     where Collation == VolumeCollation

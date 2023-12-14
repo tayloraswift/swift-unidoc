@@ -1,6 +1,6 @@
 import BSON
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct Stats:Equatable, Sendable
@@ -18,7 +18,7 @@ extension Volume
         }
     }
 }
-extension Volume.Stats
+extension Unidoc.Stats
 {
     public
     enum CodingKey:String, Sendable
@@ -27,7 +27,7 @@ extension Volume.Stats
         case decls = "D"
     }
 }
-extension Volume.Stats:BSONDocumentEncodable
+extension Unidoc.Stats:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -36,7 +36,7 @@ extension Volume.Stats:BSONDocumentEncodable
         bson[.decls] = self.decls
     }
 }
-extension Volume.Stats:BSONDocumentDecodable
+extension Unidoc.Stats:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

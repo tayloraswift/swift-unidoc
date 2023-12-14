@@ -1,6 +1,6 @@
 import UnidocRecords
 import MongoQL
 
-extension Volume.Outline:MongoMasterCodingModel
+extension Unidoc.Outline:MongoMasterCodingModel
 {
 }

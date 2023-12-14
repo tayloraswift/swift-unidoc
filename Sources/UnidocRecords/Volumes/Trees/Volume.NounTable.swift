@@ -1,25 +1,25 @@
 import BSON
 
-extension Volume
+extension Unidoc
 {
     /// A somewhat more-efficient representation for serializing an array of ``Row``s.
     @frozen @usableFromInline internal
     struct NounTable
     {
         @usableFromInline internal
-        var rows:[Volume.Noun]
+        var rows:[Unidoc.Noun]
 
         @inlinable internal
-        init(rows:[Volume.Noun])
+        init(rows:[Unidoc.Noun])
         {
             self.rows = rows
         }
     }
 }
-extension Volume.NounTable
+extension Unidoc.NounTable
 {
     @inlinable internal
-    init?(eliding rows:[Volume.Noun])
+    init?(eliding rows:[Unidoc.Noun])
     {
         if  rows.isEmpty
         {
@@ -29,13 +29,13 @@ extension Volume.NounTable
         self.init(rows: rows)
     }
 }
-extension Volume.NounTable:BSONEncodable
+extension Unidoc.NounTable:BSONEncodable
 {
     @usableFromInline internal
     func encode(to field:inout BSON.FieldEncoder)
     {
         var buffer:[UInt8] = []
-        for row:Volume.Noun in self.rows
+        for row:Unidoc.Noun in self.rows
         {
             row.shoot.serialize(into: &buffer)
 
@@ -62,7 +62,7 @@ extension Volume.NounTable:BSONEncodable
         BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: buffer).encode(to: &field)
     }
 }
-extension Volume.NounTable:BSONDecodable, BSONBinaryViewDecodable
+extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable internal
     init<Bytes>(bson:BSON.BinaryView<Bytes>) throws
@@ -84,7 +84,7 @@ extension Volume.NounTable:BSONDecodable, BSONBinaryViewDecodable
             }
 
             let shoot:Unidoc.Shoot = .deserialize(from: bson.slice[i ..< j])
-            let style:Volume.Noun.Style
+            let style:Unidoc.Noun.Style
 
             switch discriminator
             {
@@ -102,7 +102,7 @@ extension Volume.NounTable:BSONDecodable, BSONBinaryViewDecodable
                 let terminator:Bytes.Index = bson.slice[next...].firstIndex(of: 0xFF)
                 else
                 {
-                    throw Volume.NounTableMalformedError.unterminatedCustomText
+                    throw Unidoc.NounTableMalformedError.unterminatedCustomText
                 }
 
                 style = .text(.init(decoding: bson.slice[next ..< terminator], as: UTF8.self))
@@ -117,7 +117,7 @@ extension Volume.NounTable:BSONDecodable, BSONBinaryViewDecodable
 
         if  i != j
         {
-            throw Volume.NounTableMalformedError.unterminatedRow
+            throw Unidoc.NounTableMalformedError.unterminatedRow
         }
     }
 }

@@ -34,7 +34,7 @@ extension Unidoc.TypeTree:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.table] = Volume.NounTable.init(eliding: self.rows)
+        bson[.table] = Unidoc.NounTable.init(eliding: self.rows)
     }
 }
 extension Unidoc.TypeTree:BSONDocumentDecodable
@@ -43,6 +43,6 @@ extension Unidoc.TypeTree:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(id: try bson[.id].decode(),
-            rows: try bson[.table]?.decode(as: Volume.NounTable.self, with: \.rows) ?? [])
+            rows: try bson[.table]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])
     }
 }

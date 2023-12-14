@@ -5,7 +5,7 @@ import Symbols
 import Unidoc
 import URI
 
-extension Volume
+extension Unidoc
 {
     @available(*, deprecated, renamed: "Unidoc.Sitemap")
     public

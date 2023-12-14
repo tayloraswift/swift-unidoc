@@ -1,13 +1,13 @@
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     enum StemComponentError:Error, Equatable, Sendable
     {
         case empty
     }
 }
-extension Volume.StemComponentError:CustomStringConvertible
+extension Unidoc.StemComponentError:CustomStringConvertible
 {
     var description:String
     {

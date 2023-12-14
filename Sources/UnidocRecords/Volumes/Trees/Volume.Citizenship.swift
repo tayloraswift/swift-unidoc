@@ -1,4 +1,4 @@
-extension Volume
+extension Unidoc
 {
     @frozen public
     enum Citizenship:Equatable, Hashable, Comparable, Sendable

@@ -1,7 +1,7 @@
 import UnidocProfiling
 import UnidocRecords
 
-extension Volume.Stats.Decl:PieValues
+extension Unidoc.Stats.Decl:PieValues
 {
     public
     typealias SectorKey = CodingKey

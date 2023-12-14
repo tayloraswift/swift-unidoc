@@ -96,7 +96,7 @@ extension Unidoc.Vertex:Identifiable
 extension Unidoc.Vertex
 {
     @inlinable public
-    var overview:Volume.Passage?
+    var overview:Unidoc.Passage?
     {
         switch self
         {
@@ -109,7 +109,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var details:Volume.Passage?
+    var details:Unidoc.Passage?
     {
         switch self
         {

@@ -217,7 +217,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: output.principal?.vertex),
                     let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree),
-                    let overview:Volume.Passage = tests.expect(
+                    let overview:Unidoc.Passage = tests.expect(
                         value: vertex.overview),
                     tests.expect(overview.outlines.count ==? 5)
                 {
@@ -232,7 +232,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
 
-                    for outline:Volume.Outline in overview.outlines
+                    for outline:Unidoc.Outline in overview.outlines
                     {
                         let scalars:[Unidoc.Scalar]?
                         switch outline
