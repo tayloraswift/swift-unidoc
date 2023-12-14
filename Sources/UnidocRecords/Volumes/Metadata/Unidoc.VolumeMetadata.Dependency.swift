@@ -4,7 +4,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-extension Volume.Metadata
+extension Unidoc.VolumeMetadata
 {
     @frozen public
     struct Dependency:Equatable, Sendable
@@ -32,7 +32,7 @@ extension Volume.Metadata
         }
     }
 }
-extension Volume.Metadata.Dependency
+extension Unidoc.VolumeMetadata.Dependency
 {
     public
     enum CodingKey:String, Sendable
@@ -44,7 +44,7 @@ extension Volume.Metadata.Dependency
         case pinned = "p"
     }
 }
-extension Volume.Metadata.Dependency:BSONDocumentEncodable
+extension Unidoc.VolumeMetadata.Dependency:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -68,7 +68,7 @@ extension Volume.Metadata.Dependency:BSONDocumentEncodable
         bson[.pinned] = self.pinned
     }
 }
-extension Volume.Metadata.Dependency:BSONDocumentDecodable
+extension Unidoc.VolumeMetadata.Dependency:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

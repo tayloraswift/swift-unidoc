@@ -5,14 +5,10 @@ import Symbols
 import Unidoc
 import SHA1
 
-extension Volume
+extension Unidoc
 {
-    @available(*, deprecated, renamed: "Metadata")
-    public
-    typealias Meta = Metadata
-
     @frozen public
-    struct Metadata:Identifiable, Equatable, Sendable
+    struct VolumeMetadata:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Edition
@@ -69,10 +65,10 @@ extension Volume
         }
     }
 }
-extension Volume.Metadata
+extension Unidoc.VolumeMetadata
 {
     @inlinable public
-    var selector:Volume.Selector
+    var selector:Unidoc.VolumeSelector
     {
         .init(
             package: self.symbol.package,
@@ -90,7 +86,7 @@ extension Volume.Metadata
     @inlinable public
     var planes:Planes { .init(zone: self.id) }
 }
-extension Volume.Metadata
+extension Unidoc.VolumeMetadata
 {
     @frozen public
     enum CodingKey:String, Equatable, Hashable, Sendable
@@ -133,7 +129,7 @@ extension Volume.Metadata
         case api = "I"
     }
 }
-extension Volume.Metadata:BSONDocumentEncodable
+extension Unidoc.VolumeMetadata:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -168,7 +164,7 @@ extension Volume.Metadata:BSONDocumentEncodable
         bson[.api] = self.api
     }
 }
-extension Volume.Metadata:BSONDocumentDecodable
+extension Unidoc.VolumeMetadata:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

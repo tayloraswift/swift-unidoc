@@ -29,11 +29,11 @@ extension Unidoc.LookupAdjacent.LatestExtensions
             {
                 $0.expr
                 {
-                    $0[.eq] = (Volume.Group[.scope], self.scope)
+                    $0[.eq] = (Unidoc.Group[.scope], self.scope)
                 }
                 $0.expr
                 {
-                    $0[.eq] = (Volume.Group[.realm], self.id)
+                    $0[.eq] = (Unidoc.Group[.realm], self.id)
                 }
             }
         }

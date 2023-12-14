@@ -12,9 +12,9 @@ extension Site.Blog
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         private
-        let vertex:Volume.Vertex.Article
+        let vertex:Unidoc.Vertex.Article
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Volume.Vertex.Article)
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Unidoc.Vertex.Article)
         {
             self.context = context
             self.vertex = vertex
@@ -24,7 +24,7 @@ extension Site.Blog
 extension Site.Blog.Article
 {
     private
-    var volume:Volume.Metadata { self.context.volumes.principal }
+    var volume:Unidoc.VolumeMetadata { self.context.volumes.principal }
 }
 extension Site.Blog.Article:RenderablePage
 {

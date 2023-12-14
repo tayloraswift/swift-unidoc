@@ -22,9 +22,9 @@ extension Site.Blog:VolumeRoot
 {
     public static
     func response(
-        vertex:consuming Volume.Vertex,
-        groups:consuming [Volume.Group],
-        tree:consuming Volume.TypeTree?,
+        vertex:consuming Unidoc.Vertex,
+        groups:consuming [Unidoc.Group],
+        tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
     {
         if  case .article(let vertex) = vertex

@@ -18,7 +18,7 @@ extension Site.Docs
         let sidebar:HTML.Sidebar<Site.Docs>?
 
         private
-        let vertex:Volume.Vertex.Decl
+        let vertex:Unidoc.Vertex.Decl
         private
         let groups:GroupSections
 
@@ -28,7 +28,7 @@ extension Site.Docs
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Docs>?,
-            vertex:Volume.Vertex.Decl,
+            vertex:Unidoc.Vertex.Decl,
             groups:GroupSections) throws
         {
             self.context = context
@@ -206,7 +206,7 @@ extension Site.Docs.Decl:VersionedPage
             }
         }
 
-        if  let containing:Volume.Group.Extension = self.groups.containing,
+        if  let containing:Unidoc.Group.Extension = self.groups.containing,
             let constraints:ConstraintsList = self.context.constraints(containing.conditions)
         {
             main[.section, { $0.class = "generic-context" }]

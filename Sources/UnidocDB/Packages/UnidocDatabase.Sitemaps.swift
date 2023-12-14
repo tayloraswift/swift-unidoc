@@ -60,10 +60,10 @@ extension UnidocDatabase.Sitemaps
         if  let old:Unidoc.Sitemap
         {
             //  Compute sitemap delta.
-            var deletions:Set<Volume.Shoot> = .init(old.elements)
+            var deletions:Set<Unidoc.Shoot> = .init(old.elements)
             var additions:Int = 0
 
-            for page:Volume.Shoot in new.elements
+            for page:Unidoc.Shoot in new.elements
             {
                 if  case nil = deletions.remove(page)
                 {

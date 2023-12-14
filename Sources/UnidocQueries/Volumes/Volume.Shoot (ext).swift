@@ -4,7 +4,7 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Volume.Shoot:Unidoc.VertexPredicate
+extension Unidoc.Shoot:Unidoc.VertexPredicate
 {
     public
     func extend(pipeline:inout Mongo.PipelineEncoder, input:Mongo.KeyPath, output:Mongo.KeyPath)
@@ -16,7 +16,7 @@ extension Volume.Shoot:Unidoc.VertexPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: zone] = input / Volume.Metadata[.id]
+                $0[let: zone] = input / Unidoc.VolumeMetadata[.id]
             }
             $0[.pipeline] = .init
             {
@@ -24,7 +24,7 @@ extension Volume.Shoot:Unidoc.VertexPredicate
                 {
                     //  The stem index is partial, so we need this condition here in order
                     //  for MongoDB to use the index.
-                    $0[Volume.Vertex[.stem]] = .init { $0[.exists] = true }
+                    $0[Unidoc.Vertex[.stem]] = .init { $0[.exists] = true }
 
                     $0[.expr] = .expr
                     {
@@ -34,22 +34,22 @@ extension Volume.Shoot:Unidoc.VertexPredicate
                             //  But that would not be as index-friendly.
                             $0.expr
                             {
-                                $0[.eq] = (Volume.Vertex[.zone], zone)
+                                $0[.eq] = (Unidoc.Vertex[.zone], zone)
                             }
                             $0.expr
                             {
-                                $0[.eq] = (Volume.Vertex[.stem], self.stem)
+                                $0[.eq] = (Unidoc.Vertex[.stem], self.stem)
                             }
 
                             if  let hashrange:FNV24 = self.hash
                             {
                                 $0.expr
                                 {
-                                    $0[.gte] = (Volume.Vertex[.hash], hashrange.min)
+                                    $0[.gte] = (Unidoc.Vertex[.hash], hashrange.min)
                                 }
                                 $0.expr
                                 {
-                                    $0[.lte] = (Volume.Vertex[.hash], hashrange.max)
+                                    $0[.lte] = (Unidoc.Vertex[.hash], hashrange.max)
                                 }
                             }
                         }

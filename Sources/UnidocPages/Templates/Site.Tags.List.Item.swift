@@ -12,7 +12,7 @@ extension Site.Tags.List
         let sha1:String?
         let release:Bool
         let version:PatchVersion
-        let volume:Volume.Metadata?
+        let volume:Unidoc.VolumeMetadata?
         let graph:Unidoc.EditionOutput.Graph?
     }
 }
@@ -32,7 +32,7 @@ extension Site.Tags.List.Item:HyperTextOutputStreamable
         tr[.td] { $0.class = "release" } = self.release ? "yes" : "no"
         tr[.td, { $0.class = "version" }]
         {
-            if  let volume:Volume.Metadata = self.volume
+            if  let volume:Unidoc.VolumeMetadata = self.volume
             {
                 $0[.a] { $0.href = "\(Site.Docs[volume])" } = "\(self.version)"
             }

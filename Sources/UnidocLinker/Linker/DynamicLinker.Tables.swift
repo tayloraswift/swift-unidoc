@@ -38,10 +38,10 @@ extension DynamicLinker
 
         private(set)
         var extensions:Extensions
-        var articles:[Volume.Vertex.Article]
-        var decls:[Volume.Vertex.Decl]
+        var articles:[Unidoc.Vertex.Article]
+        var decls:[Unidoc.Vertex.Decl]
 
-        var groups:Volume.Groups
+        var groups:Unidoc.Volume.Groups
 
         private
         init(
@@ -113,7 +113,7 @@ extension DynamicLinker.Tables
     {
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let cultures:Volume.Group.Automatic = .init(id: self.next.autogroup.id(),
+        let cultures:Unidoc.Group.Automatic = .init(id: self.next.autogroup.id(),
             scope: self.current.id.global,
             members: self.current.cultures.indices.sorted
             {
@@ -134,7 +134,7 @@ extension DynamicLinker.Tables
     }
 
     mutating
-    func link() -> [Volume.Vertex.Culture]
+    func link() -> [Unidoc.Vertex.Culture]
     {
         self.autogroup()
 
@@ -288,7 +288,7 @@ extension DynamicLinker.Tables
     {
         for topic:SymbolGraph.Topic in topics
         {
-            var record:Volume.Group.Topic = .init(id: self.next.topic.id(),
+            var record:Unidoc.Group.Topic = .init(id: self.next.topic.id(),
                 culture: namespace.culture,
                 scope: owner)
 
@@ -317,9 +317,9 @@ extension DynamicLinker.Tables
 {
     private mutating
     func link(culture:SymbolGraph.Culture,
-        under namespace:SymbolGraph.NamespaceContext<Void>) -> Volume.Vertex.Culture
+        under namespace:SymbolGraph.NamespaceContext<Void>) -> Unidoc.Vertex.Culture
     {
-        var vertex:Volume.Vertex.Culture = .init(id: namespace.culture,
+        var vertex:Unidoc.Vertex.Culture = .init(id: namespace.culture,
             module: culture.module,
             group: self.groupContainingMember[namespace.culture.citizen])
 
@@ -348,7 +348,7 @@ extension DynamicLinker.Tables
             let symbol:Symbol.Article = self.current.articles.symbols[a]
             let scalar:Unidoc.Scalar = self.current.id + a
 
-            var vertex:Volume.Vertex.Article = .init(id: scalar,
+            var vertex:Unidoc.Vertex.Article = .init(id: scalar,
                 stem: .init(namespace.module, symbol.name),
                 culture: namespace.culture,
                 file: node.article.file.map { self.current.id + $0 },
@@ -424,7 +424,7 @@ extension DynamicLinker.Tables
                 self.extensions[implicit].subforms.append(d)
             }
 
-            var vertex:Volume.Vertex.Decl = .init(id: d,
+            var vertex:Unidoc.Vertex.Decl = .init(id: d,
                 flags: .init(
                     phylum: decl.phylum,
                     kinks: decl.kinks,

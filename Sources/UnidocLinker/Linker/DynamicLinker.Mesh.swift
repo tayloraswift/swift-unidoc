@@ -10,22 +10,22 @@ extension DynamicLinker
     struct Mesh:~Copyable
     {
         public
-        var vertices:Volume.Vertices
+        var vertices:Unidoc.Volume.Vertices
         public
-        var groups:Volume.Groups
+        var groups:Unidoc.Volume.Groups
         public
         var index:JSON
         public
-        var trees:[Volume.TypeTree]
+        var trees:[Unidoc.TypeTree]
         public
-        var tree:[Volume.Noun]
+        var tree:[Unidoc.Noun]
 
         private
-        init(vertices:Volume.Vertices,
-            groups:Volume.Groups,
+        init(vertices:Unidoc.Volume.Vertices,
+            groups:Unidoc.Volume.Groups,
             index:JSON,
-            trees:[Volume.TypeTree],
-            tree:[Volume.Noun])
+            trees:[Unidoc.TypeTree],
+            tree:[Unidoc.Noun])
         {
             self.vertices = vertices
             self.groups = groups
@@ -39,30 +39,30 @@ extension DynamicLinker.Mesh
 {
     init(
         extensions:borrowing DynamicLinker.Extensions,
-        articles:consuming [Volume.Vertex.Article],
-        cultures:consuming [Volume.Vertex.Culture],
-        decls:consuming [Volume.Vertex.Decl],
-        groups:consuming Volume.Groups,
+        articles:consuming [Unidoc.Vertex.Article],
+        cultures:consuming [Unidoc.Vertex.Culture],
+        decls:consuming [Unidoc.Vertex.Decl],
+        groups:consuming Unidoc.Volume.Groups,
         context:borrowing DynamicLinker)
     {
-        var cultures:[Volume.Vertex.Culture] = cultures
+        var cultures:[Unidoc.Vertex.Culture] = cultures
 
-        let articles:[Volume.Vertex.Article] = articles
-        let decls:[Volume.Vertex.Decl] = decls
+        let articles:[Unidoc.Vertex.Article] = articles
+        let decls:[Unidoc.Vertex.Decl] = decls
 
         var mapper:DynamicLinker.TreeMapper = .init(zone: context.current.id)
-        for vertex:Volume.Vertex.Article in articles
+        for vertex:Unidoc.Vertex.Article in articles
         {
             mapper.add(vertex)
         }
-        for vertex:Volume.Vertex.Decl in decls
+        for vertex:Unidoc.Vertex.Decl in decls
         {
             mapper.add(vertex)
         }
 
         var snapshot:Volume.SnapshotDetails = .init(abi: context.current.metadata.abi,
             requirements: context.current.metadata.requirements)
-        var foreign:[Volume.Vertex.Foreign] = []
+        var foreign:[Unidoc.Vertex.Foreign] = []
 
         //  Compute shoots for out-of-package extended types.
         for d:Int32 in context.current.decls.nodes.indices
@@ -124,7 +124,7 @@ extension DynamicLinker.Mesh
                 }
             }
 
-            let assembled:Volume.Group.Extension = context.assemble(
+            let assembled:Unidoc.Group.Extension = context.assemble(
                 extension: `extension`,
                 signature: signature)
 
@@ -145,7 +145,7 @@ extension DynamicLinker.Mesh
         }
 
         //  Create file vertices.
-        let files:[Volume.Vertex.File] = zip(
+        let files:[Unidoc.Vertex.File] = zip(
             context.current.files.indices,
             context.current.files)
             .map
@@ -153,7 +153,7 @@ extension DynamicLinker.Mesh
             .init(id: context.current.id + $0, symbol: $1)
         }
 
-        let (trees, index):([Volume.TypeTree], JSON) = mapper.build(cultures: cultures)
+        let (trees, index):([Unidoc.TypeTree], JSON) = mapper.build(cultures: cultures)
 
         self.init(vertices: .init(
                 articles: articles,

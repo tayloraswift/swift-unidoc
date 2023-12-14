@@ -6,12 +6,12 @@ extension Unidoc.Sitemap
     struct Delta:Equatable, Sendable
     {
         public
-        let deletions:[Volume.Shoot]
+        let deletions:[Unidoc.Shoot]
         public
         let additions:Int
 
         @inlinable public
-        init(deletions:[Volume.Shoot], additions:Int)
+        init(deletions:[Unidoc.Shoot], additions:Int)
         {
             self.deletions = deletions
             self.additions = additions

@@ -58,16 +58,16 @@ extension RecentActivityQuery:Mongo.PipelineQuery
                         {
                             $0[.expr] = .expr
                             {
-                                $0[.eq] = (Volume.Metadata[.id], id)
+                                $0[.eq] = (Unidoc.VolumeMetadata[.id], id)
                             }
                         }
 
-                        $0[.project] = .init(with: Volume.Metadata.names(_:))
+                        $0[.project] = .init(with: Unidoc.VolumeMetadata.names(_:))
                     }
-                    $0[.as] = UnidocDatabase.DocsFeed.Activity<Volume.Metadata>[.volume]
+                    $0[.as] = UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>[.volume]
                 }
 
-                $0[.unwind] = UnidocDatabase.DocsFeed.Activity<Volume.Metadata>[.volume]
+                $0[.unwind] = UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>[.volume]
             }
         }
 

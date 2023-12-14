@@ -19,7 +19,7 @@ extension UnidocDatabase
 extension UnidocDatabase.Trees:Mongo.CollectionModel
 {
     public
-    typealias Element = Volume.TypeTree
+    typealias Element = Unidoc.TypeTree
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeTrees" }

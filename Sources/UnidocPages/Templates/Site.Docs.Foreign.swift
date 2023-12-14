@@ -13,7 +13,7 @@ extension Site.Docs
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Volume.Vertex.Foreign
+        let vertex:Unidoc.Vertex.Foreign
         private
         let groups:GroupSections
 
@@ -22,7 +22,7 @@ extension Site.Docs
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            vertex:Volume.Vertex.Foreign,
+            vertex:Unidoc.Vertex.Foreign,
             groups:GroupSections) throws
         {
             self.context = context
@@ -83,7 +83,7 @@ extension Site.Docs.Foreign:VersionedPage
         }
 
         let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Volume.Metadata = self.context.volumes[self.vertex.extendee.zone]
+        if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.zone]
         {
             main[.section, { $0.class = "notice extendee" }]
             {

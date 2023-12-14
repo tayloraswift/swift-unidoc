@@ -18,7 +18,7 @@ extension Volume
 }
 extension Volume.StemComponents
 {
-    init(_ stem:Volume.Stem) throws
+    init(_ stem:Unidoc.Stem) throws
     {
         guard
         let (namespace, scope, last):(Substring, [Substring], Substring) = stem.split()

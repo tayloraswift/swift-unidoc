@@ -11,12 +11,12 @@ extension RecentActivityQuery
         public
         let repo:[UnidocDatabase.RepoFeed.Activity]
         public
-        let docs:[UnidocDatabase.DocsFeed.Activity<Volume.Metadata>]
+        let docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>]
 
         @inlinable internal
         init(
             repo:[UnidocDatabase.RepoFeed.Activity],
-            docs:[UnidocDatabase.DocsFeed.Activity<Volume.Metadata>])
+            docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>])
         {
             self.repo = repo
             self.docs = docs
