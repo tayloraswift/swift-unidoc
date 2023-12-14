@@ -2,10 +2,10 @@ import BSON
 import MongoQL
 import UnidocRecords
 
-extension Volume
+extension Unidoc
 {
     @frozen public
-    struct LookupOutput<T>:Equatable, Sendable
+    struct VertexOutput<T>:Equatable, Sendable
     {
         public
         let principal:PrincipalOutput?
@@ -25,7 +25,7 @@ extension Volume
         }
     }
 }
-extension Volume.LookupOutput:MongoMasterCodingModel
+extension Unidoc.VertexOutput:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -35,7 +35,7 @@ extension Volume.LookupOutput:MongoMasterCodingModel
         case volumes
     }
 }
-extension Volume.LookupOutput:BSONDocumentDecodable
+extension Unidoc.VertexOutput:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

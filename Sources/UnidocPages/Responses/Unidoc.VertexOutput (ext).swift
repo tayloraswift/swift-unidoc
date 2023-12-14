@@ -6,13 +6,13 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Volume.LookupOutput:HTTP.ServerResponseFactory where T:VolumeRoot
+extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
 {
     public consuming
     func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         guard
-        let principal:Volume.PrincipalOutput = (copy self).principal
+        let principal:Unidoc.PrincipalOutput = (copy self).principal
         else
         {
             return .notFound(.init(
