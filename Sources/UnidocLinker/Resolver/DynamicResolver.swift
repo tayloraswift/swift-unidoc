@@ -48,7 +48,7 @@ extension DynamicResolver
     }
 
     mutating
-    func link(topic:SymbolGraph.Topic) -> (overview:Volume.Passage?, members:[Volume.Link])
+    func link(topic:SymbolGraph.Topic) -> (overview:Volume.Passage?, members:[Unidoc.VertexLink])
     {
         let overview:Volume.Passage? = topic.overview.isEmpty ? nil : .init(
             outlines: topic.outlines.map { self.expand($0) },
@@ -133,7 +133,7 @@ extension DynamicResolver
     }
 
     private mutating
-    func resolve(_ outline:SymbolGraph.Outline) -> Volume.Link
+    func resolve(_ outline:SymbolGraph.Outline) -> Unidoc.VertexLink
     {
         switch outline
         {

@@ -1,16 +1,16 @@
 import BSON
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     @frozen public
-    enum Link:Equatable, Sendable
+    enum VertexLink:Equatable, Sendable
     {
         case scalar(Unidoc.Scalar)
         case text(String)
     }
 }
-extension Volume.Link:BSONEncodable
+extension Unidoc.VertexLink:BSONEncodable
 {
     @inlinable public
     func encode(to field:inout BSON.FieldEncoder)
@@ -24,7 +24,7 @@ extension Volume.Link:BSONEncodable
         }
     }
 }
-extension Volume.Link:BSONDecodable
+extension Unidoc.VertexLink:BSONDecodable
 {
     @inlinable public
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
