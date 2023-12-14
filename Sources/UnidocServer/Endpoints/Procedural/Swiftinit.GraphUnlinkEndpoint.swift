@@ -1,15 +1,15 @@
 import HTTP
 import MongoDB
+import Symbols
 import UnidocDB
-import UnidocRecords
 
 extension Swiftinit
 {
     struct GraphUnlinkEndpoint:Sendable
     {
-        let volume:VolumeIdentifier
+        let volume:Symbol.Edition
 
-        init(volume:VolumeIdentifier)
+        init(volume:Symbol.Edition)
         {
             self.volume = volume
         }

@@ -169,7 +169,7 @@ extension Swiftinit.AnyEndpoint
     func get(lunr trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self?
     {
-        if  let id:VolumeIdentifier = .init(trunk)
+        if  let id:Symbol.Edition = .init(trunk)
         {
             return .interactive(
                 Swiftinit.PipelineEndpoint<SearchIndexQuery<UnidocDatabase.Search>>.init(
@@ -339,14 +339,14 @@ extension Swiftinit.AnyEndpoint
                 }
                 else if
                     let volume:String = form["volume"],
-                    let volume:VolumeIdentifier = .init(volume)
+                    let volume:Symbol.Edition = .init(volume)
                 {
                     return .procedural(Swiftinit.GraphUplinkEndpoint.identifier(volume))
                 }
 
             case .unlink:
                 if  let volume:String = form["volume"],
-                    let volume:VolumeIdentifier = .init(volume)
+                    let volume:Symbol.Edition = .init(volume)
                 {
                     return .procedural(Swiftinit.GraphUnlinkEndpoint.init(volume: volume))
                 }

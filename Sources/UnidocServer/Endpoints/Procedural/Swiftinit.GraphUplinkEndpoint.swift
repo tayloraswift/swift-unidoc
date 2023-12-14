@@ -1,6 +1,7 @@
 import HTTP
 import HTTPServer
 import MongoDB
+import Symbols
 import Unidoc
 import UnidocDB
 import UnidocRecords
@@ -10,7 +11,7 @@ extension Swiftinit
     enum GraphUplinkEndpoint:Sendable
     {
         case coordinate(Unidoc.Edition)
-        case identifier(VolumeIdentifier)
+        case identifier(Symbol.Edition)
     }
 }
 extension Swiftinit.GraphUplinkEndpoint:BlockingEndpoint
