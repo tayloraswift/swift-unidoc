@@ -64,12 +64,12 @@ extension Mongo.Variable<Unidoc.Group>
 
                 $0.expr
                 {
-                    let members:Mongo.List<Volume.Link, Mongo.KeyPath> = .init(
+                    let members:Mongo.List<Unidoc.VertexLink, Mongo.KeyPath> = .init(
                         in: self[.members])
 
                     $0[.filter] = members.filter
                     {
-                        (link:Mongo.Variable<Volume.Link>) in Mongo.Expression.expr
+                        (link:Mongo.Variable<Unidoc.VertexLink>) in Mongo.Expression.expr
                         {
                             $0[.eq] = ("objectId", .expr { $0[.type] = link })
                         }

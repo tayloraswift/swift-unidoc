@@ -227,7 +227,7 @@ extension GroupSections:HyperTextOutputStreamable
 
                     $0[.ul]
                     {
-                        for member:Volume.Link in group.members
+                        for member:Unidoc.VertexLink in group.members
                         {
                             switch member
                             {

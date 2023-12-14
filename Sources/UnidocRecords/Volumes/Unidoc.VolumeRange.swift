@@ -1,7 +1,7 @@
-extension Volume
+extension Unidoc
 {
     @frozen public
-    struct Range:Equatable, Hashable, Sendable
+    struct VolumeRange:Equatable, Hashable, Sendable
     {
         public
         let min:Unidoc.VolumeMetadata.CodingKey
@@ -16,7 +16,7 @@ extension Volume
         }
     }
 }
-extension Volume.Range
+extension Unidoc.VolumeRange
 {
     /// Matches the ``SymbolGraph.Plane/article`` plane only.
     @inlinable public static
