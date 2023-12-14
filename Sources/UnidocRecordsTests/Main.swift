@@ -13,18 +13,18 @@ enum Main:TestMain, TestBattery
             let id:Unidoc.Scalar = .init(package: 1, version: 2, citizen: 3)
 
             if  let tests:TestGroup = tests / "Empty",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows: []))
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows: []))
             {
             }
             if  let tests:TestGroup = tests / "One",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Many",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -34,7 +34,7 @@ enum Main:TestMain, TestBattery
             {
             }
             if  let tests:TestGroup = tests / "Hashed",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit BTC"),
                         .init(stem: "CryptoKit ETH"),
@@ -48,7 +48,7 @@ enum Main:TestMain, TestBattery
             {
             }
             if  let tests:TestGroup = tests / "Stems",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit ETH Classic\tinit(_:)",
                             hash: .init(hashing: "the’ir"),
@@ -60,7 +60,7 @@ enum Main:TestMain, TestBattery
             {
             }
             if  let tests:TestGroup = tests / "CustomText",
-                    tests.roundtrip(Volume.TypeTree.init(id: id, rows:
+                    tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
                         .init(stem: "CryptoKit Getting-Started",
                             hash: .init(hashing: "Getting-Started"),

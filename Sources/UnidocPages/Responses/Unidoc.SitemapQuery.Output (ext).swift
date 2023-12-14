@@ -17,7 +17,7 @@ extension Unidoc.SitemapQuery.Output:HTTP.ServerResponseFactory
         let prefix:String = "https://swiftinit.org/\(Site.Docs.root)/\(self.package)"
         var string:String = ""
 
-        for page:Volume.Shoot in self.sitemap.elements
+        for page:Unidoc.Shoot in self.sitemap.elements
         {
             var uri:URI = []
 

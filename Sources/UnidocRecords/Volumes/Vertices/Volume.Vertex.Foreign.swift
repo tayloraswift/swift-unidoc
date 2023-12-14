@@ -1,7 +1,7 @@
 import FNV1
 import Unidoc
 
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     struct Foreign:Identifiable, Equatable, Sendable
@@ -17,7 +17,7 @@ extension Volume.Vertex
         let flags:Unidoc.Decl.Flags
 
         public
-        let stem:Volume.Stem
+        let stem:Unidoc.Stem
         public
         let hash:FNV24.Extended
 
@@ -26,7 +26,7 @@ extension Volume.Vertex
             extendee:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
             flags:Unidoc.Decl.Flags,
-            stem:Volume.Stem,
+            stem:Unidoc.Stem,
             hash:FNV24.Extended)
         {
             self.id = id
@@ -38,7 +38,7 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex.Foreign
+extension Unidoc.Vertex.Foreign
 {
     @inlinable public
     var phylum:Unidoc.Decl { self.flags.phylum }
@@ -47,7 +47,7 @@ extension Volume.Vertex.Foreign
     var kinks:Unidoc.Decl.Kinks { self.flags.kinks }
 
     @inlinable public
-    var shoot:Volume.Shoot
+    var shoot:Unidoc.Shoot
     {
         .init(
             stem: self.stem,

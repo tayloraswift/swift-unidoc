@@ -32,7 +32,7 @@ extension CanonicalVersion
     init?(principal:Unidoc.PrincipalOutput)
     {
         guard
-        let volumeOfLatest:Volume.Metadata = principal.volumeOfLatest,
+        let volumeOfLatest:Unidoc.VolumeMetadata = principal.volumeOfLatest,
         let patchOfLatest:PatchVersion = volumeOfLatest.patch
         else
         {
@@ -57,7 +57,7 @@ extension CanonicalVersion
 
         let target:Target
 
-        if  let vertex:Volume.Vertex = principal.vertexInLatest
+        if  let vertex:Unidoc.Vertex = principal.vertexInLatest
         {
             switch vertex
             {

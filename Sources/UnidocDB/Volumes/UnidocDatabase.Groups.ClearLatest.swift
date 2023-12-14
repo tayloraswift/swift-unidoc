@@ -35,15 +35,15 @@ extension UnidocDatabase.Groups.ClearLatest:Mongo.UpdateQuery
                 {
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.gte] = range.lowerBound }
+                        $0[Unidoc.Group[.id]] = .init { $0[.gte] = range.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Group[.id]] = .init { $0[.lte] = range.upperBound }
+                        $0[Unidoc.Group[.id]] = .init { $0[.lte] = range.upperBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Group[.realm]] = .init { $0[.exists] = true }
+                        $0[Unidoc.Group[.realm]] = .init { $0[.exists] = true }
                     }
                 }
             }
@@ -51,7 +51,7 @@ extension UnidocDatabase.Groups.ClearLatest:Mongo.UpdateQuery
             {
                 $0[.unset] = .init
                 {
-                    $0[Volume.Group[.realm]] = ()
+                    $0[Unidoc.Group[.realm]] = ()
                 }
             }
         }

@@ -8,12 +8,12 @@ extension Unidoc
     struct RedirectOutput:Equatable, Sendable
     {
         public
-        let matches:[Volume.Vertex]
+        let matches:[Unidoc.Vertex]
         public
-        let volume:Volume.Metadata
+        let volume:Unidoc.VolumeMetadata
 
         @inlinable internal
-        init(matches:[Volume.Vertex], volume:Volume.Metadata)
+        init(matches:[Unidoc.Vertex], volume:Unidoc.VolumeMetadata)
         {
             self.matches = matches
             self.volume = volume

@@ -21,6 +21,6 @@ extension Unidoc.LookupAdjacent.Group
     static
     func += (list:inout BSON.ListEncoder, self:Self)
     {
-        list.expr { $0[.eq] = (Volume.Group[.id], self.id) }
+        list.expr { $0[.eq] = (Unidoc.Group[.id], self.id) }
     }
 }

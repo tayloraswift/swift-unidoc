@@ -9,15 +9,15 @@ protocol VolumeRoot:StaticRoot
 {
     static
     func response(
-        vertex:consuming Volume.Vertex,
-        groups:consuming [Volume.Group],
-        tree:consuming Volume.TypeTree?,
+        vertex:consuming Unidoc.Vertex,
+        groups:consuming [Unidoc.Group],
+        tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
 }
 extension VolumeRoot
 {
     static
-    subscript(names:Volume.Metadata) -> URI
+    subscript(names:Unidoc.VolumeMetadata) -> URI
     {
         var uri:URI = Self.uri
 
@@ -27,7 +27,7 @@ extension VolumeRoot
     }
 
     static
-    subscript(names:Volume.Metadata, shoot:Volume.Shoot) -> URI
+    subscript(names:Unidoc.VolumeMetadata, shoot:Unidoc.Shoot) -> URI
     {
         var uri:URI = Self[names]
 

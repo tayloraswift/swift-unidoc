@@ -18,11 +18,11 @@ extension Unidoc.Sitemap
 extension Unidoc.Sitemap.Elements:ExpressibleByArrayLiteral
 {
     @inlinable public
-    init(arrayLiteral:Volume.Shoot...)
+    init(arrayLiteral:Unidoc.Shoot...)
     {
         self.init(bytes: [])
 
-        for element:Volume.Shoot in arrayLiteral
+        for element:Unidoc.Shoot in arrayLiteral
         {
             self.append(element)
         }
@@ -31,7 +31,7 @@ extension Unidoc.Sitemap.Elements:ExpressibleByArrayLiteral
 extension Unidoc.Sitemap.Elements
 {
     @inlinable internal mutating
-    func append(_ shoot:Volume.Shoot)
+    func append(_ shoot:Unidoc.Shoot)
     {
         shoot.serialize(into: &self.bytes) ; self.bytes.append(0x0A)
     }

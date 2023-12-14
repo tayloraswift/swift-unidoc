@@ -90,11 +90,11 @@ extension DynamicLinker
     {
         var tables:Tables = .init(context: consume self)
 
-        let cultures:[Volume.Vertex.Culture] = tables.link()
+        let cultures:[Unidoc.Vertex.Culture] = tables.link()
 
-        let articles:[Volume.Vertex.Article] = tables.articles
-        let decls:[Volume.Vertex.Decl] = tables.decls
-        let groups:Volume.Groups = tables.groups
+        let articles:[Unidoc.Vertex.Article] = tables.articles
+        let decls:[Unidoc.Vertex.Decl] = tables.decls
+        let groups:Unidoc.Volume.Groups = tables.groups
         let extensions:Extensions = tables.extensions
 
         self = (consume tables).context
@@ -170,9 +170,9 @@ extension DynamicLinker
 extension DynamicLinker
 {
     public
-    func dependencies() -> [Volume.Metadata.Dependency]
+    func dependencies() -> [Unidoc.VolumeMetadata.Dependency]
     {
-        var dependencies:[Volume.Metadata.Dependency] = []
+        var dependencies:[Unidoc.VolumeMetadata.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package != .swift,
@@ -426,7 +426,7 @@ extension DynamicLinker
 
 extension DynamicLinker
 {
-    func assemble(extension:Extension, signature:ExtensionSignature) -> Volume.Group.Extension
+    func assemble(extension:Extension, signature:ExtensionSignature) -> Unidoc.Group.Extension
     {
         let prefetch:[Unidoc.Scalar] = []
         //  TODO: compute tertiary scalars

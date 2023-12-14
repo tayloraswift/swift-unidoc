@@ -14,7 +14,7 @@ extension Mongo.Variable<Volume.Outline>
         }
     }
 }
-extension Mongo.Variable<Volume.Group>
+extension Mongo.Variable<Unidoc.Group>
 {
     var scalars:Mongo.Expression
     {

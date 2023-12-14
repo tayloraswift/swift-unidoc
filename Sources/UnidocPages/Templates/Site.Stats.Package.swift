@@ -15,12 +15,12 @@ extension Site.Stats
         let sidebar:HTML.Sidebar<Site.Stats>?
 
         private
-        let vertex:Volume.Vertex.Global
+        let vertex:Unidoc.Vertex.Global
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Stats>?,
-            vertex:Volume.Vertex.Global)
+            vertex:Unidoc.Vertex.Global)
         {
             self.context = context
             self.canonical = canonical

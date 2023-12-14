@@ -1,9 +1,9 @@
 import Symbols
 
-extension Volume
+extension Unidoc
 {
     @frozen public
-    struct Selector:Equatable, Hashable, Sendable
+    struct VolumeSelector:Equatable, Hashable, Sendable
     {
         public
         var package:Symbol.Package
@@ -18,7 +18,7 @@ extension Volume
         }
     }
 }
-extension Volume.Selector:CustomStringConvertible
+extension Unidoc.VolumeSelector:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -26,7 +26,7 @@ extension Volume.Selector:CustomStringConvertible
         self.version.map { "\(self.package):\($0)" } ?? "\(self.package)"
     }
 }
-extension Volume.Selector:LosslessStringConvertible
+extension Unidoc.VolumeSelector:LosslessStringConvertible
 {
     public
     init(_ trunk:String)

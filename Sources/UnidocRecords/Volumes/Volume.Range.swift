@@ -4,12 +4,12 @@ extension Volume
     struct Range:Equatable, Hashable, Sendable
     {
         public
-        let min:Volume.Metadata.CodingKey
+        let min:Unidoc.VolumeMetadata.CodingKey
         public
-        let max:Volume.Metadata.CodingKey
+        let max:Unidoc.VolumeMetadata.CodingKey
 
         @inlinable internal
-        init(min:Volume.Metadata.CodingKey, max:Volume.Metadata.CodingKey)
+        init(min:Unidoc.VolumeMetadata.CodingKey, max:Unidoc.VolumeMetadata.CodingKey)
         {
             self.min = min
             self.max = max

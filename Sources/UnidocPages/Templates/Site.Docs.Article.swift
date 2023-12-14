@@ -15,7 +15,7 @@ extension Site.Docs
         let sidebar:HTML.Sidebar<Site.Docs>?
 
         private
-        let vertex:Volume.Vertex.Article
+        let vertex:Unidoc.Vertex.Article
         private
         let groups:GroupSections
 
@@ -23,7 +23,7 @@ extension Site.Docs
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Docs>?,
-            vertex:Volume.Vertex.Article,
+            vertex:Unidoc.Vertex.Article,
             groups:GroupSections)
         {
             self.context = context
@@ -37,7 +37,7 @@ extension Site.Docs
 extension Site.Docs.Article
 {
     private
-    var stem:Volume.Stem { self.vertex.stem }
+    var stem:Unidoc.Stem { self.vertex.stem }
 }
 extension Site.Docs.Article:RenderablePage
 {

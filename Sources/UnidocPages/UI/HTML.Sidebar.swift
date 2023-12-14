@@ -9,12 +9,12 @@ extension HTML
     struct Sidebar<Root> where Root:VolumeRoot
     {
         private
-        let volume:Volume.Metadata
+        let volume:Unidoc.VolumeMetadata
         private
         let nouns:[Volume.Noun]
 
         private
-        init(volume:Volume.Metadata, nouns:[Volume.Noun])
+        init(volume:Unidoc.VolumeMetadata, nouns:[Volume.Noun])
         {
             self.volume = volume
             self.nouns = nouns
@@ -24,13 +24,13 @@ extension HTML
 extension HTML.Sidebar
 {
     static
-    func package(volume:Volume.Metadata) -> Self
+    func package(volume:Unidoc.VolumeMetadata) -> Self
     {
         .init(volume: volume, nouns: volume.tree)
     }
 
     static
-    func module(volume:Volume.Metadata, tree:Volume.TypeTree?) -> Self?
+    func module(volume:Unidoc.VolumeMetadata, tree:Unidoc.TypeTree?) -> Self?
     {
         guard
         let nouns:[Volume.Noun] = tree?.rows
@@ -51,7 +51,7 @@ extension HTML.Sidebar:HyperTextOutputStreamable
         //  `ul` as a direct child.
         html[.div, { $0.class = "nountree" }]
         {
-            var previous:Volume.Stem = ""
+            var previous:Unidoc.Stem = ""
             var depth:Int = 1
 
             for noun:Volume.Noun in self.nouns

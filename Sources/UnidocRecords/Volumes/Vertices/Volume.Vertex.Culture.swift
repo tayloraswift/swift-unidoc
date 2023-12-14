@@ -1,7 +1,7 @@
 import SymbolGraphs
 import Unidoc
 
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     struct Culture:Identifiable, Equatable, Sendable
@@ -44,16 +44,16 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex.Culture
+extension Unidoc.Vertex.Culture
 {
     @inlinable public
-    var shoot:Volume.Shoot
+    var shoot:Unidoc.Shoot
     {
         .init(stem: self.stem)
     }
 
     @inlinable public
-    var stem:Volume.Stem
+    var stem:Unidoc.Stem
     {
         .init(self.module.id)
     }

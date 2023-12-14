@@ -24,20 +24,20 @@ extension UnidocDatabase.Volumes
     let indexCoordinateLatest:Mongo.CollectionIndex = .init("CoordinateLatest",
         unique: true)
     {
-        $0[Volume.Metadata[.id]] = (+)
-        $0[Volume.Metadata[.latest]] = (-)
+        $0[Unidoc.VolumeMetadata[.id]] = (+)
+        $0[Unidoc.VolumeMetadata[.latest]] = (-)
     }
 
     public static
     let indexCoordinatePatch:Mongo.CollectionIndex = .init("CoordinatePatch",
         unique: true)
     {
-        $0[Volume.Metadata[.id]] = (+)
-        $0[Volume.Metadata[.patch]] = (-)
+        $0[Unidoc.VolumeMetadata[.id]] = (+)
+        $0[Unidoc.VolumeMetadata[.patch]] = (-)
     }
         where:
     {
-        $0[Volume.Metadata[.patch]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
     }
 
     public static
@@ -45,12 +45,12 @@ extension UnidocDatabase.Volumes
         collation: VolumeCollation.spec,
         unique: true)
     {
-        $0[Volume.Metadata[.package]] = (+)
-        $0[Volume.Metadata[.patch]] = (-)
+        $0[Unidoc.VolumeMetadata[.package]] = (+)
+        $0[Unidoc.VolumeMetadata[.patch]] = (-)
     }
         where:
     {
-        $0[Volume.Metadata[.patch]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
     }
 
     public static
@@ -58,25 +58,25 @@ extension UnidocDatabase.Volumes
         collation: VolumeCollation.spec,
         unique: true)
     {
-        $0[Volume.Metadata[.package]] = (+)
-        $0[Volume.Metadata[.version]] = (+)
+        $0[Unidoc.VolumeMetadata[.package]] = (+)
+        $0[Unidoc.VolumeMetadata[.version]] = (+)
     }
 
     public static
     let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: false)
     {
-        $0[Volume.Metadata[.realm]] = (+)
+        $0[Unidoc.VolumeMetadata[.realm]] = (+)
     }
         where:
     {
-        $0[Volume.Metadata[.realm]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.realm]] = .init { $0[.exists] = true }
     }
 }
 extension UnidocDatabase.Volumes:Mongo.CollectionModel
 {
     public
-    typealias Element = Volume.Metadata
+    typealias Element = Unidoc.VolumeMetadata
 
     @inlinable public static
     var name:Mongo.Collection { "Volumes" }
@@ -98,7 +98,7 @@ extension UnidocDatabase.Volumes:Mongo.RecodableModel
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: Volume.Metadata.self,
+        try await self.recode(through: Unidoc.VolumeMetadata.self,
             with: session,
             by: .now.advanced(by: .seconds(30)))
     }
@@ -106,23 +106,23 @@ extension UnidocDatabase.Volumes:Mongo.RecodableModel
 extension UnidocDatabase.Volumes
 {
     func find(named symbol:VolumeIdentifier,
-        with session:Mongo.Session) async throws -> Volume.Metadata?
+        with session:Mongo.Session) async throws -> Unidoc.VolumeMetadata?
     {
         try await session.run(
-            command: Mongo.Find<Mongo.Single<Volume.Metadata>>.init(Self.name,
+            command: Mongo.Find<Mongo.Single<Unidoc.VolumeMetadata>>.init(Self.name,
                 limit: 1)
             {
                 $0[.collation] = VolumeCollation.spec
                 $0[.filter] = .init
                 {
-                    $0[Volume.Metadata[.package]] = symbol.package
-                    $0[Volume.Metadata[.version]] = symbol.version
+                    $0[Unidoc.VolumeMetadata[.package]] = symbol.package
+                    $0[Unidoc.VolumeMetadata[.version]] = symbol.version
                 }
                 $0[.hint] = .init
                 {
 
-                    $0[Volume.Metadata[.package]] = (+)
-                    $0[Volume.Metadata[.version]] = (+)
+                    $0[Unidoc.VolumeMetadata[.package]] = (+)
+                    $0[Unidoc.VolumeMetadata[.version]] = (+)
                 }
             },
             against: self.database)
@@ -153,31 +153,31 @@ extension UnidocDatabase.Volumes
 
                     $0.append
                     {
-                        $0[Volume.Metadata[.patch]] = .init { $0[.exists] = true }
+                        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.gte] = cell.lowerBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.gte] = cell.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Volume.Metadata[.id]] = .init { $0[.lte] = cell.upperBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.lte] = cell.upperBound }
                     }
                 }
             }
             $0[.sort] = .init
             {
-                $0[Volume.Metadata[.patch]] = (-)
+                $0[Unidoc.VolumeMetadata[.patch]] = (-)
             }
             $0[.hint] = .init
             {
-                $0[Volume.Metadata[.id]] = (+)
-                $0[Volume.Metadata[.patch]] = (-)
+                $0[Unidoc.VolumeMetadata[.id]] = (+)
+                $0[Unidoc.VolumeMetadata[.patch]] = (-)
             }
             $0[.projection] = .init
             {
-                $0[Volume.Metadata[.id]] = true
-                $0[Volume.Metadata[.patch]] = true
+                $0[Unidoc.VolumeMetadata[.id]] = true
+                $0[Unidoc.VolumeMetadata[.patch]] = true
             }
         }
     }

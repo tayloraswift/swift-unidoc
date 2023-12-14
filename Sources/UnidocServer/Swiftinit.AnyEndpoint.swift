@@ -138,7 +138,7 @@ extension Swiftinit.AnyEndpoint
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        let volume:Volume.Selector = .init(trunk)
+        let volume:Unidoc.VolumeSelector = .init(trunk)
 
         //  Special sitemap route.
         //  The '-' in the name means it will never collide with a decl.
@@ -153,7 +153,7 @@ extension Swiftinit.AnyEndpoint
         }
         else
         {
-            let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
+            let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
 
             return .interactive(
                 Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
@@ -194,8 +194,8 @@ extension Swiftinit.AnyEndpoint
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        let volume:Volume.Selector = .init(trunk)
-        let shoot:Volume.Shoot = .init(path: stem, hash: parameters.hash)
+        let volume:Unidoc.VolumeSelector = .init(trunk)
+        let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
 
         return .interactive(
             Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
@@ -221,7 +221,7 @@ extension Swiftinit.AnyEndpoint
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.LegacyParameters) -> Self
     {
-        let query:Unidoc.RedirectQuery<Volume.Shoot> = .legacy(head: trunk,
+        let query:Unidoc.RedirectQuery<Unidoc.Shoot> = .legacy(head: trunk,
             rest: stem,
             from: parameters.from)
 
@@ -235,7 +235,7 @@ extension Swiftinit.AnyEndpoint
         else
         {
             return .interactive(
-                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Volume.Shoot>>.init(
+                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Unidoc.Shoot>>.init(
                 output: .text(.html),
                 query: query))
         }

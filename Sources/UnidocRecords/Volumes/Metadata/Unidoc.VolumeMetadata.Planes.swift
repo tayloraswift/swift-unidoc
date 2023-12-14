@@ -1,7 +1,7 @@
 import SymbolGraphs
 import Unidoc
 
-extension Volume.Metadata
+extension Unidoc.VolumeMetadata
 {
     @frozen public
     struct Planes
@@ -16,7 +16,7 @@ extension Volume.Metadata
         }
     }
 }
-extension Volume.Metadata.Planes
+extension Unidoc.VolumeMetadata.Planes
 {
     @inlinable public
     var min:Unidoc.Scalar { self.zone.min }

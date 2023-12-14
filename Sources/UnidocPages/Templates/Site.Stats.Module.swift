@@ -15,12 +15,12 @@ extension Site.Stats
         let sidebar:HTML.Sidebar<Site.Stats>?
 
         private
-        let vertex:Volume.Vertex.Culture
+        let vertex:Unidoc.Vertex.Culture
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:HTML.Sidebar<Site.Stats>?,
-            vertex:Volume.Vertex.Culture)
+            vertex:Unidoc.Vertex.Culture)
         {
             self.context = context
             self.canonical = canonical
@@ -35,7 +35,7 @@ extension Site.Stats.Module
     var name:String { self.vertex.module.name }
 
     private
-    var stem:Volume.Stem { self.vertex.stem }
+    var stem:Unidoc.Stem { self.vertex.stem }
 }
 extension Site.Stats.Module:RenderablePage
 {

@@ -3,7 +3,7 @@ import Symbols
 import UnidocQueries
 import UnidocRecords
 
-extension Unidoc.RedirectQuery<Volume.Shoot>
+extension Unidoc.RedirectQuery<Unidoc.Shoot>
 {
     static
     func legacy(

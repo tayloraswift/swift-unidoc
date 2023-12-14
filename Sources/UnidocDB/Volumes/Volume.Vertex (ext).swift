@@ -1,6 +1,6 @@
 import UnidocRecords
 import MongoQL
 
-extension Volume.Vertex:MongoMasterCodingModel
+extension Unidoc.Vertex:MongoMasterCodingModel
 {
 }

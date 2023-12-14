@@ -23,30 +23,30 @@ extension UnidocDatabase.Groups
     let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: true)
     {
-        $0[Volume.Group[.id]] = (+)
-        $0[Volume.Group[.realm]] = (+)
+        $0[Unidoc.Group[.id]] = (+)
+        $0[Unidoc.Group[.realm]] = (+)
     }
 
     public static
     let indexScopeRealm:Mongo.CollectionIndex = .init("ScopeRealm",
         unique: false)
     {
-        $0[Volume.Group[.scope]] = (+)
-        $0[Volume.Group[.realm]] = (+)
+        $0[Unidoc.Group[.scope]] = (+)
+        $0[Unidoc.Group[.realm]] = (+)
     }
 
     public static
     let indexScope:Mongo.CollectionIndex = .init("Scope",
         unique: true)
     {
-        $0[Volume.Group[.scope]] = (+)
-        $0[Volume.Group[.id]] = (+)
+        $0[Unidoc.Group[.scope]] = (+)
+        $0[Unidoc.Group[.id]] = (+)
     }
 }
 extension UnidocDatabase.Groups:Mongo.CollectionModel
 {
     public
-    typealias Element = Volume.Group
+    typealias Element = Unidoc.Group
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeGroups" }
@@ -64,7 +64,7 @@ extension UnidocDatabase.Groups:Mongo.CollectionModel
 extension UnidocDatabase.Groups
 {
     @discardableResult
-    func insert(_ groups:Volume.Groups,
+    func insert(_ groups:Unidoc.Volume.Groups,
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Mongo.Insertions
     {
@@ -76,22 +76,22 @@ extension UnidocDatabase.Groups
             }
                 documents:
             {
-                $0 += groups.autogroups.lazy.map(Volume.Group.automatic(_:))
-                $0 += groups.topics.lazy.map(Volume.Group.topic(_:))
+                $0 += groups.autogroups.lazy.map(Unidoc.Group.automatic(_:))
+                $0 += groups.topics.lazy.map(Unidoc.Group.topic(_:))
 
                 guard
                 let realm:Unidoc.Realm
                 else
                 {
-                    $0 += groups.extensions.lazy.map(Volume.Group.extension(_:))
+                    $0 += groups.extensions.lazy.map(Unidoc.Group.extension(_:))
                     return
                 }
 
-                for e:Volume.Group.Extension in groups.extensions
+                for e:Unidoc.Group.Extension in groups.extensions
                 {
-                    $0[Volume.Group.CodingKey.self]
+                    $0[Unidoc.Group.CodingKey.self]
                     {
-                        Volume.Group.extension(e).encode(to: &$0)
+                        Unidoc.Group.extension(e).encode(to: &$0)
 
                         $0[.realm] = realm
                     }

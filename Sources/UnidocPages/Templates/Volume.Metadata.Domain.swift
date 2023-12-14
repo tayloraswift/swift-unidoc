@@ -1,20 +1,20 @@
 import HTML
 import UnidocRecords
 
-extension Volume.Metadata
+extension Unidoc.VolumeMetadata
 {
     struct Domain
     {
         private
-        let volume:Volume.Metadata
+        let volume:Unidoc.VolumeMetadata
 
-        init(_ volume:Volume.Metadata)
+        init(_ volume:Unidoc.VolumeMetadata)
         {
             self.volume = volume
         }
     }
 }
-extension Volume.Metadata.Domain:HyperTextOutputStreamable
+extension Unidoc.VolumeMetadata.Domain:HyperTextOutputStreamable
 {
     static
     func += (span:inout HTML.ContentEncoder, self:Self)

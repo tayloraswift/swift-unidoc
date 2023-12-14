@@ -7,10 +7,10 @@ extension GroupList
     {
         let overview:ProseSection?
 
-        let vertex:Volume.Vertex
+        let vertex:Unidoc.Vertex
         let target:String?
 
-        init(overview:ProseSection?, vertex:Volume.Vertex, target:String?)
+        init(overview:ProseSection?, vertex:Unidoc.Vertex, target:String?)
         {
             self.overview = overview
             self.vertex = vertex

@@ -47,7 +47,7 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext<Unidoc.Scalar>
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, volume:Volume.Metadata, repo:Unidoc.PackageMetadata.Repo?)
+    init(principal scalar:Unidoc.Scalar, volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageMetadata.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
@@ -58,7 +58,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
 extension IdentifiablePageContext<Never?>
 {
     convenience
-    init(principal volume:Volume.Metadata, repo:Unidoc.PackageMetadata.Repo?)
+    init(principal volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageMetadata.Repo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),
@@ -104,7 +104,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 extension IdentifiablePageContext where ID:VersionedPageIdentifier
 {
     /// Generates a subdomain header for a module using its shoot.
-    func subdomain(_ module:Volume.Shoot) -> Volume.Metadata.Subdomain?
+    func subdomain(_ module:Unidoc.Shoot) -> Unidoc.VolumeMetadata.Subdomain?
     {
         let module:HTML.Link<Substring> = .init(display: module.stem.first,
             target: "\(Site.Docs[self.volume, module])")
@@ -116,7 +116,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     /// This function returns nil is `culture` is the current principal vertex. To generate a
     /// subdomain header for the current principal vertex, use ``subdomain(_:)`` instead.
     func subdomain(_ module:Substring,
-        culture:Unidoc.Scalar) -> Volume.Metadata.Subdomain?
+        culture:Unidoc.Scalar) -> Unidoc.VolumeMetadata.Subdomain?
     {
         guard
         let url:String = self.url(culture)
@@ -131,7 +131,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 
     func subdomain(_ module:Substring,
         namespace:Unidoc.Scalar,
-        culture:Unidoc.Scalar) -> Volume.Metadata.Subdomain?
+        culture:Unidoc.Scalar) -> Unidoc.VolumeMetadata.Subdomain?
     {
         guard culture != namespace
         else
@@ -151,7 +151,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
         return .init(self.volume, culture: .colonial(module, culture))
     }
 
-    var domain:Volume.Metadata.Domain { .init(self.volume) }
+    var domain:Unidoc.VolumeMetadata.Domain { .init(self.volume) }
 
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {
@@ -172,7 +172,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     {
         if  let origin:Unidoc.PackageMetadata.Repo.Origin = self.repo?.origin,
             let refname:String = self.volumes[file.zone]?.refname,
-            let file:Volume.Vertex.File = self.vertices[file]?.file,
+            let file:Unidoc.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
         {
             return .init(
@@ -203,10 +203,10 @@ extension IdentifiablePageContext:VersionedPageContext where ID:VersionedPageIde
     }
 
     @usableFromInline internal
-    var volume:Volume.Metadata { self.volumes.principal }
+    var volume:Unidoc.VolumeMetadata { self.volumes.principal }
 
     @usableFromInline internal
-    subscript(edition:Unidoc.Edition) -> Volume.Metadata?
+    subscript(edition:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
         self.volumes[edition]
     }

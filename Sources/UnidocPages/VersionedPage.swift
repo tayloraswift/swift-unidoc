@@ -22,7 +22,7 @@ extension VersionedPage where Self:StaticPage
 }
 extension VersionedPage
 {
-    var volume:Volume.Metadata { self.context.volume }
+    var volume:Unidoc.VolumeMetadata { self.context.volume }
 
     public
     func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
@@ -35,10 +35,10 @@ extension VersionedPage
                 $0["trunk"] = "\(Site.Docs[self.volume])"
             }
 
-            for dependency:Volume.Metadata.Dependency in self.volume.dependencies
+            for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
             {
                 if  let dependency:Unidoc.Edition = dependency.pinned,
-                    let dependency:Volume.Metadata = self.context[dependency]
+                    let dependency:Unidoc.VolumeMetadata = self.context[dependency]
                 {
                     $0[+, Any.self]
                     {

@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Volume.Group
+extension Unidoc.Group
 {
     @frozen public
     struct Automatic:Identifiable, Equatable, Sendable

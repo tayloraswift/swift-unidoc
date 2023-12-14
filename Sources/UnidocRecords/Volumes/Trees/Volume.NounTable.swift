@@ -83,7 +83,7 @@ extension Volume.NounTable:BSONDecodable, BSONBinaryViewDecodable
                 continue
             }
 
-            let shoot:Volume.Shoot = .deserialize(from: bson.slice[i ..< j])
+            let shoot:Unidoc.Shoot = .deserialize(from: bson.slice[i ..< j])
             let style:Volume.Noun.Style
 
             switch discriminator

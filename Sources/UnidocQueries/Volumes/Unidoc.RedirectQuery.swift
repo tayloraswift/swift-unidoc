@@ -15,12 +15,12 @@ extension Unidoc
         where VertexPredicate:Unidoc.VertexPredicate
     {
         public
-        let volume:Volume.Selector
+        let volume:Unidoc.VolumeSelector
         public
         let vertex:VertexPredicate
 
         @inlinable public
-        init(volume:Volume.Selector, lookup vertex:VertexPredicate)
+        init(volume:Unidoc.VolumeSelector, lookup vertex:VertexPredicate)
         {
             self.volume = volume
             self.vertex = vertex

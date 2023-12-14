@@ -1,7 +1,7 @@
 import Signatures
 import Unidoc
 
-extension Volume.Group
+extension Unidoc.Group
 {
     @frozen public
     struct Extension:Identifiable, Equatable, Sendable
@@ -68,7 +68,7 @@ extension Volume.Group
         }
     }
 }
-extension Volume.Group.Extension
+extension Unidoc.Group.Extension
 {
     /// Returns true if and only if this extension contains no conformances, features, nested
     /// declarations, subforms, or written documentation. The extension constraints are ignored.

@@ -21,13 +21,13 @@ extension Site.Docs
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Volume.Vertex.Global
+        let vertex:Unidoc.Vertex.Global
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            vertex:Volume.Vertex.Global,
+            vertex:Unidoc.Vertex.Global,
             groups:GroupSections)
         {
             self.context = context
@@ -190,11 +190,11 @@ extension Site.Docs.Package:VersionedPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Volume.Metadata.Dependency in self.volume.dependencies
+                        for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
                         {
                             $0[.tr]
                             {
-                                let pinned:Volume.Metadata?
+                                let pinned:Unidoc.VolumeMetadata?
 
                                 if  let pin:Unidoc.Edition = dependency.pinned
                                 {
@@ -230,7 +230,7 @@ extension Site.Docs.Package:VersionedPage
                                     }
                                 }
 
-                                if  let pinned:Volume.Metadata
+                                if  let pinned:Unidoc.VolumeMetadata
                                 {
                                     $0[.td]
                                     {

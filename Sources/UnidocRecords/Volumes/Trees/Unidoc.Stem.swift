@@ -3,7 +3,7 @@ import LexicalPaths
 import Symbols
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     /// A stem is a special representation of a master record’s lexical name within a snapshot.
     /// A stem always begins with a ``Symbol.Module``.
@@ -62,7 +62,7 @@ extension Volume
         }
     }
 }
-extension Volume.Stem:Comparable
+extension Unidoc.Stem:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -70,7 +70,7 @@ extension Volume.Stem:Comparable
         lhs.rawValue < rhs.rawValue
     }
 }
-extension Volume.Stem:ExpressibleByStringLiteral
+extension Unidoc.Stem:ExpressibleByStringLiteral
 {
     @inlinable public
     init(stringLiteral:String)
@@ -78,7 +78,7 @@ extension Volume.Stem:ExpressibleByStringLiteral
         self.init(rawValue: stringLiteral)
     }
 }
-extension Volume.Stem
+extension Unidoc.Stem
 {
     /// Returns the total number of components in this stem. This is ``depth`` plus one.
     ///
@@ -225,12 +225,12 @@ extension Volume.Stem
         }
     }
 }
-extension Volume.Stem:CustomStringConvertible
+extension Unidoc.Stem:CustomStringConvertible
 {
     @inlinable public
     var description:String { Self.format(self.rawValue) }
 }
-extension Volume.Stem
+extension Unidoc.Stem
 {
     @inlinable internal static
     func format(_ string:some StringProtocol, separator:UInt8 = 0x2E) -> String
@@ -252,7 +252,7 @@ extension Volume.Stem
         }
     }
 }
-extension Volume.Stem
+extension Unidoc.Stem
 {
     @inlinable public mutating
     func append(straight component:some StringProtocol)
@@ -270,7 +270,7 @@ extension Volume.Stem
         self.rawValue += component
     }
 }
-extension Volume.Stem
+extension Unidoc.Stem
 {
     @inlinable internal
     init(_ namespace:Symbol.Module)
@@ -326,6 +326,6 @@ extension Volume.Stem
         }
     }
 }
-extension Volume.Stem:BSONDecodable, BSONEncodable
+extension Unidoc.Stem:BSONDecodable, BSONEncodable
 {
 }

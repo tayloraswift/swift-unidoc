@@ -20,7 +20,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
     {
-        let extendee:Scalar = .init(in: vertex / Volume.Vertex[.extendee])
+        let extendee:Scalar = .init(in: vertex / Unidoc.Vertex[.extendee])
 
         pipeline[.lookup] = .init
         {
@@ -37,19 +37,19 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     //  `BSON.max` is a safe choice for a group `_id` that will never
                     //  match anything.
-                    $0[.coalesce] = (vertex / Volume.Vertex[.extension], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.Vertex[.extension], BSON.Max.init())
                 }
                 $0[let: topic.id] = .expr
                 {
-                    $0[.coalesce] = (vertex / Volume.Vertex[.group], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.Vertex[.group], BSON.Max.init())
                 }
 
                 $0[let: local.scope] = .expr
                 {
                     $0[.coalesce] =
                     (
-                        vertex / Volume.Vertex[.extendee],
-                        vertex / Volume.Vertex[.id],
+                        vertex / Unidoc.Vertex[.extendee],
+                        vertex / Unidoc.Vertex[.id],
                         BSON.Max.init()
                     )
                 }
@@ -60,19 +60,19 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                         if: extendee.missing,
                         then: .expr
                         {
-                            $0[.coalesce] = (vertex / Volume.Vertex[.id], BSON.Max.init())
+                            $0[.coalesce] = (vertex / Unidoc.Vertex[.id], BSON.Max.init())
                         },
                         else: BSON.Max.init()
                     )
                 }
                 //  We probably don’t need this, the `Groups` collection doesn’t overlap
                 //  with the `Vertices` collection.
-                $0[let: local.min] = volume / Volume.Metadata[.planes_autogroup]
-                $0[let: local.max] = volume / Volume.Metadata[.planes_max]
+                $0[let: local.min] = volume / Unidoc.VolumeMetadata[.planes_autogroup]
+                $0[let: local.max] = volume / Unidoc.VolumeMetadata[.planes_max]
 
                 $0[let: realm.id] = .expr
                 {
-                    $0[.coalesce] = (volume / Volume.Metadata[.realm], BSON.Max.init())
+                    $0[.coalesce] = (volume / Unidoc.VolumeMetadata[.realm], BSON.Max.init())
                 }
             }
             $0[.pipeline] = .init
@@ -104,9 +104,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Volume.Metadata.Dependency, Mongo.KeyPath> = .init(
-                in: volume / Volume.Metadata[.dependencies])
-            let extensions:Mongo.List<Volume.Group, Mongo.KeyPath> = .init(
+            let dependencies:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
+                in: volume / Unidoc.VolumeMetadata[.dependencies])
+            let extensions:Mongo.List<Unidoc.Group, Mongo.KeyPath> = .init(
                 in: groups)
             let adjacent:ScalarsView = .init(
                 in: vertex)

@@ -116,7 +116,7 @@ extension Unidoc.EditionsQuery:Unidoc.AliasingQuery
                         $0[.from] = UnidocDatabase.Volumes.name
                         $0[.localField] =
                             Unidoc.EditionOutput[.edition] / Unidoc.EditionMetadata[.id]
-                        $0[.foreignField] = Volume.Metadata[.id]
+                        $0[.foreignField] = Unidoc.VolumeMetadata[.id]
                         $0[.as] = Unidoc.EditionOutput[.volume]
                     }
 

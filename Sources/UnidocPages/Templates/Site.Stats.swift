@@ -20,9 +20,9 @@ extension Site.Stats:VolumeRoot
 {
     public static
     func response(
-        vertex:consuming Volume.Vertex,
-        groups:consuming [Volume.Group],
-        tree:consuming Volume.TypeTree?,
+        vertex:consuming Unidoc.Vertex,
+        groups:consuming [Unidoc.Group],
+        tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource

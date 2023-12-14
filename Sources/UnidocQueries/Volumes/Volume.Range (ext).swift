@@ -16,8 +16,8 @@ extension Volume.Range:Unidoc.VertexPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: min] = input / Volume.Metadata[self.min]
-                $0[let: max] = input / Volume.Metadata[self.max]
+                $0[let: min] = input / Unidoc.VolumeMetadata[self.min]
+                $0[let: max] = input / Unidoc.VolumeMetadata[self.max]
             }
             $0[.pipeline] = .init
             {
@@ -31,11 +31,11 @@ extension Volume.Range:Unidoc.VertexPredicate
                             (
                                 .expr
                                 {
-                                    $0[.gte] = (Volume.Vertex[.id], min)
+                                    $0[.gte] = (Unidoc.Vertex[.id], min)
                                 },
                                 .expr
                                 {
-                                    $0[.lte] = (Volume.Vertex[.id], max)
+                                    $0[.lte] = (Unidoc.Vertex[.id], max)
                                 }
                             )
                         }

@@ -2,7 +2,7 @@ import FNV1
 import MarkdownABI
 import Unidoc
 
-extension Volume.Vertex
+extension Unidoc.Vertex
 {
     @frozen public
     struct Article:Identifiable, Equatable, Sendable
@@ -10,7 +10,7 @@ extension Volume.Vertex
         public
         let id:Unidoc.Scalar
         public
-        var stem:Volume.Stem
+        var stem:Unidoc.Stem
 
         public
         var culture:Unidoc.Scalar
@@ -28,7 +28,7 @@ extension Volume.Vertex
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            stem:Volume.Stem,
+            stem:Unidoc.Stem,
             culture:Unidoc.Scalar,
             file:Unidoc.Scalar? = nil,
             headline:MarkdownBytecode = [],
@@ -49,10 +49,10 @@ extension Volume.Vertex
         }
     }
 }
-extension Volume.Vertex.Article
+extension Unidoc.Vertex.Article
 {
     @inlinable public
-    var shoot:Volume.Shoot
+    var shoot:Unidoc.Shoot
     {
         .init(stem: self.stem)
     }

@@ -21,7 +21,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
         }
 
         guard
-        let vertex:Volume.Vertex = principal.vertex
+        let vertex:Unidoc.Vertex = principal.vertex
         else
         {
             let context:IdentifiablePageContext<Never?> = .init(
@@ -64,8 +64,8 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
             context.outlines += $0.outlines
         }
 
-        let groups:[Volume.Group] = principal.groups
-        let tree:Volume.TypeTree? = principal.tree
+        let groups:[Unidoc.Group] = principal.groups
+        let tree:Unidoc.TypeTree? = principal.tree
 
         let canonical:CanonicalVersion? = .init(principal: consume principal)
 

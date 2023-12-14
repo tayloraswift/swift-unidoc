@@ -77,7 +77,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:Unidoc.VertexOutput<Any> = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let vertex:Volume.Vertex.Decl = tests.expect(
+                    let vertex:Unidoc.Vertex.Decl = tests.expect(
                         value: output.principal?.vertex?.decl)
                 {
                     tests.expect(vertex.stem.last ==? "Keys")
@@ -117,7 +117,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: try await unidoc.execute(query: query, with: session)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
-                    let _:Volume.Vertex = tests.expect(value: principal.vertex)
+                    let _:Unidoc.Vertex = tests.expect(value: principal.vertex)
                 {
                 }
             }
@@ -134,7 +134,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.RedirectOutput = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let vertex:Volume.Vertex.Decl = tests.expect(
+                    let vertex:Unidoc.Vertex.Decl = tests.expect(
                         value: output.matches.first?.decl)
                 {
                     tests.expect(vertex.stem.last ==? "init(bitPattern:)")
@@ -168,7 +168,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     if  let output:Unidoc.VertexOutput<Any> = tests.expect(
                             value: try await unidoc.execute(query: query, with: session)),
-                        let _:Volume.Vertex = tests.expect(value: output.principal?.vertex)
+                        let _:Unidoc.Vertex = tests.expect(value: output.principal?.vertex)
                     {
                     }
                 }
@@ -183,9 +183,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.VertexOutput<Any> = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let vertex:Volume.Vertex.Culture = tests.expect(
+                    let vertex:Unidoc.Vertex.Culture = tests.expect(
                         value: output.principal?.vertex?.culture),
-                    let tree:Volume.TypeTree = tests.expect(
+                    let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree)
                 {
                     tests.expect(vertex.id ==? tree.id)
@@ -213,9 +213,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.VertexOutput<Any> = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let vertex:Volume.Vertex = tests.expect(
+                    let vertex:Unidoc.Vertex = tests.expect(
                         value: output.principal?.vertex),
-                    let tree:Volume.TypeTree = tests.expect(
+                    let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree),
                     let overview:Volume.Passage = tests.expect(
                         value: vertex.overview),
@@ -280,7 +280,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:Unidoc.VertexOutput<Any> = tests.expect(
                         value: try await unidoc.execute(query: query, with: session)),
-                    let _:Volume.Vertex = tests.expect(
+                    let _:Unidoc.Vertex = tests.expect(
                         value: output.principal?.vertex)
                 {
                 }

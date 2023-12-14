@@ -1,7 +1,7 @@
 import BSON
 import Unidoc
 
-extension Volume
+extension Unidoc
 {
     @frozen public
     struct TypeTree:Identifiable, Equatable, Sendable
@@ -19,7 +19,7 @@ extension Volume
         }
     }
 }
-extension Volume.TypeTree
+extension Unidoc.TypeTree
 {
     public
     enum CodingKey:String, Sendable
@@ -28,7 +28,7 @@ extension Volume.TypeTree
         case table = "T"
     }
 }
-extension Volume.TypeTree:BSONDocumentEncodable
+extension Unidoc.TypeTree:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -37,7 +37,7 @@ extension Volume.TypeTree:BSONDocumentEncodable
         bson[.table] = Volume.NounTable.init(eliding: self.rows)
     }
 }
-extension Volume.TypeTree:BSONDocumentDecodable
+extension Unidoc.TypeTree:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

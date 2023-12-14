@@ -12,11 +12,11 @@ extension DynamicLinker
         /// Caches foreign shoots, as it is non-trivial to discover the namespace of a foreign
         /// declaration.
         private
-        var foreign:[Unidoc.Scalar: Volume.Shoot]
+        var foreign:[Unidoc.Scalar: Unidoc.Shoot]
         /// Caches local shoots, as it is non-trivial to lookup already-linked vertices by
         /// scalar.
         private
-        var local:[Unidoc.Scalar: Volume.Shoot]
+        var local:[Unidoc.Scalar: Unidoc.Shoot]
 
         /// Maps cultures to trees.
         private
@@ -38,14 +38,14 @@ extension DynamicLinker
 extension DynamicLinker.TreeMapper
 {
     mutating
-    func add(_ vertex:Volume.Vertex.Article)
+    func add(_ vertex:Unidoc.Vertex.Article)
     {
         self.local[vertex.id] = vertex.shoot
         self.trees[vertex.culture, default: []].articles.append(.init(shoot: vertex.shoot,
             style: .text("\(vertex.headline.safe)")))
     }
     mutating
-    func add(_ vertex:Volume.Vertex.Decl)
+    func add(_ vertex:Unidoc.Vertex.Decl)
     {
         self.local[vertex.id] = vertex.shoot
 
@@ -67,7 +67,7 @@ extension DynamicLinker.TreeMapper
 {
     mutating
     func register(foreign:Unidoc.Scalar,
-        with context:borrowing DynamicLinker) -> Volume.Vertex.Foreign
+        with context:borrowing DynamicLinker) -> Unidoc.Vertex.Foreign
     {
         guard
         let snapshot:DynamicLinker.Snapshot = context[foreign.package]
@@ -91,7 +91,7 @@ extension DynamicLinker.TreeMapper
         /// Our policy for hashing out-of-package types is to hash if the type uses a
         /// hash suffix in its home package, even if the type would not require any
         /// disambiguation in this package.
-        let vertex:Volume.Vertex.Foreign = .init(id: self.next.id(),
+        let vertex:Unidoc.Vertex.Foreign = .init(id: self.next.id(),
             extendee: foreign,
             scope: snapshot.scope(of: node).map { context.expand($0) } ?? [],
             flags: .init(
@@ -109,14 +109,14 @@ extension DynamicLinker.TreeMapper
 extension DynamicLinker.TreeMapper
 {
     mutating
-    func update(with group:Volume.Group.Extension)
+    func update(with group:Unidoc.Group.Extension)
     {
-        if  let shoot:Volume.Shoot = self.local[group.scope]
+        if  let shoot:Unidoc.Shoot = self.local[group.scope]
         {
             { _ in }(&self.trees[group.culture, default: []].types[shoot, default: .package])
         }
         else if
-            let shoot:Volume.Shoot = self.foreign[group.scope]
+            let shoot:Unidoc.Shoot = self.foreign[group.scope]
         {
             { _ in }(&self.trees[group.culture, default: []].types[shoot, default: .foreign])
         }
@@ -125,14 +125,14 @@ extension DynamicLinker.TreeMapper
 extension DynamicLinker.TreeMapper
 {
     consuming
-    func build(cultures:[Volume.Vertex.Culture]) -> (trees:[Volume.TypeTree], index:JSON)
+    func build(cultures:[Unidoc.Vertex.Culture]) -> (trees:[Unidoc.TypeTree], index:JSON)
     {
         let cultures:[Unidoc.Scalar: Symbol.Module] = cultures.reduce(into: [:])
         {
             $0[$1.id] = $1.module.id
         }
 
-        var trees:[Volume.TypeTree] = []
+        var trees:[Unidoc.TypeTree] = []
             trees.reserveCapacity(self.trees.count)
 
         let json:JSON = .array
@@ -147,7 +147,7 @@ extension DynamicLinker.TreeMapper
                     continue
                 }
 
-                var tree:Volume.TypeTree = .init(id: id)
+                var tree:Unidoc.TypeTree = .init(id: id)
 
                 tree.rows += members.articles.sorted
                 {
@@ -182,7 +182,7 @@ extension DynamicLinker.TreeMapper
                                 $0["h"] = noun.shoot.hash?.value
                             }
                         }
-                        for shoot:Volume.Shoot in members.procs
+                        for shoot:Unidoc.Shoot in members.procs
                         {
                             $0[+, Any.self]
                             {
