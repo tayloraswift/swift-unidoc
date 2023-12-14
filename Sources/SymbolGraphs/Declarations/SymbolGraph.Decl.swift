@@ -3,7 +3,7 @@ import BSON
 import LexicalPaths
 import Signatures
 import Sources
-import Unidoc
+import Symbols
 
 extension SymbolGraph
 {
@@ -11,11 +11,11 @@ extension SymbolGraph
     struct Decl:Equatable, Sendable
     {
         public
-        let phylum:Unidoc.Decl
+        let phylum:Phylum.Decl
         public
-        var kinks:Unidoc.Decl.Kinks
+        var kinks:Phylum.Decl.Kinks
         public
-        var route:Unidoc.Decl.Route
+        var route:Phylum.Decl.Route
 
         public
         let path:UnqualifiedPath
@@ -65,9 +65,9 @@ extension SymbolGraph
 
         @inlinable internal
         init(
-            phylum:Unidoc.Decl,
-            kinks:Unidoc.Decl.Kinks,
-            route:Unidoc.Decl.Route,
+            phylum:Phylum.Decl,
+            kinks:Phylum.Decl.Kinks,
+            route:Phylum.Decl.Route,
             path:UnqualifiedPath,
             signature:Signature<Int32> = .init(),
             location:SourceLocation<Int32>? = nil,
@@ -101,14 +101,14 @@ extension SymbolGraph
 extension SymbolGraph.Decl
 {
     @inlinable public
-    init(phylum:Unidoc.Decl, kinks:Unidoc.Decl.Kinks, path:UnqualifiedPath)
+    init(phylum:Phylum.Decl, kinks:Phylum.Decl.Kinks, path:UnqualifiedPath)
     {
         self.init(phylum: phylum, kinks: kinks, route: .unhashed, path: path)
     }
 }
 extension SymbolGraph.Decl
 {
-    /// See ``Unidoc.Decl.scope(trimming:)``.
+    /// See ``Phylum.Decl.scope(trimming:)``.
     @inlinable public
     var scope:[String]
     {
@@ -147,7 +147,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.flags] = Unidoc.Decl.Flags.init(
+        bson[.flags] = Phylum.Decl.Flags.init(
             phylum: self.phylum,
             kinks: self.kinks,
             route: self.route)
@@ -193,7 +193,7 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let flags:Unidoc.Decl.Flags = try bson[.flags].decode()
+        let flags:Phylum.Decl.Flags = try bson[.flags].decode()
         self.init(
             phylum: flags.phylum,
             kinks: flags.kinks,

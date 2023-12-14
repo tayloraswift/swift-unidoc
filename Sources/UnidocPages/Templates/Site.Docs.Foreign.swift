@@ -37,7 +37,7 @@ extension Site.Docs
 extension Site.Docs.Foreign
 {
     private
-    var demonym:Unidoc.Decl.Demonym<Language.EN>
+    var demonym:Phylum.Decl.Demonym<Language.EN>
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }

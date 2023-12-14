@@ -1,7 +1,7 @@
 import LexicalPaths
-import Unidoc
+import Symbols
 
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     /// Returns all the components of the given path if an ``actor``, ``class``, ``enum``,
     /// ``protocol``, or ``struct``; returns all but the last component otherwise.

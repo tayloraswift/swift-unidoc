@@ -1,13 +1,13 @@
 import Codelinks
-import Unidoc
+import Symbols
 
 extension Codelink.Filter
 {
     static
-    func ~= (self:Self, phylum:Unidoc.Decl?) -> Bool
+    func ~= (self:Self, phylum:Phylum.Decl?) -> Bool
     {
         guard
-        let phylum:Unidoc.Decl
+        let phylum:Phylum.Decl
         else
         {
             return false

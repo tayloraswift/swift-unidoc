@@ -14,7 +14,7 @@ extension Unidoc.Vertex
         public
         let scope:[Unidoc.Scalar]
         public
-        let flags:Unidoc.Decl.Flags
+        let flags:Phylum.Decl.Flags
 
         public
         let stem:Unidoc.Stem
@@ -25,7 +25,7 @@ extension Unidoc.Vertex
         init(id:Unidoc.Scalar,
             extendee:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
-            flags:Unidoc.Decl.Flags,
+            flags:Phylum.Decl.Flags,
             stem:Unidoc.Stem,
             hash:FNV24.Extended)
         {
@@ -41,10 +41,10 @@ extension Unidoc.Vertex
 extension Unidoc.Vertex.Foreign
 {
     @inlinable public
-    var phylum:Unidoc.Decl { self.flags.phylum }
+    var phylum:Phylum.Decl { self.flags.phylum }
 
     @inlinable public
-    var kinks:Unidoc.Decl.Kinks { self.flags.kinks }
+    var kinks:Phylum.Decl.Kinks { self.flags.kinks }
 
     @inlinable public
     var shoot:Unidoc.Shoot

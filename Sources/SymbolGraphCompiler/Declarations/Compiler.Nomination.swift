@@ -9,9 +9,9 @@ extension Compiler
         @usableFromInline internal
         let name:String
         @usableFromInline internal
-        let phylum:Unidoc.Decl
+        let phylum:Phylum.Decl
 
-        init(_ name:String, phylum:Unidoc.Decl)
+        init(_ name:String, phylum:Phylum.Decl)
         {
             self.name = name
             self.phylum = phylum

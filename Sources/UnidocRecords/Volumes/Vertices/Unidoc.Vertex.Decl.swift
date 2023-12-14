@@ -13,7 +13,7 @@ extension Unidoc.Vertex
         let id:Unidoc.Scalar
 
         public
-        let flags:Unidoc.Decl.Flags
+        let flags:Phylum.Decl.Flags
 
         public
         let signature:Signature<Unidoc.Scalar?>
@@ -52,7 +52,7 @@ extension Unidoc.Vertex
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            flags:Unidoc.Decl.Flags,
+            flags:Phylum.Decl.Flags,
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Unidoc.Stem,
@@ -110,13 +110,13 @@ extension Unidoc.Vertex.Decl
     }
 
     @inlinable public
-    var phylum:Unidoc.Decl
+    var phylum:Phylum.Decl
     {
         self.flags.phylum
     }
 
     @inlinable public
-    var kinks:Unidoc.Decl.Kinks
+    var kinks:Phylum.Decl.Kinks
     {
         self.flags.kinks
     }

@@ -28,7 +28,7 @@ extension DynamicLinker.SortPriority
 }
 extension DynamicLinker.SortPriority.Phylum
 {
-    init(_ phylum:Unidoc.Decl, position:SourcePosition? = nil)
+    init(_ phylum:Phylum.Decl, position:SourcePosition? = nil)
     {
         switch phylum
         {

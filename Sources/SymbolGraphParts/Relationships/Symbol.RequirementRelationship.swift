@@ -1,5 +1,4 @@
 import Symbols
-import Unidoc
 
 extension Symbol
 {
@@ -30,7 +29,7 @@ extension Symbol
 extension Symbol.RequirementRelationship:NestingRelationship
 {
     @inlinable public
-    var kinks:Unidoc.Decl.Kinks
+    var kinks:Phylum.Decl.Kinks
     {
         self.optional ? [.requiredOptionally] : [.required]
     }
@@ -42,7 +41,7 @@ extension Symbol.RequirementRelationship:NestingRelationship
     }
 
     public
-    func validate(source phylum:Unidoc.Decl) -> Bool
+    func validate(source phylum:Phylum.Decl) -> Bool
     {
         switch phylum
         {

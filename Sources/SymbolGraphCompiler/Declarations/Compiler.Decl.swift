@@ -22,7 +22,7 @@ extension Compiler
         let location:SourceLocation<Symbol.File>?
 
         public
-        let phylum:Unidoc.Decl
+        let phylum:Phylum.Decl
         public
         let path:UnqualifiedPath
 
@@ -53,7 +53,7 @@ extension Compiler
         public internal(set)
         var origin:Symbol.Decl?
         public internal(set)
-        var kinks:Unidoc.Decl.Kinks
+        var kinks:Phylum.Decl.Kinks
 
         public private(set)
         var comment:Doccomment?
@@ -63,7 +63,7 @@ extension Compiler
         init(_ id:Symbol.Decl,
             signature:Signature<Symbol.Decl>,
             location:SourceLocation<Symbol.File>?,
-            phylum:Unidoc.Decl,
+            phylum:Phylum.Decl,
             path:UnqualifiedPath)
         {
             self.id = id

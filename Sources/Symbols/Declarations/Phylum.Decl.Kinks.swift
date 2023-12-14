@@ -1,4 +1,4 @@
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     @frozen public
     struct Kinks:Equatable, Hashable, Sendable
@@ -13,7 +13,7 @@ extension Unidoc.Decl
         }
     }
 }
-extension Unidoc.Decl.Kinks:RawRepresentable
+extension Phylum.Decl.Kinks:RawRepresentable
 {
     @inlinable public
     var rawValue:UInt8 { self.bits }
@@ -23,19 +23,19 @@ extension Unidoc.Decl.Kinks:RawRepresentable
         self.init(bits: rawValue)
     }
 }
-extension Unidoc.Decl.Kinks:ExpressibleByArrayLiteral
+extension Phylum.Decl.Kinks:ExpressibleByArrayLiteral
 {
     @inlinable public
-    init(arrayLiteral:Unidoc.Decl.Kink...)
+    init(arrayLiteral:Phylum.Decl.Kink...)
     {
         self.init(bits: 0)
-        for what:Unidoc.Decl.Kink in arrayLiteral
+        for what:Phylum.Decl.Kink in arrayLiteral
         {
             self[is: what] = true
         }
     }
 }
-extension Unidoc.Decl.Kinks
+extension Phylum.Decl.Kinks
 {
     @inlinable public static
     func + (lhs:Self, rhs:Self) -> Self
@@ -50,7 +50,7 @@ extension Unidoc.Decl.Kinks
     }
 
     @inlinable public
-    subscript(is kink:Unidoc.Decl.Kink) -> Bool
+    subscript(is kink:Phylum.Decl.Kink) -> Bool
     {
         get
         {

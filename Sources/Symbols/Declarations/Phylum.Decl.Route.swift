@@ -1,4 +1,4 @@
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     @frozen public
     enum Route:UInt8, Equatable, Hashable, Sendable

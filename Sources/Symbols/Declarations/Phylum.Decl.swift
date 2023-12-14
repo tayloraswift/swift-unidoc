@@ -1,4 +1,4 @@
-extension Unidoc
+extension Phylum
 {
     @frozen public
     enum Decl:Hashable, Equatable, Sendable
@@ -20,7 +20,7 @@ extension Unidoc
         case `var`(Objectivity?)
     }
 }
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     /// Indicates if the declaration is typelike. This is not the same as ``orientation``!
     @inlinable public
@@ -69,7 +69,7 @@ extension Unidoc.Decl
         }
     }
 }
-extension Unidoc.Decl:RawRepresentable
+extension Phylum.Decl:RawRepresentable
 {
     @inlinable public
     init?(rawValue:UInt8)
