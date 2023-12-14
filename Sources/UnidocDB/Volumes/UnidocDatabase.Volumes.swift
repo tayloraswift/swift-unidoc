@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -105,7 +106,7 @@ extension UnidocDatabase.Volumes:Mongo.RecodableModel
 }
 extension UnidocDatabase.Volumes
 {
-    func find(named symbol:VolumeIdentifier,
+    func find(named symbol:Symbol.Edition,
         with session:Mongo.Session) async throws -> Unidoc.VolumeMetadata?
     {
         try await session.run(

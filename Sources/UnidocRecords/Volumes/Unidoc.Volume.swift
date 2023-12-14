@@ -1,22 +1,6 @@
 import JSON
+import Symbols
 import Unidoc
-
-public
-enum Volume
-{
-    public
-    typealias Vertex = Unidoc.Vertex
-    public
-    typealias Group = Unidoc.Group
-    public
-    typealias Metadata = Unidoc.VolumeMetadata
-    public
-    typealias Noun = Unidoc.Noun
-    public
-    typealias Stem = Unidoc.Stem
-    public
-    typealias Shoot = Unidoc.Shoot
-}
 
 extension Unidoc
 {
@@ -63,12 +47,12 @@ extension Unidoc.Volume
 extension Unidoc.Volume
 {
     @inlinable public
-    var id:VolumeIdentifier { self.metadata.symbol }
+    var id:Symbol.Edition { self.metadata.symbol }
 }
 extension Unidoc.Volume
 {
     @inlinable public
-    var search:SearchIndex<VolumeIdentifier>
+    var search:SearchIndex<Symbol.Edition>
     {
         .init(id: self.id, json: self.index)
     }

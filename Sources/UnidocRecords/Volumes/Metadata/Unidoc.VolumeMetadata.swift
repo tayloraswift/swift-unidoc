@@ -23,7 +23,7 @@ extension Unidoc
         var commit:SHA1?
 
         public
-        var symbol:VolumeIdentifier
+        var symbol:Symbol.Edition
         public
         var latest:Bool
         public
@@ -44,7 +44,7 @@ extension Unidoc
             display:String? = nil,
             refname:String? = nil,
             commit:SHA1? = nil,
-            symbol:VolumeIdentifier,
+            symbol:Symbol.Edition,
             latest:Bool,
             realm:Unidoc.Realm?,
             patch:PatchVersion? = nil,
