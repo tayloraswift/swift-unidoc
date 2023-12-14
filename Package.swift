@@ -504,6 +504,7 @@ let package:Package = .init(
                 .target(name: "JSON"),
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
+                .target(name: "Unidoc"),
             ]),
 
         .target(name: "UnixTime"),
