@@ -6,7 +6,7 @@ extension Compiler
     enum SemanticError:Error, Sendable
     {
         case already(has:Counterpart)
-        case cannot(have:Counterparts, as:Unidoc.Decl)
+        case cannot(have:Counterparts, as:Phylum.Decl)
     }
 }
 extension Compiler.SemanticError:CustomStringConvertible

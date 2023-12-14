@@ -4,7 +4,7 @@ extension GroupSections
 {
     enum Mode:Hashable, Equatable, Sendable
     {
-        case decl(Unidoc.Decl, Unidoc.Decl.Kinks)
+        case decl(Phylum.Decl, Phylum.Decl.Kinks)
         case meta
     }
 }

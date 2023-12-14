@@ -49,7 +49,7 @@ extension Compiler.DeclObject
         self.value.id
     }
 
-    var kinks:Unidoc.Decl.Kinks
+    var kinks:Phylum.Decl.Kinks
     {
         _read   { yield  self.value.kinks }
         _modify { yield &self.value.kinks }

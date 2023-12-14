@@ -4,7 +4,6 @@ import LexicalPaths
 import Signatures
 import Sources
 import Symbols
-import Unidoc
 
 @available(*, deprecated, renamed: "SymbolGraphPart.Vertex")
 public
@@ -20,7 +19,7 @@ extension SymbolGraphPart
         public
         let acl:ACL
         public
-        let phylum:Unidoc.Phylum
+        let phylum:Phylum
 
         public
         let doccomment:Doccomment?
@@ -40,7 +39,7 @@ extension SymbolGraphPart
         init(
             usr:Symbol.USR,
             acl:ACL,
-            phylum:Unidoc.Phylum,
+            phylum:Phylum,
             doccomment:Doccomment?,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
@@ -63,7 +62,7 @@ extension SymbolGraphPart.Vertex
     private
     init(usr:Symbol.USR,
         acl:ACL,
-        phylum:Unidoc.Phylum,
+        phylum:Phylum,
         availability:Availability,
         doccomment:Doccomment?,
         interfaces:Interfaces?,
@@ -74,7 +73,7 @@ extension SymbolGraphPart.Vertex
         path:UnqualifiedPath)
     {
         var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
-        var phylum:Unidoc.Phylum = phylum
+        var phylum:Phylum = phylum
 
         let abridged:Signature<Symbol.Decl>.Abridged
         let expanded:Signature<Symbol.Decl>.Expanded

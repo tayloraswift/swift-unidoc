@@ -102,7 +102,7 @@ extension StaticLinker
         features.map
         {
             let feature:Int32 = self.symbolizer.intern($0)
-            if  let (last, phylum):(String, Unidoc.Decl) =
+            if  let (last, phylum):(String, Phylum.Decl) =
                 self.symbolizer.graph.decls[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {

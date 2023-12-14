@@ -20,7 +20,7 @@ extension Compiler
 extension Compiler.Nominations
 {
     @inlinable public
-    subscript(feature scalar:Symbol.Decl) -> (name:String, phylum:Unidoc.Decl)?
+    subscript(feature scalar:Symbol.Decl) -> (name:String, phylum:Phylum.Decl)?
     {
         self.nominations[scalar].map { ($0.name, $0.phylum) }
     }

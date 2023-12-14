@@ -159,6 +159,7 @@ let package:Package = .init(
             [
                 .target(name: "Codelinks"),
                 .target(name: "Symbols"),
+                //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
             ]),
 
@@ -406,7 +407,6 @@ let package:Package = .init(
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
-                .target(name: "Unidoc"),
             ]),
 
         .target(name: "SymbolGraphs", dependencies:
@@ -416,7 +416,6 @@ let package:Package = .init(
                 .target(name: "SHA1"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
-                .target(name: "Unidoc"),
 
                 .product(name: "BSON", package: "swift-mongodb"),
             ],

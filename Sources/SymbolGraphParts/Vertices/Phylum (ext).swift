@@ -1,7 +1,7 @@
 import JSONDecoding
-import Unidoc
+import Symbols
 
-extension Unidoc.Phylum:JSONDecodable, JSONStringDecodable
+extension Phylum:JSONDecodable, JSONStringDecodable
 {
     public
     init?(_ description:String)
