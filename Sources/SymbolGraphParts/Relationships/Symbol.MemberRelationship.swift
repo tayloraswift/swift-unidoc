@@ -1,5 +1,4 @@
 import Symbols
-import Unidoc
 
 extension Symbol
 {
@@ -25,13 +24,13 @@ extension Symbol
 extension Symbol.MemberRelationship:NestingRelationship
 {
     @inlinable public
-    var kinks:Unidoc.Decl.Kinks { [] }
+    var kinks:Phylum.Decl.Kinks { [] }
 
     @inlinable public
     var scope:Symbol.USR { self.target }
 
     public
-    func validate(source phylum:Unidoc.Decl) -> Bool
+    func validate(source phylum:Phylum.Decl) -> Bool
     {
         switch phylum
         {

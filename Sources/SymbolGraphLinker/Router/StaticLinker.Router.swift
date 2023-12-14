@@ -22,7 +22,7 @@ extension StaticLinker.Router
 {
     subscript(namespace:Symbol.Module,
         path:UnqualifiedPath,
-        phylum:Unidoc.Decl) -> InlineDictionary<FNV24?, InlineArray<Int32>>
+        phylum:Phylum.Decl) -> InlineDictionary<FNV24?, InlineArray<Int32>>
     {
         _read
         {

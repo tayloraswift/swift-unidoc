@@ -15,7 +15,7 @@ enum Main:TestMain, TestBattery
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/SymbolGraphs/Phyla.symbols.json")
         {
-            for (symbol, phylum):([String], Unidoc.Decl) in
+            for (symbol, phylum):([String], Phylum.Decl) in
             [
                 (["Actor"],                         .actor),
                 (["Class"],                         .class),
@@ -35,7 +35,7 @@ enum Main:TestMain, TestBattery
                     tests.expect(symbol.phylum ==? .decl(phylum))
                 }
             }
-            for (symbol, phylum, name):([String], Unidoc.Decl, String) in
+            for (symbol, phylum, name):([String], Phylum.Decl, String) in
             [
                 (["Func"],                      .func(nil),             "global-func"),
                 (["Struct", "instanceMethod"],  .func(.instance),       "instance-func"),
@@ -77,7 +77,7 @@ enum Main:TestMain, TestBattery
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/SymbolGraphs/Phyla@Swift.symbols.json")
         {
-            for (symbol, phylum):([String], Unidoc.Phylum) in
+            for (symbol, phylum):([String], Phylum) in
             [
                 (["Int"], .block),
                 (["Int", "AssociatedType"], .decl(.typealias)),

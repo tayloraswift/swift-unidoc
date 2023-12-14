@@ -13,10 +13,10 @@ extension Compiler
         public
         let symbol:Symbol.USR
         public
-        let phylum:Unidoc.Phylum
+        let phylum:Phylum
 
         public
-        init(underlying:any Error, symbol:Symbol.USR, phylum:Unidoc.Phylum)
+        init(underlying:any Error, symbol:Symbol.USR, phylum:Phylum)
         {
             self.underlying = underlying
             self.symbol = symbol

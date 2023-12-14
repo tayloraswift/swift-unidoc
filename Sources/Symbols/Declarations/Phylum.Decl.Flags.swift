@@ -1,17 +1,17 @@
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     @frozen public
     struct Flags:Equatable, Sendable
     {
         public
-        let phylum:Unidoc.Decl
+        let phylum:Phylum.Decl
         public
         let kinks:Kinks
         public
         var route:Route
 
         @inlinable public
-        init(phylum:Unidoc.Decl, kinks:Kinks, route:Route)
+        init(phylum:Phylum.Decl, kinks:Kinks, route:Route)
         {
             self.phylum = phylum
             self.kinks = kinks
@@ -19,7 +19,7 @@ extension Unidoc.Decl
         }
     }
 }
-extension Unidoc.Decl.Flags:RawRepresentable
+extension Phylum.Decl.Flags:RawRepresentable
 {
     @inlinable public
     var rawValue:Int32
@@ -32,11 +32,11 @@ extension Unidoc.Decl.Flags:RawRepresentable
     init?(rawValue:Int32)
     {
         if
-            let phylum:Unidoc.Decl = .init(
+            let phylum:Phylum.Decl = .init(
                 rawValue: .init(truncatingIfNeeded: rawValue >> 24)),
-            let kinks:Unidoc.Decl.Kinks = .init(
+            let kinks:Phylum.Decl.Kinks = .init(
                 rawValue: .init(truncatingIfNeeded: rawValue >> 16)),
-            let route:Unidoc.Decl.Route = .init(
+            let route:Phylum.Decl.Route = .init(
                 rawValue: .init(truncatingIfNeeded: rawValue))
         {
             self.init(phylum: phylum, kinks: kinks, route: route)

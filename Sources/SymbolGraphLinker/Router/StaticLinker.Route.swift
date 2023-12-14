@@ -18,7 +18,7 @@ extension StaticLinker.Route
     static
     func decl(_ namespace:Symbol.Module,
         _ path:UnqualifiedPath,
-        _ phylum:Unidoc.Decl) -> Self
+        _ phylum:Phylum.Decl) -> Self
     {
         var stem:URI.Path = [.push("\(namespace)")]
         if  case .gay = phylum.orientation,

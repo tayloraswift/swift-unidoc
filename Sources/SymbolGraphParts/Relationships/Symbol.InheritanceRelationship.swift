@@ -1,5 +1,4 @@
 import Symbols
-import Unidoc
 
 extension Symbol
 {
@@ -25,10 +24,10 @@ extension Symbol
 extension Symbol.InheritanceRelationship:SuperformRelationship
 {
     @inlinable public
-    var kinks:Unidoc.Decl.Kinks { [] }
+    var kinks:Phylum.Decl.Kinks { [] }
 
     public
-    func validate(source phylum:Unidoc.Decl) -> Bool
+    func validate(source phylum:Phylum.Decl) -> Bool
     {
         switch phylum
         {

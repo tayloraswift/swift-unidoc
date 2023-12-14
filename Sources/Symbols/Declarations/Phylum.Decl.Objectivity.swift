@@ -1,4 +1,4 @@
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     @frozen public
     enum Objectivity:Equatable, Hashable, Comparable, Sendable

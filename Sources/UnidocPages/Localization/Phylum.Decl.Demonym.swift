@@ -1,21 +1,21 @@
 import HTML
 import Unidoc
 
-extension Unidoc.Decl
+extension Phylum.Decl
 {
     struct Demonym<Locale>
     {
-        let phylum:Unidoc.Decl
-        let kinks:Unidoc.Decl.Kinks
+        let phylum:Phylum.Decl
+        let kinks:Kinks
 
-        init(phylum:Unidoc.Decl, kinks:Unidoc.Decl.Kinks)
+        init(phylum:Phylum.Decl, kinks:Kinks)
         {
             self.phylum = phylum
             self.kinks = kinks
         }
     }
 }
-extension Unidoc.Decl.Demonym<Language.EN>
+extension Phylum.Decl.Demonym<Language.EN>
 {
     var modifier:String?
     {

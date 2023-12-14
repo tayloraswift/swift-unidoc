@@ -43,8 +43,8 @@ extension Unidoc
     ///
     /// Stems support relatively efficient comparisons, because they are stored as strings
     /// rather than arrays of substrings. The sort ordering is unicode-aware, and sorts the
-    /// ``Unidoc.Decl.Orientation/gay`` path orientation before the
-    /// ``Unidoc.Decl.Orientation/straight`` orientation.
+    /// ``Phylum.Decl.Orientation/gay`` path orientation before the
+    /// ``Phylum.Decl.Orientation/straight`` orientation.
     ///
     /// >   Note:
     ///     If you have a collection of stems that all share a common prefix, it may be even
@@ -286,7 +286,7 @@ extension Unidoc.Stem
     init(
         _ namespace:borrowing Symbol.Module,
         _ path:borrowing UnqualifiedPath,
-        orientation:Unidoc.Decl.Orientation)
+        orientation:Phylum.Decl.Orientation)
     {
         self.init(rawValue: "\(namespace)")
         for component:String in path.prefix
