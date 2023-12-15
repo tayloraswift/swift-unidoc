@@ -581,10 +581,12 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     public
-    func rebuild(with session:Mongo.Session) async throws
+    func rebuild(with session:Mongo.Session, queue:Bool = false) async throws
     {
-        try await self.execute(update: Snapshots.QueueUplink.all, with: session)
-
+        if  queue
+        {
+            try await self.execute(update: Snapshots.QueueUplink.all, with: session)
+        }
         while
             let editions:[Unidoc.Edition] = try await self.snapshots.linkable(8,
                 with: session)

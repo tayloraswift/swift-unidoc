@@ -56,6 +56,11 @@ let package:Package = .init(
         .library(name: "Sources", targets: ["Sources"]),
 
         .library(name: "Swiftinit", targets: ["Swiftinit"]),
+        .library(name: "SwiftinitAssets", targets: ["SwiftinitAssets"]),
+        .library(name: "SwiftinitPages", targets: ["SwiftinitPages"]),
+        .library(name: "SwiftinitRender", targets: ["SwiftinitRender"]),
+
+        .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
 
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
@@ -69,17 +74,15 @@ let package:Package = .init(
         .library(name: "UA", targets: ["UA"]),
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
-        .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
-        .library(name: "UnidocPages", targets: ["UnidocPages"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
-        .library(name: "URI", targets: ["URI"]),
 
         .executable(name: "UnidocBuild", targets: ["UnidocBuild"]),
-        .executable(name: "UnidocServer", targets: ["UnidocServer"]),
+
+        .library(name: "URI", targets: ["URI"]),
     ],
     dependencies:
     [
@@ -372,6 +375,31 @@ let package:Package = .init(
                 .target(name: "URI"),
             ]),
 
+        .target(name: "SwiftinitAssets", dependencies:
+            [
+                .target(name: "SwiftinitPages"),
+                .target(name: "System"),
+            ]),
+
+        .target(name: "SwiftinitPages", dependencies:
+            [
+                .target(name: "GitHubAPI"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "SwiftinitRender"),
+                .target(name: "UnidocAPI"),
+                .target(name: "UnidocProfiling"),
+                .target(name: "UnidocQueries"),
+            ]),
+
+        .target(name: "SwiftinitRender", dependencies:
+            [
+                .target(name: "HTTP"),
+                .target(name: "HTML"),
+                .target(name: "Media"),
+                .target(name: "Swiftinit"),
+                .target(name: "UnidocRecords"),
+            ]),
+
         .target(name: "Symbols", dependencies:
             [
                 .target(name: "Sources"),
@@ -452,12 +480,6 @@ let package:Package = .init(
                 .target(name: "Unidoc"),
             ]),
 
-        .target(name: "UnidocAssets", dependencies:
-            [
-                .target(name: "UnidocPages"),
-                .target(name: "System"),
-            ]),
-
         .target(name: "UnidocDB", dependencies:
             [
                 .target(name: "GitHubAPI"),
@@ -481,18 +503,6 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .target(name: "UnidocPages", dependencies:
-            [
-                .target(name: "GitHubAPI"),
-                .target(name: "HTTP"),
-                .target(name: "MarkdownRendering"),
-                .target(name: "Swiftinit"),
-                .target(name: "UnidocAPI"),
-                .target(name: "UnidocProfiling"),
-                .target(name: "UnidocQueries"),
-                .target(name: "URI"),
-            ]),
-
         .target(name: "UnidocProfiling", dependencies:
             [
                 .target(name: "HTTPServer"),
@@ -510,7 +520,6 @@ let package:Package = .init(
         .target(name: "UnidocRecords", dependencies:
             [
                 .target(name: "FNV1"),
-                .target(name: "JSON"),
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
@@ -534,26 +543,25 @@ let package:Package = .init(
             [
                 .target(name: "S3"),
                 .target(name: "System"),
-                .target(name: "UnidocAssets"),
+                .target(name: "SwiftinitAssets"),
             ]),
 
         .executableTarget(name: "UnidocBuild", dependencies:
             [
                 .target(name: "HTTPClient"),
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocAPI"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
             ]),
 
-        .executableTarget(name: "UnidocServer", dependencies:
+        .executableTarget(name: "SwiftinitServer", dependencies:
             [
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
                 .target(name: "Sitemaps"),
-                .target(name: "UnidocAssets"),
-                .target(name: "UnidocPages"),
+                .target(name: "SwiftinitAssets"),
+                .target(name: "SwiftinitPages"),
             ]),
 
 
