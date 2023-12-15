@@ -41,7 +41,7 @@ extension Swiftinit.SlavesDashboardEndpoint:RestrictedEndpoint
                 with: session)
         }
 
-        let page:Site.Admin.Slaves = .init(cookie: "\(cookie)")
-        return .ok(page.resource(format: .init(assets: server.assets)))
+        let page:Swiftinit.AdminPage.Slaves = .init(cookie: "\(cookie)")
+        return .ok(page.resource(format: server.format))
     }
 }

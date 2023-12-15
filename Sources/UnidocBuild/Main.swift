@@ -3,7 +3,7 @@ import NIOCore
 import NIOPosix
 import NIOSSL
 import System
-import UnidocAutomation
+import UnidocAPI
 
 @main
 enum Main

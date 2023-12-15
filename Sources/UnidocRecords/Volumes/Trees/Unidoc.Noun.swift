@@ -1,4 +1,5 @@
 import FNV1
+import UnidocAPI
 
 extension Unidoc
 {

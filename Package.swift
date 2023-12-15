@@ -55,6 +55,8 @@ let package:Package = .init(
         .library(name: "Sitemaps", targets: ["Sitemaps"]),
         .library(name: "Sources", targets: ["Sources"]),
 
+        .library(name: "Swiftinit", targets: ["Swiftinit"]),
+
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
@@ -66,8 +68,8 @@ let package:Package = .init(
 
         .library(name: "UA", targets: ["UA"]),
         .library(name: "Unidoc", targets: ["Unidoc"]),
+        .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
-        .library(name: "UnidocAutomation", targets: ["UnidocAutomation"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
@@ -365,6 +367,11 @@ let package:Package = .init(
 
         .target(name: "Sources"),
 
+        .target(name: "Swiftinit", dependencies:
+            [
+                .target(name: "URI"),
+            ]),
+
         .target(name: "Symbols", dependencies:
             [
                 .target(name: "Sources"),
@@ -439,15 +446,16 @@ let package:Package = .init(
 
         .target(name: "Unidoc"),
 
+        .target(name: "UnidocAPI", dependencies:
+            [
+                .target(name: "JSON"),
+                .target(name: "Unidoc"),
+            ]),
+
         .target(name: "UnidocAssets", dependencies:
             [
                 .target(name: "UnidocPages"),
                 .target(name: "System"),
-            ]),
-
-        .target(name: "UnidocAutomation", dependencies:
-            [
-                .target(name: "JSON"),
             ]),
 
         .target(name: "UnidocDB", dependencies:
@@ -478,7 +486,8 @@ let package:Package = .init(
                 .target(name: "GitHubAPI"),
                 .target(name: "HTTP"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "UnidocAutomation"),
+                .target(name: "Swiftinit"),
+                .target(name: "UnidocAPI"),
                 .target(name: "UnidocProfiling"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
@@ -504,7 +513,7 @@ let package:Package = .init(
                 .target(name: "JSON"),
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
-                .target(name: "Unidoc"),
+                .target(name: "UnidocAPI"),
             ]),
 
         .target(name: "UnixTime"),
@@ -532,7 +541,7 @@ let package:Package = .init(
             [
                 .target(name: "HTTPClient"),
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocAutomation"),
+                .target(name: "UnidocAPI"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
             ]),

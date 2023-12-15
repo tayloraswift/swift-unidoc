@@ -17,7 +17,7 @@ extension Swiftinit.AdminDashboardEndpoint:RestrictedEndpoint
             command: Mongo.ReplicaSetGetConfiguration.init(),
             against: .admin)
 
-        let page:Site.Admin =
+        let page:Swiftinit.AdminPage =
         {
             (counters:borrowing Swiftinit.Counters) in
 
@@ -29,9 +29,9 @@ extension Swiftinit.AdminDashboardEndpoint:RestrictedEndpoint
                 tagsCrawled: counters.tagsCrawled.load(ordering: .relaxed),
                 tagsUpdated: counters.tagsUpdated.load(ordering: .relaxed),
                 tour: server.tour,
-                real: server.secured)
+                real: server.secure)
         } (server.atomics)
 
-        return .ok(page.resource(format: .init(assets: server.assets)))
+        return .ok(page.resource(format: server.format))
     }
 }

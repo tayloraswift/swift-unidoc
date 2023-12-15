@@ -107,7 +107,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     func subdomain(_ module:Unidoc.Shoot) -> Unidoc.VolumeMetadata.Subdomain?
     {
         let module:HTML.Link<Substring> = .init(display: module.stem.first,
-            target: "\(Site.Docs[self.volume, module])")
+            target: "\(Swiftinit.Docs[self.volume, module])")
         return .init(self.volume, culture: .original(module))
     }
 

@@ -1,4 +1,5 @@
 import BSON
+import UnidocAPI
 
 extension Unidoc.Sitemap
 {

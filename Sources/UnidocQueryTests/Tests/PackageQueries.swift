@@ -33,14 +33,14 @@ struct PackageQueries:UnidocDatabaseTestBattery
                     products: []),
                 graph: empty)
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-debut"
             docs.metadata.commit = nil
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -48,28 +48,28 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.1.2")
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
                 refname: "0.1.3")
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-speak-now"
             docs.metadata.commit = nil
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.3.0")
 
-            let _:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs, with: session)
+            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -77,7 +77,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.4.0")
 
-            let uploaded:UnidocDatabase.Uploaded = try await unidoc.store(docs: docs,
+            let uploaded:Unidoc.UploadStatus = try await unidoc.store(docs: docs,
                 with: session)
 
             print(uploaded)

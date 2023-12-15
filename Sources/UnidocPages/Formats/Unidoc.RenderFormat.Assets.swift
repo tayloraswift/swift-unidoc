@@ -34,7 +34,7 @@ extension Unidoc.RenderFormat.Assets
         }
         else
         {
-            "/\(Site.Asset.root)/\(asset)"
+            "/\(Swiftinit.Asset.root)/\(asset)"
         }
     }
 

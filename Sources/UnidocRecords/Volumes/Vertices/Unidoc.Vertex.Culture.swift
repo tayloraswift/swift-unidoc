@@ -1,5 +1,6 @@
 import SymbolGraphs
 import Unidoc
+import UnidocAPI
 
 extension Unidoc.Vertex
 {

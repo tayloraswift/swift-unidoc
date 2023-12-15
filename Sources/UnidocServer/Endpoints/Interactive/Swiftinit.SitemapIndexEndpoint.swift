@@ -39,7 +39,8 @@ extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
                     xml[.sitemap]
                     {
                         $0[.loc] = """
-                        https://swiftinit.org/\(Site.Docs.root)/\(sitemap.symbol)/all-symbols
+                        https://swiftinit.org\
+                        /\(Swiftinit.Docs.root)/\(sitemap.symbol)/all-symbols
                         """
 
                         guard

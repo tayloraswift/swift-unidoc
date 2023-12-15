@@ -59,7 +59,7 @@ extension Swiftinit.PipelineEndpoint:PublicEndpoint
             return nil
         }
 
-        switch try output.response(as: .init(assets: server.assets, accept: accept))
+        switch try output.response(as: server.format(accept))
         {
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)

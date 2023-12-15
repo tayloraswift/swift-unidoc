@@ -1,6 +1,7 @@
 import FNV1
 import MarkdownABI
 import Unidoc
+import UnidocAPI
 
 extension Unidoc.Vertex
 {

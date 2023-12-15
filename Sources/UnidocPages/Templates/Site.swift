@@ -1,4 +1,3 @@
-@frozen public
-enum Site
-{
-}
+@available(*, deprecated, renamed: "Swiftinit")
+public
+typealias Site = Swiftinit

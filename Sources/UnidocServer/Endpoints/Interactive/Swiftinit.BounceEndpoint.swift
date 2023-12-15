@@ -18,8 +18,8 @@ extension Swiftinit.BounceEndpoint:PublicEndpoint
     {
         if  let oauth:GitHubOAuth = server.plugins.github?.plugin.oauth
         {
-            let page:Site.Login = .init(app: oauth)
-            return .ok(page.resource(format: .init(assets: server.assets)))
+            let page:Swiftinit.LoginPage = .init(app: oauth)
+            return .ok(page.resource(format: server.format))
         }
         else
         {

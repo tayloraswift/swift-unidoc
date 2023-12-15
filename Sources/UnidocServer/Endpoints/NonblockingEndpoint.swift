@@ -29,7 +29,7 @@ extension NonblockingEndpoint
             status = try await self.enqueue(on: server,
                 payload: payload,
                 session: session)
-            request.resume(returning: try status.response(as: .init(assets: server.assets)))
+            request.resume(returning: try status.response(as: server.format))
         }
         catch
         {

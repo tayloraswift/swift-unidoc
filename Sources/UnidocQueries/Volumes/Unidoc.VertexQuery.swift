@@ -2,6 +2,7 @@ import BSON
 import MongoDB
 import MongoQL
 import Unidoc
+import UnidocAPI
 import UnidocDB
 import UnidocRecords
 

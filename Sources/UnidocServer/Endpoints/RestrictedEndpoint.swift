@@ -23,13 +23,13 @@ extension RestrictedEndpoint
     func load(from server:borrowing Swiftinit.Server,
         with cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
     {
-        if  server.secured
+        if  server.secure
         {
             guard
             let cookie:Unidoc.Cookie = cookies.session
             else
             {
-                return .redirect(.temporary("\(Site.Login.uri)"))
+                return .redirect(.temporary("\(Swiftinit.Login.uri)"))
             }
 
             let session:Mongo.Session = try await .init(from: server.db.sessions)

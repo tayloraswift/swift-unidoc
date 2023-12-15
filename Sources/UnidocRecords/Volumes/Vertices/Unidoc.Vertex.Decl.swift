@@ -3,6 +3,7 @@ import Signatures
 import Sources
 import Symbols
 import Unidoc
+import UnidocAPI
 
 extension Unidoc.Vertex
 {

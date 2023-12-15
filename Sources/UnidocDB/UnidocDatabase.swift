@@ -6,6 +6,7 @@ import SHA1
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocAPI
 import UnidocDiagnostics
 import UnidocLinker
 import UnidocRecords
@@ -225,7 +226,7 @@ extension UnidocDatabase
 {
     public
     func store(docs:consuming SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> Uploaded
+        with session:Mongo.Session) async throws -> Unidoc.UploadStatus
     {
         let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
             with: session)
@@ -279,7 +280,7 @@ extension UnidocDatabase
 {
     public
     func publish(docs:SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> (Uploaded, Uplinked)
+        with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
     {
         var snapshot:Unidoc.Snapshot
         let realm:Unidoc.Realm?
@@ -290,11 +291,11 @@ extension UnidocDatabase
             realm: realm,
             with: session)
 
-        let uploaded:Uploaded = try await self.snapshots.upsert(
+        let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
             snapshot: consume snapshot,
             with: session)
 
-        let uplinked:Uplinked = .init(
+        let uplinked:Unidoc.UplinkStatus = .init(
             edition: uploaded.edition,
             sitemap: try await self.fill(volume: consume volume,
                 clear: uploaded.updated,
@@ -304,7 +305,8 @@ extension UnidocDatabase
     }
 
     public
-    func uplink(_ id:Unidoc.Edition, with session:Mongo.Session) async throws -> Uplinked?
+    func uplink(_ id:Unidoc.Edition,
+        with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
     {
         guard
         let package:Unidoc.PackageMetadata = try await self.packages.find(id: id.package,
@@ -336,7 +338,7 @@ extension UnidocDatabase
 
     public
     func uplink(volume:Symbol.Edition,
-        with session:Mongo.Session) async throws -> Uplinked?
+        with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
     {
         if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
                 with: session)
@@ -379,7 +381,7 @@ extension UnidocDatabase
     private
     func fill(volume:consuming Unidoc.Volume,
         clear:Bool = true,
-        with session:Mongo.Session) async throws -> Unidoc.Sitemap.Delta?
+        with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
         if  clear
         {
@@ -403,7 +405,7 @@ extension UnidocDatabase
             realm: volume.metadata.latest ? volume.metadata.realm : nil,
             with: session)
 
-        let delta:Unidoc.Sitemap.Delta? = volume.metadata.latest
+        let delta:Unidoc.SitemapDelta? = volume.metadata.latest
             ? try await self.sitemaps.update(volume.sitemap(), with: session)
             : nil
 

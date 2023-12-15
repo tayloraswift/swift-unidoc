@@ -1,3 +1,4 @@
+import Media
 import UnidocPages
 import UnidocProfiling
 
@@ -23,8 +24,9 @@ extension Swiftinit.Server
         _read { yield self.loop.atomics }
     }
 
-    var secured:Bool { self.loop.secured }
-    var assets:Unidoc.RenderFormat.Assets { self.loop.assets }
+    var secure:Bool { self.loop.secure }
+    var format:Unidoc.RenderFormat { self.loop.format }
+    func format(_ accept:AcceptType) -> Unidoc.RenderFormat { self.loop.format(accept) }
 
     var plugins:Swiftinit.Plugins { self.loop.plugins }
     var db:Swiftinit.DB { self.loop.db }

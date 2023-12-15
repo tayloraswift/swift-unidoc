@@ -40,7 +40,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         let cookie:Unidoc.Cookie = try await server.db.users.update(user: user,
             with: session)
 
-        return .redirect(.temporary("\(Site.Admin.uri)"),
+        return .redirect(.temporary("\(Swiftinit.Admin.uri)"),
             cookies: [Swiftinit.Cookies.session: "\(cookie)"])
     }
 }

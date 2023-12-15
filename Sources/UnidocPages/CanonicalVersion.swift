@@ -62,19 +62,19 @@ extension CanonicalVersion
             switch vertex
             {
             case .article(let vertex):
-                target = .article(Site.Docs[volumeOfLatest, vertex.shoot])
+                target = .article(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
 
             case .culture(let vertex):
-                target = .culture(Site.Docs[volumeOfLatest, vertex.shoot])
+                target = .culture(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
 
             case .decl(let vertex):
-                target = .decl(Site.Docs[volumeOfLatest, vertex.shoot])
+                target = .decl(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
 
             case .file:
                 return nil
 
             case .foreign(let vertex):
-                target = .foreign(Site.Docs[volumeOfLatest, vertex.shoot])
+                target = .foreign(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
 
             case .global:
                 target = .global
@@ -95,7 +95,7 @@ extension CanonicalVersion
 
         self.init(relationship: relationship,
             package: volumeOfLatest.title,
-            volume: Site.Docs[volumeOfLatest],
+            volume: Swiftinit.Docs[volumeOfLatest],
             target: target)
     }
 }
