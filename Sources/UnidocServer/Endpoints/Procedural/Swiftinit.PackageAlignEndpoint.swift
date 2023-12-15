@@ -56,7 +56,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
             return .noSuchPackage
         }
 
-        return .align(package.id, to: realm)
+        return .align(package, to: realm)
     }
 
     func perform(on server:borrowing Swiftinit.Server,
@@ -66,7 +66,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
         switch status
         {
         case .align(let package, let realm):
-            try? await server.db.unidoc.align(package: package, realm: realm, with: session)
+            try? await server.db.unidoc.align(package: package.id, realm: realm, with: session)
 
         default:
             break

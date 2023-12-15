@@ -202,8 +202,24 @@ extension Unidoc.EditionsPage:ApplicationPage
                 $0[.dt] = "Realm"
                 $0[.dd]
                 {
-                    $0.class = self.realm.map { _ in "realm" }
-                } = self.realm?.symbol ?? "none"
+                    if  let realm:Unidoc.RealmMetadata = self.realm
+                    {
+                        $0[.span] = realm.symbol
+
+                        guard self.package.realmAligning
+                        else
+                        {
+                            return
+                        }
+
+                        $0[.span] { $0.class = "placeholder" } = "alignment in progress"
+                    }
+                    else
+                    {
+                        $0[.span] { $0.class = "placeholder" } = "none"
+                    }
+
+                }
             }
 
             guard self.user?.maintains(package: self.package) ?? !format.secure
@@ -247,7 +263,7 @@ extension Unidoc.EditionsPage:ApplicationPage
                         {
                             $0.type = "checkbox"
                             $0.name = "force"
-                            $0.value = "false"
+                            $0.value = "true"
                         }
 
                         $0[.span] = "Create Realm"
