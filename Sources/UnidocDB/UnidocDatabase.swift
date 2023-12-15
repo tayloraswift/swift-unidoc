@@ -592,7 +592,7 @@ extension UnidocDatabase
             for edition:Unidoc.Edition in editions
             {
                 async
-                let cooldown:Void = Task.sleep(for: .seconds(10))
+                let cooldown:Void = Task.sleep(for: .seconds(5))
 
                 guard
                 let status:Unidoc.UplinkStatus = try await self.uplink(edition, with: session)
