@@ -13,7 +13,7 @@ struct Localhost:ServerAuthority
     }
 
     @inlinable public static
-    var scheme:ServerScheme { .https }
+    var scheme:ServerScheme { .https(port: 8443) }
     @inlinable public static
-    var domain:String { "127.0.0.1" }
+    var domain:String { "localhost" }
 }

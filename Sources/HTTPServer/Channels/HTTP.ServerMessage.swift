@@ -58,8 +58,9 @@ extension HTTP.ServerMessage
     {
         switch redirect
         {
-        case .temporary: self.init(307)
-        case .permanent: self.init(308)
+        case .see:          self.init(303)
+        case .temporary:    self.init(307)
+        case .permanent:    self.init(308)
         }
 
         self.headers.add(name: "location", value: Authority.url(redirect.location))
