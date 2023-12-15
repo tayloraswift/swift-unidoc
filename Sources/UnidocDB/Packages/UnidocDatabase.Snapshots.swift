@@ -3,6 +3,7 @@ import MongoDB
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnidocAPI
 import UnidocLinker
 import UnidocRecords
 
@@ -49,7 +50,7 @@ extension UnidocDatabase.Snapshots
 {
     public
     func upsert(snapshot:Unidoc.Snapshot,
-        with session:Mongo.Session) async throws -> UnidocDatabase.Uploaded
+        with session:Mongo.Session) async throws -> Unidoc.UploadStatus
     {
         switch try await self.upsert(some: snapshot, with: session)
         {

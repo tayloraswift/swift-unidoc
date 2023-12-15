@@ -3,6 +3,7 @@ import HTTP
 import HTTPClient
 import HTTPServer
 import IP
+import Media
 import MongoDB
 import NIOCore
 import NIOPosix
@@ -92,10 +93,19 @@ extension Swiftinit.ServerLoop
 extension Swiftinit.ServerLoop
 {
     nonisolated
-    var secured:Bool { self.options.mode.secured }
+    var secure:Bool { self.options.mode.secure }
 
     nonisolated
-    var assets:Unidoc.RenderFormat.Assets { self.options.cloudfront ? .cloudfront : .local }
+    var format:Unidoc.RenderFormat { self.format(.application(.html)) }
+
+    nonisolated
+    func format(_ accept:AcceptType) -> Unidoc.RenderFormat
+    {
+        .init(
+            assets: self.options.cloudfront ? .cloudfront : .local,
+            accept: accept,
+            secure: self.options.mode.secure)
+    }
 }
 
 extension Swiftinit.ServerLoop
@@ -157,7 +167,7 @@ extension Swiftinit.ServerLoop
     private nonisolated
     func clearance(by cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
     {
-        guard self.secured
+        guard self.secure
         else
         {
             return nil
@@ -238,7 +248,7 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
             }
 
         case .stateless(let stateless):
-            return .ok(stateless.resource(format: .init(assets: self.assets)))
+            return .ok(stateless.resource(format: self.format))
 
         case .redirect(let target):
             return .redirect(.permanent(target))

@@ -1,7 +1,6 @@
 import HTTP
 import JSON
 import Media
-import UnidocAutomation
 import UnidocQueries
 import UnidocRecords
 
@@ -14,7 +13,7 @@ extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
         {
         case .application(.json):
             guard
-            let status:UnidocAPI.PackageStatus = .init(from: self)
+            let status:Unidoc.PackageStatus = .init(from: self)
             else
             {
                 return .notFound(.init(content: .string(""),
@@ -28,8 +27,8 @@ extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
                 type: .application(.json, charset: .utf8)))
 
         case _:
-            let list:Site.Tags.List = .init(from: self)
-            return .ok(list.resource(format: format))
+            let page:Unidoc.EditionsPage = .init(from: self)
+            return .ok(page.resource(format: format))
         }
     }
 }

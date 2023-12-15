@@ -10,7 +10,7 @@ extension Swiftinit.Options
 }
 extension Swiftinit.Options.Mode
 {
-    var secured:Bool
+    var secure:Bool
     {
         switch self
         {

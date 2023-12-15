@@ -1,4 +1,4 @@
-import UnidocRecords
+import UnidocAPI
 import URI
 
 extension Unidoc.Stem

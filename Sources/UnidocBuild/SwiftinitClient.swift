@@ -5,7 +5,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import Symbols
 import System
-import UnidocAutomation
+import UnidocAPI
 import UnidocLinker
 import UnidocRecords
 
@@ -80,7 +80,7 @@ extension SwiftinitClient
         {
             @Sendable (connection:SwiftinitClient.Connection) in
 
-            let package:UnidocAPI.PackageStatus = try await connection.status(
+            let package:Unidoc.PackageStatus = try await connection.status(
                 of: symbol)
 
             try await connection.uplink(
@@ -129,7 +129,7 @@ extension SwiftinitClient
 
             print("Uploading symbol graph...")
 
-            let placement:UnidocAPI.Placement = try await connection.put(bson: bson,
+            let placement:Unidoc.UploadStatus = try await connection.put(bson: bson,
                 to: "/api/symbolgraph")
 
             print("Successfully uploaded symbol graph!")
@@ -149,7 +149,7 @@ extension SwiftinitClient
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
         //  connection open.
-        let package:UnidocAPI.PackageStatus? = try await self.connect
+        let package:Unidoc.PackageStatus? = try await self.connect
         {
             @Sendable (connection:SwiftinitClient.Connection) in
 
@@ -171,7 +171,7 @@ extension SwiftinitClient
         }
 
         guard
-        let package:UnidocAPI.PackageStatus
+        let package:Unidoc.PackageStatus
         else
         {
             print("Not a buildable package.")
@@ -182,7 +182,7 @@ extension SwiftinitClient
         let workspace:Workspace = try await .create(at: ".swiftinit")
 
         guard
-        let edition:UnidocAPI.PackageStatus.Edition = package.choose(force: force)
+        let edition:Unidoc.PackageStatus.Edition = package.choose(force: force)
         else
         {
             print("""

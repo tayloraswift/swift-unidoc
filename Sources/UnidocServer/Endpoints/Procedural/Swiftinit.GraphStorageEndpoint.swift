@@ -23,7 +23,7 @@ extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
             let snapshot:Unidoc.Snapshot = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
-            let uploaded:UnidocDatabase.Uploaded = try await server.db.snapshots.upsert(
+            let uploaded:Unidoc.UploadStatus = try await server.db.snapshots.upsert(
                 snapshot: snapshot,
                 with: session)
 

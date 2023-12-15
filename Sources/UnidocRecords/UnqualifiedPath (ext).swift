@@ -1,4 +1,5 @@
 import LexicalPaths
+import UnidocAPI
 
 extension UnqualifiedPath
 {

@@ -3,7 +3,6 @@ import IP
 import Media
 import Multiparts
 import NIOHPACK
-import UnidocAutomation
 import UnidocPages
 import URI
 
@@ -49,7 +48,7 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
 
         switch root
         {
-        case UnidocAPI.root:
+        case Swiftinit.API.root:
             endpoint = try? .put(api: trunk, type: type)
 
         case _:

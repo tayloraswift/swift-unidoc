@@ -54,7 +54,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         {
             if  case .article(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
+                return (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
             }
             else
             {
@@ -69,7 +69,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         {
             if  case .culture(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
+                return (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
             }
             else
             {
@@ -84,7 +84,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         {
             if  case .decl(let master)? = self.vertices[scalar]
             {
-                return (master, self.load(scalar) { Site.Docs[$0, master.shoot] })
+                return (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
             }
             else
             {
@@ -106,12 +106,12 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                 {
                     switch vertex
                     {
-                    case .article(let vertex):  return Site.Docs[$0, vertex.shoot]
-                    case .culture(let vertex):  return Site.Docs[$0, vertex.shoot]
-                    case .decl(let vertex):     return Site.Docs[$0, vertex.shoot]
+                    case .article(let vertex):  return Swiftinit.Docs[$0, vertex.shoot]
+                    case .culture(let vertex):  return Swiftinit.Docs[$0, vertex.shoot]
+                    case .decl(let vertex):     return Swiftinit.Docs[$0, vertex.shoot]
                     case .file:                 return nil
-                    case .foreign(let vertex):  return Site.Docs[$0, vertex.shoot]
-                    case .global:               return Site.Docs[$0]
+                    case .foreign(let vertex):  return Swiftinit.Docs[$0, vertex.shoot]
+                    case .global:               return Swiftinit.Docs[$0]
                     }
                 }
 

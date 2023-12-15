@@ -6,7 +6,7 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
+extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.VolumeRoot
 {
     public consuming
     func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
@@ -30,7 +30,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
 
             context.vertices.add(principal.matches)
 
-            if  let choices:Site.Docs.MultipleFound = .init(context,
+            if  let choices:Swiftinit.Docs.MultipleFound = .init(context,
                     matches: principal.matches)
             {
                 return .multiple(choices.resource(format: format))
@@ -39,7 +39,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:VolumeRoot
             {
                 //  We currently don’t have any actual means of obtaining a type tree in this
                 //  situation, but in theory, we could.
-                let display:Site.Docs.NotFound = .init(context,
+                let display:Swiftinit.Docs.NotFound = .init(context,
                     sidebar: .module(volume: principal.volume, tree: principal.tree))
 
                 return .notFound(display.resource(format: format))

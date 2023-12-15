@@ -20,7 +20,7 @@ extension Swiftinit.GraphUplinkEndpoint:BlockingEndpoint
         payload _:consuming [UInt8],
         session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        let updated:UnidocDatabase.Uplinked?
+        let updated:Unidoc.UplinkStatus?
 
         switch self
         {
@@ -32,13 +32,13 @@ extension Swiftinit.GraphUplinkEndpoint:BlockingEndpoint
         }
 
         guard
-        let updated:UnidocDatabase.Uplinked
+        let updated:Unidoc.UplinkStatus
         else
         {
             return .notFound("No such symbol graph.")
         }
 
-        if  let pages:Unidoc.Sitemap.Delta = updated.sitemap
+        if  let pages:Unidoc.SitemapDelta = updated.sitemap
         {
             Log[.debug] = """
             Sitemap (\(updated.edition.package)) lost \(pages.deletions.count) pages \

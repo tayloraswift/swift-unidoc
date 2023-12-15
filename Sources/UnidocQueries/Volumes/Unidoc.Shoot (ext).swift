@@ -1,6 +1,7 @@
 import FNV1
 import MongoQL
 import Unidoc
+import UnidocAPI
 import UnidocDB
 import UnidocRecords
 

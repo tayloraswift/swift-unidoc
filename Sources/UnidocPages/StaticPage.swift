@@ -14,11 +14,6 @@ extension StaticPage
     @inlinable public
     var canonicalURI:URI? { nil }
 }
-extension StaticPage where Self:StaticRoot
-{
-    @inlinable public
-    var location:URI { Self.uri }
-}
 extension StaticPage where Self:RenderablePage
 {
     public

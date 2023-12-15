@@ -5,7 +5,6 @@ import MD5
 import Multiparts
 import NIOHPACK
 import NIOHTTP1
-import UnidocAutomation
 import UnidocDB
 import UnidocPages
 import UnidocProfiling
@@ -145,10 +144,10 @@ extension Swiftinit.IntegralRequest
 
             switch root
             {
-            case Site.Admin.root:
+            case Swiftinit.Admin.root:
                 endpoint = .interactive(Swiftinit.AdminDashboardEndpoint.status)
 
-            case Site.Login.root:
+            case Swiftinit.Login.root:
                 endpoint = .interactive(Swiftinit.BounceEndpoint.init())
 
             case "robots.txt":
@@ -169,21 +168,25 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
-        case Site.Admin.root:
+        case Swiftinit.API.root:
+            endpoint = .get(api: trunk, path,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Swiftinit.Admin.root:
             endpoint = .get(admin: trunk, path, tag: tag)
 
-        case Site.Asset.root:
+        case Swiftinit.Asset.root:
             endpoint = .get(asset: trunk, tag: tag)
 
         case "auth":
             endpoint = .get(auth: trunk,
                 with: .init(uri.query?.parameters))
 
-        case Site.Blog.root:
+        case Swiftinit.Blog.root:
             endpoint = .get(articles: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case Site.Docs.root:
+        case Swiftinit.Docs.root:
             endpoint = .get(docs: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
@@ -193,21 +196,19 @@ extension Swiftinit.IntegralRequest
 
         //  Deprecated route.
         case "sitemaps":
-            endpoint = .redirect("/\(Site.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols")
+            endpoint = .redirect("""
+                /\(Swiftinit.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols
+                """)
 
-        case Site.Stats.root:
+        case Swiftinit.Stats.root:
             endpoint = .get(stats: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case Site.Tags.root:
+        case Swiftinit.Tags.root:
             endpoint = .get(tags: trunk,
                 with: .init(uri.query?.parameters,
                     user: metadata.cookies.session?.user,
                     tag: tag))
-
-        case UnidocAPI.root:
-            endpoint = .get(api: trunk, path,
-                with: .init(uri.query?.parameters, tag: tag))
 
         case "reference":
             endpoint = .get(legacy: trunk, path,
@@ -255,11 +256,11 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
-        case Site.Admin.root:
-            endpoint = try? .post(admin: trunk, path, body: body, type: type)
-
-        case UnidocAPI.root:
+        case Swiftinit.API.root:
             endpoint = try? .post(api: trunk, body: body, type: type)
+
+        case Swiftinit.Admin.root:
+            endpoint = try? .post(admin: trunk, path, body: body, type: type)
 
         case _:
             return nil

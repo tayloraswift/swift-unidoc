@@ -3,7 +3,6 @@ import HTTP
 import MD5
 import Multiparts
 import Symbols
-import UnidocAutomation
 import UnidocDB
 import UnidocPages
 import UnidocQueries
@@ -27,22 +26,22 @@ extension Swiftinit.AnyEndpoint
     static
     func get(admin trunk:String, _ stem:ArraySlice<String>, tag:MD5?) -> Self?
     {
-        if  let action:Site.Admin.Action = .init(rawValue: trunk)
+        if  let action:Swiftinit.AdminPage.Action = .init(rawValue: trunk)
         {
             return .stateless(action)
         }
 
         switch trunk
         {
-        case Site.Admin.Recode.name:
+        case Swiftinit.AdminPage.Recode.name:
             guard
             let target:String = stem.first
             else
             {
-                return .stateless(Site.Admin.Recode.init())
+                return .stateless(Swiftinit.AdminPage.Recode.init())
             }
 
-            if  let target:Site.Admin.Recode.Target = .init(rawValue: target)
+            if  let target:Swiftinit.AdminPage.Recode.Target = .init(rawValue: target)
             {
                 return .stateless(target)
             }
@@ -51,7 +50,7 @@ extension Swiftinit.AnyEndpoint
                 return nil
             }
 
-        case Site.Admin.Slaves.name:
+        case Swiftinit.AdminPage.Slaves.name:
             return .interactive(Swiftinit.SlavesDashboardEndpoint.status)
 
         case _:
@@ -65,7 +64,7 @@ extension Swiftinit.AnyEndpoint
         with parameters:Swiftinit.PipelineParameters) -> Self?
     {
         guard
-        let trunk:UnidocAPI.Get = .init(trunk)
+        let trunk:Swiftinit.API.Get = .init(trunk)
         else
         {
             return nil
@@ -125,7 +124,7 @@ extension Swiftinit.AnyEndpoint
         .interactive(
             Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
                 Unidoc.LookupAdjacent,
-                Site.Blog>>.init(
+                Swiftinit.Blog>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
                 volume: .init(package: "__swiftinit", version: "0.0.0"),
@@ -158,7 +157,7 @@ extension Swiftinit.AnyEndpoint
             return .interactive(
                 Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
                     Unidoc.LookupAdjacent,
-                    Site.Docs>>.init(
+                    Swiftinit.Docs>>.init(
                 output: parameters.explain ? nil : .text(.html),
                 query: .init(volume: volume, lookup: shoot),
                 tag: parameters.tag))
@@ -200,7 +199,7 @@ extension Swiftinit.AnyEndpoint
         return .interactive(
             Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
                 Unidoc.LookupAdjacent,
-                Site.Stats>>.init(
+                Swiftinit.Stats>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(volume: volume, lookup: shoot),
             tag: parameters.tag))
@@ -250,7 +249,7 @@ extension Swiftinit.AnyEndpoint
         body:consuming [UInt8],
         type:ContentType) throws -> Self?
     {
-        if  let action:Site.Admin.Action = .init(rawValue: action),
+        if  let action:Swiftinit.AdminPage.Action = .init(rawValue: action),
             case  .multipart(.form_data(boundary: let boundary?)) = type
         {
             let form:MultipartForm = try .init(splitting: body, on: boundary)
@@ -259,14 +258,14 @@ extension Swiftinit.AnyEndpoint
 
         switch action
         {
-        case Site.Admin.Recode.name:
+        case Swiftinit.AdminPage.Recode.name:
             if  let target:String = rest.first,
-                let target:Site.Admin.Recode.Target = .init(rawValue: target)
+                let target:Swiftinit.AdminPage.Recode.Target = .init(rawValue: target)
             {
                 return .interactive(Swiftinit.AdminEndpoint.recode(target))
             }
 
-        case Site.Admin.Slaves.name:
+        case Swiftinit.AdminPage.Slaves.name:
             return .interactive(Swiftinit.SlavesDashboardEndpoint.scramble)
 
         case _:
@@ -282,7 +281,7 @@ extension Swiftinit.AnyEndpoint
         type:ContentType) throws -> Self?
     {
         guard
-        let trunk:UnidocAPI.Post = .init(trunk)
+        let trunk:Swiftinit.API.Post = .init(trunk)
         else
         {
             return nil
@@ -367,7 +366,7 @@ extension Swiftinit.AnyEndpoint
     func put(api trunk:String, type:ContentType) throws -> Self?
     {
         guard
-        let trunk:UnidocAPI.Put = .init(trunk)
+        let trunk:Swiftinit.API.Put = .init(trunk)
         else
         {
             return nil

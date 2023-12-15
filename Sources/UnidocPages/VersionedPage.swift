@@ -32,7 +32,7 @@ extension VersionedPage
             $0[+, Any.self]
             {
                 $0["id"] = "\(self.volume.symbol)"
-                $0["trunk"] = "\(Site.Docs[self.volume])"
+                $0["trunk"] = "\(Swiftinit.Docs[self.volume])"
             }
 
             for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
@@ -43,7 +43,7 @@ extension VersionedPage
                     $0[+, Any.self]
                     {
                         $0["id"] = "\(dependency.symbol)"
-                        $0["trunk"] = "\(Site.Docs[dependency])"
+                        $0["trunk"] = "\(Swiftinit.Docs[dependency])"
                     }
                 }
             }

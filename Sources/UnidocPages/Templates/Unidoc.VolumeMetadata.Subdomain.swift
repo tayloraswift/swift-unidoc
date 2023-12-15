@@ -26,7 +26,7 @@ extension Unidoc.VolumeMetadata.Subdomain:HyperTextOutputStreamable
         {
             $0[.a]
             {
-                $0.href = "\(Site.Docs[self.volume])"
+                $0.href = "\(Swiftinit.Docs[self.volume])"
             } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
         }
 
