@@ -9,6 +9,7 @@ extension HTTP
     {
         case permanent(String)
         case temporary(String)
+        case see(other:String)
     }
 }
 extension HTTP.Redirect
@@ -18,8 +19,9 @@ extension HTTP.Redirect
     {
         switch self
         {
-        case .permanent(let location):  return location
-        case .temporary(let location):  return location
+        case .permanent(let location):  location
+        case .temporary(let location):  location
+        case .see(let location):        location
         }
     }
 }

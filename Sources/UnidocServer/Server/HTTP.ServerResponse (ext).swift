@@ -23,11 +23,11 @@ extension HTTP.ServerResponse
             default:    return \.unauthorized
             }
 
-        case .redirect(.temporary, _):
-            return \.redirectedTemporarily
-
         case .redirect(.permanent, _):
             return \.redirectedPermanently
+
+        case .redirect(_, _):
+            return \.redirectedTemporarily
         }
     }
 }

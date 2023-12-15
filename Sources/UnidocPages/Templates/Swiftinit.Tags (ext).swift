@@ -3,7 +3,7 @@ import URI
 
 extension Swiftinit.Tags
 {
-    static
+    @inlinable public static
     subscript(package:Symbol.Package) -> URI
     {
         var uri:URI = Self.uri

@@ -71,6 +71,12 @@ section.details
         dd
         {
             grid-column: 2;
+
+            span.placeholder
+            {
+                color: $light-foreground-semi;
+                font-style: italic;
+            }
         }
     }
 
