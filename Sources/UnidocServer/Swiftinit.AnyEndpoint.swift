@@ -210,7 +210,7 @@ extension Swiftinit.AnyEndpoint
     {
         .interactive(Swiftinit.PipelineEndpoint<Unidoc.EditionsQuery>.init(
             output: parameters.explain ? nil : .text(.html),
-            query: .init(package: .init(trunk), limit: 12),
+            query: .init(package: .init(trunk), limit: 12, user: parameters.user),
             tag: parameters.tag))
     }
 
