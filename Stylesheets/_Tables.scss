@@ -67,4 +67,8 @@ section.details table.tags
         color: $light-accent-barbie-pink;
         margin-right: 0.5rem;
     }
+    td.graph > .abi.uplinking:first-child::before
+    {
+        content: '⟳';
+    }
 }

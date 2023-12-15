@@ -6,6 +6,7 @@ extension Swiftinit.API
         case alignPackage = "align-package"
         case indexRepo = "index-repo"
         case indexRepoTag = "index-repo-tag"
+        case uplinkAll = "uplink-all"
         case uplink
         case unlink
     }

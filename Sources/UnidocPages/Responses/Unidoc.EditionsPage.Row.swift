@@ -48,8 +48,16 @@ extension Unidoc.EditionsPage.Row:HyperTextOutputStreamable
         {
             if  let graph:Unidoc.EditionOutput.Graph = self.graph
             {
-                $0[.span] { $0.class = "abi" } = "\(graph.abi)"
+                $0[.span]
+                {
+                    $0.class = graph.uplinking ? "abi uplinking" : "abi"
+                    $0.title = graph.uplinking ? """
+                        This symbol graph is currently queued for documentation generation.
+                        """ : nil
+                } = "\(graph.abi)"
+
                 $0 += " "
+
                 $0[.span]
                 {
                     $0.class = "kb"
