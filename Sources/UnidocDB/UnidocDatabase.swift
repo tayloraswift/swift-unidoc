@@ -571,6 +571,51 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     public
+    func rebuild(with session:Mongo.Session) async throws
+    {
+        try await self.execute(update: Snapshots.QueueUplink.all, with: session)
+
+        while
+            let editions:[Unidoc.Edition] = try await self.snapshots.linkable(8,
+                with: session)
+        {
+            for edition:Unidoc.Edition in editions
+            {
+                async
+                let cooldown:Void = Task.sleep(for: .seconds(10))
+
+                guard
+                let status:Unidoc.UplinkStatus = try await self.uplink(edition, with: session)
+                else
+                {
+                    print("failed to uplink \(edition): volume not found")
+                    continue
+                }
+
+                try await self.execute(
+                    update: Snapshots.ClearUplink.one(edition),
+                    with: session)
+
+                if  let sitemap:Unidoc.SitemapDelta = status.sitemap
+                {
+                    print("""
+                        successfully uplinked \(edition): \
+                        sitemap gained \(sitemap.additions) pages, \
+                        lost \(sitemap.deletions.count) pages
+                        """)
+                }
+                else
+                {
+                    print("successfully uplinked \(edition)")
+                }
+
+
+                try await cooldown
+            }
+        }
+    }
+
+    public
     func align(
         package:Unidoc.Package,
         realm:Unidoc.Realm?,

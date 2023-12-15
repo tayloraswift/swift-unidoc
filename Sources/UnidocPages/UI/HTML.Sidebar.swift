@@ -87,7 +87,7 @@ extension HTML.Sidebar:HyperTextOutputStreamable
                     //  The URI is only valid if the principal volume API version is at
                     //  least 1.0!
                     if  case .foreign = citizenship,
-                        self.volume.api < .v(1, 0)
+                        self.volume.abi < .v(1, 0)
                     {
                         $0[.span] = name
                     }

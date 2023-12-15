@@ -326,6 +326,9 @@ extension Swiftinit.AnyEndpoint
                         tag: tag))
                 }
 
+            case .uplinkAll:
+                return .procedural(Swiftinit.GlobalUplinkEndpoint.init())
+
             case .uplink:
                 if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package),

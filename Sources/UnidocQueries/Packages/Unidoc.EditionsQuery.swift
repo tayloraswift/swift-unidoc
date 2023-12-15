@@ -131,13 +131,17 @@ extension Unidoc.EditionsQuery:Unidoc.AliasingQuery
                         {
                             $0[.replaceWith] = .init
                             {
-                                $0[Unidoc.EditionOutput.Graph[.abi]] =
-                                    Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
-
+                                $0[Unidoc.EditionOutput.Graph[.uplinking]] = .expr
+                                {
+                                    $0[.coalesce] = (Unidoc.Snapshot[.uplinking], false)
+                                }
                                 $0[Unidoc.EditionOutput.Graph[.bytes]] = .expr
                                 {
                                     $0[.objectSize] = Unidoc.Snapshot[.graph]
                                 }
+                                $0[Unidoc.EditionOutput.Graph[.abi]] =
+                                    Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
+
                             }
                         }
                         $0[.as] = Unidoc.EditionOutput[.graph]

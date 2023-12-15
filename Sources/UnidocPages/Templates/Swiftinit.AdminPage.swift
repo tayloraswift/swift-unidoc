@@ -162,30 +162,30 @@ extension Swiftinit.AdminPage:AdministrativePage
         }
 
         //  Non-destructive actions.
-        // for (action, label):(Site.API.Post, String) in
-        // [
-        //     (
-        //         .reloadAssets,
-        //         "Reload Assets"
-        //     ),
-        // ]
-        // {
-        //     main[.hr]
+        for (action, label):(Swiftinit.API.Post, String) in
+        [
+            (
+                .uplinkAll,
+                "Uplink all volumes"
+            ),
+        ]
+        {
+            main[.hr]
 
-        //     main[.form]
-        //     {
-        //         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-        //         $0.action = "\(Site.API[action])"
-        //         $0.method = "post"
-        //     }
-        //         content:
-        //     {
-        //         $0[.p]
-        //         {
-        //             $0[.button] { $0.type = "submit" } = label
-        //         }
-        //     }
-        // }
+            main[.form]
+            {
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.API[action])"
+                $0.method = "post"
+            }
+                content:
+            {
+                $0[.p]
+                {
+                    $0[.button] { $0.type = "submit" } = label
+                }
+            }
+        }
 
         //  Destructive actions.
         for action:Action in

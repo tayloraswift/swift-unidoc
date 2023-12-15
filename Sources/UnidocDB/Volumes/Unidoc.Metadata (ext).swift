@@ -17,6 +17,6 @@ extension Unidoc.VolumeMetadata
         project[Unidoc.VolumeMetadata[.latest]] = true
         project[Unidoc.VolumeMetadata[.realm]] = true
         project[Unidoc.VolumeMetadata[.patch]] = true
-        project[Unidoc.VolumeMetadata[.api]] = true
+        project[Unidoc.VolumeMetadata[.abi]] = true
     }
 }

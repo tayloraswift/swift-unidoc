@@ -34,6 +34,17 @@ extension UnidocDatabase.Snapshots
     {
         $0[Unidoc.Snapshot[.swift]] = .init { $0[.exists] = true }
     }
+
+    public static
+    let indexUplinking:Mongo.CollectionIndex = .init("Uplinking",
+        unique: false)
+    {
+        $0[Unidoc.Snapshot[.uplinking]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.Snapshot[.uplinking]] = .init { $0[.exists] = true }
+    }
 }
 extension UnidocDatabase.Snapshots:Mongo.CollectionModel
 {
@@ -44,7 +55,13 @@ extension UnidocDatabase.Snapshots:Mongo.CollectionModel
     var name:Mongo.Collection { "Snapshots" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexSwiftReleases ] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexSwiftReleases,
+            Self.indexUplinking,
+        ]
+    }
 }
 extension UnidocDatabase.Snapshots
 {
@@ -125,5 +142,31 @@ extension UnidocDatabase.Snapshots
         {
             try await $0.reduce(into: [], +=)
         }
+    }
+}
+extension UnidocDatabase.Snapshots
+{
+    func linkable(_ limit:Int,
+        with session:Mongo.Session) async throws -> [Unidoc.Edition]?
+    {
+        let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(
+                Self.name,
+                limit: limit)
+            {
+                $0[.filter] = .init
+                {
+                    $0[Unidoc.Snapshot[.uplinking]] = true
+                }
+                $0[.projection] = .init
+                {
+                    $0[Unidoc.Snapshot[.id]] = true
+                }
+
+                $0[.hint] = Self.indexUplinking.id
+            },
+            against: self.database)
+
+        return editions.isEmpty ? nil : editions.map(\.id)
     }
 }

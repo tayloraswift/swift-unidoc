@@ -24,18 +24,24 @@ extension Unidoc
         public
         var pins:[Unidoc.Edition?]
 
+        public
+        var uplinking:Bool
+
         @inlinable internal
         init(id:Unidoc.Edition,
             metadata:SymbolGraphMetadata,
             graph:SymbolGraph,
             swift:PatchVersion?,
-            pins:[Unidoc.Edition?])
+            pins:[Unidoc.Edition?],
+            uplinking:Bool = false)
         {
             self.id = id
             self.metadata = metadata
             self.graph = graph
             self.swift = swift
             self.pins = pins
+
+            self.uplinking = uplinking
         }
     }
 }
@@ -74,6 +80,8 @@ extension Unidoc.Snapshot
         case graph = "D"
         case swift = "S"
         case pins = "p"
+
+        case uplinking = "U"
     }
 }
 extension Unidoc.Snapshot:BSONDocumentEncodable
@@ -86,6 +94,8 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.graph] = self.graph
         bson[.swift] = self.swift
         bson[.pins] = self.pins.isEmpty ? nil : self.pins
+
+        bson[.uplinking] = self.uplinking ? true : nil
     }
 }
 extension Unidoc.Snapshot:BSONDocumentDecodable
@@ -97,6 +107,7 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
             metadata: try bson[.metadata].decode(),
             graph: try bson[.graph].decode(),
             swift: try bson[.swift]?.decode(),
-            pins: try bson[.pins]?.decode() ?? [])
+            pins: try bson[.pins]?.decode() ?? [],
+            uplinking: try bson[.uplinking]?.decode() ?? false)
     }
 }

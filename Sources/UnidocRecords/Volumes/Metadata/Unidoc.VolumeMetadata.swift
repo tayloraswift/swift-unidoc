@@ -36,7 +36,7 @@ extension Unidoc
         var tree:[Noun]
 
         public
-        var api:MinorVersion
+        var abi:MinorVersion
 
         @inlinable public
         init(id:Unidoc.Edition,
@@ -50,7 +50,7 @@ extension Unidoc
             patch:PatchVersion? = nil,
             tree:[Noun] = [])
         {
-            self.api = VolumeAPI.version
+            self.abi = VolumeABI.version
 
             self.id = id
             self.dependencies = dependencies
@@ -126,7 +126,7 @@ extension Unidoc.VolumeMetadata
         case latest = "L"
         case realm = "R"
 
-        case api = "I"
+        case abi = "I"
     }
 }
 extension Unidoc.VolumeMetadata:BSONDocumentEncodable
@@ -161,7 +161,7 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
 
         bson[.planes_max] = self.planes.max
 
-        bson[.api] = self.api
+        bson[.abi] = self.abi
     }
 }
 extension Unidoc.VolumeMetadata:BSONDocumentDecodable
@@ -182,6 +182,6 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
             patch: try bson[.patch]?.decode(),
             tree: try bson[.tree]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])
 
-        self.api = try bson[.api]?.decode() ?? .v(0, 1)
+        self.abi = try bson[.abi]?.decode() ?? .v(0, 1)
     }
 }
