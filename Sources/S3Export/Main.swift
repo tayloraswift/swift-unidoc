@@ -4,9 +4,9 @@ import NIOPosix
 import NIOSSL
 import S3
 import SemanticVersions
+import SwiftinitAssets
+import SwiftinitPages
 import System
-import UnidocAssets
-import UnidocPages
 
 @main
 enum Main
@@ -41,10 +41,10 @@ enum Main
         {
             @Sendable (connection:AWS.S3Client.Connection) in
 
-            for asset:Unidoc.RenderAsset in Unidoc.RenderAsset.allCases
+            for asset:Swiftinit.Asset in Swiftinit.Asset.allCases
             {
                 let content:[UInt8] = try assets.appending(asset.source).read()
-                let path:String = asset.path(prepending: Unidoc.RenderFormat.Assets.version)
+                let path:String = asset.path(prepending: Swiftinit.RenderFormat.Assets.version)
 
                 print("Uploading \(path)...")
 
