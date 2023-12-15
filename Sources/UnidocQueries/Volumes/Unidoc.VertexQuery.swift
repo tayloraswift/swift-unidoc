@@ -248,7 +248,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
                             .latest,
                             .realm,
-                            .api
+                            .abi
                         ]
                         {
                             $0[Unidoc.PrincipalOutput[volume] / Unidoc.VolumeMetadata[key]] = true
