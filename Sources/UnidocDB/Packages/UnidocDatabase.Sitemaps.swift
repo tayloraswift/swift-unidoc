@@ -1,5 +1,4 @@
 import BSON
-import BSON
 import MongoDB
 import MongoQL
 import Symbols
@@ -51,12 +50,12 @@ extension UnidocDatabase.Sitemaps
     }
 
     func update(_ sitemap:consuming Unidoc.Sitemap,
-        with session:Mongo.Session) async throws -> Unidoc.Sitemap.Delta?
+        with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
         var new:Unidoc.Sitemap = sitemap
         let old:Unidoc.Sitemap? = try await self.find(id: new.id, with: session)
 
-        let update:Unidoc.Sitemap.Delta?
+        let update:Unidoc.SitemapDelta?
         if  let old:Unidoc.Sitemap
         {
             //  Compute sitemap delta.
@@ -71,7 +70,7 @@ extension UnidocDatabase.Sitemaps
                 }
             }
 
-            let delta:Unidoc.Sitemap.Delta = .init(
+            let delta:Unidoc.SitemapDelta = .init(
                 deletions: deletions.sorted(),
                 additions: additions)
 

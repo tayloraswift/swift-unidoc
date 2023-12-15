@@ -11,8 +11,8 @@ extension Swiftinit
 {
     enum AdminEndpoint
     {
-        case perform(Site.Admin.Action, MultipartForm?)
-        case recode(Site.Admin.Recode.Target)
+        case perform(Swiftinit.AdminPage.Action, MultipartForm?)
+        case recode(Swiftinit.AdminPage.Recode.Target)
     }
 }
 extension Swiftinit.AdminEndpoint:RestrictedEndpoint
@@ -20,7 +20,7 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let page:Site.Admin.Action.Complete
+        let page:Swiftinit.AdminPage.Action.Complete
 
         switch self
         {
@@ -36,12 +36,12 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
             }
 
             let (modified, selected):(Int, Int) = try await collection.recode(with: session)
-            let complete:Site.Admin.Recode.Complete = .init(
+            let complete:Swiftinit.AdminPage.Recode.Complete = .init(
                 selected: selected,
                 modified: modified,
                 target: target)
 
-            return .ok(complete.resource(format: .init(assets: server.assets)))
+            return .ok(complete.resource(format: server.format))
 
         case .perform(.dropUnidocDB, _):
             try await server.db.unidoc.drop(with: session)
@@ -52,13 +52,13 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
             fatalError("Restarting server...")
 
         case .perform(.upload, let form?):
-            var receipts:[UnidocDatabase.Uploaded] = []
+            var receipts:[Unidoc.UploadStatus] = []
 
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
                 let archive:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:UnidocDatabase.Uploaded = try await server.db.unidoc.publish(
+                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.publish(
                     docs: archive,
                     with: session).0
 
@@ -71,6 +71,6 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
             return nil
         }
 
-        return .ok(page.resource(format: .init(assets: server.assets)))
+        return .ok(page.resource(format: server.format))
     }
 }

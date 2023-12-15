@@ -7,7 +7,7 @@ extension RecentActivityQuery.Output:HTTP.ServerResponseFactory
     public
     func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
-        let page:Site.RecentActivity = .init(
+        let page:Swiftinit.HomePage = .init(
             repo: self.repo,
             docs: self.docs)
 

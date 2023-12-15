@@ -1,6 +1,7 @@
 import FNV1
 import Symbols
 import Unidoc
+import UnidocAPI
 
 extension Unidoc.Vertex
 {

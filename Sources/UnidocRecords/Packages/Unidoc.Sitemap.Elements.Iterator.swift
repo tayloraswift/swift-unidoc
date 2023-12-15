@@ -1,3 +1,5 @@
+import UnidocAPI
+
 extension Unidoc.Sitemap.Elements
 {
     @frozen public

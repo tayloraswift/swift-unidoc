@@ -6,7 +6,7 @@ import URI
 extension HTML
 {
     @frozen public
-    struct Sidebar<Root> where Root:VolumeRoot
+    struct Sidebar<Root> where Root:Swiftinit.VolumeRoot
     {
         private
         let volume:Unidoc.VolumeMetadata
