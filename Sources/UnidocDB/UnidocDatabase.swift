@@ -351,13 +351,19 @@ extension UnidocDatabase
         }
     }
 
-    @discardableResult
     public
     func unlink(volume:Symbol.Edition,
-        with session:Mongo.Session) async throws -> Unidoc.Edition?
+        with session:Mongo.Session) async throws -> Unidoc.UnlinkStatus?
     {
-        if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
-                with: session)
+        guard
+        let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
+            with: session)
+        else
+        {
+            return nil
+        }
+
+        if  case nil = volume.patch
         {
             try await self.vertices.clear(range: volume.id, with: session)
             try await self.groups.clear(range: volume.id, with: session)
@@ -368,11 +374,11 @@ extension UnidocDatabase
             //  have an easy way to clean up the remaining documents.
             try await self.volumes.delete(id: volume.id, with: session)
 
-            return volume.id
+            return .unlinked(volume.id)
         }
         else
         {
-            return nil
+            return .declined(volume.id)
         }
     }
 }
@@ -394,7 +400,11 @@ extension UnidocDatabase
         }
         //  If there is a volume generated from a prerelease with the same patch number,
         //  we need to delete that too.
-        try await self.unlink(volume: volume.id, with: session)
+        if  case .declined? = try await self.unlink(volume: volume.id, with: session)
+        {
+            //  We should not clear release versions by name, only by coordinate.
+            return nil
+        }
 
         try await self.volumes.insert(some: volume.metadata, with: session)
         try await self.search.insert(some: volume.search, with: session)
