@@ -239,7 +239,6 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                             .version,
                             .display,
                             .refname,
-                            .commit,
                             .patch,
 
                             //  TODO: we only need this for top-level queries and
