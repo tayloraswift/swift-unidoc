@@ -1,6 +1,6 @@
-#if os(Linux)
+#if canImport(Glibc)
 import Glibc
-#elseif os(macOS)
+#elseif canImport(Darwin)
 import Darwin
 #else
 #error("unsupported platform")
@@ -112,6 +112,23 @@ extension SystemProcess
             return
         case let status:
             throw SystemProcessError.exit(status, self.invocation)
+        }
+    }
+}
+extension SystemProcess
+{
+    @MainActor
+    public static
+    func `do`(_ operation:() async throws -> Void) async
+    {
+        do
+        {
+            try await operation()
+        }
+        catch let error
+        {
+            print(error)
+            exit(1)
         }
     }
 }
