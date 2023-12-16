@@ -61,7 +61,8 @@ extension DynamicLinker.Mesh
         }
 
         var snapshot:Unidoc.SnapshotDetails = .init(abi: context.current.metadata.abi,
-            requirements: context.current.metadata.requirements)
+            requirements: context.current.metadata.requirements,
+            commit: context.current.metadata.commit?.hash)
         var foreign:[Unidoc.Vertex.Foreign] = []
 
         //  Compute shoots for out-of-package extended types.

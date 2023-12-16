@@ -302,7 +302,7 @@ extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
                 $0[.dt] = "Symbol Graph ABI"
                 $0[.dd] = "\(self.vertex.snapshot.abi)"
 
-                if  let commit:SHA1 = self.volume.commit
+                if  let commit:SHA1 = self.vertex.snapshot.commit
                 {
                     $0[.dt] = "Git Revision"
                     $0[.dd]

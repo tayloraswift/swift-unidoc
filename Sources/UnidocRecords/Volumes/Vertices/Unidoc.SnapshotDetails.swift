@@ -1,5 +1,6 @@
 import BSON
 import SemanticVersions
+import SHA1
 import SymbolGraphs
 
 extension Unidoc
@@ -15,6 +16,9 @@ extension Unidoc
         /// `Package.swift` manifest.
         public
         var requirements:[SymbolGraphMetadata.PlatformRequirement]
+        /// The git commit to associate with this snapshot.
+        public
+        var commit:SHA1?
         /// Top-level linker statistics.
         public
         var census:Unidoc.Census
@@ -24,10 +28,12 @@ extension Unidoc
         @inlinable public
         init(abi:PatchVersion,
             requirements:[SymbolGraphMetadata.PlatformRequirement],
+            commit:SHA1?,
             census:Unidoc.Census = .init())
         {
             self.abi = abi
             self.requirements = requirements
+            self.commit = commit
             self.census = census
         }
     }
@@ -39,6 +45,7 @@ extension Unidoc.SnapshotDetails
     {
         case abi = "B"
         case requirements = "O"
+        case commit = "H"
         case census = "C"
     }
 }
@@ -49,6 +56,7 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
     {
         bson[.abi] = self.abi
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
+        bson[.commit] = self.commit
         bson[.census] = self.census
     }
 }
@@ -59,6 +67,7 @@ extension Unidoc.SnapshotDetails:BSONDocumentDecodable
     {
         self.init(abi: try bson[.abi].decode(),
             requirements: try bson[.requirements]?.decode() ?? [],
+            commit: try bson[.commit]?.decode(),
             census: try bson[.census].decode())
     }
 }
