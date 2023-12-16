@@ -581,7 +581,7 @@ extension UnidocDatabase
 extension UnidocDatabase
 {
     public
-    func rebuild(with session:Mongo.Session, queue:Bool = false) async throws
+    func rebuild(queue:Bool = false, with session:Mongo.Session) async throws
     {
         if  queue
         {
