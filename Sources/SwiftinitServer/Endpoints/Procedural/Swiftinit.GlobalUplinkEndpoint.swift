@@ -4,8 +4,11 @@ extension Swiftinit
 {
     struct GlobalUplinkEndpoint:Sendable
     {
-        init()
+        let queue:Bool
+
+        init(queue:Bool)
         {
+            self.queue = queue
         }
     }
 }
@@ -22,6 +25,6 @@ extension Swiftinit.GlobalUplinkEndpoint:NonblockingEndpoint
         session:Mongo.Session,
         status:Status) async
     {
-        try? await server.db.unidoc.rebuild(with: session)
+        try? await server.db.unidoc.rebuild(queue: self.queue, with: session)
     }
 }

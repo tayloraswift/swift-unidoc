@@ -327,7 +327,8 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .uplinkAll:
-                return .procedural(Swiftinit.GlobalUplinkEndpoint.init())
+                return .procedural(Swiftinit.GlobalUplinkEndpoint.init(
+                    queue: form["queue"] == "true"))
 
             case .uplink:
                 if  let package:String = form["package"],
