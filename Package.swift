@@ -10,6 +10,7 @@ let package:Package = .init(
         .library(name: "guides", targets: ["guides"]),
 
 
+        .library(name: "DynamicLookupMacros", targets: ["DynamicLookupMacros"]),
         .library(name: "IntegerEncodingMacros", targets: ["IntegerEncodingMacros"]),
 
 
