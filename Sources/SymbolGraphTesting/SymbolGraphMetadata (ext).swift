@@ -9,13 +9,13 @@ extension SymbolGraphMetadata
         switch (self.package, self.commit?.refname)
         {
         case (.swift, _):
-            return "swift@\(self.swift).bson"
+            "swift@\(self.swift).bson"
 
         case (let package, nil):
-            return "\(package).bson"
+            "\(package).bson"
 
         case (let package, let refname?):
-            return "\(package)@\(refname).bson"
+            "\(package)@\(refname).bson"
         }
     }
 }

@@ -1,7 +1,7 @@
 import BSON
 import SemanticVersions
-import Symbols
 import SHA1
+import Symbols
 
 @frozen public
 struct SymbolGraphMetadata:Equatable, Sendable

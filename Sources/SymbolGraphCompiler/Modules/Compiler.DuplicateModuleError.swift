@@ -16,7 +16,7 @@ extension Compiler.DuplicateModuleError:CustomStringConvertible
         switch self
         {
         case .culture(let module):
-            return "Duplicate culture '\(module)'."
+            "Duplicate culture '\(module)'."
         }
     }
 }

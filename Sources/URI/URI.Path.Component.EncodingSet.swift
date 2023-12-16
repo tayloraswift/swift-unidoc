@@ -32,10 +32,10 @@ extension URI.Path.Component.EncodingSet:PercentEncodingSet
                 0x5f,           // '_'
                 0x61 ... 0x7a,  // [a-z]
                 0x7e:           // '~'
-            return false
+            false
 
         case    _:
-            return true
+            true
         }
     }
 }

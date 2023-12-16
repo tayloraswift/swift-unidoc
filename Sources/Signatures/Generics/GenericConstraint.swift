@@ -8,17 +8,17 @@ extension GenericConstraint
     @inlinable public
     var noun:String
     {
-        switch self { case .where(let noun, is: _, to: _): return noun }
+        switch self { case .where(let noun, is: _, to: _): noun }
     }
     @inlinable public
     var what:GenericOperator
     {
-        switch self { case .where(_, is: let what, to: _): return what }
+        switch self { case .where(_, is: let what, to: _): what }
     }
     @inlinable public
     var whom:GenericType<Scalar>
     {
-        switch self { case .where(_, is: _, to: let whom): return whom }
+        switch self { case .where(_, is: _, to: let whom): whom }
     }
 }
 extension GenericConstraint:Comparable where Scalar:Comparable

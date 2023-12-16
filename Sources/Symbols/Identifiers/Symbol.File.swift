@@ -24,11 +24,11 @@ extension Symbol.File
     {
         if  let i:String.Index = self.path.lastIndex(where: { $0 == "/" || $0 == "\\" })
         {
-            return self.path[self.path.index(after: i)...]
+            self.path[self.path.index(after: i)...]
         }
         else
         {
-            return self.path[...]
+            self.path[...]
         }
     }
 }

@@ -1,5 +1,5 @@
-import LexicalPaths
 import JSONDecoding
+import LexicalPaths
 
 extension UnqualifiedPath:JSONDecodable
 {

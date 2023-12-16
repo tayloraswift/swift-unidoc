@@ -375,7 +375,7 @@ extension DynamicLinker
             }
             else
             {
-                diagnostics[nil] = ConstraintReductionError.init(invalid: ordered,
+                self.diagnostics[nil] = ConstraintReductionError.init(invalid: ordered,
                     minimal: [_].init(reduced),
                     subject: subject,
                     protocol: `protocol`)
@@ -458,10 +458,10 @@ extension DynamicLinker
         {
             switch (self.priority(of: $0), self.priority(of: $1))
             {
-            case (nil, nil):            return $0 < $1
-            case (nil,  _?):            return true
-            case ( _?, nil):            return false
-            case (let lhs?, let rhs?):  return lhs < rhs
+            case (nil, nil):            $0 < $1
+            case (nil,  _?):            true
+            case ( _?, nil):            false
+            case (let lhs?, let rhs?):  lhs < rhs
             }
         }
 

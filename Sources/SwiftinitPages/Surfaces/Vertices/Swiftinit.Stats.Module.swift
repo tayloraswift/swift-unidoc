@@ -1,8 +1,8 @@
 import HTML
 import MarkdownABI
 import MarkdownRendering
-import UnidocRecords
 import Unidoc
+import UnidocRecords
 import URI
 
 extension Swiftinit.Stats

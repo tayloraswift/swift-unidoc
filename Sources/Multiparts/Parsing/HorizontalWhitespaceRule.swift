@@ -12,9 +12,9 @@ enum HorizontalWhitespaceRule<Location>:TerminalRule
         switch terminal
         {
         case 0x09, 0x20: // '\t', ' '
-            return ()
+            ()
         default:
-            return nil
+            nil
         }
     }
 }

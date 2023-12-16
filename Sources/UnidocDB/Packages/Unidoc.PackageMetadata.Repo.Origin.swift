@@ -24,11 +24,11 @@ extension Unidoc.PackageMetadata.Repo.Origin
     {
         if  case .github(let path) = self
         {
-            return "https://github.com\(path)/blob/\(refname)/\(file)"
+            "https://github.com\(path)/blob/\(refname)/\(file)"
         }
         else
         {
-            return nil
+            nil
         }
     }
 }
@@ -39,7 +39,7 @@ extension Unidoc.PackageMetadata.Repo.Origin:CustomStringConvertible
     {
         switch self
         {
-        case .github(let path): return "github.com\(path)"
+        case .github(let path): "github.com\(path)"
         }
     }
 }

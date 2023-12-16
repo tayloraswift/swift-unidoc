@@ -25,13 +25,13 @@ extension StaticLinker.SupplementBindingError
         switch self.resolved
         {
         case .none(in: let culture):
-            return """
+            """
                 article binding '\(self.codelink)' does not refer to a declaration \
                 in its module, \(culture)
                 """
 
         case .vector:
-            return """
+            """
                 article binding '\(self.codelink)' cannot refer to a vector symbol
                 """
         }
@@ -64,10 +64,10 @@ extension StaticLinker.SupplementBindingError:Diagnostic
         switch self.resolved
         {
         case .none(in: _):
-            return []
+            []
 
         case .vector(let feature, self: _):
-            return [.init(suggested: feature)]
+            [.init(suggested: feature)]
         }
     }
 }

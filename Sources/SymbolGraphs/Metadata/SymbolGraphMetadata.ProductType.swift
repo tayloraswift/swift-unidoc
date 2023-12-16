@@ -20,14 +20,14 @@ extension SymbolGraphMetadata.ProductType:CustomStringConvertible
     {
         switch self
         {
-        case .executable:           return "executable"
-        case .library(.automatic):  return "library.automatic"
-        case .library(.dynamic):    return "library.dynamic"
-        case .library(.static):     return "library.static"
-        case .macro:                return "macro"
-        case .plugin:               return "plugin"
-        case .snippet:              return "snippet"
-        case .test:                 return "test"
+        case .executable:           "executable"
+        case .library(.automatic):  "library.automatic"
+        case .library(.dynamic):    "library.dynamic"
+        case .library(.static):     "library.static"
+        case .macro:                "macro"
+        case .plugin:               "plugin"
+        case .snippet:              "snippet"
+        case .test:                 "test"
         }
     }
 }

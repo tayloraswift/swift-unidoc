@@ -27,13 +27,13 @@ extension AnyVersion:BSONDecodable
             switch $0
             {
             case .int64(let int64):
-                return .stable(.release(.init(rawValue: int64), build: nil))
+                .stable(.release(.init(rawValue: int64), build: nil))
 
             case .string(let utf8):
-                return .init(String.init(bson: utf8))
+                .init(String.init(bson: utf8))
 
             default:
-                return nil
+                nil
             }
         }
     }

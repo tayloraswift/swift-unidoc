@@ -14,9 +14,9 @@ extension InlineDictionary:Equatable where Value:Equatable
     {
         switch (lhs, rhs)
         {
-        case (.one(let lhs), .one(let rhs)):    return lhs == rhs
-        case (.some(let lhs), .some(let rhs)):  return lhs == rhs
-        case _:                                 return false
+        case (.one(let lhs), .one(let rhs)):    lhs == rhs
+        case (.some(let lhs), .some(let rhs)):  lhs == rhs
+        case _:                                 false
         }
     }
 }

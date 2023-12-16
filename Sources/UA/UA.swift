@@ -25,7 +25,7 @@ extension UA:CustomStringConvertible
     var description:String
     {
         var string:String = ""
-        for component in components
+        for component in self.components
         {
             if !string.isEmpty
             {

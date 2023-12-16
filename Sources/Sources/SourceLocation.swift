@@ -59,18 +59,18 @@ extension SourceLocation
                 line: self.position.line + position.line,
                 column: self.position.column + position.column + indent)
         {
-            return .init(position: position, file: self.file)
+            .init(position: position, file: self.file)
         }
         else
         {
-            return nil
+            nil
         }
     }
 
     @inlinable public
     func map<T>(_ transform:(File) throws -> T) rethrows -> SourceLocation<T>
     {
-        .init(position: self.position, file: try transform(file))
+        .init(position: self.position, file: try transform(self.file))
     }
 }
 extension SourceLocation:CustomStringConvertible where File:CustomStringConvertible

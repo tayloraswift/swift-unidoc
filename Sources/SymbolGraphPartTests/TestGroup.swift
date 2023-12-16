@@ -11,8 +11,8 @@ extension TestGroup
         {
             switch $0.usr
             {
-            case .vector:   return false
-            default:        return $0.path.elementsEqual(path)
+            case .vector:   false
+            default:        $0.path.elementsEqual(path)
             }
         })
     }

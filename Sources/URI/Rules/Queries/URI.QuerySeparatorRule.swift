@@ -20,9 +20,9 @@ extension URI.QuerySeparatorRule:TerminalRule
         {
         //    '&'   ';'
         case 0x26, 0x3b:
-            return ()
+            ()
         default:
-            return nil
+            nil
         }
     }
 }

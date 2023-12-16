@@ -78,11 +78,11 @@ extension MarkdownInterpreter
         {
             if  case (let heading as MarkdownBlock.Heading) = block, heading.level == 3
             {
-                return true
+                true
             }
             else
             {
-                return false
+                false
             }
         }
 

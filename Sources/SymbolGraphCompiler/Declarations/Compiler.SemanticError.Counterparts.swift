@@ -18,14 +18,14 @@ extension Compiler.SemanticError.Counterparts:Equatable
         switch (lhs, rhs)
         {
         case    (.superforms(besides: let lhs), .superforms(besides: let rhs)):
-            return lhs == rhs
+            lhs == rhs
 
         case    (.requirements, .requirements),
                 (.scope, .scope):
-            return true
+            true
 
         case (_, _):
-            return false
+            false
         }
     }
 }

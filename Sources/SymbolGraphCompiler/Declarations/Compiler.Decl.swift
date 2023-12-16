@@ -2,8 +2,8 @@ import Availability
 import LexicalPaths
 import Signatures
 import Sources
-import Symbols
 import SymbolGraphParts
+import Symbols
 import Unidoc
 
 extension Compiler

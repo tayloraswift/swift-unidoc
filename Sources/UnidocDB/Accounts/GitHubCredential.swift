@@ -1,5 +1,5 @@
-import GitHubAPI
 import BSON
+import GitHubAPI
 
 struct GitHubCredential<Instant>:Sendable where Instant:Sendable
 {

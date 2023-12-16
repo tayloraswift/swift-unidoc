@@ -1,9 +1,9 @@
 import BSON
 import SemanticVersions
+import SHA1
 import SymbolGraphs
 import Symbols
 import Unidoc
-import SHA1
 
 extension Unidoc
 {

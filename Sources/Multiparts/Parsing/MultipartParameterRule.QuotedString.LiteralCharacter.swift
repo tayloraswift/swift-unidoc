@@ -17,9 +17,9 @@ extension MultipartParameterRule.QuotedString
                     0x23 ... 0x5b,
                     0x5d ... 0x7e,
                     0x80 ... 0xff:
-                return ()
+                ()
             default:
-                return nil
+                nil
             }
         }
     }

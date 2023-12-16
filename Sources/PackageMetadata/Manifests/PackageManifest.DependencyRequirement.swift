@@ -18,11 +18,11 @@ extension PackageManifest.DependencyRequirement
     {
         if  case .stable(let requirement) = self
         {
-            return requirement
+            requirement
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

@@ -9,7 +9,7 @@ extension Unidoc.PackageStatus
         /// the prerelease has a higher patch version.
         if  self.release.graphs == 0 || force
         {
-            return self.release
+            self.release
         }
         else if
             let prerelease:Edition = self.prerelease,
@@ -18,11 +18,11 @@ extension Unidoc.PackageStatus
             let release:SemanticVersion = .init(refname: self.release.tag),
                 release.patch < version.patch
         {
-            return prerelease
+            prerelease
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

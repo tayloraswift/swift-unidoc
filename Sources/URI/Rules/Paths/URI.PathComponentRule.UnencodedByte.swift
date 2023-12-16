@@ -21,9 +21,9 @@ extension URI.PathComponentRule.UnencodedByte:TerminalRule
         {
         //    '%',  '/',  '\',  '?',  '#'
         case 0x25, 0x2f, 0x5c, 0x3f, 0x23:
-            return nil
+            nil
         default:
-            return ()
+            ()
         }
     }
 }
