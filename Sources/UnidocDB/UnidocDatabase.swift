@@ -319,6 +319,18 @@ extension UnidocDatabase
         }
 
         var snapshot:Unidoc.Snapshot = stored
+
+        //  Single-use migration: we need to scale the ABI version numbers by one component.
+        //  No way to do this in an aggregation or an update, it turns it into a double!
+        if  snapshot.metadata.abi.components.major > 0
+        {
+            snapshot.metadata.abi = .v(
+                0,
+                UInt16.init(snapshot.metadata.abi.components.major),
+                snapshot.metadata.abi.components.minor)
+        }
+        //  END hack.
+
         let volume:Unidoc.Volume = try await self.link(&snapshot,
             realm: package.realm,
             with: session)
