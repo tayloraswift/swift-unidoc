@@ -163,28 +163,36 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         }
 
         //  Non-destructive actions.
-        for (action, label):(Swiftinit.API.Post, String) in
-        [
-            (
-                .uplinkAll,
-                "Uplink all volumes"
-            ),
-        ]
-        {
-            main[.hr]
+        main[.hr]
 
-            main[.form]
+        main[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Swiftinit.API[.uplinkAll])"
+            $0.method = "post"
+        }
+            content:
+        {
+            $0[.label]
             {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[action])"
-                $0.method = "post"
+                $0.class = "checkbox"
+                $0.title = "Queue all symbol graphs for uplinking."
             }
                 content:
             {
-                $0[.p]
+                $0[.input]
                 {
-                    $0[.button] { $0.type = "submit" } = label
+                    $0.type = "checkbox"
+                    $0.name = "queue"
+                    $0.value = "true"
                 }
+
+                $0[.span] = "Queue all symbol graphs"
+            }
+
+            $0[.p]
+            {
+                $0[.button] { $0.type = "submit" } = "Uplink volumes"
             }
         }
 
