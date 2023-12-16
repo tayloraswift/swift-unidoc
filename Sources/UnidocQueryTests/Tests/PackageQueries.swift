@@ -22,6 +22,15 @@ struct PackageQueries:UnidocDatabaseTestBattery
         let empty:SymbolGraph = .init(modules: [])
         var docs:SymbolGraphArchive
 
+        let status:
+        (
+            swift:Unidoc.UploadStatus,
+            debut:Unidoc.UploadStatus,
+            fearless:(Unidoc.UploadStatus, Unidoc.UploadStatus),
+            speakNow:(Unidoc.UploadStatus, Unidoc.UploadStatus),
+            red:Unidoc.UploadStatus
+        )
+
         do
         {
             docs = .init(
@@ -33,14 +42,14 @@ struct PackageQueries:UnidocDatabaseTestBattery
                     products: []),
                 graph: empty)
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.swift = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-debut"
             docs.metadata.commit = nil
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.debut = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -48,28 +57,28 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.1.2")
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.fearless.0 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
                 refname: "0.1.3")
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.fearless.1 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.package = "swift-speak-now"
             docs.metadata.commit = nil
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.speakNow.0 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.3.0")
 
-            let _:Unidoc.UploadStatus = try await unidoc.store(docs: docs, with: session)
+            status.speakNow.1 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
@@ -77,10 +86,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
                 refname: "0.4.0")
 
-            let uploaded:Unidoc.UploadStatus = try await unidoc.store(docs: docs,
-                with: session)
-
-            print(uploaded)
+            status.red = try await unidoc.store(docs: docs, with: session)
         }
 
         if  let tests:TestGroup = tests / "AllPackages"
@@ -111,6 +117,106 @@ struct PackageQueries:UnidocDatabaseTestBattery
                             "swift-speak-now",
                         ])
                     }
+                }
+            }
+        }
+
+        if  let tests:TestGroup = tests / "Tags"
+        {
+            if  let tests:TestGroup = tests / "Debut"
+            {
+                let query:Unidoc.PackageQuery = .init(package: "swift-debut", limit: 2)
+                await tests.do
+                {
+                    guard
+                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                        value: try await unidoc.execute(query: query, with: session))
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(value: output.tagless?.graph)
+                    tests.expect(output.prereleases ..? [])
+                    tests.expect(output.releases ..? [])
+                    tests.expect(output.package.id ==? status.debut.package)
+                }
+            }
+            if  let tests:TestGroup = tests / "Fearless"
+            {
+                let query:Unidoc.PackageQuery = .init(package: "swift-fearless", limit: 2)
+                await tests.do
+                {
+                    guard
+                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                        value: try await unidoc.execute(query: query, with: session))
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(nil: output.tagless?.graph)
+                    tests.expect(output.prereleases ..? [])
+
+                    guard tests.expect(output.releases.count ==? 2)
+                    else
+                    {
+                        return
+                    }
+
+                    //  Reverse chronological order!
+                    tests.expect(output.releases[0].edition.id ==? status.fearless.1.edition)
+                    tests.expect(output.releases[1].edition.id ==? status.fearless.0.edition)
+                }
+            }
+            if  let tests:TestGroup = tests / "SpeakNow"
+            {
+                let query:Unidoc.PackageQuery = .init(package: "swift-speak-now", limit: 2)
+                await tests.do
+                {
+                    guard
+                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                        value: try await unidoc.execute(query: query, with: session))
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(value: output.tagless?.graph)
+                    tests.expect(output.prereleases ..? [])
+
+                    guard tests.expect(output.releases.count ==? 1)
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(output.releases[0].edition.id ==? status.speakNow.1.edition)
+                }
+            }
+            if  let tests:TestGroup = tests / "Red"
+            {
+                let query:Unidoc.PackageQuery = .init(package: "swift-red", limit: 2)
+                await tests.do
+                {
+                    guard
+                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                        value: try await unidoc.execute(query: query, with: session))
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(nil: output.tagless?.graph)
+                    tests.expect(output.prereleases ..? [])
+
+                    guard tests.expect(output.releases.count ==? 1)
+                    else
+                    {
+                        return
+                    }
+
+                    tests.expect(output.releases[0].edition.id ==? status.red.edition)
                 }
             }
         }
