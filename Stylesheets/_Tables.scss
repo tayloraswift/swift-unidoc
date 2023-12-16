@@ -72,3 +72,41 @@ section.details table.tags
         content: '⟳';
     }
 }
+section.details
+{
+    span.placeholder,
+    span.parenthetical
+    {
+        color: $light-foreground-semi;
+        font-style: italic;
+    }
+
+    span.parenthetical::before
+    {
+        content: '(';
+        font-style: normal;
+        margin-left: 0.4em;
+    }
+    span.parenthetical::after
+    {
+        content: ')';
+        font-style: normal;
+    }
+}
+section.details
+{
+    > dl
+    {
+        display: grid;
+        grid-template-columns: 33% auto;
+
+        dt
+        {
+            grid-column: 1;
+        }
+        dd
+        {
+            grid-column: 2;
+        }
+    }
+}

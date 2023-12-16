@@ -59,27 +59,6 @@ section.details
 }
 section.details
 {
-    > dl
-    {
-        display: grid;
-        grid-template-columns: 33% auto;
-
-        dt
-        {
-            grid-column: 1;
-        }
-        dd
-        {
-            grid-column: 2;
-
-            span.placeholder
-            {
-                color: $light-foreground-semi;
-                font-style: italic;
-            }
-        }
-    }
-
     div.more
     {
         margin: 2rem 0;

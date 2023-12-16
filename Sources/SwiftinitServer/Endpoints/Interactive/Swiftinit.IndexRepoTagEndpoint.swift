@@ -35,8 +35,8 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let package:Unidoc.PackageMetadata = try await server.db.unidoc.execute(
-            query: Unidoc.PackageQuery.init(symbol: self.package),
+        let package:Unidoc.PackageMetadata = try await server.db.unidoc.package(
+            named: self.package,
             with: session)
         else
         {
