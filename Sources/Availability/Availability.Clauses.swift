@@ -60,11 +60,11 @@ extension Availability.Clauses
             case nil = self.deprecated,
             case nil = self.obsoleted
         {
-            return true
+            true
         }
         else
         {
-            return false
+            false
         }
     }
 }

@@ -1,5 +1,5 @@
-import Testing
 import IP
+import Testing
 
 extension Main
 {

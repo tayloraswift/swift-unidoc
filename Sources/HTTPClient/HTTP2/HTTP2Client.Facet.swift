@@ -27,11 +27,11 @@ extension HTTP2Client.Facet
         if  let headers:[String] = self.headers?[canonicalForm: ":status"],
                 headers.count == 1
         {
-            return UInt.init(headers[0])
+            UInt.init(headers[0])
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

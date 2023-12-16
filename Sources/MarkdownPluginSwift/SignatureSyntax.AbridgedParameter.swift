@@ -23,17 +23,17 @@ extension SignatureSyntax.AbridgedParameter
     {
         if  case .wildcard = self.syntax.firstName.tokenKind
         {
-            return true
+            true
         }
         else if
             case nil = self.syntax.secondName,
             case false = self.func
         {
-            return true
+            true
         }
         else
         {
-            return false
+            false
         }
     }
 }

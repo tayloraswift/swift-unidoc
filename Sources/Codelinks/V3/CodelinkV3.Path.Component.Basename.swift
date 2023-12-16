@@ -24,10 +24,10 @@ extension CodelinkV3.Path.Component.Basename:LexicalContinuation
     {
         switch self.unencased
         {
-        case "init":        return "`init`"
-        case "deinit":      return "`deinit`"
-        case "subscript":   return "`subscript`"
-        case let unencased: return unencased
+        case "init":        "`init`"
+        case "deinit":      "`deinit`"
+        case "subscript":   "`subscript`"
+        case let unencased: unencased
         }
     }
 }

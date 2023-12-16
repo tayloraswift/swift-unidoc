@@ -119,10 +119,10 @@ extension SwiftFlavoredMarkdownParser
                 {
                     switch $0
                     {
-                    case nil:       return nil
-                    case .left?:    return .left
-                    case .center?:  return .center
-                    case .right?:   return .right
+                    case nil:       nil
+                    case .left?:    .left
+                    case .center?:  .center
+                    case .right?:   .right
                     }
                 },
                 head: table.head.cells.map

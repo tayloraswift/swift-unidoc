@@ -14,11 +14,11 @@ extension CodelinkV3.Suffix
     {
         if case .hash(let hash) = self
         {
-            return hash
+            hash
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

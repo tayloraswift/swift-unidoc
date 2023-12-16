@@ -13,9 +13,9 @@ extension JSON.NumberRule
         {
             switch terminal
             {
-            case 0x2b:  return .plus
-            case 0x2d:  return .minus
-            default:    return nil
+            case 0x2b:  .plus
+            case 0x2d:  .minus
+            default:    nil
             }
         }
     }

@@ -25,13 +25,13 @@ extension JSON.OptionalDecoder
     @inlinable public static
     func ?? (lhs:Self, rhs:@autoclosure () -> Self) -> Self
     {
-        if case nil = lhs.value
+        if  case nil = lhs.value
         {
-            return rhs()
+            rhs()
         }
         else
         {
-            return lhs
+            lhs
         }
     }
 }

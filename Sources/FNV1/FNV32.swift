@@ -18,7 +18,7 @@ extension FNV32:RawRepresentable
         self.init(value: .init(bitPattern: rawValue))
     }
     @inlinable public
-    var rawValue:Int32 { .init(bitPattern: value) }
+    var rawValue:Int32 { .init(bitPattern: self.value) }
 }
 extension FNV32
 {

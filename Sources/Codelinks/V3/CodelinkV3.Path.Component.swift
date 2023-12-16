@@ -23,17 +23,17 @@ extension CodelinkV3.Path.Component:LexicalContinuation
     {
         switch self
         {
-        case .`init`(nil):                  return "init"
-        case .`init`(let arguments?):       return "init" + arguments.description
-        case .deinit:                       return "deinit"
-        case .subscript(nil):               return "subscript"
-        case .subscript(let arguments?):    return "subscript" + arguments.description
+        case .`init`(nil):                  "init"
+        case .`init`(let arguments?):       "init" + arguments.description
+        case .deinit:                       "deinit"
+        case .subscript(nil):               "subscript"
+        case .subscript(let arguments?):    "subscript" + arguments.description
 
         case .nominal(let name, nil):
-            return name.description
+            name.description
 
         case .nominal(let name, let arguments?):
-            return name.description + arguments.description
+            name.description + arguments.description
         }
     }
     @inlinable public
@@ -41,17 +41,17 @@ extension CodelinkV3.Path.Component:LexicalContinuation
     {
         switch self
         {
-        case .`init`(nil):                  return "init"
-        case .`init`(let arguments?):       return "init" + arguments.description
-        case .deinit:                       return "deinit"
-        case .subscript(nil):               return "subscript"
-        case .subscript(let arguments?):    return "subscript" + arguments.description
+        case .`init`(nil):                  "init"
+        case .`init`(let arguments?):       "init" + arguments.description
+        case .deinit:                       "deinit"
+        case .subscript(nil):               "subscript"
+        case .subscript(let arguments?):    "subscript" + arguments.description
 
         case .nominal(let name, nil):
-            return name.unencased
+            name.unencased
 
         case .nominal(let name, let arguments?):
-            return name.unencased + arguments.description
+            name.unencased + arguments.description
         }
     }
 }

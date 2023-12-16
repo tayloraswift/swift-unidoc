@@ -1,8 +1,8 @@
 import HTTP
 import IP
 import NIOCore
-import NIOHTTP1
 import NIOHPACK
+import NIOHTTP1
 
 extension HTTP
 {

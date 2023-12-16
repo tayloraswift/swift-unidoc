@@ -21,9 +21,9 @@ extension JSON.ObjectKeyError:CustomStringConvertible
         switch self
         {
         case .duplicate(let key):
-            return "duplicate key '\(key)'"
+            "duplicate key '\(key)'"
         case .undefined(let key):
-            return "undefined key '\(key)'"
+            "undefined key '\(key)'"
         }
     }
 }

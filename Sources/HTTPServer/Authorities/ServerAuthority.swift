@@ -57,8 +57,8 @@ extension ServerAuthority
     {
         switch self.scheme
         {
-        case .https(port: 443):         return "https://\(self.domain)\(uri)"
-        case .https(port: let port):    return "https://\(self.domain):\(port)\(uri)"
+        case .https(port: 443):         "https://\(self.domain)\(uri)"
+        case .https(port: let port):    "https://\(self.domain):\(port)\(uri)"
         }
     }
     static
