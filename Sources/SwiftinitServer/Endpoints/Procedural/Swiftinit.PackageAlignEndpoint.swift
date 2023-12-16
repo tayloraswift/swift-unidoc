@@ -11,6 +11,15 @@ extension Swiftinit
         let package:Symbol.Package
         let realm:String?
         let force:Bool
+
+        init(package:Symbol.Package,
+            realm:String?,
+            force:Bool)
+        {
+            self.package = package
+            self.realm = realm.map { $0.isEmpty ? nil : $0 } ?? nil
+            self.force = force
+        }
     }
 }
 extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
