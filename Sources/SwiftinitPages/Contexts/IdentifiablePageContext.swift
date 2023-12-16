@@ -169,7 +169,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
             return .init(display: path?.description ?? "", target: $1)
         }
     }
-    func link(file:Unidoc.Scalar, line:Int? = nil) -> HTML.SourceLink?
+    func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
         if  let origin:Unidoc.PackageMetadata.Repo.Origin = self.repo?.origin,
             let refname:String = self.volumes[file.zone]?.refname,

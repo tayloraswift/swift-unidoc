@@ -18,7 +18,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
         switch vertex
         {
         case .article(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 organizing: consume groups,
@@ -33,7 +33,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
             resource = page.resource(format: context.format)
 
         case .culture(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 organizing: consume groups,
@@ -47,7 +47,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
             resource = page.resource(format: context.format)
 
         case .decl(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .module(volume: context.page.volume,
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(volume: context.page.volume,
                 tree: tree)
             let groups:GroupSections = .init(context.page,
                 organizing: consume groups,

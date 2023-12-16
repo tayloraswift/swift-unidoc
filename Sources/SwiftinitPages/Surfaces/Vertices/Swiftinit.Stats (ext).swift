@@ -21,7 +21,7 @@ extension Swiftinit.Stats:Swiftinit.VolumeRoot
             throw Unidoc.VertexTypeError.article
 
         case .culture(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
+            let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.page.volume)
             let page:Module = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
@@ -38,7 +38,7 @@ extension Swiftinit.Stats:Swiftinit.VolumeRoot
             throw Unidoc.VertexTypeError.foreign
 
         case .global(let vertex):
-            let sidebar:HTML.Sidebar<Self>? = .package(volume: context.page.volume)
+            let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.page.volume)
             let page:Package = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,

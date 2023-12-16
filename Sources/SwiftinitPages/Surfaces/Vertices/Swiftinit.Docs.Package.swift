@@ -69,7 +69,7 @@ extension Swiftinit.Docs.Package:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
 {
-    var sidebar:HTML.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
+    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -116,7 +116,7 @@ extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
                 switch self.repo?.origin
                 {
                 case .github(let path)?:
-                    $0 += HTML.SourceLink.init(file: path.dropFirst(),
+                    $0 += Swiftinit.SourceLink.init(file: path.dropFirst(),
                         target: "https://github.com\(path)/tree/\(refname)")
 
                 case nil:
@@ -190,7 +190,8 @@ extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
                     }
                     $0[.tbody]
                     {
-                        for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
+                        for dependency:Unidoc.VolumeMetadata.Dependency in
+                            self.volume.dependencies
                         {
                             $0[.tr]
                             {

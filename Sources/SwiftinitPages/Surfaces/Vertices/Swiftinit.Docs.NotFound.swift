@@ -7,9 +7,10 @@ extension Swiftinit.Docs
     struct NotFound
     {
         let context:IdentifiablePageContext<Never?>
-        let sidebar:HTML.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
-        init(_ context:IdentifiablePageContext<Never?>, sidebar:HTML.Sidebar<Swiftinit.Docs>?)
+        init(_ context:IdentifiablePageContext<Never?>,
+            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?)
         {
             self.context = context
             self.sidebar = sidebar
