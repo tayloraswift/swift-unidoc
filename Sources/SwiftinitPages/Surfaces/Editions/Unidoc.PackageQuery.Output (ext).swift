@@ -5,7 +5,7 @@ import SwiftinitRender
 import UnidocQueries
 import UnidocRecords
 
-extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
+extension Unidoc.PackageQuery.Output:HTTP.ServerResponseFactory
 {
     public
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
@@ -28,7 +28,7 @@ extension Unidoc.EditionsQuery.Output:HTTP.ServerResponseFactory
                 type: .application(.json, charset: .utf8)))
 
         case _:
-            let page:Swiftinit.EditionsPage = .init(from: self)
+            let page:Swiftinit.TagsPage = .init(from: self)
             return .ok(page.resource(format: format))
         }
     }

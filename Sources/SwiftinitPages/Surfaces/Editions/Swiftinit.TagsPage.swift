@@ -9,74 +9,79 @@ import URI
 
 extension Swiftinit
 {
-    struct EditionsPage
+    struct TagsPage
     {
         private
         let package:Unidoc.PackageMetadata
         private
-        let editions:[Unidoc.EditionOutput]
+        let tagless:Unidoc.PackageQuery.Tagless?
+        private
+        let tagged:[Unidoc.PackageQuery.Tag]
         private
         let realm:Unidoc.RealmMetadata?
         private
         let user:Unidoc.User?
 
         init(package:Unidoc.PackageMetadata,
-            editions:[Unidoc.EditionOutput],
+            tagless:Unidoc.PackageQuery.Tagless?,
+            tagged:[Unidoc.PackageQuery.Tag],
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
             self.package = package
-            self.editions = editions
+            self.tagless = tagless
+            self.tagged = tagged
             self.realm = realm
             self.user = user
         }
     }
 }
-extension Swiftinit.EditionsPage
+extension Swiftinit.TagsPage
 {
-    init(from output:Unidoc.EditionsQuery.Output)
+    init(from output:borrowing Unidoc.PackageQuery.Output)
     {
-        var prereleases:ArraySlice<Unidoc.EditionOutput> = output.prereleases[...]
-        var releases:ArraySlice<Unidoc.EditionOutput> = output.releases[...]
+        var prereleases:ArraySlice<Unidoc.PackageQuery.Tag> = output.prereleases[...]
+        var releases:ArraySlice<Unidoc.PackageQuery.Tag> = output.releases[...]
 
         //  Merge the two pre-sorted arrays into a single sorted array.
-        var editions:[Unidoc.EditionOutput] = []
-            editions.reserveCapacity(prereleases.count + releases.count)
+        var tagged:[Unidoc.PackageQuery.Tag] = []
+            tagged.reserveCapacity(prereleases.count + releases.count)
         while
-            let prerelease:Unidoc.EditionOutput = prereleases.first,
-            let release:Unidoc.EditionOutput = releases.first
+            let prerelease:Unidoc.PackageQuery.Tag = prereleases.first,
+            let release:Unidoc.PackageQuery.Tag = releases.first
         {
             if  release.edition.patch < prerelease.edition.patch
             {
-                editions.append(prerelease)
+                tagged.append(prerelease)
                 prereleases.removeFirst()
             }
             else
             {
-                editions.append(release)
+                tagged.append(release)
                 releases.removeFirst()
             }
         }
 
         //  Append any remaining items.
-        editions += prereleases
-        editions += releases
+        tagged += prereleases
+        tagged += releases
 
         self.init(package: output.package,
-            editions: editions,
+            tagless: output.tagless,
+            tagged: tagged,
             realm: output.realm,
             user: output.user)
     }
 }
-extension Swiftinit.EditionsPage:Swiftinit.RenderablePage
+extension Swiftinit.TagsPage:Swiftinit.RenderablePage
 {
     var title:String { "Git Tags - \(self.package.symbol)" }
 }
-extension Swiftinit.EditionsPage:Swiftinit.StaticPage
+extension Swiftinit.TagsPage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Tags[self.package.symbol] }
 }
-extension Swiftinit.EditionsPage:Swiftinit.ApplicationPage
+extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -161,7 +166,6 @@ extension Swiftinit.EditionsPage:Swiftinit.ApplicationPage
                     {
                         $0[.th] = "Tag"
                         $0[.th] = "Commit"
-                        $0[.th] = "Release?"
                         $0[.th] = "Docs"
                         $0[.th] = "Symbol Graph"
                     }
@@ -169,17 +173,27 @@ extension Swiftinit.EditionsPage:Swiftinit.ApplicationPage
 
                 $0[.tbody]
                 {
-                    var modern:(prerelease:Bool, release:Bool) = (true, true)
-                    for output:Unidoc.EditionOutput in self.editions
+                    if  let tagless:Unidoc.PackageQuery.Tagless = self.tagless
                     {
-                        let row:Row = .init(name: output.edition.name,
-                            sha1: output.edition.sha1?.description,
-                            release: output.edition.release,
-                            version: output.edition.patch,
-                            volume: output.volume,
-                            graph: output.graph)
+                        $0[.tr] { $0.class = "tagless" } = Row.init(
+                            volume: tagless.volume,
+                            graph: tagless.graph,
+                            type: .tagless)
+                    }
 
-                        if  output.edition.release
+                    var modern:(prerelease:Bool, release:Bool) = (true, true)
+                    for tagged:Unidoc.PackageQuery.Tag in self.tagged
+                    {
+                        let row:Row = .init(
+                            volume: tagged.volume,
+                            graph: tagged.graph,
+                            type: .tagged(
+                                tagged.edition.name,
+                                tagged.edition.sha1,
+                                tagged.edition.patch,
+                                release: tagged.edition.release))
+
+                        if  tagged.edition.release
                         {
                             $0[.tr] { $0.class = modern.release ? "modern" : nil } = row
 
@@ -212,7 +226,8 @@ extension Swiftinit.EditionsPage:Swiftinit.ApplicationPage
                             return
                         }
 
-                        $0[.span] { $0.class = "placeholder" } = "alignment in progress"
+                        $0 += " "
+                        $0[.span] { $0.class = "parenthetical" } = "alignment in progress"
                     }
                     else
                     {

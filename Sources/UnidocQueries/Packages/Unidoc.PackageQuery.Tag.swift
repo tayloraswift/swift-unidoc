@@ -3,10 +3,10 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
+extension Unidoc.PackageQuery
 {
     @frozen public
-    struct EditionOutput:Equatable, Sendable
+    struct Tag:Equatable, Sendable
     {
         public
         var edition:Unidoc.EditionMetadata
@@ -27,7 +27,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionOutput:MongoMasterCodingModel
+extension Unidoc.PackageQuery.Tag:MongoMasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -37,7 +37,7 @@ extension Unidoc.EditionOutput:MongoMasterCodingModel
         case graph
     }
 }
-extension Unidoc.EditionOutput:BSONDocumentDecodable
+extension Unidoc.PackageQuery.Tag:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
