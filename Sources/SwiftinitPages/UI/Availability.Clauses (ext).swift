@@ -69,19 +69,19 @@ extension Availability.Clauses<Availability.PlatformDomain>
         )
         {
         case (unavailable: .unconditionally?, _, _, _):
-            return "unavailable"
+            "unavailable"
 
         case (nil, deprecated: _?, _, _):
-            return "deprecated"
+            "deprecated"
 
         case (nil, nil, obsoleted: _?, _):
-            return "obsoleted"
+            "obsoleted"
 
         case (nil, nil, nil, introduced: let version?):
-            return "\(version)+"
+            "\(version)+"
 
         case (nil, nil, nil, nil):
-            return nil
+            nil
         }
     }
 }

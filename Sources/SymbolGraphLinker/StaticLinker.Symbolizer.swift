@@ -192,8 +192,8 @@ extension StaticLinker.Symbolizer
     {
         switch id
         {
-        case .index(let culture):   return culture
-        case .nominated(let id):    return self.intern(id)
+        case .index(let culture):   culture
+        case .nominated(let id):    self.intern(id)
         }
     }
 }

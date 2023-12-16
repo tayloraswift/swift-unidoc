@@ -51,11 +51,11 @@ extension SymbolGraph.Culture
         if  let first:Int32 = self.namespaces.first?.range.first,
             let last:Int32 = self.namespaces.last?.range.last
         {
-            return first ... last
+            first ... last
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

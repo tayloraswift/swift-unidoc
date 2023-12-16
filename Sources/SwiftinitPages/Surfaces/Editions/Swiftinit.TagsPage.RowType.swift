@@ -1,5 +1,5 @@
-import SHA1
 import SemanticVersions
+import SHA1
 
 extension Swiftinit.TagsPage
 {

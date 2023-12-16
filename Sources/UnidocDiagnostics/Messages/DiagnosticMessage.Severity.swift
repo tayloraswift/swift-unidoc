@@ -15,9 +15,9 @@ extension DiagnosticMessage.Severity:CustomStringConvertible
     {
         switch self
         {
-        case .note:     return "note"
-        case .warning:  return "warning"
-        case .error:    return "error"
+        case .note:     "note"
+        case .warning:  "warning"
+        case .error:    "error"
         }
     }
 }
@@ -27,9 +27,9 @@ extension DiagnosticMessage.Severity
     {
         switch self
         {
-        case .note:     return .rgb(150, 150, 150)
-        case .warning:  return .magenta
-        case .error:    return .red
+        case .note:     .rgb(150, 150, 150)
+        case .warning:  .magenta
+        case .error:    .red
         }
     }
 }

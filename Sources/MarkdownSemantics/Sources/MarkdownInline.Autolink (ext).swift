@@ -1,5 +1,5 @@
-import Sources
 import MarkdownAST
+import Sources
 import UnidocDiagnostics
 
 extension MarkdownInline.Autolink:DiagnosticSubject
@@ -11,11 +11,11 @@ extension MarkdownInline.Autolink:DiagnosticSubject
         if  let base:SourceLocation<Int32> = self.source.file.location,
             let offset:Range<SourcePosition> = self.source.range
         {
-            return base.translated(by: offset.lowerBound)
+            base.translated(by: offset.lowerBound)
         }
         else
         {
-            return nil
+            nil
         }
     }
 

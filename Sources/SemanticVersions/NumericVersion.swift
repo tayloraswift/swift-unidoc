@@ -34,9 +34,9 @@ extension NumericVersion:RawRepresentable
     {
         switch self
         {
-        case .major(let version):   return Precision.major.rawValue | version.rawValue
-        case .minor(let version):   return Precision.minor.rawValue | version.rawValue
-        case .patch(let version):   return Precision.patch.rawValue | version.rawValue
+        case .major(let version):   Precision.major.rawValue | version.rawValue
+        case .minor(let version):   Precision.minor.rawValue | version.rawValue
+        case .patch(let version):   Precision.patch.rawValue | version.rawValue
         }
     }
     @inlinable public
@@ -58,9 +58,9 @@ extension NumericVersion:CustomStringConvertible
     {
         switch self
         {
-        case .major(let version):   return "\(version)"
-        case .minor(let version):   return "\(version)"
-        case .patch(let version):   return "\(version)"
+        case .major(let version):   "\(version)"
+        case .minor(let version):   "\(version)"
+        case .patch(let version):   "\(version)"
         }
     }
 }

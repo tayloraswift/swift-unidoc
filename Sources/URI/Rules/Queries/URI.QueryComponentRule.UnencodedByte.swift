@@ -21,9 +21,9 @@ extension URI.QueryComponentRule.UnencodedByte:TerminalRule
         {
         //    '%'   '&'   ';'   '='   '#'
         case 0x25, 0x26, 0x3b, 0x3d, 0x23:
-            return nil
+            nil
         default:
-            return ()
+            ()
         }
     }
 }

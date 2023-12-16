@@ -19,10 +19,10 @@ extension Swiftinit.AdminPage.Recode.Target
     {
         switch self
         {
-        case .packages:     return "Packages"
-        case .editions:     return "Editions"
-        case .volumes:      return "Volume Metadata"
-        case .vertices:     return "Vertices"
+        case .packages:     "Packages"
+        case .editions:     "Editions"
+        case .volumes:      "Volume Metadata"
+        case .vertices:     "Vertices"
         }
     }
 
@@ -31,10 +31,10 @@ extension Swiftinit.AdminPage.Recode.Target
     {
         switch self
         {
-        case .packages:     return "This will recode all package records. Are you sure?"
-        case .editions:     return "This will recode all edition records. Are you sure?"
-        case .volumes:      return "This will recode all volume metadata. Are you sure?"
-        case .vertices:     return "This will recode all volume vertices. Are you sure?"
+        case .packages:     "This will recode all package records. Are you sure?"
+        case .editions:     "This will recode all edition records. Are you sure?"
+        case .volumes:      "This will recode all volume metadata. Are you sure?"
+        case .vertices:     "This will recode all volume vertices. Are you sure?"
         }
     }
 }

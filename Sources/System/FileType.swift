@@ -24,13 +24,13 @@ extension FileType
     {
         switch self
         {
-        case .blockDevice:      return S_IFBLK
-        case .characterDevice:  return S_IFCHR
-        case .directory:        return S_IFDIR
-        case .fifo:             return S_IFIFO
-        case .regular:          return S_IFREG
-        case .socket:           return S_IFSOCK
-        case .symlink:          return S_IFLNK
+        case .blockDevice:      S_IFBLK
+        case .characterDevice:  S_IFCHR
+        case .directory:        S_IFDIR
+        case .fifo:             S_IFIFO
+        case .regular:          S_IFREG
+        case .socket:           S_IFSOCK
+        case .symlink:          S_IFLNK
         }
     }
 }

@@ -23,8 +23,8 @@ extension GenericType
     {
         switch self
         {
-        case .nominal(let type):    return type
-        case .complex:              return nil
+        case .nominal(let type):    type
+        case .complex:              nil
         }
     }
     @inlinable public
@@ -32,8 +32,8 @@ extension GenericType
     {
         switch self
         {
-        case .nominal(let type):    return .nominal(try transform(type))
-        case .complex(let type):    return .complex(type)
+        case .nominal(let type):    .nominal(try transform(type))
+        case .complex(let type):    .complex(type)
         }
     }
     @inlinable public
@@ -41,8 +41,8 @@ extension GenericType
     {
         switch self
         {
-        case .nominal(let type):    return try transform(type).map { .nominal($0) }
-        case .complex(let type):    return .complex(type)
+        case .nominal(let type):    try transform(type).map { .nominal($0) }
+        case .complex(let type):    .complex(type)
         }
     }
 }

@@ -1,6 +1,6 @@
 import Signatures
-import Symbols
 import SymbolGraphParts
+import Symbols
 import Unidoc
 
 extension Compiler

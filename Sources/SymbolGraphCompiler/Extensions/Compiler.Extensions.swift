@@ -1,7 +1,7 @@
 import LexicalPaths
 import Signatures
-import Symbols
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {

@@ -19,9 +19,9 @@ extension UA.WhitespaceRule:TerminalRule
         {
         //    ' '  '\t'  '\r'  '\n'
         case 0x20, 0x09, 0x0d, 0x0a:
-            return ()
+            ()
         default:
-            return nil
+            nil
         }
     }
 }

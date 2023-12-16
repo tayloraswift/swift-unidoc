@@ -17,10 +17,10 @@ extension SymbolGraphPart.IdentificationError:CustomStringConvertible
         switch self
         {
         case .filename(let filename):
-            return "Invalid filename: \(filename)."
+            "Invalid filename: \(filename)."
 
         case .culture(let id, expected: let culture):
-            return "Invalid filename: \(id), expected culture '\(culture)'."
+            "Invalid filename: \(id), expected culture '\(culture)'."
         }
     }
 }

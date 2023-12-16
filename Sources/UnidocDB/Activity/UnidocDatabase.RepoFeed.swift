@@ -1,5 +1,4 @@
 import BSON
-import BSON
 import MongoDB
 
 extension UnidocDatabase

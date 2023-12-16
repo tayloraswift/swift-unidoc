@@ -4,16 +4,16 @@ import DoclinkResolution
 import FNV1
 import LexicalPaths
 import MarkdownABI
-import MarkdownSemantics
-import MarkdownParsing
 import MarkdownAST
+import MarkdownParsing
+import MarkdownSemantics
 import Signatures
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
-import UnidocDiagnostics
 import Unidoc
+import UnidocDiagnostics
 
 public
 struct StaticLinker:~Copyable

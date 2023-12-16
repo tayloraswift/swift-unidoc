@@ -138,11 +138,11 @@ extension Unidoc.Stem
     {
         if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
         {
-            return self.rawValue[..<separator]
+            self.rawValue[..<separator]
         }
         else
         {
-            return self.rawValue[...]
+            self.rawValue[...]
         }
     }
     /// Returns the last lexical path component of this stem. If the stem is empty, this
@@ -155,11 +155,11 @@ extension Unidoc.Stem
     {
         if  let separator:String.Index = self.rawValue.lastIndex(where: \.isWhitespace)
         {
-            return self.rawValue[self.rawValue.index(after: separator)...]
+            self.rawValue[self.rawValue.index(after: separator)...]
         }
         else
         {
-            return self.rawValue[...]
+            self.rawValue[...]
         }
     }
     /// Returns the unqualified name of this stem, if it contains more than one component,
@@ -170,11 +170,11 @@ extension Unidoc.Stem
     {
         if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
         {
-            return Self.format(self.rawValue[self.rawValue.index(after: separator)...])[...]
+            Self.format(self.rawValue[self.rawValue.index(after: separator)...])[...]
         }
         else
         {
-            return self.rawValue[...]
+            self.rawValue[...]
         }
     }
 

@@ -1,9 +1,9 @@
 import MongoDB
 import MongoTesting
-import Symbols
 import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
+import Symbols
 import Unidoc
 import UnidocDB
 import UnidocQueries

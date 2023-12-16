@@ -30,17 +30,17 @@ extension ContentDisposition:CustomStringConvertible
         switch self
         {
         case .inline:
-            return "inline"
+            "inline"
 
         case .attachment(filename: nil):
-            return "attachment"
+            "attachment"
         case .attachment(filename: let filename?):
-            return "attachment; filename=\(Self.escape(filename))"
+            "attachment; filename=\(Self.escape(filename))"
 
         case .formData(filename: nil, name: let name):
-            return "form-data; name=\(Self.escape(name))"
+            "form-data; name=\(Self.escape(name))"
         case .formData(filename: let filename?, name: let name):
-            return "form-data; name=\(Self.escape(name)); filename=\(Self.escape(filename))"
+            "form-data; name=\(Self.escape(name)); filename=\(Self.escape(filename))"
         }
     }
 }

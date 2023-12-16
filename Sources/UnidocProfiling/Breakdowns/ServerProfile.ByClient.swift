@@ -66,7 +66,7 @@ extension ServerProfile.ByClient
     @inlinable public
     var total:Int
     {
-        return self.verifiedGooglebot
+        self.verifiedGooglebot
             + self.verifiedBingbot
             + self.likelyBaiduspider
             + self.likelyYandexbot

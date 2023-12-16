@@ -1,5 +1,5 @@
-import Symbols
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {
@@ -36,8 +36,8 @@ extension Compiler.Culture
     {
         switch doccomment.culture
         {
-        case nil, self.id?: return .init(doccomment.text, at: doccomment.start)
-        default:            return nil
+        case nil, self.id?: .init(doccomment.text, at: doccomment.start)
+        default:            nil
         }
     }
 }

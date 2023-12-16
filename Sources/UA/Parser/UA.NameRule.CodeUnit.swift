@@ -33,9 +33,9 @@ extension UA.NameRule.CodeUnit:TerminalRule
                 0x40,           //  '@'
                 0x5f,           //  '_'
                 0x7e:           //  '~'
-            return ()
+            ()
         default:
-            return nil
+            nil
         }
     }
 }

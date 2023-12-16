@@ -1,5 +1,5 @@
-import Symbols
 import PackageMetadata
+import Symbols
 
 extension PackageBuild
 {
@@ -20,18 +20,18 @@ extension PackageBuild.ID
     {
         switch self
         {
-        case    .unversioned(let id):   return id
+        case    .unversioned(let id):   id
         case    .versioned(let pin, _),
-                .upstream(let pin):     return pin.id
+                .upstream(let pin):     pin.id
         }
     }
     var pin:PackageManifest.DependencyPin?
     {
         switch self
         {
-        case    .unversioned:           return nil
+        case    .unversioned:           nil
         case    .versioned(let pin, _),
-                .upstream(let pin):     return pin
+                .upstream(let pin):     pin
         }
     }
 }

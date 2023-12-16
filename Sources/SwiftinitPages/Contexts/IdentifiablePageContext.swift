@@ -176,14 +176,14 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
             let file:Unidoc.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
         {
-            return .init(
+            .init(
                 file: file.symbol.last,
                 line: line,
                 target: line.map { "\(blob)#L\($0 + 1)" } ?? blob)
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

@@ -1,6 +1,6 @@
+import HTML
 import MarkdownABI
 import MarkdownRendering
-import HTML
 import Unidoc
 import UnidocRecords
 import URI
@@ -32,15 +32,15 @@ extension CodeSection:HyperTextRenderableMarkdown
             if  self.scalars.indices.contains(reference),
                 let target:Unidoc.Scalar = self.scalars[reference]
             {
-                return self.context.url(target)
+                self.context.url(target)
             }
             else
             {
-                return nil
+                nil
             }
 
         case _:
-            return nil
+            nil
         }
     }
 }

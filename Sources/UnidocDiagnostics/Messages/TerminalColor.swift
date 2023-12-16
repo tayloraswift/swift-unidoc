@@ -17,17 +17,17 @@ extension TerminalColor:CustomStringConvertible
     {
         switch self
         {
-        case .black:    return "90"
-        case .red:      return "91"
-        case .green:    return "92"
-        case .yellow:   return "93"
-        case .blue:     return "94"
-        case .magenta:  return "95"
-        case .cyan:     return "96"
-        case .white:    return "97"
+        case .black:    "90"
+        case .red:      "91"
+        case .green:    "92"
+        case .yellow:   "93"
+        case .blue:     "94"
+        case .magenta:  "95"
+        case .cyan:     "96"
+        case .white:    "97"
 
         case .rgb(let r, let g, let b):
-            return "38;2;\(r);\(g);\(b)"
+            "38;2;\(r);\(g);\(b)"
         }
     }
 }

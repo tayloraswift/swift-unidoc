@@ -102,11 +102,11 @@ extension Unidoc.Vertex.Decl
         if  let position:SourcePosition = self.position,
             let file:Unidoc.Scalar = self.file
         {
-            return .init(position: position, file: file)
+            .init(position: position, file: file)
         }
         else
         {
-            return nil
+            nil
         }
     }
 

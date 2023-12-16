@@ -15,8 +15,8 @@ extension Compiler.Namespace.ID
     {
         switch self
         {
-        case .index(let index): return index
-        case .nominated:        return nil
+        case .index(let index): index
+        case .nominated:        nil
         }
     }
 }

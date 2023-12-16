@@ -19,8 +19,8 @@ extension URI.PathSeparatorRule:TerminalRule
         switch terminal
         {
         //    '/'   '\'
-        case 0x2f, 0x5c: return ()
-        default: return nil
+        case 0x2f, 0x5c: ()
+        default: nil
         }
     }
 }

@@ -33,11 +33,11 @@ extension SearchIndexQuery.Output:BSONDocumentDecodable
         {
             if  case .string(let utf8) = $0
             {
-                return .binary([UInt8].init(utf8.slice))
+                .binary([UInt8].init(utf8.slice))
             }
             else
             {
-                return .length(try $0.cast { try $0.as(Int.self) })
+                .length(try $0.cast { try $0.as(Int.self) })
             }
         }
         self.init(json: json, hash: try bson[.hash].decode())

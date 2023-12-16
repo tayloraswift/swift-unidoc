@@ -5,9 +5,9 @@ import Media
 import NIOCore
 import NIOHPACK
 import Symbols
+import Unidoc
 import UnidocAPI
 import UnidocRecords
-import Unidoc
 import URI
 
 extension SwiftinitClient

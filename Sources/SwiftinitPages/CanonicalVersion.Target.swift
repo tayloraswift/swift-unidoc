@@ -18,33 +18,33 @@ extension CanonicalVersion.Target
     {
         switch self
         {
-        case .article:          return "An"
-        case .culture:          return "A"
-        case .decl:             return "A"
-        case .foreign:          return "An"
-        case .global:           return "A"
+        case .article:          "An"
+        case .culture:          "A"
+        case .decl:             "A"
+        case .foreign:          "An"
+        case .global:           "A"
         }
     }
     var demonym:String
     {
         switch self
         {
-        case .article:          return "article"
-        case .culture:          return "module"
-        case .decl:             return "symbol"
-        case .foreign:          return "extension overlay"
-        case .global:           return "package"
+        case .article:          "article"
+        case .culture:          "module"
+        case .decl:             "symbol"
+        case .foreign:          "extension overlay"
+        case .global:           "package"
         }
     }
     var identity:String
     {
         switch self
         {
-        case .article:          return "name"
-        case .culture:          return "name"
-        case .decl:             return "signature"
-        case .foreign:          return "base declaration"
-        case .global:           return "identity"
+        case .article:          "name"
+        case .culture:          "name"
+        case .decl:             "signature"
+        case .foreign:          "base declaration"
+        case .global:           "identity"
         }
     }
 
@@ -52,11 +52,11 @@ extension CanonicalVersion.Target
     {
         switch self
         {
-        case .article(let uri): return uri
-        case .culture(let uri): return uri
-        case .decl(let uri):    return uri
-        case .foreign(let uri): return uri
-        case .global:           return nil
+        case .article(let uri): uri
+        case .culture(let uri): uri
+        case .decl(let uri):    uri
+        case .foreign(let uri): uri
+        case .global:           nil
         }
     }
 }

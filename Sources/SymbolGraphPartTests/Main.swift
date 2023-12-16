@@ -344,11 +344,11 @@ enum Main:TestMain, TestBattery
                         case .scalar = membership.source,
                         case _? = membership.origin
                     {
-                        return true
+                        true
                     }
                     else
                     {
-                        return false
+                        false
                     }
                 }
                     **?

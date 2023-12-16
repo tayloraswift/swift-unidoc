@@ -18,8 +18,8 @@ extension PackageManifest.Dependency:Identifiable
     {
         switch self
         {
-        case .filesystem(let dependency): return dependency.id
-        case .resolvable(let dependency): return dependency.id
+        case .filesystem(let dependency): dependency.id
+        case .resolvable(let dependency): dependency.id
         }
     }
 }
@@ -30,11 +30,11 @@ extension PackageManifest.Dependency
     {
         if  case .resolvable(let dependency) = self
         {
-            return dependency.requirement
+            dependency.requirement
         }
         else
         {
-            return nil
+            nil
         }
     }
 }

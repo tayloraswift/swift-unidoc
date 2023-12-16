@@ -16,9 +16,9 @@ extension Main.Options.Authority
     {
         switch self
         {
-        case .localhost:    return Localhost.self
-        case .production:   return Swiftinit.Prod.self
-        case .testing:      return Swiftinit.Test.self
+        case .localhost:    Localhost.self
+        case .production:   Swiftinit.Prod.self
+        case .testing:      Swiftinit.Test.self
         }
     }
 

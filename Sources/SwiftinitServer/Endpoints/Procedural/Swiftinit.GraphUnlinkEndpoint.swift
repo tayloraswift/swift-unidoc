@@ -23,8 +23,8 @@ extension Swiftinit.GraphUnlinkEndpoint:BlockingEndpoint
     {
         switch try await server.db.unidoc.unlink(volume: self.volume, with: session)
         {
-        case  _?:   return .ok("")
-        case nil:   return .error("No such volume.")
+        case  _?:   .ok("")
+        case nil:   .error("No such volume.")
         }
     }
 }

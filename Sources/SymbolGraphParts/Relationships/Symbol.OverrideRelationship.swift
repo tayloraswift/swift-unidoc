@@ -31,24 +31,24 @@ extension Symbol.OverrideRelationship:SuperformRelationship
     {
         switch phylum
         {
-        case .actor:                return false
-        case .associatedtype:       return true
-        case .case:                 return false
-        case .class:                return false
-        case .deinitializer:        return false
-        case .enum:                 return false
-        case .func(nil):            return false
-        case .func(_?):             return true
+        case .actor:                false
+        case .associatedtype:       true
+        case .case:                 false
+        case .class:                false
+        case .deinitializer:        false
+        case .enum:                 false
+        case .func(nil):            false
+        case .func(_?):             true
         //  Protocol init can override another requirement.
-        case .initializer:          return true
-        case .macro:                return false
-        case .operator:             return true
-        case .protocol:             return false
-        case .struct:               return false
-        case .subscript:            return true
-        case .typealias:            return false
-        case .var(nil):             return false
-        case .var(_?):              return true
+        case .initializer:          true
+        case .macro:                false
+        case .operator:             true
+        case .protocol:             false
+        case .struct:               false
+        case .subscript:            true
+        case .typealias:            false
+        case .var(nil):             false
+        case .var(_?):              true
         }
     }
 }

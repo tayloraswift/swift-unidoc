@@ -1,6 +1,6 @@
 import Signatures
-import Symbols
 import Sources
+import Symbols
 
 public
 protocol DiagnosticSymbolicator<Address>
@@ -104,11 +104,11 @@ extension DiagnosticSymbolicator
         if  let root:Symbol.FileBase = self.root,
             let file:Symbol.File = self[file: scalar]
         {
-            return "\(root.path)/\(file)"
+            "\(root.path)/\(file)"
         }
         else
         {
-            return nil
+            nil
         }
     }
 }
@@ -122,25 +122,25 @@ extension DiagnosticSymbolicator where Address:Hashable
             switch $0
             {
             case    .where(let parameter, is: .equal, to: .nominal(let type?)):
-                return "\(parameter) == \(self[type])"
+                "\(parameter) == \(self[type])"
 
             case    .where(let parameter, is: .equal, to: .nominal(nil)):
-                return "\(parameter) == <unavailable>"
+                "\(parameter) == <unavailable>"
 
             case    .where(let parameter, is: .equal, to: .complex(let text)):
-                return "\(parameter) == \(text)"
+                "\(parameter) == \(text)"
 
             case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
                     .where(let parameter, is: .conformer, to: .nominal(let type?)):
-                return "\(parameter):\(self[type])"
+                "\(parameter):\(self[type])"
 
             case    .where(let parameter, is: .subclass, to: .nominal(nil)),
                     .where(let parameter, is: .conformer, to: .nominal(nil)):
-                return "\(parameter):<unavailable>"
+                "\(parameter):<unavailable>"
 
             case    .where(let parameter, is: .subclass, to: .complex(let text)),
                     .where(let parameter, is: .conformer, to: .complex(let text)):
-                return "\(parameter):\(text)"
+                "\(parameter):\(text)"
             }
         }.joined(separator: ", ")
     }

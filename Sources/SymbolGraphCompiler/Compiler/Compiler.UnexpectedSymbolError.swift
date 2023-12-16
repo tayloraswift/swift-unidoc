@@ -19,13 +19,13 @@ extension Compiler.UnexpectedSymbolError:CustomStringConvertible
         switch self
         {
         case .file(uri: let uri):
-            return "Unexpected file symbol '\(uri)'. (Did you specify a repository root?)"
+            "Unexpected file symbol '\(uri)'. (Did you specify a repository root?)"
         case .block(let symbol):
-            return "Unexpected block symbol '\(symbol)'."
+            "Unexpected block symbol '\(symbol)'."
         case .scalar(let symbol):
-            return "Unexpected scalar symbol '\(symbol)'."
+            "Unexpected scalar symbol '\(symbol)'."
         case .vector(let symbol):
-            return "Unexpected vector symbol '\(symbol)'."
+            "Unexpected vector symbol '\(symbol)'."
         }
     }
 }

@@ -17,9 +17,9 @@ extension Compiler.DuplicateSymbolError:CustomStringConvertible
         switch self
         {
         case .block(let symbol):
-            return "Duplicate block symbol '\(symbol)'."
+            "Duplicate block symbol '\(symbol)'."
         case .scalar(let symbol):
-            return "Duplicate scalar symbol '\(symbol)'."
+            "Duplicate scalar symbol '\(symbol)'."
         }
     }
 }

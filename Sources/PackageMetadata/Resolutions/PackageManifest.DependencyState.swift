@@ -31,10 +31,10 @@ extension PackageManifest.DependencyState:CustomStringConvertible
         switch self.version.canonical
         {
         case .stable(let version):
-            return "\(version) (stable, \(self.revision))"
+            "\(version) (stable, \(self.revision))"
 
         case .unstable(let name):
-            return "\(name) (unstable, \(self.revision))"
+            "\(name) (unstable, \(self.revision))"
         }
     }
 }

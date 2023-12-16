@@ -20,9 +20,9 @@ extension Swiftinit.AdminPage.Action
     {
         switch self
         {
-        case .dropUnidocDB:             return "Drop Unidoc Database"
-        case .restart:                  return "Restart Server"
-        case .upload:                   return "Upload Snapshots"
+        case .dropUnidocDB:             "Drop Unidoc Database"
+        case .restart:                  "Restart Server"
+        case .upload:                   "Upload Snapshots"
         }
     }
 }

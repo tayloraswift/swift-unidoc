@@ -1,5 +1,5 @@
-import Symbols
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {

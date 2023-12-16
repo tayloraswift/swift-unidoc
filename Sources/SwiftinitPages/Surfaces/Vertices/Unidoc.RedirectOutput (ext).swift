@@ -34,15 +34,15 @@ extension Unidoc.RedirectOutput:HTTP.ServerResponseFactory
     {
         switch self.matches.first
         {
-        case .article(let vertex)?: return Swiftinit.Docs[self.volume, vertex.shoot]
-        case .culture(let vertex)?: return Swiftinit.Docs[self.volume, vertex.shoot]
+        case .article(let vertex)?: Swiftinit.Docs[self.volume, vertex.shoot]
+        case .culture(let vertex)?: Swiftinit.Docs[self.volume, vertex.shoot]
         //  This is one of the few situations where we intentionally issue redirects
         //  to a disambiguation page.
-        case .decl(let vertex)?:    return Swiftinit.Docs[self.volume,
+        case .decl(let vertex)?:    Swiftinit.Docs[self.volume,
             self.matches.count > 1 ? .init(stem: vertex.stem) : vertex.shoot]
-        case .file?, nil:           return nil
-        case .foreign(let vertex)?: return Swiftinit.Docs[self.volume, vertex.shoot]
-        case .global?:              return Swiftinit.Docs[self.volume]
+        case .file?, nil:           nil
+        case .foreign(let vertex)?: Swiftinit.Docs[self.volume, vertex.shoot]
+        case .global?:              Swiftinit.Docs[self.volume]
         }
     }
 }

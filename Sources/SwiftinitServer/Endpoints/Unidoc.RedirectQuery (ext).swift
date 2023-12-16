@@ -15,16 +15,16 @@ extension Unidoc.RedirectQuery<Unidoc.Shoot>
         {
             switch namespace
             {
-            case "concurrency":         return "_concurrency"
-            case "differentiation":     return "_differentiation"
-            case "dispatch":            return "dispatch"
-            case "distributed":         return "distributed"
-            case "foundation":          return "foundation"
-            case "regexbuilder":        return "regexbuilder"
-            case "regexparser":         return "_regexparser"
-            case "stringprocessing":    return "_stringprocessing"
-            case "swift":               return "swift"
-            case _:                     return nil
+            case "concurrency":         "_concurrency"
+            case "differentiation":     "_differentiation"
+            case "dispatch":            "dispatch"
+            case "distributed":         "distributed"
+            case "foundation":          "foundation"
+            case "regexbuilder":        "regexbuilder"
+            case "regexparser":         "_regexparser"
+            case "stringprocessing":    "_stringprocessing"
+            case "swift":               "swift"
+            case _:                     nil
             }
         }
 

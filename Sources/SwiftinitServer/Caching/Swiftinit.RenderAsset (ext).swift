@@ -14,10 +14,10 @@ extension Swiftinit.Asset:CacheKey
                 .main_css_map,
                 .main_js,
                 .main_js_map:
-            return true
+            true
 
         case    _:
-            return false
+            false
         }
     }
 }

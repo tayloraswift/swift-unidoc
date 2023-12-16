@@ -16,8 +16,8 @@ extension StaticLinker.Supplement.Headline
     {
         switch self
         {
-        case .binding(let binding): return binding
-        case .heading:              return nil
+        case .binding(let binding): binding
+        case .heading:              nil
         }
     }
 }

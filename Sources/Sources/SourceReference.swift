@@ -27,6 +27,6 @@ extension SourceReference
     @inlinable public
     func map<T>(_ transform:(File) throws -> T) rethrows -> SourceReference<T>
     {
-        .init(file: try transform(file), range: self.range)
+        .init(file: try transform(self.file), range: self.range)
     }
 }

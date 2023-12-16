@@ -171,19 +171,19 @@ extension Timestamp.Components
         case .en:
             switch self.month
             {
-            case  1:    return "Jan"
-            case  2:    return "Feb"
-            case  3:    return "Mar"
-            case  4:    return "Apr"
-            case  5:    return "May"
-            case  6:    return "Jun"
-            case  7:    return "Jul"
-            case  8:    return "Aug"
-            case  9:    return "Sep"
-            case 10:    return "Oct"
-            case 11:    return "Nov"
-            case 12:    return "Dec"
-            case  _:    return "???"
+            case  1:    "Jan"
+            case  2:    "Feb"
+            case  3:    "Mar"
+            case  4:    "Apr"
+            case  5:    "May"
+            case  6:    "Jun"
+            case  7:    "Jul"
+            case  8:    "Aug"
+            case  9:    "Sep"
+            case 10:    "Oct"
+            case 11:    "Nov"
+            case 12:    "Dec"
+            case  _:    "???"
             }
         }
     }
@@ -196,19 +196,19 @@ extension Timestamp.Components
         case .en:
             switch self.month
             {
-            case  1:    return "January"
-            case  2:    return "February"
-            case  3:    return "March"
-            case  4:    return "April"
-            case  5:    return "May"
-            case  6:    return "June"
-            case  7:    return "July"
-            case  8:    return "August"
-            case  9:    return "September"
-            case 10:    return "October"
-            case 11:    return "November"
-            case 12:    return "December"
-            case  _:    return "?"
+            case  1:    "January"
+            case  2:    "February"
+            case  3:    "March"
+            case  4:    "April"
+            case  5:    "May"
+            case  6:    "June"
+            case  7:    "July"
+            case  8:    "August"
+            case  9:    "September"
+            case 10:    "October"
+            case 11:    "November"
+            case 12:    "December"
+            case  _:    "?"
             }
         }
     }

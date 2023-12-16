@@ -1,8 +1,8 @@
 import GitHubAPI
 import HTML
 import MarkdownRendering
-import SHA1
 import SemanticVersions
+import SHA1
 import SymbolGraphs
 import Symbols
 import Unidoc

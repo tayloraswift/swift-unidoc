@@ -28,7 +28,7 @@ extension Unidoc.PackageMetadata.Repo
     {
         switch self
         {
-        case .github(let repo): return .github(repo.owner.login, repo.name)
+        case .github(let repo): .github(repo.owner.login, repo.name)
         }
     }
 

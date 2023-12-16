@@ -85,9 +85,9 @@ extension Unidoc.Group:Identifiable
     {
         switch self
         {
-        case .automatic(let group): return group.id
-        case .extension(let group): return group.id
-        case .topic(let group):     return group.id
+        case .automatic(let group): group.id
+        case .extension(let group): group.id
+        case .topic(let group):     group.id
         }
     }
 }

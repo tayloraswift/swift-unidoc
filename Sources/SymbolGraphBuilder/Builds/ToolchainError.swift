@@ -16,13 +16,13 @@ extension ToolchainError:CustomStringConvertible
         switch self
         {
         case .developmentSnapshotNotSupported:
-            return "Development snapshots are not supported"
+            "Development snapshots are not supported"
         case .malformedSplash:
-            return "Failed to parse 'swift --version' output (splash is clipped or malformed)"
+            "Failed to parse 'swift --version' output (splash is clipped or malformed)"
         case .malformedTriple:
-            return "Failed to parse 'swift --version' output (malformed triple)"
+            "Failed to parse 'swift --version' output (malformed triple)"
         case .unsupportedTriple(let triple):
-            return "Unsupported triple '\(triple)'"
+            "Unsupported triple '\(triple)'"
         }
     }
 }

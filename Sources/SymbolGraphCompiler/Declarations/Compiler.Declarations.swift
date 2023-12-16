@@ -1,5 +1,5 @@
-import Symbols
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {
@@ -170,22 +170,22 @@ extension Compiler.Declarations
         switch self.entries[resolution]
         {
         case .included(let scalar)?:
-            return scalar.id
+            scalar.id
         case .excluded?:
-            return nil
+            nil
         case .nominated?, nil:
-            return resolution
+            resolution
         }
     }
     subscript(included resolution:Symbol.Decl) -> Compiler.DeclObject?
     {
         if  case .included(let scalar)? = self.entries[resolution]
         {
-            return scalar
+            scalar
         }
         else
         {
-            return nil
+            nil
         }
     }
     func callAsFunction(

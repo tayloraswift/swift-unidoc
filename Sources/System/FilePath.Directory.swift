@@ -26,11 +26,11 @@ extension FilePath.Directory
     {
         if  let status:FileStatus = try? .status(of: self.path)
         {
-            return status.is(.directory)
+            status.is(.directory)
         }
         else
         {
-            return false
+            false
         }
     }
 }

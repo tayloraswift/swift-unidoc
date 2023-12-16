@@ -17,7 +17,7 @@ extension Compiler.UnexpectedModuleError:CustomStringConvertible
         switch self
         {
         case .culture(let culture, in: let part):
-            return "Symbols in \(part) actually belong to culture '\(culture)'."
+            "Symbols in \(part) actually belong to culture '\(culture)'."
         }
     }
 }

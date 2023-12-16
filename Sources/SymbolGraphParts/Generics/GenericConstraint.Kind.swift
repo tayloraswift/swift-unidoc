@@ -17,9 +17,9 @@ extension GenericConstraint.Kind
     {
         switch self
         {
-        case .conformance:  return .conformer
-        case .superclass:   return .subclass
-        case .sameType:     return .equal
+        case .conformance:  .conformer
+        case .superclass:   .subclass
+        case .sameType:     .equal
         }
     }
 }

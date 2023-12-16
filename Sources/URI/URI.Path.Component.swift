@@ -50,9 +50,9 @@ extension URI.Path.Component:CustomStringConvertible
     {
         switch self
         {
-        case .empty:                return "."
-        case .pop:                  return ".."
-        case .push(let component):  return EncodingSet.encode(component)
+        case .empty:                "."
+        case .pop:                  ".."
+        case .push(let component):  EncodingSet.encode(component)
         }
     }
 }
