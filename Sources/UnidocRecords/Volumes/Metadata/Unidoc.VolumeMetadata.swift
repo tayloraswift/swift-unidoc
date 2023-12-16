@@ -19,8 +19,6 @@ extension Unidoc
         var display:String?
         public
         var refname:String?
-        public
-        var commit:SHA1?
 
         public
         var symbol:Symbol.Edition
@@ -43,7 +41,6 @@ extension Unidoc
             dependencies:[Dependency] = [],
             display:String? = nil,
             refname:String? = nil,
-            commit:SHA1? = nil,
             symbol:Symbol.Edition,
             latest:Bool,
             realm:Unidoc.Realm?,
@@ -56,7 +53,6 @@ extension Unidoc
             self.dependencies = dependencies
             self.display = display
             self.refname = refname
-            self.commit = commit
             self.symbol = symbol
             self.latest = latest
             self.realm = realm
@@ -103,7 +99,10 @@ extension Unidoc.VolumeMetadata
         /// to match (and duplicate) the refname in the associated ``Unidoc.EditionMetadata``
         /// record.
         case refname = "G"
+
+        @available(*, unavailable)
         case commit = "H"
+
         case patch = "S"
         case tree = "X"
 
@@ -143,7 +142,6 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
 
         bson[.display] = self.display
         bson[.refname] = self.refname
-        bson[.commit] = self.commit
 
         bson[.latest] = self.latest ? true : nil
         bson[.realm] = self.realm
@@ -173,7 +171,6 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
             dependencies: try bson[.dependencies]?.decode() ?? [],
             display: try bson[.display]?.decode(),
             refname: try bson[.refname]?.decode(),
-            commit: try bson[.commit]?.decode(),
             symbol: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
@@ -182,6 +179,6 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
             patch: try bson[.patch]?.decode(),
             tree: try bson[.tree]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])
 
-        self.abi = try bson[.abi]?.decode() ?? .v(0, 1)
+        self.abi = try bson[.abi].decode()
     }
 }

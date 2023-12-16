@@ -556,7 +556,6 @@ extension UnidocDatabase
             dependencies: dependencies,
             display: snapshot.metadata.display,
             refname: snapshot.metadata.commit?.refname,
-            commit: snapshot.metadata.commit?.hash,
             symbol: .init(
                 //  We want the version component of the volume symbol to be stable,
                 //  so we only encode the patch version, even if the symbol graph is

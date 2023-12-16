@@ -11,7 +11,7 @@ extension Unidoc
         var latest:Edition?
 
         public
-        var metadata:Unidoc.VolumeMetadata
+        var metadata:VolumeMetadata
         public
         var vertices:Vertices
         public
@@ -22,8 +22,8 @@ extension Unidoc
         var trees:[TypeTree]
 
         @inlinable public
-        init(latest:Unidoc.Edition?,
-            metadata:Unidoc.VolumeMetadata,
+        init(latest:Edition?,
+            metadata:VolumeMetadata,
             vertices:Vertices,
             groups:Groups,
             index:JSON,
