@@ -127,7 +127,7 @@ extension Swiftinit.AnyEndpoint
                 Swiftinit.Blog>>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(
-                volume: .init(package: "__swiftinit", version: "0.0.0"),
+                volume: .init(package: "__swiftinit", version: "__max"),
                 lookup: .init(path: ["Articles", trunk], hash: nil)),
             tag: parameters.tag))
     }
