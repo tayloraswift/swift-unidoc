@@ -1,6 +1,6 @@
 import HTML
 
-extension HTML
+extension Swiftinit
 {
     struct SourceLink:Equatable, Sendable
     {
@@ -16,7 +16,7 @@ extension HTML
         }
     }
 }
-extension HTML.SourceLink:HyperTextOutputStreamable
+extension Swiftinit.SourceLink:HyperTextOutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

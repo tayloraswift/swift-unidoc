@@ -65,7 +65,7 @@ extension Swiftinit.Docs.Foreign:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Docs.Foreign:Swiftinit.VersionedPage
 {
-    var sidebar:HTML.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
+    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -94,7 +94,10 @@ extension Swiftinit.Docs.Foreign:Swiftinit.VersionedPage
                     $0[.code] { $0[link: extendee?.target] = self.stem.last }
                     $0 += ", \(self.demonym.phrase) from "
 
-                    $0[.a] { $0.href = "\(Swiftinit.Docs[other])" } = other.symbol.package == .swift
+                    $0[.a]
+                    {
+                        $0.href = "\(Swiftinit.Docs[other])"
+                    } = other.symbol.package == .swift
                         ? "the Swift standard library"
                         : other.title
 

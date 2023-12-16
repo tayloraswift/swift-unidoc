@@ -3,10 +3,10 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension HTML
+extension Swiftinit
 {
     @frozen public
-    struct Sidebar<Root> where Root:Swiftinit.VolumeRoot
+    struct Sidebar<Root> where Root:VolumeRoot
     {
         private
         let volume:Unidoc.VolumeMetadata
@@ -21,7 +21,7 @@ extension HTML
         }
     }
 }
-extension HTML.Sidebar
+extension Swiftinit.Sidebar
 {
     static
     func package(volume:Unidoc.VolumeMetadata) -> Self
@@ -42,7 +42,7 @@ extension HTML.Sidebar
         return .init(volume: volume, nouns: nouns)
     }
 }
-extension HTML.Sidebar:HyperTextOutputStreamable
+extension Swiftinit.Sidebar:HyperTextOutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -84,28 +84,18 @@ extension HTML.Sidebar:HyperTextOutputStreamable
                     $0[.a] { $0.href = "\(uri)" ; $0.class = "text" } = text
 
                 case .stem(let citizenship):
-                    //  The URI is only valid if the principal volume API version is at
-                    //  least 1.0!
-                    if  case .foreign = citizenship,
-                        self.volume.abi < .v(1, 0)
+                    $0[.a]
                     {
-                        $0[.span] = name
-                    }
-                    else
-                    {
-                        $0[.a]
+                        $0.href = "\(uri)"
+
+                        switch citizenship
                         {
-                            $0.href = "\(uri)"
+                        case .culture:  break
+                        case .package:  $0.class = "extension local"
+                        case .foreign:  $0.class = "extension foreign"
+                        }
 
-                            switch citizenship
-                            {
-                            case .culture:  break
-                            case .package:  $0.class = "extension local"
-                            case .foreign:  $0.class = "extension foreign"
-                            }
-
-                        } = name
-                    }
+                    } = name
                 }
             }
             for _:Int in 1 ..< depth
