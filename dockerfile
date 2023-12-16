@@ -12,10 +12,10 @@ RUN apt update && apt install -y \
     libjemalloc-dev \
     libcap2-bin
 
-COPY .build/x86_64-unknown-linux-gnu/release/UnidocServer /bin/unidoc-server
-COPY .build/x86_64-unknown-linux-gnu/release/UnidocBuild /bin/unidoc-build
+COPY .build/x86_64-unknown-linux-gnu/release/SwiftinitServer /bin/swiftinit
+COPY .build/x86_64-unknown-linux-gnu/release/UnidocBuild /bin/unidoc
 
-RUN chmod +x /bin/unidoc-server
-RUN chmod +x /bin/unidoc-build
+RUN chmod +x /bin/swiftinit
+RUN chmod +x /bin/unidoc
 
 CMD swift --version
