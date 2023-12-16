@@ -9,7 +9,13 @@ import UnidocAPI
 enum Main
 {
     static
-    func main() async throws
+    func main() async
+    {
+        await SystemProcess.do(Self._main)
+    }
+
+    private static
+    func _main() async throws
     {
         let options:Options = try .parse()
 
