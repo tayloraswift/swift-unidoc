@@ -75,7 +75,7 @@ extension Swiftinit.AnyEndpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .interactive(Swiftinit.PipelineEndpoint<Unidoc.EditionsQuery>.init(
+                return .interactive(Swiftinit.PipelineEndpoint<Unidoc.PackageQuery>.init(
                     output: parameters.explain ? nil : .application(.json),
                     query: .init(package: .init(package), limit: 1),
                     tag: parameters.tag))
@@ -208,7 +208,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .interactive(Swiftinit.PipelineEndpoint<Unidoc.EditionsQuery>.init(
+        .interactive(Swiftinit.PipelineEndpoint<Unidoc.PackageQuery>.init(
             output: parameters.explain ? nil : .text(.html),
             query: .init(package: .init(trunk), limit: 12, user: parameters.user),
             tag: parameters.tag))
