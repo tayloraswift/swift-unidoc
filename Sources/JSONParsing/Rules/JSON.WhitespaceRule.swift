@@ -31,9 +31,9 @@ extension JSON
                     0x09, // '\t'
                     0x0a, // '\n'
                     0x0d: // '\r'
-                return ()
+                ()
             default:
-                return nil
+                nil
             }
         }
     }

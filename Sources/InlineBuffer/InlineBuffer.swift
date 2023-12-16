@@ -184,10 +184,10 @@ extension InlineBuffer:LosslessStringConvertible
             {
                 switch hex
                 {
-                case 0x30 ... 0x39: return hex      - 0x30
-                case 0x61 ... 0x66: return hex + 10 - 0x61
-                case 0x41 ... 0x46: return hex + 10 - 0x41
-                default:            return nil
+                case 0x30 ... 0x39: hex      - 0x30
+                case 0x61 ... 0x66: hex + 10 - 0x61
+                case 0x41 ... 0x46: hex + 10 - 0x41
+                default:            nil
                 }
             }
 

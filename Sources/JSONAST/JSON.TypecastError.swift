@@ -35,12 +35,12 @@ extension JSON.TypecastError:CustomStringConvertible
     {
         switch self
         {
-        case .null:     return "null"
-        case .bool:     return "bool"
-        case .number:   return "number"
-        case .string:   return "string"
-        case .array:    return "array"
-        case .object:   return "object"
+        case .null:     "null"
+        case .bool:     "bool"
+        case .number:   "number"
+        case .string:   "string"
+        case .array:    "array"
+        case .object:   "object"
         }
     }
     public

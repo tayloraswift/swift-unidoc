@@ -1,7 +1,7 @@
 import NIOCore
-import NIOPosix
 import NIOHPACK
 import NIOHTTP2
+import NIOPosix
 import NIOSSL
 
 @frozen public

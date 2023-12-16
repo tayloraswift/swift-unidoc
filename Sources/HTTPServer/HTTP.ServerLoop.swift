@@ -2,10 +2,10 @@ import Atomics
 import HTTP
 import IP
 import NIOCore
-import NIOPosix
-import NIOHTTP1
 import NIOHPACK
+import NIOHTTP1
 import NIOHTTP2
+import NIOPosix
 import NIOSSL
 
 extension NIOHTTP2Handler.AsyncStreamMultiplexer:@unchecked Sendable

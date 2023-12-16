@@ -55,53 +55,53 @@ extension CodelinkV3.Filter
     {
         switch self
         {
-        case .actor:                return "swift.actor"
-        case .associatedtype:       return "swift.associatedtype"
-        case .case:                 return "swift.enum.case"
-        case .class:                return "swift.class"
-        case .enum:                 return "swift.enum"
-        case .func(.default):       return "swift.func.op"
-        case .func(.global):        return "swift.func"
-        case .func(.instance):      return "swift.method"
-        case .func(.type):          return "swift.type.method"
-        case .func(_):              return nil
-        case .macro:                return "swift.macro"
-        case .module:               return nil
-        case .protocol:             return "swift.protocol"
-        case .struct:               return "swift.struct"
-        case .subscript(.instance): return "swift.subscript"
-        case .subscript(.type):     return "swift.type.subscript"
-        case .subscript(_):         return nil
-        case .typealias:            return "swift.typealias"
-        case .var(.global):         return "swift.var"
-        case .var(.instance):       return "swift.property"
-        case .var(.type):           return "swift.type.property"
-        case .var(_):               return nil
+        case .actor:                "swift.actor"
+        case .associatedtype:       "swift.associatedtype"
+        case .case:                 "swift.enum.case"
+        case .class:                "swift.class"
+        case .enum:                 "swift.enum"
+        case .func(.default):       "swift.func.op"
+        case .func(.global):        "swift.func"
+        case .func(.instance):      "swift.method"
+        case .func(.type):          "swift.type.method"
+        case .func(_):              nil
+        case .macro:                "swift.macro"
+        case .module:               nil
+        case .protocol:             "swift.protocol"
+        case .struct:               "swift.struct"
+        case .subscript(.instance): "swift.subscript"
+        case .subscript(.type):     "swift.type.subscript"
+        case .subscript(_):         nil
+        case .typealias:            "swift.typealias"
+        case .var(.global):         "swift.var"
+        case .var(.instance):       "swift.property"
+        case .var(.type):           "swift.type.property"
+        case .var(_):               nil
         }
     }
     var keywords:(first:CodelinkV3.Keyword, second:CodelinkV3.Keyword?)?
     {
         switch self
         {
-        case .actor:                return (.actor, nil)
-        case .associatedtype:       return (.associatedtype, nil)
-        case .case:                 return (.case, nil)
-        case .class:                return (.class, nil)
-        case .enum:                 return (.enum, nil)
-        case .func(.static):        return (.static, .func)
-        case .func(.class):         return (.class, .func)
-        case .func(_):              return (.func, nil)
-        case .macro:                return (.macro, nil)
-        case .module:               return (.import, nil)
-        case .protocol:             return (.protocol, nil)
-        case .struct:               return (.struct, nil)
-        case .subscript(.static):   return (.static, nil)
-        case .subscript(.class):    return (.class, nil)
-        case .subscript(_):         return nil
-        case .typealias:            return (.typealias, nil)
-        case .var(.static):         return (.static, .var)
-        case .var(.class):          return (.class, .var)
-        case .var(_):               return (.var, nil)
+        case .actor:                (.actor, nil)
+        case .associatedtype:       (.associatedtype, nil)
+        case .case:                 (.case, nil)
+        case .class:                (.class, nil)
+        case .enum:                 (.enum, nil)
+        case .func(.static):        (.static, .func)
+        case .func(.class):         (.class, .func)
+        case .func(_):              (.func, nil)
+        case .macro:                (.macro, nil)
+        case .module:               (.import, nil)
+        case .protocol:             (.protocol, nil)
+        case .struct:               (.struct, nil)
+        case .subscript(.static):   (.static, nil)
+        case .subscript(.class):    (.class, nil)
+        case .subscript(_):         nil
+        case .typealias:            (.typealias, nil)
+        case .var(.static):         (.static, .var)
+        case .var(.class):          (.class, .var)
+        case .var(_):               (.var, nil)
         }
     }
 }

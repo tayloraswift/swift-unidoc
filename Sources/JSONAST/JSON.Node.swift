@@ -92,13 +92,13 @@ extension JSON.Node:CustomStringConvertible
     {
         switch self
         {
-        case .null:                 return "null"
-        case .bool(true):           return "true"
-        case .bool(false):          return "false"
-        case .string(let literal):  return .init(literal)
-        case .number(let value):    return value.description
-        case .array(let array):     return array.description
-        case .object(let object):   return object.description
+        case .null:                 "null"
+        case .bool(true):           "true"
+        case .bool(false):          "false"
+        case .string(let literal):  .init(literal)
+        case .number(let value):    value.description
+        case .array(let array):     array.description
+        case .object(let object):   object.description
         }
     }
 }
@@ -175,8 +175,8 @@ extension JSON.Node
     {
         switch self
         {
-        case .bool(let bool):   return bool
-        default:                return nil
+        case .bool(let bool):   bool
+        default:                nil
         }
     }
 
@@ -292,8 +292,8 @@ extension JSON.Node
     {
         switch self
         {
-        case .number(let number):   return number
-        default:                    return nil
+        case .number(let number):   number
+        default:                    nil
         }
     }
 
@@ -309,8 +309,8 @@ extension JSON.Node
     {
         switch self
         {
-        case .string(let string):   return string.value
-        default:                    return nil
+        case .string(let string):   string.value
+        default:                    nil
         }
     }
 }
@@ -326,8 +326,8 @@ extension JSON.Node
     {
         switch self
         {
-        case .null: return (nil as Never?) as Never??
-        default:    return  nil            as Never??
+        case .null: (nil as Never?) as Never??
+        default:    nil            as Never??
         }
     }
 }
@@ -345,8 +345,8 @@ extension JSON.Node
     {
         switch self
         {
-        case .array(let array): return array
-        default:                return nil
+        case .array(let array): array
+        default:                nil
         }
     }
     /// Attempts to unwrap an object from this variant.
@@ -372,11 +372,11 @@ extension JSON.Node
         switch self
         {
         case .object(let items):
-            return items
+            items
         case .number(let number):
-            return .init(encoding: number)
+            .init(encoding: number)
         default:
-            return nil
+            nil
         }
     }
 }

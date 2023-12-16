@@ -1,6 +1,6 @@
 import HTTP
-import Media
 import MD5
+import Media
 import NIOCore
 import NIOHTTP1
 import NIOHTTP2

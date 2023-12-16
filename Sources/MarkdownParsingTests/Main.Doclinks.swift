@@ -1,5 +1,5 @@
-import MarkdownParsing
 import MarkdownAST
+import MarkdownParsing
 import Testing
 
 extension Main
@@ -42,8 +42,8 @@ extension Main.Doclinks:TestBattery
                     {
                         switch $0
                         {
-                        case .autolink(let autolink):   return autolink
-                        case _:                         return nil
+                        case .autolink(let autolink):   autolink
+                        case _:                         nil
                         }
                     } (paragraph.elements.first))
             {
