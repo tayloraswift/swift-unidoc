@@ -1,5 +1,5 @@
-import GitHubClient
 import GitHubAPI
+import GitHubClient
 import HTTP
 import MongoDB
 import Multiparts

@@ -11,8 +11,8 @@ extension SemanticVersion
     {
         switch self
         {
-        case .release   (let version,    build: _): return version
-        case .prerelease(let version, _, build: _): return version
+        case .release   (let version,    build: _): version
+        case .prerelease(let version, _, build: _): version
         }
     }
 
@@ -22,8 +22,8 @@ extension SemanticVersion
     {
         switch self
         {
-        case .release:      return true
-        case .prerelease:   return false
+        case .release:      true
+        case .prerelease:   false
         }
     }
 }
@@ -35,16 +35,16 @@ extension SemanticVersion:CustomStringConvertible
         switch self
         {
         case .release(let version, build: nil):
-            return "\(version)"
+            "\(version)"
 
         case .release(let version, build: let build?):
-            return "\(version)+\(build)"
+            "\(version)+\(build)"
 
         case .prerelease(let version, let alpha, build: nil):
-            return "\(version)-\(alpha)"
+            "\(version)-\(alpha)"
 
         case .prerelease(let version, let alpha, build: let build?):
-            return "\(version)-\(alpha)+\(build)"
+            "\(version)-\(alpha)+\(build)"
         }
     }
 }

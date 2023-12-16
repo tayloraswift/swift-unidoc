@@ -1,8 +1,8 @@
+import MarkdownAST
+import MarkdownParsing
+import MarkdownSemantics
 import Sources
 import SymbolGraphCompiler
-import MarkdownAST
-import MarkdownSemantics
-import MarkdownParsing
 import UnidocDiagnostics
 
 extension MarkdownSource

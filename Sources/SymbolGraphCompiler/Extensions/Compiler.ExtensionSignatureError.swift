@@ -1,6 +1,6 @@
 import Signatures
-import Symbols
 import SymbolGraphParts
+import Symbols
 
 extension Compiler
 {
@@ -28,14 +28,14 @@ extension Compiler.ExtensionSignatureError:CustomStringConvertible
     {
         if  let _:[GenericConstraint<Symbol.Decl>] = self.declared
         {
-            return """
+            """
             Cannot declare an extension (of \(self.expected.extended.type)) containing \
             a symbol with different extension constraints than its extension block.
             """
         }
         else
         {
-            return """
+            """
             Cannot declare an extension (of \(self.expected.extended.type)) containing \
             a relationship with different extension constraints than its extension \
             block.

@@ -106,11 +106,11 @@ extension CanonicalVersion
     {
         switch self.target
         {
-        case .article(let uri): return uri
-        case .culture(let uri): return uri
-        case .decl(let uri):    return uri
-        case .foreign(let uri): return uri
-        case .global:           return self.volume
+        case .article(let uri): uri
+        case .culture(let uri): uri
+        case .decl(let uri):    uri
+        case .foreign(let uri): uri
+        case .global:           self.volume
         }
     }
 }

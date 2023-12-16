@@ -34,23 +34,23 @@ extension Symbol.MemberRelationship:NestingRelationship
     {
         switch phylum
         {
-        case .actor:                return true
-        case .associatedtype:       return true
-        case .case:                 return true
-        case .class:                return true
-        case .deinitializer:        return true
-        case .enum:                 return true
-        case .func(nil):            return false
-        case .func(_?):             return true
-        case .initializer:          return true
-        case .macro:                return true // ???
-        case .operator:             return true
-        case .protocol:             return true // SE-404
-        case .struct:               return true
-        case .subscript:            return true
-        case .typealias:            return true
-        case .var(nil):             return false
-        case .var(_?):              return true
+        case .actor:                true
+        case .associatedtype:       true
+        case .case:                 true
+        case .class:                true
+        case .deinitializer:        true
+        case .enum:                 true
+        case .func(nil):            false
+        case .func(_?):             true
+        case .initializer:          true
+        case .macro:                true // ???
+        case .operator:             true
+        case .protocol:             true // SE-404
+        case .struct:               true
+        case .subscript:            true
+        case .typealias:            true
+        case .var(nil):             false
+        case .var(_?):              true
         }
     }
 }

@@ -67,17 +67,17 @@ extension Swiftinit.Asset
                 .literata47_woff2,
                 .literata75_woff2,
                 .literata77_woff2:
-            return .none
+            .none
 
         case    .main_css,
                 .main_css_map,
                 .main_js,
                 .main_js_map:
-            return .major
+            .major
 
         case    .admin_css,
                 .admin_css_map:
-            return .minor
+            .minor
         }
     }
 }

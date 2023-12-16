@@ -52,8 +52,8 @@ extension AnyVersion:CustomStringConvertible
     {
         switch self.canonical
         {
-        case .stable(let version):  return "\(version)"
-        case .unstable(let name):   return name
+        case .stable(let version):  "\(version)"
+        case .unstable(let name):   name
         }
     }
 }

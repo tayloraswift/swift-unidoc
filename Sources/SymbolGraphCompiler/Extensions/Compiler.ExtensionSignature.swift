@@ -33,15 +33,15 @@ extension Compiler.ExtensionSignature:Comparable
     {
         if      (lhs.culture, lhs.extended) < (rhs.culture, rhs.extended)
         {
-            return true
+            true
         }
         else if (lhs.culture, lhs.extended) > (rhs.culture, rhs.extended)
         {
-            return false
+            false
         }
         else
         {
-            return lhs.conditions.lexicographicallyPrecedes(rhs.conditions)
+            lhs.conditions.lexicographicallyPrecedes(rhs.conditions)
         }
     }
 }

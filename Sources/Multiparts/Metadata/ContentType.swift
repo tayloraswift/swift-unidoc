@@ -13,8 +13,8 @@ extension ContentType
     {
         switch self
         {
-        case .multipart(let type):  return type
-        case .media:                return nil
+        case .multipart(let type):  type
+        case .media:                nil
         }
     }
     @inlinable public
@@ -22,8 +22,8 @@ extension ContentType
     {
         switch self
         {
-        case .multipart:            return nil
-        case .media(let type):      return type
+        case .multipart:            nil
+        case .media(let type):      type
         }
     }
 }
@@ -34,8 +34,8 @@ extension ContentType:CustomStringConvertible
     {
         switch self
         {
-        case .multipart(let type):  return type.description
-        case .media(let type):      return type.description
+        case .multipart(let type):  type.description
+        case .media(let type):      type.description
         }
     }
 }

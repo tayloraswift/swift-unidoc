@@ -1,5 +1,5 @@
-import Sources
 import MarkdownAST
+import Sources
 import UnidocDiagnostics
 
 extension MarkdownSource

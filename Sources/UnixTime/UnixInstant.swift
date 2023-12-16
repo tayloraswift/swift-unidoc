@@ -3,18 +3,18 @@ import struct Glibc.timespec
 import struct Glibc.tm
 
 import func Glibc.clock_gettime
-import func Glibc.timegm
-import func Glibc.gmtime_r
 import var Glibc.CLOCK_REALTIME
+import func Glibc.gmtime_r
+import func Glibc.timegm
 
 #elseif canImport(Darwin)
 import struct Darwin.timespec
 import struct Darwin.tm
 
 import func Darwin.clock_gettime
-import func Darwin.timegm
-import func Darwin.gmtime_r
 import var Darwin.CLOCK_REALTIME
+import func Darwin.gmtime_r
+import func Darwin.timegm
 #else
 #error("Platform doesn’t support 'clock_gettime'")
 #endif
@@ -39,7 +39,7 @@ extension UnixInstant
     @inlinable public static
     func second(_ second:Int64, plus nanoseconds:Int64 = 0) -> Self
     {
-        return .init(second: second, nanoseconds: nanoseconds)
+        .init(second: second, nanoseconds: nanoseconds)
     }
 
     @inlinable public static

@@ -1,5 +1,5 @@
-import Symbols
 import MongoDB
+import Symbols
 import UnidocDB
 import UnidocRecords
 

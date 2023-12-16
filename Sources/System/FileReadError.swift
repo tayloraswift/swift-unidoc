@@ -11,7 +11,7 @@ extension FileReadError:CustomStringConvertible
         switch self
         {
         case .incomplete(read: let bytes, of: let expected):
-            return "Could only read \(bytes) of \(expected) bytes."
+            "Could only read \(bytes) of \(expected) bytes."
         }
     }
 }

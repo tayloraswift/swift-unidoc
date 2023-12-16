@@ -16,9 +16,9 @@ extension MultipartHeaderRule
             case    0x09,           // '\t'
                     0x20 ... 0x7e,  // ' ', VCHAR
                     0x80 ... 0xff:
-                return ()
+                ()
             default:
-                return nil
+                nil
             }
         }
     }

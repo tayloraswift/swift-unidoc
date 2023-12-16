@@ -48,21 +48,21 @@ extension Availability.CodingKey:RawRepresentable
     {
         switch self.domain
         {
-        case .agnostic(.swift):                             return "s"
-        case .agnostic(.swiftPM):                           return "p"
-        case .platform(.iOS):                               return "i"
-        case .platform(.macOS):                             return "m"
-        case .platform(.macCatalyst):                       return "c"
-        case .platform(.tvOS):                              return "t"
-        case .platform(.watchOS):                           return "w"
-        case .platform(.windows):                           return "n"
-        case .platform(.openBSD):                           return "o"
-        case .platform(.iOSApplicationExtension):           return "I"
-        case .platform(.macOSApplicationExtension):         return "M"
-        case .platform(.macCatalystApplicationExtension):   return "C"
-        case .platform(.tvOSApplicationExtension):          return "T"
-        case .platform(.watchOSApplicationExtension):       return "W"
-        case .universal:                                    return "u"
+        case .agnostic(.swift):                             "s"
+        case .agnostic(.swiftPM):                           "p"
+        case .platform(.iOS):                               "i"
+        case .platform(.macOS):                             "m"
+        case .platform(.macCatalyst):                       "c"
+        case .platform(.tvOS):                              "t"
+        case .platform(.watchOS):                           "w"
+        case .platform(.windows):                           "n"
+        case .platform(.openBSD):                           "o"
+        case .platform(.iOSApplicationExtension):           "I"
+        case .platform(.macOSApplicationExtension):         "M"
+        case .platform(.macCatalystApplicationExtension):   "C"
+        case .platform(.tvOSApplicationExtension):          "T"
+        case .platform(.watchOSApplicationExtension):       "W"
+        case .universal:                                    "u"
         }
     }
 }

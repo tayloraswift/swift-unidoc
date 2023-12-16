@@ -17,8 +17,8 @@ extension AnyVersion.Canonical:CustomStringConvertible
     {
         switch self
         {
-        case .stable(let version):  return "\(version) (stable)"
-        case .unstable(let name):   return "\(name) (unstable)"
+        case .stable(let version):  "\(version) (stable)"
+        case .unstable(let name):   "\(name) (unstable)"
         }
     }
 }

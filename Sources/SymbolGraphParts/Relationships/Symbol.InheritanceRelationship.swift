@@ -31,21 +31,21 @@ extension Symbol.InheritanceRelationship:SuperformRelationship
     {
         switch phylum
         {
-        case .actor:                return false
-        case .associatedtype:       return false
-        case .case:                 return false
-        case .class:                return true
-        case .deinitializer:        return false
-        case .enum:                 return false
-        case .func:                 return false
-        case .initializer:          return false
-        case .macro:                return false
-        case .operator:             return false
-        case .protocol:             return true
-        case .struct:               return false
-        case .subscript:            return false
-        case .typealias:            return false
-        case .var:                  return false
+        case .actor:                false
+        case .associatedtype:       false
+        case .case:                 false
+        case .class:                true
+        case .deinitializer:        false
+        case .enum:                 false
+        case .func:                 false
+        case .initializer:          false
+        case .macro:                false
+        case .operator:             false
+        case .protocol:             true
+        case .struct:               false
+        case .subscript:            false
+        case .typealias:            false
+        case .var:                  false
         }
     }
 }

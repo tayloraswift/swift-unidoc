@@ -1,6 +1,6 @@
-import HTTPServer
 import GitHubAPI
 import GitHubClient
+import HTTPServer
 import JSON
 import MongoDB
 import SemanticVersions

@@ -17,46 +17,46 @@ extension MediaType:CustomStringConvertible
         switch self
         {
         case .application(let subtype, charset: nil):
-            return "application/\(subtype)"
+            "application/\(subtype)"
 
         case .application(let subtype, charset: let encoding?):
-            return "application/\(subtype); charset=\(encoding)"
+            "application/\(subtype); charset=\(encoding)"
 
         case .audio      (let subtype, charset: nil):
-            return "audio/\(subtype)"
+            "audio/\(subtype)"
 
         case .audio      (let subtype, charset: let encoding?):
-            return "audio/\(subtype); charset=\(encoding)"
+            "audio/\(subtype); charset=\(encoding)"
 
         case .font       (let subtype, charset: nil):
-            return "font/\(subtype)"
+            "font/\(subtype)"
 
         case .font       (let subtype, charset: let encoding?):
-            return "font/\(subtype); charset=\(encoding)"
+            "font/\(subtype); charset=\(encoding)"
 
         case .image      (let subtype, charset: nil):
-            return "image/\(subtype)"
+            "image/\(subtype)"
 
         case .image      (let subtype, charset: let encoding?):
-            return "image/\(subtype); charset=\(encoding)"
+            "image/\(subtype); charset=\(encoding)"
 
         case .model      (let subtype, charset: nil):
-            return "model/\(subtype)"
+            "model/\(subtype)"
 
         case .model      (let subtype, charset: let encoding?):
-            return "model/\(subtype); charset=\(encoding)"
+            "model/\(subtype); charset=\(encoding)"
 
         case .text       (let subtype, charset: nil):
-            return "text/\(subtype)"
+            "text/\(subtype)"
 
         case .text       (let subtype, charset: let encoding?):
-            return "text/\(subtype); charset=\(encoding)"
+            "text/\(subtype); charset=\(encoding)"
 
         case .video      (let subtype, charset: nil):
-            return "video/\(subtype)"
+            "video/\(subtype)"
 
         case .video      (let subtype, charset: let encoding?):
-            return "video/\(subtype); charset=\(encoding)"
+            "video/\(subtype); charset=\(encoding)"
         }
     }
 }

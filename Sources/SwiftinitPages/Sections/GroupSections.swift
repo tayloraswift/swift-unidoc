@@ -199,11 +199,11 @@ extension GroupSections
     {
         if  scalars.isEmpty
         {
-            return nil
+            nil
         }
         else
         {
-            return .init(self.context, heading: heading, scalars: scalars)
+            .init(self.context, heading: heading, scalars: scalars)
         }
     }
 }

@@ -17,9 +17,9 @@ extension Compiler.UndefinedSymbolError:CustomStringConvertible
         switch self
         {
         case .block(let symbol):
-            return "Undefined extension block symbol '\(symbol)'."
+            "Undefined extension block symbol '\(symbol)'."
         case .scalar(let symbol):
-            return "Undefined (or external) scalar symbol '\(symbol)'."
+            "Undefined (or external) scalar symbol '\(symbol)'."
         }
     }
 }

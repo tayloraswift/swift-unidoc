@@ -1,6 +1,6 @@
 import HTTP
-import Unidoc
 import Media
+import Unidoc
 
 extension Swiftinit.GlobalUplinkEndpoint
 {

@@ -63,10 +63,10 @@ extension Symbol.Module
                 "\u{0B66}" ... "\u{0B6F}", "\u{0BE7}" ... "\u{0BEF}", "\u{0C66}" ... "\u{0C6F}",
                 "\u{0CE6}" ... "\u{0CEF}", "\u{0D66}" ... "\u{0D6F}", "\u{0E50}" ... "\u{0E59}",
                 "\u{0ED0}" ... "\u{0ED9}", "\u{0F20}" ... "\u{0F33}":
-            return "_"
+            "_"
 
         case let codepoint:
-            return self.mangle(subsequent: codepoint)
+            self.mangle(subsequent: codepoint)
         }
     }
     private static
@@ -240,9 +240,9 @@ extension Symbol.Module
                 "\u{4E00}" ... "\u{9FA5}",
                 // Hangul,
                 "\u{AC00}" ... "\u{D7A3}":
-            return codepoint
+            codepoint
         default:
-            return "_"
+            "_"
         }
     }
 }

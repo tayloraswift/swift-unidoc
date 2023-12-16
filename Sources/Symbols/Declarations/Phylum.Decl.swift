@@ -56,16 +56,16 @@ extension Phylum.Decl
         switch self
         {
         case .case, .deinitializer, .func, .initializer, .operator, .subscript, .var:
-            return .gay
+            .gay
 
         case .macro(.freestanding):
-            return .gay
+            .gay
 
         case .macro(.attached):
-            return .straight
+            .straight
 
         case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
-            return .straight
+            .straight
         }
     }
 }
@@ -108,30 +108,30 @@ extension Phylum.Decl:RawRepresentable
     {
         switch self
         {
-        case .actor:                return 0x00
-        case .associatedtype:       return 0x10
-        case .case:                 return 0x20
-        case .class:                return 0x30
-        case .deinitializer:        return 0x40
-        case .enum:                 return 0x50
-        case .func(nil):            return 0x60
-        case .func(.static):        return 0x61
-        case .func(.class):         return 0x62
-        case .func(.instance):      return 0x63
-        case .initializer:          return 0x70
-        case .operator:             return 0x80
-        case .protocol:             return 0x90
-        case .struct:               return 0xA0
-        case .subscript(.static):   return 0xB1
-        case .subscript(.class):    return 0xB2
-        case .subscript(.instance): return 0xB3
-        case .typealias:            return 0xC0
-        case .var(nil):             return 0xD0
-        case .var(.static):         return 0xD1
-        case .var(.class):          return 0xD2
-        case .var(.instance):       return 0xD3
-        case .macro(.attached):     return 0xE0
-        case .macro(.freestanding): return 0xE1
+        case .actor:                0x00
+        case .associatedtype:       0x10
+        case .case:                 0x20
+        case .class:                0x30
+        case .deinitializer:        0x40
+        case .enum:                 0x50
+        case .func(nil):            0x60
+        case .func(.static):        0x61
+        case .func(.class):         0x62
+        case .func(.instance):      0x63
+        case .initializer:          0x70
+        case .operator:             0x80
+        case .protocol:             0x90
+        case .struct:               0xA0
+        case .subscript(.static):   0xB1
+        case .subscript(.class):    0xB2
+        case .subscript(.instance): 0xB3
+        case .typealias:            0xC0
+        case .var(nil):             0xD0
+        case .var(.static):         0xD1
+        case .var(.class):          0xD2
+        case .var(.instance):       0xD3
+        case .macro(.attached):     0xE0
+        case .macro(.freestanding): 0xE1
         }
     }
 }

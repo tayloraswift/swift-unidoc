@@ -1,6 +1,6 @@
+import HTML
 import MarkdownABI
 import MarkdownRendering
-import HTML
 import Unidoc
 import UnidocRecords
 

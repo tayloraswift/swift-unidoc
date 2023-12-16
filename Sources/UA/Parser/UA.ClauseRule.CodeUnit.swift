@@ -26,9 +26,9 @@ extension UA.ClauseRule.CodeUnit:TerminalRule
         {
         //    ';'   '('   ')'
         case 0x3b, 0x28, 0x29:
-            return nil
+            nil
         default:
-            return ()
+            ()
         }
     }
 }

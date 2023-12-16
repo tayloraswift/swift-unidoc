@@ -20,12 +20,12 @@ extension SymbolGraphPart.Vertex.ACL:CustomStringConvertible
     {
         switch self
         {
-        case .private:      return "private"
-        case .fileprivate:  return "fileprivate"
-        case .internal:     return "internal"
-        case .public:       return "public"
-        case .package:      return "package"
-        case .open:         return "open"
+        case .private:      "private"
+        case .fileprivate:  "fileprivate"
+        case .internal:     "internal"
+        case .public:       "public"
+        case .package:      "package"
+        case .open:         "open"
         }
     }
 }

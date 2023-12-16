@@ -31,9 +31,9 @@ extension MultipartTokenRule
                     0x60,   // `
                     0x7c,   // |
                     0x7e:   // ~
-                return ()
+                ()
             default:
-                return nil
+                nil
             }
         }
     }

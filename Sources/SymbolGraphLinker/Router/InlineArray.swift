@@ -20,9 +20,9 @@ extension InlineArray:Sequence
         switch self
         {
         case .one(let element):
-            return try withUnsafePointer(to: element) { try body(.init(start: $0, count: 1)) }
+            try withUnsafePointer(to: element) { try body(.init(start: $0, count: 1)) }
         case .some(let elements):
-            return try elements.withContiguousStorageIfAvailable(body)
+            try elements.withContiguousStorageIfAvailable(body)
         }
     }
     @inlinable public
@@ -41,8 +41,8 @@ extension InlineArray:RandomAccessCollection
     {
         switch self
         {
-        case .one:                  return 0
-        case .some(let elements):   return elements.startIndex
+        case .one:                  0
+        case .some(let elements):   elements.startIndex
         }
     }
     @inlinable public
@@ -50,8 +50,8 @@ extension InlineArray:RandomAccessCollection
     {
         switch self
         {
-        case .one:                  return 1
-        case .some(let elements):   return elements.endIndex
+        case .one:                  1
+        case .some(let elements):   elements.endIndex
         }
     }
     @inlinable public

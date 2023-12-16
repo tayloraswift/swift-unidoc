@@ -20,16 +20,16 @@ extension MultipartType:CustomStringConvertible
         switch self
         {
         case .byteranges(boundary: let boundary?):
-            return "multipart/byteranges; boundary=\(boundary)"
+            "multipart/byteranges; boundary=\(boundary)"
 
         case .byteranges(boundary: nil):
-            return "multipart/byteranges"
+            "multipart/byteranges"
 
         case .form_data(boundary: let boundary?):
-            return "multipart/form-data; boundary=\(boundary)"
+            "multipart/form-data; boundary=\(boundary)"
 
         case .form_data(boundary: nil):
-            return "multipart/form-data"
+            "multipart/form-data"
         }
     }
 }
