@@ -12,7 +12,7 @@ extension Swiftinit.Docs
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         let canonical:CanonicalVersion?
-        let sidebar:HTML.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
         let vertex:Unidoc.Vertex.Culture
@@ -21,7 +21,7 @@ extension Swiftinit.Docs
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            sidebar:HTML.Sidebar<Swiftinit.Docs>?,
+            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.Vertex.Culture,
             groups:GroupSections)
         {
