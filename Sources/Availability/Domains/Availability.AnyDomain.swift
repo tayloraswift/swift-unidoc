@@ -16,9 +16,9 @@ extension Availability.AnyDomain:CustomStringConvertible
     {
         switch self 
         {
-        case .agnostic(let agnostic):   return agnostic.rawValue
-        case .platform(let platform):   return platform.rawValue
-        case .universal:                return "*"
+        case .agnostic(let agnostic):   agnostic.rawValue
+        case .platform(let platform):   platform.rawValue
+        case .universal:                "*"
         }
     }
 }

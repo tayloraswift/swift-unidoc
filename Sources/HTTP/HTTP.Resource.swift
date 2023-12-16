@@ -1,5 +1,5 @@
-import Media
 import MD5
+import Media
 
 @available(*, deprecated, renamed: "HTTP.Resource")
 public

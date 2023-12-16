@@ -1,5 +1,5 @@
-import MarkdownParsing
 import MarkdownAST
+import MarkdownParsing
 import Sources
 import Testing
 

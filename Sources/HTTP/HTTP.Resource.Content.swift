@@ -20,10 +20,10 @@ extension HTTP.Resource.Content
     {
         switch self
         {
-        case .binary(let buffer):   return buffer.count
-        case .buffer(let buffer):   return buffer.readableBytes
-        case .string(let string):   return string.utf8.count
-        case .length:               return 0
+        case .binary(let buffer):   buffer.count
+        case .buffer(let buffer):   buffer.readableBytes
+        case .string(let string):   string.utf8.count
+        case .length:               0
         }
     }
     /// The logical length of the content, in bytes, which may not reflect the actual ``size``
@@ -33,10 +33,10 @@ extension HTTP.Resource.Content
     {
         switch self
         {
-        case .binary(let buffer):   return buffer.count
-        case .buffer(let buffer):   return buffer.readableBytes
-        case .string(let string):   return string.utf8.count
-        case .length(let length):   return length
+        case .binary(let buffer):   buffer.count
+        case .buffer(let buffer):   buffer.readableBytes
+        case .string(let string):   string.utf8.count
+        case .length(let length):   length
         }
     }
     /// Drops any payload storage held by this instance, and replaces it with the length of the

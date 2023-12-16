@@ -99,12 +99,12 @@ extension MarkdownBytecode.Context
     {
         switch level
         {
-        case ...1:      return .h1
-        case    2:      return .h2
-        case    3:      return .h3
-        case    4:      return .h4
-        case    5:      return .h5
-        case    6, _:   return .h6
+        case ...1:      .h1
+        case    2:      .h2
+        case    3:      .h3
+        case    4:      .h4
+        case    5:      .h5
+        case    6, _:   .h6
         }
     }
 }

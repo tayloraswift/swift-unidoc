@@ -36,18 +36,18 @@ extension Availability.PlatformDomain:CustomStringConvertible
     {
         switch self
         {
-        case .iOS:                              return "iOS"
-        case .macOS:                            return "macOS"
-        case .macCatalyst:                      return "Mac Catalyst"
-        case .openBSD:                          return "OpenBSD"
-        case .tvOS:                             return "tvOS"
-        case .watchOS:                          return "watchOS"
-        case .windows:                          return "Windows"
-        case .iOSApplicationExtension:          return "iOS App Extension"
-        case .macOSApplicationExtension:        return "macOS App Extension"
-        case .macCatalystApplicationExtension:  return "Mac Catalyst App Extension"
-        case .tvOSApplicationExtension:         return "tvOS App Extension"
-        case .watchOSApplicationExtension:      return "watchOS App Extension"
+        case .iOS:                              "iOS"
+        case .macOS:                            "macOS"
+        case .macCatalyst:                      "Mac Catalyst"
+        case .openBSD:                          "OpenBSD"
+        case .tvOS:                             "tvOS"
+        case .watchOS:                          "watchOS"
+        case .windows:                          "Windows"
+        case .iOSApplicationExtension:          "iOS App Extension"
+        case .macOSApplicationExtension:        "macOS App Extension"
+        case .macCatalystApplicationExtension:  "Mac Catalyst App Extension"
+        case .tvOSApplicationExtension:         "tvOS App Extension"
+        case .watchOSApplicationExtension:      "watchOS App Extension"
         }
     }
 }

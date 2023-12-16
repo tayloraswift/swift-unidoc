@@ -13,10 +13,8 @@ extension JSON.StringRule
         {
             switch terminal
             {
-            case 0x20 ... 0x21, 0x23 ... 0x5b, 0x5d ... 0xff:
-                return ()
-            default:
-                return nil
+            case 0x20 ... 0x21, 0x23 ... 0x5b, 0x5d ... 0xff:   ()
+            default:                                            nil
             }
         }
     }

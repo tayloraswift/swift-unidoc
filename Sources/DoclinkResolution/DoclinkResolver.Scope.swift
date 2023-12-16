@@ -21,10 +21,10 @@ extension DoclinkResolver.Scope:RandomAccessCollection
     {
         switch (index, self)
         {
-        case    (1, .documentation):                return "documentation"
-        case    (1,     .tutorials):                return "tutorials"
+        case    (1, .documentation):                "documentation"
+        case    (1,     .tutorials):                "tutorials"
         case    (_, .documentation(let namespace)),
-                (_,     .tutorials(let namespace)): return "\(namespace)"
+                (_,     .tutorials(let namespace)): "\(namespace)"
         }
     }
 }
