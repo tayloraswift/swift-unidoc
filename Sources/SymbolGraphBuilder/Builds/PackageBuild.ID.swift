@@ -9,9 +9,9 @@ extension PackageBuild
         /// An unversioned root package build.
         case unversioned(Symbol.Package)
         /// A versioned root package build.
-        case versioned(PackageManifest.DependencyPin, refname:String)
+        case versioned(SPM.DependencyPin, refname:String)
         /// A versioned dependency build.
-        case upstream(PackageManifest.DependencyPin)
+        case upstream(SPM.DependencyPin)
     }
 }
 extension PackageBuild.ID
@@ -25,7 +25,7 @@ extension PackageBuild.ID
                 .upstream(let pin):     pin.id
         }
     }
-    var pin:PackageManifest.DependencyPin?
+    var pin:SPM.DependencyPin?
     {
         switch self
         {

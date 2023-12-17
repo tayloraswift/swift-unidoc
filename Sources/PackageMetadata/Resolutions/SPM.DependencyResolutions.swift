@@ -1,6 +1,6 @@
 import JSON
 
-extension PackageManifest
+extension SPM
 {
     @frozen public
     struct DependencyResolutions:Equatable, Sendable
@@ -18,7 +18,7 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.DependencyResolutions
+extension SPM.DependencyResolutions
 {
     public
     init(parsing json:String) throws
@@ -26,7 +26,7 @@ extension PackageManifest.DependencyResolutions
         try self.init(json: try JSON.Object.init(parsing: json))
     }
 }
-extension PackageManifest.DependencyResolutions:JSONObjectDecodable
+extension SPM.DependencyResolutions:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable
@@ -46,7 +46,7 @@ extension PackageManifest.DependencyResolutions:JSONObjectDecodable
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         let format:Format = try json[.format].decode()
-        let pins:[PackageManifest.DependencyPin]
+        let pins:[SPM.DependencyPin]
         switch format
         {
         case .v1:
@@ -56,7 +56,7 @@ extension PackageManifest.DependencyResolutions:JSONObjectDecodable
                 {
                     try $0.map
                     {
-                        try $0.decode(as: PackageManifest.DependencyPin.V1.self, with: \.value)
+                        try $0.decode(as: SPM.DependencyPin.V1.self, with: \.value)
                     }
                 }
             }
@@ -66,7 +66,7 @@ extension PackageManifest.DependencyResolutions:JSONObjectDecodable
             {
                 try $0.map
                 {
-                    try $0.decode(as: PackageManifest.DependencyPin.V2.self, with: \.value)
+                    try $0.decode(as: SPM.DependencyPin.V2.self, with: \.value)
                 }
             }
         }

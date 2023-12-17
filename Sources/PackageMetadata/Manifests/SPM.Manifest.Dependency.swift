@@ -2,7 +2,7 @@ import JSON
 import PackageGraphs
 import Symbols
 
-extension PackageManifest
+extension SPM.Manifest
 {
     @frozen public
     enum Dependency:Equatable, Sendable
@@ -11,7 +11,7 @@ extension PackageManifest
         case resolvable(Resolvable)
     }
 }
-extension PackageManifest.Dependency:Identifiable
+extension SPM.Manifest.Dependency:Identifiable
 {
     @inlinable public
     var id:Symbol.Package
@@ -23,10 +23,10 @@ extension PackageManifest.Dependency:Identifiable
         }
     }
 }
-extension PackageManifest.Dependency
+extension SPM.Manifest.Dependency
 {
     @inlinable public
-    var requirement:PackageManifest.DependencyRequirement?
+    var requirement:SPM.Manifest.DependencyRequirement?
     {
         if  case .resolvable(let dependency) = self
         {
@@ -38,7 +38,7 @@ extension PackageManifest.Dependency
         }
     }
 }
-extension PackageManifest.Dependency:JSONObjectDecodable
+extension SPM.Manifest.Dependency:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

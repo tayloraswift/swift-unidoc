@@ -35,9 +35,9 @@ extension Main.PackageResolved:TestBattery
             """
             tests.do
             {
-                let resolutions:PackageManifest.DependencyResolutions = try .init(
+                let resolutions:SPM.DependencyResolutions = try .init(
                     parsing: json)
-                let expected:[PackageManifest.DependencyPin] =
+                let expected:[SPM.DependencyPin] =
                 [
                     .init(id: "swift-json",
                         location: .local(root: "/swift/swift-json"),
@@ -78,9 +78,9 @@ extension Main.PackageResolved:TestBattery
             """
             tests.do
             {
-                let resolutions:PackageManifest.DependencyResolutions = try .init(
+                let resolutions:SPM.DependencyResolutions = try .init(
                     parsing: json)
-                let expected:[PackageManifest.DependencyPin] =
+                let expected:[SPM.DependencyPin] =
                 [
                     .init(id: "swift-atomics",
                         location: .remote(
@@ -103,7 +103,7 @@ extension Main.PackageResolved:TestBattery
             {
                 let filepath:FilePath = "Package.resolved"
                 let json:JSON = .init(utf8: try filepath.read())
-                let _:PackageManifest.DependencyResolutions = try json.decode()
+                let _:SPM.DependencyResolutions = try json.decode()
             }
         }
         if  let tests:TestGroup = tests / "legacy"
@@ -129,9 +129,9 @@ extension Main.PackageResolved:TestBattery
             """
             tests.do
             {
-                let resolutions:PackageManifest.DependencyResolutions = try .init(
+                let resolutions:SPM.DependencyResolutions = try .init(
                     parsing: json)
-                let expected:[PackageManifest.DependencyPin] =
+                let expected:[SPM.DependencyPin] =
                 [
                     .init(id: "swift-argument-parser",
                         location: .remote(

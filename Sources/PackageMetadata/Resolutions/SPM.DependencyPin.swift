@@ -3,7 +3,7 @@ import SemanticVersions
 import SHA1
 import Symbols
 
-extension PackageManifest
+extension SPM
 {
     @frozen public
     struct DependencyPin:Identifiable, Equatable, Hashable, Sendable
@@ -30,12 +30,12 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.DependencyPin
+extension SPM.DependencyPin
 {
     @inlinable public
     init(id:Symbol.Package,
-        location:PackageManifest.DependencyLocation,
-        state:PackageManifest.DependencyState)
+        location:SPM.DependencyLocation,
+        state:SPM.DependencyState)
     {
         self.init(id: id,
             location: location,
@@ -43,7 +43,7 @@ extension PackageManifest.DependencyPin
             version: state.version)
     }
     @inlinable public
-    var state:PackageManifest.DependencyState
+    var state:SPM.DependencyState
     {
         .init(revision: self.revision, version: self.version)
     }

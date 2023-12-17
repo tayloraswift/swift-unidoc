@@ -1,7 +1,7 @@
 import SHA1
 import SymbolGraphs
 
-extension PackageManifest
+extension SPM.Manifest
 {
     @frozen public
     enum DependencyRequirement:Hashable, Equatable, Sendable
@@ -11,7 +11,7 @@ extension PackageManifest
         case stable     (SymbolGraphMetadata.DependencyRequirement)
     }
 }
-extension PackageManifest.DependencyRequirement
+extension SPM.Manifest.DependencyRequirement
 {
     @inlinable public
     var stable:SymbolGraphMetadata.DependencyRequirement?

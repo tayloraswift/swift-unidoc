@@ -1,6 +1,6 @@
 import JSON
 
-extension PackageManifest
+extension SPM
 {
     enum DependencyPinType:String, Hashable, Equatable, Sendable
     {
@@ -8,6 +8,6 @@ extension PackageManifest
         case localSourceControl
     }
 }
-extension PackageManifest.DependencyPinType:JSONDecodable, JSONEncodable
+extension SPM.DependencyPinType:JSONDecodable, JSONEncodable
 {
 }
