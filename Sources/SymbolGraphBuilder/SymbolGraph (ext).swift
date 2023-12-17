@@ -10,7 +10,7 @@ import UnidocDiagnostics
 
 extension SymbolGraph
 {
-    public static
+    static
     func build(from artifacts:Artifacts) async throws -> Self
     {
         let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
@@ -55,7 +55,17 @@ extension SymbolGraph
             {
                 (root:Symbol.FileBase) in try artifacts.cultures.map
                 {
-                    try $0.loadArticles(root: root)
+                    switch $0.module.type
+                    {
+                    //  Only load supplements for these module types.
+                    case .executable:   break
+                    case .regular:      break
+                    case .macro:        break
+                    case .plugin:       break
+                    default:            return []
+                    }
+
+                    return try $0.loadArticles(root: root)
                 }
             }
 

@@ -6,15 +6,14 @@ import System
 
 extension PackageNode
 {
-    func pinnedDependencies(
-        using pins:[PackageManifest.DependencyPin]) throws -> [SymbolGraphMetadata.Dependency]
+    func pin(to pins:[SPM.DependencyPin]) throws -> [SymbolGraphMetadata.Dependency]
     {
-        let pins:PackageManifest.DependencyPins = try .init(indexing: pins)
+        let pins:SPM.DependencyPins = try .init(indexing: pins)
         return try self.dependencies.map
         {
-            let pin:PackageManifest.DependencyPin = try pins($0.id)
+            let pin:SPM.DependencyPin = try pins($0.id)
             return .init(package: $0.id,
-                requirement: ($0 as? PackageManifest.Dependency)?.requirement?.stable,
+                requirement: ($0 as? SPM.Manifest.Dependency)?.requirement?.stable,
                 revision: pin.revision,
                 version: pin.version)
         }

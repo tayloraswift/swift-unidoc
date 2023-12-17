@@ -4,47 +4,55 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 
+@available(*, deprecated, renamed: "SPM.Manifest")
 public
-struct PackageManifest:Equatable, Sendable
-{
-    /// The name of the package. This is *not* always the same as the package’s
-    /// identity, but often is. Some packages use this field to store a “marketing
-    /// name” for the package, such as `Swift Argument Parser`.
-    public
-    let name:String
-    public
-    let root:Symbol.FileBase
-    public
-    let requirements:[SymbolGraphMetadata.PlatformRequirement]
-    public
-    let dependencies:[Dependency]
-    public
-    let products:[Product]
-    public
-    let targets:[TargetNode]
-    /// The `swift-tools-version` format of this manifest.
-    public
-    let format:PatchVersion
+typealias PackageManifest = SPM.Manifest
 
-    @inlinable public
-    init(name:String,
-        root:Symbol.FileBase,
-        requirements:[SymbolGraphMetadata.PlatformRequirement] = [],
-        dependencies:[Dependency] = [],
-        products:[Product] = [],
-        targets:[TargetNode] = [],
-        format:PatchVersion)
+extension SPM
+{
+    /// Manifest ur destiny ✨
+    @frozen public
+    struct Manifest:Equatable, Sendable
     {
-        self.name = name
-        self.root = root
-        self.requirements = requirements
-        self.dependencies = dependencies
-        self.products = products
-        self.targets = targets
-        self.format = format
+        /// The name of the package. This is *not* always the same as the package’s
+        /// identity, but often is. Some packages use this field to store a “marketing
+        /// name” for the package, such as `Swift Argument Parser`.
+        public
+        let name:String
+        public
+        let root:Symbol.FileBase
+        public
+        let requirements:[SymbolGraphMetadata.PlatformRequirement]
+        public
+        let dependencies:[Dependency]
+        public
+        let products:[Product]
+        public
+        let targets:[TargetNode]
+        /// The `swift-tools-version` format of this manifest.
+        public
+        let format:PatchVersion
+
+        @inlinable public
+        init(name:String,
+            root:Symbol.FileBase,
+            requirements:[SymbolGraphMetadata.PlatformRequirement] = [],
+            dependencies:[Dependency] = [],
+            products:[Product] = [],
+            targets:[TargetNode] = [],
+            format:PatchVersion)
+        {
+            self.name = name
+            self.root = root
+            self.requirements = requirements
+            self.dependencies = dependencies
+            self.products = products
+            self.targets = targets
+            self.format = format
+        }
     }
 }
-extension PackageManifest:JSONObjectDecodable
+extension SPM.Manifest:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

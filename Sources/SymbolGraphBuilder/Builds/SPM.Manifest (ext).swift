@@ -2,7 +2,7 @@ import JSON
 import PackageMetadata
 import System
 
-extension PackageManifest
+extension SPM.Manifest
 {
     public static
     func dump(from build:PackageBuild) async throws -> Self

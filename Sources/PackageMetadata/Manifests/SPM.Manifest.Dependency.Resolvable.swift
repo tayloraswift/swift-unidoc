@@ -4,7 +4,7 @@ import SemanticVersions
 import SHA1
 import Symbols
 
-extension PackageManifest.Dependency
+extension SPM.Manifest.Dependency
 {
     @frozen public
     struct Resolvable:Equatable, Sendable
@@ -12,14 +12,14 @@ extension PackageManifest.Dependency
         public
         let id:Symbol.Package
         public
-        let requirement:PackageManifest.DependencyRequirement
+        let requirement:SPM.Manifest.DependencyRequirement
         public
-        let location:PackageManifest.DependencyLocation
+        let location:SPM.DependencyLocation
 
         @inlinable public
         init(id:Symbol.Package,
-            requirement:PackageManifest.DependencyRequirement,
-            location:PackageManifest.DependencyLocation)
+            requirement:SPM.Manifest.DependencyRequirement,
+            location:SPM.DependencyLocation)
         {
             self.id = id
             self.requirement = requirement
@@ -27,7 +27,7 @@ extension PackageManifest.Dependency
         }
     }
 }
-extension PackageManifest.Dependency.Resolvable:JSONObjectDecodable
+extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

@@ -1,6 +1,6 @@
 import JSON
 
-extension PackageManifest.DependencyResolutions
+extension SPM.DependencyResolutions
 {
     @frozen public
     enum Format:UInt, Equatable, Hashable, Sendable
@@ -9,7 +9,7 @@ extension PackageManifest.DependencyResolutions
         case v2 = 2
     }
 }
-extension PackageManifest.DependencyResolutions.Format:Comparable
+extension SPM.DependencyResolutions.Format:Comparable
 {
     @inlinable public static
     func < (lhs:Self, rhs:Self) -> Bool
@@ -17,6 +17,6 @@ extension PackageManifest.DependencyResolutions.Format:Comparable
         lhs.rawValue < rhs.rawValue
     }
 }
-extension PackageManifest.DependencyResolutions.Format:JSONDecodable, JSONEncodable
+extension SPM.DependencyResolutions.Format:JSONDecodable, JSONEncodable
 {
 }

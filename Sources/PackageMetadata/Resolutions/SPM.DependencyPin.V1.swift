@@ -1,20 +1,20 @@
 import JSON
 
-extension PackageManifest.DependencyPin
+extension SPM.DependencyPin
 {
     struct V1
     {
-        let value:PackageManifest.DependencyPin
+        let value:SPM.DependencyPin
 
         private
-        init(value:PackageManifest.DependencyPin)
+        init(value:SPM.DependencyPin)
         {
             self.value = value
         }
     }
 }
 
-extension PackageManifest.DependencyPin.V1:JSONObjectDecodable
+extension SPM.DependencyPin.V1:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable
@@ -28,7 +28,7 @@ extension PackageManifest.DependencyPin.V1:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let location:PackageManifest.DependencyLocation = .init(
+        let location:SPM.DependencyLocation = .init(
             location: try json[.location].decode())
 
         self.init(value: .init(id: .init(location.name),

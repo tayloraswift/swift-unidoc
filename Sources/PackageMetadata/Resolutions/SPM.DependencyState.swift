@@ -2,7 +2,7 @@ import JSON
 import SemanticVersions
 import SHA1
 
-extension PackageManifest
+extension SPM
 {
     @frozen public
     struct DependencyState:Equatable, Hashable, Sendable
@@ -20,7 +20,7 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.DependencyState:CustomStringConvertible
+extension SPM.DependencyState:CustomStringConvertible
 {
     /// A *human-readable* description of this semantic ref name. This isn’t the
     /// same as its actual name (which is lost on parsing), and cannot be used to
@@ -38,7 +38,7 @@ extension PackageManifest.DependencyState:CustomStringConvertible
         }
     }
 }
-extension PackageManifest.DependencyState:JSONObjectDecodable
+extension SPM.DependencyState:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

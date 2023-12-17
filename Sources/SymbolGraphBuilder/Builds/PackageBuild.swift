@@ -126,7 +126,7 @@ extension PackageBuild
 
         if  let revision:SHA1 = .init(stdout.prefix(while: \.isHexDigit))
         {
-            let pin:PackageManifest.DependencyPin = .init(id: package,
+            let pin:SPM.DependencyPin = .init(id: package,
                 location: .remote(url: repository),
                 revision: revision,
                 version: version)

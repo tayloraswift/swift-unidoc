@@ -2,7 +2,7 @@ import JSON
 import PackageGraphs
 import Symbols
 
-extension PackageManifest.Dependency
+extension SPM.Manifest.Dependency
 {
     @frozen public
     struct Filesystem:Equatable, Sendable
@@ -20,7 +20,7 @@ extension PackageManifest.Dependency
         }
     }
 }
-extension PackageManifest.Dependency.Filesystem:JSONObjectDecodable
+extension SPM.Manifest.Dependency.Filesystem:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

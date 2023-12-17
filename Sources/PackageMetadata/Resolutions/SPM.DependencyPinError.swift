@@ -1,6 +1,6 @@
 import Symbols
 
-extension PackageManifest
+extension SPM
 {
     @frozen public
     enum DependencyPinError:Error, Equatable, Sendable

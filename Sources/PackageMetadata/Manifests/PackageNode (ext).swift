@@ -5,22 +5,18 @@ import Symbols
 extension PackageNode
 {
     public static
-    func libraries(as id:consuming Symbol.Package,
-        flattening manifest:borrowing PackageManifest,
-        platform:borrowing SymbolGraphMetadata.Platform) throws -> Self
+    func all(flattening manifest:borrowing SPM.Manifest,
+        on platform:borrowing SymbolGraphMetadata.Platform,
+        as id:consuming Symbol.Package) throws -> Self
     {
-        try .init(as: id, flattening: manifest, platform: platform)
-        {
-            switch $0
-            {
-            case .library:  true
-            case _:         false
-            }
-        }
+        try .init(as: id, flattening: manifest, platform: platform) { _ in true }
     }
-    public
+}
+extension PackageNode
+{
+    private
     init(as id:Symbol.Package,
-        flattening manifest:borrowing PackageManifest,
+        flattening manifest:borrowing SPM.Manifest,
         platform:borrowing SymbolGraphMetadata.Platform,
         filter predicate:(SymbolGraphMetadata.ProductType) throws -> Bool) throws
     {
@@ -33,9 +29,9 @@ extension PackageNode
     }
     private
     init(id:Symbol.Package,
-        predecessors:[PackageManifest.Dependency],
+        predecessors:[SPM.Manifest.Dependency],
         platform:borrowing SymbolGraphMetadata.Platform,
-        products:borrowing [PackageManifest.Product],
+        products:borrowing [SPM.Manifest.Product],
         targets:borrowing DigraphExplorer<TargetNode>.Nodes,
         root:Symbol.FileBase) throws
     {
