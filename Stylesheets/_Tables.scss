@@ -24,10 +24,14 @@ section.details table
         padding-left: 0;
     }
 }
-section.details table.dependencies
+section.details table.dependencies,
+section.details table.platforms,
+section.details table.tags
 {
     width: 100%;
-
+}
+section.details table.dependencies
+{
     td:first-child
     {
         font-style: italic;
@@ -39,8 +43,6 @@ section.details table.dependencies
 }
 section.details table.tags
 {
-    width: 100%;
-
     tr.modern
     {
         font-weight: 700;
