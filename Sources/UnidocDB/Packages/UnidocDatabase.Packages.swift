@@ -21,13 +21,23 @@ extension UnidocDatabase
 extension UnidocDatabase.Packages
 {
     public static
-    let indexLastCrawled:Mongo.CollectionIndex = .init("LastCrawled")
+    let indexLastCrawled:Mongo.CollectionIndex = .init("LastCrawled", unique: false)
     {
         $0[Unidoc.PackageMetadata[.crawled]] = (+)
     }
         where:
     {
         $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+    }
+
+    public static
+    let indexRealm:Mongo.CollectionIndex = .init("Realm", unique: false)
+    {
+        $0[Unidoc.PackageMetadata[.realm]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.PackageMetadata[.realm]] = .init { $0[.exists] = true }
     }
 }
 extension UnidocDatabase.Packages:Mongo.CollectionModel
@@ -39,7 +49,13 @@ extension UnidocDatabase.Packages:Mongo.CollectionModel
     var name:Mongo.Collection { "Packages" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexLastCrawled ] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexLastCrawled,
+            Self.indexRealm,
+        ]
+    }
 }
 extension UnidocDatabase.Packages:Mongo.RecodableModel
 {

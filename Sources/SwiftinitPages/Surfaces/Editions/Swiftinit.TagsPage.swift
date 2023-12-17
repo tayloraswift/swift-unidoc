@@ -75,7 +75,7 @@ extension Swiftinit.TagsPage
 }
 extension Swiftinit.TagsPage:Swiftinit.RenderablePage
 {
-    var title:String { "Git Tags - \(self.package.symbol)" }
+    var title:String { "Git Tags · \(self.package.symbol)" }
 }
 extension Swiftinit.TagsPage:Swiftinit.StaticPage
 {
@@ -218,7 +218,10 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 {
                     if  let realm:Unidoc.RealmMetadata = self.realm
                     {
-                        $0[.span] = realm.symbol
+                        $0[.a]
+                        {
+                            $0.href = "\(Swiftinit.Realm[realm.symbol])"
+                        } = realm.symbol
 
                         guard self.package.realmAligning
                         else

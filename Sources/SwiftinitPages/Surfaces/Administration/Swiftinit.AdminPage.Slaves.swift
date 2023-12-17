@@ -29,7 +29,7 @@ extension Swiftinit.AdminPage.Slaves
 extension Swiftinit.AdminPage.Slaves:Swiftinit.RenderablePage
 {
     public
-    var title:String { "Slaves - Administrator Tools" }
+    var title:String { "Slaves · Administrator Tools" }
 }
 extension Swiftinit.AdminPage.Slaves:Swiftinit.StaticPage
 {

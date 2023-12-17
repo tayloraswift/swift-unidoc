@@ -11,6 +11,7 @@ extension Swiftinit.GlobalUplinkEndpoint
 }
 extension Swiftinit.GlobalUplinkEndpoint.Status:HTTP.ServerResponseFactory
 {
+    consuming
     func response(as _:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         switch self

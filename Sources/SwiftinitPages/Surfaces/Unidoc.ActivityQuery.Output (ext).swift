@@ -5,7 +5,7 @@ import UnidocQueries
 
 extension Unidoc.ActivityQuery.Output:HTTP.ServerResponseFactory
 {
-    public
+    public borrowing
     func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         let page:Swiftinit.HomePage = .init(

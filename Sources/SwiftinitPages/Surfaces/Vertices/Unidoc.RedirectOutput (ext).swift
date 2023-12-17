@@ -7,7 +7,7 @@ import URI
 
 extension Unidoc.RedirectOutput:HTTP.ServerResponseFactory
 {
-    public
+    public borrowing
     func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         if  let redirect:URI = self.redirect

@@ -39,7 +39,7 @@ extension Swiftinit.Stats.Module
 }
 extension Swiftinit.Stats.Module:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.name) - \(self.volume.title) Statistics" }
+    var title:String { "\(self.name) · \(self.volume.title) Statistics" }
 
     var description:String?
     {

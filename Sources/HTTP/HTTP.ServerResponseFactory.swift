@@ -16,5 +16,6 @@ protocol _HTTPServerResponseFactory<Format>
 {
     associatedtype Format
 
+    consuming
     func response(as format:Format) throws -> HTTP.ServerResponse
 }
