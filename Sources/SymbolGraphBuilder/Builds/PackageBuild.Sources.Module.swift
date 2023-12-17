@@ -41,20 +41,47 @@ extension PackageBuild.Sources.Module
         exclude:borrowing [String],
         root:borrowing FilePath) throws
     {
-        try self.init(scanning: module, exclude: exclude,
-            path: module.location.map { root / $0 } ?? root / "Sources" / "\(module.name)")
+        self.init(module, path: nil)
+
+        if  let location:String = module.location
+        {
+            self.path = root / location
+        }
+        else
+        {
+            let directory:String
+            switch module.type
+            {
+            case .binary:       return
+            case .executable:   directory = "Sources"
+            case .regular:      directory = "Sources"
+            case .macro:        directory = "Sources"
+            case .plugin:       directory = "Plugins"
+            case .snippet:      directory = "Snippets"
+            case .system:       return
+            case .test:         directory = "Tests"
+            }
+
+            self.path = root / directory / module.name
+        }
+
+        try self.scan(excluding: exclude)
     }
 
-    private
-    init(scanning module:SymbolGraph.Module,
-        exclude:borrowing [String],
-        path:FilePath) throws
+    private mutating
+    func scan(excluding exclude:[String]) throws
     {
+        guard
+        let path:FilePath = self.path
+        else
+        {
+            return
+        }
+
         let exclude:Set<FilePath> = exclude.reduce(into: []) { $0.insert(path / $1) }
         var include:Set<FilePath> = []
-        var language:SymbolGraph.ModuleLanguage = module.language ?? .swift
+        var language:SymbolGraph.ModuleLanguage = self.module.language ?? .swift
 
-        self.init(module, path: path)
         defer
         {
             self.articles.sort              { $0.string < $1.string }
