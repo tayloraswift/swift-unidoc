@@ -1,7 +1,7 @@
 import Signatures
 import Unidoc
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct ExtensionSignature:Equatable, Hashable, Sendable
     {

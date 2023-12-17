@@ -7,10 +7,10 @@ enum DroppedPassagesError:Equatable, Error
 }
 extension DroppedPassagesError:Diagnostic
 {
-    typealias Symbolicator = DynamicSymbolicator
+    typealias Symbolicator = Unidoc.Symbolicator
 
     static
-    func += (output:inout DiagnosticOutput<DynamicSymbolicator>, self:Self)
+    func += (output:inout DiagnosticOutput<Unidoc.Symbolicator>, self:Self)
     {
         switch self
         {

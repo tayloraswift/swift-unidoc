@@ -6,7 +6,7 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct Extensions
     {
@@ -25,21 +25,21 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.Extensions
+extension Unidoc.Linker.Extensions
 {
     var count:Int
     {
         self.table.count
     }
 
-    func sorted() -> [(key:DynamicLinker.ExtensionSignature, value:DynamicLinker.Extension)]
+    func sorted() -> [(key:Unidoc.Linker.ExtensionSignature, value:Unidoc.Linker.Extension)]
     {
         self.table.sorted { $0.value.id < $1.value.id }
     }
 }
-extension DynamicLinker.Extensions
+extension Unidoc.Linker.Extensions
 {
-    subscript(signature:DynamicLinker.ExtensionSignature) -> DynamicLinker.Extension
+    subscript(signature:Unidoc.Linker.ExtensionSignature) -> Unidoc.Linker.Extension
     {
         _read
         {
@@ -53,7 +53,7 @@ extension DynamicLinker.Extensions
         }
     }
 }
-extension DynamicLinker.Extensions
+extension Unidoc.Linker.Extensions
 {
     /// Creates extension records from the given symbol graph extensions, performing any
     /// necessary de-duplication of protocol conformances and features.
@@ -87,11 +87,11 @@ extension DynamicLinker.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
         modules:[SymbolGraph.ModuleContext],
-        context:inout DynamicLinker) -> ProtocolConformances<Int>
+        context:inout Unidoc.Linker) -> ProtocolConformances<Int>
     {
         guard
         let s:Unidoc.Scalar = context.current.scalars.decls[s],
-        let extendedSnapshot:DynamicLinker.Snapshot = context[s.package],
+        let extendedSnapshot:Unidoc.Linker.Graph = context[s.package],
         let extendedDecl:SymbolGraph.Decl = extendedSnapshot.decls[s.citizen]?.decl
         else
         {
@@ -107,7 +107,7 @@ extension DynamicLinker.Extensions
             $0.insert($1.map { extendedSnapshot.scalars.decls[$0] })
         }
         /// Cache these signatures, since we need to perform two passes.
-        let signatures:[DynamicLinker.ExtensionSignature] = extensions.map
+        let signatures:[Unidoc.Linker.ExtensionSignature] = extensions.map
         {
             .init(
                 /// Remove constraints that are already present in the base declaration.
@@ -133,7 +133,7 @@ extension DynamicLinker.Extensions
         {
             for conformance:ProtocolConformance<Int> in conformances
             {
-                let signature:DynamicLinker.ExtensionSignature = .init(
+                let signature:Unidoc.Linker.ExtensionSignature = .init(
                     conditions: conformance.conditions,
                     culture: conformance.culture,
                     extends: s)
@@ -143,7 +143,7 @@ extension DynamicLinker.Extensions
         }
 
         for (`extension`, signature):
-            (SymbolGraph.Extension, DynamicLinker.ExtensionSignature) in zip(
+            (SymbolGraph.Extension, Unidoc.Linker.ExtensionSignature) in zip(
             extensions,
             signatures)
         {
@@ -209,7 +209,7 @@ extension DynamicLinker.Extensions
         return conformances
     }
 }
-extension DynamicLinker.Extensions
+extension Unidoc.Linker.Extensions
 {
     func byNested() -> [Int32: Unidoc.Scalar]
     {

@@ -4,7 +4,7 @@ import Unidoc
 /// A combined mapping of symbols to global scalars across all upstream dependencies.
 /// Within a build tree, we assume module names are unique, which implies that symbol
 /// manglings should never collide.
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct UpstreamScalars
     {

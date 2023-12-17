@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct Extension:Identifiable, Equatable, Sendable
     {
@@ -35,7 +35,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.Extension
+extension Unidoc.Linker.Extension
 {
     var isEmpty:Bool
     {

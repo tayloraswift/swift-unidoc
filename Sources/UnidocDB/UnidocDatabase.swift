@@ -499,12 +499,12 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> Unidoc.Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)
-        var linker:DynamicLinker = try await self.snapshots.load(for: snapshot,
+        var linker:Unidoc.Linker = try await self.snapshots.load(for: snapshot,
             pins: pins,
             with: session)
 
         let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies()
-        let mesh:DynamicLinker.Mesh = linker.link()
+        let mesh:Unidoc.Linker.Mesh = linker.link()
 
         linker.status().emit(colors: .enabled)
 

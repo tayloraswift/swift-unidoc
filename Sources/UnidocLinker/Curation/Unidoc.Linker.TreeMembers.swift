@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct TreeMembers
     {
@@ -19,7 +19,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.TreeMembers:ExpressibleByArrayLiteral
+extension Unidoc.Linker.TreeMembers:ExpressibleByArrayLiteral
 {
     init(arrayLiteral:Never...)
     {

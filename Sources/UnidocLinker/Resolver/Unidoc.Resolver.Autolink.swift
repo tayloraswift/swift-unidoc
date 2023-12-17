@@ -5,7 +5,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
 
-extension DynamicResolver
+extension Unidoc.Resolver
 {
     struct Autolink
     {
@@ -20,11 +20,11 @@ extension DynamicResolver
         }
     }
 }
-extension DynamicResolver.Autolink:DiagnosticSubject
+extension Unidoc.Resolver.Autolink:DiagnosticSubject
 {
     var context:SourceContext { .init() }
 }
-extension DynamicResolver.Autolink
+extension Unidoc.Resolver.Autolink
 {
     var parsed:Codelink?
     {

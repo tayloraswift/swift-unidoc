@@ -80,7 +80,7 @@ extension UnidocDatabase.Snapshots
 {
     func load(for snapshot:Unidoc.Snapshot,
         pins:[Unidoc.Edition],
-        with session:Mongo.Session) async throws -> DynamicLinker
+        with session:Mongo.Session) async throws -> Unidoc.Linker
     {
         var dependencies:[Unidoc.Snapshot] = try await self.load(pins, with: session)
 

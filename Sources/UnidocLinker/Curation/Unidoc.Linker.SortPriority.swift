@@ -1,4 +1,4 @@
-extension DynamicLinker
+extension Unidoc.Linker
 {
     enum SortPriority:Equatable, Comparable
     {
