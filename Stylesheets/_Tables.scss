@@ -1,7 +1,5 @@
 section.details table
 {
-    width: 100%;
-
     th
     {
         text-align: left;
@@ -28,6 +26,8 @@ section.details table
 }
 section.details table.dependencies
 {
+    width: 100%;
+
     td:first-child
     {
         font-style: italic;
@@ -39,6 +39,8 @@ section.details table.dependencies
 }
 section.details table.tags
 {
+    width: 100%;
+
     tr.modern
     {
         font-weight: 700;
