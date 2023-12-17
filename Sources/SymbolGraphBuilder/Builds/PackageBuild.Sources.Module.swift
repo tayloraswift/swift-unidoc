@@ -78,16 +78,15 @@ extension PackageBuild.Sources.Module
             return
         }
 
-        let exclude:Set<FilePath> = exclude.reduce(into: []) { $0.insert(path / $1) }
+        let exclude:[FilePath] = exclude.map { path / $0 }
         var include:Set<FilePath> = []
-        var language:SymbolGraph.ModuleLanguage = self.module.language ?? .swift
 
         defer
         {
             self.articles.sort              { $0.string < $1.string }
             self.include = include.sorted   { $0.string < $1.string }
-            self.module.language = language
         }
+
         try path.directory.walk
         {
             let file:(path:FilePath, extension:String)
@@ -103,27 +102,38 @@ extension PackageBuild.Sources.Module
                 return
             }
 
-            switch (file.extension, excluded: exclude.contains(file.path))
+            guard file.extension != "md"
+            else
             {
-            case    ("md",  excluded: _):
                 //  It’s common to list markdown files under exclude paths.
                 self.articles.append(file.path)
+                return
+            }
 
-            case    ("h",   excluded: false):
+            //  TODO: might benefit from a better algorithm.
+            for prefix:FilePath in exclude
+            {
+                if  file.path.starts(with: prefix)
+                {
+                    return
+                }
+            }
+
+            switch file.extension
+            {
+            case "h":
+                //  Header files don’t indicate a C or C++ module on their own.
+                include.update(with: $0)
+
+            case "c":
+                self.module.language |= .c
+
+            case "hpp", "hxx":
                 include.update(with: $0)
                 fallthrough
 
-            case    ("c",   excluded: false):
-                language |= .c
-
-            case    ("hpp", excluded: false),
-                    ("hxx", excluded: false):
-                include.update(with: $0)
-                fallthrough
-
-            case    ("cpp", excluded: false),
-                    ("cxx", excluded: false):
-                language |= .cpp
+            case "cpp", "cxx":
+                self.module.language |= .cpp
 
             case _:
                 break
