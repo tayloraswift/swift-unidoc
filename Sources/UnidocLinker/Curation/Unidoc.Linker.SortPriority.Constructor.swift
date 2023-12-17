@@ -1,6 +1,6 @@
 import Sources
 
-extension DynamicLinker.SortPriority
+extension Unidoc.Linker.SortPriority
 {
     enum Constructor:Equatable, Comparable
     {

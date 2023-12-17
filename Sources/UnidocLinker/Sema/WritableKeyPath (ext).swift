@@ -6,7 +6,7 @@ extension WritableKeyPath<Unidoc.Stats.Coverage, Int>
 {
     static
     func classify(_ decl:SymbolGraph.Decl,
-        from snapshot:DynamicLinker.Snapshot,
+        from snapshot:Unidoc.Linker.Graph,
         at local:Int32) -> WritableKeyPath<Unidoc.Stats.Coverage, Int>
     {
         if  case _? = decl.article

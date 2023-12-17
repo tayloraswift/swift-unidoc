@@ -2,7 +2,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-extension DynamicLinker.Snapshot
+extension Unidoc.Linker.Graph
 {
     struct Scalars
     {
@@ -18,9 +18,9 @@ extension DynamicLinker.Snapshot
         }
     }
 }
-extension DynamicLinker.Snapshot.Scalars
+extension Unidoc.Linker.Graph.Scalars
 {
-    init(snapshot:borrowing Unidoc.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
+    init(snapshot:borrowing Unidoc.Snapshot, upstream:borrowing Unidoc.Linker.UpstreamScalars)
     {
         let decls:SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?> =
             snapshot.graph.decls.link

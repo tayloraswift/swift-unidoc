@@ -4,7 +4,7 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     @frozen public
     struct Mesh:~Copyable
@@ -35,22 +35,22 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.Mesh
+extension Unidoc.Linker.Mesh
 {
     init(
-        extensions:borrowing DynamicLinker.Extensions,
+        extensions:borrowing Unidoc.Linker.Extensions,
         articles:consuming [Unidoc.Vertex.Article],
         cultures:consuming [Unidoc.Vertex.Culture],
         decls:consuming [Unidoc.Vertex.Decl],
         groups:consuming Unidoc.Volume.Groups,
-        context:borrowing DynamicLinker)
+        context:borrowing Unidoc.Linker)
     {
         var cultures:[Unidoc.Vertex.Culture] = cultures
 
         let articles:[Unidoc.Vertex.Article] = articles
         let decls:[Unidoc.Vertex.Decl] = decls
 
-        var mapper:DynamicLinker.TreeMapper = .init(zone: context.current.id)
+        var mapper:Unidoc.Linker.TreeMapper = .init(zone: context.current.id)
         for vertex:Unidoc.Vertex.Article in articles
         {
             mapper.add(vertex)
@@ -111,7 +111,7 @@ extension DynamicLinker.Mesh
         }
 
         for (signature, `extension`):
-            (DynamicLinker.ExtensionSignature, DynamicLinker.Extension) in extensions.sorted()
+            (Unidoc.Linker.ExtensionSignature, Unidoc.Linker.Extension) in extensions.sorted()
             where !`extension`.isEmpty
         {
             for f:Unidoc.Scalar in `extension`.features

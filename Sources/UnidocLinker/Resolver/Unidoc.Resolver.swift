@@ -7,27 +7,29 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-struct DynamicResolver:~Copyable
+extension Unidoc
 {
-    private
-    let codelinks:CodelinkResolver<Unidoc.Scalar>
-    private(set)
-    var context:DynamicLinker
-
-    init(codelinks:CodelinkResolver<Unidoc.Scalar>,
-        context:consuming DynamicLinker)
+    struct Resolver:~Copyable
     {
-        self.codelinks = codelinks
-        self.context = context
+        private
+        let codelinks:CodelinkResolver<Scalar>
+        private(set)
+        var context:Linker
+
+        init(codelinks:CodelinkResolver<Scalar>, context:consuming Linker)
+        {
+            self.codelinks = codelinks
+            self.context = context
+        }
     }
 }
-extension DynamicResolver
+extension Unidoc.Resolver
 {
     private
-    var current:DynamicLinker.Snapshot { self.context.current }
+    var current:Unidoc.Linker.Graph { self.context.current }
 }
 
-extension DynamicResolver
+extension Unidoc.Resolver
 {
     mutating
     func link(article:SymbolGraph.Article) ->
@@ -57,7 +59,7 @@ extension DynamicResolver
         return (overview, topic.members.map { self.resolve($0) })
     }
 }
-extension DynamicResolver
+extension Unidoc.Resolver
 {
     private mutating
     func expand(_ outline:SymbolGraph.Outline) -> Unidoc.Outline
@@ -197,7 +199,7 @@ extension DynamicResolver
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.context.diagnostics[autolink] = InvalidAutolinkError<DynamicSymbolicator>.init(
+            self.context.diagnostics[autolink] = InvalidAutolinkError<Unidoc.Symbolicator>.init(
                 expression: unresolved.link)
 
             return nil
@@ -206,7 +208,7 @@ extension DynamicResolver
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.context.diagnostics[autolink] = InvalidCodelinkError<DynamicSymbolicator>.init(
+            self.context.diagnostics[autolink] = InvalidCodelinkError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 
