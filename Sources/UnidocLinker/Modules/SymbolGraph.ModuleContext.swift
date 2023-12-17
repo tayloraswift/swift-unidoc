@@ -22,36 +22,12 @@ extension SymbolGraph
         private(set)
         var imports:[Symbol.Module]
 
-        private
-        let nodes:Set<Unidoc.Scalar>
-
-        private
-        init(conformances:Set<Unidoc.Vector>,
-            codelinks:CodelinkResolver<Unidoc.Scalar>.Table,
-            imports:[Symbol.Module],
-            nodes:Set<Unidoc.Scalar>)
+        init()
         {
-            self.conformances = conformances
-            self.codelinks = codelinks
-            self.imports = imports
-            self.nodes = nodes
+            self.conformances = []
+            self.codelinks = .init()
+            self.imports = []
         }
-    }
-}
-extension SymbolGraph.ModuleContext
-{
-    init(nodes:Slice<SymbolGraph.Table<SymbolGraph.Plane.Decl, Unidoc.Scalar?>>)
-    {
-        self.init(conformances: [],
-            codelinks: .init(),
-            imports: [],
-            nodes: nodes.reduce(into: [])
-            {
-                if  let s:Unidoc.Scalar = $1
-                {
-                    $0.insert(s)
-                }
-            })
     }
 }
 extension SymbolGraph.ModuleContext
@@ -159,7 +135,7 @@ extension SymbolGraph.ModuleContext
             //
             //  This is a different condition than only caring about extensions to types
             //  that are *declared* in the package being linked.
-            if  self.nodes.contains(outer.scalar)
+            if  context.nodes.contains(outer.scalar)
             {
                 for p:Int32 in `extension`.conformances
                 {

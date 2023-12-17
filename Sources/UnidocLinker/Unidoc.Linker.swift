@@ -29,15 +29,21 @@ extension Unidoc
 
         let current:Graph
 
+        /// The set of all nodes in the current graph. These are the nodes being linked; all
+        /// other nodes in this structure are merely used for context.
+        let nodes:Set<Unidoc.Scalar>
+
         private
         init(
             byPackageIdentifier:[Symbol.Package: Graph],
             byPackage:[Package: Graph],
-            current:Graph)
+            current:Graph,
+            nodes:Set<Unidoc.Scalar>)
         {
             self.byPackageIdentifier = byPackageIdentifier
             self.byPackage = byPackage
             self.current = current
+            self.nodes = nodes
 
             self.diagnostics = .init()
         }
@@ -47,7 +53,7 @@ extension Unidoc
 extension Unidoc.Linker
 {
     public
-    init(_ currentSnapshot:Unidoc.Snapshot, dependencies:borrowing [Unidoc.Snapshot])
+    init(_ currentSnapshot:consuming Unidoc.Snapshot, dependencies:borrowing [Unidoc.Snapshot])
     {
         //  Build a combined lookup table mapping upstream symbols to scalars.
         //  Because module names are unique within a build tree, there should
@@ -83,12 +89,19 @@ extension Unidoc.Linker
             byPackage[snapshot.id.package] = snapshot
         }
 
+        let current:Graph = .init(snapshot: currentSnapshot, upstream: upstream)
+
         self.init(
             byPackageIdentifier: byPackageIdentifier,
             byPackage: byPackage,
-            current: .init(
-                snapshot: currentSnapshot,
-                upstream: upstream))
+            current: current,
+            nodes: current.scalars.decls[current.decls.nodes.indices].reduce(into: [])
+            {
+                if  let s:Unidoc.Scalar = $1
+                {
+                    $0.insert(s)
+                }
+            })
     }
 }
 extension Unidoc.Linker
@@ -227,8 +240,7 @@ extension Unidoc.Linker
         {
             for (dependencies, cultures):([Symbol.Package: Set<String>], [Int]) in groups
             {
-                var shared:SymbolGraph.ModuleContext = .init(
-                    nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
+                var shared:SymbolGraph.ModuleContext = .init()
 
                 if  let swift:Graph = self[dynamic: .swift]
                 {
