@@ -3,11 +3,17 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
+{
+    @available(*, deprecated, renamed: "Unidoc.Linker.Graph")
+    @usableFromInline
+    typealias Snapshot = Graph
+}
+extension Unidoc.Linker
 {
     @dynamicMemberLookup
-    @usableFromInline internal final
-    class Snapshot
+    @usableFromInline final
+    class Graph
     {
         let id:Unidoc.Edition
         /// Maps declarations to module namespaces. For declarations nested inside types from
@@ -43,17 +49,17 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.Snapshot
+extension Unidoc.Linker.Graph
 {
     subscript<T>(dynamicMember keyPath:KeyPath<SymbolGraph, T>) -> T
     {
         self.graph[keyPath: keyPath]
     }
 }
-extension DynamicLinker.Snapshot
+extension Unidoc.Linker.Graph
 {
     convenience
-    init(snapshot:Unidoc.Snapshot, upstream:borrowing DynamicLinker.UpstreamScalars)
+    init(snapshot:Unidoc.Snapshot, upstream:borrowing Unidoc.Linker.UpstreamScalars)
     {
         let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
 
@@ -108,14 +114,14 @@ extension DynamicLinker.Snapshot
             graph: snapshot.graph)
     }
 }
-extension DynamicLinker.Snapshot
+extension Unidoc.Linker.Graph
 {
-    func priority(of decl:Unidoc.Scalar) -> DynamicLinker.SortPriority?
+    func priority(of decl:Unidoc.Scalar) -> Unidoc.Linker.SortPriority?
     {
         if  let local:Int32 = decl - self.id,
             let decl:SymbolGraph.Decl = self.decls[local]?.decl
         {
-            let phylum:DynamicLinker.SortPriority.Phylum = .init(decl.phylum,
+            let phylum:Unidoc.Linker.SortPriority.Phylum = .init(decl.phylum,
                 position: decl.location?.position)
             return decl.signature.availability.isGenerallyRecommended ?
                 .available(phylum, decl.path.last, local) :

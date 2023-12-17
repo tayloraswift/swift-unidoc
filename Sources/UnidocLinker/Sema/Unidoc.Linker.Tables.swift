@@ -6,14 +6,14 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct Tables:~Copyable
     {
         private
         let contexts:[SymbolGraph.ModuleContext]
         private(set)
-        var context:DynamicLinker
+        var context:Unidoc.Linker
 
         /// Protocol conformances for each declaration in the **current** snapshot.
         private
@@ -46,7 +46,7 @@ extension DynamicLinker
         private
         init(
             contexts:consuming [SymbolGraph.ModuleContext],
-            context:consuming DynamicLinker,
+            context:consuming Unidoc.Linker,
             conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>>,
             extensions:Extensions)
         {
@@ -69,13 +69,13 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.Tables
+extension Unidoc.Linker.Tables
 {
-    init(context:consuming DynamicLinker)
+    init(context:consuming Unidoc.Linker)
     {
         let modules:[SymbolGraph.ModuleContext] = context.modules()
 
-        var extensions:DynamicLinker.Extensions = .init(zone: context.current.id)
+        var extensions:Unidoc.Linker.Extensions = .init(zone: context.current.id)
 
         let conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>> =
             context.current.decls.nodes.map
@@ -93,9 +93,9 @@ extension DynamicLinker.Tables
             extensions: extensions)
     }
 }
-extension DynamicLinker.Tables
+extension Unidoc.Linker.Tables
 {
-    var current:DynamicLinker.Snapshot { self.context.current }
+    var current:Unidoc.Linker.Graph { self.context.current }
 
     private
     var modules:SymbolGraph.ModuleView
@@ -106,7 +106,7 @@ extension DynamicLinker.Tables
             edition: self.current.id)
     }
 }
-extension DynamicLinker.Tables
+extension Unidoc.Linker.Tables
 {
     private mutating
     func autogroup()
@@ -188,7 +188,7 @@ extension DynamicLinker.Tables
                         //  package.
                         for conformance:ProtocolConformance<Int> in conformances[to: p]
                         {
-                            let signature:DynamicLinker.ExtensionSignature = .init(
+                            let signature:Unidoc.Linker.ExtensionSignature = .init(
                                 conditions: conformance.conditions,
                                 culture: conformance.culture,
                                 extends: owner)
@@ -278,7 +278,7 @@ extension DynamicLinker.Tables
         }
     }
 }
-extension DynamicLinker.Tables
+extension Unidoc.Linker.Tables
 {
     private mutating
     func link(topics:[SymbolGraph.Topic],
@@ -313,7 +313,7 @@ extension DynamicLinker.Tables
         }
     }
 }
-extension DynamicLinker.Tables
+extension Unidoc.Linker.Tables
 {
     private mutating
     func link(culture:SymbolGraph.Culture,
@@ -417,7 +417,7 @@ extension DynamicLinker.Tables
 
             for s:Unidoc.Scalar in superforms
             {
-                let implicit:DynamicLinker.ExtensionSignature = .init(conditions: [],
+                let implicit:Unidoc.Linker.ExtensionSignature = .init(conditions: [],
                     culture: namespace.c,
                     extends: s)
 

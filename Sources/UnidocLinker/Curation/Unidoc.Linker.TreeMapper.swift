@@ -5,7 +5,7 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     struct TreeMapper:~Copyable
     {
@@ -35,7 +35,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker.TreeMapper
+extension Unidoc.Linker.TreeMapper
 {
     mutating
     func add(_ vertex:Unidoc.Vertex.Article)
@@ -63,14 +63,14 @@ extension DynamicLinker.TreeMapper
         }
     }
 }
-extension DynamicLinker.TreeMapper
+extension Unidoc.Linker.TreeMapper
 {
     mutating
     func register(foreign:Unidoc.Scalar,
-        with context:borrowing DynamicLinker) -> Unidoc.Vertex.Foreign
+        with context:borrowing Unidoc.Linker) -> Unidoc.Vertex.Foreign
     {
         guard
-        let snapshot:DynamicLinker.Snapshot = context[foreign.package]
+        let snapshot:Unidoc.Linker.Graph = context[foreign.package]
         else
         {
             fatalError("scalar \(foreign) is not from a package in this context!")
@@ -106,7 +106,7 @@ extension DynamicLinker.TreeMapper
         return vertex
     }
 }
-extension DynamicLinker.TreeMapper
+extension Unidoc.Linker.TreeMapper
 {
     mutating
     func update(with group:Unidoc.Group.Extension)
@@ -122,7 +122,7 @@ extension DynamicLinker.TreeMapper
         }
     }
 }
-extension DynamicLinker.TreeMapper
+extension Unidoc.Linker.TreeMapper
 {
     consuming
     func build(cultures:[Unidoc.Vertex.Culture]) -> (trees:[Unidoc.TypeTree], index:JSON)
@@ -137,7 +137,7 @@ extension DynamicLinker.TreeMapper
 
         let json:JSON = .array
         {
-            for (id, members):(Unidoc.Scalar, DynamicLinker.TreeMembers) in self.trees.sorted(
+            for (id, members):(Unidoc.Scalar, Unidoc.Linker.TreeMembers) in self.trees.sorted(
                 by: { $0.key < $1.key })
             {
                 guard

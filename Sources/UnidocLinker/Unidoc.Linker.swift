@@ -7,36 +7,44 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-@available(*, deprecated, renamed: "DynamicLinker")
+@available(*, deprecated, renamed: "Unidoc.Linker")
 public
-typealias DynamicContext = DynamicLinker
+typealias DynamicContext = Unidoc.Linker
 
-@frozen public
-struct DynamicLinker:~Copyable
+@available(*, deprecated, renamed: "Unidoc.Linker")
+public
+typealias DynamicLinker = Unidoc.Linker
+
+extension Unidoc
 {
-    var diagnostics:DiagnosticContext<DynamicSymbolicator>
-
-    private
-    let byPackageIdentifier:[Symbol.Package: Snapshot]
-    private
-    let byPackage:[Unidoc.Package: Snapshot]
-
-    let current:Snapshot
-
-    private
-    init(
-        byPackageIdentifier:[Symbol.Package: Snapshot],
-        byPackage:[Unidoc.Package: Snapshot],
-        current:Snapshot)
+    @frozen public
+    struct Linker:~Copyable
     {
-        self.byPackageIdentifier = byPackageIdentifier
-        self.byPackage = byPackage
-        self.current = current
+        var diagnostics:DiagnosticContext<Unidoc.Symbolicator>
 
-        self.diagnostics = .init()
+        private
+        let byPackageIdentifier:[Symbol.Package: Graph]
+        private
+        let byPackage:[Package: Graph]
+
+        let current:Graph
+
+        private
+        init(
+            byPackageIdentifier:[Symbol.Package: Graph],
+            byPackage:[Package: Graph],
+            current:Graph)
+        {
+            self.byPackageIdentifier = byPackageIdentifier
+            self.byPackage = byPackage
+            self.current = current
+
+            self.diagnostics = .init()
+        }
     }
 }
-extension DynamicLinker
+
+extension Unidoc.Linker
 {
     public
     init(_ currentSnapshot:Unidoc.Snapshot, dependencies:borrowing [Unidoc.Snapshot])
@@ -61,15 +69,15 @@ extension DynamicLinker
         }
 
         //  Build two indexes for fast lookup by package identifier and package number.
-        var byPackageIdentifier:[Symbol.Package: Snapshot] = .init(
+        var byPackageIdentifier:[Symbol.Package: Graph] = .init(
             minimumCapacity: dependencies.count)
 
-        var byPackage:[Unidoc.Package: Snapshot] = .init(
+        var byPackage:[Unidoc.Package: Graph] = .init(
             minimumCapacity: dependencies.count)
 
         for snapshot:Unidoc.Snapshot in copy dependencies
         {
-            let snapshot:Snapshot = .init(snapshot: snapshot, upstream: upstream)
+            let snapshot:Graph = .init(snapshot: snapshot, upstream: upstream)
 
             byPackageIdentifier[snapshot.metadata.package] = snapshot
             byPackage[snapshot.id.package] = snapshot
@@ -83,7 +91,7 @@ extension DynamicLinker
                 upstream: upstream))
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     public mutating
     func link() -> Mesh
@@ -110,33 +118,34 @@ extension DynamicLinker
     public consuming
     func status() -> some Diagnostics
     {
-        let diagnostics:DiagnosticContext<DynamicSymbolicator> = self.diagnostics
-        let symbols:DynamicSymbolicator = .init(context: self,
+        let diagnostics:DiagnosticContext<Unidoc.Symbolicator> = self.diagnostics
+        let symbols:Unidoc.Symbolicator = .init(context: self,
             root: self.current.metadata.root)
 
         return diagnostics.with(symbolicator: symbols)
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     private
-    subscript(dynamic package:Symbol.Package) -> Snapshot?
+    subscript(dynamic package:Symbol.Package) -> Graph?
     {
         self.current.metadata.package == package ?
         nil : self.byPackageIdentifier[package]
     }
-    subscript(package:Symbol.Package) -> Snapshot?
+    private
+    subscript(package:Symbol.Package) -> Graph?
     {
         self.current.metadata.package == package ?
         self.current : self.byPackageIdentifier[package]
     }
-    subscript(package:Unidoc.Package) -> Snapshot?
+    subscript(package:Unidoc.Package) -> Graph?
     {
         self.current.id.package == package ?
         self.current : self.byPackage[package]
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:Int) -> [Unidoc.Scalar]
     {
@@ -167,7 +176,7 @@ extension DynamicLinker
         return path.reversed()
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     public
     func dependencies() -> [Unidoc.VolumeMetadata.Dependency]
@@ -176,7 +185,7 @@ extension DynamicLinker
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package != .swift,
-            let swift:Snapshot = self[.swift]
+            let swift:Graph = self[.swift]
         {
             dependencies.append(.init(symbol: .swift,
                 requirement: nil,
@@ -204,8 +213,6 @@ extension DynamicLinker
             self.current.cultures.indices,
             self.current.cultures)
         {
-            print("\(culture.module.id): \(culture.module.dependencies)")
-
             //  This dictionary is a dictionary key itself! Be not afraid.
             var products:[Symbol.Package: Set<String>] = [:]
             for product:Symbol.Product in culture.module.dependencies.products
@@ -223,7 +230,7 @@ extension DynamicLinker
                 var shared:SymbolGraph.ModuleContext = .init(
                     nodes: self.current.scalars.decls[self.current.decls.nodes.indices])
 
-                if  let swift:Snapshot = self[dynamic: .swift]
+                if  let swift:Graph = self[dynamic: .swift]
                 {
                     shared.add(snapshot: swift, context: self, filter: nil)
                 }
@@ -231,7 +238,7 @@ extension DynamicLinker
                     dependencies.sorted(by: { $0.key < $1.key })
                 {
                     guard
-                    let snapshot:Snapshot = self[dynamic: package]
+                    let snapshot:Graph = self[dynamic: package]
                     else
                     {
                         continue
@@ -257,7 +264,7 @@ extension DynamicLinker
         }
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     mutating
     func simplify(conformances:inout [ProtocolConformance<Int>],
@@ -334,7 +341,7 @@ extension DynamicLinker
 
                 case .where(let parameter, is: let what, to: let type):
                     if  case .nominal(let type?) = type,
-                        let snapshot:Snapshot = self[type.package],
+                        let snapshot:Graph = self[type.package],
                         let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
                     {
                         for local:Int32 in local
@@ -401,9 +408,9 @@ extension DynamicLinker
         namespace:Symbol.Module,
         module:SymbolGraph.ModuleContext,
         scope:[String] = [],
-        with yield:(inout DynamicResolver) throws -> Success) rethrows -> Success
+        with yield:(inout Unidoc.Resolver) throws -> Success) rethrows -> Success
     {
-        var resolver:DynamicResolver = .init(
+        var resolver:Unidoc.Resolver = .init(
             codelinks: .init(table: module.codelinks, scope: .init(
                 namespace: namespace,
                 imports: module.imports,
@@ -424,7 +431,7 @@ extension DynamicLinker
     }
 }
 
-extension DynamicLinker
+extension Unidoc.Linker
 {
     func assemble(extension:Extension, signature:ExtensionSignature) -> Unidoc.Group.Extension
     {
@@ -444,7 +451,7 @@ extension DynamicLinker
             details: `extension`.details)
     }
 }
-extension DynamicLinker
+extension Unidoc.Linker
 {
     /// Get the sort-priority of a declaration.
     func priority(of decl:Unidoc.Scalar) -> SortPriority?

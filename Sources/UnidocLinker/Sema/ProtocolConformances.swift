@@ -53,14 +53,14 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
 extension ProtocolConformances<Int>
 {
     init(of subject:Unidoc.Scalar,
-        signatures:borrowing [DynamicLinker.ExtensionSignature],
+        signatures:borrowing [Unidoc.Linker.ExtensionSignature],
         extensions:borrowing [SymbolGraph.Extension],
         modules:borrowing [SymbolGraph.ModuleContext],
-        context:inout DynamicLinker)
+        context:inout Unidoc.Linker)
     {
         self = [:]
 
-        for (`extension`, signature):(SymbolGraph.Extension, DynamicLinker.ExtensionSignature)
+        for (`extension`, signature):(SymbolGraph.Extension, Unidoc.Linker.ExtensionSignature)
             in zip(extensions, signatures)
         {
             let module:SymbolGraph.ModuleContext = modules[`extension`.culture]
