@@ -52,7 +52,7 @@ extension Swiftinit.Docs.Decl
 }
 extension Swiftinit.Docs.Decl:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.stem.last) - \(self.volume.title) Documentation" }
+    var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
     var description:String?
     {

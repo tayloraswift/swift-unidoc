@@ -43,7 +43,7 @@ extension Swiftinit.Docs.Module
 }
 extension Swiftinit.Docs.Module:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.name) - \(self.volume.title) Documentation" }
+    var title:String { "\(self.name) · \(self.volume.title) Documentation" }
 
     var description:String?
     {

@@ -7,7 +7,7 @@ import UnidocRecords
 
 extension Unidoc.PackageQuery.Output:HTTP.ServerResponseFactory
 {
-    public
+    public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         switch format.accept

@@ -6,7 +6,7 @@ import URI
 
 extension SearchIndexQuery.Output:HTTP.ServerResponseFactory
 {
-    public
+    public borrowing
     func response(as _:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         let content:HTTP.Resource.Content
