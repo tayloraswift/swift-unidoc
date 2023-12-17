@@ -44,7 +44,7 @@ extension Swiftinit.Docs.MultipleFound
 }
 extension Swiftinit.Docs.MultipleFound:Swiftinit.RenderablePage
 {
-    var title:String { "Disambiguation Page - \(self.volume.title) Documentation" }
+    var title:String { "Disambiguation Page · \(self.volume.title) Documentation" }
 }
 extension Swiftinit.Docs.MultipleFound:Swiftinit.StaticPage
 {

@@ -189,6 +189,16 @@ extension Swiftinit.AnyEndpoint
     }
 
     static
+    func get(realm trunk:String,
+        with parameters:Swiftinit.PipelineParameters) -> Self
+    {
+        .interactive(Swiftinit.PipelineEndpoint<Unidoc.RealmQuery>.init(
+            output: parameters.explain ? nil : .text(.html),
+            query: .init(realm: trunk, user: parameters.user),
+            tag: parameters.tag))
+    }
+
+    static
     func get(stats trunk:String,
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self

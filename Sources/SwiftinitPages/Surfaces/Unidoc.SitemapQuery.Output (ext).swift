@@ -12,7 +12,7 @@ extension Unidoc.SitemapQuery.Output:HTTP.ServerResponseFactory
     /// We don’t have granular enough `<lastmod>` information to motivate generating XML
     /// sitemaps, and all other XML sitemap features (like `<priority>`) are irrelevant to us,
     /// since Google ignores them. Therefore, we use the plain text format.
-    public
+    public borrowing
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         let prefix:String = "https://swiftinit.org/\(Swiftinit.Docs.root)/\(self.package)"

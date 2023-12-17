@@ -19,7 +19,7 @@ extension Swiftinit.Docs
 }
 extension Swiftinit.Docs.NotFound:Swiftinit.RenderablePage, Swiftinit.DynamicPage
 {
-    var title:String { "Symbol Not Found - \(self.volume.title) Documentation" }
+    var title:String { "Symbol Not Found · \(self.volume.title) Documentation" }
 }
 extension Swiftinit.Docs.NotFound:Swiftinit.ApplicationPage
 {

@@ -201,6 +201,10 @@ extension Swiftinit.IntegralRequest
                 /\(Swiftinit.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols
                 """)
 
+        case Swiftinit.Realm.root:
+            endpoint = .get(realm: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
+
         case Swiftinit.Stats.root:
             endpoint = .get(stats: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))

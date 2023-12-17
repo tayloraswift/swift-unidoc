@@ -45,7 +45,7 @@ extension Swiftinit.Docs.Foreign
 }
 extension Swiftinit.Docs.Foreign:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.stem.last) (ext) - \(self.volume.title) Documentation" }
+    var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
 
     var description:String?
     {

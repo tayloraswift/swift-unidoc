@@ -41,7 +41,7 @@ extension Swiftinit.Docs.Article
 }
 extension Swiftinit.Docs.Article:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.vertex.headline.safe) - \(self.volume.title) Documentation" }
+    var title:String { "\(self.vertex.headline.safe) · \(self.volume.title) Documentation" }
 
     var description:String?
     {

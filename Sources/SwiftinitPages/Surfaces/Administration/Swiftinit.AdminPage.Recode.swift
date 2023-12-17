@@ -25,7 +25,7 @@ extension Swiftinit.AdminPage.Recode
 extension Swiftinit.AdminPage.Recode:Swiftinit.RenderablePage
 {
     public
-    var title:String { "Schema - Administrator Tools" }
+    var title:String { "Schema · Administrator Tools" }
 }
 extension Swiftinit.AdminPage.Recode:Swiftinit.StaticPage
 {
