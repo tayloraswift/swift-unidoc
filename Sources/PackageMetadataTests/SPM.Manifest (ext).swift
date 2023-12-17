@@ -1,7 +1,7 @@
 import JSON
 import PackageMetadata
 
-extension PackageManifest
+extension SPM.Manifest
 {
     init(parsing json:String) throws
     {

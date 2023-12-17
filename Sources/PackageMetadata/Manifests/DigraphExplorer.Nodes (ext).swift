@@ -5,7 +5,7 @@ extension DigraphExplorer<TargetNode>.Nodes
 {
     /// Returns *all* targets in the index that are included, directly or indirectly,
     /// by the given product.
-    func included(by product:PackageManifest.Product,
+    func included(by product:SPM.Manifest.Product,
         on platform:SymbolGraphMetadata.Platform) throws -> Set<String>
     {
         var explorer:DigraphExplorer<TargetNode> = .init(nodes: self)
@@ -26,12 +26,12 @@ extension DigraphExplorer<TargetNode>.Nodes
     /// by at least one of the given products. The targets are canonically ordered by
     /// their internal dependency relationships; targets that appear later in the list
     /// depend only on targets that appear before them in the list.
-    func included(by products:[PackageManifest.Product],
+    func included(by products:[SPM.Manifest.Product],
         on platform:SymbolGraphMetadata.Platform) throws -> [TargetNode]
     {
         var explorer:DigraphExplorer<TargetNode> = .init(nodes: self)
 
-        for product:PackageManifest.Product in products
+        for product:SPM.Manifest.Product in products
         {
             for name:String in product.targets
             {

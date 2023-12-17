@@ -1,7 +1,7 @@
 import JSON
 import SymbolGraphs
 
-extension PackageManifest
+extension SPM.Manifest
 {
     @frozen public
     struct Product:Equatable, Sendable
@@ -22,7 +22,7 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.Product:JSONObjectDecodable
+extension SPM.Manifest.Product:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

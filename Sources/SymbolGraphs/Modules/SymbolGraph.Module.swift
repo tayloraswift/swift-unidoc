@@ -17,7 +17,7 @@ extension SymbolGraph
         /// The language of the module. This doesn’t necessarily match the languages of all the
         /// individual symbols in the module.
         ///
-        /// New in 8.8; absent in 8.7 or earlier.
+        /// New in 0.8.8; absent in 0.8.7 or earlier.
         ///
         /// This field is nil if the symbol graph was not generated from a swift package.
         public

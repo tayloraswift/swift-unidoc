@@ -87,7 +87,7 @@ extension Toolchain
         let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
 
         guard   i < j,
-                case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
+        case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
         else
         {
             throw ToolchainError.malformedSplash
@@ -184,14 +184,14 @@ extension Toolchain
     func generateDocs(for build:PackageBuild,
         pretty:Bool = false) async throws -> SymbolGraphArchive
     {
-        let manifest:PackageManifest = try await .dump(from: build)
+        let manifest:SPM.Manifest = try await .dump(from: build)
 
         print("""
             Building package: '\(build.id.package)' \
             (swift-tools-version: \(manifest.format))
             """)
 
-        //  Don’t parrot the `swift build` output to the terminal
+        //  Don’t parrot the `swift package resolve` output to the terminal
         let resolutionLog:FilePath = build.output.path / "resolution.log"
         try await resolutionLog.open(.writeOnly,
             permissions: (.rw, .r, .r),
@@ -223,10 +223,10 @@ extension Toolchain
                 stdout: $0)()
         }
 
-        let pins:[PackageManifest.DependencyPin]
+        let pins:[SPM.DependencyPin]
         do
         {
-            let resolutions:PackageManifest.DependencyResolutions = try .init(
+            let resolutions:SPM.DependencyResolutions = try .init(
                 parsing: try (build.root / "Package.resolved").read())
             pins = resolutions.pins
         }
@@ -236,34 +236,35 @@ extension Toolchain
         }
 
         let platform:SymbolGraphMetadata.Platform = try self.platform()
-        let sink:PackageNode = try .libraries(as: build.id.package,
-            flattening: manifest,
-            platform: platform)
 
         var dependencies:[PackageNode] = []
         var include:[FilePath] =
         [
             .init(manifest.root.path) / ".build" / "\(build.configuration)"
         ]
-        for pin:PackageManifest.DependencyPin in pins
+        for pin:SPM.DependencyPin in pins
         {
             let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.location.name)"
 
-            let manifest:PackageManifest = try await .dump(from: .init(id: .upstream(pin),
+            let manifest:SPM.Manifest = try await .dump(from: .init(id: .upstream(pin),
                 output: build.output,
                 root: checkout))
 
-            let upstream:PackageNode = try .libraries(as: pin.id,
-                flattening: manifest,
-                platform: platform)
-            let sources:PackageBuild.Sources = try .init(scanning: upstream)
+            let dependency:PackageNode = try .all(flattening: manifest,
+                on: platform,
+                as: pin.id)
 
-            sources.yield(include: &include)
-            dependencies.append(upstream)
+            let sources:PackageBuild.Sources = try .init(scanning: dependency)
+                sources.yield(include: &include)
+
+            dependencies.append(dependency)
         }
 
-        let package:PackageNode = try sink.flattened(dependencies: dependencies)
-        let artifacts:Artifacts = try await .dump(from: package,
+        let sinkNode:PackageNode = try .all(flattening: manifest,
+            on: platform,
+            as: build.id.package)
+        let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
+        let artifacts:Artifacts = try await .dump(from: flatNode,
             include: &include,
             output: build.output,
             triple: self.triple,
@@ -279,13 +280,28 @@ extension Toolchain
             commit = nil
         }
 
+        let dependenciesPinned:[SymbolGraphMetadata.Dependency] = try flatNode.pin(to: pins)
+        let dependenciesUsed:Set<Symbol.Package> = flatNode.products.reduce(into: [])
+        {
+            guard
+            case .library = $1.type
+            else
+            {
+                return
+            }
+            for dependency:Symbol.Product in $1.dependencies
+            {
+                $0.insert(dependency.package)
+            }
+        }
+
         let metadata:SymbolGraphMetadata = .init(package: build.id.package,
             commit: commit,
             triple: self.triple,
             swift: self.version,
             requirements: manifest.requirements,
-            dependencies: try package.pinnedDependencies(using: pins),
-            products: package.products,
+            dependencies: dependenciesPinned.filter { dependenciesUsed.contains($0.package) },
+            products: flatNode.products,
             display: manifest.name,
             root: manifest.root)
 

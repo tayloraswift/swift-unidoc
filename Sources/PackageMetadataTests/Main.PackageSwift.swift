@@ -60,7 +60,7 @@ extension Main.PackageSwift:TestBattery
             """
             tests.do
             {
-                let expected:PackageManifest = .init(name: "swift-unidoc",
+                let expected:SPM.Manifest = .init(name: "swift-unidoc",
                     root: "/swift/swift-unidoc",
                     requirements:
                     [
@@ -199,7 +199,7 @@ extension Main.PackageSwift:TestBattery
             """
             tests.do
             {
-                let expected:PackageManifest = .init(name: "swift-unidoc",
+                let expected:SPM.Manifest = .init(name: "swift-unidoc",
                     root: "/swift/swift-unidoc",
                     dependencies:
                     [
@@ -407,7 +407,7 @@ extension Main.PackageSwift:TestBattery
             tests.do
             {
                 let filepath:FilePath = "TestModules/Package.swift.json"
-                let manifest:PackageManifest = try .init(parsing: try filepath.read())
+                let manifest:SPM.Manifest = try .init(parsing: try filepath.read())
 
                 tests.expect(manifest.name ==? "swift-unidoc-testmodules")
                 tests.expect(manifest.root ==? "/swift/swift-unidoc/TestModules")

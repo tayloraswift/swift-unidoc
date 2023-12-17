@@ -66,7 +66,18 @@ extension Artifacts
     {
         for sources:PackageBuild.Sources.Module in modules
         {
-            include += sources.include
+            //  Only dump symbols for library targets.
+            switch sources.module.type
+            {
+            case .binary:       continue
+            case .executable:   continue
+            case .regular:      include += sources.include
+            case .macro:        include += sources.include
+            case .plugin:       continue
+            case .snippet:      continue
+            case .system:       continue
+            case .test:         continue
+            }
 
             let label:String = """
             \(sources.module.language?.description ?? "?") module, \(sources.module.type)

@@ -1,6 +1,6 @@
 import Symbols
 
-extension PackageManifest
+extension SPM
 {
     /// An index of identifiable digraph nodes.
     @frozen public
@@ -16,34 +16,34 @@ extension PackageManifest
         }
     }
 }
-extension PackageManifest.DependencyPins
+extension SPM.DependencyPins
 {
     public
-    init(indexing pins:[PackageManifest.DependencyPin]) throws
+    init(indexing pins:[SPM.DependencyPin]) throws
     {
         self.init()
 
-        for pin:PackageManifest.DependencyPin in pins
+        for pin:SPM.DependencyPin in pins
         {
             if  case _? = self.index.updateValue(pin, forKey: pin.id)
             {
-                throw PackageManifest.DependencyPinError.duplicate(pin.id)
+                throw SPM.DependencyPinError.duplicate(pin.id)
             }
         }
     }
 }
-extension PackageManifest.DependencyPins
+extension SPM.DependencyPins
 {
     @inlinable public
-    func callAsFunction(_ id:Symbol.Package) throws -> PackageManifest.DependencyPin
+    func callAsFunction(_ id:Symbol.Package) throws -> SPM.DependencyPin
     {
-        if  let pin:PackageManifest.DependencyPin = self.index[id]
+        if  let pin:SPM.DependencyPin = self.index[id]
         {
             return pin
         }
         else
         {
-            throw PackageManifest.DependencyPinError.undefined(id)
+            throw SPM.DependencyPinError.undefined(id)
         }
     }
 }

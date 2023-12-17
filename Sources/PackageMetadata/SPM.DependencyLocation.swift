@@ -1,6 +1,6 @@
 import Symbols
 
-extension PackageManifest
+extension SPM
 {
     @frozen public
     enum DependencyLocation:Hashable, Equatable, Sendable
@@ -11,7 +11,7 @@ extension PackageManifest
         case remote(url:String)
     }
 }
-extension PackageManifest.DependencyLocation
+extension SPM.DependencyLocation
 {
     @inlinable public
     init(location:String)
@@ -21,7 +21,7 @@ extension PackageManifest.DependencyLocation
             .remote(url: location)
     }
 }
-extension PackageManifest.DependencyLocation
+extension SPM.DependencyLocation
 {
     /// Returns the exact name of the repository, which is the last path component without the
     /// extension.
