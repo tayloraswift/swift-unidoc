@@ -1,6 +1,7 @@
 import HTML
 import MarkdownABI
 import MarkdownRendering
+import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
@@ -63,6 +64,13 @@ extension ProseSection:HyperTextRenderableMarkdown
             html[.code] = text
 
         case .path(let stem, let scalars):
+            if  let scalar:Unidoc.Scalar = scalars.first,
+                SymbolGraph.Plane.article.contains(scalar.citizen)
+            {
+                html ?= self.context.link(article: scalar)
+                return
+            }
+
             //  Take the suffix of the stem, because it may include a module namespace,
             //  and we never render the module namespace, even if it was written in the
             //  codelink text.

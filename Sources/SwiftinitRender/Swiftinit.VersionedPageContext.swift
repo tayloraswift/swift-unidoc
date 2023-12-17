@@ -1,4 +1,7 @@
 import HTML
+import MarkdownABI
+import MarkdownRendering
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -11,6 +14,10 @@ extension Swiftinit
 public
 protocol _SwiftinitVersionedPageContext:AnyObject
 {
+    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+
+    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
+
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>
         where Vector:Sequence<Unidoc.Scalar>

@@ -385,7 +385,6 @@ let package:Package = .init(
         .target(name: "SwiftinitPages", dependencies:
             [
                 .target(name: "GitHubAPI"),
-                .target(name: "MarkdownRendering"),
                 .target(name: "SwiftinitRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocProfiling"),
@@ -396,6 +395,7 @@ let package:Package = .init(
             [
                 .target(name: "HTTP"),
                 .target(name: "HTML"),
+                .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "Swiftinit"),
                 .target(name: "UnidocRecords"),

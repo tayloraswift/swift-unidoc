@@ -1,6 +1,7 @@
 import HTML
 import LexicalPaths
 import MarkdownABI
+import MarkdownRendering
 import Signatures
 import SwiftinitRender
 import Symbols
@@ -154,13 +155,6 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 
     var domain:Unidoc.VolumeMetadata.Domain { .init(self.volume) }
 
-    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
-    {
-        self.cache[culture: module].map
-        {
-            .init(display: $0.module.id, target: $1)
-        }
-    }
     func link(decl:Unidoc.Scalar) -> HTML.Link<String>?
     {
         self.cache[decl: decl].map
@@ -190,6 +184,23 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
 extension IdentifiablePageContext:Swiftinit.VersionedPageContext
     where ID:VersionedPageIdentifier
 {
+    @usableFromInline internal
+    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+    {
+        self.cache[article: article].map
+        {
+            .init(display: $0.headline.safe, target: $1)
+        }
+    }
+    @usableFromInline internal
+    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
+    {
+        self.cache[culture: module].map
+        {
+            .init(display: $0.module.id, target: $1)
+        }
+    }
+
     @usableFromInline internal
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>
