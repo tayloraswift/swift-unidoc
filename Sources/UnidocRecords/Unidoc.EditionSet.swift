@@ -51,7 +51,7 @@ extension Unidoc.EditionSet
     {
         for scalar:Unidoc.Scalar in scalars
         {
-            self.update(with: scalar.zone)
+            self.update(with: scalar.edition)
         }
     }
     mutating
@@ -59,7 +59,7 @@ extension Unidoc.EditionSet
     {
         for scalar:Unidoc.Scalar? in scalars
         {
-            self.update(with: scalar?.zone)
+            self.update(with: scalar?.edition)
         }
     }
     mutating
@@ -67,7 +67,7 @@ extension Unidoc.EditionSet
     {
         for constraint:GenericConstraint<Unidoc.Scalar?> in constraints
         {
-            self.update(with: constraint.whom.nominal??.zone)
+            self.update(with: constraint.whom.nominal??.edition)
         }
     }
     mutating

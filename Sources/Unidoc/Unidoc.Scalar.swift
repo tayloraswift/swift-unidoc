@@ -21,8 +21,12 @@ extension Unidoc
 }
 extension Unidoc.Scalar
 {
+    @available(*, deprecated, renamed: "edition")
     @inlinable public
-    var zone:Unidoc.Edition { .init(package: self.package, version: self.version) }
+    var zone:Unidoc.Edition { self.edition }
+
+    @inlinable public
+    var edition:Unidoc.Edition { .init(package: self.package, version: self.version) }
 }
 extension Unidoc.Scalar:CustomStringConvertible
 {

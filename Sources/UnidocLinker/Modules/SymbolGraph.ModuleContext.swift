@@ -57,7 +57,7 @@ extension SymbolGraph.ModuleContext
 
             self.imports.append(module)
 
-            if  let c:Unidoc.Scalar = snapshot.scalars.namespaces[c]
+            if  let c:Unidoc.Scalar = snapshot.scalars.modules[c]
             {
                 self.codelinks[module].overload(with: .init(
                     target: .scalar(c),

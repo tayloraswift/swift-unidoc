@@ -5,32 +5,42 @@ import UnidocAPI
 
 extension Unidoc.Stem
 {
-    @inlinable internal
-    init(_ namespace:Symbol.Module)
+    @inlinable internal static
+    func product(_ name:String) -> Self
     {
-        self.init(rawValue: "\(namespace)")
+        "\(name)-product"
     }
-    @inlinable public
-    init(_ namespace:Symbol.Module, _ name:Substring)
+
+    @inlinable internal static
+    func module(_ namespace:Symbol.Module) -> Self
     {
-        self.init(rawValue: "\(namespace) \(name)")
+        "\(namespace)"
     }
-    public
-    init(
-        _ namespace:borrowing Symbol.Module,
-        _ path:borrowing UnqualifiedPath,
-        orientation:Phylum.Decl.Orientation)
+
+    @inlinable public static
+    func article(_ namespace:Symbol.Module, _ name:Substring) -> Self
     {
-        self.init(rawValue: "\(namespace)")
+        "\(namespace) \(name)"
+    }
+
+    public static
+    func decl(
+        _ namespace:Symbol.Module,
+        _ path:UnqualifiedPath,
+        orientation:Phylum.Decl.Orientation) -> Self
+    {
+        var stem:Self = "\(namespace)"
         for component:String in path.prefix
         {
-            self.append(straight: component)
+            stem.append(straight: component)
         }
         switch orientation
         {
-        case .straight: self.append(straight: path.last)
-        case .gay:      self.append(gay: path.last)
+        case .straight: stem.append(straight: path.last)
+        case .gay:      stem.append(gay: path.last)
         }
+
+        return stem
     }
 }
 extension Unidoc.Stem:BSONDecodable, BSONEncodable

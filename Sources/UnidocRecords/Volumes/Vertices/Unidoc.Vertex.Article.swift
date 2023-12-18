@@ -25,7 +25,7 @@ extension Unidoc.Vertex
         public
         var details:Unidoc.Passage?
         public
-        var group:Unidoc.Scalar?
+        var group:Unidoc.Group.ID?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -35,7 +35,7 @@ extension Unidoc.Vertex
             headline:MarkdownBytecode = [],
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            group:Unidoc.Scalar? = nil)
+            group:Unidoc.Group.ID? = nil)
         {
             self.id = id
             self.stem = stem

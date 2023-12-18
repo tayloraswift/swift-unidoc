@@ -37,6 +37,9 @@ extension Swiftinit.Stats:Swiftinit.VolumeRoot
         case .foreign:
             throw Unidoc.VertexTypeError.foreign
 
+        case .product:
+            throw Unidoc.VertexTypeError.product
+
         case .global(let vertex):
             let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.page.volume)
             let page:Package = .init(context.page,

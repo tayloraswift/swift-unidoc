@@ -2,7 +2,7 @@ import BSON
 
 extension SymbolGraph
 {
-    /// A type that can serialize an array of ``SymbolGraph.Plane.Decl`` scalars
+    /// A type that can serialize an array of ``SymbolGraph.DeclPlane`` scalars
     /// much more compactly than a native BSON list.
     ///
     /// Empirically, this type reduces symbol graph archive size by around

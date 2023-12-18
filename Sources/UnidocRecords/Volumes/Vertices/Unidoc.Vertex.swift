@@ -17,6 +17,7 @@ extension Unidoc
         case culture(Culture)
         case decl(Decl)
         case file(File)
+        case product(Product)
         case foreign(Foreign)
         case global(Global)
     }
@@ -60,6 +61,15 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
+    var product:Product?
+    {
+        switch self
+        {
+        case .product(let product): product
+        case _:                     nil
+        }
+    }
+    @inlinable public
     var foreign:Foreign?
     {
         switch self
@@ -89,6 +99,7 @@ extension Unidoc.Vertex:Identifiable
         case .culture(let culture): culture.id
         case .decl(let decl):       decl.id
         case .file(let file):       file.id
+        case .product(let product): product.id
         case .foreign(let foreign): foreign.id
         case .global(let global):   global.id
         }
@@ -105,6 +116,7 @@ extension Unidoc.Vertex
         case .culture(let culture): culture.overview
         case .decl(let decl):       decl.overview
         case .file:                 nil
+        case .product:              nil
         case .foreign:              nil
         case .global:               nil
         }
@@ -118,6 +130,7 @@ extension Unidoc.Vertex
         case .culture(let culture): culture.details
         case .decl(let decl):       decl.details
         case .file:                 nil
+        case .product:              nil
         case .foreign:              nil
         case .global:               nil
         }
@@ -131,6 +144,7 @@ extension Unidoc.Vertex
         case .culture(let culture): culture.shoot
         case .decl(let decl):       decl.shoot
         case .file:                 nil
+        case .product(let product): product.shoot
         case .foreign(let foreign): foreign.shoot
         case .global:               nil
         }
@@ -168,6 +182,9 @@ extension Unidoc.Vertex
         /// Only appears in ``Culture``.
         case module = "M"
 
+        /// Only appears in ``Product``.
+        case product = "D"
+
         /// Appears in ``Decl`` and ``Foreign``.
         case flags = "F"
         /// Only appears in ``Decl``.
@@ -185,7 +202,7 @@ extension Unidoc.Vertex
         case signature_generics_parameters = "G"
         /// Only appears in ``Decl``.
         case signature_spis = "I"
-        /// Only appears in ``Decl``. The field contains a list of scalars.
+        /// Only appears in ``Decl`` or ``Product``. The field contains a list of scalars.
         case requirements = "r"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case superforms = "p"
@@ -235,7 +252,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.zone] = self.id.zone
+        bson[.zone] = self.id.edition
 
         switch self
         {
@@ -299,7 +316,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
         case .culture(let self):
             //  Save this because it is computed by mangling a target name.
             let module:Symbol.Module = self.module.id
-            //  This allows us to correlate modules identifiers across different versions.
+            //  This allows us to correlate module identifiers across different versions.
             bson[.symbol] = module
             bson[.hash] = FNV24.Extended.init(hashing: "s:m:\(module)")
             bson[.stem] = self.stem
@@ -314,6 +331,17 @@ extension Unidoc.Vertex:BSONDocumentEncodable
 
         case .file(let self):
             bson[.symbol] = self.symbol
+
+        case .product(let self):
+            bson[.symbol] = self.symbol
+            //  Product names often shadow module names, so we perturb the hash input to ward
+            //  off hash collisions.
+            bson[.hash] = FNV24.Extended.init(hashing: "s:p:\(self.symbol)")
+            bson[.stem] = self.stem
+            //  It would be incredibly strange for a product to have no requirements.
+            bson[.requirements] = self.requirements
+            bson[.product] = self.type
+            bson[.group] = self.group
 
         case .foreign(let self):
             bson[.extendee] = self.extendee
@@ -392,6 +420,13 @@ extension Unidoc.Vertex:BSONDocumentDecodable
 
         case .file?:
             self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
+
+        case .product?:
+            self = .product(.init(id: id,
+                requirements: try bson[.requirements].decode(),
+                symbol: try bson[.symbol].decode(),
+                type: try bson[.product].decode(),
+                group: try bson[.group]?.decode()))
 
         case .foreign?:
             self = .foreign(.init(id: id,
