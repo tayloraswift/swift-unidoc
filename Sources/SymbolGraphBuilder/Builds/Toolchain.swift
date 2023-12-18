@@ -301,7 +301,7 @@ extension Toolchain
             swift: self.version,
             requirements: manifest.requirements,
             dependencies: dependenciesPinned.filter { dependenciesUsed.contains($0.package) },
-            products: flatNode.products,
+            products: .init(viewing: flatNode.products),
             display: manifest.name,
             root: manifest.root)
 

@@ -73,6 +73,6 @@ extension SymbolGraph.Layer
                 try link(self.symbols[index]))
         }
 
-        return .init(storage: .init(elements: elements))
+        return .init(viewing: elements)
     }
 }

@@ -19,14 +19,14 @@ struct SymbolGraph:Equatable, Sendable
     var decls:Layer<DeclNode>
 
     public
-    var files:Table<SymbolGraph.Plane.File, Symbol.File>
+    var files:Table<FilePlane, Symbol.File>
 
     @inlinable internal
     init(namespaces:[Symbol.Module],
         cultures:[Culture],
         articles:Layer<ArticleNode> = .init(),
         decls:Layer<DeclNode> = .init(),
-        files:Table<SymbolGraph.Plane.File, Symbol.File> = [])
+        files:Table<FilePlane, Symbol.File> = [])
     {
         self.namespaces = namespaces
         self.cultures = cultures

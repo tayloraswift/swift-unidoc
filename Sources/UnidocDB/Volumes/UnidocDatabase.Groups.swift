@@ -76,7 +76,7 @@ extension UnidocDatabase.Groups
             }
                 documents:
             {
-                $0 += groups.autogroups.lazy.map(Unidoc.Group.automatic(_:))
+                $0 += groups.polygons.lazy.map(Unidoc.Group.polygon(_:))
                 $0 += groups.topics.lazy.map(Unidoc.Group.topic(_:))
 
                 guard

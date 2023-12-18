@@ -7,7 +7,7 @@ extension Unidoc.Group
     struct Extension:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Scalar
+        let id:Unidoc.Group.ID
 
         public
         let conditions:[GenericConstraint<Unidoc.Scalar?>]
@@ -38,7 +38,7 @@ extension Unidoc.Group
         var details:Unidoc.Passage?
 
         @inlinable public
-        init(id:Unidoc.Scalar,
+        init(id:Unidoc.Group.ID,
             conditions:[GenericConstraint<Unidoc.Scalar?>],
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,

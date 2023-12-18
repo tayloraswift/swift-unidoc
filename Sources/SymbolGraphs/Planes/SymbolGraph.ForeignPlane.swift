@@ -1,7 +1,7 @@
-extension SymbolGraph.Plane
+extension SymbolGraph
 {
     @frozen public
-    enum Foreign:SymbolGraph.PlaneType
+    enum ForeignPlane:SymbolGraph.PlaneType
     {
         @inlinable public static
         var plane:SymbolGraph.Plane { .foreign }

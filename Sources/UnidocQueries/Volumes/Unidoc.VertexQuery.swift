@@ -250,7 +250,8 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                             .abi
                         ]
                         {
-                            $0[Unidoc.PrincipalOutput[volume] / Unidoc.VolumeMetadata[key]] = true
+                            $0[Unidoc.PrincipalOutput[volume] / Unidoc.VolumeMetadata[key]] =
+                                true
                         }
                     }
                 }

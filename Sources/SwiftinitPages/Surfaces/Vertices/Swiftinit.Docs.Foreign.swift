@@ -65,7 +65,7 @@ extension Swiftinit.Docs.Foreign:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Docs.Foreign:Swiftinit.VersionedPage
 {
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
+    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -84,7 +84,7 @@ extension Swiftinit.Docs.Foreign:Swiftinit.VersionedPage
         }
 
         let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.zone]
+        if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.edition]
         {
             main[.section, { $0.class = "notice extendee" }]
             {
