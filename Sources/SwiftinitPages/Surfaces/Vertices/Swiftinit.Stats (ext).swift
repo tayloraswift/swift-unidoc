@@ -22,7 +22,7 @@ extension Swiftinit.Stats:Swiftinit.VolumeRoot
 
         case .culture(let vertex):
             let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.page.volume)
-            let page:Module = .init(context.page,
+            let page:ModulePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)
@@ -42,7 +42,7 @@ extension Swiftinit.Stats:Swiftinit.VolumeRoot
 
         case .global(let vertex):
             let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.page.volume)
-            let page:Package = .init(context.page,
+            let page:PackagePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)

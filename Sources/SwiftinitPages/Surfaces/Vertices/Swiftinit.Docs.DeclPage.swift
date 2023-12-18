@@ -11,7 +11,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct Decl
+    struct DeclPage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -42,15 +42,15 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.Decl
+extension Swiftinit.Docs.DeclPage
 {
     private
-    var demonym:Phylum.Decl.Demonym<Language.EN>
+    var demonym:Swiftinit.DeclDemonym
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Swiftinit.Docs.Decl:Swiftinit.RenderablePage
+extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
@@ -74,15 +74,15 @@ extension Swiftinit.Docs.Decl:Swiftinit.RenderablePage
         }
     }
 }
-extension Swiftinit.Docs.Decl:Swiftinit.StaticPage
+extension Swiftinit.Docs.DeclPage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
 }
-extension Swiftinit.Docs.Decl:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.Decl:Swiftinit.VersionedPage
+extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -126,7 +126,7 @@ extension Swiftinit.Docs.Decl:Swiftinit.VersionedPage
 
         if  let _:[String] = self.vertex.signature.spis
         {
-            main[.section, { $0.class = "notice spi" }]
+            main[.section, { $0.class = "signage spi" }]
             {
                 $0[.p] = """
                 This declaration is gated by at least one @_spi attribute.
@@ -138,7 +138,7 @@ extension Swiftinit.Docs.Decl:Swiftinit.VersionedPage
         if  let renamed:Unidoc.Scalar = self.vertex.renamed,
             let link:HTML.Link<String> = self.context.link(decl: renamed)
         {
-            main[.section, { $0.class = "notice deprecation renamed" }]
+            main[.section, { $0.class = "signage deprecation renamed" }]
             {
                 $0[.p]
                 {
@@ -151,7 +151,7 @@ extension Swiftinit.Docs.Decl:Swiftinit.VersionedPage
         else if
             let renamed:String = availability.renamed
         {
-            main[.section, { $0.class = "notice deprecation renamed" }]
+            main[.section, { $0.class = "signage deprecation renamed" }]
             {
                 $0[.p] = "This declaration has been renamed to \(renamed)."
             }
@@ -159,7 +159,7 @@ extension Swiftinit.Docs.Decl:Swiftinit.VersionedPage
 
         if  let notice:String = availability.notice
         {
-            main[.section, { $0.class = "notice deprecation" }] { $0[.p] = notice }
+            main[.section, { $0.class = "signage deprecation" }] { $0[.p] = notice }
         }
         else if !availability.isEmpty
         {

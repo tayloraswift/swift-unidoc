@@ -6,7 +6,7 @@ import URI
 
 extension Swiftinit.Blog
 {
-    struct Article
+    struct ArticlePage
     {
         private
         let context:IdentifiablePageContext<Unidoc.Scalar>
@@ -21,16 +21,16 @@ extension Swiftinit.Blog
         }
     }
 }
-extension Swiftinit.Blog.Article
+extension Swiftinit.Blog.ArticlePage
 {
     private
     var volume:Unidoc.VolumeMetadata { self.context.volumes.principal }
 }
-extension Swiftinit.Blog.Article:Swiftinit.RenderablePage
+extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 }
-extension Swiftinit.Blog.Article:Swiftinit.StaticPage
+extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
 {
     var location:URI
     {

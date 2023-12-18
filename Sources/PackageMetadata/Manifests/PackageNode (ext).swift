@@ -18,7 +18,7 @@ extension PackageNode
     init(as id:Symbol.Package,
         flattening manifest:borrowing SPM.Manifest,
         platform:borrowing SymbolGraphMetadata.Platform,
-        filter predicate:(SymbolGraphMetadata.ProductType) throws -> Bool) throws
+        filter predicate:(SymbolGraph.ProductType) throws -> Bool) throws
     {
         try self.init(id: id,
             predecessors: manifest.dependencies,

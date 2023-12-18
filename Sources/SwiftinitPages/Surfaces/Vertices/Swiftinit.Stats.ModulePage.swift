@@ -7,7 +7,7 @@ import URI
 
 extension Swiftinit.Stats
 {
-    struct Module
+    struct ModulePage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -29,15 +29,23 @@ extension Swiftinit.Stats
         }
     }
 }
-extension Swiftinit.Stats.Module
+extension Swiftinit.Stats.ModulePage
 {
+    private
+    var demonym:Swiftinit.ModuleDemonym
+    {
+        .init(
+            language: self.vertex.module.language ?? .swift,
+            type: self.vertex.module.type)
+    }
+
     private
     var name:String { self.vertex.module.name }
 
     private
     var stem:Unidoc.Stem { self.vertex.stem }
 }
-extension Swiftinit.Stats.Module:Swiftinit.RenderablePage
+extension Swiftinit.Stats.ModulePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.name) · \(self.volume.title) Statistics" }
 
@@ -46,23 +54,23 @@ extension Swiftinit.Stats.Module:Swiftinit.RenderablePage
         self.volume.symbol.package == .swift ?
         """
         View statistics and coverage data for \(self.name), \
-        a module in the Swift standard library.
+        \(self.demonym.phrase) in the Swift standard library.
         """ :
         """
         View statistics and coverage data for \(self.name), \
-        a module in the \(self.volume.title) package.
+        \(self.demonym.phrase) in the \(self.volume.title) package.
         """
     }
 }
-extension Swiftinit.Stats.Module:Swiftinit.StaticPage
+extension Swiftinit.Stats.ModulePage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Stats[self.volume, self.vertex.shoot] }
 }
-extension Swiftinit.Stats.Module:Swiftinit.ApplicationPage
+extension Swiftinit.Stats.ModulePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.Module:Swiftinit.VersionedPage
+extension Swiftinit.Stats.ModulePage:Swiftinit.VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

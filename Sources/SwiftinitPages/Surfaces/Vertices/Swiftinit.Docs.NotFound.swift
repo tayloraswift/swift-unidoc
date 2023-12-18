@@ -4,7 +4,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct NotFound
+    struct NotFoundPage
     {
         let context:IdentifiablePageContext<Never?>
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
@@ -17,15 +17,15 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.NotFound:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.Docs.NotFoundPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
 {
     var title:String { "Symbol Not Found · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.NotFound:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.NotFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.NotFound:Swiftinit.VersionedPage
+extension Swiftinit.Docs.NotFoundPage:Swiftinit.VersionedPage
 {
     var canonical:CanonicalVersion? { nil }
 

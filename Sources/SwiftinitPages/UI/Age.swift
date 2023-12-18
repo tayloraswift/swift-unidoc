@@ -1,6 +1,6 @@
 import HTML
 
-struct Age<Locale>
+struct Age
 {
     public
     var seconds:Int64
@@ -19,7 +19,7 @@ extension Age
         self.init(seconds: duration.components.seconds)
     }
 }
-extension Age<Language.EN>:CustomStringConvertible
+extension Age:CustomStringConvertible
 {
     var description:String
     {

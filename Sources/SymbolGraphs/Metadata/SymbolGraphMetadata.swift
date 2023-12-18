@@ -42,7 +42,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// The products in this list contain references to packages named in ``dependencies``.
     /// This list is used to filter other documentation objects to link against.
     public
-    var products:SymbolGraph.Table<ProductPlane, Product>
+    var products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>
     /// An optional string containing the marketing name for the package.
     public
     var display:String?
@@ -57,7 +57,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
         swift:AnyVersion,
         requirements:[PlatformRequirement] = [],
         dependencies:[Dependency] = [],
-        products:SymbolGraph.Table<ProductPlane, Product> = [],
+        products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product> = [],
         display:String? = nil,
         root:Symbol.FileBase? = nil)
     {
@@ -81,7 +81,7 @@ extension SymbolGraphMetadata
     func swift(_ swift:AnyVersion,
         tagname:String,
         triple:Triple,
-        products:SymbolGraph.Table<ProductPlane, Product>) -> Self
+        products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>) -> Self
     {
         let display:String
         switch swift.canonical

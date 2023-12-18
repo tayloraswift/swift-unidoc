@@ -258,7 +258,7 @@ extension Unidoc.Linker
                     }
 
                     var filter:Set<Int> = []
-                    for product:SymbolGraphMetadata.Product in snapshot.metadata.products
+                    for product:SymbolGraph.Product in snapshot.metadata.products
                         where products.contains(product.name)
                     {
                         filter.formUnion(product.cultures)

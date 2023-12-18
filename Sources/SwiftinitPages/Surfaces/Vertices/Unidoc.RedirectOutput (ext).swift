@@ -21,7 +21,7 @@ extension Unidoc.RedirectOutput:HTTP.ServerResponseFactory
 
             context.vertices.add(self.matches)
 
-            let display:Swiftinit.Docs.NotFound = .init(context, sidebar: nil)
+            let display:Swiftinit.Docs.NotFoundPage = .init(context, sidebar: nil)
             //  We return 410 Gone instead of 404 Not Found so that search engines and
             //  research bots will stop crawling this URL. But the page appears the same
             //  to the user.

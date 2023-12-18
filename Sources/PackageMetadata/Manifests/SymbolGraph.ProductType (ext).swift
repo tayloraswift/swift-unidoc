@@ -1,7 +1,7 @@
 import JSON
 import SymbolGraphs
 
-extension SymbolGraphMetadata.ProductType:JSONObjectDecodable
+extension SymbolGraph.ProductType:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

@@ -13,7 +13,7 @@ struct PackageNode:Identifiable
     var dependencies:[any Identifiable<Symbol.Package>]
 
     public
-    var products:[SymbolGraphMetadata.Product]
+    var products:[SymbolGraph.Product]
     public
     var modules:[SymbolGraph.Module]
     /// Lists of excluded sources, one per target node.
@@ -25,7 +25,7 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:Symbol.Package,
         dependencies:[any Identifiable<Symbol.Package>],
-        products:[SymbolGraphMetadata.Product],
+        products:[SymbolGraph.Product],
         modules:[SymbolGraph.Module],
         exclude:[[String]],
         root:Symbol.FileBase)
@@ -58,7 +58,7 @@ extension PackageNode
         var nodes:DigraphExplorer<ProductNode>.Nodes = .init()
         for package:PackageNode in dependencies
         {
-            for product:SymbolGraphMetadata.Product in package.products
+            for product:SymbolGraph.Product in package.products
             {
                 try nodes.index(.init(id: .init(name: product.name, package: package.id),
                     predecessors: product.dependencies))

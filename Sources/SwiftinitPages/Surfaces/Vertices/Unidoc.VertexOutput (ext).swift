@@ -31,7 +31,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.Volum
 
             context.vertices.add(principal.matches)
 
-            if  let choices:Swiftinit.Docs.MultipleFound = .init(context,
+            if  let choices:Swiftinit.Docs.MultipleFoundPage = .init(context,
                     matches: principal.matches)
             {
                 return .multiple(choices.resource(format: format))
@@ -40,7 +40,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.Volum
             {
                 //  We currently don’t have any actual means of obtaining a type tree in this
                 //  situation, but in theory, we could.
-                let display:Swiftinit.Docs.NotFound = .init(context,
+                let display:Swiftinit.Docs.NotFoundPage = .init(context,
                     sidebar: .module(volume: principal.volume, tree: principal.tree))
 
                 return .notFound(display.resource(format: format))

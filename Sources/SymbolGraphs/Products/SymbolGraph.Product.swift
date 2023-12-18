@@ -1,7 +1,7 @@
 import BSON
 import Symbols
 
-extension SymbolGraphMetadata
+extension SymbolGraph
 {
     @frozen public
     struct Product:Equatable, Hashable, Sendable
@@ -25,7 +25,7 @@ extension SymbolGraphMetadata
         }
     }
 }
-extension SymbolGraphMetadata.Product
+extension SymbolGraph.Product
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -36,7 +36,7 @@ extension SymbolGraphMetadata.Product
         case cultures = "C"
     }
 }
-extension SymbolGraphMetadata.Product:BSONDocumentEncodable
+extension SymbolGraph.Product:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -47,7 +47,7 @@ extension SymbolGraphMetadata.Product:BSONDocumentEncodable
         bson[.cultures] = self.cultures
     }
 }
-extension SymbolGraphMetadata.Product:BSONDocumentDecodable
+extension SymbolGraph.Product:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

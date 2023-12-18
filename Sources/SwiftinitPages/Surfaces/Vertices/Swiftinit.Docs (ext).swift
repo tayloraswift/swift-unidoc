@@ -25,7 +25,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 bias: vertex.id,
                 mode: nil)
 
-            let page:Article = .init(context.page,
+            let page:ArticlePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -39,7 +39,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
-            let page:Module = .init(context.page,
+            let page:ModulePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -54,7 +54,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 vertex: vertex,
                 bias: vertex.culture,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Decl = try .init(context.page,
+            let page:DeclPage = try .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
@@ -69,7 +69,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
-            let page:Product = .init(context.page,
+            let page:ProductPage = .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
@@ -80,7 +80,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 organizing: consume groups,
                 bias: nil,
                 mode: .decl(vertex.phylum, vertex.kinks))
-            let page:Foreign = try .init(context.page,
+            let page:ForeignPage = try .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
@@ -91,7 +91,7 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: .meta)
-            let page:Package = .init(context.page,
+            let page:PackagePage = .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
                 groups: groups)
