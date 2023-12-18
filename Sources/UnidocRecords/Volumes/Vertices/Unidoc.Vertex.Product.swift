@@ -13,7 +13,7 @@ extension Unidoc.Vertex
         public
         let symbol:String
         public
-        let type:SymbolGraphMetadata.ProductType
+        let type:SymbolGraph.ProductType
 
         public
         var group:Unidoc.Group.ID?
@@ -22,7 +22,7 @@ extension Unidoc.Vertex
         init(id:Unidoc.Scalar,
             requirements:[Unidoc.Scalar],
             symbol:String,
-            type:SymbolGraphMetadata.ProductType,
+            type:SymbolGraph.ProductType,
             group:Unidoc.Group.ID?)
         {
             self.id = id

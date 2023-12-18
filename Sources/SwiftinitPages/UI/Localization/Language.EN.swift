@@ -1,6 +1,0 @@
-extension Language
-{
-    enum EN
-    {
-    }
-}

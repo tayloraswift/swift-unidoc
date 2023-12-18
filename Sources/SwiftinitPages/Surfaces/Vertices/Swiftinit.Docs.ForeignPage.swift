@@ -7,7 +7,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct Foreign
+    struct ForeignPage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -35,15 +35,15 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.Foreign
+extension Swiftinit.Docs.ForeignPage
 {
     private
-    var demonym:Phylum.Decl.Demonym<Language.EN>
+    var demonym:Swiftinit.DeclDemonym
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Swiftinit.Docs.Foreign:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
 
@@ -55,15 +55,15 @@ extension Swiftinit.Docs.Foreign:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Docs.Foreign:Swiftinit.StaticPage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
 }
-extension Swiftinit.Docs.Foreign:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.Foreign:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.VersionedPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 

@@ -9,12 +9,12 @@ extension SPM.Manifest
         public
         let name:String
         public
-        let type:SymbolGraphMetadata.ProductType
+        let type:SymbolGraph.ProductType
         public
         let targets:[String]
 
         @inlinable public
-        init(name:String, type:SymbolGraphMetadata.ProductType, targets:[String])
+        init(name:String, type:SymbolGraph.ProductType, targets:[String])
         {
             self.name = name
             self.type = type

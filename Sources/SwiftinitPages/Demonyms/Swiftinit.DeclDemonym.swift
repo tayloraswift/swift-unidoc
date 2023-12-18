@@ -1,21 +1,20 @@
-import HTML
 import Symbols
 
-extension Phylum.Decl
+extension Swiftinit
 {
-    struct Demonym<Locale>
+    struct DeclDemonym
     {
         let phylum:Phylum.Decl
-        let kinks:Kinks
+        let kinks:Phylum.Decl.Kinks
 
-        init(phylum:Phylum.Decl, kinks:Kinks)
+        init(phylum:Phylum.Decl, kinks:Phylum.Decl.Kinks)
         {
             self.phylum = phylum
             self.kinks = kinks
         }
     }
 }
-extension Phylum.Decl.Demonym<Language.EN>
+extension Swiftinit.DeclDemonym
 {
     var modifier:String?
     {

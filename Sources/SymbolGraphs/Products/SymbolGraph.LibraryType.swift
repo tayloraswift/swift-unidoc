@@ -1,4 +1,4 @@
-extension SymbolGraphMetadata
+extension SymbolGraph
 {
     @frozen public
     enum LibraryType:String, Hashable, Equatable, Sendable

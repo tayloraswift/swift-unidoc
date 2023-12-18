@@ -1,4 +1,5 @@
-section.notice
+section.notice,
+section.signage
 {
     margin: 0.75rem 0;
 
@@ -7,17 +8,7 @@ section.notice
         margin: 0;
     }
 }
-
-section.notice.extendee
-{
-    code
-    {
-        font-style: normal;
-        background-color: transparent;
-    }
-}
-section.notice.canonical,
-section.notice.extendee
+section.notice
 {
     font-style: italic;
     color: $light-accent-barbie-pink;
@@ -37,13 +28,21 @@ section.notice.extendee
     }
 }
 
-section.spi,
-section.deprecation
+section.notice.extendee
+{
+    code
+    {
+        font-style: normal;
+        background-color: transparent;
+    }
+}
+
+section.signage
 {
     display: flex;
     align-items: stretch;
 }
-section.notice::before
+section.signage::before
 {
     padding: 0.25rem 1rem 0.5rem 1rem;
 
@@ -53,14 +52,14 @@ section.notice::before
     border-radius: 0.5rem 0 0 0.5rem;
     color: white;
 }
-section.spi::before
+section.signage.spi::before
 {
     font-size: 125%;
     background-color: $light-accent-barbie-pink;
     box-shadow: 0 0.25rem 0 0 $light-accent-barbie-pink-shadow;
     content: '@';
 }
-section.deprecation::before
+section.signage.deprecation::before
 {
     font-size: 150%;
     font-family: $typeface-monospace;
@@ -68,14 +67,13 @@ section.deprecation::before
     box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
     content: '!';
 }
-section.deprecation.renamed::before
+section.signage.deprecation.renamed::before
 {
     background-color: $light-accent-aqua;
     box-shadow: 0 0.25rem 0 0 $light-accent-aqua-shadow;
     content: '→';
 }
-section.spi > p,
-section.deprecation > p
+section.signage > p
 {
     flex: 1 1 auto;
     padding: 0.5rem 0.5rem 0.5rem 1rem;

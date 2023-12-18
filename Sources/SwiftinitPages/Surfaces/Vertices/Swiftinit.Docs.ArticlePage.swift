@@ -7,7 +7,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct Article
+    struct ArticlePage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -34,12 +34,12 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.Article
+extension Swiftinit.Docs.ArticlePage
 {
     private
     var stem:Unidoc.Stem { self.vertex.stem }
 }
-extension Swiftinit.Docs.Article:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.vertex.headline.safe) · \(self.volume.title) Documentation" }
 
@@ -48,15 +48,15 @@ extension Swiftinit.Docs.Article:Swiftinit.RenderablePage
         self.vertex.overview.map { "\(self.context.prose($0.markdown))" }
     }
 }
-extension Swiftinit.Docs.Article:Swiftinit.StaticPage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
 }
-extension Swiftinit.Docs.Article:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.Article:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

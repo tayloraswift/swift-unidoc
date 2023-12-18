@@ -5,7 +5,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct Product
+    struct ProductPage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -28,31 +28,51 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.Product:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ProductPage
+{
+    private
+    var demonym:Swiftinit.ProductDemonym
+    {
+        .init(type: self.vertex.type)
+    }
+}
+extension Swiftinit.Docs.ProductPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.vertex.symbol) · \(self.volume.title) Products" }
 
     var description:String?
     {
         """
-        \(self.vertex.symbol) is a product available in the package \(self.volume.title)").
+        \(self.vertex.symbol) is \(self.demonym.phrase) \
+        available in the package \(self.volume.title)".
         """
     }
 }
-extension Swiftinit.Docs.Product:Swiftinit.StaticPage
+extension Swiftinit.Docs.ProductPage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
 }
-extension Swiftinit.Docs.Product:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.Product:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ProductPage:Swiftinit.VersionedPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
-        //  TODO: unimplemented
+        main[.section, { $0.class = "introduction" }]
+        {
+            $0[.div, { $0.class = "eyebrows" }]
+            {
+                $0[.span] { $0.class = "phylum" } = self.demonym.title
+                $0[.span] { $0.class = "domain" } = self.context.domain
+            }
+
+            $0[.h1] = self.vertex.symbol
+        }
+
+        main[.section] { $0.class = "notice canonical" } = self.canonical
     }
 }

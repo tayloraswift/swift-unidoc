@@ -5,7 +5,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct MultipleFound
+    struct MultipleFoundPage
     {
         let context:IdentifiablePageContext<Never?>
 
@@ -26,7 +26,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.MultipleFound
+extension Swiftinit.Docs.MultipleFoundPage
 {
     init?(_ context:consuming IdentifiablePageContext<Never?>,
         matches:__shared [Unidoc.Vertex])
@@ -42,22 +42,22 @@ extension Swiftinit.Docs.MultipleFound
 
     }
 }
-extension Swiftinit.Docs.MultipleFound:Swiftinit.RenderablePage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.RenderablePage
 {
     var title:String { "Disambiguation Page · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.MultipleFound:Swiftinit.StaticPage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.StaticPage
 {
     var location:URI
     {
         Swiftinit.Docs[self.volume, .init(stem: self.identity, hash: nil)]
     }
 }
-extension Swiftinit.Docs.MultipleFound:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.MultipleFound:Swiftinit.VersionedPage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VersionedPage
 {
     var canonical:CanonicalVersion? { nil }
     var sidebar:Never? { nil }

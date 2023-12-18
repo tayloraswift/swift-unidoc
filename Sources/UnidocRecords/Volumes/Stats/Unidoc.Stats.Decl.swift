@@ -120,6 +120,28 @@ extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
 }
 extension Unidoc.Stats.Decl
 {
+    @inlinable public
+    var total:Int
+    {
+        self.typealiases
+        + self.structures
+        + self.protocols
+        + self.classes
+        + self.actors
+        + self.requirements
+        + self.witnesses
+        + self.constructors
+        + self.subscripts
+        + self.functors
+        + self.methods
+        + self.operators
+        + self.functions
+        + self.freestandingMacros
+        + self.attachedMacros
+    }
+}
+extension Unidoc.Stats.Decl
+{
     @frozen public
     enum CodingKey:String, Sendable
     {
