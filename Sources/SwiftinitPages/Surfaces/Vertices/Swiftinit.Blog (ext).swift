@@ -14,7 +14,7 @@ extension Swiftinit.Blog:Swiftinit.VolumeRoot
     {
         if  case .article(let vertex) = vertex
         {
-            let page:Article = .init(context.page, vertex: vertex)
+            let page:ArticlePage = .init(context.page, vertex: vertex)
             return .ok(page.resource(format: context.format))
         }
         else

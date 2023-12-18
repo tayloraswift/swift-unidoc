@@ -14,7 +14,7 @@ import URI
 
 extension Swiftinit.Docs
 {
-    struct Package
+    struct PackagePage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -37,12 +37,12 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.Package
+extension Swiftinit.Docs.PackagePage
 {
     private
     var repo:Unidoc.PackageMetadata.Repo? { self.context.repo }
 }
-extension Swiftinit.Docs.Package:Swiftinit.RenderablePage
+extension Swiftinit.Docs.PackagePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
@@ -59,15 +59,15 @@ extension Swiftinit.Docs.Package:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Docs.Package:Swiftinit.StaticPage
+extension Swiftinit.Docs.PackagePage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume] }
 }
-extension Swiftinit.Docs.Package:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.PackagePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
+extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
@@ -328,55 +328,11 @@ extension Swiftinit.Docs.Package:Swiftinit.VersionedPage
                 }
             }
 
-
-            $0[.div, { $0.class = "more" }]
-            {
-                let url:String = "\(Swiftinit.Stats[self.volume])"
-
-                $0[.div, { $0.class = "charts" }]
-                {
-                    $0[.div]
-                    {
-                        $0[.p]
-                        {
-                            let target:AutomaticHeading = .interfaceBreakdown
-                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
-                        }
-
-                        $0[.figure]
-                        {
-                            $0.class = "chart decl"
-                        } = self.vertex.snapshot.census.unweighted.decls.pie
-                        {
-                            """
-                            \($1) percent of the declarations in \
-                            \(self.volume.title) are \($0.name)
-                            """
-                        }
-                    }
-                    $0[.div]
-                    {
-                        let target:AutomaticHeading = .documentationCoverage
-                        $0[.p]
-                        {
-                            $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
-                        }
-
-                        $0[.figure]
-                        {
-                            $0.class = "chart coverage"
-                        } = self.vertex.snapshot.census.unweighted.coverage.pie
-                        {
-                            """
-                            \($1) percent of the declarations in \
-                            \(self.volume.title) are \($0.name)
-                            """
-                        }
-                    }
-                }
-
-                $0[.a] { $0.href = url } = "Package stats and coverage details"
-            }
+            $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
+                target: Swiftinit.Stats[self.volume],
+                census: self.vertex.snapshot.census,
+                domain: self.volume.title,
+                title: "Package stats and coverage details")
         }
 
         main += self.groups

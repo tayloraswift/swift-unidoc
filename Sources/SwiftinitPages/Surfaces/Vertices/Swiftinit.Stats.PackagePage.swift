@@ -7,7 +7,7 @@ import URI
 
 extension Swiftinit.Stats
 {
-    struct Package
+    struct PackagePage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -29,7 +29,7 @@ extension Swiftinit.Stats
         }
     }
 }
-extension Swiftinit.Stats.Package:Swiftinit.RenderablePage
+extension Swiftinit.Stats.PackagePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.volume.title) Statistics" }
 
@@ -44,15 +44,15 @@ extension Swiftinit.Stats.Package:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Stats.Package:Swiftinit.StaticPage
+extension Swiftinit.Stats.PackagePage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Stats[self.volume] }
 }
-extension Swiftinit.Stats.Package:Swiftinit.ApplicationPage
+extension Swiftinit.Stats.PackagePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.Package:Swiftinit.VersionedPage
+extension Swiftinit.Stats.PackagePage:Swiftinit.VersionedPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

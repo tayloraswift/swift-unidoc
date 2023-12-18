@@ -147,7 +147,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         if  let updated:Timestamp.Components = .init(iso8601: repo.updated),
                             let updated:UnixInstant = .init(utc: updated)
                         {
-                            let age:Age<Language.EN> = .init(now - updated)
+                            let age:Age = .init(now - updated)
 
                             $0[.dt] = "Last Pushed"
                             $0[.dd] = "\(age)"

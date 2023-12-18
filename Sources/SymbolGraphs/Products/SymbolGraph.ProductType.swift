@@ -1,6 +1,6 @@
 import BSON
 
-extension SymbolGraphMetadata
+extension SymbolGraph
 {
     @frozen public
     enum ProductType:Hashable, Equatable, Sendable
@@ -13,7 +13,7 @@ extension SymbolGraphMetadata
         case test
     }
 }
-extension SymbolGraphMetadata.ProductType:CustomStringConvertible
+extension SymbolGraph.ProductType:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -31,7 +31,7 @@ extension SymbolGraphMetadata.ProductType:CustomStringConvertible
         }
     }
 }
-extension SymbolGraphMetadata.ProductType:LosslessStringConvertible
+extension SymbolGraph.ProductType:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -50,6 +50,6 @@ extension SymbolGraphMetadata.ProductType:LosslessStringConvertible
         }
     }
 }
-extension SymbolGraphMetadata.ProductType:BSONStringDecodable, BSONStringEncodable
+extension SymbolGraph.ProductType:BSONStringDecodable, BSONStringEncodable
 {
 }

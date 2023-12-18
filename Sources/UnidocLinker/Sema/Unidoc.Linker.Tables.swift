@@ -118,7 +118,7 @@ extension Unidoc.Linker.Tables
         var products:[Unidoc.Vertex.Product] = []
             products.reserveCapacity(self.current.metadata.products.count)
 
-        for (p, product):(Int32, SymbolGraphMetadata.Product) in zip(
+        for (p, product):(Int32, SymbolGraph.Product) in zip(
             self.current.metadata.products.indices,
             self.current.metadata.products)
         {
