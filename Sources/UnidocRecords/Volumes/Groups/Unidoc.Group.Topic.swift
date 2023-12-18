@@ -6,7 +6,7 @@ extension Unidoc.Group
     struct Topic:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Scalar
+        let id:Unidoc.Group.ID
 
         public
         let culture:Unidoc.Scalar?
@@ -26,7 +26,7 @@ extension Unidoc.Group
         var members:[Unidoc.VertexLink]
 
         @inlinable public
-        init(id:Unidoc.Scalar,
+        init(id:Unidoc.Group.ID,
             culture:Unidoc.Scalar? = nil,
             scope:Unidoc.Scalar? = nil,
             prefetch:[Unidoc.Scalar] = [],

@@ -32,7 +32,7 @@ extension SymbolGraph
 extension SymbolGraph.ArticleNode:SymbolGraphNode
 {
     public
-    typealias Plane = SymbolGraph.Plane.Article
+    typealias Plane = SymbolGraph.ArticlePlane
     public
     typealias ID = Symbol.Article
 

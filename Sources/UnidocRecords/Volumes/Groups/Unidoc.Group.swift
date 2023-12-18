@@ -9,11 +9,12 @@ extension Unidoc
     @frozen public
     enum Group:Equatable, Sendable
     {
-        case  automatic (Automatic)
         case `extension`(Extension)
+        case  polygon(Polygon)
         case  topic(Topic)
     }
 }
+
 extension Unidoc.Group
 {
     @frozen public
@@ -81,12 +82,12 @@ extension Unidoc.Group
 extension Unidoc.Group:Identifiable
 {
     @inlinable public
-    var id:Unidoc.Scalar
+    var id:ID
     {
         switch self
         {
-        case .automatic(let group): group.id
         case .extension(let group): group.id
+        case .polygon(let group):   group.id
         case .topic(let group):     group.id
         }
     }
@@ -103,12 +104,6 @@ extension Unidoc.Group:BSONDocumentEncodable
 
         switch self
         {
-        case .automatic(let self):
-            bson[.scope] = self.scope
-            bson[.members] = self.members.isEmpty ? nil : self.members
-
-            zones.update(with: self.members)
-
         case .extension(let self):
             bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
             bson[.culture] = self.culture
@@ -124,7 +119,7 @@ extension Unidoc.Group:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.details] = self.details
 
-            zones.update(with: self.culture.zone)
+            zones.update(with: self.culture.edition)
 
             zones.update(with: self.conformances)
             zones.update(with: self.features)
@@ -136,6 +131,12 @@ extension Unidoc.Group:BSONDocumentEncodable
 
             zones.update(with: self.conditions)
 
+        case .polygon(let self):
+            bson[.scope] = self.scope
+            bson[.members] = self.members.isEmpty ? nil : self.members
+
+            zones.update(with: self.members)
+
         case .topic(let self):
             bson[.culture] = self.culture
             bson[.scope] = self.scope
@@ -145,7 +146,7 @@ extension Unidoc.Group:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.members] = self.members.isEmpty ? nil : self.members
 
-            zones.update(with: self.culture?.zone)
+            zones.update(with: self.culture?.edition)
             zones.update(with: self.prefetch)
         }
 
@@ -157,17 +158,9 @@ extension Unidoc.Group:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let id:Unidoc.Scalar = try bson[.id].decode()
-        switch id.plane
+        let id:ID = try bson[.id].decode()
+        switch id.rawValue.plane
         {
-        case .topic?:
-            self = .topic(.init(id: id,
-                culture: try bson[.culture]?.decode(),
-                scope: try bson[.scope]?.decode(),
-                prefetch: try bson[.prefetch]?.decode() ?? [],
-                overview: try bson[.overview]?.decode(),
-                members: try bson[.members]?.decode() ?? []))
-
         case .extension?:
             self = .extension(.init(id: id,
                 conditions: try bson[.conditions]?.decode() ?? [],
@@ -181,9 +174,17 @@ extension Unidoc.Group:BSONDocumentDecodable
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode()))
 
-        case _:
-            self = .automatic(.init(id: id,
+        case .autogroup?:
+            self = .polygon(.init(id: id,
                 scope: try bson[.scope].decode(),
+                members: try bson[.members]?.decode() ?? []))
+
+        case _:
+            self = .topic(.init(id: id,
+                culture: try bson[.culture]?.decode(),
+                scope: try bson[.scope]?.decode(),
+                prefetch: try bson[.prefetch]?.decode() ?? [],
+                overview: try bson[.overview]?.decode(),
                 members: try bson[.members]?.decode() ?? []))
         }
     }

@@ -2,18 +2,22 @@ import Unidoc
 
 extension Unidoc.Group
 {
+    @available(*, deprecated, renamed: "Polygon")
+    public
+    typealias Automatic = Polygon
+
     @frozen public
-    struct Automatic:Identifiable, Equatable, Sendable
+    struct Polygon:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Scalar
+        let id:Unidoc.Group.ID
         public
         var scope:Unidoc.Scalar?
         public
         var members:[Unidoc.Scalar]
 
         @inlinable public
-        init(id:Unidoc.Scalar,
+        init(id:Unidoc.Group.ID,
             scope:Unidoc.Scalar? = nil,
             members:[Unidoc.Scalar] = [])
         {

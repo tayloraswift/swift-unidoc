@@ -166,7 +166,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
         if  let origin:Unidoc.PackageMetadata.Repo.Origin = self.repo?.origin,
-            let refname:String = self.volumes[file.zone]?.refname,
+            let refname:String = self.volumes[file.edition]?.refname,
             let file:Unidoc.Vertex.File = self.vertices[file]?.file,
             let blob:String = origin.blob(refname: refname, file: file.symbol)
         {

@@ -91,7 +91,7 @@ extension Unidoc.Resolver
                 //  TODO: implement me
             }
             else if let namespace:Int = scalar / .module,
-                    let scalar:Unidoc.Scalar = self.current.scalars.namespaces[namespace]
+                    let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
             {
                 return .path(text, [scalar])
             }
@@ -146,7 +146,7 @@ extension Unidoc.Resolver
                 return .scalar(scalar)
             }
             else if let namespace:Int = scalar / .module,
-                    let scalar:Unidoc.Scalar = self.current.scalars.namespaces[namespace]
+                    let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
             {
                 return .scalar(scalar)
             }

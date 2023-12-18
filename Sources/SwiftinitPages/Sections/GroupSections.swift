@@ -61,7 +61,7 @@ extension GroupSections
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
-        let container:Unidoc.Scalar?
+        let container:Unidoc.Group.ID?
         let generics:Generics
         if  let vertex:Unidoc.Vertex.Decl = copy vertex
         {
@@ -100,7 +100,7 @@ extension GroupSections
                     continue
                 }
 
-                let partisanship:Partisanship = self.context.volumes.secondary[group.id.zone]
+                let partisanship:Partisanship = self.context.volumes.secondary[group.id.edition]
                     .map
                 {
                     .third($0.symbol.package)
@@ -113,9 +113,7 @@ extension GroupSections
 
                 extensions.append((group, partisanship, genericness))
 
-            case .automatic(let group):
-                //  Guess what kind of autogroup this is by looking at the bit pattern of
-                //  the first member of the group.
+            case .polygon(let group):
                 guard
                 let first:Unidoc.Scalar = group.members.first,
                 let plane:SymbolGraph.Plane = .of(first.citizen)
@@ -127,17 +125,20 @@ extension GroupSections
                 if  first == self.context.id,
                     group.members.count == 1
                 {
-                    //  This is an automatic group that contains this page only.
+                    //  This is a polygon that contains this page only.
                     continue
                 }
 
+                //  Guess what kind of polygon this is by looking at the bit pattern of its
+                //  first vertex.
                 let heading:AutomaticHeading
-
                 switch (plane, self.mode)
                 {
+                case (.product, .meta): heading = .allProducts
+                case (.product, _):     heading = .otherProducts
                 case (.module, .meta):  heading = .allModules
                 case (.module, _):      heading = .otherModules
-                case (_, _):            heading = .miscellaneous
+                default:                heading = .miscellaneous
                 }
 
                 self.other.append((heading, group.members))
@@ -181,11 +182,11 @@ extension GroupSections
     func heading(for extension:Unidoc.Group.Extension) -> ExtensionHeading
     {
         let display:String
-        switch (self.bias, self.bias?.zone)
+        switch (self.bias, self.bias?.edition)
         {
-        case (`extension`.culture?, _): display = "Citizens in "
-        case (_, `extension`.id.zone?): display = "Available in "
-        case (_,                    _): display = "Extension in "
+        case (`extension`.culture?, _):     display = "Citizens in "
+        case (_, `extension`.id.edition?):  display = "Available in "
+        case (_,                    _):     display = "Extension in "
         }
 
         return .init(self.context,

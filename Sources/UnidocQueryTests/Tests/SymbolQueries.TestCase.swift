@@ -73,7 +73,7 @@ extension SymbolQueries.TestCase
                 {
                     switch group
                     {
-                    case .automatic:
+                    case .polygon:
                         continue
 
                     case .topic(let t):

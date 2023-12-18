@@ -23,7 +23,7 @@ extension Unidoc.Linker
         var trees:[Unidoc.Scalar: TreeMembers]
 
         private
-        var next:Unidoc.Counter<SymbolGraph.Plane.Foreign>
+        var next:Unidoc.Counter<SymbolGraph.ForeignPlane>
 
         init(zone:Unidoc.Edition)
         {
@@ -98,7 +98,7 @@ extension Unidoc.Linker.TreeMapper
                 phylum: decl.phylum,
                 kinks: decl.kinks,
                 route: decl.route),
-            stem: .init(namespace, decl.path, orientation: decl.phylum.orientation),
+            stem: .decl(namespace, decl.path, orientation: decl.phylum.orientation),
             hash: .init(hashing: "\(symbol)"))
 
         self.foreign[foreign] = vertex.shoot

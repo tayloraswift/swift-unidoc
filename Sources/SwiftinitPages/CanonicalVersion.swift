@@ -73,6 +73,9 @@ extension CanonicalVersion
             case .file:
                 return nil
 
+            case .product(let vertex):
+                target = .product(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+
             case .foreign(let vertex):
                 target = .foreign(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
 
@@ -88,6 +91,7 @@ extension CanonicalVersion
             case .culture?:     target = .culture(nil)
             case .decl?:        target = .decl(nil)
             case .file?, nil:   return   nil
+            case .product?:     target = .product(nil)
             case .foreign?:     target = .foreign(nil)
             case .global?:      target = .global
             }
@@ -109,6 +113,7 @@ extension CanonicalVersion
         case .article(let uri): uri
         case .culture(let uri): uri
         case .decl(let uri):    uri
+        case .product(let uri): uri
         case .foreign(let uri): uri
         case .global:           self.volume
         }

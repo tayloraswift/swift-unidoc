@@ -8,6 +8,7 @@ extension Unidoc
         case culture
         case decl
         case file
+        case product
         case foreign
         case global
     }
@@ -24,6 +25,7 @@ extension Unidoc.VertexTypeError:CustomStringConvertible
         case .culture:  name = "culture"
         case .decl:     name = "decl"
         case .file:     name = "file"
+        case .product:  name = "product"
         case .foreign:  name = "foreign"
         case .global:   name = "global"
         }

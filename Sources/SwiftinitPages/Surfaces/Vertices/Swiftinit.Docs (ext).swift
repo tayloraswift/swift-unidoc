@@ -64,6 +64,17 @@ extension Swiftinit.Docs:Swiftinit.VolumeRoot
         case .file:
             throw Unidoc.VertexTypeError.file
 
+        case .product(let vertex):
+            let groups:GroupSections = .init(context.page,
+                organizing: consume groups,
+                bias: vertex.id,
+                mode: nil)
+            let page:Product = .init(context.page,
+                canonical: context.canonical,
+                vertex: vertex,
+                groups: groups)
+            resource = page.resource(format: context.format)
+
         case .foreign(let vertex):
             let groups:GroupSections = .init(context.page,
                 organizing: consume groups,

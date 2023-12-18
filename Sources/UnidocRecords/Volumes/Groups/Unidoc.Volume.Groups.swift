@@ -4,20 +4,20 @@ extension Unidoc.Volume
     struct Groups:Sendable
     {
         public
-        var autogroups:[Unidoc.Group.Automatic]
-        public
         var extensions:[Unidoc.Group.Extension]
+        public
+        var polygons:[Unidoc.Group.Polygon]
         public
         var topics:[Unidoc.Group.Topic]
 
         @inlinable public
         init(
-            autogroups:[Unidoc.Group.Automatic] = [],
             extensions:[Unidoc.Group.Extension] = [],
+            polygons:[Unidoc.Group.Polygon] = [],
             topics:[Unidoc.Group.Topic] = [])
         {
-            self.autogroups = autogroups
             self.extensions = extensions
+            self.polygons = polygons
             self.topics = topics
         }
     }

@@ -17,23 +17,23 @@ extension Unidoc.Linker
 
         /// Protocol conformances for each declaration in the **current** snapshot.
         private
-        let conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>>
+        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances<Int>>
 
         /// A table mapping nested declarations to their enclosing extensions.
         ///
         /// This is immutable even though ``extensions`` is mutable, because we never introduce
         /// new nested declarations after building the initial ``extensions`` structure.
         private
-        let extensionContainingNested:[Int32: Unidoc.Scalar]
+        let extensionContainingNested:[Int32: Unidoc.Group.ID]
         /// A table maping vertices to topics or autogroups.
         private
-        var groupContainingMember:[Int32: Unidoc.Scalar]
+        var groupContainingMember:[Int32: Unidoc.Group.ID]
 
         private
         var next:
         (
-            autogroup:Unidoc.Counter<SymbolGraph.Plane.Autogroup>,
-            topic:Unidoc.Counter<SymbolGraph.Plane.Topic>
+            polygon:Unidoc.Counter<SymbolGraph.AutogroupPlane>,
+            topic:Unidoc.Counter<SymbolGraph.TopicPlane>
         )
 
         private(set)
@@ -47,7 +47,7 @@ extension Unidoc.Linker
         init(
             contexts:consuming [SymbolGraph.ModuleContext],
             context:consuming Unidoc.Linker,
-            conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>>,
+            conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances<Int>>,
             extensions:Extensions)
         {
             self.contexts = contexts
@@ -58,7 +58,7 @@ extension Unidoc.Linker
             self.extensionContainingNested = extensions.byNested()
             self.groupContainingMember = [:]
 
-            self.next.autogroup = .init(zone: self.context.current.id)
+            self.next.polygon = .init(zone: self.context.current.id)
             self.next.topic = .init(zone: self.context.current.id)
 
             self.extensions = extensions
@@ -77,7 +77,7 @@ extension Unidoc.Linker.Tables
 
         var extensions:Unidoc.Linker.Extensions = .init(zone: context.current.id)
 
-        let conformances:SymbolGraph.Table<SymbolGraph.Plane.Decl, ProtocolConformances<Int>> =
+        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances<Int>> =
             context.current.decls.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
@@ -108,12 +108,55 @@ extension Unidoc.Linker.Tables
 }
 extension Unidoc.Linker.Tables
 {
-    private mutating
-    func autogroup()
+    /// This **must** be called before ``linkCultures``!
+    mutating
+    func linkProducts() -> [Unidoc.Vertex.Product]
     {
+        var productPolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon.id(),
+            scope: self.current.id.global)
+
+        var products:[Unidoc.Vertex.Product] = []
+            products.reserveCapacity(self.current.metadata.products.count)
+
+        for (p, product):(Int32, SymbolGraphMetadata.Product) in zip(
+            self.current.metadata.products.indices,
+            self.current.metadata.products)
+        {
+            var requirements:[Unidoc.Scalar] = product.cultures
+                .sorted
+            {
+                self.current.namespaces[$0] < self.current.namespaces[$1]
+            }
+                .map
+            {
+                self.current.id + $0
+            }
+
+            for product:Symbol.Product in product.dependencies.sorted()
+            {
+                if  let q:Unidoc.Scalar =
+                    self.context[product.package]?.scalars.products[product.name]
+                {
+                    requirements.append(q)
+                }
+            }
+
+            let product:Unidoc.Vertex.Product = .init(id: self.current.id + p,
+                requirements: requirements,
+                symbol: product.name,
+                type: product.type,
+                group: productPolygon.id)
+
+            productPolygon.members.append(product.id)
+            products.append(product)
+        }
+
+        //  Create a synthetic topic containing all the products. This will become a “See Also”
+        //  for their product pages.
+
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let cultures:Unidoc.Group.Automatic = .init(id: self.next.autogroup.id(),
+        let culturePolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon.id(),
             scope: self.current.id.global,
             members: self.current.cultures.indices.sorted
             {
@@ -125,19 +168,21 @@ extension Unidoc.Linker.Tables
                 self.current.id + $0
             })
 
-        self.groups.autogroups.append(cultures)
+        self.groups.polygons.append(productPolygon)
+        self.groups.polygons.append(culturePolygon)
 
         for c:Int in self.current.cultures.indices
         {
-            self.groupContainingMember[c * .module] = cultures.id
+            self.groupContainingMember[c * .module] = culturePolygon.id
         }
+
+        return products
     }
 
+    /// This **must** be called after ``linkProducts``!
     mutating
-    func link() -> [Unidoc.Vertex.Culture]
+    func linkCultures() -> [Unidoc.Vertex.Culture]
     {
-        self.autogroup()
-
         //  First pass to create the topic records, which also populates topic memberships.
         for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
             self.modules
@@ -238,7 +283,7 @@ extension Unidoc.Linker.Tables
                 let module:Symbol.Module = self.current.namespaces[decls.index]
 
                 guard
-                let scalar:Unidoc.Scalar = self.current.scalars.namespaces[decls.index]
+                let scalar:Unidoc.Scalar = self.current.scalars.modules[decls.index]
                 else
                 {
                     self.context.diagnostics[nil] = DroppedExtensionsError.extending(module,
@@ -261,7 +306,7 @@ extension Unidoc.Linker.Tables
                 }
 
                 //  Create top-level autogroup.
-                self.groups.autogroups.append(.init(id: self.next.autogroup.id(),
+                self.groups.polygons.append(.init(id: self.next.polygon.id(),
                     scope: namespace.culture,
                     members: self.context.sort(lexically: consume miscellaneous)))
             }
@@ -349,7 +394,7 @@ extension Unidoc.Linker.Tables
             let scalar:Unidoc.Scalar = self.current.id + a
 
             var vertex:Unidoc.Vertex.Article = .init(id: scalar,
-                stem: .init(namespace.module, symbol.name),
+                stem: .article(namespace.module, symbol.name),
                 culture: namespace.culture,
                 file: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,
@@ -379,9 +424,9 @@ extension Unidoc.Linker.Tables
             self.current.decls.nodes[range]))
         {
             /// Is this declaration contained in an extension?
-            let `extension`:Unidoc.Scalar? = self.extensionContainingNested[d]
+            let `extension`:Unidoc.Group.ID? = self.extensionContainingNested[d]
             /// Is this declaration a member of a topic?
-            let group:Unidoc.Scalar? = self.groupContainingMember[d]
+            let group:Unidoc.Group.ID? = self.groupContainingMember[d]
             /// Is this declaration a top-level member of its module?
             /// (Being a top-level declaration is the only way this can be nil.)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)
@@ -431,7 +476,7 @@ extension Unidoc.Linker.Tables
                     route: decl.route),
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
-                stem: .init(namespace.module, decl.path, orientation: decl.phylum.orientation),
+                stem: .decl(namespace.module, decl.path, orientation: decl.phylum.orientation),
                 requirements: self.context.sort(lexically: requirements),
                 superforms: self.context.sort(lexically: superforms),
                 namespace: namespace.id,

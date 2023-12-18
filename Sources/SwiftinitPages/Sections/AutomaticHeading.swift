@@ -8,9 +8,11 @@ enum AutomaticHeading
     case packageDependencies
     case platformRequirements
     case snapshotInformation
+    case allProducts
     case allModules
 
     case miscellaneous
+    case otherProducts
     case otherModules
     case otherMembers
 
@@ -40,9 +42,11 @@ extension AutomaticHeading:Identifiable
         case .packageDependencies:      "ss:package-dependencies"
         case .platformRequirements:     "ss:platform-requirements"
         case .snapshotInformation:      "ss:snapshot-information"
+        case .allProducts:              "ss:all-products"
         case .allModules:               "ss:all-modules"
 
         case .miscellaneous:            "ss:misc"
+        case .otherProducts:            "ss:other-products"
         case .otherModules:             "ss:other-modules"
         case .otherMembers:             "ss:other-members"
 
@@ -73,9 +77,11 @@ extension AutomaticHeading:CustomStringConvertible
         case .packageDependencies:      "Package Dependencies"
         case .platformRequirements:     "Platform Requirements"
         case .snapshotInformation:      "Snapshot Information"
+        case .allProducts:              "Products"
         case .allModules:               "Modules"
 
         case .miscellaneous:            "Miscellaneous"
+        case .otherProducts:            "Other Products"
         case .otherModules:             "Other Modules"
         case .otherMembers:             "Other Members in Extension"
 

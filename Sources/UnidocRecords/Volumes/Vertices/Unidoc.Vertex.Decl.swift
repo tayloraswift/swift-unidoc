@@ -47,9 +47,9 @@ extension Unidoc.Vertex
         var details:Unidoc.Passage?
 
         public
-        var `extension`:Unidoc.Scalar?
+        var `extension`:Unidoc.Group.ID?
         public
-        var group:Unidoc.Scalar?
+        var group:Unidoc.Group.ID?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -67,8 +67,8 @@ extension Unidoc.Vertex
             position:SourcePosition? = nil,
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            extension:Unidoc.Scalar? = nil,
-            group:Unidoc.Scalar? = nil)
+            extension:Unidoc.Group.ID? = nil,
+            group:Unidoc.Group.ID? = nil)
         {
             self.id = id
             self.flags = flags

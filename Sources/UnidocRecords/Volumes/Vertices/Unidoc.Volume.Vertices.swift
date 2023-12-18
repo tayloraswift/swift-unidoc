@@ -12,6 +12,8 @@ extension Unidoc.Volume
         public
         var files:[Unidoc.Vertex.File]
         public
+        var products:[Unidoc.Vertex.Product]
+        public
         var foreign:[Unidoc.Vertex.Foreign]
         public
         var global:Unidoc.Vertex.Global
@@ -22,6 +24,7 @@ extension Unidoc.Volume
             cultures:[Unidoc.Vertex.Culture],
             decls:[Unidoc.Vertex.Decl],
             files:[Unidoc.Vertex.File],
+            products:[Unidoc.Vertex.Product],
             foreign:[Unidoc.Vertex.Foreign],
             global:Unidoc.Vertex.Global)
         {
@@ -29,6 +32,7 @@ extension Unidoc.Volume
             self.cultures = cultures
             self.decls = decls
             self.files = files
+            self.products = products
             self.foreign = foreign
             self.global = global
         }

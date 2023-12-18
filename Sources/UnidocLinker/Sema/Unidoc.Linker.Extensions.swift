@@ -43,12 +43,12 @@ extension Unidoc.Linker.Extensions
     {
         _read
         {
-            let next:Unidoc.Scalar = self.zone + self.count * .extension
+            let next:Unidoc.Group.ID = self.zone[extension: self.count]
             yield  self.table[signature, default: .init(id: next)]
         }
         _modify
         {
-            let next:Unidoc.Scalar = self.zone + self.count * .extension
+            let next:Unidoc.Group.ID = self.zone[extension: self.count]
             yield &self.table[signature, default: .init(id: next)]
         }
     }
@@ -211,7 +211,7 @@ extension Unidoc.Linker.Extensions
 }
 extension Unidoc.Linker.Extensions
 {
-    func byNested() -> [Int32: Unidoc.Scalar]
+    func byNested() -> [Int32: Unidoc.Group.ID]
     {
         self.table.values.reduce(into: [:])
         {

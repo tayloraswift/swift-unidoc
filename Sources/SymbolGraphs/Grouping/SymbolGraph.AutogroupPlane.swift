@@ -1,7 +1,7 @@
-extension SymbolGraph.Plane
+extension SymbolGraph
 {
     @frozen public
-    enum Autogroup:SymbolGraph.PlaneType
+    enum AutogroupPlane:SymbolGraph.PlaneType
     {
         @inlinable public static
         var plane:SymbolGraph.Plane { .autogroup }

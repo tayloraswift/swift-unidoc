@@ -32,7 +32,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                 return target
             }
             else if
-                let volume:Unidoc.VolumeMetadata = self.volumes[scalar.zone],
+                let volume:Unidoc.VolumeMetadata = self.volumes[scalar.edition],
                 let uri:URI = uri(volume)
             {
                 let target:String = "\(uri)"
@@ -110,6 +110,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                     case .culture(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
                     case .decl(let vertex):     Swiftinit.Docs[$0, vertex.shoot]
                     case .file:                 nil
+                    case .product(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
                     case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
                     case .global:               Swiftinit.Docs[$0]
                     }

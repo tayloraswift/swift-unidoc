@@ -22,7 +22,7 @@ extension Unidoc.Vertex
         public
         var details:Unidoc.Passage?
         public
-        var group:Unidoc.Scalar?
+        var group:Unidoc.Group.ID?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -31,7 +31,7 @@ extension Unidoc.Vertex
             census:Unidoc.Census = .init(),
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            group:Unidoc.Scalar? = nil)
+            group:Unidoc.Group.ID? = nil)
         {
             self.id = id
 
@@ -48,14 +48,8 @@ extension Unidoc.Vertex
 extension Unidoc.Vertex.Culture
 {
     @inlinable public
-    var shoot:Unidoc.Shoot
-    {
-        .init(stem: self.stem)
-    }
+    var shoot:Unidoc.Shoot { .init(stem: self.stem) }
 
     @inlinable public
-    var stem:Unidoc.Stem
-    {
-        .init(self.module.id)
-    }
+    var stem:Unidoc.Stem { .module(self.module.id) }
 }

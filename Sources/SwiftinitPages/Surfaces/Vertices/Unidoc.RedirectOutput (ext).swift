@@ -41,6 +41,7 @@ extension Unidoc.RedirectOutput:HTTP.ServerResponseFactory
         case .decl(let vertex)?:    Swiftinit.Docs[self.volume,
             self.matches.count > 1 ? .init(stem: vertex.stem) : vertex.shoot]
         case .file?, nil:           nil
+        case .product(let vertex)?: Swiftinit.Docs[self.volume, vertex.shoot]
         case .foreign(let vertex)?: Swiftinit.Docs[self.volume, vertex.shoot]
         case .global?:              Swiftinit.Docs[self.volume]
         }

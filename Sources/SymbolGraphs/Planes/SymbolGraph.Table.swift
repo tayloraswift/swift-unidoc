@@ -15,6 +15,22 @@ extension SymbolGraph
         }
     }
 }
+extension SymbolGraph.Table
+{
+    @inlinable public
+    init(viewing elements:consuming [Element])
+    {
+        self.init(storage: .init(elements: elements))
+    }
+}
+extension SymbolGraph.Table:ExpressibleByArrayLiteral
+{
+    @inlinable public
+    init(arrayLiteral:Element...)
+    {
+        self.init(viewing: arrayLiteral)
+    }
+}
 extension SymbolGraph.Table:Equatable where Element:Equatable
 {
 }
@@ -41,21 +57,13 @@ extension SymbolGraph.Table
     func map<T>(_ transform:(_ address:Int32, _ element:Element) throws -> T)
         rethrows -> SymbolGraph.Table<Type, T>
     {
-        .init(storage: .init(elements: try self.indices.map { try transform($0, self[$0]) }))
+        .init(viewing: try self.indices.map { try transform($0, self[$0]) })
     }
 
     @inlinable public
     init(repeating element:Element, count:Int)
     {
-        self.init(storage: .init(elements: .init(repeating: element, count: count)))
-    }
-}
-extension SymbolGraph.Table:ExpressibleByArrayLiteral
-{
-    @inlinable public
-    init(arrayLiteral:Element...)
-    {
-        self.init(storage: .init(elements: arrayLiteral))
+        self.init(viewing: .init(repeating: element, count: count))
     }
 }
 extension SymbolGraph.Table:Sequence

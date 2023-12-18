@@ -24,7 +24,7 @@ extension SymbolGraph
 extension SymbolGraph.DeclNode:SymbolGraphNode
 {
     public
-    typealias Plane = SymbolGraph.Plane.Decl
+    typealias Plane = SymbolGraph.DeclPlane
     public
     typealias ID = Symbol.Decl
 

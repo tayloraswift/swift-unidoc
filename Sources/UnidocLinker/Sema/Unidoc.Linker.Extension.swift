@@ -5,7 +5,7 @@ extension Unidoc.Linker
 {
     struct Extension:Identifiable, Equatable, Sendable
     {
-        let id:Unidoc.Scalar
+        let id:Unidoc.Group.ID
 
         var conformances:[Unidoc.Scalar]
         var features:[Unidoc.Scalar]
@@ -15,7 +15,7 @@ extension Unidoc.Linker
         var overview:Unidoc.Passage?
         var details:Unidoc.Passage?
 
-        init(id:Unidoc.Scalar,
+        init(id:Unidoc.Group.ID,
             conformances:[Unidoc.Scalar] = [],
             features:[Unidoc.Scalar] = [],
             nested:[Unidoc.Scalar] = [],

@@ -39,8 +39,9 @@ extension Unidoc.Linker.Mesh
 {
     init(
         extensions:borrowing Unidoc.Linker.Extensions,
-        articles:consuming [Unidoc.Vertex.Article],
+        products:consuming [Unidoc.Vertex.Product],
         cultures:consuming [Unidoc.Vertex.Culture],
+        articles:consuming [Unidoc.Vertex.Article],
         decls:consuming [Unidoc.Vertex.Decl],
         groups:consuming Unidoc.Volume.Groups,
         context:borrowing Unidoc.Linker)
@@ -161,6 +162,7 @@ extension Unidoc.Linker.Mesh
                 cultures: cultures,
                 decls: decls,
                 files: files,
+                products: products,
                 foreign: foreign,
                 global: .init(id: context.current.id.global, snapshot: snapshot)),
             groups: groups,

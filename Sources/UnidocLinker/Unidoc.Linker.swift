@@ -111,7 +111,8 @@ extension Unidoc.Linker
     {
         var tables:Tables = .init(context: consume self)
 
-        let cultures:[Unidoc.Vertex.Culture] = tables.link()
+        let products:[Unidoc.Vertex.Product] = tables.linkProducts()
+        let cultures:[Unidoc.Vertex.Culture] = tables.linkCultures()
 
         let articles:[Unidoc.Vertex.Article] = tables.articles
         let decls:[Unidoc.Vertex.Decl] = tables.decls
@@ -121,8 +122,9 @@ extension Unidoc.Linker
         self = (consume tables).context
 
         return .init(extensions: extensions,
-            articles: articles,
+            products: products,
             cultures: cultures,
+            articles: articles,
             decls: decls,
             groups: groups,
             context: self)
@@ -146,7 +148,6 @@ extension Unidoc.Linker
         self.current.metadata.package == package ?
         nil : self.byPackageIdentifier[package]
     }
-    private
     subscript(package:Symbol.Package) -> Graph?
     {
         self.current.metadata.package == package ?

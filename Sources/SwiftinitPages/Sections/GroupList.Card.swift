@@ -64,6 +64,15 @@ extension GroupList.Card:HyperTextOutputStreamable
                 $0 ?= self.overview
             }
 
+        case .product(let vertex):
+            html[.li, { $0.class = "product" }]
+            {
+                $0[link: self.target] = vertex.symbol
+
+                //  Should always be nil right now, but eventually we want to support this.
+                $0 ?= self.overview
+            }
+
         case .file, .foreign, .global:
             //  unimplemented
             break

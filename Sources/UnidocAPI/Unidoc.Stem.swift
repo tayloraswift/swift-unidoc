@@ -96,7 +96,7 @@ extension Unidoc.Stem:Comparable
         lhs.rawValue < rhs.rawValue
     }
 }
-extension Unidoc.Stem:ExpressibleByStringLiteral
+extension Unidoc.Stem:ExpressibleByStringLiteral, ExpressibleByStringInterpolation
 {
     @inlinable public
     init(stringLiteral:String)

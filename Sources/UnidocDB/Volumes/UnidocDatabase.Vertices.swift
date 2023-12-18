@@ -89,6 +89,7 @@ extension UnidocDatabase.Vertices
                 $0 += vertices.cultures.lazy.map(Unidoc.Vertex.culture(_:))
                 $0 += vertices.decls.lazy.map(Unidoc.Vertex.decl(_:))
                 $0 += vertices.files.lazy.map(Unidoc.Vertex.file(_:))
+                $0 += vertices.products.lazy.map(Unidoc.Vertex.product(_:))
                 $0 += vertices.foreign.lazy.map(Unidoc.Vertex.foreign(_:))
 
                 $0.append(Unidoc.Vertex.global(vertices.global))
