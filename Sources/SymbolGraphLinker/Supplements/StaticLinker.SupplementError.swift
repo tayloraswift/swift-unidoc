@@ -5,7 +5,6 @@ extension StaticLinker
 {
     enum SupplementError:Error, Equatable, Sendable
     {
-        case implicitConcatenation
         case multiple
         case untitled
     }
@@ -19,12 +18,6 @@ extension StaticLinker.SupplementError:Diagnostic
     {
         switch self
         {
-        case .implicitConcatenation:
-            output[.warning] = """
-            markdown supplement extends a symbol that already has a documentation comment, \
-            and no merge behavior was specified
-            """
-
         case .multiple:
             output[.warning] = """
             markdown supplement extends a symbol that already has a supplement
