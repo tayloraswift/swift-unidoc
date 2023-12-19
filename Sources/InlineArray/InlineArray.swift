@@ -1,3 +1,4 @@
+@frozen public
 enum InlineArray<Element>
 {
     case one  (Element)
@@ -10,6 +11,15 @@ extension InlineArray:ExpressibleByArrayLiteral
     {
         self = arrayLiteral.count == 1 ? .one(arrayLiteral[0]) : .some(arrayLiteral)
     }
+}
+extension InlineArray:Equatable where Element:Equatable
+{
+}
+extension InlineArray:Hashable where Element:Hashable
+{
+}
+extension InlineArray:Sendable where Element:Sendable
+{
 }
 extension InlineArray:Sequence
 {

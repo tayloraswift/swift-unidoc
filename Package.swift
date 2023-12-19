@@ -32,6 +32,9 @@ let package:Package = .init(
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "IP", targets: ["IP"]),
+        .library(name: "InlineArray", targets: ["InlineArray"]),
+        .library(name: "InlineBuffer", targets: ["InlineBuffer"]),
+        .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
@@ -242,8 +245,11 @@ let package:Package = .init(
 
         .target(name: "IP"),
 
+        .target(name: "InlineArray"),
+
         .target(name: "InlineBuffer"),
 
+        .target(name: "InlineDictionary"),
 
         .target(name: "JSONAST"),
 
@@ -425,6 +431,8 @@ let package:Package = .init(
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
+                .target(name: "InlineArray"),
+                .target(name: "InlineDictionary"),
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "SemanticVersions"),
