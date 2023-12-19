@@ -423,7 +423,9 @@ extension Unidoc.Vertex:BSONDocumentDecodable
 
         case .product?:
             self = .product(.init(id: id,
-                requirements: try bson[.requirements].decode(),
+                //  Although this field is always present in the database, it may be removed
+                //  through query projection.
+                requirements: try bson[.requirements]?.decode() ?? [],
                 symbol: try bson[.symbol].decode(),
                 type: try bson[.product].decode(),
                 group: try bson[.group]?.decode()))

@@ -1,6 +1,6 @@
 import HTML
 
-enum AutomaticHeading
+enum AutomaticHeading:Equatable, Comparable
 {
     case packageTags
 
@@ -8,13 +8,14 @@ enum AutomaticHeading
     case packageDependencies
     case platformRequirements
     case snapshotInformation
-    case allProducts
     case allModules
+    case allProducts
+    case allProductConstituents
 
     case miscellaneous
-    case otherProducts
     case otherModules
     case otherMembers
+    case otherProducts
 
     case seeAlso
 
@@ -42,13 +43,14 @@ extension AutomaticHeading:Identifiable
         case .packageDependencies:      "ss:package-dependencies"
         case .platformRequirements:     "ss:platform-requirements"
         case .snapshotInformation:      "ss:snapshot-information"
-        case .allProducts:              "ss:all-products"
         case .allModules:               "ss:all-modules"
+        case .allProducts:              "ss:all-products"
+        case .allProductConstituents:   "ss:all-product-constituents"
 
         case .miscellaneous:            "ss:misc"
-        case .otherProducts:            "ss:other-products"
-        case .otherModules:             "ss:other-modules"
         case .otherMembers:             "ss:other-members"
+        case .otherModules:             "ss:other-modules"
+        case .otherProducts:            "ss:other-products"
 
         case .seeAlso:                  "ss:see-also"
 
@@ -77,13 +79,14 @@ extension AutomaticHeading:CustomStringConvertible
         case .packageDependencies:      "Package Dependencies"
         case .platformRequirements:     "Platform Requirements"
         case .snapshotInformation:      "Snapshot Information"
-        case .allProducts:              "Products"
         case .allModules:               "Modules"
+        case .allProducts:              "Products"
+        case .allProductConstituents:   "Product Constituents"
 
         case .miscellaneous:            "Miscellaneous"
-        case .otherProducts:            "Other Products"
-        case .otherModules:             "Other Modules"
         case .otherMembers:             "Other Members in Extension"
+        case .otherModules:             "Other Modules"
+        case .otherProducts:            "Other Products"
 
         case .seeAlso:                  "See Also"
 

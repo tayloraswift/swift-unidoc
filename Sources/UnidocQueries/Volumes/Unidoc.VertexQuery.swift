@@ -243,7 +243,8 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
                             //  TODO: we only need this for top-level queries and
                             //  foreign vertices!
-                            .tree,
+                            .products,
+                            .cultures,
 
                             .latest,
                             .realm,

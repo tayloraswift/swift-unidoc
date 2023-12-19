@@ -58,7 +58,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.VersionedPage
 {
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
+    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .product(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -74,5 +74,140 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VersionedPage
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
+
+        //  Does this product contain a module with the same name as the product?
+        for id:Unidoc.Scalar in self.vertex.requirements
+        {
+            guard
+            case .culture(let vertex) = self.context.vertices[id],
+                vertex.module.name == self.vertex.symbol
+            else
+            {
+                continue
+            }
+
+            main[.section, { $0.class = "notice" }]
+            {
+                $0[.p]
+                {
+                    $0 += "This page is for the SwiftPM "
+                    $0[.em] = "build product"
+                    $0 += " named "
+                    $0[.code] = self.vertex.symbol
+                    $0 += "."
+                }
+                $0[.p]
+                {
+                    $0 += "The "
+                    $0[.a]
+                    {
+                        $0.href = "\(Swiftinit.Docs[self.volume])"
+                    } = self.volume.title
+                    $0 += " package also contains "
+                    $0[.a]
+                    {
+                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.shoot])"
+                    } = "a module"
+                    $0 += " with the same name."
+                }
+            }
+
+            break
+        }
+
+        main[.section, { $0.class = "details" }]
+        {
+            if  case .library(let type) = self.vertex.type
+            {
+                $0[.h2] = "Product Information"
+
+                $0[.dl]
+                {
+                    $0[.dt] = "Linker mode"
+                    $0[.dd] = switch type
+                    {
+                    case .automatic:    "automatic"
+                    case .dynamic:      "dynamic"
+                    case .static:       "static"
+                    }
+                }
+            }
+
+            let heading:AutomaticHeading = .allProductConstituents
+            $0[.h2] { $0.id = heading.id } = heading
+
+            $0[.table, { $0.class = "constituents" }]
+            {
+                $0[.thead]
+                {
+                    $0[.tr]
+                    {
+                        $0[.th] = "Name"
+                        $0[.th] = "Dependency"
+                    }
+                }
+                $0[.tbody]
+                {
+                    for id:Unidoc.Scalar in self.vertex.requirements
+                    {
+                        guard
+                        let vertex:Unidoc.Vertex = self.context.vertices[id]
+                        else
+                        {
+                            continue
+                        }
+
+                        $0[.tr]
+                        {
+                            switch vertex
+                            {
+                            case .culture(let vertex):
+                                $0[.td]
+                                {
+                                    $0[.a]
+                                    {
+                                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.shoot])"
+                                    } = vertex.module.name
+                                }
+                                $0[.td]
+                                {
+                                    $0[.span] { $0.class = "placeholder" } = "none"
+                                }
+
+                            case .product(let vertex):
+                                guard
+                                let volume:Unidoc.VolumeMetadata =
+                                    self.context.volumes[id.edition]
+                                else
+                                {
+                                    return
+                                }
+
+                                $0[.td]
+                                {
+                                    $0[.a]
+                                    {
+                                        $0.href = "\(Swiftinit.Docs[volume, vertex.shoot])"
+                                    } = vertex.symbol
+                                }
+
+                                $0[.td]
+                                {
+                                    $0[.a]
+                                    {
+                                        $0.href = "\(Swiftinit.Docs[volume])"
+                                    } = "\(volume.symbol.package)"
+                                }
+
+                            default:
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        main += self.groups
     }
 }

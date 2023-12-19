@@ -26,7 +26,13 @@ extension Swiftinit.Sidebar
     static
     func package(volume:Unidoc.VolumeMetadata) -> Self
     {
-        .init(volume: volume, nouns: volume.tree)
+        .init(volume: volume, nouns: volume.cultures)
+    }
+
+    static
+    func product(volume:Unidoc.VolumeMetadata) -> Self
+    {
+        .init(volume: volume, nouns: volume.products)
     }
 
     static

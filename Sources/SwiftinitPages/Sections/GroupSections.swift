@@ -174,6 +174,7 @@ extension GroupSections
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
         self.topics.sort { $0.id < $1.id }
+        self.other.sort { $0.0 < $1.0 }
     }
 }
 extension GroupSections

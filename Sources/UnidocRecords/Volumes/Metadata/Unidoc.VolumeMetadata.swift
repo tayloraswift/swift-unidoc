@@ -31,7 +31,9 @@ extension Unidoc
 
         /// Contains a tree of the cultures in this volume.
         public
-        var tree:[Noun]
+        var products:[Noun]
+        public
+        var cultures:[Noun]
 
         public
         var abi:MinorVersion
@@ -45,7 +47,8 @@ extension Unidoc
             latest:Bool,
             realm:Unidoc.Realm?,
             patch:PatchVersion? = nil,
-            tree:[Noun] = [])
+            products:[Noun] = [],
+            cultures:[Noun] = [])
         {
             self.abi = VolumeABI.version
 
@@ -57,7 +60,8 @@ extension Unidoc
             self.latest = latest
             self.realm = realm
             self.patch = patch
-            self.tree = tree
+            self.products = products
+            self.cultures = cultures
         }
     }
 }
@@ -104,7 +108,9 @@ extension Unidoc.VolumeMetadata
         case commit = "H"
 
         case patch = "S"
-        case tree = "X"
+
+        case products = "W"
+        case cultures = "X"
 
         case planes_min = "C"
 
@@ -146,7 +152,9 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
         bson[.latest] = self.latest ? true : nil
         bson[.realm] = self.realm
         bson[.patch] = self.patch
-        bson[.tree] = Unidoc.NounTable.init(eliding: self.tree)
+
+        bson[.products] = Unidoc.NounTable.init(eliding: self.products)
+        bson[.cultures] = Unidoc.NounTable.init(eliding: self.cultures)
 
         bson[.planes_min] = self.planes.min
 
@@ -177,7 +185,10 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
             latest: try bson[.latest]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             patch: try bson[.patch]?.decode(),
-            tree: try bson[.tree]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])
+            products: try bson[.products]?.decode(
+                as: Unidoc.NounTable.self, with: \.rows) ?? [],
+            cultures: try bson[.cultures]?.decode(
+                as: Unidoc.NounTable.self, with: \.rows) ?? [])
 
         self.abi = try bson[.abi].decode()
     }

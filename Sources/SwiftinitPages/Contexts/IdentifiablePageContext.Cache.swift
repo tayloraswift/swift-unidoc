@@ -48,13 +48,13 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 }
 extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
 {
-    subscript(article scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Article, url:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Culture, url:String?)?
     {
         mutating get
         {
-            if  case .article(let master)? = self.vertices[scalar]
+            if  case .culture(let vertex)? = self.vertices[scalar]
             {
-                (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
             }
             else
             {
@@ -63,13 +63,13 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         }
     }
 
-    subscript(culture scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Culture, url:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Article, url:String?)?
     {
         mutating get
         {
-            if  case .culture(let master)? = self.vertices[scalar]
+            if  case .article(let vertex)? = self.vertices[scalar]
             {
-                (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
             }
             else
             {
@@ -78,13 +78,13 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (master:Unidoc.Vertex.Decl, url:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Decl, url:String?)?
     {
         mutating get
         {
-            if  case .decl(let master)? = self.vertices[scalar]
+            if  case .decl(let vertex)? = self.vertices[scalar]
             {
-                (master, self.load(scalar) { Swiftinit.Docs[$0, master.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
             }
             else
             {

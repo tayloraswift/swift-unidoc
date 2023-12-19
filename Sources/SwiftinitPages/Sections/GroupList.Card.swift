@@ -25,19 +25,63 @@ extension GroupList.Card:HyperTextOutputStreamable
     {
         switch self.vertex
         {
+        case .product(let vertex):
+            html[.li, { $0.class = "product" }]
+            {
+                $0[.span]
+                {
+                    $0[link: self.target] = vertex.symbol
+
+                    let tag:String
+                    switch vertex.type
+                    {
+                    case .executable:   tag = "executable"
+                    case .library:      tag = "library"
+                    case .macro:        tag = "macro"
+                    case .plugin:       tag = "plugin"
+                    case .snippet:      tag = "snippet"
+                    case .test:         tag = "test"
+                    }
+
+                    $0[.span] { $0.class = "parenthetical" } = tag
+                }
+
+                //  Should always be nil right now, but eventually we want to support this.
+                $0 ?= self.overview
+            }
+
+        case .culture(let vertex):
+            html[.li, { $0.class = "module" }]
+            {
+                $0[.span]
+                {
+                    $0[link: self.target] = vertex.module.name
+
+                    let tag:String
+                    switch vertex.module.type
+                    {
+                    case .binary:       return
+                    case .executable:   tag = "executable"
+                    case .regular:      return
+                    case .macro:        tag = "macro"
+                    case .plugin:       tag = "plugin"
+                    case .snippet:      tag = "snippet"
+                    case .system:       tag = "system"
+                    case .test:         tag = "test"
+                    }
+
+                    $0[.span] { $0.class = "parenthetical" } = tag
+                }
+
+                $0 ?= self.overview
+            }
+
         case .article(let vertex):
             html[.li, { $0.class = "article" }]
             {
                 $0[link: self.target] { $0[.h3] = vertex.headline.safe }
                 $0 ?= self.overview
                 $0[link: self.target] { $0.class = "read-more" } = "Read More"
-            }
-
-        case .culture(let vertex):
-            html[.li, { $0.class = "module" }]
-            {
-                $0[link: self.target] = vertex.module.id
-                $0 ?= self.overview
             }
 
         case .decl(let vertex):
@@ -61,15 +105,6 @@ extension GroupList.Card:HyperTextOutputStreamable
                     } = vertex.signature.abridged
                 }
 
-                $0 ?= self.overview
-            }
-
-        case .product(let vertex):
-            html[.li, { $0.class = "product" }]
-            {
-                $0[link: self.target] = vertex.symbol
-
-                //  Should always be nil right now, but eventually we want to support this.
                 $0 ?= self.overview
             }
 
