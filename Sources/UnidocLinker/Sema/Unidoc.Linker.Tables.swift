@@ -396,7 +396,7 @@ extension Unidoc.Linker.Tables
             var vertex:Unidoc.Vertex.Article = .init(id: scalar,
                 stem: .article(namespace.module, symbol.name),
                 culture: namespace.culture,
-                file: node.article.file.map { self.current.id + $0 },
+                readme: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,
                 group: self.groupContainingMember[a])
 
@@ -497,6 +497,8 @@ extension Unidoc.Linker.Tables
                 {
                     $0.link(article: article)
                 }
+
+                vertex.readme = article.file.map { self.current.id + $0 }
             }
 
             self.decls.append(vertex)

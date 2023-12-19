@@ -122,6 +122,10 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
             {
                 $0 ?= self.context.link(file: location.file, line: location.position.line)
             }
+            if  let file:Unidoc.Scalar = self.vertex.readme
+            {
+                $0 ?= self.context.link(file: file)
+            }
         }
 
         if  let _:[String] = self.vertex.signature.spis
