@@ -37,6 +37,8 @@ extension Unidoc.Vertex
         public
         var renamed:Unidoc.Scalar?
         public
+        var readme:Unidoc.Scalar?
+        public
         var file:Unidoc.Scalar?
         //  TODO: consider combining this into flags.
         public
@@ -63,6 +65,7 @@ extension Unidoc.Vertex
             culture:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
             renamed:Unidoc.Scalar? = nil,
+            readme:Unidoc.Scalar? = nil,
             file:Unidoc.Scalar? = nil,
             position:SourcePosition? = nil,
             overview:Unidoc.Passage? = nil,
@@ -86,8 +89,8 @@ extension Unidoc.Vertex
             self.group = group
 
             self.renamed = renamed
+            self.readme = readme
             self.file = file
-
             self.position = position
             self.overview = overview
             self.details = details

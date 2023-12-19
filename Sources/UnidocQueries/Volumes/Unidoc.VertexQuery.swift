@@ -344,7 +344,8 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         {
                             $0[edges.volumes] = .init
                             {
-                                $0[.ne] = Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.id]
+                                $0[.ne] =
+                                    Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.id]
                             }
                         }
                     }
