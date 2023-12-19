@@ -74,7 +74,7 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.VersionedPage
 
             $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
 
-            if  let file:Unidoc.Scalar = self.vertex.file
+            if  let file:Unidoc.Scalar = self.vertex.readme
             {
                 $0 ?= self.context.link(file: file)
             }

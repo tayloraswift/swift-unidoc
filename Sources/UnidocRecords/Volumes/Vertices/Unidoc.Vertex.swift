@@ -217,8 +217,10 @@ extension Unidoc.Vertex
         /// Only appears in ``Decl``. The field contains a scalar.
         case renamed = "a"
         /// Can appear in ``Article``, ``Culture``, or ``Decl``.
-        /// The field contains a scalar. In ``Culture``, it points to the readme
-        /// article for the module.
+        /// The field contains a scalar. In ``Article`` or ``Decl``, the file references a
+        /// markdown supplement.
+        case readme = "m"
+        /// Only appears in ``Decl``. The field contains a scalar.
         case file = "f"
 
         /// Only appears in ``Decl``.
@@ -264,7 +266,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.stem] = self.stem
 
             bson[.culture] = self.culture
-            bson[.file] = self.file
+            bson[.readme] = self.readme
             bson[.headline] = self.headline
 
             bson[.overview] = self.overview
@@ -304,6 +306,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope.isEmpty ? nil : self.scope
             bson[.renamed] = self.renamed
+            bson[.readme] = self.readme
             bson[.file] = self.file
 
             bson[.position] = self.position
@@ -322,7 +325,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.stem] = self.stem
 
             bson[.module] = self.module
-            bson[.file] = self.readme
+            bson[.readme] = self.readme
             bson[.census] = self.census
 
             bson[.overview] = self.overview
@@ -371,7 +374,8 @@ extension Unidoc.Vertex:BSONDocumentDecodable
         case .module?:
             self = .culture(.init(id: id,
                 module: try bson[.module].decode(),
-                readme: try bson[.file]?.decode(),
+                //  Needed until we can migrate the database.
+                readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
                 census: try bson[.census].decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
@@ -401,6 +405,7 @@ extension Unidoc.Vertex:BSONDocumentDecodable
                 culture: culture,
                 scope: try bson[.scope]?.decode() ?? [],
                 renamed: try bson[.renamed]?.decode(),
+                readme: try bson[.readme]?.decode(),
                 file: try bson[.file]?.decode(),
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),
@@ -412,7 +417,8 @@ extension Unidoc.Vertex:BSONDocumentDecodable
             self = .article(.init(id: id,
                 stem: try bson[.stem].decode(),
                 culture: try bson[.culture].decode(),
-                file: try bson[.file]?.decode(),
+                //  Needed until we can migrate the database.
+                readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
                 headline: try bson[.headline].decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),

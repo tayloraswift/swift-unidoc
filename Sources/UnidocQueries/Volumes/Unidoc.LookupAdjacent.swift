@@ -104,7 +104,8 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
+            let dependencies:
+                Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
                 in: volume / Unidoc.VolumeMetadata[.dependencies])
             let extensions:Mongo.List<Unidoc.Group, Mongo.KeyPath> = .init(
                 in: groups)

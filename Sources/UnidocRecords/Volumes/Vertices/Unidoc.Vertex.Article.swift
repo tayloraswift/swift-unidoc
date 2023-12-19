@@ -16,7 +16,11 @@ extension Unidoc.Vertex
         public
         var culture:Unidoc.Scalar
         public
-        var file:Unidoc.Scalar?
+        var readme:Unidoc.Scalar?
+
+        @available(*, deprecated, renamed: "readme")
+        public
+        var file:Unidoc.Scalar? { self.readme }
 
         public
         var headline:MarkdownBytecode
@@ -31,7 +35,7 @@ extension Unidoc.Vertex
         init(id:Unidoc.Scalar,
             stem:Unidoc.Stem,
             culture:Unidoc.Scalar,
-            file:Unidoc.Scalar? = nil,
+            readme:Unidoc.Scalar? = nil,
             headline:MarkdownBytecode = [],
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
@@ -41,7 +45,7 @@ extension Unidoc.Vertex
             self.stem = stem
 
             self.culture = culture
-            self.file = file
+            self.readme = readme
 
             self.headline = headline
             self.overview = overview

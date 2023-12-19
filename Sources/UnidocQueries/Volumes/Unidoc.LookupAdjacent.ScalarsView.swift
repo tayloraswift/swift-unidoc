@@ -42,6 +42,7 @@ extension Unidoc.LookupAdjacent.ScalarsView
             $0.append(self.path / Unidoc.Vertex[.culture])
             $0.append(self.path / Unidoc.Vertex[.extendee])
             $0.append(self.path / Unidoc.Vertex[.renamed])
+            $0.append(self.path / Unidoc.Vertex[.readme])
             $0.append(self.path / Unidoc.Vertex[.file])
         }
 
