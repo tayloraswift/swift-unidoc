@@ -185,19 +185,19 @@ extension IdentifiablePageContext:Swiftinit.VersionedPageContext
     where ID:VersionedPageIdentifier
 {
     @usableFromInline internal
-    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
-    {
-        self.cache[article: article].map
-        {
-            .init(display: $0.headline.safe, target: $1)
-        }
-    }
-    @usableFromInline internal
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {
         self.cache[culture: module].map
         {
             .init(display: $0.module.id, target: $1)
+        }
+    }
+    @usableFromInline internal
+    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+    {
+        self.cache[article: article].map
+        {
+            .init(display: $0.headline.safe, target: $1)
         }
     }
 

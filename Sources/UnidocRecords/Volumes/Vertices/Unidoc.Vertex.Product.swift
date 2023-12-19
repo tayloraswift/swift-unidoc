@@ -1,4 +1,5 @@
 import SymbolGraphs
+import Symbols
 import UnidocAPI
 
 extension Unidoc.Vertex
@@ -39,5 +40,5 @@ extension Unidoc.Vertex.Product
     var shoot:Unidoc.Shoot { .init(stem: self.stem) }
 
     @inlinable public
-    var stem:Unidoc.Stem { .product(self.symbol) }
+    var stem:Unidoc.Stem { .product(Symbol.Module.init(mangling: self.symbol)) }
 }

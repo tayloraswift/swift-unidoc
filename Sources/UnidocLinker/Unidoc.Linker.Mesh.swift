@@ -18,20 +18,24 @@ extension Unidoc.Linker
         public
         var trees:[Unidoc.TypeTree]
         public
-        var tree:[Unidoc.Noun]
+        var products:[Unidoc.Noun]
+        public
+        var cultures:[Unidoc.Noun]
 
         private
         init(vertices:Unidoc.Volume.Vertices,
             groups:Unidoc.Volume.Groups,
             index:JSON,
             trees:[Unidoc.TypeTree],
-            tree:[Unidoc.Noun])
+            products:[Unidoc.Noun],
+            cultures:[Unidoc.Noun])
         {
             self.vertices = vertices
             self.groups = groups
             self.index = index
             self.trees = trees
-            self.tree = tree
+            self.products = products
+            self.cultures = cultures
         }
     }
 }
@@ -162,13 +166,21 @@ extension Unidoc.Linker.Mesh
                 cultures: cultures,
                 decls: decls,
                 files: files,
-                products: products,
+                products: (copy products),
                 foreign: foreign,
                 global: .init(id: context.current.id.global, snapshot: snapshot)),
             groups: groups,
             index: index,
             trees: trees,
-            tree: cultures.map
+            products: products.map
+            {
+                .init(shoot: $0.shoot, style: .stem(.package))
+            }
+                .sorted
+            {
+                $0.shoot < $1.shoot
+            },
+            cultures: cultures.map
             {
                 .init(shoot: $0.shoot, style: .stem(.package))
             }

@@ -566,7 +566,8 @@ extension UnidocDatabase
             latest: snapshot.id == latestRelease,
             realm: realm,
             patch: thisRelease,
-            tree: mesh.tree)
+            products: mesh.products,
+            cultures: mesh.cultures)
 
         let volume:Unidoc.Volume = .init(latest: latestRelease,
             metadata: metadata,

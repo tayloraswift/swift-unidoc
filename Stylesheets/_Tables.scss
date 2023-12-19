@@ -1,3 +1,22 @@
+span.placeholder,
+span.parenthetical
+{
+    color: $light-foreground-semi;
+    font-style: italic;
+}
+
+span.parenthetical::before
+{
+    content: '(';
+    font-style: normal;
+    margin-left: 0.4em;
+}
+span.parenthetical::after
+{
+    content: ')';
+    font-style: normal;
+}
+
 section.details table
 {
     th
@@ -24,11 +43,19 @@ section.details table
         padding-left: 0;
     }
 }
+section.details table.constituents,
 section.details table.dependencies,
 section.details table.platforms,
 section.details table.tags
 {
     width: 100%;
+}
+section.details table.constituents
+{
+    td
+    {
+        font-style: italic;
+    }
 }
 section.details table.dependencies
 {
@@ -74,27 +101,6 @@ section.details table.tags
     td.graph > .abi.uplinking:first-child::before
     {
         content: '⟳';
-    }
-}
-section.details
-{
-    span.placeholder,
-    span.parenthetical
-    {
-        color: $light-foreground-semi;
-        font-style: italic;
-    }
-
-    span.parenthetical::before
-    {
-        content: '(';
-        font-style: normal;
-        margin-left: 0.4em;
-    }
-    span.parenthetical::after
-    {
-        content: ')';
-        font-style: normal;
     }
 }
 section.details

@@ -13,27 +13,25 @@ section.notice
     font-style: italic;
     color: $light-accent-barbie-pink;
 
+    code
+    {
+        font-style: normal;
+        background-color: transparent;
+    }
+
     a
     {
-        text-decoration: dashed underline;
+        text-decoration: underline;
+        text-decoration-style: dashed;
     }
     a:hover
     {
-        text-decoration: solid underline;
+        text-decoration-style: solid;
     }
 
     em
     {
         font-weight: 700;
-    }
-}
-
-section.notice.extendee
-{
-    code
-    {
-        font-style: normal;
-        background-color: transparent;
     }
 }
 
