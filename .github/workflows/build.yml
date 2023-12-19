@@ -14,8 +14,8 @@ jobs:
         strategy:
             matrix:
                 image:
-                -   5.9.1-amazonlinux2
-                -   5.9.1-jammy
+                -   5.9.2-amazonlinux2
+                -   5.9.2-jammy
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
@@ -44,5 +44,5 @@ jobs:
                 with:
                     name: unidoc-tools-${{ matrix.image }}
                     path: |
-                        .build/release/UnidocServer
+                        .build/release/SwiftinitServer
                         .build/release/UnidocBuild
