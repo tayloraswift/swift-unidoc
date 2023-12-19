@@ -1,4 +1,6 @@
 import FNV1
+import InlineArray
+import InlineDictionary
 import LexicalPaths
 import Symbols
 import Unidoc
