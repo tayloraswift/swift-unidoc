@@ -578,19 +578,6 @@ extension StaticLinker
                 fallthrough
             }
 
-            diagnostic:
-            if  case nil = supplement.parsed.metadata.merge
-            {
-                guard
-                case nil = supplement.parsed.overview, supplement.parsed.details.isEmpty
-                else
-                {
-                    self.tables.diagnostics[supplement.source] =
-                        SupplementError.implicitConcatenation
-                    break diagnostic
-                }
-            }
-
             let body:MarkdownDocumentation = comment.parse(
                 using: self.doccommentParser,
                 with: &self.tables.diagnostics)
