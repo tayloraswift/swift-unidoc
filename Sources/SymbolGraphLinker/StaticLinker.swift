@@ -2,6 +2,7 @@ import CodelinkResolution
 import Codelinks
 import DoclinkResolution
 import FNV1
+import InlineArray
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
