@@ -143,6 +143,8 @@ section.group ul
                 font-weight: normal;
                 font-size: 125%;
                 margin: 0.5rem 0;
+
+                text-decoration: underline;
             }
         }
         a.read-more
@@ -156,11 +158,12 @@ section.group ul
         margin-top: 2rem;
     }
 
+    > li.product,
     > li.module
     {
         margin: 0.5rem 0 0.5rem 0;
 
-        > a
+        > span:first-child
         {
             font-style: italic;
         }

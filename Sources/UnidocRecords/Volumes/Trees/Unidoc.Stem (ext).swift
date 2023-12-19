@@ -6,7 +6,7 @@ import UnidocAPI
 extension Unidoc.Stem
 {
     @inlinable internal static
-    func product(_ name:String) -> Self
+    func product(_ name:Symbol.Module) -> Self
     {
         "\(name)-product"
     }
