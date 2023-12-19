@@ -38,8 +38,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         }
         catch
         {
-            swift = try await toolchain.generateDocs(
-            for: try await .swift(in: workspace, clean: true))
+            swift = try await toolchain.generateDocs(for: try await .swift(
+                in: workspace,
+                clean: true))
         }
 
         let session:Mongo.Session = try await .init(from: pool)

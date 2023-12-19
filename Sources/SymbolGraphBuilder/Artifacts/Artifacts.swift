@@ -69,7 +69,7 @@ extension Artifacts
             //  Only dump symbols for library targets.
             switch sources.module.type
             {
-            case .binary:       continue
+            case .binary:       include += sources.include
             case .executable:   continue
             case .regular:      include += sources.include
             case .macro:        include += sources.include
