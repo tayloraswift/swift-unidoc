@@ -9,19 +9,19 @@ import UnidocRecords
 
 extension Swiftinit
 {
-    struct IndexRepoTagEndpoint:Sendable
+    struct PackageIndexTagEndpoint:Sendable
     {
-        let package:Symbol.Package
+        let package:Unidoc.Package
         let tag:String
 
-        init(package:Symbol.Package, tag:String)
+        init(package:Unidoc.Package, tag:String)
         {
             self.package = package
             self.tag = tag
         }
     }
 }
-extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
+extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
 {
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
@@ -35,8 +35,7 @@ extension Swiftinit.IndexRepoTagEndpoint:RestrictedEndpoint
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
-        let package:Unidoc.PackageMetadata = try await server.db.unidoc.package(
-            named: self.package,
+        let package:Unidoc.PackageMetadata = try await server.db.packages.find(id: self.package,
             with: session)
         else
         {

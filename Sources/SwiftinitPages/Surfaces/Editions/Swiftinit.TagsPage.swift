@@ -236,8 +236,10 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     {
                         $0[.span] { $0.class = "placeholder" } = "none"
                     }
-
                 }
+
+                $0[.dt] = "Hidden"
+                $0[.dd] = self.package.hidden ? "yes" : "no"
             }
 
             guard self.user?.maintains(package: self.package) ?? !format.secure
@@ -249,7 +251,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.alignPackage])"
+                $0.action = "\(Swiftinit.API[.packageAlign])"
                 $0.method = "post"
             }
                 content:
@@ -260,7 +262,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     {
                         $0.type = "hidden"
                         $0.name = "package"
-                        $0.value = "\(self.package.symbol)"
+                        $0.value = "\(self.package.id)"
                     }
 
                     $0[.input]
@@ -296,7 +298,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.indexRepoTag])"
+                $0.action = "\(Swiftinit.API[.packageConfig])"
                 $0.method = "post"
             }
                 content:
@@ -307,7 +309,39 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     {
                         $0.type = "hidden"
                         $0.name = "package"
-                        $0.value = "\(self.package.symbol)"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "hidden"
+                        $0.value = self.package.hidden ? "false" : "true"
+                    }
+                }
+                $0[.p]
+                {
+                    $0[.button] { $0.type = "submit" } = self.package.hidden
+                        ? "Unhide Package"
+                        : "Hide Package"
+                }
+            }
+
+            $0[.form]
+            {
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.API[.packageIndexTag])"
+                $0.method = "post"
+            }
+                content:
+            {
+                $0[.p]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
                     }
 
                     $0[.input]
@@ -319,7 +353,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Index GitHub Tag"
+                    $0[.button] { $0.type = "submit" } = "Index Package Tag (GitHub)"
                 }
             }
         }

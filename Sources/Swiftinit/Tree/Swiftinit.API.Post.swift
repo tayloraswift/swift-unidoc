@@ -3,9 +3,11 @@ extension Swiftinit.API
     @frozen public
     enum Post:String, Swiftinit.Method
     {
-        case alignPackage = "align-package"
-        case indexRepo = "index-repo"
-        case indexRepoTag = "index-repo-tag"
+        case packageAlign = "package-align"
+        case packageConfig = "package-config"
+        case packageIndex = "package-index"
+        case packageIndexTag = "package-index-tag"
+
         case uplinkAll = "uplink-all"
         case uplink
         case unlink

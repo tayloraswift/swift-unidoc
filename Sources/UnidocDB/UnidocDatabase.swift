@@ -160,10 +160,10 @@ extension UnidocDatabase
 
             try await self.packages.insert(some: package, with: session)
 
-            //  Regenerate the JSON list of all packages.
-            let index:SearchIndex<Int32> = try await self.packages.scan(with: session)
-
-            try await self.metadata.upsert(some: index, with: session)
+            if !package.hidden
+            {
+                try await self.rebuildPackageList(with: session)
+            }
 
             return (package, true)
 
@@ -581,8 +581,16 @@ extension UnidocDatabase
 }
 extension UnidocDatabase
 {
+    //  Regenerates the JSON list of all packages.
     public
-    func rebuild(queue:Bool = false, with session:Mongo.Session) async throws
+    func rebuildPackageList(with session:Mongo.Session) async throws
+    {
+        let index:SearchIndex<Int32> = try await self.packages.scan(with: session)
+        try await self.metadata.upsert(some: index, with: session)
+    }
+
+    public
+    func rebuildVolumes(queue:Bool = false, with session:Mongo.Session) async throws
     {
         if  queue
         {

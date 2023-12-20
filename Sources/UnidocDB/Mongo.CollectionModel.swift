@@ -388,19 +388,19 @@ extension Mongo.CollectionModel
     /// Sets the value of the specified field in the document with the specified identifier,
     /// returning true if the document was modified, false if the document was not modified,
     /// and nil if the document was not found.
-    @discardableResult
+    private
     func update(field:Mongo.KeyPath,
         of target:Element.ID,
-        to value:__owned some BSONEncodable,
+        to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
         try await self.update(field: field, by: "_id", of: target, to: value, with: session)
     }
-    @discardableResult
+    private
     func update(field:Mongo.KeyPath,
         by index:Mongo.KeyPath,
-        of key:__owned some BSONEncodable,
-        to value:__owned some BSONEncodable,
+        of key:some BSONEncodable,
+        to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
@@ -417,6 +417,37 @@ extension Mongo.CollectionModel
 
         let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.selected == 0 ? nil : updates.modified == 1
+    }
+}
+
+extension Mongo.CollectionModel where Element:MongoMasterCodingModel
+{
+    @discardableResult
+    func update(field:Element.CodingKey,
+        of target:Element.ID,
+        to value:some BSONEncodable,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(
+            field: Element[field],
+            of: target,
+            to: value,
+            with: session)
+    }
+
+    @discardableResult
+    func update(field:Element.CodingKey,
+        by index:Element.CodingKey,
+        of key:some BSONEncodable,
+        to value:some BSONEncodable,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(
+            field: Element[field],
+            by: Element[index],
+            of: key,
+            to: value,
+            with: session)
     }
 }
 

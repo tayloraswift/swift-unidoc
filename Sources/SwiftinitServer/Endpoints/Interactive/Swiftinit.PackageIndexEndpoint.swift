@@ -9,7 +9,7 @@ import UnidocRecords
 
 extension Swiftinit
 {
-    struct IndexRepoEndpoint:Sendable
+    struct PackageIndexEndpoint:Sendable
     {
         let owner:String
         let repo:String
@@ -21,7 +21,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.IndexRepoEndpoint:RestrictedEndpoint
+extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
 {
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {

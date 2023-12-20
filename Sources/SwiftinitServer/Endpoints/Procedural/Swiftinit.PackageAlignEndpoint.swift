@@ -8,11 +8,11 @@ extension Swiftinit
 {
     struct PackageAlignEndpoint:Sendable
     {
-        let package:Symbol.Package
+        let package:Unidoc.Package
         let realm:String?
         let force:Bool
 
-        init(package:Symbol.Package,
+        init(package:Unidoc.Package,
             realm:String?,
             force:Bool)
         {
@@ -57,8 +57,7 @@ extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
         }
 
         guard
-        let package:Unidoc.PackageMetadata = try await server.db.unidoc.package(
-            named: self.package,
+        let package:Unidoc.PackageMetadata = try await server.db.packages.find(id: self.package,
             with: session)
         else
         {
