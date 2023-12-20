@@ -147,35 +147,35 @@ extension Swiftinit.ClientAnnotation
                     suspicion -= 100
                 }
 
-            case .single("AppleWebKit", let version?):
+            case .single("AppleWebKit", .numeric(let version, _)?):
                 //  Modern WebKit version: might be a Barbie.
-                if  version.major >= 604
+                if  version >= 604
                 {
                     suspicion -= 1
                 }
 
-            case .single("Firefox", let version?):
+            case .single("Firefox", .numeric(let version, _)?):
                 //  Modern Firefox version: might be a Barbie.
-                if  version.major >= 115
+                if  version >= 115
                 {
                     suspicion -= 1
                 }
 
-            case .single("CriOS", let version?):
+            case .single("CriOS", .numeric(let version, _)?):
                 //  Modern Chrome version: might be a Barbie.
-                if  version.major >= 109
+                if  version >= 109
                 {
                     suspicion -= 1
                 }
 
-            case .single("Chrome", let version?):
+            case .single("Chrome", .numeric(let version, _)?):
                 //  Modern Chrome version: might be a Barbie.
-                if  version.major >= 109
+                if  version >= 109
                 {
                     suspicion -= 1
                 }
                 //  Very old Chrome version: probably a bot.
-                if  version.major < 90
+                if  version < 90
                 {
                     suspicion += 10
                 }
