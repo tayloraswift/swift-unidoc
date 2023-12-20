@@ -1,18 +1,21 @@
 extension UA
 {
     @frozen public
-    struct Version:Equatable, Hashable, Sendable
+    enum Version:Equatable, Hashable, Sendable
     {
-        public
-        let major:Int
-        public
-        let minor:String?
-
-        @inlinable public
-        init(major:Int, minor:String? = nil)
+        case numeric(Int, String?)
+        case nominal(String)
+    }
+}
+extension UA.Version
+{
+    @inlinable public
+    var major:Int?
+    {
+        switch self
         {
-            self.major = major
-            self.minor = minor
+        case .numeric(let major, _):    major
+        case .nominal:                  nil
         }
     }
 }
@@ -21,6 +24,11 @@ extension UA.Version:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        self.minor.map { "\(self.major).\($0)" } ?? "\(self.major)"
+        switch self
+        {
+        case .numeric(let major, let suffix?):  "\(major).\(suffix)"
+        case .numeric(let major, nil):          "\(major)"
+        case .nominal(let name):                name
+        }
     }
 }
