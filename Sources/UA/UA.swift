@@ -52,6 +52,12 @@ extension UA:CustomStringConvertible
 extension UA:LosslessStringConvertible
 {
     public
+    init(parsing description:String) throws
+    {
+        self.init(components: try ParsingRule.parse(description.utf8))
+    }
+
+    public
     init?(_ description:String)
     {
         do

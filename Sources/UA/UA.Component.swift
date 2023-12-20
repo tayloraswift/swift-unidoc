@@ -14,7 +14,7 @@ extension UA.Component
     @inlinable public static
     func single(_ name:String, _ major:Int, _ minor:String? = nil) -> Self
     {
-        .single(name, .init(major: major, minor: minor))
+        .single(name, .numeric(major, minor))
     }
 
     @inlinable public static

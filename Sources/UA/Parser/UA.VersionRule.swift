@@ -17,16 +17,18 @@ extension UA.VersionRule:ParsingRule
         where Source:Collection<UInt8>, Source.Index == Location
     {
         try input.parse(as: UnicodeEncoding.Slash.self)
-        let major:Int = try input.parse(
-            as: Pattern.UnsignedInteger<UnicodeDigit<Location, Terminal, Int>.Decimal>.self)
 
-        if  let _:Void = input.parse(as: UnicodeEncoding.Period?.self)
+        if  let (major, _):(Int, Void) = try? input.parse(as:
+                (
+                    Pattern.UnsignedInteger<UnicodeDigit<Location, Terminal, Int>.Decimal>,
+                    UnicodeEncoding.Period
+                ).self)
         {
-            return .init(major: major, minor: try input.parse(as: UA.NameRule.self))
+            return .numeric(major, try input.parse(as: UA.NameRule.self))
         }
         else
         {
-            return .init(major: major, minor: nil)
+            return .nominal(try input.parse(as: UA.NameRule.self))
         }
     }
 }

@@ -9,6 +9,9 @@ extension Main
     {
     }
 }
+
+import Grammar
+
 extension Main.Parsing:TestBattery
 {
     private static
@@ -23,13 +26,26 @@ extension Main.Parsing:TestBattery
     static
     func run(tests:TestGroup)
     {
-        //  TODO
-        let _:String = """
-        Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) \
-        AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1
-        """
-
-        if  let tests:TestGroup = tests / "SafariWithPrivacyGuard"
+        if  let tests:TestGroup = tests / "iPhoneSafari"
+        {
+            Self.run(tests,
+                parsing: """
+                Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) \
+                AppleWebKit/605.1.15 (KHTML, like Gecko) \
+                Version/17.1.2 Mobile/15E148 Safari/604.1
+                """,
+                expected:
+                [
+                    .single("Mozilla", 5, "0"),
+                    .group("iPhone", "CPU iPhone OS 17_1_2 like Mac OS X"),
+                    .single("AppleWebKit", 605, "1.15"),
+                    .group("KHTML, like Gecko"),
+                    .single("Version", 17, "1.2"),
+                    .single("Mobile", .nominal("15E148")),
+                    .single("Safari", 604, "1"),
+                ])
+        }
+        if  let tests:TestGroup = tests / "macSafariWithPrivacyGuard"
         {
             Self.run(tests,
                 parsing: """
