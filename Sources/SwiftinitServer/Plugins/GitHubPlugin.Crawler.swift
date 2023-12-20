@@ -142,6 +142,11 @@ extension GitHubPlugin.Crawler
                 }
             }
 
+            if  package.hidden
+            {
+                continue
+            }
+
             if  let interesting:String = release ?? prerelease,
                     response.repo.visibleInFeed
             {

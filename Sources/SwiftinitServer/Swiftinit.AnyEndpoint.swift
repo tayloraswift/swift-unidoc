@@ -308,30 +308,42 @@ extension Swiftinit.AnyEndpoint
 
             switch trunk
             {
-            case .alignPackage:
-                if  let package:String = form["package"]
+            case .packageAlign:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package)
                 {
                     return .procedural(Swiftinit.PackageAlignEndpoint.init(
-                        package: .init(package),
+                        package: package,
                         realm: form["realm"],
                         force: form["force"] == "true"))
                 }
 
-            case .indexRepo:
+            case .packageConfig:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let hidden:String = form["hidden"],
+                    let hidden:Bool = .init(hidden)
+                {
+                    return .interactive(Swiftinit.PackageConfigEndpoint.init(
+                        package: package,
+                        update: .hidden(hidden)))
+                }
+
+            case .packageIndex:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]
                 {
-                    return .interactive(Swiftinit.IndexRepoEndpoint.init(
+                    return .interactive(Swiftinit.PackageIndexEndpoint.init(
                         owner: owner,
                         repo: repo))
                 }
 
-            case .indexRepoTag:
+            case .packageIndexTag:
                 if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
                     let tag:String = form["tag"]
                 {
-                    let package:Symbol.Package = .init(package)
-                    return .interactive(Swiftinit.IndexRepoTagEndpoint.init(
+                    return .interactive(Swiftinit.PackageIndexTagEndpoint.init(
                         package: package,
                         tag: tag))
                 }

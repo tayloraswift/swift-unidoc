@@ -76,6 +76,42 @@ extension UnidocDatabase.Packages
     }
 
     public
+    func update(package:Unidoc.Package,
+        hidden:Bool,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(
+                Self.name,
+                returning: .new)
+            {
+                $0[.query] = .init
+                {
+                    $0[Unidoc.PackageMetadata[.id]] = package
+                }
+                $0[.update] = Mongo.UpdateDocument.init
+                {
+                    if  hidden
+                    {
+                        $0[.set] = .init
+                        {
+                            $0[Unidoc.PackageMetadata[.hidden]] = true
+                        }
+                    }
+                    else
+                    {
+                        $0[.unset] = .init
+                        {
+                            $0[Unidoc.PackageMetadata[.hidden]] = ()
+                        }
+                    }
+                }
+            },
+            against: self.database)
+        return package
+    }
+
+    public
     func stalest(_ limit:Int,
         with session:Mongo.Session) async throws -> [Unidoc.PackageMetadata]
     {
@@ -110,7 +146,13 @@ extension UnidocDatabase.Packages
 
             try await session.run(
                 command: Mongo.Find<Mongo.Cursor<Unidoc.PackageMetadata>>.init(Self.name,
-                    stride: 1024),
+                    stride: 1024)
+                {
+                    $0[.filter] = .init
+                    {
+                        $0[Unidoc.PackageMetadata[.hidden]] = .init { $0[.exists] = false }
+                    }
+                },
                 against: self.database)
             {
                 for try await batch:[Unidoc.PackageMetadata] in $0

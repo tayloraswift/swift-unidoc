@@ -105,7 +105,7 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.indexRepo])"
+            $0.action = "\(Swiftinit.API[.packageIndex])"
             $0.method = "post"
         }
             content:
