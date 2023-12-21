@@ -37,6 +37,12 @@ struct UnixInstant:Equatable, Hashable, Sendable
 extension UnixInstant
 {
     @inlinable public static
+    func day(_ day:UnixDay) -> Self
+    {
+        .init(second: day.index * 86_400, nanoseconds: 0)
+    }
+
+    @inlinable public static
     func second(_ second:Int64, plus nanoseconds:Int64 = 0) -> Self
     {
         .init(second: second, nanoseconds: nanoseconds)
