@@ -86,6 +86,7 @@ extension UnidocDatabase.CrawlingWindows
     }
 
     /// Updates the state of an existing crawling window.
+    @discardableResult
     public
     func push(window:Unidoc.CrawlingWindow, with session:Mongo.Session) async throws -> Bool?
     {

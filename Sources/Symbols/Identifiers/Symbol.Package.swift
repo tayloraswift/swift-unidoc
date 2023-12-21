@@ -56,7 +56,7 @@ extension Symbol.Package:LosslessStringConvertible
         }
     }
 }
-extension Symbol.Package:ExpressibleByStringLiteral
+extension Symbol.Package:ExpressibleByStringLiteral, ExpressibleByStringInterpolation
 {
     @inlinable public
     init(stringLiteral:String)

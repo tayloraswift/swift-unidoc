@@ -141,6 +141,8 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                         if  let created:Timestamp.Components = .init(iso8601: repo.created)
                         {
+                            let created:Timestamp.Date = created.date
+
                             $0[.dt] = "Created"
                             $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
                         }

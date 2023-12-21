@@ -17,15 +17,9 @@ enum Main:TestMain, TestBattery
                 bucket: .init(
                     region: .us_east_1,
                     name: "examplebucket"),
-                date: .init(
-                    components: .init(
-                        year: 2013,
-                        month: 5,
-                        day: 24,
-                        hour: 0,
-                        minute: 0,
-                        second: 0),
-                    weekday: .friday),
+                date: .init(weekday: .friday,
+                    date: .init(year: 2013, month: 5, day: 24),
+                    time: .init(hour: 0, minute: 0, second: 0)),
                 path: "/test%24file.text")
 
             tests.expect(computed ==? """

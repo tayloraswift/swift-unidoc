@@ -41,7 +41,11 @@ extension Swiftinit.PluginIntegration<PolicyPlugin>
 
 extension Swiftinit.PluginIntegration<GitHubPlugin>
 {
-    var crawler:GitHubPlugin.Crawler
+    var telescope:GitHubPlugin.RepoTelescope
+    {
+        .init(api: self.api, pat: self.plugin.pat)
+    }
+    var monitor:GitHubPlugin.RepoMonitor
     {
         .init(api: self.api, pat: self.plugin.pat)
     }

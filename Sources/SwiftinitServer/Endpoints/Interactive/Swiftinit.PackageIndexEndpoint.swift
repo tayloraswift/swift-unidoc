@@ -32,7 +32,7 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
             return nil
         }
 
-        let response:GitHubPlugin.CrawlerResponse = try await github.api.connect
+        let response:GitHubPlugin.RepoMonitorResponse = try await github.api.connect
         {
             try await $0.crawl(owner: self.owner,
                 repo: self.repo,
