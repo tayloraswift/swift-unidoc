@@ -304,7 +304,8 @@ extension UnidocDatabase
             edition: uploaded.edition,
             sitemap: try await self.fill(volume: consume volume,
                 clear: uploaded.updated,
-                with: session))
+                with: session),
+            hidden: true)
 
         return (uploaded, uplinked)
     }
@@ -339,7 +340,7 @@ extension UnidocDatabase
             sitemap: try await self.fill(volume: consume volume,
                 clear: true,
                 with: session),
-            visibleInFeed: package.repo?.visibleInFeed ?? true)
+            hidden: package.hidden)
     }
 
     public

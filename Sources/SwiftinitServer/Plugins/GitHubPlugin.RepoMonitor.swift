@@ -33,7 +33,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
         let stale:[Unidoc.PackageMetadata] = try await server.db.packages.stalest(10,
             with: session)
 
-        for package:Unidoc.PackageMetadata in stale
+        for var package:Unidoc.PackageMetadata in stale
         {
             guard case .github(let old) = package.repo
             else
@@ -46,12 +46,10 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                 repo: old.name,
                 pat: self.pat)
 
-            switch try await server.db.packages.update(record: .init(id: package.id,
-                    symbol: package.symbol,
-                    realm: package.realm,
-                    repo: .github(response.repo),
-                    crawled: .now()),
-                with: session)
+            package.repo = .github(response.repo)
+            package.crawled = .now()
+
+            switch try await server.db.packages.update(metadata: package, with: session)
             {
             case nil:
                 //  Might happen if package database is dropped while crawling.
@@ -110,8 +108,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                 continue
             }
 
-            if  let interesting:String = release ?? prerelease,
-                    response.repo.visibleInFeed
+            if  let interesting:String = release ?? prerelease
             {
                 let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
                     package: package.symbol,

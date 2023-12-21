@@ -70,9 +70,10 @@ extension UnidocDatabase.Packages:Mongo.RecodableModel
 extension UnidocDatabase.Packages
 {
     public
-    func update(record:Unidoc.PackageMetadata, with session:Mongo.Session) async throws -> Bool?
+    func update(metadata:Unidoc.PackageMetadata,
+        with session:Mongo.Session) async throws -> Bool?
     {
-        try await self.update(some: record, with: session)
+        try await self.update(some: metadata, with: session)
     }
 
     public
