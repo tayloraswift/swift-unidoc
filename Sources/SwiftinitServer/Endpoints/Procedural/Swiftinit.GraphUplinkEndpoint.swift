@@ -46,8 +46,7 @@ extension Swiftinit.GraphUplinkEndpoint:BlockingEndpoint
             """
         }
 
-        guard updated.visibleInFeed
-        else
+        if  updated.hidden
         {
             return .ok("Uplink successful, repo is invisible.")
         }
