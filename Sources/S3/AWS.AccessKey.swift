@@ -95,7 +95,7 @@ extension AWS.AccessKey
         hash:SHA256) -> String
     {
         let yyyymmddThhmmssZ:String = timestamp.components.yyyymmddThhmmssZ
-        let yyyymmdd:String = timestamp.components.yyyymmdd
+        let yyyymmdd:String = timestamp.date.yyyymmdd
 
         let headers:String = "date;host;x-amz-content-sha256;x-amz-date;x-amz-storage-class"
         let request:String = """

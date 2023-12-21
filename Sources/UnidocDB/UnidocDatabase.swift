@@ -28,6 +28,8 @@ extension UnidocDatabase
     var policies:Policies { .init() }
 
     @inlinable public
+    var crawlingWindows:CrawlingWindows { .init(database: self.id) }
+    @inlinable public
     var repoFeed:RepoFeed { .init(database: self.id) }
     @inlinable public
     var docsFeed:DocsFeed { .init(database: self.id) }
@@ -64,6 +66,7 @@ extension UnidocDatabase:Mongo.DatabaseModel
     public
     func setup(with session:Mongo.Session) async throws
     {
+        try await self.crawlingWindows.setup(with: session)
         try await self.repoFeed.setup(with: session)
         try await self.docsFeed.setup(with: session)
 
@@ -138,6 +141,7 @@ extension UnidocDatabase
     public
     func index(package:Symbol.Package,
         repo:consuming Unidoc.PackageMetadata.Repo? = nil,
+        mode:Unidoc.PackageIndexMode = .manual,
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
@@ -155,6 +159,7 @@ extension UnidocDatabase
         case .old(let id, nil):
             let package:Unidoc.PackageMetadata = .init(id: id,
                 symbol: package,
+                hidden: mode == .automatic,
                 realm: nil,
                 repo: repo)
 

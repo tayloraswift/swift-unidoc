@@ -140,18 +140,22 @@ extension Swiftinit.ServerLoop
                 try await self.update()
             }
 
+            if  let plugin:Swiftinit.PluginIntegration<GitHubPlugin> = self.plugins.github
+            {
+                tasks.addTask
+                {
+                    try await plugin.telescope.run(alongside: self)
+                }
+                tasks.addTask
+                {
+                    try await plugin.monitor.run(alongside: self)
+                }
+            }
             if  let plugin:Swiftinit.PluginIntegration<PolicyPlugin> = self.plugins.policy
             {
                 tasks.addTask
                 {
                     try await plugin.crawler.run(alongside: self, updating: policies)
-                }
-            }
-            if  let plugin:Swiftinit.PluginIntegration<GitHubPlugin> = self.plugins.github
-            {
-                tasks.addTask
-                {
-                    try await plugin.crawler.run(alongside: self)
                 }
             }
 

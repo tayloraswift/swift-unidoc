@@ -53,7 +53,7 @@ extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
 
                         $0[.lastmod] = modified.timestamp.map
                         {
-                            "\($0.components.year)-\($0.components.MM)-\($0.components.DD)"
+                            "\($0.date.year)-\($0.date.mm)-\($0.date.dd)"
                         }
                     }
                 }

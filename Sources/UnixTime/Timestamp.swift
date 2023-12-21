@@ -2,16 +2,24 @@
 struct Timestamp:Equatable, Hashable, Sendable
 {
     public
-    let components:Components
-    public
     let weekday:Weekday
+    public
+    let date:Date
+    public
+    let time:Time
 
     @inlinable public
-    init(components:Components, weekday:Weekday)
+    init(weekday:Weekday, date:Date, time:Time)
     {
-        self.components = components
         self.weekday = weekday
+        self.date = date
+        self.time = time
     }
+}
+extension Timestamp
+{
+    @inlinable public
+    var components:Components { .init(date: self.date, time: self.time) }
 }
 extension Timestamp
 {
@@ -21,10 +29,10 @@ extension Timestamp
     {
         """
         \(self.weekday.short(.en)), \
-        \(self.components.day) \
-        \(self.components.mon(.en)) \
-        \(self.components.year) \
-        \(self.components.hh):\(self.components.mm):\(self.components.ss) GMT
+        \(self.date.day) \
+        \(self.date.mon(.en)) \
+        \(self.date.year) \
+        \(self.time.hh):\(self.time.mm):\(self.time.ss) GMT
         """
     }
 }

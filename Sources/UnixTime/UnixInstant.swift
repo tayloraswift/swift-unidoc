@@ -61,12 +61,12 @@ extension UnixInstant
     init?(utc timestamp:Timestamp.Components)
     {
         var time:tm = .init(
-            tm_sec:     timestamp.second,
-            tm_min:     timestamp.minute,
-            tm_hour:    timestamp.hour,
-            tm_mday:    timestamp.day,
-            tm_mon:     timestamp.month - 1, // month in range 0 ... 11 !
-            tm_year:    timestamp.year - 1900,
+            tm_sec:     timestamp.time.second,
+            tm_min:     timestamp.time.minute,
+            tm_hour:    timestamp.time.hour,
+            tm_mday:    timestamp.date.day,
+            tm_mon:     timestamp.date.month - 1, // month in range 0 ... 11 !
+            tm_year:    timestamp.date.year - 1900,
             tm_wday:    -1,
             tm_yday:    -1,
             tm_isdst:   0,
@@ -107,15 +107,15 @@ extension UnixInstant
             return nil
         }
 
-        return .init(
-            components: .init(
+        return .init(weekday: weekday,
+            date: .init(
                 year:       segmented.tm_year + 1900,
                 month:      segmented.tm_mon + 1,
-                day:        segmented.tm_mday,
+                day:        segmented.tm_mday),
+            time: .init(
                 hour:       segmented.tm_hour,
                 minute:     segmented.tm_min,
-                second:     segmented.tm_sec),
-            weekday: weekday)
+                second:     segmented.tm_sec))
     }
 }
 extension UnixInstant:Comparable

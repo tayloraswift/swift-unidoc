@@ -1,19 +1,16 @@
 import GitHubAPI
 import GitHubClient
-import HTTPServer
-import JSON
 import MongoDB
 import SemanticVersions
 import UnidocDB
 import UnidocRecords
-import UnixTime
 
 extension GitHubPlugin
 {
-    struct Crawler
+    struct RepoMonitor
     {
-        private
         let api:GitHubClient<GitHub.API>
+
         private
         let pat:String
 
@@ -24,50 +21,16 @@ extension GitHubPlugin
         }
     }
 }
-extension GitHubPlugin.Crawler
+extension GitHubPlugin.RepoMonitor:GitHubCrawler
 {
-    func run(alongside server:Swiftinit.ServerLoop) async throws
-    {
-        while true
-        {
-            async
-            let cooldown:Void = Task.sleep(for: .seconds(30))
+    static
+    var interval:Duration { .seconds(30) }
 
-            do
-            {
-                let session:Mongo.Session = try await .init(from: server.db.sessions)
-
-                try await self.api.connect
-                {
-                    try await self.refresh(server.db,
-                        counters: server.atomics,
-                        count: 10,
-                        from: $0,
-                        with: session)
-                }
-            }
-            catch let error as any GitHubRateLimitError
-            {
-                try await Task.sleep(for: error.until - .now())
-            }
-            catch let error
-            {
-                Log[.warning] = "GitHub crawling error: \(error)"
-                server.atomics.errorsCrawling.wrappingIncrement(ordering: .relaxed)
-            }
-
-            try await cooldown
-        }
-    }
-
-    private
-    func refresh(_ db:Swiftinit.DB,
-        counters:borrowing Swiftinit.Counters,
-        count:Int,
-        from github:GitHubClient<GitHub.API>.Connection,
+    func crawl(updating server:Swiftinit.ServerLoop,
+        over connection:GitHubClient<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[Unidoc.PackageMetadata] = try await db.packages.stalest(count,
+        let stale:[Unidoc.PackageMetadata] = try await server.db.packages.stalest(10,
             with: session)
 
         for package:Unidoc.PackageMetadata in stale
@@ -78,12 +41,12 @@ extension GitHubPlugin.Crawler
                 fatalError("unreachable: non-GitHub package was marked as stale!")
             }
 
-            let response:GitHubPlugin.CrawlerResponse = try await github.crawl(
+            let response:GitHubPlugin.RepoMonitorResponse = try await connection.crawl(
                 owner: old.owner.login,
                 repo: old.name,
                 pat: self.pat)
 
-            switch try await db.packages.update(record: .init(id: package.id,
+            switch try await server.db.packages.update(record: .init(id: package.id,
                     symbol: package.symbol,
                     realm: package.realm,
                     repo: .github(response.repo),
@@ -97,11 +60,11 @@ extension GitHubPlugin.Crawler
             case _?:
                 //  To MongoDB, all repo updates look like modifications, since the package
                 //  record contains a timestamp.
-                counters.reposCrawled.wrappingIncrement(ordering: .relaxed)
+                server.atomics.reposCrawled.wrappingIncrement(ordering: .relaxed)
             }
             if  response.repo != old
             {
-                counters.reposUpdated.wrappingIncrement(ordering: .relaxed)
+                server.atomics.reposUpdated.wrappingIncrement(ordering: .relaxed)
             }
 
             //  Import tags in chronological order. The last tag in the GraphQL response
@@ -119,7 +82,7 @@ extension GitHubPlugin.Crawler
                     continue
                 }
 
-                switch try await db.unidoc.register(
+                switch try await server.db.unidoc.register(
                     package: package.id,
                     version: version,
                     refname: tag.name,
@@ -127,7 +90,7 @@ extension GitHubPlugin.Crawler
                     with: session)
                 {
                 case (let edition, new: true):
-                    counters.tagsUpdated.wrappingIncrement(ordering: .relaxed)
+                    server.atomics.tagsUpdated.wrappingIncrement(ordering: .relaxed)
 
                     switch version
                     {
@@ -138,7 +101,7 @@ extension GitHubPlugin.Crawler
                     fallthrough
 
                 case (_, new: false):
-                    counters.tagsCrawled.wrappingIncrement(ordering: .relaxed)
+                    server.atomics.tagsCrawled.wrappingIncrement(ordering: .relaxed)
                 }
             }
 
@@ -155,7 +118,7 @@ extension GitHubPlugin.Crawler
                     refname: interesting,
                     origin: .github(response.repo.owner.login, response.repo.name))
 
-                try await db.repoFeed.push(activity, with: session)
+                try await server.db.repoFeed.push(activity, with: session)
             }
         }
     }
