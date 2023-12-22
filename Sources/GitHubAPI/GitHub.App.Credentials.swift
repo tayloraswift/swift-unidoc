@@ -1,6 +1,6 @@
 import JSON
 
-extension GitHubApp
+extension GitHub.App
 {
     @frozen public
     struct Credentials:Equatable, Hashable, Sendable
@@ -18,7 +18,7 @@ extension GitHubApp
         }
     }
 }
-extension GitHubApp.Credentials:JSONObjectDecodable
+extension GitHub.App.Credentials:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

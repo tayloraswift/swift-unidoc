@@ -5,7 +5,7 @@ import NIOCore
 import NIOHPACK
 import UnixTime
 
-extension GitHubClient
+extension GitHub.Client
 {
     @frozen public
     struct Connection
@@ -23,7 +23,7 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient<GitHub.API>.Connection
+extension GitHub.Client<GitHub.API>.Connection
 {
     /// Run a GraphQL API request.
     ///
@@ -72,7 +72,7 @@ extension GitHubClient<GitHub.API>.Connection
             if  let second:String = response.headers?["x-ratelimit-reset"].first,
                 let second:Int64 = .init(second)
             {
-                throw GitHubClient<GitHub.API>.RateLimitError.init(
+                throw GitHub.Client<GitHub.API>.RateLimitError.init(
                     until: .second(second))
             }
             else
@@ -137,7 +137,7 @@ extension GitHubClient<GitHub.API>.Connection
                 if  let second:String = response.headers?["x-ratelimit-reset"].first,
                     let second:Int64 = .init(second)
                 {
-                    throw GitHubClient<GitHub.API>.RateLimitError.init(
+                    throw GitHub.Client<GitHub.API>.RateLimitError.init(
                         until: .second(second))
                 }
 

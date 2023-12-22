@@ -11,12 +11,12 @@ extension GitHubPlugin
 {
     struct RepoTelescope
     {
-        let api:GitHubClient<GitHub.API>
+        let api:GitHub.Client<GitHub.API>
 
         private
         let pat:String
 
-        init(api:GitHubClient<GitHub.API>, pat:String)
+        init(api:GitHub.Client<GitHub.API>, pat:String)
         {
             self.api = api
             self.pat = pat
@@ -30,7 +30,7 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
     var interval:Duration { .seconds(13) }
 
     func crawl(updating server:Swiftinit.ServerLoop,
-        over connection:GitHubClient<GitHub.API>.Connection,
+        over connection:GitHub.Client<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)

@@ -1,7 +1,7 @@
 import Base64
 import GitHubAPI
 
-extension GitHubOAuth
+extension GitHub.OAuth
 {
     /// Returns an HTTP authorization header value, encoded in Base64.
     @inlinable internal

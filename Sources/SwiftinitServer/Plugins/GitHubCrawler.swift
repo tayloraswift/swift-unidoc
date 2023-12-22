@@ -10,10 +10,10 @@ protocol GitHubCrawler
     static
     var interval:Duration { get }
 
-    var api:GitHubClient<GitHub.API> { get }
+    var api:GitHub.Client<GitHub.API> { get }
 
     func crawl(updating server:Swiftinit.ServerLoop,
-        over connection:GitHubClient<GitHub.API>.Connection,
+        over connection:GitHub.Client<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
 }
 extension GitHubCrawler
@@ -33,7 +33,7 @@ extension GitHubCrawler
                     try await self.crawl(updating: server, over: $0, with: session)
                 }
             }
-            catch let error as any GitHubRateLimitError
+            catch let error as any GitHub.RateLimitError
             {
                 try await Task.sleep(for: error.until - .now())
             }
