@@ -348,6 +348,13 @@ extension Swiftinit.AnyEndpoint
                         tag: tag))
                 }
 
+            case .telescope:
+                if  let days:String = form["days"],
+                    let days:Int = .init(days)
+                {
+                    return .interactive(Swiftinit.AdminEndpoint.telescope(days: days))
+                }
+
             case .uplinkAll:
                 return .procedural(Swiftinit.GlobalUplinkEndpoint.init(
                     queue: form["queue"] == "true"))

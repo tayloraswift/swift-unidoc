@@ -196,6 +196,30 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             }
         }
 
+        main[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Swiftinit.API[.telescope])"
+            $0.method = "post"
+        }
+            content:
+        {
+            $0[.p]
+            {
+                $0[.input]
+                {
+                    $0.type = "number"
+                    $0.name = "days"
+                    $0.placeholder = "days"
+                }
+            }
+
+            $0[.p]
+            {
+                $0[.button] { $0.type = "submit" } = "Activate Package Telescope"
+            }
+        }
+
         //  Destructive actions.
         for action:Action in
         [

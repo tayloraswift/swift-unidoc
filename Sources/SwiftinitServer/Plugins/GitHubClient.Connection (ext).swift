@@ -80,7 +80,7 @@ extension GitHubClient<GitHub.API>.Connection
     }
 
     func search(repos search:String,
-        limit:Int = 1000,
+        limit:Int = 100,
         pat:String) async throws -> GitHubPlugin.RepoTelescopeResponse
     {
         let query:JSON = .object
@@ -88,7 +88,7 @@ extension GitHubClient<GitHub.API>.Connection
             $0["query"] = """
             query
             {
-                search(query: \(search), type: REPOSITORY, first: \(limit))
+                search(query: "\(search)", type: REPOSITORY, first: \(limit))
                 {
                     nodes
                     {

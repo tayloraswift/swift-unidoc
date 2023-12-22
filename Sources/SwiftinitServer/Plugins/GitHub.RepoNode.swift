@@ -135,7 +135,11 @@ extension GitHub.RepoNode:JSONObjectDecodable
             archived: try json[.archived].decode(),
             disabled: try json[.disabled].decode(),
             fork: try json[.fork].decode(),
-            homepage: try json[.homepage]?.decode(as: String.self) { $0.isEmpty ? nil : $0 },
+            //  Yes, `String?`, the GitHub API does occasionally return explicit null.
+            homepage: try json[.homepage]?.decode(as: String?.self)
+            {
+                $0.map { $0.isEmpty ? nil : $0 } ?? nil
+            },
             about: try json[.about]?.decode(to: String?.self),
             created: try json[.created].decode(),
             updated: try json[.updated].decode(),

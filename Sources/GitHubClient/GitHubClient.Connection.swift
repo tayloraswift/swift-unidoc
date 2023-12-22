@@ -62,8 +62,11 @@ extension GitHubClient<GitHub.API>.Connection
                 json.utf8 += buffer.readableBytesView
             }
 
-            let wrapper:GraphQL.Response<Response> = try json.decode()
-            return wrapper.data
+            switch try json.decode(GraphQL.Response<Response>.self)
+            {
+            case .success(let data):    return data
+            case .failure(let error):   throw error
+            }
 
         case 403?:
             if  let second:String = response.headers?["x-ratelimit-reset"].first,

@@ -4,16 +4,10 @@ extension GraphQL
 {
     /// A GraphQL response wrapper, which contains a single field named ``data``.
     @frozen public
-    struct Response<Data> where Data:JSONDecodable
+    enum Response<Data> where Data:JSONDecodable
     {
-        public
-        var data:Data
-
-        @inlinable internal
-        init(data:Data)
-        {
-            self.data = data
-        }
+        case success(Data)
+        case failure(ServerError)
     }
 }
 extension GraphQL.Response:JSONObjectDecodable
@@ -22,11 +16,19 @@ extension GraphQL.Response:JSONObjectDecodable
     enum CodingKey:String, Sendable
     {
         case data
+        case errors
     }
 
     @inlinable public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(data: try json[.data].decode())
+        if  let data:Data = try json[.data]?.decode()
+        {
+            self = .success(data)
+        }
+        else
+        {
+            self = .failure(.init(json: try json[.errors].decode()))
+        }
     }
 }
