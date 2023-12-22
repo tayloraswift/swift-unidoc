@@ -1,4 +1,4 @@
-/// The essence of a GitHub application. Not to be confused with ``GitHubApp``.
+/// The essence of a GitHub application. Not to be confused with ``GitHub.App``.
 public
 protocol GitHubApplication<Credentials>:Equatable, Hashable, Sendable
 {

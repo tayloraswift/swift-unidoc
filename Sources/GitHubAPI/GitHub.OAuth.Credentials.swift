@@ -1,6 +1,6 @@
 import JSON
 
-extension GitHubOAuth
+extension GitHub.OAuth
 {
     @frozen public
     struct Credentials
@@ -18,7 +18,7 @@ extension GitHubOAuth
         }
     }
 }
-extension GitHubOAuth.Credentials:JSONObjectDecodable
+extension GitHub.OAuth.Credentials:JSONObjectDecodable
 {
     public
     enum CodingKey:String, Sendable

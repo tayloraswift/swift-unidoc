@@ -2,7 +2,7 @@ import GitHubAPI
 import GitHubClient
 import JSON
 
-extension GitHubClient<GitHub.API>.Connection
+extension GitHub.Client<GitHub.API>.Connection
 {
     func inspect(tag:String,
         owner:String,

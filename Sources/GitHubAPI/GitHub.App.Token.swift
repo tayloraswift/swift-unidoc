@@ -1,4 +1,4 @@
-extension GitHubApp
+extension GitHub.App
 {
     @frozen public
     struct Token:Equatable, Hashable, Sendable

@@ -1,10 +1,10 @@
 import GitHubAPI
 import UnixTime
 
-extension GitHubClient
+extension GitHub.Client
 {
     @frozen public
-    struct RateLimitError:GitHubRateLimitError, Equatable, Sendable
+    struct RateLimitError:GitHub.RateLimitError, Equatable, Sendable
     {
         public
         let until:UnixInstant

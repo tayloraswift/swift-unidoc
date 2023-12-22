@@ -4,22 +4,25 @@ import JSON
 import NIOCore
 import NIOHPACK
 
-@frozen public
-struct GitHubClient<Application>
+extension GitHub
 {
-    @usableFromInline internal
-    let http2:HTTP2Client
-    public
-    let app:Application
-
-    public
-    init(http2:HTTP2Client, app:Application)
+    @frozen public
+    struct Client<Application>
     {
-        self.http2 = http2
-        self.app = app
+        @usableFromInline internal
+        let http2:HTTP2Client
+        public
+        let app:Application
+
+        public
+        init(http2:HTTP2Client, app:Application)
+        {
+            self.http2 = http2
+            self.app = app
+        }
     }
 }
-extension GitHubClient:Identifiable where Application:GitHubApplication
+extension GitHub.Client:Identifiable where Application:GitHubApplication
 {
     @inlinable public
     var id:String { self.app.client }
@@ -27,11 +30,11 @@ extension GitHubClient:Identifiable where Application:GitHubApplication
     @inlinable public
     var secret:String { self.app.secret }
 }
-extension GitHubClient where Application:GitHubApplication<GitHubApp.Credentials>
+extension GitHub.Client where Application:GitHubApplication<GitHub.App.Credentials>
 {
     public
     func refresh(
-        token:String) async throws -> GitHubApp.Credentials
+        token:String) async throws -> GitHub.App.Credentials
     {
         let request:HPACKHeaders =
         [
@@ -50,7 +53,7 @@ extension GitHubClient where Application:GitHubApplication<GitHubApp.Credentials
         return try await self.authenticate(sending: request)
     }
 }
-extension GitHubClient
+extension GitHub.Client
     where Application:GitHubApplication, Application.Credentials:JSONObjectDecodable
 {
     public
@@ -103,7 +106,7 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient
+extension GitHub.Client
 {
     @inlinable public
     func connect<T>(with body:(Connection) async throws -> T) async throws -> T
@@ -114,7 +117,7 @@ extension GitHubClient
         }
     }
 }
-extension GitHubClient<GitHub.API>
+extension GitHub.Client<GitHub.API>
 {
     @available(*, deprecated, message: """
         Create a connection instead, and call the corresponding method on the connection.

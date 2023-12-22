@@ -1,6 +1,6 @@
 import HTTP
 
-extension GitHubClient
+extension GitHub.Client
 {
     @frozen public
     enum AuthenticationError:Error, Sendable

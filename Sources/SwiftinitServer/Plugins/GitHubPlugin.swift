@@ -3,11 +3,11 @@ import System
 
 struct GitHubPlugin:Sendable
 {
-    let oauth:GitHubOAuth
-    let app:GitHubApp
+    let oauth:GitHub.OAuth
+    let app:GitHub.App
     let pat:String
 
-    init(oauth:GitHubOAuth, app:GitHubApp, pat:String)
+    init(oauth:GitHub.OAuth, app:GitHub.App, pat:String)
     {
         self.oauth = oauth
         self.app = app

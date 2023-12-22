@@ -18,7 +18,7 @@ struct GitHubCredentials
 @available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials
 {
-    init(tokens:GitHubApp.Credentials, created:BSON.Millisecond)
+    init(tokens:GitHub.App.Credentials, created:BSON.Millisecond)
     {
         self.init(
             refresh: .init(token: tokens.refresh, created: created),
