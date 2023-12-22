@@ -16,19 +16,15 @@ extension UnidocDatabase.RepoFeed
         let package:Symbol.Package
         public
         let refname:String
-        public
-        let origin:Unidoc.PackageMetadata.Repo.Origin
 
         @inlinable public
         init(discovered id:BSON.Millisecond,
             package:Symbol.Package,
-            refname:String,
-            origin:Unidoc.PackageMetadata.Repo.Origin)
+            refname:String)
         {
             self.id = id
             self.package = package
             self.refname = refname
-            self.origin = origin
         }
     }
 }
@@ -41,6 +37,8 @@ extension UnidocDatabase.RepoFeed.Activity:MongoMasterCodingModel
 
         case package = "P"
         case refname = "G"
+
+        @available(*, unavailable)
         case origin = "O"
     }
 }
@@ -53,7 +51,6 @@ extension UnidocDatabase.RepoFeed.Activity:BSONDocumentEncodable
 
         bson[.package] = self.package
         bson[.refname] = self.refname
-        bson[.origin] = self.origin
     }
 }
 extension UnidocDatabase.RepoFeed.Activity:BSONDocumentDecodable
@@ -63,7 +60,6 @@ extension UnidocDatabase.RepoFeed.Activity:BSONDocumentDecodable
     {
         self.init(discovered: try bson[.id].decode(),
             package: try bson[.package].decode(),
-            refname: try bson[.refname].decode(),
-            origin: try bson[.origin].decode())
+            refname: try bson[.refname].decode())
     }
 }

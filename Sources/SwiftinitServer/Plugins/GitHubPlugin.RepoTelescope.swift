@@ -68,7 +68,7 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
         {
             let symbol:Symbol.Package = "\(repo.owner.login).\(repo.name)"
             switch try await server.db.unidoc.index(package: symbol,
-                repo: .github(repo),
+                repo: try .github(repo),
                 mode: .automatic,
                 with: session)
             {

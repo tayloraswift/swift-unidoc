@@ -31,6 +31,16 @@ extension UnidocDatabase.Packages
     }
 
     public static
+    let indexRepoCreated:Mongo.CollectionIndex = .init("RepoCreated", unique: false)
+    {
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+    }
+
+    public static
     let indexRealm:Mongo.CollectionIndex = .init("Realm", unique: false)
     {
         $0[Unidoc.PackageMetadata[.realm]] = (+)
@@ -53,6 +63,7 @@ extension UnidocDatabase.Packages:Mongo.CollectionModel
     {
         [
             Self.indexLastCrawled,
+            Self.indexRepoCreated,
             Self.indexRealm,
         ]
     }

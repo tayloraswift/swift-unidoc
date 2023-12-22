@@ -140,7 +140,7 @@ extension UnidocDatabase
 
     public
     func index(package:Symbol.Package,
-        repo:consuming Unidoc.PackageMetadata.Repo? = nil,
+        repo:consuming Unidoc.PackageRepo? = nil,
         mode:Unidoc.PackageIndexMode = .manual,
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
@@ -173,7 +173,7 @@ extension UnidocDatabase
             return (package, true)
 
         case .old(_, var package?):
-            if  let repo:Unidoc.PackageMetadata.Repo,
+            if  let repo:Unidoc.PackageRepo,
                     repo != package.repo
             {
                 package.repo = repo

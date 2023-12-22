@@ -92,15 +92,15 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Unidoc.PackageMetadata.Repo = self.package.repo
+            if  let repo:Unidoc.PackageRepo = self.package.repo
             {
                 $0[.h2] = "Package Repository"
 
                 $0[.dl]
                 {
-                    switch repo
+                    switch repo.origin
                     {
-                    case .github(let repo):
+                    case .github(let origin):
                         let now:UnixInstant = .now()
 
                         $0[.dt] = "Provider"
@@ -108,12 +108,12 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         {
                             $0[.a]
                             {
-                                $0.href = "https://github.com/\(repo.owner.login)/\(repo.name)"
+                                $0.href = origin.https
                                 $0.target = "_blank"
                             } = "GitHub"
                         }
 
-                        if  let license:GitHub.Repo.License = repo.license
+                        if  let license:Unidoc.PackageLicense = repo.license
                         {
                             $0[.dt] = "License"
                             $0[.dd] = license.name
@@ -125,10 +125,10 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         }
 
                         $0[.dt] = "Owner"
-                        $0[.dd] = repo.owner
+                        $0[.dd] = origin.owner
 
                         $0[.dt] = "Watchers"
-                        $0[.dd] = "\(repo.watchers)"
+                        $0[.dd] = "\(origin.watchers)"
 
                         $0[.dt] = "Forks"
                         $0[.dd] = "\(repo.forks)"
@@ -137,23 +137,21 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         $0[.dd] = "\(repo.stars)"
 
                         $0[.dt] = "Archived?"
-                        $0[.dd] = repo.archived ? "yes" : "no"
+                        $0[.dd] = origin.archived ? "yes" : "no"
 
-                        if  let created:Timestamp.Components = .init(iso8601: repo.created)
+                        let created:UnixInstant = .millisecond(repo.created.value)
+                        let updated:UnixInstant = .millisecond(repo.updated.value)
+
+                        if  let created:Timestamp.Date = created.timestamp?.date
                         {
-                            let created:Timestamp.Date = created.date
-
                             $0[.dt] = "Created"
                             $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
                         }
-                        if  let updated:Timestamp.Components = .init(iso8601: repo.updated),
-                            let updated:UnixInstant = .init(utc: updated)
-                        {
-                            let age:Age = .init(now - updated)
 
-                            $0[.dt] = "Last Pushed"
-                            $0[.dd] = "\(age)"
-                        }
+                        let age:Age = .init(now - updated)
+
+                        $0[.dt] = "Last Pushed"
+                        $0[.dd] = "\(age)"
                     }
                 }
             }
