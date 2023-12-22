@@ -32,7 +32,6 @@ extension GitHub.Repo.License:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(id: try json[.id].decode(),
-            name: try json[.name].decode())
+        self.init(id: try json[.id].decode(), name: try json[.name].decode())
     }
 }

@@ -35,18 +35,25 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
 
         for var package:Unidoc.PackageMetadata in stale
         {
-            guard case .github(let old) = package.repo
+            guard
+            let old:Unidoc.PackageRepo = package.repo
             else
             {
-                fatalError("unreachable: non-GitHub package was marked as stale!")
+                fatalError("unreachable: repoless package was marked as stale!")
+            }
+
+            let origin:Unidoc.PackageRepo.GitHubOrigin
+            switch old.origin
+            {
+            case .github(let github):   origin = github
             }
 
             let response:GitHubPlugin.RepoMonitorResponse = try await connection.crawl(
-                owner: old.owner.login,
-                repo: old.name,
+                owner: origin.owner,
+                repo: origin.name,
                 pat: self.pat)
 
-            package.repo = .github(response.repo)
+            package.repo = try .github(response.repo)
             package.crawled = .now()
 
             switch try await server.db.packages.update(metadata: package, with: session)
@@ -60,7 +67,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                 //  record contains a timestamp.
                 server.atomics.reposCrawled.wrappingIncrement(ordering: .relaxed)
             }
-            if  response.repo != old
+            if  package.repo != old
             {
                 server.atomics.reposUpdated.wrappingIncrement(ordering: .relaxed)
             }
@@ -112,8 +119,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
             {
                 let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
                     package: package.symbol,
-                    refname: interesting,
-                    origin: .github(response.repo.owner.login, response.repo.name))
+                    refname: interesting)
 
                 try await server.db.repoFeed.push(activity, with: session)
             }
