@@ -40,7 +40,7 @@ extension Swiftinit.Docs
 extension Swiftinit.Docs.PackagePage
 {
     private
-    var repo:Unidoc.PackageMetadata.Repo? { self.context.repo }
+    var repo:Unidoc.PackageRepo? { self.context.repo }
 }
 extension Swiftinit.Docs.PackagePage:Swiftinit.RenderablePage
 {
@@ -103,25 +103,23 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
             $0[.h1] = self.title
 
-            switch self.repo
+            switch self.repo?.origin
             {
-            case .github(let repo)?:
-                $0[.p] = repo.about
+            case .github(let origin)?:
+                $0[.p] = origin.about
+
+                guard
+                let refname:String = self.volume.refname
+                else
+                {
+                    break
+                }
+
+                $0 += Swiftinit.SourceLink.init(file: "\(origin.owner)/\(origin.name)",
+                    target: "\(origin.https)/tree/\(refname)")
 
             case nil:
                 break
-            }
-            if  let refname:String = self.volume.refname
-            {
-                switch self.repo?.origin
-                {
-                case .github(let path)?:
-                    $0 += Swiftinit.SourceLink.init(file: path.dropFirst(),
-                        target: "https://github.com\(path)/tree/\(refname)")
-
-                case nil:
-                    break
-                }
             }
         }
 
@@ -129,20 +127,20 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Unidoc.PackageMetadata.Repo = self.repo
+            if  let repo:Unidoc.PackageRepo = self.repo
             {
                 let heading:AutomaticHeading = .packageRepository
                 $0[.h2] { $0.id = heading.id } = heading
 
                 $0[.dl]
                 {
-                    switch repo
+                    switch repo.origin
                     {
-                    case .github(let repo):
+                    case .github(let origin):
                         $0[.dt] = "Provider"
                         $0[.dd] = "GitHub"
 
-                        if  let license:GitHub.Repo.License = repo.license
+                        if  let license:Unidoc.PackageLicense = repo.license
                         {
                             $0[.dt] = "License"
                             $0[.dd] = license.name
@@ -155,10 +153,10 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
                         }
 
                         //  If the repo belongs to a person, show the owner.
-                        if  repo.owner.login != "apple"
+                        if  origin.owner != "apple"
                         {
                             $0[.dt] = "Owner"
-                            $0[.dd] = repo.owner
+                            $0[.dd] = origin.owner
                         }
                     }
                 }
