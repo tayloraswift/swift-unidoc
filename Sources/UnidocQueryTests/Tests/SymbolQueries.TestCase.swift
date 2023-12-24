@@ -12,7 +12,7 @@ extension SymbolQueries
         let filters:Set<Filter>
         let members:[String]
         let nonmembers:[String]
-        let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent, Any>
+        let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
         let tests:TestGroup
 
         private
@@ -20,7 +20,7 @@ extension SymbolQueries
             filters:Set<Filter>,
             members:[String],
             nonmembers:[String],
-            query:Unidoc.VertexQuery<Unidoc.LookupAdjacent, Any>,
+            query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>,
             tests:TestGroup)
         {
             self.filters = filters
@@ -59,8 +59,8 @@ extension SymbolQueries.TestCase
     {
         await self.tests.do
         {
-            if  let output:Unidoc.VertexOutput<Any> = self.tests.expect(
-                    value: try await unidoc.execute(query: query, with: session)),
+            if  let output:Unidoc.VertexOutput = self.tests.expect(
+                    value: try await session.query(database: unidoc.id, with: self.query)),
                 let _:Unidoc.Vertex = self.tests.expect(value: output.principal?.vertex)
             {
                 let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(
