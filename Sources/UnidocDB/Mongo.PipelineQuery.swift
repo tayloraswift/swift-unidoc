@@ -22,7 +22,7 @@ protocol _MongoPipelineQuery<CollectionOrigin>:Sendable
     ///
     /// For pipelines that return multiple documents, yet do not require cursor iteration, use
     /// ``Mongo.SingleBatch``.
-    associatedtype Iteration:MongoReadEffect
+    associatedtype Iteration:Mongo.ReadEffect
 
     /// Constructs a pipeline by adding stages to the given encoder.
     func build(pipeline:inout Mongo.PipelineEncoder)
@@ -30,25 +30,14 @@ protocol _MongoPipelineQuery<CollectionOrigin>:Sendable
     /// The index to use.
     var hint:Mongo.CollectionIndex? { get }
 }
-extension Mongo.PipelineQuery where Iteration.Stride == Int
+extension Mongo.PipelineQuery
 {
-    func command(stride:Int) -> Mongo.Aggregate<Iteration>
+    @inlinable internal
+    func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>
     {
         .init(CollectionOrigin.name,
             pipeline: .init(with: self.build(pipeline:)),
             stride: stride)
-        {
-            $0[.collation] = Collation.spec
-            $0[.hint] = self.hint?.fields
-        }
-    }
-}
-extension Mongo.PipelineQuery where Iteration.Stride == Never?
-{
-    @inlinable internal
-    var command:Mongo.Aggregate<Iteration>
-    {
-        .init(CollectionOrigin.name, pipeline: .init(with: self.build(pipeline:)))
         {
             $0[.collation] = Collation.spec
             $0[.hint] = self.hint?.fields

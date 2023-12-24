@@ -10,12 +10,15 @@ extension Unidoc
     {
         /// When the repo was created. Both GitHub and GitLab define this field.
         ///
-        /// This is used as a quasi shard key for administative purposes.
+        /// For query convenience, the instant always encodes an integral date.
+        /// This field is used as a quasi shard key for administative purposes.
         public
         var created:BSON.Millisecond
         /// When the repo was last updated. Both GitHub and GitLab define this field.
+        ///
         /// The instant represents the time the repo metadata was last updated, not the time
-        /// the repo content was last updated.
+        /// the repo content was last updated. The instant may contain a fractional time
+        /// component.
         public
         var updated:BSON.Millisecond
 
@@ -68,7 +71,7 @@ extension Unidoc.PackageRepo
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixInstant = .init(utc: created)
+        let created:UnixInstant = .init(utc: .date(created))
         else
         {
             throw GitHubTimestampError.created(repo.created)

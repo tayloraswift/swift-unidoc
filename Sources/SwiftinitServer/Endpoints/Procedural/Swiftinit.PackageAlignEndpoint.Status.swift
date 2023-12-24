@@ -11,7 +11,7 @@ extension Swiftinit.PackageAlignEndpoint
         case noSuchRealm
     }
 }
-extension Swiftinit.PackageAlignEndpoint.Status:HTTP.ServerResponseFactory
+extension Swiftinit.PackageAlignEndpoint.Status:HTTP.ServerEndpoint
 {
     consuming
     func response(as _:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse

@@ -9,7 +9,7 @@ extension Swiftinit.GlobalUplinkEndpoint
         case enqueued
     }
 }
-extension Swiftinit.GlobalUplinkEndpoint.Status:HTTP.ServerResponseFactory
+extension Swiftinit.GlobalUplinkEndpoint.Status:HTTP.ServerEndpoint
 {
     consuming
     func response(as _:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
