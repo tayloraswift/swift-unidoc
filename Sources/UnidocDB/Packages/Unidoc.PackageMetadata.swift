@@ -78,6 +78,8 @@ extension Unidoc.PackageMetadata:MongoMasterCodingModel
         case realmAligning = "A"
 
         case repo = "G"
+
+        @available(*, unavailable)
         case repoLegacy = "R"
 
         case crawled = "T"
@@ -109,15 +111,5 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
             repo: try bson[.repo]?.decode(),
             crawled: try bson[.crawled]?.decode() ?? 0)
-
-        if  case nil = self.repo,
-            let legacy:Repo = try bson[.repoLegacy]?.decode()
-        {
-            switch legacy
-            {
-            case .github(let repo):
-                self.repo = try .github(repo)
-            }
-        }
     }
 }
