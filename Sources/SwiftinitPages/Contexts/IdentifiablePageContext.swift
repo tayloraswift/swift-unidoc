@@ -18,10 +18,10 @@ class IdentifiablePageContext<ID> where ID:Hashable
     private
     var cache:Cache
 
-    let repo:Unidoc.PackageMetadata.Repo?
+    let repo:Unidoc.PackageRepo?
 
     private
-    init(cache:Cache, repo:Unidoc.PackageMetadata.Repo?)
+    init(cache:Cache, repo:Unidoc.PackageRepo?)
     {
         self.outlines = []
         self.cache = cache
@@ -49,7 +49,7 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext<Unidoc.Scalar>
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageMetadata.Repo?)
+    init(principal scalar:Unidoc.Scalar, volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: scalar),
@@ -60,7 +60,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
 extension IdentifiablePageContext<Never?>
 {
     convenience
-    init(principal volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageMetadata.Repo?)
+    init(principal volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageRepo?)
     {
         self.init(cache: .init(
                 vertices: .init(principal: nil),
@@ -165,19 +165,19 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
-        if  let origin:Unidoc.PackageMetadata.Repo.Origin = self.repo?.origin,
+        if  let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
             let refname:String = self.volumes[file.edition]?.refname,
-            let file:Unidoc.Vertex.File = self.vertices[file]?.file,
-            let blob:String = origin.blob(refname: refname, file: file.symbol)
+            let file:Unidoc.Vertex.File = self.vertices[file]?.file
         {
-            .init(
+            let blob:String = origin.blob(refname: refname, file: file.symbol)
+            return .init(
                 file: file.symbol.last,
                 line: line,
                 target: line.map { "\(blob)#L\($0 + 1)" } ?? blob)
         }
         else
         {
-            nil
+            return nil
         }
     }
 }
