@@ -18,6 +18,15 @@ extension Timestamp
 }
 extension Timestamp.Components
 {
+    /// Truncates the time component of the argument to midnight.
+    @inlinable public static
+    func date(_ self:Self) -> Self
+    {
+        .init(date: self.date, time: .init(hour: 0, minute: 0, second: 0))
+    }
+}
+extension Timestamp.Components
+{
     public
     init?(iso8601 string:String)
     {

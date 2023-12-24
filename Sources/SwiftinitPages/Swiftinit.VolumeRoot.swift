@@ -1,6 +1,3 @@
-import HTTP
-import Media
-import UnidocQueries
 import UnidocRecords
 import URI
 
@@ -14,12 +11,6 @@ extension Swiftinit
 public
 protocol _SwiftinitVolumeRoot:Swiftinit.StaticRoot
 {
-    static
-    func response(
-        vertex:consuming Unidoc.Vertex,
-        groups:consuming [Unidoc.Group],
-        tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
 }
 extension Swiftinit.VolumeRoot
 {

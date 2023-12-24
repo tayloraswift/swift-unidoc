@@ -48,4 +48,7 @@ extension Swiftinit.PipelineParameters
             }
         }
     }
+
+    static
+    var none:Self { .init(user: nil, tag: nil) }
 }

@@ -1,11 +1,3 @@
-extension Swiftinit.PackageConfigEndpoint
-{
-    enum Update
-    {
-        case hidden(Bool)
-    }
-}
-
 import HTTP
 import MongoDB
 import UnidocDB

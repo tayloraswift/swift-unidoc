@@ -13,7 +13,7 @@ protocol _MongoUpdateQuery<Target>:Sendable
 {
     /// The collection the update query operates on.
     associatedtype Target:Mongo.CollectionModel
-    associatedtype Effect:MongoWriteEffect
+    associatedtype Effect:Mongo.WriteEffect
 
     /// Constructs an update query by adding statements to the given encoder.
     func build(updates:inout Mongo.UpdateEncoder<Effect>)

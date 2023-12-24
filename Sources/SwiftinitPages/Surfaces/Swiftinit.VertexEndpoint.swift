@@ -1,19 +1,40 @@
 import HTML
 import HTTP
 import Media
+import MongoDB
 import SwiftinitRender
-import Unidoc
+import UnidocDB
 import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.VolumeRoot
+extension Swiftinit
+{
+    public
+    typealias VertexEndpoint = _SwiftinitVertexEndpoint
+}
+
+/// The name of this protocol is ``Swiftinit.VolumeRoot``.
+public
+protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
+    where Query.Iteration.BatchElement == Unidoc.VertexOutput
+{
+    static
+    func response(
+        vertex:consuming Unidoc.Vertex,
+        groups:consuming [Unidoc.Group],
+        tree:consuming Unidoc.TypeTree?,
+        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+}
+
+extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         guard
-        let principal:Unidoc.PrincipalOutput = (copy self).principal
+        let output:Unidoc.VertexOutput = self.value,
+        let principal:Unidoc.PrincipalOutput = output.principal
         else
         {
             return .notFound(.init(
@@ -54,7 +75,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.Volum
         {
             context.vertices.add($0.vertices)
             context.volumes.add($0.volumes)
-        } (consume self)
+        } (consume output)
 
         vertex.overview.map
         {
@@ -72,7 +93,7 @@ extension Unidoc.VertexOutput:HTTP.ServerResponseFactory where T:Swiftinit.Volum
 
         //  Note: noun tree won’t exist if the module contains no declarations.
         //  (For example, an `@_exported` shim.)
-        return try T.response(vertex: consume vertex,
+        return try Self.response(vertex: consume vertex,
             groups: consume groups,
             tree: consume tree,
             with: .init(context,

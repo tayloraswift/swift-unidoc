@@ -5,7 +5,7 @@ import SwiftinitPages
 
 protocol NonblockingEndpoint:ProceduralEndpoint
 {
-    associatedtype Status:HTTP.ServerResponseFactory<Swiftinit.RenderFormat>
+    associatedtype Status:HTTP.ServerEndpoint<Swiftinit.RenderFormat>
 
     func enqueue(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],
