@@ -98,7 +98,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let index:SearchIndexQuery<UnidocDatabase.Metadata>.Output = tests.expect(
-                        value: try await unidoc.execute(query: query, with: session)),
+                        value: try await session.query(database: unidoc.id, with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
                     switch index.json
@@ -130,7 +130,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.PackageQuery.Output = tests.expect(
-                        value: try await unidoc.execute(query: query, with: session))
+                        value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
                         return
@@ -149,7 +149,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.PackageQuery.Output = tests.expect(
-                        value: try await unidoc.execute(query: query, with: session))
+                        value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
                         return
@@ -176,7 +176,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.PackageQuery.Output = tests.expect(
-                        value: try await unidoc.execute(query: query, with: session))
+                        value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
                         return
@@ -201,7 +201,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.PackageQuery.Output = tests.expect(
-                        value: try await unidoc.execute(query: query, with: session))
+                        value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
                         return
