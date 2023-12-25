@@ -191,13 +191,11 @@ section.details
                 }
             }
 
-            > a:hover
+            > a:hover, a:focus
             {
                 background-color: $light-background-pink;
-
                 text-decoration: none;
             }
-
 
             span.m
             {
