@@ -1,3 +1,4 @@
+import HTTP
 import Media
 
 extension Swiftinit
@@ -8,18 +9,22 @@ extension Swiftinit
         public
         let assets:Assets
         public
-        let accept:AcceptType
+        var accept:HTTP.AcceptType
         public
-        let secure:Bool
+        var locale:HTTP.Locale?
+        public
+        var secure:Bool
 
         @inlinable public
         init(
             assets:Assets,
-            accept:AcceptType = .application(.html),
+            accept:HTTP.AcceptType = .text(.html),
+            locale:HTTP.Locale? = nil,
             secure:Bool = true)
         {
-            self.accept = accept
             self.assets = assets
+            self.accept = accept
+            self.locale = locale
             self.secure = secure
         }
     }

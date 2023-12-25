@@ -32,6 +32,7 @@ let package:Package = .init(
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "IP", targets: ["IP"]),
+        .library(name: "ISO", targets: ["ISO"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
         .library(name: "InlineBuffer", targets: ["InlineBuffer"]),
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -211,6 +212,7 @@ let package:Package = .init(
 
         .target(name: "HTTP", dependencies:
             [
+                .target(name: "ISO"),
                 .target(name: "Media"),
                 .target(name: "MD5"),
 
@@ -250,6 +252,11 @@ let package:Package = .init(
         .target(name: "InlineBuffer"),
 
         .target(name: "InlineDictionary"),
+
+        .target(name: "ISO", dependencies:
+            [
+                .target(name: "IntegerEncodingMacros"),
+            ]),
 
         .target(name: "JSONAST"),
 
@@ -328,10 +335,7 @@ let package:Package = .init(
                 .target(name: "InlineBuffer"),
             ]),
 
-        .target(name: "Media", dependencies:
-            [
-                .target(name: "IntegerEncodingMacros"),
-            ]),
+        .target(name: "Media"),
 
         .target(name: "Multiparts", dependencies:
             [

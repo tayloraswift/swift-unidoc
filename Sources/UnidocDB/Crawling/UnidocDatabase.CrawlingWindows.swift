@@ -51,8 +51,8 @@ extension UnidocDatabase.CrawlingWindows
         let response:Mongo.UpdateResponse<BSON.Millisecond> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
             {
-                let today:UnixDay = .midnight(before: .now())
-                for day:UnixDay in today.advanced(by: -days) ... today
+                let today:UnixDate = .midnight(before: .now())
+                for day:UnixDate in today.advanced(by: -days) ... today
                 {
                     let window:Unidoc.CrawlingWindow = .init(id: BSON.Millisecond.init(day))
 

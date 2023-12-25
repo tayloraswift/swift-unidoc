@@ -18,7 +18,7 @@ enum Main:TestMain, TestBattery
                     region: .us_east_1,
                     name: "examplebucket"),
                 date: .init(weekday: .friday,
-                    date: .init(year: 2013, month: 5, day: 24),
+                    date: .init(year: 2013, month: .may, day: 24),
                     time: .init(hour: 0, minute: 0, second: 0)),
                 path: "/test%24file.text")
 

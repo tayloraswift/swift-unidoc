@@ -7,13 +7,23 @@ extension Swiftinit
 {
     enum ClientAnnotation:Equatable, Hashable, Sendable
     {
-        case barbie(HTTP.AcceptLanguage)
+        case barbie(HTTP.Locale)
         case bratz
         case robot(Robot)
     }
 }
 extension Swiftinit.ClientAnnotation
 {
+    var locale:HTTP.Locale?
+    {
+        switch self
+        {
+        case .barbie(let locale):   locale
+        case .bratz:                nil
+        case .robot(_):             nil
+        }
+    }
+
     var field:WritableKeyPath<ServerProfile.ByClient, Int>
     {
         switch self
@@ -122,11 +132,12 @@ extension Swiftinit.ClientAnnotation
         }
 
         guard
-        let language:String = headers.acceptLanguage,
-        let language:HTTP.AcceptLanguage = .init(language)
+        let locale:String = headers.acceptLanguage,
+        let locale:HTTP.AcceptLanguage = .init(locale),
+        let locale:HTTP.Locale = locale.dominant
         else
         {
-            //  Didn’t send a language: definitely a bot.
+            //  Didn’t send a locale: definitely a bot.
             return .robot(.other)
         }
 
@@ -191,7 +202,7 @@ extension Swiftinit.ClientAnnotation
 
         switch suspicion
         {
-        case Int.min ..<  0:    return .barbie(language)
+        case Int.min ..<  0:    return .barbie(locale)
         case 0       ... 10:    return .bratz
         case _:                 return .robot(.other)
         }

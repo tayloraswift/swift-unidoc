@@ -9,6 +9,7 @@ import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
+import UnixTime
 import URI
 
 extension Swiftinit
@@ -27,7 +28,7 @@ extension Swiftinit.AnyEndpoint
     static
     func explainable<Base>(_ endpoint:Base,
         parameters:Swiftinit.PipelineParameters,
-        accept:AcceptType = .text(.html)) -> Self
+        accept:HTTP.AcceptType? = nil) -> Self
         where   Base:HTTP.ServerEndpoint<Swiftinit.RenderFormat>,
                 Base:Mongo.PipelineEndpoint,
                 Base:Sendable
@@ -233,6 +234,26 @@ extension Swiftinit.AnyEndpoint
                 limit: 12,
                 user: parameters.user)),
             parameters: parameters)
+    }
+
+    static
+    func get(telescope trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self?
+    {
+        if  let year:Timestamp.Year = .init(trunk),
+            let endpoint:Swiftinit.PackagesCrawledEndpoint = .init(year: year)
+        {
+            .explainable(endpoint, parameters: parameters)
+        }
+        else if
+            let date:Timestamp.Date = .init(trunk),
+            let endpoint:Swiftinit.PackagesCreatedEndpoint = .init(date: date)
+        {
+            .explainable(endpoint, parameters: parameters)
+        }
+        else
+        {
+            nil
+        }
     }
 
     static

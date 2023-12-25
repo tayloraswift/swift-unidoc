@@ -6,13 +6,22 @@ import UnixTime
 extension Unidoc
 {
     public
-    struct PackageReposCreatedQuery
+    struct PackagesCreatedQuery
     {
-        let timeframe:Range<UnixDay>
+        @usableFromInline
+        let timeframe:Range<UnixDate>
+        @usableFromInline
         let limit:Int
+
+        @inlinable public
+        init(during timeframe:Range<UnixDate>, limit:Int)
+        {
+            self.timeframe = timeframe
+            self.limit = limit
+        }
     }
 }
-extension Unidoc.PackageReposCreatedQuery:Mongo.PipelineQuery
+extension Unidoc.PackagesCreatedQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = UnidocDatabase.Packages
@@ -33,11 +42,11 @@ extension Unidoc.PackageReposCreatedQuery:Mongo.PipelineQuery
 
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = .init
             {
-                $0[.gte] = BSON.Millisecond.init(UnixInstant.day(self.timeframe.lowerBound))
+                $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.lowerBound))
             }
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = .init
             {
-                $0[.lt] = BSON.Millisecond.init(UnixInstant.day(self.timeframe.upperBound))
+                $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.upperBound))
             }
         }
 

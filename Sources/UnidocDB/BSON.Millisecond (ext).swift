@@ -10,7 +10,7 @@ extension BSON.Millisecond
     }
 
     @inlinable public
-    init(_ day:UnixDay)
+    init(_ day:UnixDate)
     {
         self.init(1000 * day.index * 86_400)
     }

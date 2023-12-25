@@ -1,5 +1,5 @@
 @frozen public
-struct UnixDay:Equatable, Hashable, Sendable
+struct UnixDate:Equatable, Hashable, Sendable
 {
     public
     var index:Int64
@@ -10,25 +10,33 @@ struct UnixDay:Equatable, Hashable, Sendable
         self.index = index
     }
 }
-extension UnixDay
+extension UnixDate
 {
     @inlinable public static
     func midnight(before instant:UnixInstant) -> Self
     {
         .init(daySinceEpoch: instant.second / 86_400)
     }
-}
-extension UnixDay:ExpressibleByIntegerLiteral
-{
+
     @inlinable public
-    init(integerLiteral:Int64) { self = .init(daySinceEpoch: integerLiteral) }
+    init?(utc date:Timestamp.Date)
+    {
+        guard
+        let instant:UnixInstant = .init(utc: .init(date: date))
+        else
+        {
+            return nil
+        }
+
+        self = .midnight(before: instant)
+    }
 }
-extension UnixDay:Comparable
+extension UnixDate:Comparable
 {
     @inlinable public static
     func < (a:Self, b:Self) -> Bool { a.index < b.index }
 }
-extension UnixDay:Strideable
+extension UnixDate:Strideable
 {
     @inlinable public
     func advanced(by days:Int) -> Self { .init(daySinceEpoch: index.advanced(by: days)) }

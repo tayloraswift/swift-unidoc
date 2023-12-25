@@ -9,7 +9,7 @@ extension Timestamp
         var time:Time
 
         @inlinable public
-        init(date:Date, time:Time)
+        init(date:Date, time:Time = .midnight)
         {
             self.date = date
             self.time = time
@@ -19,11 +19,10 @@ extension Timestamp
 extension Timestamp.Components
 {
     /// Truncates the time component of the argument to midnight.
+    ///
+    /// This constructor is a shorthand for `init(date: self.date)`.
     @inlinable public static
-    func date(_ self:Self) -> Self
-    {
-        .init(date: self.date, time: .init(hour: 0, minute: 0, second: 0))
-    }
+    func date(_ self:Self) -> Self { .init(date: self.date) }
 }
 extension Timestamp.Components
 {
@@ -38,7 +37,7 @@ extension Timestamp.Components
     {
         guard
         let hyphen:String.Index = string.firstIndex(of: "-"),
-        let year:Int32 = .init(string[..<hyphen])
+        let year:Timestamp.Year = .init(string[..<hyphen])
         else
         {
             return nil
@@ -48,7 +47,7 @@ extension Timestamp.Components
 
         guard
         let hyphen:String.Index = string[month...].firstIndex(of: "-"),
-        let month:Int32 = .init(string[month ..< hyphen])
+        let month:Timestamp.Month = .init(string[month ..< hyphen])
         else
         {
             return nil
@@ -94,9 +93,9 @@ extension Timestamp.Components
             return nil
         }
 
-        if  1 ... 12 ~= month,
-            1 ... 31 ~= day,
-            0 ..< 24 ~= hour,
+        //  Don’t bother validating the day of the month; that is not what this type is for.
+
+        if  0 ..< 24 ~= hour,
             0 ..< 60 ~= minute,
             0 ... 60 ~= second
         {

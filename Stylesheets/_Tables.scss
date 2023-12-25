@@ -140,3 +140,80 @@ section.details
         }
     }
 }
+section.details
+{
+    > ol.calendar
+    {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-gap: 0.5rem;
+        grid-template-columns: repeat(7, 1fr);
+
+        li
+        {
+            > *
+            {
+                min-height: 3rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+
+                background-color: rgb(233, 233, 233);
+                padding: 0.35rem 0.5rem 0.5rem 0.5rem;
+                border-radius: 0.25rem;
+
+                p:first-child
+                {
+                    text-align: right;
+                }
+                p
+                {
+                    padding: 0;
+                    margin: 0;
+                    line-height: 1em;
+                }
+            }
+
+            > div
+            {
+                p
+                {
+                    color: $light-foreground-semi;
+                }
+            }
+
+            > a
+            {
+                p.crawled
+                {
+                    font-weight: bold;
+                }
+            }
+
+            > a:hover
+            {
+                background-color: $light-background-pink;
+
+                text-decoration: none;
+            }
+
+
+            span.m
+            {
+                color: $light-foreground-faint;
+            }
+            span.d
+            {
+                color: $light-foreground;
+            }
+        }
+        li.first
+        {
+            span.m
+            {
+                color: $light-foreground;
+            }
+        }
+    }
+}
