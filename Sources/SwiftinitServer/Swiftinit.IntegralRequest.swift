@@ -212,6 +212,10 @@ extension Swiftinit.IntegralRequest
                     user: metadata.cookies.session?.user,
                     tag: tag))
 
+        case Swiftinit.Telescope.root:
+            endpoint = .get(telescope: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
+
         case "reference":
             endpoint = .get(legacy: trunk, path,
                 with: .init(uri.query?.parameters))

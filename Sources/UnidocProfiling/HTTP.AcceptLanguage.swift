@@ -1,5 +1,5 @@
 import HTTP
-import Media
+import ISO
 
 extension HTTP
 {
@@ -7,39 +7,76 @@ extension HTTP
     struct AcceptLanguage:Equatable, Hashable, Sendable
     {
         public
-        let dominant:Macrolanguage
+        var tags:[Tag]
 
         @inlinable public
-        init(dominant:Macrolanguage)
+        init(tags:[Tag])
         {
-            self.dominant = dominant
+            self.tags = tags
         }
     }
+}
+extension HTTP.AcceptLanguage:ExpressibleByArrayLiteral
+{
+    @inlinable public
+    init(arrayLiteral:Tag...) { self.init(tags: arrayLiteral) }
 }
 extension HTTP.AcceptLanguage
 {
     public
     init?(_ string:String)
     {
-        var dominant:(subtag:Substring, quality:Double) = ("", 0.0)
+        self = []
+
+        if  string == "*"
+        {
+            return
+        }
 
         for language:Substring in string.split(separator: ",")
         {
             let language:Substring = language.drop(while: \.isWhitespace)
-            let subtag:Substring = language.prefix(while: \.isLetter)
+
+            let semicolon:String.Index?
+
+            let macrolanguage:ISO.Macrolanguage?
+            let country:ISO.Country?
+
+            if  let hyphen:String.Index = language.firstIndex(of: "-")
+            {
+                let i:String.Index = language.index(after: hyphen)
+
+                semicolon = language[i...].firstIndex(of: ";")
+
+                macrolanguage = .init(language[..<hyphen])
+                country = .init(language[i ..< (semicolon ?? language.endIndex)].lowercased())
+            }
+            else
+            {
+                semicolon = language.firstIndex(of: ";")
+
+                macrolanguage = .init(language[..<(semicolon ?? language.endIndex)])
+                country = nil
+            }
+
+            guard
+            let macrolanguage:ISO.Macrolanguage
+            else
+            {
+                continue
+            }
 
             var quality:Double = 1.0
 
             defer
             {
-                if  quality > dominant.quality
-                {
-                    dominant = (subtag, quality)
-                }
+                self.tags.append(.init(
+                    locale: .init(language: macrolanguage, country: country),
+                    q: quality))
             }
 
             guard
-            let semicolon:String.Index = language[subtag.endIndex...].firstIndex(of: ";")
+            let semicolon:String.Index
             else
             {
                 continue
@@ -67,13 +104,17 @@ extension HTTP.AcceptLanguage
             }
         }
 
-        guard
-        let macrolanguage:Macrolanguage = .init(dominant.subtag)
-        else
+        if  self.tags.isEmpty
         {
             return nil
         }
-
-        self.init(dominant: macrolanguage)
+    }
+}
+extension HTTP.AcceptLanguage
+{
+    @inlinable public
+    var dominant:HTTP.Locale?
+    {
+        self.tags.max { $0.q < $1.q }?.locale
     }
 }

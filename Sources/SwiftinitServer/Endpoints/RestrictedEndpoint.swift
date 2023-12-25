@@ -23,7 +23,8 @@ extension RestrictedEndpoint
 
     consuming
     func load(from server:borrowing Swiftinit.Server,
-        with cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
+        with cookies:Swiftinit.Cookies,
+        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         if  server.secure
         {

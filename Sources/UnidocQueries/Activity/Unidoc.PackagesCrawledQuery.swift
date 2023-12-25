@@ -5,13 +5,20 @@ import UnixTime
 
 extension Unidoc
 {
-    public
-    struct PackageReposCrawledQuery
+    @frozen public
+    struct PackagesCrawledQuery
     {
-        let timeframe:Range<UnixDay>
+        @usableFromInline
+        let range:Range<UnixDate>
+
+        @inlinable public
+        init(during range:Range<UnixDate>)
+        {
+            self.range = range
+        }
     }
 }
-extension Unidoc.PackageReposCrawledQuery:Mongo.PipelineQuery
+extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = UnidocDatabase.CrawlingWindows
@@ -30,11 +37,11 @@ extension Unidoc.PackageReposCrawledQuery:Mongo.PipelineQuery
         {
             $0[Unidoc.CrawlingWindow[.id]] = .init
             {
-                $0[.gte] = BSON.Millisecond.init(UnixInstant.day(self.timeframe.lowerBound))
+                $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.range.lowerBound))
             }
             $0[Unidoc.CrawlingWindow[.id]] = .init
             {
-                $0[.lt] = BSON.Millisecond.init(UnixInstant.day(self.timeframe.upperBound))
+                $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.range.upperBound))
             }
         }
 

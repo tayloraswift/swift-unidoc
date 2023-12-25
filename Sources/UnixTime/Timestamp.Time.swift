@@ -21,6 +21,11 @@ extension Timestamp
 }
 extension Timestamp.Time
 {
+    @inlinable public static
+    var midnight:Self { .init(hour: 0, minute: 0, second: 0) }
+}
+extension Timestamp.Time
+{
     @inlinable public
     var hh:String { self.hour < 10 ? "0\(self.hour)" : "\(self.hour)" }
 

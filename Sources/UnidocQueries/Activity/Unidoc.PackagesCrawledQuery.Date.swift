@@ -2,7 +2,7 @@ import BSON
 import MongoQL
 import UnidocDB
 
-extension Unidoc.PackageReposCrawledQuery
+extension Unidoc.PackagesCrawledQuery
 {
     @frozen public
     struct Date
@@ -20,7 +20,7 @@ extension Unidoc.PackageReposCrawledQuery
         }
     }
 }
-extension Unidoc.PackageReposCrawledQuery.Date:MongoMasterCodingModel
+extension Unidoc.PackagesCrawledQuery.Date:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -29,11 +29,11 @@ extension Unidoc.PackageReposCrawledQuery.Date:MongoMasterCodingModel
         case repos = "R"
     }
 }
-extension Unidoc.PackageReposCrawledQuery.Date:BSONDocumentDecodable
+extension Unidoc.PackagesCrawledQuery.Date:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(window: try bson[.window].decode(), repos: try bson[.repos].decode())
+        self.init(window: try bson[.window].decode(), repos: try bson[.repos]?.decode() ?? 0)
     }
 }

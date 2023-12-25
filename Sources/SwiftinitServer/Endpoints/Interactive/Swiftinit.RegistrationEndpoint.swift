@@ -20,7 +20,8 @@ extension Swiftinit
 extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        with _:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
+        with _:Swiftinit.Cookies,
+        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard let github:GitHub.Client<GitHub.API> = server.plugins.github?.api
         else

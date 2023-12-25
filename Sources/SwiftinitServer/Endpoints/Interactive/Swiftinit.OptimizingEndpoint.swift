@@ -15,9 +15,9 @@ extension Swiftinit
                 Base:Sendable
     {
         /// An `accept-type` to propogate to the base endpoint, which may influence the response
-        /// it produces.
+        /// it produces. Overrides the request’s `accept-type` if non-nil.
         private
-        let accept:AcceptType
+        let accept:HTTP.AcceptType?
         /// An optional cache tag used to optimize the response.
         private
         let etag:MD5?
@@ -25,8 +25,8 @@ extension Swiftinit
         private
         var base:Base
 
-        init(accept:AcceptType,
-            etag:MD5?,
+        init(accept:HTTP.AcceptType? = nil,
+            etag:MD5? = nil,
             base:Base)
         {
             self.accept = accept
@@ -38,14 +38,22 @@ extension Swiftinit
 extension Swiftinit.OptimizingEndpoint:PublicEndpoint
 {
     consuming
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         try await self.base.pull(from: server.db.unidoc.id, with: session)
-        let etag:MD5? = { $0.etag } (self)
 
-        switch try self.base.response(as: server.format(accept))
+        let (accept, etag):(HTTP.AcceptType?, MD5?) = { ($0.accept, $0.etag) } (self)
+
+        var format:Swiftinit.RenderFormat = format
+        if  let accept:HTTP.AcceptType
+        {
+            format.accept = accept
+        }
+
+        switch try self.base.response(as: format)
         {
         case .redirect(let redirect, cookies: let cookies):
             return .redirect(redirect, cookies: cookies)
