@@ -59,6 +59,13 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
             $0[.foreignField] = Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]
             $0[.pipeline] = .init
             {
+                /// This improves query performance enormously, as it gets MongoDB to use the
+                /// partial index. But why?? The `localField` is always non-null!
+                $0[.match] = .init
+                {
+                    $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+                }
+
                 $0[.count] = count
             }
             $0[.as] = Date[.repos]

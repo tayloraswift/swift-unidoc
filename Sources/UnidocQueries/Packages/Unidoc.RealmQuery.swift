@@ -63,8 +63,8 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
             }
         }
 
-        //  This *should* be able to use the partial index even without `$exists` guards,
-        //  as `_id` is always present.
+        //  It’s not clear to me how this is able to use the partial index even without
+        // `$exists` guards, but somehow it does.
         pipeline[.lookup] = .init
         {
             $0[.from] = UnidocDatabase.Packages.name
