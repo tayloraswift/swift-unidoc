@@ -40,7 +40,7 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
             with: session)
         else
         {
-            Log[.debug] = "Skipping telescope crawl: no windows left to crawl."
+            // Log[.debug] = "Skipping telescope crawl: no windows left to crawl."
             return
         }
 
