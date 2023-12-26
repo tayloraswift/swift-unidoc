@@ -141,10 +141,20 @@ extension UnidocDatabase
 
     public
     func index(package:Symbol.Package,
-        repo:consuming Unidoc.PackageRepo? = nil,
+        repo:Unidoc.PackageRepo? = nil,
         mode:Unidoc.PackageIndexMode = .manual,
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
+        if  case .github(let origin)? = repo?.origin,
+            let existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
+                repo: origin.id,
+                with: session)
+        {
+            //  According to GitHub, this package is already known to us by a different name.
+            try await self.alias(existing: existing.symbol, package: package, with: session)
+            return (existing, false)
+        }
+
         //  Placement involves autoincrement, which is why this cannot be done in an update.
         let placement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await session.query(
             database: self.id,
