@@ -39,8 +39,7 @@ body
         }
     }
 
-    header.app div.content,
-    main.content
+    > *.app > *.content
     {
         flex: 0 1 48rem;
 
@@ -48,8 +47,8 @@ body
         overflow-wrap: break-word;
     }
 
-    header.app div.content > *,
-    main.content
+    > header.app > div.content > *,
+    > div.app > main.content
     {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -67,23 +66,20 @@ body
         margin-top: 6rem;
     }
 
-    body > *
+    body > *.content > *.sidebar
     {
-        > *.sidebar
-        {
-            display: block;
-            flex: 0 0 16rem;
-            width: 16rem;
-        }
+        display: block;
+        flex: 0 0 16rem;
+        width: 16rem;
     }
 
-    body header.app div.content
+    body > header.app > div.content
     {
         //  48rem + 4 rem + 1 rem = 53rem
         flex: 0 1 53rem;
     }
-    body header.app div.content > *,
-    body main.content
+    body > header.app > div.content > *,
+    body > div.app > main.content
     {
         padding-left: 4rem;
     }
