@@ -246,7 +246,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
                                 }
                                 else
                                 {
-                                    $0[.td]
+                                    $0[.td] { $0.class = "placeholder" } = "unstable"
                                 }
                             }
                         }
