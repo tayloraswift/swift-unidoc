@@ -121,7 +121,7 @@ extension Swiftinit.VersionedPage
             }
             $0[.div] { $0.class = "sidebar" } = sidebar.map { _ in "" }
         }
-        body[.div]
+        body[.div, { $0.class = "app" }]
         {
             $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
             $0[.div] { $0.class = "sidebar" } = sidebar

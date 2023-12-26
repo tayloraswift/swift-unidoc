@@ -147,7 +147,14 @@ section.details
         list-style: none;
         padding: 0;
         display: grid;
-        grid-gap: 0.5rem;
+
+        grid-gap: 0.25rem;
+
+        @media only screen and (min-width: 50rem)
+        {
+            grid-gap: 0.5rem;
+        }
+
         grid-template-columns: repeat(7, 1fr);
 
         li
@@ -160,7 +167,12 @@ section.details
                 justify-content: space-between;
 
                 background-color: rgb(233, 233, 233);
-                padding: 0.35rem 0.5rem 0.5rem 0.5rem;
+
+                @media only screen and (min-width: 50rem)
+                {
+                    padding: 0.35rem 0.5rem 0.5rem 0.5rem;
+                }
+
                 border-radius: 0.25rem;
 
                 p:first-child
@@ -191,26 +203,50 @@ section.details
                 }
             }
 
+            > *
+            {
+                span.m
+                {
+                    color: $light-foreground-faint;
+                }
+                span.d
+                {
+                    color: $light-foreground;
+                }
+            }
+
             > a:hover, a:focus
             {
                 background-color: $light-background-pink;
                 text-decoration: none;
+
+                span.m
+                {
+                    color: $light-accent-barbie-pink-semi;
+                }
+                span.d
+                {
+                    color: $light-accent-barbie-pink;
+                }
             }
 
-            span.m
-            {
-                color: $light-foreground-faint;
-            }
-            span.d
-            {
-                color: $light-foreground;
-            }
         }
         li.first
         {
-            span.m
+            > *
             {
-                color: $light-foreground;
+                span.m
+                {
+                    color: $light-foreground;
+                }
+            }
+
+            > a:hover, a:focus
+            {
+                span.m
+                {
+                    color: $light-accent-barbie-pink;
+                }
             }
         }
     }
