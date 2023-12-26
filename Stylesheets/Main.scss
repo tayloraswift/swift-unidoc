@@ -32,11 +32,6 @@ body
         display: flex;
         flex-direction: row-reverse;
         justify-content: center;
-
-        > *.sidebar
-        {
-            display: none;
-        }
     }
 
     > *.app > *.content
@@ -45,6 +40,10 @@ body
 
         overflow: hidden;
         overflow-wrap: break-word;
+    }
+    > *.app > *.sidebar
+    {
+        display: none;
     }
 
     > header.app > div.content > *,
@@ -66,7 +65,7 @@ body
         margin-top: 6rem;
     }
 
-    body > *.content > *.sidebar
+    body > *.app > *.sidebar
     {
         display: block;
         flex: 0 0 16rem;
