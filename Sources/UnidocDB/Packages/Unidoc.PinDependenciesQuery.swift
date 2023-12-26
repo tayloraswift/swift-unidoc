@@ -10,10 +10,10 @@ extension Unidoc
     struct PinDependenciesQuery:Sendable
     {
         private
-        let patches:[Symbol.PackageDependency<PatchVersion>]
+        var patches:[Symbol.PackageDependency<PatchVersion>]
 
         private
-        init(patches:[Symbol.PackageDependency<PatchVersion>])
+        init(patches:[Symbol.PackageDependency<PatchVersion>] = [])
         {
             self.patches = patches
         }
@@ -23,26 +23,20 @@ extension Unidoc.PinDependenciesQuery
 {
     init?(for snapshot:borrowing Unidoc.Snapshot)
     {
-        var patches:[Symbol.PackageDependency<PatchVersion>] = []
+        self.init()
 
         for case (nil, let dependency) in zip(snapshot.pins, snapshot.metadata.dependencies)
         {
-            guard
-            let version:PatchVersion = dependency.version.release
-            else
+            if  let version:PatchVersion = dependency.version.release
             {
-                return nil
+                self.patches.append(.init(package: dependency.package, version: version))
             }
-
-            patches.append(.init(package: dependency.package, version: version))
         }
 
-        if  patches.isEmpty
+        if  self.patches.isEmpty
         {
             return nil
         }
-
-        self.init(patches: patches)
     }
 }
 extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery

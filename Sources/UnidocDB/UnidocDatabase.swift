@@ -503,6 +503,10 @@ extension UnidocDatabase
             {
                 all.append(pinned)
             }
+            else
+            {
+                print("failed to pin '\(dependency.package)' to '\(dependency.version)'")
+            }
         }
 
         return all
