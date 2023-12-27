@@ -1,4 +1,4 @@
-import MongoQL
+import MongoDB
 import UnidocRecords
 
 extension Unidoc

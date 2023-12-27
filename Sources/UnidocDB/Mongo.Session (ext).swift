@@ -14,7 +14,7 @@ extension Mongo.Session
     @inlinable public
     func update<Update>(database:Mongo.Database,
         with update:Update) async throws -> Mongo.UpdateResponse<Update.Target.Element.ID>
-        where Update:Mongo.UpdateQuery
+        where Update:Mongo.UpdateQuery, Update.Effect.ExecutionPolicy:Mongo.ExecutionPolicy
     {
         try await self.run(command: update.command, against: database)
     }
@@ -24,7 +24,7 @@ extension Mongo.Session
     //  This should be part of the swift-mongodb package.
     private
     func explain<Command>(database:Mongo.Database, command:Command) async throws -> String
-        where Command:MongoCommand
+        where Command:Mongo.Command
     {
         try await self.run(
             command: Mongo.Explain<Command>.init(verbosity: .executionStats, command: command),

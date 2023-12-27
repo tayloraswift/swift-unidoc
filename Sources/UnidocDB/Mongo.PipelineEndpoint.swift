@@ -47,7 +47,7 @@ extension Mongo.PipelineEndpoint
 
 extension Mongo.PipelineEndpoint
     where   Query.Iteration.Stride == Int,
-            Query.Iteration.Batch == Mongo.Cursor<Query.Iteration.BatchElement>.Batch
+            Query.Iteration.Batch == Mongo.CursorBatch<Query.Iteration.BatchElement>
 {
     @inlinable public mutating
     func pull(from database:Mongo.Database, with session:Mongo.Session) async throws

@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "branch" : "0.10.0",
-        "revision" : "aa3ebc930efacc06dc7e8a5fbc4af770adabbc97"
+        "revision" : "1e1c889415d61b2c00de48615b93d9f5fff0e4eb",
+        "version" : "0.10.0"
       }
     },
     {
