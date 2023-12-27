@@ -14,17 +14,17 @@ extension Swiftinit
         private
         let package:Unidoc.PackageMetadata
         private
-        let tagless:Unidoc.PackageQuery.Tagless?
+        let tagless:Unidoc.VersionsQuery.Tagless?
         private
-        let tagged:[Unidoc.PackageQuery.Tag]
+        let tagged:[Unidoc.VersionsQuery.Tag]
         private
         let realm:Unidoc.RealmMetadata?
         private
         let user:Unidoc.User?
 
         init(package:Unidoc.PackageMetadata,
-            tagless:Unidoc.PackageQuery.Tagless?,
-            tagged:[Unidoc.PackageQuery.Tag],
+            tagless:Unidoc.VersionsQuery.Tagless?,
+            tagged:[Unidoc.VersionsQuery.Tag],
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
@@ -38,17 +38,17 @@ extension Swiftinit
 }
 extension Swiftinit.TagsPage
 {
-    init(from output:borrowing Unidoc.PackageQuery.Output)
+    init(from output:borrowing Unidoc.VersionsQuery.Output)
     {
-        var prereleases:ArraySlice<Unidoc.PackageQuery.Tag> = output.prereleases[...]
-        var releases:ArraySlice<Unidoc.PackageQuery.Tag> = output.releases[...]
+        var prereleases:ArraySlice<Unidoc.VersionsQuery.Tag> = output.prereleases[...]
+        var releases:ArraySlice<Unidoc.VersionsQuery.Tag> = output.releases[...]
 
         //  Merge the two pre-sorted arrays into a single sorted array.
-        var tagged:[Unidoc.PackageQuery.Tag] = []
+        var tagged:[Unidoc.VersionsQuery.Tag] = []
             tagged.reserveCapacity(prereleases.count + releases.count)
         while
-            let prerelease:Unidoc.PackageQuery.Tag = prereleases.first,
-            let release:Unidoc.PackageQuery.Tag = releases.first
+            let prerelease:Unidoc.VersionsQuery.Tag = prereleases.first,
+            let release:Unidoc.VersionsQuery.Tag = releases.first
         {
             if  release.edition.patch < prerelease.edition.patch
             {
@@ -140,7 +140,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         $0[.dd] = origin.archived ? "yes" : "no"
 
                         let created:UnixInstant = .millisecond(repo.created.value)
-                        let updated:UnixInstant = .millisecond(repo.updated.value)
+                        let pushed:UnixInstant = .millisecond(origin.pushed.value)
 
                         if  let created:Timestamp.Date = created.timestamp?.date
                         {
@@ -148,10 +148,10 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                             $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
                         }
 
-                        let age:Age = .init(now - updated)
+                        let age:Age = .init(now - pushed)
 
                         $0[.dt] = "Last Pushed"
-                        $0[.dd] = "\(age)"
+                        $0[.dd] = age.long
                     }
                 }
             }
@@ -173,7 +173,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                 $0[.tbody]
                 {
-                    if  let tagless:Unidoc.PackageQuery.Tagless = self.tagless
+                    if  let tagless:Unidoc.VersionsQuery.Tagless = self.tagless
                     {
                         $0[.tr] { $0.class = "tagless" } = Row.init(
                             volume: tagless.volume,
@@ -182,7 +182,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     }
 
                     var modern:(prerelease:Bool, release:Bool) = (true, true)
-                    for tagged:Unidoc.PackageQuery.Tag in self.tagged
+                    for tagged:Unidoc.VersionsQuery.Tag in self.tagged
                     {
                         let row:Row = .init(
                             volume: tagged.volume,

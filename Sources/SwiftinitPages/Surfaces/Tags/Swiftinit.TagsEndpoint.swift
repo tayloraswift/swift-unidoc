@@ -13,12 +13,12 @@ extension Swiftinit
     struct TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
     {
         public
-        let query:Unidoc.PackageQuery
+        let query:Unidoc.VersionsQuery
         public
-        var value:Unidoc.PackageQuery.Output?
+        var value:Unidoc.VersionsQuery.Output?
 
         @inlinable public
-        init(query:Unidoc.PackageQuery)
+        init(query:Unidoc.VersionsQuery)
         {
             self.query = query
             self.value = nil
@@ -31,7 +31,7 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let output:Unidoc.PackageQuery.Output = self.value
+        let output:Unidoc.VersionsQuery.Output = self.value
         else
         {
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")

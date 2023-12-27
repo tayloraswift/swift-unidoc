@@ -70,6 +70,10 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
             $0[.from] = UnidocDatabase.Packages.name
             $0[.localField] = Self.target / Unidoc.RealmMetadata[.id]
             $0[.foreignField] = Unidoc.PackageMetadata[.realm]
+            $0[.pipeline] = .init
+            {
+                Unidoc.PackageOutput.extend(pipeline: &$0, from: Mongo.Pipeline.ROOT)
+            }
             $0[.as] = Output[.packages]
         }
     }

@@ -123,26 +123,6 @@ section.details
 }
 section.details
 {
-    > ol.packages
-    {
-        padding-left: 1em;
-
-        li::marker
-        {
-            color: $light-foreground-semi;
-            font-variant-numeric: oldstyle-nums;
-        }
-        li
-        {
-            a
-            {
-                font-style: italic;
-            }
-        }
-    }
-}
-section.details
-{
     > ol.calendar
     {
         list-style: none;

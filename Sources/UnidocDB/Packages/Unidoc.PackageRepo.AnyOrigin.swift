@@ -19,6 +19,36 @@ extension Unidoc.PackageRepo.AnyOrigin
         }
     }
 
+    /// Returns the registrar’s short description for the repository.
+    @inlinable public
+    var about:String?
+    {
+        switch self
+        {
+        case .github(let self): self.about
+        }
+    }
+
+    /// Returns the registrar’s name for the repository’s owner.
+    @inlinable public
+    var owner:String
+    {
+        switch self
+        {
+        case .github(let self): self.owner
+        }
+    }
+
+    /// Returns the registrar’s name for the repository.
+    @inlinable public
+    var name:String
+    {
+        switch self
+        {
+        case .github(let self): self.name
+        }
+    }
+
     @inlinable public
     func blob(refname:String, file:Symbol.File) -> String
     {

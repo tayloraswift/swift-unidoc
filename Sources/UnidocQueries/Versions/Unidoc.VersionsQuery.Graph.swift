@@ -4,7 +4,7 @@ import SemanticVersions
 import SymbolGraphs
 import UnidocRecords
 
-extension Unidoc.PackageQuery
+extension Unidoc.VersionsQuery
 {
     @frozen public
     struct Graph:Equatable, Sendable
@@ -25,7 +25,7 @@ extension Unidoc.PackageQuery
         }
     }
 }
-extension Unidoc.PackageQuery.Graph:MongoMasterCodingModel
+extension Unidoc.VersionsQuery.Graph:MongoMasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -35,7 +35,7 @@ extension Unidoc.PackageQuery.Graph:MongoMasterCodingModel
         case abi
     }
 }
-extension Unidoc.PackageQuery.Graph:BSONDocumentDecodable
+extension Unidoc.VersionsQuery.Graph:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

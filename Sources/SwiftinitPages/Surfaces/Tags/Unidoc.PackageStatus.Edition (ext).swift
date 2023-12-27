@@ -3,7 +3,7 @@ import UnidocQueries
 
 extension Unidoc.PackageStatus.Edition
 {
-    init?(from output:borrowing Unidoc.PackageQuery.Tag)
+    init?(from output:borrowing Unidoc.VersionsQuery.Tag)
     {
         self.init(coordinate: output.edition.version,
             graphs: output.graph != nil ? 1 : 0,

@@ -9,7 +9,7 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct PackageQuery:Equatable, Hashable, Sendable
+    struct VersionsQuery:Equatable, Hashable, Sendable
     {
         public
         let symbol:Symbol.Package
@@ -28,12 +28,12 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageQuery:Mongo.PipelineQuery
+extension Unidoc.VersionsQuery:Mongo.PipelineQuery
 {
     public
     typealias Iteration = Mongo.Single<Output>
 }
-extension Unidoc.PackageQuery:Unidoc.AliasingQuery
+extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
 {
     public
     typealias CollectionOrigin = UnidocDatabase.PackageAliases
@@ -157,7 +157,7 @@ extension Unidoc.PackageQuery:Unidoc.AliasingQuery
         pipeline[.unset] = tagless
     }
 }
-extension Unidoc.PackageQuery
+extension Unidoc.VersionsQuery
 {
     private static
     func load(_ pipeline:inout Mongo.PipelineEncoder,

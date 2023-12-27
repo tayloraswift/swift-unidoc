@@ -10,12 +10,12 @@ extension Swiftinit.TagsPage
     struct Row
     {
         let volume:Unidoc.VolumeMetadata?
-        let graph:Unidoc.PackageQuery.Graph?
+        let graph:Unidoc.VersionsQuery.Graph?
         let type:RowType
 
         init(
             volume:Unidoc.VolumeMetadata?,
-            graph:Unidoc.PackageQuery.Graph?,
+            graph:Unidoc.VersionsQuery.Graph?,
             type:RowType)
         {
             self.volume = volume
@@ -92,7 +92,7 @@ extension Swiftinit.TagsPage.Row:HyperTextOutputStreamable
         }
         tr[.td, { $0.class = "graph" }]
         {
-            if  let graph:Unidoc.PackageQuery.Graph = self.graph
+            if  let graph:Unidoc.VersionsQuery.Graph = self.graph
             {
                 $0[.span]
                 {

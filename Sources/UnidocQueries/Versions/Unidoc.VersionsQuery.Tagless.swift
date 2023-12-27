@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Unidoc.PackageQuery
+extension Unidoc.VersionsQuery
 {
     @frozen public
     struct Tagless:Equatable, Sendable

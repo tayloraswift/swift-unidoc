@@ -3,7 +3,7 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc.PackageQuery
+extension Unidoc.VersionsQuery
 {
     @frozen public
     struct Output:Equatable, Sendable
@@ -38,7 +38,7 @@ extension Unidoc.PackageQuery
         }
     }
 }
-extension Unidoc.PackageQuery.Output:MongoMasterCodingModel
+extension Unidoc.VersionsQuery.Output:MongoMasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -52,12 +52,12 @@ extension Unidoc.PackageQuery.Output:MongoMasterCodingModel
         case user
     }
 }
-extension Unidoc.PackageQuery.Output:BSONDocumentDecodable
+extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let tagless:Unidoc.PackageQuery.Graph? = try bson[.tagless_graph]?.decode()
+        let tagless:Unidoc.VersionsQuery.Graph? = try bson[.tagless_graph]?.decode()
         self.init(
             prereleases: try bson[.prereleases]?.decode() ?? [],
             releases: try bson[.releases]?.decode() ?? [],

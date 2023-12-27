@@ -125,11 +125,11 @@ struct PackageQueries:UnidocDatabaseTestBattery
         {
             if  let tests:TestGroup = tests / "Debut"
             {
-                let query:Unidoc.PackageQuery = .init(package: "swift-debut", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(package: "swift-debut", limit: 2)
                 await tests.do
                 {
                     guard
-                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                    let output:Unidoc.VersionsQuery.Output = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
@@ -144,11 +144,11 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "Fearless"
             {
-                let query:Unidoc.PackageQuery = .init(package: "swift-fearless", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(package: "swift-fearless", limit: 2)
                 await tests.do
                 {
                     guard
-                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                    let output:Unidoc.VersionsQuery.Output = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
@@ -171,11 +171,11 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "SpeakNow"
             {
-                let query:Unidoc.PackageQuery = .init(package: "swift-speak-now", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(package: "swift-speak-now", limit: 2)
                 await tests.do
                 {
                     guard
-                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                    let output:Unidoc.VersionsQuery.Output = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query))
                     else
                     {
@@ -196,11 +196,11 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "Red"
             {
-                let query:Unidoc.PackageQuery = .init(package: "swift-red", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(package: "swift-red", limit: 2)
                 await tests.do
                 {
                     guard
-                    let output:Unidoc.PackageQuery.Output = tests.expect(
+                    let output:Unidoc.VersionsQuery.Output = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query))
                     else
                     {

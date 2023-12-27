@@ -11,16 +11,16 @@ typealias ThinQuery = Unidoc.RedirectQuery
 extension Unidoc
 {
     @frozen public
-    struct RedirectQuery<VertexPredicate>:Equatable, Hashable, Sendable
-        where VertexPredicate:Unidoc.VertexPredicate
+    struct RedirectQuery<Predicate>:Equatable, Hashable, Sendable
+        where Predicate:VertexPredicate
     {
         public
         let volume:Unidoc.VolumeSelector
         public
-        let vertex:VertexPredicate
+        let vertex:Predicate
 
         @inlinable public
-        init(volume:Unidoc.VolumeSelector, lookup vertex:VertexPredicate)
+        init(volume:Unidoc.VolumeSelector, lookup vertex:Predicate)
         {
             self.volume = volume
             self.vertex = vertex
@@ -34,6 +34,11 @@ extension Unidoc.RedirectQuery:Mongo.PipelineQuery
 }
 extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
 {
+    /// The compiler is capable of inferring this on its own, but this makes it easier to
+    /// understand how this type witnesses ``Unidoc.VolumeQuery``.
+    public
+    typealias VertexPredicate = Predicate
+
     @inlinable public static
     var volume:Mongo.KeyPath { Unidoc.RedirectOutput[.volume] }
 
