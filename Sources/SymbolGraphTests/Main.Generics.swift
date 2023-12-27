@@ -28,7 +28,8 @@ extension Main.Generics:TestBattery
             tests.do
             {
                 let bson:BSON.List = .init(elements: parameters)
-                let decoded:[GenericParameter] = try .init(bson: .init(bson))
+                let decoded:[GenericParameter] = try .init(
+                    bson: BSON.ListView<[UInt8]>.init(bson))
 
                 tests.expect(parameters ..? decoded)
             }
@@ -63,7 +64,8 @@ extension Main.Generics:TestBattery
                     {
                         let bson:BSON.Document = .init(encoding: constraint)
 
-                        let decoded:GenericConstraint<Int32> = try .init(bson: .init(bson))
+                        let decoded:GenericConstraint<Int32> = try .init(
+                            bson: BSON.DocumentView<[UInt8]>.init(bson))
 
                         tests.expect(constraint ==? decoded)
                     }
