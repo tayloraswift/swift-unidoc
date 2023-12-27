@@ -11,9 +11,9 @@ extension Swiftinit
     struct PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
     {
         public
-        let query:Unidoc.PackagesCreatedQuery
+        let query:Unidoc.PackagesQuery<Unidoc.PackageCreated>
         public
-        var batch:[Unidoc.PackageMetadata]
+        var batch:[Unidoc.PackageOutput]
 
         @usableFromInline
         let date:Timestamp.Date

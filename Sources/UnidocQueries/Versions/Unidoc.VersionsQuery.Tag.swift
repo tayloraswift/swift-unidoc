@@ -3,7 +3,7 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc.PackageQuery
+extension Unidoc.VersionsQuery
 {
     @frozen public
     struct Tag:Equatable, Sendable
@@ -27,7 +27,7 @@ extension Unidoc.PackageQuery
         }
     }
 }
-extension Unidoc.PackageQuery.Tag:MongoMasterCodingModel
+extension Unidoc.VersionsQuery.Tag:MongoMasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -37,7 +37,7 @@ extension Unidoc.PackageQuery.Tag:MongoMasterCodingModel
         case graph
     }
 }
-extension Unidoc.PackageQuery.Tag:BSONDocumentDecodable
+extension Unidoc.VersionsQuery.Tag:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

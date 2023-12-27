@@ -9,11 +9,11 @@ extension Swiftinit
     struct PackagesCreatedPage
     {
         private
-        let packages:[Unidoc.PackageMetadata]
+        let packages:[Unidoc.PackageOutput]
         private
         let date:Timestamp.Date
 
-        init(packages:[Unidoc.PackageMetadata], on date:Timestamp.Date)
+        init(packages:[Unidoc.PackageOutput], on date:Timestamp.Date)
         {
             self.packages = packages
             self.date = date
@@ -47,15 +47,9 @@ extension Swiftinit.PackagesCreatedPage:Swiftinit.ApplicationPage
 
             $0[.ol, { $0.class = "packages" }]
             {
-                for package:Unidoc.PackageMetadata in self.packages
+                for package:Unidoc.PackageOutput in self.packages
                 {
-                    $0[.li]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Swiftinit.Tags[package.symbol])"
-                        } = "\(package.symbol)"
-                    }
+                    $0[.li] = Swiftinit.PackageCard.init(package)
                 }
             }
         }

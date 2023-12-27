@@ -1,19 +1,25 @@
 import BSON
-import MongoDB
+import MongoQL
 import UnidocDB
 import UnixTime
 
 extension Unidoc
 {
-    public
-    struct PackagesCreatedQuery
+    /// A predicate that matches all packages whose associated GitHub repositories were created
+    /// during a specific timeframe. This predicate also sorts the results by package symbol.
+    ///
+    /// >   Note:
+    ///     The name of the type is singular and not plural (`PackagesCreated`) because it is
+    ///     meant to be used as a type parameter to `PackagesQuery`, which is plural.
+    @frozen public
+    struct PackageCreated:Equatable, Hashable, Sendable
     {
         @usableFromInline
         let timeframe:Range<UnixDate>
         @usableFromInline
         let limit:Int
 
-        @inlinable public
+        @inlinable internal
         init(during timeframe:Range<UnixDate>, limit:Int)
         {
             self.timeframe = timeframe
@@ -21,20 +27,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackagesCreatedQuery:Mongo.PipelineQuery
+extension Unidoc.PackageCreated:Unidoc.PackagePredicate
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.Packages
-    public
-    typealias Collation = SimpleCollation
-    public
-    typealias Iteration = Mongo.SingleBatch<Unidoc.PackageMetadata>
-
-    public
-    var hint:Mongo.CollectionIndex? { UnidocDatabase.Packages.indexRepoCreated }
-
-    public
-    func build(pipeline:inout Mongo.PipelineEncoder)
+    func extend(pipeline:inout Mongo.PipelineEncoder)
     {
         pipeline[.match] = .init
         {

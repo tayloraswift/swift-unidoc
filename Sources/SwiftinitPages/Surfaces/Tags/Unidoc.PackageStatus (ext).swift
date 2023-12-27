@@ -4,11 +4,11 @@ import UnidocQueries
 
 extension Unidoc.PackageStatus
 {
-    init?(from output:borrowing Unidoc.PackageQuery.Output)
+    init?(from output:borrowing Unidoc.VersionsQuery.Output)
     {
         guard
         let repo:Unidoc.PackageRepo = output.package.repo,
-        let release:Unidoc.PackageQuery.Tag = output.releases.first,
+        let release:Unidoc.VersionsQuery.Tag = output.releases.first,
         let release:Edition = .init(from: release)
         else
         {

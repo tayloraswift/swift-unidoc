@@ -41,6 +41,11 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
 }
 extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 {
+    /// The compiler is capable of inferring this on its own, but this makes it easier to
+    /// understand how this type witnesses ``Unidoc.VolumeQuery``.
+    public
+    typealias VertexPredicate = Unidoc.Shoot
+
     @inlinable public static
     var volumeOfLatest:Mongo.KeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }
     @inlinable public static

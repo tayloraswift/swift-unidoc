@@ -57,7 +57,7 @@ extension Unidoc.VolumeQuery
     {
         defer
         {
-            self.vertex.extend(pipeline: &pipeline, input: Self.volume, output: Self.input)
+            self.vertex.extend(pipeline: &pipeline, volume: Self.volume, output: Self.input)
             self.extend(pipeline: &pipeline)
         }
 

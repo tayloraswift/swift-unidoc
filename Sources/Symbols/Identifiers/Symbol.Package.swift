@@ -3,13 +3,14 @@ extension Symbol
     @frozen public
     struct Package:Equatable, Hashable, Sendable
     {
+        /// The string identifier wrapped by this symbol. It may or may not contain dots.
         public
-        let name:String
+        let identifier:String
 
         @inlinable public
-        init(canonical name:String)
+        init(identifier:String)
         {
-            self.name = name
+            self.identifier = identifier
         }
     }
 }
@@ -17,10 +18,10 @@ extension Symbol
 extension Symbol.Package
 {
     @inlinable public static
-    var swift:Self { .init(canonical: "swift") }
+    var swift:Self { .init(identifier: "swift") }
 
     @inlinable public static
-    var swiftPM:Self { .init(canonical: "swift-package-manager") }
+    var swiftPM:Self { .init(identifier: "swift-package-manager") }
 }
 extension Symbol.Package:Comparable
 {
@@ -31,14 +32,14 @@ extension Symbol.Package:Comparable
         {
         case (.swift, .swift):      false
         case (.swift, _):           true
-        case (let lhs, let rhs):    lhs.name < rhs.name
+        case (let lhs, let rhs):    lhs.identifier < rhs.identifier
         }
     }
 }
 extension Symbol.Package:CustomStringConvertible
 {
     @inlinable public
-    var description:String { self.name }
+    var description:String { self.identifier }
 }
 extension Symbol.Package:LosslessStringConvertible
 {
@@ -51,8 +52,8 @@ extension Symbol.Package:LosslessStringConvertible
                 "swift-core-libraries":
             self = .swift
 
-        case let name:
-            self.init(canonical: name)
+        case let identifier:
+            self.init(identifier: identifier)
         }
     }
 }
