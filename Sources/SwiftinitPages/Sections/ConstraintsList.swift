@@ -21,7 +21,7 @@ struct ConstraintsList
         self.constraints = constraints
     }
 }
-extension ConstraintsList:HyperTextOutputStreamable
+extension ConstraintsList:HTML.OutputStreamable
 {
     static
     func += (code:inout HTML.ContentEncoder, self:Self)

@@ -34,15 +34,20 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCreatedEndpoint
-{
-}
 extension Swiftinit.PackagesCreatedEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
-        let page:Swiftinit.PackagesCreatedPage = .init(packages: self.batch, on: self.date)
+        //  If we access `self.batch` directly, it dispatches through the protocol witness to
+        //  avoid consuming `self`, so we need to use the closure to make `self` `borrowing`
+        //  which will cause the compiler to choose the stored property accessor.
+        let batch:[Unidoc.PackageOutput] = { $0.batch } (self)
+        //  This consumes `self` because it is accessing a stored property that witnesses no
+        //  protocol requirements.
+        let date:Timestamp.Date = self.date
+        let page:Swiftinit.PackagesCreatedPage = .init(batch, on: date)
+
         return .ok(page.resource(format: format))
     }
 }

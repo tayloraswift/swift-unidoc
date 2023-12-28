@@ -24,7 +24,7 @@ extension Swiftinit.TagsPage
         }
     }
 }
-extension Swiftinit.TagsPage.Row:HyperTextOutputStreamable
+extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
 {
     static
     func += (tr:inout HTML.ContentEncoder, self:Self)

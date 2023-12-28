@@ -44,14 +44,14 @@ extension Unidoc.RedirectQuery<Unidoc.Shoot>
             version = .init(head)
             head = next
 
-            switch version
+            if  let swift:NumericVersion = version
             {
-            //  We don’t have any symbol graphs for these versions of swift.
-            case .major(.v(5))?, .minor(.v(5, 6)), .patch(.v(5, 6, 1)), .patch(.v(5, 6, 2)):
-                version = nil
-
-            case _:
-                break
+                let swift:PatchVersion = .init(padding: swift)
+                //  We don’t have any symbol graphs for these versions of swift.
+                if  swift < .v(5, 8, 0)
+                {
+                    version = nil
+                }
             }
         }
 

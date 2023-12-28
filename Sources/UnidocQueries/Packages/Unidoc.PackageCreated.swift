@@ -6,7 +6,7 @@ import UnixTime
 extension Unidoc
 {
     /// A predicate that matches all packages whose associated GitHub repositories were created
-    /// during a specific timeframe. This predicate also sorts the results by package symbol.
+    /// during a specific timeframe.
     ///
     /// >   Note:
     ///     The name of the type is singular and not plural (`PackagesCreated`) because it is
@@ -47,10 +47,5 @@ extension Unidoc.PackageCreated:Unidoc.PackagePredicate
         }
 
         pipeline[.limit] = self.limit
-
-        pipeline[.sort] = .init
-        {
-            $0[Unidoc.PackageMetadata[.symbol]] = (+)
-        }
     }
 }

@@ -23,7 +23,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.StatsThumbnail:HyperTextOutputStreamable
+extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
 {
     static
     func += (div:inout HTML.ContentEncoder, self:Self)
@@ -36,7 +36,7 @@ extension Swiftinit.StatsThumbnail:HyperTextOutputStreamable
             {
                 $0[.p]
                 {
-                    let target:AutomaticHeading = .interfaceBreakdown
+                    let target:Swiftinit.StatsHeading = .interfaceBreakdown
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
                 }
 
@@ -55,7 +55,7 @@ extension Swiftinit.StatsThumbnail:HyperTextOutputStreamable
             {
                 $0[.p]
                 {
-                    let target:AutomaticHeading = .documentationCoverage
+                    let target:Swiftinit.StatsHeading = .documentationCoverage
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
                 }
 

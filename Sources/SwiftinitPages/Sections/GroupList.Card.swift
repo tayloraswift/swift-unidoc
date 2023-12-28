@@ -18,7 +18,7 @@ extension GroupList
         }
     }
 }
-extension GroupList.Card:HyperTextOutputStreamable
+extension GroupList.Card:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

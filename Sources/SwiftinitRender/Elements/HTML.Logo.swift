@@ -11,7 +11,7 @@ extension HTML
         }
     }
 }
-extension HTML.Logo:HyperTextOutputStreamable
+extension HTML.Logo:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)

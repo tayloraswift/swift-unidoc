@@ -1,7 +1,7 @@
 import GitHubAPI
 import HTML
 
-extension GitHub.Repo.Owner:HyperTextOutputStreamable
+extension GitHub.Repo.Owner:HTML.OutputStreamable
 {
     public static
     func += (dd:inout HTML.ContentEncoder, self:Self)

@@ -14,7 +14,7 @@ extension Unidoc.VolumeMetadata
         }
     }
 }
-extension Unidoc.VolumeMetadata.Domain:HyperTextOutputStreamable
+extension Unidoc.VolumeMetadata.Domain:HTML.OutputStreamable
 {
     static
     func += (span:inout HTML.ContentEncoder, self:Self)

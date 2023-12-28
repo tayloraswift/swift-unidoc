@@ -29,6 +29,17 @@ extension Unidoc.PackageRepo.AnyOrigin
         }
     }
 
+    /// Indicates whether the repository is alive. For GitHub repositories, this is true if the
+    /// repository is neither ``GitHubOrigin/archived`` nor ``GitHubOrigin/disabled``.
+    @inlinable public
+    var alive:Bool
+    {
+        switch self
+        {
+        case .github(let self): !(self.archived || self.disabled)
+        }
+    }
+
     /// Returns the registrar’s name for the repository’s owner.
     @inlinable public
     var owner:String

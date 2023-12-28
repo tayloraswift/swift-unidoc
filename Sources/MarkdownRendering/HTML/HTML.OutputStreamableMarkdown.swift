@@ -1,8 +1,19 @@
 import HTML
 import MarkdownABI
 
+extension HTML
+{
+    public
+    typealias OutputStreamableMarkdown = _HTMLOutputStreamableMarkdown
+}
+
+@available(*, deprecated, renamed: "HTML.OutputStreamableMarkdown")
 public
-protocol HyperTextRenderableMarkdown:HyperTextOutputStreamable
+typealias HyperTextRenderableMarkdown = HTML.OutputStreamableMarkdown
+
+/// The name of this protocol is ``HTML.OutputStreamableMarkdown``.
+public
+protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
 {
     var bytecode:MarkdownBytecode { get }
 
@@ -17,7 +28,7 @@ protocol HyperTextRenderableMarkdown:HyperTextOutputStreamable
     /// the given reference.
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
 }
-extension HyperTextRenderableMarkdown
+extension HTML.OutputStreamableMarkdown
 {
     /// Returns nil.
     @inlinable public
@@ -31,7 +42,7 @@ extension HyperTextRenderableMarkdown
     {
     }
 }
-extension HyperTextRenderableMarkdown
+extension HTML.OutputStreamableMarkdown
 {
     /// Equivalent to ``render(to:)``, but ignores all errors.
     @inlinable public static
@@ -45,7 +56,7 @@ extension HyperTextRenderableMarkdown
     /// returns nil if successful. This function always closes any HTML elements
     /// it creates, even on error.
     ///
-    /// See ``PlainTextRenderableMarkdown.write(to:)`` for a simpler version of this function
+    /// See ``TextOutputStreamableMarkdown.write(to:)`` for a simpler version of this function
     /// that only renders visible text.
     public
     func render(to html:inout HTML.ContentEncoder) throws

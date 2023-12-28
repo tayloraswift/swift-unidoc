@@ -24,7 +24,7 @@ struct ExtensionHeading
         self.where = `where`
     }
 }
-extension ExtensionHeading:HyperTextOutputStreamable
+extension ExtensionHeading:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

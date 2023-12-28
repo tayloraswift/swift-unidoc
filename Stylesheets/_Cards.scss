@@ -10,6 +10,14 @@ ol.packages
     flex-direction: column;
     gap: 1rem;
 
+    > li:first-child
+    {
+        > p:first-child
+        {
+            border-top: none;
+        }
+    }
+
     > li
     {
         > p:first-child,
@@ -27,11 +35,16 @@ ol.packages
 
         > p:first-child
         {
-            border-bottom: 1px solid $light-foreground-elevated;
+            margin-top: 0.5rem;
+            border-top: 2px solid $light-foreground-elevated;
 
             a
             {
                 font-style: italic;
+            }
+            a.dead
+            {
+                color: $light-foreground-semi;
             }
             span.owner
             {

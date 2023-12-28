@@ -156,7 +156,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
             }
 
-            $0[.h2] = "Package Tags"
+            $0[.h2] = Heading.tags
 
             $0[.table, { $0.class = "tags" }]
             {
@@ -209,7 +209,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
             }
 
-            $0[.h2] = "Package Settings"
+            $0[.h2] = Heading.settings
 
             $0[.dl]
             {
