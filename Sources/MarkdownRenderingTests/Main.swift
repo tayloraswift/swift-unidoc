@@ -391,7 +391,7 @@ enum Main:TestMain, TestBattery
         }
         if  let tests:TestGroup = tests / "References" / "Success"
         {
-            struct Renderable:HyperTextRenderableMarkdown
+            struct Renderable:HTML.OutputStreamableMarkdown
             {
                 let bytecode:MarkdownBytecode = .init
                 {
@@ -418,7 +418,7 @@ enum Main:TestMain, TestBattery
         }
         if  let tests:TestGroup = tests / "ReferenceAttributes"
         {
-            struct Renderable:HyperTextRenderableMarkdown
+            struct Renderable:HTML.OutputStreamableMarkdown
             {
                 let bytecode:MarkdownBytecode
 

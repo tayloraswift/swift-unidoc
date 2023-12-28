@@ -129,8 +129,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
         {
             if  let repo:Unidoc.PackageRepo = self.repo
             {
-                let heading:AutomaticHeading = .packageRepository
-                $0[.h2] { $0.id = heading.id } = heading
+                $0[.h2] = Heading.repository
 
                 $0[.dl]
                 {
@@ -172,8 +171,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
             if !self.volume.dependencies.isEmpty
             {
-                let heading:AutomaticHeading = .packageDependencies
-                $0[.h2] { $0.id = heading.id } = heading
+                $0[.h2] = Heading.dependencies
 
                 $0[.table, { $0.class = "dependencies" }]
                 {
@@ -254,11 +252,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
                 }
             }
 
-            do
-            {
-                let heading:AutomaticHeading = .platformRequirements
-                $0[.h2] { $0.id = heading.id } = heading
-            }
+            $0[.h2] = Heading.platforms
 
             $0[.table, { $0.class = "platforms" }]
             {
@@ -290,11 +284,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
                 }
             }
 
-            do
-            {
-                let heading:AutomaticHeading = .snapshotInformation
-                $0[.h2] { $0.id = heading.id } = heading
-            }
+            $0[.h2] = Heading.snapshot
 
             $0[.dl]
             {

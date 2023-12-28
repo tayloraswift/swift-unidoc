@@ -28,8 +28,8 @@ extension HTML.VectorLink where Display:Collection, Display.Element:StringProtoc
     @inlinable public
     var width:Int { self.display.reduce(self.display.count - 1) { $0 + $1.count } }
 }
-extension HTML.VectorLink:HyperTextOutputStreamable
-    where Display.Element:HyperTextOutputStreamable
+extension HTML.VectorLink:HTML.OutputStreamable
+    where Display.Element:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)

@@ -1,7 +1,7 @@
 import MarkdownABI
 
 public
-protocol PlainTextRenderableMarkdown:TextOutputStreamable, CustomStringConvertible
+protocol TextOutputStreamableMarkdown:TextOutputStreamable, CustomStringConvertible
 {
     var bytecode:MarkdownBytecode { get }
 
@@ -9,7 +9,7 @@ protocol PlainTextRenderableMarkdown:TextOutputStreamable, CustomStringConvertib
     /// the given reference.
     func load(_ reference:Int, into utf8:inout [UInt8])
 }
-extension PlainTextRenderableMarkdown
+extension TextOutputStreamableMarkdown
 {
     /// Does nothing.
     @inlinable public
@@ -17,7 +17,7 @@ extension PlainTextRenderableMarkdown
     {
     }
 }
-extension PlainTextRenderableMarkdown
+extension TextOutputStreamableMarkdown
 {
     @inlinable public
     func write(to stream:inout some TextOutputStream)
@@ -25,7 +25,7 @@ extension PlainTextRenderableMarkdown
         stream.write(self.description)
     }
 }
-extension PlainTextRenderableMarkdown
+extension TextOutputStreamableMarkdown
 {
     public
     var description:String

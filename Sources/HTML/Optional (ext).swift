@@ -1,4 +1,4 @@
-extension Optional where Wrapped:HyperTextOutputStreamable
+extension Optional where Wrapped:HTML.OutputStreamable
 {
     @inlinable public static
     func ?= (html:inout HTML.ContentEncoder, wrapped:Wrapped?)
@@ -9,7 +9,7 @@ extension Optional where Wrapped:HyperTextOutputStreamable
         }
     }
 }
-extension Optional where Wrapped:ScalableVectorOutputStreamable
+extension Optional where Wrapped:SVG.OutputStreamable
 {
     @inlinable public static
     func ?= (svg:inout SVG.ContentEncoder, wrapped:Wrapped?)

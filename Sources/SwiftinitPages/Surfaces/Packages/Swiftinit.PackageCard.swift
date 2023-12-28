@@ -14,11 +14,13 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageCard:HyperTextOutputStreamable
+extension Swiftinit.PackageCard:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)
     {
+        let dead:Bool = self.package.metadata.repo?.origin.alive == false
+
         li[.p]
         {
             $0[.span]
@@ -26,6 +28,8 @@ extension Swiftinit.PackageCard:HyperTextOutputStreamable
                 $0[.a]
                 {
                     $0.href = "\(Swiftinit.Tags[self.package.metadata.symbol])"
+                    $0.class = dead ? "dead" : nil
+
                 } = self.package.metadata.repo?.origin.name ??
                     self.package.metadata.symbol.identifier
 
@@ -46,7 +50,12 @@ extension Swiftinit.PackageCard:HyperTextOutputStreamable
 
         li[.p, { $0.class = "chyron" }]
         {
-            if  let release:Unidoc.EditionMetadata = self.package.release
+            if  dead
+            {
+                $0[.span] { $0.class = "placeholder" } = "Archived!"
+            }
+            else if
+                let release:Unidoc.EditionMetadata = self.package.release
             {
                 $0[.span] { $0.class = "release" } = "\(release.patch)"
             }

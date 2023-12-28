@@ -9,7 +9,7 @@ extension Pie
         case slices([Slice])
     }
 }
-extension Pie.Shape:HyperTextOutputStreamable
+extension Pie.Shape:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -22,7 +22,7 @@ extension Pie.Shape:HyperTextOutputStreamable
         html[.div] { $0.class = "pie-geometry" }
     }
 }
-extension Pie.Shape:ScalableVectorOutputStreamable
+extension Pie.Shape:SVG.OutputStreamable
 {
     @inlinable public static
     func += (svg:inout SVG.ContentEncoder, self:Self)

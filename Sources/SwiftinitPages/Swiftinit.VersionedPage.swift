@@ -14,7 +14,7 @@ public
 protocol _SwiftinitVersionedPage:Swiftinit.ApplicationPage
 {
     associatedtype Context:Swiftinit.VersionedPageContext
-    associatedtype Sidebar:HyperTextOutputStreamable
+    associatedtype Sidebar:HTML.OutputStreamable
 
     var canonical:CanonicalVersion? { get }
     var sidebar:Sidebar? { get }

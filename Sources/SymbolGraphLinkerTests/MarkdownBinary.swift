@@ -1,9 +1,10 @@
+import HTML
 import MarkdownABI
 import MarkdownRendering
 
 /// A thin wrapper around some ``MarkdownBytecode``, which conforms to
-/// ``HyperTextRenderableMarkdown``.
-struct MarkdownBinary:HyperTextRenderableMarkdown, Equatable, Sendable
+/// ``HTML.OutputStreamableMarkdown``.
+struct MarkdownBinary:HTML.OutputStreamableMarkdown, Equatable, Sendable
 {
     let bytecode:MarkdownBytecode
 

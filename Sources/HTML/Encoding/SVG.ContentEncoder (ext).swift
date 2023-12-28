@@ -3,7 +3,7 @@ extension SVG.ContentEncoder
     @inlinable public
     subscript<Renderable>(_ tag:SVG.ContainerElement,
         attributes:(inout SVG.AttributeEncoder) -> () = { _ in }) -> Renderable?
-        where Renderable:ScalableVectorOutputStreamable
+        where Renderable:SVG.OutputStreamable
     {
         get
         {

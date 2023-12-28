@@ -22,7 +22,7 @@ struct CodeSection
         self.context = context
     }
 }
-extension CodeSection:HyperTextRenderableMarkdown
+extension CodeSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {

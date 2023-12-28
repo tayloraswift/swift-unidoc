@@ -133,8 +133,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VersionedPage
                 }
             }
 
-            let heading:AutomaticHeading = .allProductConstituents
-            $0[.h2] { $0.id = heading.id } = heading
+            $0[.h2] = AutomaticHeading.allProductConstituents
 
             $0[.table, { $0.class = "constituents" }]
             {

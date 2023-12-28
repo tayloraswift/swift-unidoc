@@ -12,7 +12,7 @@ struct Pie<Key> where Key:PieSectorKey
         self.shape = shape
     }
 }
-extension Pie:HyperTextOutputStreamable
+extension Pie:HTML.OutputStreamable
 {
     public static
     func += (figure:inout HTML.ContentEncoder, self:Self)

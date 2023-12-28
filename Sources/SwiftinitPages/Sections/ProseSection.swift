@@ -23,7 +23,7 @@ struct ProseSection
         self.outlines = outlines
     }
 }
-extension ProseSection:HyperTextRenderableMarkdown
+extension ProseSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {
@@ -79,7 +79,7 @@ extension ProseSection:HyperTextRenderableMarkdown
         }
     }
 }
-extension ProseSection:PlainTextRenderableMarkdown
+extension ProseSection:TextOutputStreamableMarkdown
 {
     func load(_ reference:Int, into utf8:inout [UInt8])
     {

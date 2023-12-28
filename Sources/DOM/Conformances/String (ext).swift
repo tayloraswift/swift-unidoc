@@ -1,6 +1,6 @@
-extension String:HyperTextOutputStreamable
+extension String:HTML.OutputStreamable
 {
 }
-extension String:ScalableVectorOutputStreamable
+extension String:SVG.OutputStreamable
 {
 }

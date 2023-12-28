@@ -9,7 +9,7 @@ extension Swiftinit.PackagesCrawledPage
         case md(Timestamp.Month, Int32)
     }
 }
-extension Swiftinit.PackagesCrawledPage.DateLabel:HyperTextOutputStreamable
+extension Swiftinit.PackagesCrawledPage.DateLabel:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

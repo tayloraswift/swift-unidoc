@@ -119,7 +119,7 @@ extension CanonicalVersion
         }
     }
 }
-extension CanonicalVersion:HyperTextOutputStreamable
+extension CanonicalVersion:HTML.OutputStreamable
 {
     public static
     func += (section:inout HTML.ContentEncoder, self:Self)
