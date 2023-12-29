@@ -10,16 +10,16 @@ extension Unidoc
         public
         let sitemap:SitemapDelta?
         public
-        let visibleInFeed:Bool
+        let hidden:Bool
 
         @inlinable public
         init(edition:Edition,
             sitemap:SitemapDelta?,
-            visibleInFeed:Bool = false)
+            hidden:Bool)
         {
             self.edition = edition
             self.sitemap = sitemap
-            self.visibleInFeed = visibleInFeed
+            self.hidden = hidden
         }
     }
 }

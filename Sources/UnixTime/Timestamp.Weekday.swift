@@ -1,7 +1,7 @@
 extension Timestamp
 {
     @frozen public
-    enum Weekday:Int32, Equatable, Hashable, Sendable
+    enum Weekday:Int, Equatable, Hashable, Sendable
     {
         case sunday = 0
         case monday
@@ -10,6 +10,22 @@ extension Timestamp
         case thursday
         case friday
         case saturday
+    }
+}
+extension Timestamp.Weekday
+{
+    @inlinable public
+    func advanced(by stride:Int) -> Self
+    {
+        .init(rawValue: (self.rawValue + stride) % 7)!
+    }
+    /// Returns the number of days to the given weekday, modulo 7. The result is always in
+    /// the range `0 ..< 7`.
+    @inlinable public
+    func distance(to that:Self) -> Int
+    {
+        let distance:Int = that.rawValue - self.rawValue
+        return distance < 0 ? distance + 7 : distance
     }
 }
 extension Timestamp.Weekday

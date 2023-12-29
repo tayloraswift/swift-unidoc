@@ -17,7 +17,7 @@ struct GroupList
         self.scalars = scalars
     }
 }
-extension GroupList:HyperTextOutputStreamable
+extension GroupList:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

@@ -20,7 +20,7 @@ extension Pie.Chart
     @inlinable public
     var legend:Pie<Key>.Legend { .init(shape: self.shape) }
 }
-extension Pie.Chart:HyperTextOutputStreamable
+extension Pie.Chart:HTML.OutputStreamable
 {
     public static
     func += (figure:inout HTML.ContentEncoder, self:Self)

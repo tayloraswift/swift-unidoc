@@ -40,7 +40,7 @@ extension Unidoc
         ///
         /// Currently only GitHub repos are supported.
         public
-        var repo:Repo?
+        var repo:PackageRepo?
 
         /// When this package *record* was last crawled. This is different from the time when
         /// the package itself was last updated.
@@ -53,7 +53,7 @@ extension Unidoc
             hidden:Bool = false,
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
-            repo:Repo? = nil,
+            repo:PackageRepo? = nil,
             crawled:BSON.Millisecond = 0)
         {
             self.id = id
@@ -76,7 +76,12 @@ extension Unidoc.PackageMetadata:MongoMasterCodingModel
         case hidden = "H"
         case realm = "r"
         case realmAligning = "A"
-        case repo = "R"
+
+        case repo = "G"
+
+        @available(*, unavailable)
+        case repoLegacy = "R"
+
         case crawled = "T"
     }
 }

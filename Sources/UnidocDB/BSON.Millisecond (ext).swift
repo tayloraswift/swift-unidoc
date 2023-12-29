@@ -9,6 +9,12 @@ extension BSON.Millisecond
         self.init(1000 * unix.second + unix.nanoseconds / 1_000_000)
     }
 
+    @inlinable public
+    init(_ day:UnixDate)
+    {
+        self.init(1000 * day.index * 86_400)
+    }
+
     @inlinable public static
     func now() -> Self
     {

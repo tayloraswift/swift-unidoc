@@ -1,15 +1,15 @@
 extension DOM
 {
-    @frozen @usableFromInline internal
-    struct Property<Attribute> where Attribute:RawRepresentable<String>
+    @frozen @usableFromInline
+    struct Property<ID> where ID:Attribute
     {
         @usableFromInline internal
-        let attribute:Attribute
+        let attribute:ID
         @usableFromInline internal
         let value:String
 
         @inlinable internal
-        init(_ attribute:Attribute, _ value:String)
+        init(_ attribute:ID, _ value:String)
         {
             self.attribute = attribute
             self.value = value
@@ -22,7 +22,7 @@ extension DOM.Property
     func += (utf8:inout [UInt8], self:Self)
     {
         utf8.append(0x20) // ' '
-        utf8 += self.attribute.rawValue.utf8
+        utf8 += self.attribute.name.utf8
 
         if  self.value.isEmpty
         {

@@ -12,7 +12,8 @@ extension Swiftinit
 }
 extension Swiftinit.RobotsEndpoint:PublicEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        as _:Swiftinit.RenderFormat) -> HTTP.ServerResponse?
     {
         .ok("""
             User-agent: mauibot
@@ -47,6 +48,7 @@ extension Swiftinit.RobotsEndpoint:PublicEndpoint
             Disallow: /admin/
             Disallow: /auth/
             Disallow: /reference/
+            Disallow: /telescope/
 
             """)
     }

@@ -23,7 +23,7 @@ extension GitHubCredential:Hashable where Instant:Hashable
 }
 extension GitHubCredential<BSON.Millisecond>
 {
-    init(token:GitHubApp.Token, created:BSON.Millisecond)
+    init(token:GitHub.App.Token, created:BSON.Millisecond)
     {
         self.init(expires: .init(created.value + 1000 * token.secondsRemaining),
             token: token.value)

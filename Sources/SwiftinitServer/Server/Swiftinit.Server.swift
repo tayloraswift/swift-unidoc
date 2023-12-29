@@ -1,4 +1,4 @@
-import Media
+import HTTP
 import UnidocProfiling
 
 extension Swiftinit
@@ -24,8 +24,8 @@ extension Swiftinit.Server
     }
 
     var secure:Bool { self.loop.secure }
+
     var format:Swiftinit.RenderFormat { self.loop.format }
-    func format(_ accept:AcceptType) -> Swiftinit.RenderFormat { self.loop.format(accept) }
 
     var plugins:Swiftinit.Plugins { self.loop.plugins }
     var db:Swiftinit.DB { self.loop.db }

@@ -18,7 +18,7 @@ extension Unidoc
     /// The `Type` parameter allows you to transmit type information to the ``LookupOutput``.
     /// If no type information is needed, use `Any`.
     @frozen public
-    struct VertexQuery<Context, Type>:Equatable, Hashable, Sendable
+    struct VertexQuery<Context>:Equatable, Hashable, Sendable
         where Context:Unidoc.LookupContext
     {
         public
@@ -37,10 +37,15 @@ extension Unidoc
 extension Unidoc.VertexQuery:Mongo.PipelineQuery
 {
     public
-    typealias Iteration = Mongo.Single<Unidoc.VertexOutput<Type>>
+    typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 }
 extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 {
+    /// The compiler is capable of inferring this on its own, but this makes it easier to
+    /// understand how this type witnesses ``Unidoc.VolumeQuery``.
+    public
+    typealias VertexPredicate = Unidoc.Shoot
+
     @inlinable public static
     var volumeOfLatest:Mongo.KeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }
     @inlinable public static
@@ -209,7 +214,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  single document, so this pipeline should return at most 1 element.
         pipeline[.facet] = .init
         {
-            $0[Unidoc.VertexOutput<Type>[.principal]] = .init
+            $0[Unidoc.VertexOutput[.principal]] = .init
             {
                 $0[.project] = .init
                 {
@@ -300,7 +305,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 }
             }
 
-            $0[Unidoc.VertexOutput<Type>[.vertices]] = .init
+            $0[Unidoc.VertexOutput[.vertices]] = .init
             {
                 let results:Mongo.KeyPath = "results"
 
@@ -327,7 +332,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 ]
             }
 
-            $0[Unidoc.VertexOutput<Type>[.volumes]] = .init
+            $0[Unidoc.VertexOutput[.volumes]] = .init
             {
                 let results:Mongo.KeyPath = "results"
 
@@ -365,9 +370,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  Unbox single-element arrays.
         pipeline[.set] = .init
         {
-            $0[Unidoc.VertexOutput<Type>[.principal]] = .expr
+            $0[Unidoc.VertexOutput[.principal]] = .expr
             {
-                $0[.first] = Unidoc.VertexOutput<Type>[.principal]
+                $0[.first] = Unidoc.VertexOutput[.principal]
             }
         }
     }

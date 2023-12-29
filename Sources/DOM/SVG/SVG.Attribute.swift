@@ -4,7 +4,7 @@ extension SVG
 {
     @GenerateDynamicMemberFactory
     @frozen public
-    enum Attribute:String, Equatable, Hashable, Sendable
+    enum Attribute:String, DOM.Attribute, Equatable, Hashable, Sendable
     {
         case accent_height = "accent-height"
         case accumulate

@@ -8,7 +8,9 @@ import UnidocRecords
 extension Unidoc.Shoot:Unidoc.VertexPredicate
 {
     public
-    func extend(pipeline:inout Mongo.PipelineEncoder, input:Mongo.KeyPath, output:Mongo.KeyPath)
+    func extend(pipeline:inout Mongo.PipelineEncoder,
+        volume:Mongo.KeyPath,
+        output:Mongo.KeyPath)
     {
         pipeline[.lookup] = .init
         {
@@ -17,7 +19,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: zone] = input / Unidoc.VolumeMetadata[.id]
+                $0[let: zone] = volume / Unidoc.VolumeMetadata[.id]
             }
             $0[.pipeline] = .init
             {

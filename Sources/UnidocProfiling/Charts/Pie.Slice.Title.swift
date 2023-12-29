@@ -15,7 +15,7 @@ extension Pie.Slice
         }
     }
 }
-extension Pie.Slice.Title:ScalableVectorOutputStreamable
+extension Pie.Slice.Title:SVG.OutputStreamable
 {
     @inlinable internal static
     func += (svg:inout SVG.ContentEncoder, self:Self)

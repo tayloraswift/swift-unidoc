@@ -28,6 +28,8 @@ extension UnidocDatabase
     var policies:Policies { .init() }
 
     @inlinable public
+    var crawlingWindows:CrawlingWindows { .init(database: self.id) }
+    @inlinable public
     var repoFeed:RepoFeed { .init(database: self.id) }
     @inlinable public
     var docsFeed:DocsFeed { .init(database: self.id) }
@@ -64,6 +66,7 @@ extension UnidocDatabase:Mongo.DatabaseModel
     public
     func setup(with session:Mongo.Session) async throws
     {
+        try await self.crawlingWindows.setup(with: session)
         try await self.repoFeed.setup(with: session)
         try await self.docsFeed.setup(with: session)
 
@@ -93,9 +96,10 @@ extension UnidocDatabase
     func index(realm:String,
         with session:Mongo.Session) async throws -> (realm:Unidoc.RealmMetadata, new:Bool)
     {
-        let autoincrement:Unidoc.Autoincrement<Unidoc.RealmMetadata> = try await self.execute(
-            query: Unidoc.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm),
-            with: session) ?? .first
+        let autoincrement:Unidoc.Autoincrement<Unidoc.RealmMetadata> = try await session.query(
+            database: self.id,
+            with: Unidoc.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm))
+            ?? .first
 
         switch consume autoincrement
         {
@@ -132,20 +136,32 @@ extension UnidocDatabase
             //  Symbols are the same.
             return
         }
-        let _:Never? = try await self.execute(query: query, with: session)
+        let _:Never? = try await session.query(database: self.id, with: query)
     }
 
     public
     func index(package:Symbol.Package,
-        repo:consuming Unidoc.PackageMetadata.Repo? = nil,
+        repo:Unidoc.PackageRepo? = nil,
+        mode:Unidoc.PackageIndexMode = .manual,
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
-        //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let autoincrement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await self.execute(
-            query: Unidoc.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package),
-            with: session) ?? .first
+        if  case .github(let origin)? = repo?.origin,
+            let existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
+                repo: origin.id,
+                with: session)
+        {
+            //  According to GitHub, this package is already known to us by a different name.
+            try await self.alias(existing: existing.symbol, package: package, with: session)
+            return (existing, false)
+        }
 
-        switch consume autoincrement
+        //  Placement involves autoincrement, which is why this cannot be done in an update.
+        let placement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await session.query(
+            database: self.id,
+            with: Unidoc.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package))
+            ?? .first
+
+        switch consume placement
         {
         case .new(let id):
             let package:Unidoc.PackageAlias = .init(id: package, coordinate: id)
@@ -155,6 +171,7 @@ extension UnidocDatabase
         case .old(let id, nil):
             let package:Unidoc.PackageMetadata = .init(id: id,
                 symbol: package,
+                hidden: mode == .automatic,
                 realm: nil,
                 repo: repo)
 
@@ -168,7 +185,7 @@ extension UnidocDatabase
             return (package, true)
 
         case .old(_, var package?):
-            if  let repo:Unidoc.PackageMetadata.Repo,
+            if  let repo:Unidoc.PackageRepo,
                     repo != package.repo
             {
                 package.repo = repo
@@ -189,11 +206,10 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Unidoc.EditionPlacement = try await self.execute(
-            query: Unidoc.EditionPlacementQuery.init(
-                package: package,
-                refname: refname),
-            with: session) ?? .first
+        let placement:Unidoc.EditionPlacement = try await session.query(
+            database: self.id,
+            with: Unidoc.EditionPlacementQuery.init(package: package, refname: refname))
+            ?? .first
 
         switch consume placement
         {
@@ -299,7 +315,8 @@ extension UnidocDatabase
             edition: uploaded.edition,
             sitemap: try await self.fill(volume: consume volume,
                 clear: uploaded.updated,
-                with: session))
+                with: session),
+            hidden: true)
 
         return (uploaded, uplinked)
     }
@@ -334,7 +351,7 @@ extension UnidocDatabase
             sitemap: try await self.fill(volume: consume volume,
                 clear: true,
                 with: session),
-            visibleInFeed: package.repo?.visibleInFeed ?? true)
+            hidden: package.hidden)
     }
 
     public
@@ -423,9 +440,8 @@ extension UnidocDatabase
         alignment:
         if  let latest:Unidoc.Edition = volume.latest
         {
-            try await self.execute(
-                update: Volumes.AlignLatest.init(to: latest),
-                with: session)
+            try await session.update(database: self.id,
+                with: Volumes.AlignLatest.init(to: latest))
 
             guard
             let realm:Unidoc.Realm = volume.metadata.realm
@@ -434,9 +450,8 @@ extension UnidocDatabase
                 break alignment
             }
 
-            try await self.execute(
-                update: Groups.AlignLatest.init(to: latest, in: realm),
-                with: session)
+            try await session.update(database: self.id,
+                with: Groups.AlignLatest.init(to: latest, in: realm))
         }
 
         return delta
@@ -465,11 +480,11 @@ extension UnidocDatabase
 
         var pins:[Symbol.Package: Unidoc.Edition] = [:]
 
-        for pinned:Symbol.PackageDependency<Unidoc.Edition> in try await self.execute(
-            query: consume query,
-            with: session)
+        for dependency:Symbol.PackageDependency<Unidoc.Edition> in try await session.query(
+            database: self.id,
+            with: query)
         {
-            pins[pinned.package] = pinned.version
+            pins[dependency.package] = dependency.version
         }
 
         var all:[Unidoc.Edition] = []
@@ -487,6 +502,10 @@ extension UnidocDatabase
                 let pinned:Unidoc.Edition = snapshot.pins[pin]
             {
                 all.append(pinned)
+            }
+            else
+            {
+                print("failed to pin '\(dependency.package)' to '\(dependency.version)'")
             }
         }
 
@@ -594,7 +613,8 @@ extension UnidocDatabase
     {
         if  queue
         {
-            try await self.execute(update: Snapshots.QueueUplink.all, with: session)
+            try await session.update(database: self.id,
+                with: Snapshots.QueueUplink.all)
         }
         while
             let editions:[Unidoc.Edition] = try await self.snapshots.linkable(8,
@@ -613,9 +633,8 @@ extension UnidocDatabase
                     continue
                 }
 
-                try await self.execute(
-                    update: Snapshots.ClearUplink.one(edition),
-                    with: session)
+                try await session.update(database: self.id,
+                    with: Snapshots.ClearUplink.one(edition))
 
                 if  let sitemap:Unidoc.SitemapDelta = status.sitemap
                 {
@@ -642,9 +661,8 @@ extension UnidocDatabase
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws
     {
-        try await self.execute(
-            update: UnidocDatabase.Packages.AlignRealm.aligning(package),
-            with: session)
+        try await session.update(database: self.id,
+            with: UnidocDatabase.Packages.AlignRealm.aligning(package))
 
         groups:
         if  let realm:Unidoc.Realm
@@ -657,23 +675,19 @@ extension UnidocDatabase
                 break groups
             }
 
-            try await self.execute(
-                update: Groups.AlignLatest.init(to: latest.id, in: realm),
-                with: session)
+            try await session.update(database: self.id,
+                with: Groups.AlignLatest.init(to: latest.id, in: realm))
         }
         else
         {
-            try await self.execute(
-                update: Groups.ClearLatest.init(from: package),
-                with: session)
+            try await session.update(database: self.id,
+                with: Groups.ClearLatest.init(from: package))
         }
 
-        try await self.execute(
-            update: Volumes.AlignRealm.init(range: .package(package), to: realm),
-            with: session)
+        try await session.update(database: self.id,
+            with: Volumes.AlignRealm.init(range: .package(package), to: realm))
 
-        try await self.execute(
-            update: UnidocDatabase.Packages.AlignRealm.aligned(package, to: realm),
-            with: session)
+        try await session.update(database: self.id,
+            with: UnidocDatabase.Packages.AlignRealm.aligned(package, to: realm))
     }
 }

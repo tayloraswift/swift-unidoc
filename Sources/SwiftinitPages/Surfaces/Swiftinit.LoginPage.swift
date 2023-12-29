@@ -11,10 +11,10 @@ extension Swiftinit
     struct LoginPage
     {
         public
-        let app:GitHubOAuth
+        let app:GitHub.OAuth
 
         @inlinable public
-        init(app:GitHubOAuth)
+        init(app:GitHub.OAuth)
         {
             self.app = app
         }

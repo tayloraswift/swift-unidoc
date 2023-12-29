@@ -2,7 +2,7 @@ import HTML
 import LexicalPaths
 import MarkdownRendering
 
-extension UnqualifiedPath:HyperTextOutputStreamable
+extension UnqualifiedPath:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)

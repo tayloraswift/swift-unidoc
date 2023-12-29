@@ -32,6 +32,7 @@ let package:Package = .init(
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "IP", targets: ["IP"]),
+        .library(name: "ISO", targets: ["ISO"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
         .library(name: "InlineBuffer", targets: ["InlineBuffer"]),
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -96,7 +97,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.9.1")),
+            from: "0.10.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -209,6 +210,7 @@ let package:Package = .init(
 
         .target(name: "HTTP", dependencies:
             [
+                .target(name: "ISO"),
                 .target(name: "Media"),
                 .target(name: "MD5"),
 
@@ -248,6 +250,11 @@ let package:Package = .init(
         .target(name: "InlineBuffer"),
 
         .target(name: "InlineDictionary"),
+
+        .target(name: "ISO", dependencies:
+            [
+                .target(name: "IntegerEncodingMacros"),
+            ]),
 
         .target(name: "JSONAST"),
 
@@ -326,10 +333,7 @@ let package:Package = .init(
                 .target(name: "InlineBuffer"),
             ]),
 
-        .target(name: "Media", dependencies:
-            [
-                .target(name: "IntegerEncodingMacros"),
-            ]),
+        .target(name: "Media"),
 
         .target(name: "Multiparts", dependencies:
             [

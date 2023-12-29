@@ -41,12 +41,16 @@ extension Swiftinit.PluginIntegration<PolicyPlugin>
 
 extension Swiftinit.PluginIntegration<GitHubPlugin>
 {
-    var crawler:GitHubPlugin.Crawler
+    var telescope:GitHubPlugin.RepoTelescope
+    {
+        .init(api: self.api, pat: self.plugin.pat)
+    }
+    var monitor:GitHubPlugin.RepoMonitor
     {
         .init(api: self.api, pat: self.plugin.pat)
     }
 
-    var oauth:GitHubClient<GitHubOAuth>
+    var oauth:GitHub.Client<GitHub.OAuth>
     {
         .init(http2: .init(
                 threads: self.threads,
@@ -55,7 +59,7 @@ extension Swiftinit.PluginIntegration<GitHubPlugin>
             app: self.plugin.oauth)
     }
 
-    var api:GitHubClient<GitHub.API>
+    var api:GitHub.Client<GitHub.API>
     {
         .init(http2: .init(
                 threads: self.threads,

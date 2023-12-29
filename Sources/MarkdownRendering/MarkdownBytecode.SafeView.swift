@@ -1,3 +1,4 @@
+import HTML
 import MarkdownABI
 
 extension MarkdownBytecode
@@ -16,9 +17,9 @@ extension MarkdownBytecode
         }
     }
 }
-extension MarkdownBytecode.SafeView:HyperTextRenderableMarkdown
+extension MarkdownBytecode.SafeView:HTML.OutputStreamableMarkdown
 {
 }
-extension MarkdownBytecode.SafeView:PlainTextRenderableMarkdown
+extension MarkdownBytecode.SafeView:TextOutputStreamableMarkdown
 {
 }

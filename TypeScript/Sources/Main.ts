@@ -87,3 +87,74 @@ if (login !== null) {
 
     document.cookie = 'login_state=' + state + '; Path=/ ; SameSite=Lax ; Secure';
 }
+
+document.querySelectorAll('form.sort-controls').forEach((
+        form: Element,
+        key: number,
+        all: NodeListOf<Element>
+    ) => {
+
+    //  Find an `ol` element that is a sibling of the form.
+    const list: HTMLOListElement | null = form.nextElementSibling as HTMLOListElement;
+
+    if (list === null) {
+        return;
+    }
+
+    //  Look for available sort options, which are radio-type `input` elements with a `value`
+    //  attribute.
+    form.querySelectorAll('input[type="radio"][value]').forEach((
+            radio: Element,
+            key: number,
+            all: NodeListOf<Element>
+        ) => {
+
+        //  Compute the name of the `data-` attribute for each sort option, and the sort
+        //  predicate to use.
+        const dataAttribute: string = 'data-' + radio.getAttribute('value');
+        const sortPredicate: string | null = radio.getAttribute('data-predicate');
+
+        //  Add a callback to the `click` event of each sort option that reorders the list
+        //  elements according to the value of the `data-` attribute.
+        //
+        //  In Firefox at least, the `click` event will fire even if the radio button is
+        //  selected via the keyboard.
+        radio.addEventListener('click', (event: Event) => {
+            const elements: NodeListOf<Element> = list.querySelectorAll('li');
+            const sorted: Array<Element> = Array.from(elements).sort((
+                    a: Element,
+                    b: Element
+                ) => {
+                const aKey: string | null = a.getAttribute(dataAttribute);
+                const bKey: string | null = b.getAttribute(dataAttribute);
+
+                if (aKey === null || bKey === null) {
+                    return 0;
+                }
+
+                if (sortPredicate === null) {
+                    //  Use string comparison.
+                    return aKey.localeCompare(bKey);
+                } else if (sortPredicate === 'number-asc') {
+                    //  Use numeric comparison.
+                    return parseInt(aKey) - parseInt(bKey);
+                } else if (sortPredicate === 'number-desc') {
+                    //  Use numeric comparison.
+                    return parseInt(bKey) - parseInt(aKey);
+                } else {
+                    return 0;
+                }
+            });
+
+            for (const item of sorted) {
+                list.appendChild(item);
+            }
+        });
+
+        //  If the radio button is already selected, trigger the `click` event to perform the
+        //  initial sort.
+        if ((radio as HTMLInputElement).checked) {
+            radio.dispatchEvent(new Event('click'));
+        }
+    });
+});

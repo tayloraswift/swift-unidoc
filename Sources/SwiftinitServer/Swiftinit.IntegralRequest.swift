@@ -127,11 +127,8 @@ extension Swiftinit.IntegralRequest
             let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters)
 
             self.init(
-                endpoint: .interactive(
-                    Swiftinit.PipelineEndpoint<Unidoc.ActivityQuery>.init(
-                    output: parameters.explain ? nil : .text(.html),
-                    query: .init(limit: 16),
-                    tag: tag)),
+                endpoint: .explainable(Swiftinit.HomeEndpoint.init(query: .init(limit: 16)),
+                    parameters: parameters),
                 metadata: metadata)
 
             return
@@ -214,6 +211,10 @@ extension Swiftinit.IntegralRequest
                 with: .init(uri.query?.parameters,
                     user: metadata.cookies.session?.user,
                     tag: tag))
+
+        case Swiftinit.Telescope.root:
+            endpoint = .get(telescope: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
 
         case "reference":
             endpoint = .get(legacy: trunk, path,

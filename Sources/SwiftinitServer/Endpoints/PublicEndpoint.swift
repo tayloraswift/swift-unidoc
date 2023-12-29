@@ -2,13 +2,17 @@ import HTTP
 
 protocol PublicEndpoint:InteractiveEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    consuming
+    func load(from server:borrowing Swiftinit.Server,
+        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
 }
 extension PublicEndpoint
 {
+    consuming
     func load(from server:borrowing Swiftinit.Server,
-        with _:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
+        with _:Swiftinit.Cookies,
+        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        try await self.load(from: server)
+        try await self.load(from: server, as: format)
     }
 }

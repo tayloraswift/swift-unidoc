@@ -3,7 +3,7 @@ extension HTML.ContentEncoder
     @inlinable public
     subscript<Renderable>(_ tag:HTML.ContainerElement,
         attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
-        where Renderable:HyperTextOutputStreamable
+        where Renderable:HTML.OutputStreamable
     {
         get
         {
@@ -13,7 +13,7 @@ extension HTML.ContentEncoder
         {
             if  let value:Renderable
             {
-                self[tag, attributes] { $0 += value }
+                self[tag, { $0 += value ; attributes(&$0) }] { $0 += value }
             }
         }
     }
@@ -23,7 +23,7 @@ extension HTML.ContentEncoder
     @inlinable public
     subscript<Renderable>(svg:SVG.Embedded,
         attributes:(inout SVG.AttributeEncoder) -> () = { _ in }) -> Renderable?
-        where Renderable:ScalableVectorOutputStreamable
+        where Renderable:SVG.OutputStreamable
     {
         get
         {
@@ -43,17 +43,17 @@ extension HTML.ContentEncoder
     @inlinable public
     subscript<Renderable>(link target:String?,
         attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
-        where Renderable:HyperTextOutputStreamable
+        where Renderable:HTML.OutputStreamable
     {
         get
         {
             nil
         }
-        set(display)
+        set(value)
         {
-            if  let display:Renderable
+            if  let value:Renderable
             {
-                self[link: target, attributes] { $0 += display }
+                self[link: target, { $0 += value ; attributes(&$0) }] { $0 += value }
             }
         }
     }

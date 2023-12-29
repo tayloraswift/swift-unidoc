@@ -102,8 +102,7 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.VersionedPage
         }
             content:
         {
-            let breakdown:AutomaticHeading = .interfaceBreakdown
-            $0[.h2] { $0.id = breakdown.id } = breakdown
+            $0[.h2] = Swiftinit.StatsHeading.interfaceBreakdown
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -127,8 +126,7 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.VersionedPage
                 """
             }
 
-            let coverage:AutomaticHeading = .documentationCoverage
-            $0[.h2] { $0.id = coverage.id } = coverage
+            $0[.h2] = Swiftinit.StatsHeading.documentationCoverage
 
             $0[.h3] = "Declarations"
             $0[.figure]

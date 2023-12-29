@@ -23,6 +23,8 @@ extension Swiftinit.AdminDashboardEndpoint:RestrictedEndpoint
 
             .init(configuration: configuration,
                 requestsDropped: counters.requestsDropped.load(ordering: .relaxed),
+                averagePackageStaleness: .milliseconds(counters.averagePackageStaleness.load(
+                    ordering: .relaxed)),
                 errorsCrawling: counters.errorsCrawling.load(ordering: .relaxed),
                 reposCrawled: counters.reposCrawled.load(ordering: .relaxed),
                 reposUpdated: counters.reposUpdated.load(ordering: .relaxed),

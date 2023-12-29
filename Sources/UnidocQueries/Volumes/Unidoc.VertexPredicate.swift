@@ -11,5 +11,7 @@ extension Unidoc
 public
 protocol _UnidocVertexPredicate:Equatable, Hashable, Sendable
 {
-    func extend(pipeline:inout Mongo.PipelineEncoder, input:Mongo.KeyPath, output:Mongo.KeyPath)
+    func extend(pipeline:inout Mongo.PipelineEncoder,
+        volume:Mongo.KeyPath,
+        output:Mongo.KeyPath)
 }

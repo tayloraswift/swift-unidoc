@@ -16,7 +16,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.SourceLink:HyperTextOutputStreamable
+extension Swiftinit.SourceLink:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

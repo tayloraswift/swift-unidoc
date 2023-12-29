@@ -1,4 +1,5 @@
 import HTTP
+import ISO
 import Media
 
 extension ServerProfile
@@ -7,10 +8,10 @@ extension ServerProfile
     struct ByLanguage
     {
         @usableFromInline internal
-        var counts:[Macrolanguage: Int]
+        var counts:[ISO.Macrolanguage: Int]
 
         @inlinable internal
-        init(counts:[Macrolanguage: Int])
+        init(counts:[ISO.Macrolanguage: Int])
         {
             self.counts = counts
         }
@@ -27,7 +28,7 @@ extension ServerProfile.ByLanguage:ExpressibleByDictionaryLiteral
 extension ServerProfile.ByLanguage
 {
     @inlinable public
-    subscript(language:Macrolanguage) -> Int
+    subscript(language:ISO.Macrolanguage) -> Int
     {
         _read
         {
@@ -42,10 +43,10 @@ extension ServerProfile.ByLanguage
 extension ServerProfile.ByLanguage:PieValues
 {
     public
-    typealias SectorKey = Macrolanguage
+    typealias SectorKey = ISO.Macrolanguage
 
     public
-    var sectors:[(key:Macrolanguage, value:Int)]
+    var sectors:[(key:ISO.Macrolanguage, value:Int)]
     {
         self.counts.sorted { $0.key < $1.key }
     }

@@ -43,7 +43,7 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
         }
 
         guard
-        case .github(let repo) = package.repo
+        case .github(let origin) = package.repo?.origin
         else
         {
             return .notFound("Not a GitHub repository")
@@ -52,8 +52,8 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
         let response:GitHubPlugin.TagResponse = try await github.api.connect
         {
             try await $0.inspect(tag: self.tag,
-                owner: repo.owner.login,
-                repo: repo.name,
+                owner: origin.owner,
+                repo: origin.name,
                 pat: github.plugin.pat)
         }
 

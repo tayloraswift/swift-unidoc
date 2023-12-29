@@ -1,6 +1,7 @@
+import HTML
 import MarkdownRendering
 import Signatures
 
-extension Signature.Abridged:HyperTextRenderableMarkdown
+extension Signature.Abridged:HTML.OutputStreamableMarkdown
 {
 }
