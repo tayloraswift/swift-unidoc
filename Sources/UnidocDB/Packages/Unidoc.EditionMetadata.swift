@@ -68,7 +68,9 @@ extension Unidoc.EditionMetadata:MongoMasterCodingModel
     {
         case id = "_id"
 
+        /// Duplicates the high 32 bits of the ``id`` property.
         case package = "p"
+        /// Duplicates the low 32 bits of the ``id`` property.
         case version = "v"
 
         case release = "R"

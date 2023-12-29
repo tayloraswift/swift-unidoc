@@ -10,13 +10,13 @@ extension Unidoc.RealmQuery
         public
         let metadata:Unidoc.RealmMetadata
         public
-        let packages:[Unidoc.PackageMetadata]
+        let packages:[Unidoc.PackageOutput]
         public
         let user:Unidoc.User?
 
         @inlinable public
         init(metadata:Unidoc.RealmMetadata,
-            packages:[Unidoc.PackageMetadata],
+            packages:[Unidoc.PackageOutput],
             user:Unidoc.User?)
         {
             self.metadata = metadata
@@ -41,8 +41,8 @@ extension Unidoc.RealmQuery.Output:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
-            metadata:try bson[.metadata].decode(),
-            packages:try bson[.packages].decode(),
-            user:try bson[.user]?.decode())
+            metadata: try bson[.metadata].decode(),
+            packages: try bson[.packages].decode(),
+            user: try bson[.user]?.decode())
     }
 }

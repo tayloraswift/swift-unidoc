@@ -1,4 +1,4 @@
-extension Unicode.Scalar:HyperTextOutputStreamable
+extension Unicode.Scalar:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -6,7 +6,7 @@ extension Unicode.Scalar:HyperTextOutputStreamable
         html += self.utf8
     }
 }
-extension Unicode.Scalar:ScalableVectorOutputStreamable
+extension Unicode.Scalar:SVG.OutputStreamable
 {
     @inlinable public static
     func += (svg:inout SVG.ContentEncoder, self:Self)

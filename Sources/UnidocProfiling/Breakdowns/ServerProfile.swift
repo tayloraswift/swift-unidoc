@@ -49,7 +49,7 @@ struct ServerProfile
         self.requests = requests
     }
 }
-extension ServerProfile:HyperTextOutputStreamable
+extension ServerProfile:HTML.OutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)

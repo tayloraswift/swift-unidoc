@@ -22,7 +22,8 @@ extension Swiftinit
 }
 extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let db:Swiftinit.DB = server.db
 
@@ -53,7 +54,7 @@ extension Swiftinit.SitemapIndexEndpoint:PublicEndpoint
 
                         $0[.lastmod] = modified.timestamp.map
                         {
-                            "\($0.components.year)-\($0.components.MM)-\($0.components.DD)"
+                            "\($0.date.year)-\($0.date.mm)-\($0.date.dd)"
                         }
                     }
                 }

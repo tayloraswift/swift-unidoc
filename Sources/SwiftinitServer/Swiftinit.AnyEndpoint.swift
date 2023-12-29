@@ -1,12 +1,15 @@
 import FNV1
 import HTTP
 import MD5
+import Media
+import MongoDB
 import Multiparts
 import SwiftinitPages
 import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
+import UnixTime
 import URI
 
 extension Swiftinit
@@ -18,6 +21,24 @@ extension Swiftinit
         case stateless(any RenderablePage & Sendable)
         case redirect(String)
         case `static`(Cache<Swiftinit.Asset>.Request)
+    }
+}
+extension Swiftinit.AnyEndpoint
+{
+    static
+    func explainable<Base>(_ endpoint:Base,
+        parameters:Swiftinit.PipelineParameters,
+        accept:HTTP.AcceptType? = nil) -> Self
+        where   Base:HTTP.ServerEndpoint<Swiftinit.RenderFormat>,
+                Base:Mongo.PipelineEndpoint,
+                Base:Sendable
+    {
+        parameters.explain
+            ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(
+                query: endpoint.query))
+            : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(accept: accept,
+                etag: parameters.tag,
+                base: endpoint))
     }
 }
 //  GET endpoints
@@ -75,10 +96,11 @@ extension Swiftinit.AnyEndpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .interactive(Swiftinit.PipelineEndpoint<Unidoc.PackageQuery>.init(
-                    output: parameters.explain ? nil : .application(.json),
-                    query: .init(package: .init(package), limit: 1),
-                    tag: parameters.tag))
+                return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+                        package: .init(package),
+                        limit: 1)),
+                    parameters: parameters,
+                    accept: .application(.json))
             }
         }
 
@@ -121,15 +143,10 @@ extension Swiftinit.AnyEndpoint
     func get(articles trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .interactive(
-            Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
-                Unidoc.LookupAdjacent,
-                Swiftinit.Blog>>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(
+        .explainable(Swiftinit.BlogEndpoint.init(query: .init(
                 volume: .init(package: "__swiftinit", version: "__max"),
-                lookup: .init(path: ["Articles", trunk], hash: nil)),
-            tag: parameters.tag))
+                lookup: .init(path: ["Articles", trunk], hash: nil))),
+            parameters: parameters)
     }
 
     static
@@ -145,22 +162,17 @@ extension Swiftinit.AnyEndpoint
             case "all-symbols"? = stem.first,
             case stem.endIndex = stem.index(after: stem.startIndex)
         {
-            return .interactive(Swiftinit.PipelineEndpoint<Unidoc.SitemapQuery>.init(
-                output: parameters.explain ? nil : .text(.html),
-                query: .init(package: volume.package),
-                tag: parameters.tag))
+            return .explainable(Swiftinit.SitemapEndpoint.init(query: .init(
+                    package: volume.package)),
+                parameters: parameters)
         }
         else
         {
             let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
-
-            return .interactive(
-                Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
-                    Unidoc.LookupAdjacent,
-                    Swiftinit.Docs>>.init(
-                output: parameters.explain ? nil : .text(.html),
-                query: .init(volume: volume, lookup: shoot),
-                tag: parameters.tag))
+            return .explainable(Swiftinit.DocsEndpoint.init(query: .init(
+                    volume: volume,
+                    lookup: shoot)),
+                parameters: parameters)
         }
     }
 
@@ -170,32 +182,34 @@ extension Swiftinit.AnyEndpoint
     {
         if  let id:Symbol.Edition = .init(trunk)
         {
-            return .interactive(
-                Swiftinit.PipelineEndpoint<SearchIndexQuery<UnidocDatabase.Search>>.init(
-                output: parameters.explain ? nil : .application(.json),
-                query: .init(tag: parameters.tag, id: id),
-                tag: parameters.tag))
+            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Search>.init(query: .init(
+                    tag: parameters.tag,
+                    id: id)),
+                parameters: parameters,
+                accept: .application(.json))
         }
         else if trunk == "packages.json"
         {
-            return .interactive(
-                Swiftinit.PipelineEndpoint<SearchIndexQuery<UnidocDatabase.Metadata>>.init(
-                output: parameters.explain ? nil : .application(.json),
-                query: .init(tag: parameters.tag, id: 0),
-                tag: parameters.tag))
+            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Metadata>.init(query: .init(
+                    tag: parameters.tag,
+                    id: 0)),
+                parameters: parameters,
+                accept: .application(.json))
         }
-
-        return nil
+        else
+        {
+            nil
+        }
     }
 
     static
     func get(realm trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .interactive(Swiftinit.PipelineEndpoint<Unidoc.RealmQuery>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(realm: trunk, user: parameters.user),
-            tag: parameters.tag))
+        .explainable(Swiftinit.RealmEndpoint.init(query: .init(
+                realm: trunk,
+                user: parameters.user)),
+            parameters: parameters)
     }
 
     static
@@ -206,22 +220,40 @@ extension Swiftinit.AnyEndpoint
         let volume:Unidoc.VolumeSelector = .init(trunk)
         let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
 
-        return .interactive(
-            Swiftinit.PipelineEndpoint<Unidoc.VertexQuery<
-                Unidoc.LookupAdjacent,
-                Swiftinit.Stats>>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(volume: volume, lookup: shoot),
-            tag: parameters.tag))
+        return .explainable(Swiftinit.StatsEndpoint.init(query: .init(
+                volume: volume,
+                lookup: shoot)),
+            parameters: parameters)
     }
 
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .interactive(Swiftinit.PipelineEndpoint<Unidoc.PackageQuery>.init(
-            output: parameters.explain ? nil : .text(.html),
-            query: .init(package: .init(trunk), limit: 12, user: parameters.user),
-            tag: parameters.tag))
+        .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+                package: .init(trunk),
+                limit: 12,
+                user: parameters.user)),
+            parameters: parameters)
+    }
+
+    static
+    func get(telescope trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self?
+    {
+        if  let year:Timestamp.Year = .init(trunk),
+            let endpoint:Swiftinit.PackagesCrawledEndpoint = .init(year: year)
+        {
+            .explainable(endpoint, parameters: parameters)
+        }
+        else if
+            let date:Timestamp.Date = .init(trunk),
+            let endpoint:Swiftinit.PackagesCreatedEndpoint = .init(date: date)
+        {
+            .explainable(endpoint, parameters: parameters)
+        }
+        else
+        {
+            nil
+        }
     }
 
     static
@@ -234,19 +266,18 @@ extension Swiftinit.AnyEndpoint
             rest: stem,
             from: parameters.from)
 
+        //  Always pass empty parameters, as this endpoint always returns a redirect!
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .interactive(
-                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Symbol.Decl>>.init(
-                output: .text(.html),
-                query: .init(volume: query.volume, lookup: overload)))
+            return .explainable(Swiftinit.RedirectEndpoint<Symbol.Decl>.init(
+                    query: .init(volume: query.volume, lookup: overload)),
+                parameters: .none)
         }
         else
         {
-            return .interactive(
-                Swiftinit.PipelineEndpoint<Unidoc.RedirectQuery<Unidoc.Shoot>>.init(
-                output: .text(.html),
-                query: query))
+            return .explainable(Swiftinit.RedirectEndpoint<Unidoc.Shoot>.init(
+                    query: query),
+                parameters: .none)
         }
     }
 }
@@ -346,6 +377,13 @@ extension Swiftinit.AnyEndpoint
                     return .interactive(Swiftinit.PackageIndexTagEndpoint.init(
                         package: package,
                         tag: tag))
+                }
+
+            case .telescope:
+                if  let days:String = form["days"],
+                    let days:Int = .init(days)
+                {
+                    return .interactive(Swiftinit.AdminEndpoint.telescope(days: days))
                 }
 
             case .uplinkAll:

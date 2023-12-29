@@ -15,7 +15,7 @@ extension Pie
         }
     }
 }
-extension Pie.Legend:HyperTextOutputStreamable
+extension Pie.Legend:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)

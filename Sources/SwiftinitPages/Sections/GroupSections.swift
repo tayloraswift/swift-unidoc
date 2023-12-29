@@ -210,7 +210,7 @@ extension GroupSections
     }
 }
 
-extension GroupSections:HyperTextOutputStreamable
+extension GroupSections:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -275,7 +275,7 @@ extension GroupSections:HyperTextOutputStreamable
         {
             html[.section, { $0.class = "group automatic" }]
             {
-                $0[.h2] { $0.id = heading.id } = heading
+                $0[.h2] = heading
                 $0[.ul]
                 {
                     for member:Unidoc.Scalar in members
@@ -319,7 +319,7 @@ extension GroupSections:HyperTextOutputStreamable
                     heading = .supertypes
                 }
 
-                $0[.h2] { $0.id = heading.id } = heading
+                $0[.h2] = heading
                 $0[.ul]
                 {
                     for superform:Unidoc.Scalar in superforms
@@ -336,7 +336,7 @@ extension GroupSections:HyperTextOutputStreamable
             {
                 let heading:AutomaticHeading = .allRequirements
 
-                $0[.h2] { $0.id = heading.id } = heading
+                $0[.h2] = heading
                 $0[.ul]
                 {
                     for requirement:Unidoc.Scalar in requirements

@@ -31,6 +31,29 @@ extension UnidocDatabase.Packages
     }
 
     public static
+    let indexRepoCreated:Mongo.CollectionIndex = .init("RepoCreated", unique: false)
+    {
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+    }
+
+    public static
+    let indexRepoGitHub:Mongo.CollectionIndex = .init("RepoGitHub", unique: true)
+    {
+        $0[ Unidoc.PackageMetadata[.repo] /
+            Unidoc.PackageRepo[.github] /
+            Unidoc.PackageRepo.GitHubOrigin[.id]] = (+)
+    }
+        where:
+    {
+        $0[ Unidoc.PackageMetadata[.repo] /
+            Unidoc.PackageRepo[.github]] = .init { $0[.exists] = true }
+    }
+
+    public static
     let indexRealm:Mongo.CollectionIndex = .init("Realm", unique: false)
     {
         $0[Unidoc.PackageMetadata[.realm]] = (+)
@@ -53,6 +76,8 @@ extension UnidocDatabase.Packages:Mongo.CollectionModel
     {
         [
             Self.indexLastCrawled,
+            Self.indexRepoCreated,
+            Self.indexRepoGitHub,
             Self.indexRealm,
         ]
     }
@@ -69,10 +94,28 @@ extension UnidocDatabase.Packages:Mongo.RecodableModel
 }
 extension UnidocDatabase.Packages
 {
-    public
-    func update(record:Unidoc.PackageMetadata, with session:Mongo.Session) async throws -> Bool?
+    func findGitHub(repo id:Int32,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.update(some: record, with: session)
+        try await session.run(
+            command: Mongo.Find<Mongo.Single<Unidoc.PackageMetadata>>.init(Self.name, limit: 1)
+            {
+                $0[.filter] = .init
+                {
+                    $0[ Unidoc.PackageMetadata[.repo] /
+                        Unidoc.PackageRepo[.github] /
+                        Unidoc.PackageRepo.GitHubOrigin[.id]] = id
+                }
+                $0[.hint] = Self.indexRepoGitHub.id
+            },
+            against: self.database)
+    }
+
+    public
+    func update(metadata:Unidoc.PackageMetadata,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(some: metadata, with: session)
     }
 
     public

@@ -21,9 +21,10 @@ extension Swiftinit
 extension Swiftinit.LoginEndpoint:InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        with cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
+        with cookies:Swiftinit.Cookies,
+        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard let oauth:GitHubClient<GitHubOAuth> = server.plugins.github?.oauth
+        guard let oauth:GitHub.Client<GitHub.OAuth> = server.plugins.github?.oauth
         else
         {
             return nil
@@ -38,10 +39,10 @@ extension Swiftinit.LoginEndpoint:InteractiveEndpoint
         let registration:Swiftinit.RegistrationEndpoint
         do
         {
-            let access:GitHubOAuth.Credentials = try await oauth.exchange(code: self.code)
+            let access:GitHub.OAuth.Credentials = try await oauth.exchange(code: self.code)
             registration = .init(token: access.token)
         }
-        catch is GitHubClient<GitHubOAuth>.AuthenticationError
+        catch is GitHub.Client<GitHub.OAuth>.AuthenticationError
         {
             return .unauthorized("Authentication failed")
         }
@@ -50,6 +51,6 @@ extension Swiftinit.LoginEndpoint:InteractiveEndpoint
             throw error
         }
 
-        return try await registration.load(from: server, with: cookies)
+        return try await registration.load(from: server, with: cookies, as: format)
     }
 }

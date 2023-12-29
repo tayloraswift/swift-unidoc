@@ -14,9 +14,10 @@ extension Swiftinit
 }
 extension Swiftinit.BounceEndpoint:PublicEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        as _:Swiftinit.RenderFormat) -> HTTP.ServerResponse?
     {
-        if  let oauth:GitHubOAuth = server.plugins.github?.plugin.oauth
+        if  let oauth:GitHub.OAuth = server.plugins.github?.plugin.oauth
         {
             let page:Swiftinit.LoginPage = .init(app: oauth)
             return .ok(page.resource(format: server.format))

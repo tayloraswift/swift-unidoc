@@ -22,7 +22,7 @@ extension Swiftinit.RenderFormat.Assets
     /// To reduce cache churn, not all assets are versioned. For example, the fonts and
     /// the favicon do not use the version numbers.
     @inlinable public static
-    var version:MinorVersion { .v(9, 0) }
+    var version:MinorVersion { .v(12, 0) }
 }
 extension Swiftinit.RenderFormat.Assets
 {

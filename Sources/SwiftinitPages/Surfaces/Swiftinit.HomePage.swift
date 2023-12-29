@@ -105,7 +105,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                         $0[.span] = item.refname
                                     }
 
-                                    $0[.p] { $0.class = "age" } = "\(age)"
+                                    $0[.p] { $0.class = "age" } = age.long
                                 }
                             }
                         }
@@ -134,7 +134,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                         } = item.volume.symbol.version
                                     }
 
-                                    $0[.p] { $0.class = "age" } = "\(age)"
+                                    $0[.p] { $0.class = "age" } = age.long
                                 }
                             }
                         }

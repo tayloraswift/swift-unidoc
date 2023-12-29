@@ -17,6 +17,8 @@ extension Swiftinit
         public
         let requestsDropped:Int
         public
+        let averagePackageStaleness:Duration
+        public
         let errorsCrawling:Int
         public
         let reposCrawled:Int
@@ -35,6 +37,7 @@ extension Swiftinit
         @inlinable public
         init(configuration:Mongo.ReplicaSetConfiguration,
             requestsDropped:Int,
+            averagePackageStaleness:Duration,
             errorsCrawling:Int,
             reposCrawled:Int,
             reposUpdated:Int,
@@ -46,6 +49,7 @@ extension Swiftinit
             self.configuration = configuration
 
             self.requestsDropped = requestsDropped
+            self.averagePackageStaleness = averagePackageStaleness
             self.errorsCrawling = errorsCrawling
             self.reposCrawled = reposCrawled
             self.reposUpdated = reposUpdated
@@ -196,6 +200,30 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             }
         }
 
+        main[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Swiftinit.API[.telescope])"
+            $0.method = "post"
+        }
+            content:
+        {
+            $0[.p]
+            {
+                $0[.input]
+                {
+                    $0.type = "number"
+                    $0.name = "days"
+                    $0.placeholder = "days"
+                }
+            }
+
+            $0[.p]
+            {
+                $0[.button] { $0.type = "submit" } = "Activate Package Telescope"
+            }
+        }
+
         //  Destructive actions.
         for action:Action in
         [
@@ -226,19 +254,48 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
         main[.dl]
         {
+            let uptime:Age = .init(self.tour.started.duration(to: .now))
+
             $0[.dt] = "Uptime"
-            $0[.dd] = "\(self.tour.started.duration(to: .now))"
+            $0[.dd] = uptime.long
 
             let requests:Int =
                 self.tour.profile.requests.http1.total +
                 self.tour.profile.requests.http2.total
+
             $0[.dt] = "Requests"
             $0[.dd] = "\(requests)"
 
             $0[.dt] = "Requests (Barbies)"
             $0[.dd] = "\(self.tour.profile.requests.http2.barbie)"
 
+            $0[.dt] = "requests dropped"
+            $0[.dd] = "\(self.requestsDropped)"
 
+            let staleness:Duration = self.averagePackageStaleness
+            $0[.dt] = "Average package staleness"
+            $0[.dd] = "\(staleness)"
+
+            $0[.dt] = "GitHub crawling errors"
+            $0[.dd] = "\(self.errorsCrawling)"
+
+            $0[.dt] = "GitHub repos crawled"
+            $0[.dd] = "\(self.reposCrawled)"
+
+            $0[.dt] = "GitHub repos updated"
+            $0[.dd] = "\(self.reposUpdated)"
+
+            $0[.dt] = "GitHub tags crawled"
+            $0[.dd] = "\(self.tagsCrawled)"
+
+            $0[.dt] = "GitHub tags updated"
+            $0[.dd] = "\(self.tagsUpdated)"
+        }
+
+        main[.h2] = "Performance"
+
+        main[.dl]
+        {
             if  let last:ServerTour.Request = self.tour.lastImpression
             {
                 $0[.h3] = "Last Impression"
@@ -297,24 +354,6 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
             $0[.dt] = "bytes transferred (content only)"
             $0[.dd] = "\(self.tour.profile.requests.bytes.total)"
-
-            $0[.dt] = "requests dropped"
-            $0[.dd] = "\(self.requestsDropped)"
-
-            $0[.dt] = "GitHub crawling errors"
-            $0[.dd] = "\(self.errorsCrawling)"
-
-            $0[.dt] = "GitHub repos crawled"
-            $0[.dd] = "\(self.reposCrawled)"
-
-            $0[.dt] = "GitHub repos updated"
-            $0[.dd] = "\(self.reposUpdated)"
-
-            $0[.dt] = "GitHub tags crawled"
-            $0[.dd] = "\(self.tagsCrawled)"
-
-            $0[.dt] = "GitHub tags updated"
-            $0[.dd] = "\(self.tagsUpdated)"
         }
 
         main += self.tour.profile

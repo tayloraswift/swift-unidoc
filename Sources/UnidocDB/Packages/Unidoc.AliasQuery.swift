@@ -5,7 +5,7 @@ import UnidocRecords
 extension Unidoc
 {
     /// A query that adds a new alias to the specified `Aliases` collection by looking up and
-    /// branching from an existing alias.
+    /// branching from an existing alias. If the alias already exists, the query does nothing.
     struct AliasQuery<Aliases>:Sendable
         where   Aliases:Mongo.CollectionModel,
                 Aliases.Element:MongoMasterCodingModel<Unidoc.AliasKey>
@@ -50,7 +50,7 @@ extension Unidoc.AliasQuery:Mongo.PipelineQuery
             $0[.into] = Aliases.name
             $0[.on] = Aliases.Element[.id]
             $0[.whenNotMatched] = .insert
-            $0[.whenMatched] = .fail
+            $0[.whenMatched] = .keepExisting
         }
     }
 }

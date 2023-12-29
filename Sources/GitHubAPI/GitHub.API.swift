@@ -1,4 +1,4 @@
-extension GitHubOAuth
+extension GitHub.OAuth
 {
     @available(*, deprecated, renamed: "GitHub.API")
     public
@@ -13,10 +13,10 @@ extension GitHub
         public
         let agent:String
         public
-        let oauth:GitHubOAuth
+        let oauth:GitHub.OAuth
 
         @inlinable internal
-        init(agent:String, oauth:GitHubOAuth)
+        init(agent:String, oauth:GitHub.OAuth)
         {
             self.agent = agent
             self.oauth = oauth

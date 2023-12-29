@@ -48,7 +48,7 @@ extension Swiftinit.Sidebar
         return .init(volume: volume, nouns: nouns)
     }
 }
-extension Swiftinit.Sidebar:HyperTextOutputStreamable
+extension Swiftinit.Sidebar:HTML.OutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)

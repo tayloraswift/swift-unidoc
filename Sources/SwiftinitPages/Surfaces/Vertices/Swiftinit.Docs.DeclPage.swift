@@ -216,9 +216,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
         {
             main[.section, { $0.class = "generic-context" }]
             {
-                let heading:AutomaticHeading = .genericContext
-                $0[.h2] { $0.id = heading.id } = heading
-
+                $0[.h2] = AutomaticHeading.genericContext
                 $0[.code] { $0.class = "constraints" } = constraints
             }
         }

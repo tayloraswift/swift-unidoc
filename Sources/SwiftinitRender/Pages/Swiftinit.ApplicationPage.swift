@@ -10,7 +10,7 @@ extension Swiftinit
 public
 protocol _SwiftinitApplicationPage<Navigator>:Swiftinit.RenderablePage
 {
-    associatedtype Navigator:HyperTextOutputStreamable
+    associatedtype Navigator:HTML.OutputStreamable
     var navigator:Navigator { get }
 
     func main(_:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
@@ -68,7 +68,7 @@ extension Swiftinit.ApplicationPage
                 }
             }
         }
-        body[.div]
+        body[.div, { $0.class = "app" }]
         {
             $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
         }

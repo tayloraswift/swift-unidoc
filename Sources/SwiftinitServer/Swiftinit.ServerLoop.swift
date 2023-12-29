@@ -96,14 +96,18 @@ extension Swiftinit.ServerLoop
     var secure:Bool { self.options.mode.secure }
 
     nonisolated
-    var format:Swiftinit.RenderFormat { self.format(.application(.html)) }
+    var format:Swiftinit.RenderFormat
+    {
+        self.format(accept: .application(.html), locale: nil)
+    }
 
-    nonisolated
-    func format(_ accept:AcceptType) -> Swiftinit.RenderFormat
+    nonisolated private
+    func format(accept:HTTP.AcceptType, locale:HTTP.Locale?) -> Swiftinit.RenderFormat
     {
         .init(
             assets: self.options.cloudfront ? .cloudfront : .local,
             accept: accept,
+            locale: locale,
             secure: self.options.mode.secure)
     }
 }
@@ -140,18 +144,24 @@ extension Swiftinit.ServerLoop
                 try await self.update()
             }
 
+            if  let plugin:Swiftinit.PluginIntegration<GitHubPlugin> = self.plugins.github
+            {
+                tasks.addTask
+                {
+                    var telescope:GitHubPlugin.RepoTelescope = plugin.telescope
+                    try await telescope.run(alongside: self)
+                }
+                tasks.addTask
+                {
+                    var monitor:GitHubPlugin.RepoMonitor = plugin.monitor
+                    try await monitor.run(alongside: self)
+                }
+            }
             if  let plugin:Swiftinit.PluginIntegration<PolicyPlugin> = self.plugins.policy
             {
                 tasks.addTask
                 {
                     try await plugin.crawler.run(alongside: self, updating: policies)
-                }
-            }
-            if  let plugin:Swiftinit.PluginIntegration<GitHubPlugin> = self.plugins.github
-            {
-                tasks.addTask
-                {
-                    try await plugin.crawler.run(alongside: self)
                 }
             }
 
@@ -279,7 +289,10 @@ extension Swiftinit.ServerLoop
 
         let response:HTTP.ServerResponse = try await endpoint.load(
             from: .init(self, tour: self.tour),
-            with: metadata.cookies)
+            with: metadata.cookies,
+            as: self.format(
+                accept: .text(.html),
+                locale: metadata.annotation.locale))
             ?? .notFound(.init(
                 content: .string("not found"),
                 type: .text(.plain, charset: .utf8)))
@@ -322,9 +335,9 @@ extension Swiftinit.ServerLoop
 
         switch metadata.annotation
         {
-        case    .barbie(let language):
+        case    .barbie(let locale):
             self.tour.profile.responses.toBarbie[keyPath: status] += 1
-            self.tour.profile.languages[language.dominant] += 1
+            self.tour.profile.languages[locale.language] += 1
 
             self.tour.lastImpression = metadata.logged
 

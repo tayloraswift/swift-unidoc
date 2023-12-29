@@ -13,6 +13,7 @@ extension Swiftinit
     {
         case perform(Swiftinit.AdminPage.Action, MultipartForm?)
         case recode(Swiftinit.AdminPage.Recode.Target)
+        case telescope(days:Int)
     }
 }
 extension Swiftinit.AdminEndpoint:RestrictedEndpoint
@@ -69,6 +70,12 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
 
         case .perform(.upload, nil):
             return nil
+
+        case .telescope(days: let days):
+            let updates:Mongo.Updates = try await server.db.crawlingWindows.create(days: days,
+                with: session)
+
+            return .ok("Updated \(updates.modified) of \(updates.selected) crawling windows.")
         }
 
         return .ok(page.resource(format: server.format))
