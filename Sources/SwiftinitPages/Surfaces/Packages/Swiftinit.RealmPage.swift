@@ -6,12 +6,12 @@ extension Swiftinit
     struct RealmPage
     {
         let metadata:Unidoc.RealmMetadata
-        let packages:[Unidoc.PackageOutput]
+        let packages:PackageGroups
         let user:Unidoc.User?
 
         private
         init(metadata:Unidoc.RealmMetadata,
-            packages:[Unidoc.PackageOutput],
+            packages:PackageGroups,
             user:Unidoc.User?)
         {
             self.metadata = metadata
@@ -26,13 +26,13 @@ extension Swiftinit.RealmPage
     {
         let output:Unidoc.RealmQuery.Output = output
 
-        var packages:[Unidoc.PackageOutput] = output.packages
+        let packages:[Unidoc.PackageOutput] = output.packages
         let metadata:Unidoc.RealmMetadata = output.metadata
         let user:Unidoc.User? = (consume output).user
 
-        packages.sort { $0.metadata.symbol < $1.metadata.symbol }
-
-        self.init(metadata: metadata, packages: packages, user: user)
+        self.init(metadata: metadata,
+            packages: .init(organizing: packages, heading: .realm),
+            user: user)
     }
 }
 extension Swiftinit.RealmPage:Swiftinit.RenderablePage
@@ -57,16 +57,10 @@ extension Swiftinit.RealmPage:Swiftinit.ApplicationPage
             if  self.packages.isEmpty
             {
                 $0[.p] = "This realm contains no packages."
-                return
             }
-
-            $0[.h2] = "Realm members"
-            $0[.ol, { $0.class = "packages" }]
+            else
             {
-                for package:Unidoc.PackageOutput in self.packages
-                {
-                    $0[.li] = Swiftinit.PackageCard.init(package)
-                }
+                $0 += self.packages
             }
         }
     }

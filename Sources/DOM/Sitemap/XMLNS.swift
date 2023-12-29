@@ -1,5 +1,5 @@
 @frozen @usableFromInline internal
-enum XMLNS:String, Equatable, Hashable, Sendable
+enum XMLNS:String, DOM.Attribute, Equatable, Hashable, Sendable
 {
     case xmlns
 }

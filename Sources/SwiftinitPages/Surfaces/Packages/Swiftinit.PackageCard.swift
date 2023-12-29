@@ -7,11 +7,26 @@ extension Swiftinit
     {
         private
         let package:Unidoc.PackageOutput
+        /// Cached for sort performance.
+        let order:String
 
         init(_ package:Unidoc.PackageOutput)
         {
             self.package = package
+
+            let name:String = package.metadata.repo?.origin.name
+                ?? package.metadata.symbol.identifier
+            self.order = name.lowercased()
         }
+    }
+}
+extension Swiftinit.PackageCard
+{
+    var owner:String? { self.package.metadata.repo?.origin.owner }
+    var stars:Int? { self.package.metadata.repo?.stars }
+    var name:String
+    {
+        self.package.metadata.repo?.origin.name ?? self.package.metadata.symbol.identifier
     }
 }
 extension Swiftinit.PackageCard:HTML.OutputStreamable
@@ -30,8 +45,7 @@ extension Swiftinit.PackageCard:HTML.OutputStreamable
                     $0.href = "\(Swiftinit.Tags[self.package.metadata.symbol])"
                     $0.class = dead ? "dead" : nil
 
-                } = self.package.metadata.repo?.origin.name ??
-                    self.package.metadata.symbol.identifier
+                } = self.name
 
                 $0[.span] { $0.class = "owner" } = self.package.metadata.repo?.origin.owner
             }

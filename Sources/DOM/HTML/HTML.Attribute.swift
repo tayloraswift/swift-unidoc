@@ -4,7 +4,7 @@ extension HTML
 {
     @GenerateDynamicMemberFactory(excluding: "rel")
     @frozen public
-    enum Attribute:String, Equatable, Hashable, Sendable
+    enum Attribute:String, DOM.Attribute, Equatable, Hashable, Sendable
     {
         case accept
         case accept_charset = "accept-charset"

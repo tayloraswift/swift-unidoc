@@ -50,6 +50,25 @@ extension HTML.AttributeEncoder
 extension HTML.AttributeEncoder
 {
     @inlinable public
+    subscript(data suffix:String) -> String?
+    {
+        get
+        {
+            nil
+        }
+        set(text)
+        {
+            if  let text:String
+            {
+                self.utf8 += DOM.Property<CustomData>.init(.data(suffix), text)
+            }
+        }
+    }
+}
+
+extension HTML.AttributeEncoder
+{
+    @inlinable public
     subscript(dynamicMember path:KeyPath<HTML.Attribute.Factory, HTML.Attribute>) -> Bool
     {
         get
