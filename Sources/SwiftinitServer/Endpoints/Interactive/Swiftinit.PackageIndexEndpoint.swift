@@ -40,7 +40,12 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
         }
 
         //  Discard the tags for now, we want them to get indexed by the crawler.
-        let repo:GitHub.Repo = (consume response).repo
+        guard
+        let repo:GitHub.Repo = response.repo
+        else
+        {
+            return .notFound("No such repo.")
+        }
 
         guard repo.owner.login.allSatisfy({ $0 != "." })
         else
