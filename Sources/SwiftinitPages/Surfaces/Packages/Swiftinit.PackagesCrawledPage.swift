@@ -56,7 +56,20 @@ extension Swiftinit.PackagesCrawledPage:Swiftinit.ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.h1] = "\(self.year)"
+            $0[.nav]
+            {
+                $0[.a]
+                {
+                    $0.href = "\(Swiftinit.Telescope[self.year.predecessor])"
+                } = "◀"
+
+                $0[.h1] = "\(self.year)"
+
+                $0[.a]
+                {
+                    $0.href = "\(Swiftinit.Telescope[self.year.successor])"
+                } = "▶"
+            }
         }
 
         main[.section, { $0.class = "details" }]

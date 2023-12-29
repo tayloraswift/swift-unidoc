@@ -37,6 +37,14 @@ extension Timestamp.Year:Strideable
         .init(rawValue: self.rawValue.advanced(by: stride))
     }
 }
+extension Timestamp.Year
+{
+    @inlinable public
+    var predecessor:Self { self.advanced(by: -1) }
+
+    @inlinable public
+    var successor:Self { self.advanced(by: 1) }
+}
 extension Timestamp.Year:CustomStringConvertible
 {
     @inlinable public
