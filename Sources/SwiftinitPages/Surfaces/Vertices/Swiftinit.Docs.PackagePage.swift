@@ -103,23 +103,9 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
             $0[.h1] = self.title
 
-            switch self.repo?.origin
+            if  let repo:Unidoc.PackageRepo = self.repo
             {
-            case .github(let origin)?:
-                $0[.p] = origin.about
-
-                guard
-                let refname:String = self.volume.refname
-                else
-                {
-                    break
-                }
-
-                $0 += Swiftinit.SourceLink.init(file: "\(origin.owner)/\(origin.name)",
-                    target: "\(origin.https)/tree/\(refname)")
-
-            case nil:
-                break
+                $0 += Swiftinit.PackageBanner.init(repo: repo, tag: self.volume.refname)
             }
         }
 

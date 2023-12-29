@@ -1,6 +1,36 @@
 @import 'Colors';
 @import 'Typefaces';
 
+p.chyron
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    color: $light-foreground-semi;
+
+    > span.release
+    {
+        font-weight: bold;
+    }
+
+    > span:last-child
+    {
+        display: flex;
+        gap: 0.5em;
+
+        span.pushed::before
+        {
+            content: '▲ ';
+        }
+        span.stars::before
+        {
+            content: '★ ';
+            color: $light-accent-yellow;
+        }
+    }
+}
+
 ol.packages
 {
     padding-left: 0;
@@ -20,8 +50,7 @@ ol.packages
 
     > li
     {
-        > p:first-child,
-        > p.chyron
+        > p:first-child
         {
             display: flex;
             flex-direction: row;
@@ -57,27 +86,9 @@ ol.packages
         }
         > p.chyron
         {
-            color: $light-foreground-semi;
-
             > span.release
             {
                 font-weight: bold;
-            }
-
-            > span:last-child
-            {
-                display: flex;
-                gap: 0.5em;
-
-                span.pushed::before
-                {
-                    content: '▲ ';
-                }
-                span.stars::before
-                {
-                    content: '★ ';
-                    color: $light-accent-yellow;
-                }
             }
         }
     }

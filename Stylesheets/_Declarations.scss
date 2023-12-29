@@ -80,7 +80,13 @@ section.introduction
         margin-top: 0.5em;
     }
 
-    a.source::before
+    p.chyron
+    {
+        margin: 0;
+        max-width: inherit;
+    }
+
+    a.source.github::before
     {
         display: inline-block;
         content: '';

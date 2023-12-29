@@ -1,3 +1,4 @@
+import BSON
 import HTML
 import UnixTime
 
@@ -85,30 +86,15 @@ extension Swiftinit.PackageCard:HTML.OutputStreamable
                 return
             }
 
-            $0[.span]
+            let pushed:BSON.Millisecond
+            switch repo.origin
             {
-                switch repo.origin
-                {
-                case .github(let origin):
-                    let age:Age = .init(.now() - .millisecond(origin.pushed.value))
-                    $0[.span]
-                    {
-                        $0.class = "pushed"
-                        $0.title = """
-                        This package’s repository was last pushed to \(age.long).
-                        """
-                    } = age.short
-                }
-
-                $0[.span]
-                {
-                    $0.class = "stars"
-                    $0.title = """
-                    This package’s repository has
-                    \(repo.stars) \(repo.stars != 1 ? "stars" : "star").
-                    """
-                } = "\(repo.stars)"
+            case .github(let origin):   pushed = origin.pushed
             }
+
+            $0[.span] = Swiftinit.PackageIndicators.init(
+                pushed: pushed,
+                stars: repo.stars)
         }
     }
 }

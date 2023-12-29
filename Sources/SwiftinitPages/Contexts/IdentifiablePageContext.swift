@@ -165,20 +165,29 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
     }
     func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
-        if  let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
-            let refname:String = self.volumes[file.edition]?.refname,
-            let file:Unidoc.Vertex.File = self.vertices[file]?.file
-        {
-            let blob:String = origin.blob(refname: refname, file: file.symbol)
-            return .init(
-                file: file.symbol.last,
-                line: line,
-                target: line.map { "\(blob)#L\($0 + 1)" } ?? blob)
-        }
+        guard
+        let refname:String = self.volumes[file.edition]?.refname,
+        let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
+        let file:Unidoc.Vertex.File = self.vertices[file]?.file
         else
         {
             return nil
         }
+
+        let icon:Swiftinit.SourceLink.Icon
+        let blob:String
+
+        switch origin
+        {
+        case .github(let origin):
+            icon = .github
+            blob = "\(origin.https)/blob/\(refname)/\(file.symbol)"
+        }
+
+        return .init(target: line.map { "\(blob)#L\($0 + 1)" } ?? blob,
+            icon: icon,
+            file: file.symbol.last,
+            line: line)
     }
 }
 extension IdentifiablePageContext:Swiftinit.VersionedPageContext

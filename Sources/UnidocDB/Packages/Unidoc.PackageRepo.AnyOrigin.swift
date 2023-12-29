@@ -59,13 +59,4 @@ extension Unidoc.PackageRepo.AnyOrigin
         case .github(let self): self.name
         }
     }
-
-    @inlinable public
-    func blob(refname:String, file:Symbol.File) -> String
-    {
-        switch self
-        {
-        case .github(let self): "\(self.https)/blob/\(refname)/\(file)"
-        }
-    }
 }
