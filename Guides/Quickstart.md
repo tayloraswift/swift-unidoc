@@ -88,7 +88,7 @@ $ docker run -it --rm \
 Inside the container, run the `unidoc-build` command and pass it a single argument, which is the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
 
 ```bash
-# unidoc-build swift -f
+# unidoc-build swift
 ```
 
 If you navigate to [`localhost:8443/`](https://localhost:8443/) in a browser, you should notice a new documentation volume under **Recent docs** named *swift*.
@@ -122,7 +122,7 @@ $ docker run -it --rm \
 Inside the container, run `unidoc-build`, and pass the path to the `/projects/` directory to the `--input` option. Use `swift-nio` as the package name; this **must** match the name of project directory.
 
 ```bash
-# unidoc-build swift-nio -f --input /projects
+# unidoc-build swift-nio --input /projects
 ```
 
 Unidoc will launch a `swift build` process, which could take a few minutes. It will then compile, upload, and link the documentation. When it is done, you should see a new documentation volume under **Recent docs** named *swift-nio*. Because the documentation is local, it will have the version number `0.0.0`.
