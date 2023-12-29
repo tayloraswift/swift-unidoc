@@ -1,6 +1,7 @@
 import BSON
 import GitHubAPI
 import GitHubClient
+import HTTPServer
 import MongoDB
 import SemanticVersions
 import UnidocDB
@@ -109,8 +110,16 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     ordering: .relaxed)
             }
 
-            package.repo = try .github(response.repo)
             package.crawled = now
+
+            if  let repo:GitHub.Repo = response.repo
+            {
+                package.repo = try .github(repo)
+            }
+            else
+            {
+                Log[.warning] = "(crawler) returned null for repo '\(package.symbol)'"
+            }
 
             switch try await server.db.packages.update(metadata: package, with: session)
             {

@@ -6,10 +6,10 @@ extension GitHubPlugin
     /// Models a GraphQL repo monitor response.
     struct RepoMonitorResponse
     {
-        var repo:GitHub.Repo
+        var repo:GitHub.Repo?
         var tags:[GitHub.Tag]
 
-        init(repo:GitHub.Repo, tags:[GitHub.Tag])
+        init(repo:GitHub.Repo?, tags:[GitHub.Tag])
         {
             self.repo = repo
             self.tags = tags
@@ -25,6 +25,12 @@ extension GitHubPlugin.RepoMonitorResponse:JSONObjectDecodable
 
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
+        if  case .null = json[.repository].value ?? .null
+        {
+            self.init(repo: nil, tags: [])
+            return
+        }
+
         self = try json[.repository].decode(using: GitHub.RepoNode.CodingKey.self)
         {
             let node:GitHub.RepoNode = try .init(json: $0)
