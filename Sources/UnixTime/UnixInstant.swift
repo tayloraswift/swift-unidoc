@@ -64,9 +64,22 @@ extension UnixInstant
         return .init(second: second, nanoseconds: milliseconds * 1_000_000)
     }
 
+    /// Y3K bug!
     @inlinable public
-    init?(utc timestamp:Timestamp.Components)
+    init?(utc timestamp:Timestamp.Components,
+        sanity checks:Timestamp.Sanity = .year(in: 1970 ... 2970))
     {
+        switch checks
+        {
+        case .unchecked:    break
+        case .year(in: let range):
+            guard range.contains(timestamp.date.year)
+            else
+            {
+                return nil
+            }
+        }
+
         var time:tm = .init(
             tm_sec:     timestamp.time.second,
             tm_min:     timestamp.time.minute,
