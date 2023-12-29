@@ -148,11 +148,13 @@ extension Swiftinit.ServerLoop
             {
                 tasks.addTask
                 {
-                    try await plugin.telescope.run(alongside: self)
+                    var telescope:GitHubPlugin.RepoTelescope = plugin.telescope
+                    try await telescope.run(alongside: self)
                 }
                 tasks.addTask
                 {
-                    try await plugin.monitor.run(alongside: self)
+                    var monitor:GitHubPlugin.RepoMonitor = plugin.monitor
+                    try await monitor.run(alongside: self)
                 }
             }
             if  let plugin:Swiftinit.PluginIntegration<PolicyPlugin> = self.plugins.policy

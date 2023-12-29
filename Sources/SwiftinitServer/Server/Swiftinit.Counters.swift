@@ -6,6 +6,8 @@ extension Swiftinit
     {
         let requestsDropped:UnsafeAtomic<Int>
 
+        /// Has units of milliseconds, but we don’t have a way to type that with `UnsafeAtomic`.
+        let averagePackageStaleness:UnsafeAtomic<Int>
         let errorsCrawling:UnsafeAtomic<Int>
         let reposCrawled:UnsafeAtomic<Int>
         let reposUpdated:UnsafeAtomic<Int>
@@ -15,6 +17,8 @@ extension Swiftinit
         init()
         {
             self.requestsDropped = .create(0)
+
+            self.averagePackageStaleness = .create(0)
             self.errorsCrawling = .create(0)
             self.reposCrawled = .create(0)
             self.reposUpdated = .create(0)
@@ -25,6 +29,8 @@ extension Swiftinit
         deinit
         {
             self.requestsDropped.destroy()
+
+            self.averagePackageStaleness.destroy()
             self.errorsCrawling.destroy()
             self.reposCrawled.destroy()
             self.reposUpdated.destroy()
