@@ -21,6 +21,67 @@ extension Timestamp
         }
     }
 }
+extension Timestamp.Date
+{
+    /// A shorthand for `self.adjacent.before`. If you need both dates, it is more efficient to
+    /// call `self.adjacent` and destructure the result.
+    @inlinable public
+    var predecessor:Self { self.adjacent.before }
+
+    /// A shorthand for `self.adjacent.after`. If you need both dates, it is more efficient to
+    /// call `self.adjacent` and destructure the result.
+    @inlinable public
+    var successor:Self { self.adjacent.after }
+
+    /// Computes the dates adjacent to this one. Performs no system calls.
+    @inlinable public
+    var adjacent:(before:Self, after:Self)
+    {
+        let (_, leap):(Timestamp.Weekday, Bool) = self.year.vibe
+        let days:ClosedRange<Int32> = self.month.days(leap: leap)
+
+        let before:Self
+        let after:Self
+
+        switch self.day
+        {
+        case days.lowerBound:
+            if  case .january = self.month
+            {
+                //  December always has 31 days regardless of whether it’s a leap year.
+                before = .init(year: self.year.predecessor, month: .december, day: 31)
+            }
+            else
+            {
+                let month:Timestamp.Month = self.month.predecessor
+                let days:ClosedRange<Int32> = month.days(leap: leap)
+
+                before = .init(year: self.year, month: month, day: days.upperBound)
+            }
+
+            /// All the months have at least 28 days, right?
+            after = .init(year: self.year, month: self.month, day: self.day + 1)
+
+        case days.upperBound:
+            before = .init(year: self.year, month: self.month, day: self.day - 1)
+
+            if  case .december = self.month
+            {
+                after = .init(year: self.year.successor, month: .january, day: 1)
+            }
+            else
+            {
+                after = .init(year: self.year, month: self.month.successor, day: 1)
+            }
+
+        default:
+            before = .init(year: self.year, month: self.month, day: self.day - 1)
+            after = .init(year: self.year, month: self.month, day: self.day + 1)
+        }
+
+        return (before, after)
+    }
+}
 extension Timestamp.Date:CustomStringConvertible
 {
     /// Formats the date as `yyyy-mm-dd`.

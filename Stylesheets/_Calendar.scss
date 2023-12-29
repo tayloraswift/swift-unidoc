@@ -1,0 +1,147 @@
+@import 'Colors';
+@import 'Typefaces';
+
+section.introduction > nav
+{
+    margin: 2rem 0 1rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 3rem;
+
+    > h1
+    {
+        margin: 0 0.5em;
+    }
+
+    > h1, a
+    {
+        font-size: 1.8rem;
+        font-family: $typeface-serif;
+        font-weight: normal;
+        line-height: 100%;
+    }
+
+    > a
+    {
+        color: $light-foreground-semi;
+    }
+    > a:hover,
+    > a:focus
+    {
+        color: $light-accent-barbie-pink;
+        text-decoration: none;
+    }
+}
+section.details
+{
+    > ol.calendar
+    {
+        list-style: none;
+        padding: 0;
+        display: grid;
+
+        grid-gap: 0.25rem;
+
+        @media only screen and (min-width: 50rem)
+        {
+            grid-gap: 0.5rem;
+        }
+
+        grid-template-columns: repeat(7, 1fr);
+
+        li
+        {
+            > *
+            {
+                min-height: 3rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+
+                background-color: rgb(233, 233, 233);
+
+                @media only screen and (min-width: 50rem)
+                {
+                    padding: 0.35rem 0.5rem 0.5rem 0.5rem;
+                }
+
+                border-radius: 0.25rem;
+
+                p:first-child
+                {
+                    text-align: right;
+                }
+                p
+                {
+                    padding: 0;
+                    margin: 0;
+                    line-height: 1em;
+                }
+            }
+
+            > div
+            {
+                p
+                {
+                    color: $light-foreground-semi;
+                }
+            }
+
+            > a
+            {
+                p.crawled
+                {
+                    font-weight: bold;
+                }
+            }
+
+            > *
+            {
+                span.m
+                {
+                    color: $light-foreground-faint;
+                }
+                span.d
+                {
+                    color: $light-foreground;
+                }
+            }
+
+            > a:hover, a:focus
+            {
+                background-color: $light-background-pink;
+                text-decoration: none;
+
+                span.m
+                {
+                    color: $light-accent-barbie-pink-semi;
+                }
+                span.d
+                {
+                    color: $light-accent-barbie-pink;
+                }
+            }
+
+        }
+        li.first
+        {
+            > *
+            {
+                span.m
+                {
+                    color: $light-foreground;
+                }
+            }
+
+            > a:hover, a:focus
+            {
+                span.m
+                {
+                    color: $light-accent-barbie-pink;
+                }
+            }
+        }
+    }
+}

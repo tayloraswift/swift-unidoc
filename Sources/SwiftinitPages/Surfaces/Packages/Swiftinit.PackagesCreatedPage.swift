@@ -34,7 +34,22 @@ extension Swiftinit.PackagesCreatedPage:Swiftinit.ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.h1] = self.date.short(.en)
+            $0[.nav]
+            {
+                let (before, after):(Timestamp.Date, Timestamp.Date) = self.date.adjacent
+
+                $0[.a]
+                {
+                    $0.href = "\(Swiftinit.Telescope[before])"
+                } = "◀"
+
+                $0[.h1] = self.date.long(.en)
+
+                $0[.a]
+                {
+                    $0.href = "\(Swiftinit.Telescope[after])"
+                } = "▶"
+            }
         }
 
         main[.section, { $0.class = "details" }]
