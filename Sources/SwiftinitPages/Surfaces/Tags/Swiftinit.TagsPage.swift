@@ -88,6 +88,11 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = "\(self.package.symbol)"
+
+            if  let repo:Unidoc.PackageRepo = self.package.repo
+            {
+                $0 += Swiftinit.PackageBanner.init(repo: repo)
+            }
         }
 
         main[.section, { $0.class = "details" }]
@@ -98,20 +103,13 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                 $0[.dl]
                 {
+                    let created:UnixInstant
+
                     switch repo.origin
                     {
                     case .github(let origin):
-                        let now:UnixInstant = .now()
-
                         $0[.dt] = "Provider"
-                        $0[.dd]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = origin.https
-                                $0.target = "_blank"
-                            } = "GitHub"
-                        }
+                        $0[.dd] = "GitHub"
 
                         if  let license:Unidoc.PackageLicense = repo.license
                         {
@@ -133,25 +131,21 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         $0[.dt] = "Forks"
                         $0[.dd] = "\(repo.forks)"
 
-                        $0[.dt] = "Stars"
-                        $0[.dd] = "\(repo.stars)"
-
                         $0[.dt] = "Archived?"
                         $0[.dd] = origin.archived ? "yes" : "no"
 
-                        let created:UnixInstant = .millisecond(repo.created.value)
-                        let pushed:UnixInstant = .millisecond(origin.pushed.value)
-
-                        if  let created:Timestamp.Date = created.timestamp?.date
+                        created = .millisecond(repo.created.value)
+                    }
+                    if  let created:Timestamp.Date = created.timestamp?.date
+                    {
+                        $0[.dt] = "Created"
+                        $0[.dd]
                         {
-                            $0[.dt] = "Created"
-                            $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
+                            $0[.a]
+                            {
+                                $0.href = "\(Swiftinit.Telescope[created])"
+                            } = "\(created.month(.en)) \(created.day), \(created.year)"
                         }
-
-                        let age:Age = .init(now - pushed)
-
-                        $0[.dt] = "Last Pushed"
-                        $0[.dd] = age.long
                     }
                 }
             }
