@@ -1,3 +1,4 @@
+import BSON
 import GitHubAPI
 import GitHubClient
 import MongoDB
@@ -7,6 +8,36 @@ import UnidocRecords
 
 extension GitHubPlugin
 {
+    struct Average
+    {
+        private(set)
+        var total:Double
+        private(set)
+        var count:Int
+
+        init()
+        {
+            self.total = 0
+            self.count = 0
+        }
+    }
+}
+extension GitHubPlugin.Average
+{
+    mutating
+    func insert(_ value:Double)
+    {
+        self.total += value
+        self.count += 1
+    }
+
+    var value:Double?
+    {
+        self.count > 0 ? self.total / Double.init(self.count) : nil
+    }
+}
+extension GitHubPlugin
+{
     struct RepoMonitor
     {
         let api:GitHub.Client<GitHub.API>
@@ -14,10 +45,15 @@ extension GitHubPlugin
         private
         let pat:String
 
+        private
+        var staleness:Average
+
         init(api:GitHub.Client<GitHub.API>, pat:String)
         {
             self.api = api
             self.pat = pat
+
+            self.staleness = .init()
         }
     }
 }
@@ -26,6 +62,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
     static
     var interval:Duration { .seconds(30) }
 
+    mutating
     func crawl(updating server:Swiftinit.ServerLoop,
         over connection:GitHub.Client<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
@@ -53,8 +90,27 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                 repo: origin.name,
                 pat: self.pat)
 
+            let now:BSON.Millisecond = .now()
+
+            staleness:
+            if  package.crawled != 0
+            {
+                //  Not entirely accurate (leap seconds!!!), but good enough for stats.
+                self.staleness.insert(Double.init(now.value - package.crawled.value))
+
+                guard
+                let average:Double = self.staleness.value
+                else
+                {
+                    break staleness
+                }
+
+                server.atomics.averagePackageStaleness.store(Int.init(average),
+                    ordering: .relaxed)
+            }
+
             package.repo = try .github(response.repo)
-            package.crawled = .now()
+            package.crawled = now
 
             switch try await server.db.packages.update(metadata: package, with: session)
             {

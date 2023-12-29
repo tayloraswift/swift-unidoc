@@ -12,12 +12,14 @@ protocol GitHubCrawler
 
     var api:GitHub.Client<GitHub.API> { get }
 
+    mutating
     func crawl(updating server:Swiftinit.ServerLoop,
         over connection:GitHub.Client<GitHub.API>.Connection,
         with session:Mongo.Session) async throws
 }
 extension GitHubCrawler
 {
+    mutating
     func run(alongside server:Swiftinit.ServerLoop) async throws
     {
         while true
