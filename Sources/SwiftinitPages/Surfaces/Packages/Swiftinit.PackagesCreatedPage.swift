@@ -34,7 +34,7 @@ extension Swiftinit.PackagesCreatedPage:Swiftinit.ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.nav]
+            $0[.nav, { $0.class = "calendar" }]
             {
                 let (before, after):(Timestamp.Date, Timestamp.Date) = self.date.adjacent
 

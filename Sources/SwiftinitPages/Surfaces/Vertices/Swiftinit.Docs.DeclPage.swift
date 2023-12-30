@@ -1,4 +1,5 @@
 import Availability
+import FNV1
 import HTML
 import LexicalPaths
 import MarkdownABI
@@ -211,13 +212,37 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
             }
         }
 
-        if  let containing:Unidoc.Group.Extension = self.groups.containing,
-            let constraints:ConstraintsList = self.context.constraints(containing.conditions)
+        main[.section, { $0.class = "metadata" }]
         {
-            main[.section, { $0.class = "generic-context" }]
+            $0[.details]
             {
-                $0[.h2] = AutomaticHeading.genericContext
-                $0[.code] { $0.class = "constraints" } = constraints
+                $0[.summary] = "Mangled symbol"
+
+                $0[.p, { $0.class = "symbol" }]
+                {
+                    $0[.code] = self.vertex.symbol.rawValue
+                }
+
+                $0[.p]
+                {
+                    $0[.code]
+                    {
+                        let hash:FNV24 = .init(hashing: "\(self.vertex.symbol)")
+                        $0 += "FNV24: ["
+                        $0[.span] { $0.class = "fnv24" } = "\(hash)"
+                        $0 += "]"
+                    }
+                }
+            }
+
+            if  let containing:Unidoc.Group.Extension = self.groups.containing,
+                let list:ConstraintsList = self.context.constraints(containing.conditions)
+            {
+                $0[.details, { $0.open = true }]
+                {
+                    $0[.summary] = "Constraints"
+                    $0[.code] { $0.class = "constraints" } = list
+                }
             }
         }
 

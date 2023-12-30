@@ -19,8 +19,8 @@ protocol _SwiftinitVersionedPageContext:AnyObject
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
 
     func vector<Display, Vector>(_ vector:Vector,
-        display:Display) -> HTML.VectorLink<Display, Vector>
-        where Vector:Sequence<Unidoc.Scalar>
+        display:Display) -> HTML.VectorLink<Display, Vector>?
+        where Vector:Collection<Unidoc.Scalar>
 
     func url(_ scalar:Unidoc.Scalar) -> String?
 
