@@ -49,6 +49,10 @@ section.group
         {
             content: '';
         }
+        summary::-webkit-details-marker
+        {
+            display: none;
+        }
     }
     details[open]
     {
