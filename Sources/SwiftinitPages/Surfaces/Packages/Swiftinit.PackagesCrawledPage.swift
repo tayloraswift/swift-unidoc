@@ -56,7 +56,7 @@ extension Swiftinit.PackagesCrawledPage:Swiftinit.ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.nav]
+            $0[.nav, { $0.class = "calendar" }]
             {
                 $0[.a]
                 {

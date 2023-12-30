@@ -212,10 +212,10 @@ extension IdentifiablePageContext:Swiftinit.VersionedPageContext
 
     @usableFromInline internal
     func vector<Display, Vector>(_ vector:Vector,
-        display:Display) -> HTML.VectorLink<Display, Vector>
-        where Vector:Sequence<Unidoc.Scalar>
+        display:Display) -> HTML.VectorLink<Display, Vector>?
+        where Vector:Collection<Unidoc.Scalar>
     {
-        .init(self, display: display, scalars: vector)
+        vector.isEmpty ? nil : .init(self, display: display, scalars: vector)
     }
 
     @usableFromInline internal
