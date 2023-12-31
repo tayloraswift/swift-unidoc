@@ -244,7 +244,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     let age:Age = .init(now - crawled)
 
                     $0[.dt] = "Repo read"
-                    $0[.dd] = "\(age.long) ago"
+                    $0[.dd] = age.long
                 }
                 if  let crawled:BSON.Millisecond = self.package.crawled
                 {
@@ -254,8 +254,8 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     $0[.dt] = "Tags read"
                     $0[.dd] = self.package.crawlingIntervalTargetDays.map
                     {
-                        "\(age.long) ago (target: \($0) \($0 != 1 ? "days" : "day"))"
-                    } ?? "\(age.long) ago"
+                        "\(age.long) (target: \($0) \($0 != 1 ? "days" : "day"))"
+                    } ?? age.long
                 }
             }
 
