@@ -10,11 +10,14 @@ extension Swiftinit
         let pushed:BSON.Millisecond
         private
         let stars:Int
+        private
+        let now:UnixInstant
 
-        init(pushed:BSON.Millisecond, stars:Int)
+        init(pushed:BSON.Millisecond, stars:Int, now:UnixInstant)
         {
             self.pushed = pushed
             self.stars = stars
+            self.now = now
         }
     }
 }
@@ -23,7 +26,7 @@ extension Swiftinit.PackageIndicators:HTML.OutputStreamable
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
-        let age:Age = .init(.now() - .millisecond(self.pushed.value))
+        let age:Age = .init(self.now - .millisecond(self.pushed.value))
 
         span[.span]
         {

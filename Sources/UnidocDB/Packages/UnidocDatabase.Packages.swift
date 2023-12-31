@@ -21,9 +21,9 @@ extension UnidocDatabase
 extension UnidocDatabase.Packages
 {
     public static
-    let indexLastCrawled:Mongo.CollectionIndex = .init("LastCrawled", unique: false)
+    let indexExpiration:Mongo.CollectionIndex = .init("LastCrawled", unique: false)
     {
-        $0[Unidoc.PackageMetadata[.crawled]] = (+)
+        $0[Unidoc.PackageMetadata[.expires]] = (+)
     }
         where:
     {
@@ -75,7 +75,7 @@ extension UnidocDatabase.Packages:Mongo.CollectionModel
     var indexes:[Mongo.CollectionIndex]
     {
         [
-            Self.indexLastCrawled,
+            Self.indexExpiration,
             Self.indexRepoCreated,
             Self.indexRepoGitHub,
             Self.indexRealm,
@@ -168,12 +168,9 @@ extension UnidocDatabase.Packages
                 }
                 $0[.sort] = .init
                 {
-                    $0[Unidoc.PackageMetadata[.crawled]] = (+)
+                    $0[Unidoc.PackageMetadata[.expires]] = (+)
                 }
-                $0[.hint] = .init
-                {
-                    $0[Unidoc.PackageMetadata[.crawled]] = (+)
-                }
+                $0[.hint] = Self.indexExpiration.id
             },
             against: self.database)
     }

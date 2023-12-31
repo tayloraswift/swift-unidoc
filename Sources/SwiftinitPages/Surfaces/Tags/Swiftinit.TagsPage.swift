@@ -1,3 +1,4 @@
+import BSON
 import GitHubAPI
 import HTML
 import Media
@@ -85,13 +86,15 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let now:UnixInstant = .now()
+
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = "\(self.package.symbol)"
 
             if  let repo:Unidoc.PackageRepo = self.package.repo
             {
-                $0 += Swiftinit.PackageBanner.init(repo: repo)
+                $0 += Swiftinit.PackageBanner.init(repo: repo, now: now)
             }
         }
 
@@ -234,6 +237,18 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                 $0[.dt] = "Hidden"
                 $0[.dd] = self.package.hidden ? "yes" : "no"
+
+                if  let crawled:BSON.Millisecond = self.package.crawled
+                {
+                    let crawled:UnixInstant = .millisecond(crawled.value)
+                    let age:Age = .init(now - crawled)
+
+                    $0[.dt] = "Last read"
+                    $0[.dd] = self.package.crawlingIntervalTargetDays.map
+                    {
+                        "\(age.long) ago (target: \($0) \($0 != 1 ? "days" : "day"))"
+                    } ?? "\(age.long) ago"
+                }
             }
 
             guard self.user?.maintains(package: self.package) ?? !format.secure
