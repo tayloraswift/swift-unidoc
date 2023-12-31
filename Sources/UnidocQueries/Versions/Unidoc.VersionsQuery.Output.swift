@@ -6,7 +6,7 @@ import UnidocRecords
 extension Unidoc.VersionsQuery
 {
     @frozen public
-    struct Output:Equatable, Sendable
+    struct Output:Sendable
     {
         public
         var prereleases:[Tag]

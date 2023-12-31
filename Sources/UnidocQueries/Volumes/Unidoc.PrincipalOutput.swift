@@ -9,7 +9,7 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct PrincipalOutput:Equatable, Sendable
+    struct PrincipalOutput:Sendable
     {
         public
         let matches:[Vertex]

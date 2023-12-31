@@ -117,7 +117,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
 
             if  let repo:GitHub.Repo = response.repo
             {
-                package.repo = try .github(repo)
+                package.repo = try .github(repo, crawled: now)
             }
             else
             {
@@ -142,10 +142,6 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                 //  To MongoDB, all repo updates look like modifications, since the package
                 //  record contains a timestamp.
                 server.atomics.reposCrawled.wrappingIncrement(ordering: .relaxed)
-            }
-            if  package.repo != old
-            {
-                server.atomics.reposUpdated.wrappingIncrement(ordering: .relaxed)
             }
 
             //  Import tags in chronological order. The last tag in the GraphQL response

@@ -1,3 +1,4 @@
+import BSON
 import GitHubAPI
 import GitHubClient
 import HTTPServer
@@ -62,22 +63,22 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
             """,
             pat: self.pat)
 
-        window.expires = .now()
-        window.crawled = window.expires
+        let now:BSON.Millisecond = .now()
+
+        window.expires = now
+        window.crawled = now
 
         for repo:GitHub.Repo in discovered.repos
         {
             let symbol:Symbol.Package = "\(repo.owner.login).\(repo.name)"
-            switch try await server.db.unidoc.index(package: symbol,
-                repo: try .github(repo),
+            let repo:Unidoc.PackageRepo = try .github(repo, crawled: now)
+
+            if  case (let package, new: true) = try await server.db.unidoc.index(
+                package: symbol,
+                repo: repo,
                 mode: .automatic,
                 with: session)
             {
-            case (let package, new: false):
-                continue
-                // Log[.debug] = "telescope: '\(package.symbol)' has already been discovered"
-
-            case (let package, new: true):
                 Log[.debug] = "telescope: '\(package.symbol)' added (created: \(repo.created))"
             }
         }

@@ -6,8 +6,11 @@ import UnixTime
 extension Unidoc
 {
     @frozen public
-    struct PackageRepo:Equatable, Sendable
+    struct PackageRepo:Sendable
     {
+        public
+        var crawled:BSON.Millisecond
+
         /// When the repo was created. Both GitHub and GitLab define this field.
         ///
         /// For query convenience, the instant always encodes an integral date.
@@ -44,6 +47,7 @@ extension Unidoc
 
         @inlinable public
         init(
+            crawled:BSON.Millisecond,
             created:BSON.Millisecond,
             updated:BSON.Millisecond,
             license:PackageLicense?,
@@ -53,6 +57,7 @@ extension Unidoc
             forks:Int = 0,
             stars:Int = 0)
         {
+            self.crawled = crawled
             self.created = created
             self.updated = updated
             self.license = license
@@ -67,7 +72,7 @@ extension Unidoc
 extension Unidoc.PackageRepo
 {
     @inlinable public static
-    func github(_ repo:GitHub.Repo) throws -> Self
+    func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
@@ -93,7 +98,7 @@ extension Unidoc.PackageRepo
             throw GitHubTimestampError.pushed(repo.pushed)
         }
 
-        return .init(
+        return .init(crawled: crawled,
             created: .init(created),
             updated: .init(updated),
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
@@ -120,6 +125,7 @@ extension Unidoc.PackageRepo:MongoMasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
+        case crawled = "I"
         case created = "C"
         case updated = "U"
 
@@ -138,6 +144,7 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
+        bson[.crawled] = self.crawled
         bson[.created] = self.created
         bson[.updated] = self.updated
 
@@ -161,7 +168,8 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
     {
         let origin:AnyOrigin = .github(try bson[.github].decode())
 
-        self.init(
+        self.init( // TODO: deoptionalize
+            crawled: try bson[.crawled]?.decode() ?? 0,
             created: try bson[.created].decode(),
             updated: try bson[.updated].decode(),
             license: try bson[.license]?.decode(),

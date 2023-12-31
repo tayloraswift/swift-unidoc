@@ -59,7 +59,7 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
 
         let (package, new):(Unidoc.PackageMetadata, Bool) = try await server.db.unidoc.index(
             package: symbol,
-            repo: .github(repo),
+            repo: .github(repo, crawled: .now()),
             with: session)
 
         return .ok("""

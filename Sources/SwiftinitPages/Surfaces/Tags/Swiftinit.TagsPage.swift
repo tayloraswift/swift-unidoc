@@ -238,12 +238,20 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 $0[.dt] = "Hidden"
                 $0[.dd] = self.package.hidden ? "yes" : "no"
 
+                if  let crawled:BSON.Millisecond = self.package.repo?.crawled
+                {
+                    let crawled:UnixInstant = .millisecond(crawled.value)
+                    let age:Age = .init(now - crawled)
+
+                    $0[.dt] = "Repo read"
+                    $0[.dd] = "\(age.long) ago"
+                }
                 if  let crawled:BSON.Millisecond = self.package.crawled
                 {
                     let crawled:UnixInstant = .millisecond(crawled.value)
                     let age:Age = .init(now - crawled)
 
-                    $0[.dt] = "Last read"
+                    $0[.dt] = "Tags read"
                     $0[.dd] = self.package.crawlingIntervalTargetDays.map
                     {
                         "\(age.long) ago (target: \($0) \($0 != 1 ? "days" : "day"))"

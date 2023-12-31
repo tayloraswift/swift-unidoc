@@ -27,7 +27,6 @@ extension Swiftinit.AdminDashboardEndpoint:RestrictedEndpoint
                     ordering: .relaxed)),
                 errorsCrawling: counters.errorsCrawling.load(ordering: .relaxed),
                 reposCrawled: counters.reposCrawled.load(ordering: .relaxed),
-                reposUpdated: counters.reposUpdated.load(ordering: .relaxed),
                 tagsCrawled: counters.tagsCrawled.load(ordering: .relaxed),
                 tagsUpdated: counters.tagsUpdated.load(ordering: .relaxed),
                 tour: server.tour,

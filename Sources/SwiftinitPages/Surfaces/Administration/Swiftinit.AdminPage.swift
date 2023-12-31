@@ -23,8 +23,6 @@ extension Swiftinit
         public
         let reposCrawled:Int
         public
-        let reposUpdated:Int
-        public
         let tagsCrawled:Int
         public
         let tagsUpdated:Int
@@ -40,7 +38,6 @@ extension Swiftinit
             averagePackageStaleness:Duration,
             errorsCrawling:Int,
             reposCrawled:Int,
-            reposUpdated:Int,
             tagsCrawled:Int,
             tagsUpdated:Int,
             tour:ServerTour,
@@ -52,7 +49,6 @@ extension Swiftinit
             self.averagePackageStaleness = averagePackageStaleness
             self.errorsCrawling = errorsCrawling
             self.reposCrawled = reposCrawled
-            self.reposUpdated = reposUpdated
             self.tagsCrawled = tagsCrawled
             self.tagsUpdated = tagsUpdated
 
@@ -281,9 +277,6 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
             $0[.dt] = "GitHub repos crawled"
             $0[.dd] = "\(self.reposCrawled)"
-
-            $0[.dt] = "GitHub repos updated"
-            $0[.dd] = "\(self.reposUpdated)"
 
             $0[.dt] = "GitHub tags crawled"
             $0[.dd] = "\(self.tagsCrawled)"

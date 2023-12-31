@@ -5,7 +5,7 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct VertexOutput:Equatable, Sendable
+    struct VertexOutput:Sendable
     {
         public
         let principal:PrincipalOutput?
