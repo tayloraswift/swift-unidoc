@@ -146,12 +146,19 @@ extension UnidocDatabase
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
         if  case .github(let origin)? = repo?.origin,
-            let existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
+            var existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
                 repo: origin.id,
                 with: session)
         {
             //  According to GitHub, this package is already known to us by a different name.
             try await self.alias(existing: existing.symbol, package: package, with: session)
+            try await self.packages.update(field: .repo,
+                of: existing.id,
+                to: repo,
+                with: session)
+
+            existing.repo = repo
+
             return (existing, false)
         }
 
@@ -185,11 +192,14 @@ extension UnidocDatabase
             return (package, true)
 
         case .old(_, var package?):
-            if  let repo:Unidoc.PackageRepo,
-                    repo != package.repo
+            if  let repo:Unidoc.PackageRepo
             {
+                try await self.packages.update(field: .repo,
+                    of: package.id,
+                    to: repo,
+                    with: session)
+
                 package.repo = repo
-                try await self.packages.update(some: package, with: session)
             }
 
             return (package, false)

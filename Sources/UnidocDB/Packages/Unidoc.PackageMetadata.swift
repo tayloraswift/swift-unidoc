@@ -9,7 +9,7 @@ import UnixTime
 extension Unidoc
 {
     @frozen public
-    struct PackageMetadata:Identifiable, Equatable, Sendable
+    struct PackageMetadata:Identifiable, Sendable
     {
         /// The coordinate this package was assigned. All package coordinates are currently
         /// positive.
