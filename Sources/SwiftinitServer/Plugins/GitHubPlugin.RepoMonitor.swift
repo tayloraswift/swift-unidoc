@@ -6,6 +6,7 @@ import MongoDB
 import SemanticVersions
 import UnidocDB
 import UnidocRecords
+import UnixTime
 
 extension GitHubPlugin
 {
@@ -58,6 +59,10 @@ extension GitHubPlugin
         }
     }
 }
+
+
+
+
 extension GitHubPlugin.RepoMonitor:GitHubCrawler
 {
     static
@@ -94,10 +99,10 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
             let now:BSON.Millisecond = .now()
 
             staleness:
-            if  package.crawled != 0
+            if  let crawled:BSON.Millisecond = package.crawled
             {
                 //  Not entirely accurate (leap seconds!!!), but good enough for stats.
-                self.staleness.insert(Double.init(now.value - package.crawled.value))
+                self.staleness.insert(Double.init(now.value - crawled.value))
 
                 guard
                 let average:Double = self.staleness.value
@@ -110,16 +115,22 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     ordering: .relaxed)
             }
 
-            package.crawled = now
-
             if  let repo:GitHub.Repo = response.repo
             {
                 package.repo = try .github(repo)
             }
             else
             {
+                package.repo = nil
                 Log[.warning] = "(crawler) returned null for repo '\(package.symbol)'"
             }
+
+            if  let days:Int64 = package.crawlingIntervalTargetDays
+            {
+                package.expires = .init(now.value + days * 86400 * 1000)
+            }
+
+            package.crawled = now
 
             switch try await server.db.packages.update(metadata: package, with: session)
             {

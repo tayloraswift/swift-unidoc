@@ -23,10 +23,10 @@ extension UnidocDatabase
 extension UnidocDatabase.CrawlingWindows
 {
     public static
-    let indexLastCrawled:Mongo.CollectionIndex = .init("LastCrawled",
+    let indexExpiration:Mongo.CollectionIndex = .init("LastCrawled",
         unique: false)
     {
-        $0[Unidoc.CrawlingWindow[.crawled]] = (+)
+        $0[Unidoc.CrawlingWindow[.expires]] = (+)
     }
 }
 extension UnidocDatabase.CrawlingWindows:Mongo.CollectionModel
@@ -38,7 +38,7 @@ extension UnidocDatabase.CrawlingWindows:Mongo.CollectionModel
     var name:Mongo.Collection { "CrawlingWindows" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexLastCrawled ] }
+    var indexes:[Mongo.CollectionIndex] { [ Self.indexExpiration ] }
 }
 extension UnidocDatabase.CrawlingWindows
 {
@@ -54,13 +54,23 @@ extension UnidocDatabase.CrawlingWindows
                 let today:UnixDate = .midnight(before: .now())
                 for day:UnixDate in today.advanced(by: -days) ... today
                 {
-                    let window:Unidoc.CrawlingWindow = .init(id: BSON.Millisecond.init(day))
+                    let id:BSON.Millisecond = .init(day)
 
                     $0
                     {
                         $0[.upsert] = true
-                        $0[.q] = .init { $0[Unidoc.CrawlingWindow[.id]] = window.id }
-                        $0[.u] = .init { $0[.set] = window }
+                        $0[.q] = .init { $0[Unidoc.CrawlingWindow[.id]] = id }
+                        $0[.u] = .init
+                        {
+                            $0[.set] = .init
+                            {
+                                $0[Unidoc.CrawlingWindow[.id]] = id
+                            }
+                            $0[.setOnInsert] = .init
+                            {
+                                $0[Unidoc.CrawlingWindow[.expires]] = 0 as BSON.Millisecond
+                            }
+                        }
                     }
                 }
             },
@@ -69,7 +79,8 @@ extension UnidocDatabase.CrawlingWindows
         return try response.updates()
     }
 
-    /// Retrieves a single (arbitrarily chosen) window that has not been crawled yet.
+    /// Retrieves a single window that has not been crawled yet. Windows with lower expirations
+    /// will be returned first.
     public
     func pull(with session:Mongo.Session) async throws -> Unidoc.CrawlingWindow?
     {
@@ -77,10 +88,8 @@ extension UnidocDatabase.CrawlingWindows
             command: Mongo.Find<Mongo.Single<Unidoc.CrawlingWindow>>.init(Self.name,
                 limit: 1)
             {
-                $0[.filter] = .init
-                {
-                    $0[Unidoc.CrawlingWindow[.crawled]] = .init { $0[.exists] = false }
-                }
+                $0[.sort] = .init { $0[Unidoc.CrawlingWindow[.expires]] = (+) }
+                $0[.hint] = Self.indexExpiration.id
             },
             against: self.database)
     }

@@ -10,11 +10,14 @@ extension Swiftinit
         let repo:Unidoc.PackageRepo
         private
         let tag:String?
+        private
+        let now:UnixInstant
 
-        init(repo:Unidoc.PackageRepo, tag:String? = nil)
+        init(repo:Unidoc.PackageRepo, tag:String? = nil, now:UnixInstant)
         {
             self.repo = repo
             self.tag = tag
+            self.now = now
         }
     }
 }
@@ -47,7 +50,8 @@ extension Swiftinit.PackageBanner:HTML.OutputStreamable
 
             $0[.span] = Swiftinit.PackageIndicators.init(
                 pushed: pushed,
-                stars: self.repo.stars)
+                stars: self.repo.stars,
+                now: self.now)
         }
     }
 }

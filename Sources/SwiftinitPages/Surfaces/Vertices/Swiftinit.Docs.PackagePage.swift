@@ -105,7 +105,9 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
             if  let repo:Unidoc.PackageRepo = self.repo
             {
-                $0 += Swiftinit.PackageBanner.init(repo: repo, tag: self.volume.refname)
+                $0 += Swiftinit.PackageBanner.init(repo: repo,
+                    tag: self.volume.refname,
+                    now: .now())
             }
         }
 

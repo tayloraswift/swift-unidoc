@@ -62,7 +62,8 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
             """,
             pat: self.pat)
 
-        window.crawled = .now()
+        window.expires = .now()
+        window.crawled = window.expires
 
         for repo:GitHub.Repo in discovered.repos
         {
@@ -73,7 +74,8 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
                 with: session)
             {
             case (let package, new: false):
-                Log[.debug] = "telescope: '\(package.symbol)' has already been discovered"
+                continue
+                // Log[.debug] = "telescope: '\(package.symbol)' has already been discovered"
 
             case (let package, new: true):
                 Log[.debug] = "telescope: '\(package.symbol)' added (created: \(repo.created))"

@@ -19,6 +19,25 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.PackageLicense
+{
+    /// Indicates if the license is (impressionistically) free or not. This is not legal advice!
+    @inlinable public
+    var free:Bool
+    {
+        switch self.spdx
+        {
+        case    "NOASSERTION",
+                "NONE":
+            false
+
+        //  We don’t know enough about licenses to know if they are free or not, and
+        //  Swiftinit does not provide legal advice.
+        default:
+            true
+        }
+    }
+}
 extension Unidoc.PackageLicense:MongoMasterCodingModel
 {
     @frozen public
