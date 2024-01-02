@@ -63,6 +63,7 @@ let package:Package = .init(
         .library(name: "Swiftinit", targets: ["Swiftinit"]),
         .library(name: "SwiftinitAssets", targets: ["SwiftinitAssets"]),
         .library(name: "SwiftinitPages", targets: ["SwiftinitPages"]),
+        .library(name: "SwiftinitPlugins", targets: ["SwiftinitPlugins"]),
         .library(name: "SwiftinitRender", targets: ["SwiftinitRender"]),
 
         .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
@@ -399,6 +400,16 @@ let package:Package = .init(
                 .target(name: "UnidocQueries"),
             ]),
 
+        .target(name: "SwiftinitPlugins", dependencies:
+            [
+                .target(name: "SwiftinitRender"),
+                .target(name: "UnidocDB"),
+
+                .product(name: "Atomics", package: "swift-atomics"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ]),
+
         .target(name: "SwiftinitRender", dependencies:
             [
                 .target(name: "HTTP"),
@@ -573,6 +584,7 @@ let package:Package = .init(
                 .target(name: "Sitemaps"),
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),
+                .target(name: "SwiftinitPlugins"),
             ]),
 
 

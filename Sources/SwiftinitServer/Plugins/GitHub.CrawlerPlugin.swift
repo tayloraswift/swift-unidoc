@@ -1,6 +1,7 @@
 import GitHubAPI
 import GitHubClient
 import MongoDB
+import SwiftinitPlugins
 import UnixTime
 
 extension GitHub

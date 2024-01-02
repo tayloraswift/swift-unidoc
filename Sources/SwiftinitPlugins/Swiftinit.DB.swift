@@ -12,6 +12,7 @@ extension Swiftinit
         public
         let unidoc:UnidocDatabase
 
+        @inlinable public
         init(sessions:Mongo.SessionPool, unidoc:UnidocDatabase)
         {
             self.sessions = sessions

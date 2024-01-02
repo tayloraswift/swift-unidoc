@@ -1,6 +1,7 @@
 import HTTPClient
 import HTTPServer
 import IP
+import SwiftinitPlugins
 
 extension Swiftinit
 {
