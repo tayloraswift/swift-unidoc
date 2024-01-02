@@ -25,8 +25,13 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
 {
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
-        guard
-        let github:Swiftinit.PluginIntegration<GitHubPlugin> = server.plugins.github
+        let github:GitHub.Client<GitHub.API<String>>
+        if  let api:GitHub.API<String> = server.github?.api
+        {
+            github = .graphql(api: api,
+                threads: server.context.threads,
+                niossl: server.context.niossl)
+        }
         else
         {
             return nil
@@ -49,12 +54,9 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
             return .notFound("Not a GitHub repository")
         }
 
-        let response:GitHubPlugin.TagResponse = try await github.api.connect
+        let response:GitHub.TagResponse = try await github.connect
         {
-            try await $0.inspect(tag: self.tag,
-                owner: origin.owner,
-                repo: origin.name,
-                pat: github.plugin.pat)
+            try await $0.inspect(tag: self.tag, owner: origin.owner, repo: origin.name)
         }
 
         guard

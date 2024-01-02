@@ -1,17 +1,16 @@
-import Atomics
 import IP
 
-extension HTTP
+extension IP
 {
-    public final
-    class Policylist:Sendable
+    @frozen public
+    struct Policylist:Sendable
     {
-        public
+        @usableFromInline
         let v4:[(UInt8, [IP.V4: IP.Service])]
-        public
+        @usableFromInline
         let v6:[(UInt8, [IP.V6: IP.Service])]
 
-        @inlinable public
+        @inlinable internal
         init(
             v4:[(UInt8, [IP.V4: IP.Service])],
             v6:[(UInt8, [IP.V6: IP.Service])])
@@ -21,9 +20,15 @@ extension HTTP
         }
     }
 }
-extension HTTP.Policylist
+extension IP.Policylist
 {
-    public convenience
+    @inlinable public
+    init()
+    {
+        self.init(v4: [], v6: [])
+    }
+
+    @inlinable public
     init(
         v4:borrowing IP.BlockTable<IP.V4, IP.Service>,
         v6:borrowing IP.BlockTable<IP.V6, IP.Service>)
@@ -33,7 +38,7 @@ extension HTTP.Policylist
             v6: v6.blocks.sorted { $0.key < $1.key })
     }
 }
-extension HTTP.Policylist
+extension IP.Policylist
 {
     subscript(ip:IP.V6) -> IP.Service?
     {
@@ -67,7 +72,4 @@ extension HTTP.Policylist
 
         return nil
     }
-}
-extension HTTP.Policylist:AtomicReference
-{
 }

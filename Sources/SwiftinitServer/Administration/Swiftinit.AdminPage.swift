@@ -8,49 +8,27 @@ import URI
 
 extension Swiftinit
 {
-    @frozen public
     struct AdminPage
     {
-        public
         let configuration:Mongo.ReplicaSetConfiguration
 
-        public
         let requestsDropped:Int
-        public
-        let averagePackageStaleness:Duration
-        public
-        let errorsCrawling:Int
-        public
-        let reposCrawled:Int
-        public
-        let tagsCrawled:Int
-        public
-        let tagsUpdated:Int
+        let plugins:[any Swiftinit.ServerPlugin]
 
-        public
         let tour:ServerTour
-        public
         let real:Bool
 
         @inlinable public
         init(configuration:Mongo.ReplicaSetConfiguration,
             requestsDropped:Int,
-            averagePackageStaleness:Duration,
-            errorsCrawling:Int,
-            reposCrawled:Int,
-            tagsCrawled:Int,
-            tagsUpdated:Int,
+            plugins:[any Swiftinit.ServerPlugin],
             tour:ServerTour,
             real:Bool)
         {
             self.configuration = configuration
 
             self.requestsDropped = requestsDropped
-            self.averagePackageStaleness = averagePackageStaleness
-            self.errorsCrawling = errorsCrawling
-            self.reposCrawled = reposCrawled
-            self.tagsCrawled = tagsCrawled
-            self.tagsUpdated = tagsUpdated
+            self.plugins = plugins
 
             self.tour = tour
             self.real = real
@@ -67,17 +45,14 @@ extension Swiftinit.AdminPage
 }
 extension Swiftinit.AdminPage:Swiftinit.StaticPage
 {
-    public
     var location:URI { Swiftinit.Admin.uri }
 }
 extension Swiftinit.AdminPage:Swiftinit.RenderablePage
 {
-    public
     var title:String { "Administrator Tools" }
 }
 extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 {
-    public
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.h1] = "Welcome Empress!"
@@ -97,6 +72,14 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             {
                 $0[.li] { $0[.a] { $0.href = "\(Recode.uri)" } = "Manage Schema" }
                 $0[.li] { $0[.a] { $0.href = "\(Slaves.uri)" } = "Manage Slaves" }
+
+                for plugin:any Swiftinit.ServerPlugin in self.plugins
+                {
+                    $0[.li]
+                    {
+                        $0[.a] { $0.href = "/plugin/\(plugin.id)" } = plugin.id
+                    }
+                }
             }
         }
 
@@ -250,10 +233,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
         main[.dl]
         {
-            let uptime:Age = .init(self.tour.started.duration(to: .now))
 
             $0[.dt] = "Uptime"
-            $0[.dd] = uptime.long
+            $0[.dd] = "\(self.tour.started.duration(to: .now))"
 
             let requests:Int =
                 self.tour.profile.requests.http1.total +
@@ -267,22 +249,6 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
             $0[.dt] = "requests dropped"
             $0[.dd] = "\(self.requestsDropped)"
-
-            let staleness:Duration = self.averagePackageStaleness
-            $0[.dt] = "Average package staleness"
-            $0[.dd] = "\(staleness)"
-
-            $0[.dt] = "GitHub crawling errors"
-            $0[.dd] = "\(self.errorsCrawling)"
-
-            $0[.dt] = "GitHub repos crawled"
-            $0[.dd] = "\(self.reposCrawled)"
-
-            $0[.dt] = "GitHub tags crawled"
-            $0[.dd] = "\(self.tagsCrawled)"
-
-            $0[.dt] = "GitHub tags updated"
-            $0[.dd] = "\(self.tagsUpdated)"
         }
 
         main[.h2] = "Performance"

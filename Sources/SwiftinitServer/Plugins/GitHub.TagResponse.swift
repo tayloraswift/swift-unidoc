@@ -1,20 +1,20 @@
 import GitHubAPI
 import JSON
 
-extension GitHubPlugin
+extension GitHub
 {
     /// Models a GraphQL crawler response.
     struct TagResponse
     {
-        var tag:GitHub.Tag?
+        var tag:Tag?
 
-        init(tag:GitHub.Tag?)
+        init(tag:Tag?)
         {
             self.tag = tag
         }
     }
 }
-extension GitHubPlugin.TagResponse:JSONObjectDecodable
+extension GitHub.TagResponse:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {

@@ -1,4 +1,4 @@
-extension Swiftinit.Options
+extension Swiftinit.ServerOptions
 {
     enum Mode
     {
@@ -6,7 +6,7 @@ extension Swiftinit.Options
         case production
     }
 }
-extension Swiftinit.Options.Mode
+extension Swiftinit.ServerOptions.Mode
 {
     var secure:Bool
     {
