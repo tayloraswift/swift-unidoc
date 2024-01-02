@@ -8,40 +8,35 @@ import UnidocDB
 import UnidocRecords
 import UnixTime
 
-extension GitHubPlugin
+extension GitHub
 {
-    struct RepoTelescope
+    struct RepoTelescope:Sendable
     {
-        let api:GitHub.Client<GitHub.API>
+        var status:StatusPage
 
-        private
-        let pat:String
-
-        init(api:GitHub.Client<GitHub.API>, pat:String)
+        init()
         {
-            self.api = api
-            self.pat = pat
+            self.status = .init()
         }
     }
 }
-extension GitHubPlugin.RepoTelescope:GitHubCrawler
+extension GitHub.RepoTelescope:GitHub.Crawler
 {
     //  Picking something relatively prime to 30 seconds.
-    static
     var interval:Duration { .seconds(13) }
 
-    func crawl(updating server:Swiftinit.ServerLoop,
-        over connection:GitHub.Client<GitHub.API>.Connection,
+    mutating
+    func crawl(updating db:Swiftinit.DB,
+        over connection:GitHub.Client<GitHub.API<String>>.Connection,
         with session:Mongo.Session) async throws
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        let session:Mongo.Session = try await .init(from: db.sessions)
 
         guard
-        var window:Unidoc.CrawlingWindow = try await server.db.crawlingWindows.pull(
+        var window:Unidoc.CrawlingWindow = try await db.crawlingWindows.pull(
             with: session)
         else
         {
-            // Log[.debug] = "Skipping telescope crawl: no windows left to crawl."
             return
         }
 
@@ -55,34 +50,47 @@ extension GitHubPlugin.RepoTelescope:GitHubCrawler
             return
         }
 
-        let discovered:GitHubPlugin.RepoTelescopeResponse = try await connection.search(
+        let discovered:GitHub.RepoTelescopeResponse = try await connection.search(
             repos: """
             language:swift \
             created:\(created.year)-\(created.mm)-\(created.dd) \
             stars:>1
-            """,
-            pat: self.pat)
+            """)
 
         let now:BSON.Millisecond = .now()
 
         window.expires = now
         window.crawled = now
 
+        self.status.windowsCrawled += 1
+
         for repo:GitHub.Repo in discovered.repos
         {
             let symbol:Symbol.Package = "\(repo.owner.login).\(repo.name)"
             let repo:Unidoc.PackageRepo = try .github(repo, crawled: now)
 
-            if  case (let package, new: true) = try await server.db.unidoc.index(
+            switch try await db.unidoc.index(
                 package: symbol,
                 repo: repo,
                 mode: .automatic,
                 with: session)
             {
-                Log[.debug] = "telescope: '\(package.symbol)' added (created: \(repo.created))"
+            case (_, new: true):
+                self.status.reposIndexed += 1
+                fallthrough
+
+            case (_, new: false):
+                self.status.reposCrawled += 1
             }
+
         }
 
-        try await server.db.crawlingWindows.push(window: window, with: session)
+        try await db.crawlingWindows.push(window: window, with: session)
+    }
+
+    mutating
+    func log(error:consuming any Error)
+    {
+        self.status.error = error
     }
 }

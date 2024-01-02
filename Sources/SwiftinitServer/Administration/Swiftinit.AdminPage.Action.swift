@@ -4,7 +4,6 @@ import URI
 
 extension Swiftinit.AdminPage
 {
-    @frozen public
     enum Action:String, Equatable, Hashable, Sendable
     {
         case dropUnidocDB = "drop-unidoc-db"
@@ -49,17 +48,14 @@ extension Swiftinit.AdminPage.Action
 }
 extension Swiftinit.AdminPage.Action:Swiftinit.RenderablePage
 {
-    public
     var title:String { "\(self.label)?" }
 }
 extension Swiftinit.AdminPage.Action:Swiftinit.StaticPage
 {
-    public
     var location:URI { Swiftinit.AdminPage[self] }
 }
 extension Swiftinit.AdminPage.Action:Swiftinit.AdministrativePage
 {
-    public
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.form]

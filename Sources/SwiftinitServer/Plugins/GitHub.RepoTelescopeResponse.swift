@@ -1,20 +1,20 @@
 import GitHubAPI
 import JSON
 
-extension GitHubPlugin
+extension GitHub
 {
     /// Models a GraphQL repo monitor response.
     struct RepoTelescopeResponse
     {
-        var repos:[GitHub.Repo]
+        var repos:[Repo]
 
-        init(repos:[GitHub.Repo])
+        init(repos:[Repo])
         {
             self.repos = repos
         }
     }
 }
-extension GitHubPlugin.RepoTelescopeResponse:JSONObjectDecodable
+extension GitHub.RepoTelescopeResponse:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {

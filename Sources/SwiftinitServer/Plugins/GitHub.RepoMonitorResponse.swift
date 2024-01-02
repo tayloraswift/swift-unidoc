@@ -1,7 +1,7 @@
 import GitHubAPI
 import JSON
 
-extension GitHubPlugin
+extension GitHub
 {
     /// Models a GraphQL repo monitor response.
     struct RepoMonitorResponse
@@ -16,7 +16,7 @@ extension GitHubPlugin
         }
     }
 }
-extension GitHubPlugin.RepoMonitorResponse:JSONObjectDecodable
+extension GitHub.RepoMonitorResponse:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {

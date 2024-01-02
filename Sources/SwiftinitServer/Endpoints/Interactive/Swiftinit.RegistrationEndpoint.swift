@@ -23,7 +23,14 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         with _:Swiftinit.Cookies,
         as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard let github:GitHub.Client<GitHub.API> = server.plugins.github?.api
+        let github:GitHub.Client<GitHub.API<Void>>
+
+        if  let api:GitHub.API<Void> = server.github?.oauth.api
+        {
+            github = .rest(api: api,
+                threads: server.context.threads,
+                niossl: server.context.niossl)
+        }
         else
         {
             return nil

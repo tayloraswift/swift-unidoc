@@ -4,9 +4,12 @@ import UnidocDB
 extension Swiftinit
 {
     @dynamicMemberLookup
+    @frozen public
     struct DB:Sendable
     {
+        public
         let sessions:Mongo.SessionPool
+        public
         let unidoc:UnidocDatabase
 
         init(sessions:Mongo.SessionPool, unidoc:UnidocDatabase)
@@ -18,6 +21,7 @@ extension Swiftinit
 }
 extension Swiftinit.DB
 {
+    @inlinable public
     subscript<Collection>(
         dynamicMember keyPath:KeyPath<UnidocDatabase, Collection>) -> Collection
         where Collection:Mongo.CollectionModel

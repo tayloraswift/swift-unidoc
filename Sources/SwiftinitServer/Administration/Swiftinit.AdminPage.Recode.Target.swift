@@ -4,7 +4,6 @@ import URI
 
 extension Swiftinit.AdminPage.Recode
 {
-    @frozen public
     enum Target:String, CaseIterable
     {
         case packages
@@ -40,17 +39,14 @@ extension Swiftinit.AdminPage.Recode.Target
 }
 extension Swiftinit.AdminPage.Recode.Target:Swiftinit.RenderablePage
 {
-    public
     var title:String { "Recode \(self.label)?" }
 }
 extension Swiftinit.AdminPage.Recode.Target:Swiftinit.StaticPage
 {
-    public
     var location:URI { Swiftinit.AdminPage.Recode.uri.path / self.rawValue }
 }
 extension Swiftinit.AdminPage.Recode.Target:Swiftinit.AdministrativePage
 {
-    public
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.form]

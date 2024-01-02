@@ -143,7 +143,7 @@ extension Swiftinit.IntegralRequest
             switch root
             {
             case Swiftinit.Admin.root:
-                endpoint = .interactive(Swiftinit.AdminDashboardEndpoint.status)
+                endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
 
             case Swiftinit.Login.root:
                 endpoint = .interactive(Swiftinit.BounceEndpoint.init())
@@ -191,6 +191,9 @@ extension Swiftinit.IntegralRequest
         case "lunr":
             endpoint = .get(lunr: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
+
+        case "plugin":
+            endpoint = .interactive(Swiftinit.DashboardEndpoint.plugin(trunk))
 
         //  Deprecated route.
         case "sitemaps":

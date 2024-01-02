@@ -1,7 +1,7 @@
 import IP
 import JSON
 
-extension PolicyPlugin.Crawler
+extension Swiftinit.PolicyClient
 {
     struct Response
     {
@@ -15,7 +15,7 @@ extension PolicyPlugin.Crawler
         }
     }
 }
-extension PolicyPlugin.Crawler.Response:JSONObjectDecodable
+extension Swiftinit.PolicyClient.Response:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {

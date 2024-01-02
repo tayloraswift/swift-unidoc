@@ -5,10 +5,8 @@ import URI
 
 extension Swiftinit.AdminPage
 {
-    @frozen public
     struct Recode
     {
-        @inlinable public
         init()
         {
         }
@@ -16,7 +14,7 @@ extension Swiftinit.AdminPage
 }
 extension Swiftinit.AdminPage.Recode
 {
-    @inlinable public static
+    static
     var name:String { "recode" }
 
     static
@@ -24,17 +22,14 @@ extension Swiftinit.AdminPage.Recode
 }
 extension Swiftinit.AdminPage.Recode:Swiftinit.RenderablePage
 {
-    public
     var title:String { "Schema · Administrator Tools" }
 }
 extension Swiftinit.AdminPage.Recode:Swiftinit.StaticPage
 {
-    public
     var location:URI { Self.uri }
 }
 extension Swiftinit.AdminPage.Recode:Swiftinit.AdministrativePage
 {
-    public
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.h1] = "Manage Schema"

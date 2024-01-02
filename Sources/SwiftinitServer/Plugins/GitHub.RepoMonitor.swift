@@ -8,72 +8,28 @@ import UnidocDB
 import UnidocRecords
 import UnixTime
 
-extension GitHubPlugin
+extension GitHub
 {
-    struct Average
+    struct RepoMonitor:Sendable
     {
-        private(set)
-        var total:Double
-        private(set)
-        var count:Int
+        var status:StatusPage
 
         init()
         {
-            self.total = 0
-            self.count = 0
+            self.status = .init()
         }
     }
 }
-extension GitHubPlugin.Average
+extension GitHub.RepoMonitor:GitHub.Crawler
 {
-    mutating
-    func insert(_ value:Double)
-    {
-        self.total += value
-        self.count += 1
-    }
-
-    var value:Double?
-    {
-        self.count > 0 ? self.total / Double.init(self.count) : nil
-    }
-}
-extension GitHubPlugin
-{
-    struct RepoMonitor
-    {
-        let api:GitHub.Client<GitHub.API>
-
-        private
-        let pat:String
-
-        private
-        var staleness:Average
-
-        init(api:GitHub.Client<GitHub.API>, pat:String)
-        {
-            self.api = api
-            self.pat = pat
-
-            self.staleness = .init()
-        }
-    }
-}
-
-
-
-
-extension GitHubPlugin.RepoMonitor:GitHubCrawler
-{
-    static
     var interval:Duration { .seconds(30) }
 
     mutating
-    func crawl(updating server:Swiftinit.ServerLoop,
-        over connection:GitHub.Client<GitHub.API>.Connection,
+    func crawl(updating db:Swiftinit.DB,
+        over connection:GitHub.Client<GitHub.API<String>>.Connection,
         with session:Mongo.Session) async throws
     {
-        let stale:[Unidoc.PackageMetadata] = try await server.db.packages.stalest(10,
+        let stale:[Unidoc.PackageMetadata] = try await db.packages.stalest(10,
             with: session)
 
         for var package:Unidoc.PackageMetadata in stale
@@ -91,28 +47,15 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
             case .github(let github):   origin = github
             }
 
-            let response:GitHubPlugin.RepoMonitorResponse = try await connection.crawl(
+            let response:GitHub.RepoMonitorResponse = try await connection.crawl(
                 owner: origin.owner,
-                repo: origin.name,
-                pat: self.pat)
+                repo: origin.name)
 
             let now:BSON.Millisecond = .now()
 
-            staleness:
             if  let crawled:BSON.Millisecond = package.crawled
             {
-                //  Not entirely accurate (leap seconds!!!), but good enough for stats.
-                self.staleness.insert(Double.init(now.value - crawled.value))
-
-                guard
-                let average:Double = self.staleness.value
-                else
-                {
-                    break staleness
-                }
-
-                server.atomics.averagePackageStaleness.store(Int.init(average),
-                    ordering: .relaxed)
+                self.status.lag = .milliseconds(now.value - crawled.value)
             }
 
             if  let repo:GitHub.Repo = response.repo
@@ -132,16 +75,16 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
 
             package.crawled = now
 
-            switch try await server.db.packages.update(metadata: package, with: session)
+            if  case nil = try await db.packages.update(metadata: package, with: session)
             {
-            case nil:
                 //  Might happen if package database is dropped while crawling.
                 continue
-
-            case _?:
+            }
+            else
+            {
                 //  To MongoDB, all repo updates look like modifications, since the package
                 //  record contains a timestamp.
-                server.atomics.reposCrawled.wrappingIncrement(ordering: .relaxed)
+                self.status.reposCrawled += 1
             }
 
             //  Import tags in chronological order. The last tag in the GraphQL response
@@ -159,7 +102,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     continue
                 }
 
-                switch try await server.db.unidoc.register(
+                switch try await db.unidoc.register(
                     package: package.id,
                     version: version,
                     refname: tag.name,
@@ -167,7 +110,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     with: session)
                 {
                 case (let edition, new: true):
-                    server.atomics.tagsUpdated.wrappingIncrement(ordering: .relaxed)
+                    self.status.tagsUpdated += 1
 
                     switch version
                     {
@@ -178,7 +121,7 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     fallthrough
 
                 case (_, new: false):
-                    server.atomics.tagsCrawled.wrappingIncrement(ordering: .relaxed)
+                    self.status.tagsCrawled += 1
                 }
             }
 
@@ -193,8 +136,14 @@ extension GitHubPlugin.RepoMonitor:GitHubCrawler
                     package: package.symbol,
                     refname: interesting)
 
-                try await server.db.repoFeed.push(activity, with: session)
+                try await db.repoFeed.push(activity, with: session)
             }
         }
+    }
+
+    mutating
+    func log(error:consuming any Error)
+    {
+        self.status.error = error
     }
 }

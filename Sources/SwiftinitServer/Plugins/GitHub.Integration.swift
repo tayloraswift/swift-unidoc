@@ -1,20 +1,23 @@
 import GitHubAPI
 import System
 
-struct GitHubPlugin:Sendable
+extension GitHub
 {
-    let oauth:GitHub.OAuth
-    let app:GitHub.App
-    let pat:String
-
-    init(oauth:GitHub.OAuth, app:GitHub.App, pat:String)
+    struct Integration:Sendable
     {
-        self.oauth = oauth
-        self.app = app
-        self.pat = pat
+        let oauth:GitHub.OAuth
+        let app:GitHub.App
+        let pat:String
+
+        init(oauth:GitHub.OAuth, app:GitHub.App, pat:String)
+        {
+            self.oauth = oauth
+            self.app = app
+            self.pat = pat
+        }
     }
 }
-extension GitHubPlugin
+extension GitHub.Integration
 {
     static
     func load(secrets:FilePath) throws -> Self
@@ -28,4 +31,8 @@ extension GitHubPlugin
                 secret: try (secrets / "github-app-secret").readLine()),
             pat: try (secrets / "github-pat").readLine())
     }
+}
+extension GitHub.Integration
+{
+    var api:GitHub.API<String> { self.oauth.api(pat: self.pat) }
 }

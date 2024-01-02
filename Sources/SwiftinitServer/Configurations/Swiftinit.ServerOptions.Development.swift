@@ -1,4 +1,4 @@
-extension Swiftinit.Options
+extension Swiftinit.ServerOptions
 {
     /// Options for the server that are configurable in development mode.
     struct Development
