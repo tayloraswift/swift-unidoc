@@ -11,6 +11,7 @@ import NIOHTTP1
 import NIOPosix
 import NIOSSL
 import SwiftinitPages
+import SwiftinitPlugins
 import UnidocDB
 import UnidocProfiling
 import UnidocQueries

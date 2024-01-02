@@ -14,7 +14,3 @@ protocol _SwiftinitServerPlugin:Identifiable<String>, Sendable
 
     func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
 }
-extension Swiftinit.ServerPlugin
-{
-    var page:(any Swiftinit.RenderablePage)? { self.status.load() }
-}
