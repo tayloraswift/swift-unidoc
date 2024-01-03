@@ -25,7 +25,7 @@ extension Phylum
 extension Phylum.DeclFlags
 {
     @inlinable package static
-    func swift(_ flags:Phylum.Decl.SwiftFlags) -> Self
+    func swift(_ flags:Phylum.SwiftFlags) -> Self
     {
         .init(language: .swift, phylum: flags.phylum, kinks: flags.kinks, route: flags.route)
     }
