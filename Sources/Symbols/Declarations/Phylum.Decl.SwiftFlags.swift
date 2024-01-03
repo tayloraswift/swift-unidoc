@@ -1,7 +1,8 @@
 extension Phylum.Decl
 {
+    /// This type is deprecated and will gradually be replaced by ``Phylum.DeclFlags``.
     @frozen public
-    struct Flags:Equatable, Sendable
+    struct SwiftFlags:Equatable, Sendable
     {
         public
         let phylum:Phylum.Decl
@@ -19,7 +20,7 @@ extension Phylum.Decl
         }
     }
 }
-extension Phylum.Decl.Flags:RawRepresentable
+extension Phylum.Decl.SwiftFlags:RawRepresentable
 {
     @inlinable public
     var rawValue:Int32

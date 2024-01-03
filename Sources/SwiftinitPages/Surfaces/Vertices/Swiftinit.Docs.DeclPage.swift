@@ -83,7 +83,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

@@ -18,7 +18,7 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Vertices where ID:VersionedPageIdentifier
+extension IdentifiablePageContext.Vertices where ID:Swiftinit.VertexPageIdentifier
 {
     mutating
     func add(_ masters:[Unidoc.Vertex])

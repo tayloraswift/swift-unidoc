@@ -186,7 +186,10 @@ extension Unidoc.Vertex
         case product = "D"
 
         /// Appears in ``Decl`` and ``Foreign``.
-        case flags = "F"
+        case flags = "L"
+        /// Deprecated.
+        case flags_swift = "F"
+
         /// Only appears in ``Decl``.
         case signature_availability = "A"
         /// Only appears in ``Decl``.
@@ -385,7 +388,7 @@ extension Unidoc.Vertex:BSONDocumentDecodable
             let culture:Unidoc.Scalar = try bson[.culture].decode()
 
             self = .decl(.init(id: id,
-                flags: try bson[.flags].decode(),
+                flags: try bson[.flags]?.decode() ?? .swift(try bson[.flags_swift].decode()),
                 signature: .init(
                     availability: try bson[.signature_availability]?.decode() ?? .init(),
                     abridged: Signature<Unidoc.Scalar?>.Abridged.init(
@@ -440,7 +443,7 @@ extension Unidoc.Vertex:BSONDocumentDecodable
             self = .foreign(.init(id: id,
                 extendee: try bson[.extendee].decode(),
                 scope: try bson[.scope]?.decode() ?? [],
-                flags: try bson[.flags].decode(),
+                flags: try bson[.flags]?.decode() ?? .swift(try bson[.flags_swift].decode()),
                 stem: try bson[.stem].decode(),
                 hash: try bson[.hash].decode()))
 

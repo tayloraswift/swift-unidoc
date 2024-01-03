@@ -57,7 +57,7 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VertexPage
 {
     var canonical:CanonicalVersion? { nil }
     var sidebar:Never? { nil }

@@ -1,5 +1,5 @@
 import Unidoc
 
-extension Unidoc.Scalar:VersionedPageIdentifier
+extension Unidoc.Scalar:Swiftinit.VertexPageIdentifier
 {
 }

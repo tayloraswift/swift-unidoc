@@ -14,7 +14,7 @@ extension Swiftinit
     typealias VertexEndpoint = _SwiftinitVertexEndpoint
 }
 
-/// The name of this protocol is ``Swiftinit.VolumeRoot``.
+/// The name of this protocol is ``Swiftinit.VertexLayer``.
 public
 protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
     where Query.Iteration.BatchElement == Unidoc.VertexOutput

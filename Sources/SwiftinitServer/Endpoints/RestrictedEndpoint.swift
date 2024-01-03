@@ -32,7 +32,7 @@ extension RestrictedEndpoint
             let cookie:Unidoc.Cookie = cookies.session
             else
             {
-                return .redirect(.temporary("\(Swiftinit.Login.uri)"))
+                return .redirect(.temporary("\(Swiftinit.Root.login)"))
             }
 
             let session:Mongo.Session = try await .init(from: server.db.sessions)

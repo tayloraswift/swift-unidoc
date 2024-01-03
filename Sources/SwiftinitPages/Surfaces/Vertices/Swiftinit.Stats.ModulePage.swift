@@ -70,7 +70,7 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.ModulePage:Swiftinit.VersionedPage
+extension Swiftinit.Stats.ModulePage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

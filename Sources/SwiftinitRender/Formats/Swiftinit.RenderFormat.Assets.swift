@@ -35,7 +35,7 @@ extension Swiftinit.RenderFormat.Assets
         }
         else
         {
-            "/\(Swiftinit.Asset.root)/\(asset)"
+            "\(Swiftinit.Root.asset)/\(asset)"
         }
     }
 

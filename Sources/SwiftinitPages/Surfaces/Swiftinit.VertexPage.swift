@@ -8,12 +8,12 @@ import URI
 extension Swiftinit
 {
     public
-    typealias VersionedPage = _SwiftinitVersionedPage
+    typealias VertexPage = _SwiftinitVertexPage
 }
 public
-protocol _SwiftinitVersionedPage:Swiftinit.ApplicationPage
+protocol _SwiftinitVertexPage:Swiftinit.ApplicationPage
 {
-    associatedtype Context:Swiftinit.VersionedPageContext
+    associatedtype Context:Swiftinit.VertexPageContext
     associatedtype Sidebar:HTML.OutputStreamable
 
     var canonical:CanonicalVersion? { get }
@@ -21,12 +21,12 @@ protocol _SwiftinitVersionedPage:Swiftinit.ApplicationPage
 
     var context:Context { get }
 }
-extension Swiftinit.VersionedPage where Self:Swiftinit.StaticPage
+extension Swiftinit.VertexPage where Self:Swiftinit.StaticPage
 {
     @inlinable public
     var canonicalURI:URI? { self.canonical?.uri }
 }
-extension Swiftinit.VersionedPage
+extension Swiftinit.VertexPage
 {
     var volume:Unidoc.VolumeMetadata { self.context.volume }
 

@@ -8,11 +8,11 @@ import UnidocRecords
 extension Swiftinit
 {
     public
-    typealias VersionedPageContext = _SwiftinitVersionedPageContext
+    typealias VertexPageContext = _SwiftinitVertexPageContext
 }
 
 public
-protocol _SwiftinitVersionedPageContext:AnyObject
+protocol _SwiftinitVertexPageContext:AnyObject
 {
     func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
 

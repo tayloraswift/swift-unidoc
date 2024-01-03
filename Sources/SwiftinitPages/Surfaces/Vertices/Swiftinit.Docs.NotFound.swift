@@ -25,7 +25,7 @@ extension Swiftinit.Docs.NotFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.NotFoundPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.NotFoundPage:Swiftinit.VertexPage
 {
     var canonical:CanonicalVersion? { nil }
 

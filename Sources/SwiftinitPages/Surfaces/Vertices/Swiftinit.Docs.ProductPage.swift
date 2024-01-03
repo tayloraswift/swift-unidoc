@@ -56,7 +56,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .product(volume: self.volume) }
 

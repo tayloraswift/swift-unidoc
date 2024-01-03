@@ -8,12 +8,12 @@ import UnidocRecords
 struct ProseSection
 {
     private
-    let context:any Swiftinit.VersionedPageContext
+    let context:any Swiftinit.VertexPageContext
 
     let bytecode:MarkdownBytecode
     let outlines:[Unidoc.Outline]
 
-    init(_ context:any Swiftinit.VersionedPageContext,
+    init(_ context:any Swiftinit.VertexPageContext,
         bytecode:MarkdownBytecode,
         outlines:[Unidoc.Outline])
     {

@@ -76,7 +76,7 @@ extension Compiler.Declarations
 extension Compiler.Declarations
 {
     mutating
-    func include(culture:Symbol.Module) throws -> Compiler.Culture
+    func include(language:Phylum.Language, culture:Symbol.Module) throws -> Compiler.Culture
     {
         let next:Int = self.cultures.count
 
@@ -92,7 +92,7 @@ extension Compiler.Declarations
             }
         }(&self.cultures[culture])
 
-        return .init(id: culture, index: next, root: self.root)
+        return .init(id: culture, language: language, index: next, root: self.root)
     }
 }
 extension Compiler.Declarations

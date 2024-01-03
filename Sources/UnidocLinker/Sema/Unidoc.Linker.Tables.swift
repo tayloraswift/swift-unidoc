@@ -471,6 +471,7 @@ extension Unidoc.Linker.Tables
 
             var vertex:Unidoc.Vertex.Decl = .init(id: d,
                 flags: .init(
+                    language: decl.language,
                     phylum: decl.phylum,
                     kinks: decl.kinks,
                     route: decl.route),
