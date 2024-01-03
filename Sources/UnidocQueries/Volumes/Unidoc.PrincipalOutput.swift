@@ -12,12 +12,12 @@ extension Unidoc
     struct PrincipalOutput:Sendable
     {
         public
-        let matches:[Vertex]
+        let matches:[AnyVertex]
 
         public
-        let vertex:Vertex?
+        let vertex:AnyVertex?
         public
-        let vertexInLatest:Vertex?
+        let vertexInLatest:AnyVertex?
 
         public
         let groups:[Group]
@@ -35,9 +35,9 @@ extension Unidoc
 
         @inlinable internal
         init(
-            matches:[Vertex],
-            vertex:Vertex?,
-            vertexInLatest:Vertex?,
+            matches:[AnyVertex],
+            vertex:AnyVertex?,
+            vertexInLatest:AnyVertex?,
             groups:[Group],
             volume:VolumeMetadata,
             volumeOfLatest:VolumeMetadata?,

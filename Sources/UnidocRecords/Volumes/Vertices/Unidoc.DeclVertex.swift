@@ -5,10 +5,10 @@ import Symbols
 import Unidoc
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct Decl:Identifiable, Equatable, Sendable
+    struct DeclVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -97,7 +97,20 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex.Decl
+extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
+{
+    @inlinable public
+    var hash:FNV24.Extended { .init(hashing: "\(self.symbol)") }
+
+    @inlinable public
+    var shoot:Unidoc.Shoot
+    {
+        .init(
+            stem: self.stem,
+            hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
+    }
+}
+extension Unidoc.DeclVertex
 {
     @inlinable public
     var location:SourceLocation<Unidoc.Scalar>?
@@ -123,19 +136,5 @@ extension Unidoc.Vertex.Decl
     var kinks:Phylum.Decl.Kinks
     {
         self.flags.kinks
-    }
-
-    @inlinable public
-    var shoot:Unidoc.Shoot
-    {
-        .init(
-            stem: self.stem,
-            hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
-    }
-
-    @inlinable internal
-    var hash:FNV24.Extended
-    {
-        .init(hashing: "\(self.symbol)")
     }
 }

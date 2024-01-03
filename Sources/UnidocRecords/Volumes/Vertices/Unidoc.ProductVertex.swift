@@ -1,11 +1,12 @@
+import FNV1
 import SymbolGraphs
 import Symbols
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct Product:Identifiable, Equatable, Sendable
+    struct ProductVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -34,11 +35,11 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex.Product
+extension Unidoc.ProductVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
-    var shoot:Unidoc.Shoot { .init(stem: self.stem) }
+    var stem:Unidoc.Stem { .product(Symbol.Module.init(mangling: self.symbol)) }
 
     @inlinable public
-    var stem:Unidoc.Stem { .product(Symbol.Module.init(mangling: self.symbol)) }
+    var hash:FNV24.Extended { .init(hashing: "s:p:\(self.symbol)") }
 }

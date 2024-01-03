@@ -20,7 +20,7 @@ extension Swiftinit.Docs
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
-        let vertex:Unidoc.Vertex.Decl
+        let vertex:Unidoc.DeclVertex
         private
         let groups:GroupSections
 
@@ -30,7 +30,7 @@ extension Swiftinit.Docs
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.Vertex.Decl,
+            vertex:Unidoc.DeclVertex,
             groups:GroupSections) throws
         {
             self.context = context

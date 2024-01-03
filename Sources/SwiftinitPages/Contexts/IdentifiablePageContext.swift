@@ -168,7 +168,7 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
         guard
         let refname:String = self.volumes[file.edition]?.refname,
         let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
-        let file:Unidoc.Vertex.File = self.vertices[file]?.file
+        let file:Unidoc.FileVertex = self.vertices[file]?.file
         else
         {
             return nil

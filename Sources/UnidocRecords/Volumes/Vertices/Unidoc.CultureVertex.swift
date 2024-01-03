@@ -1,11 +1,12 @@
+import FNV1
 import SymbolGraphs
 import Unidoc
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct Culture:Identifiable, Equatable, Sendable
+    struct CultureVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -45,11 +46,11 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex.Culture
+extension Unidoc.CultureVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
-    var shoot:Unidoc.Shoot { .init(stem: self.stem) }
+    var stem:Unidoc.Stem { .module(self.module.id) }
 
     @inlinable public
-    var stem:Unidoc.Stem { .module(self.module.id) }
+    var hash:FNV24.Extended { .init(hashing: "s:m:\(self.module.id)") }
 }

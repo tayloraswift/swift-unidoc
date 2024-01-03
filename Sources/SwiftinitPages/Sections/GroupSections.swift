@@ -57,13 +57,13 @@ extension GroupSections
 {
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         organizing groups:/*consuming*/ [Unidoc.Group],
-        vertex:borrowing Unidoc.Vertex.Decl? = nil,
+        vertex:borrowing Unidoc.DeclVertex? = nil,
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
         let container:Unidoc.Group.ID?
         let generics:Generics
-        if  let vertex:Unidoc.Vertex.Decl = copy vertex
+        if  let vertex:Unidoc.DeclVertex = copy vertex
         {
             self.init(consume context,
                 requirements: vertex.requirements.isEmpty ? nil : vertex.requirements,

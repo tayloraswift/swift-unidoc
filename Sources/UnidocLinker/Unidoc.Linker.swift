@@ -111,11 +111,11 @@ extension Unidoc.Linker
     {
         var tables:Tables = .init(context: consume self)
 
-        let products:[Unidoc.Vertex.Product] = tables.linkProducts()
-        let cultures:[Unidoc.Vertex.Culture] = tables.linkCultures()
+        let products:[Unidoc.ProductVertex] = tables.linkProducts()
+        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
 
-        let articles:[Unidoc.Vertex.Article] = tables.articles
-        let decls:[Unidoc.Vertex.Decl] = tables.decls
+        let articles:[Unidoc.ArticleVertex] = tables.articles
+        let decls:[Unidoc.DeclVertex] = tables.decls
         let groups:Unidoc.Volume.Groups = tables.groups
         let extensions:Extensions = tables.extensions
 

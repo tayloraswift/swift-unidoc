@@ -72,15 +72,15 @@ extension Unidoc.Volume
         }
 
         var elements:Unidoc.Sitemap.Elements = []
-        for vertex:Unidoc.Vertex.Culture in self.vertices.cultures
+        for vertex:Unidoc.CultureVertex in self.vertices.cultures
         {
             elements.append(vertex.shoot)
         }
-        for vertex:Unidoc.Vertex.Article in self.vertices.articles
+        for vertex:Unidoc.ArticleVertex in self.vertices.articles
         {
             elements.append(vertex.shoot)
         }
-        for vertex:Unidoc.Vertex.Decl in self.vertices.decls
+        for vertex:Unidoc.DeclVertex in self.vertices.decls
         {
             //  Skip C and C++ declarations.
             guard !ignoredModules.contains(vertex.culture),

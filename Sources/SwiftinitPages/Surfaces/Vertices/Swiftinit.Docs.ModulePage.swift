@@ -15,14 +15,14 @@ extension Swiftinit.Docs
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
-        let vertex:Unidoc.Vertex.Culture
+        let vertex:Unidoc.CultureVertex
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.Vertex.Culture,
+            vertex:Unidoc.CultureVertex,
             groups:GroupSections)
         {
             self.context = context

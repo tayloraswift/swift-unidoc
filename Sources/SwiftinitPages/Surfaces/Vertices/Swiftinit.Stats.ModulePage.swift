@@ -15,12 +15,12 @@ extension Swiftinit.Stats
         let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?
 
         private
-        let vertex:Unidoc.Vertex.Culture
+        let vertex:Unidoc.CultureVertex
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?,
-            vertex:Unidoc.Vertex.Culture)
+            vertex:Unidoc.CultureVertex)
         {
             self.context = context
             self.canonical = canonical

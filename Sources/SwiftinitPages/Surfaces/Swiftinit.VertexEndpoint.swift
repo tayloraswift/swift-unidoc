@@ -21,7 +21,7 @@ protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
 {
     static
     func response(
-        vertex:consuming Unidoc.Vertex,
+        vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.Group],
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
@@ -43,7 +43,7 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         }
 
         guard
-        let vertex:Unidoc.Vertex = principal.vertex
+        let vertex:Unidoc.AnyVertex = principal.vertex
         else
         {
             let context:IdentifiablePageContext<Never?> = .init(
