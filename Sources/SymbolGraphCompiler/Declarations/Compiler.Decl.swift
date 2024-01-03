@@ -101,7 +101,7 @@ extension Compiler.Decl
 
         let language:Phylum.Language
         if  case .swift = culture.language,
-            case .c = symbol.language
+            case .c = (copy symbol).language
         {
             language = .c
         }
