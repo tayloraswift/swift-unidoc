@@ -21,7 +21,8 @@ extension Mongo.Session
 }
 extension Mongo.Session
 {
-    //  This should be part of the swift-mongodb package.
+    //  This should be part of the swift-mongodb package. An incredibly interesting statement,
+    //  considering this method is private.
     private
     func explain<Command>(database:Mongo.Database, command:Command) async throws -> String
         where Command:Mongo.Command
