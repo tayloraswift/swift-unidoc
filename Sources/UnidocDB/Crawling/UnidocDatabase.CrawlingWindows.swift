@@ -84,14 +84,14 @@ extension UnidocDatabase.CrawlingWindows
     public
     func pull(with session:Mongo.Session) async throws -> Unidoc.CrawlingWindow?
     {
-        try await session.run(
-            command: Mongo.Find<Mongo.Single<Unidoc.CrawlingWindow>>.init(Self.name,
-                limit: 1)
-            {
-                $0[.sort] = .init { $0[Unidoc.CrawlingWindow[.expires]] = (+) }
-                $0[.hint] = Self.indexExpiration.id
-            },
-            against: self.database)
+        let command:Mongo.Find<Mongo.Single<Unidoc.CrawlingWindow>> = .init(Self.name,
+            limit: 1)
+        {
+            $0[.sort] = .init { $0[Unidoc.CrawlingWindow[.expires]] = (+) }
+            $0[.hint] = Self.indexExpiration.id
+        }
+
+        return try await session.run(command: command, against: self.database)
     }
 
     /// Updates the state of an existing crawling window.
