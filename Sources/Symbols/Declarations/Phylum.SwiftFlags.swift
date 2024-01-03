@@ -1,18 +1,18 @@
-extension Phylum.Decl
+extension Phylum
 {
-    /// This type is deprecated and will gradually be replaced by ``Phylum.DeclFlags``.
+    /// This type is deprecated and will gradually be replaced by ``DeclFlags``.
     @frozen public
     struct SwiftFlags:Equatable, Sendable
     {
         public
-        let phylum:Phylum.Decl
+        let phylum:Decl
         public
-        let kinks:Kinks
+        let kinks:Decl.Kinks
         public
-        var route:Route
+        var route:Decl.Route
 
         @inlinable public
-        init(phylum:Phylum.Decl, kinks:Kinks, route:Route)
+        init(phylum:Decl, kinks:Decl.Kinks, route:Decl.Route)
         {
             self.phylum = phylum
             self.kinks = kinks
@@ -20,7 +20,7 @@ extension Phylum.Decl
         }
     }
 }
-extension Phylum.Decl.SwiftFlags:RawRepresentable
+extension Phylum.SwiftFlags:RawRepresentable
 {
     @inlinable public
     var rawValue:Int32

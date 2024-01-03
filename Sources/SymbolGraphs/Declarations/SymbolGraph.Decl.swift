@@ -132,7 +132,7 @@ extension SymbolGraph.Decl
     enum CodingKey:String, Sendable
     {
         /// Deprecated.
-        case _swiftflags = "X"
+        case flags_swift = "X"
         /// New in 0.8.12.
         case flags = "Y"
         case path = "P"
@@ -209,7 +209,7 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let flags:Phylum.DeclFlags = try bson[.flags]?.decode()
-            ?? .swift(try bson[._swiftflags].decode())
+            ?? .swift(try bson[.flags_swift].decode())
 
         self.init(
             language: flags.language,
