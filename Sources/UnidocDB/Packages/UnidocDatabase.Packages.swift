@@ -97,18 +97,23 @@ extension UnidocDatabase.Packages
     func findGitHub(repo id:Int32,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
-        try await session.run(
-            command: Mongo.Find<Mongo.Single<Unidoc.PackageMetadata>>.init(Self.name, limit: 1)
+        let command:Mongo.Find<Mongo.Single<Unidoc.PackageMetadata>> = .init(Self.name,
+            limit: 1)
+        {
+            $0[.filter] = .init
             {
-                $0[.filter] = .init
-                {
-                    $0[ Unidoc.PackageMetadata[.repo] /
-                        Unidoc.PackageRepo[.github] /
-                        Unidoc.PackageRepo.GitHubOrigin[.id]] = id
-                }
-                $0[.hint] = Self.indexRepoGitHub.id
-            },
-            against: self.database)
+                //  We need this to use the partial index, for some reason.
+                $0[ Unidoc.PackageMetadata[.repo] /
+                    Unidoc.PackageRepo[.github]] = .init { $0[.exists] = true }
+
+                $0[ Unidoc.PackageMetadata[.repo] /
+                    Unidoc.PackageRepo[.github] /
+                    Unidoc.PackageRepo.GitHubOrigin[.id]] = id
+            }
+            $0[.hint] = Self.indexRepoGitHub.id
+        }
+
+        return try await session.run(command: command, against: self.database)
     }
 
     public
@@ -158,21 +163,21 @@ extension UnidocDatabase.Packages
     func stalest(_ limit:Int,
         with session:Mongo.Session) async throws -> [Unidoc.PackageMetadata]
     {
-        try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Unidoc.PackageMetadata>>.init(Self.name,
-                limit: limit)
+        let command:Mongo.Find<Mongo.SingleBatch<Unidoc.PackageMetadata>> = .init(Self.name,
+            limit: limit)
+        {
+            $0[.filter] = .init
             {
-                $0[.filter] = .init
-                {
-                    $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
-                }
-                $0[.sort] = .init
-                {
-                    $0[Unidoc.PackageMetadata[.expires]] = (+)
-                }
-                $0[.hint] = Self.indexExpiration.id
-            },
-            against: self.database)
+                $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+            }
+            $0[.sort] = .init
+            {
+                $0[Unidoc.PackageMetadata[.expires]] = (+)
+            }
+            $0[.hint] = Self.indexExpiration.id
+        }
+
+        return try await session.run(command: command, against: self.database)
     }
 }
 extension UnidocDatabase.Packages
