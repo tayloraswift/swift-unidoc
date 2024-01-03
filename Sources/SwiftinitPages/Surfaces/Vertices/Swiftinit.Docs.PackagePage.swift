@@ -21,13 +21,13 @@ extension Swiftinit.Docs
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Unidoc.Vertex.Global
+        let vertex:Unidoc.GlobalVertex
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            vertex:Unidoc.Vertex.Global,
+            vertex:Unidoc.GlobalVertex,
             groups:GroupSections)
         {
             self.context = context

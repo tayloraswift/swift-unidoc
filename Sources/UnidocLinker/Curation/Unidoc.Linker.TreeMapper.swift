@@ -38,14 +38,14 @@ extension Unidoc.Linker
 extension Unidoc.Linker.TreeMapper
 {
     mutating
-    func add(_ vertex:Unidoc.Vertex.Article)
+    func add(_ vertex:Unidoc.ArticleVertex)
     {
         self.local[vertex.id] = vertex.shoot
         self.trees[vertex.culture, default: []].articles.append(.init(shoot: vertex.shoot,
             style: .text("\(vertex.headline.safe)")))
     }
     mutating
-    func add(_ vertex:Unidoc.Vertex.Decl)
+    func add(_ vertex:Unidoc.DeclVertex)
     {
         self.local[vertex.id] = vertex.shoot
 
@@ -67,7 +67,7 @@ extension Unidoc.Linker.TreeMapper
 {
     mutating
     func register(foreign:Unidoc.Scalar,
-        with context:borrowing Unidoc.Linker) -> Unidoc.Vertex.Foreign
+        with context:borrowing Unidoc.Linker) -> Unidoc.ForeignVertex
     {
         guard
         let snapshot:Unidoc.Linker.Graph = context[foreign.package]
@@ -91,7 +91,7 @@ extension Unidoc.Linker.TreeMapper
         /// Our policy for hashing out-of-package types is to hash if the type uses a
         /// hash suffix in its home package, even if the type would not require any
         /// disambiguation in this package.
-        let vertex:Unidoc.Vertex.Foreign = .init(id: self.next.id(),
+        let vertex:Unidoc.ForeignVertex = .init(id: self.next.id(),
             extendee: foreign,
             scope: snapshot.scope(of: node).map { context.expand($0) } ?? [],
             flags: .init(
@@ -126,7 +126,7 @@ extension Unidoc.Linker.TreeMapper
 extension Unidoc.Linker.TreeMapper
 {
     consuming
-    func build(cultures:[Unidoc.Vertex.Culture]) -> (trees:[Unidoc.TypeTree], index:JSON)
+    func build(cultures:[Unidoc.CultureVertex]) -> (trees:[Unidoc.TypeTree], index:JSON)
     {
         let cultures:[Unidoc.Scalar: Symbol.Module] = cultures.reduce(into: [:])
         {

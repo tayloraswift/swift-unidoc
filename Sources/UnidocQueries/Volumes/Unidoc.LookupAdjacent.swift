@@ -20,7 +20,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
     {
-        let extendee:Scalar = .init(in: vertex / Unidoc.Vertex[.extendee])
+        let extendee:Scalar = .init(in: vertex / Unidoc.AnyVertex[.extendee])
 
         pipeline[.lookup] = .init
         {
@@ -37,19 +37,19 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     //  `BSON.max` is a safe choice for a group `_id` that will never
                     //  match anything.
-                    $0[.coalesce] = (vertex / Unidoc.Vertex[.extension], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.extension], BSON.Max.init())
                 }
                 $0[let: topic.id] = .expr
                 {
-                    $0[.coalesce] = (vertex / Unidoc.Vertex[.group], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.group], BSON.Max.init())
                 }
 
                 $0[let: local.scope] = .expr
                 {
                     $0[.coalesce] =
                     (
-                        vertex / Unidoc.Vertex[.extendee],
-                        vertex / Unidoc.Vertex[.id],
+                        vertex / Unidoc.AnyVertex[.extendee],
+                        vertex / Unidoc.AnyVertex[.id],
                         BSON.Max.init()
                     )
                 }
@@ -60,7 +60,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                         if: extendee.missing,
                         then: .expr
                         {
-                            $0[.coalesce] = (vertex / Unidoc.Vertex[.id], BSON.Max.init())
+                            $0[.coalesce] = (vertex / Unidoc.AnyVertex[.id], BSON.Max.init())
                         },
                         else: BSON.Max.init()
                     )

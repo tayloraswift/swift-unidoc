@@ -29,7 +29,7 @@ extension Swiftinit.Docs
 extension Swiftinit.Docs.MultipleFoundPage
 {
     init?(_ context:consuming IdentifiablePageContext<Never?>,
-        matches:__shared [Unidoc.Vertex])
+        matches:__shared [Unidoc.AnyVertex])
     {
         if  let stem:Unidoc.Stem = matches.first?.shoot?.stem
         {

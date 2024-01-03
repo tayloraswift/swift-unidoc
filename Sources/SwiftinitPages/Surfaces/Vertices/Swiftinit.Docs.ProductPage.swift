@@ -12,13 +12,13 @@ extension Swiftinit.Docs
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Unidoc.Vertex.Product
+        let vertex:Unidoc.ProductVertex
         private
         let groups:GroupSections
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            vertex:Unidoc.Vertex.Product,
+            vertex:Unidoc.ProductVertex,
             groups:GroupSections)
         {
             self.context = context
@@ -150,7 +150,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                     for id:Unidoc.Scalar in self.vertex.requirements
                     {
                         guard
-                        let vertex:Unidoc.Vertex = self.context.vertices[id]
+                        let vertex:Unidoc.AnyVertex = self.context.vertices[id]
                         else
                         {
                             continue

@@ -3,10 +3,10 @@ import MarkdownABI
 import Unidoc
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct Article:Identifiable, Equatable, Sendable
+    struct ArticleVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -54,11 +54,8 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex.Article
+extension Unidoc.ArticleVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
-    var shoot:Unidoc.Shoot
-    {
-        .init(stem: self.stem)
-    }
+    var hash:FNV24.Extended { .init(hashing: "\(self.stem)") }
 }

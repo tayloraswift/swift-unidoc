@@ -122,7 +122,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 {
                     $0[.coalesce] =
                     (
-                        Unidoc.PrincipalOutput[.vertex] / Unidoc.Vertex[.symbol],
+                        Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.symbol],
                         BSON.Max.init()
                     )
                 }
@@ -130,7 +130,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 {
                     $0[.coalesce] =
                     (
-                        Unidoc.PrincipalOutput[.vertex] / Unidoc.Vertex[.hash],
+                        Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.hash],
                         BSON.Max.init()
                     )
                 }
@@ -153,20 +153,20 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                             //  a compound index.
                             .expr
                             {
-                                $0[.eq] = (Unidoc.Vertex[.hash], hash)
+                                $0[.eq] = (Unidoc.AnyVertex[.hash], hash)
                             },
                             .expr
                             {
-                                $0[.gte] = (Unidoc.Vertex[.id], min)
+                                $0[.gte] = (Unidoc.AnyVertex[.id], min)
                             },
                             .expr
                             {
-                                $0[.lte] = (Unidoc.Vertex[.id], max)
+                                $0[.lte] = (Unidoc.AnyVertex[.id], max)
                             },
 
                             .expr
                             {
-                                $0[.eq] = (Unidoc.Vertex[.symbol], symbol)
+                                $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol)
                             }
                         )
                     }
@@ -177,10 +177,10 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 //  We do not need to load *any* markdown for this record.
                 $0[.unset] =
                 [
-                    Unidoc.Vertex[.requirements],
-                    Unidoc.Vertex[.superforms],
-                    Unidoc.Vertex[.overview],
-                    Unidoc.Vertex[.details],
+                    Unidoc.AnyVertex[.requirements],
+                    Unidoc.AnyVertex[.superforms],
+                    Unidoc.AnyVertex[.overview],
+                    Unidoc.AnyVertex[.details],
                 ]
             }
             $0[.as] = Unidoc.PrincipalOutput[.vertexInLatest]
@@ -270,15 +270,15 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     {
                         $0[let: tree] = .expr
                         {
-                            //  ``Unidoc.Vertex.Culture`` doesn’t have a `culture`
+                            //  ``Unidoc.CultureVertex`` doesn’t have a `culture`
                             //  field, but we still want to get the type tree for
                             //  its `_id`. The ``Database.Trees`` collection only
                             //  contains type trees, so it’s okay if the `_id` is
                             //  not a culture.
                             $0[.coalesce] =
                             (
-                                Unidoc.PrincipalOutput[.vertex] / Unidoc.Vertex[.culture],
-                                Unidoc.PrincipalOutput[.vertex] / Unidoc.Vertex[.id],
+                                Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.culture],
+                                Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.id],
                                 BSON.Max.init()
                             )
                         }
@@ -318,7 +318,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 {
                     $0[.from] = UnidocDatabase.Vertices.name
                     $0[.localField] = edges.scalars
-                    $0[.foreignField] = Unidoc.Vertex[.id]
+                    $0[.foreignField] = Unidoc.AnyVertex[.id]
                     $0[.as] = results
                 }
                 $0[.unwind] = results
@@ -326,9 +326,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 //  We do not need to load all the markdown for secondary vertices.
                 $0[.unset] =
                 [
-                    Unidoc.Vertex[.requirements],
-                    Unidoc.Vertex[.superforms],
-                    Unidoc.Vertex[.details],
+                    Unidoc.AnyVertex[.requirements],
+                    Unidoc.AnyVertex[.superforms],
+                    Unidoc.AnyVertex[.details],
                 ]
             }
 

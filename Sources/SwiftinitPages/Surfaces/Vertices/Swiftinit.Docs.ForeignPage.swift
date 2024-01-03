@@ -14,7 +14,7 @@ extension Swiftinit.Docs
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Unidoc.Vertex.Foreign
+        let vertex:Unidoc.ForeignVertex
         private
         let groups:GroupSections
 
@@ -23,7 +23,7 @@ extension Swiftinit.Docs
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
-            vertex:Unidoc.Vertex.Foreign,
+            vertex:Unidoc.ForeignVertex,
             groups:GroupSections) throws
         {
             self.context = context

@@ -33,11 +33,11 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
                             (
                                 .expr
                                 {
-                                    $0[.gte] = (Unidoc.Vertex[.id], min)
+                                    $0[.gte] = (Unidoc.AnyVertex[.id], min)
                                 },
                                 .expr
                                 {
-                                    $0[.lte] = (Unidoc.Vertex[.id], max)
+                                    $0[.lte] = (Unidoc.AnyVertex[.id], max)
                                 }
                             )
                         }

@@ -3,10 +3,10 @@ import Symbols
 import Unidoc
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct Foreign:Identifiable, Equatable, Sendable
+    struct ForeignVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
@@ -40,14 +40,8 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex.Foreign
+extension Unidoc.ForeignVertex:Unidoc.PrincipalVertex
 {
-    @inlinable public
-    var phylum:Phylum.Decl { self.flags.phylum }
-
-    @inlinable public
-    var kinks:Phylum.Decl.Kinks { self.flags.kinks }
-
     @inlinable public
     var shoot:Unidoc.Shoot
     {
@@ -55,4 +49,12 @@ extension Unidoc.Vertex.Foreign
             stem: self.stem,
             hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
     }
+}
+extension Unidoc.ForeignVertex
+{
+    @inlinable public
+    var phylum:Phylum.Decl { self.flags.phylum }
+
+    @inlinable public
+    var kinks:Phylum.Decl.Kinks { self.flags.kinks }
 }

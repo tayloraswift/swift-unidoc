@@ -57,7 +57,7 @@ extension CanonicalVersion
 
         let target:Target
 
-        if  let vertex:Unidoc.Vertex = principal.vertexInLatest
+        if  let vertex:Unidoc.AnyVertex = principal.vertexInLatest
         {
             switch vertex
             {

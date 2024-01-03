@@ -48,7 +48,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
 }
 extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
 {
-    subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Culture, url:String?)?
+    subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
     {
         mutating get
         {
@@ -63,7 +63,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         }
     }
 
-    subscript(article scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Article, url:String?)?
+    subscript(article scalar:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)?
     {
         mutating get
         {
@@ -78,7 +78,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Decl, url:String?)?
+    subscript(decl scalar:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)?
     {
         mutating get
         {
@@ -94,13 +94,13 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
     }
 
     /// Returns the URL for the given scalar, as long as it does not point to a file.
-    subscript(scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex, url:String?)?
+    subscript(scalar:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)?
     {
         mutating get
         {
             self.vertices[scalar].map
             {
-                (vertex:Unidoc.Vertex) in
+                (vertex:Unidoc.AnyVertex) in
 
                 let url:String? = self.load(scalar)
                 {

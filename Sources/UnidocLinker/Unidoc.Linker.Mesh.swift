@@ -43,24 +43,24 @@ extension Unidoc.Linker.Mesh
 {
     init(
         extensions:borrowing Unidoc.Linker.Extensions,
-        products:consuming [Unidoc.Vertex.Product],
-        cultures:consuming [Unidoc.Vertex.Culture],
-        articles:consuming [Unidoc.Vertex.Article],
-        decls:consuming [Unidoc.Vertex.Decl],
+        products:consuming [Unidoc.ProductVertex],
+        cultures:consuming [Unidoc.CultureVertex],
+        articles:consuming [Unidoc.ArticleVertex],
+        decls:consuming [Unidoc.DeclVertex],
         groups:consuming Unidoc.Volume.Groups,
         context:borrowing Unidoc.Linker)
     {
-        var cultures:[Unidoc.Vertex.Culture] = cultures
+        var cultures:[Unidoc.CultureVertex] = cultures
 
-        let articles:[Unidoc.Vertex.Article] = articles
-        let decls:[Unidoc.Vertex.Decl] = decls
+        let articles:[Unidoc.ArticleVertex] = articles
+        let decls:[Unidoc.DeclVertex] = decls
 
         var mapper:Unidoc.Linker.TreeMapper = .init(zone: context.current.id)
-        for vertex:Unidoc.Vertex.Article in articles
+        for vertex:Unidoc.ArticleVertex in articles
         {
             mapper.add(vertex)
         }
-        for vertex:Unidoc.Vertex.Decl in decls
+        for vertex:Unidoc.DeclVertex in decls
         {
             mapper.add(vertex)
         }
@@ -68,7 +68,7 @@ extension Unidoc.Linker.Mesh
         var snapshot:Unidoc.SnapshotDetails = .init(abi: context.current.metadata.abi,
             requirements: context.current.metadata.requirements,
             commit: context.current.metadata.commit?.hash)
-        var foreign:[Unidoc.Vertex.Foreign] = []
+        var foreign:[Unidoc.ForeignVertex] = []
 
         //  Compute shoots for out-of-package extended types.
         for d:Int32 in context.current.decls.nodes.indices
@@ -151,7 +151,7 @@ extension Unidoc.Linker.Mesh
         }
 
         //  Create file vertices.
-        let files:[Unidoc.Vertex.File] = zip(
+        let files:[Unidoc.FileVertex] = zip(
             context.current.files.indices,
             context.current.files)
             .map

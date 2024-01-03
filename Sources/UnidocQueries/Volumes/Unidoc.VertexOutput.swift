@@ -10,13 +10,13 @@ extension Unidoc
         public
         let principal:PrincipalOutput?
         public
-        let vertices:[Unidoc.Vertex]
+        let vertices:[Unidoc.AnyVertex]
         public
         let volumes:[Unidoc.VolumeMetadata]
 
         @inlinable public
         init(principal:PrincipalOutput?,
-            vertices:[Unidoc.Vertex],
+            vertices:[Unidoc.AnyVertex],
             volumes:[Unidoc.VolumeMetadata])
         {
             self.principal = principal

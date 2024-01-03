@@ -38,8 +38,8 @@ extension Unidoc.Linker
 
         private(set)
         var extensions:Extensions
-        var articles:[Unidoc.Vertex.Article]
-        var decls:[Unidoc.Vertex.Decl]
+        var articles:[Unidoc.ArticleVertex]
+        var decls:[Unidoc.DeclVertex]
 
         var groups:Unidoc.Volume.Groups
 
@@ -110,12 +110,12 @@ extension Unidoc.Linker.Tables
 {
     /// This **must** be called before ``linkCultures``!
     mutating
-    func linkProducts() -> [Unidoc.Vertex.Product]
+    func linkProducts() -> [Unidoc.ProductVertex]
     {
         var productPolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon.id(),
             scope: self.current.id.global)
 
-        var products:[Unidoc.Vertex.Product] = []
+        var products:[Unidoc.ProductVertex] = []
             products.reserveCapacity(self.current.metadata.products.count)
 
         for (p, product):(Int32, SymbolGraph.Product) in zip(
@@ -141,7 +141,7 @@ extension Unidoc.Linker.Tables
                 }
             }
 
-            let product:Unidoc.Vertex.Product = .init(id: self.current.id + p,
+            let product:Unidoc.ProductVertex = .init(id: self.current.id + p,
                 requirements: requirements,
                 symbol: product.name,
                 type: product.type,
@@ -181,7 +181,7 @@ extension Unidoc.Linker.Tables
 
     /// This **must** be called after ``linkProducts``!
     mutating
-    func linkCultures() -> [Unidoc.Vertex.Culture]
+    func linkCultures() -> [Unidoc.CultureVertex]
     {
         //  First pass to create the topic records, which also populates topic memberships.
         for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
@@ -362,9 +362,9 @@ extension Unidoc.Linker.Tables
 {
     private mutating
     func link(culture:SymbolGraph.Culture,
-        under namespace:SymbolGraph.NamespaceContext<Void>) -> Unidoc.Vertex.Culture
+        under namespace:SymbolGraph.NamespaceContext<Void>) -> Unidoc.CultureVertex
     {
-        var vertex:Unidoc.Vertex.Culture = .init(id: namespace.culture,
+        var vertex:Unidoc.CultureVertex = .init(id: namespace.culture,
             module: culture.module,
             group: self.groupContainingMember[namespace.culture.citizen])
 
@@ -393,7 +393,7 @@ extension Unidoc.Linker.Tables
             let symbol:Symbol.Article = self.current.articles.symbols[a]
             let scalar:Unidoc.Scalar = self.current.id + a
 
-            var vertex:Unidoc.Vertex.Article = .init(id: scalar,
+            var vertex:Unidoc.ArticleVertex = .init(id: scalar,
                 stem: .article(namespace.module, symbol.name),
                 culture: namespace.culture,
                 readme: node.article.file.map { self.current.id + $0 },
@@ -469,7 +469,7 @@ extension Unidoc.Linker.Tables
                 self.extensions[implicit].subforms.append(d)
             }
 
-            var vertex:Unidoc.Vertex.Decl = .init(id: d,
+            var vertex:Unidoc.DeclVertex = .init(id: d,
                 flags: .init(
                     language: decl.language,
                     phylum: decl.phylum,

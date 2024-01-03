@@ -11,21 +11,21 @@ import UnidocAPI
 extension Unidoc
 {
     @frozen public
-    enum Vertex:Equatable, Sendable
+    enum AnyVertex:Equatable, Sendable
     {
-        case article(Article)
-        case culture(Culture)
-        case decl(Decl)
-        case file(File)
-        case product(Product)
-        case foreign(Foreign)
-        case global(Global)
+        case article(ArticleVertex)
+        case culture(CultureVertex)
+        case decl(DeclVertex)
+        case file(FileVertex)
+        case product(ProductVertex)
+        case foreign(ForeignVertex)
+        case global(GlobalVertex)
     }
 }
-extension Unidoc.Vertex
+extension Unidoc.AnyVertex
 {
     @inlinable public
-    var article:Article?
+    var article:Unidoc.ArticleVertex?
     {
         switch self
         {
@@ -34,7 +34,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var culture:Culture?
+    var culture:Unidoc.CultureVertex?
     {
         switch self
         {
@@ -43,7 +43,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var decl:Decl?
+    var decl:Unidoc.DeclVertex?
     {
         switch self
         {
@@ -52,7 +52,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var file:File?
+    var file:Unidoc.FileVertex?
     {
         switch self
         {
@@ -61,7 +61,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var product:Product?
+    var product:Unidoc.ProductVertex?
     {
         switch self
         {
@@ -70,7 +70,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var foreign:Foreign?
+    var foreign:Unidoc.ForeignVertex?
     {
         switch self
         {
@@ -79,7 +79,7 @@ extension Unidoc.Vertex
         }
     }
     @inlinable public
-    var global:Global?
+    var global:Unidoc.GlobalVertex?
     {
         switch self
         {
@@ -88,7 +88,7 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex:Identifiable
+extension Unidoc.AnyVertex:Identifiable
 {
     @inlinable public
     var id:Unidoc.Scalar
@@ -105,7 +105,7 @@ extension Unidoc.Vertex:Identifiable
         }
     }
 }
-extension Unidoc.Vertex
+extension Unidoc.AnyVertex
 {
     @inlinable public
     var overview:Unidoc.Passage?
@@ -150,7 +150,7 @@ extension Unidoc.Vertex
         }
     }
 }
-extension Unidoc.Vertex
+extension Unidoc.AnyVertex
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -249,7 +249,7 @@ extension Unidoc.Vertex
         case hash = "H"
     }
 }
-extension Unidoc.Vertex:BSONDocumentEncodable
+extension Unidoc.AnyVertex:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -263,7 +263,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             //  This allows us to correlate article identifiers across different versions.
             //  Articles are so few in number that we can afford to duplicate this.
             bson[.symbol] = self.stem
-            bson[.hash] = FNV24.Extended.init(hashing: "\(self.stem)")
+            bson[.hash] = self.hash
             bson[.stem] = self.stem
 
             bson[.culture] = self.culture
@@ -318,11 +318,9 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.group] = self.group
 
         case .culture(let self):
-            //  Save this because it is computed by mangling a target name.
-            let module:Symbol.Module = self.module.id
             //  This allows us to correlate module identifiers across different versions.
-            bson[.symbol] = module
-            bson[.hash] = FNV24.Extended.init(hashing: "s:m:\(module)")
+            bson[.symbol] = self.module.id
+            bson[.hash] = self.hash
             bson[.stem] = self.stem
 
             bson[.module] = self.module
@@ -340,7 +338,7 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.symbol] = self.symbol
             //  Product names often shadow module names, so we perturb the hash input to ward
             //  off hash collisions.
-            bson[.hash] = FNV24.Extended.init(hashing: "s:p:\(self.symbol)")
+            bson[.hash] = self.hash
             bson[.stem] = self.stem
             //  It would be incredibly strange for a product to have no requirements.
             bson[.requirements] = self.requirements
@@ -355,15 +353,13 @@ extension Unidoc.Vertex:BSONDocumentEncodable
             bson[.stem] = self.stem
 
         case .global(let self):
-            //  This must have a value, otherwise it would get lost among all the file
-            //  vertices, and queries for it would be very slow.
-            bson[.hash] = 0
-            bson[.stem] = ""
+            bson[.hash] = self.hash
+            bson[.stem] = self.stem
             bson[.snapshot] = self.snapshot
         }
     }
 }
-extension Unidoc.Vertex:BSONDocumentDecodable
+extension Unidoc.AnyVertex:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

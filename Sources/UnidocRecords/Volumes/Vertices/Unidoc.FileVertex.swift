@@ -2,10 +2,10 @@ import Symbols
 import Unidoc
 import UnidocAPI
 
-extension Unidoc.Vertex
+extension Unidoc
 {
     @frozen public
-    struct File:Identifiable, Equatable, Sendable
+    struct FileVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar

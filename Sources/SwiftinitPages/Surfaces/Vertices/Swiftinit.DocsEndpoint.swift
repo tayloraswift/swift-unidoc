@@ -28,7 +28,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
     public static
     func response(
-        vertex:consuming Unidoc.Vertex,
+        vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.Group],
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse

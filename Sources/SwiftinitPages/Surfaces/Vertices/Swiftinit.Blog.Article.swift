@@ -12,9 +12,9 @@ extension Swiftinit.Blog
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
         private
-        let vertex:Unidoc.Vertex.Article
+        let vertex:Unidoc.ArticleVertex
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Unidoc.Vertex.Article)
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Unidoc.ArticleVertex)
         {
             self.context = context
             self.vertex = vertex
