@@ -52,7 +52,7 @@ extension CompilerTestBattery
         let compiled:(([[Compiler.Namespace]], Compiler.Nominations), [Compiler.Extension])? =
             (tests ! "Compilation").do
         {
-            try compiler.compile(culture: parts[0].culture, parts: parts)
+            try compiler.compile(language: .swift, culture: parts[0].culture, parts: parts)
 
             return (compiler.declarations.load(), compiler.extensions.load())
         }

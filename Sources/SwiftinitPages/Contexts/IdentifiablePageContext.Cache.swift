@@ -21,7 +21,7 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
+extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
 {
     mutating
     func load(_ scalar:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
@@ -46,7 +46,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
         } (&self.uris[scalar])
     }
 }
-extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
+extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
 {
     subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Culture, url:String?)?
     {

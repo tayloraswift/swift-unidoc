@@ -2,6 +2,7 @@ import HTML
 import HTTP
 import Media
 import MongoDB
+import Swiftinit
 import SwiftinitRender
 import UnidocProfiling
 import URI
@@ -40,12 +41,12 @@ extension Swiftinit.AdminPage
     static
     subscript(action:Action) -> URI
     {
-        Swiftinit.Admin.uri.path / action.rawValue
+        Swiftinit.Root.admin / action.rawValue
     }
 }
 extension Swiftinit.AdminPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Admin.uri }
+    var location:URI { Swiftinit.Root.admin.uri }
 }
 extension Swiftinit.AdminPage:Swiftinit.RenderablePage
 {

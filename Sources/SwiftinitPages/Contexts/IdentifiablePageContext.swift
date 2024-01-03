@@ -75,7 +75,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
         .init(self, constraints: constraints)
     }
 }
-extension IdentifiablePageContext where ID:VersionedPageIdentifier
+extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 {
     func prose(overview passage:Unidoc.Passage) -> ProseSection
     {
@@ -103,7 +103,7 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
         }
     }
 }
-extension IdentifiablePageContext where ID:VersionedPageIdentifier
+extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 {
     /// Generates a subdomain header for a module using its shoot.
     func subdomain(_ module:Unidoc.Shoot) -> Unidoc.VolumeMetadata.Subdomain?
@@ -190,8 +190,8 @@ extension IdentifiablePageContext where ID:VersionedPageIdentifier
             line: line)
     }
 }
-extension IdentifiablePageContext:Swiftinit.VersionedPageContext
-    where ID:VersionedPageIdentifier
+extension IdentifiablePageContext:Swiftinit.VertexPageContext
+    where ID:Swiftinit.VertexPageIdentifier
 {
     @usableFromInline internal
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?

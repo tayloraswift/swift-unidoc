@@ -1,5 +1,6 @@
 import HTML
 import Media
+import Swiftinit
 import SwiftinitRender
 import URI
 
@@ -18,7 +19,7 @@ extension Swiftinit.AdminPage.Recode
     var name:String { "recode" }
 
     static
-    var uri:URI { Swiftinit.Admin.uri.path / Self.name }
+    var uri:URI { Swiftinit.Root.admin / Self.name }
 }
 extension Swiftinit.AdminPage.Recode:Swiftinit.RenderablePage
 {

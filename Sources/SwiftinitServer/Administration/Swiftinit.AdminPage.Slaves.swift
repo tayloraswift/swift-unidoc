@@ -1,5 +1,6 @@
 import HTML
 import Media
+import Swiftinit
 import SwiftinitRender
 import URI
 
@@ -21,7 +22,7 @@ extension Swiftinit.AdminPage.Slaves
     var name:String { "slaves" }
 
     static
-    var uri:URI { Swiftinit.Admin.uri.path / Self.name }
+    var uri:URI { Swiftinit.Root.admin / Self.name }
 }
 extension Swiftinit.AdminPage.Slaves:Swiftinit.RenderablePage
 {

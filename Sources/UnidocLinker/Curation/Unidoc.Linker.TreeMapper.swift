@@ -95,6 +95,7 @@ extension Unidoc.Linker.TreeMapper
             extendee: foreign,
             scope: snapshot.scope(of: node).map { context.expand($0) } ?? [],
             flags: .init(
+                language: decl.language,
                 phylum: decl.phylum,
                 kinks: decl.kinks,
                 route: decl.route),

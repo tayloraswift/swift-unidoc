@@ -1,21 +1,19 @@
-import BSON
-
-extension SymbolGraph
+extension Phylum
 {
     @frozen public
-    enum ModuleLanguage:Int32, Equatable, Hashable, Sendable
+    enum Language:Int32, Equatable, Hashable, Sendable
     {
         case swift  = 0
         case c      = 1
         case cpp    = 2
     }
 }
-extension SymbolGraph.ModuleLanguage:Comparable
+extension Phylum.Language:Comparable
 {
     @inlinable public static
     func < (a:Self, b:Self) -> Bool { a.rawValue < b.rawValue }
 }
-extension SymbolGraph.ModuleLanguage
+extension Phylum.Language
 {
     /// Returns the language union of the two operands.
     ///
@@ -34,7 +32,7 @@ extension SymbolGraph.ModuleLanguage
         lhs = lhs | rhs
     }
 }
-extension SymbolGraph.ModuleLanguage:CustomStringConvertible
+extension Phylum.Language:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -46,7 +44,4 @@ extension SymbolGraph.ModuleLanguage:CustomStringConvertible
         case .cpp:      "c++"
         }
     }
-}
-extension SymbolGraph.ModuleLanguage:BSONEncodable, BSONDecodable
-{
 }

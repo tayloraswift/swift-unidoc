@@ -11,9 +11,9 @@ struct CodeSection
     private
     let scalars:[Unidoc.Scalar?]
     private
-    let context:any Swiftinit.VersionedPageContext
+    let context:any Swiftinit.VertexPageContext
 
-    init(_ context:any Swiftinit.VersionedPageContext,
+    init(_ context:any Swiftinit.VertexPageContext,
         bytecode:MarkdownBytecode,
         scalars:[Unidoc.Scalar?])
     {

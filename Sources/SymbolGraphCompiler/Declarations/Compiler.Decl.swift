@@ -22,6 +22,8 @@ extension Compiler
         let location:SourceLocation<Symbol.File>?
 
         public
+        let language:Phylum.Language
+        public
         let phylum:Phylum.Decl
         public
         let path:UnqualifiedPath
@@ -63,6 +65,7 @@ extension Compiler
         init(_ id:Symbol.Decl,
             signature:Signature<Symbol.Decl>,
             location:SourceLocation<Symbol.File>?,
+            language:Phylum.Language,
             phylum:Phylum.Decl,
             path:UnqualifiedPath)
         {
@@ -70,6 +73,7 @@ extension Compiler
 
             self.signature = signature
             self.location = location
+            self.language = language
             self.phylum = phylum
             self.path = path
 
@@ -95,9 +99,21 @@ extension Compiler.Decl
             throw Compiler.UnexpectedSymbolError.scalar(symbol)
         }
 
+        let language:Phylum.Language
+        if  case .swift = culture.language,
+            case .c = symbol.language
+        {
+            language = .c
+        }
+        else
+        {
+            language = culture.language
+        }
+
         self.init(symbol,
             signature: vertex.signature,
             location: try vertex.location?.map(culture.resolve(uri:)),
+            language: language,
             phylum: phylum,
             path: vertex.path)
 

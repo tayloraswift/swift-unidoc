@@ -16,7 +16,7 @@ extension Unidoc.Vertex
         public
         let scope:[Unidoc.Scalar]
         public
-        let flags:Phylum.Decl.Flags
+        let flags:Phylum.DeclFlags
 
         public
         let stem:Unidoc.Stem
@@ -27,7 +27,7 @@ extension Unidoc.Vertex
         init(id:Unidoc.Scalar,
             extendee:Unidoc.Scalar,
             scope:[Unidoc.Scalar],
-            flags:Phylum.Decl.Flags,
+            flags:Phylum.DeclFlags,
             stem:Unidoc.Stem,
             hash:FNV24.Extended)
         {

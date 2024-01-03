@@ -1,4 +1,5 @@
 import SymbolGraphs
+import Symbols
 import System
 
 extension PackageBuild.Sources

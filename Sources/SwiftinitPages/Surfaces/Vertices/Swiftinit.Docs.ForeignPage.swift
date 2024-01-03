@@ -63,7 +63,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 

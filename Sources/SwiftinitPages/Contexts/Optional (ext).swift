@@ -1,6 +1,6 @@
 import Unidoc
 
-extension Never?:VersionedPageIdentifier
+extension Never?:Swiftinit.VertexPageIdentifier
 {
     static
     func != (self:Self, id:Unidoc.Scalar) -> Bool
