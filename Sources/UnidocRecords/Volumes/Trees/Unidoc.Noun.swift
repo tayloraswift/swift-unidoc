@@ -23,5 +23,5 @@ extension Unidoc
 extension Unidoc.Noun
 {
     @inlinable public
-    var route:Unidoc.Route { .init(shoot: shoot, swift: type.swift) }
+    var route:Unidoc.Route { .init(shoot: shoot, cdecl: type.cdecl) }
 }

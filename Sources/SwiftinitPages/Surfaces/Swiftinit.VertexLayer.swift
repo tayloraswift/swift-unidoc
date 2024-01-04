@@ -16,29 +16,40 @@ protocol _SwiftinitVertexLayer
     var docs:Swiftinit.Root { get }
 
     static
+    var docc:Swiftinit.Root { get }
+
+    static
     var hist:Swiftinit.Root { get }
 }
 extension Swiftinit.VertexLayer
 {
-    static
-    subscript(volume:Unidoc.VolumeMetadata) -> URI
+    private static
+    subscript(volume:Unidoc.VolumeSelector, cdecl cdecl:Bool) -> URI
     {
-        let volume:Unidoc.VolumeSelector = volume.selector
-
-        if  case nil = volume.version
+        if  case _? = volume.version
         {
-            return Self.docs / "\(volume)"
+            Self.hist / "\(volume)"
+        }
+        else if cdecl
+        {
+            Self.docc / "\(volume)"
         }
         else
         {
-            return Self.hist / "\(volume)"
+            Self.docs / "\(volume)"
         }
+    }
+
+    static
+    subscript(volume:Unidoc.VolumeMetadata) -> URI
+    {
+        Self[volume.selector, cdecl: false]
     }
 
     static
     subscript(volume:Unidoc.VolumeMetadata, route:Unidoc.Route) -> URI
     {
-        var uri:URI = Self[volume]
+        var uri:URI = Self[volume.selector, cdecl: route.cdecl]
 
         uri.path += route.stem
         uri["hash"] = route.hash?.description

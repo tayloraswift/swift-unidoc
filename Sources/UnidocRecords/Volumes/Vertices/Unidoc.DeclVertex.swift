@@ -102,7 +102,7 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
     @inlinable public
     var route:Unidoc.Route
     {
-        .init(shoot: self.shoot, swift: self.flags.language == .swift)
+        .init(shoot: self.shoot, cdecl: self.flags.language == .c)
     }
 
     @inlinable public

@@ -10,5 +10,8 @@ extension Swiftinit.Docs:Swiftinit.VertexLayer
     var docs:Swiftinit.Root { .docs }
 
     static
+    var docc:Swiftinit.Root { .docc }
+
+    static
     var hist:Swiftinit.Root { .hist }
 }
