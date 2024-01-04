@@ -10,7 +10,7 @@ extension Unidoc.Group
         let id:Unidoc.Group.ID
 
         public
-        let conditions:[GenericConstraint<Unidoc.Scalar?>]
+        let constraints:[GenericConstraint<Unidoc.Scalar?>]
         public
         let culture:Unidoc.Scalar
         public
@@ -39,7 +39,7 @@ extension Unidoc.Group
 
         @inlinable public
         init(id:Unidoc.Group.ID,
-            conditions:[GenericConstraint<Unidoc.Scalar?>],
+            constraints:[GenericConstraint<Unidoc.Scalar?>],
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,
             conformances:[Unidoc.Scalar] = [],
@@ -52,7 +52,7 @@ extension Unidoc.Group
         {
             self.id = id
 
-            self.conditions = conditions
+            self.constraints = constraints
             self.culture = culture
             self.scope = scope
 

@@ -3,28 +3,25 @@ import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
 
-/// Describes a single type’s protocol conformances. Depending on how the type is being used,
-/// the lists may or may not be exhaustive.
-struct ProtocolConformances<Culture>
+/// Describes a single type’s protocol conformances. Depending on how this structure is being
+/// used, the lists may or may not be exhaustive.
+struct ProtocolConformances:Sendable
 {
     private
-    var table:[Unidoc.Scalar: [ProtocolConformance<Culture>]]
+    var table:[Unidoc.Scalar: [Unidoc.Linker.ExtensionConditions]]
 
     private
-    init(table:[Unidoc.Scalar: [ProtocolConformance<Culture>]])
+    init(table:[Unidoc.Scalar: [Unidoc.Linker.ExtensionConditions]])
     {
         self.table = table
     }
-}
-extension ProtocolConformances:Sendable where Culture:Sendable
-{
 }
 extension ProtocolConformances
 {
     /// Yields all known conformances to the specified protocol. This subscript returns an empty
     /// list if no conformances are known to exist. It can also return more than one conformance
     /// if multiple modules declare conformances to the same protocol.
-    subscript(to protocol:Unidoc.Scalar) -> [ProtocolConformance<Culture>]
+    subscript(to protocol:Unidoc.Scalar) -> [Unidoc.Linker.ExtensionConditions]
     {
         _read
         {
@@ -38,7 +35,8 @@ extension ProtocolConformances
 }
 extension ProtocolConformances:Sequence
 {
-    func makeIterator() -> Dictionary<Unidoc.Scalar, [ProtocolConformance<Culture>]>.Iterator
+    func makeIterator()
+        -> Dictionary<Unidoc.Scalar, [Unidoc.Linker.ExtensionConditions]>.Iterator
     {
         self.table.makeIterator()
     }
@@ -50,20 +48,22 @@ extension ProtocolConformances:ExpressibleByDictionaryLiteral
         self.init(table: [:])
     }
 }
-extension ProtocolConformances<Int>
+extension ProtocolConformances
 {
     init(of subject:Unidoc.Scalar,
-        signatures:borrowing [Unidoc.Linker.ExtensionSignature],
+        conditions:borrowing [Unidoc.Linker.ExtensionConditions],
         extensions:borrowing [SymbolGraph.Extension],
         modules:borrowing [SymbolGraph.ModuleContext],
         context:inout Unidoc.Linker)
     {
         self = [:]
 
-        for (`extension`, signature):(SymbolGraph.Extension, Unidoc.Linker.ExtensionSignature)
-            in zip(extensions, signatures)
+        for (conditions, `extension`):
+            (Unidoc.Linker.ExtensionConditions, SymbolGraph.Extension) in zip(
+            conditions,
+            extensions)
         {
-            let module:SymbolGraph.ModuleContext = modules[`extension`.culture]
+            let module:SymbolGraph.ModuleContext = modules[conditions.culture]
             for p:Int32 in `extension`.conformances
             {
                 //  Only track conformances that were declared by modules in
@@ -71,14 +71,13 @@ extension ProtocolConformances<Int>
                 if  let p:Unidoc.Scalar = context.current.scalars.decls[p],
                     case false = module.already(conforms: subject, to: p)
                 {
-                    self[to: p].append(.init(
-                        conditions: signature.conditions,
-                        culture: `extension`.culture))
+                    self[to: p].append(conditions)
                 }
             }
         }
 
-        for i:Dictionary<Unidoc.Scalar, [ProtocolConformance<Int>]>.Index in self.table.indices
+        for i:Dictionary<Unidoc.Scalar, [Unidoc.Linker.ExtensionConditions]>.Index
+            in self.table.indices
         {
             let `protocol`:Unidoc.Scalar = self.table.keys[i]
             context.simplify(conformances: &self.table.values[i],
