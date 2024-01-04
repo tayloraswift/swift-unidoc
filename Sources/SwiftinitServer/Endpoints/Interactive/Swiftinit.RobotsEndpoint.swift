@@ -47,6 +47,7 @@ extension Swiftinit.RobotsEndpoint:PublicEndpoint
             User-agent: *
             Disallow: /admin/
             Disallow: /auth/
+            Disallow: /docc/
             Disallow: /hist/
             Disallow: /reference/
             Disallow: /telescope/
