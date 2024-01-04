@@ -10,5 +10,8 @@ extension Swiftinit.Blog:Swiftinit.VertexLayer
     var docs:Swiftinit.Root { .blog }
 
     static
+    var docc:Swiftinit.Root { .blog }
+
+    static
     var hist:Swiftinit.Root { .blog }
 }

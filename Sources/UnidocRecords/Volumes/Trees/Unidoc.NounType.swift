@@ -13,11 +13,11 @@ extension Unidoc
 extension Unidoc.NounType
 {
     @inlinable internal
-    var swift:Bool
+    var cdecl:Bool
     {
         switch self
         {
-        case .stem(_, let flags?):  flags.language == .swift
+        case .stem(_, let flags?):  flags.language == .c
         case .stem(_, nil):         false
         case .text:                 false
         }

@@ -33,7 +33,7 @@ extension Unidoc.NounTable
 }
 extension Unidoc.NounTable
 {
-    @usableFromInline static
+    @inlinable internal static
     var version:BSON.BinarySubtype { .custom(code: 0x80) }
 }
 extension Unidoc.NounTable:BSONEncodable
