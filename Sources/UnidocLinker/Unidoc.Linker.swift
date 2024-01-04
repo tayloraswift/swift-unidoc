@@ -280,7 +280,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     mutating
-    func simplify(conformances:inout [ProtocolConformance<Int>],
+    func simplify(conformances:inout [ExtensionConditions],
         of subject:Unidoc.Scalar,
         to protocol:Unidoc.Scalar)
     {
@@ -305,7 +305,7 @@ extension Unidoc.Linker
                 return
             }
 
-            $0[$1.culture, default: []].append($1.conditions)
+            $0[$1.culture, default: []].append($1.constraints)
         }
 
         //  A type can only conform to a protocol once in a culture,
@@ -405,11 +405,7 @@ extension Unidoc.Linker
         }
 
         //  Conformances should now be unique per culture.
-        conformances = reduced.map
-        {
-            .init(conditions: $0.value, culture: $0.key)
-        }
-
+        conformances = reduced.map { .init(constraints: $0.value, culture: $0.key) }
         conformances.sort
         {
             $0.culture < $1.culture
@@ -451,10 +447,10 @@ extension Unidoc.Linker
         let prefetch:[Unidoc.Scalar] = []
         //  TODO: compute tertiary scalars
 
-        return .init(id: `extension`.id,
-            conditions: signature.conditions,
+        return .init(id: self.current.id[`extension`.id],
+            constraints: signature.conditions.constraints,
             culture: self.current.id + signature.culture,
-            scope: signature.extends,
+            scope: signature.extendee,
             conformances: self.sort(lexically: `extension`.conformances),
             features: self.sort(lexically: `extension`.features),
             nested: self.sort(lexically: `extension`.nested),

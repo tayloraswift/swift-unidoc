@@ -12,26 +12,23 @@ extension Unidoc.Linker
     {
         private
         var table:[ExtensionSignature: Extension]
-        /// A copy of the current snapshot’s zone. This helps us avoid overlapping
-        /// access when performing mutations on `self` while reading from the original
-        /// snapshot context.
-        private
-        let zone:Unidoc.Edition
 
-        init(table:[ExtensionSignature: Extension] = [:], zone:Unidoc.Edition)
+        private
+        init(table:[ExtensionSignature: Extension])
         {
             self.table = table
-            self.zone = zone
         }
+    }
+}
+extension Unidoc.Linker.Extensions:ExpressibleByDictionaryLiteral
+{
+    init(dictionaryLiteral:(Unidoc.Linker.ExtensionSignature, Never)...)
+    {
+        self.init(table: [:])
     }
 }
 extension Unidoc.Linker.Extensions
 {
-    var count:Int
-    {
-        self.table.count
-    }
-
     func sorted() -> [(key:Unidoc.Linker.ExtensionSignature, value:Unidoc.Linker.Extension)]
     {
         self.table.sorted { $0.value.id < $1.value.id }
@@ -39,17 +36,20 @@ extension Unidoc.Linker.Extensions
 }
 extension Unidoc.Linker.Extensions
 {
+    private
+    var next:Unidoc.Linker.Extension.ID { .init(index: self.table.count) }
+
     subscript(signature:Unidoc.Linker.ExtensionSignature) -> Unidoc.Linker.Extension
     {
         _read
         {
-            let next:Unidoc.Group.ID = self.zone[extension: self.count]
-            yield  self.table[signature, default: .init(id: next)]
+            let id:Unidoc.Linker.Extension.ID = self.next
+            yield  self.table[signature, default: .init(id: id)]
         }
         _modify
         {
-            let next:Unidoc.Group.ID = self.zone[extension: self.count]
-            yield &self.table[signature, default: .init(id: next)]
+            let id:Unidoc.Linker.Extension.ID = self.next
+            yield &self.table[signature, default: .init(id: id)]
         }
     }
 }
@@ -87,7 +87,7 @@ extension Unidoc.Linker.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
         modules:[SymbolGraph.ModuleContext],
-        context:inout Unidoc.Linker) -> ProtocolConformances<Int>
+        context:inout Unidoc.Linker) -> ProtocolConformances
     {
         guard
         let s:Unidoc.Scalar = context.current.scalars.decls[s],
@@ -106,12 +106,12 @@ extension Unidoc.Linker.Extensions
         {
             $0.insert($1.map { extendedSnapshot.scalars.decls[$0] })
         }
-        /// Cache these signatures, since we need to perform two passes.
-        let signatures:[Unidoc.Linker.ExtensionSignature] = extensions.map
+        /// Cache these constraints, since we need to perform two passes.
+        let conditions:[Unidoc.Linker.ExtensionConditions] = extensions.map
         {
+            /// Remove constraints that are already present in the base declaration.
             .init(
-                /// Remove constraints that are already present in the base declaration.
-                conditions: $0.conditions.compactMap
+                constraints: $0.conditions.compactMap
                 {
                     let constraint:GenericConstraint<Unidoc.Scalar?> = $0.map
                     {
@@ -119,33 +119,28 @@ extension Unidoc.Linker.Extensions
                     }
                     return universal.contains(constraint) ? nil : constraint
                 },
-                culture: $0.culture,
-                extends: s)
+                culture: $0.culture)
         }
 
-        let conformances:ProtocolConformances<Int> = .init(of: s,
-            signatures: signatures,
+        let conformances:ProtocolConformances = .init(of: s,
+            conditions: conditions,
             extensions: extensions,
             modules: modules,
             context: &context)
 
-        for (p, conformances):(Unidoc.Scalar, [ProtocolConformance<Int>]) in conformances
+        for (p, conformances):(Unidoc.Scalar, [Unidoc.Linker.ExtensionConditions])
+            in conformances
         {
-            for conformance:ProtocolConformance<Int> in conformances
+            for conformance:Unidoc.Linker.ExtensionConditions in conformances
             {
-                let signature:Unidoc.Linker.ExtensionSignature = .init(
-                    conditions: conformance.conditions,
-                    culture: conformance.culture,
-                    extends: s)
-
-                self[signature].conformances.append(p)
+                self[.extends(s, where: conformance)].conformances.append(p)
             }
         }
 
-        for (`extension`, signature):
-            (SymbolGraph.Extension, Unidoc.Linker.ExtensionSignature) in zip(
-            extensions,
-            signatures)
+        for (conditions, `extension`):
+            (Unidoc.Linker.ExtensionConditions, SymbolGraph.Extension) in zip(
+            conditions,
+            extensions)
         {
             //  It’s possible for two locally-disjoint extensions to coalesce
             //  into a single global extension due to constraint dropping...
@@ -167,7 +162,7 @@ extension Unidoc.Linker.Extensions
                     //  multiple parallel conformances within the same package
                     //  to be quite rare.
                     if  conformances[to: p].contains(
-                            where: { $0.culture == signature.culture })
+                            where: { $0.culture == `extension`.culture })
                     {
                         $0.features += features
                     }
@@ -203,7 +198,7 @@ extension Unidoc.Linker.Extensions
                     $0.link(article: article)
                 }
 
-            } (&self[signature])
+            } (&self[.extends(s, where: conditions)])
         }
 
         return conformances
@@ -211,7 +206,7 @@ extension Unidoc.Linker.Extensions
 }
 extension Unidoc.Linker.Extensions
 {
-    func byNested() -> [Int32: Unidoc.Group.ID]
+    func byNested() -> [Int32: Unidoc.Linker.Extension.ID]
     {
         self.table.values.reduce(into: [:])
         {

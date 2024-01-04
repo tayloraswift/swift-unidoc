@@ -154,7 +154,7 @@ extension Unidoc.Linker.Graph
     /// Returns the lexical scope of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
     ///
-    /// This returns nil if the requested declaration is a top-level declaration, of if it
+    /// This returns nil if the requested declaration is a top-level declaration, or if it
     /// is not a citizen of this snapshot.
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {

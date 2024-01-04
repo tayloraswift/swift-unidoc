@@ -25,7 +25,7 @@ extension Unidoc.Group
 
         /// Optional and appears in ``Extension`` only. The field contains a list of
         /// constraints, which contain scalars.
-        case conditions = "g"
+        case constraints = "g"
 
         /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
         case culture = "c"
@@ -105,7 +105,7 @@ extension Unidoc.Group:BSONDocumentEncodable
         switch self
         {
         case .extension(let self):
-            bson[.conditions] = self.conditions.isEmpty ? nil : self.conditions
+            bson[.constraints] = self.constraints.isEmpty ? nil : self.constraints
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
@@ -129,7 +129,7 @@ extension Unidoc.Group:BSONDocumentEncodable
             zones.update(with: self.subforms)
             zones.update(with: self.prefetch)
 
-            zones.update(with: self.conditions)
+            zones.update(with: self.constraints)
 
         case .polygon(let self):
             bson[.scope] = self.scope
@@ -163,7 +163,7 @@ extension Unidoc.Group:BSONDocumentDecodable
         {
         case .extension?:
             self = .extension(.init(id: id,
-                conditions: try bson[.conditions]?.decode() ?? [],
+                constraints: try bson[.constraints]?.decode() ?? [],
                 culture: try bson[.culture].decode(),
                 scope: try bson[.scope].decode(),
                 conformances: try bson[.conformances]?.decode() ?? [],

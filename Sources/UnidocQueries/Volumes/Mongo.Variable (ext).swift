@@ -26,7 +26,7 @@ extension Mongo.Variable<Unidoc.Group>
                 {
                     let constraints:
                         Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.KeyPath> = .init(
-                        in: self[.conditions])
+                        in: self[.constraints])
 
                     $0[.map] = constraints.map { $0[.nominal] }
                 }

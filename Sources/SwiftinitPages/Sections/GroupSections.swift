@@ -106,8 +106,8 @@ extension GroupSections
                     .third($0.symbol.package)
                 } ?? .first
 
-                let genericness:Genericness = group.conditions.isEmpty ?
-                    .unconstrained : generics.count(substituting: group.conditions) > 0 ?
+                let genericness:Genericness = group.constraints.isEmpty ?
+                    .unconstrained : generics.count(substituting: group.constraints) > 0 ?
                     .constrained :
                     .concretized
 
@@ -193,7 +193,7 @@ extension GroupSections
         return .init(self.context,
             display: display,
             culture: `extension`.culture,
-            where: `extension`.conditions)
+            where: `extension`.constraints)
     }
 
     private
