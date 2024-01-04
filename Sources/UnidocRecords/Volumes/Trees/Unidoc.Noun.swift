@@ -1,34 +1,27 @@
 import FNV1
+import Symbols
 import UnidocAPI
 
 extension Unidoc
 {
     @frozen public
-    struct Noun:Equatable, Hashable, Sendable
+    struct Noun:Equatable, Sendable
     {
         public
         let shoot:Shoot
         public
-        let style:Style
+        let type:NounType
 
         @inlinable public
-        init(shoot:Shoot, style:Style)
+        init(shoot:Shoot, type:NounType)
         {
             self.shoot = shoot
-            self.style = style
+            self.type = type
         }
     }
 }
 extension Unidoc.Noun
 {
     @inlinable public
-    init(stem:Unidoc.Stem, hash:FNV24? = nil, text:String)
-    {
-        self.init(shoot: .init(stem: stem, hash: hash), style: .text(text))
-    }
-    @inlinable public
-    init(stem:Unidoc.Stem, hash:FNV24? = nil, from citizenship:Unidoc.Citizenship = .culture)
-    {
-        self.init(shoot: .init(stem: stem, hash: hash), style: .stem(citizenship))
-    }
+    var route:Unidoc.Route { .init(shoot: shoot, swift: type.swift) }
 }

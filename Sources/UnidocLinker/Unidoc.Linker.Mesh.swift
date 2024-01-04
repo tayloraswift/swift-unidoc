@@ -174,7 +174,7 @@ extension Unidoc.Linker.Mesh
             trees: trees,
             products: products.map
             {
-                .init(shoot: $0.shoot, style: .stem(.package))
+                .init(shoot: $0.shoot, type: .stem(.package, nil))
             }
                 .sorted
             {
@@ -182,7 +182,7 @@ extension Unidoc.Linker.Mesh
             },
             cultures: cultures.map
             {
-                .init(shoot: $0.shoot, style: .stem(.package))
+                .init(shoot: $0.shoot, type: .stem(.package, nil))
             }
                 .sorted
             {

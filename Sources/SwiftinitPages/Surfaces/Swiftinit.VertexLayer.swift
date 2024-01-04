@@ -36,12 +36,12 @@ extension Swiftinit.VertexLayer
     }
 
     static
-    subscript(volume:Unidoc.VolumeMetadata, shoot:Unidoc.Shoot) -> URI
+    subscript(volume:Unidoc.VolumeMetadata, route:Unidoc.Route) -> URI
     {
         var uri:URI = Self[volume]
 
-        uri.path += shoot.stem
-        uri["hash"] = shoot.hash?.description
+        uri.path += route.stem
+        uri["hash"] = route.hash?.description
 
         return uri
     }

@@ -40,15 +40,15 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
 
         let redirect:URI? = switch output.matches.first
         {
-        case .article(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
-        case .culture(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
+        case .article(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
+        case .culture(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
         //  This is one of the few situations where we intentionally issue redirects
         //  to a disambiguation page.
         case .decl(let vertex)?:    Swiftinit.Docs[output.volume,
-            output.matches.count > 1 ? .init(stem: vertex.stem) : vertex.shoot]
+            output.matches.count > 1 ? .bare(vertex.stem) : vertex.route]
         case .file?, nil:           nil
-        case .product(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
-        case .foreign(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
+        case .product(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
+        case .foreign(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
         case .global?:              Swiftinit.Docs[output.volume]
         }
 

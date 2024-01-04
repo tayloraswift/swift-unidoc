@@ -64,7 +64,7 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Stats.ModulePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Stats[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Stats[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Stats.ModulePage:Swiftinit.ApplicationPage
 {
@@ -74,14 +74,14 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
-        let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.shoot])"
+        let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
 
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module details"
-                $0[.span] { $0.class = "domain" } = self.context.subdomain(self.vertex.shoot)
+                $0[.span] { $0.class = "domain" } = self.context.subdomain(self.vertex.route)
             }
 
             $0[.h1] = "\(self.name) metrics"

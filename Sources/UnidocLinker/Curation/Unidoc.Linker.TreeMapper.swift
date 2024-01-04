@@ -12,11 +12,11 @@ extension Unidoc.Linker
         /// Caches foreign shoots, as it is non-trivial to discover the namespace of a foreign
         /// declaration.
         private
-        var foreign:[Unidoc.Scalar: Unidoc.Shoot]
+        var foreign:[Unidoc.Scalar: (Unidoc.Shoot, Phylum.DeclFlags)]
         /// Caches local shoots, as it is non-trivial to lookup already-linked vertices by
         /// scalar.
         private
-        var local:[Unidoc.Scalar: Unidoc.Shoot]
+        var local:[Unidoc.Scalar: (Unidoc.Shoot, Phylum.DeclFlags)]
 
         /// Maps cultures to trees.
         private
@@ -40,19 +40,20 @@ extension Unidoc.Linker.TreeMapper
     mutating
     func add(_ vertex:Unidoc.ArticleVertex)
     {
-        self.local[vertex.id] = vertex.shoot
-        self.trees[vertex.culture, default: []].articles.append(.init(shoot: vertex.shoot,
-            style: .text("\(vertex.headline.safe)")))
+        self.trees[vertex.culture, default: []].articles.append(.init(
+            shoot: vertex.shoot,
+            type: .text("\(vertex.headline.safe)")))
     }
     mutating
     func add(_ vertex:Unidoc.DeclVertex)
     {
-        self.local[vertex.id] = vertex.shoot
+        self.local[vertex.id] = (vertex.shoot, vertex.flags)
 
         switch vertex.phylum
         {
         case .actor, .class, .struct, .enum, .protocol, .macro(.attached):
-            self.trees[vertex.culture, default: []].types[vertex.shoot] = .culture
+            self.trees[vertex.culture, default: []].types[vertex.shoot] =
+                (.culture, vertex.flags)
 
         case .func(nil), .var(nil), .macro(.freestanding):
             //  Global procedures show up in search, but not in the type tree.
@@ -102,7 +103,7 @@ extension Unidoc.Linker.TreeMapper
             stem: .decl(namespace, decl.path, orientation: decl.phylum.orientation),
             hash: .init(hashing: "\(symbol)"))
 
-        self.foreign[foreign] = vertex.shoot
+        self.foreign[foreign] = (vertex.shoot, vertex.flags)
 
         return vertex
     }
@@ -112,14 +113,16 @@ extension Unidoc.Linker.TreeMapper
     mutating
     func update(with group:Unidoc.Group.Extension)
     {
-        if  let shoot:Unidoc.Shoot = self.local[group.scope]
+        let tree:Unidoc.Scalar = group.culture
+
+        if  let (shoot, flags):(Unidoc.Shoot, Phylum.DeclFlags) = self.local[group.scope]
         {
-            { _ in }(&self.trees[group.culture, default: []].types[shoot, default: .package])
+            { _ in }(&self.trees[tree, default: []].types[shoot, default: (.package, flags)])
         }
         else if
-            let shoot:Unidoc.Shoot = self.foreign[group.scope]
+            let (shoot, flags):(Unidoc.Shoot, Phylum.DeclFlags) = self.foreign[group.scope]
         {
-            { _ in }(&self.trees[group.culture, default: []].types[shoot, default: .foreign])
+            { _ in }(&self.trees[tree, default: []].types[shoot, default: (.foreign, flags)])
         }
     }
 }
@@ -152,12 +155,12 @@ extension Unidoc.Linker.TreeMapper
 
                 tree.rows += members.articles.sorted
                 {
-                    $0.style < $1.style
+                    $0.type.text ?? "" < $1.type.text ?? ""
                 }
 
                 tree.rows += members.types.map
                 {
-                    .init(shoot: $0.key, style: .stem($0.value))
+                    .init(shoot: $0.key, type: .stem($0.value.0, $0.value.1))
                 }
                     .sorted
                 {
@@ -171,7 +174,7 @@ extension Unidoc.Linker.TreeMapper
                     {
                         for noun:Unidoc.Noun in tree.rows
                         {
-                            if  case .stem(let citizenship) = noun.style,
+                            if  case .stem(let citizenship, _) = noun.type,
                                 citizenship != .culture
                             {
                                 continue

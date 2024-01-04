@@ -19,41 +19,46 @@ enum Main:TestMain, TestBattery
             if  let tests:TestGroup = tests / "One",
                     tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC"),
+                        .decl("CryptoKit BTC"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Many",
                     tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC"),
-                        .init(stem: "CryptoKit ETH"),
-                        .init(stem: "CryptoKit ETH Classic"),
-                        .init(stem: "CryptoKit SOL"),
+                        .decl("CryptoKit BTC"),
+                        .decl("CryptoKit ETH"),
+                        .decl("CryptoKit ETH Classic"),
+                        .decl("CryptoKit SOL"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Hashed",
                     tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit BTC"),
-                        .init(stem: "CryptoKit ETH"),
-                        .init(stem: "CryptoKit ETH Classic"),
-                        .init(stem: "CryptoKit ETH Classic\tinit(_:)",
+                        .decl("CryptoKit BTC"),
+                        .decl("CryptoKit ETH"),
+                        .decl("CryptoKit ETH Classic"),
+                        .decl("CryptoKit ETH Classic\tinit(_:)",
+                            language: .c,
+                            phylum: .initializer,
                             hash: .init(hashing: "moist")),
-                        .init(stem: "CryptoKit ETH Classic\tinit(_:)",
+                        .decl("CryptoKit ETH Classic\tinit(_:)",
+                            phylum: .initializer,
                             hash: .init(hashing: "the’ir")),
-                        .init(stem: "CryptoKit SOL"),
+                        .decl("CryptoKit SOL"),
                     ]))
             {
             }
             if  let tests:TestGroup = tests / "Stems",
                     tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit ETH Classic\tinit(_:)",
+                        .decl("CryptoKit ETH Classic\tinit(_:)",
+                            phylum: .initializer,
                             hash: .init(hashing: "the’ir"),
                             from: .culture),
-                        .init(stem: "CryptoCore BTC\tinit(_:)",
+                        .decl("CryptoCore BTC\tinit(_:)",
+                            phylum: .initializer,
                             hash: .init(hashing: "the’ir"),
                             from: .package),
                     ]))
@@ -62,14 +67,14 @@ enum Main:TestMain, TestBattery
             if  let tests:TestGroup = tests / "CustomText",
                     tests.roundtrip(Unidoc.TypeTree.init(id: id, rows:
                     [
-                        .init(stem: "CryptoKit Getting-Started",
-                            hash: .init(hashing: "Getting-Started"),
-                            text: "Getting Started"),
-                        .init(stem: "CryptoCore Weird-Title",
+                        .article("CryptoKit Getting-Started",
+                            text: "Getting Started",
+                            hash: .init(hashing: "Getting-Started")),
+                        .article("CryptoCore Weird-Title",
                             text: "\u{00}\u{FF}"),
-                        .init(stem: "CryptoCore Weird-Title-With-Hash",
-                            hash: .init(hashing: "Weird-Title-With-Hash"),
-                            text: "\u{00}\u{FF}"),
+                        .article("CryptoCore Weird-Title-With-Hash",
+                            text: "\u{00}\u{FF}",
+                            hash: .init(hashing: "Weird-Title-With-Hash")),
                     ]))
             {
             }
