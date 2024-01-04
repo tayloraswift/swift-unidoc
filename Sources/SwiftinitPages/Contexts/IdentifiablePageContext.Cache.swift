@@ -54,7 +54,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         {
             if  case .culture(let vertex)? = self.vertices[scalar]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
             }
             else
             {
@@ -69,7 +69,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         {
             if  case .article(let vertex)? = self.vertices[scalar]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
             }
             else
             {
@@ -84,7 +84,7 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         {
             if  case .decl(let vertex)? = self.vertices[scalar]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
+                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
             }
             else
             {
@@ -106,12 +106,12 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
                 {
                     switch vertex
                     {
-                    case .article(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .culture(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .decl(let vertex):     Swiftinit.Docs[$0, vertex.shoot]
+                    case .article(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                    case .culture(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                    case .decl(let vertex):     Swiftinit.Docs[$0, vertex.route]
                     case .file:                 nil
-                    case .product(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
+                    case .product(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                    case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.route]
                     case .global:               Swiftinit.Docs[$0]
                     }
                 }

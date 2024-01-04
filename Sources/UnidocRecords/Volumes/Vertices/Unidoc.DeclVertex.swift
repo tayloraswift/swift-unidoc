@@ -100,7 +100,10 @@ extension Unidoc
 extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
-    var hash:FNV24.Extended { .init(hashing: "\(self.symbol)") }
+    var route:Unidoc.Route
+    {
+        .init(shoot: self.shoot, swift: self.flags.language == .swift)
+    }
 
     @inlinable public
     var shoot:Unidoc.Shoot
@@ -109,6 +112,9 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
             stem: self.stem,
             hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
     }
+
+    @inlinable public
+    var hash:FNV24.Extended { .init(hashing: "\(self.symbol)") }
 }
 extension Unidoc.DeclVertex
 {

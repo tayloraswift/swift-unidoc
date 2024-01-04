@@ -62,22 +62,22 @@ extension CanonicalVersion
             switch vertex
             {
             case .article(let vertex):
-                target = .article(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+                target = .article(Swiftinit.Docs[volumeOfLatest, vertex.route])
 
             case .culture(let vertex):
-                target = .culture(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+                target = .culture(Swiftinit.Docs[volumeOfLatest, vertex.route])
 
             case .decl(let vertex):
-                target = .decl(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+                target = .decl(Swiftinit.Docs[volumeOfLatest, vertex.route])
 
             case .file:
                 return nil
 
             case .product(let vertex):
-                target = .product(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+                target = .product(Swiftinit.Docs[volumeOfLatest, vertex.route])
 
             case .foreign(let vertex):
-                target = .foreign(Swiftinit.Docs[volumeOfLatest, vertex.shoot])
+                target = .foreign(Swiftinit.Docs[volumeOfLatest, vertex.route])
 
             case .global:
                 target = .global

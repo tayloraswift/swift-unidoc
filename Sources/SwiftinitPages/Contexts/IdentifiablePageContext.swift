@@ -106,7 +106,7 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 {
     /// Generates a subdomain header for a module using its shoot.
-    func subdomain(_ module:Unidoc.Shoot) -> Unidoc.VolumeMetadata.Subdomain?
+    func subdomain(_ module:Unidoc.Route) -> Unidoc.VolumeMetadata.Subdomain?
     {
         let module:HTML.Link<Substring> = .init(display: module.stem.first,
             target: "\(Swiftinit.Docs[self.volume, module])")

@@ -50,7 +50,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
 {
@@ -106,7 +106,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                     $0 += " package also contains "
                     $0[.a]
                     {
-                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.shoot])"
+                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.route])"
                     } = "a module"
                     $0 += " with the same name."
                 }
@@ -165,7 +165,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.shoot])"
+                                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.route])"
                                     } = vertex.module.name
                                 }
                                 $0[.td]
@@ -186,7 +186,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[volume, vertex.shoot])"
+                                        $0.href = "\(Swiftinit.Docs[volume, vertex.route])"
                                     } = vertex.symbol
                                 }
 

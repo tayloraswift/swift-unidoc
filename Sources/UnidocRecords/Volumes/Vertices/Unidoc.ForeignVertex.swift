@@ -43,6 +43,12 @@ extension Unidoc
 extension Unidoc.ForeignVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
+    var route:Unidoc.Route
+    {
+        .init(shoot: self.shoot, swift: self.flags.language == .swift)
+    }
+
+    @inlinable public
     var shoot:Unidoc.Shoot
     {
         .init(

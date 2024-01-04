@@ -192,10 +192,30 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Getting-Started", text: "Getting started"),
-                            .init(stem: "BarbieCore Barbie", from: .culture),
-                            .init(stem: "BarbieCore Barbie ID", from: .culture),
-                            .init(stem: "BarbieCore Barbie PlasticKeychain", from: .culture),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Getting-Started"),
+                                type: .text("Getting started")),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie ID"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
                         ])
                 }
             }
@@ -224,11 +244,41 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Barbie", from: .package),
-                            .init(stem: "BarbieCore Barbie Dreamhouse", from: .culture),
-                            .init(stem: "BarbieCore Barbie Dreamhouse Keys", from: .culture),
-                            .init(stem: "BarbieCore Barbie PlasticKeychain", from: .package),
-                            .init(stem: "Swift Array", from: .foreign),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie"),
+                                type: .stem(.package, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie Dreamhouse"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie Dreamhouse Keys"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
+                                type: .stem(.package, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "Swift Array"),
+                                type: .stem(.foreign, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))

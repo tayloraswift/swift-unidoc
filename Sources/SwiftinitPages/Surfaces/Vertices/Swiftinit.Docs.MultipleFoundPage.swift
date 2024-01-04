@@ -48,10 +48,7 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.StaticPage
 {
-    var location:URI
-    {
-        Swiftinit.Docs[self.volume, .init(stem: self.identity, hash: nil)]
-    }
+    var location:URI { Swiftinit.Docs[self.volume, .bare(self.identity)] }
 }
 extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.ApplicationPage
 {

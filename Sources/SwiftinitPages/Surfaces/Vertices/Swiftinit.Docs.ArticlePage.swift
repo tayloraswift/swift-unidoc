@@ -50,7 +50,7 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.ApplicationPage
 {

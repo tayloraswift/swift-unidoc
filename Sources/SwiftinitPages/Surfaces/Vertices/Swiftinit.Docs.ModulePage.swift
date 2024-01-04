@@ -71,7 +71,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ModulePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ModulePage:Swiftinit.ApplicationPage
 {
@@ -164,7 +164,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
                 }
 
                 $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
-                    target: Swiftinit.Stats[self.volume, self.vertex.shoot],
+                    target: Swiftinit.Stats[self.volume, self.vertex.route],
                     census: self.vertex.census,
                     domain: self.name,
                     title: "Module stats and coverage details")

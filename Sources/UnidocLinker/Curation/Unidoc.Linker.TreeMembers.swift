@@ -1,3 +1,4 @@
+import Symbols
 import UnidocRecords
 
 extension Unidoc.Linker
@@ -6,12 +7,12 @@ extension Unidoc.Linker
     {
         var articles:[Unidoc.Noun]
         var procs:[Unidoc.Shoot]
-        var types:[Unidoc.Shoot: Unidoc.Citizenship]
+        var types:[Unidoc.Shoot: (Unidoc.Citizenship, Phylum.DeclFlags)]
 
         private
         init(articles:[Unidoc.Noun],
             procs:[Unidoc.Shoot],
-            types:[Unidoc.Shoot: Unidoc.Citizenship])
+            types:[Unidoc.Shoot: (Unidoc.Citizenship, Phylum.DeclFlags)])
         {
             self.articles = articles
             self.procs = procs
