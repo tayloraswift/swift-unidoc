@@ -16,11 +16,11 @@ struct GroupSections
     let superforms:[Unidoc.Scalar]?
 
     private(set)
-    var containing:Unidoc.Group.Extension?
+    var containing:Unidoc.ExtensionGroup?
     private
-    var extensions:[Unidoc.Group.Extension]
+    var extensions:[Unidoc.ExtensionGroup]
     private
-    var topics:[Unidoc.Group.Topic]
+    var topics:[Unidoc.TopicGroup]
     private
     var other:[(AutomaticHeading, [Unidoc.Scalar])]
 
@@ -33,9 +33,9 @@ struct GroupSections
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
-        containing:Unidoc.Group.Extension? = nil,
-        extensions:[Unidoc.Group.Extension] = [],
-        topics:[Unidoc.Group.Topic] = [],
+        containing:Unidoc.ExtensionGroup? = nil,
+        extensions:[Unidoc.ExtensionGroup] = [],
+        topics:[Unidoc.TopicGroup] = [],
         other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
         bias:Unidoc.Scalar?,
         mode:Mode?)
@@ -86,13 +86,17 @@ extension GroupSections
             generics = .init([])
         }
 
-        var extensions:[(Unidoc.Group.Extension, Partisanship, Genericness)] = []
+        var extensions:[(Unidoc.ExtensionGroup, Partisanship, Genericness)] = []
         var curated:Set<Unidoc.Scalar> = [self.context.id]
 
         for group:Unidoc.Group in groups
         {
             switch group
             {
+            case .conformers:
+                //  Unimplemented.
+                continue
+
             case .extension(let group):
                 if  case group.id? = container
                 {
@@ -113,7 +117,7 @@ extension GroupSections
 
                 extensions.append((group, partisanship, genericness))
 
-            case .polygon(let group):
+            case .polygonal(let group):
                 guard
                 let first:Unidoc.Scalar = group.members.first,
                 let plane:SymbolGraph.Plane = first.plane
@@ -180,7 +184,7 @@ extension GroupSections
 extension GroupSections
 {
     private
-    func heading(for extension:Unidoc.Group.Extension) -> ExtensionHeading
+    func heading(for extension:Unidoc.ExtensionGroup) -> ExtensionHeading
     {
         let display:String
         switch (self.bias, self.bias?.edition)
@@ -215,7 +219,7 @@ extension GroupSections:HTML.OutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        for group:Unidoc.Group.Topic in self.topics
+        for group:Unidoc.TopicGroup in self.topics
         {
             guard group.members.contains(.scalar(self.context.id))
             else
@@ -347,7 +351,7 @@ extension GroupSections:HTML.OutputStreamable
             }
         }
 
-        if  let sisters:Unidoc.Group.Extension = self.containing, !sisters.nested.isEmpty
+        if  let sisters:Unidoc.ExtensionGroup = self.containing, !sisters.nested.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
             {
@@ -361,7 +365,7 @@ extension GroupSections:HTML.OutputStreamable
             }
         }
 
-        for group:Unidoc.Group.Extension in self.extensions where !group.isEmpty
+        for group:Unidoc.ExtensionGroup in self.extensions where !group.isEmpty
         {
             html[.section, { $0.class = "group extension" }]
             {

@@ -1,9 +1,9 @@
 import Unidoc
 
-extension Unidoc.Group
+extension Unidoc
 {
     @frozen public
-    struct Topic:Identifiable, Equatable, Sendable
+    struct TopicGroup:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Group.ID

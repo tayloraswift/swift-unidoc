@@ -6,54 +6,54 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc
 {
     struct Extensions
     {
         private
-        var table:[ExtensionSignature: Extension]
+        var table:[ExtensionSignature: Unidoc.ExtensionBody]
 
         private
-        init(table:[ExtensionSignature: Extension])
+        init(table:[ExtensionSignature: Unidoc.ExtensionBody])
         {
             self.table = table
         }
     }
 }
-extension Unidoc.Linker.Extensions:ExpressibleByDictionaryLiteral
+extension Unidoc.Extensions:ExpressibleByDictionaryLiteral
 {
-    init(dictionaryLiteral:(Unidoc.Linker.ExtensionSignature, Never)...)
+    init(dictionaryLiteral:(Unidoc.ExtensionSignature, Never)...)
     {
         self.init(table: [:])
     }
 }
-extension Unidoc.Linker.Extensions
+extension Unidoc.Extensions
 {
-    func sorted() -> [(key:Unidoc.Linker.ExtensionSignature, value:Unidoc.Linker.Extension)]
+    func sorted() -> [(key:Unidoc.ExtensionSignature, value:Unidoc.ExtensionBody)]
     {
         self.table.sorted { $0.value.id < $1.value.id }
     }
 }
-extension Unidoc.Linker.Extensions
+extension Unidoc.Extensions
 {
     private
-    var next:Unidoc.Linker.Extension.ID { .init(index: self.table.count) }
+    var next:Unidoc.ExtensionBody.ID { .init(index: self.table.count) }
 
-    subscript(signature:Unidoc.Linker.ExtensionSignature) -> Unidoc.Linker.Extension
+    subscript(signature:Unidoc.ExtensionSignature) -> Unidoc.ExtensionBody
     {
         _read
         {
-            let id:Unidoc.Linker.Extension.ID = self.next
+            let id:Unidoc.ExtensionBody.ID = self.next
             yield  self.table[signature, default: .init(id: id)]
         }
         _modify
         {
-            let id:Unidoc.Linker.Extension.ID = self.next
+            let id:Unidoc.ExtensionBody.ID = self.next
             yield &self.table[signature, default: .init(id: id)]
         }
     }
 }
-extension Unidoc.Linker.Extensions
+extension Unidoc.Extensions
 {
     /// Creates extension records from the given symbol graph extensions, performing any
     /// necessary de-duplication of protocol conformances and features.
@@ -107,7 +107,7 @@ extension Unidoc.Linker.Extensions
             $0.insert($1.map { extendedSnapshot.scalars.decls[$0] })
         }
         /// Cache these constraints, since we need to perform two passes.
-        let conditions:[Unidoc.Linker.ExtensionConditions] = extensions.map
+        let conditions:[Unidoc.ExtensionConditions] = extensions.map
         {
             /// Remove constraints that are already present in the base declaration.
             .init(
@@ -128,17 +128,17 @@ extension Unidoc.Linker.Extensions
             modules: modules,
             context: &context)
 
-        for (p, conformances):(Unidoc.Scalar, [Unidoc.Linker.ExtensionConditions])
+        for (p, conformances):(Unidoc.Scalar, [Unidoc.ExtensionConditions])
             in conformances
         {
-            for conformance:Unidoc.Linker.ExtensionConditions in conformances
+            for conformance:Unidoc.ExtensionConditions in conformances
             {
                 self[.extends(s, where: conformance)].conformances.append(p)
             }
         }
 
         for (conditions, `extension`):
-            (Unidoc.Linker.ExtensionConditions, SymbolGraph.Extension) in zip(
+            (Unidoc.ExtensionConditions, SymbolGraph.Extension) in zip(
             conditions,
             extensions)
         {
@@ -204,9 +204,9 @@ extension Unidoc.Linker.Extensions
         return conformances
     }
 }
-extension Unidoc.Linker.Extensions
+extension Unidoc.Extensions
 {
-    func byNested() -> [Int32: Unidoc.Linker.Extension.ID]
+    func byNested() -> [Int32: Unidoc.ExtensionBody.ID]
     {
         self.table.values.reduce(into: [:])
         {

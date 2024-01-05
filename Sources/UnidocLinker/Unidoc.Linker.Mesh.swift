@@ -42,7 +42,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker.Mesh
 {
     init(
-        extensions:borrowing Unidoc.Linker.Extensions,
+        extensions:borrowing Unidoc.Extensions,
         products:consuming [Unidoc.ProductVertex],
         cultures:consuming [Unidoc.CultureVertex],
         articles:consuming [Unidoc.ArticleVertex],
@@ -117,7 +117,7 @@ extension Unidoc.Linker.Mesh
         }
 
         for (signature, `extension`):
-            (Unidoc.Linker.ExtensionSignature, Unidoc.Linker.Extension) in extensions.sorted()
+            (Unidoc.ExtensionSignature, Unidoc.ExtensionBody) in extensions.sorted()
             where !`extension`.isEmpty
         {
             for f:Unidoc.Scalar in `extension`.features
@@ -131,7 +131,7 @@ extension Unidoc.Linker.Mesh
                 }
             }
 
-            let assembled:Unidoc.Group.Extension = context.assemble(
+            let assembled:Unidoc.ExtensionGroup = context.assemble(
                 extension: `extension`,
                 signature: signature)
 

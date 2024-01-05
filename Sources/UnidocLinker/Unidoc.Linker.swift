@@ -117,7 +117,7 @@ extension Unidoc.Linker
         let articles:[Unidoc.ArticleVertex] = tables.articles
         let decls:[Unidoc.DeclVertex] = tables.decls
         let groups:Unidoc.Volume.Groups = tables.groups
-        let extensions:Extensions = tables.extensions
+        let extensions:Unidoc.Extensions = tables.extensions
 
         self = (consume tables).context
 
@@ -280,7 +280,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     mutating
-    func simplify(conformances:inout [ExtensionConditions],
+    func simplify(conformances:inout [Unidoc.ExtensionConditions],
         of subject:Unidoc.Scalar,
         to protocol:Unidoc.Scalar)
     {
@@ -442,12 +442,13 @@ extension Unidoc.Linker
 
 extension Unidoc.Linker
 {
-    func assemble(extension:Extension, signature:ExtensionSignature) -> Unidoc.Group.Extension
+    func assemble(extension:Unidoc.ExtensionBody,
+        signature:Unidoc.ExtensionSignature) -> Unidoc.ExtensionGroup
     {
         let prefetch:[Unidoc.Scalar] = []
         //  TODO: compute tertiary scalars
 
-        return .init(id: self.current.id[`extension`.id],
+        return .init(id: `extension`.id.in(self.current.id),
             constraints: signature.conditions.constraints,
             culture: self.current.id + signature.culture,
             scope: signature.extendee,

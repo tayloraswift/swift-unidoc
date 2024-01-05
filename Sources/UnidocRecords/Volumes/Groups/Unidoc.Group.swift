@@ -9,19 +9,39 @@ extension Unidoc
     @frozen public
     enum Group:Equatable, Sendable
     {
-        case `extension`(Extension)
-        case  polygon(Polygon)
-        case  topic(Topic)
+        case  conformers(ConformingTypesGroup)
+
+        case `extension`(ExtensionGroup)
+        case  polygonal(PolygonalGroup)
+        case  topic(TopicGroup)
     }
 }
 
 extension Unidoc.Group
 {
+    @available(*, deprecated, renamed: "Unidoc.ExtensionGroup")
+    public
+    typealias Extension = Unidoc.ExtensionGroup
+
+    @available(*, deprecated, renamed: "Unidoc.PolygonalGroup")
+    public
+    typealias Automatic = Unidoc.PolygonalGroup
+
+    @available(*, deprecated, renamed: "Unidoc.PolygonalGroup")
+    public
+    typealias Polygon = Unidoc.PolygonalGroup
+
+    @available(*, deprecated, renamed: "Unidoc.TopicGroup")
+    public
+    typealias Topic = Unidoc.TopicGroup
+
     @frozen public
     enum CodingKey:String, Sendable
     {
         /// Always present.
         case id = "_id"
+
+        case layer = "A"
 
         /// Optional and appears in ``Extension`` only. The field contains a list of
         /// constraints, which contain scalars.
@@ -42,7 +62,7 @@ extension Unidoc.Group
         /// Optional and appears in ``Extension`` only.
         /// The field contains a list of scalars.
         case nested = "n"
-        /// Optional and appears in ``Extension`` only.
+        /// Optional and appears in ``Extension`` or ``ConformingTypes``.
         /// The field contains a list of scalars.
         case subforms = "s"
 
@@ -67,15 +87,15 @@ extension Unidoc.Group
         /// encoded if non-empty, but it will never be decoded.
         case zones = "z"
 
-        /// A database-internal flag indicating if this group originates from the latest
-        /// release version of its package. Practically, this determines if extensions are
-        /// visible outside of their native volume.
-        ///
-        /// ``Unidoc.Group`` doesn’t encode this directly, the ``Records.Groups.Element``
-        /// view abstraction adds it after delegating to ``Unidoc.Group``’s ``encode(to:)``
-        /// witness.
         @available(*, unavailable)
         case latest = "L"
+        /// A database-internal flag indicating the realm of the package this group originates
+        /// from, if the group belongs to a snapshot of the latest release version of that
+        /// package. Practically, this determines if extensions are visible outside of their
+        /// native volume.
+        ///
+        /// ``Unidoc.Group`` doesn’t encode this directly, the ``UnidocDatabase.Groups``
+        /// type adds it after delegating to ``Unidoc.Group``’s ``encode(to:)`` witness.
         case realm = "R"
     }
 }
@@ -86,9 +106,10 @@ extension Unidoc.Group:Identifiable
     {
         switch self
         {
-        case .extension(let group): group.id
-        case .polygon(let group):   group.id
-        case .topic(let group):     group.id
+        case .conformers(let group):    group.id
+        case .extension(let group):     group.id
+        case .polygonal(let group):     group.id
+        case .topic(let group):         group.id
         }
     }
 }
@@ -104,7 +125,23 @@ extension Unidoc.Group:BSONDocumentEncodable
 
         switch self
         {
+        case .conformers(let self):
+            bson[.layer] = Unidoc.GroupLayer.protocols
+
+            bson[.constraints] = self.constraints.isEmpty ? nil : self.constraints
+            bson[.culture] = self.culture
+            bson[.scope] = self.scope
+
+            //  This is the only array field and there is no reason why it would ever be empty.
+            bson[.subforms] = self.types
+
+            zones.update(with: self.culture.edition)
+            zones.update(with: self.types)
+            zones.update(with: self.constraints)
+
         case .extension(let self):
+            bson[.layer] = Unidoc.GroupLayer.curations
+
             bson[.constraints] = self.constraints.isEmpty ? nil : self.constraints
             bson[.culture] = self.culture
             bson[.scope] = self.scope
@@ -131,13 +168,17 @@ extension Unidoc.Group:BSONDocumentEncodable
 
             zones.update(with: self.constraints)
 
-        case .polygon(let self):
+        case .polygonal(let self):
+            bson[.layer] = Unidoc.GroupLayer.curations
+
             bson[.scope] = self.scope
             bson[.members] = self.members.isEmpty ? nil : self.members
 
             zones.update(with: self.members)
 
         case .topic(let self):
+            bson[.layer] = Unidoc.GroupLayer.curations
+
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
@@ -161,6 +202,13 @@ extension Unidoc.Group:BSONDocumentDecodable
         let id:ID = try bson[.id].decode()
         switch id.plane
         {
+        case .conformers?:
+            self = .conformers(.init(id: id,
+                constraints: try bson[.constraints]?.decode() ?? [],
+                culture: try bson[.culture].decode(),
+                scope: try bson[.scope].decode(),
+                types: try bson[.subforms].decode()))
+
         case .extension?:
             self = .extension(.init(id: id,
                 constraints: try bson[.constraints]?.decode() ?? [],
@@ -175,7 +223,7 @@ extension Unidoc.Group:BSONDocumentDecodable
                 details: try bson[.details]?.decode()))
 
         case .polygon?:
-            self = .polygon(.init(id: id,
+            self = .polygonal(.init(id: id,
                 scope: try bson[.scope].decode(),
                 members: try bson[.members]?.decode() ?? []))
 
