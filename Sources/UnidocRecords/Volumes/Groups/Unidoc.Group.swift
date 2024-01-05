@@ -159,7 +159,7 @@ extension Unidoc.Group:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         let id:ID = try bson[.id].decode()
-        switch id.rawValue.plane
+        switch id.plane
         {
         case .extension?:
             self = .extension(.init(id: id,
@@ -174,7 +174,7 @@ extension Unidoc.Group:BSONDocumentDecodable
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode()))
 
-        case .autogroup?:
+        case .polygon?:
             self = .polygon(.init(id: id,
                 scope: try bson[.scope].decode(),
                 members: try bson[.members]?.decode() ?? []))

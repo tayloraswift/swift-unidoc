@@ -20,8 +20,8 @@ extension Symbol.Decl:Unidoc.VertexPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: min] = volume / Unidoc.VolumeMetadata[.planes_min]
-                $0[let: max] = volume / Unidoc.VolumeMetadata[.planes_max]
+                $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
+                $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
             }
             $0[.pipeline] = .init
             {

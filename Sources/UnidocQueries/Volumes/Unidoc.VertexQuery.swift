@@ -137,9 +137,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 //  ``volumeOfLatest`` is always non-nil, so we don’t need to worry about
                 //  degenerate index behavior.
                 $0[let: min] =
-                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.planes_min]
+                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.min]
                 $0[let: max] =
-                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.planes_max]
+                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.max]
             }
             $0[.pipeline] = .init
             {

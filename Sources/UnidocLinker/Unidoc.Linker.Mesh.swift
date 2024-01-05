@@ -76,7 +76,8 @@ extension Unidoc.Linker.Mesh
             if  case nil = context.current.decls.nodes[d].decl,
                 let f:Unidoc.Scalar = context.current.scalars.decls[d]
             {
-                foreign.append(mapper.register(foreign: f, with: context))
+                let next:Int = foreign.count
+                foreign.append(mapper.register(foreign: f, with: context, as: next))
             }
         }
 

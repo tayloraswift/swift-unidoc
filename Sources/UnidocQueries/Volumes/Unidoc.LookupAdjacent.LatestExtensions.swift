@@ -8,9 +8,9 @@ extension Unidoc.LookupAdjacent
     struct LatestExtensions
     {
         let scope:Mongo.Variable<Unidoc.Scalar>
-        let id:Mongo.Variable<Unidoc>
+        let id:Mongo.Variable<Unidoc.Realm>
 
-        init(scope:Mongo.Variable<Unidoc.Scalar>, id:Mongo.Variable<Unidoc>)
+        init(scope:Mongo.Variable<Unidoc.Scalar>, id:Mongo.Variable<Unidoc.Realm>)
         {
             self.scope = scope
             self.id = id
