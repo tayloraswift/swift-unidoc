@@ -8,14 +8,9 @@ extension Unidoc.Edition
     {
         .init(rawValue: self + id.index * .extension)
     }
-    @inlinable public
-    subscript(polygon i:Int) -> Unidoc.Group.ID
+
+    subscript(group citizen:Int32) -> Unidoc.Group.ID
     {
-        .init(rawValue: self + i * .autogroup)
-    }
-    @inlinable public
-    subscript(topic i:Int) -> Unidoc.Group.ID
-    {
-        .init(rawValue: self + i * .topic)
+        .init(rawValue: self + citizen)
     }
 }

@@ -35,11 +35,7 @@ extension Unidoc.Linker
         var groupContainingMember:[Int32: Unidoc.Group.ID]
 
         private
-        var next:
-        (
-            polygon:Unidoc.Counter<SymbolGraph.AutogroupPlane>,
-            topic:Unidoc.Counter<SymbolGraph.TopicPlane>
-        )
+        var next:Next
 
         private(set)
         var extensions:Extensions
@@ -63,8 +59,7 @@ extension Unidoc.Linker
             self.extensionContainingNested = extensions.byNested()
             self.groupContainingMember = [:]
 
-            self.next.polygon = .init(zone: self.context.current.id)
-            self.next.topic = .init(zone: self.context.current.id)
+            self.next = .init(base: self.context.current.id)
 
             self.extensions = extensions
             self.articles = []
@@ -144,7 +139,7 @@ extension Unidoc.Linker.Tables
     mutating
     func linkProducts() -> [Unidoc.ProductVertex]
     {
-        var productPolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon.id(),
+        var productPolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon(),
             scope: self.current.id.global)
 
         var products:[Unidoc.ProductVertex] = []
@@ -188,7 +183,7 @@ extension Unidoc.Linker.Tables
 
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let culturePolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon.id(),
+        let culturePolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon(),
             scope: self.current.id.global,
             members: self.current.cultures.indices.sorted
             {
@@ -335,8 +330,8 @@ extension Unidoc.Linker.Tables
                     continue
                 }
 
-                //  Create top-level autogroup.
-                self.groups.polygons.append(.init(id: self.next.polygon.id(),
+                //  Create top-level polygon.
+                self.groups.polygons.append(.init(id: self.next.polygon(),
                     scope: namespace.culture,
                     members: self.context.sort(lexically: consume miscellaneous)))
             }
@@ -363,7 +358,7 @@ extension Unidoc.Linker.Tables
     {
         for topic:SymbolGraph.Topic in topics
         {
-            var record:Unidoc.Group.Topic = .init(id: self.next.topic.id(),
+            var record:Unidoc.Group.Topic = .init(id: self.next.topic(),
                 culture: namespace.culture,
                 scope: owner)
 

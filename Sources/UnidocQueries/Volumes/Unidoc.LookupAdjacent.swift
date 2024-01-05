@@ -65,10 +65,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                         else: BSON.Max.init()
                     )
                 }
-                //  We probably don’t need this, the `Groups` collection doesn’t overlap
-                //  with the `Vertices` collection.
-                $0[let: local.min] = volume / Unidoc.VolumeMetadata[.planes_autogroup]
-                $0[let: local.max] = volume / Unidoc.VolumeMetadata[.planes_max]
+
+                $0[let: local.min] = volume / Unidoc.VolumeMetadata[.min]
+                $0[let: local.max] = volume / Unidoc.VolumeMetadata[.max]
 
                 $0[let: realm.id] = .expr
                 {

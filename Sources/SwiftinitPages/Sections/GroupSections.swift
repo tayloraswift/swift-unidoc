@@ -116,7 +116,7 @@ extension GroupSections
             case .polygon(let group):
                 guard
                 let first:Unidoc.Scalar = group.members.first,
-                let plane:SymbolGraph.Plane = .of(first.citizen)
+                let plane:SymbolGraph.Plane = first.plane
                 else
                 {
                     continue
