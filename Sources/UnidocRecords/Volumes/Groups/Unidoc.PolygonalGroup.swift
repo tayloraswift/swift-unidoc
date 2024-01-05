@@ -1,13 +1,9 @@
 import Unidoc
 
-extension Unidoc.Group
+extension Unidoc
 {
-    @available(*, deprecated, renamed: "Polygon")
-    public
-    typealias Automatic = Polygon
-
     @frozen public
-    struct Polygon:Identifiable, Equatable, Sendable
+    struct PolygonalGroup:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Group.ID

@@ -29,7 +29,7 @@ extension Unidoc.Linker
         /// This is immutable even though ``extensions`` is mutable, because we never introduce
         /// new nested declarations after building the initial ``extensions`` structure.
         private
-        let extensionContainingNested:[Int32: Extension.ID]
+        let extensionContainingNested:[Int32: Unidoc.ExtensionBody.ID]
         /// A table maping vertices to topics or autogroups.
         private
         var groupContainingMember:[Int32: Unidoc.Group.ID]
@@ -38,7 +38,7 @@ extension Unidoc.Linker
         var next:Next
 
         private(set)
-        var extensions:Extensions
+        var extensions:Unidoc.Extensions
         var articles:[Unidoc.ArticleVertex]
         var decls:[Unidoc.DeclVertex]
 
@@ -49,7 +49,7 @@ extension Unidoc.Linker
             contexts:consuming [SymbolGraph.ModuleContext],
             context:consuming Unidoc.Linker,
             conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances>,
-            extensions:Extensions)
+            extensions:Unidoc.Extensions)
         {
             self.contexts = contexts
             self.context = context
@@ -75,7 +75,7 @@ extension Unidoc.Linker.Tables
     {
         let modules:[SymbolGraph.ModuleContext] = context.modules()
 
-        var extensions:Unidoc.Linker.Extensions = [:]
+        var extensions:Unidoc.Extensions = [:]
 
         let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances> =
             context.current.decls.nodes.map
@@ -111,7 +111,7 @@ extension Unidoc.Linker.Tables
     borrowing
     func _linkConformingTypes()
     {
-        var conformers:[Unidoc.Scalar: [Unidoc.Linker.ExtensionConditions: [Unidoc.Scalar]]] = [:]
+        var conformers:[Unidoc.Scalar: [Unidoc.ExtensionConditions: [Unidoc.Scalar]]] = [:]
 
         for (d, conformances):(Int32, ProtocolConformances) in zip(
             context.current.decls.nodes.indices,
@@ -124,10 +124,10 @@ extension Unidoc.Linker.Tables
                 continue
             }
 
-            for (p, conditions):(Unidoc.Scalar, [Unidoc.Linker.ExtensionConditions])
+            for (p, conditions):(Unidoc.Scalar, [Unidoc.ExtensionConditions])
                 in conformances
             {
-                for condition:Unidoc.Linker.ExtensionConditions in conditions
+                for condition:Unidoc.ExtensionConditions in conditions
                 {
                     conformers[p, default: [:]][condition, default: []].append(d)
                 }
@@ -139,7 +139,7 @@ extension Unidoc.Linker.Tables
     mutating
     func linkProducts() -> [Unidoc.ProductVertex]
     {
-        var productPolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon(),
+        var productPolygon:Unidoc.PolygonalGroup = .init(id: self.next.polygon(),
             scope: self.current.id.global)
 
         var products:[Unidoc.ProductVertex] = []
@@ -183,7 +183,7 @@ extension Unidoc.Linker.Tables
 
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let culturePolygon:Unidoc.Group.Polygon = .init(id: self.next.polygon(),
+        let culturePolygon:Unidoc.PolygonalGroup = .init(id: self.next.polygon(),
             scope: self.current.id.global,
             members: self.current.cultures.indices.sorted
             {
@@ -258,7 +258,7 @@ extension Unidoc.Linker.Tables
                         //  This drops the feature if it belongs to a protocol whose
                         //  conformance was not declared by any culture of the current
                         //  package.
-                        for conditions:Unidoc.Linker.ExtensionConditions in conformances[to: p]
+                        for conditions:Unidoc.ExtensionConditions in conformances[to: p]
                         {
                             self.extensions[.extends(owner, where: conditions)]
                                 .features
@@ -358,7 +358,7 @@ extension Unidoc.Linker.Tables
     {
         for topic:SymbolGraph.Topic in topics
         {
-            var record:Unidoc.Group.Topic = .init(id: self.next.topic(),
+            var record:Unidoc.TopicGroup = .init(id: self.next.topic(),
                 culture: namespace.culture,
                 scope: owner)
 
@@ -449,7 +449,7 @@ extension Unidoc.Linker.Tables
             self.current.decls.nodes[range]))
         {
             /// Is this declaration contained in an extension?
-            let e:Unidoc.Linker.Extension.ID? = self.extensionContainingNested[d]
+            let e:Unidoc.ExtensionBody.ID? = self.extensionContainingNested[d]
             /// Is this declaration a member of a topic?
             let group:Unidoc.Group.ID? = self.groupContainingMember[d]
             /// Is this declaration a top-level member of its module?
@@ -487,7 +487,7 @@ extension Unidoc.Linker.Tables
 
             for s:Unidoc.Scalar in superforms
             {
-                let unconditional:Unidoc.Linker.ExtensionConditions = .init(constraints: [],
+                let unconditional:Unidoc.ExtensionConditions = .init(constraints: [],
                     culture: namespace.c)
 
                 self.extensions[.extends(s, where: unconditional)].subforms.append(d)
@@ -510,7 +510,7 @@ extension Unidoc.Linker.Tables
                 renamed: decl.renamed.map { self.current.scalars.decls[$0] } ?? nil,
                 file: decl.location.map { self.current.id + $0.file },
                 position: decl.location?.position,
-                extension: e.map { self.current.id[$0] },
+                extension: e?.in(self.current.id),
                 group: group)
 
             if  let article:SymbolGraph.Article = decl.article

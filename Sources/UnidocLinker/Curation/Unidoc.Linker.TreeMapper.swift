@@ -107,7 +107,7 @@ extension Unidoc.Linker.TreeMapper
 extension Unidoc.Linker.TreeMapper
 {
     mutating
-    func update(with group:Unidoc.Group.Extension)
+    func update(with group:Unidoc.ExtensionGroup)
     {
         let tree:Unidoc.Scalar = group.culture
 

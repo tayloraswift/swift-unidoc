@@ -1,7 +1,7 @@
 import Signatures
 import Unidoc
 
-extension Unidoc.Linker
+extension Unidoc
 {
     struct ExtensionSignature:Equatable, Hashable, Sendable
     {
@@ -16,11 +16,11 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.ExtensionSignature
+extension Unidoc.ExtensionSignature
 {
     static
     func extends(_ extendee:consuming Unidoc.Scalar,
-        where conditions:consuming Unidoc.Linker.ExtensionConditions) -> Self
+        where conditions:consuming Unidoc.ExtensionConditions) -> Self
     {
         .init(conditions: conditions, extendee: extendee)
     }

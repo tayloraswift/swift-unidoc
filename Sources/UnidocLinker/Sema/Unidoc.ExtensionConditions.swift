@@ -1,7 +1,7 @@
 import Signatures
 import Unidoc
 
-extension Unidoc.Linker
+extension Unidoc
 {
     struct ExtensionConditions:Equatable, Hashable, Sendable
     {

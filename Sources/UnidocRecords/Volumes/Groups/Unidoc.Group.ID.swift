@@ -18,14 +18,6 @@ extension Unidoc.Group
 }
 extension Unidoc.Group.ID
 {
-    @inlinable public static
-    func first(_ plane:Unidoc.Group.Plane, in edition:Unidoc.Edition) -> Self
-    {
-        .init(rawValue: edition + (plane | 0))
-    }
-}
-extension Unidoc.Group.ID
-{
     @inlinable public
     var edition:Unidoc.Edition { self.rawValue.edition }
     @inlinable public
@@ -34,7 +26,7 @@ extension Unidoc.Group.ID
     var version:Unidoc.Version { self.rawValue.version }
 
     @inlinable public
-    var plane:Unidoc.Group.Plane? { .of(self.rawValue.citizen) }
+    var plane:Unidoc.GroupType? { .of(self.rawValue.citizen) }
 }
 extension Unidoc.Group.ID:Comparable
 {

@@ -3,7 +3,12 @@ import UnidocRecords
 
 extension Unidoc.Linker
 {
-    struct Extension:Identifiable, Equatable, Sendable
+    @available(*, deprecated)
+    typealias Extension = Unidoc.ExtensionBody
+}
+extension Unidoc
+{
+    struct ExtensionBody:Identifiable, Equatable, Sendable
     {
         let id:ID
 
@@ -35,7 +40,7 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.Extension
+extension Unidoc.ExtensionBody
 {
     var isEmpty:Bool
     {

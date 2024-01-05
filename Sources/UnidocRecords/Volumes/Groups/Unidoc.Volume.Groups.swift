@@ -4,17 +4,17 @@ extension Unidoc.Volume
     struct Groups:Sendable
     {
         public
-        var extensions:[Unidoc.Group.Extension]
+        var extensions:[Unidoc.ExtensionGroup]
         public
-        var polygons:[Unidoc.Group.Polygon]
+        var polygons:[Unidoc.PolygonalGroup]
         public
-        var topics:[Unidoc.Group.Topic]
+        var topics:[Unidoc.TopicGroup]
 
         @inlinable public
         init(
-            extensions:[Unidoc.Group.Extension] = [],
-            polygons:[Unidoc.Group.Polygon] = [],
-            topics:[Unidoc.Group.Topic] = [])
+            extensions:[Unidoc.ExtensionGroup] = [],
+            polygons:[Unidoc.PolygonalGroup] = [],
+            topics:[Unidoc.TopicGroup] = [])
         {
             self.extensions = extensions
             self.polygons = polygons

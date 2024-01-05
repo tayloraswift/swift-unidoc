@@ -24,12 +24,12 @@ extension Unidoc.Linker.Tables.Next
     mutating
     func polygon() -> Unidoc.Group.ID
     {
-        self.base[group: self.polygons() * .polygon]
+        Unidoc.GroupType.polygon.id(self.polygons(), in: self.base)
     }
 
     mutating
     func topic() -> Unidoc.Group.ID
     {
-        self.base[group: self.topics() * .topic]
+        Unidoc.GroupType.topic.id(self.topics(), in: self.base)
     }
 }

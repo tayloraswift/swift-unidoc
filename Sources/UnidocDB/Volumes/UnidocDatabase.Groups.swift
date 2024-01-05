@@ -76,7 +76,7 @@ extension UnidocDatabase.Groups
             }
                 documents:
             {
-                $0 += groups.polygons.lazy.map(Unidoc.Group.polygon(_:))
+                $0 += groups.polygons.lazy.map(Unidoc.Group.polygonal(_:))
                 $0 += groups.topics.lazy.map(Unidoc.Group.topic(_:))
 
                 guard
@@ -87,7 +87,7 @@ extension UnidocDatabase.Groups
                     return
                 }
 
-                for e:Unidoc.Group.Extension in groups.extensions
+                for e:Unidoc.ExtensionGroup in groups.extensions
                 {
                     $0[Unidoc.Group.CodingKey.self]
                     {

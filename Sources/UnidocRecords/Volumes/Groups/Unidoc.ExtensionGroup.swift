@@ -1,10 +1,10 @@
 import Signatures
 import Unidoc
 
-extension Unidoc.Group
+extension Unidoc
 {
     @frozen public
-    struct Extension:Identifiable, Equatable, Sendable
+    struct ExtensionGroup:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Group.ID
@@ -68,7 +68,7 @@ extension Unidoc.Group
         }
     }
 }
-extension Unidoc.Group.Extension
+extension Unidoc.ExtensionGroup
 {
     /// Returns true if and only if this extension contains no conformances, features, nested
     /// declarations, subforms, or written documentation. The extension constraints are ignored.
