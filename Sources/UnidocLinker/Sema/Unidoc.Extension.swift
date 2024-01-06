@@ -23,24 +23,17 @@ extension Unidoc
         var overview:Unidoc.Passage?
         var details:Unidoc.Passage?
 
-        private
-        init(id:LinkerIndex<Self>,
-            conformances:[Unidoc.Scalar],
-            features:[Unidoc.Scalar],
-            nested:[Unidoc.Scalar],
-            subforms:[Unidoc.Scalar],
-            overview:Unidoc.Passage? ,
-            details:Unidoc.Passage? )
+        init(id:LinkerIndex<Self>)
         {
             self.id = id
 
-            self.conformances = conformances
-            self.features = features
-            self.nested = nested
-            self.subforms = subforms
+            self.conformances = []
+            self.features = []
+            self.nested = []
+            self.subforms = []
 
-            self.overview = overview
-            self.details = details
+            self.overview = nil
+            self.details = nil
         }
     }
 }
@@ -50,17 +43,6 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
 
     static
     var type:Unidoc.GroupType { .extension }
-
-    init(id:Unidoc.LinkerIndex<Self>)
-    {
-        self.init(id: id,
-            conformances: [],
-            features: [],
-            nested: [],
-            subforms: [],
-            overview: nil,
-            details: nil)
-    }
 
     var isEmpty:Bool
     {
@@ -72,6 +54,7 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
         self.details == nil
     }
 
+    __consuming
     func assemble(signature:Unidoc.ExtensionSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
     {

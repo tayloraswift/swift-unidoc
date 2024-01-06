@@ -72,8 +72,8 @@ extension Unidoc.Linker.Table<Unidoc.Conformers>
         {
             for condition:Unidoc.ExtensionConditions in conditions
             {
-                self[.conforms(to: p, in: condition.culture)].list.append(.init(id: type,
-                    where: condition.constraints))
+                self[.conforms(to: p, in: condition.culture)].append(conformer: type,
+                    where: condition.constraints)
             }
         }
     }

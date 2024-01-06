@@ -1,5 +1,6 @@
 import BSON
 import Signatures
+import SymbolGraphs
 
 extension Unidoc
 {
@@ -21,40 +22,28 @@ extension Unidoc
 }
 extension Unidoc.ConformingType
 {
-    @inlinable
-    var conditional:Conditional?
+    @frozen public
+    enum CodingKey:String, Sendable
     {
-        self.constraints.isEmpty ? nil : .init(id: self.id, where: self.constraints)
+        case id = "i"
+        //  Non-optional, because we expect to encode unconditional conformances separately.
+        case constraints = "g"
     }
 }
-extension Unidoc.ConformingType:BSONEncodable
+extension Unidoc.ConformingType:BSONDocumentEncodable
 {
-    @inlinable public
-    func encode(to field:inout BSON.FieldEncoder)
+    public
+    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        if  let conditional:Conditional = self.conditional
-        {
-            conditional.encode(to: &field)
-        }
-        else
-        {
-            self.id.encode(to: &field)
-        }
+        bson[.id] = self.id
+        bson[.constraints] = self.constraints
     }
 }
-extension Unidoc.ConformingType:BSONDecodable
+extension Unidoc.ConformingType:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        if  case .id(let id) = bson
-        {
-            self.init(id: Unidoc.Scalar.init(id))
-        }
-        else
-        {
-            let conditional:Conditional = try .init(bson: bson)
-            self.init(id: conditional.id, where: conditional.constraints)
-        }
+        self.init(id: try bson[.id].decode(), where: try bson[.constraints].decode())
     }
 }

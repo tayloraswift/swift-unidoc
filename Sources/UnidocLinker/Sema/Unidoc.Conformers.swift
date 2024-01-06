@@ -1,3 +1,4 @@
+import Signatures
 import UnidocRecords
 
 extension Unidoc
@@ -5,14 +6,29 @@ extension Unidoc
     struct Conformers:Identifiable
     {
         let id:LinkerIndex<Self>
-        var list:[ConformingType]
 
         private
-        init(id:LinkerIndex<Self>, list:[ConformingType])
+        var unconditional:[Unidoc.Scalar]
+        private
+        var conditional:[ConformingType]
+
+        init(id:LinkerIndex<Self>)
         {
             self.id = id
-            self.list = list
+            self.unconditional = []
+            self.conditional = []
         }
+    }
+}
+extension Unidoc.Conformers
+{
+    mutating
+    func append(conformer type:Unidoc.Scalar,
+        where constraints:[GenericConstraint<Unidoc.Scalar?>])
+    {
+        constraints.isEmpty
+            ? self.unconditional.append(type)
+            : self.conditional.append(.init(id: type, where: constraints))
     }
 }
 extension Unidoc.Conformers:Unidoc.LinkerIndexable
@@ -22,19 +38,20 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
     static
     var type:Unidoc.GroupType { .conformers }
 
-    init(id:Unidoc.LinkerIndex<Self>)
+    var isEmpty:Bool
     {
-        self.init(id: id, list: [])
+        self.unconditional.isEmpty && self.conditional.isEmpty
     }
 
-    var isEmpty:Bool { self.list.isEmpty }
-
+    __consuming
     func assemble(signature:Unidoc.ConformanceSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ConformerGroup
     {
         .init(id: self.id.in(linker.current.id),
             culture: linker.current.id + signature.culture,
             scope: signature.conformance,
-            types: self.list) // do we need to sort this?
+            unconditional: self.unconditional,
+            conditional: self.conditional)
+            // do we need to sort this?
     }
 }

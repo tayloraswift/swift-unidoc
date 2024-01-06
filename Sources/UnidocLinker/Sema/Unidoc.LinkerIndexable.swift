@@ -14,5 +14,6 @@ protocol _UnidocLinkerIndexable:Identifiable<Unidoc.LinkerIndex<Self>>
 
     var isEmpty:Bool { get }
 
+    consuming
     func assemble(signature:Signature, with linker:borrowing Unidoc.Linker) -> Assembled
 }
