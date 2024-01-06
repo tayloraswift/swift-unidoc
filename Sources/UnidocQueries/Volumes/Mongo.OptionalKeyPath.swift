@@ -1,10 +1,10 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.LookupAdjacent
+extension Mongo
 {
-    /// A type that binds an optional ``Unidoc.Scalar``.
-    struct Scalar
+    /// FIXME: this is totally broken if the path points to a boolean field!
+    struct OptionalKeyPath
     {
         let path:Mongo.KeyPath
 
@@ -14,7 +14,7 @@ extension Unidoc.LookupAdjacent
         }
     }
 }
-extension Unidoc.LookupAdjacent.Scalar
+extension Mongo.OptionalKeyPath
 {
     /// Generates an expression that evaluates to `true` if the field is null or does not exist,
     /// and something that is not `true` otherwise. This expression is suitable for use as a
@@ -24,11 +24,8 @@ extension Unidoc.LookupAdjacent.Scalar
     /// this evaluates to an integer, which is not a boolean `true`. When used as a predicate,
     /// the `else` branch will be taken. If ``path`` is nil, the predicate evaluates to `true`,
     /// so the `then` branch will be taken.
-    var missing:Mongo.Expression
+    var null:Mongo.Expression
     {
-        .expr
-        {
-            $0[.coalesce] = (self.path, true)
-        }
+        .expr { $0[.coalesce] = (self.path, true) }
     }
 }

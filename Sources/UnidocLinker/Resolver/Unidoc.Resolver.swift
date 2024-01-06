@@ -50,7 +50,7 @@ extension Unidoc.Resolver
     }
 
     mutating
-    func link(topic:SymbolGraph.Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.VertexLink])
+    func link(topic:SymbolGraph.Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
     {
         let overview:Unidoc.Passage? = topic.overview.isEmpty ? nil : .init(
             outlines: topic.outlines.map { self.expand($0) },
@@ -135,7 +135,7 @@ extension Unidoc.Resolver
     }
 
     private mutating
-    func resolve(_ outline:SymbolGraph.Outline) -> Unidoc.VertexLink
+    func resolve(_ outline:SymbolGraph.Outline) -> Unidoc.TopicMember
     {
         switch outline
         {

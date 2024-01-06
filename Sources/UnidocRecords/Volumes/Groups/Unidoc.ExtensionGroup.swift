@@ -3,11 +3,17 @@ import Unidoc
 
 extension Unidoc
 {
+    /// Models an extension, which is characterized by a set of constraints, a perpetrating
+    /// culture, and an extended declaration.
+    ///
+    /// Extension groups are *groups* in the sense that they represent multiple merged
+    /// extension blocks, but the name of the type was chosen because they can also be used to
+    /// group related vertices, and for symmetry with the other group types.
     @frozen public
     struct ExtensionGroup:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Group.ID
+        let id:Unidoc.Group
 
         public
         let constraints:[GenericConstraint<Unidoc.Scalar?>]
@@ -38,7 +44,7 @@ extension Unidoc
         var details:Unidoc.Passage?
 
         @inlinable public
-        init(id:Unidoc.Group.ID,
+        init(id:Unidoc.Group,
             constraints:[GenericConstraint<Unidoc.Scalar?>],
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,

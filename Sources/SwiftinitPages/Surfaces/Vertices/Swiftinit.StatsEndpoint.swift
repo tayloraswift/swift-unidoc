@@ -29,7 +29,7 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
     public static
     func response(
         vertex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.Group],
+        groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
     {

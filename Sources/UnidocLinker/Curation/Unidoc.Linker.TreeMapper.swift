@@ -64,6 +64,27 @@ extension Unidoc.Linker.TreeMapper
     mutating
     func register(foreign:Unidoc.Scalar,
         with context:borrowing Unidoc.Linker,
+        as index:Int) -> Unidoc.ForeignVertex?
+    {
+        {
+            if  case nil = $0
+            {
+                let vertex:Unidoc.ForeignVertex = Self.create(foreign: foreign,
+                    with: context,
+                    as: index)
+                $0 = (vertex.shoot, vertex.flags)
+                return vertex
+            }
+            else
+            {
+                return nil
+            }
+        } (&self.foreign[foreign])
+    }
+
+    private static
+    func create(foreign:Unidoc.Scalar,
+        with context:borrowing Unidoc.Linker,
         as index:Int) -> Unidoc.ForeignVertex
     {
         guard
@@ -88,7 +109,7 @@ extension Unidoc.Linker.TreeMapper
         /// Our policy for hashing out-of-package types is to hash if the type uses a
         /// hash suffix in its home package, even if the type would not require any
         /// disambiguation in this package.
-        let vertex:Unidoc.ForeignVertex = .init(id: context.current.id + index * .foreign,
+        return .init(id: context.current.id + index * .foreign,
             extendee: foreign,
             scope: snapshot.scope(of: node).map { context.expand($0) } ?? [],
             flags: .init(
@@ -98,10 +119,6 @@ extension Unidoc.Linker.TreeMapper
                 route: decl.route),
             stem: .decl(namespace, decl.path, orientation: decl.phylum.orientation),
             hash: .init(hashing: "\(symbol)"))
-
-        self.foreign[foreign] = (vertex.shoot, vertex.flags)
-
-        return vertex
     }
 }
 extension Unidoc.Linker.TreeMapper

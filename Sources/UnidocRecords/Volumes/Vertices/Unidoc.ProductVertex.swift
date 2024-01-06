@@ -18,14 +18,14 @@ extension Unidoc
         let type:SymbolGraph.ProductType
 
         public
-        var group:Unidoc.Group.ID?
+        var group:Unidoc.Group?
 
         @inlinable public
         init(id:Unidoc.Scalar,
             requirements:[Unidoc.Scalar],
             symbol:String,
             type:SymbolGraph.ProductType,
-            group:Unidoc.Group.ID?)
+            group:Unidoc.Group?)
         {
             self.id = id
             self.requirements = requirements

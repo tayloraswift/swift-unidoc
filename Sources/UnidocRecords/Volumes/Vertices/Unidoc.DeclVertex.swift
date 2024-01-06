@@ -49,9 +49,9 @@ extension Unidoc
         var details:Unidoc.Passage?
 
         public
-        var `extension`:Unidoc.Group.ID?
+        var `extension`:Unidoc.Group?
         public
-        var group:Unidoc.Group.ID?
+        var group:Unidoc.Group?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -70,8 +70,8 @@ extension Unidoc
             position:SourcePosition? = nil,
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            extension:Unidoc.Group.ID? = nil,
-            group:Unidoc.Group.ID? = nil)
+            extension:Unidoc.Group? = nil,
+            group:Unidoc.Group? = nil)
         {
             self.id = id
             self.flags = flags

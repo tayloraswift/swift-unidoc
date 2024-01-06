@@ -3,20 +3,23 @@ import SymbolGraphs
 import Unidoc
 import UnidocDiagnostics
 
-/// Describes a single type’s protocol conformances. Depending on how this structure is being
-/// used, the lists may or may not be exhaustive.
-struct ProtocolConformances:Sendable
+extension Unidoc
 {
-    private
-    var table:[Unidoc.Scalar: [Unidoc.ExtensionConditions]]
-
-    private
-    init(table:[Unidoc.Scalar: [Unidoc.ExtensionConditions]])
+    /// Describes a single type’s protocol conformances. Depending on how this structure is
+    /// being used, the lists may or may not be exhaustive.
+    struct ConformanceList:Sendable
     {
-        self.table = table
+        private
+        var table:[Scalar: [ExtensionConditions]]
+
+        private
+        init(table:[Scalar: [ExtensionConditions]])
+        {
+            self.table = table
+        }
     }
 }
-extension ProtocolConformances
+extension Unidoc.ConformanceList
 {
     /// Yields all known conformances to the specified protocol. This subscript returns an empty
     /// list if no conformances are known to exist. It can also return more than one conformance
@@ -33,7 +36,7 @@ extension ProtocolConformances
         }
     }
 }
-extension ProtocolConformances:Sequence
+extension Unidoc.ConformanceList:Sequence
 {
     func makeIterator()
         -> Dictionary<Unidoc.Scalar, [Unidoc.ExtensionConditions]>.Iterator
@@ -41,14 +44,14 @@ extension ProtocolConformances:Sequence
         self.table.makeIterator()
     }
 }
-extension ProtocolConformances:ExpressibleByDictionaryLiteral
+extension Unidoc.ConformanceList:ExpressibleByDictionaryLiteral
 {
     init(dictionaryLiteral elements:(Unidoc.Scalar, Never)...)
     {
         self.init(table: [:])
     }
 }
-extension ProtocolConformances
+extension Unidoc.ConformanceList
 {
     init(of subject:Unidoc.Scalar,
         conditions:borrowing [Unidoc.ExtensionConditions],

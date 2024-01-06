@@ -3,7 +3,7 @@ import Unidoc
 
 extension Unidoc
 {
-    struct ExtensionSignature:Equatable, Hashable, Sendable
+    struct ExtensionSignature:Equatable, Hashable
     {
         let conditions:ExtensionConditions
         let extendee:Unidoc.Scalar

@@ -23,30 +23,32 @@ extension UnidocDatabase.Groups
     let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: true)
     {
-        $0[Unidoc.Group[.id]] = (+)
-        $0[Unidoc.Group[.realm]] = (+)
+        $0[Unidoc.AnyGroup[.id]] = (+)
+        $0[Unidoc.AnyGroup[.realm]] = (+)
     }
 
     public static
     let indexScopeRealm:Mongo.CollectionIndex = .init("ScopeRealm",
         unique: false)
     {
-        $0[Unidoc.Group[.scope]] = (+)
-        $0[Unidoc.Group[.realm]] = (+)
+        $0[Unidoc.AnyGroup[.layer]] = (+)
+        $0[Unidoc.AnyGroup[.scope]] = (+)
+        $0[Unidoc.AnyGroup[.realm]] = (+)
     }
 
     public static
     let indexScope:Mongo.CollectionIndex = .init("Scope",
         unique: true)
     {
-        $0[Unidoc.Group[.scope]] = (+)
-        $0[Unidoc.Group[.id]] = (+)
+        $0[Unidoc.AnyGroup[.layer]] = (+)
+        $0[Unidoc.AnyGroup[.scope]] = (+)
+        $0[Unidoc.AnyGroup[.id]] = (+)
     }
 }
 extension UnidocDatabase.Groups:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidoc.Group
+    typealias Element = Unidoc.AnyGroup
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeGroups" }
@@ -76,22 +78,32 @@ extension UnidocDatabase.Groups
             }
                 documents:
             {
-                $0 += groups.polygons.lazy.map(Unidoc.Group.polygonal(_:))
-                $0 += groups.topics.lazy.map(Unidoc.Group.topic(_:))
+                $0 += groups.polygons.lazy.map(Unidoc.AnyGroup.polygonal(_:))
+                $0 += groups.topics.lazy.map(Unidoc.AnyGroup.topic(_:))
 
                 guard
                 let realm:Unidoc.Realm
                 else
                 {
-                    $0 += groups.extensions.lazy.map(Unidoc.Group.extension(_:))
+                    $0 += groups.conformers.lazy.map(Unidoc.AnyGroup.conformers(_:))
+                    $0 += groups.extensions.lazy.map(Unidoc.AnyGroup.extension(_:))
                     return
                 }
 
-                for e:Unidoc.ExtensionGroup in groups.extensions
+                for group:Unidoc.ConformerGroup in groups.conformers
                 {
-                    $0[Unidoc.Group.CodingKey.self]
+                    $0[Unidoc.AnyGroup.CodingKey.self]
                     {
-                        Unidoc.Group.extension(e).encode(to: &$0)
+                        Unidoc.AnyGroup.conformers(group).encode(to: &$0)
+
+                        $0[.realm] = realm
+                    }
+                }
+                for group:Unidoc.ExtensionGroup in groups.extensions
+                {
+                    $0[Unidoc.AnyGroup.CodingKey.self]
+                    {
+                        Unidoc.AnyGroup.extension(group).encode(to: &$0)
 
                         $0[.realm] = realm
                     }

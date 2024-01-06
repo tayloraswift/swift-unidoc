@@ -23,7 +23,7 @@ extension Unidoc
         public
         var details:Unidoc.Passage?
         public
-        var group:Unidoc.Group.ID?
+        var group:Unidoc.Group?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -32,7 +32,7 @@ extension Unidoc
             census:Unidoc.Census = .init(),
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            group:Unidoc.Group.ID? = nil)
+            group:Unidoc.Group? = nil)
         {
             self.id = id
 

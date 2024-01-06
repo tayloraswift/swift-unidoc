@@ -6,32 +6,32 @@ extension Unidoc
     struct TopicGroup:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Group.ID
+        let id:Group
 
         public
-        let culture:Unidoc.Scalar?
+        let culture:Scalar?
         public
-        let scope:Unidoc.Scalar?
+        let scope:Scalar?
 
         /// Additional scalars to prefetch when this extension is loaded.
         /// This is used to obtain the masters for passage referents in the
         /// overview passages of the actual declarations in this extension
         /// without having to perform an additional lookup phase.
         public
-        let prefetch:[Unidoc.Scalar]
+        let prefetch:[Scalar]
 
         public
-        var overview:Unidoc.Passage?
+        var overview:Passage?
         public
-        var members:[Unidoc.VertexLink]
+        var members:[TopicMember]
 
         @inlinable public
-        init(id:Unidoc.Group.ID,
-            culture:Unidoc.Scalar? = nil,
-            scope:Unidoc.Scalar? = nil,
-            prefetch:[Unidoc.Scalar] = [],
-            overview:Unidoc.Passage? = nil,
-            members:[Unidoc.VertexLink] = [])
+        init(id:Group,
+            culture:Scalar? = nil,
+            scope:Scalar? = nil,
+            prefetch:[Scalar] = [],
+            overview:Passage? = nil,
+            members:[TopicMember] = [])
         {
             self.id = id
 

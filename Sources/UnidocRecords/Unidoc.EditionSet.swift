@@ -78,4 +78,13 @@ extension Unidoc.EditionSet
             self.update(with: scalars)
         }
     }
+    mutating
+    func update(with types:[Unidoc.ConformingType])
+    {
+        for type:Unidoc.ConformingType in types
+        {
+            self.update(with: type.id.edition)
+            self.update(with: type.constraints)
+        }
+    }
 }
