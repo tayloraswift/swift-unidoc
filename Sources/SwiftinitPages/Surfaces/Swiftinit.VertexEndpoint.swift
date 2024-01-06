@@ -22,7 +22,7 @@ protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
     static
     func response(
         vertex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.Group],
+        groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
 }
@@ -86,7 +86,7 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
             context.outlines += $0.outlines
         }
 
-        let groups:[Unidoc.Group] = principal.groups
+        let groups:[Unidoc.AnyGroup] = principal.groups
         let tree:Unidoc.TypeTree? = principal.tree
 
         let canonical:CanonicalVersion? = .init(principal: consume principal)

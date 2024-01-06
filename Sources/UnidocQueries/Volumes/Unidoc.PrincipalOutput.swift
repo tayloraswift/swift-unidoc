@@ -20,7 +20,7 @@ extension Unidoc
         let vertexInLatest:AnyVertex?
 
         public
-        let groups:[Group]
+        let groups:[AnyGroup]
 
         public
         let volume:VolumeMetadata
@@ -38,7 +38,7 @@ extension Unidoc
             matches:[AnyVertex],
             vertex:AnyVertex?,
             vertexInLatest:AnyVertex?,
-            groups:[Group],
+            groups:[AnyGroup],
             volume:VolumeMetadata,
             volumeOfLatest:VolumeMetadata?,
             repo:PackageRepo?,

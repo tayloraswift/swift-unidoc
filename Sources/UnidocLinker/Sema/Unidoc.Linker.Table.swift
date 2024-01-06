@@ -6,54 +6,80 @@ import Unidoc
 import UnidocDiagnostics
 import UnidocRecords
 
-extension Unidoc
+extension Unidoc.Linker
 {
-    struct Extensions
+    struct Table<Group> where Group:Unidoc.LinkerIndexable
     {
         private
-        var table:[ExtensionSignature: Unidoc.ExtensionBody]
+        var table:[Group.Signature: Group]
 
         private
-        init(table:[ExtensionSignature: Unidoc.ExtensionBody])
+        init(table:[Group.Signature: Group])
         {
             self.table = table
         }
     }
 }
-extension Unidoc.Extensions:ExpressibleByDictionaryLiteral
+extension Unidoc.Linker.Table:ExpressibleByDictionaryLiteral
 {
-    init(dictionaryLiteral:(Unidoc.ExtensionSignature, Never)...)
+    init(dictionaryLiteral:(Group.Signature, Never)...)
     {
         self.init(table: [:])
     }
 }
-extension Unidoc.Extensions
+extension Unidoc.Linker.Table
 {
-    func sorted() -> [(key:Unidoc.ExtensionSignature, value:Unidoc.ExtensionBody)]
+    consuming
+    func load() -> [(key:Group.Signature, value:Group)]
     {
-        self.table.sorted { $0.value.id < $1.value.id }
+        var extensions:[(key:Group.Signature, value:Group)]
+
+        extensions = self.table.filter { !$0.value.isEmpty }
+        extensions.sort { $0.1.id < $1.1.id }
+
+        return extensions
     }
 }
-extension Unidoc.Extensions
+extension Unidoc.Linker.Table
 {
     private
-    var next:Unidoc.ExtensionBody.ID { .init(index: self.table.count) }
+    var next:Unidoc.LinkerIndex<Group> { .init(ordinal: self.table.count) }
 
-    subscript(signature:Unidoc.ExtensionSignature) -> Unidoc.ExtensionBody
+    subscript(signature:Group.Signature) -> Group
     {
         _read
         {
-            let id:Unidoc.ExtensionBody.ID = self.next
+            let id:Unidoc.LinkerIndex<Group> = self.next
             yield  self.table[signature, default: .init(id: id)]
         }
         _modify
         {
-            let id:Unidoc.ExtensionBody.ID = self.next
+            let id:Unidoc.LinkerIndex<Group> = self.next
             yield &self.table[signature, default: .init(id: id)]
         }
     }
 }
-extension Unidoc.Extensions
+
+extension Unidoc.Linker.Table<Unidoc.Conformers>
+{
+    mutating
+    func add(conformances:Unidoc.ConformanceList, of type:Unidoc.Scalar)
+    {
+        /// Although the order in which we visit the protocols is non-deterministic,
+        /// the order of the accumulated conformances is still deterministic since each
+        /// protocol only has one conditions array.
+        for (p, conditions):(Unidoc.Scalar, [Unidoc.ExtensionConditions]) in conformances
+        {
+            for condition:Unidoc.ExtensionConditions in conditions
+            {
+                self[.conforms(to: p, in: condition.culture)].list.append(.init(id: type,
+                    where: condition.constraints))
+            }
+        }
+    }
+}
+
+extension Unidoc.Linker.Table<Unidoc.Extension>
 {
     /// Creates extension records from the given symbol graph extensions, performing any
     /// necessary de-duplication of protocol conformances and features.
@@ -87,7 +113,7 @@ extension Unidoc.Extensions
     func add(_ extensions:[SymbolGraph.Extension],
         extending s:Int32,
         modules:[SymbolGraph.ModuleContext],
-        context:inout Unidoc.Linker) -> ProtocolConformances
+        context:inout Unidoc.Linker) -> Unidoc.ConformanceList
     {
         guard
         let s:Unidoc.Scalar = context.current.scalars.decls[s],
@@ -122,7 +148,7 @@ extension Unidoc.Extensions
                 culture: $0.culture)
         }
 
-        let conformances:ProtocolConformances = .init(of: s,
+        let conformances:Unidoc.ConformanceList = .init(of: s,
             conditions: conditions,
             extensions: extensions,
             modules: modules,
@@ -204,9 +230,9 @@ extension Unidoc.Extensions
         return conformances
     }
 }
-extension Unidoc.Extensions
+extension Unidoc.Linker.Table<Unidoc.Extension>
 {
-    func byNested() -> [Int32: Unidoc.ExtensionBody.ID]
+    func byNested() -> [Int32: Unidoc.LinkerIndex<Unidoc.Extension>]
     {
         self.table.values.reduce(into: [:])
         {

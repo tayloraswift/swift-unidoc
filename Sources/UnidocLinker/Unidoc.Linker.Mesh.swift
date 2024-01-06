@@ -42,20 +42,21 @@ extension Unidoc.Linker
 extension Unidoc.Linker.Mesh
 {
     init(
-        extensions:borrowing Unidoc.Extensions,
+        conformances:consuming Unidoc.Linker.Table<Unidoc.Conformers>,
+        extensions:consuming Unidoc.Linker.Table<Unidoc.Extension>,
         products:consuming [Unidoc.ProductVertex],
         cultures:consuming [Unidoc.CultureVertex],
         articles:consuming [Unidoc.ArticleVertex],
         decls:consuming [Unidoc.DeclVertex],
         groups:consuming Unidoc.Volume.Groups,
-        context:borrowing Unidoc.Linker)
+        linker:borrowing Unidoc.Linker)
     {
         var cultures:[Unidoc.CultureVertex] = cultures
 
         let articles:[Unidoc.ArticleVertex] = articles
         let decls:[Unidoc.DeclVertex] = decls
 
-        var mapper:Unidoc.Linker.TreeMapper = .init(zone: context.current.id)
+        var mapper:Unidoc.Linker.TreeMapper = .init(zone: linker.current.id)
         for vertex:Unidoc.ArticleVertex in articles
         {
             mapper.add(vertex)
@@ -65,25 +66,14 @@ extension Unidoc.Linker.Mesh
             mapper.add(vertex)
         }
 
-        var snapshot:Unidoc.SnapshotDetails = .init(abi: context.current.metadata.abi,
-            requirements: context.current.metadata.requirements,
-            commit: context.current.metadata.commit?.hash)
+        var snapshot:Unidoc.SnapshotDetails = .init(abi: linker.current.metadata.abi,
+            requirements: linker.current.metadata.requirements,
+            commit: linker.current.metadata.commit?.hash)
         var foreign:[Unidoc.ForeignVertex] = []
-
-        //  Compute shoots for out-of-package extended types.
-        for d:Int32 in context.current.decls.nodes.indices
-        {
-            if  case nil = context.current.decls.nodes[d].decl,
-                let f:Unidoc.Scalar = context.current.scalars.decls[d]
-            {
-                let next:Int = foreign.count
-                foreign.append(mapper.register(foreign: f, with: context, as: next))
-            }
-        }
 
         //  Compute unweighted stats
         for (c, culture):(Int, SymbolGraph.Culture) in zip(cultures.indices,
-            context.current.cultures)
+            linker.current.cultures)
         {
             guard let range:ClosedRange<Int32> = culture.decls
             else
@@ -92,10 +82,10 @@ extension Unidoc.Linker.Mesh
             }
             for d:Int32 in range
             {
-                if  let decl:SymbolGraph.Decl = context.current.decls.nodes[d].decl
+                if  let decl:SymbolGraph.Decl = linker.current.decls.nodes[d].decl
                 {
                     let coverage:WritableKeyPath<Unidoc.Stats.Coverage, Int> = .classify(decl,
-                        from: context.current,
+                        from: linker.current,
                         at: d)
 
                     let decl:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
@@ -116,13 +106,12 @@ extension Unidoc.Linker.Mesh
             cultures[c].census.weighted = cultures[c].census.unweighted
         }
 
-        for (signature, `extension`):
-            (Unidoc.ExtensionSignature, Unidoc.ExtensionBody) in extensions.sorted()
-            where !`extension`.isEmpty
+        for (signature, `extension`):(Unidoc.ExtensionSignature, Unidoc.Extension)
+            in extensions.load()
         {
             for f:Unidoc.Scalar in `extension`.features
             {
-                if  let decl:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
+                if  let decl:SymbolGraph.Decl = linker[f.package]?.decls[f.citizen]?.decl
                 {
                     let bin:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
 
@@ -131,13 +120,22 @@ extension Unidoc.Linker.Mesh
                 }
             }
 
-            let assembled:Unidoc.ExtensionGroup = context.assemble(
-                extension: `extension`,
-                signature: signature)
+            let assembled:Unidoc.ExtensionGroup = `extension`.assemble(signature: signature,
+                with: linker)
 
             defer
             {
                 groups.extensions.append(assembled)
+            }
+
+            //  Compute shoots and create a foreign vertex, if this is the first extension for
+            //  its scope.
+            let next:Int = foreign.count
+            if  let vertex:Unidoc.ForeignVertex = mapper.register(foreign: assembled.scope,
+                    with: linker,
+                    as: next)
+            {
+                foreign.append(vertex)
             }
 
             //  Extensions that only contain subforms are not interesting.
@@ -150,14 +148,33 @@ extension Unidoc.Linker.Mesh
 
             mapper.update(with: assembled)
         }
+        for (signature, conformers):(Unidoc.ConformanceSignature, Unidoc.Conformers)
+            in conformances.load()
+        {
+            let assembled:Unidoc.ConformerGroup = conformers.assemble(signature: signature,
+                with: linker)
+
+            defer
+            {
+                groups.conformers.append(assembled)
+            }
+
+            let next:Int = foreign.count
+            if  let vertex:Unidoc.ForeignVertex = mapper.register(foreign: assembled.scope,
+                    with: linker,
+                    as: next)
+            {
+                foreign.append(vertex)
+            }
+        }
 
         //  Create file vertices.
         let files:[Unidoc.FileVertex] = zip(
-            context.current.files.indices,
-            context.current.files)
+            linker.current.files.indices,
+            linker.current.files)
             .map
         {
-            .init(id: context.current.id + $0, symbol: $1)
+            .init(id: linker.current.id + $0, symbol: $1)
         }
 
         let (trees, index):([Unidoc.TypeTree], JSON) = mapper.build(cultures: cultures)
@@ -169,7 +186,7 @@ extension Unidoc.Linker.Mesh
                 files: files,
                 products: (copy products),
                 foreign: foreign,
-                global: .init(id: context.current.id.global, snapshot: snapshot)),
+                global: .init(id: linker.current.id.global, snapshot: snapshot)),
             groups: groups,
             index: index,
             trees: trees,

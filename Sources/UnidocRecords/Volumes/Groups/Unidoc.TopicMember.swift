@@ -4,13 +4,13 @@ import Unidoc
 extension Unidoc
 {
     @frozen public
-    enum VertexLink:Equatable, Sendable
+    enum TopicMember:Equatable, Sendable
     {
         case scalar(Unidoc.Scalar)
         case text(String)
     }
 }
-extension Unidoc.VertexLink:BSONEncodable
+extension Unidoc.TopicMember:BSONEncodable
 {
     @inlinable public
     func encode(to field:inout BSON.FieldEncoder)
@@ -24,7 +24,7 @@ extension Unidoc.VertexLink:BSONEncodable
         }
     }
 }
-extension Unidoc.VertexLink:BSONDecodable
+extension Unidoc.TopicMember:BSONDecodable
 {
     @inlinable public
     init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws

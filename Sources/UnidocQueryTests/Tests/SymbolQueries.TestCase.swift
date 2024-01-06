@@ -69,7 +69,7 @@ extension SymbolQueries.TestCase
                     $0[$1.id] = $1.shoot?.stem.last
                 }
                 var counts:[Substring: Int] = [:]
-                for group:Unidoc.Group in output.principal?.groups ?? []
+                for group:Unidoc.AnyGroup in output.principal?.groups ?? []
                 {
                     switch group
                     {

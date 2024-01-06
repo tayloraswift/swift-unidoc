@@ -20,15 +20,20 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
     {
-        let extendee:Scalar = .init(in: vertex / Unidoc.AnyVertex[.extendee])
+        let extendee:Mongo.OptionalKeyPath = .init(in: vertex / Unidoc.AnyVertex[.extendee])
 
         pipeline[.lookup] = .init
         {
             let `extension`:Group = .init(id: "extension")
             let topic:Group = .init(id: "topic")
 
-            let local:LockedExtensions = .init(scope: "local", min: "min", max: "max")
-            let realm:LatestExtensions = .init(scope: "scope", id: "realm")
+            let local:Unidoc.LockedExtensionsPredicate = .init(layer: .default,
+                scope: "local",
+                min: "min",
+                max: "max")
+            let realm:Unidoc.LatestExtensionsPredicate = .init(layer: .default,
+                scope: "scope",
+                id: "realm")
 
             $0[.from] = UnidocDatabase.Groups.name
             $0[.let] = .init
@@ -57,7 +62,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     $0[.cond] =
                     (
-                        if: extendee.missing,
+                        if: extendee.null,
                         then: .expr
                         {
                             $0[.coalesce] = (vertex / Unidoc.AnyVertex[.id], BSON.Max.init())
@@ -106,7 +111,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             let dependencies:
                 Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
                 in: volume / Unidoc.VolumeMetadata[.dependencies])
-            let extensions:Mongo.List<Unidoc.Group, Mongo.KeyPath> = .init(
+            let extensions:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath> = .init(
                 in: groups)
             let adjacent:ScalarsView = .init(
                 in: vertex)

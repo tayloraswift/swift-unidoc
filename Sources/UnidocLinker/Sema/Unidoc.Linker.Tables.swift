@@ -22,23 +22,23 @@ extension Unidoc.Linker
         /// upstream dependencies, like the standard library. However, the lists only include
         /// conformances that were declared by at least one of the current snapshot’s cultures.
         private
-        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances>
+        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, Unidoc.ConformanceList>
 
         /// A table mapping nested declarations to their enclosing extensions.
         ///
         /// This is immutable even though ``extensions`` is mutable, because we never introduce
         /// new nested declarations after building the initial ``extensions`` structure.
         private
-        let extensionContainingNested:[Int32: Unidoc.ExtensionBody.ID]
+        let extensionContainingNested:[Int32: Unidoc.LinkerIndex<Unidoc.Extension>]
         /// A table maping vertices to topics or autogroups.
         private
-        var groupContainingMember:[Int32: Unidoc.Group.ID]
+        var groupContainingMember:[Int32: Unidoc.Group]
 
         private
         var next:Next
 
         private(set)
-        var extensions:Unidoc.Extensions
+        var extensions:Unidoc.Linker.Table<Unidoc.Extension>
         var articles:[Unidoc.ArticleVertex]
         var decls:[Unidoc.DeclVertex]
 
@@ -48,8 +48,8 @@ extension Unidoc.Linker
         init(
             contexts:consuming [SymbolGraph.ModuleContext],
             context:consuming Unidoc.Linker,
-            conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances>,
-            extensions:Unidoc.Extensions)
+            conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, Unidoc.ConformanceList>,
+            extensions:Unidoc.Linker.Table<Unidoc.Extension>)
         {
             self.contexts = contexts
             self.context = context
@@ -75,9 +75,9 @@ extension Unidoc.Linker.Tables
     {
         let modules:[SymbolGraph.ModuleContext] = context.modules()
 
-        var extensions:Unidoc.Extensions = [:]
+        var extensions:Unidoc.Linker.Table<Unidoc.Extension> = [:]
 
-        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, ProtocolConformances> =
+        let conformances:SymbolGraph.Table<SymbolGraph.DeclPlane, Unidoc.ConformanceList> =
             context.current.decls.nodes.map
         {
             $1.extensions.isEmpty ? [:] : extensions.add($1.extensions,
@@ -109,30 +109,21 @@ extension Unidoc.Linker.Tables
 extension Unidoc.Linker.Tables
 {
     borrowing
-    func _linkConformingTypes()
+    func linkConformingTypes() -> Unidoc.Linker.Table<Unidoc.Conformers>
     {
-        var conformers:[Unidoc.Scalar: [Unidoc.ExtensionConditions: [Unidoc.Scalar]]] = [:]
+        var types:Unidoc.Linker.Table<Unidoc.Conformers> = [:]
 
-        for (d, conformances):(Int32, ProtocolConformances) in zip(
-            context.current.decls.nodes.indices,
-            conformances)
+        for (d, conformances):(Int32, Unidoc.ConformanceList) in zip(
+            self.current.decls.nodes.indices,
+            self.conformances)
         {
-            guard
-            let d:Unidoc.Scalar = context.current.scalars.decls[d]
-            else
+            if  let d:Unidoc.Scalar = self.current.scalars.decls[d]
             {
-                continue
-            }
-
-            for (p, conditions):(Unidoc.Scalar, [Unidoc.ExtensionConditions])
-                in conformances
-            {
-                for condition:Unidoc.ExtensionConditions in conditions
-                {
-                    conformers[p, default: [:]][condition, default: []].append(d)
-                }
+                types.add(conformances: conformances, of: d)
             }
         }
+
+        return types
     }
 
     /// This **must** be called before ``linkCultures``!
@@ -226,7 +217,7 @@ extension Unidoc.Linker.Tables
                     module: self.current.namespaces[decls.index])
 
                 for (d, (node, conformances)):
-                    (Int32, (SymbolGraph.DeclNode, ProtocolConformances)) in zip(
+                    (Int32, (SymbolGraph.DeclNode, Unidoc.ConformanceList)) in zip(
                     decls.range,
                     zip(self.current.decls.nodes[decls.range],
                         self.conformances[decls.range]))
@@ -449,9 +440,9 @@ extension Unidoc.Linker.Tables
             self.current.decls.nodes[range]))
         {
             /// Is this declaration contained in an extension?
-            let e:Unidoc.ExtensionBody.ID? = self.extensionContainingNested[d]
+            let e:Unidoc.LinkerIndex<Unidoc.Extension>? = self.extensionContainingNested[d]
             /// Is this declaration a member of a topic?
-            let group:Unidoc.Group.ID? = self.groupContainingMember[d]
+            let group:Unidoc.Group? = self.groupContainingMember[d]
             /// Is this declaration a top-level member of its module?
             /// (Being a top-level declaration is the only way this can be nil.)
             let scope:Unidoc.Scalar? = self.current.scope(of: d)

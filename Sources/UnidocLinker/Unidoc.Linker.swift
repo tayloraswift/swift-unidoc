@@ -111,23 +111,26 @@ extension Unidoc.Linker
     {
         var tables:Tables = .init(context: consume self)
 
+        let conformances:Table<Unidoc.Conformers> = tables.linkConformingTypes()
         let products:[Unidoc.ProductVertex] = tables.linkProducts()
         let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
 
         let articles:[Unidoc.ArticleVertex] = tables.articles
         let decls:[Unidoc.DeclVertex] = tables.decls
         let groups:Unidoc.Volume.Groups = tables.groups
-        let extensions:Unidoc.Extensions = tables.extensions
+        let extensions:Table<Unidoc.Extension> = tables.extensions
 
         self = (consume tables).context
 
-        return .init(extensions: extensions,
+        return .init(
+            conformances: conformances,
+            extensions: extensions,
             products: products,
             cultures: cultures,
             articles: articles,
             decls: decls,
             groups: groups,
-            context: self)
+            linker: self)
     }
 
     public consuming
@@ -437,28 +440,6 @@ extension Unidoc.Linker
             self = (consume resolver).context
             throw error
         }
-    }
-}
-
-extension Unidoc.Linker
-{
-    func assemble(extension:Unidoc.ExtensionBody,
-        signature:Unidoc.ExtensionSignature) -> Unidoc.ExtensionGroup
-    {
-        let prefetch:[Unidoc.Scalar] = []
-        //  TODO: compute tertiary scalars
-
-        return .init(id: `extension`.id.in(self.current.id),
-            constraints: signature.conditions.constraints,
-            culture: self.current.id + signature.culture,
-            scope: signature.extendee,
-            conformances: self.sort(lexically: `extension`.conformances),
-            features: self.sort(lexically: `extension`.features),
-            nested: self.sort(lexically: `extension`.nested),
-            subforms: self.sort(lexically: `extension`.subforms),
-            prefetch: prefetch,
-            overview: `extension`.overview,
-            details: `extension`.details)
     }
 }
 extension Unidoc.Linker

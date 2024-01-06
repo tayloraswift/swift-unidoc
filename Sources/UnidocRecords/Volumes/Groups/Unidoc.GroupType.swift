@@ -3,7 +3,7 @@ import Unidoc
 
 extension Unidoc
 {
-    /// Tag bits for ``Unidoc.Group.ID``.
+    /// Tag bits for ``Unidoc.Group``.
     @frozen public
     enum GroupType:UInt32, Equatable, Sendable
     {
@@ -17,7 +17,7 @@ extension Unidoc
 extension Unidoc.GroupType
 {
     @inlinable public
-    func id(_ i:Int, in edition:Unidoc.Edition) -> Unidoc.Group.ID
+    func id(_ i:Int, in edition:Unidoc.Edition) -> Unidoc.Group
     {
         precondition(0 ... 0x00_FFFFFF ~= i)
         let citizen:Int32 = .init(bitPattern: self.rawValue) | Int32.init(i)

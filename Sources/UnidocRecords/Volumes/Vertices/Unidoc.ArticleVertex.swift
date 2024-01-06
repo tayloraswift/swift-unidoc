@@ -29,7 +29,7 @@ extension Unidoc
         public
         var details:Unidoc.Passage?
         public
-        var group:Unidoc.Group.ID?
+        var group:Unidoc.Group?
 
         @inlinable public
         init(id:Unidoc.Scalar,
@@ -39,7 +39,7 @@ extension Unidoc
             headline:MarkdownBytecode = [],
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            group:Unidoc.Group.ID? = nil)
+            group:Unidoc.Group? = nil)
         {
             self.id = id
             self.stem = stem

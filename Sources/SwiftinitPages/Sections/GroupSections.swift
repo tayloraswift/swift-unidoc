@@ -56,12 +56,12 @@ struct GroupSections
 extension GroupSections
 {
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-        organizing groups:/*consuming*/ [Unidoc.Group],
+        organizing groups:/*consuming*/ [Unidoc.AnyGroup],
         vertex:borrowing Unidoc.DeclVertex? = nil,
         bias:Unidoc.Scalar? = nil,
         mode:Mode? = nil)
     {
-        let container:Unidoc.Group.ID?
+        let container:Unidoc.Group?
         let generics:Generics
         if  let vertex:Unidoc.DeclVertex = copy vertex
         {
@@ -89,7 +89,7 @@ extension GroupSections
         var extensions:[(Unidoc.ExtensionGroup, Partisanship, Genericness)] = []
         var curated:Set<Unidoc.Scalar> = [self.context.id]
 
-        for group:Unidoc.Group in groups
+        for group:Unidoc.AnyGroup in groups
         {
             switch group
             {
@@ -233,7 +233,7 @@ extension GroupSections:HTML.OutputStreamable
 
                     $0[.ul]
                     {
-                        for member:Unidoc.VertexLink in group.members
+                        for member:Unidoc.TopicMember in group.members
                         {
                             switch member
                             {

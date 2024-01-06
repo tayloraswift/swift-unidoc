@@ -3,7 +3,7 @@ import UnidocDiagnostics
 
 enum DroppedPassagesError:Equatable, Error
 {
-    case fromExtension(Unidoc.ExtensionBody.ID, of:Unidoc.Scalar)
+    case fromExtension(Unidoc.LinkerIndex<Unidoc.Extension>, of:Unidoc.Scalar)
 }
 extension DroppedPassagesError:Diagnostic
 {
