@@ -14,15 +14,22 @@ extension Unidoc
         let scope:Scalar
 
         public
-        var types:[ConformingType]
+        var unconditional:[Unidoc.Scalar]
+        public
+        var conditional:[ConformingType]
 
         @inlinable public
-        init(id:Group, culture:Scalar, scope:Scalar, types:[ConformingType] = [])
+        init(id:Group,
+            culture:Scalar,
+            scope:Scalar,
+            unconditional:[Unidoc.Scalar] = [],
+            conditional:[ConformingType] = [])
         {
             self.id = id
             self.culture = culture
             self.scope = scope
-            self.types = types
+            self.unconditional = unconditional
+            self.conditional = conditional
         }
     }
 }

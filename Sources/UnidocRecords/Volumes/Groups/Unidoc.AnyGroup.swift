@@ -67,8 +67,11 @@ extension Unidoc.AnyGroup
         case members = "t"
 
         /// Optional and appears in ``ConformingTypesGroup`` only.
+        /// The field contains a list of scalars.
+        case unconditional = "u"
+        /// Optional and appears in ``ConformingTypesGroup`` only.
         /// The field contains a list of conforming types, which contain scalars.
-        case types = "k"
+        case conditional = "k"
 
         /// Contains a list of precomputed zones, as MongoDB cannot easily
         /// convert scalars to zones. This field will be computed and
@@ -119,11 +122,12 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
-            //  This is the only array field and there is no reason why it would ever be empty.
-            bson[.types] = self.types
+            bson[.unconditional] = self.unconditional.isEmpty ? nil : self.unconditional
+            bson[.conditional] = self.conditional.isEmpty ? nil : self.conditional
 
             zones.update(with: self.culture.edition)
-            zones.update(with: self.types)
+            zones.update(with: self.unconditional)
+            zones.update(with: self.conditional)
 
         case .extension(let self):
             bson[.constraints] = self.constraints.isEmpty ? nil : self.constraints
@@ -186,7 +190,8 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
             self = .conformers(.init(id: id,
                 culture: try bson[.culture].decode(),
                 scope: try bson[.scope].decode(),
-                types: try bson[.types].decode()))
+                unconditional: try bson[.unconditional]?.decode() ?? [],
+                conditional: try bson[.conditional]?.decode() ?? []))
 
         case .extension?:
             self = .extension(.init(id: id,
