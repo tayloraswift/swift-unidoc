@@ -73,7 +73,7 @@ extension SymbolQueries.TestCase
                 {
                     switch group
                     {
-                    case .conformers:
+                    case .conformer:
                         continue
 
                     case .polygonal:

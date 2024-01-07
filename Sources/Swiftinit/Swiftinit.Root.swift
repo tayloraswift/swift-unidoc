@@ -15,6 +15,8 @@ extension Swiftinit
         case login
         case lunr
         case plugin
+        case ptcl
+        case pdct
         case realm
         case stats
         case tags
@@ -55,6 +57,8 @@ extension Swiftinit.Root:Identifiable
         case .login:        "login"
         case .lunr:         "lunr"
         case .plugin:       "plugin"
+        case .ptcl:         "ptcl"
+        case .pdct:         "pdct"
         case .realm:        "realm"
         case .stats:        "stats"
         case .tags:         "tags"

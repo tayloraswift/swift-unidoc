@@ -85,7 +85,7 @@ extension UnidocDatabase.Groups
                 let realm:Unidoc.Realm
                 else
                 {
-                    $0 += groups.conformers.lazy.map(Unidoc.AnyGroup.conformers(_:))
+                    $0 += groups.conformers.lazy.map(Unidoc.AnyGroup.conformer(_:))
                     $0 += groups.extensions.lazy.map(Unidoc.AnyGroup.extension(_:))
                     return
                 }
@@ -94,7 +94,7 @@ extension UnidocDatabase.Groups
                 {
                     $0[Unidoc.AnyGroup.CodingKey.self]
                     {
-                        Unidoc.AnyGroup.conformers(group).encode(to: &$0)
+                        Unidoc.AnyGroup.conformer(group).encode(to: &$0)
 
                         $0[.realm] = realm
                     }

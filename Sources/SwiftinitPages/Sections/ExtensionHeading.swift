@@ -10,18 +10,19 @@ struct ExtensionHeading
     let display:String
     private
     let culture:Unidoc.Scalar
+
     private
-    let `where`:[GenericConstraint<Unidoc.Scalar?>]
+    let constraints:[GenericConstraint<Unidoc.Scalar?>]
 
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         display:String,
         culture:Unidoc.Scalar,
-        where:[GenericConstraint<Unidoc.Scalar?>])
+        where constraints:[GenericConstraint<Unidoc.Scalar?>])
     {
         self.context = context
         self.display = display
         self.culture = culture
-        self.where = `where`
+        self.constraints = constraints
     }
 }
 extension ExtensionHeading:HTML.OutputStreamable
@@ -35,6 +36,6 @@ extension ExtensionHeading:HTML.OutputStreamable
             $0 ?= self.context.link(module: self.culture)
         }
 
-        html[.code] { $0.class = "constraints" } = self.context.constraints(self.where)
+        html[.code] { $0.class = "constraints" } = self.context.constraints(self.constraints)
     }
 }

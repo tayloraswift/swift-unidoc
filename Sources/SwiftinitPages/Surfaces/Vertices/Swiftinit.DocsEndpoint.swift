@@ -1,10 +1,8 @@
 import HTTP
-import Media
 import MongoDB
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
-import URI
 
 extension Swiftinit
 {

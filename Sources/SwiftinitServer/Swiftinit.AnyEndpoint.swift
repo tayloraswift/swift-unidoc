@@ -203,6 +203,18 @@ extension Swiftinit.AnyEndpoint
     }
 
     static
+    func get(ptcl trunk:String,
+        _ stem:ArraySlice<String>,
+        with parameters:Swiftinit.PipelineParameters) -> Self
+    {
+        .explainable(Swiftinit.PtclEndpoint.init(query: .init(
+                volume: .init(trunk),
+                vertex: .init(path: stem, hash: parameters.hash),
+                layer: .protocols)),
+            parameters: parameters)
+    }
+
+    static
     func get(realm trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
@@ -217,12 +229,9 @@ extension Swiftinit.AnyEndpoint
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        let volume:Unidoc.VolumeSelector = .init(trunk)
-        let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
-
-        return .explainable(Swiftinit.StatsEndpoint.init(query: .init(
-                volume: volume,
-                vertex: shoot)),
+        .explainable(Swiftinit.StatsEndpoint.init(query: .init(
+                volume: .init(trunk),
+                vertex: .init(path: stem, hash: parameters.hash))),
             parameters: parameters)
     }
 

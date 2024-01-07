@@ -235,8 +235,8 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                 }
             }
 
-            if  let containing:Unidoc.ExtensionGroup = self.groups.containing,
-                let list:ConstraintsList = self.context.constraints(containing.constraints)
+            if  let peers:Unidoc.ExtensionGroup = self.groups.peers,
+                let list:ConstraintsList = self.context.constraints(peers.constraints)
             {
                 $0[.details, { $0.open = true }]
                 {

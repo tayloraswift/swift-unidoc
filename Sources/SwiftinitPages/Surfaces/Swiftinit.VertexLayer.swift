@@ -41,12 +41,6 @@ extension Swiftinit.VertexLayer
     }
 
     static
-    subscript(volume:Unidoc.VolumeMetadata) -> URI
-    {
-        Self[volume.selector, cdecl: false]
-    }
-
-    static
     subscript(volume:Unidoc.VolumeMetadata, route:Unidoc.Route) -> URI
     {
         var uri:URI = Self[volume.selector, cdecl: route.cdecl]
@@ -55,5 +49,11 @@ extension Swiftinit.VertexLayer
         uri["hash"] = route.hash?.description
 
         return uri
+    }
+
+    static
+    subscript(volume:Unidoc.VolumeMetadata) -> URI
+    {
+        Self[volume.selector, cdecl: false]
     }
 }

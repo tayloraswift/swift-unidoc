@@ -1,5 +1,4 @@
 import HTTP
-import Media
 import MongoDB
 import UnidocDB
 import UnidocQueries
@@ -8,7 +7,7 @@ import UnidocRecords
 extension Swiftinit
 {
     @frozen public
-    struct BlogEndpoint:Mongo.SingleOutputEndpoint
+    struct PtclEndpoint:Mongo.SingleOutputEndpoint
     {
         public
         let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
@@ -23,7 +22,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.BlogEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
+extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
     public static
     func response(
@@ -34,8 +33,23 @@ extension Swiftinit.BlogEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
     {
         switch vertex
         {
-        case .article(let vertex):
-            let page:Swiftinit.Blog.ArticlePage = .init(context.page, vertex: vertex)
+        case .decl(let vertex):
+            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
+                volume: context.page.volume,
+                tree: tree)
+
+            let groups:GroupSections = .init(context.page,
+                organizing: consume groups,
+                vertex: vertex,
+                bias: vertex.culture,
+                mode: .decl(vertex.phylum, vertex.kinks))
+
+            let page:Swiftinit.PtclPage = try .init(context.page,
+                canonical: context.canonical,
+                sidebar: sidebar,
+                vertex: vertex,
+                groups: groups)
+
             return .ok(page.resource(format: context.format))
 
         case let unexpected:

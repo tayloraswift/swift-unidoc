@@ -7,7 +7,7 @@ extension Unidoc
     @frozen public
     enum GroupType:UInt32, Equatable, Sendable
     {
-        case  conformers    = 0x00_000000
+        case  conformer     = 0x00_000000
 
         case  polygon       = 0xC0_000000
         case `extension`    = 0xC2_000000

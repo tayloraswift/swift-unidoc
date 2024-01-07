@@ -36,7 +36,7 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
     typealias Signature = Unidoc.ConformanceSignature
 
     static
-    var type:Unidoc.GroupType { .conformers }
+    var type:Unidoc.GroupType { .conformer }
 
     var isEmpty:Bool
     {
