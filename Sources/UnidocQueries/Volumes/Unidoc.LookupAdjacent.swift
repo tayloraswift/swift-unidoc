@@ -8,13 +8,26 @@ extension Unidoc
 {
     /// A context mode that looks up all adjacent scalars and volumes.
     @frozen public
-    enum LookupAdjacent
+    struct LookupAdjacent:Sendable
     {
+        @usableFromInline
+        let layer:GroupLayer?
+
+        @inlinable
+        init(layer:GroupLayer?)
+        {
+            self.layer = layer
+        }
     }
+}
+extension Unidoc.LookupAdjacent
+{
+    private
+    var predicate:Unidoc.GroupLayerPredicate { .init(self.layer) }
 }
 extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
-    public static
+    public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
@@ -24,31 +37,25 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 
         pipeline[.lookup] = .init
         {
-            let `extension`:Group = .init(id: "extension")
-            let topic:Group = .init(id: "topic")
+            let special:SpecialGroups
 
-            let local:Unidoc.LockedExtensionsPredicate = .init(layer: .default,
+            switch self.layer
+            {
+            case .protocols?:   special = .protocols
+            default:            special = .default(.init(peers: "peers", topic: "topic"))
+            }
+
+            let local:LockedExtensions = .init(layer: self.predicate,
                 scope: "local",
                 min: "min",
                 max: "max")
-            let realm:Unidoc.LatestExtensionsPredicate = .init(layer: .default,
+            let realm:LatestExtensions = .init(layer: self.predicate,
                 scope: "scope",
                 id: "realm")
 
             $0[.from] = UnidocDatabase.Groups.name
             $0[.let] = .init
             {
-                $0[let: `extension`.id] = .expr
-                {
-                    //  `BSON.max` is a safe choice for a group `_id` that will never
-                    //  match anything.
-                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.extension], BSON.Max.init())
-                }
-                $0[let: topic.id] = .expr
-                {
-                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.group], BSON.Max.init())
-                }
-
                 $0[let: local.scope] = .expr
                 {
                     $0[.coalesce] =
@@ -78,6 +85,24 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     $0[.coalesce] = (volume / Unidoc.VolumeMetadata[.realm], BSON.Max.init())
                 }
+
+                guard
+                case .default(let special) = special
+                else
+                {
+                    return
+                }
+
+                $0[let: special.peers] = .expr
+                {
+                    //  `BSON.max` is a safe choice for a group `_id` that will never
+                    //  match anything.
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.extension], BSON.Max.init())
+                }
+                $0[let: special.topic] = .expr
+                {
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.group], BSON.Max.init())
+                }
             }
             $0[.pipeline] = .init
             {
@@ -87,8 +112,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                     {
                         $0[.or] = .init
                         {
-                            $0 += `extension`
-                            $0 += topic
+                            $0 += special
                             $0 += local
                             $0 += realm
                         }
@@ -99,7 +123,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         }
     }
 
-    public static
+    public
     func edges(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
@@ -108,29 +132,21 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:
-                Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
-                in: volume / Unidoc.VolumeMetadata[.dependencies])
-            let extensions:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath> = .init(
-                in: groups)
-            let adjacent:ScalarsView = .init(
-                in: vertex)
-
             $0[output.volumes] = .expr
             {
-                $0[.setUnion] = .init
-                {
-                    $0.expr { $0[.reduce] = extensions.flatMap(\.zones) }
-                    $0.expr { $0[.map] = dependencies.map { $0[.pinned] } }
-                }
+                let adjacent:Volumes = .init(
+                    upstream: .init(in: volume / Unidoc.VolumeMetadata[.dependencies]),
+                    groups: .init(in: groups))
+
+                $0[.setUnion] = .init { $0 += adjacent }
             }
             $0[output.scalars] = .expr
             {
-                $0[.setUnion] = .init
-                {
-                    $0.expr { $0[.reduce] = extensions.flatMap(\.scalars) }
-                    $0 += adjacent
-                }
+                let adjacent:Vertices = .init(layer: self.predicate,
+                    groups: .init(in: groups),
+                    vertex: vertex)
+
+                $0[.setUnion] = .init  { $0 += adjacent }
             }
         }
     }
