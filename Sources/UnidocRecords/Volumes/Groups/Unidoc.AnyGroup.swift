@@ -9,7 +9,7 @@ extension Unidoc
     @frozen public
     enum AnyGroup:Equatable, Sendable
     {
-        case  conformers(ConformerGroup)
+        case  conformer(ConformerGroup)
 
         case `extension`(ExtensionGroup)
         case  polygonal(PolygonalGroup)
@@ -97,7 +97,7 @@ extension Unidoc.AnyGroup:Identifiable
     {
         switch self
         {
-        case .conformers(let group):    group.id
+        case .conformer(let group):     group.id
         case .extension(let group):     group.id
         case .polygonal(let group):     group.id
         case .topic(let group):         group.id
@@ -116,7 +116,7 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
 
         switch self
         {
-        case .conformers(let self):
+        case .conformer(let self):
             bson[.layer] = Unidoc.GroupLayer.protocols
 
             bson[.culture] = self.culture
@@ -186,8 +186,8 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
         let id:ID = try bson[.id].decode()
         switch id.plane
         {
-        case .conformers?:
-            self = .conformers(.init(id: id,
+        case .conformer?:
+            self = .conformer(.init(id: id,
                 culture: try bson[.culture].decode(),
                 scope: try bson[.scope].decode(),
                 unconditional: try bson[.unconditional]?.decode() ?? [],

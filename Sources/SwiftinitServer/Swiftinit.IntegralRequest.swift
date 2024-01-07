@@ -195,15 +195,19 @@ extension Swiftinit.IntegralRequest
         case Swiftinit.Root.plugin.id:
             endpoint = .interactive(Swiftinit.DashboardEndpoint.plugin(trunk))
 
+        case Swiftinit.Root.ptcl.id:
+            endpoint = .get(ptcl: trunk, path,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Swiftinit.Root.realm.id:
+            endpoint = .get(realm: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
+
         //  Deprecated route.
         case "sitemaps":
             endpoint = .redirect("""
                 \(Swiftinit.Root.docs)/\(trunk.prefix { $0 != "." })/all-symbols
                 """)
-
-        case Swiftinit.Root.realm.id:
-            endpoint = .get(realm: trunk,
-                with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.stats.id:
             endpoint = .get(stats: trunk, path,

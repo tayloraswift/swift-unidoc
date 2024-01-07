@@ -13,6 +13,23 @@ extension Unidoc
         case global
     }
 }
+extension Unidoc.VertexTypeError
+{
+    static
+    func reject(_ vertex:Unidoc.AnyVertex) -> Self
+    {
+        switch vertex
+        {
+        case .article:  .article
+        case .culture:  .culture
+        case .decl:     .decl
+        case .file:     .file
+        case .product:  .product
+        case .foreign:  .foreign
+        case .global:   .global
+        }
+    }
+}
 extension Unidoc.VertexTypeError:CustomStringConvertible
 {
     var description:String

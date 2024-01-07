@@ -15,14 +15,17 @@ struct GroupSections
     private
     let superforms:[Unidoc.Scalar]?
 
-    private(set)
-    var containing:Unidoc.ExtensionGroup?
+    private
+    var conformers:[Unidoc.ConformerGroup]
     private
     var extensions:[Unidoc.ExtensionGroup]
     private
     var topics:[Unidoc.TopicGroup]
     private
     var other:[(AutomaticHeading, [Unidoc.Scalar])]
+
+    private(set)
+    var peers:Unidoc.ExtensionGroup?
 
     private
     let bias:Unidoc.Scalar?
@@ -33,10 +36,11 @@ struct GroupSections
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         requirements:[Unidoc.Scalar]?,
         superforms:[Unidoc.Scalar]?,
-        containing:Unidoc.ExtensionGroup? = nil,
+        conformers:[Unidoc.ConformerGroup] = [],
         extensions:[Unidoc.ExtensionGroup] = [],
         topics:[Unidoc.TopicGroup] = [],
         other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
+        peers:Unidoc.ExtensionGroup? = nil,
         bias:Unidoc.Scalar?,
         mode:Mode?)
     {
@@ -44,11 +48,11 @@ struct GroupSections
 
         self.requirements = requirements
         self.superforms = superforms
-
-        self.containing = containing
+        self.conformers = conformers
         self.extensions = extensions
         self.topics = topics
         self.other = other
+        self.peers = peers
         self.bias = bias
         self.mode = mode
     }
@@ -93,14 +97,13 @@ extension GroupSections
         {
             switch group
             {
-            case .conformers:
-                //  Unimplemented.
-                continue
+            case .conformer(let group):
+                self.conformers.append(group)
 
             case .extension(let group):
                 if  case group.id? = container
                 {
-                    self.containing = group
+                    self.peers = group
                     continue
                 }
 
@@ -174,9 +177,12 @@ extension GroupSections
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
 
-        self.containing = self.containing.map { $0.subtracting(curated) }
+        //  No need to filter the conformers, as it should never appear alongside any custom
+        //  curated groups.
+        self.peers = self.peers.map { $0.subtracting(curated) }
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
+        self.conformers.sort { $0.id < $1.id }
         self.topics.sort { $0.id < $1.id }
         self.other.sort { $0.0 < $1.0 }
     }
@@ -184,33 +190,40 @@ extension GroupSections
 extension GroupSections
 {
     private
-    func heading(for extension:Unidoc.ExtensionGroup) -> ExtensionHeading
+    func heading(culture:Unidoc.Scalar,
+        constraints:[GenericConstraint<Unidoc.Scalar?>] = []) -> ExtensionHeading
     {
         let display:String
         switch (self.bias, self.bias?.edition)
         {
-        case (`extension`.culture?, _):     display = "Citizens in "
-        case (_, `extension`.id.edition?):  display = "Available in "
-        case (_,                    _):     display = "Extension in "
+        case (culture?, _):         display = "Citizens in "
+        case (_, culture.edition?): display = "Available in "
+        case (_,                _): display = "Extension in "
         }
 
-        return .init(self.context,
-            display: display,
-            culture: `extension`.culture,
-            where: `extension`.constraints)
+        return .init(self.context, display: display, culture: culture, where: constraints)
+    }
+    private
+    func heading(for group:Unidoc.ConformerGroup) -> ExtensionHeading
+    {
+        self.heading(culture: group.culture)
+    }
+    private
+    func heading(for group:Unidoc.ExtensionGroup) -> ExtensionHeading
+    {
+        self.heading(culture: group.culture, constraints: group.constraints)
+    }
+
+    private
+    func list(_ types:__owned [Unidoc.ConformingType]) -> Swiftinit.DenseList?
+    {
+        types.isEmpty ? nil : .init(self.context, members: types)
     }
 
     private
     func list(_ scalars:__owned [Unidoc.Scalar], under heading:String? = nil) -> GroupList?
     {
-        if  scalars.isEmpty
-        {
-            nil
-        }
-        else
-        {
-            .init(self.context, heading: heading, scalars: scalars)
-        }
+        scalars.isEmpty ? nil : .init(self.context, heading: heading, scalars: scalars)
     }
 }
 
@@ -351,17 +364,28 @@ extension GroupSections:HTML.OutputStreamable
             }
         }
 
-        if  let sisters:Unidoc.ExtensionGroup = self.containing, !sisters.nested.isEmpty
+        if  let peers:Unidoc.ExtensionGroup = self.peers, !peers.nested.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
             {
                 AutomaticHeading.otherMembers.window(&$0,
-                    listing: sisters.nested,
+                    listing: peers.nested,
                     limit: 12,
                     open: self.extensions.allSatisfy(\.isEmpty))
                 {
                     $0 ?= self.context.card($1)
                 }
+            }
+        }
+
+        for group:Unidoc.ConformerGroup in self.conformers
+        {
+            html[.section, { $0.class = "group conformer" }]
+            {
+                $0 += self.heading(for: group)
+
+                $0[.ul] = self.list(group.unconditional.map { .init(id: $0, where: []) }
+                    + group.conditional)
             }
         }
 

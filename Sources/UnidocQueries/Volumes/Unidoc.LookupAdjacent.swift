@@ -10,7 +10,7 @@ extension Unidoc
     @frozen public
     struct LookupAdjacent:Sendable
     {
-        @usableFromInline
+        public
         let layer:GroupLayer?
 
         @inlinable
