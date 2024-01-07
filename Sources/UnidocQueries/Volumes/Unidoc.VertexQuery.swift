@@ -18,20 +18,38 @@ extension Unidoc
     /// The `Type` parameter allows you to transmit type information to the ``LookupOutput``.
     /// If no type information is needed, use `Any`.
     @frozen public
-    struct VertexQuery<Context>:Equatable, Hashable, Sendable
-        where Context:Unidoc.LookupContext
+    struct VertexQuery<Context>:Sendable where Context:Unidoc.LookupContext & Sendable
     {
         public
         let volume:VolumeSelector
         public
         let vertex:Shoot
+        public
+        let lookup:Context
 
-        @inlinable public
-        init(volume:VolumeSelector, lookup vertex:Shoot)
+        @inlinable
+        init(volume:VolumeSelector, vertex:Shoot, lookup:Context)
         {
             self.volume = volume
             self.vertex = vertex
+            self.lookup = lookup
         }
+    }
+}
+extension Unidoc.VertexQuery<Unidoc.LookupLimited>
+{
+    @inlinable public
+    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot)
+    {
+        self.init(volume: volume, vertex: vertex, lookup: .limited)
+    }
+}
+extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
+{
+    @inlinable public
+    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot, layer:Unidoc.GroupLayer? = nil)
+    {
+        self.init(volume: volume, vertex: vertex, lookup: .init(layer: layer))
     }
 }
 extension Unidoc.VertexQuery:Mongo.PipelineQuery
@@ -195,7 +213,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         }
 
         //  Gather all the extensions to the principal vertex.
-        Context.groups(&pipeline,
+        self.lookup.groups(&pipeline,
             volume: Unidoc.PrincipalOutput[.volume],
             vertex: Unidoc.PrincipalOutput[.vertex],
             output: Unidoc.PrincipalOutput[.groups])
@@ -204,7 +222,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  The extensions have precomputed volume ids for MongoDB’s convenience.
         let edges:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath) = ("scalars", "volumes")
 
-        Context.edges(&pipeline,
+        self.lookup.edges(&pipeline,
             volume: Unidoc.PrincipalOutput[.volume],
             vertex: Unidoc.PrincipalOutput[.vertex],
             groups: Unidoc.PrincipalOutput[.groups],

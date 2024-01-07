@@ -3,17 +3,17 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Unidoc
+extension Unidoc.LookupAdjacent
 {
-    struct LockedExtensionsPredicate
+    struct LockedExtensions
     {
-        let layer:GroupLayerPredicate
+        let layer:Unidoc.GroupLayerPredicate
         let scope:Mongo.Variable<Unidoc.Scalar>
         let min:Mongo.Variable<BSON.Identifier>
         let max:Mongo.Variable<BSON.Identifier>
 
         init(
-            layer:GroupLayerPredicate,
+            layer:Unidoc.GroupLayerPredicate,
             scope:Mongo.Variable<Unidoc.Scalar>,
             min:Mongo.Variable<BSON.Identifier>,
             max:Mongo.Variable<BSON.Identifier>)
@@ -25,7 +25,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.LockedExtensionsPredicate
+extension Unidoc.LookupAdjacent.LockedExtensions
 {
     static
     func += (list:inout BSON.ListEncoder, self:Self)

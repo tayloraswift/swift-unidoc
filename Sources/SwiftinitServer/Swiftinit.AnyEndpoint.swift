@@ -145,7 +145,7 @@ extension Swiftinit.AnyEndpoint
     {
         .explainable(Swiftinit.BlogEndpoint.init(query: .init(
                 volume: .init(package: "__swiftinit", version: "__max"),
-                lookup: .init(path: ["Articles", trunk], hash: nil))),
+                vertex: .init(path: ["Articles", trunk], hash: nil))),
             parameters: parameters)
     }
 
@@ -171,7 +171,7 @@ extension Swiftinit.AnyEndpoint
             let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
             return .explainable(Swiftinit.DocsEndpoint.init(query: .init(
                     volume: volume,
-                    lookup: shoot)),
+                    vertex: shoot)),
                 parameters: parameters)
         }
     }
@@ -222,7 +222,7 @@ extension Swiftinit.AnyEndpoint
 
         return .explainable(Swiftinit.StatsEndpoint.init(query: .init(
                 volume: volume,
-                lookup: shoot)),
+                vertex: shoot)),
             parameters: parameters)
     }
 
