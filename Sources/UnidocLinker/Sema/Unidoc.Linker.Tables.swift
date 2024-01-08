@@ -324,7 +324,8 @@ extension Unidoc.Linker.Tables
                 //  Create top-level polygon.
                 self.groups.polygons.append(.init(id: self.next.polygon(),
                     scope: namespace.culture,
-                    members: self.context.sort(lexically: consume miscellaneous)))
+                    members: self.context.sort(consume miscellaneous,
+                        by: Unidoc.SemanticPriority.self)))
             }
             //  Create article records.
             if  let articles:ClosedRange<Int32> = culture.articles
@@ -493,8 +494,8 @@ extension Unidoc.Linker.Tables
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
                 stem: .decl(namespace.module, decl.path, orientation: decl.phylum.orientation),
-                requirements: self.context.sort(lexically: requirements),
-                superforms: self.context.sort(lexically: superforms),
+                requirements: self.context.sort(requirements, by: Unidoc.SemanticPriority.self),
+                superforms: self.context.sort(superforms, by: Unidoc.SemanticPriority.self),
                 namespace: namespace.id,
                 culture: namespace.culture,
                 scope: scope.map { self.context.expand($0) } ?? [],

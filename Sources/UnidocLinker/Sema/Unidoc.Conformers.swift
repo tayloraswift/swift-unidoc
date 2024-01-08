@@ -50,8 +50,7 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
         .init(id: self.id.in(linker.current.id),
             culture: linker.current.id + signature.culture,
             scope: signature.conformance,
-            unconditional: self.unconditional,
-            conditional: self.conditional)
-            // do we need to sort this?
+            unconditional: linker.sort(self.unconditional, by: Unidoc.LexicalPriority.self),
+            conditional: linker.sort(self.conditional, by: Unidoc.LexicalPriority.self))
     }
 }

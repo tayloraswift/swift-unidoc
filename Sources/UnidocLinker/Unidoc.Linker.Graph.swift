@@ -116,23 +116,6 @@ extension Unidoc.Linker.Graph
 }
 extension Unidoc.Linker.Graph
 {
-    func priority(of decl:Unidoc.Scalar) -> Unidoc.Linker.SortPriority?
-    {
-        if  let local:Int32 = decl - self.id,
-            let decl:SymbolGraph.Decl = self.decls[local]?.decl
-        {
-            let phylum:Unidoc.Linker.SortPriority.Phylum = .init(decl.phylum,
-                position: decl.location?.position)
-            return decl.signature.availability.isGenerallyRecommended ?
-                .available(phylum, decl.path.last, local) :
-                .removed(phylum, decl.path.last, local)
-        }
-        else
-        {
-            return nil
-        }
-    }
-
     func namespace(of declaration:Unidoc.Scalar) -> Symbol.Module?
     {
         (declaration - self.id).map(self.namespace(of:)) ?? nil

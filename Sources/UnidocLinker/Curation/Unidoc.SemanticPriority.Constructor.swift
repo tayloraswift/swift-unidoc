@@ -1,6 +1,6 @@
 import Sources
 
-extension Unidoc.Linker.SortPriority
+extension Unidoc.SemanticPriority
 {
     enum Constructor:Equatable, Comparable
     {

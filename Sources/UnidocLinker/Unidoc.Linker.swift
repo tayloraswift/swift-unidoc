@@ -444,22 +444,17 @@ extension Unidoc.Linker
 }
 extension Unidoc.Linker
 {
-    /// Get the sort-priority of a declaration.
-    func priority(of decl:Unidoc.Scalar) -> SortPriority?
-    {
-        self[decl.package]?.priority(of: decl)
-    }
-
-    func sort(lexically decls:consuming [Unidoc.Scalar]) -> [Unidoc.Scalar]
+    func sort<Decl, Priority>(_ decls:consuming [Decl], by _:Priority.Type) -> [Decl]
+        where Decl:Identifiable<Unidoc.Scalar>, Priority:Unidoc.SortPriority
     {
         decls.sort
         {
-            switch (self.priority(of: $0), self.priority(of: $1))
+            switch (Priority.of(decl: $0.id, in: self), Priority.of(decl: $1.id, in: self))
             {
-            case (nil, nil):            $0 < $1
-            case (nil,  _?):            true
-            case ( _?, nil):            false
-            case (let lhs?, let rhs?):  lhs < rhs
+            case (nil, nil):        $0.id < $1.id
+            case (nil,  _?):        true
+            case ( _?, nil):        false
+            case (let a?, let b?):  a  <  b
             }
         }
 

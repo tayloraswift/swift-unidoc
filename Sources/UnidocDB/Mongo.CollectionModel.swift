@@ -499,7 +499,9 @@ extension Mongo.CollectionModel
         return deletions.deleted
     }
 }
-extension Mongo.CollectionModel<Unidoc.Scalar>
+//  TODO: we need to unify ``Unidoc.Scalar`` and ``Unidoc.Group`, most likely by introducing
+//  a new type ``Unidoc.Vertex``.
+extension Mongo.CollectionModel // where Element.ID == Unidoc.Scalar
 {
     /// Deletes all records from the collection within the specified zone.
     func clear(range:Unidoc.Edition, with session:Mongo.Session) async throws
