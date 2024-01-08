@@ -1,7 +1,7 @@
 import HTML
 import UnidocRecords
 
-extension GroupList
+extension Swiftinit.GroupList
 {
     struct Card
     {
@@ -18,7 +18,7 @@ extension GroupList
         }
     }
 }
-extension GroupList.Card:HTML.OutputStreamable
+extension Swiftinit.GroupList.Card:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

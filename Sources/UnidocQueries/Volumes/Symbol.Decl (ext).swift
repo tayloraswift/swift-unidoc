@@ -10,7 +10,8 @@ extension Symbol.Decl:Unidoc.VertexPredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        output:Mongo.KeyPath,
+        unset:[Mongo.KeyPath])
     {
         pipeline[.lookup] = .init
         {
@@ -56,6 +57,7 @@ extension Symbol.Decl:Unidoc.VertexPredicate
                 }
 
                 $0[.limit] = 1
+                $0[.unset] = unset
             }
             $0[.as] = output
         }

@@ -70,7 +70,8 @@ extension IdentifiablePageContext<Never?>
 }
 extension IdentifiablePageContext<Unidoc.Scalar>
 {
-    func constraints(_ constraints:[GenericConstraint<Unidoc.Scalar?>]) -> ConstraintsList?
+    func constraints(
+        _ constraints:[GenericConstraint<Unidoc.Scalar?>]) -> Swiftinit.ConstraintsList?
     {
         .init(self, constraints: constraints)
     }
@@ -93,7 +94,7 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 
-    func card(_ scalar:Unidoc.Scalar) -> GroupList.Card?
+    func card(_ scalar:Unidoc.Scalar) -> Swiftinit.GroupList.Card?
     {
         self.cache[scalar].map
         {

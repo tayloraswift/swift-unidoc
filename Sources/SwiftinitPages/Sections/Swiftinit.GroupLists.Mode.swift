@@ -1,6 +1,6 @@
 import Symbols
 
-extension GroupSections
+extension Swiftinit.GroupLists
 {
     enum Mode:Hashable, Equatable, Sendable
     {

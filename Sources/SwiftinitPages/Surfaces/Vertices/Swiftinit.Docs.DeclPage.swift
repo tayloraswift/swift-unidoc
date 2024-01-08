@@ -22,7 +22,7 @@ extension Swiftinit.Docs
         private
         let vertex:Unidoc.DeclVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
         private
         let stem:Unidoc.StemComponents
@@ -31,7 +31,7 @@ extension Swiftinit.Docs
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
-            groups:GroupSections) throws
+            groups:Swiftinit.GroupLists) throws
         {
             self.context = context
             self.canonical = canonical
@@ -236,7 +236,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
 
             if  let peers:Unidoc.ExtensionGroup = self.groups.peers,
-                let list:ConstraintsList = self.context.constraints(peers.constraints)
+                let list:Swiftinit.ConstraintsList = self.context.constraints(peers.constraints)
             {
                 $0[.details, { $0.open = true }]
                 {

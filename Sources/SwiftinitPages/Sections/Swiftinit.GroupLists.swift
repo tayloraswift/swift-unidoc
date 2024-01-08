@@ -6,58 +6,61 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-struct GroupSections
+extension Swiftinit
 {
-    let context:IdentifiablePageContext<Unidoc.Scalar>
-
-    private
-    let requirements:[Unidoc.Scalar]?
-    private
-    let superforms:[Unidoc.Scalar]?
-
-    private
-    var conformers:[Unidoc.ConformerGroup]
-    private
-    var extensions:[Unidoc.ExtensionGroup]
-    private
-    var topics:[Unidoc.TopicGroup]
-    private
-    var other:[(AutomaticHeading, [Unidoc.Scalar])]
-
-    private(set)
-    var peers:Unidoc.ExtensionGroup?
-
-    private
-    let bias:Unidoc.Scalar?
-    private
-    let mode:Mode?
-
-    private
-    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-        requirements:[Unidoc.Scalar]?,
-        superforms:[Unidoc.Scalar]?,
-        conformers:[Unidoc.ConformerGroup] = [],
-        extensions:[Unidoc.ExtensionGroup] = [],
-        topics:[Unidoc.TopicGroup] = [],
-        other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
-        peers:Unidoc.ExtensionGroup? = nil,
-        bias:Unidoc.Scalar?,
-        mode:Mode?)
+    struct GroupLists
     {
-        self.context = context
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
-        self.requirements = requirements
-        self.superforms = superforms
-        self.conformers = conformers
-        self.extensions = extensions
-        self.topics = topics
-        self.other = other
-        self.peers = peers
-        self.bias = bias
-        self.mode = mode
+        private
+        let requirements:[Unidoc.Scalar]?
+        private
+        let superforms:[Unidoc.Scalar]?
+
+        private
+        var conformers:[Unidoc.ConformerGroup]
+        private
+        var extensions:[Unidoc.ExtensionGroup]
+        private
+        var topics:[Unidoc.TopicGroup]
+        private
+        var other:[(AutomaticHeading, [Unidoc.Scalar])]
+
+        private(set)
+        var peers:Unidoc.ExtensionGroup?
+
+        private
+        let bias:Unidoc.Scalar?
+        private
+        let mode:Mode?
+
+        private
+        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+            requirements:[Unidoc.Scalar]?,
+            superforms:[Unidoc.Scalar]?,
+            conformers:[Unidoc.ConformerGroup] = [],
+            extensions:[Unidoc.ExtensionGroup] = [],
+            topics:[Unidoc.TopicGroup] = [],
+            other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
+            peers:Unidoc.ExtensionGroup? = nil,
+            bias:Unidoc.Scalar?,
+            mode:Mode?)
+        {
+            self.context = context
+
+            self.requirements = requirements
+            self.superforms = superforms
+            self.conformers = conformers
+            self.extensions = extensions
+            self.topics = topics
+            self.other = other
+            self.peers = peers
+            self.bias = bias
+            self.mode = mode
+        }
     }
 }
-extension GroupSections
+extension Swiftinit.GroupLists
 {
     init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
         organizing groups:/*consuming*/ [Unidoc.AnyGroup],
@@ -187,7 +190,7 @@ extension GroupSections
         self.other.sort { $0.0 < $1.0 }
     }
 }
-extension GroupSections
+extension Swiftinit.GroupLists
 {
     private
     func heading(culture:Unidoc.Scalar,
@@ -221,13 +224,14 @@ extension GroupSections
     }
 
     private
-    func list(_ scalars:__owned [Unidoc.Scalar], under heading:String? = nil) -> GroupList?
+    func list(_ scalars:__owned [Unidoc.Scalar],
+        under heading:String? = nil) -> Swiftinit.GroupList?
     {
         scalars.isEmpty ? nil : .init(self.context, heading: heading, scalars: scalars)
     }
 }
 
-extension GroupSections:HTML.OutputStreamable
+extension Swiftinit.GroupLists:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

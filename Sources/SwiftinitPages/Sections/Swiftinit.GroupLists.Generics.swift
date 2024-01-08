@@ -2,7 +2,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension GroupSections
+extension Swiftinit.GroupLists
 {
     struct Generics
     {
@@ -16,7 +16,7 @@ extension GroupSections
         }
     }
 }
-extension GroupSections.Generics
+extension Swiftinit.GroupLists.Generics
 {
     init(_ generics:__shared [GenericParameter])
     {

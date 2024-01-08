@@ -39,7 +39,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
@@ -55,7 +55,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
@@ -70,7 +70,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 vertex: vertex,
                 bias: vertex.culture,
@@ -86,7 +86,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             throw Unidoc.VertexTypeError.file
 
         case .product(let vertex):
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: nil)
@@ -97,7 +97,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: context.format)
 
         case .foreign(let vertex):
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 bias: nil,
                 mode: .decl(vertex.phylum, vertex.kinks))
@@ -108,7 +108,7 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: context.format)
 
         case .global(let vertex):
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 bias: vertex.id,
                 mode: .meta)

@@ -17,14 +17,14 @@ extension Swiftinit.Docs
         private
         let vertex:Unidoc.ArticleVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.ArticleVertex,
-            groups:GroupSections)
+            groups:Swiftinit.GroupLists)
         {
             self.context = context
             self.canonical = canonical

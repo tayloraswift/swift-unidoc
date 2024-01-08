@@ -14,9 +14,6 @@ extension Unidoc
 {
     /// Performs a vertex query within a volume, with additional lookups as determined by
     /// the specialized `Context`.
-    ///
-    /// The `Type` parameter allows you to transmit type information to the ``LookupOutput``.
-    /// If no type information is needed, use `Any`.
     @frozen public
     struct VertexQuery<Context>:Sendable where Context:Unidoc.LookupContext & Sendable
     {
@@ -26,13 +23,16 @@ extension Unidoc
         let vertex:Shoot
         public
         let lookup:Context
+        public
+        let unset:[Mongo.KeyPath]
 
         @inlinable
-        init(volume:VolumeSelector, vertex:Shoot, lookup:Context)
+        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, unset:[Mongo.KeyPath] = [])
         {
             self.volume = volume
             self.vertex = vertex
             self.lookup = lookup
+            self.unset = unset
         }
     }
 }
@@ -49,7 +49,20 @@ extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
     @inlinable public
     init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot, layer:Unidoc.GroupLayer? = nil)
     {
-        self.init(volume: volume, vertex: vertex, lookup: .init(layer: layer))
+        let context:Context = .init(layer: layer)
+        let unset:[Unidoc.AnyVertex.CodingKey]
+
+        switch layer
+        {
+        case nil:           unset = []
+        case .protocols?:   unset = [.requirements, .superforms, .overview, .details]
+        }
+
+        self.init(
+            volume: volume,
+            vertex: vertex,
+            lookup: context,
+            unset: unset.map { Unidoc.AnyVertex[$0] })
     }
 }
 extension Unidoc.VertexQuery:Mongo.PipelineQuery
@@ -86,10 +99,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 (
                     if: .expr
                     {
-                        $0[.eq] =
-                        (
-                            1, .expr { $0[.size] = Unidoc.PrincipalOutput[.matches] }
-                        )
+                        $0[.eq] = (1, .expr { $0[.size] = Unidoc.PrincipalOutput[.matches] })
                     },
                     then: .expr { $0[.first] = Unidoc.PrincipalOutput[.matches] },
                     else: Never??.some(nil)

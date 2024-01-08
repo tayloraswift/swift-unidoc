@@ -46,6 +46,19 @@ extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
     var input:Mongo.KeyPath { Unidoc.RedirectOutput[.matches] }
 
     @inlinable public
+    var unset:[Mongo.KeyPath]
+    {
+        [
+            Unidoc.AnyVertex[.requirements],
+            Unidoc.AnyVertex[.superforms],
+
+            Unidoc.AnyVertex[.overview],
+            Unidoc.AnyVertex[.details],
+            Unidoc.AnyVertex[.census],
+        ]
+    }
+
+    @inlinable public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
     }
