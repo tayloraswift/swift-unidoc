@@ -9,12 +9,12 @@ extension Unidoc.LookupAdjacent
     struct Vertices
     {
         private
-        let layer:Unidoc.GroupLayerPredicate
+        let layer:Unidoc.GroupLayer?
 
         let groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>
         let vertex:Mongo.KeyPath
 
-        init(layer:Unidoc.GroupLayerPredicate,
+        init(layer:Unidoc.GroupLayer?,
             groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>,
             vertex:Mongo.KeyPath)
         {
@@ -27,24 +27,21 @@ extension Unidoc.LookupAdjacent
 }
 extension Unidoc.LookupAdjacent.Vertices
 {
+    private
+    var predicate:Unidoc.GroupLayerPredicate { .init(self.layer) }
+}
+extension Unidoc.LookupAdjacent.Vertices
+{
     static
     func += (list:inout BSON.ListEncoder, self:Self)
     {
-        //  Extract scalars adjacent to the current vertex.
-        for array:Unidoc.AnyVertex.CodingKey in
-        [
-            .signature_expanded_scalars,
-            .requirements,
-            .superforms,
-            .scope,
-        ]
+        //  Extract scalars adjacent to the list of vertex groups.
+        list.expr
         {
-            list.expr
-            {
-                $0[.coalesce] = (self.vertex / Unidoc.AnyVertex[array], [] as [Never])
-            }
+            $0[.reduce] = self.groups.flatMap(self.predicate.adjacent(to:))
         }
 
+        //  Extract scalars adjacent to the current vertex.
         list.append
         {
             $0.append(self.vertex / Unidoc.AnyVertex[.namespace])
@@ -63,6 +60,29 @@ extension Unidoc.LookupAdjacent.Vertices
             $0[.map] = constraints.map { $0[.nominal] }
         }
 
+        let arrays:[Unidoc.AnyVertex.CodingKey]
+        defer
+        {
+            for array:Unidoc.AnyVertex.CodingKey in arrays
+            {
+                list.expr
+                {
+                    $0[.coalesce] = (self.vertex / Unidoc.AnyVertex[array], [] as [Never])
+                }
+            }
+        }
+
+        switch self.layer
+        {
+        case nil:
+            arrays = [.signature_expanded_scalars, .scope, .requirements, .superforms]
+
+        case .protocols?:
+            arrays = [.signature_expanded_scalars, .scope]
+            return
+        }
+
+        //  Only needed for the default layer.
         for passage:Unidoc.AnyVertex.CodingKey in [.overview, .details]
         {
             list.expr
@@ -72,12 +92,6 @@ extension Unidoc.LookupAdjacent.Vertices
 
                 $0[.reduce] = outlines.flatMap(\.scalars)
             }
-        }
-
-        //  Extract scalars adjacent to the list of vertex groups.
-        list.expr
-        {
-            $0[.reduce] = self.groups.flatMap(self.layer.adjacent(to:))
         }
     }
 }

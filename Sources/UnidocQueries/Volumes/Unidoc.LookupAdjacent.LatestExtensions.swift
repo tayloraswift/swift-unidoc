@@ -7,12 +7,12 @@ extension Unidoc.LookupAdjacent
 {
     struct LatestExtensions
     {
-        let layer:Unidoc.GroupLayerPredicate
+        let layer:Unidoc.GroupLayer?
         let scope:Mongo.Variable<Unidoc.Scalar>
         let id:Mongo.Variable<Unidoc.Realm>
 
         init(
-            layer:Unidoc.GroupLayerPredicate,
+            layer:Unidoc.GroupLayer?,
             scope:Mongo.Variable<Unidoc.Scalar>,
             id:Mongo.Variable<Unidoc.Realm>)
         {
@@ -25,23 +25,41 @@ extension Unidoc.LookupAdjacent
 extension Unidoc.LookupAdjacent.LatestExtensions
 {
     static
-    func += (list:inout BSON.ListEncoder, self:Self)
+    func += (or:inout Mongo.PredicateListEncoder, self:Self)
     {
-        list.expr
+        or.append
         {
             $0[.and] = .init
             {
-                $0.expr
+                $0.append
                 {
-                    $0[.eq] = (Unidoc.AnyGroup[.layer], self.layer)
+                    //  Alas, it is not as simple as performing an `$eq` match on `null`.
+                    guard
+                    let layer:Unidoc.GroupLayer = self.layer
+                    else
+                    {
+                        $0[Unidoc.AnyGroup[.layer]] = .init { $0[.exists] = false }
+                        return
+                    }
+
+                    $0[.expr] = .expr
+                    {
+                        $0[.eq] = (Unidoc.AnyGroup[.layer], layer)
+                    }
                 }
-                $0.expr
+                $0.append
                 {
-                    $0[.eq] = (Unidoc.AnyGroup[.scope], self.scope)
+                    $0[.expr] = .expr
+                    {
+                        $0[.eq] = (Unidoc.AnyGroup[.scope], self.scope)
+                    }
                 }
-                $0.expr
+                $0.append
                 {
-                    $0[.eq] = (Unidoc.AnyGroup[.realm], self.id)
+                    $0[.expr] = .expr
+                    {
+                        $0[.eq] = (Unidoc.AnyGroup[.realm], self.id)
+                    }
                 }
             }
         }
