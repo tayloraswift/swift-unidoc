@@ -1,4 +1,4 @@
-extension Unidoc.Linker.SortPriority
+extension Unidoc.SemanticPriority
 {
     enum Member:Equatable, Comparable
     {

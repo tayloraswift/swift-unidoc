@@ -5,7 +5,7 @@ import SymbolGraphs
 extension Unidoc
 {
     @frozen public
-    struct ConformingType:Equatable, Sendable
+    struct ConformingType:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
