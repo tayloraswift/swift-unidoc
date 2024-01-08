@@ -20,11 +20,6 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.LookupAdjacent
-{
-    private
-    var predicate:Unidoc.GroupLayerPredicate { .init(self.layer) }
-}
 extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
     public
@@ -45,11 +40,11 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             default:            special = .default(.init(peers: "peers", topic: "topic"))
             }
 
-            let local:LockedExtensions = .init(layer: self.predicate,
+            let local:LockedExtensions = .init(layer: self.layer,
                 scope: "local",
                 min: "min",
                 max: "max")
-            let realm:LatestExtensions = .init(layer: self.predicate,
+            let realm:LatestExtensions = .init(layer: self.layer,
                 scope: "scope",
                 id: "realm")
 
@@ -108,14 +103,11 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             {
                 $0[.match] = .init
                 {
-                    $0[.expr] = .expr
+                    $0[.or] = .init
                     {
-                        $0[.or] = .init
-                        {
-                            $0 += special
-                            $0 += local
-                            $0 += realm
-                        }
+                        $0 += local
+                        $0 += realm
+                        $0 += special
                     }
                 }
             }
@@ -142,7 +134,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             }
             $0[output.scalars] = .expr
             {
-                let adjacent:Vertices = .init(layer: self.predicate,
+                let adjacent:Vertices = .init(layer: self.layer,
                     groups: .init(in: groups),
                     vertex: vertex)
 

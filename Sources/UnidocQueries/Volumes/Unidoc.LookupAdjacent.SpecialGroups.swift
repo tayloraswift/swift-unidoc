@@ -14,7 +14,7 @@ extension Unidoc.LookupAdjacent
 extension Unidoc.LookupAdjacent.SpecialGroups
 {
     static
-    func += (list:inout BSON.ListEncoder, self:Self)
+    func += (or:inout Mongo.PredicateListEncoder, self:Self)
     {
         switch self
         {
@@ -22,8 +22,14 @@ extension Unidoc.LookupAdjacent.SpecialGroups
             break
 
         case .default(let self):
-            list.expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.peers) }
-            list.expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.topic) }
+            or.append
+            {
+                $0[.expr] = .expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.peers) }
+            }
+            or.append
+            {
+                $0[.expr] = .expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.topic) }
+            }
         }
     }
 }

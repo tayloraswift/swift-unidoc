@@ -66,20 +66,27 @@ extension Unidoc.Linker.TreeMapper
         with context:borrowing Unidoc.Linker,
         as index:Int) -> Unidoc.ForeignVertex?
     {
+        if  case nil = self.local[foreign]
         {
-            if  case nil = $0
             {
-                let vertex:Unidoc.ForeignVertex = Self.create(foreign: foreign,
-                    with: context,
-                    as: index)
-                $0 = (vertex.shoot, vertex.flags)
-                return vertex
-            }
-            else
-            {
-                return nil
-            }
-        } (&self.foreign[foreign])
+                if  case nil = $0
+                {
+                    let vertex:Unidoc.ForeignVertex = Self.create(foreign: foreign,
+                        with: context,
+                        as: index)
+                    $0 = (vertex.shoot, vertex.flags)
+                    return vertex
+                }
+                else
+                {
+                    return nil
+                }
+            } (&self.foreign[foreign])
+        }
+        else
+        {
+            nil
+        }
     }
 
     private static
