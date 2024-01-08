@@ -14,12 +14,12 @@ extension Swiftinit.Docs
         private
         let vertex:Unidoc.ProductVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
         init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
             canonical:CanonicalVersion?,
             vertex:Unidoc.ProductVertex,
-            groups:GroupSections)
+            groups:Swiftinit.GroupLists)
         {
             self.context = context
             self.canonical = canonical

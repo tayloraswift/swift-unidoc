@@ -10,9 +10,9 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Swiftinit.Ptcl
 {
-    struct PtclPage
+    struct ConformersPage
     {
         let context:IdentifiablePageContext<Unidoc.Scalar>
 
@@ -22,7 +22,7 @@ extension Swiftinit
         private
         let vertex:Unidoc.DeclVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
         private
         let stem:Unidoc.StemComponents
@@ -31,7 +31,7 @@ extension Swiftinit
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
-            groups:GroupSections) throws
+            groups:Swiftinit.GroupLists) throws
         {
             self.context = context
             self.canonical = canonical
@@ -43,7 +43,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PtclPage
+extension Swiftinit.Ptcl.ConformersPage
 {
     private
     var demonym:Swiftinit.DeclDemonym
@@ -51,7 +51,7 @@ extension Swiftinit.PtclPage
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Swiftinit.PtclPage:Swiftinit.RenderablePage
+extension Swiftinit.Ptcl.ConformersPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
@@ -75,15 +75,15 @@ extension Swiftinit.PtclPage:Swiftinit.RenderablePage
         }
     }
 }
-extension Swiftinit.PtclPage:Swiftinit.StaticPage
+extension Swiftinit.Ptcl.ConformersPage:Swiftinit.StaticPage
 {
     var location:URI { Swiftinit.Ptcl[self.volume, self.vertex.route] }
 }
-extension Swiftinit.PtclPage:Swiftinit.ApplicationPage
+extension Swiftinit.Ptcl.ConformersPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.PtclPage:Swiftinit.VertexPage
+extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

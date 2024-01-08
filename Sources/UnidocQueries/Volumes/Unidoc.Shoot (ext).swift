@@ -10,11 +10,12 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        output:Mongo.KeyPath,
+        unset:[Mongo.KeyPath])
     {
         pipeline[.lookup] = .init
         {
-            let zone:Mongo.Variable<Unidoc.Scalar> = "zone"
+            let zone:Mongo.Variable<Unidoc.Edition> = "zone"
 
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
@@ -60,6 +61,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                 }
 
                 $0[.limit] = 50
+                $0[.unset] = unset
             }
             $0[.as] = output
         }

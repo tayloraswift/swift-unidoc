@@ -2,26 +2,29 @@ import HTML
 import Signatures
 import Unidoc
 
-struct ConstraintsList
+extension Swiftinit
 {
-    let context:IdentifiablePageContext<Unidoc.Scalar>
-
-    private
-    let constraints:[GenericConstraint<Unidoc.Scalar?>]
-
-    init?(_ context:IdentifiablePageContext<Unidoc.Scalar>,
-        constraints:[GenericConstraint<Unidoc.Scalar?>])
+    struct ConstraintsList
     {
-        if  constraints.isEmpty
-        {
-            return nil
-        }
+        let context:IdentifiablePageContext<Unidoc.Scalar>
 
-        self.context = context
-        self.constraints = constraints
+        private
+        let constraints:[GenericConstraint<Unidoc.Scalar?>]
+
+        init?(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+            constraints:[GenericConstraint<Unidoc.Scalar?>])
+        {
+            if  constraints.isEmpty
+            {
+                return nil
+            }
+
+            self.context = context
+            self.constraints = constraints
+        }
     }
 }
-extension ConstraintsList:HTML.OutputStreamable
+extension Swiftinit.ConstraintsList:HTML.OutputStreamable
 {
     static
     func += (code:inout HTML.ContentEncoder, self:Self)

@@ -1,4 +1,4 @@
-extension GroupSections
+extension Swiftinit.GroupLists
 {
     enum Genericness:Equatable, Hashable, Comparable, Sendable
     {

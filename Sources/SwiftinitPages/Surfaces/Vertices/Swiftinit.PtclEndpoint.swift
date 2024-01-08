@@ -38,13 +38,13 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.page.volume,
                 tree: tree)
 
-            let groups:GroupSections = .init(context.page,
+            let groups:Swiftinit.GroupLists = .init(context.page,
                 organizing: consume groups,
                 vertex: vertex,
                 bias: vertex.culture,
                 mode: .decl(vertex.phylum, vertex.kinks))
 
-            let page:Swiftinit.PtclPage = try .init(context.page,
+            let page:Swiftinit.Ptcl.ConformersPage = try .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex,
