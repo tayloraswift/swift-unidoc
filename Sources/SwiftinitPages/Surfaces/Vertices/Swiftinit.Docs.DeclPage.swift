@@ -14,7 +14,7 @@ extension Swiftinit.Docs
 {
     struct DeclPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
@@ -27,7 +27,7 @@ extension Swiftinit.Docs
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
@@ -141,7 +141,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
         let availability:Availability = self.vertex.signature.availability
         if  let renamed:Unidoc.Scalar = self.vertex.renamed,
-            let link:HTML.Link<String> = self.context.link(decl: renamed)
+            let link:HTML.Link<UnqualifiedPath> = self.context.link(decl: renamed)
         {
             main[.section, { $0.class = "signage deprecation renamed" }]
             {

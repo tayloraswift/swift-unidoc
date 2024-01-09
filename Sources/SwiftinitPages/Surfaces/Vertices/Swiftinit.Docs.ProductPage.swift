@@ -7,7 +7,7 @@ extension Swiftinit.Docs
 {
     struct ProductPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
 
@@ -16,7 +16,7 @@ extension Swiftinit.Docs
         private
         let groups:Swiftinit.GroupLists
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             vertex:Unidoc.ProductVertex,
             groups:Swiftinit.GroupLists)
@@ -79,7 +79,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
         for id:Unidoc.Scalar in self.vertex.requirements
         {
             guard
-            case .culture(let vertex) = self.context.vertices[id],
+            case (.culture(let vertex), _)? = self.context.vertices[id],
                 vertex.module.name == self.vertex.symbol
             else
             {
@@ -150,7 +150,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                     for id:Unidoc.Scalar in self.vertex.requirements
                     {
                         guard
-                        let vertex:Unidoc.AnyVertex = self.context.vertices[id]
+                        let (vertex, _):(Unidoc.AnyVertex, Bool) = self.context.vertices[id]
                         else
                         {
                             continue

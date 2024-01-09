@@ -9,7 +9,7 @@ extension Swiftinit.Stats
 {
     struct ModulePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?
@@ -17,7 +17,7 @@ extension Swiftinit.Stats
         private
         let vertex:Unidoc.CultureVertex
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?,
             vertex:Unidoc.CultureVertex)

@@ -1,7 +1,7 @@
 import Unidoc
 import UnidocRecords
 
-extension IdentifiablePageContext
+extension Swiftinit
 {
     struct Volumes:Sendable
     {
@@ -18,7 +18,7 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Volumes
+extension Swiftinit.Volumes
 {
     mutating
     func add(_ names:[Unidoc.VolumeMetadata])
@@ -30,7 +30,7 @@ extension IdentifiablePageContext.Volumes
         }
     }
 }
-extension IdentifiablePageContext.Volumes
+extension Swiftinit.Volumes
 {
     subscript(zone:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {

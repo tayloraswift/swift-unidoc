@@ -8,12 +8,12 @@ extension IdentifiablePageContext
     struct Cache
     {
         var vertices:Vertices
-        var volumes:Volumes
+        var volumes:Swiftinit.Volumes
 
         private
         var uris:[Unidoc.Scalar: String]
 
-        init(vertices:Vertices, volumes:Volumes, uris:[Unidoc.Scalar: String] = [:])
+        init(vertices:Vertices, volumes:Swiftinit.Volumes, uris:[Unidoc.Scalar: String] = [:])
         {
             self.vertices = vertices
             self.volumes = volumes
@@ -21,7 +21,7 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
+extension IdentifiablePageContext.Cache
 {
     mutating
     func load(_ scalar:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
@@ -46,18 +46,19 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         } (&self.uris[scalar])
     }
 }
-extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
+extension IdentifiablePageContext.Cache
 {
     subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
     {
         mutating get
         {
-            if  case .culture(let vertex)? = self.vertices[scalar]
+            switch self.vertices[scalar]
             {
+            case (.culture(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.culture(let vertex), principal: false)?:
                 (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
-            }
-            else
-            {
+            default:
                 nil
             }
         }
@@ -67,12 +68,13 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
     {
         mutating get
         {
-            if  case .article(let vertex)? = self.vertices[scalar]
+            switch self.vertices[scalar]
             {
+            case (.article(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.article(let vertex), principal: false)?:
                 (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
-            }
-            else
-            {
+            default:
                 nil
             }
         }
@@ -82,12 +84,13 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
     {
         mutating get
         {
-            if  case .decl(let vertex)? = self.vertices[scalar]
+            switch self.vertices[scalar]
             {
+            case (.decl(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.decl(let vertex), principal: false)?:
                 (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.route] })
-            }
-            else
-            {
+            default:
                 nil
             }
         }
@@ -100,23 +103,28 @@ extension IdentifiablePageContext.Cache where ID:Swiftinit.VertexPageIdentifier
         {
             self.vertices[scalar].map
             {
-                (vertex:Unidoc.AnyVertex) in
-
-                let url:String? = self.load(scalar)
+                switch $0
                 {
-                    switch vertex
+                case (let vertex, principal: false):
+                    let url:String? = self.load(scalar)
                     {
-                    case .article(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                    case .culture(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                    case .decl(let vertex):     Swiftinit.Docs[$0, vertex.route]
-                    case .file:                 nil
-                    case .product(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                    case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                    case .global:               Swiftinit.Docs[$0]
+                        switch vertex
+                        {
+                        case .article(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .culture(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .decl(let vertex):     Swiftinit.Docs[$0, vertex.route]
+                        case .file:                 nil
+                        case .product(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .global:               Swiftinit.Docs[$0]
+                        }
                     }
-                }
 
-                return (vertex, url)
+                    return (vertex, url)
+
+                case (let vertex, principal: true):
+                    return (vertex, nil)
+                }
             }
         }
     }

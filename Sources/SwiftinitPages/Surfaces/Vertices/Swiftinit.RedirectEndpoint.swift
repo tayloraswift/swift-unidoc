@@ -58,7 +58,9 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
         }
         else
         {
-            let context:IdentifiablePageContext<Never?> = .init(principal: output.volume,
+            let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
+                    vertices: .init(),
+                    volumes: .init(principal: output.volume)),
                 repo: nil)
 
             context.vertices.add(output.matches)

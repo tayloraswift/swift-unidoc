@@ -7,7 +7,7 @@ extension Swiftinit.Docs
 {
     struct MultipleFoundPage
     {
-        let context:IdentifiablePageContext<Never?>
+        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
 
         let identity:Unidoc.Stem
 
@@ -15,7 +15,7 @@ extension Swiftinit.Docs
         let matches:[Unidoc.Scalar]
 
         private
-        init(_ context:IdentifiablePageContext<Never?>,
+        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
             identity:Unidoc.Stem,
             matches:[Unidoc.Scalar])
         {
@@ -28,7 +28,7 @@ extension Swiftinit.Docs
 }
 extension Swiftinit.Docs.MultipleFoundPage
 {
-    init?(_ context:consuming IdentifiablePageContext<Never?>,
+    init?(_ context:consuming IdentifiablePageContext<Swiftinit.SecondaryOnly>,
         matches:__shared [Unidoc.AnyVertex])
     {
         if  let stem:Unidoc.Stem = matches.first?.shoot?.stem

@@ -26,12 +26,15 @@ extension Swiftinit
 }
 extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
+    public
+    typealias VertexLayer = Swiftinit.Stats
+
     public static
     func response(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
 

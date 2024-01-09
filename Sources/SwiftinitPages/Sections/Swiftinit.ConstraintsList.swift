@@ -1,4 +1,5 @@
 import HTML
+import LexicalPaths
 import Signatures
 import Unidoc
 
@@ -6,12 +7,12 @@ extension Swiftinit
 {
     struct ConstraintsList
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:any VertexPageContext
 
         private
         let constraints:[GenericConstraint<Unidoc.Scalar?>]
 
-        init?(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init?(_ context:any VertexPageContext,
             constraints:[GenericConstraint<Unidoc.Scalar?>])
         {
             if  constraints.isEmpty
@@ -52,29 +53,26 @@ extension Swiftinit.ConstraintsList:HTML.OutputStreamable
             case    .equal:     code += " == "
             }
 
-            code[.span, { $0.highlight = .type }]
+            switch constraint.whom
             {
-                switch constraint.whom
-                {
-                case .complex(let text):
-                    $0 += text
+            case .complex(let text):
+                code[.span] { $0.highlight = .type } = text
 
-                case .nominal(let scalar):
-                    if  let scalar:Unidoc.Scalar,
-                        let link:HTML.Link<String> = self.context.link(
-                            decl: scalar)
-                    {
-                        $0 += link
-                    }
-                    else if
-                        let scalar:Unidoc.Scalar
-                    {
-                        $0 += "(redacted, \(scalar))"
-                    }
-                    else
-                    {
-                        $0 += "(redacted)"
-                    }
+            case .nominal(let scalar):
+                if  let scalar:Unidoc.Scalar,
+                    let link:HTML.Link<UnqualifiedPath> = self.context.link(
+                        decl: scalar)
+                {
+                    code += link
+                }
+                else if
+                    let scalar:Unidoc.Scalar
+                {
+                    code += "(redacted, \(scalar))"
+                }
+                else
+                {
+                    code += "(redacted)"
                 }
             }
         }

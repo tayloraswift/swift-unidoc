@@ -9,8 +9,8 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-@usableFromInline internal final
-class IdentifiablePageContext<ID> where ID:Hashable
+@usableFromInline final
+class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
 {
     /// Shared outlines, valid for the overview and details passages.
     var outlines:[Unidoc.Outline]
@@ -20,7 +20,6 @@ class IdentifiablePageContext<ID> where ID:Hashable
 
     let repo:Unidoc.PackageRepo?
 
-    private
     init(cache:Cache, repo:Unidoc.PackageRepo?)
     {
         self.outlines = []
@@ -31,7 +30,7 @@ class IdentifiablePageContext<ID> where ID:Hashable
 extension IdentifiablePageContext:Identifiable
 {
     @usableFromInline internal
-    var id:ID { self.vertices.principal }
+    var id:Vertices.ID { self.vertices.id }
 }
 extension IdentifiablePageContext
 {
@@ -40,35 +39,25 @@ extension IdentifiablePageContext
         _read   { yield  self.cache.vertices }
         _modify { yield &self.cache.vertices }
     }
-    var volumes:Volumes
+    var volumes:Swiftinit.Volumes
     {
         _read   { yield  self.cache.volumes }
         _modify { yield &self.cache.volumes }
     }
 }
-extension IdentifiablePageContext<Unidoc.Scalar>
+extension IdentifiablePageContext
 {
     convenience
-    init(principal scalar:Unidoc.Scalar, volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageRepo?)
+    init(vertices cache:consuming Vertices,
+        volume:Unidoc.VolumeMetadata,
+        repo:Unidoc.PackageRepo?)
     {
-        self.init(cache: .init(
-                vertices: .init(principal: scalar),
-                volumes: .init(principal: volume)),
+        self.init(
+            cache: .init(vertices: cache, volumes: .init(principal: volume)),
             repo: repo)
     }
 }
-extension IdentifiablePageContext<Never?>
-{
-    convenience
-    init(principal volume:Unidoc.VolumeMetadata, repo:Unidoc.PackageRepo?)
-    {
-        self.init(cache: .init(
-                vertices: .init(principal: nil),
-                volumes: .init(principal: volume)),
-            repo: repo)
-    }
-}
-extension IdentifiablePageContext<Unidoc.Scalar>
+extension IdentifiablePageContext
 {
     func constraints(
         _ constraints:[GenericConstraint<Unidoc.Scalar?>]) -> Swiftinit.ConstraintsList?
@@ -76,7 +65,7 @@ extension IdentifiablePageContext<Unidoc.Scalar>
         .init(self, constraints: constraints)
     }
 }
-extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
+extension IdentifiablePageContext
 {
     func prose(overview passage:Unidoc.Passage) -> ProseSection
     {
@@ -96,15 +85,19 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 
     func card(_ scalar:Unidoc.Scalar) -> Swiftinit.GroupList.Card?
     {
-        self.cache[scalar].map
+        guard
+        case (let vertex, let url?)? = self.cache[scalar]
+        else
         {
-            .init(overview: $0.overview.map(self.prose(overview:)),
-                vertex: $0,
-                target: $1)
+            return nil
         }
+
+        return .init(overview: vertex.overview.map(self.prose(overview:)),
+            vertex: vertex,
+            target: url)
     }
 }
-extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
+extension IdentifiablePageContext
 {
     /// Generates a subdomain header for a module using its shoot.
     func subdomain(_ module:Unidoc.Route) -> Unidoc.VolumeMetadata.Subdomain?
@@ -156,20 +149,14 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
 
     var domain:Unidoc.VolumeMetadata.Domain { .init(self.volume) }
 
-    func link(decl:Unidoc.Scalar) -> HTML.Link<String>?
-    {
-        self.cache[decl: decl].map
-        {
-            let path:UnqualifiedPath? = .init(splitting: $0.stem)
-            return .init(display: path?.description ?? "", target: $1)
-        }
-    }
+
+
     func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
         guard
         let refname:String = self.volumes[file.edition]?.refname,
         let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
-        let file:Unidoc.FileVertex = self.vertices[file]?.file
+        case (.file(let file), _)? = self.vertices[file]
         else
         {
             return nil
@@ -192,9 +179,8 @@ extension IdentifiablePageContext where ID:Swiftinit.VertexPageIdentifier
     }
 }
 extension IdentifiablePageContext:Swiftinit.VertexPageContext
-    where ID:Swiftinit.VertexPageIdentifier
 {
-    @usableFromInline internal
+    @usableFromInline
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {
         self.cache[culture: module].map
@@ -202,7 +188,22 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
             .init(display: $0.module.id, target: $1)
         }
     }
-    @usableFromInline internal
+
+    @usableFromInline
+    func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
+    {
+        guard
+        let (decl, url):(Unidoc.DeclVertex, String?) = self.cache[decl: decl],
+        let path:UnqualifiedPath = .init(splitting: decl.stem)
+        else
+        {
+            return nil
+        }
+
+        return .init(display: path, target: url)
+    }
+
+    @usableFromInline
     func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
     {
         self.cache[article: article].map
@@ -211,7 +212,7 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
         }
     }
 
-    @usableFromInline internal
+    @usableFromInline
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>?
         where Vector:Collection<Unidoc.Scalar>
@@ -219,16 +220,16 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
         vector.isEmpty ? nil : .init(self, display: display, scalars: vector)
     }
 
-    @usableFromInline internal
+    @usableFromInline
     func url(_ scalar:Unidoc.Scalar) -> String?
     {
         self.cache[scalar]?.url
     }
 
-    @usableFromInline internal
+    @usableFromInline
     var volume:Unidoc.VolumeMetadata { self.volumes.principal }
 
-    @usableFromInline internal
+    @usableFromInline
     subscript(edition:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
         self.volumes[edition]

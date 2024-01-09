@@ -1,4 +1,5 @@
 import HTML
+import LexicalPaths
 import MarkdownRendering
 import Symbols
 import Unidoc
@@ -9,7 +10,7 @@ extension Swiftinit.Docs
 {
     struct ForeignPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
 
@@ -21,7 +22,7 @@ extension Swiftinit.Docs
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             vertex:Unidoc.ForeignVertex,
             groups:Swiftinit.GroupLists) throws
@@ -83,7 +84,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
             $0[.h1] = "\(self.stem.last) (ext)"
         }
 
-        let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
+        let extendee:HTML.Link<UnqualifiedPath>? = self.context.link(decl: self.vertex.extendee)
         if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.edition]
         {
             main[.section, { $0.class = "notice extendee" }]
@@ -91,7 +92,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
                 $0[.p]
                 {
                     $0 += "You’re viewing third-party extensions to "
-                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0[.code] = extendee
                     $0 += ", \(self.demonym.phrase) from "
 
                     $0[.a]
@@ -109,7 +110,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
                     $0 += """
                     You can also read the documentation for
                     """
-                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0[.code] = extendee
                     $0 += " itself."
                 }
             }

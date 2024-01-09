@@ -1,16 +1,16 @@
 import Media
 import SwiftinitRender
-import Unidoc
+import UnidocRecords
 
 @frozen public
-struct IdentifiableResponseContext
+struct IdentifiableResponseContext<Vertices> where Vertices:Swiftinit.VertexCache
 {
-    let page:IdentifiablePageContext<Unidoc.Scalar>
+    let page:IdentifiablePageContext<Vertices>
 
     let canonical:CanonicalVersion?
     let format:Swiftinit.RenderFormat
 
-    init(_ page:IdentifiablePageContext<Unidoc.Scalar>,
+    init(_ page:IdentifiablePageContext<Vertices>,
         canonical:CanonicalVersion?,
         format:Swiftinit.RenderFormat)
     {

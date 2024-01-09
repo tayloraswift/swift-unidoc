@@ -9,7 +9,7 @@ extension Swiftinit.Docs
 {
     struct ModulePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
@@ -19,7 +19,7 @@ extension Swiftinit.Docs
         private
         let groups:Swiftinit.GroupLists
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.CultureVertex,

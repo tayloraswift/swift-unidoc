@@ -14,7 +14,7 @@ extension Swiftinit.Ptcl
 {
     struct ConformersPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
@@ -22,16 +22,16 @@ extension Swiftinit.Ptcl
         private
         let vertex:Unidoc.DeclVertex
         private
-        let groups:Swiftinit.GroupLists
+        let groups:Swiftinit.ConformingTypes
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
-            groups:Swiftinit.GroupLists) throws
+            groups:Swiftinit.ConformingTypes) throws
         {
             self.context = context
             self.canonical = canonical

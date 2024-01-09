@@ -5,12 +5,12 @@ extension Swiftinit
 {
     struct GroupList
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let heading:String?
         let scalars:[Unidoc.Scalar]
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             heading:String?,
             scalars:[Unidoc.Scalar])
         {
