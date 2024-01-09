@@ -5,7 +5,7 @@ extension Unidoc
 {
     struct ExtensionConditions:Equatable, Hashable, Sendable
     {
-        let constraints:[GenericConstraint<Unidoc.Scalar?>]
+        var constraints:[GenericConstraint<Unidoc.Scalar?>]
         let culture:Int
 
         init(constraints:[GenericConstraint<Unidoc.Scalar?>], culture:Int)

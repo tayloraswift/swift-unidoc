@@ -163,11 +163,20 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
             }
         }
 
-        for (conditions, `extension`):
+        for (var conditions, `extension`):
             (Unidoc.ExtensionConditions, SymbolGraph.Extension) in zip(
             conditions,
             extensions)
         {
+            if  case .protocol = extendedDecl.phylum
+            {
+                /// Lint tautological `Self:#Self` constraints. These exist in extensions to
+                /// ``RawRepresentable`` in the standard library.
+                conditions.constraints.removeAll
+                {
+                    $0 == .where("Self", is: .conformer, to: .nominal(s))
+                }
+            }
             //  It’s possible for two locally-disjoint extensions to coalesce
             //  into a single global extension due to constraint dropping...
             {
