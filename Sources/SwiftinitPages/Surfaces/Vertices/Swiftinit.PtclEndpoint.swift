@@ -24,12 +24,17 @@ extension Swiftinit
 }
 extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
+    public
+    typealias VertexCache = Swiftinit.SecondaryOnly
+    public
+    typealias VertexLayer = Swiftinit.Ptcl
+
     public static
     func response(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
         switch vertex
         {
@@ -38,11 +43,9 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.page.volume,
                 tree: tree)
 
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.ConformingTypes = try .init(context.page,
                 organizing: consume groups,
-                vertex: vertex,
-                bias: vertex.culture,
-                mode: .decl(vertex.phylum, vertex.kinks))
+                bias: .culture(vertex.culture))
 
             let page:Swiftinit.Ptcl.ConformersPage = try .init(context.page,
                 canonical: context.canonical,

@@ -24,12 +24,15 @@ extension Swiftinit
 }
 extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
+    public
+    typealias VertexLayer = Swiftinit.Docs
+
     public static
     func response(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
 
@@ -39,9 +42,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
-                bias: vertex.id,
+                bias: .culture(vertex.culture),
                 mode: nil)
 
             let page:Swiftinit.Docs.ArticlePage = .init(context.page,
@@ -55,9 +58,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
-                bias: vertex.id,
+                bias: .culture(vertex.id), //  I AM THE CULTURE
                 mode: nil)
             let page:Swiftinit.Docs.ModulePage = .init(context.page,
                 canonical: context.canonical,
@@ -70,10 +73,10 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
                 vertex: vertex,
-                bias: vertex.culture,
+                bias: .culture(vertex.culture),
                 mode: .decl(vertex.phylum, vertex.kinks))
             let page:Swiftinit.Docs.DeclPage = try .init(context.page,
                 canonical: context.canonical,
@@ -86,9 +89,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             throw Unidoc.VertexTypeError.file
 
         case .product(let vertex):
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
-                bias: vertex.id,
+                bias: .neutral,
                 mode: nil)
             let page:Swiftinit.Docs.ProductPage = .init(context.page,
                 canonical: context.canonical,
@@ -97,9 +100,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: context.format)
 
         case .foreign(let vertex):
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
-                bias: nil,
+                bias: .neutral,
                 mode: .decl(vertex.phylum, vertex.kinks))
             let page:Swiftinit.Docs.ForeignPage = try .init(context.page,
                 canonical: context.canonical,
@@ -108,9 +111,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: context.format)
 
         case .global(let vertex):
-            let groups:Swiftinit.GroupLists = .init(context.page,
+            let groups:Swiftinit.GroupLists = try .init(context.page,
                 organizing: consume groups,
-                bias: vertex.id,
+                bias: .neutral,
                 mode: .meta)
             let page:Swiftinit.Docs.PackagePage = .init(context.page,
                 canonical: context.canonical,

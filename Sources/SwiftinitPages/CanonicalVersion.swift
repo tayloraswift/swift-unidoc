@@ -29,7 +29,7 @@ struct CanonicalVersion
 }
 extension CanonicalVersion
 {
-    init?(principal:Unidoc.PrincipalOutput)
+    init?(principal:Unidoc.PrincipalOutput, layer:(some Swiftinit.VertexLayer).Type)
     {
         guard
         let volumeOfLatest:Unidoc.VolumeMetadata = principal.volumeOfLatest,
@@ -62,22 +62,22 @@ extension CanonicalVersion
             switch vertex
             {
             case .article(let vertex):
-                target = .article(Swiftinit.Docs[volumeOfLatest, vertex.route])
+                target = .article(layer[volumeOfLatest, vertex.route])
 
             case .culture(let vertex):
-                target = .culture(Swiftinit.Docs[volumeOfLatest, vertex.route])
+                target = .culture(layer[volumeOfLatest, vertex.route])
 
             case .decl(let vertex):
-                target = .decl(Swiftinit.Docs[volumeOfLatest, vertex.route])
+                target = .decl(layer[volumeOfLatest, vertex.route])
 
             case .file:
                 return nil
 
             case .product(let vertex):
-                target = .product(Swiftinit.Docs[volumeOfLatest, vertex.route])
+                target = .product(layer[volumeOfLatest, vertex.route])
 
             case .foreign(let vertex):
-                target = .foreign(Swiftinit.Docs[volumeOfLatest, vertex.route])
+                target = .foreign(layer[volumeOfLatest, vertex.route])
 
             case .global:
                 target = .global
@@ -99,7 +99,7 @@ extension CanonicalVersion
 
         self.init(relationship: relationship,
             package: volumeOfLatest.title,
-            volume: Swiftinit.Docs[volumeOfLatest],
+            volume: Swiftinit.Docs[volumeOfLatest], // this does *not* use `layer`!
             target: target)
     }
 }

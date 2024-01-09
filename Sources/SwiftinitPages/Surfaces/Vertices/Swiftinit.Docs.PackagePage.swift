@@ -16,7 +16,7 @@ extension Swiftinit.Docs
 {
     struct PackagePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
 
@@ -25,7 +25,7 @@ extension Swiftinit.Docs
         private
         let groups:Swiftinit.GroupLists
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             vertex:Unidoc.GlobalVertex,
             groups:Swiftinit.GroupLists)

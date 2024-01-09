@@ -1,17 +1,18 @@
 extension Swiftinit
 {
+    @frozen public
     enum Docs
     {
     }
 }
 extension Swiftinit.Docs:Swiftinit.VertexLayer
 {
-    static
+    @inlinable public static
     var docs:Swiftinit.Root { .docs }
 
-    static
+    @inlinable public static
     var docc:Swiftinit.Root { .docc }
 
-    static
+    @inlinable public static
     var hist:Swiftinit.Root { .hist }
 }

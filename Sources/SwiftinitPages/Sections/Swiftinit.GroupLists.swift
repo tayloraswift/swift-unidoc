@@ -10,15 +10,13 @@ extension Swiftinit
 {
     struct GroupLists
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         private
         let requirements:[Unidoc.Scalar]?
         private
         let superforms:[Unidoc.Scalar]?
 
-        private
-        var conformers:[Unidoc.ConformerGroup]
         private
         var extensions:[Unidoc.ExtensionGroup]
         private
@@ -30,27 +28,25 @@ extension Swiftinit
         var peers:Unidoc.ExtensionGroup?
 
         private
-        let bias:Unidoc.Scalar?
+        let bias:Bias
         private
-        let mode:Mode?
+        let mode:GroupListMode?
 
         private
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             requirements:[Unidoc.Scalar]?,
             superforms:[Unidoc.Scalar]?,
-            conformers:[Unidoc.ConformerGroup] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
             topics:[Unidoc.TopicGroup] = [],
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
             peers:Unidoc.ExtensionGroup? = nil,
-            bias:Unidoc.Scalar?,
-            mode:Mode?)
+            bias:Bias,
+            mode:GroupListMode?)
         {
             self.context = context
 
             self.requirements = requirements
             self.superforms = superforms
-            self.conformers = conformers
             self.extensions = extensions
             self.topics = topics
             self.other = other
@@ -62,11 +58,11 @@ extension Swiftinit
 }
 extension Swiftinit.GroupLists
 {
-    init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+    init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
         organizing groups:/*consuming*/ [Unidoc.AnyGroup],
         vertex:borrowing Unidoc.DeclVertex? = nil,
-        bias:Unidoc.Scalar? = nil,
-        mode:Mode? = nil)
+        bias:Swiftinit.Bias,
+        mode:Swiftinit.GroupListMode? = nil) throws
     {
         let container:Unidoc.Group?
         let generics:Generics
@@ -100,9 +96,6 @@ extension Swiftinit.GroupLists
         {
             switch group
             {
-            case .conformer(let group):
-                self.conformers.append(group)
-
             case .extension(let group):
                 if  case group.id? = container
                 {
@@ -160,6 +153,9 @@ extension Swiftinit.GroupLists
                 }
 
                 self.topics.append(group)
+
+            case let unexpected:
+                throw Unidoc.GroupTypeError.reject(unexpected)
             }
         }
 
@@ -185,44 +181,12 @@ extension Swiftinit.GroupLists
         self.peers = self.peers.map { $0.subtracting(curated) }
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
-        self.conformers.sort { $0.id < $1.id }
         self.topics.sort { $0.id < $1.id }
         self.other.sort { $0.0 < $1.0 }
     }
 }
 extension Swiftinit.GroupLists
 {
-    private
-    func heading(culture:Unidoc.Scalar,
-        constraints:[GenericConstraint<Unidoc.Scalar?>] = []) -> ExtensionHeading
-    {
-        let display:String
-        switch (self.bias, self.bias?.edition)
-        {
-        case (culture?, _):         display = "Citizens in "
-        case (_, culture.edition?): display = "Available in "
-        case (_,                _): display = "Extension in "
-        }
-
-        return .init(self.context, display: display, culture: culture, where: constraints)
-    }
-    private
-    func heading(for group:Unidoc.ConformerGroup) -> ExtensionHeading
-    {
-        self.heading(culture: group.culture)
-    }
-    private
-    func heading(for group:Unidoc.ExtensionGroup) -> ExtensionHeading
-    {
-        self.heading(culture: group.culture, constraints: group.constraints)
-    }
-
-    private
-    func list(_ types:__owned [Unidoc.ConformingType]) -> Swiftinit.DenseList?
-    {
-        types.isEmpty ? nil : .init(self.context, members: types)
-    }
-
     private
     func list(_ scalars:__owned [Unidoc.Scalar],
         under heading:String? = nil) -> Swiftinit.GroupList?
@@ -382,22 +346,13 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
-        for group:Unidoc.ConformerGroup in self.conformers
-        {
-            html[.section, { $0.class = "group conformer" }]
-            {
-                $0 += self.heading(for: group)
-
-                $0[.ul] = self.list(group.unconditional.map { .init(id: $0, where: []) }
-                    + group.conditional)
-            }
-        }
-
         for group:Unidoc.ExtensionGroup in self.extensions where !group.isEmpty
         {
             html[.section, { $0.class = "group extension" }]
             {
-                $0 += self.heading(for: group)
+                $0 += Swiftinit.ExtensionHeader.init(self.context,
+                    heading: .init(culture: group.culture, bias: self.bias),
+                    where: group.constraints)
 
                 $0 ?= self.list(group.conformances, under: "Conformances")
                 $0 ?= self.list(group.nested, under: "Members")
@@ -417,8 +372,8 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                         let (restatements, witnesses):([Unidoc.Scalar], [Unidoc.Scalar]) =
                             group.subforms.reduce(into: ([], []))
                         {
-                            if  case true? =
-                                self.context.vertices[$1]?.decl?.kinks[is: .intrinsicWitness]
+                            if  case (.decl(let decl), _)? = self.context.vertices[$1],
+                                decl.kinks[is: .intrinsicWitness]
                             {
                                 $0.1.append($1)
                             }

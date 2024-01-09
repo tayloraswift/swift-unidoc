@@ -1,8 +1,8 @@
 import Symbols
 
-extension Swiftinit.GroupLists
+extension Swiftinit
 {
-    enum Mode:Hashable, Equatable, Sendable
+    enum GroupListMode:Hashable, Equatable, Sendable
     {
         case decl(Phylum.Decl, Phylum.Decl.Kinks)
         case meta

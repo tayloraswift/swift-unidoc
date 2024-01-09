@@ -1,4 +1,5 @@
 import HTML
+import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
 import Symbols
@@ -15,6 +16,8 @@ public
 protocol _SwiftinitVertexPageContext:AnyObject
 {
     func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+
+    func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
 
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
 

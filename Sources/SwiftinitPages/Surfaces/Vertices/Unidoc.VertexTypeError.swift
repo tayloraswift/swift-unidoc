@@ -1,5 +1,3 @@
-import UnidocRecords
-
 extension Unidoc
 {
     enum VertexTypeError:Error, Equatable, Sendable

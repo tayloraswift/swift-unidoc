@@ -19,14 +19,16 @@ public
 protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
     where Query.Iteration.BatchElement == Unidoc.VertexOutput
 {
+    associatedtype VertexCache:Swiftinit.VertexCache = Swiftinit.Vertices
+    associatedtype VertexLayer:Swiftinit.VertexLayer
+
     static
     func response(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
 }
-
 extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
@@ -46,8 +48,9 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         let vertex:Unidoc.AnyVertex = principal.vertex
         else
         {
-            let context:IdentifiablePageContext<Never?> = .init(
-                principal: principal.volume,
+            let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
+                    vertices: .init(),
+                    volumes: .init(principal: principal.volume)),
                 repo: principal.repo)
 
             context.vertices.add(principal.matches)
@@ -68,8 +71,10 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
             }
         }
 
-        let context:IdentifiablePageContext<Unidoc.Scalar> = .init(principal: vertex.id,
-            volume: principal.volume,
+        let vertices:Swiftinit.Vertices = .init(principal: vertex)
+        let context:IdentifiablePageContext<VertexCache> = .init(cache: .init(
+                vertices: .form(from: consume vertices),
+                volumes: .init(principal: principal.volume)),
             repo: principal.repo)
         ;
         {
@@ -89,7 +94,8 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         let groups:[Unidoc.AnyGroup] = principal.groups
         let tree:Unidoc.TypeTree? = principal.tree
 
-        let canonical:CanonicalVersion? = .init(principal: consume principal)
+        let canonical:CanonicalVersion? = .init(principal: consume principal,
+            layer: VertexLayer.self)
 
         //  Note: noun tree won’t exist if the module contains no declarations.
         //  (For example, an `@_exported` shim.)

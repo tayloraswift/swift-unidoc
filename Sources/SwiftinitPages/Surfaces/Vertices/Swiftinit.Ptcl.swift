@@ -1,17 +1,18 @@
 extension Swiftinit
 {
+    @frozen public
     enum Ptcl
     {
     }
 }
 extension Swiftinit.Ptcl:Swiftinit.VertexLayer
 {
-    static
+    @inlinable public static
     var docs:Swiftinit.Root { .ptcl }
 
-    static
+    @inlinable public static
     var docc:Swiftinit.Root { .ptcl }
 
-    static
+    @inlinable public static
     var hist:Swiftinit.Root { .ptcl }
 }
