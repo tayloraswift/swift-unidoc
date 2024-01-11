@@ -71,14 +71,16 @@ extension PackageBuild
         from repository:String,
         at refname:String,
         in shared:Workspace,
-        clean:Bool = false) async throws -> Self
+        clean:Set<Clean> = []) async throws -> Self
     {
         let version:AnyVersion = .init(refname)
 
-        let container:Workspace = try await shared.create("\(package)",
-            clean: clean)
-        let checkouts:Workspace = try await container.create("checkouts")
-        let artifacts:Workspace = try await container.create("artifacts@\(refname)")
+        let container:Workspace = try await shared.create("\(package)")
+        let checkouts:Workspace = try await container.create("checkouts",
+            clean: clean.contains(.checkouts))
+        let artifacts:Workspace = try await container.create("artifacts@\(refname)",
+            clean: clean.contains(.artifacts))
+
         let cloned:FilePath = checkouts.path / "\(package)"
 
         print("Pulling repository from remote: \(repository)")

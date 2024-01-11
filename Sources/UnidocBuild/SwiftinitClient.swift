@@ -197,7 +197,7 @@ extension SwiftinitClient
             from: package.repo,
             at: edition.tag,
             in: workspace,
-            clean: false)
+            clean: [.artifacts])
 
         let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
             pretty: pretty)

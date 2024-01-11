@@ -40,7 +40,7 @@ enum Main:TestMain, TestBattery
                         from: "https://github.com/apple/swift-atomics.git",
                         at: "1.1.0",
                         in: workspace,
-                        clean: true),
+                        clean: [.artifacts]),
                     pretty: true)
             })
         {
@@ -55,7 +55,7 @@ enum Main:TestMain, TestBattery
                         from: "https://github.com/apple/swift-nio.git",
                         at: "2.58.0",
                         in: workspace,
-                        clean: true),
+                        clean: [.artifacts]),
                     pretty: true)
             })
         {
@@ -80,7 +80,7 @@ enum Main:TestMain, TestBattery
                         from: "https://github.com/apple/swift-nio-ssl.git",
                         at: "2.24.0",
                         in: workspace,
-                        clean: true),
+                        clean: [.artifacts]),
                     pretty: true)
             })
         {
@@ -104,7 +104,7 @@ enum Main:TestMain, TestBattery
                         from: "https://github.com/apple/swift-async-dns-resolver.git",
                         at: "0.1.2",
                         in: workspace,
-                        clean: true),
+                        clean: [.artifacts]),
                     pretty: true)
             })
         {
@@ -128,7 +128,7 @@ enum Main:TestMain, TestBattery
                         from: "https://github.com/apple/swift-syntax.git",
                         at: "508.0.0",
                         in: workspace,
-                        clean: true),
+                        clean: [.artifacts]),
                     pretty: true)
             })
         {
