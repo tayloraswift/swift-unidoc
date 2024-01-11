@@ -94,6 +94,30 @@ enum Main:TestMain, TestBattery
             docs.roundtrip(for: tests, in: workspace.path)
         }
 
+        //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
+        //  to handle that.
+        if  let tests:TestGroup = tests / "swift-async-dns-resolver",
+            let docs:SymbolGraphArchive = (await tests.do
+            {
+                try await toolchain.generateDocs(for: try await .remote(
+                        package: "swift-async-dns-resolver",
+                        from: "https://github.com/apple/swift-async-dns-resolver.git",
+                        at: "0.1.2",
+                        in: workspace,
+                        clean: true),
+                    pretty: true)
+            })
+        {
+            tests.expect(docs.metadata.dependencies.map(\.package) **?
+            [
+                "swift-collections",
+                "swift-atomics",
+                "swift-nio",
+            ])
+
+            docs.roundtrip(for: tests, in: workspace.path)
+        }
+
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-syntax",
