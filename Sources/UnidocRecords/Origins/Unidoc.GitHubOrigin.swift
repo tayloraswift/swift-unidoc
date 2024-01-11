@@ -1,7 +1,6 @@
 import BSON
-import MongoQL
 
-extension Unidoc.PackageRepo
+extension Unidoc
 {
     /// This type is largely the same as ``GitHub.Repo``, but with common fields extracted.
     @frozen public
@@ -35,7 +34,7 @@ extension Unidoc.PackageRepo
         public
         var fork:Bool
 
-        @inlinable internal
+        @inlinable public
         init(id:Int32,
             pushed:BSON.Millisecond,
             owner:String,
@@ -62,7 +61,7 @@ extension Unidoc.PackageRepo
         }
     }
 }
-extension Unidoc.PackageRepo.GitHubOrigin
+extension Unidoc.GitHubOrigin
 {
     @inlinable public
     var https:String
@@ -70,7 +69,7 @@ extension Unidoc.PackageRepo.GitHubOrigin
         "https://github.com/\(self.owner)/\(self.name)"
     }
 }
-extension Unidoc.PackageRepo.GitHubOrigin:MongoMasterCodingModel
+extension Unidoc.GitHubOrigin
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -91,7 +90,7 @@ extension Unidoc.PackageRepo.GitHubOrigin:MongoMasterCodingModel
         case fork = "K"
     }
 }
-extension Unidoc.PackageRepo.GitHubOrigin:BSONDocumentEncodable
+extension Unidoc.GitHubOrigin:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -112,7 +111,7 @@ extension Unidoc.PackageRepo.GitHubOrigin:BSONDocumentEncodable
         bson[.fork] = self.fork
     }
 }
-extension Unidoc.PackageRepo.GitHubOrigin:BSONDocumentDecodable
+extension Unidoc.GitHubOrigin:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws

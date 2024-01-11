@@ -59,11 +59,9 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
         else
         {
             let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
-                    vertices: .init(),
+                    vertices: .init(secondary: output.matches),
                     volumes: .init(principal: output.volume)),
                 repo: nil)
-
-            context.vertices.add(output.matches)
 
             let display:Swiftinit.Docs.NotFoundPage = .init(context, sidebar: nil)
             //  We return 410 Gone instead of 404 Not Found so that search engines and

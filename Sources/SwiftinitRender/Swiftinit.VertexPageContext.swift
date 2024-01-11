@@ -15,21 +15,26 @@ extension Swiftinit
 public
 protocol _SwiftinitVertexPageContext:AnyObject
 {
-    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
-
-    func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
-
-    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
-
-    func vector<Display, Vector>(_ vector:Vector,
-        display:Display) -> HTML.VectorLink<Display, Vector>?
-        where Vector:Collection<Unidoc.Scalar>
-
-    func url(_ scalar:Unidoc.Scalar) -> String?
-
-    /// Returns the principal volume metadata for the associated page.
+    /// Returns the metadata document for the principal volume of the associated page.
     var volume:Unidoc.VolumeMetadata { get }
 
-    /// Returns the volume metadata for the specified edition, if available.
-    subscript(edition:Unidoc.Edition) -> Unidoc.VolumeMetadata? { get }
+    /// Returns the metadata document for the specified volume, if available.
+    subscript(volume:Unidoc.Edition) -> Unidoc.VolumeMetadata? { get }
+    /// Returns the vertex document for the specified vertex, if available.
+    subscript(vertex:Unidoc.Scalar) -> Unidoc.AnyVertex? { get }
+
+    /// Returns the vertex document for the specified vertex and its URL, if available.
+    ///
+    /// The URL could be nil if the vertex’s native volume could not be loaded, or if the URL
+    /// would point back to the current page.
+    subscript(vertex id:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)? { get }
+
+    subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)? { get }
+    subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)? { get }
+    subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)? { get }
+    subscript(file id:Unidoc.Scalar) ->
+    (
+        vertex:Unidoc.FileVertex,
+        origin:Unidoc.PackageOrigin?
+    )? { get }
 }

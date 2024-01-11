@@ -33,7 +33,7 @@ extension Swiftinit.GroupList:HTML.OutputStreamable
         {
             for scalar:Unidoc.Scalar in self.scalars
             {
-                $0 ?= self.context.card(scalar)
+                $0[.li] = self.context.card(scalar)
             }
         }
     }

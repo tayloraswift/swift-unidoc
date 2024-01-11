@@ -1,4 +1,6 @@
-extension Unidoc.PackageRepo
+import UnidocRecords
+
+extension Unidoc
 {
     @frozen @usableFromInline
     enum GitHubTimestampError:Equatable, Error
@@ -8,7 +10,7 @@ extension Unidoc.PackageRepo
         case pushed(String)
     }
 }
-extension Unidoc.PackageRepo.GitHubTimestampError:CustomStringConvertible
+extension Unidoc.GitHubTimestampError:CustomStringConvertible
 {
     @usableFromInline
     var description:String

@@ -30,20 +30,7 @@ class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
 extension IdentifiablePageContext:Identifiable
 {
     @usableFromInline internal
-    var id:Vertices.ID { self.vertices.id }
-}
-extension IdentifiablePageContext
-{
-    var vertices:Vertices
-    {
-        _read   { yield  self.cache.vertices }
-        _modify { yield &self.cache.vertices }
-    }
-    var volumes:Swiftinit.Volumes
-    {
-        _read   { yield  self.cache.volumes }
-        _modify { yield &self.cache.volumes }
-    }
+    var id:Vertices.ID { self.cache.vertices.id }
 }
 extension IdentifiablePageContext
 {
@@ -59,14 +46,7 @@ extension IdentifiablePageContext
 }
 extension IdentifiablePageContext
 {
-    func constraints(
-        _ constraints:[GenericConstraint<Unidoc.Scalar?>]) -> Swiftinit.ConstraintsList?
-    {
-        .init(self, constraints: constraints)
-    }
-}
-extension IdentifiablePageContext
-{
+    @available(*, deprecated)
     func prose(overview passage:Unidoc.Passage) -> ProseSection
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
@@ -83,18 +63,25 @@ extension IdentifiablePageContext
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 
-    func card(_ scalar:Unidoc.Scalar) -> Swiftinit.GroupList.Card?
+    func card(_ id:Unidoc.Scalar) -> Swiftinit.AnyCard?
     {
-        guard
-        case (let vertex, let url?)? = self.cache[scalar]
-        else
+        switch self[vertex: id]
         {
-            return nil
-        }
+        case (.article(let vertex), let url?)?:
+            .article(.init(self, vertex: vertex, target: url))
 
-        return .init(overview: vertex.overview.map(self.prose(overview:)),
-            vertex: vertex,
-            target: url)
+        case (.culture(let vertex), let url?)?:
+            .culture(.init(self, vertex: vertex, target: url))
+
+        case (.decl(let vertex), let url?)?:
+            .decl(.init(self, vertex: vertex, target: url))
+
+        case (.product(let vertex), let url?)?:
+            .product(.init(self, vertex: vertex, target: url))
+
+        default:
+            nil
+        }
     }
 }
 extension IdentifiablePageContext
@@ -115,7 +102,7 @@ extension IdentifiablePageContext
         culture:Unidoc.Scalar) -> Unidoc.VolumeMetadata.Subdomain?
     {
         guard
-        let url:String = self.url(culture)
+        let url:String = self[culture: culture]?.url
         else
         {
             return nil
@@ -136,7 +123,7 @@ extension IdentifiablePageContext
         }
 
         guard
-        let namespace:String = self.url(namespace),
+        let namespace:String = self[culture: culture]?.url,
         let culture:HTML.Link<Symbol.Module> = self.link(module: culture)
         else
         {
@@ -148,90 +135,60 @@ extension IdentifiablePageContext
     }
 
     var domain:Unidoc.VolumeMetadata.Domain { .init(self.volume) }
-
-
-
-    func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
-    {
-        guard
-        let refname:String = self.volumes[file.edition]?.refname,
-        let origin:Unidoc.PackageRepo.AnyOrigin = self.repo?.origin,
-        case (.file(let file), _)? = self.vertices[file]
-        else
-        {
-            return nil
-        }
-
-        let icon:Swiftinit.SourceLink.Icon
-        let blob:String
-
-        switch origin
-        {
-        case .github(let origin):
-            icon = .github
-            blob = "\(origin.https)/blob/\(refname)/\(file.symbol)"
-        }
-
-        return .init(target: line.map { "\(blob)#L\($0 + 1)" } ?? blob,
-            icon: icon,
-            file: file.symbol.last,
-            line: line)
-    }
 }
 extension IdentifiablePageContext:Swiftinit.VertexPageContext
 {
     @usableFromInline
-    func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
+    var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }
+
+    @usableFromInline
+    subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
-        self.cache[culture: module].map
-        {
-            .init(display: $0.module.id, target: $1)
-        }
+        self.cache.volumes.secondary[volume]
+    }
+    @usableFromInline
+    subscript(volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
+    {
+        self.cache.volumes[volume]
     }
 
     @usableFromInline
-    func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
+    subscript(vertex:Unidoc.Scalar) -> Unidoc.AnyVertex?
     {
-        guard
-        let (decl, url):(Unidoc.DeclVertex, String?) = self.cache[decl: decl],
-        let path:UnqualifiedPath = .init(splitting: decl.stem)
-        else
-        {
-            return nil
-        }
-
-        return .init(display: path, target: url)
+        self.cache.vertices[vertex]?.vertex
     }
 
     @usableFromInline
-    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+    subscript(vertex id:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)?
     {
-        self.cache[article: article].map
-        {
-            .init(display: $0.headline.safe, target: $1)
-        }
+        self.cache[id]
     }
 
     @usableFromInline
-    func vector<Display, Vector>(_ vector:Vector,
-        display:Display) -> HTML.VectorLink<Display, Vector>?
-        where Vector:Collection<Unidoc.Scalar>
+    subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
     {
-        vector.isEmpty ? nil : .init(self, display: display, scalars: vector)
+        self.cache[culture: id]
     }
 
     @usableFromInline
-    func url(_ scalar:Unidoc.Scalar) -> String?
+    subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)?
     {
-        self.cache[scalar]?.url
+        self.cache[article: id]
     }
 
     @usableFromInline
-    var volume:Unidoc.VolumeMetadata { self.volumes.principal }
+    subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)?
+    {
+        self.cache[decl: id]
+    }
 
     @usableFromInline
-    subscript(edition:Unidoc.Edition) -> Unidoc.VolumeMetadata?
+    subscript(file id:Unidoc.Scalar) ->
+    (
+        vertex:Unidoc.FileVertex,
+        origin:Unidoc.PackageOrigin?
+    )?
     {
-        self.volumes[edition]
+        self.cache.vertices[id]?.vertex.file.map { (vertex: $0, origin: self.repo?.origin) }
     }
 }

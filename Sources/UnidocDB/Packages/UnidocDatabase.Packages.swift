@@ -45,7 +45,7 @@ extension UnidocDatabase.Packages
     {
         $0[ Unidoc.PackageMetadata[.repo] /
             Unidoc.PackageRepo[.github] /
-            Unidoc.PackageRepo.GitHubOrigin[.id]] = (+)
+            Unidoc.GitHubOrigin[.id]] = (+)
     }
         where:
     {
@@ -108,7 +108,7 @@ extension UnidocDatabase.Packages
 
                 $0[ Unidoc.PackageMetadata[.repo] /
                     Unidoc.PackageRepo[.github] /
-                    Unidoc.PackageRepo.GitHubOrigin[.id]] = id
+                    Unidoc.GitHubOrigin[.id]] = id
             }
             $0[.hint] = Self.indexRepoGitHub.id
         }

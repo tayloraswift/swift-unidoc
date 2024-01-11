@@ -20,14 +20,15 @@ extension Swiftinit.DenseList.Iterator
 extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
 {
     private mutating
-    func advance(with context:IdentifiablePageContext<Swiftinit.SecondaryOnly>)
+    func advance(with context:some Swiftinit.VertexPageContext)
     {
         while   let type:Unidoc.ConformingType = self.base.next()
         {
-            if  let link:HTML.Link<UnqualifiedPath> = context.link(decl: type.id)
+            if  let next:Swiftinit.DenseList.Card = .init(type.id,
+                    constraints: type.constraints,
+                    with: context)
             {
-                self.next = .init(link: link,
-                    constraints: context.constraints(type.constraints))
+                self.next = next
                 return
             }
         }
@@ -35,8 +36,7 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
         self.next = nil
     }
     mutating
-    func pull(
-        with context:IdentifiablePageContext<Swiftinit.SecondaryOnly>) -> Swiftinit.DenseList.Card?
+    func pull(with context:some Swiftinit.VertexPageContext) -> Swiftinit.DenseList.Card?
     {
         defer { self.advance(with: context) }
         return self.next
@@ -45,13 +45,13 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
 extension Swiftinit.DenseList.Iterator.Cards<Unidoc.Scalar>
 {
     private mutating
-    func advance(with context:IdentifiablePageContext<Swiftinit.SecondaryOnly>)
+    func advance(with context:some Swiftinit.VertexPageContext)
     {
         while   let type:Unidoc.Scalar = self.base.next()
         {
-            if  let link:HTML.Link<UnqualifiedPath> = context.link(decl: type)
+            if  let next:Swiftinit.DenseList.Card = .init(type, with: context)
             {
-                self.next = .init(link: link, constraints: nil)
+                self.next = next
                 return
             }
         }
@@ -59,8 +59,7 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.Scalar>
         self.next = nil
     }
     mutating
-    func pull(
-        with context:IdentifiablePageContext<Swiftinit.SecondaryOnly>) -> Swiftinit.DenseList.Card?
+    func pull(with context:some Swiftinit.VertexPageContext) -> Swiftinit.DenseList.Card?
     {
         defer { self.advance(with: context) }
         return self.next

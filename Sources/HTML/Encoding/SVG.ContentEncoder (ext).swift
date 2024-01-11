@@ -5,11 +5,8 @@ extension SVG.ContentEncoder
         attributes:(inout SVG.AttributeEncoder) -> () = { _ in }) -> Renderable?
         where Renderable:SVG.OutputStreamable
     {
-        get
-        {
-            nil
-        }
-        set(value)
+        get { nil }
+        set (value)
         {
             if  let value:Renderable
             {

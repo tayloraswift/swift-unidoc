@@ -103,7 +103,7 @@ extension Swiftinit.GroupLists
                     continue
                 }
 
-                let partisanship:Partisanship = self.context.volumes.secondary[group.id.edition]
+                let partisanship:Partisanship = self.context[secondary: group.id.edition]
                     .map
                 {
                     .third($0.symbol.package)
@@ -210,7 +210,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 //  any prose associated with it.
                 html[.section, { $0.class = "group topic" }]
                 {
-                    $0 ?= group.overview.map(self.context.prose(overview:))
+                    $0 ?= group.overview.map { ProseSection.init(self.context, passage: $0) }
 
                     $0[.ul]
                     {
@@ -219,7 +219,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                             switch member
                             {
                             case .scalar(let scalar):
-                                $0 ?= self.context.card(scalar)
+                                $0[.li] = self.context.card(scalar)
 
                             case .text(let text):
                                 $0[.li] { $0[.span] { $0[.code] = text } }
@@ -247,7 +247,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                     switch $1
                     {
                     case .scalar(let scalar):
-                        $0 ?= self.context.card(scalar)
+                        $0[.li] = self.context.card(scalar)
 
                     case .text(let text):
                         $0[.li] { $0[.span] { $0[.code] = text } }
@@ -265,7 +265,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 {
                     for member:Unidoc.Scalar in members
                     {
-                        $0 ?= self.context.card(member)
+                        $0[.li] = self.context.card(member)
                     }
                 }
             }
@@ -309,7 +309,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 {
                     for superform:Unidoc.Scalar in superforms
                     {
-                        $0 ?= self.context.card(superform)
+                        $0[.li] = self.context.card(superform)
                     }
                 }
             }
@@ -326,7 +326,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 {
                     for requirement:Unidoc.Scalar in requirements
                     {
-                        $0 ?= self.context.card(requirement)
+                        $0[.li] = self.context.card(requirement)
                     }
                 }
             }
@@ -341,7 +341,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                     limit: 12,
                     open: self.extensions.allSatisfy(\.isEmpty))
                 {
-                    $0 ?= self.context.card($1)
+                    $0[.li] = self.context.card($1)
                 }
             }
         }
@@ -350,9 +350,13 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
         {
             html[.section, { $0.class = "group extension" }]
             {
-                $0 += Swiftinit.ExtensionHeader.init(self.context,
-                    heading: .init(culture: group.culture, bias: self.bias),
-                    where: group.constraints)
+                $0[.h2] = Swiftinit.ExtensionHeader.init(self.context,
+                    heading: .init(culture: group.culture, bias: self.bias))
+
+                $0[.div, .code]
+                {
+                    $0.class = "constraints"
+                } = Swiftinit.ConstraintsList.init(self.context, constraints: group.constraints)
 
                 $0 ?= self.list(group.conformances, under: "Conformances")
                 $0 ?= self.list(group.nested, under: "Members")
@@ -372,7 +376,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                         let (restatements, witnesses):([Unidoc.Scalar], [Unidoc.Scalar]) =
                             group.subforms.reduce(into: ([], []))
                         {
-                            if  case (.decl(let decl), _)? = self.context.vertices[$1],
+                            if  case .decl(let decl)? = self.context[$1],
                                 decl.kinks[is: .intrinsicWitness]
                             {
                                 $0.1.append($1)

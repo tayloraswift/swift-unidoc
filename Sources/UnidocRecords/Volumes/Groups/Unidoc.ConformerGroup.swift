@@ -33,3 +33,11 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.ConformerGroup
+{
+    @inlinable public
+    var count:Int
+    {
+        self.unconditional.count + self.conditional.count
+    }
+}

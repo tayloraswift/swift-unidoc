@@ -8,17 +8,19 @@ extension Swiftinit
 
         private
         var conformers:[Unidoc.ConformerGroup]
+        private(set)
+        var count:Int
 
         private
         let bias:Bias
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
-            conformers:[Unidoc.ConformerGroup] = [],
             bias:Bias)
         {
             self.context = context
-            self.conformers = conformers
+            self.conformers = []
+            self.count = 0
             self.bias = bias
         }
     }
@@ -40,10 +42,13 @@ extension Swiftinit.ConformingTypes
             }
 
             self.conformers.append(group)
+            self.count += group.count
         }
 
         self.conformers.sort { $0.id < $1.id }
     }
+
+    var cultures:Int { self.conformers.count }
 }
 extension Swiftinit.ConformingTypes:HTML.OutputStreamable
 {
@@ -52,7 +57,7 @@ extension Swiftinit.ConformingTypes:HTML.OutputStreamable
     {
         for group:Unidoc.ConformerGroup in self.conformers
         {
-            html[.section, { $0.class = "group conformer" }]
+            html[.section, { $0.class = "group dense conformer" }]
             {
                 $0[.h2] = Swiftinit.ConformingTypesHeader.init(self.context,
                     heading: .init(culture: group.culture, bias: self.bias))

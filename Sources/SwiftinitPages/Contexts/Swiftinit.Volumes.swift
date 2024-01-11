@@ -9,9 +9,10 @@ extension Swiftinit
         private(set)
         var secondary:[Unidoc.Edition: Unidoc.VolumeMetadata]
 
+        private
         init(
             principal:Unidoc.VolumeMetadata,
-            secondary:[Unidoc.Edition: Unidoc.VolumeMetadata] = [:])
+            secondary:[Unidoc.Edition: Unidoc.VolumeMetadata])
         {
             self.principal = principal
             self.secondary = secondary
@@ -20,14 +21,13 @@ extension Swiftinit
 }
 extension Swiftinit.Volumes
 {
-    mutating
-    func add(_ names:[Unidoc.VolumeMetadata])
+    init(principal:Unidoc.VolumeMetadata, secondary:[Unidoc.VolumeMetadata] = [])
     {
-        for names:Unidoc.VolumeMetadata in names where
-            names.id != self.principal.id
+        let secondary:[Unidoc.Edition: Unidoc.VolumeMetadata] = secondary.reduce(into: [:])
         {
-            self.secondary[names.id] = names
+            $0[$1.id] = principal.id != $1.id ? $1 : nil
         }
+        self.init(principal: principal, secondary: secondary)
     }
 }
 extension Swiftinit.Volumes

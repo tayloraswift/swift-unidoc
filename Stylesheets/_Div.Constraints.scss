@@ -1,0 +1,36 @@
+//  Generic constraints
+div.constraints code,
+div.constraints code
+{
+    line-height: 1.6rem;
+    color: $light-swift;
+    font-size: inherit;
+
+    display: block;
+    text-indent: -3.6rem;
+    margin-left: 3.6rem;
+
+    span.xk // keyword
+    {
+        color: $light-accent-comment;
+    }
+
+    span.xv, // identifier
+    span.xt, // type
+    span.xu  // typealias
+    {
+        color: $light-accent-yellow;
+        font-weight: 500;
+    }
+    a
+    {
+        //  WebKit requires separate statements for dashed underline.
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        text-decoration-color: $light-accent-yellow;
+    }
+    a:hover
+    {
+        text-decoration-style: solid;
+    }
+}

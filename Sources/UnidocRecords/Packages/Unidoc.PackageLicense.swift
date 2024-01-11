@@ -1,5 +1,4 @@
 import BSON
-import MongoQL
 
 extension Unidoc
 {
@@ -38,7 +37,7 @@ extension Unidoc.PackageLicense
         }
     }
 }
-extension Unidoc.PackageLicense:MongoMasterCodingModel
+extension Unidoc.PackageLicense
 {
     @frozen public
     enum CodingKey:String, Sendable

@@ -152,6 +152,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                 {
                     $0[.a]
                     {
+                        $0.class = "button"
                         $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
                     } = "Repo details and more versions"
                 }
@@ -183,7 +184,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 
                                 if  let pin:Unidoc.Edition = dependency.pinned
                                 {
-                                    pinned = self.context.volumes[pin]
+                                    pinned = self.context[pin]
 
                                     $0[.td]
                                     {
