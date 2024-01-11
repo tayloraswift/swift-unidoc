@@ -11,13 +11,11 @@ extension Unidoc
 public
 protocol _UnidocLookupContext
 {
-    static
     func groups(_:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,
         output:Mongo.KeyPath)
 
-    static
     func edges(_:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex:Mongo.KeyPath,

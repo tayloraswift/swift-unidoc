@@ -10,12 +10,17 @@ extension Unidoc
         let id:BSON.Millisecond
         public
         var crawled:BSON.Millisecond?
+        public
+        var expires:BSON.Millisecond
 
         @inlinable public
-        init(id:BSON.Millisecond, crawled:BSON.Millisecond? = nil)
+        init(id:BSON.Millisecond,
+            crawled:BSON.Millisecond? = nil,
+            expires:BSON.Millisecond = 0)
         {
             self.id = id
             self.crawled = crawled
+            self.expires = expires
         }
     }
 }
@@ -25,7 +30,8 @@ extension Unidoc.CrawlingWindow:MongoMasterCodingModel
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case crawled = "T"
+        case crawled = "C"
+        case expires = "T"
     }
 }
 extension Unidoc.CrawlingWindow:BSONDocumentEncodable
@@ -35,6 +41,7 @@ extension Unidoc.CrawlingWindow:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.crawled] = self.crawled
+        bson[.expires] = self.expires
     }
 }
 extension Unidoc.CrawlingWindow:BSONDocumentDecodable
@@ -42,6 +49,8 @@ extension Unidoc.CrawlingWindow:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(id: try bson[.id].decode(), crawled: try bson[.crawled]?.decode())
+        self.init(id: try bson[.id].decode(),
+            crawled: try bson[.crawled]?.decode(),
+            expires: try bson[.expires]?.decode() ?? 0)
     }
 }

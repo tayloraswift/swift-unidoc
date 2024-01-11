@@ -16,13 +16,3 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VolumeRange
-{
-    /// Matches the ``SymbolGraph.Plane/article`` plane only.
-    @inlinable public static
-    var articles:Self { .init(min: .planes_article, max: .planes_file) }
-
-    /// Matches the ``SymbolGraph.Plane/file`` plane only.
-    @inlinable public static
-    var files:Self { .init(min: .planes_file, max: .planes_extension) }
-}

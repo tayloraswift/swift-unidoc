@@ -35,6 +35,9 @@ protocol _UnidocVolumeQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
     static
     var input:Mongo.KeyPath { get }
 
+    /// The fields that will be removed from all matching primary vertex documents.
+    var unset:[Mongo.KeyPath] { get }
+
     func extend(pipeline:inout Mongo.PipelineEncoder)
 }
 extension Unidoc.VolumeQuery
@@ -57,7 +60,11 @@ extension Unidoc.VolumeQuery
     {
         defer
         {
-            self.vertex.extend(pipeline: &pipeline, volume: Self.volume, output: Self.input)
+            self.vertex.extend(pipeline: &pipeline,
+                volume: Self.volume,
+                output: Self.input,
+                unset: self.unset)
+
             self.extend(pipeline: &pipeline)
         }
 

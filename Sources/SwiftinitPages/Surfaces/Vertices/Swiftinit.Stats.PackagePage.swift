@@ -9,18 +9,18 @@ extension Swiftinit.Stats
 {
     struct PackagePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?
 
         private
-        let vertex:Unidoc.Vertex.Global
+        let vertex:Unidoc.GlobalVertex
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?,
-            vertex:Unidoc.Vertex.Global)
+            vertex:Unidoc.GlobalVertex)
         {
             self.context = context
             self.canonical = canonical
@@ -52,7 +52,7 @@ extension Swiftinit.Stats.PackagePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.PackagePage:Swiftinit.VersionedPage
+extension Swiftinit.Stats.PackagePage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

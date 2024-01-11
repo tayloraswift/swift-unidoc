@@ -1,0 +1,41 @@
+section.details
+{
+    aside
+    {
+        position: relative;
+        margin: 2rem 0;
+
+        h3
+        {
+            margin: 0;
+            padding: 0.5rem 0;
+            font-size: inherit;
+
+            color: $light-foreground-semi;
+            border-bottom: 2px solid $light-foreground-semi;
+        }
+
+        border-bottom: 2px solid $light-foreground-semi;
+    }
+    aside.important,
+    aside.warning
+    {
+        h3
+        {
+            color: $light-accent-hot-pink;
+            border-color: $light-accent-hot-pink;
+        }
+
+        border-color: $light-accent-hot-pink;
+    }
+
+    aside:last-child
+    {
+        border-bottom: none;
+    }
+
+    pre
+    {
+        font-size: 90.625%;
+    }
+}

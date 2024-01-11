@@ -2,12 +2,9 @@ import GitHubAPI
 import GitHubClient
 import JSON
 
-extension GitHub.Client<GitHub.API>.Connection
+extension GitHub.Client<GitHub.API<String>>.Connection
 {
-    func inspect(tag:String,
-        owner:String,
-        repo:String,
-        pat:String) async throws -> GitHubPlugin.TagResponse
+    func inspect(tag:String, owner:String, repo:String) async throws -> GitHub.TagResponse
     {
         let query:JSON = .object
         {
@@ -24,13 +21,10 @@ extension GitHub.Client<GitHub.API>.Connection
             }
             """
         }
-        return try await self.post(query: "\(query)", with: pat)
+        return try await self.post(query: "\(query)")
     }
 
-    func crawl(
-        owner:String,
-        repo:String,
-        pat:String) async throws -> GitHubPlugin.RepoMonitorResponse
+    func crawl(owner:String, repo:String) async throws -> GitHub.RepoMonitorResponse
     {
         let query:JSON = .object
         {
@@ -76,12 +70,11 @@ extension GitHub.Client<GitHub.API>.Connection
             }
             """
         }
-        return try await self.post(query: "\(query)", with: pat)
+        return try await self.post(query: "\(query)")
     }
 
     func search(repos search:String,
-        limit:Int = 100,
-        pat:String) async throws -> GitHubPlugin.RepoTelescopeResponse
+        limit:Int = 100) async throws -> GitHub.RepoTelescopeResponse
     {
         let query:JSON = .object
         {
@@ -127,6 +120,6 @@ extension GitHub.Client<GitHub.API>.Connection
             """
         }
 
-        return try await self.post(query: "\(query)", with: pat)
+        return try await self.post(query: "\(query)")
     }
 }

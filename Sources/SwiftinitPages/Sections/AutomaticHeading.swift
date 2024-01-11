@@ -13,8 +13,6 @@ enum AutomaticHeading:Equatable, Comparable
 
     case seeAlso
 
-    case genericContext
-
     case allRequirements
     case restatesRequirements
     case implementsRequirements
@@ -39,8 +37,6 @@ extension AutomaticHeading:Identifiable
 
         case .seeAlso:                  "ss:see-also"
 
-        case .genericContext:           "ss:generic-context"
-
         case .allRequirements:          "ss:requirements"
         case .restatesRequirements:     "ss:requirements-restated"
         case .implementsRequirements:   "ss:requirements-implemented"
@@ -58,16 +54,14 @@ extension AutomaticHeading:CustomStringConvertible
         {
         case .allModules:               "Modules"
         case .allProducts:              "Products"
-        case .allProductConstituents:   "Product Constituents"
+        case .allProductConstituents:   "Product constituents"
 
         case .miscellaneous:            "Miscellaneous"
-        case .otherMembers:             "Other Members in Extension"
-        case .otherModules:             "Other Modules"
-        case .otherProducts:            "Other Products"
+        case .otherMembers:             "Other members in extension"
+        case .otherModules:             "Other modules"
+        case .otherProducts:            "Other products"
 
-        case .seeAlso:                  "See Also"
-
-        case .genericContext:           "Generic Context"
+        case .seeAlso:                  "See also"
 
         case .allRequirements:          "Requirements"
         case .restatesRequirements:     "Restates"

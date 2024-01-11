@@ -8,7 +8,7 @@ extension Swiftinit
 }
 
 public
-protocol _SwiftinitAdministrativePage:Swiftinit.StaticPage
+protocol _SwiftinitAdministrativePage:Swiftinit.RenderablePage
 {
     func main(_:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
 }

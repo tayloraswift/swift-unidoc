@@ -4,29 +4,29 @@ extension Unidoc.Volume
     struct Vertices:Sendable
     {
         public
-        var articles:[Unidoc.Vertex.Article]
+        var articles:[Unidoc.ArticleVertex]
         public
-        var cultures:[Unidoc.Vertex.Culture]
+        var cultures:[Unidoc.CultureVertex]
         public
-        var decls:[Unidoc.Vertex.Decl]
+        var decls:[Unidoc.DeclVertex]
         public
-        var files:[Unidoc.Vertex.File]
+        var files:[Unidoc.FileVertex]
         public
-        var products:[Unidoc.Vertex.Product]
+        var products:[Unidoc.ProductVertex]
         public
-        var foreign:[Unidoc.Vertex.Foreign]
+        var foreign:[Unidoc.ForeignVertex]
         public
-        var global:Unidoc.Vertex.Global
+        var global:Unidoc.GlobalVertex
 
         @inlinable public
         init(
-            articles:[Unidoc.Vertex.Article],
-            cultures:[Unidoc.Vertex.Culture],
-            decls:[Unidoc.Vertex.Decl],
-            files:[Unidoc.Vertex.File],
-            products:[Unidoc.Vertex.Product],
-            foreign:[Unidoc.Vertex.Foreign],
-            global:Unidoc.Vertex.Global)
+            articles:[Unidoc.ArticleVertex],
+            cultures:[Unidoc.CultureVertex],
+            decls:[Unidoc.DeclVertex],
+            files:[Unidoc.FileVertex],
+            products:[Unidoc.ProductVertex],
+            foreign:[Unidoc.ForeignVertex],
+            global:Unidoc.GlobalVertex)
         {
             self.articles = articles
             self.cultures = cultures

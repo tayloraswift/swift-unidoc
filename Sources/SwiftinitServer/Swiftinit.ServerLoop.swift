@@ -1,4 +1,5 @@
 import Atomics
+import GitHubAPI
 import HTTP
 import HTTPClient
 import HTTPServer
@@ -10,6 +11,7 @@ import NIOHTTP1
 import NIOPosix
 import NIOSSL
 import SwiftinitPages
+import SwiftinitPlugins
 import UnidocDB
 import UnidocProfiling
 import UnidocQueries
@@ -23,7 +25,9 @@ extension Swiftinit
         nonisolated
         let atomics:Counters
         nonisolated
-        let plugins:Plugins
+        let context:ServerPluginContext
+        nonisolated
+        let plugins:[String: any Swiftinit.ServerPlugin]
         nonisolated
         let db:DB
 
@@ -32,14 +36,19 @@ extension Swiftinit
             updates:AsyncStream<Update>
 
         private nonisolated
-        let options:Options
+        let options:ServerOptions
         private
         var tour:ServerTour
 
-        init(options:Options, plugins:Plugins, db:DB)
+        init(
+            plugins:[String: any Swiftinit.ServerPlugin],
+            context:ServerPluginContext,
+            options:ServerOptions,
+            db:DB)
         {
             self.atomics = .init()
             self.plugins = plugins
+            self.context = context
             self.db = db
 
             var continuation:AsyncStream<Update>.Continuation? = nil
@@ -57,34 +66,15 @@ extension Swiftinit
 extension Swiftinit.ServerLoop
 {
     init(
-        options:Swiftinit.Options,
-        threads:MultiThreadedEventLoopGroup,
+        plugins:[any Swiftinit.ServerPlugin],
+        context:Swiftinit.ServerPluginContext,
+        options:Swiftinit.ServerOptions,
         mongodb:Mongo.SessionPool) async throws
     {
-        let policy:PolicyPlugin? = options.whitelists ? .init() : nil
-        let github:GitHubPlugin? = options.secrets.github.map
-        {
-            do
-            {
-                return try .load(secrets: $0)
-            }
-            catch
-            {
-                Log[.debug] = "App secret unavailable, GitHub integration has been disabled!"
-                return nil
-            }
-        } ?? nil
-
-        var configuration:TLSConfiguration = .makeClientConfiguration()
-            configuration.applicationProtocols = ["h2"]
-
         self.init(
+            plugins: plugins.reduce(into: [:]) { $0[$1.id] = $1 },
+            context: context,
             options: options,
-            plugins: .init(list: .init(
-                    policy: policy,
-                    github: github),
-                threads: threads,
-                niossl: try .init(configuration: configuration)),
             db: .init(sessions: mongodb,
                 unidoc: await .setup(as: "unidoc", in: mongodb)))
     }
@@ -94,6 +84,9 @@ extension Swiftinit.ServerLoop
 {
     nonisolated
     var secure:Bool { self.options.mode.secure }
+
+    nonisolated
+    var github:GitHub.Integration? { self.options.github }
 
     nonisolated
     var format:Swiftinit.RenderFormat
@@ -130,38 +123,33 @@ extension Swiftinit.ServerLoop
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
 
-            let policies:ManagedAtomic<HTTP.Policylist> = .init(.init(v4: [], v6: []))
+            var policy:Swiftinit.PolicyPlugin? = nil
+            for plugin:any Swiftinit.ServerPlugin in self.plugins.values
+            {
+                if  case let plugin as Swiftinit.PolicyPlugin = plugin
+                {
+                    policy = plugin
+                }
 
-            tasks.addTask
-            {
-                try await self.serve(from: ("::", self.options.port),
-                    as: self.options.authority,
-                    on: self.plugins.threads,
-                    policylist: policies)
-            }
-            tasks.addTask
-            {
-                try await self.update()
-            }
-
-            if  let plugin:Swiftinit.PluginIntegration<GitHubPlugin> = self.plugins.github
-            {
                 tasks.addTask
                 {
-                    var telescope:GitHubPlugin.RepoTelescope = plugin.telescope
-                    try await telescope.run(alongside: self)
+                    try await plugin.run(in: self.context, with: self.db)
+                }
+            }
+            do
+            {
+                let policy:Swiftinit.PolicyPlugin? = consume policy
+
+                tasks.addTask
+                {
+                    try await self.serve(from: ("::", self.options.port),
+                        as: self.options.authority,
+                        on: self.context.threads,
+                        policy: policy)
                 }
                 tasks.addTask
                 {
-                    var monitor:GitHubPlugin.RepoMonitor = plugin.monitor
-                    try await monitor.run(alongside: self)
-                }
-            }
-            if  let plugin:Swiftinit.PluginIntegration<PolicyPlugin> = self.plugins.policy
-            {
-                tasks.addTask
-                {
-                    try await plugin.crawler.run(alongside: self, updating: policies)
+                    try await self.update()
                 }
             }
 
@@ -300,9 +288,9 @@ extension Swiftinit.ServerLoop
         let duration:Duration = .now - initiated
 
         //  Don’t count login requests.
-        if  endpoint is Swiftinit.BounceEndpoint ||
-            endpoint is Swiftinit.LoginEndpoint ||
-            endpoint is Swiftinit.AdminDashboardEndpoint
+        if  endpoint is Swiftinit.DashboardEndpoint ||
+            endpoint is Swiftinit.BounceEndpoint ||
+            endpoint is Swiftinit.LoginEndpoint
         {
             return response
         }

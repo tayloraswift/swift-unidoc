@@ -6,7 +6,7 @@ import URI
 extension Swiftinit
 {
     @frozen public
-    struct Sidebar<Root> where Root:VolumeRoot
+    struct Sidebar<Root> where Root:VertexLayer
     {
         private
         let volume:Unidoc.VolumeMetadata
@@ -82,14 +82,14 @@ extension Swiftinit.Sidebar:HTML.OutputStreamable
                 previous = noun.shoot.stem
                 depth = indents
 
-                var uri:URI { Root[self.volume, noun.shoot] }
+                var uri:URI { Root[self.volume, noun.route] }
 
-                switch noun.style
+                switch noun.type
                 {
                 case .text(let text):
                     $0[.a] { $0.href = "\(uri)" ; $0.class = "text" } = text
 
-                case .stem(let citizenship):
+                case .stem(let citizenship, _):
                     $0[.a]
                     {
                         $0.href = "\(uri)"

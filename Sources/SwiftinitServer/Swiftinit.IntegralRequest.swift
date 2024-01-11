@@ -142,10 +142,10 @@ extension Swiftinit.IntegralRequest
 
             switch root
             {
-            case Swiftinit.Admin.root:
-                endpoint = .interactive(Swiftinit.AdminDashboardEndpoint.status)
+            case Swiftinit.Root.admin.id:
+                endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
 
-            case Swiftinit.Login.root:
+            case Swiftinit.Root.login.id:
                 endpoint = .interactive(Swiftinit.BounceEndpoint.init())
 
             case "robots.txt":
@@ -166,53 +166,60 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
-        case Swiftinit.API.root:
+        case Swiftinit.Root.api.id:
             endpoint = .get(api: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case Swiftinit.Admin.root:
+        case Swiftinit.Root.admin.id:
             endpoint = .get(admin: trunk, path, tag: tag)
 
-        case Swiftinit.Asset.root:
+        case Swiftinit.Root.asset.id:
             endpoint = .get(asset: trunk, tag: tag)
 
         case "auth":
             endpoint = .get(auth: trunk,
                 with: .init(uri.query?.parameters))
 
-        case Swiftinit.Blog.root:
+        case Swiftinit.Root.blog.id:
             endpoint = .get(articles: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case Swiftinit.Docs.root:
+        case Swiftinit.Root.docs.id, Swiftinit.Root.docc.id, Swiftinit.Root.hist.id:
             endpoint = .get(docs: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case "lunr":
+        case Swiftinit.Root.lunr.id:
             endpoint = .get(lunr: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Swiftinit.Root.plugin.id:
+            endpoint = .interactive(Swiftinit.DashboardEndpoint.plugin(trunk))
+
+        case Swiftinit.Root.ptcl.id:
+            endpoint = .get(ptcl: trunk, path,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Swiftinit.Root.realm.id:
+            endpoint = .get(realm: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         //  Deprecated route.
         case "sitemaps":
             endpoint = .redirect("""
-                /\(Swiftinit.Docs.root)/\(trunk.prefix { $0 != "." })/all-symbols
+                \(Swiftinit.Root.docs)/\(trunk.prefix { $0 != "." })/all-symbols
                 """)
 
-        case Swiftinit.Realm.root:
-            endpoint = .get(realm: trunk,
-                with: .init(uri.query?.parameters, tag: tag))
-
-        case Swiftinit.Stats.root:
+        case Swiftinit.Root.stats.id:
             endpoint = .get(stats: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
-        case Swiftinit.Tags.root:
+        case Swiftinit.Root.tags.id:
             endpoint = .get(tags: trunk,
                 with: .init(uri.query?.parameters,
                     user: metadata.cookies.session?.user,
                     tag: tag))
 
-        case Swiftinit.Telescope.root:
+        case Swiftinit.Root.telescope.id:
             endpoint = .get(telescope: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
@@ -262,10 +269,10 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
-        case Swiftinit.API.root:
+        case Swiftinit.Root.api.id:
             endpoint = try? .post(api: trunk, body: body, type: type)
 
-        case Swiftinit.Admin.root:
+        case Swiftinit.Root.admin.id:
             endpoint = try? .post(admin: trunk, path, body: body, type: type)
 
         case _:

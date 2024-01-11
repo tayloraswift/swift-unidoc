@@ -78,7 +78,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
-                    let vertex:Unidoc.Vertex.Decl = tests.expect(
+                    let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.principal?.vertex?.decl)
                 {
                     tests.expect(vertex.stem.last ==? "Keys")
@@ -118,7 +118,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: try await session.query(database: unidoc.id, with: query)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
-                    let _:Unidoc.Vertex = tests.expect(value: principal.vertex)
+                    let _:Unidoc.AnyVertex = tests.expect(value: principal.vertex)
                 {
                 }
             }
@@ -135,7 +135,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.RedirectOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
-                    let vertex:Unidoc.Vertex.Decl = tests.expect(
+                    let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.matches.first?.decl)
                 {
                     tests.expect(vertex.stem.last ==? "init(bitPattern:)")
@@ -169,7 +169,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     if  let output:Unidoc.VertexOutput = tests.expect(
                             value: try await session.query(database: unidoc.id, with: query)),
-                        let _:Unidoc.Vertex = tests.expect(value: output.principal?.vertex)
+                        let _:Unidoc.AnyVertex = tests.expect(value: output.principal?.vertex)
                     {
                     }
                 }
@@ -184,7 +184,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
-                    let vertex:Unidoc.Vertex.Culture = tests.expect(
+                    let vertex:Unidoc.CultureVertex = tests.expect(
                         value: output.principal?.vertex?.culture),
                     let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree)
@@ -192,10 +192,30 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Getting-Started", text: "Getting started"),
-                            .init(stem: "BarbieCore Barbie", from: .culture),
-                            .init(stem: "BarbieCore Barbie ID", from: .culture),
-                            .init(stem: "BarbieCore Barbie PlasticKeychain", from: .culture),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Getting-Started"),
+                                type: .text("Getting started")),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie ID"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
                         ])
                 }
             }
@@ -214,7 +234,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
-                    let vertex:Unidoc.Vertex = tests.expect(
+                    let vertex:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex),
                     let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree),
@@ -224,11 +244,41 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     tests.expect(tree.rows ..?
                         [
-                            .init(stem: "BarbieCore Barbie", from: .package),
-                            .init(stem: "BarbieCore Barbie Dreamhouse", from: .culture),
-                            .init(stem: "BarbieCore Barbie Dreamhouse Keys", from: .culture),
-                            .init(stem: "BarbieCore Barbie PlasticKeychain", from: .package),
-                            .init(stem: "Swift Array", from: .foreign),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie"),
+                                type: .stem(.package, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie Dreamhouse"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .enum,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie Dreamhouse Keys"),
+                                type: .stem(.culture, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
+                                type: .stem(.package, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
+                            .init(
+                                shoot: .init(stem: "Swift Array"),
+                                type: .stem(.foreign, .init(
+                                    language: .swift,
+                                    phylum: .struct,
+                                    kinks: [],
+                                    route: .unhashed))),
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
@@ -281,7 +331,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
-                    let _:Unidoc.Vertex = tests.expect(
+                    let _:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex)
                 {
                 }

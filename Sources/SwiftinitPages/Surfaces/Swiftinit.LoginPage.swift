@@ -23,7 +23,7 @@ extension Swiftinit
 extension Swiftinit.LoginPage:Swiftinit.StaticPage
 {
     @inlinable public
-    var location:URI { Swiftinit.Login.uri }
+    var location:URI { Swiftinit.Root.login.uri }
 }
 extension Swiftinit.LoginPage:Swiftinit.RenderablePage
 {

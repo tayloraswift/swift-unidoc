@@ -21,7 +21,7 @@ extension SymbolGraph
         ///
         /// This field is nil if the symbol graph was not generated from a swift package.
         public
-        var language:ModuleLanguage?
+        var language:Phylum.Language?
         /// The path to the module’s source directory, relative to the
         /// package root. If nil, the path is just [`"Sources/\(self.name)"`]().
         public
@@ -31,7 +31,7 @@ extension SymbolGraph
         init(name:String,
             type:ModuleType = .regular,
             dependencies:ModuleDependencies = .init(),
-            language:ModuleLanguage? = nil,
+            language:Phylum.Language? = nil,
             location:String? = nil)
         {
             self.name = name

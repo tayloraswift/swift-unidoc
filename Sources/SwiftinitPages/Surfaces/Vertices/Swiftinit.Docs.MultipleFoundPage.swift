@@ -7,7 +7,7 @@ extension Swiftinit.Docs
 {
     struct MultipleFoundPage
     {
-        let context:IdentifiablePageContext<Never?>
+        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
 
         let identity:Unidoc.Stem
 
@@ -15,7 +15,7 @@ extension Swiftinit.Docs
         let matches:[Unidoc.Scalar]
 
         private
-        init(_ context:IdentifiablePageContext<Never?>,
+        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
             identity:Unidoc.Stem,
             matches:[Unidoc.Scalar])
         {
@@ -28,8 +28,8 @@ extension Swiftinit.Docs
 }
 extension Swiftinit.Docs.MultipleFoundPage
 {
-    init?(_ context:consuming IdentifiablePageContext<Never?>,
-        matches:__shared [Unidoc.Vertex])
+    init?(_ context:consuming IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+        matches:__shared [Unidoc.AnyVertex])
     {
         if  let stem:Unidoc.Stem = matches.first?.shoot?.stem
         {
@@ -48,16 +48,13 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.StaticPage
 {
-    var location:URI
-    {
-        Swiftinit.Docs[self.volume, .init(stem: self.identity, hash: nil)]
-    }
+    var location:URI { Swiftinit.Docs[self.volume, .bare(self.identity)] }
 }
 extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VertexPage
 {
     var canonical:CanonicalVersion? { nil }
     var sidebar:Never? { nil }
@@ -85,7 +82,7 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VersionedPage
             {
                 for match:Unidoc.Scalar in self.matches
                 {
-                    $0 ?= self.context.card(match)
+                    $0[.li] = self.context.card(match)
                 }
             }
         }

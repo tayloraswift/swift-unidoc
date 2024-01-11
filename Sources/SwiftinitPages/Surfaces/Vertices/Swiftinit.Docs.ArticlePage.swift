@@ -9,22 +9,22 @@ extension Swiftinit.Docs
 {
     struct ArticlePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
-        let vertex:Unidoc.Vertex.Article
+        let vertex:Unidoc.ArticleVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.Vertex.Article,
-            groups:GroupSections)
+            vertex:Unidoc.ArticleVertex,
+            groups:Swiftinit.GroupLists)
         {
             self.context = context
             self.canonical = canonical
@@ -50,13 +50,13 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {

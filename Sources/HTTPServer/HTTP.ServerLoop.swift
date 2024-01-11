@@ -50,7 +50,7 @@ extension HTTP.ServerLoop
         from binding:(address:String, port:Int),
         as authority:Authority,
         on threads:MultiThreadedEventLoopGroup,
-        policylist:ManagedAtomic<HTTP.Policylist>) async throws
+        policy:(some HTTP.ServerPolicy)? = nil) async throws
         where Authority:ServerAuthority
     {
         let bootstrap:ServerBootstrap = .init(group: threads)
@@ -127,7 +127,7 @@ extension HTTP.ServerLoop
             {
                 do
                 {
-                    let policylist:HTTP.Policylist = policylist.load(ordering: .relaxed)
+                    let policylist:IP.Policylist = policy?.load() ?? .init()
 
                     switch try await $0.get()
                     {

@@ -6,13 +6,18 @@ extension Compiler
     struct Culture
     {
         let id:Symbol.Module
+        let language:Phylum.Language
         let index:Int
         private
         let root:Symbol.FileBase?
 
-        init(id:Symbol.Module, index:Int, root:Symbol.FileBase?)
+        init(id:Symbol.Module,
+            language:Phylum.Language,
+            index:Int,
+            root:Symbol.FileBase?)
         {
             self.id = id
+            self.language = language
             self.index = index
             self.root = root
         }

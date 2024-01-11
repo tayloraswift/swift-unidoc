@@ -31,7 +31,10 @@ extension SymbolGraph
 
                 time.compiling += try clock.measure
                 {
-                    try compiler.compile(culture: culture.id, parts: parts)
+                    try compiler.compile(
+                        language: culture.module.language ?? .swift,
+                        culture: culture.id,
+                        parts: parts)
                 }
             }
 

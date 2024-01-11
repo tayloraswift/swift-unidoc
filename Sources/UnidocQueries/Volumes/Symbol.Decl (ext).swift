@@ -10,7 +10,8 @@ extension Symbol.Decl:Unidoc.VertexPredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        output:Mongo.KeyPath,
+        unset:[Mongo.KeyPath])
     {
         pipeline[.lookup] = .init
         {
@@ -20,8 +21,8 @@ extension Symbol.Decl:Unidoc.VertexPredicate
             $0[.from] = UnidocDatabase.Vertices.name
             $0[.let] = .init
             {
-                $0[let: min] = volume / Unidoc.VolumeMetadata[.planes_min]
-                $0[let: max] = volume / Unidoc.VolumeMetadata[.planes_max]
+                $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
+                $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
             }
             $0[.pipeline] = .init
             {
@@ -37,25 +38,26 @@ extension Symbol.Decl:Unidoc.VertexPredicate
                         (
                             .expr
                             {
-                                $0[.eq] = (Unidoc.Vertex[.hash], hash)
+                                $0[.eq] = (Unidoc.AnyVertex[.hash], hash)
                             },
                             .expr
                             {
-                                $0[.gte] = (Unidoc.Vertex[.id], min)
+                                $0[.gte] = (Unidoc.AnyVertex[.id], min)
                             },
                             .expr
                             {
-                                $0[.lte] = (Unidoc.Vertex[.id], max)
+                                $0[.lte] = (Unidoc.AnyVertex[.id], max)
                             },
                             .expr
                             {
-                                $0[.eq] = (Unidoc.Vertex[.symbol], self)
+                                $0[.eq] = (Unidoc.AnyVertex[.symbol], self)
                             }
                         )
                     }
                 }
 
                 $0[.limit] = 1
+                $0[.unset] = unset
             }
             $0[.as] = output
         }

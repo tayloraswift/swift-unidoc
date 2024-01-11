@@ -1,4 +1,5 @@
 import Availability
+import FNV1
 import HTML
 import LexicalPaths
 import MarkdownABI
@@ -13,24 +14,24 @@ extension Swiftinit.Docs
 {
     struct DeclPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
-        let vertex:Unidoc.Vertex.Decl
+        let vertex:Unidoc.DeclVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.Vertex.Decl,
-            groups:GroupSections) throws
+            vertex:Unidoc.DeclVertex,
+            groups:Swiftinit.GroupLists) throws
         {
             self.context = context
             self.canonical = canonical
@@ -76,13 +77,13 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.DeclPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -140,7 +141,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
 
         let availability:Availability = self.vertex.signature.availability
         if  let renamed:Unidoc.Scalar = self.vertex.renamed,
-            let link:HTML.Link<String> = self.context.link(decl: renamed)
+            let link:HTML.Link<UnqualifiedPath> = self.context.link(decl: renamed)
         {
             main[.section, { $0.class = "signage deprecation renamed" }]
             {
@@ -211,18 +212,59 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VersionedPage
             }
         }
 
-        if  let containing:Unidoc.Group.Extension = self.groups.containing,
-            let constraints:ConstraintsList = self.context.constraints(containing.conditions)
+        main[.section, { $0.class = "metadata" }]
         {
-            main[.section, { $0.class = "generic-context" }]
+            $0[.details]
             {
-                $0[.h2] = AutomaticHeading.genericContext
-                $0[.code] { $0.class = "constraints" } = constraints
+                $0[.summary] = "Mangled symbol"
+
+                $0[.p, { $0.class = "symbol" }]
+                {
+                    $0[.code] = self.vertex.symbol.rawValue
+                }
+
+                $0[.p]
+                {
+                    $0[.code]
+                    {
+                        let hash:FNV24 = .init(hashing: "\(self.vertex.symbol)")
+                        $0 += "FNV24: ["
+                        $0[.span] { $0.class = "fnv24" } = "\(hash)"
+                        $0 += "]"
+                    }
+                }
+            }
+
+            if  let peers:Unidoc.ExtensionGroup = self.groups.peers,
+                let constraints:Swiftinit.ConstraintsList = .init(self.context,
+                    constraints: peers.constraints)
+            {
+                $0[.details, { $0.open = true }]
+                {
+                    $0[.summary] = "Constraints"
+                    $0[.div, .code] { $0.class = "constraints" } = constraints
+                }
             }
         }
 
-        main[.section] { $0.class = "details" } =
-            (self.vertex.details?.markdown).map(self.context.prose(_:))
+        main[.section, { $0.class = "details" }]
+        {
+            if  case .protocol = self.vertex.phylum
+            {
+                $0[.div, { $0.class = "more" }]
+                {
+                    $0[.a]
+                    {
+                        $0.class = "button"
+                        $0.href = "\(Swiftinit.Ptcl[self.volume, self.vertex.route])"
+                    } = "Browse conforming types"
+                }
+            }
+            if  let markdown:MarkdownBytecode = self.vertex.details?.markdown
+            {
+                $0 += self.context.prose(markdown)
+            }
+        }
 
         main += self.groups
     }

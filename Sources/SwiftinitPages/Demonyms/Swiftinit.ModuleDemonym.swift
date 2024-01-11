@@ -1,13 +1,14 @@
 import SymbolGraphs
+import Symbols
 
 extension Swiftinit
 {
     struct ModuleDemonym
     {
-        let language:SymbolGraph.ModuleLanguage
+        let language:Phylum.Language
         let type:SymbolGraph.ModuleType
 
-        init(language:SymbolGraph.ModuleLanguage, type:SymbolGraph.ModuleType)
+        init(language:Phylum.Language, type:SymbolGraph.ModuleType)
         {
             self.language = language
             self.type = type

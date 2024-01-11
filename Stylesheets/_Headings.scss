@@ -64,11 +64,6 @@ li[id]:target::before
     margin: -100px 0 0;
 }
 
-li[id].decl:target code a
-{
-    background-color: rgba(255, 238, 0, 0.25);
-}
-
 h1
 {
     font-size: 200%;

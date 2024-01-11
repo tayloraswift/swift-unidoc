@@ -1,9 +1,7 @@
 import HTML
 import MarkdownABI
 import MarkdownRendering
-import Unidoc
 import UnidocRecords
-import URI
 
 struct CodeSection
 {
@@ -11,9 +9,9 @@ struct CodeSection
     private
     let scalars:[Unidoc.Scalar?]
     private
-    let context:any Swiftinit.VersionedPageContext
+    let context:any Swiftinit.VertexPageContext
 
-    init(_ context:any Swiftinit.VersionedPageContext,
+    init(_ context:any Swiftinit.VertexPageContext,
         bytecode:MarkdownBytecode,
         scalars:[Unidoc.Scalar?])
     {
@@ -32,7 +30,7 @@ extension CodeSection:HTML.OutputStreamableMarkdown
             if  self.scalars.indices.contains(reference),
                 let target:Unidoc.Scalar = self.scalars[reference]
             {
-                self.context.url(target)
+                self.context[vertex: target]?.url
             }
             else
             {

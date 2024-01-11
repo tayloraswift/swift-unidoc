@@ -23,7 +23,14 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         with _:Swiftinit.Cookies,
         as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard let github:GitHub.Client<GitHub.API> = server.plugins.github?.api
+        let github:GitHub.Client<GitHub.API<Void>>
+
+        if  let api:GitHub.API<Void> = server.github?.oauth.api
+        {
+            github = .rest(api: api,
+                threads: server.context.threads,
+                niossl: server.context.niossl)
+        }
         else
         {
             return nil
@@ -40,7 +47,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         let cookie:Unidoc.Cookie = try await server.db.users.update(user: user,
             with: session)
 
-        return .redirect(.temporary("\(Swiftinit.Admin.uri)"),
+        return .redirect(.temporary("\(Swiftinit.Root.admin)"),
             cookies: [Swiftinit.Cookies.session: "\(cookie)"])
     }
 }

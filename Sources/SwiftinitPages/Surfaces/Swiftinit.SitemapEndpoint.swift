@@ -42,7 +42,7 @@ extension Swiftinit.SitemapEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let prefix:String = "https://swiftinit.org/\(Swiftinit.Docs.root)/\(output.package)"
+        let prefix:String = "https://swiftinit.org\(Swiftinit.Root.docs)/\(output.package)"
         var string:String = ""
 
         for page:Unidoc.Shoot in output.sitemap.elements

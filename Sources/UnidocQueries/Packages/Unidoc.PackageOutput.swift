@@ -5,7 +5,7 @@ import UnidocDB
 extension Unidoc
 {
     @frozen public
-    struct PackageOutput:Equatable, Sendable
+    struct PackageOutput:Sendable
     {
         public
         let metadata:PackageMetadata

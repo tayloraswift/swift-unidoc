@@ -24,7 +24,13 @@ extension Swiftinit.LoginEndpoint:InteractiveEndpoint
         with cookies:Swiftinit.Cookies,
         as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard let oauth:GitHub.Client<GitHub.OAuth> = server.plugins.github?.oauth
+        let github:GitHub.Client<GitHub.OAuth>
+        if  let oauth:GitHub.OAuth = server.github?.oauth
+        {
+            github = .oauth(oauth,
+                threads: server.context.threads,
+                niossl: server.context.niossl)
+        }
         else
         {
             return nil
@@ -39,7 +45,7 @@ extension Swiftinit.LoginEndpoint:InteractiveEndpoint
         let registration:Swiftinit.RegistrationEndpoint
         do
         {
-            let access:GitHub.OAuth.Credentials = try await oauth.exchange(code: self.code)
+            let access:GitHub.OAuth.Credentials = try await github.exchange(code: self.code)
             registration = .init(token: access.token)
         }
         catch is GitHub.Client<GitHub.OAuth>.AuthenticationError

@@ -8,12 +8,12 @@ extension IdentifiablePageContext
     struct Cache
     {
         var vertices:Vertices
-        var volumes:Volumes
+        var volumes:Swiftinit.Volumes
 
         private
         var uris:[Unidoc.Scalar: String]
 
-        init(vertices:Vertices, volumes:Volumes, uris:[Unidoc.Scalar: String] = [:])
+        init(vertices:Vertices, volumes:Swiftinit.Volumes, uris:[Unidoc.Scalar: String] = [:])
         {
             self.vertices = vertices
             self.volumes = volumes
@@ -21,10 +21,10 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
+extension IdentifiablePageContext.Cache
 {
     mutating
-    func load(_ scalar:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
+    func load(_ id:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
     {
         {
             if  let target:String = $0
@@ -32,7 +32,7 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
                 return target
             }
             else if
-                let volume:Unidoc.VolumeMetadata = self.volumes[scalar.edition],
+                let volume:Unidoc.VolumeMetadata = self.volumes[id.edition],
                 let uri:URI = uri(volume)
             {
                 let target:String = "\(uri)"
@@ -43,80 +43,88 @@ extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
             {
                 return nil
             }
-        } (&self.uris[scalar])
+        } (&self.uris[id])
     }
 }
-extension IdentifiablePageContext.Cache where ID:VersionedPageIdentifier
+extension IdentifiablePageContext.Cache
 {
-    subscript(culture scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Culture, url:String?)?
+    subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
     {
         mutating get
         {
-            if  case .culture(let vertex)? = self.vertices[scalar]
+            switch self.vertices[id]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
-            }
-            else
-            {
+            case (.culture(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.culture(let vertex), principal: false)?:
+                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+            default:
                 nil
             }
         }
     }
 
-    subscript(article scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Article, url:String?)?
+    subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)?
     {
         mutating get
         {
-            if  case .article(let vertex)? = self.vertices[scalar]
+            switch self.vertices[id]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
-            }
-            else
-            {
+            case (.article(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.article(let vertex), principal: false)?:
+                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+            default:
                 nil
             }
         }
     }
 
-    subscript(decl scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex.Decl, url:String?)?
+    subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)?
     {
         mutating get
         {
-            if  case .decl(let vertex)? = self.vertices[scalar]
+            switch self.vertices[id]
             {
-                (vertex, self.load(scalar) { Swiftinit.Docs[$0, vertex.shoot] })
-            }
-            else
-            {
+            case (.decl(let vertex), principal: true)?:
+                (vertex, nil)
+            case (.decl(let vertex), principal: false)?:
+                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+            default:
                 nil
             }
         }
     }
 
     /// Returns the URL for the given scalar, as long as it does not point to a file.
-    subscript(scalar:Unidoc.Scalar) -> (vertex:Unidoc.Vertex, url:String?)?
+    subscript(id:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)?
     {
         mutating get
         {
-            self.vertices[scalar].map
+            self.vertices[id].map
             {
-                (vertex:Unidoc.Vertex) in
-
-                let url:String? = self.load(scalar)
+                switch $0
                 {
-                    switch vertex
+                case (let vertex, principal: false):
+                    let url:String? = self.load(id)
                     {
-                    case .article(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .culture(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .decl(let vertex):     Swiftinit.Docs[$0, vertex.shoot]
-                    case .file:                 nil
-                    case .product(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.shoot]
-                    case .global:               Swiftinit.Docs[$0]
+                        switch vertex
+                        {
+                        case .article(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .culture(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .decl(let vertex):     Swiftinit.Docs[$0, vertex.route]
+                        case .file:                 nil
+                        case .product(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.route]
+                        case .global:               Swiftinit.Docs[$0]
+                        }
                     }
-                }
 
-                return (vertex, url)
+                    return (vertex, url)
+
+                case (let vertex, principal: true):
+                    return (vertex, nil)
+                }
             }
         }
     }

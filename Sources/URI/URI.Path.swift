@@ -129,7 +129,7 @@ extension URI.Path:RangeReplaceableCollection
         self.components.replaceSubrange(range, with: elements)
     }
     @inlinable public mutating
-    func append(_ component:Component)
+    func append(_ component:consuming Component)
     {
         self.components.append(component)
     }
@@ -137,21 +137,20 @@ extension URI.Path:RangeReplaceableCollection
 extension URI.Path
 {
     @inlinable public static
-    func / (self:Self, component:String) -> URI
+    func / (self:consuming Self, component:consuming String) -> URI
     {
         .init(path: self.appending(.push(component)))
     }
 
-    @inlinable public
-    func appending(_ component:Component) -> Self
+    @inlinable public consuming
+    func appending(_ component:consuming Component) -> Self
     {
-        var path:Self = self
-            path.append(component)
-        return path
+        self.append(component)
+        return self
     }
 
     @inlinable public mutating
-    func append(_ component:String)
+    func append(_ component:consuming String)
     {
         self.append(.push(component))
     }

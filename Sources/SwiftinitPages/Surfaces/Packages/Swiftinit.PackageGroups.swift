@@ -1,4 +1,5 @@
 import HTML
+import UnixTime
 
 extension Swiftinit
 {
@@ -31,6 +32,8 @@ extension Swiftinit.PackageGroups
 {
     init(organizing packages:consuming [Unidoc.PackageOutput], heading:Heading? = nil)
     {
+        let now:UnixInstant = .now()
+
         var packages:
         (
             inactive:[Swiftinit.PackageCard],
@@ -38,28 +41,18 @@ extension Swiftinit.PackageGroups
             free:[Swiftinit.PackageCard]
         ) = packages.reduce(into: ([], [], []))
         {
-            if  case false = $1.metadata.repo?.origin.alive
+            if  case false? = $1.metadata.repo?.origin.alive
             {
-                $0.inactive.append(.init($1))
-                return
+                $0.inactive.append(.init($1, now: now))
             }
-            guard
-            let license:Unidoc.PackageLicense = $1.metadata.repo?.license
+            else if
+                case true? = $1.metadata.repo?.license?.free
+            {
+                $0.free.append(.init($1, now: now))
+            }
             else
             {
-                $0.unfree.append(.init($1))
-                return
-            }
-            switch license.spdx
-            {
-            case    "NOASSERTION",
-                    "NONE":
-                $0.unfree.append(.init($1))
-
-            //  We don’t know enough about licenses to know if they are free or not, and
-            //  Swiftinit does not provide legal advice.
-            default:
-                $0.free.append(.init($1))
+                $0.unfree.append(.init($1, now: now))
             }
         }
 
