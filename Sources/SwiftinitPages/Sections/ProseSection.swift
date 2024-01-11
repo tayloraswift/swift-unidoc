@@ -23,12 +23,19 @@ struct ProseSection
         self.outlines = outlines
     }
 }
+extension ProseSection
+{
+    init(_ context:any Swiftinit.VertexPageContext, passage:Unidoc.Passage)
+    {
+        self.init(context, bytecode: passage.markdown, outlines: passage.outlines)
+    }
+}
 extension ProseSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
     {
-        guard   case .href = attribute,
-                self.outlines.indices.contains(reference)
+        guard case .href = attribute,
+        self.outlines.indices.contains(reference)
         else
         {
             return nil
@@ -41,7 +48,7 @@ extension ProseSection:HTML.OutputStreamableMarkdown
         case .path(_, let scalars):
             if  let target:Unidoc.Scalar = scalars.last
             {
-                return self.context.url(target)
+                return self.context[vertex: target]?.url
             }
             else
             {

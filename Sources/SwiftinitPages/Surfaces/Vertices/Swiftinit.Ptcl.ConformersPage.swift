@@ -53,26 +53,15 @@ extension Swiftinit.Ptcl.ConformersPage
 }
 extension Swiftinit.Ptcl.ConformersPage:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
+    var title:String
+    {
+        "\(self.stem.last) (Conforming Types) · \(self.volume.title) Documentation"
+    }
 
     var description:String?
     {
-        if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
-        {
-            "\(self.context.prose(overview))"
-        }
-        else if case .swift = self.volume.symbol.package
-        {
-            """
-            \(self.stem.last) is \(self.demonym.phrase) from the Swift standard library.
-            """
-        }
-        else
-        {
-            """
-            \(self.stem.last) is \(self.demonym.phrase) from the package \(self.volume.title).
-            """
-        }
+        // TODO
+        nil
     }
 }
 extension Swiftinit.Ptcl.ConformersPage:Swiftinit.StaticPage
@@ -87,11 +76,14 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
+        let name:Substring = self.stem.last
+
         main[.section, { $0.class = "introduction" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span] { $0.class = "phylum" } = "Protocol"
+                $0[.span] { $0.class = "phylum" } = "Conforming types"
 
                 $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.namespace,
                     namespace: self.vertex.namespace,
@@ -101,9 +93,29 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
             $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
                 display: self.stem.scope)
 
-            $0[.h1] = self.stem.last
+            $0[.h1] = name
 
-            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
+            $0[.p]
+            {
+                $0 += "The protocol "
+                $0[.code] { $0[.a] { $0.href = back } = name }
+                switch self.groups.count
+                {
+                case 0:
+                    $0 += " has no known conforming types available."
+
+                case 1:
+                    $0 += " has one known conforming type."
+
+                case let count:
+                    $0 += " has \(count) known conforming types"
+
+                    if  self.groups.cultures > 1
+                    {
+                        $0 += " across \(self.groups.cultures) modules."
+                    }
+                }
+            }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical

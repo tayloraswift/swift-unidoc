@@ -85,7 +85,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
         }
 
         let extendee:HTML.Link<UnqualifiedPath>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.edition]
+        if  let other:Unidoc.VolumeMetadata = self.context[self.vertex.extendee.edition]
         {
             main[.section, { $0.class = "notice extendee" }]
             {

@@ -1,6 +1,4 @@
 import BSON
-import GitHubAPI
-import MongoQL
 import UnixTime
 
 extension Unidoc
@@ -37,7 +35,7 @@ extension Unidoc
 
         /// Information specific to the repo’s hosting provider.
         public
-        var origin:AnyOrigin
+        var origin:PackageOrigin
         /// The number of forks this repo has. Both GitHub and GitLab count forks.
         public
         var forks:Int
@@ -53,7 +51,7 @@ extension Unidoc
             license:PackageLicense?,
             topics:[String],
             master:String,
-            origin:AnyOrigin,
+            origin:PackageOrigin,
             forks:Int = 0,
             stars:Int = 0)
         {
@@ -71,56 +69,15 @@ extension Unidoc
 }
 extension Unidoc.PackageRepo
 {
-    @inlinable public static
-    func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
-    {
-        guard
-        let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixInstant = .init(utc: .date(created))
-        else
-        {
-            throw GitHubTimestampError.created(repo.created)
-        }
+    @available(*, deprecated, renamed: "Unidoc.PackageOrigin")
+    public
+    typealias AnyOrigin = Unidoc.PackageOrigin
 
-        guard
-        let updated:Timestamp.Components = .init(iso8601: repo.updated),
-        let updated:UnixInstant = .init(utc: updated)
-        else
-        {
-            throw GitHubTimestampError.updated(repo.updated)
-        }
-
-        guard
-        let pushed:Timestamp.Components = .init(iso8601: repo.pushed),
-        let pushed:UnixInstant = .init(utc: pushed)
-        else
-        {
-            throw GitHubTimestampError.pushed(repo.pushed)
-        }
-
-        return .init(crawled: crawled,
-            created: .init(created),
-            updated: .init(updated),
-            license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
-            topics: repo.topics,
-            master: repo.master,
-            origin: .github(.init(
-                id: repo.id,
-                pushed: .init(pushed),
-                owner: repo.owner.login,
-                name: repo.name,
-                homepage: repo.homepage,
-                about: repo.about,
-                watchers: repo.watchers,
-                size: repo.size,
-                archived: repo.archived,
-                disabled: repo.disabled,
-                fork: repo.fork)),
-            forks: repo.forks,
-            stars: repo.stars)
-    }
+    @available(*, deprecated, renamed: "Unidoc.GitHubOrigin")
+    public
+    typealias GitHubOrigin = Unidoc.GitHubOrigin
 }
-extension Unidoc.PackageRepo:MongoMasterCodingModel
+extension Unidoc.PackageRepo
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -166,7 +123,7 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let origin:AnyOrigin = .github(try bson[.github].decode())
+        let origin:Unidoc.PackageOrigin = .github(try bson[.github].decode())
 
         self.init( // TODO: deoptionalize
             crawled: try bson[.crawled]?.decode() ?? 0,

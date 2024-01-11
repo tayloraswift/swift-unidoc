@@ -1,15 +1,52 @@
 extension HTML.ContentEncoder
 {
+    /// Optionally encodes an ``HTML.OutputStreamable`` value to the stream through **multiple
+    /// levels** of HTML tags, with optional attributes added to the **outermost** wrapper tag.
+    ///
+    /// If the value is nil, `attributes` will not be evaluated and nothing will be encoded.
+    /// The getter always returns nil.
     @inlinable public
-    subscript<Renderable>(_ tag:HTML.ContainerElement,
+    subscript<Renderable>(
+        _ exterior:HTML.ContainerElement,
+        _ interior:HTML.ContainerElement...,
+        exterior attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
+        where Renderable:HTML.OutputStreamable
+    {
+        get { nil }
+        set (value)
+        {
+            if  let value:Renderable
+            {
+                self[exterior, { $0 += value ; attributes(&$0) }]
+                {
+                    for interior:HTML.ContainerElement in interior
+                    {
+                        $0.open(interior)
+                    }
+
+                    $0 += value
+
+                    for interior:HTML.ContainerElement in interior.reversed()
+                    {
+                        $0.close(interior)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Optionally encodes an ``HTML.OutputStreamable`` value to the stream through a **single**
+    /// HTML tag, with optional attributes added to the wrapping tag.
+    ///
+    /// If the value is nil, `attributes` will not be evaluated and nothing will be encoded.
+    /// The getter always returns nil.
+    @inlinable public
+    subscript<Renderable>(tag:HTML.ContainerElement,
         attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
         where Renderable:HTML.OutputStreamable
     {
-        get
-        {
-            nil
-        }
-        set(value)
+        get { nil }
+        set (value)
         {
             if  let value:Renderable
             {
@@ -25,11 +62,8 @@ extension HTML.ContentEncoder
         attributes:(inout SVG.AttributeEncoder) -> () = { _ in }) -> Renderable?
         where Renderable:SVG.OutputStreamable
     {
-        get
-        {
-            nil
-        }
-        set(value)
+        get { nil }
+        set (value)
         {
             if  let value:Renderable
             {
@@ -45,11 +79,8 @@ extension HTML.ContentEncoder
         attributes:(inout HTML.AttributeEncoder) -> () = { _ in }) -> Renderable?
         where Renderable:HTML.OutputStreamable
     {
-        get
-        {
-            nil
-        }
-        set(value)
+        get { nil }
+        set (value)
         {
             if  let value:Renderable
             {

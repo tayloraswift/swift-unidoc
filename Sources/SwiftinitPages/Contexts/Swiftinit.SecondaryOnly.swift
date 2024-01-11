@@ -8,10 +8,18 @@ extension Swiftinit
         @usableFromInline
         var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]
 
+        private
         init(secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = [:])
         {
             self.secondary = secondary
         }
+    }
+}
+extension Swiftinit.SecondaryOnly
+{
+    init(secondary:[Unidoc.AnyVertex])
+    {
+        self.init(secondary: secondary.reduce(into: [:]) { $0[$1.id] = $1 })
     }
 }
 extension Swiftinit.SecondaryOnly:Identifiable
@@ -32,15 +40,6 @@ extension Swiftinit.SecondaryOnly:Swiftinit.VertexCache
         secondary[principal.id] = principal
 
         return .init(secondary: secondary)
-    }
-
-    public mutating
-    func add(_ vertices:[Unidoc.AnyVertex])
-    {
-        for vertex:Unidoc.AnyVertex in vertices
-        {
-            self.secondary[vertex.id] = vertex
-        }
     }
 
     @inlinable public

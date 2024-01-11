@@ -10,6 +10,7 @@ extension Swiftinit
         @usableFromInline
         var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]
 
+        private
         init(
             principal:Unidoc.AnyVertex,
             secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = [:])
@@ -17,6 +18,19 @@ extension Swiftinit
             self.principal = principal
             self.secondary = secondary
         }
+    }
+}
+extension Swiftinit.Vertices
+{
+    init(
+        principal:Unidoc.AnyVertex,
+        secondary:[Unidoc.AnyVertex])
+    {
+        let secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = secondary.reduce(into: [:])
+        {
+            $0[$1.id] = principal.id != $1.id ? $1 : nil
+        }
+        self.init(principal: principal, secondary: secondary)
     }
 }
 extension Swiftinit.Vertices:Identifiable
@@ -28,15 +42,6 @@ extension Swiftinit.Vertices:Swiftinit.VertexCache
 {
     @inlinable public static
     func form(from self:consuming Swiftinit.Vertices) -> Self { `self` }
-
-    public mutating
-    func add(_ vertices:[Unidoc.AnyVertex])
-    {
-        for vertex:Unidoc.AnyVertex in vertices where self.principal.id != vertex.id
-        {
-            self.secondary[vertex.id] = vertex
-        }
-    }
 
     @inlinable public
     subscript(_ vertex:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, principal:Bool)?

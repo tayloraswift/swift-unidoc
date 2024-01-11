@@ -30,7 +30,7 @@ extension Swiftinit.DenseList.Iterator:IteratorProtocol
         switch (self.cards.0.next, self.cards.1.next)
         {
         case (let a?, let b?):
-            a.link.display <= b.link.display
+            a.path <= b.path
                 ? self.cards.0.pull(with: self.context)
                 : self.cards.1.pull(with: self.context)
 

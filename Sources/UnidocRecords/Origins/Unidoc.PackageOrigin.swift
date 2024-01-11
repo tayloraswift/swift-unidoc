@@ -1,14 +1,14 @@
 import Symbols
 
-extension Unidoc.PackageRepo
+extension Unidoc
 {
     @frozen public
-    enum AnyOrigin:Equatable, Sendable
+    enum PackageOrigin:Equatable, Sendable
     {
         case github(GitHubOrigin)
     }
 }
-extension Unidoc.PackageRepo.AnyOrigin
+extension Unidoc.PackageOrigin
 {
     @inlinable public
     var https:String

@@ -49,11 +49,9 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         else
         {
             let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
-                    vertices: .init(),
+                    vertices: .init(secondary: principal.matches),
                     volumes: .init(principal: principal.volume)),
                 repo: principal.repo)
-
-            context.vertices.add(principal.matches)
 
             if  let choices:Swiftinit.Docs.MultipleFoundPage = .init(context,
                     matches: principal.matches)
@@ -71,16 +69,17 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
             }
         }
 
-        let vertices:Swiftinit.Vertices = .init(principal: vertex)
+        let vertices:Swiftinit.Vertices = .init(principal: vertex,
+            secondary: output.vertices)
+        let volumes:Swiftinit.Volumes = .init(principal: principal.volume,
+            secondary: output.volumes)
+
+        _ = consume output
+
         let context:IdentifiablePageContext<VertexCache> = .init(cache: .init(
                 vertices: .form(from: consume vertices),
-                volumes: .init(principal: principal.volume)),
+                volumes: volumes),
             repo: principal.repo)
-        ;
-        {
-            context.vertices.add($0.vertices)
-            context.volumes.add($0.volumes)
-        } (consume output)
 
         vertex.overview.map
         {

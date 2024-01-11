@@ -79,7 +79,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
         for id:Unidoc.Scalar in self.vertex.requirements
         {
             guard
-            case (.culture(let vertex), _)? = self.context.vertices[id],
+            case .culture(let vertex)? = self.context[id],
                 vertex.module.name == self.vertex.symbol
             else
             {
@@ -150,7 +150,8 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                     for id:Unidoc.Scalar in self.vertex.requirements
                     {
                         guard
-                        let (vertex, _):(Unidoc.AnyVertex, Bool) = self.context.vertices[id]
+                        let volume:Unidoc.VolumeMetadata = self.context[id.edition],
+                        let vertex:Unidoc.AnyVertex = self.context[id]
                         else
                         {
                             continue
@@ -165,7 +166,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.route])"
+                                        $0.href = "\(Swiftinit.Docs[volume, vertex.route])"
                                     } = vertex.module.name
                                 }
                                 $0[.td]
@@ -174,14 +175,6 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                                 }
 
                             case .product(let vertex):
-                                guard
-                                let volume:Unidoc.VolumeMetadata =
-                                    self.context.volumes[id.edition]
-                                else
-                                {
-                                    return
-                                }
-
                                 $0[.td]
                                 {
                                     $0[.a]

@@ -236,18 +236,35 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
 
             if  let peers:Unidoc.ExtensionGroup = self.groups.peers,
-                let list:Swiftinit.ConstraintsList = self.context.constraints(peers.constraints)
+                let constraints:Swiftinit.ConstraintsList = .init(self.context,
+                    constraints: peers.constraints)
             {
                 $0[.details, { $0.open = true }]
                 {
                     $0[.summary] = "Constraints"
-                    $0[.code] { $0.class = "constraints" } = list
+                    $0[.div, .code] { $0.class = "constraints" } = constraints
                 }
             }
         }
 
-        main[.section] { $0.class = "details" } =
-            (self.vertex.details?.markdown).map(self.context.prose(_:))
+        main[.section, { $0.class = "details" }]
+        {
+            if  case .protocol = self.vertex.phylum
+            {
+                $0[.div, { $0.class = "more" }]
+                {
+                    $0[.a]
+                    {
+                        $0.class = "button"
+                        $0.href = "\(Swiftinit.Ptcl[self.volume, self.vertex.route])"
+                    } = "Browse conforming types"
+                }
+            }
+            if  let markdown:MarkdownBytecode = self.vertex.details?.markdown
+            {
+                $0 += self.context.prose(markdown)
+            }
+        }
 
         main += self.groups
     }

@@ -82,7 +82,7 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VertexPage
             {
                 for match:Unidoc.Scalar in self.matches
                 {
-                    $0 ?= self.context.card(match)
+                    $0[.li] = self.context.card(match)
                 }
             }
         }

@@ -41,7 +41,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 fatalError("unreachable: repoless package was marked as stale!")
             }
 
-            let origin:Unidoc.PackageRepo.GitHubOrigin
+            let origin:Unidoc.GitHubOrigin
             switch old.origin
             {
             case .github(let github):   origin = github

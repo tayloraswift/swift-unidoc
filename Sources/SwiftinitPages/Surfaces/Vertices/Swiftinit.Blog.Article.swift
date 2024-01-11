@@ -24,7 +24,7 @@ extension Swiftinit.Blog
 extension Swiftinit.Blog.ArticlePage
 {
     private
-    var volume:Unidoc.VolumeMetadata { self.context.volumes.principal }
+    var volume:Unidoc.VolumeMetadata { self.context.volume }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {
