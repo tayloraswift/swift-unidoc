@@ -29,6 +29,12 @@ extension Phylum.DeclFlags
     {
         .init(language: .swift, phylum: flags.phylum, kinks: flags.kinks, route: flags.route)
     }
+
+    @inlinable public
+    var cdecl:Bool
+    {
+        self.language == .c || self.language == .cpp
+    }
 }
 extension Phylum.DeclFlags:RawRepresentable
 {
