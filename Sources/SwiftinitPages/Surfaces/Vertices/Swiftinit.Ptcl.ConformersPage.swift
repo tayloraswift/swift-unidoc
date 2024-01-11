@@ -114,6 +114,10 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
                     {
                         $0 += " across \(self.groups.cultures) modules."
                     }
+                    else
+                    {
+                        $0 += "."
+                    }
                 }
             }
         }
