@@ -197,10 +197,7 @@ extension SwiftinitClient
             from: package.repo,
             at: edition.tag,
             in: workspace,
-            clean: true)
-
-        //  Remove the `Package.resolved` file to force a new resolution.
-        try await build.removePackageResolved()
+            clean: false)
 
         let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
             pretty: pretty)

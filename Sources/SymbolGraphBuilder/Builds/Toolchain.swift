@@ -28,8 +28,7 @@ extension Toolchain
     public static
     func detect() async throws -> Self
     {
-        let (readable, writable):(FileDescriptor, FileDescriptor) =
-        try FileDescriptor.pipe()
+        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
         defer
         {
@@ -187,29 +186,30 @@ extension Toolchain
         let manifest:SPM.Manifest = try await .dump(from: build)
 
         print("""
-            Building package: '\(build.id.package)' \
+            Resolving dependencies for '\(build.id.package)' \
             (swift-tools-version: \(manifest.format))
             """)
 
-        //  Don’t parrot the `swift package resolve` output to the terminal
+        //  Don’t parrot the `swift package update` output to the terminal
         let resolutionLog:FilePath = build.output.path / "resolution.log"
         try await resolutionLog.open(.writeOnly,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {
+            //  This command only prints to stderr, for some reason.
             try await SystemProcess.init(command: "swift",
                 "package",
-                "resolve",
+                "update",
                 "--package-path", "\(build.root)",
-                stdout: $0)()
+                stdout: nil,
+                stderr: $0)()
         }
 
         //  Don’t parrot the `swift build` output to the terminal
         let buildLog:FilePath = build.output.path / "build.log"
 
         print("""
-            Building package: '\(build.id.package)', \
-            streaming output to '\(buildLog)'
+            Streaming swift build output to: \(buildLog)
             """)
 
         try await buildLog.open(.writeOnly,

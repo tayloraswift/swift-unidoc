@@ -29,14 +29,6 @@ extension PackageBuild
 }
 extension PackageBuild
 {
-    public
-    func removePackageResolved() async throws
-    {
-        try await SystemProcess.init(command: "rm", "-f", "\(self.root / "Package.resolved")")()
-    }
-}
-extension PackageBuild
-{
     /// Creates a build setup by attaching a package located in a directory of the
     /// same name in the specified location.
     ///
@@ -98,12 +90,13 @@ extension PackageBuild
         else
         {
             try await SystemProcess.init(command: "git", "-C", "\(checkouts)",
-                "clone", repository, "\(package)", "--quiet")()
+                "clone", repository, "\(package)", "--recurse-submodules", "--quiet")()
         }
 
         try await SystemProcess.init(command: "git", "-C", "\(cloned)",
             "-c", "advice.detachedHead=false",
-            "checkout", "-f", refname)()
+            "checkout", "-f", refname,
+            "--recurse-submodules")()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
             try FileDescriptor.pipe()
