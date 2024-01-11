@@ -40,15 +40,15 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
 
         let redirect:URI? = switch output.matches.first
         {
-        case .article(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
-        case .culture(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
+        case .article(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
+        case .culture(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
         //  This is one of the few situations where we intentionally issue redirects
         //  to a disambiguation page.
         case .decl(let vertex)?:    Swiftinit.Docs[output.volume,
-            output.matches.count > 1 ? .init(stem: vertex.stem) : vertex.shoot]
+            output.matches.count > 1 ? .bare(vertex.stem) : vertex.route]
         case .file?, nil:           nil
-        case .product(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
-        case .foreign(let vertex)?: Swiftinit.Docs[output.volume, vertex.shoot]
+        case .product(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
+        case .foreign(let vertex)?: Swiftinit.Docs[output.volume, vertex.route]
         case .global?:              Swiftinit.Docs[output.volume]
         }
 
@@ -58,10 +58,10 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
         }
         else
         {
-            let context:IdentifiablePageContext<Never?> = .init(principal: output.volume,
+            let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
+                    vertices: .init(secondary: output.matches),
+                    volumes: .init(principal: output.volume)),
                 repo: nil)
-
-            context.vertices.add(output.matches)
 
             let display:Swiftinit.Docs.NotFoundPage = .init(context, sidebar: nil)
             //  We return 410 Gone instead of 404 Not Found so that search engines and

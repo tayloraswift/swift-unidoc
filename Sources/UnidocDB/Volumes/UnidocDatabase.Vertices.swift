@@ -30,15 +30,15 @@ extension UnidocDatabase.Vertices
         //  extraordinarily rare.
         //  See:
         //  forums.swift.org/t/how-does-docc-mitigate-fnv-1-hash-collisions/65673
-        $0[Unidoc.Vertex[.zone]] = (+)
-        $0[Unidoc.Vertex[.stem]] = (+)
-        $0[Unidoc.Vertex[.hash]] = (+)
+        $0[Unidoc.AnyVertex[.zone]] = (+)
+        $0[Unidoc.AnyVertex[.stem]] = (+)
+        $0[Unidoc.AnyVertex[.hash]] = (+)
     }
         where:
     {
         //  This limits the index to vertices with a stem. This is all of them,
-        //  except for ``Unidoc.Vertex.File``.
-        $0[Unidoc.Vertex[.stem]] = .init { $0[.exists] = true }
+        //  except for ``Unidoc.FileVertex``.
+        $0[Unidoc.AnyVertex[.stem]] = .init { $0[.exists] = true }
     }
 
     public static
@@ -46,14 +46,14 @@ extension UnidocDatabase.Vertices
         collation: VolumeCollation.spec,
         unique: true)
     {
-        $0[Unidoc.Vertex[.hash]] = (+)
-        $0[Unidoc.Vertex[.id]] = (+)
+        $0[Unidoc.AnyVertex[.hash]] = (+)
+        $0[Unidoc.AnyVertex[.id]] = (+)
     }
 }
 extension UnidocDatabase.Vertices:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidoc.Vertex
+    typealias Element = Unidoc.AnyVertex
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeVertices" }
@@ -66,7 +66,7 @@ extension UnidocDatabase.Vertices:Mongo.RecodableModel
     public
     func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
     {
-        try await self.recode(through: Unidoc.Vertex.self,
+        try await self.recode(through: Unidoc.AnyVertex.self,
             with: session,
             by: .now.advanced(by: .seconds(60)))
     }
@@ -85,14 +85,14 @@ extension UnidocDatabase.Vertices
             }
                 documents:
             {
-                $0 += vertices.articles.lazy.map(Unidoc.Vertex.article(_:))
-                $0 += vertices.cultures.lazy.map(Unidoc.Vertex.culture(_:))
-                $0 += vertices.decls.lazy.map(Unidoc.Vertex.decl(_:))
-                $0 += vertices.files.lazy.map(Unidoc.Vertex.file(_:))
-                $0 += vertices.products.lazy.map(Unidoc.Vertex.product(_:))
-                $0 += vertices.foreign.lazy.map(Unidoc.Vertex.foreign(_:))
+                $0 += vertices.articles.lazy.map(Unidoc.AnyVertex.article(_:))
+                $0 += vertices.cultures.lazy.map(Unidoc.AnyVertex.culture(_:))
+                $0 += vertices.decls.lazy.map(Unidoc.AnyVertex.decl(_:))
+                $0 += vertices.files.lazy.map(Unidoc.AnyVertex.file(_:))
+                $0 += vertices.products.lazy.map(Unidoc.AnyVertex.product(_:))
+                $0 += vertices.foreign.lazy.map(Unidoc.AnyVertex.foreign(_:))
 
-                $0.append(Unidoc.Vertex.global(vertices.global))
+                $0.append(Unidoc.AnyVertex.global(vertices.global))
             },
             against: self.database)
 

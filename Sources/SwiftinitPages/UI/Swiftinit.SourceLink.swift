@@ -4,12 +4,14 @@ extension Swiftinit
 {
     struct SourceLink:Equatable, Sendable
     {
+        let target:String?
+        let icon:Icon
         let file:Substring
         let line:Int?
-        let target:String?
 
-        init(file:Substring, line:Int? = nil, target:String?)
+        init(target:String?, icon:Icon, file:Substring, line:Int? = nil)
         {
+            self.icon = icon
             self.file = file
             self.line = line
             self.target = target
@@ -26,7 +28,7 @@ extension Swiftinit.SourceLink:HTML.OutputStreamable
             $0.rel = .noopener
             $0.rel = .google_ugc
             $0.target = "_blank"
-            $0.class = "source"
+            $0.class = "source \(self.icon.id)"
         }
             content:
         {

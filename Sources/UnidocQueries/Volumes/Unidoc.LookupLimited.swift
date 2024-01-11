@@ -6,14 +6,15 @@ extension Unidoc
 {
     /// A context mode that looks up volumes for the current volume’s dependencies only.
     @frozen public
-    enum LookupLimited
+    enum LookupLimited:Sendable
     {
+        case limited
     }
 }
 extension Unidoc.LookupLimited:Unidoc.LookupContext
 {
     /// Sets the `output` to an empty array.
-    public static
+    public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,
         volume _:Mongo.KeyPath,
         vertex _:Mongo.KeyPath,
@@ -27,7 +28,7 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
 
     /// Stores the editions of the current volume’s dependencies in `output.volumes`, and
     /// sets `output.scalars` to an empty array.
-    public static
+    public
     func edges(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
         vertex _:Mongo.KeyPath,
@@ -36,7 +37,8 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
     {
         pipeline[.set] = .init
         {
-            let dependencies:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
+            let dependencies:
+                Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
                 in: volume / Unidoc.VolumeMetadata[.dependencies])
 
             $0[output.volumes] = .expr

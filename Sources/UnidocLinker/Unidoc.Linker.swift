@@ -111,23 +111,26 @@ extension Unidoc.Linker
     {
         var tables:Tables = .init(context: consume self)
 
-        let products:[Unidoc.Vertex.Product] = tables.linkProducts()
-        let cultures:[Unidoc.Vertex.Culture] = tables.linkCultures()
+        let conformances:Table<Unidoc.Conformers> = tables.linkConformingTypes()
+        let products:[Unidoc.ProductVertex] = tables.linkProducts()
+        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
 
-        let articles:[Unidoc.Vertex.Article] = tables.articles
-        let decls:[Unidoc.Vertex.Decl] = tables.decls
+        let articles:[Unidoc.ArticleVertex] = tables.articles
+        let decls:[Unidoc.DeclVertex] = tables.decls
         let groups:Unidoc.Volume.Groups = tables.groups
-        let extensions:Extensions = tables.extensions
+        let extensions:Table<Unidoc.Extension> = tables.extensions
 
         self = (consume tables).context
 
-        return .init(extensions: extensions,
+        return .init(
+            conformances: conformances,
+            extensions: extensions,
             products: products,
             cultures: cultures,
             articles: articles,
             decls: decls,
             groups: groups,
-            context: self)
+            linker: self)
     }
 
     public consuming
@@ -280,7 +283,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     mutating
-    func simplify(conformances:inout [ProtocolConformance<Int>],
+    func simplify(conformances:inout [Unidoc.ExtensionConditions],
         of subject:Unidoc.Scalar,
         to protocol:Unidoc.Scalar)
     {
@@ -305,7 +308,7 @@ extension Unidoc.Linker
                 return
             }
 
-            $0[$1.culture, default: []].append($1.conditions)
+            $0[$1.culture, default: []].append($1.constraints)
         }
 
         //  A type can only conform to a protocol once in a culture,
@@ -405,11 +408,7 @@ extension Unidoc.Linker
         }
 
         //  Conformances should now be unique per culture.
-        conformances = reduced.map
-        {
-            .init(conditions: $0.value, culture: $0.key)
-        }
-
+        conformances = reduced.map { .init(constraints: $0.value, culture: $0.key) }
         conformances.sort
         {
             $0.culture < $1.culture
@@ -443,45 +442,19 @@ extension Unidoc.Linker
         }
     }
 }
-
 extension Unidoc.Linker
 {
-    func assemble(extension:Extension, signature:ExtensionSignature) -> Unidoc.Group.Extension
-    {
-        let prefetch:[Unidoc.Scalar] = []
-        //  TODO: compute tertiary scalars
-
-        return .init(id: `extension`.id,
-            conditions: signature.conditions,
-            culture: self.current.id + signature.culture,
-            scope: signature.extends,
-            conformances: self.sort(lexically: `extension`.conformances),
-            features: self.sort(lexically: `extension`.features),
-            nested: self.sort(lexically: `extension`.nested),
-            subforms: self.sort(lexically: `extension`.subforms),
-            prefetch: prefetch,
-            overview: `extension`.overview,
-            details: `extension`.details)
-    }
-}
-extension Unidoc.Linker
-{
-    /// Get the sort-priority of a declaration.
-    func priority(of decl:Unidoc.Scalar) -> SortPriority?
-    {
-        self[decl.package]?.priority(of: decl)
-    }
-
-    func sort(lexically decls:consuming [Unidoc.Scalar]) -> [Unidoc.Scalar]
+    func sort<Decl, Priority>(_ decls:consuming [Decl], by _:Priority.Type) -> [Decl]
+        where Decl:Identifiable<Unidoc.Scalar>, Priority:Unidoc.SortPriority
     {
         decls.sort
         {
-            switch (self.priority(of: $0), self.priority(of: $1))
+            switch (Priority.of(decl: $0.id, in: self), Priority.of(decl: $1.id, in: self))
             {
-            case (nil, nil):            $0 < $1
-            case (nil,  _?):            true
-            case ( _?, nil):            false
-            case (let lhs?, let rhs?):  lhs < rhs
+            case (nil, nil):        $0.id < $1.id
+            case (nil,  _?):        true
+            case ( _?, nil):        false
+            case (let a?, let b?):  a  <  b
             }
         }
 

@@ -4,6 +4,9 @@ import Media
 
 extension Swiftinit
 {
+    /// A renderable page that lacks a static URL. This protocol has no requirements; it only
+    /// exists to allow users to explicitly opt-in to a default implementation for
+    /// ``resource(format:)``.
     public
     typealias DynamicPage = _SwiftinitDynamicPage
 }

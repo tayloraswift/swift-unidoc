@@ -6,10 +6,10 @@ extension Swiftinit.Docs
 {
     struct NotFoundPage
     {
-        let context:IdentifiablePageContext<Never?>
+        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
-        init(_ context:IdentifiablePageContext<Never?>,
+        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?)
         {
             self.context = context
@@ -25,7 +25,7 @@ extension Swiftinit.Docs.NotFoundPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.NotFoundPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.NotFoundPage:Swiftinit.VertexPage
 {
     var canonical:CanonicalVersion? { nil }
 

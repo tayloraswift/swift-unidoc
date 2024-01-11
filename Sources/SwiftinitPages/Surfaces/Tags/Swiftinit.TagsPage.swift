@@ -1,3 +1,4 @@
+import BSON
 import GitHubAPI
 import HTML
 import Media
@@ -85,9 +86,16 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let now:UnixInstant = .now()
+
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = "\(self.package.symbol)"
+
+            if  let repo:Unidoc.PackageRepo = self.package.repo
+            {
+                $0 += Swiftinit.PackageBanner.init(repo: repo, now: now)
+            }
         }
 
         main[.section, { $0.class = "details" }]
@@ -98,20 +106,13 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                 $0[.dl]
                 {
+                    let created:UnixInstant
+
                     switch repo.origin
                     {
                     case .github(let origin):
-                        let now:UnixInstant = .now()
-
                         $0[.dt] = "Provider"
-                        $0[.dd]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = origin.https
-                                $0.target = "_blank"
-                            } = "GitHub"
-                        }
+                        $0[.dd] = "GitHub"
 
                         if  let license:Unidoc.PackageLicense = repo.license
                         {
@@ -133,25 +134,21 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         $0[.dt] = "Forks"
                         $0[.dd] = "\(repo.forks)"
 
-                        $0[.dt] = "Stars"
-                        $0[.dd] = "\(repo.stars)"
-
                         $0[.dt] = "Archived?"
                         $0[.dd] = origin.archived ? "yes" : "no"
 
-                        let created:UnixInstant = .millisecond(repo.created.value)
-                        let pushed:UnixInstant = .millisecond(origin.pushed.value)
-
-                        if  let created:Timestamp.Date = created.timestamp?.date
+                        created = .millisecond(repo.created.value)
+                    }
+                    if  let created:Timestamp.Date = created.timestamp?.date
+                    {
+                        $0[.dt] = "Created"
+                        $0[.dd]
                         {
-                            $0[.dt] = "Created"
-                            $0[.dd] = "\(created.month(.en)) \(created.day), \(created.year)"
+                            $0[.a]
+                            {
+                                $0.href = "\(Swiftinit.Telescope[created])"
+                            } = "\(created.month(.en)) \(created.day), \(created.year)"
                         }
-
-                        let age:Age = .init(now - pushed)
-
-                        $0[.dt] = "Last Pushed"
-                        $0[.dd] = age.long
                     }
                 }
             }
@@ -240,6 +237,26 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                 $0[.dt] = "Hidden"
                 $0[.dd] = self.package.hidden ? "yes" : "no"
+
+                if  let crawled:BSON.Millisecond = self.package.repo?.crawled
+                {
+                    let crawled:UnixInstant = .millisecond(crawled.value)
+                    let age:Age = .init(now - crawled)
+
+                    $0[.dt] = "Repo read"
+                    $0[.dd] = age.long
+                }
+                if  let crawled:BSON.Millisecond = self.package.crawled
+                {
+                    let crawled:UnixInstant = .millisecond(crawled.value)
+                    let age:Age = .init(now - crawled)
+
+                    $0[.dt] = "Tags read"
+                    $0[.dd] = self.package.crawlingIntervalTargetDays.map
+                    {
+                        "\(age.long) (target: \($0) \($0 != 1 ? "days" : "day"))"
+                    } ?? age.long
+                }
             }
 
             guard self.user?.maintains(package: self.package) ?? !format.secure

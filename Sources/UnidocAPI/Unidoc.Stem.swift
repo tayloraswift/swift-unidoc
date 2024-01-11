@@ -2,7 +2,7 @@ import Symbols
 
 extension Unidoc
 {
-    /// A stem is a special representation of a master record’s lexical name within a snapshot.
+    /// A stem is a special representation of a vertex’s lexical name within a snapshot.
     /// A stem always begins with a ``Symbol.Module``.
     ///
     /// ## Empty stems

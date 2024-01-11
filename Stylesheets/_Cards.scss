@@ -1,6 +1,36 @@
 @import 'Colors';
 @import 'Typefaces';
 
+p.chyron
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    color: $light-foreground-semi;
+
+    > span.release
+    {
+        font-weight: bold;
+    }
+
+    > span:last-child
+    {
+        display: flex;
+        gap: 0.5em;
+
+        span.pushed::before
+        {
+            content: '▲ ';
+        }
+        span.stars::before
+        {
+            content: '★ ';
+            color: $light-accent-yellow;
+        }
+    }
+}
+
 ol.packages
 {
     padding-left: 0;
@@ -20,8 +50,7 @@ ol.packages
 
     > li
     {
-        > p:first-child,
-        > p.chyron
+        > p:first-child
         {
             display: flex;
             flex-direction: row;
@@ -57,144 +86,10 @@ ol.packages
         }
         > p.chyron
         {
-            color: $light-foreground-semi;
-
             > span.release
             {
                 font-weight: bold;
             }
-
-            > span:last-child
-            {
-                display: flex;
-                gap: 0.5em;
-
-                span.pushed::before
-                {
-                    content: '▲ ';
-                }
-                span.stars::before
-                {
-                    content: '★ ';
-                    color: $light-accent-yellow;
-                }
-            }
-        }
-    }
-}
-
-section.group ul
-{
-    > li.article
-    {
-        margin: 1.5rem 0 0.5rem 0;
-
-        a:first-child
-        {
-            color: inherit;
-
-            h3
-            {
-                font-family: $typeface-serif;
-                font-weight: normal;
-                font-size: 125%;
-                margin: 0.5rem 0;
-
-                text-decoration: underline;
-            }
-        }
-        a.read-more
-        {
-            font-style: italic;
-        }
-    }
-
-    > li.article + li.article
-    {
-        margin-top: 2rem;
-    }
-
-    > li.product,
-    > li.module
-    {
-        margin: 0.5rem 0 0.5rem 0;
-
-        > span:first-child
-        {
-            font-style: italic;
-        }
-    }
-    > li.decl
-    {
-        margin: 0.5rem 0 0.5rem 0;
-        padding: 0;
-
-        > a:first-child
-        {
-            position: absolute;
-            margin-left: -1.5em;
-            margin-top: 0.8em;
-        }
-        > a:first-child::before
-        {
-            content: '$';
-
-            line-height: 1.5rem;
-
-            font-family: $typeface-monospace;
-            font-size: 100%;
-            opacity: 0.25;
-            color: $light-foreground-semi;
-        }
-        > a:first-child:hover::before
-        {
-            opacity: 1;
-            color: $light-accent-hot-pink
-        }
-
-        > code
-        {
-            display: block;
-            padding: 0.8em 0 0 0;
-            text-indent: -2.5rem;
-            margin-left: 2.5rem;
-            white-space: pre-wrap;
-
-            font-size: 100%;
-            line-height: 1.5rem;
-
-            a
-            {
-                color: $light-accent-comment;
-
-                span.xv
-                {
-                    color: $light-accent-hot-pink;
-                }
-            }
-
-            a.discouraged
-            {
-                text-decoration: line-through;
-
-                span.xv
-                {
-                    color: inherit;
-                }
-            }
-        }
-
-        > code.multiline
-        {
-            text-indent: 0;
-            margin-left: 0;
-        }
-
-        p
-        {
-            padding: 0 0 0 2.5rem;
-            line-height: 1.3rem;
-            font-size: 90.625%;
         }
     }
 }

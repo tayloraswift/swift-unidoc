@@ -17,87 +17,9 @@ p
 p code
 {
     background-color: $light-code-well;
+    font-size: 90.625%;
+
     padding: 0.2rem 0.5rem 0.25rem;
     line-height: 0;
     border-radius: 0.4rem;
-}
-section.details
-{
-    aside
-    {
-        position: relative;
-        margin: 2rem 0;
-
-        h3
-        {
-            margin: 0;
-            padding: 0.5rem 0;
-            font-size: inherit;
-
-            color: $light-foreground-semi;
-            border-bottom: 2px solid $light-foreground-semi;
-        }
-
-        border-bottom: 2px solid $light-foreground-semi;
-    }
-    aside.important,
-    aside.warning
-    {
-        h3
-        {
-            color: $light-accent-hot-pink;
-            border-color: $light-accent-hot-pink;
-        }
-
-        border-color: $light-accent-hot-pink;
-    }
-
-    aside:last-child
-    {
-        border-bottom: none;
-    }
-}
-section.details
-{
-    div.more
-    {
-        margin: 2rem 0;
-
-        text-align: center;
-
-        > a
-        {
-            font-family: $typeface-sans;
-            font-weight: 700;
-            font-size: 120%;
-        }
-    }
-
-    div.more div.charts
-    {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-
-        h2, h3
-        {
-            font-size: 100%;
-            margin: 0;
-        }
-        h3
-        {
-            font-weight: 500;
-            color: $light-foreground-semi;
-        }
-
-        figure
-        {
-            margin: 1rem;
-
-            div.pie
-            {
-                font-size: 10px;
-            }
-        }
-    }
 }

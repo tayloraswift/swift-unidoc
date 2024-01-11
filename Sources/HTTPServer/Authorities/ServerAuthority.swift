@@ -16,6 +16,8 @@ protocol ServerAuthority:Sendable
 
     var tls:NIOSSLContext { get }
 
+    init(tls:NIOSSLContext)
+
     static
     func redact(error:any Error) -> String
 }

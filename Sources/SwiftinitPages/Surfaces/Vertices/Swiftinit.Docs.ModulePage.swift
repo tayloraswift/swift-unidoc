@@ -9,21 +9,21 @@ extension Swiftinit.Docs
 {
     struct ModulePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
-        let vertex:Unidoc.Vertex.Culture
+        let vertex:Unidoc.CultureVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.Vertex.Culture,
-            groups:GroupSections)
+            vertex:Unidoc.CultureVertex,
+            groups:Swiftinit.GroupLists)
         {
             self.context = context
             self.canonical = canonical
@@ -71,13 +71,13 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ModulePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ModulePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ModulePage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -164,7 +164,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VersionedPage
                 }
 
                 $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
-                    target: Swiftinit.Stats[self.volume, self.vertex.shoot],
+                    target: Swiftinit.Stats[self.volume, self.vertex.route],
                     census: self.vertex.census,
                     domain: self.name,
                     title: "Module stats and coverage details")

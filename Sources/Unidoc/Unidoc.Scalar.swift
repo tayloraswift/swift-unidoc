@@ -19,6 +19,11 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.Scalar:Identifiable
+{
+    @inlinable public
+    var id:Self { self }
+}
 extension Unidoc.Scalar
 {
     @available(*, deprecated, renamed: "edition")

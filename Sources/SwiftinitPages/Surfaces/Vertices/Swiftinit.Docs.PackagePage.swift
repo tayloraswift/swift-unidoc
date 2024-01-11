@@ -16,19 +16,19 @@ extension Swiftinit.Docs
 {
     struct PackagePage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Unidoc.Vertex.Global
+        let vertex:Unidoc.GlobalVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
-            vertex:Unidoc.Vertex.Global,
-            groups:GroupSections)
+            vertex:Unidoc.GlobalVertex,
+            groups:Swiftinit.GroupLists)
         {
             self.context = context
             self.canonical = canonical
@@ -67,7 +67,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
@@ -103,23 +103,11 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
             $0[.h1] = self.title
 
-            switch self.repo?.origin
+            if  let repo:Unidoc.PackageRepo = self.repo
             {
-            case .github(let origin)?:
-                $0[.p] = origin.about
-
-                guard
-                let refname:String = self.volume.refname
-                else
-                {
-                    break
-                }
-
-                $0 += Swiftinit.SourceLink.init(file: "\(origin.owner)/\(origin.name)",
-                    target: "\(origin.https)/tree/\(refname)")
-
-            case nil:
-                break
+                $0 += Swiftinit.PackageBanner.init(repo: repo,
+                    tag: self.volume.refname,
+                    now: .now())
             }
         }
 
@@ -164,6 +152,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
                 {
                     $0[.a]
                     {
+                        $0.class = "button"
                         $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
                     } = "Repo details and more versions"
                 }
@@ -195,7 +184,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VersionedPage
 
                                 if  let pin:Unidoc.Edition = dependency.pinned
                                 {
-                                    pinned = self.context.volumes[pin]
+                                    pinned = self.context[pin]
 
                                     $0[.td]
                                     {

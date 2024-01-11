@@ -3,6 +3,8 @@ import HTTPClient
 import JSON
 import NIOCore
 import NIOHPACK
+import NIOPosix
+import NIOSSL
 
 extension GitHub
 {
@@ -14,12 +16,54 @@ extension GitHub
         public
         let app:Application
 
-        public
+        private
         init(http2:HTTP2Client, app:Application)
         {
             self.http2 = http2
             self.app = app
         }
+    }
+}
+extension GitHub.Client<GitHub.API<String>>
+{
+    public static
+    func graphql(api:consuming GitHub.API<String>,
+        threads:consuming MultiThreadedEventLoopGroup,
+        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.API<String>>
+    {
+        .init(http2: .init(
+                threads: threads,
+                niossl: niossl,
+                remote: "api.github.com"),
+            app: api)
+    }
+}
+extension GitHub.Client<GitHub.API<Void>>
+{
+    public static
+    func rest(api:consuming GitHub.API<Void>,
+        threads:consuming MultiThreadedEventLoopGroup,
+        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.API<Void>>
+    {
+        .init(http2: .init(
+                threads: threads,
+                niossl: niossl,
+                remote: "api.github.com"),
+            app: api)
+    }
+}
+extension GitHub.Client<GitHub.OAuth>
+{
+    public static
+    func oauth(_ oauth:consuming GitHub.OAuth,
+        threads:consuming MultiThreadedEventLoopGroup,
+        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.OAuth>
+    {
+        .init(http2: .init(
+                threads: threads,
+                niossl: niossl,
+                remote: "github.com"),
+            app: oauth)
     }
 }
 extension GitHub.Client:Identifiable where Application:GitHubApplication
@@ -115,18 +159,5 @@ extension GitHub.Client
         {
             try await body(Connection.init(http2: $0, app: self.app))
         }
-    }
-}
-extension GitHub.Client<GitHub.API>
-{
-    @available(*, deprecated, message: """
-        Create a connection instead, and call the corresponding method on the connection.
-        """)
-    @inlinable public
-    func get<Response>(_:Response.Type = Response.self,
-        from endpoint:String,
-        with token:String? = nil) async throws -> Response where Response:JSONDecodable
-    {
-        try await self.connect { try await $0.get(from: endpoint, with: token) }
     }
 }

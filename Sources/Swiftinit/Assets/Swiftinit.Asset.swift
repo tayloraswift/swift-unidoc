@@ -28,11 +28,6 @@ extension Swiftinit
         case admin_css_map      = "admin.css.map"
     }
 }
-extension Swiftinit.Asset:Swiftinit.StaticRoot
-{
-    @inlinable public static
-    var root:String { "asset" }
-}
 extension Swiftinit.Asset:CustomStringConvertible
 {
     @inlinable public

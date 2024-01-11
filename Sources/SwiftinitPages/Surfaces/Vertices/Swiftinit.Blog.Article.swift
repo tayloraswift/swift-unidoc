@@ -9,12 +9,12 @@ extension Swiftinit.Blog
     struct ArticlePage
     {
         private
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         private
-        let vertex:Unidoc.Vertex.Article
+        let vertex:Unidoc.ArticleVertex
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>, vertex:Unidoc.Vertex.Article)
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>, vertex:Unidoc.ArticleVertex)
         {
             self.context = context
             self.vertex = vertex
@@ -24,7 +24,7 @@ extension Swiftinit.Blog
 extension Swiftinit.Blog.ArticlePage
 {
     private
-    var volume:Unidoc.VolumeMetadata { self.context.volumes.principal }
+    var volume:Unidoc.VolumeMetadata { self.context.volume }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {

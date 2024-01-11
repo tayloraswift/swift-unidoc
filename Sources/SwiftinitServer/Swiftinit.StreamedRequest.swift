@@ -48,7 +48,7 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
 
         switch root
         {
-        case Swiftinit.API.root:
+        case Swiftinit.Root.api.id:
             endpoint = try? .put(api: trunk, type: type)
 
         case _:

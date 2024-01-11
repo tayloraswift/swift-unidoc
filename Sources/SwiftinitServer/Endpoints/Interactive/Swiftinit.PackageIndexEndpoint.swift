@@ -25,18 +25,21 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
 {
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
-        guard
-        let github:Swiftinit.PluginIntegration<GitHubPlugin> = server.plugins.github
+        let github:GitHub.Client<GitHub.API<String>>
+        if  let api:GitHub.API<String> = server.github?.api
+        {
+            github = .graphql(api: api,
+                threads: server.context.threads,
+                niossl: server.context.niossl)
+        }
         else
         {
             return nil
         }
 
-        let response:GitHubPlugin.RepoMonitorResponse = try await github.api.connect
+        let response:GitHub.RepoMonitorResponse = try await github.connect
         {
-            try await $0.crawl(owner: self.owner,
-                repo: self.repo,
-                pat: github.plugin.pat)
+            try await $0.crawl(owner: self.owner, repo: self.repo)
         }
 
         //  Discard the tags for now, we want them to get indexed by the crawler.
@@ -59,7 +62,7 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
 
         let (package, new):(Unidoc.PackageMetadata, Bool) = try await server.db.unidoc.index(
             package: symbol,
-            repo: .github(repo),
+            repo: .github(repo, crawled: .now()),
             with: session)
 
         return .ok("""

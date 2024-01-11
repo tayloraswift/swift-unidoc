@@ -1,3 +1,4 @@
+import BSON
 import HTML
 import UnixTime
 
@@ -7,12 +8,16 @@ extension Swiftinit
     {
         private
         let package:Unidoc.PackageOutput
+        private
+        let now:UnixInstant
+
         /// Cached for sort performance.
         let order:String
 
-        init(_ package:Unidoc.PackageOutput)
+        init(_ package:Unidoc.PackageOutput, now:UnixInstant)
         {
             self.package = package
+            self.now = now
 
             let name:String = package.metadata.repo?.origin.name
                 ?? package.metadata.symbol.identifier
@@ -85,30 +90,16 @@ extension Swiftinit.PackageCard:HTML.OutputStreamable
                 return
             }
 
-            $0[.span]
+            let pushed:BSON.Millisecond
+            switch repo.origin
             {
-                switch repo.origin
-                {
-                case .github(let origin):
-                    let age:Age = .init(.now() - .millisecond(origin.pushed.value))
-                    $0[.span]
-                    {
-                        $0.class = "pushed"
-                        $0.title = """
-                        This package’s repository was last pushed to \(age.long).
-                        """
-                    } = age.short
-                }
-
-                $0[.span]
-                {
-                    $0.class = "stars"
-                    $0.title = """
-                    This package’s repository has
-                    \(repo.stars) \(repo.stars != 1 ? "stars" : "star").
-                    """
-                } = "\(repo.stars)"
+            case .github(let origin):   pushed = origin.pushed
             }
+
+            $0[.span] = Swiftinit.PackageIndicators.init(
+                pushed: pushed,
+                stars: repo.stars,
+                now: self.now)
         }
     }
 }

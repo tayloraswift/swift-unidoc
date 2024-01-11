@@ -14,19 +14,21 @@ extension Swiftinit
     typealias VertexEndpoint = _SwiftinitVertexEndpoint
 }
 
-/// The name of this protocol is ``Swiftinit.VolumeRoot``.
+/// The name of this protocol is ``Swiftinit.VertexLayer``.
 public
 protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
     where Query.Iteration.BatchElement == Unidoc.VertexOutput
 {
+    associatedtype VertexCache:Swiftinit.VertexCache = Swiftinit.Vertices
+    associatedtype VertexLayer:Swiftinit.VertexLayer
+
     static
     func response(
-        vertex:consuming Unidoc.Vertex,
-        groups:consuming [Unidoc.Group],
+        vertex:consuming Unidoc.AnyVertex,
+        groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
 }
-
 extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
@@ -43,14 +45,13 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         }
 
         guard
-        let vertex:Unidoc.Vertex = principal.vertex
+        let vertex:Unidoc.AnyVertex = principal.vertex
         else
         {
-            let context:IdentifiablePageContext<Never?> = .init(
-                principal: principal.volume,
+            let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
+                    vertices: .init(secondary: principal.matches),
+                    volumes: .init(principal: principal.volume)),
                 repo: principal.repo)
-
-            context.vertices.add(principal.matches)
 
             if  let choices:Swiftinit.Docs.MultipleFoundPage = .init(context,
                     matches: principal.matches)
@@ -68,14 +69,17 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
             }
         }
 
-        let context:IdentifiablePageContext<Unidoc.Scalar> = .init(principal: vertex.id,
-            volume: principal.volume,
+        let vertices:Swiftinit.Vertices = .init(principal: vertex,
+            secondary: output.vertices)
+        let volumes:Swiftinit.Volumes = .init(principal: principal.volume,
+            secondary: output.volumes)
+
+        _ = consume output
+
+        let context:IdentifiablePageContext<VertexCache> = .init(cache: .init(
+                vertices: .form(from: consume vertices),
+                volumes: volumes),
             repo: principal.repo)
-        ;
-        {
-            context.vertices.add($0.vertices)
-            context.volumes.add($0.volumes)
-        } (consume output)
 
         vertex.overview.map
         {
@@ -86,10 +90,11 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
             context.outlines += $0.outlines
         }
 
-        let groups:[Unidoc.Group] = principal.groups
+        let groups:[Unidoc.AnyGroup] = principal.groups
         let tree:Unidoc.TypeTree? = principal.tree
 
-        let canonical:CanonicalVersion? = .init(principal: consume principal)
+        let canonical:CanonicalVersion? = .init(principal: consume principal,
+            layer: VertexLayer.self)
 
         //  Note: noun tree won’t exist if the module contains no declarations.
         //  (For example, an `@_exported` shim.)

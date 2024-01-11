@@ -1,5 +1,3 @@
-import UnidocRecords
-
 extension Unidoc
 {
     enum VertexTypeError:Error, Equatable, Sendable
@@ -11,6 +9,23 @@ extension Unidoc
         case product
         case foreign
         case global
+    }
+}
+extension Unidoc.VertexTypeError
+{
+    static
+    func reject(_ vertex:Unidoc.AnyVertex) -> Self
+    {
+        switch vertex
+        {
+        case .article:  .article
+        case .culture:  .culture
+        case .decl:     .decl
+        case .file:     .file
+        case .product:  .product
+        case .foreign:  .foreign
+        case .global:   .global
+        }
     }
 }
 extension Unidoc.VertexTypeError:CustomStringConvertible

@@ -25,7 +25,9 @@ struct Compiler
 extension Compiler
 {
     public mutating
-    func compile(culture:Symbol.Module, parts:[SymbolGraphPart]) throws
+    func compile(language:Phylum.Language,
+        culture:Symbol.Module,
+        parts:[SymbolGraphPart]) throws
     {
         for part:SymbolGraphPart in parts where part.culture != culture
         {
@@ -34,7 +36,8 @@ extension Compiler
                 culture: culture)
         }
 
-        let culture:Culture = try self.declarations.include(culture: culture)
+        let culture:Culture = try self.declarations.include(language: language,
+            culture: culture)
 
         do
         {

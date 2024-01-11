@@ -25,6 +25,13 @@ extension Swiftinit.GlobalUplinkEndpoint:NonblockingEndpoint
         session:Mongo.Session,
         status:Status) async
     {
-        try? await server.db.unidoc.rebuildVolumes(queue: self.queue, with: session)
+        do
+        {
+            try await server.db.unidoc.rebuildVolumes(queue: self.queue, with: session)
+        }
+        catch let error
+        {
+            print("global uplink failed: \(error)")
+        }
     }
 }

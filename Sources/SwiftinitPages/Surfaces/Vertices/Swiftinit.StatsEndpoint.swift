@@ -26,20 +26,20 @@ extension Swiftinit
 }
 extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
+    public
+    typealias VertexLayer = Swiftinit.Stats
+
     public static
     func response(
-        vertex:consuming Unidoc.Vertex,
-        groups:consuming [Unidoc.Group],
+        vertex:consuming Unidoc.AnyVertex,
+        groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
 
         switch vertex
         {
-        case .article:
-            throw Unidoc.VertexTypeError.article
-
         case .culture(let vertex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
                 volume: context.page.volume)
@@ -49,18 +49,6 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 vertex: vertex)
             resource = page.resource(format: context.format)
 
-        case .decl:
-            throw Unidoc.VertexTypeError.decl
-
-        case .file:
-            throw Unidoc.VertexTypeError.file
-
-        case .foreign:
-            throw Unidoc.VertexTypeError.foreign
-
-        case .product:
-            throw Unidoc.VertexTypeError.product
-
         case .global(let vertex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
                 volume: context.page.volume)
@@ -69,6 +57,9 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 sidebar: sidebar,
                 vertex: vertex)
             resource = page.resource(format: context.format)
+
+        case let unexpected:
+            throw Unidoc.VertexTypeError.reject(unexpected)
         }
 
         return .ok(resource)

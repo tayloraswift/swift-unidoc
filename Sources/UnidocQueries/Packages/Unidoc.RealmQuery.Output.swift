@@ -5,7 +5,7 @@ import UnidocDB
 extension Unidoc.RealmQuery
 {
     @frozen public
-    struct Output:Equatable, Sendable
+    struct Output:Sendable
     {
         public
         let metadata:Unidoc.RealmMetadata

@@ -8,7 +8,8 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        output:Mongo.KeyPath,
+        unset:[Mongo.KeyPath])
     {
         pipeline[.lookup] = .init
         {
@@ -23,30 +24,25 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
             }
             $0[.pipeline] = .init
             {
-                $0.stage
+                $0[.match] = .init
                 {
-                    $0[.match] = .init
+                    $0[.expr] = .expr
                     {
-                        $0[.expr] = .expr
-                        {
-                            $0[.and] =
-                            (
-                                .expr
-                                {
-                                    $0[.gte] = (Unidoc.Vertex[.id], min)
-                                },
-                                .expr
-                                {
-                                    $0[.lte] = (Unidoc.Vertex[.id], max)
-                                }
-                            )
-                        }
+                        $0[.and] =
+                        (
+                            .expr
+                            {
+                                $0[.gte] = (Unidoc.AnyVertex[.id], min)
+                            },
+                            .expr
+                            {
+                                $0[.lte] = (Unidoc.AnyVertex[.id], max)
+                            }
+                        )
                     }
                 }
-                $0.stage
-                {
-                    $0[.limit] = 50
-                }
+                $0[.limit] = 50
+                $0[.unset] = unset
             }
             $0[.as] = output
         }

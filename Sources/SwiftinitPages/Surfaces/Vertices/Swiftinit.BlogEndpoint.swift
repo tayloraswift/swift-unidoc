@@ -25,21 +25,24 @@ extension Swiftinit
 }
 extension Swiftinit.BlogEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
+    public
+    typealias VertexLayer = Swiftinit.Blog
+
     public static
     func response(
-        vertex:consuming Unidoc.Vertex,
-        groups:consuming [Unidoc.Group],
+        vertex:consuming Unidoc.AnyVertex,
+        groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext) throws -> HTTP.ServerResponse
+        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
-        if  case .article(let vertex) = vertex
+        switch vertex
         {
+        case .article(let vertex):
             let page:Swiftinit.Blog.ArticlePage = .init(context.page, vertex: vertex)
             return .ok(page.resource(format: context.format))
-        }
-        else
-        {
-            return .error("not an article!")
+
+        case let unexpected:
+            throw Unidoc.VertexTypeError.reject(unexpected)
         }
     }
 }

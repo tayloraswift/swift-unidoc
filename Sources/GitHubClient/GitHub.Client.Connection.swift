@@ -23,15 +23,14 @@ extension GitHub.Client
         }
     }
 }
-extension GitHub.Client<GitHub.API>.Connection
+extension GitHub.Client<GitHub.API<String>>.Connection
 {
     /// Run a GraphQL API request.
     ///
-    /// The request will be charged to the user associated with the given token. It is not
+    /// The request will be charged to the user associated with the stored token. It is not
     /// possible to run a GraphQL API request without a token.
     @inlinable public
     func post<Response>(query:String,
-        with token:String,
         for _:Response.Type = Response.self) async throws -> Response
         where Response:JSONDecodable
     {
@@ -42,7 +41,7 @@ extension GitHub.Client<GitHub.API>.Connection
                 ":authority": self.http2.remote,
                 ":path": "/graphql",
 
-                "authorization": "Bearer \(token)",
+                "authorization": "Bearer \(self.app.pat)",
 
                 //  GitHub will reject the API request if the user-agent is not set.
                 "user-agent": self.app.agent,
@@ -72,7 +71,7 @@ extension GitHub.Client<GitHub.API>.Connection
             if  let second:String = response.headers?["x-ratelimit-reset"].first,
                 let second:Int64 = .init(second)
             {
-                throw GitHub.Client<GitHub.API>.RateLimitError.init(
+                throw GitHub.Client<GitHub.API<String>>.RateLimitError.init(
                     until: .second(second))
             }
             else
@@ -84,7 +83,9 @@ extension GitHub.Client<GitHub.API>.Connection
             throw HTTP.StatusError.init(code: response.status)
         }
     }
-
+}
+extension GitHub.Client<GitHub.API<Void>>.Connection
+{
     /// Run a REST API request.
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
@@ -137,7 +138,7 @@ extension GitHub.Client<GitHub.API>.Connection
                 if  let second:String = response.headers?["x-ratelimit-reset"].first,
                     let second:Int64 = .init(second)
                 {
-                    throw GitHub.Client<GitHub.API>.RateLimitError.init(
+                    throw GitHub.Client<GitHub.API<Void>>.RateLimitError.init(
                         until: .second(second))
                 }
 

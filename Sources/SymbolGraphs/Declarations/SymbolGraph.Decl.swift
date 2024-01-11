@@ -11,6 +11,8 @@ extension SymbolGraph
     struct Decl:Equatable, Sendable
     {
         public
+        let language:Phylum.Language
+        public
         let phylum:Phylum.Decl
         public
         var kinks:Phylum.Decl.Kinks
@@ -65,6 +67,7 @@ extension SymbolGraph
 
         @inlinable internal
         init(
+            language:Phylum.Language,
             phylum:Phylum.Decl,
             kinks:Phylum.Decl.Kinks,
             route:Phylum.Decl.Route,
@@ -79,6 +82,7 @@ extension SymbolGraph
             origin:Int32? = nil,
             topics:[Topic] = [])
         {
+            self.language = language
             self.phylum = phylum
             self.kinks = kinks
             self.route = route
@@ -101,9 +105,16 @@ extension SymbolGraph
 extension SymbolGraph.Decl
 {
     @inlinable public
-    init(phylum:Phylum.Decl, kinks:Phylum.Decl.Kinks, path:UnqualifiedPath)
+    init(language:Phylum.Language,
+        phylum:Phylum.Decl,
+        kinks:Phylum.Decl.Kinks,
+        path:UnqualifiedPath)
     {
-        self.init(phylum: phylum, kinks: kinks, route: .unhashed, path: path)
+        self.init(language: language,
+            phylum: phylum,
+            kinks: kinks,
+            route: .unhashed,
+            path: path)
     }
 }
 extension SymbolGraph.Decl
@@ -120,7 +131,10 @@ extension SymbolGraph.Decl
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case flags = "X"
+        /// Deprecated.
+        case flags_swift = "X"
+        /// New in 0.8.12.
+        case flags = "Y"
         case path = "P"
 
         case signature_availability = "V"
@@ -147,7 +161,8 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.flags] = Phylum.Decl.Flags.init(
+        bson[.flags] = Phylum.DeclFlags.init(
+            language: self.language,
             phylum: self.phylum,
             kinks: self.kinks,
             route: self.route)
@@ -193,8 +208,11 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        let flags:Phylum.Decl.Flags = try bson[.flags].decode()
+        let flags:Phylum.DeclFlags = try bson[.flags]?.decode()
+            ?? .swift(try bson[.flags_swift].decode())
+
         self.init(
+            language: flags.language,
             phylum: flags.phylum,
             kinks: flags.kinks,
             route: flags.route,

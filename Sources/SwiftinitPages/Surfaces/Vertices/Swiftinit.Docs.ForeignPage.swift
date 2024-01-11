@@ -1,4 +1,5 @@
 import HTML
+import LexicalPaths
 import MarkdownRendering
 import Symbols
 import Unidoc
@@ -9,22 +10,22 @@ extension Swiftinit.Docs
 {
     struct ForeignPage
     {
-        let context:IdentifiablePageContext<Unidoc.Scalar>
+        let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         let canonical:CanonicalVersion?
 
         private
-        let vertex:Unidoc.Vertex.Foreign
+        let vertex:Unidoc.ForeignVertex
         private
-        let groups:GroupSections
+        let groups:Swiftinit.GroupLists
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Unidoc.Scalar>,
+        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             canonical:CanonicalVersion?,
-            vertex:Unidoc.Vertex.Foreign,
-            groups:GroupSections) throws
+            vertex:Unidoc.ForeignVertex,
+            groups:Swiftinit.GroupLists) throws
         {
             self.context = context
             self.canonical = canonical
@@ -57,13 +58,13 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.Docs.ForeignPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.shoot] }
+    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
 }
 extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.VersionedPage
+extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 
@@ -83,15 +84,15 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VersionedPage
             $0[.h1] = "\(self.stem.last) (ext)"
         }
 
-        let extendee:HTML.Link<String>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Unidoc.VolumeMetadata = self.context.volumes[self.vertex.extendee.edition]
+        let extendee:HTML.Link<UnqualifiedPath>? = self.context.link(decl: self.vertex.extendee)
+        if  let other:Unidoc.VolumeMetadata = self.context[self.vertex.extendee.edition]
         {
             main[.section, { $0.class = "notice extendee" }]
             {
                 $0[.p]
                 {
                     $0 += "You’re viewing third-party extensions to "
-                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0[.code] = extendee
                     $0 += ", \(self.demonym.phrase) from "
 
                     $0[.a]
@@ -109,7 +110,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VersionedPage
                     $0 += """
                     You can also read the documentation for
                     """
-                    $0[.code] { $0[link: extendee?.target] = self.stem.last }
+                    $0[.code] = extendee
                     $0 += " itself."
                 }
             }

@@ -9,18 +9,18 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct PrincipalOutput:Equatable, Sendable
+    struct PrincipalOutput:Sendable
     {
         public
-        let matches:[Vertex]
+        let matches:[AnyVertex]
 
         public
-        let vertex:Vertex?
+        let vertex:AnyVertex?
         public
-        let vertexInLatest:Vertex?
+        let vertexInLatest:AnyVertex?
 
         public
-        let groups:[Group]
+        let groups:[AnyGroup]
 
         public
         let volume:VolumeMetadata
@@ -35,10 +35,10 @@ extension Unidoc
 
         @inlinable internal
         init(
-            matches:[Vertex],
-            vertex:Vertex?,
-            vertexInLatest:Vertex?,
-            groups:[Group],
+            matches:[AnyVertex],
+            vertex:AnyVertex?,
+            vertexInLatest:AnyVertex?,
+            groups:[AnyGroup],
             volume:VolumeMetadata,
             volumeOfLatest:VolumeMetadata?,
             repo:PackageRepo?,

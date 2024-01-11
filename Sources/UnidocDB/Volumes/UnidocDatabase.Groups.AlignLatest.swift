@@ -39,15 +39,15 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
 
                     $0.append
                     {
-                        $0[Unidoc.Group[.id]] = .init { $0[.gte] = latest.lowerBound }
+                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.gte] = latest.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Unidoc.Group[.id]] = .init { $0[.lte] = latest.upperBound }
+                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.lte] = latest.upperBound }
                     }
                     $0.append
                     {
-                        $0[Unidoc.Group[.realm]] = .init { $0[.ne] = self.realm }
+                        $0[Unidoc.AnyGroup[.realm]] = .init { $0[.ne] = self.realm }
                     }
                 }
             }
@@ -55,7 +55,7 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
             {
                 $0[.set] = .init
                 {
-                    $0[Unidoc.Group[.realm]] = self.realm
+                    $0[Unidoc.AnyGroup[.realm]] = self.realm
                 }
             }
         }
@@ -71,11 +71,11 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
 
                     $0.append
                     {
-                        $0[Unidoc.Group[.id]] = .init { $0[.gte] = all.lowerBound }
+                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.gte] = all.lowerBound }
                     }
                     $0.append
                     {
-                        $0[Unidoc.Group[.id]] = .init { $0[.lte] = all.upperBound }
+                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.lte] = all.upperBound }
                     }
                     $0.append
                     {
@@ -83,17 +83,17 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
                         {
                             $0.append
                             {
-                                $0[Unidoc.Group[.id]] = .init { $0[.lt] = latest.lowerBound }
+                                $0[Unidoc.AnyGroup[.id]] = .init { $0[.lt] = latest.lowerBound }
                             }
                             $0.append
                             {
-                                $0[Unidoc.Group[.id]] = .init { $0[.gt] = latest.upperBound }
+                                $0[Unidoc.AnyGroup[.id]] = .init { $0[.gt] = latest.upperBound }
                             }
                         }
                     }
                     $0.append
                     {
-                        $0[Unidoc.Group[.realm]] = .init { $0[.exists] = true }
+                        $0[Unidoc.AnyGroup[.realm]] = .init { $0[.exists] = true }
                     }
                 }
             }
@@ -101,7 +101,7 @@ extension UnidocDatabase.Groups.AlignLatest:Mongo.UpdateQuery
             {
                 $0[.unset] = .init
                 {
-                    $0[Unidoc.Group[.realm]] = ()
+                    $0[Unidoc.AnyGroup[.realm]] = ()
                 }
             }
         }

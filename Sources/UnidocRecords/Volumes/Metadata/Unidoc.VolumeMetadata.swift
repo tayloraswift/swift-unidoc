@@ -82,9 +82,6 @@ extension Unidoc.VolumeMetadata
     @available(*, deprecated)
     @inlinable public
     var version:String { self.symbol.version }
-
-    @inlinable public
-    var planes:Planes { .init(zone: self.id) }
 }
 extension Unidoc.VolumeMetadata
 {
@@ -112,16 +109,19 @@ extension Unidoc.VolumeMetadata
         case products = "W"
         case cultures = "X"
 
-        case planes_min = "C"
+        @available(*, unavailable)
+        case min_article = "A"
+        @available(*, unavailable)
+        case min_file = "F"
+        @available(*, unavailable)
+        case min_polygon = "U"
+        @available(*, unavailable)
+        case min_extension = "E"
+        @available(*, unavailable)
+        case min_topic = "T"
 
-        case planes_article = "A"
-        case planes_file = "F"
-
-        case planes_autogroup = "U"
-        case planes_extension = "E"
-        case planes_topic = "T"
-
-        case planes_max = "Z"
+        case min = "C"
+        case max = "Z"
 
         /// Indicates if this zone contains records from the latest release version of its
         /// package. It is computed and aligned within the database according to the value of
@@ -156,16 +156,11 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
         bson[.products] = Unidoc.NounTable.init(eliding: self.products)
         bson[.cultures] = Unidoc.NounTable.init(eliding: self.cultures)
 
-        bson[.planes_min] = self.planes.min
-
-        bson[.planes_article] = self.planes.article
-        bson[.planes_file] = self.planes.file
-
-        bson[.planes_autogroup] = self.planes.autogroup
-        bson[.planes_extension] = self.planes.extension
-        bson[.planes_topic] = self.planes.topic
-
-        bson[.planes_max] = self.planes.max
+        //  The `.bson` suffix really isn’t necessary here, but I’ve written it here to
+        //  emphasize the type of this field is a raw ``BSON.Identifier`` and not a vertex
+        //  scalar.
+        bson[.min] = self.id.min.bson
+        bson[.max] = self.id.max.bson
 
         bson[.abi] = self.abi
     }
