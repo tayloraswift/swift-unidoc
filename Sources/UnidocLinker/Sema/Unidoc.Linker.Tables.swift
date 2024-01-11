@@ -117,8 +117,19 @@ extension Unidoc.Linker.Tables
             self.current.decls.nodes.indices,
             self.conformances)
         {
-            if  let d:Unidoc.Scalar = self.current.scalars.decls[d]
+            guard
+            let d:Unidoc.Scalar = self.current.scalars.decls[d]
+            else
             {
+                continue
+            }
+
+            switch self.context[d.package]?.decls[d.citizen]?.decl?.language
+            {
+            case .c?, .cpp?:
+                continue
+
+            case .swift?, nil:
                 types.add(conformances: conformances, of: d)
             }
         }
