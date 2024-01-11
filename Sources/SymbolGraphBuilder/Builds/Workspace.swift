@@ -42,7 +42,10 @@ extension Workspace
     func create(_ name:String, clean:Bool = false) async throws -> Self
     {
         let workspace:Self = try await .create(at: self.path / name)
-        if  clean { try await workspace.clean() }
+        if  clean
+        {
+            try await workspace.clean()
+        }
         return workspace
     }
 }
