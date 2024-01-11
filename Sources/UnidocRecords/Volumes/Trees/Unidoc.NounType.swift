@@ -17,7 +17,7 @@ extension Unidoc.NounType
     {
         switch self
         {
-        case .stem(_, let flags?):  flags.language == .c
+        case .stem(_, let flags?):  flags.cdecl
         case .stem(_, nil):         false
         case .text:                 false
         }
