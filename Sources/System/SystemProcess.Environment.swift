@@ -1,3 +1,11 @@
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
+#else
+#error("unsupported platform")
+#endif
+
 extension SystemProcess
 {
     @frozen public
