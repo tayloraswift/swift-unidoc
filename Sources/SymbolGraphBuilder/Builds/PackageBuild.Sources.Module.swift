@@ -9,7 +9,8 @@ extension PackageBuild.Sources
     {
         var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
-        var path:FilePath?
+        private(set)
+        var origin:Origin?
 
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
@@ -21,10 +22,10 @@ extension PackageBuild.Sources
         var include:[FilePath]
 
         private
-        init(_ module:SymbolGraph.Module, path:FilePath?)
+        init(_ module:SymbolGraph.Module, origin:Origin? = nil)
         {
             self.module = module
-            self.path = path
+            self.origin = origin
 
             self.articles = []
             self.include = []
@@ -33,20 +34,15 @@ extension PackageBuild.Sources
 }
 extension PackageBuild.Sources.Module
 {
-    init(_ module:SymbolGraph.Module)
-    {
-        self.init(module, path: nil)
-    }
-
     init(scanning module:SymbolGraph.Module,
         exclude:borrowing [String],
         root:borrowing FilePath) throws
     {
-        self.init(module, path: nil)
+        self.init(module)
 
         if  let location:String = module.location
         {
-            self.path = root / location
+            self.origin = .sources(root / location)
         }
         else
         {
@@ -63,17 +59,28 @@ extension PackageBuild.Sources.Module
             case .test:         directory = "Tests"
             }
 
-            self.path = root / directory / module.name
+            self.origin = .sources(root / directory / module.name)
         }
 
         try self.scan(excluding: exclude)
     }
 
+    static
+    func toolchain(module name:String, dependencies:Int...) -> Self
+    {
+        .init(.init(name: name,
+                type: .binary,
+                dependencies: .init(modules: dependencies)),
+            origin: .toolchain)
+    }
+}
+extension PackageBuild.Sources.Module
+{
     private mutating
     func scan(excluding exclude:[String]) throws
     {
         guard
-        let path:FilePath = self.path
+        case .sources(let path) = self.origin
         else
         {
             return
@@ -122,6 +129,9 @@ extension PackageBuild.Sources.Module
 
             switch file.extension
             {
+            case "swift":
+                self.module.language |= .swift
+
             case "h":
                 //  Header files don’t indicate a C or C++ module on their own.
                 include.update(with: $0)

@@ -9,7 +9,7 @@ public
 struct Artifacts
 {
     let cultures:[Culture]
-    let root:Symbol.FileBase?
+    var root:Symbol.FileBase?
 
     private
     init(cultures:[Culture], root:Symbol.FileBase? = nil)
@@ -20,80 +20,41 @@ struct Artifacts
 }
 extension Artifacts
 {
-    /// Dumps the symbols for the given package, using this workspace as the
-    /// output directory.
-    public static
-    func dump(from package:PackageNode,
+    private
+    init(dumping modules:[PackageBuild.Sources.Module],
         include:inout [FilePath],
         output:Workspace,
         triple:Triple,
-        pretty:Bool = false) async throws -> Self
-    {
-        //  Note: the manifest root is the root we want; the repository root may
-        //  be a relative path.
-        let sources:PackageBuild.Sources = try .init(scanning: package)
-        return .init(cultures: try await Self.dump(
-                modules: sources.modules,
-                include: &include,
-                output: output,
-                triple: triple,
-                pretty: pretty),
-            root: package.root)
-    }
-    /// Dumps the symbols for the given targets, using this workspace as the
-    /// output directory.
-    public static
-    func dump(modules:[SymbolGraph.Module],
-        output:Workspace,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Self
-    {
-        var include:[FilePath] = []
-        return .init(cultures: try await Self.dump(
-                modules: modules.map(PackageBuild.Sources.Module.init(_:)),
-                include: &include,
-                output: output,
-                triple: triple,
-                pretty: pretty))
-    }
-
-    private static
-    func dump(modules:[PackageBuild.Sources.Module],
-        include:inout [FilePath],
-        output:Workspace,
-        triple:Triple,
-        pretty:Bool) async throws -> [Culture]
+        pretty:Bool) async throws
     {
         for sources:PackageBuild.Sources.Module in modules
         {
-            //  Only dump symbols for library targets.
-            switch sources.module.type
+            let label:String
+            if  case .toolchain? = sources.origin
             {
-            case .binary:       include += sources.include
-            case .executable:   continue
-            case .regular:      include += sources.include
-            case .macro:        include += sources.include
-            case .plugin:       continue
-            case .snippet:      continue
-            case .system:       continue
-            case .test:         continue
+                label = "toolchain"
+            }
+            else
+            {
+                //  Only dump symbols for library targets.
+                switch sources.module.type
+                {
+                case .binary:       include += sources.include
+                case .executable:   continue
+                case .regular:      include += sources.include
+                case .macro:        include += sources.include
+                case .plugin:       continue
+                case .snippet:      continue
+                case .system:       continue
+                case .test:         continue
+                }
+
+                label = """
+                \(sources.module.language?.description ?? "?"), \(sources.module.type)
+                """
             }
 
-            let label:String = """
-            \(sources.module.language?.description ?? "?") module, \(sources.module.type)
-            """
-
-            switch sources.module.id
-            {
-            case    "_CertificateInternals":    // unbuildable, from swift-certificates 1.0.0
-                continue
-
-            case    "_NIODataStructures": // unbuildable, as of swift-nio 2.60.0
-                continue
-
-            case let name:
-                print("Dumping symbols for module '\(name)' (\(label))")
-            }
+            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
 
             var arguments:[String] =
             [
@@ -117,7 +78,33 @@ extension Artifacts
                 arguments.append("\(include)")
             }
 
-            try await SystemProcess.init(command: "swift", arguments: arguments)()
+            let null:FilePath = "/dev/null"
+            try await null.open(.writeOnly)
+            {
+                let environment:SystemProcess.Environment = .inherit
+                {
+                    $0["SWIFT_BACKTRACE"] = "enable=no"
+                }
+                let extractor:SystemProcess = try .init(command: "swift",
+                    arguments: arguments,
+                    stderr: $0,
+                    with: environment)
+
+                do
+                {
+                    try await extractor()
+                }
+                catch SystemProcessError.exit(139, _)
+                {
+                    print("""
+                    Failed to dump symbols for module '\(sources.module.id)' due to SIGSEGV \
+                    from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
+                    compiler; see https://github.com/apple/swift/issues/68767.
+                    """)
+
+                    return
+                }
+            }
         }
 
         var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
@@ -155,12 +142,56 @@ extension Artifacts
             }
         }
 
-        return modules.map
+        let cultures:[Culture] = modules.map
         {
             .init($0.module,
                 articles: $0.articles,
                 artifacts: output.path,
                 parts: parts[$0.module.id, default: []])
         }
+
+        self.init(cultures: cultures)
+    }
+}
+extension Artifacts
+{
+    /// Dumps the symbols for the given package, using the `output` workspace as the
+    /// output directory.
+    public static
+    func dump(from package:PackageNode,
+        include:inout [FilePath],
+        output:Workspace,
+        triple:Triple,
+        pretty:Bool = false) async throws -> Self
+    {
+        //  Note: the manifest root is the root we want; the repository root may
+        //  be a relative path.
+        let sources:PackageBuild.Sources = try .init(scanning: package)
+        let root:Symbol.FileBase = package.root
+
+        var package:Self = try await .init(dumping: sources.modules,
+            include: &include,
+            output: output,
+            triple: triple,
+            pretty: pretty)
+
+        package.root = root
+
+        return package
+    }
+    /// Dumps the symbols for the given targets, using the `output` workspace as the
+    /// output directory.
+    static
+    func dump(modules:[PackageBuild.Sources.Module],
+        output:Workspace,
+        triple:Triple,
+        pretty:Bool = false) async throws -> Self
+    {
+        var include:[FilePath] = []
+        return try await .init(dumping: modules,
+            include: &include,
+            output: output,
+            triple: triple,
+            pretty: pretty)
     }
 }
