@@ -35,7 +35,8 @@ extension SystemProcess
     public
     init(command:String, arguments:[String],
         stdout:FileDescriptor? = nil,
-        stderr:FileDescriptor? = nil) throws
+        stderr:FileDescriptor? = nil,
+        with environment:consuming SystemProcess.Environment = .inherit) throws
     {
         let invocation:[String] = [command] + arguments
         // must be null-terminated!
@@ -80,14 +81,17 @@ extension SystemProcess
             posix_spawn_file_actions_adddup2(&actions, stderr.rawValue, 2)
         }
 
-        var pid:pid_t = 0
-        switch posix_spawnp(&pid, command, &actions, nil, argv, environ)
+        var process:pid_t = 0
+        let status:Int32 = environment.withUnsafePointers
         {
-        case 0:
-            self.init(invocation: invocation, id: pid)
-        case let status:
+            posix_spawnp(&process, command, &actions, nil, argv, $0)
+        }
+        if   status != 0
+        {
             throw SystemProcessError.spawn(status, invocation)
         }
+
+        self.init(invocation: invocation, id: process)
     }
 
     public

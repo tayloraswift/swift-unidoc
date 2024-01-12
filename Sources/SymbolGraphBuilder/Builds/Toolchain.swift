@@ -117,48 +117,47 @@ extension Toolchain
             modules:
             [
                 //  0:
-                .init(name: "Swift", type: .binary,
-                    dependencies: .init()),
+                .toolchain(module: "Swift"),
                 //  1:
-                .init(name: "_Concurrency", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "_Concurrency",
+                    dependencies: 0),
                 //  2:
-                .init(name: "Distributed", type: .binary,
-                    dependencies: .init(modules: [0, 1])),
+                .toolchain(module: "Distributed",
+                    dependencies: 0, 1),
 
                 //  3:
-                .init(name: "_Differentiation", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "_Differentiation",
+                    dependencies: 0),
 
                 //  4:
-                .init(name: "_RegexParser", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "_RegexParser",
+                    dependencies: 0),
                 //  5:
-                .init(name: "_StringProcessing", type: .binary,
-                    dependencies: .init(modules: [0, 4])),
+                .toolchain(module: "_StringProcessing",
+                    dependencies: 0, 4),
                 //  6:
-                .init(name: "RegexBuilder", type: .binary,
-                    dependencies: .init(modules: [0, 4, 5])),
+                .toolchain(module: "RegexBuilder",
+                    dependencies: 0, 4, 5),
 
                 //  7:
-                .init(name: "Cxx", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "Cxx",
+                    dependencies: 0),
 
                 //  8:
-                .init(name: "Dispatch", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "Dispatch",
+                    dependencies: 0),
                 //  9:
-                .init(name: "DispatchIntrospection", type: .binary,
-                    dependencies: .init(modules: [0])),
+                .toolchain(module: "DispatchIntrospection",
+                    dependencies: 0),
                 // 10:
-                .init(name: "Foundation", type: .binary,
-                    dependencies: .init(modules: [0, 8])),
+                .toolchain(module: "Foundation",
+                    dependencies: 0, 8),
                 // 11:
-                .init(name: "FoundationNetworking", type: .binary,
-                    dependencies: .init(modules: [0, 8, 10])),
+                .toolchain(module: "FoundationNetworking",
+                    dependencies: 0, 8, 10),
                 // 12:
-                .init(name: "FoundationXML", type: .binary,
-                    dependencies: .init(modules: [0, 8, 10])),
+                .toolchain(module: "FoundationXML",
+                    dependencies: 0, 8, 10),
             ],
             output: build.output,
             triple: self.triple,
