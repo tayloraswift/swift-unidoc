@@ -76,22 +76,57 @@ extension Codelink:LosslessStringConvertible
     init?(_ string:Substring)
     {
         guard
-        var i:String.Index = string.indices.first
+        let i:String.Index = string.indices.first
         else
         {
             return nil
         }
 
-        if  string[i] == "/"
+        //  Trim trailing slashes.
+        var j:String.Index = string.endIndex
+        while true
         {
-            self.init(base: .qualified)
-            i = string.index(after: i)
+            let k:String.Index = string.index(before: j)
+            if  k == i
+            {
+                return nil
+            }
+            else if string[k] == "/"
+            {
+                j = k
+            }
+            else
+            {
+                break
+            }
+        }
+
+        if  string[i] != "/"
+        {
+            self.init(base: .relative, parsing: string[i ..< j])
+            return
+        }
+
+        var path:Path = .init()
+        //  Special case for bare operator references:
+        if  case j? = path.extend(parsing: string.unicodeScalars[i ..< j])
+        {
+            self.init(base: .relative, path: path)
         }
         else
         {
-            self.init(base: .relative)
+            self.init(base: .qualified, parsing: string[string.index(after: i) ..< j])
         }
+    }
+}
+extension Codelink
+{
+    private
+    init?(base:Base, parsing string:Substring)
+    {
+        self.init(base: base)
 
+        var i:String.Index = string.startIndex
         while let j:String.Index = self.path.extend(parsing: string.unicodeScalars[i...])
         {
             guard j < string.endIndex

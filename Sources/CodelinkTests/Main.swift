@@ -115,6 +115,38 @@ enum Main:TestMain, TestBattery
                 tests.expect(link.path.visible ..? ["Real", "init"])
                 tests.expect(nil: link.suffix)
             }
+            if  let tests:TestGroup = tests / "EmptyTrailingComponent",
+                let link:Codelink = tests.roundtrip("Real.init/")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["Real", "init"])
+                tests.expect(link.path.visible ..? ["Real", "init"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "DivisionOperator",
+                let link:Codelink = tests.roundtrip("/(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["/(_:_:)"])
+                tests.expect(link.path.visible ..? ["/(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "CustomOperator",
+                let link:Codelink = tests.roundtrip("/-/(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["/-/(_:_:)"])
+                tests.expect(link.path.visible ..? ["/-/(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "ClosedRangeOperator",
+                let link:Codelink = tests.roundtrip("...(_:_:)")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["...(_:_:)"])
+                tests.expect(link.path.visible ..? ["...(_:_:)"])
+                tests.expect(nil: link.suffix)
+            }
         }
         if  let tests:TestGroup = tests / "Codelink" / "Disambiguator"
         {
@@ -237,6 +269,14 @@ enum Main:TestMain, TestBattery
             }
             if  let tests:TestGroup = tests / "Visible",
                 let link:Codelink = tests.roundtrip("/Swift.Int")
+            {
+                tests.expect(link.base ==? .qualified)
+                tests.expect(link.path.components ..? ["Swift", "Int"])
+                tests.expect(link.path.visible ..? ["Swift", "Int"])
+                tests.expect(nil: link.suffix)
+            }
+            if  let tests:TestGroup = tests / "EmptyTrailingComponent",
+                let link:Codelink = tests.roundtrip("/Swift.Int/")
             {
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])

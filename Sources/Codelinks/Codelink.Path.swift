@@ -28,6 +28,9 @@ extension Codelink.Path
 }
 extension Codelink.Path
 {
+    /// Attempts to extend this path by parsing the given string, returning nil if the string
+    /// does not begin with a valid path component. This method only changes the path if the
+    /// parsing succeeds.
     mutating
     func extend(parsing string:Substring.UnicodeScalarView) -> String.Index?
     {
