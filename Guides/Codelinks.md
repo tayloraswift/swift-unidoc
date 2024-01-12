@@ -191,8 +191,6 @@ The unified codelink format uses the `.` character to join vector links. The `/`
 | ` ``Unicode.Scalar/value`` ` | `value` |
 | ` ``Unicode/Scalar/value`` ` | `value` |
 
-Trailing slashes are forbidden.
-
 Multiple consecutive path separators are forbidden. This prevents ambiguity with custom operators.
 
 | Codelink | Renders as | Parses as |
@@ -210,6 +208,8 @@ If a path component begins with an operator character, all subsequent `.` charac
 | --- | --- | --- |
 | ` ``Real../.(_:_:)`` ` | `Real../.(_:_:)` | `["Real", "./.(_:_:)"]` |
 | ` ``Real/./.(_:_:)`` ` | `./.(_:_:)` | `["Real", "./.(_:_:)"]` |
+
+Trailing slashes are allowed in vector links, and have no effect on the appearance of the rendered codelink. This has the potential to truncate bare operator references, if the operator name ends with a `/` character. Therefore, operators **must** be written with their full argument tuples.
 
 ### Disambiguators
 
