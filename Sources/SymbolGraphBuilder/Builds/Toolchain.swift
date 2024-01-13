@@ -263,11 +263,6 @@ extension Toolchain
             on: platform,
             as: build.id.package)
         let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
-        let artifacts:Artifacts = try await .dump(from: flatNode,
-            include: &include,
-            output: build.output,
-            triple: self.triple,
-            pretty: pretty)
 
         let commit:SymbolGraphMetadata.Commit?
         if  case .versioned(let pin, let ref) = build.id
@@ -304,7 +299,15 @@ extension Toolchain
             display: manifest.name,
             root: manifest.root)
 
-        return .init(metadata: metadata, graph: try await .build(from: artifacts))
+        let artifacts:Artifacts = try await .dump(from: flatNode,
+            include: &include,
+            output: build.output,
+            triple: self.triple,
+            pretty: pretty)
+
+        let graph:SymbolGraph = try await .build(from: artifacts)
+
+        return .init(metadata: metadata, graph: graph)
     }
 }
 extension Toolchain

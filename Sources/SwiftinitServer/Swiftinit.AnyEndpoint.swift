@@ -96,9 +96,8 @@ extension Swiftinit.AnyEndpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
-                        package: .init(package),
-                        limit: 1)),
+                let package:Symbol.Package = .init(package)
+                return .explainable(Swiftinit.TagsEndpoint.init(query: .latest(package)),
                     parameters: parameters,
                     accept: .application(.json))
             }
@@ -238,8 +237,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.TagsEndpoint.init(query: .init(
-                package: .init(trunk),
+        .explainable(Swiftinit.TagsEndpoint.init(query: .tags(.init(trunk),
                 limit: 12,
                 user: parameters.user)),
             parameters: parameters)
@@ -348,6 +346,16 @@ extension Swiftinit.AnyEndpoint
 
             switch trunk
             {
+            case .packageAlias:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let alias:String = form["alias"]
+                {
+                    return .interactive(Swiftinit.PackageAliasEndpoint.init(
+                        package: package,
+                        alias: .init(alias)))
+                }
+
             case .packageAlign:
                 if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package)

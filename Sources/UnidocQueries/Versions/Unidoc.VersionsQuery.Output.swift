@@ -1,5 +1,7 @@
 import BSON
 import MongoQL
+import SymbolGraphs
+import Symbols
 import UnidocDB
 import UnidocRecords
 
@@ -15,6 +17,8 @@ extension Unidoc.VersionsQuery
         public
         var tagless:Tagless?
         public
+        var aliases:[Symbol.Package]
+        public
         var package:Unidoc.PackageMetadata
         public
         var realm:Unidoc.RealmMetadata?
@@ -25,6 +29,7 @@ extension Unidoc.VersionsQuery
         init(prereleases:[Tag],
             releases:[Tag],
             tagless:Tagless?,
+            aliases:[Symbol.Package],
             package:Unidoc.PackageMetadata,
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
@@ -32,6 +37,7 @@ extension Unidoc.VersionsQuery
             self.prereleases = prereleases
             self.releases = releases
             self.tagless = tagless
+            self.aliases = aliases
             self.package = package
             self.realm = realm
             self.user = user
@@ -47,6 +53,7 @@ extension Unidoc.VersionsQuery.Output:MongoMasterCodingModel
         case releases
         case tagless_volume
         case tagless_graph
+        case aliases
         case package
         case realm
         case user
@@ -65,6 +72,7 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
             {
                 .init(volume: try bson[.tagless_volume]?.decode(), graph: $0)
             },
+            aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),
             realm: try bson[.realm]?.decode(),
             user: try bson[.user]?.decode())

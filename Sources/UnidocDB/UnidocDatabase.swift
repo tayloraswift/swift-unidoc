@@ -104,9 +104,8 @@ extension UnidocDatabase
         switch consume autoincrement
         {
         case .new(let id):
-            let realm:Unidoc.RealmAlias = .init(id: realm, coordinate: id)
             //  This can fail if we race with another process.
-            try await self.realmAliases.insert(some: realm, with: session)
+            try await self.realmAliases.insert(alias: realm, of: id, with: session)
             fallthrough
 
         case .old(let id, nil):
@@ -123,6 +122,7 @@ extension UnidocDatabase
     }
 
     /// Registers an **alias** of a package.
+    @_spi(testable)
     public
     func alias(
         existing package:Symbol.Package,
@@ -151,7 +151,23 @@ extension UnidocDatabase
                 with: session)
         {
             //  According to GitHub, this package is already known to us by a different name.
-            try await self.alias(existing: existing.symbol, package: package, with: session)
+            aliasing:
+            do
+            {
+                if  existing.symbol == package
+                {
+                    break aliasing
+                }
+
+                try await self.packageAliases.insert(alias: package,
+                    of: existing.id,
+                    with: session)
+            }
+            catch is Mongo.WriteError
+            {
+                //  Alias already exists.
+            }
+
             try await self.packages.update(field: .repo,
                 of: existing.id,
                 to: repo,
@@ -171,8 +187,7 @@ extension UnidocDatabase
         switch consume placement
         {
         case .new(let id):
-            let package:Unidoc.PackageAlias = .init(id: package, coordinate: id)
-            try await self.packageAliases.insert(some: package, with: session)
+            try await self.packageAliases.insert(alias: package, of: id, with: session)
             fallthrough
 
         case .old(let id, nil):

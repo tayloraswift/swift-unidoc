@@ -1,5 +1,7 @@
 import BSON
 import MongoDB
+import SymbolGraphs
+import Symbols
 import UnidocRecords
 
 extension UnidocDatabase
@@ -36,4 +38,16 @@ extension UnidocDatabase.RealmAliases:Mongo.CollectionModel
 
     @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [Self.indexCoordinate] }
+}
+extension UnidocDatabase.RealmAliases
+{
+    public
+    func insert(alias:String,
+        of coordinate:Unidoc.Realm,
+        with session:Mongo.Session) async throws
+    {
+        try await self.insert(
+            some: Unidoc.RealmAlias.init(id: alias, coordinate: coordinate),
+            with: session)
+    }
 }

@@ -38,3 +38,15 @@ extension UnidocDatabase.PackageAliases:Mongo.CollectionModel
     @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [ Self.indexCoordinate ] }
 }
+extension UnidocDatabase.PackageAliases
+{
+    public
+    func insert(alias:Symbol.Package,
+        of coordinate:Unidoc.Package,
+        with session:Mongo.Session) async throws
+    {
+        try await self.insert(
+            some: Unidoc.PackageAlias.init(id: alias, coordinate: coordinate),
+            with: session)
+    }
+}
