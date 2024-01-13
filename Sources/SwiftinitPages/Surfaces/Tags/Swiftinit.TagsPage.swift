@@ -2,6 +2,7 @@ import BSON
 import GitHubAPI
 import HTML
 import Media
+import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -13,6 +14,8 @@ extension Swiftinit
     struct TagsPage
     {
         private
+        let aliases:[Symbol.Package]
+        private
         let package:Unidoc.PackageMetadata
         private
         let tagless:Unidoc.VersionsQuery.Tagless?
@@ -23,12 +26,15 @@ extension Swiftinit
         private
         let user:Unidoc.User?
 
-        init(package:Unidoc.PackageMetadata,
+        init(
+            aliases:[Symbol.Package],
+            package:Unidoc.PackageMetadata,
             tagless:Unidoc.VersionsQuery.Tagless?,
             tagged:[Unidoc.VersionsQuery.Tag],
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
+            self.aliases = aliases
             self.package = package
             self.tagless = tagless
             self.tagged = tagged
@@ -67,7 +73,9 @@ extension Swiftinit.TagsPage
         tagged += prereleases
         tagged += releases
 
-        self.init(package: output.package,
+        self.init(
+            aliases: output.aliases,
+            package: output.package,
             tagless: output.tagless,
             tagged: tagged,
             realm: output.realm,
@@ -259,6 +267,16 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
             }
 
+            $0[.h3] = "Names and aliases"
+
+            $0[.ol, { $0.class = "aliases" }]
+            {
+                for symbol:Symbol.Package in self.aliases
+                {
+                    $0[.li] = "\(symbol)"
+                }
+            }
+
             guard self.user?.maintains(package: self.package) ?? !format.secure
             else
             {
@@ -341,6 +359,36 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     $0[.button] { $0.type = "submit" } = self.package.hidden
                         ? "Unhide Package"
                         : "Hide Package"
+                }
+            }
+
+            $0[.form]
+            {
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.API[.packageAlias])"
+                $0.method = "post"
+            }
+                content:
+            {
+                $0[.p]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "alias"
+                        $0.placeholder = "new name"
+                    }
+                }
+                $0[.p]
+                {
+                    $0[.button] { $0.type = "submit" } = "Alias Package"
                 }
             }
 
