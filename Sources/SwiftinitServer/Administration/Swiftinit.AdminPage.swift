@@ -157,26 +157,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         }
             content:
         {
-            $0[.label]
-            {
-                $0.class = "checkbox"
-                $0.title = "Queue all symbol graphs for uplinking."
-            }
-                content:
-            {
-                $0[.input]
-                {
-                    $0.type = "checkbox"
-                    $0.name = "queue"
-                    $0.value = "true"
-                }
-
-                $0[.span] = "Queue all symbol graphs"
-            }
-
             $0[.p]
             {
-                $0[.button] { $0.type = "submit" } = "Uplink volumes"
+                $0[.button] { $0.type = "submit" } = "Uplink all symbol graphs"
             }
         }
 

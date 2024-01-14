@@ -8,6 +8,7 @@ enum Main:TestMain
     let all:[any TestBattery.Type] =
     [
         Availabilities.self,
+        Dependencies.self,
         Generics.self,
     ]
 }

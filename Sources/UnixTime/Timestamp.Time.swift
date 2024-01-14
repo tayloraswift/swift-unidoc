@@ -24,6 +24,12 @@ extension Timestamp.Time
     @inlinable public static
     var midnight:Self { .init(hour: 0, minute: 0, second: 0) }
 }
+extension Timestamp.Time:CustomStringConvertible
+{
+    /// Formats the time as `hh:mm:ss`.
+    @inlinable public
+    var description:String { "\(self.hh):\(self.mm):\(self.ss)" }
+}
 extension Timestamp.Time
 {
     @inlinable public

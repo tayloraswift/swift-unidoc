@@ -7,13 +7,13 @@ extension AnyVersion:BSONEncodable
     public
     func encode(to field:inout BSON.FieldEncoder)
     {
-        switch self.canonical
+        if  case .stable(.release(let version, build: nil)) = self.canonical
         {
-        case .stable(.release(let version, build: nil)):
             version.encode(to: &field)
-
-        case let other:
-            "\(other)".encode(to: &field)
+        }
+        else
+        {
+            "\(self)".encode(to: &field)
         }
     }
 }

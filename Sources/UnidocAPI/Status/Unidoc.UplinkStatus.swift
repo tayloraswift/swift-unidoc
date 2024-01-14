@@ -1,4 +1,4 @@
-import Unidoc
+import Symbols
 
 extension Unidoc
 {
@@ -8,18 +8,22 @@ extension Unidoc
         public
         let edition:Edition
         public
-        let sitemap:SitemapDelta?
+        let volume:Symbol.Edition
         public
         let hidden:Bool
+        public
+        let delta:SitemapDelta?
 
         @inlinable public
         init(edition:Edition,
-            sitemap:SitemapDelta?,
-            hidden:Bool)
+            volume:Symbol.Edition,
+            hidden:Bool,
+            delta:SitemapDelta?)
         {
             self.edition = edition
-            self.sitemap = sitemap
+            self.volume = volume
             self.hidden = hidden
+            self.delta = delta
         }
     }
 }

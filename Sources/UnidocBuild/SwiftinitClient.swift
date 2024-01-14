@@ -129,16 +129,10 @@ extension SwiftinitClient
 
             print("Uploading symbol graph...")
 
-            let placement:Unidoc.UploadStatus = try await connection.put(bson: bson,
+            let _:Unidoc.UploadStatus = try await connection.put(bson: bson,
                 to: "/api/symbolgraph")
 
             print("Successfully uploaded symbol graph!")
-
-            try await connection.uplink(
-                package: placement.edition.package,
-                version: placement.edition.version)
-
-            print("Successfully uplinked symbol graph!")
         }
     }
 
@@ -206,7 +200,8 @@ extension SwiftinitClient
                 package: package.coordinate,
                 version: edition.coordinate),
             metadata: archive.metadata,
-            graph: archive.graph))
+            graph: archive.graph,
+            link: force ? .refresh : .initial))
 
         try await self.connect
         {
@@ -217,12 +212,6 @@ extension SwiftinitClient
             try await connection.put(bson: bson, to: "/api/snapshot")
 
             print("Successfully uploaded symbol graph!")
-
-            try await connection.uplink(
-                package: package.coordinate,
-                version: edition.coordinate)
-
-            print("Successfully uplinked symbol graph!")
         }
     }
 }
