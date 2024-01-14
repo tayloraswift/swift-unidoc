@@ -59,8 +59,8 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
                 where item.header.name == "documentation-binary"
             {
                 let archive:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.publish(
-                    docs: archive,
+                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.store(
+                    linking: archive,
                     with: session).0
 
                 receipts.append(receipt)

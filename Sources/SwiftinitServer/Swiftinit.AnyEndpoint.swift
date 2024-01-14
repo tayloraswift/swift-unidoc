@@ -404,8 +404,7 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .uplinkAll:
-                return .procedural(Swiftinit.GlobalUplinkEndpoint.init(
-                    queue: form["queue"] == "true"))
+                return .interactive(Swiftinit.GraphUplinkEndpoint.init(queue: .all))
 
             case .uplink:
                 if  let package:String = form["package"],
@@ -413,15 +412,9 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .procedural(Swiftinit.GraphUplinkEndpoint.coordinate(.init(
-                        package: package,
-                        version: version)))
-                }
-                else if
-                    let volume:String = form["volume"],
-                    let volume:Symbol.Edition = .init(volume)
-                {
-                    return .procedural(Swiftinit.GraphUplinkEndpoint.identifier(volume))
+                    return .interactive(Swiftinit.GraphUplinkEndpoint.init(
+                        queue: .one(.init(package: package, version: version)),
+                        uri: form["redirect"]))
                 }
 
             case .unlink:

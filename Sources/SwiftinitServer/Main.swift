@@ -188,7 +188,10 @@ extension Main
             {
                 @Sendable (pool:Mongo.SessionPool) in
 
-                var plugins:[any Swiftinit.ServerPlugin] = []
+                var plugins:[any Swiftinit.ServerPlugin] =
+                [
+                    Swiftinit.LinkerPlugin.init(),
+                ]
 
                 if  options.whitelists
                 {

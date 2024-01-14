@@ -36,11 +36,16 @@ extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
 
         case .plugin(let id):
             guard
-            let plugin:any Swiftinit.ServerPlugin = server.plugins[id],
-            let page:any Swiftinit.RenderablePage = plugin.page
+            let plugin:any Swiftinit.ServerPlugin = server.plugins[id]
             else
             {
                 return .notFound("No such plugin")
+            }
+            guard
+            let page:any Swiftinit.RenderablePage = plugin.page
+            else
+            {
+                return .notFound("This plugin has not been initialized yet")
             }
 
             return .ok(page.resource(format: server.format))

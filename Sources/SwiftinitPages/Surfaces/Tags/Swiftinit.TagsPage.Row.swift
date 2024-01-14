@@ -1,4 +1,5 @@
 import HTML
+import Media
 import SemanticVersions
 import SHA1
 import UnidocDB
@@ -9,15 +10,18 @@ extension Swiftinit.TagsPage
 {
     struct Row
     {
+        let linkable:UplinkButton?
+
         let volume:Unidoc.VolumeMetadata?
         let graph:Unidoc.VersionsQuery.Graph?
         let type:RowType
 
-        init(
+        init(linkable:UplinkButton?,
             volume:Unidoc.VolumeMetadata?,
             graph:Unidoc.VersionsQuery.Graph?,
             type:RowType)
         {
+            self.linkable = linkable
             self.volume = volume
             self.graph = graph
             self.type = type
@@ -117,6 +121,16 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
                 {
                     $0.title = "No symbol graph has been built for this version."
                 }
+            }
+
+            if  let button:Swiftinit.TagsPage.UplinkButton = self.linkable
+            {
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.API[.uplink])"
+                    $0.method = "post"
+                } = button
             }
         }
     }

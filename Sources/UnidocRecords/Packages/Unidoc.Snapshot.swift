@@ -25,7 +25,7 @@ extension Unidoc
         var pins:[Unidoc.Edition?]
 
         public
-        var uplinking:Bool
+        var link:LinkState?
 
         @inlinable internal
         init(id:Unidoc.Edition,
@@ -33,7 +33,7 @@ extension Unidoc
             graph:SymbolGraph,
             swift:PatchVersion?,
             pins:[Unidoc.Edition?],
-            uplinking:Bool = false)
+            link:LinkState?)
         {
             self.id = id
             self.metadata = metadata
@@ -41,14 +41,17 @@ extension Unidoc
             self.swift = swift
             self.pins = pins
 
-            self.uplinking = uplinking
+            self.link = link
         }
     }
 }
 extension Unidoc.Snapshot
 {
     @inlinable public
-    init(id:Unidoc.Edition, metadata:SymbolGraphMetadata, graph:SymbolGraph)
+    init(id:Unidoc.Edition,
+        metadata:SymbolGraphMetadata,
+        graph:SymbolGraph,
+        link:LinkState?)
     {
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?
@@ -67,7 +70,8 @@ extension Unidoc.Snapshot
             metadata: metadata,
             graph: graph,
             swift: swift,
-            pins: [])
+            pins: [],
+            link: link)
     }
 }
 extension Unidoc.Snapshot
@@ -95,7 +99,7 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.swift] = self.swift
         bson[.pins] = self.pins.isEmpty ? nil : self.pins
 
-        bson[.uplinking] = self.uplinking ? true : nil
+        bson[.uplinking] = self.link
     }
 }
 extension Unidoc.Snapshot:BSONDocumentDecodable
@@ -108,6 +112,6 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
             graph: try bson[.graph].decode(),
             swift: try bson[.swift]?.decode(),
             pins: try bson[.pins]?.decode() ?? [],
-            uplinking: try bson[.uplinking]?.decode() ?? false)
+            link: try bson[.uplinking]?.decode())
     }
 }

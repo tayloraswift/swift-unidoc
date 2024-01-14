@@ -225,7 +225,6 @@ extension Unidoc.VersionsQuery
                         $0[.objectSize] = Unidoc.Snapshot[.graph]
                     }
                     $0[Graph[.abi]] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
-
                 }
             }
             $0[.as] = graph

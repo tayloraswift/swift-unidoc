@@ -7,6 +7,9 @@ import UnidocDB
 
 extension Swiftinit
 {
+    /// This endpoint is used to index and store a symbol graph in the database. It is virtually
+    /// identical to `Swiftinit.GraphStorageEndpoint` except it is capable of registering
+    /// documentation that has not yet been indexed by the GitHub plugin.
     enum GraphPlacementEndpoint:Sendable
     {
         case put

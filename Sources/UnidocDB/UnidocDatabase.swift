@@ -265,11 +265,14 @@ extension UnidocDatabase
 }
 extension UnidocDatabase
 {
+    /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
+    /// uplink.
     public
     func store(docs:consuming SymbolGraphArchive,
         with session:Mongo.Session) async throws -> Unidoc.UploadStatus
     {
         let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
+            link: .initial,
             with: session)
 
         return try await self.snapshots.upsert(snapshot: snapshot, with: session)
@@ -277,6 +280,7 @@ extension UnidocDatabase
 
     private
     func label(docs:consuming SymbolGraphArchive,
+        link:Unidoc.Snapshot.LinkState?,
         with session:Mongo.Session) async throws ->
         (
             snapshot:Unidoc.Snapshot,
@@ -312,25 +316,37 @@ extension UnidocDatabase
                 package: package.id,
                 version: version),
             metadata: docs.metadata,
-            graph: docs.graph)
+            graph: docs.graph,
+            link: link)
 
         return (snapshot, package.realm)
     }
 }
 extension UnidocDatabase
 {
+    @available(*, deprecated, renamed: "store(linking:with:)")
     public
     func publish(docs:SymbolGraphArchive,
+        with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
+    {
+        try await self.store(linking: docs, with: session)
+    }
+
+    /// Indexes, stores, and links a symbol graph in the database.
+    public
+    func store(linking docs:SymbolGraphArchive,
         with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
     {
         var snapshot:Unidoc.Snapshot
         let realm:Unidoc.Realm?
 
-        (snapshot, realm) = try await self.label(docs: docs, with: session)
+        //  Don’t queue for uplink, since we’re going to do that synchronously.
+        (snapshot, realm) = try await self.label(docs: docs, link: nil, with: session)
 
         let volume:Unidoc.Volume = try await self.link(&snapshot,
             realm: realm,
             with: session)
+        let symbol:Symbol.Edition = volume.metadata.symbol
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
             snapshot: consume snapshot,
@@ -338,10 +354,11 @@ extension UnidocDatabase
 
         let uplinked:Unidoc.UplinkStatus = .init(
             edition: uploaded.edition,
-            sitemap: try await self.fill(volume: consume volume,
+            volume: symbol,
+            hidden: true,
+            delta: try await self.fill(volume: consume volume,
                 clear: uploaded.updated,
-                with: session),
-            hidden: true)
+                with: session))
 
         return (uploaded, uplinked)
     }
@@ -360,11 +377,16 @@ extension UnidocDatabase
             return nil
         }
 
+        /// We do **not** transition the snapshot link state here, since we would rather
+        /// update the field selectively, and do so **after** we have successfully filled the
+        /// volume.
         var snapshot:Unidoc.Snapshot = stored
 
+        let hidden:Bool = package.hidden || snapshot.link != .initial
         let volume:Unidoc.Volume = try await self.link(&snapshot,
             realm: package.realm,
             with: session)
+        let symbol:Symbol.Edition = volume.metadata.symbol
 
         if  stored != snapshot
         {
@@ -373,13 +395,14 @@ extension UnidocDatabase
 
         return .init(
             edition: id,
-            sitemap: try await self.fill(volume: consume volume,
+            volume: symbol,
+            hidden: hidden,
+            delta: try await self.fill(volume: consume volume,
                 clear: true,
-                with: session),
-            hidden: package.hidden)
+                with: session))
     }
 
-    public
+    private
     func uplink(volume:Symbol.Edition,
         with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
     {
@@ -631,53 +654,6 @@ extension UnidocDatabase
     {
         let index:SearchIndex<Int32> = try await self.packages.scan(with: session)
         try await self.metadata.upsert(some: index, with: session)
-    }
-
-    public
-    func rebuildVolumes(queue:Bool = false, with session:Mongo.Session) async throws
-    {
-        if  queue
-        {
-            try await session.update(database: self.id,
-                with: Snapshots.QueueUplink.all)
-        }
-        while
-            let editions:[Unidoc.Edition] = try await self.snapshots.linkable(8,
-                with: session)
-        {
-            for edition:Unidoc.Edition in editions
-            {
-                async
-                let cooldown:Void = Task.sleep(for: .seconds(5))
-
-                guard
-                let status:Unidoc.UplinkStatus = try await self.uplink(edition, with: session)
-                else
-                {
-                    print("failed to uplink \(edition): volume not found")
-                    continue
-                }
-
-                try await session.update(database: self.id,
-                    with: Snapshots.ClearUplink.one(edition))
-
-                if  let sitemap:Unidoc.SitemapDelta = status.sitemap
-                {
-                    print("""
-                        successfully uplinked \(edition): \
-                        sitemap gained \(sitemap.additions) pages, \
-                        lost \(sitemap.deletions.count) pages
-                        """)
-                }
-                else
-                {
-                    print("successfully uplinked \(edition)")
-                }
-
-
-                try await cooldown
-            }
-        }
     }
 
     public

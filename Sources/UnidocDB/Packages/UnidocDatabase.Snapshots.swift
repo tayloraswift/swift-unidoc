@@ -146,8 +146,9 @@ extension UnidocDatabase.Snapshots
 }
 extension UnidocDatabase.Snapshots
 {
+    public
     func linkable(_ limit:Int,
-        with session:Mongo.Session) async throws -> [Unidoc.Edition]?
+        with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
         let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(
@@ -167,6 +168,6 @@ extension UnidocDatabase.Snapshots
             },
             against: self.database)
 
-        return editions.isEmpty ? nil : editions.map(\.id)
+        return editions.map(\.id)
     }
 }

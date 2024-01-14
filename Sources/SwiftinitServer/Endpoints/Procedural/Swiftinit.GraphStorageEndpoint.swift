@@ -6,6 +6,7 @@ import UnidocRecords
 
 extension Swiftinit
 {
+    /// See ``GraphPlacementEndpoint``.
     enum GraphStorageEndpoint:Sendable
     {
         case put

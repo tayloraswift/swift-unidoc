@@ -94,6 +94,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let maintainer:Bool = self.user?.maintains(package: self.package) ?? !format.secure
         let now:UnixInstant = .now()
 
         main[.section, { $0.class = "introduction" }]
@@ -180,7 +181,12 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 {
                     if  let tagless:Unidoc.VersionsQuery.Tagless = self.tagless
                     {
+                        let button:UplinkButton = .init(
+                            edition: .init(package: self.package.id, version: -1),
+                            package: self.package.symbol)
+
                         $0[.tr] { $0.class = "tagless" } = Row.init(
+                            linkable: maintainer ? button : nil,
                             volume: tagless.volume,
                             graph: tagless.graph,
                             type: .tagless)
@@ -189,7 +195,12 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     var modern:(prerelease:Bool, release:Bool) = (true, true)
                     for tagged:Unidoc.VersionsQuery.Tag in self.tagged
                     {
+                        let button:UplinkButton = .init(
+                            edition: tagged.edition.id,
+                            package: self.package.symbol)
+
                         let row:Row = .init(
+                            linkable: maintainer ? button : nil,
                             volume: tagged.volume,
                             graph: tagged.graph,
                             type: .tagged(
@@ -277,7 +288,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
             }
 
-            guard self.user?.maintains(package: self.package) ?? !format.secure
+            guard maintainer
             else
             {
                 return
