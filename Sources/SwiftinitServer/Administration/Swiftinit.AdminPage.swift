@@ -13,7 +13,6 @@ extension Swiftinit
     {
         let configuration:Mongo.ReplicaSetConfiguration
 
-        let requestsDropped:Int
         let plugins:[any Swiftinit.ServerPlugin]
 
         let tour:ServerTour
@@ -21,16 +20,12 @@ extension Swiftinit
 
         @inlinable public
         init(configuration:Mongo.ReplicaSetConfiguration,
-            requestsDropped:Int,
             plugins:[any Swiftinit.ServerPlugin],
             tour:ServerTour,
             real:Bool)
         {
             self.configuration = configuration
-
-            self.requestsDropped = requestsDropped
             self.plugins = plugins
-
             self.tour = tour
             self.real = real
         }
@@ -231,8 +226,8 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             $0[.dt] = "Requests (Barbies)"
             $0[.dd] = "\(self.tour.profile.requests.http2.barbie)"
 
-            $0[.dt] = "requests dropped"
-            $0[.dd] = "\(self.requestsDropped)"
+            $0[.dt] = "Server errors"
+            $0[.dd] = "\(self.tour.errors)"
         }
 
         main[.h2] = "Performance"

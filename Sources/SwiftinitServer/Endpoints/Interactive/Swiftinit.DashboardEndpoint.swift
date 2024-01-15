@@ -21,16 +21,10 @@ extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin)
 
-            let page:Swiftinit.AdminPage =
-            {
-                (counters:borrowing Swiftinit.Counters) in
-
-                .init(configuration: configuration,
-                    requestsDropped: counters.requestsDropped.load(ordering: .relaxed),
-                    plugins: server.plugins.values.sorted { $0.id < $1.id },
-                    tour: server.tour,
-                    real: server.secure)
-            } (server.atomics)
+            let page:Swiftinit.AdminPage = .init(configuration: configuration,
+                plugins: server.plugins.values.sorted { $0.id < $1.id },
+                tour: server.tour,
+                real: server.secure)
 
             return .ok(page.resource(format: server.format))
 
