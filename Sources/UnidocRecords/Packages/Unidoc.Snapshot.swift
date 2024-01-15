@@ -85,7 +85,7 @@ extension Unidoc.Snapshot
         case swift = "S"
         case pins = "p"
 
-        case uplinking = "U"
+        case link = "U"
     }
 }
 extension Unidoc.Snapshot:BSONDocumentEncodable
@@ -99,7 +99,7 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.swift] = self.swift
         bson[.pins] = self.pins.isEmpty ? nil : self.pins
 
-        bson[.uplinking] = self.link
+        bson[.link] = self.link
     }
 }
 extension Unidoc.Snapshot:BSONDocumentDecodable
@@ -112,6 +112,6 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
             graph: try bson[.graph].decode(),
             swift: try bson[.swift]?.decode(),
             pins: try bson[.pins]?.decode() ?? [],
-            link: try bson[.uplinking]?.decode())
+            link: try bson[.link]?.decode())
     }
 }

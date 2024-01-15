@@ -118,8 +118,8 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
             {
                 $0[.span]
                 {
-                    $0.class = graph.uplinking ? "abi uplinking" : "abi"
-                    $0.title = graph.uplinking ? """
+                    $0.class = graph.link != nil ? "abi uplinking" : "abi"
+                    $0.title = graph.link != nil ? """
                         This symbol graph is currently queued for documentation generation.
                         """ : nil
                 } = "\(graph.abi)"
