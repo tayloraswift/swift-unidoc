@@ -19,8 +19,6 @@ extension Swiftinit
 }
 extension Swiftinit.Server
 {
-    var atomics:Swiftinit.Counters { _read { yield self.loop.atomics } }
-
     var plugins:[String: any Swiftinit.ServerPlugin] { self.loop.plugins }
     var context:Swiftinit.ServerPluginContext { self.loop.context }
 

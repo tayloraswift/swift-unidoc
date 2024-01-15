@@ -38,7 +38,7 @@ extension Swiftinit.LinkerPlugin.StatusPage:Swiftinit.AdministrativePage
         main[.h1] = "Linker plugin"
 
         main[.h2] = "Events"
-        main[.ol]
+        main[.ol, { $0.class = "events" }]
         {
             for entry in self.entries.reversed()
             {
