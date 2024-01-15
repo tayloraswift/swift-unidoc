@@ -44,7 +44,7 @@ extension UnidocDatabase.Snapshots.QueueUplink:Mongo.UpdateQuery
             {
                 $0[.set] = .init
                 {
-                    $0[Unidoc.Snapshot[.uplinking]] = Unidoc.Snapshot.LinkState.refresh
+                    $0[Unidoc.Snapshot[.link]] = Unidoc.Snapshot.LinkState.refresh
                 }
             }
         }

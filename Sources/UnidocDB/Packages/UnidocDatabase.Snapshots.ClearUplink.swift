@@ -35,7 +35,7 @@ extension UnidocDatabase.Snapshots.ClearUplink:Mongo.UpdateQuery
             {
                 $0[.unset] = .init
                 {
-                    $0[Unidoc.Snapshot[.uplinking]] = ()
+                    $0[Unidoc.Snapshot[.link]] = ()
                 }
             }
         }

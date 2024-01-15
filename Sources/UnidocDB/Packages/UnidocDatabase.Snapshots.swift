@@ -39,11 +39,11 @@ extension UnidocDatabase.Snapshots
     let indexUplinking:Mongo.CollectionIndex = .init("Uplinking",
         unique: false)
     {
-        $0[Unidoc.Snapshot[.uplinking]] = (+)
+        $0[Unidoc.Snapshot[.link]] = (+)
     }
         where:
     {
-        $0[Unidoc.Snapshot[.uplinking]] = .init { $0[.exists] = true }
+        $0[Unidoc.Snapshot[.link]] = .init { $0[.exists] = true }
     }
 }
 extension UnidocDatabase.Snapshots:Mongo.CollectionModel
@@ -157,7 +157,7 @@ extension UnidocDatabase.Snapshots
             {
                 $0[.filter] = .init
                 {
-                    $0[Unidoc.Snapshot[.uplinking]] = true
+                    $0[Unidoc.Snapshot[.link]] = .init { $0[.exists] = true }
                 }
                 $0[.projection] = .init
                 {

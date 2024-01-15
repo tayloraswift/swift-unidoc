@@ -217,14 +217,11 @@ extension Unidoc.VersionsQuery
                 $0[.replaceWith] = .init
                 {
                     $0[Graph[.id]] = Unidoc.Snapshot[.id]
-                    $0[Graph[.uplinking]] = .expr
-                    {
-                        $0[.coalesce] = (Unidoc.Snapshot[.uplinking], false)
-                    }
                     $0[Graph[.bytes]] = .expr
                     {
                         $0[.objectSize] = Unidoc.Snapshot[.graph]
                     }
+                    $0[Graph[.link]] = Unidoc.Snapshot[.link]
                     $0[Graph[.abi]] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
                 }
             }
