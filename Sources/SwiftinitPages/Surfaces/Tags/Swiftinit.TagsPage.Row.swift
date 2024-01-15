@@ -2,6 +2,7 @@ import HTML
 import Media
 import SemanticVersions
 import SHA1
+import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -16,6 +17,7 @@ extension Swiftinit.TagsPage
         let graph:Unidoc.VersionsQuery.Graph?
         let type:RowType
 
+        private
         init(linkable:UplinkButton?,
             volume:Unidoc.VolumeMetadata?,
             graph:Unidoc.VersionsQuery.Graph?,
@@ -26,6 +28,22 @@ extension Swiftinit.TagsPage
             self.graph = graph
             self.type = type
         }
+    }
+}
+extension Swiftinit.TagsPage.Row
+{
+    init(maintainer:Bool,
+        package:Symbol.Package,
+        volume:Unidoc.VolumeMetadata?,
+        graph:Unidoc.VersionsQuery.Graph?,
+        type:Swiftinit.TagsPage.RowType)
+    {
+        self.init(linkable: maintainer
+                ? graph.map { .init(edition: $0.id, package: package) }
+                : nil,
+            volume: volume,
+            graph: graph,
+            type: type)
     }
 }
 extension Swiftinit.TagsPage.Row:HTML.OutputStreamable

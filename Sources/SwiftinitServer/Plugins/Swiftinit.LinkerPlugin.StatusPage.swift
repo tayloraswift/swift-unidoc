@@ -36,16 +36,26 @@ extension Swiftinit.LinkerPlugin.StatusPage:Swiftinit.AdministrativePage
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.h1] = "Linker plugin"
-
-        main[.h2] = "Events"
-        main[.ol, { $0.class = "events" }]
+        main[.section, { $0.class = "events" }]
         {
-            for entry in self.entries.reversed()
+            $0[.h2] = "Events"
+            $0[.ol, { $0.class = "events" }]
             {
-                $0[.li]
+                for entry in self.entries.reversed()
                 {
-                    $0[.p] = "\(entry.timestamp.date) \(entry.timestamp.time)"
-                    $0[.p] = "\(entry.event)"
+                    $0[.li]
+                    {
+                        $0[.p]
+                        {
+                            $0[.time]
+                            {
+                                $0.datetime = """
+                                \(entry.timestamp.date)T\(entry.timestamp.time)Z
+                                """
+                            } = "\(entry.timestamp.date) \(entry.timestamp.time)"
+                        }
+                        $0[.p] = "\(entry.event)"
+                    }
                 }
             }
         }

@@ -1,0 +1,43 @@
+table.tags
+{
+    width: 100%;
+
+    tr.modern
+    {
+        font-weight: 700;
+    }
+
+    td.graph
+    {
+        font-weight: 700;
+        color: $light-foreground-semi;
+
+        span.kb
+        {
+            font-weight: normal;
+        }
+
+        form
+        {
+            display: inline-block;
+            margin-left: 0.5em;
+        }
+    }
+
+    td.graph > span:first-child::before
+    {
+        content: '✗';
+        color: $light-foreground-semi;
+        margin-right: 0.5rem;
+    }
+    td.graph > .abi:first-child::before
+    {
+        content: '✓';
+        color: $light-accent-barbie-pink;
+        margin-right: 0.5rem;
+    }
+    td.graph > .abi.uplinking:first-child::before
+    {
+        content: '⟳';
+    }
+}
