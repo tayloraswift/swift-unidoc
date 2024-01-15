@@ -216,6 +216,7 @@ extension Unidoc.VersionsQuery
             {
                 $0[.replaceWith] = .init
                 {
+                    $0[Graph[.id]] = Unidoc.Snapshot[.id]
                     $0[Graph[.uplinking]] = .expr
                     {
                         $0[.coalesce] = (Unidoc.Snapshot[.uplinking], false)

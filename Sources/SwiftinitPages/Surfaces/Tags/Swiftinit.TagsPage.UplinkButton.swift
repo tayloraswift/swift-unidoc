@@ -20,30 +20,25 @@ extension Swiftinit.TagsPage.UplinkButton:HTML.OutputStreamable
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
     {
-        form[.p]
+        form[.input]
         {
-            $0[.input]
-            {
-                $0.type = "hidden"
-                $0.name = "package"
-                $0.value = "\(self.edition.package)"
-            }
-            $0[.input]
-            {
-                $0.type = "hidden"
-                $0.name = "version"
-                $0.value = "\(self.edition.version)"
-            }
-            $0[.input]
-            {
-                $0.type = "hidden"
-                $0.name = "redirect"
-                $0.value = "\(Swiftinit.Tags[self.package])"
-            }
+            $0.type = "hidden"
+            $0.name = "package"
+            $0.value = "\(self.edition.package)"
         }
-        form[.p]
+        form[.input]
         {
-            $0[.button] { $0.type = "submit" } = "Uplink"
+            $0.type = "hidden"
+            $0.name = "version"
+            $0.value = "\(self.edition.version)"
         }
+        form[.input]
+        {
+            $0.type = "hidden"
+            $0.name = "redirect"
+            $0.value = "\(Swiftinit.Tags[self.package])"
+        }
+
+        form[.button] { $0.type = "submit" } = "Uplink"
     }
 }

@@ -181,12 +181,9 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 {
                     if  let tagless:Unidoc.VersionsQuery.Tagless = self.tagless
                     {
-                        let button:UplinkButton = .init(
-                            edition: .init(package: self.package.id, version: -1),
-                            package: self.package.symbol)
-
                         $0[.tr] { $0.class = "tagless" } = Row.init(
-                            linkable: maintainer ? button : nil,
+                            maintainer: maintainer,
+                            package: self.package.symbol,
                             volume: tagless.volume,
                             graph: tagless.graph,
                             type: .tagless)
@@ -195,12 +192,9 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     var modern:(prerelease:Bool, release:Bool) = (true, true)
                     for tagged:Unidoc.VersionsQuery.Tag in self.tagged
                     {
-                        let button:UplinkButton = .init(
-                            edition: tagged.edition.id,
-                            package: self.package.symbol)
-
                         let row:Row = .init(
-                            linkable: maintainer ? button : nil,
+                            maintainer: maintainer,
+                            package: self.package.symbol,
                             volume: tagged.volume,
                             graph: tagged.graph,
                             type: .tagged(

@@ -46,8 +46,7 @@ section.details table
 }
 section.details table.constituents,
 section.details table.dependencies,
-section.details table.platforms,
-section.details table.tags
+section.details table.platforms
 {
     width: 100%;
 }
@@ -69,41 +68,7 @@ section.details table.dependencies
         padding: 0 0.5rem;
     }
 }
-section.details table.tags
-{
-    tr.modern
-    {
-        font-weight: 700;
-    }
 
-    td.graph
-    {
-        font-weight: 700;
-        color: $light-foreground-semi;
-
-        span.kb
-        {
-            font-weight: normal;
-        }
-    }
-
-    td.graph > span:first-child::before
-    {
-        content: '✗';
-        color: $light-foreground-semi;
-        margin-right: 0.5rem;
-    }
-    td.graph > .abi:first-child::before
-    {
-        content: '✓';
-        color: $light-accent-barbie-pink;
-        margin-right: 0.5rem;
-    }
-    td.graph > .abi.uplinking:first-child::before
-    {
-        content: '⟳';
-    }
-}
 section.details
 {
     > dl
