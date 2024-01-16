@@ -1,5 +1,17 @@
 extension HTML.ContentEncoder
 {
+    /// Encodes **any** ``HTML.OutputStreamable`` value to this HTML stream.
+    ///
+    /// This is the **only** supported interface for encoding existentials to HTML, since
+    /// `Optional<any HTML.OutputStreamable>` would displace all of the DSL’s generic overloads.
+    @inlinable public static
+    func *= (html:inout Self, _self:any HTML.OutputStreamable)
+    {
+        _self.encode(to: &html)
+    }
+}
+extension HTML.ContentEncoder
+{
     /// Optionally encodes an ``HTML.OutputStreamable`` value to the stream through **multiple
     /// levels** of HTML tags, with optional attributes added to the **outermost** wrapper tag.
     ///

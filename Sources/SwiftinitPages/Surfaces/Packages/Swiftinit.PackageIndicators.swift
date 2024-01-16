@@ -26,7 +26,7 @@ extension Swiftinit.PackageIndicators:HTML.OutputStreamable
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
-        let age:Age = .init(self.now - .millisecond(self.pushed.value))
+        let age:Swiftinit.Age = .init(self.now - .millisecond(self.pushed.value))
 
         span[.span]
         {

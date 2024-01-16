@@ -1,4 +1,5 @@
 import BSON
+import Durations
 import MongoQL
 import SymbolGraphs
 import Symbols
@@ -129,58 +130,8 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
 extension Unidoc.PackageMetadata
 {
     public
-    var crawlingIntervalTargetDays:Int64?
+    var crawlingIntervalTarget:Milliseconds?
     {
-        guard
-        let repo:Unidoc.PackageRepo = self.repo
-        else
-        {
-            return nil
-        }
-
-        guard repo.origin.alive
-        else
-        {
-            //  Repo has been deleted from, archived in, or disabled by the registrar.
-            return 30
-        }
-
-        var days:Int64 = 0
-
-        switch repo.license?.free
-        {
-        //  The license is free.
-        case true?:     break
-        //  No license. The package is probably new and the author hasn’t gotten around to
-        //  adding a license yet.
-        case nil:       days += 3
-        //  The license is intentionally unfree.
-        case false?:    days += 14
-        }
-
-        //  Deprioritize hidden packages.
-        if  self.hidden
-        {
-            days += 1
-        }
-        //  Prioritize packages with more stars. (We currently only index packages with at
-        //  least two stars.)
-        //
-        //  If the package is part of the `public` realm (or whatever realm `0` has been named),
-        //  we consider it to have infinite stars.
-        if  case 0? = self.realm
-        {
-            return days
-        }
-
-        switch repo.stars
-        {
-        case  0 ...  2: days += 3
-        case  3 ... 10: days += 2
-        case 11 ... 20: days += 1
-        default:        break
-        }
-
-        return days
+        self.repo?.crawlingIntervalTarget(realm: self.realm, hidden: self.hidden)
     }
 }

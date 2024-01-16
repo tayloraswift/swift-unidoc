@@ -2,6 +2,7 @@ import Atomics
 import HTML
 import HTTPServer
 import IP
+import UnixTime
 import URI
 
 extension Swiftinit.LinkerPlugin
@@ -19,7 +20,7 @@ extension Swiftinit.LinkerPlugin
 }
 extension Swiftinit.LinkerPlugin.StatusPage
 {
-    init(from buffer:Swiftinit.EventBuffer<Swiftinit.Linker.Event>)
+    init(from buffer:borrowing Swiftinit.EventBuffer<Swiftinit.Linker.Event>)
     {
         //  This will be sent concurrently, so it will almost certainly
         //  end up being copied anyway.
@@ -35,25 +36,20 @@ extension Swiftinit.LinkerPlugin.StatusPage:Swiftinit.AdministrativePage
     public
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let now:UnixInstant = .now()
+
         main[.h1] = "Linker plugin"
         main[.section, { $0.class = "events" }]
         {
             $0[.h2] = "Events"
             $0[.ol, { $0.class = "events" }]
             {
-                for entry in self.entries.reversed()
+                for entry:Swiftinit.EventBuffer<Swiftinit.Linker.Event>.Entry
+                    in self.entries.reversed()
                 {
                     $0[.li]
                     {
-                        $0[.p]
-                        {
-                            $0[.time]
-                            {
-                                $0.datetime = """
-                                \(entry.timestamp.date)T\(entry.timestamp.time)Z
-                                """
-                            } = "\(entry.timestamp.date) \(entry.timestamp.time)"
-                        }
+                        $0[.p] = entry.time(now: now)
                         $0[.p] = "\(entry.event)"
                     }
                 }
