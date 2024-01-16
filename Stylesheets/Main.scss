@@ -5,25 +5,30 @@
 @import 'Colors';
 @import 'CodeBlocks';
 @import 'CodeSpans';
-@import 'Declarations';
-@import 'Div.Constraints';
-@import 'Div.More';
-@import 'Form';
+@import 'div.constraints';
+@import 'div.more';
+@import 'dl';
+@import 'form';
 @import 'Headings';
 @import 'Home';
+@import 'kbd';
 @import 'Logo';
 @import 'Notices';
+@import 'p';
 @import 'Search';
-@import 'Section.Details';
-@import 'Section.Events';
-@import 'Section.Group';
-@import 'Section.Group.Dense';
-@import 'Section.Introduction';
+@import 'section.availability';
+@import 'section.declaration';
+@import 'section.details';
+@import 'section.events';
+@import 'section.group';
+@import 'section.group.dense';
+@import 'section.introduction';
+@import 'section.metadata';
 @import 'Sidebar';
 @import 'Tables';
-@import 'Table.Tags';
+@import 'table';
+@import 'table.tags';
 @import 'Typefaces';
-@import 'Prose';
 
 body
 {

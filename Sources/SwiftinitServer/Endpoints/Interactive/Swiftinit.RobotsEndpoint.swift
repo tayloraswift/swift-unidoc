@@ -50,9 +50,11 @@ extension Swiftinit.RobotsEndpoint:PublicEndpoint
             Disallow: /docc/
             Disallow: /hist/
             Disallow: /pdct/
+            Disallow: /plugin/
             Disallow: /ptcl/
             Disallow: /reference/
             Disallow: /telescope/
+            Disallow: /user/
 
             """)
     }

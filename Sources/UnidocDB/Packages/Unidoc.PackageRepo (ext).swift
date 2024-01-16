@@ -1,4 +1,5 @@
 import BSON
+import Durations
 import GitHubAPI
 import MongoQL
 import UnidocRecords
@@ -56,5 +57,57 @@ extension Unidoc.PackageRepo
                 fork: repo.fork)),
             forks: repo.forks,
             stars: repo.stars)
+    }
+}
+
+extension Unidoc.PackageRepo
+{
+    public
+    func crawlingIntervalTarget(realm:Unidoc.Realm?, hidden:Bool) -> Milliseconds
+    {
+        guard self.origin.alive
+        else
+        {
+            //  Repo has been deleted from, archived in, or disabled by the registrar.
+            return .day * 30
+        }
+
+        var days:Int = 0
+
+        switch self.license?.free
+        {
+        //  The license is free.
+        case true?:     break
+        //  No license. The package is probably new and the author hasn’t gotten around to
+        //  adding a license yet.
+        case nil:       days += 3
+        //  The license is intentionally unfree.
+        case false?:    days += 14
+        }
+
+        //  Deprioritize hidden packages.
+        if  hidden
+        {
+            days += 1
+        }
+        //  Prioritize packages with more stars. (We currently only index packages with at
+        //  least two stars.)
+        //
+        //  If the package is part of the `public` realm (or whatever realm `0` has been named),
+        //  we consider it to have infinite stars.
+        if  case 0? = realm
+        {
+            return .day * days
+        }
+
+        switch self.stars
+        {
+        case  0 ...  2: days += 3
+        case  3 ... 10: days += 2
+        case 11 ... 20: days += 1
+        default:        break
+        }
+
+        return .day * days
     }
 }

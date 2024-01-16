@@ -1,17 +1,19 @@
-import HTML
-
-struct Age
+extension Swiftinit
 {
-    public
-    var seconds:Int64
-
-    @inlinable public
-    init(seconds:Int64)
+    @frozen public
+    struct Age
     {
-        self.seconds = seconds
+        public
+        var seconds:Int64
+
+        @inlinable public
+        init(seconds:Int64)
+        {
+            self.seconds = seconds
+        }
     }
 }
-extension Age
+extension Swiftinit.Age
 {
     @inlinable public
     init(_ duration:Duration)
@@ -19,8 +21,9 @@ extension Age
         self.init(seconds: duration.components.seconds)
     }
 }
-extension Age
+extension Swiftinit.Age
 {
+    @inlinable public
     var short:String
     {
         if      self.seconds < 2 * 60
@@ -41,6 +44,7 @@ extension Age
         }
     }
 
+    @inlinable public
     var long:String
     {
         if      self.seconds < 2 * 60

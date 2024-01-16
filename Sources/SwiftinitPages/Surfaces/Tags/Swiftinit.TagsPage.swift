@@ -1,4 +1,5 @@
 import BSON
+import Durations
 import GitHubAPI
 import HTML
 import Media
@@ -254,7 +255,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 if  let crawled:BSON.Millisecond = self.package.repo?.crawled
                 {
                     let crawled:UnixInstant = .millisecond(crawled.value)
-                    let age:Age = .init(now - crawled)
+                    let age:Swiftinit.Age = .init(now - crawled)
 
                     $0[.dt] = "Repo read"
                     $0[.dd] = age.long
@@ -262,13 +263,22 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 if  let crawled:BSON.Millisecond = self.package.crawled
                 {
                     let crawled:UnixInstant = .millisecond(crawled.value)
-                    let age:Age = .init(now - crawled)
+                    let age:Swiftinit.Age = .init(now - crawled)
 
                     $0[.dt] = "Tags read"
-                    $0[.dd] = self.package.crawlingIntervalTargetDays.map
+                    $0[.dd]
                     {
-                        "\(age.long) (target: \($0) \($0 != 1 ? "days" : "day"))"
-                    } ?? age.long
+                        $0 += age.long
+
+                        $0[.span]
+                        {
+                            $0.class = "parenthetical"
+                        } = self.package.crawlingIntervalTarget.map
+                        {
+                            let interval:Swiftinit.Age = .init(.milliseconds($0))
+                            return "target: \(interval.short)"
+                        }
+                    }
                 }
             }
 

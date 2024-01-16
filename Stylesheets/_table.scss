@@ -1,0 +1,26 @@
+table
+{
+    th
+    {
+        text-align: left;
+        font-family: $typeface-sans;
+        padding-bottom: 0.5rem;
+
+        color: $light-foreground-semi;
+        border-bottom: 2px solid $light-swift;
+    }
+    tbody tr:first-child td
+    {
+        padding-top: 0.5rem;
+    }
+    th,
+    td
+    {
+        padding-left: 0.5rem;
+    }
+    th:first-child,
+    td:first-child
+    {
+        padding-left: 0;
+    }
+}

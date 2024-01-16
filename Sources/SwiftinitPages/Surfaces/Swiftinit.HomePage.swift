@@ -93,7 +93,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                 $0[.li]
                                 {
                                     let discovered:UnixInstant = .millisecond(item.id.value)
-                                    let age:Age = .init(now - discovered)
+                                    let age:Swiftinit.Age = .init(now - discovered)
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -123,7 +123,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                 $0[.li]
                                 {
                                     let discovered:UnixInstant = .millisecond(item.id.value)
-                                    let age:Age = .init(now - discovered)
+                                    let age:Swiftinit.Age = .init(now - discovered)
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
