@@ -95,6 +95,8 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     {
                         $0[.a]
                         {
+                            //  FIXME: this could be wrong if the package is renamed.
+                            //  We should set this from the repo metadata instead.
                             $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
                         } = "all tags"
                     }
