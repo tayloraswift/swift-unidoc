@@ -28,7 +28,7 @@ extension Swiftinit.Age
     {
         if      self.seconds < 2 * 60
         {
-            "\(self.seconds) s)"
+            "\(self.seconds) s"
         }
         else if self.seconds < 2 * 60 * 60
         {
