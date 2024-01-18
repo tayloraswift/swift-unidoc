@@ -40,6 +40,7 @@ extension PackageBuild.Sources.Module
     {
         self.init(module)
 
+        locations:
         if  let location:String = module.location
         {
             self.origin = .sources(root / location)
@@ -49,13 +50,13 @@ extension PackageBuild.Sources.Module
             let directory:String
             switch module.type
             {
-            case .binary:       return
+            case .binary:       break locations
             case .executable:   directory = "Sources"
             case .regular:      directory = "Sources"
             case .macro:        directory = "Sources"
             case .plugin:       directory = "Plugins"
             case .snippet:      directory = "Snippets"
-            case .system:       return
+            case .system:       directory = "Sources"
             case .test:         directory = "Tests"
             }
 
@@ -135,6 +136,11 @@ extension PackageBuild.Sources.Module
             case "h":
                 //  Header files don’t indicate a C or C++ module on their own.
                 include.update(with: $0)
+
+            case "modulemap":
+                //  But modulemaps do.
+                include.update(with: $0)
+                fallthrough
 
             case "c":
                 self.module.language |= .c
