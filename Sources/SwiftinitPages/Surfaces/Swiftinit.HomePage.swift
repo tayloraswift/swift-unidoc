@@ -80,6 +80,28 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                     }
                 }
 
+                $0[.nav]
+                {
+                    $0[.ul]
+                    {
+                        $0[.li]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "/docs/swift"
+                            } = "Standard Library Docs"
+                        }
+
+                        $0[.li]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "/docs/swift-package-manager/packagedescription"
+                            } = "SwiftPM PackageDescription"
+                        }
+                    }
+                }
+
                 $0[.div, { $0.class = "feeds" }]
                 {
                     $0[.section, { $0.class = "repo" }]
