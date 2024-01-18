@@ -77,19 +77,13 @@ extension GitHub.RepoMonitor:GitHub.Crawler
             let now:BSON.Millisecond = .now()
 
             self.buffer.push(event: CrawlingEvent.init(package: package.symbol,
-                sinceExpected: package.expires.duration(to: now),
+                sinceExpected: package.expires?.duration(to: now),
                 sinceActual: package.crawled?.duration(to: now),
                 repo: response.repo))
 
             if  let repo:GitHub.Repo = response.repo
             {
-                let repo:Unidoc.PackageRepo = try .github(repo, crawled: now)
-                let interval:Milliseconds = repo.crawlingIntervalTarget(realm: package.realm,
-                    hidden: package.hidden)
-
-                package.expires = repo.crawled.advanced(by: interval)
-                package.crawled = repo.crawled
-                package.repo = repo
+                package.update(repo: try .github(repo, crawled: now, fetched: true))
             }
             else
             {

@@ -27,6 +27,7 @@ extension UnidocDatabase.Packages
     }
         where:
     {
+        $0[Unidoc.PackageMetadata[.expires]] = .init { $0[.exists] = true }
         $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
     }
 
@@ -168,6 +169,7 @@ extension UnidocDatabase.Packages
         {
             $0[.filter] = .init
             {
+                $0[Unidoc.PackageMetadata[.expires]] = .init { $0[.exists] = true }
                 $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
             }
             $0[.sort] = .init

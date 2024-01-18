@@ -43,6 +43,8 @@ extension Unidoc
         public
         var repo:PackageRepo?
 
+        //  TODO: deprecate these:
+
         /// When this package *record* was last crawled. This is different from the time when
         /// the package itself was last updated.
         public
@@ -54,7 +56,7 @@ extension Unidoc
         ///
         /// Packages we want to crawl less frequently have an expiration in the future.
         public
-        var expires:BSON.Millisecond
+        var expires:BSON.Millisecond?
 
         @inlinable public
         init(id:Unidoc.Package,
@@ -64,7 +66,7 @@ extension Unidoc
             realmAligning:Bool = false,
             repo:PackageRepo? = nil,
             crawled:BSON.Millisecond? = nil,
-            expires:BSON.Millisecond = 0)
+            expires:BSON.Millisecond? = 0)
         {
             self.id = id
             self.symbol = symbol
@@ -75,6 +77,27 @@ extension Unidoc
             self.crawled = crawled
             self.expires = expires
         }
+    }
+}
+extension Unidoc.PackageMetadata
+{
+    public mutating
+    func update(repo:consuming Unidoc.PackageRepo)
+    {
+        if  let interval:Milliseconds = repo.crawlingIntervalTarget(
+                hidden: self.hidden,
+                realm: self.realm)
+        {
+            repo.expires = repo.crawled.advanced(by: interval)
+        }
+        else
+        {
+            repo.expires = nil
+        }
+
+        self.crawled = repo.crawled
+        self.expires = repo.expires
+        self.repo = repo
     }
 }
 extension Unidoc.PackageMetadata:MongoMasterCodingModel
@@ -132,6 +155,6 @@ extension Unidoc.PackageMetadata
     public
     var crawlingIntervalTarget:Milliseconds?
     {
-        self.repo?.crawlingIntervalTarget(realm: self.realm, hidden: self.hidden)
+        self.repo?.crawlingIntervalTarget(hidden: self.hidden, realm: self.realm)
     }
 }

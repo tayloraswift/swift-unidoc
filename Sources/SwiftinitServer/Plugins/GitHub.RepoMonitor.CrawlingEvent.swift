@@ -9,12 +9,12 @@ extension GitHub.RepoMonitor
     {
         let package:Symbol.Package
 
-        let sinceExpected:Milliseconds
+        let sinceExpected:Milliseconds?
         let sinceActual:Milliseconds?
         let repo:GitHub.Repo?
 
         init(package:Symbol.Package,
-            sinceExpected:Milliseconds,
+            sinceExpected:Milliseconds?,
             sinceActual:Milliseconds?,
             repo:GitHub.Repo?)
         {
@@ -48,11 +48,13 @@ extension GitHub.RepoMonitor.CrawlingEvent:HTML.OutputStreamable
             dl[.dt] = "Previously crawled"
             dl[.dd] = age.long
         }
+        if  let milliseconds:Milliseconds = self.sinceExpected
+        {
+            let error:Swiftinit.Age = .init(.milliseconds(milliseconds))
 
-        let error:Swiftinit.Age = .init(.milliseconds(self.sinceExpected))
-
-        dl[.dt] = "Scheduling error"
-        dl[.dd] = error.short
+            dl[.dt] = "Scheduling error"
+            dl[.dd] = error.short
+        }
 
         dl[.dt] = "State transition"
         dl[.dd] = self.repo == nil ? "retracted" : "updated"
