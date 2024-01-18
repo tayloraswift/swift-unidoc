@@ -67,6 +67,8 @@ extension Unidoc.Linker.Mesh
         }
 
         var snapshot:Unidoc.SnapshotDetails = .init(abi: linker.current.metadata.abi,
+            latestManifest: linker.current.metadata.tools,
+            extraManifests: linker.current.metadata.manifests,
             requirements: linker.current.metadata.requirements,
             commit: linker.current.metadata.commit?.hash)
         var foreign:[Unidoc.ForeignVertex] = []

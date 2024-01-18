@@ -182,6 +182,7 @@ extension Toolchain
     func generateDocs(for build:PackageBuild,
         pretty:Bool = false) async throws -> SymbolGraphArchive
     {
+        let manifestVersions:[MinorVersion] = try build.listExtraManifests()
         let manifest:SPM.Manifest = try await .dump(from: build)
 
         print("""
@@ -293,6 +294,8 @@ extension Toolchain
             commit: commit,
             triple: self.triple,
             swift: self.version,
+            tools: manifest.format,
+            manifests: manifestVersions,
             requirements: manifest.requirements,
             dependencies: dependenciesPinned.filter { dependenciesUsed.contains($0.package) },
             products: .init(viewing: flatNode.products),

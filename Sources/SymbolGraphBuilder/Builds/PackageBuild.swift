@@ -29,6 +29,30 @@ extension PackageBuild
 }
 extension PackageBuild
 {
+    func listExtraManifests() throws -> [MinorVersion]
+    {
+        var versions:[MinorVersion] = []
+        for file:Result<FilePath.Component, any Error> in self.root.directory
+        {
+            let file:FilePath.Component = try file.get()
+            let name:String = file.stem
+
+            guard case "swift" = file.extension,
+            let hyphen:String.Index = name.lastIndex(of: "-"),
+            let suffix:MinorVersion = .init(name[name.index(after: hyphen)...]),
+            case "Package@swift" = name[..<hyphen]
+            else
+            {
+                continue
+            }
+
+            versions.append(suffix)
+        }
+        return versions
+    }
+}
+extension PackageBuild
+{
     /// Creates a build setup by attaching a package located in a directory of the
     /// same name in the specified location.
     ///

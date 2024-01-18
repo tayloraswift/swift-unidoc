@@ -10,3 +10,14 @@ p
         @include inline-code;
     }
 }
+
+p.note
+{
+    color: $light-foreground-semi;
+    font-style: italic;
+
+    em
+    {
+        font-style: normal;
+    }
+}
