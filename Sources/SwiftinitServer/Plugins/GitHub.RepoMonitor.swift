@@ -22,7 +22,7 @@ extension GitHub
         var tagsUpdated:Int
         private
         var buffer:Swiftinit.EventBuffer<any Swiftinit.ServerPluginEvent>
-        private
+
         var error:(any Error)?
 
         init()
@@ -160,11 +160,5 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 try await db.repoFeed.push(activity, with: session)
             }
         }
-    }
-
-    mutating
-    func log(error:consuming any Error)
-    {
-        self.error = error
     }
 }

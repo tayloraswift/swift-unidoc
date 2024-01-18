@@ -22,13 +22,5 @@ protocol _GitHubCrawler
         with session:Mongo.Session) async throws
 
     /// Log an error that was not caused by a rate limit.
-    mutating
-    func log(error:consuming any Error)
-}
-extension GitHub.Crawler
-{
-    /// Ignores the error.
-    func log(error:consuming any Error)
-    {
-    }
+    var error:(any Error)? { get set }
 }

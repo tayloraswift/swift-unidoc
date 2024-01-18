@@ -12,11 +12,24 @@ extension GitHub
 {
     struct RepoTelescope:Sendable
     {
-        var status:StatusPage
+        private
+        var windowsCrawled:Int
+        private
+        var reposCrawled:Int
+        private
+        var reposIndexed:Int
+        private
+        var buffer:Swiftinit.EventBuffer<any Swiftinit.ServerPluginEvent>
+
+        var error:(any Error)?
 
         init()
         {
-            self.status = .init()
+            self.windowsCrawled = 0
+            self.reposCrawled = 0
+            self.reposIndexed = 0
+            self.buffer = .init(minimumCapacity: 100)
+            self.error = nil
         }
     }
 }
@@ -24,6 +37,15 @@ extension GitHub.RepoTelescope:GitHub.Crawler
 {
     //  Picking something relatively prime to 30 seconds.
     var interval:Duration { .seconds(13) }
+
+    var status:StatusPage
+    {
+        .init(error: self.error,
+            windowsCrawled: self.windowsCrawled,
+            reposCrawled: self.reposCrawled,
+            reposIndexed: self.reposIndexed,
+            buffer: self.buffer)
+    }
 
     mutating
     func crawl(updating db:Swiftinit.DB,
@@ -62,7 +84,7 @@ extension GitHub.RepoTelescope:GitHub.Crawler
         window.expires = now
         window.crawled = now
 
-        self.status.windowsCrawled += 1
+        self.windowsCrawled += 1
 
         for repo:GitHub.Repo in discovered.repos
         {
@@ -76,21 +98,17 @@ extension GitHub.RepoTelescope:GitHub.Crawler
                 with: session)
             {
             case (_, new: true):
-                self.status.reposIndexed += 1
+                self.buffer.push(
+                    event: GitHub.RepoTelescope.DiscoveryEvent.init(package: symbol))
+                self.reposIndexed += 1
                 fallthrough
 
             case (_, new: false):
-                self.status.reposCrawled += 1
+                self.reposCrawled += 1
             }
 
         }
 
         try await db.crawlingWindows.push(window: window, with: session)
-    }
-
-    mutating
-    func log(error:consuming any Error)
-    {
-        self.status.error = error
     }
 }
