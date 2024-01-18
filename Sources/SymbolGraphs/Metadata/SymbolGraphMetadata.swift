@@ -28,6 +28,13 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// format.
     public
     var swift:AnyVersion
+    /// The swift tools version declared in the package manifest, if the relevant documentation
+    /// was generated from a package. New in 0.8.14.
+    public
+    var tools:PatchVersion?
+    /// Any additional manifests that were found in the package root directory. New in 0.8.14.
+    public
+    var manifests:[MinorVersion]
 
     /// The platform requirements of the relevant package. This field is
     /// informative only.
@@ -55,6 +62,8 @@ struct SymbolGraphMetadata:Equatable, Sendable
         commit:Commit?,
         triple:Triple,
         swift:AnyVersion,
+        tools:PatchVersion? = nil,
+        manifests:[MinorVersion] = [],
         requirements:[PlatformRequirement] = [],
         dependencies:[Dependency] = [],
         products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product> = [],
@@ -67,6 +76,8 @@ struct SymbolGraphMetadata:Equatable, Sendable
         self.commit = commit
         self.triple = triple
         self.swift = swift
+        self.tools = tools
+        self.manifests = manifests
 
         self.dependencies = dependencies
         self.requirements = requirements
@@ -116,6 +127,8 @@ extension SymbolGraphMetadata
         case commit_refname = "refname"
         case triple
         case swift = "toolchain"
+        case tools
+        case manifests
         case requirements
         case dependencies
         case products
@@ -144,6 +157,8 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
         bson[.commit_refname] = self.commit?.refname
         bson[.triple] = self.triple
         bson[.swift] = self.swift
+        bson[.tools] = self.tools
+        bson[.manifests] = self.manifests.isEmpty ? nil : self.manifests
 
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
@@ -165,6 +180,8 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
             },
             triple: try bson[.triple].decode(),
             swift: try bson[.swift].decode(),
+            tools: try bson[.tools]?.decode(),
+            manifests: try bson[.manifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             dependencies: try bson[.dependencies]?.decode() ?? [],
             products: try bson[.products].decode(),
