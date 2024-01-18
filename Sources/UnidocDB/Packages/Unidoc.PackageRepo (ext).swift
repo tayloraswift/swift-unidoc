@@ -11,7 +11,9 @@ extension Unidoc.PackageRepo:MongoMasterCodingModel
 extension Unidoc.PackageRepo
 {
     @inlinable public static
-    func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
+    func github(_ repo:GitHub.Repo,
+        crawled:BSON.Millisecond,
+        fetched:Bool = false) throws -> Self
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
@@ -38,6 +40,8 @@ extension Unidoc.PackageRepo
         }
 
         return .init(crawled: crawled,
+            fetched: fetched ? crawled : nil,
+            expires: nil,
             created: .init(created),
             updated: .init(updated),
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
@@ -62,14 +66,13 @@ extension Unidoc.PackageRepo
 
 extension Unidoc.PackageRepo
 {
-    public
-    func crawlingIntervalTarget(realm:Unidoc.Realm?, hidden:Bool) -> Milliseconds
+    func crawlingIntervalTarget(hidden:Bool, realm:Unidoc.Realm?) -> Milliseconds?
     {
         guard self.origin.alive
         else
         {
             //  Repo has been deleted from, archived in, or disabled by the registrar.
-            return .day * 30
+            return nil
         }
 
         var days:Int = 0
@@ -82,7 +85,7 @@ extension Unidoc.PackageRepo
         //  adding a license yet.
         case nil:       days += 3
         //  The license is intentionally unfree.
-        case false?:    days += 14
+        case false?:    return nil
         }
 
         //  Deprioritize hidden packages.

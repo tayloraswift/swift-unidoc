@@ -8,6 +8,10 @@ extension Unidoc
     {
         public
         var crawled:BSON.Millisecond
+        public
+        var fetched:BSON.Millisecond?
+        public
+        var expires:BSON.Millisecond?
 
         /// When the repo was created. Both GitHub and GitLab define this field.
         ///
@@ -46,6 +50,8 @@ extension Unidoc
         @inlinable public
         init(
             crawled:BSON.Millisecond,
+            fetched:BSON.Millisecond?,
+            expires:BSON.Millisecond?,
             created:BSON.Millisecond,
             updated:BSON.Millisecond,
             license:PackageLicense?,
@@ -56,6 +62,9 @@ extension Unidoc
             stars:Int = 0)
         {
             self.crawled = crawled
+            self.fetched = fetched
+            self.expires = expires
+
             self.created = created
             self.updated = updated
             self.license = license
@@ -83,6 +92,8 @@ extension Unidoc.PackageRepo
     enum CodingKey:String, Sendable
     {
         case crawled = "I"
+        case fetched = "G"
+        case expires = "E"
         case created = "C"
         case updated = "U"
 
@@ -102,6 +113,8 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.crawled] = self.crawled
+        bson[.fetched] = self.fetched
+        bson[.expires] = self.expires
         bson[.created] = self.created
         bson[.updated] = self.updated
 
@@ -127,6 +140,8 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
 
         self.init( // TODO: deoptionalize
             crawled: try bson[.crawled]?.decode() ?? 0,
+            fetched: try bson[.fetched]?.decode(),
+            expires: try bson[.expires]?.decode(),
             created: try bson[.created].decode(),
             updated: try bson[.updated].decode(),
             license: try bson[.license]?.decode(),
