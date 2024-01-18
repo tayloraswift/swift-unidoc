@@ -54,7 +54,7 @@ extension GitHub.CrawlerPlugin:Swiftinit.ServerPlugin
             }
             catch let error
             {
-                crawler.log(error: error)
+                crawler.error = error
                 self.status.replace(value: crawler.status)
             }
 
