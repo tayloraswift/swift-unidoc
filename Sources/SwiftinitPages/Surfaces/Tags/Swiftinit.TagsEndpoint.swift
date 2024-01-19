@@ -10,7 +10,7 @@ import UnidocRecords
 extension Swiftinit
 {
     @frozen public
-    struct TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+    struct TagsEndpoint
     {
         public
         let query:Unidoc.VersionsQuery
@@ -24,6 +24,11 @@ extension Swiftinit
             self.value = nil
         }
     }
+}
+extension Swiftinit.TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
 {

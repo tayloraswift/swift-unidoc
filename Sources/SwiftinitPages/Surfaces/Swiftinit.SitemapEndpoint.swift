@@ -10,7 +10,7 @@ import URI
 extension Swiftinit
 {
     @frozen public
-    struct SitemapEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+    struct SitemapEndpoint
     {
         public
         let query:Unidoc.SitemapQuery
@@ -24,6 +24,11 @@ extension Swiftinit
             self.value = nil
         }
     }
+}
+extension Swiftinit.SitemapEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.SitemapEndpoint:HTTP.ServerEndpoint
 {

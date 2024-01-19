@@ -9,7 +9,7 @@ import URI
 extension Swiftinit
 {
     @frozen public
-    struct LunrEndpoint<Collection>:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+    struct LunrEndpoint<Collection>
         where Collection:Mongo.CollectionModel
     {
         public
@@ -24,6 +24,11 @@ extension Swiftinit
             self.value = nil
         }
     }
+}
+extension Swiftinit.LunrEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.LunrEndpoint:HTTP.ServerEndpoint
 {

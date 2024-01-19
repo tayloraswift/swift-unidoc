@@ -29,6 +29,13 @@ protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
 }
+extension Swiftinit.VertexEndpoint
+{
+    /// All vertex endpoints should be read-only, and they read from secondary replicas when
+    /// possible.
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
+}
 extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
