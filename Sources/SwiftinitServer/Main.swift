@@ -184,7 +184,9 @@ extension Main
                 niossl: try .init(configuration: configuration))
             let options:Swiftinit.ServerOptions = try self.options()
 
-            await mongodb.withSessionPool
+            //  Uncomment this to debug MongoDB driver issues:
+            //  let _logger:Mongo.Logger = .init(level: .full)
+            await mongodb.withSessionPool(logger: nil)
             {
                 @Sendable (pool:Mongo.SessionPool) in
 

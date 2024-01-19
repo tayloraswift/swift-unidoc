@@ -234,6 +234,9 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
                 catch let error
                 {
                     self.tour.errors += 1
+
+                    Log[.error] = "\(error)"
+
                     let page:Swiftinit.ServerErrorPage = .init(error: error)
                     return .error(page.resource(format: self.format))
                 }

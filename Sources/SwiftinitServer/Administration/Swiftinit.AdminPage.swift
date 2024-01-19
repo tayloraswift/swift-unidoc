@@ -311,8 +311,11 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             $0[.dt] = "version"
             $0[.dd] = "\(self.configuration.version)"
 
-            $0[.dt] = "term"
-            $0[.dd] = "\(self.configuration.term)"
+            if  let term:Int = self.configuration.term
+            {
+                $0[.dt] = "term"
+                $0[.dd] = "\(term)"
+            }
         }
     }
 }
