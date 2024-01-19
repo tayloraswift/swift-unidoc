@@ -32,10 +32,13 @@ extension Mongo.SingleBatchEndpoint
     /// A more-efficient, cursorless implementation of
     /// ``Mongo/PipelineEndpoint.pull(from:with:)``.
     @inlinable public mutating
-    func pull(from database:Mongo.Database, with session:Mongo.Session) async throws
+    func pull(from database:Mongo.Database,
+        with session:Mongo.Session,
+        on replica:Mongo.ReadPreference = .primary) async throws
     {
         self.batch = try await session.run(
             command: self.query.command(stride: nil),
-            against: database)
+            against: database,
+            on: replica)
     }
 }
