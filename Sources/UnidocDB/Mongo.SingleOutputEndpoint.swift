@@ -36,13 +36,11 @@ extension Mongo.SingleOutputEndpoint
     /// A more-efficient, cursorless implementation of
     /// ``Mongo/PipelineEndpoint.pull(from:with:)``.
     @inlinable public mutating
-    func pull(from database:Mongo.Database,
-        with session:Mongo.Session,
-        on replica:Mongo.ReadPreference = .primary) async throws
+    func pull(from database:Mongo.Database, with session:Mongo.Session) async throws
     {
         self.value = try await session.run(
             command: self.query.command(stride: nil),
             against: database,
-            on: replica)
+            on: Self.replica)
     }
 }

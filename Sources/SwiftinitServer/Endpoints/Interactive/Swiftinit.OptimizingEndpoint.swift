@@ -43,10 +43,7 @@ extension Swiftinit.OptimizingEndpoint:PublicEndpoint
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-        try await self.base.pull(
-            from: server.db.unidoc.id,
-            with: session,
-            on: .secondaryPreferred)
+        try await self.base.pull(from: server.db.unidoc.id, with: session)
 
         let (accept, etag):(HTTP.AcceptType?, MD5?) = { ($0.accept, $0.etag) } (self)
 

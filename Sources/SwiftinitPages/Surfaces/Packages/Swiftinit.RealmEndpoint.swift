@@ -7,7 +7,7 @@ import UnidocQueries
 extension Swiftinit
 {
     @frozen public
-    struct RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+    struct RealmEndpoint
     {
         public
         let query:Unidoc.RealmQuery
@@ -21,6 +21,11 @@ extension Swiftinit
             self.value = nil
         }
     }
+}
+extension Swiftinit.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.RealmEndpoint:HTTP.ServerEndpoint
 {
