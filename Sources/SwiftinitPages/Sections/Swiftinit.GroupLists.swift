@@ -25,7 +25,9 @@ extension Swiftinit
         var other:[(AutomaticHeading, [Unidoc.Scalar])]
 
         private(set)
-        var peers:Unidoc.ExtensionGroup?
+        var peerConstraints:[GenericConstraint<Unidoc.Scalar?>]
+        private(set)
+        var peerList:[Unidoc.Scalar]
 
         private
         let bias:Bias
@@ -39,7 +41,8 @@ extension Swiftinit
             extensions:[Unidoc.ExtensionGroup] = [],
             topics:[Unidoc.TopicGroup] = [],
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
-            peers:Unidoc.ExtensionGroup? = nil,
+            peerConstraints:[GenericConstraint<Unidoc.Scalar?>] = [],
+            peerList:[Unidoc.Scalar] = [],
             bias:Bias,
             mode:GroupListMode?)
         {
@@ -50,7 +53,8 @@ extension Swiftinit
             self.extensions = extensions
             self.topics = topics
             self.other = other
-            self.peers = peers
+            self.peerConstraints = peerConstraints
+            self.peerList = peerList
             self.bias = bias
             self.mode = mode
         }
@@ -69,12 +73,12 @@ extension Swiftinit.GroupLists
         if  let vertex:Unidoc.DeclVertex = copy vertex
         {
             self.init(consume context,
-                requirements: vertex.requirements.isEmpty ? nil : vertex.requirements,
+                requirements: vertex._requirements.isEmpty ? nil : vertex._requirements,
                 superforms: vertex.superforms.isEmpty ? nil : vertex.superforms,
                 bias: bias,
                 mode: mode)
 
-            container = vertex.extension
+            container = vertex.peers
             generics = .init(vertex.signature.generics.parameters)
         }
         else
@@ -99,7 +103,8 @@ extension Swiftinit.GroupLists
             case .extension(let group):
                 if  case group.id? = container
                 {
-                    self.peers = group
+                    self.peerConstraints = group.constraints
+                    self.peerList = group.nested
                     continue
                 }
 
@@ -178,8 +183,9 @@ extension Swiftinit.GroupLists
 
         //  No need to filter the conformers, as it should never appear alongside any custom
         //  curated groups.
-        self.peers = self.peers.map { $0.subtracting(curated) }
         self.extensions = extensions.map { $0.0.subtracting(curated) }
+
+        self.peerList.removeAll(where: curated.contains(_:))
 
         self.topics.sort { $0.id < $1.id }
         self.other.sort { $0.0 < $1.0 }
@@ -332,12 +338,12 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
-        if  let peers:Unidoc.ExtensionGroup = self.peers, !peers.nested.isEmpty
+        if  !self.peerList.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
             {
                 AutomaticHeading.otherMembers.window(&$0,
-                    listing: peers.nested,
+                    listing: self.peerList,
                     limit: 12,
                     open: self.extensions.allSatisfy(\.isEmpty))
                 {

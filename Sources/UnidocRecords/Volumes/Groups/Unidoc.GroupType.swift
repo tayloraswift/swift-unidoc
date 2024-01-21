@@ -12,6 +12,7 @@ extension Unidoc
         case  polygon       = 0xC0_000000
         case `extension`    = 0xC2_000000
         case  topic         = 0xC3_000000
+        case  intrinsic     = 0xC4_000000
     }
 }
 extension Unidoc.GroupType

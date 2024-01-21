@@ -114,6 +114,18 @@ extension SymbolQueries.TestCase
                         {
                             counts[secondaries[s] ?? "", default: 0] += 1
                         }
+
+                    case .intrinsic(let i):
+                        guard self.filters.contains(.intrinsics)
+                        else
+                        {
+                            continue
+                        }
+
+                        for m:Unidoc.Scalar in i.members
+                        {
+                            counts[secondaries[m] ?? "", default: 0] += 1
+                        }
                     }
                 }
 
