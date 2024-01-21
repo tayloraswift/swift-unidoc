@@ -132,14 +132,24 @@ extension Compiler.DeclObject
     /// Adds a requirement to this scalar object, assuming it is a protocol.
     func add(requirement:Symbol.Decl) throws
     {
-        if  case .protocol = self.value.phylum
-        {
-            self.value.requirements.insert(requirement)
-        }
+        guard case .protocol = self.value.phylum
         else
         {
             throw Compiler.SemanticError.cannot(have: .requirements, as: self.value.phylum)
         }
+
+        self.value.requirements.insert(requirement)
+    }
+    /// Adds an inhabitant to this scalar object, assuming it is an enum.
+    func add(inhabitant:Symbol.Decl) throws
+    {
+        guard case .enum = self.value.phylum
+        else
+        {
+            throw Compiler.SemanticError.cannot(have: .inhabitants, as: self.value.phylum)
+        }
+
+        self.value.inhabitants.insert(inhabitant)
     }
     /// Adds an *unqualified* feature to this scalar object.
     ///

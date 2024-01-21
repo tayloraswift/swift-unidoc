@@ -15,9 +15,9 @@ extension Swiftinit
         private
         var requirements:[Unidoc.Scalar]
         private
-        var superforms:[Unidoc.Scalar]
+        var inhabitants:[Unidoc.Scalar]
         private
-        var cases:[Unidoc.Scalar]
+        var superforms:[Unidoc.Scalar]
 
         private
         var extensions:[Unidoc.ExtensionGroup]
@@ -39,8 +39,8 @@ extension Swiftinit
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             requirements:[Unidoc.Scalar] = [],
+            inhabitants:[Unidoc.Scalar] = [],
             superforms:[Unidoc.Scalar] = [],
-            cases:[Unidoc.Scalar] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
             topics:[Unidoc.TopicGroup] = [],
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
@@ -52,8 +52,8 @@ extension Swiftinit
             self.context = context
 
             self.requirements = requirements
+            self.inhabitants = inhabitants
             self.superforms = superforms
-            self.cases = cases
 
             self.extensions = extensions
             self.topics = topics
@@ -131,7 +131,7 @@ extension Swiftinit.GroupLists
                     self.requirements += group.members
 
                 case .decl(.enum, _)?:
-                    self.cases += group.members
+                    self.inhabitants += group.members
 
                 default:
                     throw Unidoc.GroupTypeError.reject(.intrinsic(group))
@@ -352,16 +352,16 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 }
             }
         }
-        if !self.cases.isEmpty
+        if !self.inhabitants.isEmpty
         {
-            html[.section, { $0.class = "group cases" }]
+            html[.section, { $0.class = "group inhabitants" }]
             {
                 let heading:AutomaticHeading = .allCases
 
                 $0[.h2] = heading
                 $0[.ul]
                 {
-                    for id:Unidoc.Scalar in self.cases
+                    for id:Unidoc.Scalar in self.inhabitants
                     {
                         $0[.li] = self.context.card(id)
                     }
