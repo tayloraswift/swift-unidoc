@@ -8,6 +8,8 @@ extension Unidoc.Volume
         public
         var extensions:[Unidoc.ExtensionGroup]
         public
+        var intrinsics:[Unidoc.IntrinsicGroup]
+        public
         var polygons:[Unidoc.PolygonalGroup]
         public
         var topics:[Unidoc.TopicGroup]
@@ -16,11 +18,13 @@ extension Unidoc.Volume
         init(
             conformers:[Unidoc.ConformerGroup] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
+            intrinsics:[Unidoc.IntrinsicGroup] = [],
             polygons:[Unidoc.PolygonalGroup] = [],
             topics:[Unidoc.TopicGroup] = [])
         {
             self.conformers = conformers
             self.extensions = extensions
+            self.intrinsics = intrinsics
             self.polygons = polygons
             self.topics = topics
         }

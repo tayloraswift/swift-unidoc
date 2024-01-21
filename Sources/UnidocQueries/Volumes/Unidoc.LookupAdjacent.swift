@@ -92,7 +92,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     //  `BSON.max` is a safe choice for a group `_id` that will never
                     //  match anything.
-                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.extension], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.peers], BSON.Max.init())
                 }
                 $0[let: special.topic] = .expr
                 {

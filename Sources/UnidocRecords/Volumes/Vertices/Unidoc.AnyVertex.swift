@@ -239,7 +239,7 @@ extension Unidoc.AnyVertex
         case details = "d"
 
         /// Only appears in ``Decl``. The field contains a *group* scalar.
-        case `extension` = "y"
+        case peers = "y"
         /// Can appear in any master record except a ``File``.
         /// The field contains a *group* scalar. (Not a vertex scalar!)
         case group = "t"
@@ -247,6 +247,10 @@ extension Unidoc.AnyVertex
         /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
         /// for ``File``. In ``Global``, it is always zero.
         case hash = "H"
+
+        @available(*, deprecated, renamed: "peers")
+        @inlinable public static
+        var `extension`:Self { .peers }
     }
 }
 extension Unidoc.AnyVertex:BSONDocumentEncodable
@@ -301,7 +305,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 
             bson[.signature_spis] = self.signature.spis
 
-            bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
+            bson[.requirements] = self._requirements.isEmpty ? nil : self._requirements
             bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
             bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
             bson[.culture] = self.culture
@@ -314,7 +318,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.details] = self.details
 
-            bson[.extension] = self.extension
+            bson[.peers] = self.peers
             bson[.group] = self.group
 
         case .culture(let self):
@@ -396,7 +400,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                     spis: try bson[.signature_spis]?.decode()),
                 symbol: try bson[.symbol].decode(),
                 stem: try bson[.stem].decode(),
-                requirements: try bson[.requirements]?.decode() ?? [],
+                _requirements: try bson[.requirements]?.decode() ?? [],
                 superforms: try bson[.superforms]?.decode() ?? [],
                 namespace: try bson[.namespace]?.decode() ?? culture,
                 culture: culture,
@@ -407,7 +411,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
-                extension: try bson[.extension]?.decode(),
+                peers: try bson[.peers]?.decode(),
                 group: try bson[.group]?.decode()))
 
         case .article?:

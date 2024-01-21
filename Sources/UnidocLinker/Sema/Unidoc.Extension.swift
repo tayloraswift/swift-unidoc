@@ -58,10 +58,7 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
     func assemble(signature:Unidoc.ExtensionSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
     {
-        let prefetch:[Unidoc.Scalar] = []
-        //  TODO: compute tertiary scalars
-
-        return .init(id: self.id.in(linker.current.id),
+        .init(id: self.id.in(linker.current.id),
             constraints: signature.conditions.constraints,
             culture: linker.current.id + signature.culture,
             scope: signature.extendee,
@@ -69,7 +66,6 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
             features: linker.sort(self.features, by: Unidoc.SemanticPriority.self),
             nested: linker.sort(self.nested, by: Unidoc.SemanticPriority.self),
             subforms: linker.sort(self.subforms, by: Unidoc.SemanticPriority.self),
-            prefetch: prefetch,
             overview: self.overview,
             details: self.details)
     }
