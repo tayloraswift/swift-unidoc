@@ -49,7 +49,7 @@ extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
     var unset:[Mongo.KeyPath]
     {
         [
-            Unidoc.AnyVertex[.requirements],
+            Unidoc.AnyVertex[.constituents],
             Unidoc.AnyVertex[.superforms],
 
             Unidoc.AnyVertex[.overview],

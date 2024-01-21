@@ -76,7 +76,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
         //  Does this product contain a module with the same name as the product?
-        for id:Unidoc.Scalar in self.vertex.requirements
+        for id:Unidoc.Scalar in self.vertex.constituents
         {
             guard
             case .culture(let vertex)? = self.context[id],
@@ -147,7 +147,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                 }
                 $0[.tbody]
                 {
-                    for id:Unidoc.Scalar in self.vertex.requirements
+                    for id:Unidoc.Scalar in self.vertex.constituents
                     {
                         guard
                         let volume:Unidoc.VolumeMetadata = self.context[id.edition],

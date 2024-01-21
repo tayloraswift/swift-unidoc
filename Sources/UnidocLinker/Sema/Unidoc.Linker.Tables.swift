@@ -147,7 +147,7 @@ extension Unidoc.Linker.Tables
             self.current.metadata.products.indices,
             self.current.metadata.products)
         {
-            var requirements:[Unidoc.Scalar] = product.cultures
+            var constituents:[Unidoc.Scalar] = product.cultures
                 .sorted
             {
                 self.current.namespaces[$0] < self.current.namespaces[$1]
@@ -162,12 +162,12 @@ extension Unidoc.Linker.Tables
                 if  let q:Unidoc.Scalar =
                     self.context[product.package]?.scalars.products[product.name]
                 {
-                    requirements.append(q)
+                    constituents.append(q)
                 }
             }
 
             let product:Unidoc.ProductVertex = .init(id: self.current.id + p,
-                requirements: requirements,
+                constituents: constituents,
                 symbol: product.name,
                 type: product.type,
                 group: productPolygon.id)
@@ -241,7 +241,7 @@ extension Unidoc.Linker.Tables
                     let intrinsicGroup:Unidoc.Group = self.next(.intrinsic)
                     var intrinsicMembers:[Unidoc.Scalar] = []
                         intrinsicMembers.reserveCapacity(decl.requirements.count)
-
+                    //  https://forums.swift.org/t/efficiently-chaining-two-arrays/69551
                     for requirement:Int32 in decl.requirements
                     {
                         //  This should always succeed, since requirements should appear in
@@ -256,6 +256,18 @@ extension Unidoc.Linker.Tables
 
                         self.peers[requirement] = intrinsicGroup
                         intrinsicMembers.append(r)
+                    }
+                    for inhabitant:Int32 in decl.inhabitants
+                    {
+                        guard
+                        let i:Unidoc.Scalar = self.current.scalars.decls[inhabitant]
+                        else
+                        {
+                            continue
+                        }
+
+                        self.peers[inhabitant] = intrinsicGroup
+                        intrinsicMembers.append(i)
                     }
 
                     if !intrinsicMembers.isEmpty

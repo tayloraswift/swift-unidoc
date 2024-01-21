@@ -75,7 +75,7 @@ extension Unidoc.LookupAdjacent.Vertices
         switch self.layer
         {
         case nil:
-            arrays = [.signature_expanded_scalars, .scope, .requirements, .superforms]
+            arrays = [.signature_expanded_scalars, .scope, .constituents, .superforms]
 
         case .protocols?:
             arrays = [.signature_expanded_scalars, .scope]

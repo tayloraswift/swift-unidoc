@@ -55,7 +55,7 @@ extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
         switch layer
         {
         case nil:           unset = []
-        case .protocols?:   unset = [.requirements, .superforms, .overview, .details]
+        case .protocols?:   unset = [.constituents, .superforms, .overview, .details]
         }
 
         self.init(
@@ -205,7 +205,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 //  We do not need to load *any* markdown for this record.
                 $0[.unset] =
                 [
-                    Unidoc.AnyVertex[.requirements],
+                    Unidoc.AnyVertex[.constituents],
                     Unidoc.AnyVertex[.superforms],
                     Unidoc.AnyVertex[.overview],
                     Unidoc.AnyVertex[.details],
@@ -354,7 +354,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 //  We do not need to load all the markdown for secondary vertices.
                 $0[.unset] =
                 [
-                    Unidoc.AnyVertex[.requirements],
+                    Unidoc.AnyVertex[.constituents],
                     Unidoc.AnyVertex[.superforms],
                     Unidoc.AnyVertex[.details],
                 ]
