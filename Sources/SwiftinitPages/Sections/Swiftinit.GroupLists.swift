@@ -13,9 +13,11 @@ extension Swiftinit
         let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         private
-        let requirements:[Unidoc.Scalar]?
+        var requirements:[Unidoc.Scalar]
         private
-        let superforms:[Unidoc.Scalar]?
+        var superforms:[Unidoc.Scalar]
+        private
+        var cases:[Unidoc.Scalar]
 
         private
         var extensions:[Unidoc.ExtensionGroup]
@@ -36,8 +38,9 @@ extension Swiftinit
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            requirements:[Unidoc.Scalar]?,
-            superforms:[Unidoc.Scalar]?,
+            requirements:[Unidoc.Scalar] = [],
+            superforms:[Unidoc.Scalar] = [],
+            cases:[Unidoc.Scalar] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
             topics:[Unidoc.TopicGroup] = [],
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
@@ -50,6 +53,8 @@ extension Swiftinit
 
             self.requirements = requirements
             self.superforms = superforms
+            self.cases = cases
+
             self.extensions = extensions
             self.topics = topics
             self.other = other
@@ -73,8 +78,8 @@ extension Swiftinit.GroupLists
         if  let vertex:Unidoc.DeclVertex = copy vertex
         {
             self.init(consume context,
-                requirements: vertex._requirements.isEmpty ? nil : vertex._requirements,
-                superforms: vertex.superforms.isEmpty ? nil : vertex.superforms,
+                requirements: vertex._requirements,
+                superforms: vertex.superforms,
                 bias: bias,
                 mode: mode)
 
@@ -84,8 +89,6 @@ extension Swiftinit.GroupLists
         else
         {
             self.init(consume context,
-                requirements: nil,
-                superforms: nil,
                 bias: bias,
                 mode: mode)
 
@@ -120,6 +123,19 @@ extension Swiftinit.GroupLists
                     .concretized
 
                 extensions.append((group, partisanship, genericness))
+
+            case .intrinsic(let group):
+                switch self.mode
+                {
+                case .decl(.protocol, _)?:
+                    self.requirements += group.members
+
+                case .decl(.enum, _)?:
+                    self.cases += group.members
+
+                default:
+                    throw Unidoc.GroupTypeError.reject(.intrinsic(group))
+                }
 
             case .polygonal(let group):
                 guard
@@ -283,7 +299,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             return
         }
 
-        if  let superforms:[Unidoc.Scalar] = self.superforms
+        if !self.superforms.isEmpty
         {
             html[.section, { $0.class = "group superforms" }]
             {
@@ -313,15 +329,14 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 $0[.h2] = heading
                 $0[.ul]
                 {
-                    for superform:Unidoc.Scalar in superforms
+                    for id:Unidoc.Scalar in self.superforms
                     {
-                        $0[.li] = self.context.card(superform)
+                        $0[.li] = self.context.card(id)
                     }
                 }
             }
         }
-
-        if  let requirements:[Unidoc.Scalar] = self.requirements
+        if !self.requirements.isEmpty
         {
             html[.section, { $0.class = "group requirements" }]
             {
@@ -330,9 +345,25 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 $0[.h2] = heading
                 $0[.ul]
                 {
-                    for requirement:Unidoc.Scalar in requirements
+                    for id:Unidoc.Scalar in self.requirements
                     {
-                        $0[.li] = self.context.card(requirement)
+                        $0[.li] = self.context.card(id)
+                    }
+                }
+            }
+        }
+        if !self.cases.isEmpty
+        {
+            html[.section, { $0.class = "group cases" }]
+            {
+                let heading:AutomaticHeading = .allCases
+
+                $0[.h2] = heading
+                $0[.ul]
+                {
+                    for id:Unidoc.Scalar in self.cases
+                    {
+                        $0[.li] = self.context.card(id)
                     }
                 }
             }

@@ -13,6 +13,7 @@ enum AutomaticHeading:Equatable, Comparable
 
     case seeAlso
 
+    case allCases
     case allRequirements
     case restatesRequirements
     case implementsRequirements
@@ -37,6 +38,7 @@ extension AutomaticHeading:Identifiable
 
         case .seeAlso:                  "ss:see-also"
 
+        case .allCases:                 "ss:cases"
         case .allRequirements:          "ss:requirements"
         case .restatesRequirements:     "ss:requirements-restated"
         case .implementsRequirements:   "ss:requirements-implemented"
@@ -63,6 +65,7 @@ extension AutomaticHeading:CustomStringConvertible
 
         case .seeAlso:                  "See also"
 
+        case .allCases:                 "Cases"
         case .allRequirements:          "Requirements"
         case .restatesRequirements:     "Restates"
         case .implementsRequirements:   "Implements"
