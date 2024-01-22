@@ -48,6 +48,9 @@ extension PackageBuild
 
             versions.append(suffix)
         }
+
+        versions.sort()
+
         return versions
     }
 }
