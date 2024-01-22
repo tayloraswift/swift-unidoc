@@ -7,9 +7,11 @@ enum AutomaticHeading:Equatable, Comparable
     case allProductConstituents
 
     case miscellaneous
+    case otherCases
     case otherModules
     case otherMembers
     case otherProducts
+    case otherRequirements
 
     case seeAlso
 
@@ -32,9 +34,11 @@ extension AutomaticHeading:Identifiable
         case .allProductConstituents:   "ss:all-product-constituents"
 
         case .miscellaneous:            "ss:misc"
+        case .otherCases:               "ss:other-cases"
         case .otherMembers:             "ss:other-members"
         case .otherModules:             "ss:other-modules"
         case .otherProducts:            "ss:other-products"
+        case .otherRequirements:        "ss:other-requirements"
 
         case .seeAlso:                  "ss:see-also"
 
@@ -59,9 +63,11 @@ extension AutomaticHeading:CustomStringConvertible
         case .allProductConstituents:   "Product constituents"
 
         case .miscellaneous:            "Miscellaneous"
+        case .otherCases:               "Other cases"
         case .otherMembers:             "Other members in extension"
         case .otherModules:             "Other modules"
         case .otherProducts:            "Other products"
+        case .otherRequirements:        "Other requirements"
 
         case .seeAlso:                  "See also"
 
