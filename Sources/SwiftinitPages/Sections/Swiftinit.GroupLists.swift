@@ -125,6 +125,12 @@ extension Swiftinit.GroupLists
                 extensions.append((group, partisanship, genericness))
 
             case .intrinsic(let group):
+                if  case group.id? = container
+                {
+                    self.peerList = group.members
+                    continue
+                }
+
                 switch self.mode
                 {
                 case .decl(.protocol, _)?:
@@ -222,9 +228,21 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
+        var other:Unidoc.TopicGroup? = nil
         for group:Unidoc.TopicGroup in self.topics
         {
-            guard group.members.contains(.scalar(self.context.id))
+            if  group.members.contains(.scalar(self.context.id))
+            {
+                guard group.members.count > 1
+                else
+                {
+                    //  This is a topic group that contains this page only.
+                    //  A “See Also” section is not necessary.
+                    continue
+                }
+
+                other = group
+            }
             else
             {
                 //  This is a topic group that doesn’t contain this page.
@@ -247,32 +265,6 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                                 $0[.li] { $0[.span] { $0[.code] = text } }
                             }
                         }
-                    }
-                }
-
-                continue
-            }
-
-            if  group.members.count == 1
-            {
-                //  This is a topic group that contains this page only.
-                //  A “See Also” section is not necessary.
-                continue
-            }
-
-            html[.section, { $0.class = "group topic" }]
-            {
-                AutomaticHeading.seeAlso.window(&$0,
-                    listing: group.members,
-                    limit: 12)
-                {
-                    switch $1
-                    {
-                    case .scalar(let scalar):
-                        $0[.li] = self.context.card(scalar)
-
-                    case .text(let text):
-                        $0[.li] { $0[.span] { $0[.code] = text } }
                     }
                 }
             }
@@ -379,6 +371,26 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                     open: self.extensions.allSatisfy(\.isEmpty))
                 {
                     $0[.li] = self.context.card($1)
+                }
+            }
+        }
+
+        if  let other:Unidoc.TopicGroup
+        {
+            html[.section, { $0.class = "group topic" }]
+            {
+                AutomaticHeading.seeAlso.window(&$0,
+                    listing: other.members,
+                    limit: 12)
+                {
+                    switch $1
+                    {
+                    case .scalar(let scalar):
+                        $0[.li] = self.context.card(scalar)
+
+                    case .text(let text):
+                        $0[.li] { $0[.span] { $0[.code] = text } }
+                    }
                 }
             }
         }
