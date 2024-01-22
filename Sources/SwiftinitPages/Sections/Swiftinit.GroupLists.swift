@@ -365,7 +365,22 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
         {
             html[.section, { $0.class = "group sisters" }]
             {
-                AutomaticHeading.otherMembers.window(&$0,
+                let heading:AutomaticHeading
+
+                if  kinks[is: .required]
+                {
+                    heading = .otherRequirements
+                }
+                else if case .case = phylum
+                {
+                    heading = .otherCases
+                }
+                else
+                {
+                    heading = .otherMembers
+                }
+
+                heading.window(&$0,
                     listing: self.peerList,
                     limit: 12,
                     open: self.extensions.allSatisfy(\.isEmpty))
