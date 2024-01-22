@@ -317,9 +317,9 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     $0[.dd]
                     {
                         let url:String?
-                        if  case .github(let path)? = self.repo?.origin
+                        if  case .github(let origin)? = self.repo?.origin
                         {
-                            url = "https://github.com\(path)/tree/\(commit)"
+                            url = "\(origin.https)/tree/\(commit)"
                         }
                         else
                         {
