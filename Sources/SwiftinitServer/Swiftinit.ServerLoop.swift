@@ -236,6 +236,7 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
                     self.tour.errors += 1
 
                     Log[.error] = "\(error)"
+                    Log[.error] = "request = \(request.metadata.path)"
 
                     let page:Swiftinit.ServerErrorPage = .init(error: error)
                     return .error(page.resource(format: self.format))

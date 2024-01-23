@@ -250,7 +250,26 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
 
                 $0[.dt] = "Hidden"
-                $0[.dd] = self.package.hidden ? "yes" : "no"
+                $0[.dd]
+                {
+                    $0 += self.package.hidden ? "yes" : "no"
+
+                    guard maintainer
+                    else
+                    {
+                        return
+                    }
+
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Swiftinit.API[.packageConfig])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "hidden",
+                        value: self.package.hidden ? "false" : "true",
+                        label: self.package.hidden ? "Unhide Package" : "Hide Package")
+                }
 
                 if  let crawled:BSON.Millisecond = self.package.repo?.crawled
                 {
@@ -284,11 +303,38 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
             $0[.h3] = "Names and aliases"
 
-            $0[.ol, { $0.class = "aliases" }]
+            $0[.dl, { $0.class = "aliases" }]
             {
                 for symbol:Symbol.Package in self.aliases
                 {
-                    $0[.li] = "\(symbol)"
+                    $0[.dt] = "\(symbol)"
+
+                    if  symbol == self.package.symbol
+                    {
+                        $0[.dd]
+                        {
+                            $0[.span] { $0.class = "placeholder" } = "current name"
+                        }
+                    }
+                    else if maintainer
+                    {
+                        $0[.dd]
+                        {
+                            $0[.form]
+                            {
+                                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                                $0.action = "\(Swiftinit.API[.packageConfig])"
+                                $0.method = "post"
+                            } = ConfigButton.init(package: self.package.id,
+                                update: "symbol",
+                                value: "\(symbol)",
+                                label: "Rename package")
+                        }
+                    }
+                    else
+                    {
+                        $0[.dd]
+                    }
                 }
             }
 
@@ -336,44 +382,12 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                             $0.value = "true"
                         }
 
-                        $0[.span] = "Create Realm"
+                        $0[.span] = "Create realm"
                     }
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Transfer Package"
-                }
-            }
-
-            $0[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.packageConfig])"
-                $0.method = "post"
-            }
-                content:
-            {
-                $0[.p]
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "package"
-                        $0.value = "\(self.package.id)"
-                    }
-
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "hidden"
-                        $0.value = self.package.hidden ? "false" : "true"
-                    }
-                }
-                $0[.p]
-                {
-                    $0[.button] { $0.type = "submit" } = self.package.hidden
-                        ? "Unhide Package"
-                        : "Hide Package"
+                    $0[.button] { $0.type = "submit" } = "Transfer package"
                 }
             }
 
@@ -403,7 +417,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Alias Package"
+                    $0[.button] { $0.type = "submit" } = "Alias package"
                 }
             }
 
@@ -433,7 +447,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Index Package Tag (GitHub)"
+                    $0[.button] { $0.type = "submit" } = "Index package tag (GitHub)"
                 }
             }
         }

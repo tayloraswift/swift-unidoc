@@ -1,6 +1,7 @@
 import BSON
 import JSON
 import MongoDB
+import Symbols
 import UnidocRecords
 
 extension UnidocDatabase
@@ -122,6 +123,14 @@ extension UnidocDatabase.Packages
         with session:Mongo.Session) async throws -> Bool?
     {
         try await self.update(some: metadata, with: session)
+    }
+
+    public
+    func update(package:Unidoc.Package,
+        symbol:Symbol.Package,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(field: .symbol, of: package, to: symbol, with: session)
     }
 
     public
