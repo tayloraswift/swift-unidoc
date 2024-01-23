@@ -17,7 +17,7 @@ extension Mongo.UpdateEncoder
         self.update(element, upsert: true)
     }
 
-    @inlinable internal mutating
+    @inlinable mutating
     func update(
         _ element:some BSONDocumentEncodable & Identifiable<some BSONEncodable>,
         upsert:Bool)
@@ -27,6 +27,23 @@ extension Mongo.UpdateEncoder
             $0[.upsert] = upsert
             $0[.q] = .init { $0["_id"] = element.id }
             $0[.u] = element
+        }
+    }
+
+    @inlinable mutating
+    func update(field:Mongo.KeyPath,
+        by index:Mongo.KeyPath,
+        of key:some BSONEncodable,
+        to value:some BSONEncodable)
+    {
+        self
+        {
+            $0[.hint] = .init { $0[index] = (+) }
+            $0[.q] = .init { $0[index] = key }
+            $0[.u] = .init
+            {
+                $0[.set] = .init { $0[field] = value }
+            }
         }
     }
 }

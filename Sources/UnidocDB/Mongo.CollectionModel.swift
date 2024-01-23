@@ -406,12 +406,21 @@ extension Mongo.CollectionModel
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
             {
-                $0
-                {
-                    $0[.hint] = .init { $0[index] = (+) }
-                    $0[.q] = .init { $0[index] = key }
-                    $0[.u] = .init { $0[.set] = .init { $0[field] = value } }
-                }
+                $0.update(field: field, by: index, of: key, to: value)
+            },
+            against: self.database)
+
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
+        return updates.selected == 0 ? nil : updates.modified == 1
+    }
+    @inlinable package
+    func update(with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
+    {
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                try encode(&$0)
             },
             against: self.database)
 
