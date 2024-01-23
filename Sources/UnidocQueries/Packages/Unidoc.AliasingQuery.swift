@@ -15,7 +15,6 @@ extension Unidoc
 public
 protocol _UnidocAliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
     where   CollectionOrigin.Element:MongoMasterCodingModel<Unidoc.AliasKey>,
-            CollectionTarget.Element:BSONDecodable,
             Collation == SimpleCollation
 {
     override

@@ -367,14 +367,27 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .packageConfig:
-                if  let package:String = form["package"],
-                    let package:Unidoc.Package = .init(package),
-                    let hidden:String = form["hidden"],
+                guard
+                let package:String = form["package"],
+                let package:Unidoc.Package = .init(package)
+                else
+                {
+                    break
+                }
+
+                if  let hidden:String = form["hidden"],
                     let hidden:Bool = .init(hidden)
                 {
                     return .interactive(Swiftinit.PackageConfigEndpoint.init(
                         package: package,
                         update: .hidden(hidden)))
+                }
+                else if
+                    let symbol:Symbol.Package = form["symbol"].map(Symbol.Package.init(_:))
+                {
+                    return .interactive(Swiftinit.PackageConfigEndpoint.init(
+                        package: package,
+                        update: .symbol(symbol)))
                 }
 
             case .packageIndex:
