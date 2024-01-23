@@ -76,11 +76,15 @@ extension Unidoc.Linker.Graph
                 continue
             }
 
-            if  let requirements:[Int32] = node.decl?.requirements
+            if  let decl:SymbolGraph.Decl = node.decl
             {
-                for requirement:Int32 in requirements
+                for requirement:Int32 in decl.requirements
                 {
                     hierarchy[requirement] = n
+                }
+                for inhabitant:Int32 in decl.inhabitants
+                {
+                    hierarchy[inhabitant] = n
                 }
             }
             for `extension`:SymbolGraph.Extension in node.extensions
