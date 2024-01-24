@@ -84,6 +84,7 @@ extension Unidoc.SnapshotDetails:BSONDocumentDecodable
             extraManifests: try bson[.extraManifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             commit: try bson[.commit]?.decode(),
-            census: try bson[.census].decode())
+            //  Deprojected when serving a redirect.
+            census: try bson[.census]?.decode() ?? .init())
     }
 }
