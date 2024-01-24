@@ -378,7 +378,8 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 module: try bson[.module].decode(),
                 //  Needed until we can migrate the database.
                 readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
-                census: try bson[.census].decode(),
+                //  Might be decoding with this key deprojected.
+                census: try bson[.census]?.decode() ?? .init(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
