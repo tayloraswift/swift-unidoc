@@ -17,31 +17,31 @@ extension Swiftinit.RobotsEndpoint:PublicEndpoint
     {
         .ok("""
             User-agent: mauibot
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: semrushbot
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: ahrefsbot
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: blexbot
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: seo spider
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: MJ12bot
-            Crawl-delay: 20
+            Crawl-delay: 60
 
 
             User-agent: Bytespider
-            Crawl-delay: 10
+            Crawl-delay: 60
 
 
             User-agent: *
@@ -55,6 +55,10 @@ extension Swiftinit.RobotsEndpoint:PublicEndpoint
             Disallow: /reference/
             Disallow: /telescope/
             Disallow: /user/
+            Disallow: /docs/swift-unidoc/
+            Allow: /docs/swift-unidoc/guides/
+
+            Sitemap: https://swiftinit.org/sitemap.xml
 
             """)
     }
