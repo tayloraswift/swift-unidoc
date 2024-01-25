@@ -18,8 +18,8 @@ extension SPM.Manifest.Dependency:Identifiable
     {
         switch self
         {
-        case .filesystem(let dependency): dependency.id
-        case .resolvable(let dependency): dependency.id
+        case .filesystem(let dependency): dependency.identity
+        case .resolvable(let dependency): dependency.identity
         }
     }
 }

@@ -19,7 +19,7 @@ extension SPM.DependencyPin.V2:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
-        case id = "identity"
+        case identity
         case location
         case state
         case type = "kind"
@@ -37,7 +37,8 @@ extension SPM.DependencyPin.V2:JSONObjectDecodable
             location = .remote(url: try json[.location].decode())
         }
 
-        self.init(value: .init(id: try json[.id].decode(),
+        self.init(value: .init(
+            identity: try json[.identity].decode(),
             location: location,
             state: try json[.state].decode()))
     }

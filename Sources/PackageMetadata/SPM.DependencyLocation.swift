@@ -24,7 +24,7 @@ extension SPM.DependencyLocation
 extension SPM.DependencyLocation
 {
     /// Returns the exact name of the repository, which is the last path component without the
-    /// extension.
+    /// `.git` extension.
     public
     var name:Substring
     {
@@ -38,6 +38,14 @@ extension SPM.DependencyLocation
         let start:String.Index = uri.lastIndex(of: "/").map(uri.index(after:)) ??
             uri.startIndex
 
-        return uri[start...].prefix(while: { $0 != "." })
+        if  let end:String.Index = uri.lastIndex(of: "."),
+            uri[end...] == ".git"
+        {
+            return uri[start ..< end]
+        }
+        else
+        {
+            return uri[start...]
+        }
     }
 }

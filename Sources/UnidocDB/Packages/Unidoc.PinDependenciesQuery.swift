@@ -29,7 +29,7 @@ extension Unidoc.PinDependenciesQuery
         {
             if  let version:PatchVersion = dependency.version.release
             {
-                self.patches.append(.init(package: dependency.package, version: version))
+                self.patches.append(.init(package: dependency.id, version: version))
             }
         }
 

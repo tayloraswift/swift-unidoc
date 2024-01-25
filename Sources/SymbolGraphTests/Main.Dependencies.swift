@@ -18,6 +18,7 @@ extension Main.Dependencies:TestBattery
             (
                 "Semver",
                 .init(package: "swift-example",
+                    packageScope: nil,
                     requirement: .exact(.v(1, 2, 3)),
                     revision: 0xabcd1234,
                     version: .stable(.release(.v(1, 2, 3))))
@@ -25,6 +26,7 @@ extension Main.Dependencies:TestBattery
             (
                 "Branch",
                 .init(package: "swift-example",
+                    packageScope: nil,
                     requirement: nil,
                     revision: 0xabcd1234,
                     version: "master")

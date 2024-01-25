@@ -11,6 +11,8 @@ extension SymbolGraphMetadata
         public
         let package:Symbol.Package
         public
+        let packageScope:Symbol.PackageScope?
+        public
         let requirement:DependencyRequirement?
         public
         let revision:SHA1
@@ -19,15 +21,27 @@ extension SymbolGraphMetadata
 
         @inlinable public
         init(package:Symbol.Package,
+            packageScope:Symbol.PackageScope?,
             requirement:DependencyRequirement?,
             revision:SHA1,
             version:AnyVersion)
         {
             self.package = package
+            self.packageScope = packageScope
             self.requirement = requirement
             self.revision = revision
             self.version = version
         }
+    }
+}
+extension SymbolGraphMetadata.Dependency:Identifiable
+{
+    /// Returns a fully qualified identifier for this dependency, if scoped, or simply the
+    /// package identifier otherwise.
+    @inlinable public
+    var id:Symbol.Package
+    {
+        self.packageScope.map { $0 | self.package } ?? self.package
     }
 }
 extension SymbolGraphMetadata.Dependency
@@ -36,6 +50,7 @@ extension SymbolGraphMetadata.Dependency
     enum CodingKey:String, Sendable
     {
         case package = "P"
+        case packageScope = "S"
         case requirement_lower = "L"
         case requirement_upper = "U"
         case revision = "H"
@@ -48,6 +63,7 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.package] = self.package
+        bson[.packageScope] = self.packageScope
 
         switch self.requirement
         {
@@ -89,6 +105,7 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
         }
 
         self.init(package: try bson[.package].decode(),
+            packageScope: try bson[.packageScope]?.decode(),
             requirement: requirement,
             revision: try bson[.revision].decode(),
             version: try bson[.version].decode())

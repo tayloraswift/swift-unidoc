@@ -22,7 +22,7 @@ extension PackageBuild.ID
         {
         case    .unversioned(let id):   id
         case    .versioned(let pin, _),
-                .upstream(let pin):     pin.id
+                .upstream(let pin):     pin.identity
         }
     }
     var pin:SPM.DependencyPin?

@@ -1,5 +1,4 @@
-import JSONDecoding
-import JSONEncoding
+import JSON
 
 extension JSON
 {
