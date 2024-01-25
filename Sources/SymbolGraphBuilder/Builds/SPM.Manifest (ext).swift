@@ -14,7 +14,7 @@ extension SPM.Manifest
 
         case    .versioned(let pin, _),
                 .upstream(let pin):
-            print("Dumping manifest for package '\(pin.id)' at \(pin.state)")
+            print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
         }
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we

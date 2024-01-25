@@ -252,7 +252,7 @@ extension Toolchain
 
             let dependency:PackageNode = try .all(flattening: manifest,
                 on: platform,
-                as: pin.id)
+                as: pin.identity)
 
             let sources:PackageBuild.Sources = try .init(scanning: dependency)
                 sources.yield(include: &include)

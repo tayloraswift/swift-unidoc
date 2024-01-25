@@ -39,7 +39,7 @@ extension Main.PackageResolved:TestBattery
                     parsing: json)
                 let expected:[SPM.DependencyPin] =
                 [
-                    .init(id: "swift-json",
+                    .init(identity: "swift-json",
                         location: .local(root: "/swift/swift-json"),
                         revision: 0x36ef4bf1e6ae38f881ed253d5656839a046456f1,
                         version: .stable(.release(.v(0, 4, 5)))),
@@ -82,12 +82,12 @@ extension Main.PackageResolved:TestBattery
                     parsing: json)
                 let expected:[SPM.DependencyPin] =
                 [
-                    .init(id: "swift-atomics",
+                    .init(identity: "swift-atomics",
                         location: .remote(
                             url: "https://github.com/apple/swift-atomics.git"),
                         revision: 0xff3d2212b6b093db7f177d0855adbc4ef9c5f036,
                         version: .stable(.release(.v(1, 0, 3)))),
-                    .init(id: "swift-grammar",
+                    .init(identity: "swift-grammar",
                         location: .remote(
                             url: "https://github.com/kelvin13/swift-grammar"),
                         revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
@@ -133,7 +133,7 @@ extension Main.PackageResolved:TestBattery
                     parsing: json)
                 let expected:[SPM.DependencyPin] =
                 [
-                    .init(id: "swift-argument-parser",
+                    .init(identity: "swift-argument-parser",
                         location: .remote(
                             url: "https://github.com/apple/swift-argument-parser.git"),
                         revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
