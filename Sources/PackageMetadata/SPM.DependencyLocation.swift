@@ -23,6 +23,29 @@ extension SPM.DependencyLocation
 }
 extension SPM.DependencyLocation
 {
+    public
+    var owner:Symbol.PackageScope?
+    {
+        switch self
+        {
+        case .local:
+            return nil
+
+        case .remote(let url):
+            guard
+            let j:String.Index = url.lastIndex(of: "/"),
+            let i:String.Index = url[..<j].lastIndex(of: "/"),
+            url[..<i] == "https://github.com"
+            else
+            {
+                return nil
+            }
+
+            let start:String.Index = url.index(after: i)
+            return .init(url[start ..< j])
+        }
+    }
+
     /// Returns the exact name of the repository, which is the last path component without the
     /// `.git` extension.
     public

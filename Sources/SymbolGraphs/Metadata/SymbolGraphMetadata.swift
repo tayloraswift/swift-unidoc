@@ -12,6 +12,9 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// A package identifier to associate with this symbol graph.
     public
     var package:Symbol.Package
+    /// A package identifier scope to associate with this symbol graph.
+    public
+    var packageScope:Symbol.PackageScope?
     /// A git commit to associate with the relevant symbol graph.
     ///
     /// This is nil for local package symbol graphs.
@@ -59,6 +62,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
 
     @inlinable public
     init(package:Symbol.Package,
+        packageScope:Symbol.PackageScope?,
         commit:Commit?,
         triple:Triple,
         swift:AnyVersion,
@@ -73,6 +77,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
         self.abi = SymbolGraphABI.version
 
         self.package = package
+        self.packageScope = packageScope
         self.commit = commit
         self.triple = triple
         self.swift = swift
@@ -109,6 +114,7 @@ extension SymbolGraphMetadata
 
         return .init(
             package: .swift,
+            packageScope: nil,
             commit: .init(nil, refname: tagname),
             triple: triple,
             swift: swift,
@@ -123,6 +129,7 @@ extension SymbolGraphMetadata
     {
         case abi
         case package
+        case packageScope = "scope"
         case commit_hash = "revision"
         case commit_refname = "refname"
         case triple
@@ -153,6 +160,7 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
     {
         bson[.abi] = self.abi
         bson[.package] = self.package
+        bson[.packageScope] = self.packageScope
         bson[.commit_hash] = self.commit?.hash
         bson[.commit_refname] = self.commit?.refname
         bson[.triple] = self.triple
@@ -174,6 +182,7 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
+            packageScope: try bson[.packageScope]?.decode(),
             commit: try bson[.commit_refname]?.decode(as: String.self)
             {
                 .init(try bson[.commit_hash]?.decode(), refname: $0)

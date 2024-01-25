@@ -291,6 +291,7 @@ extension Toolchain
         }
 
         let metadata:SymbolGraphMetadata = .init(package: build.id.package,
+            packageScope: build.id.pin?.location.owner,
             commit: commit,
             triple: self.triple,
             swift: self.version,
