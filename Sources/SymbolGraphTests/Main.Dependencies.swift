@@ -17,16 +17,14 @@ extension Main.Dependencies:TestBattery
         [
             (
                 "Semver",
-                .init(package: "swift-example",
-                    packageScope: nil,
+                .init(package: .init(name: "swift-example"),
                     requirement: .exact(.v(1, 2, 3)),
                     revision: 0xabcd1234,
                     version: .stable(.release(.v(1, 2, 3))))
             ),
             (
                 "Branch",
-                .init(package: "swift-example",
-                    packageScope: nil,
+                .init(package: .init(name: "swift-example"),
                     requirement: nil,
                     revision: 0xabcd1234,
                     version: "master")

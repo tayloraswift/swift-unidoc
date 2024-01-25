@@ -11,10 +11,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
 
     /// A package identifier to associate with this symbol graph.
     public
-    var package:Symbol.Package
-    /// A package identifier scope to associate with this symbol graph.
-    public
-    var packageScope:Symbol.PackageScope?
+    var package:Package
     /// A git commit to associate with the relevant symbol graph.
     ///
     /// This is nil for local package symbol graphs.
@@ -61,8 +58,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     var root:Symbol.FileBase?
 
     @inlinable public
-    init(package:Symbol.Package,
-        packageScope:Symbol.PackageScope?,
+    init(package:Package,
         commit:Commit?,
         triple:Triple,
         swift:AnyVersion,
@@ -77,7 +73,6 @@ struct SymbolGraphMetadata:Equatable, Sendable
         self.abi = SymbolGraphABI.version
 
         self.package = package
-        self.packageScope = packageScope
         self.commit = commit
         self.triple = triple
         self.swift = swift
@@ -113,9 +108,8 @@ extension SymbolGraphMetadata
         }
 
         return .init(
-            package: .swift,
-            packageScope: nil,
-            commit: .init(nil, refname: tagname),
+            package: .init(name: .swift),
+            commit: .init(name: tagname),
             triple: triple,
             swift: swift,
             products: products,
@@ -128,8 +122,8 @@ extension SymbolGraphMetadata
     enum CodingKey:String, Sendable
     {
         case abi
-        case package
-        case packageScope = "scope"
+        case package_name = "package"
+        case package_scope = "scope"
         case commit_hash = "revision"
         case commit_refname = "refname"
         case triple
@@ -159,10 +153,10 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.abi] = self.abi
-        bson[.package] = self.package
-        bson[.packageScope] = self.packageScope
-        bson[.commit_hash] = self.commit?.hash
-        bson[.commit_refname] = self.commit?.refname
+        bson[.package_name] = self.package.name
+        bson[.package_scope] = self.package.scope
+        bson[.commit_hash] = self.commit?.sha1
+        bson[.commit_refname] = self.commit?.name
         bson[.triple] = self.triple
         bson[.swift] = self.swift
         bson[.tools] = self.tools
@@ -181,11 +175,12 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
         self.init(
-            package: try bson[.package].decode(),
-            packageScope: try bson[.packageScope]?.decode(),
+            package: .init(
+                scope: try bson[.package_scope]?.decode(),
+                name: try bson[.package_name].decode()),
             commit: try bson[.commit_refname]?.decode(as: String.self)
             {
-                .init(try bson[.commit_hash]?.decode(), refname: $0)
+                .init(name: $0, sha1: try bson[.commit_hash]?.decode())
             },
             triple: try bson[.triple].decode(),
             swift: try bson[.swift].decode(),

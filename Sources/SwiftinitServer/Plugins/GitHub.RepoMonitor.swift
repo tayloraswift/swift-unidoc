@@ -118,7 +118,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 switch try await db.unidoc.register(
                     package: package.id,
                     version: version,
-                    refname: tag.name,
+                    name: tag.name,
                     sha1: tag.hash,
                     with: session)
                 {

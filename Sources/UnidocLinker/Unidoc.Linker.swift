@@ -23,7 +23,7 @@ extension Unidoc
         var diagnostics:DiagnosticContext<Unidoc.Symbolicator>
 
         private
-        let byPackageIdentifier:[Symbol.Package: Graph]
+        let byPackageName:[Symbol.Package: Graph]
         private
         let byPackage:[Package: Graph]
 
@@ -35,12 +35,12 @@ extension Unidoc
 
         private
         init(
-            byPackageIdentifier:[Symbol.Package: Graph],
+            byPackageName:[Symbol.Package: Graph],
             byPackage:[Package: Graph],
             current:Graph,
             nodes:Set<Unidoc.Scalar>)
         {
-            self.byPackageIdentifier = byPackageIdentifier
+            self.byPackageName = byPackageName
             self.byPackage = byPackage
             self.current = current
             self.nodes = nodes
@@ -75,7 +75,7 @@ extension Unidoc.Linker
         }
 
         //  Build two indexes for fast lookup by package identifier and package number.
-        var byPackageIdentifier:[Symbol.Package: Graph] = .init(
+        var byPackageName:[Symbol.Package: Graph] = .init(
             minimumCapacity: dependencies.count)
 
         var byPackage:[Unidoc.Package: Graph] = .init(
@@ -85,14 +85,14 @@ extension Unidoc.Linker
         {
             let snapshot:Graph = .init(snapshot: snapshot, upstream: upstream)
 
-            byPackageIdentifier[snapshot.metadata.package] = snapshot
+            byPackageName[snapshot.metadata.package.name] = snapshot
             byPackage[snapshot.id.package] = snapshot
         }
 
         let current:Graph = .init(snapshot: currentSnapshot, upstream: upstream)
 
         self.init(
-            byPackageIdentifier: byPackageIdentifier,
+            byPackageName: byPackageName,
             byPackage: byPackage,
             current: current,
             nodes: current.scalars.decls[current.decls.nodes.indices].reduce(into: [])
@@ -148,13 +148,13 @@ extension Unidoc.Linker
     private
     subscript(dynamic package:Symbol.Package) -> Graph?
     {
-        self.current.metadata.package == package ?
-        nil : self.byPackageIdentifier[package]
+        self.current.metadata.package.name == package ?
+        nil : self.byPackageName[package]
     }
     subscript(package:Symbol.Package) -> Graph?
     {
-        self.current.metadata.package == package ?
-        self.current : self.byPackageIdentifier[package]
+        self.current.metadata.package.name == package ?
+        self.current : self.byPackageName[package]
     }
     subscript(package:Unidoc.Package) -> Graph?
     {
@@ -201,7 +201,7 @@ extension Unidoc.Linker
         var dependencies:[Unidoc.VolumeMetadata.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
-        if  self.current.metadata.package != .swift,
+        if  self.current.metadata.package.name != .swift,
             let swift:Graph = self[.swift]
         {
             dependencies.append(.init(symbol: .swift,
@@ -211,10 +211,10 @@ extension Unidoc.Linker
         }
         for dependency:SymbolGraphMetadata.Dependency in self.current.metadata.dependencies
         {
-            dependencies.append(.init(symbol: dependency.package,
+            dependencies.append(.init(symbol: dependency.package.name,
                 requirement: dependency.requirement,
                 resolution: dependency.version.release,
-                pinned: self[dependency.package]?.id))
+                pinned: self[dependency.package.name]?.id))
         }
 
         return dependencies

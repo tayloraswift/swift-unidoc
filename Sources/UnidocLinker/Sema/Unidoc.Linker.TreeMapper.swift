@@ -108,7 +108,7 @@ extension Unidoc.Linker.TreeMapper
         {
             fatalError("""
                 scalar \(foreign) is either not a decl, or not from \
-                \(snapshot.metadata.package)!
+                \(snapshot.metadata.package.name)!
                 """)
         }
 

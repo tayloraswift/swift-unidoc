@@ -70,7 +70,7 @@ extension Unidoc.Linker.Mesh
             latestManifest: linker.current.metadata.tools,
             extraManifests: linker.current.metadata.manifests,
             requirements: linker.current.metadata.requirements,
-            commit: linker.current.metadata.commit?.hash)
+            commit: linker.current.metadata.commit?.sha1)
         var foreign:[Unidoc.ForeignVertex] = []
 
         //  Compute unweighted stats

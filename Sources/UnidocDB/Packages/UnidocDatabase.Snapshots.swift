@@ -84,7 +84,7 @@ extension UnidocDatabase.Snapshots
     {
         var dependencies:[Unidoc.Snapshot] = try await self.load(pins, with: session)
 
-        if  snapshot.metadata.package != .swift,
+        if  snapshot.metadata.package.name != .swift,
             let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(with: session)
         {
             dependencies.append(swift)

@@ -40,3 +40,8 @@ extension Symbol.PackageScope:LosslessStringConvertible
         }
     }
 }
+extension Symbol.PackageScope:ExpressibleByStringLiteral, ExpressibleByStringInterpolation
+{
+    @inlinable public
+    init(stringLiteral:String) { self.init(stringLiteral)! }
+}

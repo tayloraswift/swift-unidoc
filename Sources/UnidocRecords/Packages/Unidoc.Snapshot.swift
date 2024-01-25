@@ -55,7 +55,7 @@ extension Unidoc.Snapshot
     {
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?
-        if  case .swift = metadata.package,
+        if  case .swift = metadata.package.name,
             let version:SemanticVersion = metadata.swift.stable,
                 version.release
         {
