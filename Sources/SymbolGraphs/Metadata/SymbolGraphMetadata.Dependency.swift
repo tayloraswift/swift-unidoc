@@ -9,9 +9,7 @@ extension SymbolGraphMetadata
     struct Dependency:Equatable, Sendable
     {
         public
-        let package:Symbol.Package
-        public
-        let packageScope:Symbol.PackageScope?
+        let package:Package
         public
         let requirement:DependencyRequirement?
         public
@@ -20,14 +18,12 @@ extension SymbolGraphMetadata
         let version:AnyVersion
 
         @inlinable public
-        init(package:Symbol.Package,
-            packageScope:Symbol.PackageScope?,
+        init(package:Package,
             requirement:DependencyRequirement?,
             revision:SHA1,
             version:AnyVersion)
         {
             self.package = package
-            self.packageScope = packageScope
             self.requirement = requirement
             self.revision = revision
             self.version = version
@@ -39,18 +35,15 @@ extension SymbolGraphMetadata.Dependency:Identifiable
     /// Returns a fully qualified identifier for this dependency, if scoped, or simply the
     /// package identifier otherwise.
     @inlinable public
-    var id:Symbol.Package
-    {
-        self.packageScope.map { $0 | self.package } ?? self.package
-    }
+    var id:Symbol.Package { self.package.id }
 }
 extension SymbolGraphMetadata.Dependency
 {
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case package = "P"
-        case packageScope = "S"
+        case package_name = "P"
+        case package_scope = "S"
         case requirement_lower = "L"
         case requirement_upper = "U"
         case revision = "H"
@@ -62,8 +55,8 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.package] = self.package
-        bson[.packageScope] = self.packageScope
+        bson[.package_name] = self.package.name
+        bson[.package_scope] = self.package.scope
 
         switch self.requirement
         {
@@ -104,8 +97,9 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
             requirement = upper < lower ? nil : .range(lower ..< upper)
         }
 
-        self.init(package: try bson[.package].decode(),
-            packageScope: try bson[.packageScope]?.decode(),
+        self.init(package: .init(
+                scope: try bson[.package_scope]?.decode(),
+                name: try bson[.package_name].decode()),
             requirement: requirement,
             revision: try bson[.revision].decode(),
             version: try bson[.version].decode())

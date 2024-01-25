@@ -228,14 +228,14 @@ extension UnidocDatabase
     func register(
         package:Unidoc.Package,
         version:SemanticVersion,
-        refname:String,
+        name:String,
         sha1:SHA1?,
         with session:Mongo.Session) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
         let placement:Unidoc.EditionPlacement = try await session.query(
             database: self.id,
-            with: Unidoc.EditionPlacementQuery.init(package: package, refname: refname))
+            with: Unidoc.EditionPlacementQuery.init(package: package, refname: name))
             ?? .first
 
         switch consume placement
@@ -246,7 +246,7 @@ extension UnidocDatabase
                     version: id),
                 release: version.release,
                 patch: version.patch,
-                name: refname,
+                name: name,
                 sha1: sha1)
             //  This can fail if we race with another process.
             try await self.editions.insert(some: edition, with: session)
@@ -291,20 +291,20 @@ extension UnidocDatabase
     {
         let docs:SymbolGraphArchive = docs
         let (package, _):(Unidoc.PackageMetadata, Bool) = try await self.index(
-            package: docs.metadata.package,
+            package: docs.metadata.package.id,
             repo: nil,
             with: session)
 
         //  Is this a version-controlled package?
         let version:Unidoc.Version
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
-            let semver:SemanticVersion = docs.metadata.package.version(tag: commit.refname)
+            let semver:SemanticVersion = docs.metadata.package.name.version(tag: commit.name)
         {
             let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.register(
                 package: package.id,
                 version: semver,
-                refname: commit.refname,
-                sha1: commit.hash,
+                name: commit.name,
+                sha1: commit.sha1,
                 with: session)
 
             version = edition.version
@@ -511,7 +511,7 @@ extension UnidocDatabase
     func pin(_ snapshot:inout Unidoc.Snapshot,
         with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
-        print("pinning dependencies for \(snapshot.metadata.package)...")
+        print("pinning dependencies for \(snapshot.metadata.package.name)...")
 
         //  Important: all snapshots start off with an empty pin list, so we might need to
         //  extend the array to match the number of dependencies in the metadata.
@@ -543,7 +543,7 @@ extension UnidocDatabase
             snapshot.pins.indices,
             snapshot.metadata.dependencies)
         {
-            if  let pinned:Unidoc.Edition = pins[dependency.package]
+            if  let pinned:Unidoc.Edition = pins[dependency.package.name]
             {
                 snapshot.pins[pin] = pinned
                 all.append(pinned)
@@ -555,7 +555,7 @@ extension UnidocDatabase
             }
             else
             {
-                print("failed to pin '\(dependency.package)' to '\(dependency.version)'")
+                print("failed to pin '\(dependency.package.name)' to '\(dependency.version)'")
             }
         }
 
@@ -587,7 +587,7 @@ extension UnidocDatabase
                 of: snapshot.id.package,
                 with: session)
 
-            switch snapshot.metadata.package.version(tag: commit.refname)
+            switch snapshot.metadata.package.name.version(tag: commit.name)
             {
             case .release(let patch, build: _)?:
                 if  let formerRelease:Volumes.PatchView,
@@ -625,12 +625,12 @@ extension UnidocDatabase
         let metadata:Unidoc.VolumeMetadata = .init(id: snapshot.id,
             dependencies: dependencies,
             display: snapshot.metadata.display,
-            refname: snapshot.metadata.commit?.refname,
+            refname: snapshot.metadata.commit?.name,
             symbol: .init(
                 //  We want the version component of the volume symbol to be stable,
                 //  so we only encode the patch version, even if the symbol graph is
                 //  from a prerelease tag.
-                package: snapshot.metadata.package,
+                package: snapshot.metadata.package.id,
                 version: version),
             latest: snapshot.id == latestRelease,
             realm: realm,

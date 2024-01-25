@@ -60,7 +60,7 @@ enum Main:TestMain, TestBattery
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
-            tests.expect(docs.metadata.dependencies.map(\.package) **?
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
             [
                 "swift-collections",
                 "swift-atomics",
@@ -84,7 +84,7 @@ enum Main:TestMain, TestBattery
                     pretty: true)
             })
         {
-            tests.expect(docs.metadata.dependencies.map(\.package) **?
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
             [
                 "swift-collections",
                 "swift-atomics",
@@ -108,7 +108,7 @@ enum Main:TestMain, TestBattery
                     pretty: true)
             })
         {
-            tests.expect(docs.metadata.dependencies.map(\.package) **?
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
             [
                 "swift-collections",
                 "swift-atomics",
@@ -133,7 +133,7 @@ enum Main:TestMain, TestBattery
             })
         {
             //  the swift-argument-parser dependency should have been linted.
-            tests.expect(docs.metadata.dependencies.map(\.package) **? [])
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [])
 
             docs.roundtrip(for: tests, in: workspace.path)
         }

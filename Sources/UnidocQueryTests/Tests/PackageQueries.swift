@@ -35,9 +35,8 @@ struct PackageQueries:UnidocDatabaseTestBattery
         {
             docs = .init(
                 metadata: .init(
-                    package: .swift,
-                    packageScope: nil,
-                    commit: .init(nil, refname: "swift-5.8.1-RELEASE"),
+                    package: .init(name: .swift),
+                    commit: .init(name: "swift-5.8.1-RELEASE"),
                     triple: toolchain.triple,
                     swift: .stable(.release(.v(5, 8, 1))),
                     products: []),
@@ -47,45 +46,45 @@ struct PackageQueries:UnidocDatabaseTestBattery
         }
         do
         {
-            docs.metadata.package = "swift-debut"
+            docs.metadata.package.name = "swift-debut"
             docs.metadata.commit = nil
 
             status.debut = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
-            docs.metadata.package = "swift-fearless"
-            docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
-                refname: "0.1.2")
+            docs.metadata.package.name = "swift-fearless"
+            docs.metadata.commit = .init(name: "0.1.2",
+                sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
             status.fearless.0 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
-            docs.metadata.commit = .init(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,
-                refname: "0.1.3")
+            docs.metadata.commit = .init(name: "0.1.3",
+                sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
 
             status.fearless.1 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
-            docs.metadata.package = "swift-speak-now"
+            docs.metadata.package.name = "swift-speak-now"
             docs.metadata.commit = nil
 
             status.speakNow.0 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
-            docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
-                refname: "0.3.0")
+            docs.metadata.commit = .init(name: "0.3.0",
+                sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
             status.speakNow.1 = try await unidoc.store(docs: docs, with: session)
         }
         do
         {
-            docs.metadata.package = "swift-red"
-            docs.metadata.commit = .init(0xffffffffffffffffffffffffffffffffffffffff,
-                refname: "0.4.0")
+            docs.metadata.package.name = "swift-red"
+            docs.metadata.commit = .init(name: "0.4.0",
+                sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
             status.red = try await unidoc.store(docs: docs, with: session)
         }

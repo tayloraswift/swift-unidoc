@@ -13,8 +13,7 @@ extension PackageNode
         return try self.dependencies.map
         {
             let pin:SPM.DependencyPin = try pins($0.id)
-            return .init(package: $0.id,
-                packageScope: pin.location.owner,
+            return .init(package: .init(scope: pin.location.owner, name: $0.id),
                 requirement: ($0 as? SPM.Manifest.Dependency)?.requirement?.stable,
                 revision: pin.revision,
                 version: pin.version)

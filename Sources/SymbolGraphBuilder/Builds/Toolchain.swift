@@ -268,7 +268,7 @@ extension Toolchain
         let commit:SymbolGraphMetadata.Commit?
         if  case .versioned(let pin, let ref) = build.id
         {
-            commit = .init(pin.revision, refname: ref)
+            commit = .init(name: ref, sha1: pin.revision)
         }
         else
         {
@@ -290,15 +290,20 @@ extension Toolchain
             }
         }
 
-        let metadata:SymbolGraphMetadata = .init(package: build.id.package,
-            packageScope: build.id.pin?.location.owner,
+        let metadata:SymbolGraphMetadata = .init(
+            package: .init(
+                scope: build.id.pin?.location.owner,
+                name: build.id.package),
             commit: commit,
             triple: self.triple,
             swift: self.version,
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
-            dependencies: dependenciesPinned.filter { dependenciesUsed.contains($0.package) },
+            dependencies: dependenciesPinned.filter
+            {
+                dependenciesUsed.contains($0.package.name)
+            },
             products: .init(viewing: flatNode.products),
             display: manifest.name,
             root: manifest.root)
