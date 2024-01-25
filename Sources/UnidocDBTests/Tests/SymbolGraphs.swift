@@ -27,6 +27,7 @@ struct SymbolGraphs:MongoTestBattery
             docs = .init(
                 metadata: .init(
                     package: .swift,
+                    packageScope: nil,
                     commit: .init(nil, refname: "swift-5.8.1-RELEASE"),
                     triple: triple,
                     swift: .stable(.release(.v(5, 8, 1))),

@@ -28,6 +28,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
         {
             let empty:SymbolGraphArchive = .init(metadata: .init(
                     package: package,
+                    packageScope: nil,
                     commit: .init(nil, refname: tag),
                     triple: toolchain.triple,
                     swift: toolchain.version),

@@ -36,6 +36,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs = .init(
                 metadata: .init(
                     package: .swift,
+                    packageScope: nil,
                     commit: .init(nil, refname: "swift-5.8.1-RELEASE"),
                     triple: toolchain.triple,
                     swift: .stable(.release(.v(5, 8, 1))),

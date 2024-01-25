@@ -29,9 +29,9 @@ extension PackageBuild.ID
     {
         switch self
         {
-        case    .unversioned:           nil
-        case    .versioned(let pin, _),
-                .upstream(let pin):     pin
+        case .unversioned:              nil
+        case .versioned(let pin, _):    pin
+        case .upstream(let pin):        pin
         }
     }
 }
