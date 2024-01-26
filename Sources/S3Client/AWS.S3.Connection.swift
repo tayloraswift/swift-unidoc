@@ -4,52 +4,54 @@ import NIOCore
 import NIOHTTP1
 import S3
 
-extension AWS.S3Client
+extension AWS.S3
 {
+    /// We would never be running an S3 server ourselves, so we don’t need to namespace this.
     @frozen public
     struct Connection
     {
         @usableFromInline internal
-        let http1:HTTP1Client.Connection
-        @usableFromInline internal
         let bucket:AWS.S3.Bucket
         @usableFromInline internal
-        let key:AWS.AccessKey
+        let http1:HTTP1Client.Connection
 
         @inlinable internal
-        init(http1:HTTP1Client.Connection, bucket:AWS.S3.Bucket, key:AWS.AccessKey)
+        init(bucket:AWS.S3.Bucket, http1:HTTP1Client.Connection)
         {
-            self.http1 = http1
             self.bucket = bucket
-            self.key = key
+            self.http1 = http1
         }
     }
 }
-extension AWS.S3Client.Connection
+extension AWS.S3.Connection
 {
     public
     func put(_ content:[UInt8],
         using storage:AWS.S3.StorageClass = .standard,
         path:String,
-        type:MediaType) async throws
+        type:MediaType,
+        with key:AWS.AccessKey) async throws
     {
         try await self.put(self.http1.buffer(bytes: content),
             using: storage,
             path: path,
-            type: type)
+            type: type,
+            with: key)
     }
 
     private
     func put(_ content:ByteBuffer,
         using storage:AWS.S3.StorageClass,
         path:String,
-        type:MediaType) async throws
+        type:MediaType,
+        with key:AWS.AccessKey?) async throws
     {
-        var headers:HTTPHeaders = self.key.sign(put: content,
+        var headers:HTTPHeaders = key?.sign(put: content,
             storage: storage,
             bucket: self.bucket,
-            path: path)
+            path: path) ?? ["host": bucket.domain]
 
+        headers.add(name: "content-length", value: "\(content.readableBytes)")
         headers.add(name: "content-type", value: "\(type)")
 
         let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
@@ -62,15 +64,13 @@ extension AWS.S3Client.Connection
         let status:HTTPResponseStatus = facet.head?.status
         else
         {
-            fatalError("No status.")
+            throw AWS.S3.RequestError.put(0)
         }
-
-        print("status: \(status)")
-
-        for buffer:ByteBuffer in facet.body
+        guard
+        case .ok = status
+        else
         {
-            print(String.init(decoding: buffer.readableBytesView,
-                as: Unicode.UTF8.self))
+            throw AWS.S3.RequestError.put(status.code)
         }
     }
 }

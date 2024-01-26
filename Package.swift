@@ -54,6 +54,7 @@ let package:Package = .init(
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
         .library(name: "S3", targets: ["S3"]),
+        .library(name: "S3Client", targets: ["S3Client"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
         .library(name: "Signatures", targets: ["Signatures"]),
@@ -355,8 +356,16 @@ let package:Package = .init(
 
         .target(name: "S3", dependencies:
             [
+            ]),
+
+        .target(name: "S3Client", dependencies:
+            [
                 .target(name: "HTTPClient"),
+                .target(name: "Media"),
+                .target(name: "S3"),
                 .target(name: "UnixTime"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "SHA2", package: "swift-hash"),
             ]),
 
@@ -563,7 +572,7 @@ let package:Package = .init(
 
         .executableTarget(name: "S3Export", dependencies:
             [
-                .target(name: "S3"),
+                .target(name: "S3Client"),
                 .target(name: "System"),
                 .target(name: "SwiftinitAssets"),
             ]),
@@ -646,7 +655,7 @@ let package:Package = .init(
 
         .executableTarget(name: "S3Tests", dependencies:
             [
-                .target(name: "S3"),
+                .target(name: "S3Client"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
