@@ -21,7 +21,7 @@ extension Unidoc
 extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.CrawlingWindows
+    typealias CollectionOrigin = Unidoc.DB.CrawlingWindows
     public
     typealias Collation = SimpleCollation
     public
@@ -54,7 +54,7 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
 
         pipeline[.lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Packages.name
+            $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Date[.window] / Unidoc.CrawlingWindow[.id]
             $0[.foreignField] = Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]
             $0[.pipeline] = .init

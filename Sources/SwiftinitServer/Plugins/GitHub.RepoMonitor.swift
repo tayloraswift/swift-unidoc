@@ -153,7 +153,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
 
             if  let interesting:String = (indexed.release ?? indexed.prerelease)?.name
             {
-                let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: now,
+                let activity:Unidoc.DB.RepoFeed.Activity = .init(discovered: now,
                     package: package.symbol,
                     refname: interesting)
 

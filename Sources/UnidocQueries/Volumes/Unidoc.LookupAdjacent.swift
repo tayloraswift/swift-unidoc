@@ -48,7 +48,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 scope: "scope",
                 id: "realm")
 
-            $0[.from] = UnidocDatabase.Groups.name
+            $0[.from] = Unidoc.DB.Groups.name
             $0[.let] = .init
             {
                 $0[let: local.scope] = .expr

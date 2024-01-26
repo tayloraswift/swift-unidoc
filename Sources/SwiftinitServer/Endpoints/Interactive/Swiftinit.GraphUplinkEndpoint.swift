@@ -11,10 +11,10 @@ extension Swiftinit
     /// Queues one or more editions for uplinking. The uplinking process itself is asynchronous.
     struct GraphUplinkEndpoint:Sendable
     {
-        let queue:UnidocDatabase.Snapshots.QueueUplink
+        let queue:Unidoc.DB.Snapshots.QueueUplink
         let uri:String?
 
-        init(queue:UnidocDatabase.Snapshots.QueueUplink, uri:String? = nil)
+        init(queue:Unidoc.DB.Snapshots.QueueUplink, uri:String? = nil)
         {
             self.queue = queue
             self.uri = uri

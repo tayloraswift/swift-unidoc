@@ -9,12 +9,12 @@ extension Swiftinit
 {
     struct HomePage
     {
-        let repo:[UnidocDatabase.RepoFeed.Activity]
-        let docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>]
+        let repo:[Unidoc.DB.RepoFeed.Activity]
+        let docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>]
 
         init(
-            repo:[UnidocDatabase.RepoFeed.Activity],
-            docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>])
+            repo:[Unidoc.DB.RepoFeed.Activity],
+            docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>])
         {
             self.repo = repo
             self.docs = docs
@@ -110,7 +110,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                         $0[.ol]
                         {
                             let now:UnixInstant = .now()
-                            for item:UnidocDatabase.RepoFeed.Activity in self.repo
+                            for item:Unidoc.DB.RepoFeed.Activity in self.repo
                             {
                                 $0[.li]
                                 {
@@ -139,7 +139,7 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                         $0[.ol]
                         {
                             let now:UnixInstant = .now()
-                            for item:UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata> in
+                            for item:Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata> in
                                 self.docs
                             {
                                 $0[.li]

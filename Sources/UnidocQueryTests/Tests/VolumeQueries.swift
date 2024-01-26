@@ -16,7 +16,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
     static
     func run(tests:TestGroup,
         pool:Mongo.SessionPool,
-        unidoc:UnidocDatabase) async throws
+        unidoc:Unidoc.DB) async throws
     {
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()

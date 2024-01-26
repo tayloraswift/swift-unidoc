@@ -29,14 +29,14 @@ extension Unidoc.PackagesQuery<Unidoc.PackageCreated>
 extension Unidoc.PackagesQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.Packages
+    typealias CollectionOrigin = Unidoc.DB.Packages
     public
     typealias Collation = SimpleCollation
     public
     typealias Iteration = Mongo.SingleBatch<Unidoc.PackageOutput>
 
     public
-    var hint:Mongo.CollectionIndex? { UnidocDatabase.Packages.indexRepoCreated }
+    var hint:Mongo.CollectionIndex? { Unidoc.DB.Packages.indexRepoCreated }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)

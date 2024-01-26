@@ -52,7 +52,7 @@ extension Unidoc.PackageOutput
         //  Lookup the latest release of each package.
         pipeline[.lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Editions.name
+            $0[.from] = Unidoc.DB.Editions.name
             $0[.localField] = Unidoc.PackageOutput[.metadata] /
                 Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
