@@ -115,7 +115,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                     continue
                 }
 
-                switch try await db.unidoc.register(
+                switch try await db.unidoc.index(
                     package: package.id,
                     version: version,
                     name: tag.name,

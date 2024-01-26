@@ -232,7 +232,7 @@ extension Unidoc.DB
 
     /// Registers an **edition** of a package.
     public
-    func register(
+    func index(
         package:Unidoc.Package,
         version:SemanticVersion,
         name:String,
@@ -274,6 +274,38 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
+    /// Indexes and stores a symbol graph in the database, linking it **synchronously**.
+    @_spi(testable)
+    public
+    func store(linking docs:SymbolGraphArchive,
+        with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
+    {
+        var snapshot:Unidoc.Snapshot
+        let realm:Unidoc.Realm?
+
+        //  Don’t queue for uplink, since we’re going to do that synchronously.
+        (snapshot, realm) = try await self.label(docs: docs, link: nil, with: session)
+
+        let volume:Unidoc.Volume = try await self.link(&snapshot,
+            realm: realm,
+            with: session)
+        let symbol:Symbol.Edition = volume.metadata.symbol
+
+        let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
+            snapshot: consume snapshot,
+            with: session)
+
+        let uplinked:Unidoc.UplinkStatus = .init(
+            edition: uploaded.edition,
+            volume: symbol,
+            hidden: true,
+            delta: try await self.fill(volume: consume volume,
+                clear: uploaded.updated,
+                with: session))
+
+        return (uploaded, uplinked)
+    }
+
     /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
     /// uplink.
     public
@@ -307,7 +339,7 @@ extension Unidoc.DB
         if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
             let semver:SemanticVersion = docs.metadata.package.name.version(tag: commit.name)
         {
-            let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.register(
+            let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.index(
                 package: package.id,
                 version: semver,
                 name: commit.name,
@@ -333,45 +365,6 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    @available(*, deprecated, renamed: "store(linking:with:)")
-    public
-    func publish(docs:SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
-    {
-        try await self.store(linking: docs, with: session)
-    }
-
-    /// Indexes, stores, and links a symbol graph in the database.
-    public
-    func store(linking docs:SymbolGraphArchive,
-        with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
-    {
-        var snapshot:Unidoc.Snapshot
-        let realm:Unidoc.Realm?
-
-        //  Don’t queue for uplink, since we’re going to do that synchronously.
-        (snapshot, realm) = try await self.label(docs: docs, link: nil, with: session)
-
-        let volume:Unidoc.Volume = try await self.link(&snapshot,
-            realm: realm,
-            with: session)
-        let symbol:Symbol.Edition = volume.metadata.symbol
-
-        let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
-            snapshot: consume snapshot,
-            with: session)
-
-        let uplinked:Unidoc.UplinkStatus = .init(
-            edition: uploaded.edition,
-            volume: symbol,
-            hidden: true,
-            delta: try await self.fill(volume: consume volume,
-                clear: uploaded.updated,
-                with: session))
-
-        return (uploaded, uplinked)
-    }
-
     public
     func uplink(_ id:Unidoc.Edition,
         with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
