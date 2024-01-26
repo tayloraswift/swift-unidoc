@@ -5,6 +5,7 @@ import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
 import Unidoc
+@_spi(testable)
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
