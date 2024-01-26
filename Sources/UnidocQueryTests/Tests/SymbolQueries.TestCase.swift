@@ -55,7 +55,7 @@ extension SymbolQueries.TestCase
             tests: tests)
     }
 
-    func run(on unidoc:UnidocDatabase, with session:Mongo.Session) async
+    func run(on unidoc:Unidoc.DB, with session:Mongo.Session) async
     {
         await self.tests.do
         {

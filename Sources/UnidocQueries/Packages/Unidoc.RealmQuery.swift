@@ -32,9 +32,9 @@ extension Unidoc.RealmQuery:Mongo.PipelineQuery
 extension Unidoc.RealmQuery:Unidoc.AliasingQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.RealmAliases
+    typealias CollectionOrigin = Unidoc.DB.RealmAliases
     public
-    typealias CollectionTarget = UnidocDatabase.Realms
+    typealias CollectionTarget = Unidoc.DB.Realms
 
     @inlinable public static
     var target:Mongo.KeyPath { Output[.metadata] }
@@ -46,7 +46,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
         {
             pipeline[.lookup] = .init
             {
-                $0[.from] = UnidocDatabase.Users.name
+                $0[.from] = Unidoc.DB.Users.name
                 $0[.pipeline] = .init
                 {
                     $0[.match] = .init
@@ -67,7 +67,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
         // `$exists` guards, but somehow it does.
         pipeline[.lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Packages.name
+            $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Self.target / Unidoc.RealmMetadata[.id]
             $0[.foreignField] = Unidoc.PackageMetadata[.realm]
             $0[.pipeline] = .init

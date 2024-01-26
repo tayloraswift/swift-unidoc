@@ -11,7 +11,7 @@ extension Unidoc
 
 /// The name of this protocol is ``Unidoc.VolumeQuery``.
 public
-protocol _UnidocVolumeQuery:Mongo.PipelineQuery<UnidocDatabase.Volumes>
+protocol _UnidocVolumeQuery:Mongo.PipelineQuery<Unidoc.DB.Volumes>
     where Collation == VolumeCollation
 {
     associatedtype VertexPredicate:Unidoc.VertexPredicate
@@ -51,8 +51,8 @@ extension Unidoc.VolumeQuery
     var hint:Mongo.CollectionIndex?
     {
         self.volume.version == nil
-            ? UnidocDatabase.Volumes.indexSymbolicPatch
-            : UnidocDatabase.Volumes.indexSymbolic
+            ? Unidoc.DB.Volumes.indexSymbolicPatch
+            : Unidoc.DB.Volumes.indexSymbolic
     }
 
     public

@@ -181,7 +181,7 @@ extension Swiftinit.AnyEndpoint
     {
         if  let id:Symbol.Edition = .init(trunk)
         {
-            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Search>.init(query: .init(
+            .explainable(Swiftinit.LunrEndpoint<Unidoc.DB.Search>.init(query: .init(
                     tag: parameters.tag,
                     id: id)),
                 parameters: parameters,
@@ -189,7 +189,7 @@ extension Swiftinit.AnyEndpoint
         }
         else if trunk == "packages.json"
         {
-            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Metadata>.init(query: .init(
+            .explainable(Swiftinit.LunrEndpoint<Unidoc.DB.Metadata>.init(query: .init(
                     tag: parameters.tag,
                     id: 0)),
                 parameters: parameters,

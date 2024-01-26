@@ -35,9 +35,9 @@ extension Unidoc.VersionsQuery:Mongo.PipelineQuery
 extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.PackageAliases
+    typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public
-    typealias CollectionTarget = UnidocDatabase.Packages
+    typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
     var target:Mongo.KeyPath { Output[.package] }
@@ -59,7 +59,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         {
             pipeline[.lookup] = Mongo.LookupDocument.init
             {
-                $0[.from] = UnidocDatabase.Editions.name
+                $0[.from] = Unidoc.DB.Editions.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
                 $0[.foreignField] = Unidoc.EditionMetadata[.package]
                 $0[.pipeline] = .init
@@ -138,7 +138,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
 
             pipeline[.lookup] = .init
             {
-                $0[.from] = UnidocDatabase.PackageAliases.name
+                $0[.from] = Unidoc.DB.PackageAliases.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
                 $0[.foreignField] = Unidoc.PackageAlias[.coordinate]
                 $0[.as] = aliases.expression
@@ -154,7 +154,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             //  Lookup the associated realm.
             pipeline[.lookup] = .init
             {
-                $0[.from] = UnidocDatabase.Realms.name
+                $0[.from] = Unidoc.DB.Realms.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
                 $0[.foreignField] = Unidoc.RealmMetadata[.id]
                 $0[.as] = Output[.realm]
@@ -170,7 +170,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             //  Lookup the querying user.
             pipeline[.lookup] = .init
             {
-                $0[.from] = UnidocDatabase.Users.name
+                $0[.from] = Unidoc.DB.Users.name
                 $0[.pipeline] = .init
                 {
                     $0[.match] = .init
@@ -200,7 +200,7 @@ extension Unidoc.VersionsQuery
         //  Check if a volume has been created for this edition.
         pipeline[.lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Volumes.name
+            $0[.from] = Unidoc.DB.Volumes.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.VolumeMetadata[.id]
             $0[.as] = volume
@@ -209,7 +209,7 @@ extension Unidoc.VersionsQuery
         //  Check if a symbol graph has been uploaded for this edition.
         pipeline[.lookup] = Mongo.LookupDocument.init
         {
-            $0[.from] = UnidocDatabase.Snapshots.name
+            $0[.from] = Unidoc.DB.Snapshots.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.Snapshot[.id]
             $0[.pipeline] = .init

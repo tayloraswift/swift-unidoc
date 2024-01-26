@@ -17,7 +17,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
         {
             let zone:Mongo.Variable<Unidoc.Edition> = "zone"
 
-            $0[.from] = UnidocDatabase.Vertices.name
+            $0[.from] = Unidoc.DB.Vertices.name
             $0[.let] = .init
             {
                 $0[let: zone] = volume / Unidoc.VolumeMetadata[.id]

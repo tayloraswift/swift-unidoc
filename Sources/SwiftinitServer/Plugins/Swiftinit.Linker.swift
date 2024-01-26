@@ -102,7 +102,7 @@ extension Swiftinit.Linker
         }
 
         try await session.update(database: db.unidoc.id,
-            with: UnidocDatabase.Snapshots.ClearUplink.one(edition))
+            with: Unidoc.DB.Snapshots.ClearUplink.one(edition))
 
         self.buffer.push(event: .uplinked(status))
 

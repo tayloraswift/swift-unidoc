@@ -16,7 +16,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
     static
     func run(tests:TestGroup,
         pool:Mongo.SessionPool,
-        unidoc:UnidocDatabase) async throws
+        unidoc:Unidoc.DB) async throws
     {
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
@@ -59,7 +59,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
     }
 
     private static
-    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:UnidocDatabase) async throws
+    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:Unidoc.DB) async throws
     {
         guard
         let tests:TestGroup

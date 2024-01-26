@@ -12,7 +12,7 @@ struct SymbolGraphs:MongoTestBattery
     static
     func run(tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:UnidocDatabase = await .setup(as: database, in: pool)
+        let database:Unidoc.DB = await .setup(as: database, in: pool)
 
         let session:Mongo.Session = try await .init(from: pool)
 

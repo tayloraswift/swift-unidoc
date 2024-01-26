@@ -110,7 +110,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  Lookup the repo-level information.
         pipeline[.lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Packages.name
+            $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.cell]
             $0[.foreignField] = Unidoc.PackageMetadata[.id]
             $0[.as] = Unidoc.PrincipalOutput[.repo]
@@ -143,7 +143,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             let min:Mongo.Variable<Unidoc.Scalar> = "min"
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
-            $0[.from] = UnidocDatabase.Vertices.name
+            $0[.from] = Unidoc.DB.Vertices.name
             $0[.let] = .init
             {
                 $0[let: symbol] = .expr
@@ -293,7 +293,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 {
                     let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
 
-                    $0[.from] = UnidocDatabase.Trees.name
+                    $0[.from] = Unidoc.DB.Trees.name
                     $0[.let] = .init
                     {
                         $0[let: tree] = .expr
@@ -344,7 +344,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 }
                 $0[.lookup] = .init
                 {
-                    $0[.from] = UnidocDatabase.Vertices.name
+                    $0[.from] = Unidoc.DB.Vertices.name
                     $0[.localField] = edges.scalars
                     $0[.foreignField] = Unidoc.AnyVertex[.id]
                     $0[.as] = results
@@ -385,7 +385,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 }
                 $0[.lookup] = .init
                 {
-                    $0[.from] = UnidocDatabase.Volumes.name
+                    $0[.from] = Unidoc.DB.Volumes.name
                     $0[.localField] = edges.volumes
                     $0[.foreignField] = Unidoc.VolumeMetadata[.id]
                     $0[.as] = results

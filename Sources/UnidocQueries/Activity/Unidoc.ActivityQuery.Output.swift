@@ -9,14 +9,14 @@ extension Unidoc.ActivityQuery
     struct Output:Sendable
     {
         public
-        let repo:[UnidocDatabase.RepoFeed.Activity]
+        let repo:[Unidoc.DB.RepoFeed.Activity]
         public
-        let docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>]
+        let docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>]
 
         @inlinable internal
         init(
-            repo:[UnidocDatabase.RepoFeed.Activity],
-            docs:[UnidocDatabase.DocsFeed.Activity<Unidoc.VolumeMetadata>])
+            repo:[Unidoc.DB.RepoFeed.Activity],
+            docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>])
         {
             self.repo = repo
             self.docs = docs

@@ -88,7 +88,7 @@ extension Unidoc.AnyGroup
         /// package. Practically, this determines if extensions are visible outside of their
         /// native volume.
         ///
-        /// ``Unidoc.AnyGroup`` doesn’t encode this directly, the ``UnidocDatabase.Groups``
+        /// ``Unidoc.AnyGroup`` doesn’t encode this directly, the ``Unidoc.DB.Groups``
         /// type adds it after delegating to ``Unidoc.AnyGroup``’s ``encode(to:)`` witness.
         case realm = "R"
     }

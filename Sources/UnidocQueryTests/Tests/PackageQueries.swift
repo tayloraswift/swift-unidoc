@@ -14,7 +14,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
     static
     func run(tests:TestGroup,
         pool:Mongo.SessionPool,
-        unidoc:UnidocDatabase) async throws
+        unidoc:Unidoc.DB) async throws
     {
         let toolchain:Toolchain = try await .detect()
         let session:Mongo.Session = try await .init(from: pool)
@@ -91,13 +91,13 @@ struct PackageQueries:UnidocDatabaseTestBattery
 
         if  let tests:TestGroup = tests / "AllPackages"
         {
-            let query:SearchIndexQuery<UnidocDatabase.Metadata> = .init(
+            let query:SearchIndexQuery<Unidoc.DB.Metadata> = .init(
                 tag: nil,
                 id: 0)
 
             await tests.do
             {
-                if  let index:SearchIndexQuery<UnidocDatabase.Metadata>.Output = tests.expect(
+                if  let index:SearchIndexQuery<Unidoc.DB.Metadata>.Output = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
