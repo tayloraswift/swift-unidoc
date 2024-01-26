@@ -3,6 +3,7 @@ import NIOCore
 import NIOPosix
 import NIOSSL
 import S3
+import S3Client
 import SemanticVersions
 import SwiftinitAssets
 import SwiftinitPages
@@ -30,16 +31,13 @@ enum Main
             fatalError("could not load AWS access key!")
         }
 
-        let s3:AWS.S3Client = .init(
-            http1: .init(threads: threads,
-                niossl: niossl,
-                remote: "\(bucket.name).s3.amazonaws.com"),
-            bucket: bucket,
-            key: key)
+        let s3:AWS.S3.Client = .init(threads: threads,
+            niossl: niossl,
+            bucket: bucket)
 
         try await s3.connect
         {
-            @Sendable (connection:AWS.S3Client.Connection) in
+            @Sendable (connection:AWS.S3.Connection) in
 
             for asset:Swiftinit.Asset in Swiftinit.Asset.allCases
             {
@@ -51,7 +49,8 @@ enum Main
                 try await connection.put(content,
                     using: .standard,
                     path: path,
-                    type: asset.type)
+                    type: asset.type,
+                    with: key)
             }
         }
     }
