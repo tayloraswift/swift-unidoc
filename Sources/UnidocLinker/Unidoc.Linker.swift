@@ -53,43 +53,45 @@ extension Unidoc
 extension Unidoc.Linker
 {
     public
-    init(_ currentSnapshot:consuming Unidoc.Snapshot, dependencies:borrowing [Unidoc.Snapshot])
+    init(
+        linking primary:consuming SymbolGraphObject<Unidoc.Edition>,
+        against others:borrowing [SymbolGraphObject<Unidoc.Edition>])
     {
         //  Build a combined lookup table mapping upstream symbols to scalars.
         //  Because module names are unique within a build tree, there should
         //  be no collisions among mangled symbols.
         var upstream:UpstreamScalars = .init()
 
-        for snapshot:Unidoc.Snapshot in copy dependencies
+        for other:SymbolGraphObject<Unidoc.Edition> in copy others
         {
-            for (citizen, symbol):(Int32, Symbol.Decl) in snapshot.graph.decls.citizens
+            for (citizen, symbol):(Int32, Symbol.Decl) in other.graph.decls.citizens
             {
-                upstream.citizens[symbol] = snapshot.id + citizen
+                upstream.citizens[symbol] = other.id + citizen
             }
             for (culture, symbol):(Int, Symbol.Module) in zip(
-                snapshot.graph.cultures.indices,
-                snapshot.graph.namespaces)
+                other.graph.cultures.indices,
+                other.graph.namespaces)
             {
-                upstream.cultures[symbol] = snapshot.id + culture * .module
+                upstream.cultures[symbol] = other.id + culture * .module
             }
         }
 
         //  Build two indexes for fast lookup by package identifier and package number.
         var byPackageName:[Symbol.Package: Graph] = .init(
-            minimumCapacity: dependencies.count)
+            minimumCapacity: others.count)
 
         var byPackage:[Unidoc.Package: Graph] = .init(
-            minimumCapacity: dependencies.count)
+            minimumCapacity: others.count)
 
-        for snapshot:Unidoc.Snapshot in copy dependencies
+        for other:SymbolGraphObject<Unidoc.Edition> in copy others
         {
-            let snapshot:Graph = .init(snapshot: snapshot, upstream: upstream)
+            let other:Graph = .init(other, upstream: upstream)
 
-            byPackageName[snapshot.metadata.package.name] = snapshot
-            byPackage[snapshot.id.package] = snapshot
+            byPackageName[other.metadata.package.name] = other
+            byPackage[other.id.package] = other
         }
 
-        let current:Graph = .init(snapshot: currentSnapshot, upstream: upstream)
+        let current:Graph = .init(primary, upstream: upstream)
 
         self.init(
             byPackageName: byPackageName,

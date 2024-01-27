@@ -5,7 +5,7 @@ import Symbols
 import System
 import Testing
 
-extension SymbolGraphArchive
+extension SymbolGraphObject<Void>
 {
     public static
     func load(package:Symbol.Package,
@@ -28,7 +28,7 @@ extension SymbolGraphArchive
         return file
     }
 }
-extension SymbolGraphArchive
+extension SymbolGraphObject<Void>
 {
     public
     func roundtrip(for tests:TestGroup, in directory:FilePath)
@@ -38,7 +38,7 @@ extension SymbolGraphArchive
             let file:FilePath = try self.save(in: directory)
 
             if  let tests:TestGroup = tests / "roundtripping",
-                let decoded:SymbolGraphArchive = tests.do(
+                let decoded:Self = tests.do(
                 {
                     try .init(buffer: try file.read())
                 })

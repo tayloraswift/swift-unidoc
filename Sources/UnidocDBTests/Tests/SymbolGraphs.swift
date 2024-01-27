@@ -19,7 +19,7 @@ struct SymbolGraphs:MongoTestBattery
         let triple:Triple = .init("x86_64-unknown-linux-gnu")!
         let empty:SymbolGraph = .init(modules: [])
 
-        var docs:SymbolGraphArchive
+        var docs:SymbolGraphObject<Void>
 
         do
         {

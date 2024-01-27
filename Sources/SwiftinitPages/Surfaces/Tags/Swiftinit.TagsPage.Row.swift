@@ -116,6 +116,8 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
         {
             if  let graph:Unidoc.VersionsQuery.Graph = self.graph
             {
+                let size:Int = graph.inlineBytes ?? graph.remoteBytes
+
                 $0[.span]
                 {
                     $0.class = graph.link != nil ? "abi uplinking" : "abi"
@@ -129,9 +131,9 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
                 $0[.span]
                 {
                     $0.class = "kb"
-                    $0.title = "\(graph.bytes) bytes"
+                    $0.title = "\(size) bytes, \(graph.inlineBytes ?? 0) bytes on disk"
 
-                } = "(\(graph.bytes >> 10) kb)"
+                } = "(\(size >> 10) kb)"
             }
             else
             {

@@ -24,7 +24,7 @@ extension Swiftinit.GraphPlacementEndpoint:BlockingEndpoint
         switch self
         {
         case .put:
-            let docs:SymbolGraphArchive = try .init(
+            let docs:SymbolGraphObject<Void> = try .init(
                 bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
 
             let uploaded:Unidoc.UploadStatus = try await server.db.unidoc.store(

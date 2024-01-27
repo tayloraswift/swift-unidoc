@@ -26,11 +26,35 @@ extension AWS.S3
 extension AWS.S3.Connection
 {
     public
+    func get(path:String) async throws -> [UInt8]
+    {
+        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+            method: .GET,
+            path: path,
+            head: ["host": bucket.domain]))
+
+        guard
+        let status:HTTPResponseStatus = facet.head?.status
+        else
+        {
+            throw AWS.S3.RequestError.get(0)
+        }
+        guard
+        case .ok = status
+        else
+        {
+            throw AWS.S3.RequestError.get(status.code)
+        }
+
+        return facet.body
+    }
+
+    public
     func put(_ content:[UInt8],
         using storage:AWS.S3.StorageClass = .standard,
         path:String,
         type:MediaType,
-        with key:AWS.AccessKey) async throws
+        with key:AWS.AccessKey? = nil) async throws
     {
         try await self.put(self.http1.buffer(bytes: content),
             using: storage,

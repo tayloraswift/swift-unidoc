@@ -22,7 +22,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         let workspace:Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
 
-        let example:SymbolGraphArchive = try await toolchain.generateDocs(
+        let example:SymbolGraphObject<Void> = try await toolchain.generateDocs(
             for: try await .local(package: "swift-malibu",
                 from: "TestPackages",
                 in: workspace,
@@ -31,7 +31,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         example.roundtrip(for: tests, in: workspace.path)
 
-        let swift:SymbolGraphArchive
+        let swift:SymbolGraphObject<Void>
         do
         {
             //  Use the cached binary if available.

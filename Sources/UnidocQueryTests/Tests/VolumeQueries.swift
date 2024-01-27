@@ -27,7 +27,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
 
         for (i, tag):(Int32, String) in zip(0..., ["0.1.0", "0.2.0", "1.0.0-beta.1"])
         {
-            let empty:SymbolGraphArchive = .init(metadata: .init(
+            let empty:SymbolGraphObject<Void> = .init(metadata: .init(
                     package: .init(name: package),
                     commit: .init(name: tag),
                     triple: toolchain.triple,

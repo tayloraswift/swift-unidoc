@@ -5,12 +5,6 @@ import UnidocRecords
 
 extension Unidoc.Linker
 {
-    @available(*, deprecated, renamed: "Unidoc.Linker.Graph")
-    @usableFromInline
-    typealias Snapshot = Graph
-}
-extension Unidoc.Linker
-{
     @dynamicMemberLookup
     @usableFromInline final
     class Graph
@@ -59,16 +53,17 @@ extension Unidoc.Linker.Graph
 extension Unidoc.Linker.Graph
 {
     convenience
-    init(snapshot:Unidoc.Snapshot, upstream:borrowing Unidoc.Linker.UpstreamScalars)
+    init(_ object:SymbolGraphObject<Unidoc.Edition>,
+        upstream:borrowing Unidoc.Linker.UpstreamScalars)
     {
-        let scalars:Scalars = .init(snapshot: snapshot, upstream: upstream)
+        let scalars:Scalars = .init(object, upstream: upstream)
 
         var hierarchy:[Int32: Unidoc.Scalar] = [:]
-            hierarchy.reserveCapacity(snapshot.graph.decls.nodes.count)
+            hierarchy.reserveCapacity(object.graph.decls.nodes.count)
 
         for (n, node):(Int32, SymbolGraph.DeclNode) in zip(
-            snapshot.graph.decls.nodes.indices,
-            snapshot.graph.decls.nodes)
+            object.graph.decls.nodes.indices,
+            object.graph.decls.nodes)
         {
             guard let n:Unidoc.Scalar = scalars.decls[n]
             else
@@ -90,7 +85,7 @@ extension Unidoc.Linker.Graph
             for `extension`:SymbolGraph.Extension in node.extensions
             {
                 for nested:Int32 in `extension`.nested where
-                    snapshot.graph.decls.contains(citizen: nested)
+                    object.graph.decls.contains(citizen: nested)
                 {
                     hierarchy[nested] = n
                 }
@@ -99,7 +94,7 @@ extension Unidoc.Linker.Graph
 
         var qualifiers:[Int32: Int] = [:]
 
-        for culture:SymbolGraph.Culture in snapshot.graph.cultures
+        for culture:SymbolGraph.Culture in object.graph.cultures
         {
             for namespace:SymbolGraph.Namespace in culture.namespaces
             {
@@ -110,12 +105,12 @@ extension Unidoc.Linker.Graph
             }
         }
 
-        self.init(id: snapshot.id,
+        self.init(id: object.id,
             qualifiers: qualifiers,
             hierarchy: hierarchy,
             scalars: scalars,
-            metadata: snapshot.metadata,
-            graph: snapshot.graph)
+            metadata: object.metadata,
+            graph: object.graph)
     }
 }
 extension Unidoc.Linker.Graph

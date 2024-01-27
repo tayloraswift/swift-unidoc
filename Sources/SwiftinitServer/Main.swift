@@ -3,6 +3,7 @@ import HTTPServer
 import MongoDB
 import NIOPosix
 import NIOSSL
+import S3
 import System
 
 struct Main
@@ -58,6 +59,15 @@ extension Main
                 case "localhost":   self.authority = Localhost.self
                 case let invalid:   throw OptionsError.invalidAuthority(invalid)
                 }
+
+            case "-b", "--bucket":
+                guard let bucket:String = arguments.next()
+                else
+                {
+                    throw Main.OptionsError.invalidBucketName(nil)
+                }
+
+                self.development.bucket = .init(region: .us_east_1, name: bucket)
 
             case "-c", "--certificates":
                 guard let certificates:String = arguments.next()
@@ -136,8 +146,8 @@ extension Main
             // configuration.applicationProtocols = ["h2", "http/1.1"]
             configuration.applicationProtocols = ["h2"]
 
-        var options:Swiftinit.ServerOptions = .init(authority: self.authority.init(
-            tls: try .init(configuration: configuration)))
+        var options:Swiftinit.ServerOptions = .init(
+            authority: self.authority.init(tls: try .init(configuration: configuration)))
 
         let assets:FilePath = "Assets"
         if  self.github
@@ -147,6 +157,11 @@ extension Main
         if  self.authority is Localhost.Type
         {
             options.mode = .development(.init(source: assets), self.development)
+            options.bucket = self.development.bucket
+        }
+        else
+        {
+            options.bucket = .init(region: .us_east_1, name: "symbolgraphs")
         }
 
         return options
@@ -192,7 +207,7 @@ extension Main
 
                 var plugins:[any Swiftinit.ServerPlugin] =
                 [
-                    Swiftinit.LinkerPlugin.init(),
+                    Swiftinit.LinkerPlugin.init(bucket: options.bucket),
                 ]
 
                 if  options.whitelists

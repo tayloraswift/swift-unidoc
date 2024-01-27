@@ -1,4 +1,5 @@
 import MongoDB
+import S3Client
 import SwiftinitPlugins
 import UnidocDB
 
@@ -9,11 +10,14 @@ extension Swiftinit
         private
         let status:AtomicPointer<LinkerPlugin.StatusPage>
         private
+        let graphs:AWS.S3.Client?
+        private
         var buffer:Swiftinit.EventBuffer<Event>
 
-        init(updating status:AtomicPointer<LinkerPlugin.StatusPage>)
+        init(updating status:AtomicPointer<LinkerPlugin.StatusPage>, graphs:AWS.S3.Client?)
         {
             self.status = status
+            self.graphs = graphs
             self.buffer = .init(minimumCapacity: 100)
         }
     }
@@ -94,6 +98,7 @@ extension Swiftinit.Linker
 
         guard
         let status:Unidoc.UplinkStatus = try await db.unidoc.uplink(edition,
+            from: self.graphs,
             with: session)
         else
         {

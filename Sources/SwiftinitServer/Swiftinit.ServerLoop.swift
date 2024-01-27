@@ -10,6 +10,7 @@ import NIOCore
 import NIOHTTP1
 import NIOPosix
 import NIOSSL
+import S3
 import SwiftinitPages
 import SwiftinitPlugins
 import UnidocDB
@@ -84,6 +85,8 @@ extension Swiftinit.ServerLoop
 
     nonisolated
     var github:GitHub.Integration? { self.options.github }
+    nonisolated
+    var bucket:AWS.S3.Bucket? { self.options.bucket }
 
     nonisolated
     var format:Swiftinit.RenderFormat
