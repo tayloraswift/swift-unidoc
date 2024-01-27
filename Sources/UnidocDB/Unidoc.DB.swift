@@ -296,6 +296,7 @@ extension Unidoc.DB
         }
 
         let volume:Unidoc.Volume = try await self.link(&snapshot,
+            symbol: docs.metadata.package.id,
             loader: nil as NoLoader?,
             realm: realm,
             with: session)
@@ -397,6 +398,7 @@ extension Unidoc.DB
 
         let hidden:Bool = package.hidden || snapshot.link != .initial
         let volume:Unidoc.Volume = try await self.link(&snapshot,
+            symbol: package.symbol,
             loader: loader,
             realm: package.realm,
             with: session)
@@ -415,21 +417,6 @@ extension Unidoc.DB
                 clear: true,
                 with: session))
     }
-
-    // private
-    // func uplink(volume:Symbol.Edition,
-    //     with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
-    // {
-    //     if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
-    //             with: session)
-    //     {
-    //         try await self.uplink(volume.id, with: session)
-    //     }
-    //     else
-    //     {
-    //         nil
-    //     }
-    // }
 
     public
     func unlink(volume:Symbol.Edition,
@@ -576,6 +563,7 @@ extension Unidoc.DB
 
     private
     func link(_ snapshot:inout Unidoc.Snapshot,
+        symbol package:Symbol.Package,
         loader:(some Unidoc.GraphLoader)?,
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Unidoc.Volume
@@ -644,7 +632,7 @@ extension Unidoc.DB
                 //  We want the version component of the volume symbol to be stable,
                 //  so we only encode the patch version, even if the symbol graph is
                 //  from a prerelease tag.
-                package: snapshot.metadata.package.id,
+                package: package,
                 version: version),
             latest: snapshot.id == latestRelease,
             realm: realm,
