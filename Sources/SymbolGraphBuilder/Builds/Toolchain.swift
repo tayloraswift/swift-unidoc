@@ -110,7 +110,7 @@ extension Toolchain
 {
     public
     func generateDocs(for build:ToolchainBuild,
-        pretty:Bool = false) async throws -> SymbolGraphArchive
+        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let artifacts:Artifacts = try await .dump(
@@ -180,7 +180,7 @@ extension Toolchain
     }
     public
     func generateDocs(for build:PackageBuild,
-        pretty:Bool = false) async throws -> SymbolGraphArchive
+        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
     {
         let manifestVersions:[MinorVersion] = try build.listExtraManifests()
         let manifest:SPM.Manifest = try await .dump(from: build)

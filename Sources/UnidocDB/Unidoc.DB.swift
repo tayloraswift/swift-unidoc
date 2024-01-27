@@ -9,6 +9,7 @@ import Unidoc
 import UnidocAPI
 import UnidocDiagnostics
 import UnidocLinker
+@_spi(testable)
 import UnidocRecords
 
 @available(*, deprecated, renamed: "Unidoc.DB")
@@ -277,7 +278,7 @@ extension Unidoc.DB
     /// Indexes and stores a symbol graph in the database, linking it **synchronously**.
     @_spi(testable)
     public
-    func store(linking docs:SymbolGraphArchive,
+    func store(linking docs:SymbolGraphObject<Void>,
         with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
     {
         var snapshot:Unidoc.Snapshot
@@ -286,7 +287,16 @@ extension Unidoc.DB
         //  Don’t queue for uplink, since we’re going to do that synchronously.
         (snapshot, realm) = try await self.label(docs: docs, link: nil, with: session)
 
+        enum NoLoader:Unidoc.GraphLoader
+        {
+            func load(graph:Unidoc.GraphPath) async throws -> [UInt8]
+            {
+                throw Unidoc.GraphLoaderError.unavailable
+            }
+        }
+
         let volume:Unidoc.Volume = try await self.link(&snapshot,
+            loader: nil as NoLoader?,
             realm: realm,
             with: session)
         let symbol:Symbol.Edition = volume.metadata.symbol
@@ -309,7 +319,7 @@ extension Unidoc.DB
     /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
     /// uplink.
     public
-    func store(docs:consuming SymbolGraphArchive,
+    func store(docs:consuming SymbolGraphObject<Void>,
         with session:Mongo.Session) async throws -> Unidoc.UploadStatus
     {
         let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
@@ -320,7 +330,7 @@ extension Unidoc.DB
     }
 
     private
-    func label(docs:consuming SymbolGraphArchive,
+    func label(docs:consuming SymbolGraphObject<Void>,
         link:Unidoc.Snapshot.LinkState?,
         with session:Mongo.Session) async throws ->
         (
@@ -328,7 +338,7 @@ extension Unidoc.DB
             realm:Unidoc.Realm?
         )
     {
-        let docs:SymbolGraphArchive = docs
+        let docs:SymbolGraphObject<Void> = docs
         let (package, _):(Unidoc.PackageMetadata, Bool) = try await self.index(
             package: docs.metadata.package.id,
             repo: nil,
@@ -357,7 +367,7 @@ extension Unidoc.DB
                 package: package.id,
                 version: version),
             metadata: docs.metadata,
-            graph: docs.graph,
+            inline: docs.graph,
             link: link)
 
         return (snapshot, package.realm)
@@ -367,6 +377,7 @@ extension Unidoc.DB
 {
     public
     func uplink(_ id:Unidoc.Edition,
+        loader:(some Unidoc.GraphLoader)?,
         with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
     {
         guard
@@ -386,6 +397,7 @@ extension Unidoc.DB
 
         let hidden:Bool = package.hidden || snapshot.link != .initial
         let volume:Unidoc.Volume = try await self.link(&snapshot,
+            loader: loader,
             realm: package.realm,
             with: session)
         let symbol:Symbol.Edition = volume.metadata.symbol
@@ -404,20 +416,20 @@ extension Unidoc.DB
                 with: session))
     }
 
-    private
-    func uplink(volume:Symbol.Edition,
-        with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
-    {
-        if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
-                with: session)
-        {
-            try await self.uplink(volume.id, with: session)
-        }
-        else
-        {
-            nil
-        }
-    }
+    // private
+    // func uplink(volume:Symbol.Edition,
+    //     with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
+    // {
+    //     if  let volume:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume,
+    //             with: session)
+    //     {
+    //         try await self.uplink(volume.id, with: session)
+    //     }
+    //     else
+    //     {
+    //         nil
+    //     }
+    // }
 
     public
     func unlink(volume:Symbol.Edition,
@@ -564,11 +576,13 @@ extension Unidoc.DB
 
     private
     func link(_ snapshot:inout Unidoc.Snapshot,
+        loader:(some Unidoc.GraphLoader)?,
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Unidoc.Volume
     {
         let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)
         var linker:Unidoc.Linker = try await self.snapshots.load(for: snapshot,
+            from: loader,
             pins: pins,
             with: session)
 

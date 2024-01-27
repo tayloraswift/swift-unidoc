@@ -99,7 +99,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.10.4")),
+            from: "0.10.5")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -590,6 +590,7 @@ let package:Package = .init(
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
+                .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),

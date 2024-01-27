@@ -1,5 +1,6 @@
 import GitHubAPI
 import HTTPServer
+import S3
 
 extension Swiftinit
 {
@@ -8,14 +9,17 @@ extension Swiftinit
     {
         let authority:any ServerAuthority
         var github:GitHub.Integration?
+        var bucket:AWS.S3.Bucket?
         var mode:Mode
 
         init(authority:any ServerAuthority,
             github:GitHub.Integration? = nil,
+            bucket:AWS.S3.Bucket? = nil,
             mode:Mode = .production)
         {
             self.authority = authority
             self.github = github
+            self.bucket = bucket
             self.mode = mode
         }
     }

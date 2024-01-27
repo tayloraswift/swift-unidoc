@@ -79,18 +79,25 @@ extension Unidoc.DB.Snapshots
 extension Unidoc.DB.Snapshots
 {
     func load(for snapshot:Unidoc.Snapshot,
+        from loader:(some Unidoc.GraphLoader)?,
         pins:[Unidoc.Edition],
         with session:Mongo.Session) async throws -> Unidoc.Linker
     {
-        var dependencies:[Unidoc.Snapshot] = try await self.load(pins, with: session)
+        var objects:[SymbolGraphObject<Unidoc.Edition>] = []
+            objects.reserveCapacity(1 + pins.count)
 
         if  snapshot.metadata.package.name != .swift,
             let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(with: session)
         {
-            dependencies.append(swift)
+            objects.append(try await swift.load(with: loader))
         }
 
-        let missing:Set<Unidoc.Edition> = dependencies.reduce(into: .init(pins))
+        for other:Unidoc.Snapshot in try await self.load(pins, with: session)
+        {
+            objects.append(try await other.load(with: loader))
+        }
+
+        let missing:Set<Unidoc.Edition> = objects.reduce(into: .init(pins))
         {
             $0.remove($1.id)
         }
@@ -99,7 +106,7 @@ extension Unidoc.DB.Snapshots
             print("warning: could not load snapshot dependency '\(missing)'")
         }
 
-        return .init(snapshot, dependencies: dependencies)
+        return .init(linking: try await snapshot.load(with: loader), against: objects)
     }
 }
 extension Unidoc.DB.Snapshots

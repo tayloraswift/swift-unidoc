@@ -98,7 +98,7 @@ extension SwiftinitClient
         let toolchain:Toolchain = try await .detect()
         let workspace:Workspace = try await .create(at: ".swiftinit")
 
-        let archive:SymbolGraphArchive
+        let archive:SymbolGraphObject<Void>
         if  symbol == .swift
         {
             let build:ToolchainBuild = try await .swift(in: workspace,
@@ -193,14 +193,14 @@ extension SwiftinitClient
             in: workspace,
             clean: [.artifacts])
 
-        let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
+        let archive:SymbolGraphObject<Void> = try await toolchain.generateDocs(for: build,
             pretty: pretty)
 
         let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: .init(
                 package: package.coordinate,
                 version: edition.coordinate),
             metadata: archive.metadata,
-            graph: archive.graph,
+            inline: archive.graph,
             link: force ? .refresh : .initial))
 
         try await self.connect

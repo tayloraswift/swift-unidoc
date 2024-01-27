@@ -21,7 +21,7 @@ enum Main:TestMain, TestBattery
         }
 
         if  let tests:TestGroup = tests / "standard-library",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .swift(
                         in: workspace,
@@ -33,7 +33,7 @@ enum Main:TestMain, TestBattery
         }
 
         if  let tests:TestGroup = tests / "swift-atomics",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-atomics",
@@ -48,7 +48,7 @@ enum Main:TestMain, TestBattery
         }
 
         if  let tests:TestGroup = tests / "swift-nio",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio",
@@ -73,7 +73,7 @@ enum Main:TestMain, TestBattery
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-nio-ssl",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-nio-ssl",
@@ -97,7 +97,7 @@ enum Main:TestMain, TestBattery
         //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
         //  to handle that.
         if  let tests:TestGroup = tests / "swift-async-dns-resolver",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-async-dns-resolver",
@@ -121,7 +121,7 @@ enum Main:TestMain, TestBattery
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-syntax",
-            let docs:SymbolGraphArchive = (await tests.do
+            let docs:SymbolGraphObject<Void> = (await tests.do
             {
                 try await toolchain.generateDocs(for: try await .remote(
                         package: "swift-syntax",

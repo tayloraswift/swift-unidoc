@@ -20,7 +20,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
         let session:Mongo.Session = try await .init(from: pool)
 
         let empty:SymbolGraph = .init(modules: [])
-        var docs:SymbolGraphArchive
+        var docs:SymbolGraphObject<Void>
 
         let status:
         (

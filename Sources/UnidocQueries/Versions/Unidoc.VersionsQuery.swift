@@ -217,9 +217,16 @@ extension Unidoc.VersionsQuery
                 $0[.replaceWith] = .init
                 {
                     $0[Graph[.id]] = Unidoc.Snapshot[.id]
-                    $0[Graph[.bytes]] = .expr
+                    $0[Graph[.inlineBytes]] = .expr
                     {
-                        $0[.objectSize] = Unidoc.Snapshot[.graph]
+                        $0[.objectSize] = .expr
+                        {
+                            $0[.coalesce] = (Unidoc.Snapshot[.inline], BSON.Null.init())
+                        }
+                    }
+                    $0[Graph[.remoteBytes]] = .expr
+                    {
+                        $0[.coalesce] = (Unidoc.Snapshot[.size], 0)
                     }
                     $0[Graph[.link]] = Unidoc.Snapshot[.link]
                     $0[Graph[.abi]] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]

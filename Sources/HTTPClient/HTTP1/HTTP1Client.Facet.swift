@@ -9,9 +9,9 @@ extension HTTP1Client
         public
         var head:HTTPResponseHead?
         public
-        var body:[ByteBuffer]
+        var body:[UInt8]
 
-        init(head:HTTPResponseHead? = nil, body:[ByteBuffer] = [])
+        init(head:HTTPResponseHead? = nil, body:[UInt8] = [])
         {
             self.head = head
             self.body = body
