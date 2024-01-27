@@ -542,7 +542,7 @@ extension Unidoc.DB
             snapshot.pins.indices,
             snapshot.metadata.dependencies)
         {
-            if  let pinned:Unidoc.Edition = pins[dependency.package.name]
+            if  let pinned:Unidoc.Edition = pins[dependency.id]
             {
                 snapshot.pins[pin] = pinned
                 all.append(pinned)
@@ -554,7 +554,7 @@ extension Unidoc.DB
             }
             else
             {
-                print("failed to pin '\(dependency.package.name)' to '\(dependency.version)'")
+                print("failed to pin '\(dependency.id)' to '\(dependency.version)'")
             }
         }
 
