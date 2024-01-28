@@ -1,4 +1,4 @@
-extension SearchIndexQuery.Output
+extension Unidoc.TextResourceOutput
 {
     @frozen public
     enum Content:Sendable

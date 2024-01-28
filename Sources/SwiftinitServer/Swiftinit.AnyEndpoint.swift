@@ -74,6 +74,9 @@ extension Swiftinit.AnyEndpoint
         case Swiftinit.AdminPage.Slaves.name:
             return .interactive(Swiftinit.SlavesDashboardEndpoint.status)
 
+        case "robots":
+            return .interactive(Swiftinit.TextEditorEndpoint.init(id: .robots_txt))
+
         case _:
             return nil
         }
@@ -181,7 +184,7 @@ extension Swiftinit.AnyEndpoint
     {
         if  let id:Symbol.Edition = .init(trunk)
         {
-            .explainable(Swiftinit.LunrEndpoint<Unidoc.DB.Search>.init(query: .init(
+            .explainable(Swiftinit.LunrEndpoint.init(query: .init(
                     tag: parameters.tag,
                     id: id)),
                 parameters: parameters,
@@ -189,9 +192,9 @@ extension Swiftinit.AnyEndpoint
         }
         else if trunk == "packages.json"
         {
-            .explainable(Swiftinit.LunrEndpoint<Unidoc.DB.Metadata>.init(query: .init(
+            .explainable(Swiftinit.TextEndpoint.init(query: .init(
                     tag: parameters.tag,
-                    id: 0)),
+                    id: .packages_json)),
                 parameters: parameters,
                 accept: .application(.json))
         }
@@ -436,11 +439,34 @@ extension Swiftinit.AnyEndpoint
                 {
                     return .procedural(Swiftinit.GraphUnlinkEndpoint.init(volume: volume))
                 }
+
+            default:
+                break
             }
 
-            fallthrough
+            return nil
 
-        case _:
+        case .multipart(.form_data(boundary: let boundary?)):
+            let form:MultipartForm = try .init(splitting: body, on: boundary)
+
+            switch trunk
+            {
+            case .robots_txt:
+                if  let item:MultipartForm.Item = form.first(
+                        where: { $0.header.name == "text" })
+                {
+                    return .procedural(Swiftinit.TextUpdateEndpoint.init(text: .init(
+                        id: .robots_txt,
+                        utf8: [UInt8].init(item.value))))
+                }
+
+            default:
+                break
+            }
+
+            return nil
+
+        default:
             return nil
         }
     }

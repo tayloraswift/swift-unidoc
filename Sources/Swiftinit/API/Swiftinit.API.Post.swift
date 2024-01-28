@@ -9,6 +9,8 @@ extension Swiftinit.API
         case packageIndex = "package-index"
         case packageIndexTag = "package-index-tag"
 
+        case robots_txt = "robots.txt"
+
         case telescope = "telescope"
 
         case uplinkAll = "uplink-all"

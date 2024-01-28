@@ -52,6 +52,7 @@ extension Swiftinit.IntegralRequest:HTTP.ServerIntegralRequest
         case .robot(.amazonbot):    return nil
         case .robot(.baiduspider):  break
         case .robot(.bingbot):      break
+        case .robot(.bytespider):   return nil
         case .robot(.cloudfront):   break
         case .robot(.duckduckbot):  break
         case .robot(.google):       break
@@ -79,6 +80,15 @@ extension Swiftinit.IntegralRequest:HTTP.ServerIntegralRequest
             address: address,
             service: service,
             path: path)
+
+        if  path != "/robots.txt"
+        {
+            switch metadata.annotation
+            {
+            case .robot(.bytespider):   return nil
+            default:                    break
+            }
+        }
 
         self.init(get: metadata, tag: .init(header: headers["if-none-match"]))
     }
@@ -149,7 +159,13 @@ extension Swiftinit.IntegralRequest
                 endpoint = .interactive(Swiftinit.BounceEndpoint.init())
 
             case "robots.txt":
-                endpoint = .interactive(Swiftinit.RobotsEndpoint.init())
+                let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters,
+                    tag: tag)
+
+                endpoint = .explainable(Swiftinit.TextEndpoint.init(query: .init(
+                        tag: parameters.tag,
+                        id: .robots_txt)),
+                    parameters: parameters)
 
             case "sitemap.xml":
                 endpoint = .interactive(Swiftinit.SitemapIndexEndpoint.init(tag: tag))

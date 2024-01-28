@@ -93,15 +93,15 @@ struct PackageQueries:UnidocDatabaseTestBattery
         {
             let query:SearchIndexQuery<Unidoc.DB.Metadata> = .init(
                 tag: nil,
-                id: 0)
+                id: .packages_json)
 
             await tests.do
             {
-                if  let index:SearchIndexQuery<Unidoc.DB.Metadata>.Output = tests.expect(
+                if  let index:Unidoc.TextResourceOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
-                    switch index.json
+                    switch index.utf8
                     {
                     case .length:
                         tests.expect(value: nil as [UInt8]?)

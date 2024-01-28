@@ -22,7 +22,7 @@ extension Unidoc.DB
 extension Unidoc.DB.Metadata:Mongo.CollectionModel
 {
     public
-    typealias Element = SearchIndex<Int32>
+    typealias Element = Unidoc.TextResource<Key>
 
     @inlinable public static
     var name:Mongo.Collection { "Metadata" }
