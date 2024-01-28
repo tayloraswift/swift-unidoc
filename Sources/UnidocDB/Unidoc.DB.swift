@@ -56,6 +56,7 @@ extension Unidoc.DB
     var snapshots:Snapshots { .init(database: self.id) }
     @inlinable public
     var sitemaps:Sitemaps { .init(database: self.id) }
+    @inlinable public
     var metadata:Metadata { .init(database: self.id) }
 
     @inlinable public
@@ -656,7 +657,8 @@ extension Unidoc.DB
     public
     func rebuildPackageList(with session:Mongo.Session) async throws
     {
-        let index:SearchIndex<Int32> = try await self.packages.scan(with: session)
+        let index:Unidoc.TextResource<Unidoc.DB.Metadata.Key> = try await self.packages.scan(
+            with: session)
         try await self.metadata.upsert(some: index, with: session)
     }
 

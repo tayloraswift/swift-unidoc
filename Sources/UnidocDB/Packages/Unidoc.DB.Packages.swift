@@ -193,7 +193,8 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
-    func scan(with session:Mongo.Session) async throws -> SearchIndex<Int32>
+    func scan(
+        with session:Mongo.Session) async throws -> Unidoc.TextResource<Unidoc.DB.Metadata.Key>
     {
         //  TODO: this should project the `_id`
         let json:JSON = try await .array
@@ -221,6 +222,6 @@ extension Unidoc.DB.Packages
             }
         }
 
-        return .init(id: 0, json: json)
+        return .init(id: .packages_json, utf8: json.utf8)
     }
 }

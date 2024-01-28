@@ -19,7 +19,7 @@ extension Unidoc.DB
 extension Unidoc.DB.Search:Mongo.CollectionModel
 {
     public
-    typealias Element = SearchIndex<Symbol.Edition>
+    typealias Element = Unidoc.TextResource<Symbol.Edition>
 
     @inlinable public static
     var name:Mongo.Collection { "VolumeSearch" }
