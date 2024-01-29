@@ -76,30 +76,27 @@ extension GitHub.RepoMonitor:GitHub.Crawler
 
             let now:BSON.Millisecond = .now()
 
+            self.reposCrawled += 1
             self.buffer.push(event: CrawlingEvent.init(package: package.symbol,
-                sinceExpected: package.expires?.duration(to: now),
-                sinceActual: package.crawled?.duration(to: now),
+                sinceExpected: old.expires?.duration(to: now),
+                sinceActual: old.crawled.duration(to: now),
                 repo: response.repo))
 
             if  let repo:GitHub.Repo = response.repo
             {
-                package.update(repo: try .github(repo, crawled: now, fetched: true))
+                package.fetched(repo: try .github(repo, crawled: now))
             }
             else
             {
                 package.repo = nil
             }
 
-            if  case nil = try await db.packages.update(metadata: package, with: session)
+            if  case nil = try await db.packages.update(package: package.id,
+                    repo: package.repo,
+                    with: session)
             {
                 //  Might happen if package database is dropped while crawling.
                 continue
-            }
-            else
-            {
-                //  To MongoDB, all repo updates look like modifications, since the package
-                //  record contains a timestamp.
-                self.reposCrawled += 1
             }
 
             //  Import tags in chronological order. The last tag in the GraphQL response

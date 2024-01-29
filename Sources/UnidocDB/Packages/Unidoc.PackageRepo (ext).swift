@@ -11,9 +11,7 @@ extension Unidoc.PackageRepo:MongoMasterCodingModel
 extension Unidoc.PackageRepo
 {
     @inlinable public static
-    func github(_ repo:GitHub.Repo,
-        crawled:BSON.Millisecond,
-        fetched:Bool = false) throws -> Self
+    func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
@@ -40,8 +38,9 @@ extension Unidoc.PackageRepo
         }
 
         return .init(crawled: crawled,
-            fetched: fetched ? crawled : nil,
+            fetched: nil,
             expires: nil,
+            account: .init(type: .github, user: repo.owner.id),
             created: .init(created),
             updated: .init(updated),
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },

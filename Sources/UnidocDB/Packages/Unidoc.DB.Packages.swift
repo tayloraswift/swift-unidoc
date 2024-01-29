@@ -22,14 +22,29 @@ extension Unidoc.DB
 extension Unidoc.DB.Packages
 {
     public static
-    let indexExpiration:Mongo.CollectionIndex = .init("LastCrawled", unique: false)
+    let indexAccount:Mongo.CollectionIndex = .init("RepoAccount", unique: false)
     {
-        $0[Unidoc.PackageMetadata[.expires]] = (+)
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]] = (+)
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.expires]] = .init { $0[.exists] = true }
-        $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]] = .init
+        {
+            $0[.exists] = true
+        }
+    }
+
+    public static
+    let indexExpiration:Mongo.CollectionIndex = .init("RepoExpires", unique: false)
+    {
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = .init
+        {
+            $0[.exists] = true
+        }
     }
 
     public static
@@ -77,6 +92,7 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
     var indexes:[Mongo.CollectionIndex]
     {
         [
+            Self.indexAccount,
             Self.indexExpiration,
             Self.indexRepoCreated,
             Self.indexRepoGitHub,
@@ -125,12 +141,22 @@ extension Unidoc.DB.Packages
         try await self.update(some: metadata, with: session)
     }
 
+    @discardableResult
     public
     func update(package:Unidoc.Package,
         symbol:Symbol.Package,
         with session:Mongo.Session) async throws -> Bool?
     {
         try await self.update(field: .symbol, of: package, to: symbol, with: session)
+    }
+
+    @discardableResult
+    public
+    func update(package:Unidoc.Package,
+        repo:Unidoc.PackageRepo?,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(field: .repo, of: package, to: repo, with: session)
     }
 
     public
@@ -178,12 +204,14 @@ extension Unidoc.DB.Packages
         {
             $0[.filter] = .init
             {
-                $0[Unidoc.PackageMetadata[.expires]] = .init { $0[.exists] = true }
-                $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = .init
+                {
+                    $0[.exists] = true
+                }
             }
             $0[.sort] = .init
             {
-                $0[Unidoc.PackageMetadata[.expires]] = (+)
+                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
             }
             $0[.hint] = Self.indexExpiration.id
         }

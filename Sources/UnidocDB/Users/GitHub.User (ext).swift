@@ -1,12 +1,11 @@
 import BSON
 import GitHubAPI
 
-extension GitHub.User:BSONDocumentEncodable
+extension GitHub.User<Void>:BSONDocumentEncodable, BSONEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.id] = self.id
         bson[.login] = self.login
         bson[.icon] = self.icon
         bson[.node] = self.node
@@ -26,13 +25,12 @@ extension GitHub.User:BSONDocumentEncodable
         bson[.updated] = self.updated
     }
 }
-extension GitHub.User:BSONDocumentDecodable
+extension GitHub.User<Void>:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        self.init(
-            id: try bson[.id].decode(),
+        self.init(id: (),
             login: try bson[.login].decode(),
             icon: try bson[.icon].decode(),
             node: try bson[.node].decode(),

@@ -89,11 +89,10 @@ extension GitHub.RepoTelescope:GitHub.Crawler
         for repo:GitHub.Repo in discovered.repos
         {
             let symbol:Symbol.Package = "\(repo.owner.login).\(repo.name)"
-            let repo:Unidoc.PackageRepo = try .github(repo, crawled: now)
 
             switch try await db.unidoc.index(
                 package: symbol,
-                repo: repo,
+                repo: try .github(repo, crawled: now),
                 mode: .automatic,
                 with: session)
             {

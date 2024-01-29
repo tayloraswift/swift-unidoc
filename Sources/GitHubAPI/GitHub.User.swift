@@ -3,10 +3,10 @@ import JSON
 extension GitHub
 {
     @frozen public
-    struct User:Identifiable, Equatable, Sendable
+    struct User<ID>
     {
         public
-        let id:Int32
+        let id:ID
 
         /// The user’s @-name.
         public
@@ -57,7 +57,7 @@ extension GitHub
         var updated:String
 
         @inlinable public
-        init(id:Int32,
+        init(id:ID,
             login:String,
             icon:String,
             node:String,
@@ -97,7 +97,16 @@ extension GitHub
         }
     }
 }
-extension GitHub.User:JSONObjectDecodable
+extension GitHub.User:Identifiable where ID:Hashable
+{
+}
+extension GitHub.User:Equatable where ID:Equatable
+{
+}
+extension GitHub.User:Sendable where ID:Sendable
+{
+}
+extension GitHub.User
 {
     public
     enum CodingKey:String, Sendable
@@ -121,7 +130,9 @@ extension GitHub.User:JSONObjectDecodable
         case created = "created_at"
         case updated = "updated_at"
     }
-
+}
+extension GitHub.User<UInt32>:JSONObjectDecodable, JSONDecodable
+{
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
