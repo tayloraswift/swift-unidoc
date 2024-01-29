@@ -74,15 +74,15 @@ extension Unidoc.PackageRepo
             return nil
         }
 
-        var days:Int = 0
+        var interval:Milliseconds = 0
 
         switch self.license?.free
         {
         //  The license is free.
-        case true?:     break
+        case true?:     interval += .minute * 10
         //  No license. The package is probably new and the author hasn’t gotten around to
         //  adding a license yet.
-        case nil:       days += 3
+        case nil:       interval += .day * 3
         //  The license is intentionally unfree.
         case false?:    return nil
         }
@@ -90,7 +90,7 @@ extension Unidoc.PackageRepo
         //  Deprioritize hidden packages.
         if  hidden
         {
-            days += 1
+            interval += .hour * 1
         }
         //  Prioritize packages with more stars. (We currently only index packages with at
         //  least two stars.)
@@ -99,17 +99,25 @@ extension Unidoc.PackageRepo
         //  we consider it to have infinite stars.
         if  case 0? = realm
         {
-            return .day * days
+            return interval
         }
 
         switch self.stars
         {
-        case  0 ...  2: days += 3
-        case  3 ... 10: days += 2
-        case 11 ... 20: days += 1
+        case    0 ...    2: interval += .day * 4
+        case    3 ...   10: interval += .day * 3
+        case   11 ...   20: interval += .day * 2
+        case   21 ...   50: interval += .day * 1
+        case   51 ...   99: interval += .hour * 12
+        case  100 ...  499: interval += .hour * 8
+        case  500 ...  999: interval += .hour * 5
+        case 1000 ... 1999: interval += .hour * 4
+        case 2000 ... 2999: interval += .hour * 3
+        case 3000 ... 3999: interval += .hour * 2
+        case 4000 ... 4999: interval += .hour * 1
         default:        break
         }
 
-        return .day * days
+        return interval
     }
 }
