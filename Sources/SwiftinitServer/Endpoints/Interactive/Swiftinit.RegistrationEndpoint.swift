@@ -38,8 +38,8 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
 
         let user:Unidoc.User = try await github.connect
         {
-            let user:GitHub.User = try await $0.get(from: "/user", with: self.token)
-            return .init(account: .github(user),
+            let user:GitHub.User<UInt32> = try await $0.get(from: "/user", with: self.token)
+            return .init(id: .init(type: .github, user: user.id),
                 level: user.id == 2556986 ? .administratrix : .human)
         }
 

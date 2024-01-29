@@ -178,11 +178,10 @@ extension Unidoc.DB
                 //  Alias already exists.
             }
 
-            existing.update(repo: consume repo)
+            existing.crawled(repo: consume repo)
 
-            try await self.packages.update(field: .repo,
-                of: existing.id,
-                to: existing.repo,
+            try await self.packages.update(package: existing.id,
+                repo: existing.repo,
                 with: session)
 
             return (existing, false)
@@ -201,12 +200,15 @@ extension Unidoc.DB
             fallthrough
 
         case .old(let id, nil):
-            let package:Unidoc.PackageMetadata = .init(id: id,
+            var package:Unidoc.PackageMetadata = .init(id: id,
                 symbol: package,
                 hidden: mode == .automatic,
-                realm: nil,
-                repo: repo,
-                expires: repo == nil ? nil : 0)
+                realm: nil)
+
+            if  let repo:Unidoc.PackageRepo = repo
+            {
+                package.crawled(repo: consume repo)
+            }
 
             try await self.packages.insert(some: package, with: session)
 
@@ -220,11 +222,10 @@ extension Unidoc.DB
         case .old(_, var package?):
             if  let repo:Unidoc.PackageRepo
             {
-                package.update(repo: consume repo)
+                package.crawled(repo: consume repo)
 
-                try await self.packages.update(field: .repo,
-                    of: package.id,
-                    to: package.repo,
+                try await self.packages.update(package: package.id,
+                    repo: package.repo,
                     with: session)
             }
 

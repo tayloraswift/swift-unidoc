@@ -23,7 +23,7 @@ extension Swiftinit.SlavesDashboardEndpoint:RestrictedEndpoint
         case .scramble:
             guard
             let changed:Unidoc.Cookie = try await server.db.users.scramble(
-                user: .machine(0),
+                user: .init(type: .unidoc, user: 0),
                 with: session)
             else
             {

@@ -1,34 +1,44 @@
 import BSON
+import GitHubAPI
 import MongoQL
 import UnidocRecords
 
 extension Unidoc
 {
     @frozen public
-    struct User:Equatable, Sendable
+    struct User:Identifiable, Sendable
     {
         public
-        var account:Account
+        var id:Account
         public
         var level:Level
         public
-        var realm:Unidoc.RealmMetadata?
+        var realm:Unidoc.Realm?
+
+        public
+        var github:GitHub.User<Void>?
 
         @inlinable public
-        init(account:Account, level:Level, realm:Unidoc.RealmMetadata? = nil)
+        init(id:Account,
+            level:Level,
+            realm:Unidoc.Realm? = nil,
+            github:GitHub.User<Void>? = nil)
         {
-            self.account = account
+            self.id = id
+
             self.level = level
             self.realm = realm
+
+            self.github = nil
         }
     }
 }
 extension Unidoc.User
 {
     @inlinable public static
-    func machine(_ number:Int32 = 0) -> Self
+    func machine(_ number:UInt32 = 0) -> Self
     {
-        .init(account: .machine(number), level: .machine)
+        .init(id: .init(type: .unidoc, user: number), level: .machine)
     }
 }
 extension Unidoc.User
@@ -47,11 +57,6 @@ extension Unidoc.User
         }
     }
 }
-extension Unidoc.User:Identifiable
-{
-    @inlinable public
-    var id:Unidoc.User.ID { self.account.id }
-}
 extension Unidoc.User:MongoMasterCodingModel
 {
     public
@@ -59,6 +64,7 @@ extension Unidoc.User:MongoMasterCodingModel
     {
         case id = "_id"
         case level
+        case realm
 
         case github = "github"
 
@@ -73,13 +79,11 @@ extension Unidoc.User:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.level] = self.level
 
-        switch self.account
-        {
-        case .machine:          break
-        case .github(let user): bson[.github] = user
-        }
+        bson[.level] = self.level
+        bson[.realm] = self.realm
+
+        bson[.github] = self.github
     }
 }
 extension Unidoc.User:BSONDocumentDecodable
@@ -87,15 +91,9 @@ extension Unidoc.User:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
     {
-        switch try bson[.id].decode(to: Unidoc.User.ID.self)
-        {
-        case .machine(let id):
-            self = .machine(id)
-
-        case .github:
-            self.init(
-                account: .github(try bson[.github].decode()),
-                level: try bson[.level].decode())
-        }
+        self.init(id: try bson[.id].decode(),
+            level: try bson[.level].decode(),
+            realm: try bson[.realm]?.decode(),
+            github: try bson[.github]?.decode())
     }
 }
