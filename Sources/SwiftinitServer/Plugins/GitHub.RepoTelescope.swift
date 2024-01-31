@@ -75,6 +75,7 @@ extension GitHub.RepoTelescope:GitHub.Crawler
         let discovered:GitHub.RepoTelescopeResponse = try await connection.search(
             repos: """
             language:swift \
+            archived:false \
             created:\(created.year)-\(created.mm)-\(created.dd) \
             stars:>1
             """)
