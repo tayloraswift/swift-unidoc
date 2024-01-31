@@ -107,7 +107,6 @@ extension Unidoc.Snapshot
         let document:BSON.Document = .init(encoding: inline)
 
         self.size = Int64.init(document.bytes.count)
-        self.type = .bson
         self.inline = nil
 
         return document.bytes
