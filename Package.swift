@@ -100,6 +100,8 @@ let package:Package = .init(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.10.5")),
+        .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
+            from: "4.1.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -595,6 +597,7 @@ let package:Package = .init(
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),
                 .target(name: "SwiftinitPlugins"),
+                .product(name: "LZ77", package: "swift-png"),
             ]),
 
 

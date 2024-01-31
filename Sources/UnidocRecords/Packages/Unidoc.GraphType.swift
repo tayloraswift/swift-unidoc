@@ -9,6 +9,8 @@ extension Unidoc
     {
         /// Uncompressed BSON.
         case bson = 0
+        /// Zlib-compressed BSON.
+        case bson_zz = 1
     }
 }
 extension Unidoc.GraphType:CustomStringConvertible
@@ -18,7 +20,8 @@ extension Unidoc.GraphType:CustomStringConvertible
     {
         switch self
         {
-        case .bson: "bson"
+        case .bson:     "bson"
+        case .bson_zz:  "bson.zz"
         }
     }
 }

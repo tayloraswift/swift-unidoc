@@ -1,4 +1,5 @@
 import BSON
+import LZ77
 import S3
 import S3Client
 import SymbolGraphs
@@ -21,6 +22,19 @@ extension Swiftinit.GraphLoader:Unidoc.GraphLoader
 {
     func load(graph:Unidoc.GraphPath) async throws -> [UInt8]
     {
-        try await self.s3.get(path: "\(graph)")
+        var bytes:[UInt8] = try await self.s3.get(path: "\(graph)")
+
+        switch graph.type
+        {
+        case .bson:
+            break
+
+        case .bson_zz:
+            var inflator:LZ77.Inflator = .init(format: .zlib)
+            try inflator.push((consume bytes)[...])
+            bytes = inflator.pull()
+        }
+
+        return bytes
     }
 }
