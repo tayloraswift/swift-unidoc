@@ -82,6 +82,10 @@ extension Unidoc.PackageMetadata
 
             repo.expires = target
         }
+        else
+        {
+            repo.expires = nil
+        }
 
         self.repo = repo
     }
