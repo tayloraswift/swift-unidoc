@@ -34,7 +34,8 @@ extension Availability
     @inlinable public
     var isGenerallyRecommended:Bool
     {
-        self.universal?.isGenerallyRecommended ?? true &&
-        self.agnostic[.swift]?.isGenerallyRecommended ?? true
+        self.universal?.isGenerallyRecommended ?? true
+        &&  self.agnostic[.swift]?.isGenerallyRecommended ?? true
+        &&  self.agnostic[.swiftPM]?.isGenerallyRecommended ?? true
     }
 }
