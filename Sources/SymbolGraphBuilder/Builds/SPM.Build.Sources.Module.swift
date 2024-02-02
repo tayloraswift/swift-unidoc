@@ -2,7 +2,7 @@ import SymbolGraphs
 import Symbols
 import System
 
-extension PackageBuild.Sources
+extension SPM.Build.Sources
 {
     /// Stores information about the source files for a module.
     struct Module
@@ -32,7 +32,7 @@ extension PackageBuild.Sources
         }
     }
 }
-extension PackageBuild.Sources.Module
+extension SPM.Build.Sources.Module
 {
     init(scanning module:SymbolGraph.Module,
         exclude:borrowing [String],
@@ -75,7 +75,7 @@ extension PackageBuild.Sources.Module
             origin: .toolchain)
     }
 }
-extension PackageBuild.Sources.Module
+extension SPM.Build.Sources.Module
 {
     private mutating
     func scan(excluding exclude:[String]) throws

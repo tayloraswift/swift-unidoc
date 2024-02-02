@@ -96,25 +96,25 @@ extension SwiftinitClient
         pretty:Bool) async throws
     {
         let toolchain:Toolchain = try await .detect()
-        let workspace:Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
         let archive:SymbolGraphObject<Void>
         if  symbol == .swift
         {
-            let build:ToolchainBuild = try await .swift(in: workspace,
+            let build:Toolchain.Build = try await .swift(in: workspace,
                 clean: true)
 
-            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+            archive = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else if
             let search:FilePath
         {
-            let build:PackageBuild = try await .local(package: symbol,
+            let build:SPM.Build = try await .local(package: symbol,
                 from: search,
                 in: workspace,
                 clean: true)
 
-            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+            archive = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else
         {
@@ -173,7 +173,7 @@ extension SwiftinitClient
         }
 
         let toolchain:Toolchain = try await .detect()
-        let workspace:Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
         guard
         let edition:Unidoc.PackageStatus.Edition = package.choose(force: force)
@@ -186,14 +186,15 @@ extension SwiftinitClient
             return
         }
 
-        let build:PackageBuild = try await .remote(
+        let build:SPM.Build = try await .remote(
             package: symbol,
             from: package.repo,
             at: edition.tag,
             in: workspace,
             clean: [.artifacts])
 
-        let archive:SymbolGraphObject<Void> = try await toolchain.generateDocs(for: build,
+        let archive:SymbolGraphObject<Void> = try await .init(building: build,
+            with: toolchain,
             pretty: pretty)
 
         let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: .init(

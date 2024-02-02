@@ -11,7 +11,7 @@ import UnidocDiagnostics
 extension SymbolGraph
 {
     static
-    func build(from artifacts:Artifacts) async throws -> Self
+    func build(from artifacts:SPM.Artifacts) async throws -> Self
     {
         let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
@@ -25,7 +25,7 @@ extension SymbolGraph
 
             var compiler:Compiler = .init(root: artifacts.root)
 
-            for culture:Artifacts.Culture in artifacts.cultures
+            for culture:SPM.Artifacts.Culture in artifacts.cultures
             {
                 let parts:[SymbolGraphPart] = try culture.loadSymbols()
 

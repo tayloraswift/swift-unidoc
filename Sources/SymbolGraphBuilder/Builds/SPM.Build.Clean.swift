@@ -1,4 +1,4 @@
-extension PackageBuild
+extension SPM.Build
 {
     public
     enum Clean:Equatable, Hashable, Sendable

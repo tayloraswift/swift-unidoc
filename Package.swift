@@ -101,7 +101,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.10.5")),
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.1.0")),
+            from: "4.2.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
