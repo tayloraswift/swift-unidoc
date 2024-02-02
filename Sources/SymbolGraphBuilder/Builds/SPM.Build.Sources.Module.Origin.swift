@@ -1,6 +1,6 @@
 import System
 
-extension PackageBuild.Sources.Module
+extension SPM.Build.Sources.Module
 {
     enum Origin
     {

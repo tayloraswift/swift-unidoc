@@ -19,8 +19,8 @@ struct VolumeQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let workspace:Workspace = try await .create(at: ".testing")
-        let toolchain:Toolchain = try await .detect()
+        let workspace:SPM.Workspace = try await .create(at: ".testing")
+        let swift:Toolchain = try await .detect()
 
         let session:Mongo.Session = try await .init(from: pool)
         let package:Symbol.Package = "swift-version-controlled"
@@ -30,8 +30,8 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             let empty:SymbolGraphObject<Void> = .init(metadata: .init(
                     package: .init(name: package),
                     commit: .init(name: tag),
-                    triple: toolchain.triple,
-                    swift: toolchain.version),
+                    triple: swift.triple,
+                    swift: swift.version),
                 graph: .init(modules: []))
 
             empty.roundtrip(for: tests, in: workspace.path)

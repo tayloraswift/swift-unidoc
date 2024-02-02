@@ -1,26 +1,15 @@
-import System
-
-@frozen public
-struct Workspace:Equatable
+public
+protocol SystemWorkspace:CustomStringConvertible
 {
-    public
-    let path:FilePath
-
-    @inlinable public
     init(path:FilePath)
-    {
-        self.path = path
-    }
+    var path:FilePath { get }
 }
-extension Workspace:CustomStringConvertible
+extension SystemWorkspace
 {
     @inlinable public
-    var description:String
-    {
-        "\(self.path)"
-    }
+    var description:String { "\(self.path)" }
 }
-extension Workspace
+extension SystemWorkspace
 {
     public static
     func create(at path:FilePath) async throws -> Self
@@ -35,13 +24,16 @@ extension Workspace
         try await SystemProcess.init(command: "rm", "-f", "\(self.path.appending("*"))")()
     }
 }
-extension Workspace
+extension SystemWorkspace
 {
     /// Creates a nested workspace directory within this one.
     public
-    func create(_ name:String, clean:Bool = false) async throws -> Self
+    func create<NestedWorkspace>(_ name:String,
+        clean:Bool = false,
+        as  _:NestedWorkspace.Type = Self.self) async throws -> NestedWorkspace
+        where NestedWorkspace:SystemWorkspace
     {
-        let workspace:Self = try await .create(at: self.path / name)
+        let workspace:NestedWorkspace = try await .create(at: self.path / name)
         if  clean
         {
             try await workspace.clean()

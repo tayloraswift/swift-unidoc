@@ -11,10 +11,11 @@ enum Main:TestMain, TestBattery
     static
     func run(tests:TestGroup) async
     {
-        guard   let workspace:Workspace =
-                    await (tests ! "workspace").do({ try await .create(at: ".testing") }),
-                let toolchain:Toolchain =
-                    await (tests ! "toolchain").do({ try await .detect() })
+        guard
+        let workspace:SPM.Workspace =
+            await (tests ! "workspace").do({ try await .create(at: ".testing") }),
+        let toolchain:Toolchain =
+            await (tests ! "toolchain").do({ try await .detect() })
         else
         {
             return
@@ -23,9 +24,10 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "standard-library",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .swift(
+                try await .init(building: try await .swift(
                         in: workspace,
                         clean: true),
+                    with: toolchain,
                     pretty: true)
             })
         {
@@ -35,12 +37,13 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "swift-atomics",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .remote(
+                try await .init(building: try await .remote(
                         package: "swift-atomics",
                         from: "https://github.com/apple/swift-atomics.git",
                         at: "1.1.0",
                         in: workspace,
                         clean: [.artifacts]),
+                    with: toolchain,
                     pretty: true)
             })
         {
@@ -50,12 +53,13 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "swift-nio",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .remote(
+                try await .init(building: try await .remote(
                         package: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
                         at: "2.58.0",
                         in: workspace,
                         clean: [.artifacts]),
+                    with: toolchain,
                     pretty: true)
             })
         {
@@ -75,12 +79,13 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "swift-nio-ssl",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .remote(
+                try await .init(building: try await .remote(
                         package: "swift-nio-ssl",
                         from: "https://github.com/apple/swift-nio-ssl.git",
                         at: "2.24.0",
                         in: workspace,
                         clean: [.artifacts]),
+                    with: toolchain,
                     pretty: true)
             })
         {
@@ -99,12 +104,13 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "swift-async-dns-resolver",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .remote(
+                try await .init(building: try await .remote(
                         package: "swift-async-dns-resolver",
                         from: "https://github.com/apple/swift-async-dns-resolver.git",
                         at: "0.1.2",
                         in: workspace,
                         clean: [.artifacts]),
+                    with: toolchain,
                     pretty: true)
             })
         {
@@ -123,12 +129,13 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "swift-syntax",
             let docs:SymbolGraphObject<Void> = (await tests.do
             {
-                try await toolchain.generateDocs(for: try await .remote(
+                try await .init(building: try await .remote(
                         package: "swift-syntax",
                         from: "https://github.com/apple/swift-syntax.git",
                         at: "508.0.0",
                         in: workspace,
                         clean: [.artifacts]),
+                    with: toolchain,
                     pretty: true)
             })
         {

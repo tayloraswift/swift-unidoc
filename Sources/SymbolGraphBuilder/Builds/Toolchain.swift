@@ -1,6 +1,8 @@
+import JSON
 import PackageGraphs
 import PackageMetadata
 import SemanticVersions
+import SymbolGraphParts
 import SymbolGraphs
 import Symbols
 import System
@@ -14,34 +16,24 @@ struct Toolchain
     let tagname:String
     public
     let triple:Triple
+    /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
+    /// string `"swift"`.
+    private
+    let swift:String
 
     private
-    init(version:AnyVersion, tagname:String, triple:Triple)
+    init(version:AnyVersion, tagname:String, triple:Triple, swift:String)
     {
         self.version = version
         self.tagname = tagname
         self.triple = triple
+        self.swift = swift
     }
 }
 extension Toolchain
 {
-    public static
-    func detect() async throws -> Self
-    {
-        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
-
-        defer
-        {
-            try? writable.close()
-            try? readable.close()
-        }
-
-        try await SystemProcess.init(command: "swift", "--version", stdout: writable)()
-        return try .init(parsing: try readable.read(buffering: 1024))
-    }
-
     private
-    init(parsing splash:String) throws
+    init(parsing splash:String, swift:String) throws
     {
         //  Splash should consist of two complete lines of the form
         //
@@ -98,230 +90,32 @@ extension Toolchain
             self.init(
                 version: .init(toolchain[2]),
                 tagname: .init(parenthesized[i ..< j]),
-                triple: triple)
+                triple: triple,
+                swift: swift)
         }
         else
         {
             throw ToolchainError.malformedTriple
         }
     }
-}
-extension Toolchain
-{
-    public
-    func generateDocs(for build:ToolchainBuild,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
+
+    public static
+    func detect(swift:String = "swift") async throws -> Self
     {
-        //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let artifacts:Artifacts = try await .dump(
-            modules:
-            [
-                //  0:
-                .toolchain(module: "Swift"),
-                //  1:
-                .toolchain(module: "_Concurrency",
-                    dependencies: 0),
-                //  2:
-                .toolchain(module: "Distributed",
-                    dependencies: 0, 1),
+        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
-                //  3:
-                .toolchain(module: "_Differentiation",
-                    dependencies: 0),
-
-                //  4:
-                .toolchain(module: "_RegexParser",
-                    dependencies: 0),
-                //  5:
-                .toolchain(module: "_StringProcessing",
-                    dependencies: 0, 4),
-                //  6:
-                .toolchain(module: "RegexBuilder",
-                    dependencies: 0, 4, 5),
-
-                //  7:
-                .toolchain(module: "Cxx",
-                    dependencies: 0),
-
-                //  8:
-                .toolchain(module: "Dispatch",
-                    dependencies: 0),
-                //  9:
-                .toolchain(module: "DispatchIntrospection",
-                    dependencies: 0),
-                // 10:
-                .toolchain(module: "Foundation",
-                    dependencies: 0, 8),
-                // 11:
-                .toolchain(module: "FoundationNetworking",
-                    dependencies: 0, 8, 10),
-                // 12:
-                .toolchain(module: "FoundationXML",
-                    dependencies: 0, 8, 10),
-            ],
-            output: build.output,
-            triple: self.triple,
-            pretty: pretty)
-
-        let metadata:SymbolGraphMetadata = .swift(self.version,
-            tagname: self.tagname,
-            triple: self.triple,
-            products:
-            [
-                .init(name: "__stdlib__", type: .library(.automatic),
-                    dependencies: [],
-                    cultures: [Int].init(0 ... 7)),
-                .init(name: "__corelibs__", type: .library(.automatic),
-                    dependencies: [],
-                    cultures: [Int].init(artifacts.cultures.indices)),
-            ])
-
-        return .init(metadata: metadata, graph: try await .build(from: artifacts))
-    }
-    public
-    func generateDocs(for build:PackageBuild,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
-    {
-        let manifestVersions:[MinorVersion] = try build.listExtraManifests()
-        let manifest:SPM.Manifest = try await .dump(from: build)
-
-        print("""
-            Resolving dependencies for '\(build.id.package)' \
-            (swift-tools-version: \(manifest.format))
-            """)
-
-        //  Don’t parrot the `swift package update` output to the terminal
-        let resolutionLog:FilePath = build.output.path / "resolution.log"
-        try await resolutionLog.open(.writeOnly,
-            permissions: (.rw, .r, .r),
-            options: [.create, .truncate])
+        defer
         {
-            //  This command only prints to stderr, for some reason.
-            try await SystemProcess.init(command: "swift",
-                "package",
-                "update",
-                "--package-path", "\(build.root)",
-                stdout: nil,
-                stderr: $0)()
+            try? writable.close()
+            try? readable.close()
         }
 
-        //  Don’t parrot the `swift build` output to the terminal
-        let buildLog:FilePath = build.output.path / "build.log"
-
-        print("""
-            Streaming swift build output to: \(buildLog)
-            """)
-
-        try await buildLog.open(.writeOnly,
-            permissions: (.rw, .r, .r),
-            options: [.create, .truncate])
-        {
-            try await SystemProcess.init(command: "swift",
-                "build",
-                "--configuration", "\(build.configuration)",
-                "--package-path", "\(build.root)",
-                stdout: $0)()
-        }
-
-        let pins:[SPM.DependencyPin]
-        do
-        {
-            let resolutions:SPM.DependencyResolutions = try .init(
-                parsing: try (build.root / "Package.resolved").read())
-            pins = resolutions.pins
-        }
-        catch is FileError
-        {
-            pins = []
-        }
-
-        let platform:SymbolGraphMetadata.Platform = try self.platform()
-
-        var dependencies:[PackageNode] = []
-        var include:[FilePath] =
-        [
-            .init(manifest.root.path) / ".build" / "\(build.configuration)"
-        ]
-        for pin:SPM.DependencyPin in pins
-        {
-            let checkout:FilePath = build.root / ".build" / "checkouts" / "\(pin.location.name)"
-
-            let manifest:SPM.Manifest = try await .dump(from: .init(id: .upstream(pin),
-                output: build.output,
-                root: checkout))
-
-            let dependency:PackageNode = try .all(flattening: manifest,
-                on: platform,
-                as: pin.identity)
-
-            let sources:PackageBuild.Sources = try .init(scanning: dependency)
-                sources.yield(include: &include)
-
-            dependencies.append(dependency)
-        }
-
-        let sinkNode:PackageNode = try .all(flattening: manifest,
-            on: platform,
-            as: build.id.package)
-        let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
-
-        let commit:SymbolGraphMetadata.Commit?
-        if  case .versioned(let pin, let ref) = build.id
-        {
-            commit = .init(name: ref, sha1: pin.revision)
-        }
-        else
-        {
-            commit = nil
-        }
-
-        let dependenciesPinned:[SymbolGraphMetadata.Dependency] = try flatNode.pin(to: pins)
-        let dependenciesUsed:Set<Symbol.Package> = flatNode.products.reduce(into: [])
-        {
-            guard
-            case .library = $1.type
-            else
-            {
-                return
-            }
-            for dependency:Symbol.Product in $1.dependencies
-            {
-                $0.insert(dependency.package)
-            }
-        }
-
-        let metadata:SymbolGraphMetadata = .init(
-            package: .init(
-                scope: build.id.pin?.location.owner,
-                name: build.id.package),
-            commit: commit,
-            triple: self.triple,
-            swift: self.version,
-            tools: manifest.format,
-            manifests: manifestVersions,
-            requirements: manifest.requirements,
-            dependencies: dependenciesPinned.filter
-            {
-                dependenciesUsed.contains($0.package.name)
-            },
-            products: .init(viewing: flatNode.products),
-            display: manifest.name,
-            root: manifest.root)
-
-        let artifacts:Artifacts = try await .dump(from: flatNode,
-            include: &include,
-            output: build.output,
-            triple: self.triple,
-            pretty: pretty)
-
-        let graph:SymbolGraph = try await .build(from: artifacts)
-
-        return .init(metadata: metadata, graph: graph)
+        try await SystemProcess.init(command: swift, "--version", stdout: writable)()
+        return try .init(parsing: try readable.read(buffering: 1024), swift: swift)
     }
 }
 extension Toolchain
 {
-    private
     func platform() throws -> SymbolGraphMetadata.Platform
     {
         if      self.triple.os.starts(with: "linux")
@@ -352,5 +146,280 @@ extension Toolchain
         {
             throw ToolchainError.unsupportedTriple(self.triple)
         }
+    }
+}
+
+extension Toolchain
+{
+    func manifest(package:FilePath, json file:FilePath) async throws -> SPM.Manifest
+    {
+        //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
+        //  limit. So instead of getting the `dump-package` output from a pipe, we
+        //  tell the subprocess to write it to a file, and read back the file afterwards.
+        let json:JSON
+        do
+        {
+            let utf8:[UInt8] = try await file.open(.readWrite,
+                permissions: (.rw, .r, .r),
+                options: [.create, .truncate])
+            {
+                let dump:SystemProcess = try .init(command: self.swift,
+                    "package", "dump-package",
+                    "--package-path", "\(package)",
+                    stdout: $0)
+                try await dump()
+                return try $0.readAll()
+            }
+
+            json = .init(utf8: utf8)
+        }
+        catch let error
+        {
+            throw SPM.ManifestDumpError.init(underlying: error, root: package)
+        }
+
+        return try json.decode()
+    }
+
+    func resolve(package:FilePath, log:FilePath) async throws -> [SPM.DependencyPin]
+    {
+        print("Streaming 'swift package update' output to: \(log)")
+
+        try await log.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            //  This command only prints to stderr, for some reason.
+            try await SystemProcess.init(command: self.swift,
+                "package",
+                "update",
+                "--package-path", "\(package)",
+                stdout: nil,
+                stderr: $0)()
+        }
+
+        do
+        {
+            let resolutions:SPM.DependencyResolutions = try .init(
+                parsing: try (package / "Package.resolved").read())
+            return resolutions.pins
+        }
+        catch is FileError
+        {
+            return []
+        }
+    }
+
+    func build(
+        package:FilePath,
+        release:Bool = false,
+        log:FilePath) async throws -> SPM.BuildDirectory
+    {
+        print("Streaming 'swift build' output to: \(log)")
+
+        let scratch:SPM.BuildDirectory = .init(path: package / ".build.unidoc")
+
+        try await log.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            try await SystemProcess.init(command: self.swift,
+                "build",
+                "--configuration", release ? "release" : "debug",
+                "--package-path", "\(package)",
+                "--scratch-path", "\(scratch.path)",
+                stdout: $0)()
+        }
+
+        return scratch
+    }
+}
+extension Toolchain
+{
+    /// Dumps the symbols for the given package, using the `output` workspace as the
+    /// output directory.
+    public
+    func dump(from package:PackageNode,
+        include:inout [FilePath],
+        output:SPM.ArtifactDirectory,
+        triple:Triple,
+        pretty:Bool = false) async throws -> SPM.Artifacts
+    {
+        //  Note: the manifest root is the root we want; the repository root may
+        //  be a relative path.
+        let sources:SPM.Build.Sources = try .init(scanning: package)
+        let cultures:[SPM.Artifacts.Culture] = try await self.dump(
+            modules: sources.modules,
+            include: &include,
+            output: output,
+            triple: triple,
+            pretty: pretty)
+
+        return .init(cultures: cultures, root: package.root)
+    }
+    /// Dumps the symbols for the given targets, using the `output` workspace as the
+    /// output directory.
+    func dump(modules:[SPM.Build.Sources.Module],
+        output:SPM.ArtifactDirectory,
+        triple:Triple,
+        pretty:Bool = false) async throws -> SPM.Artifacts
+    {
+        var include:[FilePath] = []
+        let cultures:[SPM.Artifacts.Culture] = try await self.dump(
+            modules: modules,
+            include: &include,
+            output: output,
+            triple: triple,
+            pretty: pretty)
+
+        return .init(cultures: cultures)
+    }
+
+    private
+    func dump(modules:[SPM.Build.Sources.Module],
+        include:inout [FilePath],
+        output:SPM.ArtifactDirectory,
+        triple:Triple,
+        pretty:Bool) async throws -> [SPM.Artifacts.Culture]
+    {
+        for sources:SPM.Build.Sources.Module in modules
+        {
+            let label:String
+            if  case .toolchain? = sources.origin
+            {
+                label = "toolchain"
+            }
+            else
+            {
+                //  Only dump symbols for library targets.
+                switch sources.module.type
+                {
+                case .binary:       include += sources.include
+                case .executable:   continue
+                case .regular:      include += sources.include
+                case .macro:        include += sources.include
+                case .plugin:       continue
+                case .snippet:      continue
+                case .system:       continue
+                case .test:         continue
+                }
+
+                label = """
+                \(sources.module.language?.description ?? "?"), \(sources.module.type)
+                """
+            }
+
+            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
+
+            var arguments:[String] =
+            [
+                "symbolgraph-extract",
+
+                "-module-name",                     "\(sources.module.id)",
+                "-target",                          "\(triple)",
+                "-minimum-access-level",            "internal",
+                "-output-dir",                      "\(output.path)",
+                "-emit-extension-block-symbols",
+                "-include-spi-symbols",
+                "-skip-inherited-docs",
+            ]
+            if  pretty
+            {
+                arguments.append("-pretty-print")
+            }
+            for include:FilePath in include
+            {
+                arguments.append("-I")
+                arguments.append("\(include)")
+            }
+
+            let null:FilePath = "/dev/null"
+            try await null.open(.writeOnly)
+            {
+                let environment:SystemProcess.Environment = .inherit
+                {
+                    $0["SWIFT_BACKTRACE"] = "enable=no"
+                }
+                let extractor:SystemProcess = try .init(command: self.swift,
+                    arguments: arguments,
+                    stderr: $0,
+                    with: environment)
+
+                do
+                {
+                    try await extractor()
+                }
+                catch SystemProcessError.exit(139, _)
+                {
+                    print("""
+                    Failed to dump symbols for module '\(sources.module.id)' due to SIGSEGV \
+                    from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
+                    compiler; see https://github.com/apple/swift/issues/68767.
+                    """)
+
+                    return
+                }
+            }
+        }
+
+        var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
+        for part:Result<FilePath.Component, any Error> in output.path.directory
+        {
+            //  We don’t want to *parse* the JSON yet to discover the culture,
+            //  because the JSON can be very large, and parsing JSON is very
+            //  expensive (compared to parsing BSON). So we trust that the file
+            //  name is correct and indicates what is contained within the file.
+            if  let id:SymbolGraphPart.ID = .init("\(try part.get())")
+            {
+                switch id.namespace
+                {
+                case    "CDispatch",                    // too low-level
+                        "CFURLSessionInterface",        // too low-level
+                        "CFXMLInterface",               // too low-level
+                        "CoreFoundation",               // too low-level
+                        "Glibc",                        // linux-gnu specific
+                        "SwiftGlibc",                   // linux-gnu specific
+                        "SwiftOnoneSupport",            // contains no symbols
+                        "SwiftOverlayShims",            // too low-level
+                        "SwiftShims",                   // contains no symbols
+                        "XCTest",                       // site policy
+                        "_Builtin_intrinsics",          // contains only one symbol, free(_:)
+                        "_Builtin_stddef_max_align_t",  // contains only two symbols
+                        "_InternalStaticMirror",        // unbuildable
+                        "_InternalSwiftScan",           // unbuildable
+                        "_SwiftConcurrencyShims",       // contains only two symbols
+                        "std":                          // unbuildable
+                    continue
+
+                default:
+                    parts[id.culture, default: []].append(id)
+                }
+            }
+        }
+
+        return modules.map
+        {
+            .init($0.module,
+                articles: $0.articles,
+                artifacts: output.path,
+                parts: parts[$0.module.id, default: []])
+        }
+    }
+}
+extension Toolchain
+{
+    @available(*, deprecated)
+    public
+    func generateDocs(for build:Toolchain.Build,
+        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
+    {
+        try await .init(building: build, with: self, pretty: pretty)
+    }
+    @available(*, deprecated)
+    public
+    func generateDocs(for build:SPM.Build,
+        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
+    {
+        try await .init(building: build, with: self, pretty: pretty)
     }
 }

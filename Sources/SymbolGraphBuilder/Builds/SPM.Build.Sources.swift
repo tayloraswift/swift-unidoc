@@ -1,7 +1,7 @@
 import PackageGraphs
 import System
 
-extension PackageBuild
+extension SPM.Build
 {
     /// Stores information about the source files for a package.
     struct Sources
@@ -15,7 +15,7 @@ extension PackageBuild
         }
     }
 }
-extension PackageBuild.Sources
+extension SPM.Build.Sources
 {
     init(scanning package:borrowing PackageNode) throws
     {
@@ -26,7 +26,7 @@ extension PackageBuild.Sources
         })
     }
 }
-extension PackageBuild.Sources
+extension SPM.Build.Sources
 {
     func yield(include:inout [FilePath])
     {

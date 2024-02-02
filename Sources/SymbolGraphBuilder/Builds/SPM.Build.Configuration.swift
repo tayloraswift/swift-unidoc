@@ -1,4 +1,4 @@
-extension PackageBuild
+extension SPM.Build
 {
     @frozen public
     enum Configuration:String
@@ -6,7 +6,7 @@ extension PackageBuild
         case debug = "debug"
     }
 }
-extension PackageBuild.Configuration:CustomStringConvertible
+extension SPM.Build.Configuration:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -14,7 +14,7 @@ extension PackageBuild.Configuration:CustomStringConvertible
         self.rawValue
     }
 }
-extension PackageBuild.Configuration:LosslessStringConvertible
+extension SPM.Build.Configuration:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
