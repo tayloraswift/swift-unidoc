@@ -4,9 +4,9 @@ import Swiftinit
 import SwiftinitRender
 import URI
 
-extension Swiftinit.AdminPage
+extension Swiftinit
 {
-    struct Slaves
+    struct CookiePage
     {
         var cookie:String
 
@@ -16,27 +16,27 @@ extension Swiftinit.AdminPage
         }
     }
 }
-extension Swiftinit.AdminPage.Slaves
+extension Swiftinit.CookiePage
 {
     static
-    var name:String { "slaves" }
+    var name:String { "cookies" }
 
     static
     var uri:URI { Swiftinit.Root.admin / Self.name }
 }
-extension Swiftinit.AdminPage.Slaves:Swiftinit.RenderablePage
+extension Swiftinit.CookiePage:Swiftinit.RenderablePage
 {
-    var title:String { "Slaves · Administrator Tools" }
+    var title:String { "Cookies · Administrator Tools" }
 }
-extension Swiftinit.AdminPage.Slaves:Swiftinit.StaticPage
+extension Swiftinit.CookiePage:Swiftinit.StaticPage
 {
     var location:URI { Self.uri }
 }
-extension Swiftinit.AdminPage.Slaves:Swiftinit.AdministrativePage
+extension Swiftinit.CookiePage:Swiftinit.AdministrativePage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
-        main[.h1] = "Manage Slaves"
+        main[.h1] = "Manage cookies"
 
         main[.section, { $0.class = "cookie-jar" }]
         {
