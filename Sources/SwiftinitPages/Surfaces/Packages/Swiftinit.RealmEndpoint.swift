@@ -25,7 +25,7 @@ extension Swiftinit
 extension Swiftinit.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
-    var replica:Mongo.ReadPreference { .nearest }
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.RealmEndpoint:HTTP.ServerEndpoint
 {
