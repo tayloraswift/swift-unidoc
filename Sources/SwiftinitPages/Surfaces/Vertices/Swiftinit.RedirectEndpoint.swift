@@ -28,7 +28,7 @@ extension Swiftinit
 extension Swiftinit.RedirectEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
-    var replica:Mongo.ReadPreference { .nearest }
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
 {

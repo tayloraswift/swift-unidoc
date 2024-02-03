@@ -34,7 +34,7 @@ extension Swiftinit.VertexEndpoint
     /// All vertex endpoints should be read-only, and they read from secondary replicas when
     /// possible.
     @inlinable public static
-    var replica:Mongo.ReadPreference { .nearest }
+    var replica:Mongo.ReadPreference { .secondaryPreferred }
 }
 extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
