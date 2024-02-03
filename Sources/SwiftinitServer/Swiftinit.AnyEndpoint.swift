@@ -71,8 +71,11 @@ extension Swiftinit.AnyEndpoint
                 return nil
             }
 
-        case Swiftinit.AdminPage.Slaves.name:
-            return .interactive(Swiftinit.SlavesDashboardEndpoint.status)
+        case Swiftinit.ReplicaSetPage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.replicaSet)
+
+        case Swiftinit.CookiePage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: false))
 
         case "robots":
             return .interactive(Swiftinit.TextEditorEndpoint.init(id: .robots_txt))
@@ -316,8 +319,8 @@ extension Swiftinit.AnyEndpoint
                 return .interactive(Swiftinit.AdminEndpoint.recode(target))
             }
 
-        case Swiftinit.AdminPage.Slaves.name:
-            return .interactive(Swiftinit.SlavesDashboardEndpoint.scramble)
+        case Swiftinit.CookiePage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: true))
 
         case _:
             break
