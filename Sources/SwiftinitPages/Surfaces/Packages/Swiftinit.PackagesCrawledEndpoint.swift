@@ -40,7 +40,7 @@ extension Swiftinit
 extension Swiftinit.PackagesCrawledEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
 {
     @inlinable public static
-    var replica:Mongo.ReadPreference { .secondaryPreferred }
+    var replica:Mongo.ReadPreference { .nearest }
 }
 extension Swiftinit.PackagesCrawledEndpoint:HTTP.ServerEndpoint
 {
