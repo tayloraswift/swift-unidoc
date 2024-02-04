@@ -215,7 +215,7 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             for (host, latency):(Mongo.Host, Nanoseconds) in self.servers
             {
                 $0[.dt] = "\(host)"
-                $0[.dd] = "\(latency.rawValue / 1_000_000) ms"
+                $0[.dd] = "\(latency.rawValue / 1_000) µs"
             }
         }
 

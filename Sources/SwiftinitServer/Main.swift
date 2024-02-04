@@ -19,7 +19,7 @@ struct Main
     /// Whether to enable GitHub integration if access keys are available.
     /// Defaults to false.
     var github:Bool
-    var mongo:String
+    var mongo:Mongo.Host
 
     private
     init() throws
@@ -90,7 +90,7 @@ extension Main
             case "-m", "--mongo":
                 switch arguments.next()
                 {
-                case let host?:     self.mongo = host
+                case let host?:     self.mongo = .init(host)
                 case nil:           throw Main.OptionsError.invalidMongoReplicaSetSeed
                 }
 
@@ -189,7 +189,9 @@ extension Main
                 $0.appname = "Unidoc Server"
 
                 $0.connectionTimeout = .seconds(5)
-                $0.monitorInterval = .seconds(5)
+                $0.monitorInterval = .seconds(3)
+
+                $0.topology = .replicated(set: "swiftinit-rs")
             }
 
             var configuration:TLSConfiguration = .makeClientConfiguration()
@@ -199,9 +201,7 @@ extension Main
                 niossl: try .init(configuration: configuration))
             let options:Swiftinit.ServerOptions = try self.options()
 
-            //  Uncomment this to debug MongoDB driver issues:
-            //  let _logger:Mongo.Logger = .init(level: .full)
-            await mongodb.withSessionPool(logger: nil)
+            await mongodb.withSessionPool(logger: .init(level: .error))
             {
                 @Sendable (pool:Mongo.SessionPool) in
 
