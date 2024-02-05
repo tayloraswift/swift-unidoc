@@ -41,7 +41,7 @@ extension Main.Dependencies:TestBattery
             {
                 let encoded:BSON.Document = .init(encoding: value)
                 let decoded:SymbolGraphMetadata.Dependency = try .init(
-                    bson: BSON.DocumentView<[UInt8]>.init(encoded))
+                    bson: BSON.DocumentView.init(encoded))
 
                 tests.expect(value ==? decoded)
             }

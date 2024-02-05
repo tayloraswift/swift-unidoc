@@ -367,7 +367,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 extension Unidoc.AnyVertex:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let id:Unidoc.Scalar = try bson[.id].decode()
 

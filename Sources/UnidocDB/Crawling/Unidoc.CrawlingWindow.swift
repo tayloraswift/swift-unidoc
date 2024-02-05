@@ -47,7 +47,7 @@ extension Unidoc.CrawlingWindow:BSONDocumentEncodable
 extension Unidoc.CrawlingWindow:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             crawled: try bson[.crawled]?.decode(),

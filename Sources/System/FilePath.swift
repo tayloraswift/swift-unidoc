@@ -129,7 +129,7 @@ extension FilePath
     //     }
     // }
     @inlinable public
-    func overwrite(with array:[UInt8],
+    func overwrite(with bytes:ArraySlice<UInt8>,
         permissions:
         (
             owner:FilePermissions.Component?,
@@ -141,7 +141,7 @@ extension FilePath
             permissions: permissions,
             options: [.create, .truncate])
         {
-            try $0.writeAll(array)
+            try $0.writeAll(bytes)
         }
     }
     // @inlinable public

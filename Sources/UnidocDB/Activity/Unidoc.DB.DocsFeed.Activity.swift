@@ -47,7 +47,7 @@ extension Unidoc.DB.DocsFeed.Activity:BSONDocumentEncodable
 extension Unidoc.DB.DocsFeed.Activity:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(discovered: try bson[.id].decode(), volume: try bson[.volume].decode())
     }

@@ -25,16 +25,16 @@ extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
         {
         case .put:
             var snapshot:Unidoc.Snapshot = try .init(
-                bson: BSON.DocumentView<[UInt8]>.init(slice: payload))
+                bson: BSON.DocumentView.init(slice: payload[...]))
 
             if  let bucket:AWS.S3.Bucket = server.bucket,
-                let bson:[UInt8] = snapshot.move()
+                let bson:ArraySlice<UInt8> = snapshot.move()
             {
                 var deflator:LZ77.Deflator = .init(format: .zlib,
                     level: 7,
                     hint: 128 << 10)
 
-                deflator.push((consume bson)[...], last: true)
+                deflator.push(consume bson, last: true)
 
                 var bson:[UInt8] = []
                 while let part:[UInt8] = deflator.pull()

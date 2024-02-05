@@ -53,10 +53,10 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
     where Scalar:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let (sigil, noun):(Sigil, String) = try bson[.generic].decode(
-            as: BSON.UTF8View<Bytes.SubSequence>.self)
+            as: BSON.UTF8View<ArraySlice<UInt8>>.self)
         {
             guard let sigil:Unicode.Scalar = $0.slice.first.map(Unicode.Scalar.init(_:))
             else

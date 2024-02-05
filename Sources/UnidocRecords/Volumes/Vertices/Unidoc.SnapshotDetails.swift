@@ -77,7 +77,7 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
 extension Unidoc.SnapshotDetails:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(abi: try bson[.abi].decode(),
             latestManifest: try bson[.latestManifest]?.decode(),

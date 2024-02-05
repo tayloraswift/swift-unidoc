@@ -62,7 +62,7 @@ extension Unidoc.VersionsQuery.Output:MongoMasterCodingModel
 extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let tagless:Unidoc.VersionsQuery.Graph? = try bson[.tagless_graph]?.decode()
         self.init(

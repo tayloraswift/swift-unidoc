@@ -9,5 +9,5 @@ extension Unidoc
 public
 protocol _UnidocGraphLoader
 {
-    func load(graph:Unidoc.GraphPath) async throws -> [UInt8]
+    func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
 }

@@ -58,7 +58,7 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
 extension SymbolGraph.Outline:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         if  let scalar:Int32 = try bson[.scalar]?.decode()
         {

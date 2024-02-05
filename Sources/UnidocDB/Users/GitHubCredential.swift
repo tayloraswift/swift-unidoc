@@ -49,7 +49,7 @@ extension GitHubCredential:BSONDocumentEncodable, BSONEncodable
 extension GitHubCredential:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
     where Instant:BSONDecodable
 {
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             expires: try bson[.expires].decode(),

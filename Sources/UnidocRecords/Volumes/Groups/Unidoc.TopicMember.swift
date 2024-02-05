@@ -27,7 +27,7 @@ extension Unidoc.TopicMember:BSONEncodable
 extension Unidoc.TopicMember:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.AnyValue) throws
     {
         if  case .string(let utf8) = bson
         {

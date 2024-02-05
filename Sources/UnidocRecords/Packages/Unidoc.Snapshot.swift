@@ -95,7 +95,7 @@ extension Unidoc.Snapshot
     ///
     /// This method returns nil if this snapshot does not contain an inline symbol graph.
     @inlinable public mutating
-    func move() -> [UInt8]?
+    func move() -> ArraySlice<UInt8>?
     {
         guard
         let inline:SymbolGraph = self.inline
@@ -125,9 +125,8 @@ extension Unidoc.Snapshot
         else if
             let loader:Loader
         {
-            let bytes:[UInt8] = try await loader.load(graph: self.path)
-            let graph:SymbolGraph = try .init(bson: BSON.DocumentView<[UInt8]>.init(
-                slice: bytes))
+            let bytes:ArraySlice<UInt8> = try await loader.load(graph: self.path)
+            let graph:SymbolGraph = try .init(bson: BSON.DocumentView.init(slice: bytes))
 
             return .init(metadata: self.metadata, graph: graph, id: self.id)
         }
@@ -176,7 +175,7 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
 extension Unidoc.Snapshot:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             metadata: try bson[.metadata].decode(),

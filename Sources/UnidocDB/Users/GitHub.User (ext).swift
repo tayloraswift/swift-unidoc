@@ -28,7 +28,7 @@ extension GitHub.User<Void>:BSONDocumentEncodable, BSONEncodable
 extension GitHub.User<Void>:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: (),
             login: try bson[.login].decode(),

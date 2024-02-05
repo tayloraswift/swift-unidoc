@@ -24,8 +24,7 @@ extension Main.Availabilities:TestBattery
             {
                 let bson:BSON.Document = .init(encoding: availability)
 
-                let decoded:Availability = try .init(
-                    bson: BSON.DocumentView<[UInt8]>.init(bson))
+                let decoded:Availability = try .init(bson: BSON.DocumentView.init(bson))
 
                 tests.expect(availability ==? decoded)
             }
@@ -44,7 +43,7 @@ extension Main.Availabilities:TestBattery
             {
                 let bson:BSON.Document = .init(encoding: availability)
                 let decoded:Availability = try .init(
-                    bson: BSON.DocumentView<[UInt8]>.init(bson))
+                    bson: BSON.DocumentView.init(bson))
 
                 tests.expect(availability ==? decoded)
             }
@@ -66,7 +65,7 @@ extension Main.Availabilities:TestBattery
             {
                 let bson:BSON.Document = .init(encoding: availability)
                 let decoded:Availability = try .init(
-                    bson: BSON.DocumentView<[UInt8]>.init(bson))
+                    bson: BSON.DocumentView.init(bson))
 
                 tests.expect(availability ==? decoded)
             }

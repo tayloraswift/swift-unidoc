@@ -20,7 +20,7 @@ extension Swiftinit
 }
 extension Swiftinit.GraphLoader:Unidoc.GraphLoader
 {
-    func load(graph:Unidoc.GraphPath) async throws -> [UInt8]
+    func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
     {
         var bytes:[UInt8] = try await self.s3.get(path: "\(graph)")
 
@@ -35,6 +35,6 @@ extension Swiftinit.GraphLoader:Unidoc.GraphLoader
             bytes = inflator.pull()
         }
 
-        return bytes
+        return bytes[...]
     }
 }

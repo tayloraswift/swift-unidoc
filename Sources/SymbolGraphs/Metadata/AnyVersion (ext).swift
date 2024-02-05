@@ -20,7 +20,7 @@ extension AnyVersion:BSONEncodable
 extension AnyVersion:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.AnyValue) throws
     {
         self = try bson.cast
         {

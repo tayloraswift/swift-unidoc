@@ -67,21 +67,17 @@ extension SymbolGraphObject<Void>:BSONDocumentDecodable,
     BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(metadata: try bson[.metadata].decode(), graph: try bson[.graph].decode())
     }
 
     public
-    init(buffer:UnsafeRawBufferPointer) throws
-    {
-        try self.init(bson: BSON.DocumentView<UnsafeRawBufferPointer>.init(slice: buffer))
-    }
-    public
     init(buffer:ArraySlice<UInt8>) throws
     {
-        try self.init(bson: BSON.DocumentView<ArraySlice<UInt8>>.init(slice: buffer))
+        try self.init(bson: BSON.DocumentView.init(slice: buffer))
     }
+
     public
     init(buffer:[UInt8]) throws
     {

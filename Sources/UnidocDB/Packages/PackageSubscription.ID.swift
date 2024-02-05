@@ -53,7 +53,7 @@ extension PackageSubscription.ID:BSONDocumentEncodable
 extension PackageSubscription.ID:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             dependency: try bson[.dependency].decode(),
