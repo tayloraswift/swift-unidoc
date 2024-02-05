@@ -58,11 +58,12 @@ extension Unidoc.TextResource:BSONDocumentDecodable, BSONDocumentViewDecodable, 
     where ID:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
-            utf8: try bson[.utf8].decode(as: BSON.UTF8View<Bytes.SubSequence>.self)
+            utf8: try bson[.utf8].decode(as: BSON.UTF8View<ArraySlice<UInt8>>.self)
         {
+            /// Are we better off performing this copy in the first place?
             [UInt8].init($0.slice)
         })
     }

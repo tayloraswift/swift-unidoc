@@ -48,7 +48,7 @@ extension Unidoc.Cookie:BSONDocumentDecodable
     typealias CodingKey = Unidoc.User.CodingKey
 
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(user: try bson[.id].decode(), cookie: try bson[.cookie].decode())
     }

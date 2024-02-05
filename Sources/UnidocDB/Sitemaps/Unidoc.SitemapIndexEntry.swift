@@ -36,7 +36,7 @@ extension Unidoc.SitemapIndexEntry:MongoMasterCodingModel
 extension Unidoc.SitemapIndexEntry:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(modified: try bson[.modified]?.decode(), symbol: try bson[.symbol].decode())
     }

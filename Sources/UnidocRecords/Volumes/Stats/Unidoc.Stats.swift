@@ -39,7 +39,7 @@ extension Unidoc.Stats:BSONDocumentEncodable
 extension Unidoc.Stats:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             coverage: try bson[.coverage].decode(),

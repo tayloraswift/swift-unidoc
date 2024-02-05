@@ -30,7 +30,7 @@ extension Unidoc.Autoincrement:MongoMasterCodingModel
 }
 extension Unidoc.Autoincrement:BSONDocumentDecodable
 {
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let id:Document.ID = try bson[.id].decode()
 

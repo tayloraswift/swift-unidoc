@@ -27,7 +27,7 @@ extension Unidoc.EditionPlacement:MongoMasterCodingModel
 }
 extension Unidoc.EditionPlacement:BSONDocumentDecodable
 {
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         if  let edition:Unidoc.EditionMetadata = try bson[.edition]?.decode()
         {

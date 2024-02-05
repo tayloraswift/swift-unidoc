@@ -40,7 +40,7 @@ extension Unidoc.TypeTree:BSONDocumentEncodable
 extension Unidoc.TypeTree:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             rows: try bson[.table]?.decode(as: Unidoc.NounTable.self, with: \.rows) ?? [])

@@ -188,7 +188,7 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
 extension Unidoc.AnyGroup:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let id:ID = try bson[.id].decode()
         switch id.plane

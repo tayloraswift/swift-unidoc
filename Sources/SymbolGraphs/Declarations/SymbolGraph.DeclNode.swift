@@ -62,7 +62,7 @@ extension SymbolGraph.DeclNode:BSONDocumentEncodable
 extension SymbolGraph.DeclNode:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             extensions: try bson[.extensions]?.decode() ?? [],

@@ -157,7 +157,7 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
 extension Unidoc.PackageRepo:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let origin:Unidoc.PackageOrigin = .github(try bson[.github].decode())
 

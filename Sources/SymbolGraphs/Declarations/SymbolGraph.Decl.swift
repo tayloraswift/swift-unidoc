@@ -213,7 +213,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
 extension SymbolGraph.Decl:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let flags:Phylum.DeclFlags = try bson[.flags]?.decode()
             ?? .swift(try bson[.flags_swift].decode())

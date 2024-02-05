@@ -172,7 +172,7 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
 extension SymbolGraphMetadata:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             package: .init(

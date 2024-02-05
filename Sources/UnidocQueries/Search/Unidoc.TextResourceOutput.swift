@@ -34,7 +34,7 @@ extension Unidoc.TextResourceOutput:MongoMasterCodingModel
 extension Unidoc.TextResourceOutput:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let utf8:Content = try bson[.utf8].decode
         {

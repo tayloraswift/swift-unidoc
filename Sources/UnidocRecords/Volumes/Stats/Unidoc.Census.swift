@@ -39,7 +39,7 @@ extension Unidoc.Census:BSONDocumentEncodable
 extension Unidoc.Census:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             unweighted: try bson[.unweighted].decode(),

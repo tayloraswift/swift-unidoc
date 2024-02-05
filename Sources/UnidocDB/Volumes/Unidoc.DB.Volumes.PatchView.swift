@@ -22,7 +22,7 @@ extension Unidoc.DB.Volumes.PatchView:BSONDocumentDecodable
 {
     typealias CodingKey = Unidoc.VolumeMetadata.CodingKey
 
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(), patch: try bson[.patch].decode())
     }

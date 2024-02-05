@@ -4,11 +4,11 @@ import BSON
 extension Availability:BSONDocumentDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init()
 
-        for field:BSON.FieldDecoder<CodingKey, Bytes.SubSequence> in bson
+        for field:BSON.FieldDecoder<CodingKey> in bson
         {
             switch field.key.domain
             {

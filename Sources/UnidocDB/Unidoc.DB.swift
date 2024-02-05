@@ -291,7 +291,7 @@ extension Unidoc.DB
 
         enum NoLoader:Unidoc.GraphLoader
         {
-            func load(graph:Unidoc.GraphPath) async throws -> [UInt8]
+            func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
             {
                 throw Unidoc.GraphLoaderError.unavailable
             }

@@ -46,7 +46,7 @@ extension GitHubCredentials:BSONDocumentEncodable
 @available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials:BSONDocumentDecodable
 {
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             refresh: try bson[.refresh].decode(),

@@ -35,7 +35,7 @@ extension Unidoc.ActivityQuery.Output:MongoMasterCodingModel
 extension Unidoc.ActivityQuery.Output:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(repo: try bson[.repo].decode(), docs: try bson[.docs].decode())
     }

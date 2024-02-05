@@ -147,7 +147,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
 extension Unidoc.PackageMetadata:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             symbol: try bson[.symbol].decode(),

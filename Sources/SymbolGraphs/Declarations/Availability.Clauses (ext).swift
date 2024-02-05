@@ -20,7 +20,7 @@ extension Availability.Clauses:BSONDocumentDecodable, BSONDocumentViewDecodable,
             Domain.Bound:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(unavailable: try bson[.unavailable]?.decode(),
             deprecated: try bson[.deprecated]?.decode(),
