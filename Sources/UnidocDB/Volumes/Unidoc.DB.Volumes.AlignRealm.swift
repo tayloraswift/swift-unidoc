@@ -35,11 +35,17 @@ extension Unidoc.DB.Volumes.AlignRealm:Mongo.UpdateQuery
                 {
                     $0.append
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.gte] = self.range.lowerBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init
+                        {
+                            $0[.gte] = self.range.lowerBound
+                        }
                     }
                     $0.append
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.lte] = self.range.upperBound }
+                        $0[Unidoc.VolumeMetadata[.id]] = .init
+                        {
+                            $0[.lte] = self.range.upperBound
+                        }
                     }
                     $0.append
                     {
@@ -54,18 +60,18 @@ extension Unidoc.DB.Volumes.AlignRealm:Mongo.UpdateQuery
                     }
                 }
             }
-            $0[.u] = .init
+            $0[.u]
             {
                 if  let realm:Unidoc.Realm = self.realm
                 {
-                    $0[.set] = .init
+                    $0[.set]
                     {
                         $0[Unidoc.VolumeMetadata[.realm]] = realm
                     }
                 }
                 else
                 {
-                    $0[.unset] = .init
+                    $0[.unset]
                     {
                         $0[Unidoc.VolumeMetadata[.realm]] = ()
                     }

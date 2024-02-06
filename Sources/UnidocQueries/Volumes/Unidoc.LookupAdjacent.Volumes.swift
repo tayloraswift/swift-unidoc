@@ -6,12 +6,12 @@ extension Unidoc.LookupAdjacent
 {
     struct Volumes
     {
-        let upstream:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath>
-        let groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>
+        let upstream:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.AnyKeyPath>
+        let groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>
 
         init(
-            upstream:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath>,
-            groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>)
+            upstream:Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.AnyKeyPath>,
+            groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>)
         {
             self.upstream = upstream
             self.groups = groups

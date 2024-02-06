@@ -33,9 +33,9 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
                 $0[Unidoc.VolumeMetadata[.id]] = self.latest
                 $0[Unidoc.VolumeMetadata[.latest]] = .init { $0[.ne] = true }
             }
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.set] = .init
+                $0[.set]
                 {
                     $0[Unidoc.VolumeMetadata[.latest]] = true
                 }
@@ -68,9 +68,9 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
                     }
                 }
             }
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.unset] = .init
+                $0[.unset]
                 {
                     $0[Unidoc.VolumeMetadata[.latest]] = ()
                 }

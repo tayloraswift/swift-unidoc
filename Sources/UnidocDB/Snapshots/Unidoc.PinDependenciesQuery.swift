@@ -50,16 +50,16 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         //  Lookup the package alias documents by symbol.
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Unidoc.PackageAlias[.id]] = .init { $0[.in] = self.patches.lazy.map(\.package) }
         }
 
-        let coordinate:Mongo.KeyPath = "_coordinate"
-        let patch:Mongo.KeyPath = "_patch"
+        let coordinate:Mongo.AnyKeyPath = "_coordinate"
+        let patch:Mongo.AnyKeyPath = "_patch"
 
         //  We are only interested in the coordinate value stored in the alias documents.
-        pipeline[.replaceWith] = .init
+        pipeline[stage: .replaceWith] = .init
         {
             $0[Symbol.PackageDependency<Unidoc.Edition>[.package]] = Unidoc.PackageAlias[.id]
             $0[coordinate] = Unidoc.PackageAlias[.coordinate]
@@ -67,25 +67,25 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 
         //  Map the coordinates back to the patch versions associated with the original
         //  packages.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.foreignField] = Symbol.PackageDependency<PatchVersion>[.package]
             $0[.localField] = Symbol.PackageDependency<Unidoc.Edition>[.package]
-            $0[.pipeline] = .init { $0[.documents] = self.patches }
+            $0[.pipeline] = .init { $0[stage: .documents] = self.patches }
             $0[.as] = patch
         }
 
-        pipeline[.unwind] = patch
+        pipeline[stage: .unwind] = patch
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[patch] = patch / Symbol.PackageDependency<PatchVersion>[.version]
         }
 
-        let edition:Mongo.KeyPath = "_edition"
+        let edition:Mongo.AnyKeyPath = "_edition"
 
         //  Lookup release editions using the package coordinate and patch version.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             let p:Mongo.Variable<Int32> = "p"
             let v:Mongo.Variable<PatchVersion> = "v"
@@ -98,7 +98,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
             }
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     $0[.and] = .init
                     {
@@ -128,15 +128,15 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
             $0[.as] = edition
         }
 
-        pipeline[.unwind] = edition
+        pipeline[stage: .unwind] = edition
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Symbol.PackageDependency<Unidoc.Edition>[.version]] =
                 edition / Unidoc.EditionMetadata[.id]
         }
 
         //  Lint temporary variables.
-        pipeline[.unset] = [coordinate, patch, edition]
+        pipeline[stage: .unset] = [coordinate, patch, edition]
     }
 }

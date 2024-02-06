@@ -9,11 +9,11 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
 {
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        output:Mongo.KeyPath,
-        unset:[Mongo.KeyPath])
+        volume:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath,
+        unset:[Mongo.AnyKeyPath])
     {
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             let zone:Mongo.Variable<Unidoc.Edition> = "zone"
 
@@ -24,7 +24,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
             }
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     //  The stem index is partial, so we need this condition here in order
                     //  for MongoDB to use the index.
@@ -60,8 +60,8 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                     }
                 }
 
-                $0[.limit] = 50
-                $0[.unset] = unset
+                $0[stage: .limit] = 50
+                $0[stage: .unset] = unset
             }
             $0[.as] = output
         }

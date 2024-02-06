@@ -50,11 +50,11 @@ extension Unidoc.TextResource:BSONDocumentEncodable, BSONEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.utf8] = BSON.UTF8View<[UInt8]>.init(slice: self.utf8)
+        bson[.utf8] = BSON.UTF8View<[UInt8]>.init(bytes: self.utf8)
         bson[.hash] = MD5.init(hashing: self.utf8)
     }
 }
-extension Unidoc.TextResource:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension Unidoc.TextResource:BSONDocumentDecodable, BSONDecodable
     where ID:BSONDecodable
 {
     @inlinable public
@@ -64,7 +64,7 @@ extension Unidoc.TextResource:BSONDocumentDecodable, BSONDocumentViewDecodable, 
             utf8: try bson[.utf8].decode(as: BSON.UTF8View<ArraySlice<UInt8>>.self)
         {
             /// Are we better off performing this copy in the first place?
-            [UInt8].init($0.slice)
+            [UInt8].init($0.bytes)
         })
     }
 }

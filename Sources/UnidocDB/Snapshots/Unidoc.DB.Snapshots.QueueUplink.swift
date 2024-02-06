@@ -40,9 +40,9 @@ extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
                 }
             }
 
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.set] = .init
+                $0[.set]
                 {
                     $0[Unidoc.Snapshot[.link]] = Unidoc.Snapshot.LinkState.refresh
                 }

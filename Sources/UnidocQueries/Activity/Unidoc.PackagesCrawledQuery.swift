@@ -33,7 +33,7 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Unidoc.CrawlingWindow[.id]] = .init
             {
@@ -45,14 +45,14 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[.replaceWith] = .init
+        pipeline[stage: .replaceWith] = .init
         {
             $0[Date[.window]] = Mongo.Pipeline.ROOT
         }
 
-        let count:Mongo.KeyPath = "_count"
+        let count:Mongo.AnyKeyPath = "_count"
 
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Date[.window] / Unidoc.CrawlingWindow[.id]
@@ -61,22 +61,22 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
             {
                 /// This improves query performance enormously, as it gets MongoDB to use the
                 /// partial index. But why?? The `localField` is always non-null!
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
                 }
 
-                $0[.count] = count
+                $0[stage: .count] = count
             }
             $0[.as] = Date[.repos]
         }
 
         //  Unbox the count.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Date[.repos]] = .expr { $0[.first] = Date[.repos] }
         }
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Date[.repos]] = Date[.repos] / count
         }

@@ -37,19 +37,19 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
     typealias CollectionTarget = Unidoc.DB.Realms
 
     @inlinable public static
-    var target:Mongo.KeyPath { Output[.metadata] }
+    var target:Mongo.AnyKeyPath { Output[.metadata] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
         if  let user:Unidoc.User.ID = self.user
         {
-            pipeline[.lookup] = .init
+            pipeline[stage: .lookup] = .init
             {
                 $0[.from] = Unidoc.DB.Users.name
                 $0[.pipeline] = .init
                 {
-                    $0[.match] = .init
+                    $0[stage: .match] = .init
                     {
                         $0[Unidoc.User[.id]] = user
                     }
@@ -57,7 +57,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
                 $0[.as] = Output[.user]
             }
             //  Unbox single-element array.
-            pipeline[.set] = .init
+            pipeline[stage: .set] = .init
             {
                 $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
             }
@@ -65,7 +65,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
 
         //  It’s not clear to me how this is able to use the partial index even without
         // `$exists` guards, but somehow it does.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Self.target / Unidoc.RealmMetadata[.id]

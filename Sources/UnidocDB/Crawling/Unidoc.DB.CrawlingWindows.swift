@@ -60,13 +60,13 @@ extension Unidoc.DB.CrawlingWindows
                     {
                         $0[.upsert] = true
                         $0[.q] = .init { $0[Unidoc.CrawlingWindow[.id]] = id }
-                        $0[.u] = .init
+                        $0[.u]
                         {
-                            $0[.set] = .init
+                            $0[.set]
                             {
                                 $0[Unidoc.CrawlingWindow[.id]] = id
                             }
-                            $0[.setOnInsert] = .init
+                            $0[.setOnInsert]
                             {
                                 $0[Unidoc.CrawlingWindow[.expires]] = 0 as BSON.Millisecond
                             }

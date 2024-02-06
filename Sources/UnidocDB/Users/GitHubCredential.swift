@@ -46,7 +46,7 @@ extension GitHubCredential:BSONDocumentEncodable, BSONEncodable
         bson[.token] = self.token
     }
 }
-extension GitHubCredential:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension GitHubCredential:BSONDocumentDecodable, BSONDecodable
     where Instant:BSONDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

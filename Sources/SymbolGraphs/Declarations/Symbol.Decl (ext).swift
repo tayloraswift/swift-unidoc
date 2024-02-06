@@ -16,7 +16,7 @@ extension Symbol.Decl:BSONEncodable
             let language:BSON.BinarySubtype = .custom(code: 0x80 | self.language.ascii)
             let binary:BSON.BinaryView<UnsafeBufferPointer<UInt8>> = .init(
                 subtype: language,
-                slice: $0)
+                bytes: $0)
 
             binary.encode(to: &field)
         }
@@ -25,9 +25,9 @@ extension Symbol.Decl:BSONEncodable
 extension Symbol.Decl:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
     {
-        let suffix:String = .init(decoding: bson.slice, as: Unicode.ASCII.self)
+        let suffix:String = .init(decoding: bson.bytes, as: Unicode.ASCII.self)
         self.init(Language.init(ascii: bson.subtype.rawValue & 0x7F), ascii: suffix)
     }
 }

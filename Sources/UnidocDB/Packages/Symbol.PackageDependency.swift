@@ -36,9 +36,7 @@ extension Symbol.PackageDependency:BSONDocumentEncodable, BSONEncodable
         bson[.version] = version
     }
 }
-extension Symbol.PackageDependency:BSONDocumentDecodable,
-    BSONDocumentViewDecodable,
-    BSONDecodable
+extension Symbol.PackageDependency:BSONDocumentDecodable, BSONDecodable
     where Version:BSONDecodable
 {
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

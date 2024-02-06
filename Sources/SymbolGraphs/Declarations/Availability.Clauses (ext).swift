@@ -14,7 +14,7 @@ extension Availability.Clauses
         case message = "M"
     }
 }
-extension Availability.Clauses:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension Availability.Clauses:BSONDocumentDecodable, BSONDecodable
     where   Domain.Unavailability:BSONDecodable,
             Domain.Deprecation:BSONDecodable,
             Domain.Bound:BSONDecodable

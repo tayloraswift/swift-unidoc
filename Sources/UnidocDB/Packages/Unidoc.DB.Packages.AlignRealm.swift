@@ -38,9 +38,9 @@ extension Unidoc.DB.Packages.AlignRealm:Mongo.UpdateQuery
             {
             case .aligning(let package):
                 $0[.q] = .init { $0[Unidoc.PackageMetadata[.id]] = package }
-                $0[.u] = .init
+                $0[.u]
                 {
-                    $0[.set] = .init
+                    $0[.set]
                     {
                         $0[Unidoc.PackageMetadata[.realmAligning]] = true
                     }
@@ -48,13 +48,13 @@ extension Unidoc.DB.Packages.AlignRealm:Mongo.UpdateQuery
 
             case .aligned(let package, let realm):
                 $0[.q] = .init { $0[Unidoc.PackageMetadata[.id]] = package }
-                $0[.u] = .init
+                $0[.u]
                 {
-                    $0[.unset] = .init
+                    $0[.unset]
                     {
                         $0[Unidoc.PackageMetadata[.realmAligning]] = ()
                     }
-                    $0[.set] = .init
+                    $0[.set]
                     {
                         $0[Unidoc.PackageMetadata[.realm]] = realm as Unidoc.Realm??
                     }

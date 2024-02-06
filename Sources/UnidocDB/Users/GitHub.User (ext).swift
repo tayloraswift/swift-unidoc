@@ -25,7 +25,7 @@ extension GitHub.User<Void>:BSONDocumentEncodable, BSONEncodable
         bson[.updated] = self.updated
     }
 }
-extension GitHub.User<Void>:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension GitHub.User<Void>:BSONDocumentDecodable, BSONDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

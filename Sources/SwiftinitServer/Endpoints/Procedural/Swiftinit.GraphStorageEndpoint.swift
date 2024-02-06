@@ -25,7 +25,7 @@ extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
         {
         case .put:
             var snapshot:Unidoc.Snapshot = try .init(
-                bson: BSON.DocumentView.init(slice: payload[...]))
+                bson: BSON.Document.init(bytes: payload[...]))
 
             if  let bucket:AWS.S3.Bucket = server.bucket,
                 let bson:ArraySlice<UInt8> = snapshot.move()
