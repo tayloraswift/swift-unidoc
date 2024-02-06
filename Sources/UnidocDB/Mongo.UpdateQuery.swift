@@ -16,7 +16,7 @@ protocol _MongoUpdateQuery<Target>:Sendable
     associatedtype Effect:Mongo.WriteEffect
 
     /// Constructs an update query by adding statements to the given encoder.
-    func build(updates:inout Mongo.UpdateEncoder<Effect>)
+    func build(updates:inout Mongo.UpdateListEncoder<Effect>)
 
     var ordered:Bool { get }
 }

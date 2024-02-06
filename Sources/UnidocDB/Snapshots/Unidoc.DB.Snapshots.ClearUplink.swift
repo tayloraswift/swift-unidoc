@@ -21,7 +21,7 @@ extension Unidoc.DB.Snapshots.ClearUplink:Mongo.UpdateQuery
     var ordered:Bool { false }
 
     public
-    func build(updates:inout Mongo.UpdateEncoder<Mongo.One>)
+    func build(updates:inout Mongo.UpdateListEncoder<Mongo.One>)
     {
         updates
         {

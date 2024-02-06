@@ -1,7 +1,7 @@
 import BSON
 import MongoDB
 
-extension Mongo.UpdateEncoder
+extension Mongo.UpdateListEncoder
 {
     @inlinable mutating
     func update(field:Mongo.AnyKeyPath,

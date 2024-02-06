@@ -22,7 +22,7 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
 
     var ordered:Bool { false }
 
-    func build(updates:inout Mongo.UpdateEncoder<Mongo.Many>)
+    func build(updates:inout Mongo.UpdateListEncoder<Mongo.Many>)
     {
         //  If the metadata document for `self.latest` doesn’t have the latest-flag, add it.
         updates
