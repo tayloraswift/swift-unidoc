@@ -52,8 +52,7 @@ extension SymbolGraphObject<Void>
         case graph
     }
 }
-extension SymbolGraphObject<Void>:BSONDocumentEncodable,
-    BSONEncodable
+extension SymbolGraphObject<Void>:BSONDocumentEncodable, BSONEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -62,9 +61,7 @@ extension SymbolGraphObject<Void>:BSONDocumentEncodable,
         bson[.graph] = self.graph
     }
 }
-extension SymbolGraphObject<Void>:BSONDocumentDecodable,
-    BSONDocumentViewDecodable,
-    BSONDecodable
+extension SymbolGraphObject<Void>:BSONDocumentDecodable, BSONDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
@@ -75,7 +72,7 @@ extension SymbolGraphObject<Void>:BSONDocumentDecodable,
     public
     init(buffer:ArraySlice<UInt8>) throws
     {
-        try self.init(bson: BSON.DocumentView.init(slice: buffer))
+        try self.init(bson: BSON.Document.init(bytes: buffer))
     }
 
     public

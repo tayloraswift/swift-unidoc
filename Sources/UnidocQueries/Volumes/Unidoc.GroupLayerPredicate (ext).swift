@@ -28,7 +28,7 @@ extension Unidoc.GroupLayerPredicate
                     }
                 }
 
-                for passage:Mongo.KeyPath in
+                for passage:Mongo.AnyKeyPath in
                 [
                     group[.overview] / Unidoc.Passage[.outlines],
                     group[.details] / Unidoc.Passage[.outlines],
@@ -36,7 +36,7 @@ extension Unidoc.GroupLayerPredicate
                 {
                     $0.expr
                     {
-                        let outlines:Mongo.List<Unidoc.Outline, Mongo.KeyPath> = .init(
+                        let outlines:Mongo.List<Unidoc.Outline, Mongo.AnyKeyPath> = .init(
                             in: passage)
 
                         $0[.reduce] = outlines.flatMap(\.scalars)
@@ -45,7 +45,7 @@ extension Unidoc.GroupLayerPredicate
 
                 $0.expr
                 {
-                    let members:Mongo.List<Unidoc.TopicMember, Mongo.KeyPath> = .init(
+                    let members:Mongo.List<Unidoc.TopicMember, Mongo.AnyKeyPath> = .init(
                         in: group[.members])
 
                     $0[.filter] = members.filter

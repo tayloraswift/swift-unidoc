@@ -37,15 +37,15 @@ extension Unidoc.AliasQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Aliases.Element[.id]] = self.symbol
         }
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Aliases.Element[.id]] = self.alias
         }
-        pipeline[.merge] = .init
+        pipeline[stage: .merge] = .init
         {
             $0[.into] = Aliases.name
             $0[.on] = Aliases.Element[.id]

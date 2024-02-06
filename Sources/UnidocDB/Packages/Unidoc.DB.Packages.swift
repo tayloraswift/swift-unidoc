@@ -177,14 +177,14 @@ extension Unidoc.DB.Packages
                 {
                     if  hidden
                     {
-                        $0[.set] = .init
+                        $0[.set]
                         {
                             $0[Unidoc.PackageMetadata[.hidden]] = true
                         }
                     }
                     else
                     {
-                        $0[.unset] = .init
+                        $0[.unset]
                         {
                             $0[Unidoc.PackageMetadata[.hidden]] = ()
                         }

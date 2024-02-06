@@ -40,7 +40,8 @@ extension Unidoc.TextResourceOutput:BSONDocumentDecodable
         {
             if  case .string(let utf8) = $0
             {
-                .binary([UInt8].init(utf8.slice))
+                //  Do we really need to copy the bytes here?
+                .binary([UInt8].init(utf8.bytes))
             }
             else
             {

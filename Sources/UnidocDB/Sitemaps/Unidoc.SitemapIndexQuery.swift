@@ -18,12 +18,12 @@ extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.sort] = .init
+        pipeline[stage: .sort] = .init
         {
             $0[Unidoc.Sitemap[.id]] = (+)
         }
 
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Unidoc.Sitemap[.id]
@@ -31,9 +31,9 @@ extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
             $0[.as] = Unidoc.SitemapIndexEntry[.symbol]
         }
 
-        pipeline[.unwind] = Unidoc.SitemapIndexEntry[.symbol]
+        pipeline[stage: .unwind] = Unidoc.SitemapIndexEntry[.symbol]
 
-        pipeline[.replaceWith] = .init
+        pipeline[stage: .replaceWith] = .init
         {
             $0[Unidoc.SitemapIndexEntry[.modified]] = Unidoc.Sitemap[.modified]
             $0[Unidoc.SitemapIndexEntry[.symbol]] =

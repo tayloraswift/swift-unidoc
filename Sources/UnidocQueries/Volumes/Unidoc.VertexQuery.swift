@@ -24,10 +24,10 @@ extension Unidoc
         public
         let lookup:Context
         public
-        let unset:[Mongo.KeyPath]
+        let unset:[Mongo.AnyKeyPath]
 
         @inlinable
-        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, unset:[Mongo.KeyPath] = [])
+        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, unset:[Mongo.AnyKeyPath] = [])
         {
             self.volume = volume
             self.vertex = vertex
@@ -78,12 +78,12 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
     typealias VertexPredicate = Unidoc.Shoot
 
     @inlinable public static
-    var volumeOfLatest:Mongo.KeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }
+    var volumeOfLatest:Mongo.AnyKeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }
     @inlinable public static
-    var volume:Mongo.KeyPath { Unidoc.PrincipalOutput[.volume] }
+    var volume:Mongo.AnyKeyPath { Unidoc.PrincipalOutput[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Unidoc.PrincipalOutput[.matches] }
+    var input:Mongo.AnyKeyPath { Unidoc.PrincipalOutput[.matches] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
@@ -91,7 +91,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  Populate this field only if exactly one vertex matched.
         //  This allows us to skip looking up secondary/tertiary records if
         //  we are only going to generate a disambiguation page.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.PrincipalOutput[.vertex]] = .expr
             {
@@ -108,7 +108,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         }
 
         //  Lookup the repo-level information.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.cell]
@@ -117,14 +117,14 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         }
 
         //  Unbox single-element array and access element field.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.PrincipalOutput[.repo]] = .expr
             {
                 $0[.first] = Unidoc.PrincipalOutput[.repo]
             }
         }
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.PrincipalOutput[.repo]] =
                 Unidoc.PrincipalOutput[.repo] / Unidoc.PackageMetadata[.repo]
@@ -135,7 +135,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //
         //  This stage is a lot like the ``Symbol.Decl`` extension, but `symbol` and `hash`
         //  are variables obtained from the principal `vertex` record.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
             let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
@@ -171,7 +171,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             }
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     $0[.expr] = .expr
                     {
@@ -200,10 +200,10 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     }
                 }
 
-                $0[.limit] = 1
+                $0[stage: .limit] = 1
 
                 //  We do not need to load *any* markdown for this record.
-                $0[.unset] =
+                $0[stage: .unset] =
                 [
                     Unidoc.AnyVertex[.constituents],
                     Unidoc.AnyVertex[.superforms],
@@ -214,7 +214,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             $0[.as] = Unidoc.PrincipalOutput[.vertexInLatest]
         }
         //  Unbox single-element array.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.PrincipalOutput[.vertexInLatest]] = .expr
             {
@@ -230,7 +230,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
         //  Extract (and de-duplicate) the scalars and volumes mentioned by the extensions.
         //  The extensions have precomputed volume ids for MongoDB’s convenience.
-        let edges:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath) = ("scalars", "volumes")
+        let edges:(scalars:Mongo.AnyKeyPath, volumes:Mongo.AnyKeyPath) = ("scalars", "volumes")
 
         self.lookup.edges(&pipeline,
             volume: Unidoc.PrincipalOutput[.volume],
@@ -240,11 +240,11 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
-        pipeline[.facet] = .init
+        pipeline[stage: .facet] = .init
         {
             $0[Unidoc.VertexOutput[.principal]] = .init
             {
-                $0[.project] = .init
+                $0[stage: .project] = .init
                 {
                     for key:Unidoc.PrincipalOutput.CodingKey in
                     [
@@ -289,7 +289,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         }
                     }
                 }
-                $0[.lookup] = .init
+                $0[stage: .lookup] = .init
                 {
                     let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
 
@@ -313,7 +313,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     }
                     $0[.pipeline] = .init
                     {
-                        $0[.match] = .init
+                        $0[stage: .match] = .init
                         {
                             $0[.expr] = .expr
                             {
@@ -324,7 +324,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     $0[.as] = Unidoc.PrincipalOutput[.tree]
                 }
                 //  Unbox single-element array.
-                $0[.set] = .init
+                $0[stage: .set] = .init
                 {
                     $0[Unidoc.PrincipalOutput[.tree]] = .expr
                     {
@@ -335,24 +335,24 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
             $0[Unidoc.VertexOutput[.vertices]] = .init
             {
-                let results:Mongo.KeyPath = "results"
+                let results:Mongo.AnyKeyPath = "results"
 
-                $0[.unwind] = edges.scalars
-                $0[.match] = .init
+                $0[stage: .unwind] = edges.scalars
+                $0[stage: .match] = .init
                 {
                     $0[edges.scalars] = .init { $0[.ne] = Never??.some(nil) }
                 }
-                $0[.lookup] = .init
+                $0[stage: .lookup] = .init
                 {
                     $0[.from] = Unidoc.DB.Vertices.name
                     $0[.localField] = edges.scalars
                     $0[.foreignField] = Unidoc.AnyVertex[.id]
                     $0[.as] = results
                 }
-                $0[.unwind] = results
-                $0[.replaceWith] = results
+                $0[stage: .unwind] = results
+                $0[stage: .replaceWith] = results
                 //  We do not need to load all the markdown for secondary vertices.
-                $0[.unset] =
+                $0[stage: .unset] =
                 [
                     Unidoc.AnyVertex[.constituents],
                     Unidoc.AnyVertex[.superforms],
@@ -362,10 +362,10 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
             $0[Unidoc.VertexOutput[.volumes]] = .init
             {
-                let results:Mongo.KeyPath = "results"
+                let results:Mongo.AnyKeyPath = "results"
 
-                $0[.unwind] = edges.volumes
-                $0[.match] = .init
+                $0[stage: .unwind] = edges.volumes
+                $0[stage: .match] = .init
                 {
                     $0[.and] = .init
                     {
@@ -383,20 +383,20 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         }
                     }
                 }
-                $0[.lookup] = .init
+                $0[stage: .lookup] = .init
                 {
                     $0[.from] = Unidoc.DB.Volumes.name
                     $0[.localField] = edges.volumes
                     $0[.foreignField] = Unidoc.VolumeMetadata[.id]
                     $0[.as] = results
                 }
-                $0[.unwind] = results
-                $0[.replaceWith] = results
-                $0[.project] = .init(with: Unidoc.VolumeMetadata.names(_:))
+                $0[stage: .unwind] = results
+                $0[stage: .replaceWith] = results
+                $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))
             }
         }
         //  Unbox single-element arrays.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.VertexOutput[.principal]] = .expr
             {

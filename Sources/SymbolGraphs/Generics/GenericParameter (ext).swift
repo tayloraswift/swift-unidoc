@@ -17,9 +17,9 @@ extension GenericParameter:BSONStringEncodable
 extension GenericParameter:BSONStringDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.UTF8View<Bytes>) throws
+    init(bson:BSON.UTF8View<ArraySlice<UInt8>>) throws
     {
-        let prefix:Bytes.SubSequence = bson.slice.prefix
+        let prefix:ArraySlice<UInt8> = bson.bytes.prefix
         {
             0x30 ... 0x39 ~= $0
         }
@@ -33,7 +33,7 @@ extension GenericParameter:BSONStringDecodable
         }
 
         self.init(name: .init(
-                decoding: bson.slice.suffix(from: prefix.endIndex),
+                decoding: bson.bytes.suffix(from: prefix.endIndex),
                 as: Unicode.UTF8.self),
             depth: depth)
     }

@@ -31,9 +31,9 @@ extension Unidoc.DB.Snapshots.ClearUplink:Mongo.UpdateQuery
                 $0[.q] = .init { $0[Unidoc.Snapshot[.id]] = edition }
             }
 
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.unset] = .init
+                $0[.unset]
                 {
                     $0[Unidoc.Snapshot[.link]] = ()
                 }

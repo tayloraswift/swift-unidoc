@@ -126,7 +126,7 @@ extension Unidoc.Snapshot
             let loader:Loader
         {
             let bytes:ArraySlice<UInt8> = try await loader.load(graph: self.path)
-            let graph:SymbolGraph = try .init(bson: BSON.DocumentView.init(slice: bytes))
+            let graph:SymbolGraph = try .init(bson: BSON.Document.init(bytes: bytes))
 
             return .init(metadata: self.metadata, graph: graph, id: self.id)
         }

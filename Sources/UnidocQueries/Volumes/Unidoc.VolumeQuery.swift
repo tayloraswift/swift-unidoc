@@ -25,25 +25,25 @@ protocol _UnidocVolumeQuery:Mongo.PipelineQuery<Unidoc.DB.Volumes>
     /// If nil, the query will still look up the latest stable release, but the result will
     /// be discarded.
     static
-    var volumeOfLatest:Mongo.KeyPath? { get }
+    var volumeOfLatest:Mongo.AnyKeyPath? { get }
     /// The field to store the ``Unidoc.VolumeMetadata`` of the **requested snapshot** in.
     static
-    var volume:Mongo.KeyPath { get }
+    var volume:Mongo.AnyKeyPath { get }
 
     /// The field that will contain the list of matching master records, which will become the
     /// input of the conforming type’s ``extend(pipeline:)`` witness.
     static
-    var input:Mongo.KeyPath { get }
+    var input:Mongo.AnyKeyPath { get }
 
     /// The fields that will be removed from all matching primary vertex documents.
-    var unset:[Mongo.KeyPath] { get }
+    var unset:[Mongo.AnyKeyPath] { get }
 
     func extend(pipeline:inout Mongo.PipelineEncoder)
 }
 extension Unidoc.VolumeQuery
 {
     @inlinable public static
-    var volumeOfLatest:Mongo.KeyPath? { nil }
+    var volumeOfLatest:Mongo.AnyKeyPath? { nil }
 }
 extension Unidoc.VolumeQuery
 {
@@ -76,7 +76,7 @@ extension Unidoc.VolumeQuery
             //
             //  This works a lot like ``Database.Names.latest(of:with:)``, except it queries the
             //  package by name instead of id.
-            pipeline[.match] = .init
+            pipeline[stage: .match] = .init
             {
                 $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                 $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
@@ -85,20 +85,20 @@ extension Unidoc.VolumeQuery
             //  it is closer to the ground-truth, and the latest-flag doesn’t
             //  have a unique (compound) index with the package name, since
             //  it experiences rolling alignments.
-            pipeline[.sort] = .init
+            pipeline[stage: .sort] = .init
             {
                 $0[Unidoc.VolumeMetadata[.patch]] = (-)
             }
 
-            pipeline[.limit] = 1
+            pipeline[stage: .limit] = 1
 
-            pipeline[.replaceWith] = .init
+            pipeline[stage: .replaceWith] = .init
             {
                 $0[Self.volume] = Mongo.Pipeline.ROOT
 
                 //  ``Unidoc.VolumeMetadata`` is complex but not that large, and duplicating this
                 //  makes the rest of the query a lot simpler.
-                if  let volume:Mongo.KeyPath = Self.volumeOfLatest
+                if  let volume:Mongo.AnyKeyPath = Self.volumeOfLatest
                 {
                     $0[volume] = Mongo.Pipeline.ROOT
                 }
@@ -108,7 +108,7 @@ extension Unidoc.VolumeQuery
             //  If a version string was provided, use that to filter between
             //  multiple versions of the same package.
             //  This index is unique, so we don’t need a sort or a limit.
-            pipeline[.match] = .init
+            pipeline[stage: .match] = .init
             {
                 $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                 $0[Unidoc.VolumeMetadata[.version]] = version
@@ -116,34 +116,34 @@ extension Unidoc.VolumeQuery
             //  ``Unidoc.VolumeMetadata`` has many keys. to simplify the output schema
             //  and allow re-use of the earlier pipeline stages, we demote
             //  the zone fields to a subdocument.
-            pipeline[.replaceWith] = .init
+            pipeline[stage: .replaceWith] = .init
             {
                 $0[Self.volume] = Mongo.Pipeline.ROOT
             }
 
             guard
-            let volumeOfLatest:Mongo.KeyPath = Self.volumeOfLatest
+            let volumeOfLatest:Mongo.AnyKeyPath = Self.volumeOfLatest
             else
             {
                 break
             }
 
-            pipeline[.lookup] = .init
+            pipeline[stage: .lookup] = .init
             {
                 $0[.from] = CollectionOrigin.name
                 $0[.pipeline] = .init
                 {
-                    $0[.match] = .init
+                    $0[stage: .match] = .init
                     {
                         $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                         $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
                     }
-                    $0[.sort] = .init
+                    $0[stage: .sort] = .init
                     {
                         $0[Unidoc.VolumeMetadata[.patch]] = (-)
                     }
 
-                    $0[.limit] = 1
+                    $0[stage: .limit] = 1
                 }
                 $0[.as] = volumeOfLatest
             }
@@ -152,7 +152,7 @@ extension Unidoc.VolumeQuery
             //
             //  One of the implications of this is that it is *impossible* to access unreleased
             //  documentation if the package does not have at least one release in the database.
-            pipeline[.unwind] = volumeOfLatest
+            pipeline[stage: .unwind] = volumeOfLatest
         }
     }
 }

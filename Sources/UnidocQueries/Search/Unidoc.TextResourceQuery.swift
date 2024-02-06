@@ -42,7 +42,7 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Unidoc.TextResource<CollectionOrigin.Element.ID>[.id]] = self.id
         }
@@ -54,7 +54,7 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
             return
         }
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.TextResourceOutput[.hash]] =
                 Unidoc.TextResource<CollectionOrigin.Element.ID>[.hash]

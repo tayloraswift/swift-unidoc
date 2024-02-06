@@ -28,8 +28,7 @@ extension Main.Generics:TestBattery
             tests.do
             {
                 let bson:BSON.List = .init(elements: parameters)
-                let decoded:[GenericParameter] = try .init(
-                    bson: BSON.ListView.init(bson))
+                let decoded:[GenericParameter] = try .init(bson: bson)
 
                 tests.expect(parameters ..? decoded)
             }
@@ -50,7 +49,8 @@ extension Main.Generics:TestBattery
 
                 for what:GenericOperator in [.conformer, .subclass, .equal]
                 {
-                    guard let tests:TestGroup = tests / "\(what)"
+                    guard
+                    let tests:TestGroup = tests / "\(what)"
                     else
                     {
                         continue
@@ -63,9 +63,7 @@ extension Main.Generics:TestBattery
                     tests.do
                     {
                         let bson:BSON.Document = .init(encoding: constraint)
-
-                        let decoded:GenericConstraint<Int32> = try .init(
-                            bson: BSON.DocumentView.init(bson))
+                        let decoded:GenericConstraint<Int32> = try .init(bson: bson)
 
                         tests.expect(constraint ==? decoded)
                     }

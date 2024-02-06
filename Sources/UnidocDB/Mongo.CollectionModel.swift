@@ -169,7 +169,7 @@ extension Mongo.CollectionModel
 {
     @inlinable internal
     func find<Decodable>(_:Decodable.Type = Decodable.self,
-        by index:Mongo.KeyPath,
+        by index:Mongo.AnyKeyPath,
         of key:__owned some BSONEncodable,
         with session:Mongo.Session) async throws -> Decodable?
         where   Decodable:BSONDocumentDecodable,
@@ -389,7 +389,7 @@ extension Mongo.CollectionModel
     /// returning true if the document was modified, false if the document was not modified,
     /// and nil if the document was not found.
     private
-    func update(field:Mongo.KeyPath,
+    func update(field:Mongo.AnyKeyPath,
         of target:Element.ID,
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
@@ -397,8 +397,8 @@ extension Mongo.CollectionModel
         try await self.update(field: field, by: "_id", of: target, to: value, with: session)
     }
     private
-    func update(field:Mongo.KeyPath,
-        by index:Mongo.KeyPath,
+    func update(field:Mongo.AnyKeyPath,
+        by index:Mongo.AnyKeyPath,
         of key:some BSONEncodable,
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?

@@ -51,12 +51,9 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
                     }
                 }
             }
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.set] = .init
-                {
-                    $0[Unidoc.AnyGroup[.realm]] = self.realm
-                }
+                $0[.set] { $0[Unidoc.AnyGroup[.realm]] = self.realm }
             }
         }
 
@@ -97,12 +94,9 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
                     }
                 }
             }
-            $0[.u] = .init
+            $0[.u]
             {
-                $0[.unset] = .init
-                {
-                    $0[Unidoc.AnyGroup[.realm]] = ()
-                }
+                $0[.unset] { $0[Unidoc.AnyGroup[.realm]] = () }
             }
         }
     }

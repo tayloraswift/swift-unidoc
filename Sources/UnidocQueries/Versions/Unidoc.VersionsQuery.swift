@@ -40,7 +40,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
     typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
-    var target:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.AnyKeyPath { Output[.package] }
 
     @inlinable public
     var symbol:Symbol.Package
@@ -57,28 +57,28 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
     {
         for release:Bool in [true, false]
         {
-            pipeline[.lookup] = Mongo.LookupDocument.init
+            pipeline[stage: .lookup] = Mongo.LookupDocument.init
             {
                 $0[.from] = Unidoc.DB.Editions.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
                 $0[.foreignField] = Unidoc.EditionMetadata[.package]
                 $0[.pipeline] = .init
                 {
-                    $0[.match] = .init
+                    $0[stage: .match] = .init
                     {
                         $0[Unidoc.EditionMetadata[.release]] = release
                         $0[Unidoc.EditionMetadata[.release]] = .init { $0[.exists] = true }
                     }
 
-                    $0[.sort] = .init
+                    $0[stage: .sort] = .init
                     {
                         $0[Unidoc.EditionMetadata[.patch]] = (-)
                         $0[Unidoc.EditionMetadata[.version]] = (-)
                     }
 
-                    $0[.limit] = self.limit
+                    $0[stage: .limit] = self.limit
 
-                    $0[.replaceWith] = .init
+                    $0[stage: .replaceWith] = .init
                     {
                         $0[Tag[.edition]] = Mongo.Pipeline.ROOT
                     }
@@ -102,9 +102,9 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         do
         {
             //  Compute id of local snapshot, if one were to exist.
-            let tagless:Mongo.KeyPath = "_tagless"
+            let tagless:Mongo.AnyKeyPath = "_tagless"
 
-            pipeline[.set] = .init
+            pipeline[stage: .set] = .init
             {
                 $0[tagless] = .expr
                 {
@@ -128,15 +128,15 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
                 graph: Output[.tagless_graph],
                 for: tagless)
 
-            pipeline[.unset] = tagless
+            pipeline[stage: .unset] = tagless
         }
         do
         {
             //  Lookup other aliases for this package.
-            let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.KeyPath> = .init(
+            let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
                 in: Output[.aliases])
 
-            pipeline[.lookup] = .init
+            pipeline[stage: .lookup] = .init
             {
                 $0[.from] = Unidoc.DB.PackageAliases.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
@@ -144,7 +144,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
                 $0[.as] = aliases.expression
             }
 
-            pipeline[.set] = .init
+            pipeline[stage: .set] = .init
             {
                 $0[Output[.aliases]] = .expr { $0[.map] = aliases.map { $0[.id] } }
             }
@@ -152,7 +152,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         do
         {
             //  Lookup the associated realm.
-            pipeline[.lookup] = .init
+            pipeline[stage: .lookup] = .init
             {
                 $0[.from] = Unidoc.DB.Realms.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
@@ -160,7 +160,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
                 $0[.as] = Output[.realm]
             }
             //  Unbox single-element array.
-            pipeline[.set] = .init
+            pipeline[stage: .set] = .init
             {
                 $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
             }
@@ -168,12 +168,12 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         if  let user:Unidoc.User.ID
         {
             //  Lookup the querying user.
-            pipeline[.lookup] = .init
+            pipeline[stage: .lookup] = .init
             {
                 $0[.from] = Unidoc.DB.Users.name
                 $0[.pipeline] = .init
                 {
-                    $0[.match] = .init
+                    $0[stage: .match] = .init
                     {
                         $0[Unidoc.User[.id]] = user
                     }
@@ -182,7 +182,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             }
 
             //  Unbox single-element array.
-            pipeline[.set] = .init
+            pipeline[stage: .set] = .init
             {
                 $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
             }
@@ -193,12 +193,12 @@ extension Unidoc.VersionsQuery
 {
     private static
     func load(_ pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        graph:Mongo.KeyPath,
-        for id:Mongo.KeyPath)
+        volume:Mongo.AnyKeyPath,
+        graph:Mongo.AnyKeyPath,
+        for id:Mongo.AnyKeyPath)
     {
         //  Check if a volume has been created for this edition.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Volumes.name
             $0[.localField] = id
@@ -207,14 +207,14 @@ extension Unidoc.VersionsQuery
         }
 
         //  Check if a symbol graph has been uploaded for this edition.
-        pipeline[.lookup] = Mongo.LookupDocument.init
+        pipeline[stage: .lookup] = Mongo.LookupDocument.init
         {
             $0[.from] = Unidoc.DB.Snapshots.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.Snapshot[.id]
             $0[.pipeline] = .init
             {
-                $0[.replaceWith] = .init
+                $0[stage: .replaceWith] = .init
                 {
                     $0[Graph[.id]] = Unidoc.Snapshot[.id]
                     $0[Graph[.inlineBytes]] = .expr
@@ -236,7 +236,7 @@ extension Unidoc.VersionsQuery
         }
 
         //  Unbox single-element arrays.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[volume] = .expr { $0[.first] = volume }
             $0[graph] = .expr { $0[.first] = graph }

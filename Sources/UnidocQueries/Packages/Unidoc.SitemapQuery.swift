@@ -33,12 +33,12 @@ extension Unidoc.SitemapQuery:Unidoc.AliasingQuery
     typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
-    var target:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.AnyKeyPath { Output[.package] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.Sitemaps.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
@@ -46,9 +46,9 @@ extension Unidoc.SitemapQuery:Unidoc.AliasingQuery
             $0[.as] = Output[.sitemap]
         }
 
-        pipeline[.unwind] = Output[.sitemap]
+        pipeline[stage: .unwind] = Output[.sitemap]
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Output[.package]] = Self.target / Unidoc.PackageMetadata[.symbol]
         }

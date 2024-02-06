@@ -40,13 +40,13 @@ extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
     typealias VertexPredicate = Predicate
 
     @inlinable public static
-    var volume:Mongo.KeyPath { Unidoc.RedirectOutput[.volume] }
+    var volume:Mongo.AnyKeyPath { Unidoc.RedirectOutput[.volume] }
 
     @inlinable public static
-    var input:Mongo.KeyPath { Unidoc.RedirectOutput[.matches] }
+    var input:Mongo.AnyKeyPath { Unidoc.RedirectOutput[.matches] }
 
     @inlinable public
-    var unset:[Mongo.KeyPath]
+    var unset:[Mongo.AnyKeyPath]
     {
         [
             Unidoc.AnyVertex[.constituents],

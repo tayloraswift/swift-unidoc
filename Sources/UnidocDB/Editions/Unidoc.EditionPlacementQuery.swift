@@ -28,38 +28,38 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        let new:Mongo.KeyPath = "new"
-        let old:Mongo.KeyPath = "old"
-        let all:Mongo.KeyPath = "all"
+        let new:Mongo.AnyKeyPath = "new"
+        let old:Mongo.AnyKeyPath = "old"
+        let all:Mongo.AnyKeyPath = "all"
 
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Unidoc.EditionMetadata[.package]] = package
         }
-        pipeline[.facet] = .init
+        pipeline[stage: .facet] = .init
         {
             $0[old] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     $0[Unidoc.EditionMetadata[.name]] = refname
                 }
 
-                $0[.replaceWith] = .init
+                $0[stage: .replaceWith] = .init
                 {
                     $0[Unidoc.EditionPlacement[.edition]] = Mongo.Pipeline.ROOT
                 }
             }
             $0[new] = .init
             {
-                $0[.sort] = .init
+                $0[stage: .sort] = .init
                 {
                     $0[Unidoc.EditionMetadata[.version]] = (-)
                 }
 
-                $0[.limit] = 1
+                $0[stage: .limit] = 1
 
-                $0[.replaceWith] = .init
+                $0[stage: .replaceWith] = .init
                 {
                     $0[Unidoc.EditionPlacement[.coordinate]] = .expr
                     {
@@ -69,13 +69,13 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[all] = .expr { $0[.concatArrays] = (old, new) }
         }
 
-        pipeline[.unwind] = all
-        pipeline[.replaceWith] = all
-        pipeline[.limit] = 1
+        pipeline[stage: .unwind] = all
+        pipeline[stage: .replaceWith] = all
+        pipeline[stage: .limit] = 1
     }
 }

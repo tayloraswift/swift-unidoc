@@ -64,7 +64,7 @@ extension Unidoc.DB.DocsFeed
                 }
                 $0[.update] = .init
                 {
-                    $0[.setOnInsert] = .init
+                    $0[.setOnInsert]
                     {
                         $0[Activity<Unidoc.Edition>[.id]] = activity.id
                         $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
