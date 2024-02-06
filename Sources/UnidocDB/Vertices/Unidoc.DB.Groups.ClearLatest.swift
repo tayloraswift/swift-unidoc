@@ -22,7 +22,7 @@ extension Unidoc.DB.Groups.ClearLatest:Mongo.UpdateQuery
 
     var ordered:Bool { false }
 
-    func build(updates:inout Mongo.UpdateEncoder<Mongo.Many>)
+    func build(updates:inout Mongo.UpdateListEncoder<Mongo.Many>)
     {
         updates
         {

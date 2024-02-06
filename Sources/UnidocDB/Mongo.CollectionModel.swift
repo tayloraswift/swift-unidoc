@@ -415,7 +415,7 @@ extension Mongo.CollectionModel
     }
     @inlinable package
     func update(with session:Mongo.Session,
-        do encode:(inout Mongo.UpdateEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
+        do encode:(inout Mongo.UpdateListEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)

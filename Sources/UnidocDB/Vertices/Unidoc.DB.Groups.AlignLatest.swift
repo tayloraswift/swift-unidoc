@@ -24,7 +24,7 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
 
     var ordered:Bool { true }
 
-    func build(updates:inout Mongo.UpdateEncoder<Mongo.Many>)
+    func build(updates:inout Mongo.UpdateListEncoder<Mongo.Many>)
     {
         let latest:ClosedRange<Unidoc.Scalar> = .edition(self.latest)
         let all:ClosedRange<Unidoc.Scalar> = .package(self.latest.package)

@@ -22,7 +22,7 @@ extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
     var ordered:Bool { false }
 
     public
-    func build(updates:inout Mongo.UpdateEncoder<Mongo.Many>)
+    func build(updates:inout Mongo.UpdateListEncoder<Mongo.Many>)
     {
         updates
         {

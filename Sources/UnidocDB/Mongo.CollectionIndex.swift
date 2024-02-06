@@ -51,7 +51,7 @@ extension Mongo.CollectionIndex
 }
 extension Mongo.CollectionIndex
 {
-    func build(statement:inout Mongo.CreateIndexStatement)
+    func build(statement:inout Mongo.CreateIndexStatementEncoder)
     {
         statement[.name] = self.id
         statement[.collation] = self.collation
