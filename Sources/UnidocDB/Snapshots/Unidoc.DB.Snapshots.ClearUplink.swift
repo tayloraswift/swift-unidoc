@@ -28,7 +28,7 @@ extension Unidoc.DB.Snapshots.ClearUplink:Mongo.UpdateQuery
             switch self
             {
             case .one(let edition):
-                $0[.q] = .init { $0[Unidoc.Snapshot[.id]] = edition }
+                $0[.q] { $0[Unidoc.Snapshot[.id]] = edition }
             }
 
             $0[.u]

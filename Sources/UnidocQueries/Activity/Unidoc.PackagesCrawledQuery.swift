@@ -35,11 +35,11 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
     {
         pipeline[stage: .match] = .init
         {
-            $0[Unidoc.CrawlingWindow[.id]] = .init
+            $0[Unidoc.CrawlingWindow[.id]]
             {
                 $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.range.lowerBound))
             }
-            $0[Unidoc.CrawlingWindow[.id]] = .init
+            $0[Unidoc.CrawlingWindow[.id]]
             {
                 $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.range.upperBound))
             }
@@ -63,7 +63,7 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
                 /// partial index. But why?? The `localField` is always non-null!
                 $0[stage: .match] = .init
                 {
-                    $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+                    $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
                 }
 
                 $0[stage: .count] = count

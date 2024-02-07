@@ -55,15 +55,6 @@
       }
     },
     {
-      "identity" : "swift-mongodb",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tayloraswift/swift-mongodb",
-      "state" : {
-        "branch" : "swap-type-names",
-        "revision" : "aa83889ec88977be10d68e05444e2fcc0425bfd2"
-      }
-    },
-    {
       "identity" : "swift-nio",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio",

@@ -87,6 +87,15 @@ extension Main
             case "-r", "--redirect":
                 self.redirect = true
 
+            case "-s", "--replica-set":
+                guard let replicaSet:String = arguments.next()
+                else
+                {
+                    throw Main.OptionsError.invalidReplicaSet
+                }
+
+                self.development.replicaSet = replicaSet
+
             case "-m", "--mongo":
                 switch arguments.next()
                 {
@@ -183,16 +192,7 @@ extension Main
         }
         else
         {
-            let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongo] /?
-            {
-                $0.executors = .shared(threads)
-                $0.appname = "Unidoc Server"
-
-                $0.connectionTimeout = .seconds(5)
-                $0.monitorInterval = .seconds(3)
-
-                $0.topology = .replicated(set: "swiftinit-rs")
-            }
+            let mongod:Mongo.Host = self.mongo
 
             var configuration:TLSConfiguration = .makeClientConfiguration()
                 configuration.applicationProtocols = ["h2"]
@@ -200,6 +200,17 @@ extension Main
             let context:Swiftinit.ServerPluginContext = .init(threads: threads,
                 niossl: try .init(configuration: configuration))
             let options:Swiftinit.ServerOptions = try self.options()
+
+            let mongodb:Mongo.DriverBootstrap = MongoDB / [mongod] /?
+            {
+                $0.executors = .shared(threads)
+                $0.appname = "Unidoc Server"
+
+                $0.connectionTimeout = .seconds(5)
+                $0.monitorInterval = .seconds(3)
+
+                $0.topology = .replicated(set: options.replicaSet)
+            }
 
             await mongodb.withSessionPool(logger: .init(level: .error))
             {

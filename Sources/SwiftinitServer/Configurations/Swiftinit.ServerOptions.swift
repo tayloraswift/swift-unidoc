@@ -26,21 +26,30 @@ extension Swiftinit
 }
 extension Swiftinit.ServerOptions
 {
-    subscript(dynamicMember keyPath:KeyPath<Development, Bool>) -> Bool
+    private
+    var development:Development?
     {
         switch self.mode
         {
-        case .development(_, let options):  options[keyPath: keyPath]
-        case .production:                   true
+        case .development(_, let options):  options
+        case .production:                   nil
         }
+    }
+}
+extension Swiftinit.ServerOptions
+{
+    subscript(dynamicMember keyPath:KeyPath<Development, Bool>) -> Bool
+    {
+        self.development?[keyPath: keyPath] ?? true
+    }
+
+    var replicaSet:String
+    {
+        self.development?.replicaSet ?? "swiftinit-rs"
     }
 
     var port:Int
     {
-        switch self.mode
-        {
-        case .development(_, let options):  options.port
-        case .production:                   443
-        }
+        self.development?.port ?? 443
     }
 }

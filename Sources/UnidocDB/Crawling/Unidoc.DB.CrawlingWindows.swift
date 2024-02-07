@@ -59,7 +59,7 @@ extension Unidoc.DB.CrawlingWindows
                     $0
                     {
                         $0[.upsert] = true
-                        $0[.q] = .init { $0[Unidoc.CrawlingWindow[.id]] = id }
+                        $0[.q] { $0[Unidoc.CrawlingWindow[.id]] = id }
                         $0[.u]
                         {
                             $0[.set]

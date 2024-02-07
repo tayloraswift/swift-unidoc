@@ -67,7 +67,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
                     $0[stage: .match] = .init
                     {
                         $0[Unidoc.EditionMetadata[.release]] = release
-                        $0[Unidoc.EditionMetadata[.release]] = .init { $0[.exists] = true }
+                        $0[Unidoc.EditionMetadata[.release]] { $0[.exists] = true }
                     }
 
                     $0[stage: .sort] = .init

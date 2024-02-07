@@ -52,7 +52,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         //  Lookup the package alias documents by symbol.
         pipeline[stage: .match] = .init
         {
-            $0[Unidoc.PackageAlias[.id]] = .init { $0[.in] = self.patches.lazy.map(\.package) }
+            $0[Unidoc.PackageAlias[.id]] { $0[.in] = self.patches.lazy.map(\.package) }
         }
 
         let coordinate:Mongo.AnyKeyPath = "_coordinate"
@@ -100,28 +100,19 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
             {
                 $0[stage: .match] = .init
                 {
-                    $0[.and] = .init
+                    $0[.and]
                     {
-                        $0.append
+                        $0
                         {
-                            $0[.expr] = .expr
-                            {
-                                $0[.eq] = (Unidoc.EditionMetadata[.package], p)
-                            }
+                            $0[.expr] { $0[.eq] = (Unidoc.EditionMetadata[.package], p) }
                         }
 
-                        $0.append
+                        $0
                         {
-                            $0[.expr] = .expr
-                            {
-                                $0[.eq] = (Unidoc.EditionMetadata[.patch], v)
-                            }
+                            $0[.expr] { $0[.eq] = (Unidoc.EditionMetadata[.patch], v) }
                         }
 
-                        $0.append
-                        {
-                            $0[Unidoc.EditionMetadata[.release]] = true
-                        }
+                        $0 { $0[Unidoc.EditionMetadata[.release]] = true }
                     }
                 }
             }

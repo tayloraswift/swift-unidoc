@@ -73,16 +73,6 @@ extension Unidoc.User:MongoMasterCodingModel
         case cookie
     }
 }
-extension Unidoc.User
-{
-    func encode(set:inout Mongo.UpdateFieldsEncoder<Mongo.UpdateDocumentEncoder.Assignment>)
-    {
-        set[Self[.id]] = self.id
-        set[Self[.level]] = self.level
-        set[Self[.realm]] = self.realm
-        set[Self[.github]] { $0[.literal] = self.github }
-    }
-}
 extension Unidoc.User:BSONDocumentEncodable
 {
     public

@@ -28,11 +28,11 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                 {
                     //  The stem index is partial, so we need this condition here in order
                     //  for MongoDB to use the index.
-                    $0[Unidoc.AnyVertex[.stem]] = .init { $0[.exists] = true }
+                    $0[Unidoc.AnyVertex[.stem]] { $0[.exists] = true }
 
-                    $0[.expr] = .expr
+                    $0[.expr]
                     {
-                        $0[.and] = .init
+                        $0[.and]
                         {
                             //  We could also use a range operator to filter on `_id`.
                             //  But that would not be as index-friendly.

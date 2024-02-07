@@ -10,6 +10,9 @@ extension Swiftinit.ServerOptions
         /// Whether to enable IP whitelisting.
         var whitelists:Bool
 
+        /// The name of the replica set to use for development.
+        var replicaSet:String
+
         /// A test bucket for development. For this to work, you should probably make the bucket
         /// publically writable. It goes without saying that you should delete such a bucket
         /// as soon as you are done testing it.
@@ -21,9 +24,8 @@ extension Swiftinit.ServerOptions
         {
             self.cloudfront = false
             self.whitelists = false
-
+            self.replicaSet = "unidoc-rs"
             self.bucket = nil
-
             self.port = 8443
         }
     }
