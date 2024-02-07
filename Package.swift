@@ -98,9 +98,9 @@ let package:Package = .init(
 
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
-        //.package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-        //    from: "0.11.0")),
-        .package(path: "../swift-mongodb"),
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
+            from: "0.12.0")),
+        //.package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.2.0")),
