@@ -128,7 +128,7 @@ extension SPM.Build
         let container:SPM.Workspace = try await shared.create("\(package)")
         let checkouts:SPM.CheckoutDirectory = try await container.create("checkouts",
             clean: clean.contains(.checkouts))
-        let artifacts:SPM.ArtifactDirectory = try await container.create("artifacts@\(refname)",
+        let artifacts:ArtifactDirectory = try await container.create("artifacts@\(refname)",
             clean: clean.contains(.artifacts))
 
         let cloned:FilePath = checkouts.path / "\(package)"
@@ -189,7 +189,7 @@ extension SPM.Build:DocumentationBuild
 {
     mutating
     func compile(with swift:Toolchain,
-        pretty:Bool) async throws -> (SymbolGraphMetadata, SPM.Artifacts)
+        pretty:Bool) async throws -> (SymbolGraphMetadata, Artifacts)
     {
         switch self.id
         {
@@ -295,7 +295,7 @@ extension SPM.Build:DocumentationBuild
             display: manifest.name,
             root: manifest.root)
 
-        let artifacts:SPM.Artifacts = try await swift.dump(from: flatNode,
+        let artifacts:Artifacts = try await swift.dump(from: flatNode,
             include: &include,
             output: self.output,
             triple: swift.triple,

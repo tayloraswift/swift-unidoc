@@ -24,7 +24,7 @@ extension SymbolGraphObject<Void>
         pretty:Bool) async throws
     {
         let metadata:SymbolGraphMetadata
-        let artifacts:SPM.Artifacts
+        let artifacts:Artifacts
 
         (metadata, artifacts) = try await build.compile(with: swift, pretty: pretty)
 
