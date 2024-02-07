@@ -6,7 +6,7 @@ import SymbolGraphs
 import Symbols
 import System
 
-extension SPM.Artifacts
+extension Artifacts
 {
     struct Culture
     {
@@ -29,14 +29,14 @@ extension SPM.Artifacts
         }
     }
 }
-extension SPM.Artifacts.Culture:Identifiable
+extension Artifacts.Culture:Identifiable
 {
     var id:Symbol.Module
     {
         self.module.id
     }
 }
-extension SPM.Artifacts.Culture
+extension Artifacts.Culture
 {
     func loadArticles(root:Symbol.FileBase) throws -> [MarkdownSourceFile]
     {
@@ -83,7 +83,7 @@ extension SPM.Artifacts.Culture
             }
             catch let error
             {
-                throw SPM.ArtifactError.init(underlying: error, path: path)
+                throw ArtifactError.init(underlying: error, path: path)
             }
         }
     }

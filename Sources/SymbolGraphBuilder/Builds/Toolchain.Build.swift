@@ -2,14 +2,14 @@ import SymbolGraphs
 
 extension Toolchain
 {
-    @frozen public
+    public
     struct Build
     {
         /// Where to emit documentation artifacts to.
-        let output:SPM.ArtifactDirectory
+        let output:ArtifactDirectory
 
         private
-        init(output:SPM.ArtifactDirectory)
+        init(output:ArtifactDirectory)
         {
             self.output = output
         }
@@ -27,10 +27,10 @@ extension Toolchain.Build
 extension Toolchain.Build:DocumentationBuild
 {
     func compile(with swift:Toolchain,
-        pretty:Bool) async throws -> (SymbolGraphMetadata, SPM.Artifacts)
+        pretty:Bool) async throws -> (SymbolGraphMetadata, Artifacts)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let artifacts:SPM.Artifacts = try await swift.dump(
+        let artifacts:Artifacts = try await swift.dump(
             modules:
             [
                 //  0:

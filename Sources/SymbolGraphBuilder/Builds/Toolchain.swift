@@ -238,17 +238,16 @@ extension Toolchain
 {
     /// Dumps the symbols for the given package, using the `output` workspace as the
     /// output directory.
-    public
     func dump(from package:PackageNode,
         include:inout [FilePath],
-        output:SPM.ArtifactDirectory,
+        output:ArtifactDirectory,
         triple:Triple,
-        pretty:Bool = false) async throws -> SPM.Artifacts
+        pretty:Bool = false) async throws -> Artifacts
     {
         //  Note: the manifest root is the root we want; the repository root may
         //  be a relative path.
         let sources:SPM.Build.Sources = try .init(scanning: package)
-        let cultures:[SPM.Artifacts.Culture] = try await self.dump(
+        let cultures:[Artifacts.Culture] = try await self.dump(
             modules: sources.modules,
             include: &include,
             output: output,
@@ -260,12 +259,12 @@ extension Toolchain
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
     func dump(modules:[SPM.Build.Sources.Module],
-        output:SPM.ArtifactDirectory,
+        output:ArtifactDirectory,
         triple:Triple,
-        pretty:Bool = false) async throws -> SPM.Artifacts
+        pretty:Bool = false) async throws -> Artifacts
     {
         var include:[FilePath] = []
-        let cultures:[SPM.Artifacts.Culture] = try await self.dump(
+        let cultures:[Artifacts.Culture] = try await self.dump(
             modules: modules,
             include: &include,
             output: output,
@@ -278,9 +277,9 @@ extension Toolchain
     private
     func dump(modules:[SPM.Build.Sources.Module],
         include:inout [FilePath],
-        output:SPM.ArtifactDirectory,
+        output:ArtifactDirectory,
         triple:Triple,
-        pretty:Bool) async throws -> [SPM.Artifacts.Culture]
+        pretty:Bool) async throws -> [Artifacts.Culture]
     {
         for sources:SPM.Build.Sources.Module in modules
         {
