@@ -6,8 +6,30 @@ extension Unidoc
     @frozen public
     struct PackageRepo:Sendable
     {
+        /// When the package’s repo information was last read. This is always non-nil because
+        /// crawling is how we obtain this structure in the first place.
         public
         var crawled:BSON.Millisecond
+        /// When the package’s tags were last fetched. Nil if the package’s tags have not been
+        /// read yet.
+        public
+        var fetched:BSON.Millisecond?
+        /// When we should fetch the package’s tags again. This is nil in some cases where we
+        /// do not want to crawl the package at all, such as when the package is archived or
+        /// unfree.
+        ///
+        /// Packages that we want to crawl frequently will expire instantly – that is, they
+        /// have an expiration equal to ``fetched``.
+        ///
+        /// Even if this becomes nil, it is expected that a small number of packages may again
+        /// be rediscovered later and ruled eligible for crawling.
+        public
+        var expires:BSON.Millisecond?
+
+        /// The account that owns the repo, and could be reasonably allowed to update its
+        /// package settings.
+        public
+        var account:Unidoc.Account?
 
         /// When the repo was created. Both GitHub and GitLab define this field.
         ///
@@ -46,6 +68,9 @@ extension Unidoc
         @inlinable public
         init(
             crawled:BSON.Millisecond,
+            fetched:BSON.Millisecond?,
+            expires:BSON.Millisecond?,
+            account:Unidoc.Account?,
             created:BSON.Millisecond,
             updated:BSON.Millisecond,
             license:PackageLicense?,
@@ -56,6 +81,10 @@ extension Unidoc
             stars:Int = 0)
         {
             self.crawled = crawled
+            self.fetched = fetched
+            self.expires = expires
+            self.account = account
+
             self.created = created
             self.updated = updated
             self.license = license
@@ -83,6 +112,10 @@ extension Unidoc.PackageRepo
     enum CodingKey:String, Sendable
     {
         case crawled = "I"
+        case fetched = "G"
+        case expires = "E"
+        case account = "A"
+
         case created = "C"
         case updated = "U"
 
@@ -102,6 +135,9 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.crawled] = self.crawled
+        bson[.fetched] = self.fetched
+        bson[.expires] = self.expires
+        bson[.account] = self.account
         bson[.created] = self.created
         bson[.updated] = self.updated
 
@@ -121,12 +157,15 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
 extension Unidoc.PackageRepo:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let origin:Unidoc.PackageOrigin = .github(try bson[.github].decode())
 
         self.init( // TODO: deoptionalize
             crawled: try bson[.crawled]?.decode() ?? 0,
+            fetched: try bson[.fetched]?.decode(),
+            expires: try bson[.expires]?.decode(),
+            account: try bson[.account]?.decode(),
             created: try bson[.created].decode(),
             updated: try bson[.updated].decode(),
             license: try bson[.license]?.decode(),

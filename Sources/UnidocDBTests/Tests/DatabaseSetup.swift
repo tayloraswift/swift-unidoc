@@ -13,9 +13,9 @@ struct DatabaseSetup:MongoTestBattery
         //  (Initialization should be idempotent.)
         await tests.do
         {
-            let _:UnidocDatabase = await .setup(as: database, in: pool)
-            let _:UnidocDatabase = await .setup(as: database, in: pool)
-            let _:UnidocDatabase = await .setup(as: database, in: pool)
+            let _:Unidoc.DB = await .setup(as: database, in: pool)
+            let _:Unidoc.DB = await .setup(as: database, in: pool)
+            let _:Unidoc.DB = await .setup(as: database, in: pool)
         }
     }
 }

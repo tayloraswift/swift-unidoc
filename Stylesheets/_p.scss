@@ -1,0 +1,23 @@
+@import 'Mixins/InlineCode';
+
+p
+{
+    line-height: 1.8rem;
+    hyphens: auto;
+
+    code
+    {
+        @include inline-code;
+    }
+}
+
+p.note
+{
+    color: $light-foreground-semi;
+    font-style: italic;
+
+    em
+    {
+        font-style: normal;
+    }
+}

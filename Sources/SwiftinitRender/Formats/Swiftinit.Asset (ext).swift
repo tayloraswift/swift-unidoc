@@ -7,13 +7,8 @@ typealias StaticAsset = Swiftinit.Asset
 extension Swiftinit.Asset
 {
     @inlinable public
-    func path(prepending version:MinorVersion) -> String
+    func path(prepending version:MajorVersion) -> String
     {
-        switch self.versioning
-        {
-        case .none:     "/asset/\(self)"
-        case .major:    "/asset/\(version.major)/\(self)"
-        case .minor:    "/asset/\(version)/\(self)"
-        }
+        self.versioned ? "/asset/\(version)/\(self)" : "/asset/\(self)"
     }
 }

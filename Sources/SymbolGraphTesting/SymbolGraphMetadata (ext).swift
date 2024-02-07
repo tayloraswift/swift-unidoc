@@ -6,7 +6,7 @@ extension SymbolGraphMetadata
     /// A suitable filename for the associated symbol graph archive.
     var filename:String
     {
-        switch (self.package, self.commit?.refname)
+        switch (self.package.name, self.commit?.name)
         {
         case (.swift, _):
             "swift@\(self.swift).bson"

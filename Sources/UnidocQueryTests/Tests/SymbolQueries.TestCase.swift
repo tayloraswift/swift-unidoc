@@ -55,7 +55,7 @@ extension SymbolQueries.TestCase
             tests: tests)
     }
 
-    func run(on unidoc:UnidocDatabase, with session:Mongo.Session) async
+    func run(on unidoc:Unidoc.DB, with session:Mongo.Session) async
     {
         await self.tests.do
         {
@@ -113,6 +113,18 @@ extension SymbolQueries.TestCase
                         for s:Unidoc.Scalar in e.subforms
                         {
                             counts[secondaries[s] ?? "", default: 0] += 1
+                        }
+
+                    case .intrinsic(let i):
+                        guard self.filters.contains(.intrinsics)
+                        else
+                        {
+                            continue
+                        }
+
+                        for m:Unidoc.Scalar in i.members
+                        {
+                            counts[secondaries[m] ?? "", default: 0] += 1
                         }
                     }
                 }

@@ -32,6 +32,10 @@ extension Compiler
         public internal(set)
         var requirements:Set<Symbol.Decl>
 
+        /// Enumeration cases.
+        public internal(set)
+        var inhabitants:Set<Symbol.Decl>
+
         /// The scalars that this scalar implements, overrides, or inherits
         /// from. Superforms are intrinsic but there can be more than one
         /// per scalar.
@@ -78,6 +82,7 @@ extension Compiler
             self.path = path
 
             self.requirements = []
+            self.inhabitants = []
             self.superforms = []
             self.features = []
             self.origin = nil

@@ -10,8 +10,8 @@ extension Unidoc
     enum AnyGroup:Equatable, Sendable
     {
         case  conformer(ConformerGroup)
-
         case `extension`(ExtensionGroup)
+        case  intrinsic(IntrinsicGroup)
         case  polygonal(PolygonalGroup)
         case  topic(TopicGroup)
     }
@@ -27,32 +27,34 @@ extension Unidoc.AnyGroup
 
         case layer = "A"
 
-        /// Optional and appears in ``Extension`` only. The field contains a list of
+        /// Optional and appears in ``ExtensionGroup`` only. The field contains a list of
         /// constraints, which contain scalars.
         case constraints = "g"
 
-        /// Always present in ``Extension``, optional in ``Topic``, and contains a scalar.
+        /// Always present in ``ExtensionGroup``, optional in ``TopicGroup``, and contains a
+        /// scalar.
         case culture = "c"
-        /// Always present in ``Extension``, optional otherwise, and contains a scalar.
+        /// Always present in ``ExtensionGroup``, optional otherwise, and contains a scalar.
         /// Usually doesn’t need a secondary lookup.
         case scope = "X"
 
-        /// Optional and appears in ``Extension`` only.
+        /// Optional and appears in ``ExtensionGroup`` only.
         /// The field contains a list of scalars.
         case conformances = "p"
-        /// Optional and appears in ``Extension`` only.
+        /// Optional and appears in ``ExtensionGroup`` only.
         /// The field contains a list of scalars.
         case features = "f"
-        /// Optional and appears in ``Extension`` only.
+        /// Optional and appears in ``ExtensionGroup`` only.
         /// The field contains a list of scalars.
         case nested = "n"
-        /// Optional and appears in ``Extension``.
+        /// Optional and appears in ``ExtensionGroup``.
         /// The field contains a list of scalars.
         case subforms = "s"
 
         /// Contains a list of scalars referenced by the overview passages
         /// of the various master records referenced in this extension.
         /// This field is a lookup optimization.
+        @available(*, unavailable)
         case prefetch = "y"
 
         /// Contains a passage, which contains a list of outlines,
@@ -61,8 +63,9 @@ extension Unidoc.AnyGroup
         /// Contains a passage, which contains a list of outlines,
         /// each of which may contain a scalar. Only appears in ``Extension``.
         case details = "d"
-        /// Appears in ``Automatic`` and ``Topic``. In ``Topic``, the field contains links,
-        /// some of which are scalars. In ``Automatic`` the field contains scalars, all of
+        /// Appears in ``PolygonalGroup``, ``IntrinsicGroup`` and ``TopicGroup``.
+        /// In ``TopicGroup``, the field contains links, some of which are scalars.
+        /// In ``PolygonalGroup`` and ``IntrinsicGroup`` the field contains scalars, all of
         /// which are, of course, scalars.
         case members = "t"
 
@@ -85,7 +88,7 @@ extension Unidoc.AnyGroup
         /// package. Practically, this determines if extensions are visible outside of their
         /// native volume.
         ///
-        /// ``Unidoc.AnyGroup`` doesn’t encode this directly, the ``UnidocDatabase.Groups``
+        /// ``Unidoc.AnyGroup`` doesn’t encode this directly, the ``Unidoc.DB.Groups``
         /// type adds it after delegating to ``Unidoc.AnyGroup``’s ``encode(to:)`` witness.
         case realm = "R"
     }
@@ -99,6 +102,7 @@ extension Unidoc.AnyGroup:Identifiable
         {
         case .conformer(let group):     group.id
         case .extension(let group):     group.id
+        case .intrinsic(let group):     group.id
         case .polygonal(let group):     group.id
         case .topic(let group):         group.id
         }
@@ -139,8 +143,6 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             bson[.nested] = self.nested.isEmpty ? nil : self.nested
             bson[.subforms] = self.subforms.isEmpty ? nil : self.subforms
 
-            bson[.prefetch] = self.prefetch.isEmpty ? nil : self.prefetch
-
             bson[.overview] = self.overview
             bson[.details] = self.details
 
@@ -152,9 +154,17 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             //  their culture.
             zones.update(with: self.nested)
             zones.update(with: self.subforms)
-            zones.update(with: self.prefetch)
 
             zones.update(with: self.constraints)
+
+        case .intrinsic(let self):
+            bson[.culture] = self.culture
+            bson[.scope] = self.scope
+
+            bson[.members] = self.members.isEmpty ? nil : self.members
+
+            zones.update(with: self.culture.edition)
+            zones.update(with: self.members)
 
         case .polygonal(let self):
             bson[.scope] = self.scope
@@ -166,13 +176,10 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
-            bson[.prefetch] = self.prefetch.isEmpty ? nil : self.prefetch
-
             bson[.overview] = self.overview
             bson[.members] = self.members.isEmpty ? nil : self.members
 
             zones.update(with: self.culture?.edition)
-            zones.update(with: self.prefetch)
         }
 
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
@@ -181,7 +188,7 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
 extension Unidoc.AnyGroup:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let id:ID = try bson[.id].decode()
         switch id.plane
@@ -202,9 +209,14 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
                 features: try bson[.features]?.decode() ?? [],
                 nested: try bson[.nested]?.decode() ?? [],
                 subforms: try bson[.subforms]?.decode() ?? [],
-                prefetch: try bson[.prefetch]?.decode() ?? [],
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode()))
+
+        case .intrinsic?:
+            self = .intrinsic(.init(id: id,
+                culture: try bson[.culture].decode(),
+                scope: try bson[.scope].decode(),
+                members: try bson[.members]?.decode() ?? []))
 
         case .polygon?:
             self = .polygonal(.init(id: id,
@@ -215,7 +227,6 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
             self = .topic(.init(id: id,
                 culture: try bson[.culture]?.decode(),
                 scope: try bson[.scope]?.decode(),
-                prefetch: try bson[.prefetch]?.decode() ?? [],
                 overview: try bson[.overview]?.decode(),
                 members: try bson[.members]?.decode() ?? []))
         }

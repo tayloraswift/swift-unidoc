@@ -5,7 +5,7 @@ import SemanticVersions
 extension Availability.VersionRange:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.AnyValue<Bytes>) throws
+    init(bson:BSON.AnyValue) throws
     {
         //  Use ``BSON.min`` instead of ``BSON.null``, decoding explicit nulls
         //  with sugared syntax is a footgun.

@@ -1,7 +1,9 @@
 import BSON
+import Durations
 import GitHubAPI
 import HTML
 import Media
+import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -13,6 +15,8 @@ extension Swiftinit
     struct TagsPage
     {
         private
+        let aliases:[Symbol.Package]
+        private
         let package:Unidoc.PackageMetadata
         private
         let tagless:Unidoc.VersionsQuery.Tagless?
@@ -23,12 +27,15 @@ extension Swiftinit
         private
         let user:Unidoc.User?
 
-        init(package:Unidoc.PackageMetadata,
+        init(
+            aliases:[Symbol.Package],
+            package:Unidoc.PackageMetadata,
             tagless:Unidoc.VersionsQuery.Tagless?,
             tagged:[Unidoc.VersionsQuery.Tag],
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
+            self.aliases = aliases
             self.package = package
             self.tagless = tagless
             self.tagged = tagged
@@ -67,7 +74,9 @@ extension Swiftinit.TagsPage
         tagged += prereleases
         tagged += releases
 
-        self.init(package: output.package,
+        self.init(
+            aliases: output.aliases,
+            package: output.package,
             tagless: output.tagless,
             tagged: tagged,
             realm: output.realm,
@@ -86,6 +95,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
+        let maintainer:Bool = self.user?.maintains(package: self.package) ?? !format.secure
         let now:UnixInstant = .now()
 
         main[.section, { $0.class = "introduction" }]
@@ -173,6 +183,8 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     if  let tagless:Unidoc.VersionsQuery.Tagless = self.tagless
                     {
                         $0[.tr] { $0.class = "tagless" } = Row.init(
+                            maintainer: maintainer,
+                            package: self.package.symbol,
                             volume: tagless.volume,
                             graph: tagless.graph,
                             type: .tagless)
@@ -182,6 +194,8 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     for tagged:Unidoc.VersionsQuery.Tag in self.tagged
                     {
                         let row:Row = .init(
+                            maintainer: maintainer,
+                            package: self.package.symbol,
                             volume: tagged.volume,
                             graph: tagged.graph,
                             type: .tagged(
@@ -236,30 +250,95 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
 
                 $0[.dt] = "Hidden"
-                $0[.dd] = self.package.hidden ? "yes" : "no"
+                $0[.dd]
+                {
+                    $0 += self.package.hidden ? "yes" : "no"
+
+                    guard maintainer
+                    else
+                    {
+                        return
+                    }
+
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Swiftinit.API[.packageConfig])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "hidden",
+                        value: self.package.hidden ? "false" : "true",
+                        label: self.package.hidden ? "Unhide Package" : "Hide Package")
+                }
 
                 if  let crawled:BSON.Millisecond = self.package.repo?.crawled
                 {
                     let crawled:UnixInstant = .millisecond(crawled.value)
-                    let age:Age = .init(now - crawled)
+                    let age:Swiftinit.Age = .init(now - crawled)
 
                     $0[.dt] = "Repo read"
                     $0[.dd] = age.long
                 }
-                if  let crawled:BSON.Millisecond = self.package.crawled
+                if  let crawled:BSON.Millisecond = self.package.repo?.crawled
                 {
                     let crawled:UnixInstant = .millisecond(crawled.value)
-                    let age:Age = .init(now - crawled)
+                    let age:Swiftinit.Age = .init(now - crawled)
 
                     $0[.dt] = "Tags read"
-                    $0[.dd] = self.package.crawlingIntervalTargetDays.map
+                    $0[.dd]
                     {
-                        "\(age.long) (target: \($0) \($0 != 1 ? "days" : "day"))"
-                    } ?? age.long
+                        $0 += age.long
+
+                        $0[.span]
+                        {
+                            $0.class = "parenthetical"
+                        } = self.package.crawlingIntervalTarget.map
+                        {
+                            let interval:Swiftinit.Age = .init(.milliseconds($0))
+                            return "target: \(interval.short)"
+                        }
+                    }
                 }
             }
 
-            guard self.user?.maintains(package: self.package) ?? !format.secure
+            $0[.h3] = "Names and aliases"
+
+            $0[.dl, { $0.class = "aliases" }]
+            {
+                for symbol:Symbol.Package in self.aliases
+                {
+                    $0[.dt] = "\(symbol)"
+
+                    if  symbol == self.package.symbol
+                    {
+                        $0[.dd]
+                        {
+                            $0[.span] { $0.class = "placeholder" } = "current name"
+                        }
+                    }
+                    else if maintainer
+                    {
+                        $0[.dd]
+                        {
+                            $0[.form]
+                            {
+                                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                                $0.action = "\(Swiftinit.API[.packageConfig])"
+                                $0.method = "post"
+                            } = ConfigButton.init(package: self.package.id,
+                                update: "symbol",
+                                value: "\(symbol)",
+                                label: "Rename package")
+                        }
+                    }
+                    else
+                    {
+                        $0[.dd]
+                    }
+                }
+            }
+
+            guard maintainer
             else
             {
                 return
@@ -303,19 +382,19 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                             $0.value = "true"
                         }
 
-                        $0[.span] = "Create Realm"
+                        $0[.span] = "Create realm"
                     }
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Transfer Package"
+                    $0[.button] { $0.type = "submit" } = "Transfer package"
                 }
             }
 
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.packageConfig])"
+                $0.action = "\(Swiftinit.API[.packageAlias])"
                 $0.method = "post"
             }
                 content:
@@ -331,16 +410,14 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
 
                     $0[.input]
                     {
-                        $0.type = "hidden"
-                        $0.name = "hidden"
-                        $0.value = self.package.hidden ? "false" : "true"
+                        $0.type = "text"
+                        $0.name = "alias"
+                        $0.placeholder = "new name"
                     }
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = self.package.hidden
-                        ? "Unhide Package"
-                        : "Hide Package"
+                    $0[.button] { $0.type = "submit" } = "Alias package"
                 }
             }
 
@@ -370,7 +447,7 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                 }
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = "Index Package Tag (GitHub)"
+                    $0[.button] { $0.type = "submit" } = "Index package tag (GitHub)"
                 }
             }
         }

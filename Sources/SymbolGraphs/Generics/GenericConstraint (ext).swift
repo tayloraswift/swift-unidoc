@@ -49,16 +49,16 @@ extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
         }
     }
 }
-extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentViewDecodable
+extension GenericConstraint:BSONDocumentDecodable, BSONDecodable
     where Scalar:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let (sigil, noun):(Sigil, String) = try bson[.generic].decode(
-            as: BSON.UTF8View<Bytes.SubSequence>.self)
+            as: BSON.UTF8View<ArraySlice<UInt8>>.self)
         {
-            guard let sigil:Unicode.Scalar = $0.slice.first.map(Unicode.Scalar.init(_:))
+            guard let sigil:Unicode.Scalar = $0.bytes.first.map(Unicode.Scalar.init(_:))
             else
             {
                 throw SigilError.init()
@@ -69,7 +69,7 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable, BSONDocumentVi
                 throw SigilError.init(invalid: sigil)
             }
 
-            return (sigil, .init(decoding: $0.slice.dropFirst(), as: Unicode.UTF8.self))
+            return (sigil, .init(decoding: $0.bytes.dropFirst(), as: Unicode.UTF8.self))
         }
 
         let type:GenericType<Scalar>

@@ -5,6 +5,7 @@ import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
 import Unidoc
+@_spi(testable)
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -16,27 +17,27 @@ struct VolumeQueries:UnidocDatabaseTestBattery
     static
     func run(tests:TestGroup,
         pool:Mongo.SessionPool,
-        unidoc:UnidocDatabase) async throws
+        unidoc:Unidoc.DB) async throws
     {
-        let workspace:Workspace = try await .create(at: ".testing")
-        let toolchain:Toolchain = try await .detect()
+        let workspace:SPM.Workspace = try await .create(at: ".testing")
+        let swift:Toolchain = try await .detect()
 
         let session:Mongo.Session = try await .init(from: pool)
         let package:Symbol.Package = "swift-version-controlled"
 
         for (i, tag):(Int32, String) in zip(0..., ["0.1.0", "0.2.0", "1.0.0-beta.1"])
         {
-            let empty:SymbolGraphArchive = .init(metadata: .init(
-                    package: package,
-                    commit: .init(nil, refname: tag),
-                    triple: toolchain.triple,
-                    swift: toolchain.version),
+            let empty:SymbolGraphObject<Void> = .init(metadata: .init(
+                    package: .init(name: package),
+                    commit: .init(name: tag),
+                    triple: swift.triple,
+                    swift: swift.version),
                 graph: .init(modules: []))
 
             empty.roundtrip(for: tests, in: workspace.path)
 
             let v:Unidoc.Version = .init(rawValue: i)
-            tests.expect(try await unidoc.publish(docs: empty, with: session).0 ==? .init(
+            tests.expect(try await unidoc.store(linking: empty, with: session).0 ==? .init(
                 edition: .init(package: 0, version: v),
                 updated: false))
         }

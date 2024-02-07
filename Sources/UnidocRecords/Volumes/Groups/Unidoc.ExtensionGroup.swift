@@ -31,13 +31,6 @@ extension Unidoc
         public
         var subforms:[Unidoc.Scalar]
 
-        /// Additional scalars to prefetch when this extension is loaded.
-        /// This is used to obtain the masters for passage referents in the
-        /// overview passages of the actual declarations in this extension
-        /// without having to perform an additional lookup phase.
-        public
-        var prefetch:[Unidoc.Scalar]
-
         public
         var overview:Unidoc.Passage?
         public
@@ -52,7 +45,6 @@ extension Unidoc
             features:[Unidoc.Scalar] = [],
             nested:[Unidoc.Scalar] = [],
             subforms:[Unidoc.Scalar] = [],
-            prefetch:[Unidoc.Scalar] = [],
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil)
         {
@@ -66,8 +58,6 @@ extension Unidoc
             self.features = features
             self.nested = nested
             self.subforms = subforms
-
-            self.prefetch = prefetch
 
             self.overview = overview
             self.details = details

@@ -24,13 +24,13 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
     public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        vertex:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        volume:Mongo.AnyKeyPath,
+        vertex:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath)
     {
         let extendee:Mongo.OptionalKeyPath = .init(in: vertex / Unidoc.AnyVertex[.extendee])
 
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             let special:SpecialGroups
 
@@ -48,7 +48,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 scope: "scope",
                 id: "realm")
 
-            $0[.from] = UnidocDatabase.Groups.name
+            $0[.from] = Unidoc.DB.Groups.name
             $0[.let] = .init
             {
                 $0[let: local.scope] = .expr
@@ -92,7 +92,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 {
                     //  `BSON.max` is a safe choice for a group `_id` that will never
                     //  match anything.
-                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.extension], BSON.Max.init())
+                    $0[.coalesce] = (vertex / Unidoc.AnyVertex[.peers], BSON.Max.init())
                 }
                 $0[let: special.topic] = .expr
                 {
@@ -101,9 +101,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             }
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
-                    $0[.or] = .init
+                    $0[.or]
                     {
                         $0 += local
                         $0 += realm
@@ -117,12 +117,12 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 
     public
     func edges(_ pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        vertex:Mongo.KeyPath,
-        groups:Mongo.KeyPath,
-        output:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath))
+        volume:Mongo.AnyKeyPath,
+        vertex:Mongo.AnyKeyPath,
+        groups:Mongo.AnyKeyPath,
+        output:(scalars:Mongo.AnyKeyPath, volumes:Mongo.AnyKeyPath))
     {
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[output.volumes] = .expr
             {

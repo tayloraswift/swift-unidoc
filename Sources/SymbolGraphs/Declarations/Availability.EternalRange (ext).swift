@@ -4,7 +4,7 @@ import BSON
 extension Availability.EternalRange:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.AnyValue<Bytes>) throws
+    init(bson:BSON.AnyValue) throws
     {
         let _:BSON.Min = try .init(bson: bson)
         self = .unconditionally

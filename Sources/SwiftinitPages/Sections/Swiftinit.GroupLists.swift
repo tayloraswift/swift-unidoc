@@ -13,9 +13,11 @@ extension Swiftinit
         let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         private
-        let requirements:[Unidoc.Scalar]?
+        var requirements:[Unidoc.Scalar]
         private
-        let superforms:[Unidoc.Scalar]?
+        var inhabitants:[Unidoc.Scalar]
+        private
+        var superforms:[Unidoc.Scalar]
 
         private
         var extensions:[Unidoc.ExtensionGroup]
@@ -25,7 +27,9 @@ extension Swiftinit
         var other:[(AutomaticHeading, [Unidoc.Scalar])]
 
         private(set)
-        var peers:Unidoc.ExtensionGroup?
+        var peerConstraints:[GenericConstraint<Unidoc.Scalar?>]
+        private(set)
+        var peerList:[Unidoc.Scalar]
 
         private
         let bias:Bias
@@ -34,23 +38,28 @@ extension Swiftinit
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            requirements:[Unidoc.Scalar]?,
-            superforms:[Unidoc.Scalar]?,
+            requirements:[Unidoc.Scalar] = [],
+            inhabitants:[Unidoc.Scalar] = [],
+            superforms:[Unidoc.Scalar] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
             topics:[Unidoc.TopicGroup] = [],
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
-            peers:Unidoc.ExtensionGroup? = nil,
+            peerConstraints:[GenericConstraint<Unidoc.Scalar?>] = [],
+            peerList:[Unidoc.Scalar] = [],
             bias:Bias,
             mode:GroupListMode?)
         {
             self.context = context
 
             self.requirements = requirements
+            self.inhabitants = inhabitants
             self.superforms = superforms
+
             self.extensions = extensions
             self.topics = topics
             self.other = other
-            self.peers = peers
+            self.peerConstraints = peerConstraints
+            self.peerList = peerList
             self.bias = bias
             self.mode = mode
         }
@@ -69,19 +78,17 @@ extension Swiftinit.GroupLists
         if  let vertex:Unidoc.DeclVertex = copy vertex
         {
             self.init(consume context,
-                requirements: vertex.requirements.isEmpty ? nil : vertex.requirements,
-                superforms: vertex.superforms.isEmpty ? nil : vertex.superforms,
+                requirements: vertex._requirements,
+                superforms: vertex.superforms,
                 bias: bias,
                 mode: mode)
 
-            container = vertex.extension
+            container = vertex.peers
             generics = .init(vertex.signature.generics.parameters)
         }
         else
         {
             self.init(consume context,
-                requirements: nil,
-                superforms: nil,
                 bias: bias,
                 mode: mode)
 
@@ -99,7 +106,8 @@ extension Swiftinit.GroupLists
             case .extension(let group):
                 if  case group.id? = container
                 {
-                    self.peers = group
+                    self.peerConstraints = group.constraints
+                    self.peerList = group.nested
                     continue
                 }
 
@@ -115,6 +123,25 @@ extension Swiftinit.GroupLists
                     .concretized
 
                 extensions.append((group, partisanship, genericness))
+
+            case .intrinsic(let group):
+                if  case group.id? = container
+                {
+                    self.peerList = group.members
+                    continue
+                }
+
+                switch self.mode
+                {
+                case .decl(.protocol, _)?:
+                    self.requirements += group.members
+
+                case .decl(.enum, _)?:
+                    self.inhabitants += group.members
+
+                default:
+                    throw Unidoc.GroupTypeError.reject(.intrinsic(group))
+                }
 
             case .polygonal(let group):
                 guard
@@ -178,8 +205,9 @@ extension Swiftinit.GroupLists
 
         //  No need to filter the conformers, as it should never appear alongside any custom
         //  curated groups.
-        self.peers = self.peers.map { $0.subtracting(curated) }
         self.extensions = extensions.map { $0.0.subtracting(curated) }
+
+        self.peerList.removeAll(where: curated.contains(_:))
 
         self.topics.sort { $0.id < $1.id }
         self.other.sort { $0.0 < $1.0 }
@@ -200,9 +228,21 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
+        var other:Unidoc.TopicGroup? = nil
         for group:Unidoc.TopicGroup in self.topics
         {
-            guard group.members.contains(.scalar(self.context.id))
+            if  group.members.contains(.scalar(self.context.id))
+            {
+                guard group.members.count > 1
+                else
+                {
+                    //  This is a topic group that contains this page only.
+                    //  A “See Also” section is not necessary.
+                    continue
+                }
+
+                other = group
+            }
             else
             {
                 //  This is a topic group that doesn’t contain this page.
@@ -225,32 +265,6 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                                 $0[.li] { $0[.span] { $0[.code] = text } }
                             }
                         }
-                    }
-                }
-
-                continue
-            }
-
-            if  group.members.count == 1
-            {
-                //  This is a topic group that contains this page only.
-                //  A “See Also” section is not necessary.
-                continue
-            }
-
-            html[.section, { $0.class = "group topic" }]
-            {
-                AutomaticHeading.seeAlso.window(&$0,
-                    listing: group.members,
-                    limit: 12)
-                {
-                    switch $1
-                    {
-                    case .scalar(let scalar):
-                        $0[.li] = self.context.card(scalar)
-
-                    case .text(let text):
-                        $0[.li] { $0[.span] { $0[.code] = text } }
                     }
                 }
             }
@@ -277,7 +291,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             return
         }
 
-        if  let superforms:[Unidoc.Scalar] = self.superforms
+        if !self.superforms.isEmpty
         {
             html[.section, { $0.class = "group superforms" }]
             {
@@ -307,15 +321,14 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 $0[.h2] = heading
                 $0[.ul]
                 {
-                    for superform:Unidoc.Scalar in superforms
+                    for id:Unidoc.Scalar in self.superforms
                     {
-                        $0[.li] = self.context.card(superform)
+                        $0[.li] = self.context.card(id)
                     }
                 }
             }
         }
-
-        if  let requirements:[Unidoc.Scalar] = self.requirements
+        if !self.requirements.isEmpty
         {
             html[.section, { $0.class = "group requirements" }]
             {
@@ -324,24 +337,75 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 $0[.h2] = heading
                 $0[.ul]
                 {
-                    for requirement:Unidoc.Scalar in requirements
+                    for id:Unidoc.Scalar in self.requirements
                     {
-                        $0[.li] = self.context.card(requirement)
+                        $0[.li] = self.context.card(id)
+                    }
+                }
+            }
+        }
+        if !self.inhabitants.isEmpty
+        {
+            html[.section, { $0.class = "group inhabitants" }]
+            {
+                let heading:AutomaticHeading = .allCases
+
+                $0[.h2] = heading
+                $0[.ul]
+                {
+                    for id:Unidoc.Scalar in self.inhabitants
+                    {
+                        $0[.li] = self.context.card(id)
                     }
                 }
             }
         }
 
-        if  let peers:Unidoc.ExtensionGroup = self.peers, !peers.nested.isEmpty
+        if  !self.peerList.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
             {
-                AutomaticHeading.otherMembers.window(&$0,
-                    listing: peers.nested,
+                let heading:AutomaticHeading
+
+                if  kinks[is: .required]
+                {
+                    heading = .otherRequirements
+                }
+                else if case .case = phylum
+                {
+                    heading = .otherCases
+                }
+                else
+                {
+                    heading = .otherMembers
+                }
+
+                heading.window(&$0,
+                    listing: self.peerList,
                     limit: 12,
                     open: self.extensions.allSatisfy(\.isEmpty))
                 {
                     $0[.li] = self.context.card($1)
+                }
+            }
+        }
+
+        if  let other:Unidoc.TopicGroup
+        {
+            html[.section, { $0.class = "group topic" }]
+            {
+                AutomaticHeading.seeAlso.window(&$0,
+                    listing: other.members,
+                    limit: 12)
+                {
+                    switch $1
+                    {
+                    case .scalar(let scalar):
+                        $0[.li] = self.context.card(scalar)
+
+                    case .text(let text):
+                        $0[.li] { $0[.span] { $0[.code] = text } }
+                    }
                 }
             }
         }

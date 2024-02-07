@@ -12,13 +12,19 @@ extension Unidoc
         public
         var abi:PatchVersion
 
+        /// The swift tools version from the symbol graph metadata.
+        public
+        var latestManifest:PatchVersion?
+        public
+        var extraManifests:[MinorVersion]
         /// Platform requirements read from the symbol graph, which in turn got them from a
         /// `Package.swift` manifest.
         public
         var requirements:[SymbolGraphMetadata.PlatformRequirement]
-        /// The git commit to associate with this snapshot.
+        /// The git commit hash from the symbol graph metadata.
         public
         var commit:SHA1?
+
         /// Top-level linker statistics.
         public
         var census:Unidoc.Census
@@ -27,11 +33,15 @@ extension Unidoc
 
         @inlinable public
         init(abi:PatchVersion,
+            latestManifest:PatchVersion?,
+            extraManifests:[MinorVersion],
             requirements:[SymbolGraphMetadata.PlatformRequirement],
             commit:SHA1?,
             census:Unidoc.Census = .init())
         {
             self.abi = abi
+            self.latestManifest = latestManifest
+            self.extraManifests = extraManifests
             self.requirements = requirements
             self.commit = commit
             self.census = census
@@ -44,6 +54,8 @@ extension Unidoc.SnapshotDetails
     enum CodingKey:String, Sendable
     {
         case abi = "B"
+        case latestManifest = "S"
+        case extraManifests = "E"
         case requirements = "O"
         case commit = "H"
         case census = "C"
@@ -55,6 +67,8 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.abi] = self.abi
+        bson[.latestManifest] = self.latestManifest
+        bson[.extraManifests] = self.extraManifests.isEmpty ? nil : self.extraManifests
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.commit] = self.commit
         bson[.census] = self.census
@@ -63,11 +77,14 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
 extension Unidoc.SnapshotDetails:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(abi: try bson[.abi].decode(),
+            latestManifest: try bson[.latestManifest]?.decode(),
+            extraManifests: try bson[.extraManifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             commit: try bson[.commit]?.decode(),
-            census: try bson[.census].decode())
+            //  Deprojected when serving a redirect.
+            census: try bson[.census]?.decode() ?? .init())
     }
 }

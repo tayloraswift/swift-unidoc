@@ -36,6 +36,7 @@ extension Mongo.SingleBatchEndpoint
     {
         self.batch = try await session.run(
             command: self.query.command(stride: nil),
-            against: database)
+            against: database,
+            on: Self.replica)
     }
 }

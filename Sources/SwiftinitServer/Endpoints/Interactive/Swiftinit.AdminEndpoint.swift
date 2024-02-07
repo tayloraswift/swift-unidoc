@@ -58,10 +58,10 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
             for item:MultipartForm.Item in form
                 where item.header.name == "documentation-binary"
             {
-                let archive:SymbolGraphArchive = try .init(buffer: item.value)
-                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.publish(
+                let archive:SymbolGraphObject<Void> = try .init(buffer: item.value)
+                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.store(
                     docs: archive,
-                    with: session).0
+                    with: session)
 
                 receipts.append(receipt)
             }

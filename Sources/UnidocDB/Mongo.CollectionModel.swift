@@ -169,7 +169,7 @@ extension Mongo.CollectionModel
 {
     @inlinable internal
     func find<Decodable>(_:Decodable.Type = Decodable.self,
-        by index:Mongo.KeyPath,
+        by index:Mongo.AnyKeyPath,
         of key:__owned some BSONEncodable,
         with session:Mongo.Session) async throws -> Decodable?
         where   Decodable:BSONDocumentDecodable,
@@ -389,7 +389,7 @@ extension Mongo.CollectionModel
     /// returning true if the document was modified, false if the document was not modified,
     /// and nil if the document was not found.
     private
-    func update(field:Mongo.KeyPath,
+    func update(field:Mongo.AnyKeyPath,
         of target:Element.ID,
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
@@ -397,8 +397,8 @@ extension Mongo.CollectionModel
         try await self.update(field: field, by: "_id", of: target, to: value, with: session)
     }
     private
-    func update(field:Mongo.KeyPath,
-        by index:Mongo.KeyPath,
+    func update(field:Mongo.AnyKeyPath,
+        by index:Mongo.AnyKeyPath,
         of key:some BSONEncodable,
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
@@ -406,12 +406,21 @@ extension Mongo.CollectionModel
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
             {
-                $0
-                {
-                    $0[.hint] = .init { $0[index] = (+) }
-                    $0[.q] = .init { $0[index] = key }
-                    $0[.u] = .init { $0[.set] = .init { $0[field] = value } }
-                }
+                $0.update(field: field, by: index, of: key, to: value)
+            },
+            against: self.database)
+
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
+        return updates.selected == 0 ? nil : updates.modified == 1
+    }
+    @inlinable package
+    func update(with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateListEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
+    {
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+            {
+                try encode(&$0)
             },
             against: self.database)
 
@@ -464,15 +473,15 @@ extension Mongo.CollectionModel
 
     @inlinable internal
     func delete(with session:Mongo.Session,
-        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Bool
+        matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name)
             {
-                try $0
+                $0
                 {
                     $0[.limit] = .one
-                    $0[.q] = try .init(with: predicate)
+                    $0[.q, predicate]
                 }
             },
             against: self.database)
@@ -482,15 +491,15 @@ extension Mongo.CollectionModel
     }
 
     func deleteAll(with session:Mongo.Session,
-        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Int
+        matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)
             {
-                try $0
+                $0
                 {
                     $0[.limit] = .unlimited
-                    $0[.q] = try .init(with: predicate)
+                    $0[.q, predicate]
                 }
             },
             against: self.database)
@@ -512,24 +521,12 @@ extension Mongo.CollectionModel // where Element.ID == Unidoc.Scalar
                 $0
                 {
                     $0[.limit] = .unlimited
-                    $0[.q] = .init
+                    $0[.q]
                     {
-                        $0[.and] = .init
+                        $0[.and]
                         {
-                            $0.append
-                            {
-                                $0["_id"] = .init
-                                {
-                                    $0[.gte] = range.min
-                                }
-                            }
-                            $0.append
-                            {
-                                $0["_id"] = .init
-                                {
-                                    $0[.lte] = range.max
-                                }
-                            }
+                            $0 { $0["_id"] { $0[.gte] = range.min } }
+                            $0 { $0["_id"] { $0[.lte] = range.max } }
                         }
                     }
                 }

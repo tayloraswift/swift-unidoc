@@ -44,7 +44,7 @@ extension HTTP2Client.Connection
     }
 
     @inlinable public
-    func buffer(bytes:[UInt8]) -> ByteBuffer
+    func buffer(bytes:ArraySlice<UInt8>) -> ByteBuffer
     {
         self.channel.allocator.buffer(bytes: bytes)
     }

@@ -34,7 +34,12 @@ extension GitHub.Client<GitHub.API<String>>.Connection
                 repository(owner: "\(owner)", name: "\(repo)")
                 {
                     id: databaseId
-                    owner { login }
+                    owner
+                    {
+                        login
+                        ... on User { id: databaseId }
+                        ... on Organization { id: databaseId }
+                    }
                     name
 
                     license: licenseInfo { id: spdxId, name }
@@ -88,7 +93,12 @@ extension GitHub.Client<GitHub.API<String>>.Connection
                         ... on Repository
                         {
                             id: databaseId
-                            owner { login }
+                            owner
+                            {
+                                login
+                                ... on User { id: databaseId }
+                                ... on Organization { id: databaseId }
+                            }
                             name
 
                             license: licenseInfo { id: spdxId, name }

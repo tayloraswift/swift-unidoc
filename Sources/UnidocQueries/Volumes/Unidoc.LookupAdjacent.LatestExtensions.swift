@@ -27,39 +27,30 @@ extension Unidoc.LookupAdjacent.LatestExtensions
     static
     func += (or:inout Mongo.PredicateListEncoder, self:Self)
     {
-        or.append
+        or
         {
-            $0[.and] = .init
+            $0[.and]
             {
-                $0.append
+                $0
                 {
                     //  Alas, it is not as simple as performing an `$eq` match on `null`.
                     guard
                     let layer:Unidoc.GroupLayer = self.layer
                     else
                     {
-                        $0[Unidoc.AnyGroup[.layer]] = .init { $0[.exists] = false }
+                        $0[Unidoc.AnyGroup[.layer]] { $0[.exists] = false }
                         return
                     }
 
-                    $0[.expr] = .expr
-                    {
-                        $0[.eq] = (Unidoc.AnyGroup[.layer], layer)
-                    }
+                    $0[.expr] { $0[.eq] = (Unidoc.AnyGroup[.layer], layer) }
                 }
-                $0.append
+                $0
                 {
-                    $0[.expr] = .expr
-                    {
-                        $0[.eq] = (Unidoc.AnyGroup[.scope], self.scope)
-                    }
+                    $0[.expr] { $0[.eq] = (Unidoc.AnyGroup[.scope], self.scope) }
                 }
-                $0.append
+                $0
                 {
-                    $0[.expr] = .expr
-                    {
-                        $0[.eq] = (Unidoc.AnyGroup[.realm], self.id)
-                    }
+                    $0[.expr] { $0[.eq] = (Unidoc.AnyGroup[.realm], self.id) }
                 }
             }
         }

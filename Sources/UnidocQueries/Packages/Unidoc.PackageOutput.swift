@@ -32,7 +32,7 @@ extension Unidoc.PackageOutput:MongoMasterCodingModel
 extension Unidoc.PackageOutput:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             metadata: try bson[.metadata].decode(),
@@ -44,36 +44,36 @@ extension Unidoc.PackageOutput
     static
     func extend(pipeline:inout Mongo.PipelineEncoder, from metadata:some BSONEncodable)
     {
-        pipeline[.replaceWith] = .init
+        pipeline[stage: .replaceWith] = .init
         {
             $0[Unidoc.PackageOutput[.metadata]] = Mongo.Pipeline.ROOT
         }
 
         //  Lookup the latest release of each package.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Editions.name
+            $0[.from] = Unidoc.DB.Editions.name
             $0[.localField] = Unidoc.PackageOutput[.metadata] /
                 Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     $0[Unidoc.EditionMetadata[.release]] = true
                 }
-                $0[.sort] = .init
+                $0[stage: .sort] = .init
                 {
                     $0[Unidoc.EditionMetadata[.patch]] = (-)
                     $0[Unidoc.EditionMetadata[.version]] = (-)
                 }
-                $0[.limit] = 1
+                $0[stage: .limit] = 1
             }
             $0[.as] = Unidoc.PackageOutput[.release]
         }
 
         //  Unbox single-element array.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Unidoc.PackageOutput[.release]] = .expr
             {

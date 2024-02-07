@@ -28,27 +28,27 @@ extension Unidoc.SitemapQuery:Mongo.PipelineQuery
 extension Unidoc.SitemapQuery:Unidoc.AliasingQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.PackageAliases
+    typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public
-    typealias CollectionTarget = UnidocDatabase.Packages
+    typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
-    var target:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.AnyKeyPath { Output[.package] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Sitemaps.name
+            $0[.from] = Unidoc.DB.Sitemaps.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.Sitemap[.id]
             $0[.as] = Output[.sitemap]
         }
 
-        pipeline[.unwind] = Output[.sitemap]
+        pipeline[stage: .unwind] = Output[.sitemap]
 
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[Output[.package]] = Self.target / Unidoc.PackageMetadata[.symbol]
         }

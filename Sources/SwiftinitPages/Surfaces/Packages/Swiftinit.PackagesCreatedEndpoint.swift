@@ -8,7 +8,7 @@ import UnixTime
 extension Swiftinit
 {
     @frozen public
-    struct PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
+    struct PackagesCreatedEndpoint
     {
         public
         let query:Unidoc.PackagesQuery<Unidoc.PackageCreated>
@@ -33,6 +33,11 @@ extension Swiftinit
             self.date = date
         }
     }
+}
+extension Swiftinit.PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .nearest }
 }
 extension Swiftinit.PackagesCreatedEndpoint:HTTP.ServerEndpoint
 {

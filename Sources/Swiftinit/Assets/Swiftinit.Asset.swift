@@ -4,6 +4,7 @@ extension Swiftinit
     enum Asset:String, CaseIterable, Hashable, Sendable
     {
         case error404_jpg       = "error404.jpg"
+        case error500_jpg       = "error500.jpg"
 
         case favicon_ico        = "favicon.ico"
         case favicon_png        = "favicon.png"
@@ -51,28 +52,24 @@ extension Swiftinit.Asset
 extension Swiftinit.Asset
 {
     @inlinable public
-    var versioning:Versioning
+    var versioned:Bool
     {
         switch self
         {
-        case    .error404_jpg,
-                .favicon_ico,
-                .favicon_png,
-                .literata45_woff2,
-                .literata47_woff2,
-                .literata75_woff2,
-                .literata77_woff2:
-            .none
-
-        case    .main_css,
-                .main_css_map,
-                .main_js,
-                .main_js_map:
-            .major
-
-        case    .admin_css,
-                .admin_css_map:
-            .minor
+        case .error404_jpg:     false
+        case .error500_jpg:     false
+        case .favicon_ico:      false
+        case .favicon_png:      false
+        case .literata45_woff2: false
+        case .literata47_woff2: false
+        case .literata75_woff2: false
+        case .literata77_woff2: false
+        case .main_css:         true
+        case .main_css_map:     true
+        case .main_js:          true
+        case .main_js_map:      true
+        case .admin_css:        true
+        case .admin_css_map:    true
         }
     }
 }

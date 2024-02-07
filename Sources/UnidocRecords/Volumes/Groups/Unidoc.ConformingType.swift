@@ -42,7 +42,7 @@ extension Unidoc.ConformingType:BSONDocumentEncodable
 extension Unidoc.ConformingType:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(), where: try bson[.constraints].decode())
     }

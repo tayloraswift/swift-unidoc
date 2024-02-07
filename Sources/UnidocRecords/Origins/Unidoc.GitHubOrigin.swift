@@ -114,7 +114,7 @@ extension Unidoc.GitHubOrigin:BSONDocumentEncodable
 extension Unidoc.GitHubOrigin:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             pushed: try bson[.pushed].decode(),

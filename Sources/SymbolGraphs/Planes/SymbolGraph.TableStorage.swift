@@ -138,7 +138,7 @@ extension SymbolGraph.TableStorage:BSONEncodable where Element:BSONEncodable
 extension SymbolGraph.TableStorage:BSONDecodable where Element:BSONDecodable
 {
     @inlinable internal
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.AnyValue) throws
     {
         self.init(elements: try .init(bson: bson))
     }

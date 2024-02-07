@@ -1,0 +1,29 @@
+form
+{
+    button
+    {
+        display: inline-block;
+        background: $light-accent-barbie-pink;
+        box-shadow: 0 0.2rem 0 0 $light-accent-barbie-pink-semi;
+        border: none;
+        border-radius: 0.25rem;
+
+        color: white;
+        font-family: $typeface-sans;
+        font-size: 87.5%;
+    }
+    button:hover
+    {
+        cursor: pointer;
+    }
+    button:hover,
+    button:focus
+    {
+        box-shadow: 0 0.2rem 0 0 $light-accent-barbie-pink-faint;
+    }
+    button:active
+    {
+        box-shadow: none;
+        transform: translateY(0.2rem);
+    }
+}

@@ -44,6 +44,8 @@ extension HTTP1Client.Connection
 }
 extension HTTP1Client.Connection
 {
+    //  TODO: we could use the `content-length` header to avoid reallocating the destination
+    //  buffer.
     public
     func fetch(_ request:__owned HTTP1Client.Request) async throws -> HTTP1Client.Facet
     {

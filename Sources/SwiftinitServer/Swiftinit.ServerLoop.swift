@@ -10,6 +10,7 @@ import NIOCore
 import NIOHTTP1
 import NIOPosix
 import NIOSSL
+import S3
 import SwiftinitPages
 import SwiftinitPlugins
 import UnidocDB
@@ -22,8 +23,6 @@ extension Swiftinit
     final
     actor ServerLoop
     {
-        nonisolated
-        let atomics:Counters
         nonisolated
         let context:ServerPluginContext
         nonisolated
@@ -46,7 +45,6 @@ extension Swiftinit
             options:ServerOptions,
             db:DB)
         {
-            self.atomics = .init()
             self.plugins = plugins
             self.context = context
             self.db = db
@@ -87,6 +85,8 @@ extension Swiftinit.ServerLoop
 
     nonisolated
     var github:GitHub.Integration? { self.options.github }
+    nonisolated
+    var bucket:AWS.S3.Bucket? { self.options.bucket }
 
     nonisolated
     var format:Swiftinit.RenderFormat
@@ -188,6 +188,7 @@ extension Swiftinit.ServerLoop
         }
     }
 }
+
 extension Swiftinit.ServerLoop:HTTP.ServerLoop
 {
     nonisolated
@@ -224,7 +225,26 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
         switch request.endpoint
         {
         case .interactive(let endpoint):
-            return try await self.response(endpoint: endpoint, metadata: request.metadata)
+            return await
+            {
+                (self:isolated Swiftinit.ServerLoop) in
+
+                do
+                {
+                    return try await self.response(endpoint: endpoint,
+                        metadata: request.metadata)
+                }
+                catch let error
+                {
+                    self.tour.errors += 1
+
+                    Log[.error] = "\(error)"
+                    Log[.error] = "request = \(request.metadata.path)"
+
+                    let page:Swiftinit.ServerErrorPage = .init(error: error)
+                    return .error(page.resource(format: self.format))
+                }
+            } (self)
 
         case .procedural(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
@@ -252,15 +272,14 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
             return .redirect(.permanent(target))
 
         case .static(let request):
-            if  case .development(let cache, _) = self.options.mode
-            {
-                return try await cache.serve(request)
-            }
+            guard case .development(let cache, _) = self.options.mode
             else
             {
                 //  In production mode, static assets are served by Cloudfront.
                 return .forbidden("")
             }
+
+            return try await cache.serve(request)
         }
     }
 }

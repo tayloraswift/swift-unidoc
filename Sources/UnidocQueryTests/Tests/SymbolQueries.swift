@@ -5,6 +5,7 @@ import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
 import Unidoc
+@_spi(testable)
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -16,21 +17,22 @@ struct SymbolQueries:UnidocDatabaseTestBattery
     static
     func run(tests:TestGroup,
         pool:Mongo.SessionPool,
-        unidoc:UnidocDatabase) async throws
+        unidoc:Unidoc.DB) async throws
     {
-        let workspace:Workspace = try await .create(at: ".testing")
+        let workspace:SPM.Workspace = try await .create(at: ".testing")
         let toolchain:Toolchain = try await .detect()
 
-        let example:SymbolGraphArchive = try await toolchain.generateDocs(
-            for: try await .local(package: "swift-malibu",
+        let example:SymbolGraphObject<Void> = try await .init(building: try await .local(
+                package: "swift-malibu",
                 from: "TestPackages",
                 in: workspace,
                 clean: true),
+            with: toolchain,
             pretty: true)
 
         example.roundtrip(for: tests, in: workspace.path)
 
-        let swift:SymbolGraphArchive
+        let swift:SymbolGraphObject<Void>
         do
         {
             //  Use the cached binary if available.
@@ -38,18 +40,18 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         }
         catch
         {
-            swift = try await toolchain.generateDocs(for: try await .swift(
-                in: workspace,
-                clean: true))
+            swift = try await .init(building: try await .swift(in: workspace, clean: true),
+                with: toolchain,
+                pretty: true)
         }
 
         let session:Mongo.Session = try await .init(from: pool)
 
-        tests.expect(try await unidoc.publish(docs: consume swift, with: session).0 ==? .init(
+        tests.expect(try await unidoc.store(linking: swift, with: session).0 ==? .init(
             edition: .init(package: 0, version: 0),
             updated: false))
 
-        tests.expect(try await unidoc.publish(docs: consume example, with: session).0 ==? .init(
+        tests.expect(try await unidoc.store(linking: example, with: session).0 ==? .init(
             edition: .init(package: 1, version: -1),
             updated: false))
 
@@ -59,7 +61,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
     }
 
     private static
-    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:UnidocDatabase) async throws
+    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:Unidoc.DB) async throws
     {
         guard
         let tests:TestGroup

@@ -32,20 +32,20 @@ extension Unidoc.PackageCreated:Unidoc.PackagePredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
-            $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+            $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
 
-            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = .init
+            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]]
             {
                 $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.lowerBound))
             }
-            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = .init
+            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]]
             {
                 $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.upperBound))
             }
         }
 
-        pipeline[.limit] = self.limit
+        pipeline[stage: .limit] = self.limit
     }
 }

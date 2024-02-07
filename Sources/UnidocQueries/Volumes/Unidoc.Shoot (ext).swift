@@ -9,30 +9,30 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
 {
     public
     func extend(pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        output:Mongo.KeyPath,
-        unset:[Mongo.KeyPath])
+        volume:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath,
+        unset:[Mongo.AnyKeyPath])
     {
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             let zone:Mongo.Variable<Unidoc.Edition> = "zone"
 
-            $0[.from] = UnidocDatabase.Vertices.name
+            $0[.from] = Unidoc.DB.Vertices.name
             $0[.let] = .init
             {
                 $0[let: zone] = volume / Unidoc.VolumeMetadata[.id]
             }
             $0[.pipeline] = .init
             {
-                $0[.match] = .init
+                $0[stage: .match] = .init
                 {
                     //  The stem index is partial, so we need this condition here in order
                     //  for MongoDB to use the index.
-                    $0[Unidoc.AnyVertex[.stem]] = .init { $0[.exists] = true }
+                    $0[Unidoc.AnyVertex[.stem]] { $0[.exists] = true }
 
-                    $0[.expr] = .expr
+                    $0[.expr]
                     {
-                        $0[.and] = .init
+                        $0[.and]
                         {
                             //  We could also use a range operator to filter on `_id`.
                             //  But that would not be as index-friendly.
@@ -60,8 +60,8 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                     }
                 }
 
-                $0[.limit] = 50
-                $0[.unset] = unset
+                $0[stage: .limit] = 50
+                $0[stage: .unset] = unset
             }
             $0[.as] = output
         }

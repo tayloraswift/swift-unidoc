@@ -1,4 +1,5 @@
 import JSON
+import Symbols
 
 extension SPM.DependencyPin
 {
@@ -31,7 +32,8 @@ extension SPM.DependencyPin.V1:JSONObjectDecodable
         let location:SPM.DependencyLocation = .init(
             location: try json[.location].decode())
 
-        self.init(value: .init(id: .init(location.name),
+        self.init(value: .init(
+            identity: Symbol.Package.init(location.name),
             location: location,
             state: try json[.state].decode()))
     }

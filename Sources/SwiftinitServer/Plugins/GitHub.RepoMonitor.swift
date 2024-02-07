@@ -1,6 +1,8 @@
 import BSON
+import Durations
 import GitHubAPI
 import GitHubClient
+import HTML
 import HTTPServer
 import MongoDB
 import SemanticVersions
@@ -10,19 +12,40 @@ import UnixTime
 
 extension GitHub
 {
-    struct RepoMonitor:Sendable
+    struct RepoMonitor
     {
-        var status:StatusPage
+        private
+        var reposCrawled:Int
+        private
+        var tagsCrawled:Int
+        private
+        var tagsUpdated:Int
+        private
+        var buffer:Swiftinit.EventBuffer<any Swiftinit.ServerPluginEvent>
+
+        var error:(any Error)?
 
         init()
         {
-            self.status = .init()
+            self.reposCrawled = 0
+            self.tagsCrawled = 0
+            self.tagsUpdated = 0
+            self.buffer = .init(minimumCapacity: 100)
+            self.error = nil
         }
     }
 }
 extension GitHub.RepoMonitor:GitHub.Crawler
 {
     var interval:Duration { .seconds(30) }
+    var status:StatusPage
+    {
+        .init(error: self.error,
+            reposCrawled: self.reposCrawled,
+            tagsCrawled: self.tagsCrawled,
+            tagsUpdated: self.tagsUpdated,
+            buffer: self.buffer)
+    }
 
     mutating
     func crawl(updating db:Swiftinit.DB,
@@ -53,45 +76,32 @@ extension GitHub.RepoMonitor:GitHub.Crawler
 
             let now:BSON.Millisecond = .now()
 
-            if  let crawled:BSON.Millisecond = package.crawled
-            {
-                self.status.lag = .milliseconds(now.value - crawled.value)
-            }
+            self.reposCrawled += 1
+            self.buffer.push(event: CrawlingEvent.init(package: package.symbol,
+                sinceExpected: old.expires?.duration(to: now),
+                sinceActual: old.crawled.duration(to: now),
+                repo: response.repo))
 
             if  let repo:GitHub.Repo = response.repo
             {
-                package.repo = try .github(repo, crawled: now)
+                package.fetched(repo: try .github(repo, crawled: now))
             }
             else
             {
                 package.repo = nil
-                Log[.warning] = "(crawler) returned null for repo '\(package.symbol)'"
             }
 
-            if  let days:Int64 = package.crawlingIntervalTargetDays
-            {
-                package.expires = .init(now.value + days * 86400 * 1000)
-            }
-
-            package.crawled = now
-
-            if  case nil = try await db.packages.update(metadata: package, with: session)
+            if  case nil = try await db.packages.update(package: package.id,
+                    repo: package.repo,
+                    with: session)
             {
                 //  Might happen if package database is dropped while crawling.
                 continue
             }
-            else
-            {
-                //  To MongoDB, all repo updates look like modifications, since the package
-                //  record contains a timestamp.
-                self.status.reposCrawled += 1
-            }
 
             //  Import tags in chronological order. The last tag in the GraphQL response
             //  is the most recent.
-            var prerelease:String? = nil
-            var release:String? = nil
-
+            var indexed:IndexTagsEvent = .init(package: package.symbol)
             for tag:GitHub.Tag in response.tags
             {
                 guard
@@ -102,27 +112,35 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                     continue
                 }
 
-                switch try await db.unidoc.register(
+                switch try await db.unidoc.index(
                     package: package.id,
                     version: version,
-                    refname: tag.name,
+                    name: tag.name,
                     sha1: tag.hash,
                     with: session)
                 {
                 case (let edition, new: true):
-                    self.status.tagsUpdated += 1
+                    indexed.updated += 1
 
                     switch version
                     {
-                    case .prerelease:   prerelease = edition.name
-                    case .release:      release = edition.name
+                    case .prerelease:   indexed.prerelease = edition
+                    case .release:      indexed.release = edition
                     }
 
                     fallthrough
 
                 case (_, new: false):
-                    self.status.tagsCrawled += 1
+                    indexed.crawled += 1
                 }
+            }
+
+            self.tagsCrawled += indexed.crawled
+            self.tagsUpdated += indexed.updated
+
+            if  indexed.crawled > 0
+            {
+                self.buffer.push(event: indexed)
             }
 
             if  package.hidden
@@ -130,20 +148,14 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 continue
             }
 
-            if  let interesting:String = release ?? prerelease
+            if  let interesting:String = (indexed.release ?? indexed.prerelease)?.name
             {
-                let activity:UnidocDatabase.RepoFeed.Activity = .init(discovered: .now(),
+                let activity:Unidoc.DB.RepoFeed.Activity = .init(discovered: now,
                     package: package.symbol,
                     refname: interesting)
 
                 try await db.repoFeed.push(activity, with: session)
             }
         }
-    }
-
-    mutating
-    func log(error:consuming any Error)
-    {
-        self.status.error = error
     }
 }

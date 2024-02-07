@@ -90,7 +90,7 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
 extension SymbolGraph.Culture:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(module: try bson[.module].decode())
 

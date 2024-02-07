@@ -52,9 +52,9 @@ extension Unidoc.Volume
 extension Unidoc.Volume
 {
     @inlinable public
-    var search:SearchIndex<Symbol.Edition>
+    var search:Unidoc.TextResource<Symbol.Edition>
     {
-        .init(id: self.id, json: self.index)
+        .init(id: self.id, utf8: self.index.utf8)
     }
 
     public

@@ -23,8 +23,9 @@ extension Unidoc
         public
         let stem:Unidoc.Stem
 
+        /// Deprecated.
         public
-        let requirements:[Unidoc.Scalar]
+        let _requirements:[Unidoc.Scalar]
         public
         let superforms:[Unidoc.Scalar]
         public
@@ -49,7 +50,7 @@ extension Unidoc
         var details:Unidoc.Passage?
 
         public
-        var `extension`:Unidoc.Group?
+        var peers:Unidoc.Group?
         public
         var group:Unidoc.Group?
 
@@ -59,7 +60,7 @@ extension Unidoc
             signature:Signature<Unidoc.Scalar?>,
             symbol:Symbol.Decl,
             stem:Unidoc.Stem,
-            requirements:[Unidoc.Scalar] = [],
+            _requirements:[Unidoc.Scalar] = [],
             superforms:[Unidoc.Scalar] = [],
             namespace:Unidoc.Scalar,
             culture:Unidoc.Scalar,
@@ -70,7 +71,7 @@ extension Unidoc
             position:SourcePosition? = nil,
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
-            extension:Unidoc.Group? = nil,
+            peers:Unidoc.Group? = nil,
             group:Unidoc.Group? = nil)
         {
             self.id = id
@@ -80,12 +81,12 @@ extension Unidoc
             self.symbol = symbol
             self.stem = stem
 
-            self.requirements = requirements
+            self._requirements = _requirements
             self.superforms = superforms
             self.namespace = namespace
             self.culture = culture
             self.scope = scope
-            self.extension = `extension`
+            self.peers = peers
             self.group = group
 
             self.renamed = renamed

@@ -71,8 +71,14 @@ extension Swiftinit.AnyEndpoint
                 return nil
             }
 
-        case Swiftinit.AdminPage.Slaves.name:
-            return .interactive(Swiftinit.SlavesDashboardEndpoint.status)
+        case Swiftinit.ReplicaSetPage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.replicaSet)
+
+        case Swiftinit.CookiePage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: false))
+
+        case "robots":
+            return .interactive(Swiftinit.TextEditorEndpoint.init(id: .robots_txt))
 
         case _:
             return nil
@@ -96,9 +102,8 @@ extension Swiftinit.AnyEndpoint
         case .build:
             if  let package:String = stem.first
             {
-                return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
-                        package: .init(package),
-                        limit: 1)),
+                let package:Symbol.Package = .init(package)
+                return .explainable(Swiftinit.TagsEndpoint.init(query: .latest(package)),
                     parameters: parameters,
                     accept: .application(.json))
             }
@@ -182,7 +187,7 @@ extension Swiftinit.AnyEndpoint
     {
         if  let id:Symbol.Edition = .init(trunk)
         {
-            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Search>.init(query: .init(
+            .explainable(Swiftinit.LunrEndpoint.init(query: .init(
                     tag: parameters.tag,
                     id: id)),
                 parameters: parameters,
@@ -190,9 +195,9 @@ extension Swiftinit.AnyEndpoint
         }
         else if trunk == "packages.json"
         {
-            .explainable(Swiftinit.LunrEndpoint<UnidocDatabase.Metadata>.init(query: .init(
+            .explainable(Swiftinit.TextEndpoint.init(query: .init(
                     tag: parameters.tag,
-                    id: 0)),
+                    id: .packages_json)),
                 parameters: parameters,
                 accept: .application(.json))
         }
@@ -238,8 +243,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.TagsEndpoint.init(query: .init(
-                package: .init(trunk),
+        .explainable(Swiftinit.TagsEndpoint.init(query: .tags(.init(trunk),
                 limit: 12,
                 user: parameters.user)),
             parameters: parameters)
@@ -315,8 +319,8 @@ extension Swiftinit.AnyEndpoint
                 return .interactive(Swiftinit.AdminEndpoint.recode(target))
             }
 
-        case Swiftinit.AdminPage.Slaves.name:
-            return .interactive(Swiftinit.SlavesDashboardEndpoint.scramble)
+        case Swiftinit.CookiePage.name:
+            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: true))
 
         case _:
             break
@@ -348,6 +352,16 @@ extension Swiftinit.AnyEndpoint
 
             switch trunk
             {
+            case .packageAlias:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let alias:String = form["alias"]
+                {
+                    return .interactive(Swiftinit.PackageAliasEndpoint.init(
+                        package: package,
+                        alias: .init(alias)))
+                }
+
             case .packageAlign:
                 if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package)
@@ -359,14 +373,27 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .packageConfig:
-                if  let package:String = form["package"],
-                    let package:Unidoc.Package = .init(package),
-                    let hidden:String = form["hidden"],
+                guard
+                let package:String = form["package"],
+                let package:Unidoc.Package = .init(package)
+                else
+                {
+                    break
+                }
+
+                if  let hidden:String = form["hidden"],
                     let hidden:Bool = .init(hidden)
                 {
                     return .interactive(Swiftinit.PackageConfigEndpoint.init(
                         package: package,
                         update: .hidden(hidden)))
+                }
+                else if
+                    let symbol:Symbol.Package = form["symbol"].map(Symbol.Package.init(_:))
+                {
+                    return .interactive(Swiftinit.PackageConfigEndpoint.init(
+                        package: package,
+                        update: .symbol(symbol)))
                 }
 
             case .packageIndex:
@@ -396,8 +423,7 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .uplinkAll:
-                return .procedural(Swiftinit.GlobalUplinkEndpoint.init(
-                    queue: form["queue"] == "true"))
+                return .interactive(Swiftinit.GraphUplinkEndpoint.init(queue: .all))
 
             case .uplink:
                 if  let package:String = form["package"],
@@ -405,15 +431,9 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .procedural(Swiftinit.GraphUplinkEndpoint.coordinate(.init(
-                        package: package,
-                        version: version)))
-                }
-                else if
-                    let volume:String = form["volume"],
-                    let volume:Symbol.Edition = .init(volume)
-                {
-                    return .procedural(Swiftinit.GraphUplinkEndpoint.identifier(volume))
+                    return .interactive(Swiftinit.GraphUplinkEndpoint.init(
+                        queue: .one(.init(package: package, version: version)),
+                        uri: form["redirect"]))
                 }
 
             case .unlink:
@@ -422,11 +442,34 @@ extension Swiftinit.AnyEndpoint
                 {
                     return .procedural(Swiftinit.GraphUnlinkEndpoint.init(volume: volume))
                 }
+
+            default:
+                break
             }
 
-            fallthrough
+            return nil
 
-        case _:
+        case .multipart(.form_data(boundary: let boundary?)):
+            let form:MultipartForm = try .init(splitting: body, on: boundary)
+
+            switch trunk
+            {
+            case .robots_txt:
+                if  let item:MultipartForm.Item = form.first(
+                        where: { $0.header.name == "text" })
+                {
+                    return .procedural(Swiftinit.TextUpdateEndpoint.init(text: .init(
+                        id: .robots_txt,
+                        utf8: [UInt8].init(item.value))))
+                }
+
+            default:
+                break
+            }
+
+            return nil
+
+        default:
             return nil
         }
     }

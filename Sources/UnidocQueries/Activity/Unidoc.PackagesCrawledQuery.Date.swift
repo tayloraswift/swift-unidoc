@@ -32,7 +32,7 @@ extension Unidoc.PackagesCrawledQuery.Date:MongoMasterCodingModel
 extension Unidoc.PackagesCrawledQuery.Date:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(window: try bson[.window].decode(), repos: try bson[.repos]?.decode() ?? 0)
     }

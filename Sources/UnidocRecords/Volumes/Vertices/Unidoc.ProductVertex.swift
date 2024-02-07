@@ -11,7 +11,7 @@ extension Unidoc
         public
         let id:Unidoc.Scalar
         public
-        let requirements:[Unidoc.Scalar]
+        let constituents:[Unidoc.Scalar]
         public
         let symbol:String
         public
@@ -22,13 +22,13 @@ extension Unidoc
 
         @inlinable public
         init(id:Unidoc.Scalar,
-            requirements:[Unidoc.Scalar],
+            constituents:[Unidoc.Scalar],
             symbol:String,
             type:SymbolGraph.ProductType,
             group:Unidoc.Group?)
         {
             self.id = id
-            self.requirements = requirements
+            self.constituents = constituents
             self.symbol = symbol
             self.type = type
             self.group = group

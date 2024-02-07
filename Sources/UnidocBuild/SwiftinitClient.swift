@@ -96,25 +96,25 @@ extension SwiftinitClient
         pretty:Bool) async throws
     {
         let toolchain:Toolchain = try await .detect()
-        let workspace:Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
-        let archive:SymbolGraphArchive
+        let archive:SymbolGraphObject<Void>
         if  symbol == .swift
         {
-            let build:ToolchainBuild = try await .swift(in: workspace,
+            let build:Toolchain.Build = try await .swift(in: workspace,
                 clean: true)
 
-            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+            archive = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else if
             let search:FilePath
         {
-            let build:PackageBuild = try await .local(package: symbol,
+            let build:SPM.Build = try await .local(package: symbol,
                 from: search,
                 in: workspace,
                 clean: true)
 
-            archive = try await toolchain.generateDocs(for: build, pretty: pretty)
+            archive = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else
         {
@@ -129,16 +129,10 @@ extension SwiftinitClient
 
             print("Uploading symbol graph...")
 
-            let placement:Unidoc.UploadStatus = try await connection.put(bson: bson,
+            let _:Unidoc.UploadStatus = try await connection.put(bson: bson,
                 to: "/api/symbolgraph")
 
             print("Successfully uploaded symbol graph!")
-
-            try await connection.uplink(
-                package: placement.edition.package,
-                version: placement.edition.version)
-
-            print("Successfully uplinked symbol graph!")
         }
     }
 
@@ -179,7 +173,7 @@ extension SwiftinitClient
         }
 
         let toolchain:Toolchain = try await .detect()
-        let workspace:Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
         guard
         let edition:Unidoc.PackageStatus.Edition = package.choose(force: force)
@@ -192,24 +186,23 @@ extension SwiftinitClient
             return
         }
 
-        let build:PackageBuild = try await .remote(
+        let build:SPM.Build = try await .remote(
             package: symbol,
             from: package.repo,
             at: edition.tag,
             in: workspace,
-            clean: true)
+            clean: [.artifacts])
 
-        //  Remove the `Package.resolved` file to force a new resolution.
-        try await build.removePackageResolved()
-
-        let archive:SymbolGraphArchive = try await toolchain.generateDocs(for: build,
+        let archive:SymbolGraphObject<Void> = try await .init(building: build,
+            with: toolchain,
             pretty: pretty)
 
         let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: .init(
                 package: package.coordinate,
                 version: edition.coordinate),
             metadata: archive.metadata,
-            graph: archive.graph))
+            inline: archive.graph,
+            link: force ? .refresh : .initial))
 
         try await self.connect
         {
@@ -220,12 +213,6 @@ extension SwiftinitClient
             try await connection.put(bson: bson, to: "/api/snapshot")
 
             print("Successfully uploaded symbol graph!")
-
-            try await connection.uplink(
-                package: package.coordinate,
-                version: edition.coordinate)
-
-            print("Successfully uplinked symbol graph!")
         }
     }
 }

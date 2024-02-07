@@ -11,7 +11,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
 
     /// A package identifier to associate with this symbol graph.
     public
-    var package:Symbol.Package
+    var package:Package
     /// A git commit to associate with the relevant symbol graph.
     ///
     /// This is nil for local package symbol graphs.
@@ -28,6 +28,13 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// format.
     public
     var swift:AnyVersion
+    /// The swift tools version declared in the package manifest, if the relevant documentation
+    /// was generated from a package. New in 0.8.14.
+    public
+    var tools:PatchVersion?
+    /// Any additional manifests that were found in the package root directory. New in 0.8.14.
+    public
+    var manifests:[MinorVersion]
 
     /// The platform requirements of the relevant package. This field is
     /// informative only.
@@ -51,10 +58,12 @@ struct SymbolGraphMetadata:Equatable, Sendable
     var root:Symbol.FileBase?
 
     @inlinable public
-    init(package:Symbol.Package,
+    init(package:Package,
         commit:Commit?,
         triple:Triple,
         swift:AnyVersion,
+        tools:PatchVersion? = nil,
+        manifests:[MinorVersion] = [],
         requirements:[PlatformRequirement] = [],
         dependencies:[Dependency] = [],
         products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product> = [],
@@ -67,6 +76,8 @@ struct SymbolGraphMetadata:Equatable, Sendable
         self.commit = commit
         self.triple = triple
         self.swift = swift
+        self.tools = tools
+        self.manifests = manifests
 
         self.dependencies = dependencies
         self.requirements = requirements
@@ -97,8 +108,8 @@ extension SymbolGraphMetadata
         }
 
         return .init(
-            package: .swift,
-            commit: .init(nil, refname: tagname),
+            package: .init(name: .swift),
+            commit: .init(name: tagname),
             triple: triple,
             swift: swift,
             products: products,
@@ -111,11 +122,14 @@ extension SymbolGraphMetadata
     enum CodingKey:String, Sendable
     {
         case abi
-        case package
+        case package_name = "package"
+        case package_scope = "scope"
         case commit_hash = "revision"
         case commit_refname = "refname"
         case triple
         case swift = "toolchain"
+        case tools
+        case manifests
         case requirements
         case dependencies
         case products
@@ -139,11 +153,14 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.abi] = self.abi
-        bson[.package] = self.package
-        bson[.commit_hash] = self.commit?.hash
-        bson[.commit_refname] = self.commit?.refname
+        bson[.package_name] = self.package.name
+        bson[.package_scope] = self.package.scope
+        bson[.commit_hash] = self.commit?.sha1
+        bson[.commit_refname] = self.commit?.name
         bson[.triple] = self.triple
         bson[.swift] = self.swift
+        bson[.tools] = self.tools
+        bson[.manifests] = self.manifests.isEmpty ? nil : self.manifests
 
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.dependencies] = self.dependencies.isEmpty ? nil : self.dependencies
@@ -155,16 +172,20 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
 extension SymbolGraphMetadata:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
-            package: try bson[.package].decode(),
+            package: .init(
+                scope: try bson[.package_scope]?.decode(),
+                name: try bson[.package_name].decode()),
             commit: try bson[.commit_refname]?.decode(as: String.self)
             {
-                .init(try bson[.commit_hash]?.decode(), refname: $0)
+                .init(name: $0, sha1: try bson[.commit_hash]?.decode())
             },
             triple: try bson[.triple].decode(),
             swift: try bson[.swift].decode(),
+            tools: try bson[.tools]?.decode(),
+            manifests: try bson[.manifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             dependencies: try bson[.dependencies]?.decode() ?? [],
             products: try bson[.products].decode(),

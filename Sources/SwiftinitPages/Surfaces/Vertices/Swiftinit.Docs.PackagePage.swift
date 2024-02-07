@@ -95,6 +95,8 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     {
                         $0[.a]
                         {
+                            //  FIXME: this could be wrong if the package is renamed.
+                            //  We should set this from the repo metadata instead.
                             $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
                         } = "all tags"
                     }
@@ -243,34 +245,63 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 
             $0[.h2] = Heading.platforms
 
-            $0[.table, { $0.class = "platforms" }]
+            $0[.dl]
             {
-                $0[.thead]
+                //  All packages on Swiftinit support Linux.
+                $0[.dt] = "Supports Linux?"
+                $0[.dd] = "yes"
+
+                if  let version:PatchVersion = self.vertex.snapshot.latestManifest
                 {
-                    $0[.tr]
-                    {
-                        $0[.th] = "Platform"
-                        $0[.th] = "Minimum Version"
-                    }
+                    $0[.dt] = "Swift tools version"
+                    $0[.dd] = "\(version)"
                 }
-                $0[.tbody]
+            }
+
+            if !self.vertex.snapshot.extraManifests.isEmpty
+            {
+                $0[.p, { $0.class = "note" }]
                 {
-                    //  Every package on Swiftinit supports Linux.
-                    $0[.tr]
+                    $0 += "This package vends additional manifests targeting older versions "
+                    $0[.em] = """
+                    (\(self.vertex.snapshot.extraManifests.map
                     {
-                        $0[.td] = "linux"
-                        $0[.td] = "none"
-                    }
-                    for platform:SymbolGraphMetadata.PlatformRequirement in
-                        self.vertex.snapshot.requirements
+                        "\($0)"
+                    }.joined(separator: ", ")))
+                    """
+                    $0 += " of Swift!"
+                }
+            }
+            if !self.vertex.snapshot.requirements.isEmpty
+            {
+                $0[.table, { $0.class = "platforms" }]
+                {
+                    $0[.thead]
                     {
                         $0[.tr]
                         {
-                            $0[.td] = "\(platform.id)"
-                            $0[.td] = "\(platform.min)"
+                            $0[.th] = "Platform"
+                            $0[.th] = "Minimum Version"
+                        }
+                    }
+                    $0[.tbody]
+                    {
+                        for platform:SymbolGraphMetadata.PlatformRequirement in
+                            self.vertex.snapshot.requirements
+                        {
+                            $0[.tr]
+                            {
+                                $0[.td] = "\(platform.id)"
+                                $0[.td] = "\(platform.min)"
+                            }
                         }
                     }
                 }
+
+                $0[.p] { $0.class = "note" } = """
+                Platform requirements originate from the manifest targeting the latest version
+                of Swift!
+                """
             }
 
             $0[.h2] = Heading.snapshot
@@ -286,9 +317,9 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     $0[.dd]
                     {
                         let url:String?
-                        if  case .github(let path)? = self.repo?.origin
+                        if  case .github(let origin)? = self.repo?.origin
                         {
-                            url = "https://github.com\(path)/tree/\(commit)"
+                            url = "\(origin.https)/tree/\(commit)"
                         }
                         else
                         {

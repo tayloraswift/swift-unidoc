@@ -15,7 +15,6 @@ extension Unidoc
 public
 protocol _UnidocAliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
     where   CollectionOrigin.Element:MongoMasterCodingModel<Unidoc.AliasKey>,
-            CollectionTarget.Element:BSONDecodable,
             Collation == SimpleCollation
 {
     override
@@ -24,7 +23,7 @@ protocol _UnidocAliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.Pipeline
 
     /// The field to store the target document (a `CollectionTarget.Element`) in.
     static
-    var target:Mongo.KeyPath { get }
+    var target:Mongo.AnyKeyPath { get }
 
     var symbol:CollectionOrigin.Element.ID { get }
 
@@ -43,14 +42,14 @@ extension Unidoc.AliasingQuery
             self.extend(pipeline: &pipeline)
         }
 
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[CollectionOrigin.Element[.id]] = self.symbol
         }
 
-        pipeline[.limit] = 1
+        pipeline[stage: .limit] = 1
 
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = CollectionTarget.name
             $0[.localField] = CollectionOrigin.Element[.coordinate]
@@ -58,11 +57,11 @@ extension Unidoc.AliasingQuery
             $0[.as] = Self.target
         }
 
-        pipeline[.project] = .init
+        pipeline[stage: .project] = .init
         {
             $0[Self.target] = true
         }
 
-        pipeline[.unwind] = Self.target
+        pipeline[stage: .unwind] = Self.target
     }
 }

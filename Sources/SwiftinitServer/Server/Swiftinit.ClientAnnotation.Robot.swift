@@ -12,6 +12,10 @@ extension Swiftinit.ClientAnnotation
         case baiduspider
         /// Crawler belonging to Bing, an American search engine.
         case bingbot
+        /// Mozilla/5.0 (Linux; Android 5.0)
+        /// AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36
+        /// (compatible; Bytespider; spider-feedback@bytedance.com)
+        case bytespider
 
         /// Amazon CloudFront.
         case cloudfront
@@ -63,6 +67,10 @@ extension Swiftinit.ClientAnnotation.Robot
         else if string.contains("baidu")
         {
             return .baiduspider
+        }
+        else if string.contains("bytedance")
+        {
+            return .bytespider
         }
         else if string.contains("duckduck")
         {

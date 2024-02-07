@@ -1,5 +1,6 @@
 import GitHubAPI
 import HTTP
+import S3
 import UnidocProfiling
 
 extension Swiftinit
@@ -19,14 +20,13 @@ extension Swiftinit
 }
 extension Swiftinit.Server
 {
-    var atomics:Swiftinit.Counters { _read { yield self.loop.atomics } }
-
     var plugins:[String: any Swiftinit.ServerPlugin] { self.loop.plugins }
     var context:Swiftinit.ServerPluginContext { self.loop.context }
 
     var secure:Bool { self.loop.secure }
 
     var github:GitHub.Integration? { self.loop.github }
+    var bucket:AWS.S3.Bucket? { self.loop.bucket }
 
     var format:Swiftinit.RenderFormat { self.loop.format }
     var db:Swiftinit.DB { self.loop.db }

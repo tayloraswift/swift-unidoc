@@ -73,10 +73,10 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
             return .ok("Ignored tag '\(tag.name)': not a semantic or swift version")
         }
 
-        let (edition, new):(Unidoc.EditionMetadata, Bool) = try await server.db.unidoc.register(
+        let (edition, new):(Unidoc.EditionMetadata, Bool) = try await server.db.unidoc.index(
             package: package.id,
             version: version,
-            refname: tag.name,
+            name: tag.name,
             sha1: tag.hash,
             with: session)
 

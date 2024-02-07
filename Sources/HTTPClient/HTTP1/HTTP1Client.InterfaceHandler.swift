@@ -57,8 +57,17 @@ extension HTTP1Client.InterfaceHandler:ChannelInboundHandler
         case .head(let head):
             self.facet.head = head
 
+            if  let length:String = head.headers["content-length"].first,
+                let length:Int = .init(length)
+            {
+                self.facet.body.reserveCapacity(length)
+            }
+
         case .body(let buffer):
-            self.facet.body.append(buffer)
+            buffer.withUnsafeReadableBytes
+            {
+                self.facet.body += $0
+            }
 
         case .end(_):
             self.request?.resume(returning: self.facet)

@@ -1,5 +1,4 @@
-import JSONDecoding
-import JSONEncoding
+import JSON
 import SHA1
 
 extension SHA1:JSONStringDecodable, JSONStringEncodable

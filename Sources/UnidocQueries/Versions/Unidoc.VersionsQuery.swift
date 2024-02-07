@@ -9,22 +9,21 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct VersionsQuery:Equatable, Hashable, Sendable
+    enum VersionsQuery:Equatable, Hashable, Sendable
     {
-        public
-        let symbol:Symbol.Package
-
-        @usableFromInline
-        let limit:Int
-        @usableFromInline
-        let user:Unidoc.User.ID?
-
-        @inlinable public
-        init(package symbol:Symbol.Package, limit:Int, user:Unidoc.User.ID? = nil)
+        case latest(Symbol.Package)
+        case tags(Symbol.Package, limit:Int, user:Unidoc.User.ID? = nil)
+    }
+}
+extension Unidoc.VersionsQuery
+{
+    private
+    var limit:Int
+    {
+        switch self
         {
-            self.symbol = symbol
-            self.limit = limit
-            self.user = user
+        case .latest:                   1
+        case .tags(_, let limit, _):    limit
         }
     }
 }
@@ -36,77 +35,50 @@ extension Unidoc.VersionsQuery:Mongo.PipelineQuery
 extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
 {
     public
-    typealias CollectionOrigin = UnidocDatabase.PackageAliases
+    typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public
-    typealias CollectionTarget = UnidocDatabase.Packages
+    typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
-    var target:Mongo.KeyPath { Output[.package] }
+    var target:Mongo.AnyKeyPath { Output[.package] }
+
+    @inlinable public
+    var symbol:Symbol.Package
+    {
+        switch self
+        {
+        case .latest(let symbol):       symbol
+        case .tags(let symbol, _, _):   symbol
+        }
+    }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        if  let user:Unidoc.User.ID = self.user
-        {
-            pipeline[.lookup] = .init
-            {
-                $0[.from] = UnidocDatabase.Users.name
-                $0[.pipeline] = .init
-                {
-                    $0[.match] = .init
-                    {
-                        $0[Unidoc.User[.id]] = user
-                    }
-                }
-                $0[.as] = Output[.user]
-            }
-
-            //  Unbox single-element array.
-            pipeline[.set] = .init
-            {
-                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
-            }
-        }
-
-        //  Lookup the associated realm.
-        pipeline[.lookup] = .init
-        {
-            $0[.from] = UnidocDatabase.Realms.name
-            $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
-            $0[.foreignField] = Unidoc.RealmMetadata[.id]
-            $0[.as] = Output[.realm]
-        }
-
-        //  Unbox single-element array.
-        pipeline[.set] = .init
-        {
-            $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
-        }
-
         for release:Bool in [true, false]
         {
-            pipeline[.lookup] = Mongo.LookupDocument.init
+            pipeline[stage: .lookup] = Mongo.LookupDocument.init
             {
-                $0[.from] = UnidocDatabase.Editions.name
+                $0[.from] = Unidoc.DB.Editions.name
                 $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
                 $0[.foreignField] = Unidoc.EditionMetadata[.package]
                 $0[.pipeline] = .init
                 {
-                    $0[.match] = .init
+                    $0[stage: .match] = .init
                     {
                         $0[Unidoc.EditionMetadata[.release]] = release
-                        $0[Unidoc.EditionMetadata[.release]] = .init { $0[.exists] = true }
+                        $0[Unidoc.EditionMetadata[.release]] { $0[.exists] = true }
                     }
 
-                    $0[.sort] = .init
+                    $0[stage: .sort] = .init
                     {
                         $0[Unidoc.EditionMetadata[.patch]] = (-)
                         $0[Unidoc.EditionMetadata[.version]] = (-)
                     }
 
-                    $0[.limit] = self.limit
+                    $0[stage: .limit] = self.limit
 
-                    $0[.replaceWith] = .init
+                    $0[stage: .replaceWith] = .init
                     {
                         $0[Tag[.edition]] = Mongo.Pipeline.ROOT
                     }
@@ -120,87 +92,151 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             }
         }
 
-        //  Compute id of local snapshot, if one were to exist.
-        //  Only do this if the limit is greater than 1.
-        guard self.limit > 1
+        guard
+        case .tags(_, _, user: let user) = self
         else
         {
             return
         }
 
-        let tagless:Mongo.KeyPath = "_tagless"
-
-        pipeline[.set] = .init
+        do
         {
-            $0[tagless] = .expr
+            //  Compute id of local snapshot, if one were to exist.
+            let tagless:Mongo.AnyKeyPath = "_tagless"
+
+            pipeline[stage: .set] = .init
             {
-                $0[.add] = .init
+                $0[tagless] = .expr
                 {
-                    $0.expr
+                    $0[.add] = .init
                     {
-                        $0[.multiply] =
-                        (
-                            Self.target / Unidoc.PackageMetadata[.id],
-                            0x0000_0001_0000_0000 as Int64
-                        )
+                        $0.expr
+                        {
+                            $0[.multiply] =
+                            (
+                                Self.target / Unidoc.PackageMetadata[.id],
+                                0x0000_0001_0000_0000 as Int64
+                            )
+                        }
+                        $0.append(0x0000_0000_ffff_ffff as Int64)
                     }
-                    $0.append(0x0000_0000_ffff_ffff as Int64)
                 }
             }
+
+            Self.load(&pipeline,
+                volume: Output[.tagless_volume],
+                graph: Output[.tagless_graph],
+                for: tagless)
+
+            pipeline[stage: .unset] = tagless
         }
+        do
+        {
+            //  Lookup other aliases for this package.
+            let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
+                in: Output[.aliases])
 
-        Self.load(&pipeline,
-            volume: Output[.tagless_volume],
-            graph: Output[.tagless_graph],
-            for: tagless)
+            pipeline[stage: .lookup] = .init
+            {
+                $0[.from] = Unidoc.DB.PackageAliases.name
+                $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
+                $0[.foreignField] = Unidoc.PackageAlias[.coordinate]
+                $0[.as] = aliases.expression
+            }
 
-        pipeline[.unset] = tagless
+            pipeline[stage: .set] = .init
+            {
+                $0[Output[.aliases]] = .expr { $0[.map] = aliases.map { $0[.id] } }
+            }
+        }
+        do
+        {
+            //  Lookup the associated realm.
+            pipeline[stage: .lookup] = .init
+            {
+                $0[.from] = Unidoc.DB.Realms.name
+                $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
+                $0[.foreignField] = Unidoc.RealmMetadata[.id]
+                $0[.as] = Output[.realm]
+            }
+            //  Unbox single-element array.
+            pipeline[stage: .set] = .init
+            {
+                $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
+            }
+        }
+        if  let user:Unidoc.User.ID
+        {
+            //  Lookup the querying user.
+            pipeline[stage: .lookup] = .init
+            {
+                $0[.from] = Unidoc.DB.Users.name
+                $0[.pipeline] = .init
+                {
+                    $0[stage: .match] = .init
+                    {
+                        $0[Unidoc.User[.id]] = user
+                    }
+                }
+                $0[.as] = Output[.user]
+            }
+
+            //  Unbox single-element array.
+            pipeline[stage: .set] = .init
+            {
+                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
+            }
+        }
     }
 }
 extension Unidoc.VersionsQuery
 {
     private static
     func load(_ pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        graph:Mongo.KeyPath,
-        for id:Mongo.KeyPath)
+        volume:Mongo.AnyKeyPath,
+        graph:Mongo.AnyKeyPath,
+        for id:Mongo.AnyKeyPath)
     {
         //  Check if a volume has been created for this edition.
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
-            $0[.from] = UnidocDatabase.Volumes.name
+            $0[.from] = Unidoc.DB.Volumes.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.VolumeMetadata[.id]
             $0[.as] = volume
         }
 
         //  Check if a symbol graph has been uploaded for this edition.
-        pipeline[.lookup] = Mongo.LookupDocument.init
+        pipeline[stage: .lookup] = Mongo.LookupDocument.init
         {
-            $0[.from] = UnidocDatabase.Snapshots.name
+            $0[.from] = Unidoc.DB.Snapshots.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.Snapshot[.id]
             $0[.pipeline] = .init
             {
-                $0[.replaceWith] = .init
+                $0[stage: .replaceWith] = .init
                 {
-                    $0[Graph[.uplinking]] = .expr
+                    $0[Graph[.id]] = Unidoc.Snapshot[.id]
+                    $0[Graph[.inlineBytes]] = .expr
                     {
-                        $0[.coalesce] = (Unidoc.Snapshot[.uplinking], false)
+                        $0[.objectSize] = .expr
+                        {
+                            $0[.coalesce] = (Unidoc.Snapshot[.inline], BSON.Null.init())
+                        }
                     }
-                    $0[Graph[.bytes]] = .expr
+                    $0[Graph[.remoteBytes]] = .expr
                     {
-                        $0[.objectSize] = Unidoc.Snapshot[.graph]
+                        $0[.coalesce] = (Unidoc.Snapshot[.size], 0)
                     }
+                    $0[Graph[.link]] = Unidoc.Snapshot[.link]
                     $0[Graph[.abi]] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
-
                 }
             }
             $0[.as] = graph
         }
 
         //  Unbox single-element arrays.
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[volume] = .expr { $0[.first] = volume }
             $0[graph] = .expr { $0[.first] = graph }

@@ -6,9 +6,9 @@ extension Mongo
     /// FIXME: this is totally broken if the path points to a boolean field!
     struct OptionalKeyPath
     {
-        let path:Mongo.KeyPath
+        let path:Mongo.AnyKeyPath
 
-        init(in path:Mongo.KeyPath)
+        init(in path:Mongo.AnyKeyPath)
         {
             self.path = path
         }

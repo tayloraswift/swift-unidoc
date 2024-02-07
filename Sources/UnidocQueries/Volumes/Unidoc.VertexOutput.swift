@@ -38,7 +38,7 @@ extension Unidoc.VertexOutput:MongoMasterCodingModel
 extension Unidoc.VertexOutput:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             principal: try bson[.principal]?.decode(),

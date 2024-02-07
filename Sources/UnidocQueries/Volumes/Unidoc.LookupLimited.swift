@@ -16,11 +16,11 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
     /// Sets the `output` to an empty array.
     public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,
-        volume _:Mongo.KeyPath,
-        vertex _:Mongo.KeyPath,
-        output:Mongo.KeyPath)
+        volume _:Mongo.AnyKeyPath,
+        vertex _:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath)
     {
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             $0[output] = [] as [Never]
         }
@@ -30,15 +30,15 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
     /// sets `output.scalars` to an empty array.
     public
     func edges(_ pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        vertex _:Mongo.KeyPath,
-        groups _:Mongo.KeyPath,
-        output:(scalars:Mongo.KeyPath, volumes:Mongo.KeyPath))
+        volume:Mongo.AnyKeyPath,
+        vertex _:Mongo.AnyKeyPath,
+        groups _:Mongo.AnyKeyPath,
+        output:(scalars:Mongo.AnyKeyPath, volumes:Mongo.AnyKeyPath))
     {
-        pipeline[.set] = .init
+        pipeline[stage: .set] = .init
         {
             let dependencies:
-                Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.KeyPath> = .init(
+                Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.AnyKeyPath> = .init(
                 in: volume / Unidoc.VolumeMetadata[.dependencies])
 
             $0[output.volumes] = .expr
