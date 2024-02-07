@@ -1,5 +1,6 @@
-@_spi(testable)
 import S3
+@_spi(testable)
+import S3Client
 import Testing
 
 @main

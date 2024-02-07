@@ -29,15 +29,15 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.match] = .init
+        pipeline[stage: .match] = .init
         {
             $0[Aliases.Element[.id]] = self.symbol
         }
-        pipeline[.replaceWith] = .init
+        pipeline[stage: .replaceWith] = .init
         {
             $0[Iteration.BatchElement[.id]] = Aliases.Element[.coordinate]
         }
-        pipeline[.lookup] = .init
+        pipeline[stage: .lookup] = .init
         {
             $0[.from] = Targets.name
             $0[.localField] = Iteration.BatchElement[.id]
@@ -46,19 +46,19 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
             //  to succeed while package registration fails, and we need to know that.
             $0[.as] = Iteration.BatchElement[.document]
         }
-        pipeline[.unionWith] = .init
+        pipeline[stage: .unionWith] = .init
         {
             $0[.collection] = Aliases.name
             $0[.pipeline] = .init
             {
-                $0[.sort] = .init
+                $0[stage: .sort] = .init
                 {
                     $0[Aliases.Element[.coordinate]] = (-)
                 }
 
-                $0[.limit] = 1
+                $0[stage: .limit] = 1
 
-                $0[.replaceWith] = .init
+                $0[stage: .replaceWith] = .init
                 {
                     $0[Iteration.BatchElement[.id]] = .expr
                     {
@@ -68,11 +68,11 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
             }
         }
         //  Prefer existing registrations, if any.
-        pipeline[.sort] = .init
+        pipeline[stage: .sort] = .init
         {
             $0[Iteration.BatchElement[.id]] = (+)
         }
 
-        pipeline[.limit] = 1
+        pipeline[stage: .limit] = 1
     }
 }

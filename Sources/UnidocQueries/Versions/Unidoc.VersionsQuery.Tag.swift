@@ -40,7 +40,7 @@ extension Unidoc.VersionsQuery.Tag:MongoMasterCodingModel
 extension Unidoc.VersionsQuery.Tag:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(edition: try bson[.edition].decode(),
             volume: try bson[.volume]?.decode(),

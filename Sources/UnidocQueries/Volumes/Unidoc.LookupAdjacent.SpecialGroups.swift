@@ -22,14 +22,8 @@ extension Unidoc.LookupAdjacent.SpecialGroups
             break
 
         case .default(let self):
-            or.append
-            {
-                $0[.expr] = .expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.peers) }
-            }
-            or.append
-            {
-                $0[.expr] = .expr { $0[.eq] = (Unidoc.AnyGroup[.id], self.topic) }
-            }
+            or { $0[.expr] { $0[.eq] = (Unidoc.AnyGroup[.id], self.peers) } }
+            or { $0[.expr] { $0[.eq] = (Unidoc.AnyGroup[.id], self.topic) } }
         }
     }
 }

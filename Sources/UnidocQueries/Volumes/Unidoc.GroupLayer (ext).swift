@@ -15,7 +15,7 @@ extension Unidoc.GroupLayer
                 switch self
                 {
                 case .protocols:
-                    let conditional:Mongo.List<Unidoc.ConformingType, Mongo.KeyPath> = .init(
+                    let conditional:Mongo.List<Unidoc.ConformingType, Mongo.AnyKeyPath> = .init(
                         in: group[.conditional])
 
                     $0.append([group[.culture]])

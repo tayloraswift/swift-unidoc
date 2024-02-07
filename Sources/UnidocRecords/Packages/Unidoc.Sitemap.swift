@@ -87,7 +87,7 @@ extension Unidoc.Sitemap:BSONDocumentEncodable
 extension Unidoc.Sitemap:BSONDocumentDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
             elements: try bson[.elements].decode(),

@@ -10,8 +10,7 @@ import URI
 extension Swiftinit
 {
     @frozen public
-    struct RedirectEndpoint<Predicate>:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
-        where Predicate:Unidoc.VertexPredicate
+    struct RedirectEndpoint<Predicate> where Predicate:Unidoc.VertexPredicate
     {
         public
         let query:Unidoc.RedirectQuery<Predicate>
@@ -25,6 +24,11 @@ extension Swiftinit
             self.value = nil
         }
     }
+}
+extension Swiftinit.RedirectEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+{
+    @inlinable public static
+    var replica:Mongo.ReadPreference { .nearest }
 }
 extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
 {

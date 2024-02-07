@@ -58,7 +58,7 @@ extension Unidoc.PackageLicense:BSONDocumentEncodable
 extension Unidoc.PackageLicense:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(spdx: try bson[.spdx].decode(), name: try bson[.name].decode())
     }

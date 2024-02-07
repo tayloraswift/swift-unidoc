@@ -40,7 +40,7 @@ extension Mongo.CollectionIndex
         collation:Mongo.Collation? = nil,
         unique:Bool = false,
         fields:(inout Mongo.SortDocument) -> (),
-        where filter:((inout Mongo.PredicateDocument) -> ())? = nil)
+        where filter:((inout Mongo.PredicateEncoder) -> ())? = nil)
     {
         self.init(id: id,
             collation: collation,
@@ -51,7 +51,7 @@ extension Mongo.CollectionIndex
 }
 extension Mongo.CollectionIndex
 {
-    func build(statement:inout Mongo.CreateIndexStatement)
+    func build(statement:inout Mongo.CreateIndexStatementEncoder)
     {
         statement[.name] = self.id
         statement[.collation] = self.collation

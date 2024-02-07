@@ -17,7 +17,8 @@ extension SymbolGraph
         /// The language of the module. This doesn’t necessarily match the languages of all the
         /// individual symbols in the module.
         ///
-        /// New in 0.8.8; absent in 0.8.7 or earlier.
+        /// New in 0.8.8; absent in 0.8.7 or earlier. We didn’t record this consistently until
+        /// 0.8.13.
         ///
         /// This field is nil if the symbol graph was not generated from a swift package.
         public
@@ -84,7 +85,7 @@ extension SymbolGraph.Module:BSONDocumentEncodable
 extension SymbolGraph.Module:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             name: try bson[.name].decode(),

@@ -74,13 +74,13 @@ extension Unidoc.NounTable:BSONEncodable
             }
         }
 
-        BSON.BinaryView<[UInt8]>.init(subtype: Self.version, slice: buffer).encode(to: &field)
+        BSON.BinaryView<[UInt8]>.init(subtype: Self.version, bytes: buffer).encode(to: &field)
     }
 }
 extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
 {
-    @inlinable internal
-    init<Bytes>(bson:BSON.BinaryView<Bytes>) throws
+    @inlinable
+    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
     {
         if  case Self.version = bson.subtype
         {
@@ -92,21 +92,21 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
             return
         }
 
-        var i:Bytes.Index = bson.slice.startIndex
-        var j:Bytes.Index = i
-        while j < bson.slice.endIndex
+        var i:Int = bson.bytes.startIndex
+        var j:Int = i
+        while j < bson.bytes.endIndex
         {
-            let next:Bytes.Index = bson.slice.index(after: j)
+            let next:Int = bson.bytes.index(after: j)
 
             guard
-            let discriminator:Discriminator = .init(rawValue: bson.slice[j])
+            let discriminator:Discriminator = .init(rawValue: bson.bytes[j])
             else
             {
                 j = next
                 continue
             }
 
-            let shoot:Unidoc.Shoot = .deserialize(from: bson.slice[i ..< j])
+            let shoot:Unidoc.Shoot = .deserialize(from: bson.bytes[i ..< j])
             let citizenship:Unidoc.Citizenship
 
             switch discriminator
@@ -116,16 +116,16 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
             case .foreign:  citizenship = .foreign
             case .custom:
                 guard
-                let terminator:Bytes.Index = bson.slice[next...].firstIndex(of: 0xFF)
+                let terminator:Int = bson.bytes[next...].firstIndex(of: 0xFF)
                 else
                 {
                     throw Unidoc.NounTableMalformedError.unterminatedCustomText
                 }
 
-                let text:String = .init(decoding: bson.slice[next ..< terminator],
+                let text:String = .init(decoding: bson.bytes[next ..< terminator],
                     as: UTF8.self)
 
-                let k:Bytes.Index = bson.slice.index(after: terminator)
+                let k:Int = bson.bytes.index(after: terminator)
 
                 self.rows.append(.init(shoot: shoot, type: .text(text)))
 
@@ -135,16 +135,16 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
                 continue
             }
 
-            if  next < bson.slice.endIndex,
-                let k:Bytes.Index = bson.slice.index(next,
+            if  next < bson.bytes.endIndex,
+                let k:Int = bson.bytes.index(next,
                     offsetBy: MemoryLayout<Int32>.size,
-                    limitedBy: bson.slice.endIndex)
+                    limitedBy: bson.bytes.endIndex)
             {
                 let flags:Int32 = withUnsafeTemporaryAllocation(
                     byteCount: MemoryLayout<Int32>.size,
                     alignment: MemoryLayout<Int32>.alignment)
                 {
-                    $0.copyBytes(from: bson.slice[next ..< k])
+                    $0.copyBytes(from: bson.bytes[next ..< k])
                     return .init(bigEndian: $0.load(as: Int32.self))
                 }
 
@@ -167,26 +167,26 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
         }
     }
 
-    @inlinable internal
-    init<Bytes>(legacy bson:BSON.BinaryView<Bytes>) throws
+    @inlinable
+    init(legacy bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
     {
         self.init(rows: [])
 
-        var i:Bytes.Index = bson.slice.startIndex
-        var j:Bytes.Index = i
-        while j < bson.slice.endIndex
+        var i:Int = bson.bytes.startIndex
+        var j:Int = i
+        while j < bson.bytes.endIndex
         {
-            var next:Bytes.Index = bson.slice.index(after: j)
+            var next:Int = bson.bytes.index(after: j)
 
             guard
-            let discriminator:Discriminator = .init(rawValue: bson.slice[j])
+            let discriminator:Discriminator = .init(rawValue: bson.bytes[j])
             else
             {
                 j = next
                 continue
             }
 
-            let shoot:Unidoc.Shoot = .deserialize(from: bson.slice[i ..< j])
+            let shoot:Unidoc.Shoot = .deserialize(from: bson.bytes[i ..< j])
             let type:Unidoc.NounType
 
             switch discriminator
@@ -202,14 +202,14 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
 
             case .custom:
                 guard
-                let terminator:Bytes.Index = bson.slice[next...].firstIndex(of: 0xFF)
+                let terminator:Int = bson.bytes[next...].firstIndex(of: 0xFF)
                 else
                 {
                     throw Unidoc.NounTableMalformedError.unterminatedCustomText
                 }
 
-                type = .text(.init(decoding: bson.slice[next ..< terminator], as: UTF8.self))
-                next = bson.slice.index(after: terminator)
+                type = .text(.init(decoding: bson.bytes[next ..< terminator], as: UTF8.self))
+                next = bson.bytes.index(after: terminator)
             }
 
             self.rows.append(.init(shoot: shoot, type: type))

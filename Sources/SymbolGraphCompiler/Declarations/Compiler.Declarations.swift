@@ -188,8 +188,7 @@ extension Compiler.Declarations
             nil
         }
     }
-    func callAsFunction(
-        internal resolution:Symbol.Decl) throws -> Compiler.DeclObject?
+    func callAsFunction(internal resolution:Symbol.Decl) throws -> Compiler.DeclObject?
     {
         switch self.entries[resolution]
         {

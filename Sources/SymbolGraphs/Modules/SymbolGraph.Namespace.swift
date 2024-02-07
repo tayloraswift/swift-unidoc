@@ -43,7 +43,7 @@ extension SymbolGraph.Namespace:BSONDocumentEncodable
 extension SymbolGraph.Namespace:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             range: try bson[.first].decode() ... bson[.last].decode(),

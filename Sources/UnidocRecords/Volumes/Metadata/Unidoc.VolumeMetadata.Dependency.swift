@@ -71,7 +71,7 @@ extension Unidoc.VolumeMetadata.Dependency:BSONDocumentEncodable
 extension Unidoc.VolumeMetadata.Dependency:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let requirement:SymbolGraphMetadata.DependencyRequirement?
         switch

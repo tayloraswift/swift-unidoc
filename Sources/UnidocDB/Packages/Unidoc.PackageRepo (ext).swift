@@ -1,4 +1,5 @@
 import BSON
+import Durations
 import GitHubAPI
 import MongoQL
 import UnidocRecords
@@ -37,6 +38,9 @@ extension Unidoc.PackageRepo
         }
 
         return .init(crawled: crawled,
+            fetched: nil,
+            expires: nil,
+            account: .init(type: .github, user: repo.owner.id),
             created: .init(created),
             updated: .init(updated),
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
@@ -56,5 +60,64 @@ extension Unidoc.PackageRepo
                 fork: repo.fork)),
             forks: repo.forks,
             stars: repo.stars)
+    }
+}
+
+extension Unidoc.PackageRepo
+{
+    func crawlingIntervalTarget(hidden:Bool, realm:Unidoc.Realm?) -> Milliseconds?
+    {
+        guard self.origin.alive
+        else
+        {
+            //  Repo has been deleted from, archived in, or disabled by the registrar.
+            return nil
+        }
+
+        var interval:Milliseconds = 0
+
+        switch self.license?.free
+        {
+        //  The license is free.
+        case true?:     interval += .minute * 10
+        //  No license. The package is probably new and the author hasn’t gotten around to
+        //  adding a license yet.
+        case nil:       interval += .day * 3
+        //  The license is intentionally unfree.
+        case false?:    return nil
+        }
+
+        //  Deprioritize hidden packages.
+        if  hidden
+        {
+            interval += .hour * 1
+        }
+        //  Prioritize packages with more stars. (We currently only index packages with at
+        //  least two stars.)
+        //
+        //  If the package is part of the `public` realm (or whatever realm `0` has been named),
+        //  we consider it to have infinite stars.
+        if  case 0? = realm
+        {
+            return interval
+        }
+
+        switch self.stars
+        {
+        case    0 ...    2: interval += .day * 4
+        case    3 ...   10: interval += .day * 3
+        case   11 ...   20: interval += .day * 2
+        case   21 ...   50: interval += .day * 1
+        case   51 ...   99: interval += .hour * 12
+        case  100 ...  499: interval += .hour * 8
+        case  500 ...  999: interval += .hour * 5
+        case 1000 ... 1999: interval += .hour * 4
+        case 2000 ... 2999: interval += .hour * 3
+        case 3000 ... 3999: interval += .hour * 2
+        case 4000 ... 4999: interval += .hour * 1
+        default:        break
+        }
+
+        return interval
     }
 }

@@ -10,10 +10,10 @@ extension Swiftinit
         public
         let sessions:Mongo.SessionPool
         public
-        let unidoc:UnidocDatabase
+        let unidoc:Unidoc.DB
 
         @inlinable public
-        init(sessions:Mongo.SessionPool, unidoc:UnidocDatabase)
+        init(sessions:Mongo.SessionPool, unidoc:Unidoc.DB)
         {
             self.sessions = sessions
             self.unidoc = unidoc
@@ -24,7 +24,7 @@ extension Swiftinit.DB
 {
     @inlinable public
     subscript<Collection>(
-        dynamicMember keyPath:KeyPath<UnidocDatabase, Collection>) -> Collection
+        dynamicMember keyPath:KeyPath<Unidoc.DB, Collection>) -> Collection
         where Collection:Mongo.CollectionModel
     {
         self.unidoc[keyPath: keyPath]

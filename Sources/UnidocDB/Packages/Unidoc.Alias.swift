@@ -58,7 +58,7 @@ extension Unidoc.Alias:BSONDocumentEncodable
 extension Unidoc.Alias:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(), coordinate: try bson[.coordinate].decode())
     }

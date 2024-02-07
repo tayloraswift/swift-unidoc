@@ -36,6 +36,9 @@ extension SymbolGraph
         /// Protocol requirements.
         public
         var requirements:[Int32]
+        /// Enum cases, if this is an enum.
+        public
+        var inhabitants:[Int32]
         /// The addresses of the scalars that this scalar implements,
         /// overrides, or inherits from. Superforms are intrinsic but there
         /// can be more than one per scalar.
@@ -76,6 +79,7 @@ extension SymbolGraph
             location:SourceLocation<Int32>? = nil,
             article:Article? = nil,
             requirements:[Int32] = [],
+            inhabitants:[Int32] = [],
             superforms:[Int32] = [],
             features:[Int32] = [],
             renamed:Int32? = nil,
@@ -93,6 +97,7 @@ extension SymbolGraph
             self.article = article
 
             self.requirements = requirements
+            self.inhabitants = inhabitants
             self.superforms = superforms
             self.features = features
             self.renamed = renamed
@@ -146,6 +151,7 @@ extension SymbolGraph.Decl
         case signature_spis = "I"
 
         case requirements = "R"
+        case inhabitants = "M"
         case superforms = "S"
         case features = "F"
         case renamed = "N"
@@ -192,6 +198,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
         bson[.signature_spis] = self.signature.spis
 
         bson[.requirements] = SymbolGraph.Buffer.init(elidingEmpty: self.requirements)
+        bson[.inhabitants] = SymbolGraph.Buffer.init(elidingEmpty: self.inhabitants)
         bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
         bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
 
@@ -206,7 +213,7 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
 extension SymbolGraph.Decl:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let flags:Phylum.DeclFlags = try bson[.flags]?.decode()
             ?? .swift(try bson[.flags_swift].decode())
@@ -233,12 +240,14 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
 
             location: try bson[.location]?.decode(),
             article: try bson[.article]?.decode(),
-            requirements: try bson[.requirements]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
-            superforms: try bson[.superforms]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
-            features: try bson[.features]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+            requirements: try bson[.requirements]?.decode(as: SymbolGraph.Buffer.self,
+                with: \.elements) ?? [],
+            inhabitants: try bson[.inhabitants]?.decode(as: SymbolGraph.Buffer.self,
+                with: \.elements) ?? [],
+            superforms: try bson[.superforms]?.decode(as: SymbolGraph.Buffer.self,
+                with: \.elements) ?? [],
+            features: try bson[.features]?.decode(as: SymbolGraph.Buffer.self,
+                with: \.elements) ?? [],
             renamed: try bson[.renamed]?.decode(),
             origin: try bson[.origin]?.decode(),
             topics: try bson[.topics]?.decode() ?? [])

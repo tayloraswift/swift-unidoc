@@ -50,14 +50,14 @@ extension Unidoc.Sitemap.Elements:BSONEncodable
     public
     func encode(to field:inout BSON.FieldEncoder)
     {
-        BSON.BinaryView<[UInt8]>.init(subtype: .generic, slice: self.bytes).encode(to: &field)
+        BSON.BinaryView<[UInt8]>.init(subtype: .generic, bytes: self.bytes).encode(to: &field)
     }
 }
 extension Unidoc.Sitemap.Elements:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
     {
-        self.init(bytes: [UInt8].init(bson.slice))
+        self.init(bytes: [UInt8].init(bson.bytes))
     }
 }

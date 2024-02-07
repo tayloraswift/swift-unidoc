@@ -34,31 +34,32 @@ extension Unidoc.Linker.Graph
 }
 extension Unidoc.Linker.Graph.Scalars
 {
-    init(snapshot:borrowing Unidoc.Snapshot, upstream:borrowing Unidoc.Linker.UpstreamScalars)
+    init(_ object:borrowing SymbolGraphObject<Unidoc.Edition>,
+        upstream:borrowing Unidoc.Linker.UpstreamScalars)
     {
         let decls:SymbolGraph.Table<SymbolGraph.DeclPlane, Unidoc.Scalar?> =
-            snapshot.graph.decls.link
+            object.graph.decls.link
         {
-            snapshot.id + $0
+            object.id + $0
         }
         dynamic:
         {
             upstream.citizens[$0]
         }
 
-        let modules:[Unidoc.Scalar?] = snapshot.graph.link
+        let modules:[Unidoc.Scalar?] = object.graph.link
         {
-            snapshot.id + $0
+            object.id + $0
         }
         dynamic:
         {
             upstream.cultures[$0]
         }
 
-        let products:[String: Unidoc.Scalar] = snapshot.metadata.products.indices.reduce(
+        let products:[String: Unidoc.Scalar] = object.metadata.products.indices.reduce(
             into: [:])
         {
-            $0[snapshot.metadata.products[$1].name] = snapshot.id + $1
+            $0[object.metadata.products[$1].name] = object.id + $1
         }
 
         self.init(products: products,

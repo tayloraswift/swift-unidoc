@@ -1,4 +1,5 @@
 import HTML
+import Durations
 import HTTP
 import Media
 import MongoDB
@@ -11,26 +12,20 @@ extension Swiftinit
 {
     struct AdminPage
     {
-        let configuration:Mongo.ReplicaSetConfiguration
-
-        let requestsDropped:Int
+        let servers:[(host:Mongo.Host, latency:Nanoseconds)]
         let plugins:[any Swiftinit.ServerPlugin]
 
         let tour:ServerTour
         let real:Bool
 
-        @inlinable public
-        init(configuration:Mongo.ReplicaSetConfiguration,
-            requestsDropped:Int,
+        init(
+            servers:[(host:Mongo.Host, latency:Nanoseconds)],
             plugins:[any Swiftinit.ServerPlugin],
             tour:ServerTour,
             real:Bool)
         {
-            self.configuration = configuration
-
-            self.requestsDropped = requestsDropped
+            self.servers = servers
             self.plugins = plugins
-
             self.tour = tour
             self.real = real
         }
@@ -71,8 +66,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         {
             $0[.ul]
             {
+                $0[.li] { $0[.a] { $0.href = "\(Swiftinit.ReplicaSetPage.uri)" } = "RS" }
+                $0[.li] { $0[.a] { $0.href = "\(Swiftinit.CookiePage.uri)" } = "Cookies" }
                 $0[.li] { $0[.a] { $0.href = "\(Recode.uri)" } = "Manage Schema" }
-                $0[.li] { $0[.a] { $0.href = "\(Slaves.uri)" } = "Manage Slaves" }
 
                 for plugin:any Swiftinit.ServerPlugin in self.plugins
                 {
@@ -157,26 +153,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         }
             content:
         {
-            $0[.label]
-            {
-                $0.class = "checkbox"
-                $0.title = "Queue all symbol graphs for uplinking."
-            }
-                content:
-            {
-                $0[.input]
-                {
-                    $0.type = "checkbox"
-                    $0.name = "queue"
-                    $0.value = "true"
-                }
-
-                $0[.span] = "Queue all symbol graphs"
-            }
-
             $0[.p]
             {
-                $0[.button] { $0.type = "submit" } = "Uplink volumes"
+                $0[.button] { $0.type = "submit" } = "Uplink all symbol graphs"
             }
         }
 
@@ -230,8 +209,19 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
         main[.hr]
 
-        main[.h2] = "Tour information"
+        main[.h2] = "Database servers"
+        main[.dl]
+        {
+            for (host, latency):(Mongo.Host, Nanoseconds) in self.servers
+            {
+                $0[.dt] = "\(host)"
+                $0[.dd] = "\(latency.rawValue / 1_000) µs"
+            }
+        }
 
+        main[.hr]
+
+        main[.h2] = "Tour information"
         main[.dl]
         {
 
@@ -248,8 +238,8 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
             $0[.dt] = "Requests (Barbies)"
             $0[.dd] = "\(self.tour.profile.requests.http2.barbie)"
 
-            $0[.dt] = "requests dropped"
-            $0[.dd] = "\(self.requestsDropped)"
+            $0[.dt] = "Server errors"
+            $0[.dd] = "\(self.tour.errors)"
         }
 
         main[.h2] = "Performance"
@@ -317,24 +307,5 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         }
 
         main += self.tour.profile
-
-        main[.hr]
-
-        main[.h2] = "Replica set information"
-
-        main[.dl]
-        {
-            $0[.dt] = "name"
-            $0[.dd] = self.configuration.name
-
-            $0[.dt] = "members"
-            $0[.dd] = "\(self.configuration.members.map(\.host.description))"
-
-            $0[.dt] = "version"
-            $0[.dd] = "\(self.configuration.version)"
-
-            $0[.dt] = "term"
-            $0[.dd] = "\(self.configuration.term)"
-        }
     }
 }

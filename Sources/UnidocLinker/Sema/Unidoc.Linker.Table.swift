@@ -241,13 +241,13 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
 }
 extension Unidoc.Linker.Table<Unidoc.Extension>
 {
-    func byNested() -> [Int32: Unidoc.LinkerIndex<Unidoc.Extension>]
+    func peers(in edition:Unidoc.Edition) -> [Int32: Unidoc.Group]
     {
         self.table.values.reduce(into: [:])
         {
             for nested:Unidoc.Scalar in $1.nested
             {
-                $0[nested.citizen] = $1.id
+                $0[nested.citizen] = $1.id.in(edition)
             }
         }
     }

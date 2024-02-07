@@ -14,13 +14,13 @@ extension Availability.Clauses
         case message = "M"
     }
 }
-extension Availability.Clauses:BSONDocumentDecodable, BSONDocumentViewDecodable, BSONDecodable
+extension Availability.Clauses:BSONDocumentDecodable, BSONDecodable
     where   Domain.Unavailability:BSONDecodable,
             Domain.Deprecation:BSONDecodable,
             Domain.Bound:BSONDecodable
 {
     @inlinable public
-    init<Bytes>(bson:BSON.DocumentDecoder<CodingKey, Bytes>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(unavailable: try bson[.unavailable]?.decode(),
             deprecated: try bson[.deprecated]?.decode(),

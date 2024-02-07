@@ -3,6 +3,7 @@ import HTTPServer
 import MongoDB
 import NIOPosix
 import NIOSSL
+import S3
 import System
 
 struct Main
@@ -18,7 +19,7 @@ struct Main
     /// Whether to enable GitHub integration if access keys are available.
     /// Defaults to false.
     var github:Bool
-    var mongo:String
+    var mongo:Mongo.Host
 
     private
     init() throws
@@ -59,6 +60,15 @@ extension Main
                 case let invalid:   throw OptionsError.invalidAuthority(invalid)
                 }
 
+            case "-b", "--bucket":
+                guard let bucket:String = arguments.next()
+                else
+                {
+                    throw Main.OptionsError.invalidBucketName(nil)
+                }
+
+                self.development.bucket = .init(region: .us_east_1, name: bucket)
+
             case "-c", "--certificates":
                 guard let certificates:String = arguments.next()
                 else
@@ -77,10 +87,19 @@ extension Main
             case "-r", "--redirect":
                 self.redirect = true
 
+            case "-s", "--replica-set":
+                guard let replicaSet:String = arguments.next()
+                else
+                {
+                    throw Main.OptionsError.invalidReplicaSet
+                }
+
+                self.development.replicaSet = replicaSet
+
             case "-m", "--mongo":
                 switch arguments.next()
                 {
-                case let host?:     self.mongo = host
+                case let host?:     self.mongo = .init(host)
                 case nil:           throw Main.OptionsError.invalidMongoReplicaSetSeed
                 }
 
@@ -136,8 +155,8 @@ extension Main
             // configuration.applicationProtocols = ["h2", "http/1.1"]
             configuration.applicationProtocols = ["h2"]
 
-        var options:Swiftinit.ServerOptions = .init(authority: self.authority.init(
-            tls: try .init(configuration: configuration)))
+        var options:Swiftinit.ServerOptions = .init(
+            authority: self.authority.init(tls: try .init(configuration: configuration)))
 
         let assets:FilePath = "Assets"
         if  self.github
@@ -147,6 +166,11 @@ extension Main
         if  self.authority is Localhost.Type
         {
             options.mode = .development(.init(source: assets), self.development)
+            options.bucket = self.development.bucket
+        }
+        else
+        {
+            options.bucket = .init(region: .us_east_1, name: "symbolgraphs")
         }
 
         return options
@@ -168,14 +192,7 @@ extension Main
         }
         else
         {
-            let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongo] /?
-            {
-                $0.executors = .shared(threads)
-                $0.appname = "Unidoc Server"
-
-                $0.connectionTimeout = .seconds(5)
-                $0.monitorInterval = .seconds(5)
-            }
+            let mongod:Mongo.Host = self.mongo
 
             var configuration:TLSConfiguration = .makeClientConfiguration()
                 configuration.applicationProtocols = ["h2"]
@@ -184,11 +201,25 @@ extension Main
                 niossl: try .init(configuration: configuration))
             let options:Swiftinit.ServerOptions = try self.options()
 
-            await mongodb.withSessionPool
+            let mongodb:Mongo.DriverBootstrap = MongoDB / [mongod] /?
+            {
+                $0.executors = .shared(threads)
+                $0.appname = "Unidoc Server"
+
+                $0.connectionTimeout = .seconds(5)
+                $0.monitorInterval = .seconds(3)
+
+                $0.topology = .replicated(set: options.replicaSet)
+            }
+
+            await mongodb.withSessionPool(logger: .init(level: .error))
             {
                 @Sendable (pool:Mongo.SessionPool) in
 
-                var plugins:[any Swiftinit.ServerPlugin] = []
+                var plugins:[any Swiftinit.ServerPlugin] =
+                [
+                    Swiftinit.LinkerPlugin.init(bucket: options.bucket),
+                ]
 
                 if  options.whitelists
                 {

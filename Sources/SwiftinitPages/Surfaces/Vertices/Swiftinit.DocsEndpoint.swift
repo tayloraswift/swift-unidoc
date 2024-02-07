@@ -7,7 +7,7 @@ import UnidocRecords
 extension Swiftinit
 {
     @frozen public
-    struct DocsEndpoint:Mongo.SingleOutputEndpoint
+    struct DocsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
     {
         public
         let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>

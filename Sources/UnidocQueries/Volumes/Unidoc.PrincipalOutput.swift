@@ -77,7 +77,7 @@ extension Unidoc.PrincipalOutput:MongoMasterCodingModel
 extension Unidoc.PrincipalOutput:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             matches: try bson[.matches].decode(),

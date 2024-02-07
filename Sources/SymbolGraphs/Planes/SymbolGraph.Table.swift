@@ -125,7 +125,7 @@ extension SymbolGraph.Table:BSONEncodable where Element:BSONEncodable
 extension SymbolGraph.Table:BSONDecodable where Element:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.AnyValue) throws
     {
         self.init(storage: try .init(bson: bson))
     }

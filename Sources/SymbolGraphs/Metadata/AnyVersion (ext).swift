@@ -7,20 +7,20 @@ extension AnyVersion:BSONEncodable
     public
     func encode(to field:inout BSON.FieldEncoder)
     {
-        switch self.canonical
+        if  case .stable(.release(let version, build: nil)) = self.canonical
         {
-        case .stable(.release(let version, build: nil)):
             version.encode(to: &field)
-
-        case let other:
-            "\(other)".encode(to: &field)
+        }
+        else
+        {
+            "\(self)".encode(to: &field)
         }
     }
 }
 extension AnyVersion:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue<some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.AnyValue) throws
     {
         self = try bson.cast
         {

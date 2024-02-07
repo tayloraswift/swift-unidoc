@@ -1,0 +1,18 @@
+section.events
+{
+    ol
+    {
+        list-style: none;
+        padding: 0;
+
+        border-top: 1px solid $light-foreground-semi;
+
+        > li
+        {
+            time
+            {
+                font-weight: 700;
+            }
+        }
+    }
+}

@@ -1,5 +1,4 @@
 import BSON
-import MongoDB
 import MongoQL
 import UnidocDB
 import UnidocRecords
@@ -30,10 +29,10 @@ extension Unidoc.AliasResolutionQuery:Unidoc.AliasingQuery
     typealias CollectionTarget = Targets
 
     static
-    var target:Mongo.KeyPath { "_id" }
+    var target:Mongo.AnyKeyPath { "_id" }
 
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[.replaceWith] = Self.target
+        pipeline[stage: .replaceWith] = Self.target
     }
 }

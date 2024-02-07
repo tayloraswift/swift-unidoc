@@ -4,6 +4,7 @@ extension Unidoc
     {
         case  conformer
         case `extension`
+        case  intrinsic
         case  polygonal
         case  topic
     }
@@ -17,6 +18,7 @@ extension Unidoc.GroupTypeError
         {
         case .conformer:    .conformer
         case .extension:    .extension
+        case .intrinsic:    .intrinsic
         case .polygonal:    .polygonal
         case .topic:        .topic
         }

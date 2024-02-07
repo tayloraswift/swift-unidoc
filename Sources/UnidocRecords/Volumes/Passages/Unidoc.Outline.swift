@@ -38,7 +38,7 @@ extension Unidoc.Outline:BSONDocumentEncodable
 extension Unidoc.Outline:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let display:String = try bson[.display].decode()
         switch try bson[.scalars]?.decode(to: [Unidoc.Scalar].self)

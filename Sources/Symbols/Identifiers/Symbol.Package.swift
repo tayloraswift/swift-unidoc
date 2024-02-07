@@ -3,11 +3,12 @@ extension Symbol
     @frozen public
     struct Package:Equatable, Hashable, Sendable
     {
-        /// The string identifier wrapped by this symbol. It may or may not contain dots.
+        /// The string identifier wrapped by this symbol. It may or may not contain dots, and
+        /// is always lowercased.
         public
         let identifier:String
 
-        @inlinable public
+        @inlinable
         init(identifier:String)
         {
             self.identifier = identifier
@@ -64,4 +65,9 @@ extension Symbol.Package:ExpressibleByStringLiteral, ExpressibleByStringInterpol
     {
         self.init(stringLiteral)
     }
+}
+extension Symbol.Package
+{
+    @inlinable public static
+    func | (a:Symbol.PackageScope, b:Self) -> Self { .init(identifier: "\(a).\(b)") }
 }

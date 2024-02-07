@@ -25,9 +25,9 @@ extension SPM.DependencyPins
 
         for pin:SPM.DependencyPin in pins
         {
-            if  case _? = self.index.updateValue(pin, forKey: pin.id)
+            if  case _? = self.index.updateValue(pin, forKey: pin.identity)
             {
-                throw SPM.DependencyPinError.duplicate(pin.id)
+                throw SPM.DependencyPinError.duplicate(pin.identity)
             }
         }
     }
@@ -35,15 +35,15 @@ extension SPM.DependencyPins
 extension SPM.DependencyPins
 {
     @inlinable public
-    func callAsFunction(_ id:Symbol.Package) throws -> SPM.DependencyPin
+    func callAsFunction(_ identity:Symbol.Package) throws -> SPM.DependencyPin
     {
-        if  let pin:SPM.DependencyPin = self.index[id]
+        if  let pin:SPM.DependencyPin = self.index[identity]
         {
             return pin
         }
         else
         {
-            throw SPM.DependencyPinError.undefined(id)
+            throw SPM.DependencyPinError.undefined(identity)
         }
     }
 }

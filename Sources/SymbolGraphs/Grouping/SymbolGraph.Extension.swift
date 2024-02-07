@@ -83,7 +83,7 @@ extension SymbolGraph.Extension:BSONDocumentEncodable
 extension SymbolGraph.Extension:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let culture:Int = try bson[.culture].decode()
         self.init(conditions: try bson[.conditions]?.decode() ?? [],

@@ -1,5 +1,6 @@
 import HTTP
 import MongoDB
+import Symbols
 import UnidocDB
 
 extension Swiftinit
@@ -21,23 +22,33 @@ extension Swiftinit.PackageConfigEndpoint:RestrictedEndpoint
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let updated:Unidoc.PackageMetadata?
+        let updated:Symbol.Package?
         switch self.update
         {
         case .hidden(let hidden):
-            updated = try await server.db.packages.update(package: self.package,
+            let package:Unidoc.PackageMetadata? = try await server.db.packages.update(
+                package: self.package,
                 hidden: hidden,
                 with: session)
+            updated = package?.symbol
+
+        case .symbol(let symbol):
+            let package:Bool? = try await server.db.packages.update(
+                package: self.package,
+                symbol: symbol,
+                with: session)
+
+            updated = package != nil ? symbol : nil
         }
 
         guard
-        let updated:Unidoc.PackageMetadata
+        let updated:Symbol.Package
         else
         {
             return .notFound("No such package")
         }
 
         try await server.db.unidoc.rebuildPackageList(with: session)
-        return .redirect(.see(other: "\(Swiftinit.Tags[updated.symbol])"))
+        return .redirect(.see(other: "\(Swiftinit.Tags[updated])"))
     }
 }

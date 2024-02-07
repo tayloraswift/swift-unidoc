@@ -190,7 +190,7 @@ extension Unidoc.Stats.Decl:BSONDocumentEncodable
 extension Unidoc.Stats.Decl:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             typealiases: try bson[.typealiases]?.decode() ?? 0,

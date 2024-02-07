@@ -54,6 +54,7 @@ let package:Package = .init(
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
         .library(name: "S3", targets: ["S3"]),
+        .library(name: "S3Client", targets: ["S3Client"]),
 
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
         .library(name: "Signatures", targets: ["Signatures"]),
@@ -98,7 +99,11 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.10.1")),
+            from: "0.12.0")),
+        //.package(path: "../swift-mongodb"),
+
+        .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
+            from: "4.2.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -355,8 +360,16 @@ let package:Package = .init(
 
         .target(name: "S3", dependencies:
             [
+            ]),
+
+        .target(name: "S3Client", dependencies:
+            [
                 .target(name: "HTTPClient"),
+                .target(name: "Media"),
+                .target(name: "S3"),
                 .target(name: "UnixTime"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "SHA2", package: "swift-hash"),
             ]),
 
@@ -563,7 +576,7 @@ let package:Package = .init(
 
         .executableTarget(name: "S3Export", dependencies:
             [
-                .target(name: "S3"),
+                .target(name: "S3Client"),
                 .target(name: "System"),
                 .target(name: "SwiftinitAssets"),
             ]),
@@ -581,10 +594,12 @@ let package:Package = .init(
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
+                .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),
                 .target(name: "SwiftinitPlugins"),
+                .product(name: "LZ77", package: "swift-png"),
             ]),
 
 
@@ -646,7 +661,7 @@ let package:Package = .init(
 
         .executableTarget(name: "S3Tests", dependencies:
             [
-                .target(name: "S3"),
+                .target(name: "S3Client"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

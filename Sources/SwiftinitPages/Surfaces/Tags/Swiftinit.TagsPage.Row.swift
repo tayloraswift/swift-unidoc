@@ -1,6 +1,8 @@
 import HTML
+import Media
 import SemanticVersions
 import SHA1
+import Symbols
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -9,19 +11,39 @@ extension Swiftinit.TagsPage
 {
     struct Row
     {
+        let linkable:UplinkButton?
+
         let volume:Unidoc.VolumeMetadata?
         let graph:Unidoc.VersionsQuery.Graph?
         let type:RowType
 
-        init(
+        private
+        init(linkable:UplinkButton?,
             volume:Unidoc.VolumeMetadata?,
             graph:Unidoc.VersionsQuery.Graph?,
             type:RowType)
         {
+            self.linkable = linkable
             self.volume = volume
             self.graph = graph
             self.type = type
         }
+    }
+}
+extension Swiftinit.TagsPage.Row
+{
+    init(maintainer:Bool,
+        package:Symbol.Package,
+        volume:Unidoc.VolumeMetadata?,
+        graph:Unidoc.VersionsQuery.Graph?,
+        type:Swiftinit.TagsPage.RowType)
+    {
+        self.init(linkable: maintainer
+                ? graph.map { .init(edition: $0.id, package: package) }
+                : nil,
+            volume: volume,
+            graph: graph,
+            type: type)
     }
 }
 extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
@@ -94,10 +116,12 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
         {
             if  let graph:Unidoc.VersionsQuery.Graph = self.graph
             {
+                let size:Int = graph.inlineBytes ?? graph.remoteBytes
+
                 $0[.span]
                 {
-                    $0.class = graph.uplinking ? "abi uplinking" : "abi"
-                    $0.title = graph.uplinking ? """
+                    $0.class = graph.link != nil ? "abi uplinking" : "abi"
+                    $0.title = graph.link != nil ? """
                         This symbol graph is currently queued for documentation generation.
                         """ : nil
                 } = "\(graph.abi)"
@@ -107,9 +131,9 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
                 $0[.span]
                 {
                     $0.class = "kb"
-                    $0.title = "\(graph.bytes) bytes"
+                    $0.title = "\(size) bytes, \(graph.inlineBytes ?? 0) bytes on disk"
 
-                } = "(\(graph.bytes >> 10) kb)"
+                } = "(\(size >> 10) kb)"
             }
             else
             {
@@ -117,6 +141,16 @@ extension Swiftinit.TagsPage.Row:HTML.OutputStreamable
                 {
                     $0.title = "No symbol graph has been built for this version."
                 }
+            }
+
+            if  let button:Swiftinit.TagsPage.UplinkButton = self.linkable
+            {
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.API[.uplink])"
+                    $0.method = "post"
+                } = button
             }
         }
     }

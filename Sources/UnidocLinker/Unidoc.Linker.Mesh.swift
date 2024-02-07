@@ -67,8 +67,10 @@ extension Unidoc.Linker.Mesh
         }
 
         var snapshot:Unidoc.SnapshotDetails = .init(abi: linker.current.metadata.abi,
+            latestManifest: linker.current.metadata.tools,
+            extraManifests: linker.current.metadata.manifests,
             requirements: linker.current.metadata.requirements,
-            commit: linker.current.metadata.commit?.hash)
+            commit: linker.current.metadata.commit?.sha1)
         var foreign:[Unidoc.ForeignVertex] = []
 
         //  Compute unweighted stats
@@ -106,6 +108,34 @@ extension Unidoc.Linker.Mesh
             cultures[c].census.weighted = cultures[c].census.unweighted
         }
 
+        //  We do this here and not dynamically in the loop after it for several reasons.
+        //
+        //  1.  Some of the extensions might be synthetic, and if we mirror them, they might
+        //      not have the correct hash disambiguator settings. For example, a mirror vertex
+        //      generated from a synthetic extension could collide with a local vertex that
+        //      has its route set to `unhashed`.
+        //
+        //  2.  We often have multiple extensions attached to the same extended declaration,
+        //      and we would have to de-duplicate them when creating mirror vertices.
+        //
+        //  3.  We really want to avoid doing any package-wide URL computation in the dynamic
+        //      linker, because that could be done by the static linker, and we would rather
+        //      hew to the URLs that the static linker computed.
+        for (n, node):(Int32, SymbolGraph.DeclNode) in zip(
+            linker.current.decls.nodes.indices,
+            linker.current.decls.nodes)
+        {
+            let next:Int = foreign.count
+            if  case nil = node.decl,
+                let vertex:Unidoc.Scalar = linker.current.scalars.decls[n],
+                let mirror:Unidoc.ForeignVertex = mapper.register(foreign: vertex,
+                    with: linker,
+                    as: next)
+            {
+                foreign.append(mirror)
+            }
+        }
+
         for (signature, `extension`):(Unidoc.ExtensionSignature, Unidoc.Extension)
             in extensions.load()
         {
@@ -126,16 +156,6 @@ extension Unidoc.Linker.Mesh
             defer
             {
                 groups.extensions.append(assembled)
-            }
-
-            //  Compute shoots and create a foreign vertex, if this is the first extension for
-            //  its scope.
-            let next:Int = foreign.count
-            if  let vertex:Unidoc.ForeignVertex = mapper.register(foreign: assembled.scope,
-                    with: linker,
-                    as: next)
-            {
-                foreign.append(vertex)
             }
 
             //  Extensions that only contain subforms are not interesting.
@@ -159,6 +179,11 @@ extension Unidoc.Linker.Mesh
                 groups.conformers.append(assembled)
             }
 
+            //  FIXME: This has a small chance of causing URL collisions, because these are
+            //  technically synthetic extensions, and generating mirror vertices from synthetic
+            //  extensions is evil. Instead, the static linker should be tracking the upstream
+            //  protocols as symbol graph nodes, and we should only be generating mirror
+            //  vertices here as a backward compatibility measure for older symbol graphs.
             let next:Int = foreign.count
             if  let vertex:Unidoc.ForeignVertex = mapper.register(foreign: assembled.scope,
                     with: linker,

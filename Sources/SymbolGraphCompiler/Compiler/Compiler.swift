@@ -223,7 +223,8 @@ extension Compiler
         switch relationship.source
         {
         case .vector(let vector):
-            guard let feature:Symbol.Decl = self.declarations[vector.feature]
+            guard
+            let feature:Symbol.Decl = self.declarations[vector.feature]
             else
             {
                 return // Feature is hidden.
@@ -237,7 +238,8 @@ extension Compiler
             case .scalar(let heir):
                 //  If the colonial graph was generated with '-emit-extension-symbols',
                 //  we should never see an external type reference here.
-                guard let heir:DeclObject = try self.declarations(internal: heir)
+                guard
+                let heir:DeclObject = try self.declarations(internal: heir)
                 else
                 {
                     return // Feature is hidden.
@@ -273,7 +275,8 @@ extension Compiler
         case .scalar(let member):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard let member:DeclObject = try self.declarations(internal: member)
+            guard
+            let member:DeclObject = try self.declarations(internal: member)
             else
             {
                 return // Member is hidden.
@@ -287,9 +290,21 @@ extension Compiler
 
             case .scalar(let type):
                 //  We should never see an external type reference here either.
-                if  let type:DeclObject = try self.declarations(internal: type)
+                guard
+                let type:DeclObject = try self.declarations(internal: type)
+                else
                 {
-                    try member.assign(scope: relationship)
+                    return // Type is hidden.
+                }
+
+                try member.assign(scope: relationship)
+
+                if  case .case = member.value.phylum
+                {
+                    try type.add(inhabitant: member.id)
+                }
+                else
+                {
                     //  Generate an implicit, internal extension for this membership,
                     //  if one does not already exist.
                     self.extensions(culture, type, where: member.conditions).add(

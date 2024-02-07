@@ -40,7 +40,7 @@ extension SymbolGraph.Buffer:BSONEncodable
     @usableFromInline internal
     func encode(to field:inout BSON.FieldEncoder)
     {
-        let bson:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, slice: .init(
+        let bson:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, bytes: .init(
             unsafeUninitializedCapacity: self.elements.count * 3)
         {
             for (i, scalar):(Int, Int32) in self.elements.enumerated()
@@ -59,21 +59,14 @@ extension SymbolGraph.Buffer:BSONEncodable
 extension SymbolGraph.Buffer:BSONBinaryViewDecodable
 {
     @inlinable internal
-    init<Bytes>(bson:BSON.BinaryView<Bytes>) throws
+    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
     {
-        if  let buffer:Self =
-            try bson.slice.withContiguousStorageIfAvailable(Self.init(bytes:))
-        {
-            self = buffer
-        }
-        else
-        {
-            try self.init(bytes: bson.slice)
-        }
+        self = try bson.bytes.withUnsafeBytes(Self.init(bytes:))
     }
 
+    /// Is there even a measurable benefit from using `UnsafeRawBufferPointer` here?
     @inlinable internal
-    init<Bytes>(bytes compact:Bytes) throws where Bytes:RandomAccessCollection<UInt8>
+    init(bytes compact:UnsafeRawBufferPointer) throws
     {
         guard compact.startIndex < compact.endIndex
         else
@@ -90,11 +83,11 @@ extension SymbolGraph.Buffer:BSONBinaryViewDecodable
 
         self.init(.init(unsafeUninitializedCapacity: count)
         {
-            var a:Bytes.Index = compact.startIndex
+            var a:Int = compact.startIndex
             for i:Int in 0 ..< count
             {
-                let b:Bytes.Index = compact.index(after: a)
-                let c:Bytes.Index = compact.index(after: b)
+                let b:Int = compact.index(after: a)
+                let c:Int = compact.index(after: b)
                 defer
                 {
                     a = compact.index(after: c)

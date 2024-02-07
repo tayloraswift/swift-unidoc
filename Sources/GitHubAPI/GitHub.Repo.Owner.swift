@@ -7,11 +7,14 @@ extension GitHub.Repo
     {
         public
         var login:String
+        public
+        var id:UInt32
 
         @inlinable public
-        init(login:String)
+        init(login:String, id:UInt32)
         {
             self.login = login
+            self.id = id
         }
     }
 }
@@ -20,7 +23,6 @@ extension GitHub.Repo.Owner:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
-        @available(*, unavailable)
         case id
 
         case login
@@ -32,6 +34,6 @@ extension GitHub.Repo.Owner:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(login: try json[.login].decode())
+        self.init(login: try json[.login].decode(), id: try json[.id].decode())
     }
 }

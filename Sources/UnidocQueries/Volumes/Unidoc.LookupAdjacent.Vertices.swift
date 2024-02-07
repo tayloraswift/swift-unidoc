@@ -11,12 +11,12 @@ extension Unidoc.LookupAdjacent
         private
         let layer:Unidoc.GroupLayer?
 
-        let groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>
-        let vertex:Mongo.KeyPath
+        let groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>
+        let vertex:Mongo.AnyKeyPath
 
         init(layer:Unidoc.GroupLayer?,
-            groups:Mongo.List<Unidoc.AnyGroup, Mongo.KeyPath>,
-            vertex:Mongo.KeyPath)
+            groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>,
+            vertex:Mongo.AnyKeyPath)
         {
             self.layer = layer
 
@@ -42,7 +42,7 @@ extension Unidoc.LookupAdjacent.Vertices
         }
 
         //  Extract scalars adjacent to the current vertex.
-        list.append
+        list
         {
             $0.append(self.vertex / Unidoc.AnyVertex[.namespace])
             $0.append(self.vertex / Unidoc.AnyVertex[.culture])
@@ -54,7 +54,7 @@ extension Unidoc.LookupAdjacent.Vertices
 
         list.expr
         {
-            let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.KeyPath> =
+            let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.AnyKeyPath> =
                 .init(in: self.vertex / Unidoc.AnyVertex[.signature_generics_constraints])
 
             $0[.map] = constraints.map { $0[.nominal] }
@@ -75,7 +75,7 @@ extension Unidoc.LookupAdjacent.Vertices
         switch self.layer
         {
         case nil:
-            arrays = [.signature_expanded_scalars, .scope, .requirements, .superforms]
+            arrays = [.signature_expanded_scalars, .scope, .constituents, .superforms]
 
         case .protocols?:
             arrays = [.signature_expanded_scalars, .scope]
@@ -87,7 +87,7 @@ extension Unidoc.LookupAdjacent.Vertices
         {
             list.expr
             {
-                let outlines:Mongo.List<Unidoc.Outline, Mongo.KeyPath> = .init(
+                let outlines:Mongo.List<Unidoc.Outline, Mongo.AnyKeyPath> = .init(
                     in: self.vertex / Unidoc.AnyVertex[passage] / Unidoc.Passage[.outlines])
 
                 $0[.reduce] = outlines.flatMap(\.scalars)

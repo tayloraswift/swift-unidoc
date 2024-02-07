@@ -7,6 +7,8 @@ struct ServerTour
     let started:ContinuousClock.Instant
     public
     var profile:ServerProfile
+    public
+    var errors:Int
 
     public
     var lastImpression:Request?
@@ -23,6 +25,7 @@ struct ServerTour
     {
         self.started = started
         self.profile = .init()
+        self.errors = 0
 
         self.lastImpression = nil
         self.lastSearchbot = nil

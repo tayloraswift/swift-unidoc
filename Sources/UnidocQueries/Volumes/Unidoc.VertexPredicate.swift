@@ -12,7 +12,7 @@ public
 protocol _UnidocVertexPredicate:Equatable, Hashable, Sendable
 {
     func extend(pipeline:inout Mongo.PipelineEncoder,
-        volume:Mongo.KeyPath,
-        output:Mongo.KeyPath,
-        unset:[Mongo.KeyPath])
+        volume:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath,
+        unset:[Mongo.AnyKeyPath])
 }

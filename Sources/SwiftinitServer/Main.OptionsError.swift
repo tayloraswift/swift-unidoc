@@ -5,8 +5,10 @@ extension Main
     {
         case invalidMongoReplicaSetSeed
         case invalidAuthority(String?)
+        case invalidBucketName(String?)
         case invalidCertificateDirectory
         case invalidPort(String?)
+        case invalidReplicaSet
         case unrecognized(String)
     }
 }

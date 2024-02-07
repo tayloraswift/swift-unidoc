@@ -184,6 +184,8 @@ extension Unidoc.AnyVertex
 
         /// Only appears in ``Product``.
         case product = "D"
+        /// Only appears in ``Product``. The field contains a list of scalars.
+        case constituents = "r"
 
         /// Appears in ``Decl`` and ``Foreign``.
         case flags = "L"
@@ -203,8 +205,6 @@ extension Unidoc.AnyVertex
         case signature_generics_parameters = "G"
         /// Only appears in ``Decl``.
         case signature_spis = "I"
-        /// Only appears in ``Decl`` or ``Product``. The field contains a list of scalars.
-        case requirements = "r"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case superforms = "p"
         /// Only appears in ``Decl``, and only when different from ``culture``.
@@ -239,7 +239,7 @@ extension Unidoc.AnyVertex
         case details = "d"
 
         /// Only appears in ``Decl``. The field contains a *group* scalar.
-        case `extension` = "y"
+        case peers = "y"
         /// Can appear in any master record except a ``File``.
         /// The field contains a *group* scalar. (Not a vertex scalar!)
         case group = "t"
@@ -247,6 +247,10 @@ extension Unidoc.AnyVertex
         /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
         /// for ``File``. In ``Global``, it is always zero.
         case hash = "H"
+
+        @available(*, deprecated, renamed: "peers")
+        @inlinable public static
+        var `extension`:Self { .peers }
     }
 }
 extension Unidoc.AnyVertex:BSONDocumentEncodable
@@ -301,7 +305,8 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 
             bson[.signature_spis] = self.signature.spis
 
-            bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
+            //  Deprecated.
+            bson[.constituents] = self._requirements.isEmpty ? nil : self._requirements
             bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
             bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
             bson[.culture] = self.culture
@@ -314,7 +319,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             bson[.overview] = self.overview
             bson[.details] = self.details
 
-            bson[.extension] = self.extension
+            bson[.peers] = self.peers
             bson[.group] = self.group
 
         case .culture(let self):
@@ -340,8 +345,8 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             //  off hash collisions.
             bson[.hash] = self.hash
             bson[.stem] = self.stem
-            //  It would be incredibly strange for a product to have no requirements.
-            bson[.requirements] = self.requirements
+            //  It would be incredibly strange for a product to have no constituents.
+            bson[.constituents] = self.constituents
             bson[.product] = self.type
             bson[.group] = self.group
 
@@ -362,7 +367,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 extension Unidoc.AnyVertex:BSONDocumentDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey, some RandomAccessCollection<UInt8>>) throws
+    init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let id:Unidoc.Scalar = try bson[.id].decode()
 
@@ -373,7 +378,8 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 module: try bson[.module].decode(),
                 //  Needed until we can migrate the database.
                 readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
-                census: try bson[.census].decode(),
+                //  Might be decoding with this key deprojected.
+                census: try bson[.census]?.decode() ?? .init(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))
@@ -396,7 +402,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                     spis: try bson[.signature_spis]?.decode()),
                 symbol: try bson[.symbol].decode(),
                 stem: try bson[.stem].decode(),
-                requirements: try bson[.requirements]?.decode() ?? [],
+                _requirements: try bson[.constituents]?.decode() ?? [],
                 superforms: try bson[.superforms]?.decode() ?? [],
                 namespace: try bson[.namespace]?.decode() ?? culture,
                 culture: culture,
@@ -407,7 +413,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 position: try bson[.position]?.decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
-                extension: try bson[.extension]?.decode(),
+                peers: try bson[.peers]?.decode(),
                 group: try bson[.group]?.decode()))
 
         case .article?:
@@ -428,7 +434,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
             self = .product(.init(id: id,
                 //  Although this field is always present in the database, it may be removed
                 //  through query projection.
-                requirements: try bson[.requirements]?.decode() ?? [],
+                constituents: try bson[.constituents]?.decode() ?? [],
                 symbol: try bson[.symbol].decode(),
                 type: try bson[.product].decode(),
                 group: try bson[.group]?.decode()))

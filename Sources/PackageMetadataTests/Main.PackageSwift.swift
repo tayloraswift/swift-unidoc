@@ -68,7 +68,8 @@ extension Main.PackageSwift:TestBattery
                     ],
                     dependencies:
                     [
-                        .filesystem(.init(id: "swift-json",
+                        .filesystem(.init(
+                            identity: "swift-json",
                             location: "/swift/swift-json")),
                     ],
                     format: .v(5, 7, 0))
@@ -203,31 +204,36 @@ extension Main.PackageSwift:TestBattery
                     root: "/swift/swift-unidoc",
                     dependencies:
                     [
-                        .resolvable(.init(id: "swift-json",
-                            requirement: .refname("master"),
+                        .resolvable(.init(
+                            identity: "swift-json",
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-json"))),
+                                url: "https://github.com/kelvin13/swift-json"),
+                            requirement: .refname("master"))),
 
-                        .resolvable(.init(id: "swift-grammar",
-                            requirement: .stable(.range(.v(0, 3, 1) ..< .v(0, 4, 0))),
+                        .resolvable(.init(
+                            identity: "swift-grammar",
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-grammar"))),
+                                url: "https://github.com/kelvin13/swift-grammar"),
+                            requirement: .stable(.range(.v(0, 3, 1) ..< .v(0, 4, 0))))),
 
-                        .resolvable(.init(id: "swift-hash",
+                        .resolvable(.init(
+                            identity: "swift-hash",
+                            location: .remote(
+                                url: "https://github.com/kelvin13/swift-hash"),
                             requirement: .revision(
-                                0x36ef4bf1e6ae38f881ed253d5656839a046456f1),
-                            location: .remote(
-                                url: "https://github.com/kelvin13/swift-hash"))),
+                                0x36ef4bf1e6ae38f881ed253d5656839a046456f1))),
 
-                        .resolvable(.init(id: "swift-mongodb",
-                            requirement: .stable(.range(.v(0, 4, 5) ..< .v(0, 5, 0))),
+                        .resolvable(.init(
+                            identity: "swift-mongodb",
                             location: .local(
-                                root: "/swift/swift-mongodb"))),
+                                root: "/swift/swift-mongodb"),
+                            requirement: .stable(.range(.v(0, 4, 5) ..< .v(0, 5, 0))))),
 
-                        .resolvable(.init(id: "swift-system",
-                            requirement: .stable(.exact(.v(0, 4, 5))),
+                        .resolvable(.init(
+                            identity: "swift-system",
                             location: .remote(
-                                url: "https://github.com/apple/swift-system"))),
+                                url: "https://github.com/apple/swift-system"),
+                            requirement: .stable(.exact(.v(0, 4, 5))))),
                     ],
                     format: .v(5, 7, 0))
                 tests.expect(try .init(parsing: json) ==? expected)
