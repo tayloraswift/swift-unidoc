@@ -59,10 +59,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
                     {
                         $0[stage: .match] = .init
                         {
-                            $0[.expr] = .expr
-                            {
-                                $0[.eq] = (Unidoc.VolumeMetadata[.id], id)
-                            }
+                            $0[.expr] { $0[.eq] = (Unidoc.VolumeMetadata[.id], id) }
                         }
 
                         $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))

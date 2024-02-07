@@ -38,7 +38,7 @@ extension Unidoc.DB.Volumes
     }
         where:
     {
-        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
     }
 
     public static
@@ -51,7 +51,7 @@ extension Unidoc.DB.Volumes
     }
         where:
     {
-        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
     }
 
     public static
@@ -71,7 +71,7 @@ extension Unidoc.DB.Volumes
     }
         where:
     {
-        $0[Unidoc.VolumeMetadata[.realm]] = .init { $0[.exists] = true }
+        $0[Unidoc.VolumeMetadata[.realm]] { $0[.exists] = true }
     }
 }
 extension Unidoc.DB.Volumes:Mongo.CollectionModel
@@ -148,21 +148,21 @@ extension Unidoc.DB.Volumes
         {
             $0[.filter] = .init
             {
-                $0[.and] = .init
+                $0[.and]
                 {
                     let cell:ClosedRange<Unidoc.Edition> = .package(package)
 
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
+                        $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
                     }
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.gte] = cell.lowerBound }
+                        $0[Unidoc.VolumeMetadata[.id]] { $0[.gte] = cell.lowerBound }
                     }
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.lte] = cell.upperBound }
+                        $0[Unidoc.VolumeMetadata[.id]] { $0[.lte] = cell.upperBound }
                     }
                 }
             }

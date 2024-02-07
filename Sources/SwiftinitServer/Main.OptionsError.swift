@@ -8,6 +8,7 @@ extension Main
         case invalidBucketName(String?)
         case invalidCertificateDirectory
         case invalidPort(String?)
+        case invalidReplicaSet
         case unrecognized(String)
     }
 }

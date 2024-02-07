@@ -32,7 +32,7 @@ extension Unidoc.DB.Snapshots
     }
         where:
     {
-        $0[Unidoc.Snapshot[.swift]] = .init { $0[.exists] = true }
+        $0[Unidoc.Snapshot[.swift]] { $0[.exists] = true }
     }
 
     public static
@@ -43,7 +43,7 @@ extension Unidoc.DB.Snapshots
     }
         where:
     {
-        $0[Unidoc.Snapshot[.link]] = .init { $0[.exists] = true }
+        $0[Unidoc.Snapshot[.link]] { $0[.exists] = true }
     }
 }
 extension Unidoc.DB.Snapshots:Mongo.CollectionModel
@@ -121,7 +121,7 @@ extension Unidoc.DB.Snapshots
             {
                 $0[.filter] = .init
                 {
-                    $0[Unidoc.Snapshot[.swift]] = .init { $0[.exists] = true }
+                    $0[Unidoc.Snapshot[.swift]] { $0[.exists] = true }
                 }
                 $0[.sort] = .init
                 {
@@ -142,7 +142,7 @@ extension Unidoc.DB.Snapshots
             {
                 $0[.filter] = .init
                 {
-                    $0[Unidoc.Snapshot[.id]] = .init { $0[.in] = pins }
+                    $0[Unidoc.Snapshot[.id]] { $0[.in] = pins }
                 }
             },
             against: self.database)
@@ -164,7 +164,7 @@ extension Unidoc.DB.Snapshots
             {
                 $0[.filter] = .init
                 {
-                    $0[Unidoc.Snapshot[.link]] = .init { $0[.exists] = true }
+                    $0[Unidoc.Snapshot[.link]] { $0[.exists] = true }
                 }
                 $0[.projection] = .init
                 {

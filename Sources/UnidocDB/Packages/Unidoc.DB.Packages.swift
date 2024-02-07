@@ -28,7 +28,7 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]] = .init
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]]
         {
             $0[.exists] = true
         }
@@ -41,7 +41,7 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = .init
+        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]]
         {
             $0[.exists] = true
         }
@@ -54,7 +54,7 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.repo]] = .init { $0[.exists] = true }
+        $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
     }
 
     public static
@@ -66,8 +66,10 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[ Unidoc.PackageMetadata[.repo] /
-            Unidoc.PackageRepo[.github]] = .init { $0[.exists] = true }
+        $0[ Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.github]]
+        {
+            $0[.exists] = true
+        }
     }
 
     public static
@@ -77,7 +79,7 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.realm]] = .init { $0[.exists] = true }
+        $0[Unidoc.PackageMetadata[.realm]] { $0[.exists] = true }
     }
 }
 extension Unidoc.DB.Packages:Mongo.CollectionModel
@@ -122,7 +124,7 @@ extension Unidoc.DB.Packages
             {
                 //  We need this to use the partial index, for some reason.
                 $0[ Unidoc.PackageMetadata[.repo] /
-                    Unidoc.PackageRepo[.github]] = .init { $0[.exists] = true }
+                    Unidoc.PackageRepo[.github]] { $0[.exists] = true }
 
                 $0[ Unidoc.PackageMetadata[.repo] /
                     Unidoc.PackageRepo[.github] /
@@ -204,7 +206,7 @@ extension Unidoc.DB.Packages
         {
             $0[.filter] = .init
             {
-                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = .init
+                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]]
                 {
                     $0[.exists] = true
                 }
@@ -235,7 +237,7 @@ extension Unidoc.DB.Packages
                 {
                     $0[.filter] = .init
                     {
-                        $0[Unidoc.PackageMetadata[.hidden]] = .init { $0[.exists] = false }
+                        $0[Unidoc.PackageMetadata[.hidden]] { $0[.exists] = false }
                     }
                 },
                 against: self.database)

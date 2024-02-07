@@ -103,7 +103,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             {
                 $0[stage: .match] = .init
                 {
-                    $0[.or] = .init
+                    $0[.or]
                     {
                         $0 += local
                         $0 += realm

@@ -173,30 +173,18 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             {
                 $0[stage: .match] = .init
                 {
-                    $0[.expr] = .expr
+                    $0[.expr]
                     {
-                        $0[.and] =
-                        (
+                        $0[.and]
+                        {
                             //  The first three of these clauses should be able to use
                             //  a compound index.
-                            .expr
-                            {
-                                $0[.eq] = (Unidoc.AnyVertex[.hash], hash)
-                            },
-                            .expr
-                            {
-                                $0[.gte] = (Unidoc.AnyVertex[.id], min)
-                            },
-                            .expr
-                            {
-                                $0[.lte] = (Unidoc.AnyVertex[.id], max)
-                            },
+                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
+                            $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                            $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
 
-                            .expr
-                            {
-                                $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol)
-                            }
-                        )
+                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
+                        }
                     }
                 }
 
@@ -315,10 +303,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     {
                         $0[stage: .match] = .init
                         {
-                            $0[.expr] = .expr
-                            {
-                                $0[.eq] = (Unidoc.TypeTree[.id], tree)
-                            }
+                            $0[.expr] { $0[.eq] = (Unidoc.TypeTree[.id], tree) }
                         }
                     }
                     $0[.as] = Unidoc.PrincipalOutput[.tree]
@@ -340,7 +325,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 $0[stage: .unwind] = edges.scalars
                 $0[stage: .match] = .init
                 {
-                    $0[edges.scalars] = .init { $0[.ne] = Never??.some(nil) }
+                    $0[edges.scalars] { $0[.ne] = BSON.Null.init() }
                 }
                 $0[stage: .lookup] = .init
                 {
@@ -367,15 +352,15 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 $0[stage: .unwind] = edges.volumes
                 $0[stage: .match] = .init
                 {
-                    $0[.and] = .init
+                    $0[.and]
                     {
-                        $0.append
+                        $0
                         {
-                            $0[edges.volumes] = .init { $0[.ne] = .some(nil as Never?) }
+                            $0[edges.volumes] { $0[.ne] = BSON.Null.init() }
                         }
-                        $0.append
+                        $0
                         {
-                            $0[edges.volumes] = .init
+                            $0[edges.volumes]
                             {
                                 $0[.ne] =
                                     Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.id]

@@ -28,10 +28,10 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
         updates
         {
             $0[.multi] = false
-            $0[.q] = .init
+            $0[.q]
             {
                 $0[Unidoc.VolumeMetadata[.id]] = self.latest
-                $0[Unidoc.VolumeMetadata[.latest]] = .init { $0[.ne] = true }
+                $0[Unidoc.VolumeMetadata[.latest]] { $0[.ne] = true }
             }
             $0[.u]
             {
@@ -47,33 +47,30 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
         {
             $0[.multi] = true
             $0[.hint] = Unidoc.DB.Volumes.indexCoordinateLatest.id
-            $0[.q] = .init
+            $0[.q]
             {
-                $0[.and] = .init
+                $0[.and]
                 {
                     let cell:ClosedRange<Unidoc.Edition> = .package(self.latest.package)
 
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.gte] = cell.lowerBound }
+                        $0[Unidoc.VolumeMetadata[.id]] { $0[.gte] = cell.lowerBound }
                     }
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.lte] = cell.upperBound }
+                        $0[Unidoc.VolumeMetadata[.id]] { $0[.lte] = cell.upperBound }
                     }
-                    $0.append
+                    $0
                     {
-                        $0[Unidoc.VolumeMetadata[.id]] = .init { $0[.ne] = self.latest }
-                        $0[Unidoc.VolumeMetadata[.latest]] = .init { $0[.exists] = true }
+                        $0[Unidoc.VolumeMetadata[.id]] { $0[.ne] = self.latest }
+                        $0[Unidoc.VolumeMetadata[.latest]] { $0[.exists] = true }
                     }
                 }
             }
             $0[.u]
             {
-                $0[.unset]
-                {
-                    $0[Unidoc.VolumeMetadata[.latest]] = ()
-                }
+                $0[.unset] { $0[Unidoc.VolumeMetadata[.latest]] = () }
             }
         }
     }

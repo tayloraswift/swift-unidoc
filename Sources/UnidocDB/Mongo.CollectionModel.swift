@@ -473,15 +473,15 @@ extension Mongo.CollectionModel
 
     @inlinable internal
     func delete(with session:Mongo.Session,
-        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Bool
+        matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name)
             {
-                try $0
+                $0
                 {
                     $0[.limit] = .one
-                    $0[.q] = try .init(with: predicate)
+                    $0[.q, predicate]
                 }
             },
             against: self.database)
@@ -491,15 +491,15 @@ extension Mongo.CollectionModel
     }
 
     func deleteAll(with session:Mongo.Session,
-        matching predicate:(inout Mongo.PredicateDocument) throws -> ()) async throws -> Int
+        matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)
             {
-                try $0
+                $0
                 {
                     $0[.limit] = .unlimited
-                    $0[.q] = try .init(with: predicate)
+                    $0[.q, predicate]
                 }
             },
             against: self.database)
@@ -521,24 +521,12 @@ extension Mongo.CollectionModel // where Element.ID == Unidoc.Scalar
                 $0
                 {
                     $0[.limit] = .unlimited
-                    $0[.q] = .init
+                    $0[.q]
                     {
-                        $0[.and] = .init
+                        $0[.and]
                         {
-                            $0.append
-                            {
-                                $0["_id"] = .init
-                                {
-                                    $0[.gte] = range.min
-                                }
-                            }
-                            $0.append
-                            {
-                                $0["_id"] = .init
-                                {
-                                    $0[.lte] = range.max
-                                }
-                            }
+                            $0 { $0["_id"] { $0[.gte] = range.min } }
+                            $0 { $0["_id"] { $0[.lte] = range.max } }
                         }
                     }
                 }

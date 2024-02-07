@@ -27,24 +27,15 @@ extension Unidoc.DB.Groups.ClearLatest:Mongo.UpdateQuery
         updates
         {
             $0[.multi] = true
-            $0[.q] = .init
+            $0[.q]
             {
                 let range:ClosedRange<Unidoc.Scalar> = .package(self.package)
 
-                $0[.and] = .init
+                $0[.and]
                 {
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.gte] = range.lowerBound }
-                    }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.lte] = range.upperBound }
-                    }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.realm]] = .init { $0[.exists] = true }
-                    }
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.gte] = range.lowerBound } }
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.lte] = range.upperBound } }
+                    $0 { $0[Unidoc.AnyGroup[.realm]] { $0[.exists] = true } }
                 }
             }
             $0[.u]

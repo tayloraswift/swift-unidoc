@@ -31,7 +31,7 @@ extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
                 $0[.multi] = true
             }
 
-            $0[.q] = .init
+            $0[.q]
             {
                 switch self
                 {

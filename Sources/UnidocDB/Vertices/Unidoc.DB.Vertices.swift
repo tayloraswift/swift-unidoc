@@ -38,7 +38,7 @@ extension Unidoc.DB.Vertices
     {
         //  This limits the index to vertices with a stem. This is all of them,
         //  except for ``Unidoc.FileVertex``.
-        $0[Unidoc.AnyVertex[.stem]] = .init { $0[.exists] = true }
+        $0[Unidoc.AnyVertex[.stem]] { $0[.exists] = true }
     }
 
     public static

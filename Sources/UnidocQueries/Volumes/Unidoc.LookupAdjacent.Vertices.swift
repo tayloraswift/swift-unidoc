@@ -42,7 +42,7 @@ extension Unidoc.LookupAdjacent.Vertices
         }
 
         //  Extract scalars adjacent to the current vertex.
-        list.append
+        list
         {
             $0.append(self.vertex / Unidoc.AnyVertex[.namespace])
             $0.append(self.vertex / Unidoc.AnyVertex[.culture])

@@ -32,23 +32,13 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
         updates
         {
             $0[.multi] = true
-            $0[.q] = .init
+            $0[.q]
             {
-                $0[.and] = .init
+                $0[.and]
                 {
-
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.gte] = latest.lowerBound }
-                    }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.lte] = latest.upperBound }
-                    }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.realm]] = .init { $0[.ne] = self.realm }
-                    }
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.gte] = latest.lowerBound } }
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.lte] = latest.upperBound } }
+                    $0 { $0[Unidoc.AnyGroup[.realm]] { $0[.ne] = self.realm } }
                 }
             }
             $0[.u]
@@ -61,37 +51,21 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
         {
             $0[.multi] = true
             $0[.hint] = Unidoc.DB.Groups.indexRealm.id
-            $0[.q] = .init
+            $0[.q]
             {
-                $0[.and] = .init
+                $0[.and]
                 {
-
-                    $0.append
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.gte] = all.lowerBound } }
+                    $0 { $0[Unidoc.AnyGroup[.id]] { $0[.lte] = all.upperBound } }
+                    $0
                     {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.gte] = all.lowerBound }
-                    }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.id]] = .init { $0[.lte] = all.upperBound }
-                    }
-                    $0.append
-                    {
-                        $0[.or] = .init
+                        $0[.or]
                         {
-                            $0.append
-                            {
-                                $0[Unidoc.AnyGroup[.id]] = .init { $0[.lt] = latest.lowerBound }
-                            }
-                            $0.append
-                            {
-                                $0[Unidoc.AnyGroup[.id]] = .init { $0[.gt] = latest.upperBound }
-                            }
+                            $0 { $0[Unidoc.AnyGroup[.id]] { $0[.lt] = latest.lowerBound } }
+                            $0 { $0[Unidoc.AnyGroup[.id]] { $0[.gt] = latest.upperBound } }
                         }
                     }
-                    $0.append
-                    {
-                        $0[Unidoc.AnyGroup[.realm]] = .init { $0[.exists] = true }
-                    }
+                    $0 { $0[Unidoc.AnyGroup[.realm]] { $0[.exists] = true } }
                 }
             }
             $0[.u]

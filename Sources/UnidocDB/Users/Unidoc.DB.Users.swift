@@ -83,10 +83,7 @@ extension Unidoc.DB.Users
                 }
                 $0[.update] = .init
                 {
-                    $0[.set]
-                    {
-                        user.encode(set: &$0)
-                    }
+                    $0[.set] = user
                     $0[.setOnInsert]
                     {
                         $0[Element[.cookie]] = Int64.random(in: .min ... .max)

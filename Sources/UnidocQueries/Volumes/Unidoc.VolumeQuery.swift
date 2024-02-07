@@ -79,7 +79,7 @@ extension Unidoc.VolumeQuery
             pipeline[stage: .match] = .init
             {
                 $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
-                $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
+                $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
             }
             //  We use the patch number instead of the latest-flag because
             //  it is closer to the ground-truth, and the latest-flag doesn’t
@@ -136,7 +136,7 @@ extension Unidoc.VolumeQuery
                     $0[stage: .match] = .init
                     {
                         $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
-                        $0[Unidoc.VolumeMetadata[.patch]] = .init { $0[.exists] = true }
+                        $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
                     }
                     $0[stage: .sort] = .init
                     {
