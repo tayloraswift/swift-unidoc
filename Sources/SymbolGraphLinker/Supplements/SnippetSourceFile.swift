@@ -6,13 +6,13 @@ struct SnippetSourceFile:Equatable, Sendable
     public
     let name:String
     public
-    let text:String
+    let utf8:[UInt8]
 
     @inlinable public
-    init(name:String, text:String)
+    init(name:String, utf8:[UInt8])
     {
         self.name = name
-        self.text = text
+        self.utf8 = utf8
     }
 }
 extension SnippetSourceFile

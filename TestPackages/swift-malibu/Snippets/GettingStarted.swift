@@ -10,7 +10,7 @@ print("Hi Barbie!")
 //  This part of the snippet is not included in the rendered documentation.
 print("Hi Ken!")
 
-//  snippet.F
+//  snippet.F1
 func f()
 {
     let _:String = """
@@ -25,6 +25,14 @@ func f()
 
     let _:String = """
     This is another expression embedded inside a code block
+    """
+
+    //  snippet.end
+
+    //  snippet.F2
+    let _:String = """
+    This is a third expression embedded inside a code block. It is part of an indented snippet
+    slice.
     """
 
     //  snippet.end
