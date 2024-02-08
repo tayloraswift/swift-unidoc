@@ -239,6 +239,7 @@ extension Toolchain
     /// Dumps the symbols for the given package, using the `output` workspace as the
     /// output directory.
     func dump(from package:PackageNode,
+        snippets:Snippets,
         include:inout [FilePath],
         output:ArtifactDirectory,
         triple:Triple,
@@ -254,7 +255,7 @@ extension Toolchain
             triple: triple,
             pretty: pretty)
 
-        return .init(cultures: cultures, root: package.root)
+        return .init(cultures: cultures, snippets: snippets.list, root: package.root)
     }
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
@@ -271,7 +272,7 @@ extension Toolchain
             triple: triple,
             pretty: pretty)
 
-        return .init(cultures: cultures)
+        return .init(cultures: cultures, snippets: [])
     }
 
     private

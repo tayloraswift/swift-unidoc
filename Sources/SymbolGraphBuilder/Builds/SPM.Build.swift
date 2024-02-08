@@ -225,8 +225,8 @@ extension SPM.Build:DocumentationBuild
         let scratch:SPM.BuildDirectory = try await swift.build(package: self.root,
             log: log.build)
 
-
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
+        let snippets:Snippets = try .load(from: manifest.snippets, in: self.root)
 
         var dependencies:[PackageNode] = []
         var include:[FilePath] = [ scratch.path / "\(self.configuration)" ]
@@ -296,6 +296,7 @@ extension SPM.Build:DocumentationBuild
             root: manifest.root)
 
         let artifacts:Artifacts = try await swift.dump(from: flatNode,
+            snippets: snippets,
             include: &include,
             output: self.output,
             triple: swift.triple,

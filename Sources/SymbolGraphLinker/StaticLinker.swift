@@ -24,6 +24,8 @@ struct StaticLinker:~Copyable
     private
     let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>
     private
+    let swiftParser:MarkdownCodeLanguage.Swift?
+    private
     let nominations:Compiler.Nominations
 
     private
@@ -41,11 +43,12 @@ struct StaticLinker:~Copyable
         modules:[SymbolGraph.Module],
         plugins:[any MarkdownCodeLanguageType] = [])
     {
+        let swift:(any MarkdownCodeLanguageType)? = plugins.first { $0.name == "swift" }
         //  If we were given a plugin that says it can highlight swift,
         //  make it the default plugin for the doccomment parser.
-        self.doccommentParser = .init(plugins: plugins,
-            default: plugins.first { $0.name == "swift" })
+        self.doccommentParser = .init(plugins: plugins, default: swift)
         self.markdownParser = .init(plugins: plugins)
+        self.swiftParser = swift as? MarkdownCodeLanguage.Swift
         self.nominations = nominations
 
         self.symbolizer = .init(modules: modules)
@@ -245,7 +248,22 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[MarkdownSourceFile]])
+    func attach(snippets supplements:[SnippetSourceFile])
+    {
+        guard
+        let swiftParser:MarkdownCodeLanguage.Swift = self.swiftParser
+        else
+        {
+            return
+        }
+
+        for snippet:SnippetSourceFile in supplements
+        {
+            swiftParser.highlighter._parse(snippet: snippet.text)
+        }
+    }
+    public mutating
+    func attach(markdown supplements:[[MarkdownSourceFile]])
     {
         let articles:[[Article]] = zip(supplements.indices, supplements).map
         {

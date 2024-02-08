@@ -38,7 +38,7 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    func loadArticles(root:Symbol.FileBase) throws -> [MarkdownSourceFile]
+    func loadMarkdown(root:Symbol.FileBase) throws -> [MarkdownSourceFile]
     {
         //  Compute this once, since it’s used in the loop below.
         let bundle:Symbol.Module = self.module.id
@@ -60,7 +60,7 @@ extension Artifacts.Culture
                 $0.components.dropFirst(root.components.count))
             let id:Symbol.File = .init("\(relative)")
 
-            print("Loading artifact: \(id)")
+            print("Loading markdown: \(id)")
 
             return .init(bundle: bundle, path: id, text: try $0.read())
         }
@@ -75,7 +75,7 @@ extension Artifacts.Culture
         {
             let path:FilePath = self.artifacts / "\($0)"
 
-            print("Loading artifact: \($0)")
+            print("Loading symbols: \($0)")
 
             do
             {
