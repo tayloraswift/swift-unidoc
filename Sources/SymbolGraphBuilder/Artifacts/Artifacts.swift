@@ -51,7 +51,7 @@ extension Artifacts
         try self.snippets.map
         {
             print("Loading snippet: \($0.name)")
-            return .init(name: $0.name, text: try $0.location.read())
+            return .init(name: $0.name, utf8: try $0.location.read())
         }
     }
 }

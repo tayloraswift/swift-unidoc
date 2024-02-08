@@ -259,7 +259,7 @@ extension StaticLinker
 
         for snippet:SnippetSourceFile in supplements
         {
-            swiftParser.highlighter._parse(snippet: snippet.text)
+            swiftParser.highlighter._parse(snippet: snippet.utf8)
         }
     }
     public mutating
