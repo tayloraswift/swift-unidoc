@@ -16,20 +16,19 @@ extension SymbolGraph
         let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
 
-        let clock:ContinuousClock = .init()
-        var time:(compiling:Duration, linking:Duration)
-
+        var profiler:BuildProfiler = .init()
         do
         {
-            time.compiling = .zero
-
             var compiler:Compiler = .init(root: artifacts.root)
 
             for culture:Artifacts.Culture in artifacts.cultures
             {
-                let parts:[SymbolGraphPart] = try culture.loadSymbols()
+                let parts:[SymbolGraphPart] = try profiler.measure(\.loadingSymbols)
+                {
+                    try culture.loadSymbols()
+                }
 
-                time.compiling += try clock.measure
+                try profiler.measure(\.compiling)
                 {
                     try compiler.compile(
                         language: culture.module.language ?? .swift,
@@ -42,7 +41,9 @@ extension SymbolGraph
             (extensions) = compiler.extensions.load()
 
             print("""
-                Compiled documentation in \(time.compiling)
+                Compiled documentation!
+                    time loading symbols    : \(profiler.loadingSymbols)
+                    time compiling          : \(profiler.compiling)
                 cultures        : \(namespaces.count)
                 namespaces      : \(namespaces.reduce(0) { $0 + $1.count })
                 declarations    : \(namespaces.reduce(0)
@@ -54,48 +55,57 @@ extension SymbolGraph
         }
         do
         {
-            let supplements:[[MarkdownSourceFile]]? = try artifacts.root.map
-            {
-                (root:Symbol.FileBase) in try artifacts.cultures.map
-                {
-                    switch $0.module.type
-                    {
-                    //  Only load supplements for these module types.
-                    case .executable:   break
-                    case .regular:      break
-                    case .macro:        break
-                    case .plugin:       break
-                    default:            return []
-                    }
-
-                    return try $0.loadArticles(root: root)
-                }
-            }
-
             var linker:StaticLinker = .init(nominations: nominations,
                 modules: artifacts.cultures.map(\.module),
                 plugins: [.swift])
 
-            time.linking = clock.measure
+            let scalarPositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
             {
-                let scalarPositions:[[SymbolGraph.Namespace]] = linker.allocate(
-                    namespaces: namespaces)
-                let extensionPositions:[(Int32, Int)] = linker.allocate(
-                    extensions: extensions)
+                linker.allocate(namespaces: namespaces)
+            }
+            let extensionPositions:[(Int32, Int)] = profiler.measure(\.linking)
+            {
+                linker.allocate(extensions: extensions)
+            }
 
-                //  Calling this is mandatory, even if there are no supplements.
-                linker.attach(supplements: supplements ?? [])
+            //  Load and attach snippets.
+            let snippets:[SnippetSourceFile] = try profiler.measure(\.loadingSources)
+            {
+                try artifacts.loadSnippets()
+            }
+
+            profiler.measure(\.linking)
+            {
+                linker.attach(snippets: snippets)
+            }
+
+            _ = consume snippets
+
+            //  Load and attach markdown supplements.
+            let markdown:[[MarkdownSourceFile]] = try profiler.measure(\.loadingSources)
+            {
+                try artifacts.loadMarkdown()
+            }
+
+            let graph:SymbolGraph = try profiler.measure(\.linking)
+            {
+                //  Calling this is mandatory, even if there are no supplements!
+                linker.attach(markdown: markdown)
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
+
+                return try linker.load()
             }
 
-            let graph:SymbolGraph = try linker.load()
+            _ = consume markdown
 
             linker.status(root: artifacts.root).emit(colors: .enabled)
 
             print("""
-                Linked documentation in \(time.linking)
+                Linked documentation!
+                    time loading sources    : \(profiler.loadingSources)
+                    time linking            : \(profiler.linking)
                 symbols         : \(graph.decls.symbols.count)
                 """)
 
