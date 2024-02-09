@@ -33,36 +33,36 @@ enum MarkdownKeywordPrefix:String, Equatable, Hashable, Sendable
 }
 extension MarkdownKeywordPrefix
 {
-    func callAsFunction(_ discussion:__owned [MarkdownBlock]) -> MarkdownBlock
+    func callAsFunction(_ discussion:__owned [Markdown.BlockElement]) -> Markdown.BlockElement
     {
         switch self
         {
-        case .attention:        MarkdownBlock.Aside.Attention.init(discussion)
-        case .author:           MarkdownBlock.Aside.Author.init(discussion)
-        case .authors:          MarkdownBlock.Aside.Authors.init(discussion)
-        case .bug:              MarkdownBlock.Aside.Bug.init(discussion)
-        case .complexity:       MarkdownBlock.Aside.Complexity.init(discussion)
-        case .copyright:        MarkdownBlock.Aside.Copyright.init(discussion)
-        case .date:             MarkdownBlock.Aside.Date.init(discussion)
-        case .experiment:       MarkdownBlock.Aside.Experiment.init(discussion)
-        case .important:        MarkdownBlock.Aside.Important.init(discussion)
-        case .invariant:        MarkdownBlock.Aside.Invariant.init(discussion)
-        case .mutating:         MarkdownBlock.Aside.Mutating.init(discussion)
-        case .nonmutating:      MarkdownBlock.Aside.Nonmutating.init(discussion)
-        case .note:             MarkdownBlock.Aside.Note.init(discussion)
-        case .parameters:       MarkdownBlock.Parameters.init(discussion)
-        case .postcondition:    MarkdownBlock.Aside.Postcondition.init(discussion)
-        case .precondition:     MarkdownBlock.Aside.Precondition.init(discussion)
-        case .remark:           MarkdownBlock.Aside.Remark.init(discussion)
-        case .requires:         MarkdownBlock.Aside.Requires.init(discussion)
-        case .returns:          MarkdownBlock.Aside.Returns.init(discussion)
-        case .seealso:          MarkdownBlock.Aside.SeeAlso.init(discussion)
-        case .since:            MarkdownBlock.Aside.Since.init(discussion)
-        case .throws:           MarkdownBlock.Aside.Throws.init(discussion)
-        case .tip:              MarkdownBlock.Aside.Tip.init(discussion)
-        case .todo:             MarkdownBlock.Aside.ToDo.init(discussion)
-        case .version:          MarkdownBlock.Aside.Version.init(discussion)
-        case .warning:          MarkdownBlock.Aside.Warning.init(discussion)
+        case .attention:        Markdown.BlockAside.Attention.init(discussion)
+        case .author:           Markdown.BlockAside.Author.init(discussion)
+        case .authors:          Markdown.BlockAside.Authors.init(discussion)
+        case .bug:              Markdown.BlockAside.Bug.init(discussion)
+        case .complexity:       Markdown.BlockAside.Complexity.init(discussion)
+        case .copyright:        Markdown.BlockAside.Copyright.init(discussion)
+        case .date:             Markdown.BlockAside.Date.init(discussion)
+        case .experiment:       Markdown.BlockAside.Experiment.init(discussion)
+        case .important:        Markdown.BlockAside.Important.init(discussion)
+        case .invariant:        Markdown.BlockAside.Invariant.init(discussion)
+        case .mutating:         Markdown.BlockAside.Mutating.init(discussion)
+        case .nonmutating:      Markdown.BlockAside.Nonmutating.init(discussion)
+        case .note:             Markdown.BlockAside.Note.init(discussion)
+        case .parameters:       Markdown.BlockParameters.init(discussion)
+        case .postcondition:    Markdown.BlockAside.Postcondition.init(discussion)
+        case .precondition:     Markdown.BlockAside.Precondition.init(discussion)
+        case .remark:           Markdown.BlockAside.Remark.init(discussion)
+        case .requires:         Markdown.BlockAside.Requires.init(discussion)
+        case .returns:          Markdown.BlockAside.Returns.init(discussion)
+        case .seealso:          Markdown.BlockAside.SeeAlso.init(discussion)
+        case .since:            Markdown.BlockAside.Since.init(discussion)
+        case .throws:           Markdown.BlockAside.Throws.init(discussion)
+        case .tip:              Markdown.BlockAside.Tip.init(discussion)
+        case .todo:             Markdown.BlockAside.ToDo.init(discussion)
+        case .version:          Markdown.BlockAside.Version.init(discussion)
+        case .warning:          Markdown.BlockAside.Warning.init(discussion)
         }
     }
 }
@@ -73,7 +73,7 @@ extension MarkdownKeywordPrefix:MarkdownSemanticPrefix
     static
     var radius:Int { 2 }
 
-    init?(from elements:__shared [MarkdownInline.Block])
+    init?(from elements:__shared [Markdown.InlineElement])
     {
         if  elements.count == 1
         {

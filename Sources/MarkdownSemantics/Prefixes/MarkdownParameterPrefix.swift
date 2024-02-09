@@ -18,7 +18,7 @@ extension MarkdownParameterPrefix:MarkdownSemanticPrefix
     /// Detects an instance of this pattern type from the given array of
     /// inline block content. The array contains inline content up to, but
     /// not including, an unformatted `:` character.
-    init?(from elements:__shared [MarkdownInline.Block])
+    init?(from elements:__shared [Markdown.InlineElement])
     {
         let words:[Substring] = elements.lazy.map(\.text).joined().split(maxSplits: 1,
             omittingEmptySubsequences: true,

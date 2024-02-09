@@ -41,16 +41,16 @@ extension Main.SourcePositions:TestBattery
             ),
         ]
         {
-            let tree:MarkdownTree = .init { parser.parse(source) }
+            let tree:Markdown.Tree = .init { parser.parse(source) }
             if  let tests:TestGroup = tests / name,
                 let expected:SourcePosition = tests.expect(value: .init(
                     line: expected.line,
                     column: expected.column)),
-                let paragraph:MarkdownBlock.Paragraph = tests.expect(
-                    value: tree.blocks.first as? MarkdownBlock.Paragraph)
+                let paragraph:Markdown.BlockParagraph = tests.expect(
+                    value: tree.blocks.first as? Markdown.BlockParagraph)
             {
                 var position:SourcePosition?
-                for element:MarkdownInline.Block in paragraph.elements
+                for element:Markdown.InlineElement in paragraph.elements
                 {
                     if case .autolink(let autolink) = element
                     {

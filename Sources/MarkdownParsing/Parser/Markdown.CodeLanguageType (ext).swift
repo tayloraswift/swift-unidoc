@@ -3,8 +3,8 @@ import MarkdownAST
 
 extension Markdown.CodeLanguageType
 {
-    func attach(to code:String) -> MarkdownBlock
+    func attach(to code:String) -> Markdown.BlockElement
     {
-        MarkdownBlock.Code<Self>.init(language: self, text: code)
+        Markdown.BlockCode<Self>.init(language: self, text: code)
     }
 }

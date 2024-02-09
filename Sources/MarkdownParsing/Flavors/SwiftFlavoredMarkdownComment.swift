@@ -6,10 +6,10 @@ enum SwiftFlavoredMarkdownComment:MarkdownFlavor
 {
     /// Clips `h1` headings to `h2`.
     public static
-    func transform(blocks:inout [MarkdownBlock])
+    func transform(blocks:inout [Markdown.BlockElement])
     {
         //  Don’t care about nested headings
-        for case let heading as MarkdownBlock.Heading in blocks
+        for case let heading as Markdown.BlockHeading in blocks
         {
             heading.clip(to: 2)
         }

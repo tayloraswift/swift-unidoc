@@ -296,7 +296,7 @@ extension StaticLinker
             }
             else
             {
-                let blocks:[MarkdownBlock] = self.doccommentParser.parse(MarkdownSource.init(
+                let blocks:[Markdown.BlockElement] = self.doccommentParser.parse(MarkdownSource.init(
                     location: .init(position: .zero, file: file),
                     text: description))
 
@@ -458,7 +458,7 @@ extension StaticLinker
     }
 
     private
-    func resolve(decl binding:MarkdownInline.Autolink,
+    func resolve(decl binding:Markdown.InlineAutolink,
         in namespace:Symbol.Module) throws -> Int32?
     {
         //  Special rule for article bindings: if the text of the codelink matches
