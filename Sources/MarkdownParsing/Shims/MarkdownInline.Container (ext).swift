@@ -1,9 +1,8 @@
-import Markdown
 import MarkdownAST
 
 extension MarkdownInline.Container where Element:ParsableAsInlineMarkup
 {
-    init(from markup:/* borrowing */ any InlineContainer,
+    init(from markup:/* borrowing */ any _InlineContainer,
         in source:borrowing MarkdownSource,
         as type:MarkdownInline.ContainerType)
     {
