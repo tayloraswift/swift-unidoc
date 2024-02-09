@@ -1,11 +1,10 @@
-import Markdown
 import Sources
 
 extension SourceReference
 {
-    init(file:File, trimming trim:Int = 0, from range:Range<Markdown.SourceLocation>?)
+    init(file:File, trimming trim:Int = 0, from range:Range<_SourceLocation>?)
     {
-        if  let range:Range<Markdown.SourceLocation>,
+        if  let range:Range<_SourceLocation>,
             let start:SourcePosition = .init(range.lowerBound, offset: trim),
             let end:SourcePosition = .init(range.upperBound, offset: -trim)
         {

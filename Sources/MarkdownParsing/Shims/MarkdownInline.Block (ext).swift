@@ -1,41 +1,40 @@
-import Markdown
 import MarkdownAST
 import Sources
 
 extension MarkdownInline.Block:ParsableAsInlineMarkup
 {
-    init(from markup:/* borrowing */ any InlineMarkup, in source:borrowing MarkdownSource)
+    init(from markup:/* borrowing */ any _InlineMarkup, in source:borrowing MarkdownSource)
     {
         switch /* copy */ markup
         {
-        case is LineBreak:
+        case is _LineBreak:
             self = .text("\n")
 
-        case is SoftBreak:
+        case is _SoftBreak:
             self = .text(" ")
 
-        case let span as CustomInline:
+        case let span as _CustomInline:
             self = .text(span.text)
 
-        case let span as Text:
+        case let span as _Text:
             self = .text(span.string)
 
-        case let span as InlineHTML:
+        case let span as _InlineHTML:
             self = .html(.init(text: span.rawHTML))
 
-        case let span as InlineCode:
+        case let span as _InlineCode:
             self = .code(.init(text: span.code))
 
-        case let span as Emphasis:
+        case let span as _Emphasis:
             self = .container(.init(from: span, in: source, as: .em))
 
-        case let span as Strikethrough:
+        case let span as _Strikethrough:
             self = .container(.init(from: span, in: source, as: .s))
 
-        case let span as Strong:
+        case let span as _Strong:
             self = .container(.init(from: span, in: source, as: .strong))
 
-        case let image as Image:
+        case let image as _Image:
             self = .image(.init(target: image.source,
                 title: image.title,
                 elements: image.inlineChildren.map
@@ -43,14 +42,14 @@ extension MarkdownInline.Block:ParsableAsInlineMarkup
                     MarkdownInline.init(from: $0, in: source)
                 }))
 
-        case let link as SymbolLink:
+        case let link as _SymbolLink:
             // exclude the backticks from the source range
             self = .autolink(.init(
                 source: .init(file: copy source, trimming: 2, from: link.range),
                 text: link.destination ?? "",
                 code: true))
 
-        case let link as Link:
+        case let link as _Link:
             let elements:[MarkdownInline] = link.inlineChildren.map
             {
                 MarkdownInline.init(from: $0, in: source)

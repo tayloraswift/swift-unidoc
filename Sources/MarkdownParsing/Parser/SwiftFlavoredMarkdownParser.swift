@@ -1,4 +1,3 @@
-import Markdown
 import MarkdownABI
 import MarkdownAST
 
@@ -34,7 +33,7 @@ extension SwiftFlavoredMarkdownParser:MarkdownParser
     public
     func parse(_ source:borrowing MarkdownSource) -> [MarkdownBlock]
     {
-        let document:Document = .init(parsing: source.text, options:
+        let document:_Document = .init(parsing: source.text, options:
         [
             .parseBlockDirectives,
             .parseSymbolLinks,
@@ -54,18 +53,18 @@ extension SwiftFlavoredMarkdownParser
 {
     private
     func block(
-        from markup:/* borrowing */ any BlockMarkup,
+        from markup:/* borrowing */ any _BlockMarkup,
         in source:borrowing MarkdownSource) -> MarkdownBlock?
     {
         switch /* copy */ markup
         {
-        case let block as Markdown.BlockQuote:
+        case let block as _BlockQuote:
             return MarkdownBlock.Quote.init(block.blockChildren.compactMap
                 {
                     self.block(from: $0, in: source)
                 })
 
-        case let block as Markdown.BlockDirective:
+        case let block as _BlockDirective:
             return MarkdownBlock.Directive.init(name: block.name,
                 arguments: block.argumentText.parseNameValueArguments().map
                 {
@@ -76,7 +75,7 @@ extension SwiftFlavoredMarkdownParser
                     self.block(from: $0, in: source)
                 })
 
-        case let block as Markdown.CodeBlock:
+        case let block as _CodeBlock:
             if  let language:String = block.language
             {
                 return (self.plugins[language] ?? .unsupported(language)).attach(to: block.code)
@@ -91,14 +90,14 @@ extension SwiftFlavoredMarkdownParser
                 return MarkdownBlock.Code<MarkdownCodeLanguage.PlainText>.init(text: block.code)
             }
 
-        case let block as Markdown.Heading:
+        case let block as _Heading:
             return MarkdownBlock.Heading.init(level: block.level,
                 elements: block.inlineChildren.map
                 {
                     MarkdownInline.Block.init(from: $0, in: source)
                 })
 
-        case let block as Markdown.HTMLBlock:
+        case let block as _HTMLBlock:
             let html:Substring = block.rawHTML.drop(while: \.isWhitespace)
             if  html.starts(with: "<!--")
             {
@@ -108,13 +107,13 @@ extension SwiftFlavoredMarkdownParser
 
             return MarkdownBlock.HTML.init(text: block.rawHTML)
 
-        case let block as Markdown.Paragraph:
+        case let block as _Paragraph:
             return MarkdownBlock.Paragraph.init(block.inlineChildren.map
                 {
                     MarkdownInline.Block.init(from: $0, in: source)
                 })
 
-        case let table as Markdown.Table:
+        case let table as _Table:
             return MarkdownTable.init(columns: table.columnAlignments.map
                 {
                     switch $0
@@ -143,25 +142,25 @@ extension SwiftFlavoredMarkdownParser
                     }
                 })
 
-        case let block as Markdown.ListItem:
+        case let block as _ListItem:
             return self.item(from: block, in: source)
 
-        case let block as Markdown.OrderedList:
+        case let block as _OrderedList:
             return MarkdownBlock.OrderedList.init(block.listItems.map
                 {
                     self.item(from: $0, in: source)
                 })
 
-        case let block as Markdown.UnorderedList:
+        case let block as _UnorderedList:
             return MarkdownBlock.UnorderedList.init(block.listItems.map
                 {
                     self.item(from: $0, in: source)
                 })
 
-        case is Markdown.ThematicBreak:
+        case is _ThematicBreak:
             return MarkdownBlock.ThematicBreak.init()
 
-        case is Markdown.CustomBlock:
+        case is _CustomBlock:
             return MarkdownBlock.init()
 
         case let unsupported:
@@ -172,7 +171,7 @@ extension SwiftFlavoredMarkdownParser
 
     private
     func item(
-        from markup:/* borrowing */ ListItem,
+        from markup:/* borrowing */ _ListItem,
         in source:borrowing MarkdownSource) -> MarkdownBlock.Item
     {
         .init(

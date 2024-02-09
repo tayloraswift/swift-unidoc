@@ -40,3 +40,11 @@ module. For example, `[`_Concurrency`](./_Concurrency)` produces
 
 You can link to declarations from other packages/frameworks that are dependencies of the current
 module. For example, `[`Task`](./Task)` produces [`Task`](./Task).
+
+## Snippets
+
+@Snippet(id: "GettingStarted", slice: "")
+
+@Snippet(id: "GettingStarted", slice: "F1")
+
+@Snippet(id: "GettingStarted", slice: "F2")
