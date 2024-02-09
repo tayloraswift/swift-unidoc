@@ -248,6 +248,13 @@ extension StaticLinker
 
 extension StaticLinker
 {
+    // struct Snippet
+    // {
+
+    // }
+}
+extension StaticLinker
+{
     public mutating
     func attach(
         markdown:[[MarkdownSourceFile]],

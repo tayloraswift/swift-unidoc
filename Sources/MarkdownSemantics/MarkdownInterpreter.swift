@@ -238,6 +238,11 @@ extension MarkdownInterpreter
                 case "Metadata":
                     metadata.update(with: block.elements)
 
+                case "Snippet":
+                    //  Don’t know how to handle these yet, so we just render them
+                    //  as code blocks.
+                    self.append(block)
+
                 case _:
                     //  Don’t know how to handle these yet, so we just render them
                     //  as code blocks.

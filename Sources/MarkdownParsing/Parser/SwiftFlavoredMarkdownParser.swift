@@ -53,10 +53,10 @@ extension SwiftFlavoredMarkdownParser
 {
     private
     func block(
-        from markup:/* borrowing */ any _BlockMarkup,
+        from markup:borrowing any _BlockMarkup,
         in source:borrowing MarkdownSource) -> MarkdownBlock?
     {
-        switch /* copy */ markup
+        switch copy markup
         {
         case let block as _BlockQuote:
             return MarkdownBlock.Quote.init(block.blockChildren.compactMap
