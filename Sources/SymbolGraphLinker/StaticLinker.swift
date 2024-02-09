@@ -7,6 +7,7 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
+import MarkdownRendering
 import MarkdownSemantics
 import Signatures
 import Snippets
@@ -25,7 +26,7 @@ struct StaticLinker:~Copyable
     private
     let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>
     private
-    let swiftParser:MarkdownCodeLanguage.Swift?
+    let swiftParser:Markdown.SwiftLanguage?
     private
     let nominations:Compiler.Nominations
 
@@ -42,14 +43,14 @@ struct StaticLinker:~Copyable
     public
     init(nominations:Compiler.Nominations,
         modules:[SymbolGraph.Module],
-        plugins:[any MarkdownCodeLanguageType] = [])
+        plugins:[any Markdown.CodeLanguageType] = [])
     {
-        let swift:(any MarkdownCodeLanguageType)? = plugins.first { $0.name == "swift" }
+        let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
         //  If we were given a plugin that says it can highlight swift,
         //  make it the default plugin for the doccomment parser.
         self.doccommentParser = .init(plugins: plugins, default: swift)
         self.markdownParser = .init(plugins: plugins)
-        self.swiftParser = swift as? MarkdownCodeLanguage.Swift
+        self.swiftParser = swift as? Markdown.SwiftLanguage
         self.nominations = nominations
 
         self.symbolizer = .init(modules: modules)
@@ -269,7 +270,7 @@ extension StaticLinker
     func attach(snippets supplements:[SwiftSourceFile])
     {
         guard
-        let swift:MarkdownCodeLanguage.Swift = self.swiftParser
+        let swift:Markdown.SwiftLanguage = self.swiftParser
         else
         {
             return

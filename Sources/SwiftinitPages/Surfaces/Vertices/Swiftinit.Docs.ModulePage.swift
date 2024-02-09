@@ -55,7 +55,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
 
     var description:String?
     {
-        if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
+        if  let overview:Markdown.Bytecode = self.vertex.overview?.markdown
         {
             "\(self.context.prose(overview))"
         }

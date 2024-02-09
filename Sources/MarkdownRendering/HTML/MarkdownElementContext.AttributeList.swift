@@ -32,7 +32,7 @@ extension MarkdownElementContext.AttributeList
         self.classes.append(enumerated.rawValue)
     }
     mutating
-    func append(value:consuming String, as instruction:MarkdownBytecode.Attribute)
+    func append(value:consuming String, as instruction:Markdown.Bytecode.Attribute)
     {
         switch instruction
         {

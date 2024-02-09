@@ -30,7 +30,7 @@ extension MarkdownTestBattery
             }
             let details:MarkdownBinary = .init(bytecode: .init
             {
-                (encoder:inout MarkdownBinaryEncoder)in
+                (encoder:inout Markdown.BinaryEncoder)in
 
                 documentation.details.visit
                 {

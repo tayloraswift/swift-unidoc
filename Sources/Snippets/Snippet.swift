@@ -7,12 +7,12 @@ struct Snippet:Equatable, Sendable
     let name:String
 
     public
-    var overview:MarkdownBytecode?
+    var overview:Markdown.Bytecode?
     public
     var slices:[Slice]
 
     @inlinable public
-    init(name:String, overview:MarkdownBytecode?, slices:[Slice])
+    init(name:String, overview:Markdown.Bytecode?, slices:[Slice])
     {
         self.name = name
 

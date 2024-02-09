@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Nonmutating:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .nonmutating }
+        var context:Markdown.Bytecode.Context { .nonmutating }
     }
 }

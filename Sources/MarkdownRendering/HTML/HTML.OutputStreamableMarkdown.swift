@@ -15,14 +15,14 @@ typealias HyperTextRenderableMarkdown = HTML.OutputStreamableMarkdown
 public
 protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
 {
-    var bytecode:MarkdownBytecode { get }
+    var bytecode:Markdown.Bytecode { get }
 
     /// Returns the value for an attribute identified by the given reference.
     /// If the witness returns nil, the renderer will omit the attribute.
     ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.
-    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
@@ -32,7 +32,7 @@ extension HTML.OutputStreamableMarkdown
 {
     /// Returns nil.
     @inlinable public
-    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
     {
         nil
     }
@@ -73,7 +73,7 @@ extension HTML.OutputStreamableMarkdown
         }
 
         var newlines:Int = 0
-        for instruction:MarkdownInstruction in self.bytecode
+        for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
             {

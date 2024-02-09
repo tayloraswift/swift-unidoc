@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Authors:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .authors }
+        var context:Markdown.Bytecode.Context { .authors }
     }
 }

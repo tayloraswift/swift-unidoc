@@ -69,7 +69,7 @@ extension MarkdownInline.Link:MarkdownElement
     }
 
     public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
         guard
         let target:Target = self.target

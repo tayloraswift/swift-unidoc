@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Invariant:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .invariant }
+        var context:Markdown.Bytecode.Context { .invariant }
     }
 }

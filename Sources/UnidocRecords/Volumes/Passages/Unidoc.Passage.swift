@@ -10,10 +10,10 @@ extension Unidoc
         public
         let outlines:[Outline]
         public
-        let markdown:MarkdownBytecode
+        let markdown:Markdown.Bytecode
 
         @inlinable public
-        init(outlines:[Outline], markdown:MarkdownBytecode)
+        init(outlines:[Outline], markdown:Markdown.Bytecode)
         {
             self.outlines = outlines
             self.markdown = markdown

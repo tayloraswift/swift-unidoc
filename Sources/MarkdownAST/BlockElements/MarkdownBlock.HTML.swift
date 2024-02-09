@@ -16,7 +16,7 @@ extension MarkdownBlock
 
         /// Emits the raw text content of this element in a transparent instruction context.
         public override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.transparent] = self.text
         }

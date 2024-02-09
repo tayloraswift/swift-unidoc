@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Postcondition:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .postcondition }
+        var context:Markdown.Bytecode.Context { .postcondition }
     }
 }

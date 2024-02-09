@@ -24,7 +24,7 @@ extension MarkdownInline
 extension MarkdownInline.Image:MarkdownElement
 {
     public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
         binary[.img]
         {

@@ -7,7 +7,7 @@ extension MarkdownElementContext
     struct AttributeContext
     {
         private
-        var current:MarkdownBytecode.Attribute?
+        var current:Markdown.Bytecode.Attribute?
         private
         var buffer:[UInt8]
 
@@ -39,13 +39,13 @@ extension MarkdownElementContext.AttributeContext
     /// Closes the current attribute (if any), and appends it to the list of
     /// complete attributes, making it available for encoding.
     mutating
-    func flush(beginning next:MarkdownBytecode.Attribute?)
+    func flush(beginning next:Markdown.Bytecode.Attribute?)
     {
         defer
         {
             self.current = next
         }
-        if  let instruction:MarkdownBytecode.Attribute = self.current
+        if  let instruction:Markdown.Bytecode.Attribute = self.current
         {
             self.list.append(value: .init(decoding: self.buffer, as: Unicode.UTF8.self),
                 as: instruction)

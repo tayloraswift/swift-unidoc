@@ -5,14 +5,14 @@ import MarkdownAST
 struct SwiftFlavoredMarkdownParser<Flavor> where Flavor:MarkdownFlavor
 {
     private
-    let plugins:[String: any MarkdownCodeLanguageType]
+    let plugins:[String: any Markdown.CodeLanguageType]
     private
-    let `default`:(any MarkdownCodeLanguageType)?
+    let `default`:(any Markdown.CodeLanguageType)?
 
     private
     init(
-        plugins:[String: any MarkdownCodeLanguageType],
-        default:(any MarkdownCodeLanguageType)? = nil)
+        plugins:[String: any Markdown.CodeLanguageType],
+        default:(any Markdown.CodeLanguageType)? = nil)
     {
         self.plugins = plugins
         self.default = `default`
@@ -22,8 +22,8 @@ extension SwiftFlavoredMarkdownParser
 {
     public
     init(
-        plugins:[any MarkdownCodeLanguageType] = [],
-        default:(any MarkdownCodeLanguageType)? = nil)
+        plugins:[any Markdown.CodeLanguageType] = [],
+        default:(any Markdown.CodeLanguageType)? = nil)
     {
         self.init(plugins: plugins.reduce(into: [:]) { $0[$1.name] = $1 }, default: `default`)
     }
@@ -81,13 +81,13 @@ extension SwiftFlavoredMarkdownParser
                 return (self.plugins[language] ?? .unsupported(language)).attach(to: block.code)
             }
             else if
-                let plugin:any MarkdownCodeLanguageType = self.default
+                let plugin:any Markdown.CodeLanguageType = self.default
             {
                 return plugin.attach(to: block.code)
             }
             else
             {
-                return MarkdownBlock.Code<MarkdownCodeLanguage.PlainText>.init(text: block.code)
+                return MarkdownBlock.Code<Markdown.PlainText>.init(text: block.code)
             }
 
         case let block as _Heading:
@@ -164,7 +164,7 @@ extension SwiftFlavoredMarkdownParser
             return MarkdownBlock.init()
 
         case let unsupported:
-            return MarkdownBlock.Code<MarkdownCodeLanguage.PlainText>.init(
+            return MarkdownBlock.Code<Markdown.PlainText>.init(
                 text: "<unsupported markdown node '\(type(of: unsupported))' >")
         }
     }

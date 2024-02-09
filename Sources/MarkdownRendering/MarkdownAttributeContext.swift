@@ -22,7 +22,7 @@ protocol MarkdownAttributeContext
     /// Terminates the current attribute, if any, and begins a new attribute if `next` is
     /// non-nil.
     mutating
-    func flush(beginning next:MarkdownBytecode.Attribute?)
+    func flush(beginning next:Markdown.Bytecode.Attribute?)
 }
 extension MarkdownAttributeContext
 {

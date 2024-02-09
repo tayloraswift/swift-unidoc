@@ -110,11 +110,11 @@ extension StaticOutliner
     func link(attached body:MarkdownDocumentation,
         file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])
     {
-        let overview:MarkdownBytecode = self.link(overview: body.overview)
+        let overview:Markdown.Bytecode = self.link(overview: body.overview)
 
         let fold:Int = self.cache.fold
 
-        let details:MarkdownBytecode = self.link(details: body.details)
+        let details:Markdown.Bytecode = self.link(details: body.details)
 
         let article:SymbolGraph.Article = .init(
             outlines: self.cache.clear(),
@@ -132,13 +132,13 @@ extension StaticOutliner
     func link(article body:MarkdownDocumentation,
         file:Int32?) -> SymbolGraph.Article
     {
-        let overview:MarkdownBytecode = self.link(overview: body.overview)
+        let overview:Markdown.Bytecode = self.link(overview: body.overview)
 
         let fold:Int = self.cache.fold
 
         //  We don’t support topics lists in extension documentation.
         //  So we just render them into the article as lists of links.
-        let details:MarkdownBytecode = self.link(
+        let details:Markdown.Bytecode = self.link(
             details: body.details,
             topics: body.topics)
 
@@ -153,7 +153,7 @@ extension StaticOutliner
     mutating
     func link(blocks:[MarkdownBlock], file:Int32) -> SymbolGraph.Article
     {
-        let rendered:MarkdownBytecode = .init
+        let rendered:Markdown.Bytecode = .init
         {
             for block:MarkdownBlock in blocks
             {
@@ -179,9 +179,9 @@ extension StaticOutliner
         {
             (topic:MarkdownDocumentation.Topic) in
 
-            let overview:MarkdownBytecode = .init
+            let overview:Markdown.Bytecode = .init
             {
-                (binary:inout MarkdownBinaryEncoder) in topic.visit(members: false)
+                (binary:inout Markdown.BinaryEncoder) in topic.visit(members: false)
                 {
                     $0.outline { self.outline(autolink: $0) }
                     $0.emit(into: &binary)
@@ -204,11 +204,11 @@ extension StaticOutliner
     }
 
     private mutating
-    func link(overview:MarkdownBlock.Paragraph?) -> MarkdownBytecode
+    func link(overview:MarkdownBlock.Paragraph?) -> Markdown.Bytecode
     {
         .init
         {
-            (binary:inout MarkdownBinaryEncoder) in overview.map
+            (binary:inout Markdown.BinaryEncoder) in overview.map
             {
                 $0.outline { self.outline(autolink: $0) }
                 $0.emit(into: &binary)
@@ -219,11 +219,11 @@ extension StaticOutliner
     private mutating
     func link(
         details:MarkdownDocumentation.Details,
-        topics:[MarkdownDocumentation.Topic] = []) -> MarkdownBytecode
+        topics:[MarkdownDocumentation.Topic] = []) -> Markdown.Bytecode
     {
         .init
         {
-            (binary:inout MarkdownBinaryEncoder) in
+            (binary:inout Markdown.BinaryEncoder) in
 
             details.visit
             {

@@ -22,7 +22,7 @@ extension MarkdownTextContext.AttributeContext:MarkdownAttributeContext
     }
 
     mutating
-    func flush(beginning next:MarkdownBytecode.Attribute?)
+    func flush(beginning next:Markdown.Bytecode.Attribute?)
     {
         self.current = next.map { _ in }
     }

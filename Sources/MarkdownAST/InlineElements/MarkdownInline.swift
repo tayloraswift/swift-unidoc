@@ -11,7 +11,7 @@ enum MarkdownInline:Equatable, Hashable, Sendable
 extension MarkdownInline:MarkdownElement
 {
     @inlinable public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
         switch self
         {

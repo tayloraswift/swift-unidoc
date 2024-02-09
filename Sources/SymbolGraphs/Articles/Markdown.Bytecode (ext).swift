@@ -1,7 +1,7 @@
 import BSON
 import MarkdownABI
 
-extension MarkdownBytecode:BSONEncodable
+extension Markdown.Bytecode:BSONEncodable
 {
     public
     func encode(to field:inout BSON.FieldEncoder)
@@ -10,7 +10,7 @@ extension MarkdownBytecode:BSONEncodable
         view.encode(to: &field)
     }
 }
-extension MarkdownBytecode:BSONDecodable, BSONBinaryViewDecodable
+extension Markdown.Bytecode:BSONDecodable, BSONBinaryViewDecodable
 {
     @inlinable public
     init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws

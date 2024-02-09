@@ -58,7 +58,7 @@ extension MarkdownElementContext
 }
 extension MarkdownElementContext
 {
-    init(from markdown:MarkdownBytecode.Context, attributes:inout AttributeList)
+    init(from markdown:Markdown.Bytecode.Context, attributes:inout AttributeList)
     {
         switch markdown
         {

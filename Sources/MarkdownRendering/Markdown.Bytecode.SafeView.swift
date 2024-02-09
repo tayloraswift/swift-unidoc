@@ -1,25 +1,25 @@
 import HTML
 import MarkdownABI
 
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     /// Renders the wrapped bytecode without inlining any references.
     @frozen public
     struct SafeView:Equatable, Sendable
     {
         public
-        let bytecode:MarkdownBytecode
+        let bytecode:Markdown.Bytecode
 
         @inlinable internal
-        init(_ bytecode:MarkdownBytecode)
+        init(_ bytecode:Markdown.Bytecode)
         {
             self.bytecode = bytecode
         }
     }
 }
-extension MarkdownBytecode.SafeView:HTML.OutputStreamableMarkdown
+extension Markdown.Bytecode.SafeView:HTML.OutputStreamableMarkdown
 {
 }
-extension MarkdownBytecode.SafeView:TextOutputStreamableMarkdown
+extension Markdown.Bytecode.SafeView:TextOutputStreamableMarkdown
 {
 }

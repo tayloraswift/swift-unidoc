@@ -22,7 +22,7 @@ extension MarkdownBlock
 
         /// Emits a fallback description of the directive.
         @inlinable public override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.pre]
             {

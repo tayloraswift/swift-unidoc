@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Precondition:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .precondition }
+        var context:Markdown.Bytecode.Context { .precondition }
     }
 }

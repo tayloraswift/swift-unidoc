@@ -6,6 +6,6 @@ extension MarkdownTable
     class HeaderCell:AnyCell
     {
         class override
-        var context:MarkdownBytecode.Context { .th }
+        var context:Markdown.Bytecode.Context { .th }
     }
 }

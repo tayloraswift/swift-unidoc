@@ -27,7 +27,7 @@ extension MarkdownBlock
         }
         /// Emits the elements in this container, with no framing.
         open override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             for element:Element in self.elements
             {

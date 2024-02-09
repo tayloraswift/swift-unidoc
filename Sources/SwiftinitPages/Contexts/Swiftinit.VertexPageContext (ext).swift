@@ -41,7 +41,7 @@ extension Swiftinit.VertexPageContext
     }
 
     @usableFromInline
-    func link(article:Unidoc.Scalar) -> HTML.Link<MarkdownBytecode.SafeView>?
+    func link(article:Unidoc.Scalar) -> HTML.Link<Markdown.Bytecode.SafeView>?
     {
         self[article: article].map
         {

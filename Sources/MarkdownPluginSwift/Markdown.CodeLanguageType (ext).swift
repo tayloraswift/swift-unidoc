@@ -1,6 +1,6 @@
 import MarkdownABI
 
-extension MarkdownCodeLanguageType where Self == MarkdownCodeLanguage.Swift
+extension Markdown.CodeLanguageType where Self == Markdown.SwiftLanguage
 {
     @inlinable public static
     var swift:Self { .init() }

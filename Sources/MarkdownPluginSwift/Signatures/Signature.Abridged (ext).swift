@@ -24,7 +24,7 @@ extension Signature.Abridged
     init(utf8:[UInt8])
     {
         let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .abridged($0) }
-        let bytecode:MarkdownBytecode = .init
+        let bytecode:Markdown.Bytecode = .init
         {
             for span:SignatureSyntax.Span in signature.elements
             {

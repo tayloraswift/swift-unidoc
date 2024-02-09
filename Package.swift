@@ -466,6 +466,7 @@ let package:Package = .init(
                 .target(name: "InlineArray"),
                 .target(name: "InlineDictionary"),
                 .target(name: "MarkdownParsing"),
+                .target(name: "MarkdownRendering"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "SemanticVersions"),
                 .target(name: "SHA1"),

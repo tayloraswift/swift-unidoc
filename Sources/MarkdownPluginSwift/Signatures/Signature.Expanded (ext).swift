@@ -54,7 +54,7 @@ extension Signature.Expanded
         var references:[Scalar: Int] = [:]
         var referents:[Scalar] = []
 
-        let bytecode:MarkdownBytecode = .init
+        let bytecode:Markdown.Bytecode = .init
         {
             for span:SignatureSyntax.Span in signature.elements
             {

@@ -39,9 +39,9 @@ extension MarkdownInline.Container:MarkdownElement
         }
     }
     public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
-        let context:MarkdownBytecode.Context
+        let context:Markdown.Bytecode.Context
         switch self.type
         {
         case .em:       context = .em

@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Date:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .date }
+        var context:Markdown.Bytecode.Context { .date }
     }
 }

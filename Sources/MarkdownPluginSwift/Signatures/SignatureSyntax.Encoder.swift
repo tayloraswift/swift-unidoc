@@ -11,13 +11,13 @@ extension SignatureSyntax
 
         /// An override for the color of the next span.
         private
-        var color:MarkdownBytecode.Context?
+        var color:Markdown.Bytecode.Context?
         /// The depth level used to encode the next span.
         private
         var depth:Span.Depth?
 
         init(spans:[Span] = [],
-            color:MarkdownBytecode.Context? = nil,
+            color:Markdown.Bytecode.Context? = nil,
             depth:Span.Depth? = nil)
         {
             self.spans = spans
@@ -39,7 +39,7 @@ extension SignatureSyntax.Encoder
 }
 extension SignatureSyntax.Encoder
 {
-    subscript(in color:MarkdownBytecode.Context) -> Self
+    subscript(in color:Markdown.Bytecode.Context) -> Self
     {
         get
         {
@@ -49,7 +49,7 @@ extension SignatureSyntax.Encoder
         }
         _modify
         {
-            let outer:MarkdownBytecode.Context? = self.color
+            let outer:Markdown.Bytecode.Context? = self.color
             self.color = color
             defer { self.color = outer }
 
@@ -87,7 +87,7 @@ extension SignatureSyntax.Encoder
         for span:SyntaxClassifiedRange in syntax.classifications
         {
             let range:Range<Int> = span.offset ..< span.offset + span.length
-            let color:MarkdownBytecode.Context? = .init(classification: span.kind)
+            let color:Markdown.Bytecode.Context? = .init(classification: span.kind)
 
             self.spans.append(.text(range, color.map { self.color ?? $0 }, self.depth))
         }

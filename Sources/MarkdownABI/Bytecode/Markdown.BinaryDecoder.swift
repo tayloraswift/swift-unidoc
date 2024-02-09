@@ -1,19 +1,22 @@
-@frozen public
-struct MarkdownBinaryDecoder
+extension Markdown
 {
-    @usableFromInline
-    let bytes:[UInt8]
-    @usableFromInline
-    var index:Int
-
-    @inlinable internal
-    init(bytes:[UInt8])
+    @frozen public
+    struct BinaryDecoder
     {
-        self.bytes = bytes
-        self.index = bytes.startIndex
+        @usableFromInline
+        let bytes:[UInt8]
+        @usableFromInline
+        var index:Int
+
+        @inlinable internal
+        init(bytes:[UInt8])
+        {
+            self.bytes = bytes
+            self.index = bytes.startIndex
+        }
     }
 }
-extension MarkdownBinaryDecoder
+extension Markdown.BinaryDecoder
 {
     @inlinable internal mutating
     func read() -> UInt8?
@@ -68,10 +71,10 @@ extension MarkdownBinaryDecoder
         self.read().flatMap(Instruction.init(rawValue:))
     }
 }
-extension MarkdownBinaryDecoder:IteratorProtocol
+extension Markdown.BinaryDecoder:IteratorProtocol
 {
     @inlinable public mutating
-    func next() -> MarkdownInstruction?
+    func next() -> Markdown.Instruction?
     {
         guard let byte:UInt8 = self.read()
         else
@@ -87,10 +90,10 @@ extension MarkdownBinaryDecoder:IteratorProtocol
             break
         }
 
-        switch MarkdownBytecode.Marker.init(rawValue: byte)
+        switch Markdown.Bytecode.Marker.init(rawValue: byte)
         {
         case .push?:
-            if  let instruction:MarkdownBytecode.Context = self.read()
+            if  let instruction:Markdown.Bytecode.Context = self.read()
             {
                 return .push(instruction)
             }
@@ -99,41 +102,41 @@ extension MarkdownBinaryDecoder:IteratorProtocol
             return .pop
 
         case .attribute?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read()
+            if  let attribute:Markdown.Bytecode.Attribute = self.read()
             {
                 return .attribute(attribute)
             }
 
         case .attribute8?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+            if  let attribute:Markdown.Bytecode.Attribute = self.read(),
                 let reference:Int = self.read(UInt8.self)
             {
                 return .attribute(attribute, reference)
             }
 
         case .attribute16?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+            if  let attribute:Markdown.Bytecode.Attribute = self.read(),
                 let reference:Int = self.read(UInt16.self)
             {
                 return .attribute(attribute, reference)
             }
 
         case .attribute32?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+            if  let attribute:Markdown.Bytecode.Attribute = self.read(),
                 let reference:Int = self.read(UInt32.self)
             {
                 return .attribute(attribute, reference)
             }
 
         case .attribute64?:
-            if  let attribute:MarkdownBytecode.Attribute = self.read(),
+            if  let attribute:Markdown.Bytecode.Attribute = self.read(),
                 let reference:Int = self.read(UInt64.self)
             {
                 return .attribute(attribute, reference)
             }
 
         case .emit?:
-            if  let instruction:MarkdownBytecode.Emission = self.read()
+            if  let instruction:Markdown.Bytecode.Emission = self.read()
             {
                 return .emit(instruction)
             }

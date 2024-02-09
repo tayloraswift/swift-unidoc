@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class SeeAlso:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .seealso }
+        var context:Markdown.Bytecode.Context { .seealso }
     }
 }

@@ -1,4 +1,4 @@
-extension MarkdownCodeLanguage.PlainText
+extension Markdown.PlainText
 {
     @frozen public
     enum Highlighter
@@ -6,11 +6,11 @@ extension MarkdownCodeLanguage.PlainText
         case none
     }
 }
-extension MarkdownCodeLanguage.PlainText.Highlighter:MarkdownCodeHighlighter
+extension Markdown.PlainText.Highlighter:Markdown.CodeHighlighter
 {
     /// Writes the text to the binary without any highlighting.
     @inlinable public
-    func emit(_ text:String, into binary:inout MarkdownBinaryEncoder)
+    func emit(_ text:String, into binary:inout Markdown.BinaryEncoder)
     {
         binary += text
     }
