@@ -1,9 +1,9 @@
 import MarkdownAST
 
-extension MarkdownDocumentation
+extension Markdown
 {
     @frozen public
-    struct Metadata
+    struct SemanticMetadata
     {
         public
         var merge:MergeBehavior?
@@ -15,7 +15,7 @@ extension MarkdownDocumentation
         }
     }
 }
-extension MarkdownDocumentation.Metadata
+extension Markdown.SemanticMetadata
 {
     mutating
     func update(with blocks:[Markdown.BlockElement])

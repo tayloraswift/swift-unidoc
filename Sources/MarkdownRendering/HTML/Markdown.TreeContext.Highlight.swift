@@ -1,13 +1,13 @@
 import HTML
 
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     struct Highlight:Equatable, Hashable, Sendable
     {
         let container:HTML.ContainerElement
-        let type:MarkdownSyntaxHighlight
+        let type:Markdown.SyntaxHighlight
 
-        init(container:HTML.ContainerElement, type:MarkdownSyntaxHighlight)
+        init(container:HTML.ContainerElement, type:Markdown.SyntaxHighlight)
         {
             self.container = container
             self.type = type

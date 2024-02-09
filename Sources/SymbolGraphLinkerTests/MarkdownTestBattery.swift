@@ -22,7 +22,7 @@ extension MarkdownTestBattery
 
         tests.do
         {
-            let documentation:MarkdownDocumentation = markdown.parse(using: parser,
+            let documentation:Markdown.SemanticDocument = markdown.parse(using: parser,
                 with: &ignore)
             let overview:MarkdownBinary? = documentation.overview.map
             {

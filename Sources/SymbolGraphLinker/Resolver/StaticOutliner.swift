@@ -107,7 +107,7 @@ extension StaticOutliner
     }
 
     mutating
-    func link(attached body:MarkdownDocumentation,
+    func link(attached body:Markdown.SemanticDocument,
         file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])
     {
         let overview:Markdown.Bytecode = self.link(overview: body.overview)
@@ -129,7 +129,7 @@ extension StaticOutliner
     }
 
     mutating
-    func link(article body:MarkdownDocumentation,
+    func link(article body:Markdown.SemanticDocument,
         file:Int32?) -> SymbolGraph.Article
     {
         let overview:Markdown.Bytecode = self.link(overview: body.overview)
@@ -173,11 +173,11 @@ extension StaticOutliner
 extension StaticOutliner
 {
     private mutating
-    func link(topics:[MarkdownDocumentation.Topic]) -> [SymbolGraph.Topic]
+    func link(topics:[Markdown.SemanticTopic]) -> [SymbolGraph.Topic]
     {
         topics.map
         {
-            (topic:MarkdownDocumentation.Topic) in
+            (topic:Markdown.SemanticTopic) in
 
             let overview:Markdown.Bytecode = .init
             {
@@ -218,8 +218,8 @@ extension StaticOutliner
 
     private mutating
     func link(
-        details:MarkdownDocumentation.Details,
-        topics:[MarkdownDocumentation.Topic] = []) -> Markdown.Bytecode
+        details:Markdown.SemanticSections,
+        topics:[Markdown.SemanticTopic] = []) -> Markdown.Bytecode
     {
         .init
         {
@@ -231,7 +231,7 @@ extension StaticOutliner
                 $0.emit(into: &binary)
             }
 
-            for topic:MarkdownDocumentation.Topic in topics
+            for topic:Markdown.SemanticTopic in topics
             {
                 topic.visit(members: true)
                 {

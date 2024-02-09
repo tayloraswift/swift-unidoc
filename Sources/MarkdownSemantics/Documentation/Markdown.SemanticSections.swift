@@ -1,25 +1,25 @@
 import MarkdownAST
 
-extension MarkdownDocumentation
+extension Markdown
 {
     @frozen public
-    struct Details
+    struct SemanticSections
     {
         public
-        var parameters:Markdown.BlockParameters?
+        var parameters:BlockParameters?
         public
-        var returns:Markdown.BlockAside.Returns?
+        var returns:BlockAside.Returns?
         public
-        var `throws`:Markdown.BlockAside.Throws?
+        var `throws`:BlockAside.Throws?
 
         public
-        var article:[Markdown.BlockElement]
+        var article:[BlockElement]
 
         public
-        init(parameters:Markdown.BlockParameters?,
-            returns:Markdown.BlockAside.Returns?,
-            throws:Markdown.BlockAside.Throws?,
-            article:[Markdown.BlockElement])
+        init(parameters:BlockParameters?,
+            returns:BlockAside.Returns?,
+            throws:BlockAside.Throws?,
+            article:[BlockElement])
         {
             self.parameters = parameters
             self.returns = returns
@@ -28,7 +28,7 @@ extension MarkdownDocumentation
         }
     }
 }
-extension MarkdownDocumentation.Details
+extension Markdown.SemanticSections
 {
     @inlinable public
     var isEmpty:Bool
@@ -39,7 +39,7 @@ extension MarkdownDocumentation.Details
         self.article.isEmpty
     }
 }
-extension MarkdownDocumentation.Details
+extension Markdown.SemanticSections
 {
     /// Calls ``yield`` once for each block in the structure.
     ///

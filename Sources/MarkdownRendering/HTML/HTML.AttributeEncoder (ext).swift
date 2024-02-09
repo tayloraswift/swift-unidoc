@@ -3,7 +3,7 @@ import HTML
 extension HTML.AttributeEncoder
 {
     @inlinable public
-    var highlight:MarkdownSyntaxHighlight?
+    var highlight:Markdown.SyntaxHighlight?
     {
         get
         {

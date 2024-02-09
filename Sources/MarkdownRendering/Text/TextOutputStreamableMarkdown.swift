@@ -45,15 +45,15 @@ extension TextOutputStreamableMarkdown
     public
     func write(to utf8:inout [UInt8]) throws
     {
-        var attributes:MarkdownTextContext.AttributeContext = .init()
-        var stack:[MarkdownTextContext] = []
+        var attributes:Markdown.TextContext.AttributeContext = .init()
+        var stack:[Markdown.TextContext] = []
 
         for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
             {
             case .invalid:
-                throw MarkdownRenderingError.invalidInstruction
+                throw Markdown.RenderingError.invalidInstruction
 
             case .attribute(let attribute, nil):
                 attributes.flush(beginning: attribute)
@@ -78,7 +78,7 @@ extension TextOutputStreamableMarkdown
                 guard case _? = stack.popLast()
                 else
                 {
-                    throw MarkdownRenderingError.illegalInstruction
+                    throw Markdown.RenderingError.illegalInstruction
                 }
 
             case .utf8(let codeunit):
@@ -92,7 +92,7 @@ extension TextOutputStreamableMarkdown
         guard stack.isEmpty
         else
         {
-            throw MarkdownRenderingError.interrupted
+            throw Markdown.RenderingError.interrupted
         }
     }
 }

@@ -1,9 +1,9 @@
 import MarkdownAST
 
-extension MarkdownDocumentation
+extension Markdown
 {
     @frozen public
-    struct Topic
+    struct SemanticTopic
     {
         public
         let article:[Markdown.BlockElement]
@@ -18,7 +18,7 @@ extension MarkdownDocumentation
         }
     }
 }
-extension MarkdownDocumentation.Topic
+extension Markdown.SemanticTopic
 {
     /// Calls ``yield`` once for each block in the structure. If `members` is true, this
     /// function will materialize the topic’s ``members`` as an unordered list of autolinks
@@ -42,7 +42,7 @@ extension MarkdownDocumentation.Topic
         try yield(Markdown.BlockListUnordered.init(items))
     }
 }
-extension MarkdownDocumentation.Topic
+extension Markdown.SemanticTopic
 {
     init?(heading:Markdown.BlockElement?, body blocks:ArraySlice<Markdown.BlockElement>)
     {

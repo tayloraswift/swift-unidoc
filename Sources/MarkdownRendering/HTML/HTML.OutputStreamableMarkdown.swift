@@ -61,12 +61,12 @@ extension HTML.OutputStreamableMarkdown
     public
     func render(to html:inout HTML.ContentEncoder) throws
     {
-        var attributes:MarkdownElementContext.AttributeContext = .init()
-        var stack:[MarkdownElementContext] = []
+        var attributes:Markdown.TreeContext.AttributeContext = .init()
+        var stack:[Markdown.TreeContext] = []
 
         defer
         {
-            for context:MarkdownElementContext in stack.reversed()
+            for context:Markdown.TreeContext in stack.reversed()
             {
                 html.close(context: context)
             }
@@ -78,7 +78,7 @@ extension HTML.OutputStreamableMarkdown
             switch instruction
             {
             case .invalid:
-                throw MarkdownRenderingError.invalidInstruction
+                throw Markdown.RenderingError.invalidInstruction
 
             case .attribute(let attribute, nil):
                 attributes.flush(beginning: attribute)
@@ -106,7 +106,7 @@ extension HTML.OutputStreamableMarkdown
             case .push(let element):
                 attributes.flush()
 
-                let context:MarkdownElementContext = .init(from: element,
+                let context:Markdown.TreeContext = .init(from: element,
                     attributes: &attributes.list)
 
                 html.emit(newlines: &newlines)
@@ -128,7 +128,7 @@ extension HTML.OutputStreamableMarkdown
                     html.close(context: context)
 
                 case nil:
-                    throw MarkdownRenderingError.illegalInstruction
+                    throw Markdown.RenderingError.illegalInstruction
                 }
 
             case .utf8(let codeunit):
@@ -162,7 +162,7 @@ extension HTML.OutputStreamableMarkdown
         guard stack.isEmpty
         else
         {
-            throw MarkdownRenderingError.interrupted
+            throw Markdown.RenderingError.interrupted
         }
     }
 }

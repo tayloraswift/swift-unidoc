@@ -1,33 +1,36 @@
 import HTML
 import MarkdownABI
 
-enum MarkdownElementContext
+extension Markdown
 {
-    /// An anchorable context, which generates an HTML container element
-    /// with an `a` element inside of it that links to the outer container’s
-    /// fragment `id`.
-    case anchorable(HTML.ContainerElement)
-    /// A normal HTML container element.
-    case container(HTML.ContainerElement)
-    /// A syntax highlight, which generates an `a` or `span` element,
-    /// depending on its attribute context.
-    case highlight(Highlight)
-    /// A section context, which generates a `section` element, with
-    /// a synthesized `h2` heading.
-    case section(Section)
-    /// A signage context, which generates an `aside` element, with
-    /// a synthesized `h3` heading.
-    case signage(Signage)
-    /// A snippet context, which generates a `pre` element with a `code`
-    /// element inside of it, and enables line numbers. The outer `pre`
-    /// element has a single class named `snippet`.
-    case snippet
-    /// The transparent context, which ignores attributes, and renders
-    /// all nested elements without any wrappers, and without escaping
-    /// special characters.
-    case transparent
+    enum TreeContext
+    {
+        /// An anchorable context, which generates an HTML container element
+        /// with an `a` element inside of it that links to the outer container’s
+        /// fragment `id`.
+        case anchorable(HTML.ContainerElement)
+        /// A normal HTML container element.
+        case container(HTML.ContainerElement)
+        /// A syntax highlight, which generates an `a` or `span` element,
+        /// depending on its attribute context.
+        case highlight(Highlight)
+        /// A section context, which generates a `section` element, with
+        /// a synthesized `h2` heading.
+        case section(Section)
+        /// A signage context, which generates an `aside` element, with
+        /// a synthesized `h3` heading.
+        case signage(Signage)
+        /// A snippet context, which generates a `pre` element with a `code`
+        /// element inside of it, and enables line numbers. The outer `pre`
+        /// element has a single class named `snippet`.
+        case snippet
+        /// The transparent context, which ignores attributes, and renders
+        /// all nested elements without any wrappers, and without escaping
+        /// special characters.
+        case transparent
+    }
 }
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     private static
     func heading(_ type:HTML.ContainerElement, attributes:borrowing AttributeList) -> Self
@@ -36,7 +39,7 @@ extension MarkdownElementContext
     }
 
     private static
-    func highlight(_ type:MarkdownSyntaxHighlight, attributes:inout AttributeList) -> Self
+    func highlight(_ type:Markdown.SyntaxHighlight, attributes:inout AttributeList) -> Self
     {
         let container:HTML.ContainerElement = attributes.href == nil ? .span : .a
         attributes.append(class: type)
@@ -56,7 +59,7 @@ extension MarkdownElementContext
         return .signage(type)
     }
 }
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     init(from markdown:Markdown.Bytecode.Context, attributes:inout AttributeList)
     {
