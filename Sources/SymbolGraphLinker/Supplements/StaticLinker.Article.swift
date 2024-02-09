@@ -2,6 +2,7 @@ import MarkdownSemantics
 
 extension StaticLinker
 {
+    @frozen public
     struct Article
     {
         let standalone:Int32?

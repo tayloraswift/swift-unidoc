@@ -38,11 +38,10 @@ extension Artifacts.Culture:Identifiable
 }
 extension Artifacts.Culture
 {
-    func loadMarkdown(root:Symbol.FileBase) throws -> [MarkdownSourceFile]
+    func loadMarkdown(symbolizer:SPM.PathSymbolizer) throws -> [MarkdownSourceFile]
     {
         //  Compute this once, since it’s used in the loop below.
         let bundle:Symbol.Module = self.module.id
-        let root:FilePath = .init(root.path).lexicallyNormalized()
 
         return try self.articles.sorted
         {
@@ -50,15 +49,7 @@ extension Artifacts.Culture
         }
         .map
         {
-            guard $0.components.starts(with: root.components)
-            else
-            {
-                fatalError("Could not lexically rebase article file path '\($0)'")
-            }
-
-            let relative:FilePath = .init(root: nil,
-                $0.components.dropFirst(root.components.count))
-            let id:Symbol.File = .init("\(relative)")
+            let id:Symbol.File = symbolizer.rebase($0)
 
             print("Loading markdown: \(id)")
 

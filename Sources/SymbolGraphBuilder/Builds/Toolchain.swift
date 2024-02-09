@@ -239,28 +239,28 @@ extension Toolchain
     /// Dumps the symbols for the given package, using the `output` workspace as the
     /// output directory.
     func dump(from package:PackageNode,
-        snippets:Snippets,
+        snippetsDirectory:String,
         include:inout [FilePath],
-        output:ArtifactDirectory,
+        output:ArtifactsDirectory,
         triple:Triple,
         pretty:Bool = false) async throws -> Artifacts
     {
-        //  Note: the manifest root is the root we want; the repository root may
-        //  be a relative path.
-        let sources:SPM.Build.Sources = try .init(scanning: package)
+        let sources:SPM.PackageSources = try .init(scanning: package,
+            snippetsDirectory: snippetsDirectory)
+
         let cultures:[Artifacts.Culture] = try await self.dump(
-            modules: sources.modules,
+            modules: sources.cultures,
             include: &include,
             output: output,
             triple: triple,
             pretty: pretty)
 
-        return .init(cultures: cultures, snippets: snippets.list, root: package.root)
+        return .init(cultures: cultures, snippets: sources.snippets, root: package.root)
     }
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(modules:[SPM.Build.Sources.Module],
-        output:ArtifactDirectory,
+    func dump(modules:[SPM.NominalSources],
+        output:ArtifactsDirectory,
         triple:Triple,
         pretty:Bool = false) async throws -> Artifacts
     {
@@ -276,13 +276,13 @@ extension Toolchain
     }
 
     private
-    func dump(modules:[SPM.Build.Sources.Module],
+    func dump(modules:[SPM.NominalSources],
         include:inout [FilePath],
-        output:ArtifactDirectory,
+        output:ArtifactsDirectory,
         triple:Triple,
         pretty:Bool) async throws -> [Artifacts.Culture]
     {
-        for sources:SPM.Build.Sources.Module in modules
+        for sources:SPM.NominalSources in modules
         {
             let label:String
             if  case .toolchain? = sources.origin

@@ -320,6 +320,7 @@ let package:Package = .init(
             [
                 .target(name: "MarkdownABI"),
                 .target(name: "Signatures"),
+                .target(name: "Snippets"),
                 .target(name: "Symbols"),
 
                 .product(name: "SwiftIDEUtils", package: "swift-syntax"),
@@ -389,6 +390,11 @@ let package:Package = .init(
         .target(name: "Sitemaps", dependencies:
             [
                 .target(name: "DOM"),
+            ]),
+
+        .target(name: "Snippets", dependencies:
+            [
+                .target(name: "MarkdownABI"),
             ]),
 
         .target(name: "Sources"),
@@ -463,6 +469,7 @@ let package:Package = .init(
                 .target(name: "MarkdownSemantics"),
                 .target(name: "SemanticVersions"),
                 .target(name: "SHA1"),
+                .target(name: "Snippets"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
@@ -474,6 +481,12 @@ let package:Package = .init(
             [
                 .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
+                //  This is the point where the symbol graph compiler becomes infected with a
+                //  (non-macro) SwiftSyntax dependency.
+                //
+                //  This also means that the static symbol graph linker can freely use any
+                //  of the SwiftSyntax-powered plugins, since we have already paid for the
+                //  dependency.
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),

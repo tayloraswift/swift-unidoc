@@ -6,14 +6,14 @@ extension CodelinkResolver
     struct Scope
     {
         public
-        let namespace:Symbol.Module
+        let namespace:Symbol.Module?
         public
         let imports:[Symbol.Module]
         public
         let path:[String]
 
         @inlinable public
-        init(namespace:Symbol.Module, imports:[Symbol.Module] = [], path:[String] = [])
+        init(namespace:Symbol.Module?, imports:[Symbol.Module] = [], path:[String] = [])
         {
             self.namespace = namespace
             self.imports = imports

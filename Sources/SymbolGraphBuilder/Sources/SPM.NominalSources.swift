@@ -2,10 +2,10 @@ import SymbolGraphs
 import Symbols
 import System
 
-extension SPM.Build.Sources
+extension SPM
 {
     /// Stores information about the source files for a module.
-    struct Module
+    struct NominalSources
     {
         var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
@@ -32,7 +32,7 @@ extension SPM.Build.Sources
         }
     }
 }
-extension SPM.Build.Sources.Module
+extension SPM.NominalSources
 {
     init(scanning module:SymbolGraph.Module,
         exclude:borrowing [String],
@@ -75,7 +75,7 @@ extension SPM.Build.Sources.Module
             origin: .toolchain)
     }
 }
-extension SPM.Build.Sources.Module
+extension SPM.NominalSources
 {
     private mutating
     func scan(excluding exclude:[String]) throws

@@ -1,21 +1,20 @@
 import Symbols
 
 @frozen public
-struct SnippetSourceFile:Equatable, Sendable
+struct SwiftSourceFile:Equatable, Sendable
 {
     public
     let name:String
     public
+    let path:Symbol.File
+    public
     let utf8:[UInt8]
 
     @inlinable public
-    init(name:String, utf8:[UInt8])
+    init(name:String, path:Symbol.File, utf8:[UInt8])
     {
+        self.path = path
         self.name = name
         self.utf8 = utf8
     }
-}
-extension SnippetSourceFile
-{
-    var id:Symbol.Module { .init(mangling: self.name) }
 }

@@ -9,10 +9,13 @@ import System
 struct Artifacts
 {
     let cultures:[Culture]
-    let snippets:[Snippet]
+    let snippets:[SPM.SnippetSources]
+
     var root:Symbol.FileBase?
 
-    init(cultures:[Culture], snippets:[Snippet], root:Symbol.FileBase? = nil)
+    init(cultures:[Artifacts.Culture],
+        snippets:[SPM.SnippetSources],
+        root:Symbol.FileBase? = nil)
     {
         self.cultures = cultures
         self.snippets = snippets
@@ -21,10 +24,15 @@ struct Artifacts
 }
 extension Artifacts
 {
+    private
+    var symbolizer:SPM.PathSymbolizer? { self.root.map(SPM.PathSymbolizer.init(root:)) }
+}
+extension Artifacts
+{
     func loadMarkdown() throws -> [[MarkdownSourceFile]]
     {
         guard
-        let root:Symbol.FileBase = self.root
+        let symbolizer:SPM.PathSymbolizer = self.symbolizer
         else
         {
             return []
@@ -42,16 +50,26 @@ extension Artifacts
             default:            return []
             }
 
-            return try $0.loadMarkdown(root: root)
+            return try $0.loadMarkdown(symbolizer: symbolizer)
         }
     }
 
-    func loadSnippets() throws -> [SnippetSourceFile]
+    func loadSnippets() throws -> [SwiftSourceFile]
     {
-        try self.snippets.map
+        guard
+        let symbolizer:SPM.PathSymbolizer = self.symbolizer
+        else
         {
-            print("Loading snippet: \($0.name)")
-            return .init(name: $0.name, utf8: try $0.location.read())
+            return []
+        }
+
+        return try self.snippets.map
+        {
+            let id:Symbol.File = symbolizer.rebase($0.location)
+
+            print("Loading snippet: \(id)")
+
+            return .init(name: $0.name, path: id, utf8: try $0.location.read())
         }
     }
 }

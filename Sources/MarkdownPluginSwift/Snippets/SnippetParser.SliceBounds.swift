@@ -95,8 +95,6 @@ extension SnippetParser.SliceBounds
         {
             slice.ranges.append(range)
 
-            print(slice.ranges)
-
             var start:Int? = range.lowerBound
             for j:Int in range
             {
