@@ -6,10 +6,10 @@ extension Toolchain
     struct Build
     {
         /// Where to emit documentation artifacts to.
-        let output:ArtifactDirectory
+        let output:ArtifactsDirectory
 
         private
-        init(output:ArtifactDirectory)
+        init(output:ArtifactsDirectory)
         {
             self.output = output
         }

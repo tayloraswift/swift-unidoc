@@ -1,6 +1,6 @@
 import System
 
-extension SPM.Build.Sources.Module
+extension SPM.NominalSources
 {
     enum Origin
     {

@@ -1,6 +1,7 @@
 import MarkdownABI
 import MarkdownAST
 import MarkdownPluginSwift
+import Snippets
 import SymbolGraphCompiler
 import SymbolGraphLinker
 import SymbolGraphParts
@@ -68,37 +69,35 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            //  Load and attach snippets.
-            let snippets:[SnippetSourceFile] = try profiler.measure(\.loadingSources)
+            let markdown:[[MarkdownSourceFile]]
+            let snippets:[SwiftSourceFile]
+
+            (markdown, snippets) = try profiler.measure(\.loadingSources)
             {
-                try artifacts.loadSnippets()
+                (
+                    try artifacts.loadMarkdown(),
+                    try artifacts.loadSnippets()
+                )
             }
 
-            profiler.measure(\.linking)
+            let articles:[[StaticLinker.Article]] = profiler.measure(\.linking)
             {
-                linker.attach(snippets: snippets)
+                //  Calling this is mandatory, even if there are no supplements!
+                linker.attach(markdown: markdown, snippets: snippets)
             }
 
+            _ = consume markdown
             _ = consume snippets
-
-            //  Load and attach markdown supplements.
-            let markdown:[[MarkdownSourceFile]] = try profiler.measure(\.loadingSources)
-            {
-                try artifacts.loadMarkdown()
-            }
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                //  Calling this is mandatory, even if there are no supplements!
-                linker.attach(markdown: markdown)
+                linker.link(articles: articles)
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
 
                 return try linker.load()
             }
-
-            _ = consume markdown
 
             linker.status(root: artifacts.root).emit(colors: .enabled)
 

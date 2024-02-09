@@ -1,6 +1,6 @@
 import System
 
-struct ArtifactDirectory:SystemWorkspace
+struct ArtifactsDirectory:SystemWorkspace
 {
     let path:FilePath
 

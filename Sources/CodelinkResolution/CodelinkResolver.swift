@@ -27,19 +27,22 @@ extension CodelinkResolver
         switch link.base
         {
         case .relative:
-            for index:Int in
-                (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
+            if  let namespace:Symbol.Module = self.scope.namespace
             {
-                let overloads:Overloads = self.table.query(
-                    qualified: ["\(self.scope.namespace)"]
-                        + self.scope.path[..<index]
-                        + link.path.components,
-                    suffix: link.suffix)
-
-                guard overloads.isEmpty
-                else
+                for index:Int in
+                    (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
                 {
-                    return overloads
+                    let overloads:Overloads = self.table.query(
+                        qualified: ["\(namespace)"]
+                            + self.scope.path[..<index]
+                            + link.path.components,
+                        suffix: link.suffix)
+
+                    guard overloads.isEmpty
+                    else
+                    {
+                        return overloads
+                    }
                 }
             }
             for namespace:Symbol.Module in self.scope.imports where

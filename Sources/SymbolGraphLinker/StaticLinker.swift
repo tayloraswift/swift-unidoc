@@ -9,6 +9,7 @@ import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
 import Signatures
+import Snippets
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
@@ -248,22 +249,73 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(snippets supplements:[SnippetSourceFile])
+    func attach(
+        markdown:[[MarkdownSourceFile]],
+        snippets:[SwiftSourceFile]) -> [[Article]]
+    {
+        //  Markdown supplements are attached first, because the snippets may reference them.
+        defer { self.attach(snippets: snippets) }
+        return  self.attach(markdown: markdown)
+    }
+
+    private mutating
+    func attach(snippets supplements:[SwiftSourceFile])
     {
         guard
-        let swiftParser:MarkdownCodeLanguage.Swift = self.swiftParser
+        let swift:MarkdownCodeLanguage.Swift = self.swiftParser
         else
         {
             return
         }
 
-        for snippet:SnippetSourceFile in supplements
+        //  Right now we only do one pass over the snippets, since no one should be referencing
+        //  snippets from other snippets.
+        let scopes:StaticResolver.Scopes = .init(
+            codelink: .init(namespace: nil, imports: self.symbolizer.importAll, path: []),
+            doclink: nil)
+
+        for snippet:SwiftSourceFile in supplements
         {
-            swiftParser.highlighter._parse(snippet: snippet.utf8)
+            let (description, slices):(String, [Snippet.Slice]) = swift.parse(
+                snippet: snippet.utf8)
+
+            let file:Int32 = self.symbolizer.intern(snippet.path)
+            let article:SymbolGraph.Article?
+
+            if  description.allSatisfy(\.isWhitespace)
+            {
+                article = nil
+            }
+            else
+            {
+                let blocks:[MarkdownBlock] = self.doccommentParser.parse(MarkdownSource.init(
+                    location: .init(position: .zero, file: file),
+                    text: description))
+
+                article = self.tables.resolving(with: scopes)
+                {
+                    $0.link(blocks: blocks, file: file)
+                }
+
+                print("Snippet '\(snippet.name)':")
+                print("--------------------")
+                print("\(article!.overview.safe)")
+                print("\(article!.details.safe)")
+                print("--------------------")
+            }
+
+            for slice:Snippet.Slice in slices
+            {
+                print("Snippet '\(snippet.name).\(slice.id)':")
+                print("--------------------")
+                print("\(slice.bytecode.safe)")
+                print("--------------------")
+            }
         }
     }
-    public mutating
-    func attach(markdown supplements:[[MarkdownSourceFile]])
+
+    private mutating
+    func attach(markdown supplements:[[MarkdownSourceFile]]) -> [[Article]]
     {
         let articles:[[Article]] = zip(supplements.indices, supplements).map
         {
@@ -313,32 +365,9 @@ extension StaticLinker
                 hash: .init(hashing: "\(namespace)")))
         }
 
-        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
-        {
-            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
-            for article:Article in articles
-            {
-                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
-                {
-                    if  let standalone:Int32 = article.standalone
-                    {
-                        (
-                            self.symbolizer.graph.articles.nodes[standalone].article,
-                            self.symbolizer.graph.articles.nodes[standalone].topics
-                        ) = $0.link(attached: article.body, file: article.file)
-                    }
-                    else
-                    {
-                        //  This is the article for the module’s landing page.
-                        (
-                            self.symbolizer.graph.cultures[culture].article,
-                            self.symbolizer.graph.cultures[culture].topics
-                        ) = $0.link(attached: article.body, file: article.file)
-                    }
-                }
-            }
-        }
+        return articles
     }
+
     /// Parses and stores the given supplemental documentation if it has a binding
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
@@ -711,8 +740,8 @@ extension StaticLinker
 
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
-                let importAll:[Symbol.Module] = self.symbolizer.importAll ;
-
+                let importAll:[Symbol.Module] = self.symbolizer.importAll
+                ;
                 {
                     let scopes:StaticResolver.Scopes = .init(
                         codelink: .init(
@@ -727,6 +756,38 @@ extension StaticLinker
                     }
 
                 } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
+            }
+        }
+    }
+}
+extension StaticLinker
+{
+    public mutating
+    func link(articles:[[Article]])
+    {
+        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
+        {
+            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
+            for article:Article in articles
+            {
+                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
+                {
+                    if  let standalone:Int32 = article.standalone
+                    {
+                        (
+                            self.symbolizer.graph.articles.nodes[standalone].article,
+                            self.symbolizer.graph.articles.nodes[standalone].topics
+                        ) = $0.link(attached: article.body, file: article.file)
+                    }
+                    else
+                    {
+                        //  This is the article for the module’s landing page.
+                        (
+                            self.symbolizer.graph.cultures[culture].article,
+                            self.symbolizer.graph.cultures[culture].topics
+                        ) = $0.link(attached: article.body, file: article.file)
+                    }
+                }
             }
         }
     }
