@@ -31,7 +31,7 @@ extension SwiftFlavoredMarkdownParser
 extension SwiftFlavoredMarkdownParser:MarkdownParser
 {
     public
-    func parse(_ source:borrowing MarkdownSource) -> [MarkdownBlock]
+    func parse(_ source:borrowing MarkdownSource) -> [Markdown.BlockElement]
     {
         let document:_Document = .init(parsing: source.text, options:
         [
@@ -39,7 +39,7 @@ extension SwiftFlavoredMarkdownParser:MarkdownParser
             .parseSymbolLinks,
         ])
 
-        var blocks:[MarkdownBlock] = document.blockChildren.compactMap
+        var blocks:[Markdown.BlockElement] = document.blockChildren.compactMap
         {
             self.block(from: $0, in: source)
         }
@@ -54,18 +54,18 @@ extension SwiftFlavoredMarkdownParser
     private
     func block(
         from markup:borrowing any _BlockMarkup,
-        in source:borrowing MarkdownSource) -> MarkdownBlock?
+        in source:borrowing MarkdownSource) -> Markdown.BlockElement?
     {
         switch copy markup
         {
         case let block as _BlockQuote:
-            return MarkdownBlock.Quote.init(block.blockChildren.compactMap
+            return Markdown.BlockQuote.init(block.blockChildren.compactMap
                 {
                     self.block(from: $0, in: source)
                 })
 
         case let block as _BlockDirective:
-            return MarkdownBlock.Directive.init(name: block.name,
+            return Markdown.BlockDirective.init(name: block.name,
                 arguments: block.argumentText.parseNameValueArguments().map
                 {
                     ($0.name, $0.value)
@@ -87,14 +87,14 @@ extension SwiftFlavoredMarkdownParser
             }
             else
             {
-                return MarkdownBlock.Code<Markdown.PlainText>.init(text: block.code)
+                return Markdown.BlockCode<Markdown.PlainText>.init(text: block.code)
             }
 
         case let block as _Heading:
-            return MarkdownBlock.Heading.init(level: block.level,
+            return Markdown.BlockHeading.init(level: block.level,
                 elements: block.inlineChildren.map
                 {
-                    MarkdownInline.Block.init(from: $0, in: source)
+                    Markdown.InlineElement.init(from: $0, in: source)
                 })
 
         case let block as _HTMLBlock:
@@ -105,16 +105,16 @@ extension SwiftFlavoredMarkdownParser
                 return nil
             }
 
-            return MarkdownBlock.HTML.init(text: block.rawHTML)
+            return Markdown.BlockHTML.init(text: block.rawHTML)
 
         case let block as _Paragraph:
-            return MarkdownBlock.Paragraph.init(block.inlineChildren.map
+            return Markdown.BlockParagraph.init(block.inlineChildren.map
                 {
-                    MarkdownInline.Block.init(from: $0, in: source)
+                    Markdown.InlineElement.init(from: $0, in: source)
                 })
 
         case let table as _Table:
-            return MarkdownTable.init(columns: table.columnAlignments.map
+            return Markdown.Table.init(columns: table.columnAlignments.map
                 {
                     switch $0
                     {
@@ -128,7 +128,7 @@ extension SwiftFlavoredMarkdownParser
                 {
                     .init($0.inlineChildren.map
                     {
-                        MarkdownInline.Block.init(from: $0, in: source)
+                        Markdown.InlineElement.init(from: $0, in: source)
                     })
                 },
                 body: table.body.rows.map
@@ -137,7 +137,7 @@ extension SwiftFlavoredMarkdownParser
                     {
                         .init($0.inlineChildren.map
                         {
-                            MarkdownInline.Block.init(from: $0, in: source)
+                            Markdown.InlineElement.init(from: $0, in: source)
                         })
                     }
                 })
@@ -146,25 +146,25 @@ extension SwiftFlavoredMarkdownParser
             return self.item(from: block, in: source)
 
         case let block as _OrderedList:
-            return MarkdownBlock.OrderedList.init(block.listItems.map
+            return Markdown.BlockListOrdered.init(block.listItems.map
                 {
                     self.item(from: $0, in: source)
                 })
 
         case let block as _UnorderedList:
-            return MarkdownBlock.UnorderedList.init(block.listItems.map
+            return Markdown.BlockListUnordered.init(block.listItems.map
                 {
                     self.item(from: $0, in: source)
                 })
 
         case is _ThematicBreak:
-            return MarkdownBlock.ThematicBreak.init()
+            return Markdown.BlockRule.init()
 
         case is _CustomBlock:
-            return MarkdownBlock.init()
+            return Markdown.BlockElement.init()
 
         case let unsupported:
-            return MarkdownBlock.Code<Markdown.PlainText>.init(
+            return Markdown.BlockCode<Markdown.PlainText>.init(
                 text: "<unsupported markdown node '\(type(of: unsupported))' >")
         }
     }
@@ -172,7 +172,7 @@ extension SwiftFlavoredMarkdownParser
     private
     func item(
         from markup:/* borrowing */ _ListItem,
-        in source:borrowing MarkdownSource) -> MarkdownBlock.Item
+        in source:borrowing MarkdownSource) -> Markdown.BlockItem
     {
         .init(
             checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },

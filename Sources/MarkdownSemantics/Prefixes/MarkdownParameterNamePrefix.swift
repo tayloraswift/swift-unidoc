@@ -17,7 +17,7 @@ extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
     static
     var radius:Int { 2 }
 
-    init?(from elements:__shared [MarkdownInline.Block])
+    init?(from elements:__shared [Markdown.InlineElement])
     {
         if  elements.count == 1
         {

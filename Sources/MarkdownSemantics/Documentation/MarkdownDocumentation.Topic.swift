@@ -6,12 +6,12 @@ extension MarkdownDocumentation
     struct Topic
     {
         public
-        let article:[MarkdownBlock]
+        let article:[Markdown.BlockElement]
         public
-        let members:[MarkdownInline.Autolink]
+        let members:[Markdown.InlineAutolink]
 
         private
-        init(article:[MarkdownBlock], members:[MarkdownInline.Autolink])
+        init(article:[Markdown.BlockElement], members:[Markdown.InlineAutolink])
         {
             self.article = article
             self.members = members
@@ -24,7 +24,7 @@ extension MarkdownDocumentation.Topic
     /// function will materialize the topic’s ``members`` as an unordered list of autolinks
     /// at the end of the ``article``.
     @inlinable public
-    func visit(members:Bool = true, _ yield:(MarkdownBlock) throws -> ()) rethrows
+    func visit(members:Bool = true, _ yield:(Markdown.BlockElement) throws -> ()) rethrows
     {
         try self.article.forEach(yield)
 
@@ -34,33 +34,33 @@ extension MarkdownDocumentation.Topic
             return
         }
 
-        let items:[MarkdownBlock.Item] = self.members.map
+        let items:[Markdown.BlockItem] = self.members.map
         {
-            .init(elements: [MarkdownBlock.Paragraph.init([.autolink($0)])])
+            .init(elements: [Markdown.BlockParagraph.init([.autolink($0)])])
         }
 
-        try yield(MarkdownBlock.UnorderedList.init(items))
+        try yield(Markdown.BlockListUnordered.init(items))
     }
 }
 extension MarkdownDocumentation.Topic
 {
-    init?(heading:MarkdownBlock?, body blocks:ArraySlice<MarkdownBlock>)
+    init?(heading:Markdown.BlockElement?, body blocks:ArraySlice<Markdown.BlockElement>)
     {
-        var blocks:ArraySlice<MarkdownBlock> = copy blocks
+        var blocks:ArraySlice<Markdown.BlockElement> = copy blocks
 
         guard
-        case (let list as MarkdownBlock.UnorderedList)? = blocks.popLast()
+        case (let list as Markdown.BlockListUnordered)? = blocks.popLast()
         else
         {
             return nil
         }
 
-        var members:[MarkdownInline.Autolink] = []
+        var members:[Markdown.InlineAutolink] = []
             members.reserveCapacity(list.elements.count)
 
-        for item:MarkdownBlock.Item in list.elements
+        for item:Markdown.BlockItem in list.elements
         {
-            if  case (let paragraph as MarkdownBlock.Paragraph)? = item.elements.first,
+            if  case (let paragraph as Markdown.BlockParagraph)? = item.elements.first,
                     item.elements.count == 1,
                 case .autolink(let member)? = paragraph.elements.first,
                     paragraph.elements.count == 1
@@ -73,18 +73,18 @@ extension MarkdownDocumentation.Topic
             }
         }
         //  Promote all (unnested) headings by one level
-        for case (let heading as MarkdownBlock.Heading) in blocks
+        for case (let heading as Markdown.BlockHeading) in blocks
         {
             heading.level -= 1
         }
 
-        if  let heading:MarkdownBlock
+        if  let heading:Markdown.BlockElement
         {
             self.init(article: [heading] + blocks, members: members)
         }
         else
         {
-            self.init(article: [MarkdownBlock].init(blocks), members: members)
+            self.init(article: [Markdown.BlockElement].init(blocks), members: members)
         }
     }
 }

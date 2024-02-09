@@ -38,7 +38,7 @@ extension StaticOutliner
 extension StaticOutliner
 {
     private mutating
-    func outline(autolink:MarkdownInline.Autolink) -> Int?
+    func outline(autolink:Markdown.InlineAutolink) -> Int?
     {
         self.cache(autolink.text)
         {
@@ -151,11 +151,11 @@ extension StaticOutliner
     }
 
     mutating
-    func link(blocks:[MarkdownBlock], file:Int32) -> SymbolGraph.Article
+    func link(blocks:[Markdown.BlockElement], file:Int32) -> SymbolGraph.Article
     {
         let rendered:Markdown.Bytecode = .init
         {
-            for block:MarkdownBlock in blocks
+            for block:Markdown.BlockElement in blocks
             {
                 block.outline { self.outline(autolink: $0) }
                 block.emit(into: &$0)
@@ -190,7 +190,7 @@ extension StaticOutliner
 
             let outlines:[SymbolGraph.Outline] = self.cache.clear()
 
-            for member:MarkdownInline.Autolink in topic.members
+            for member:Markdown.InlineAutolink in topic.members
             {
                 let _:Int? = self.outline(autolink: member)
             }
@@ -204,7 +204,7 @@ extension StaticOutliner
     }
 
     private mutating
-    func link(overview:MarkdownBlock.Paragraph?) -> Markdown.Bytecode
+    func link(overview:Markdown.BlockParagraph?) -> Markdown.Bytecode
     {
         .init
         {

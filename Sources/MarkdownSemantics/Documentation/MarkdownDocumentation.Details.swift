@@ -6,20 +6,20 @@ extension MarkdownDocumentation
     struct Details
     {
         public
-        var parameters:MarkdownBlock.Parameters?
+        var parameters:Markdown.BlockParameters?
         public
-        var returns:MarkdownBlock.Aside.Returns?
+        var returns:Markdown.BlockAside.Returns?
         public
-        var `throws`:MarkdownBlock.Aside.Throws?
+        var `throws`:Markdown.BlockAside.Throws?
 
         public
-        var article:[MarkdownBlock]
+        var article:[Markdown.BlockElement]
 
         public
-        init(parameters:MarkdownBlock.Parameters?,
-            returns:MarkdownBlock.Aside.Returns?,
-            throws:MarkdownBlock.Aside.Throws?,
-            article:[MarkdownBlock])
+        init(parameters:Markdown.BlockParameters?,
+            returns:Markdown.BlockAside.Returns?,
+            throws:Markdown.BlockAside.Throws?,
+            article:[Markdown.BlockElement])
         {
             self.parameters = parameters
             self.returns = returns
@@ -46,7 +46,7 @@ extension MarkdownDocumentation.Details
     /// This coroutine visits the ``parameters``, then the ``returns``, then the ``throws``,
     /// and finally the ``article``.
     @inlinable public
-    func visit(_ yield:(MarkdownBlock) throws -> ()) rethrows
+    func visit(_ yield:(Markdown.BlockElement) throws -> ()) rethrows
     {
         try self.parameters.map(yield)
         try self.returns.map(yield)

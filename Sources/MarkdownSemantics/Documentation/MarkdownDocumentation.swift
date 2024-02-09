@@ -6,7 +6,7 @@ struct MarkdownDocumentation
     public
     var metadata:Metadata
     public
-    var overview:MarkdownBlock.Paragraph?
+    var overview:Markdown.BlockParagraph?
     public
     var details:Details
     public
@@ -15,7 +15,7 @@ struct MarkdownDocumentation
     @inlinable public
     init(
         metadata:Metadata,
-        overview:MarkdownBlock.Paragraph?,
+        overview:Markdown.BlockParagraph?,
         details:Details,
         topics:[Topic])
     {
@@ -40,7 +40,7 @@ extension MarkdownDocumentation
     public mutating
     func merge(appending body:Self)
     {
-        if  let first:MarkdownBlock.Paragraph = body.overview
+        if  let first:Markdown.BlockParagraph = body.overview
         {
             self.details.article.append(first)
         }

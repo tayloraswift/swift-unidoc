@@ -49,9 +49,9 @@ extension MarkdownSource
             diagnostics = interpreter.diagnostics
         }
 
-        let blocks:[MarkdownBlock] = parser.parse(copy self)
+        let blocks:[Markdown.BlockElement] = parser.parse(copy self)
 
-        if  case (let heading as MarkdownBlock.Heading)? = blocks.first, heading.level == 1
+        if  case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
             return .init(headline: .init(heading),
                 parsed: interpreter.organize(blocks.dropFirst()),

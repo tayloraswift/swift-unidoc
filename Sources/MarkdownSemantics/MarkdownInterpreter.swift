@@ -12,7 +12,7 @@ struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicat
     private
     var topics:[MarkdownDocumentation.Topic]
     private
-    var blocks:[MarkdownBlock]
+    var blocks:[Markdown.BlockElement]
 
     public
     init(diagnostics:consuming DiagnosticContext<Symbolicator>)
@@ -27,7 +27,7 @@ struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicat
 extension MarkdownInterpreter
 {
     private mutating
-    func append(_ block:MarkdownBlock)
+    func append(_ block:Markdown.BlockElement)
     {
         defer
         {
@@ -36,7 +36,7 @@ extension MarkdownInterpreter
 
         //  Only h2 headings are interesting, but if we encounter a stray h1, that can
         //  also terminate a topics list.
-        guard case (let heading as MarkdownBlock.Heading) = block, heading.level <= 2
+        guard case (let heading as Markdown.BlockHeading) = block, heading.level <= 2
         else
         {
             return
@@ -57,7 +57,7 @@ extension MarkdownInterpreter
     }
 
     private mutating
-    func load() -> (article:[MarkdownBlock], topics:[MarkdownDocumentation.Topic])
+    func load() -> (article:[Markdown.BlockElement], topics:[MarkdownDocumentation.Topic])
     {
         defer
         {
@@ -74,9 +74,9 @@ extension MarkdownInterpreter
     private mutating
     func interpret()
     {
-        func h3(_ block:MarkdownBlock) -> Bool
+        func h3(_ block:Markdown.BlockElement) -> Bool
         {
-            if  case (let heading as MarkdownBlock.Heading) = block, heading.level == 3
+            if  case (let heading as Markdown.BlockHeading) = block, heading.level == 3
             {
                 true
             }
@@ -103,7 +103,7 @@ extension MarkdownInterpreter
 
         /// If the topics list doesn’t begin with an h3 heading, use the topics header
         /// itself as the first topic heading.
-        var heading:MarkdownBlock? = h3(self.blocks[current]) ? nil : self.blocks[start]
+        var heading:Markdown.BlockElement? = h3(self.blocks[current]) ? nil : self.blocks[start]
 
         while true
         {
@@ -140,21 +140,25 @@ extension MarkdownInterpreter
 extension MarkdownInterpreter
 {
     public mutating
-    func organize(_ blocks:ArraySlice<MarkdownBlock>) -> MarkdownDocumentation
+    func organize(_ blocks:ArraySlice<Markdown.BlockElement>) -> MarkdownDocumentation
     {
-        var parameters:(discussion:[MarkdownBlock], list:[MarkdownBlock.Parameter]) = ([], [])
-        var returns:[MarkdownBlock] = []
-        var `throws`:[MarkdownBlock] = []
+        var parameters:(discussion:[Markdown.BlockElement], list:[Markdown.BlockParameter]) =
+        (
+            [],
+            []
+        )
+        var returns:[Markdown.BlockElement] = []
+        var `throws`:[Markdown.BlockElement] = []
 
         var metadata:MarkdownDocumentation.Metadata = .init()
 
-        for block:MarkdownBlock in blocks
+        for block:Markdown.BlockElement in blocks
         {
             switch block
             {
-            case let list as MarkdownBlock.UnorderedList:
-                var items:[MarkdownBlock.Item] = []
-                for item:MarkdownBlock.Item in list.elements
+            case let list as Markdown.BlockListUnordered:
+                var items:[Markdown.BlockItem] = []
+                for item:Markdown.BlockItem in list.elements
                 {
                     guard let prefix:MarkdownBlockPrefix = .extract(from: &item.elements)
                     else
@@ -169,12 +173,12 @@ extension MarkdownInterpreter
                             name: parameter.name))
 
                     case .keywords(.parameters):
-                        for block:MarkdownBlock in item.elements
+                        for block:Markdown.BlockElement in item.elements
                         {
                             switch block
                             {
-                            case let list as MarkdownBlock.UnorderedList:
-                                for item:MarkdownBlock.Item in list.elements
+                            case let list as Markdown.BlockListUnordered:
+                                for item:Markdown.BlockItem in list.elements
                                 {
                                     let parameter:MarkdownParameterNamePrefix? = .extract(
                                         from: &item.elements)
@@ -203,7 +207,7 @@ extension MarkdownInterpreter
                     self.append(list)
                 }
 
-            case let quote as MarkdownBlock.Quote:
+            case let quote as Markdown.BlockQuote:
                 guard let prefix:MarkdownBlockPrefix = .extract(from: &quote.elements)
                 else
                 {
@@ -229,7 +233,7 @@ extension MarkdownInterpreter
                     self.append(aside(quote.elements))
                 }
 
-            case let block as MarkdownBlock.Directive:
+            case let block as Markdown.BlockDirective:
                 switch block.name
                 {
                 case "Comment":
@@ -254,15 +258,15 @@ extension MarkdownInterpreter
             }
         }
 
-        var article:[MarkdownBlock]
+        var article:[Markdown.BlockElement]
         let topics:[MarkdownDocumentation.Topic]
 
         (article, topics) = self.load()
 
-        let overview:MarkdownBlock.Paragraph?
+        let overview:Markdown.BlockParagraph?
         switch article.first
         {
-        case (let paragraph as MarkdownBlock.Paragraph)?:
+        case (let paragraph as Markdown.BlockParagraph)?:
             overview = paragraph
             article.removeFirst()
 

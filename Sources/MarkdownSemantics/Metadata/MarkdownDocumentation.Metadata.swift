@@ -18,9 +18,9 @@ extension MarkdownDocumentation
 extension MarkdownDocumentation.Metadata
 {
     mutating
-    func update(with blocks:[MarkdownBlock])
+    func update(with blocks:[Markdown.BlockElement])
     {
-        for case let block as MarkdownBlock.Directive in blocks
+        for case let block as Markdown.BlockDirective in blocks
         {
             switch block.name
             {

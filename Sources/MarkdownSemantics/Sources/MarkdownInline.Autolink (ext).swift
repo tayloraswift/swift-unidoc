@@ -2,7 +2,7 @@ import MarkdownAST
 import Sources
 import UnidocDiagnostics
 
-extension MarkdownInline.Autolink:DiagnosticSubject
+extension Markdown.InlineAutolink:DiagnosticSubject
 {
     /// Returns the **absolute** source location of this autolink.
     public

@@ -14,7 +14,7 @@ protocol MarkdownSemanticPrefix
     /// Detects an instance of this pattern type from the given array of
     /// inline block content. The array contains inline content up to, but
     /// not including, an unformatted `:` character.
-    init?(from elements:__shared [MarkdownInline.Block]) rethrows
+    init?(from elements:__shared [Markdown.InlineElement]) rethrows
 }
 extension MarkdownSemanticPrefix
 {
@@ -22,9 +22,9 @@ extension MarkdownSemanticPrefix
     /// if one matches. This function only mutates the array if it returns
     /// a non-nil pattern.
     static
-    func extract(from blocks:inout [MarkdownBlock]) rethrows -> Self?
+    func extract(from blocks:inout [Markdown.BlockElement]) rethrows -> Self?
     {
-        guard case (let paragraph as MarkdownBlock.Paragraph)? = blocks.first
+        guard case (let paragraph as Markdown.BlockParagraph)? = blocks.first
         else
         {
             return nil
@@ -46,15 +46,15 @@ extension MarkdownSemanticPrefix
     /// if one matches. This function only mutates the array if it returns
     /// a non-nil pattern.
     private static
-    func extract(from elements:inout [MarkdownInline.Block]) rethrows -> Self?
+    func extract(from elements:inout [Markdown.InlineElement]) rethrows -> Self?
     {
-        for (index, span):(Int, MarkdownInline.Block)
+        for (index, span):(Int, Markdown.InlineElement)
             in zip(elements.indices, elements.prefix(Self.radius))
         {
             if  case .text(let text) = span,
                 let colon:String.Index = text.firstIndex(of: ":")
             {
-                var outer:[MarkdownInline.Block] = .init(elements[..<index])
+                var outer:[Markdown.InlineElement] = .init(elements[..<index])
                 let inner:Substring = text[..<colon]
                 //  If the text before the `:` contains non-whitespace characters,
                 //  add them to the list of elements.

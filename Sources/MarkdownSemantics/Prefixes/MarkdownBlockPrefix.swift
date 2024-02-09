@@ -10,7 +10,7 @@ extension MarkdownBlockPrefix:MarkdownSemanticPrefix
     static
     var radius:Int { 4 }
 
-    init?(from elements:__shared [MarkdownInline.Block])
+    init?(from elements:__shared [Markdown.InlineElement])
     {
         if      let parameter:MarkdownParameterPrefix = .init(from: elements)
         {

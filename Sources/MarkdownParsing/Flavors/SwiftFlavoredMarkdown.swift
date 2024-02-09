@@ -5,9 +5,9 @@ enum SwiftFlavoredMarkdown:MarkdownFlavor
 {
     /// Gives anchors to all level 2 and 3 headings.
     @inlinable public static
-    func transform(blocks:inout [MarkdownBlock])
+    func transform(blocks:inout [Markdown.BlockElement])
     {
-        for case let block as MarkdownBlock.Heading in blocks
+        for case let block as Markdown.BlockHeading in blocks
         {
             if  2 ... 3 ~= block.level
             {

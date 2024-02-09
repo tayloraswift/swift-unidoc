@@ -1,6 +1,6 @@
 extension Markdown
 {
-    /// An uninhabited type that markdown parsers can substitute for ``MarkdownBlock.Code``’s
+    /// An uninhabited type that markdown parsers can substitute for ``Markdown.BlockCode``’s
     /// type parameter when emitting code blocks without a code language.
     @frozen public
     enum PlainText
