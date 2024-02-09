@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Requires:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .requires }
+        var context:Markdown.Bytecode.Context { .requires }
     }
 }

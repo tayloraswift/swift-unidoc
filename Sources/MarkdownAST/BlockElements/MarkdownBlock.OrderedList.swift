@@ -7,7 +7,7 @@ extension MarkdownBlock
     {
         /// Emits an `ol` element.
         public override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.ol] { super.emit(into: &$0) }
         }

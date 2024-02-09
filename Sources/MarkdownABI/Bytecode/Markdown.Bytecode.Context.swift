@@ -1,4 +1,4 @@
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     /// An instruction that pushes a container element onto the document stack.
     @frozen public
@@ -89,7 +89,7 @@ extension MarkdownBytecode
         case warning
     }
 }
-extension MarkdownBytecode.Context
+extension Markdown.Bytecode.Context
 {
     /// Returns a heading context, clamping the given heading `level`. If
     /// `level` is less than 1, this function returns ``h1``. If `level`

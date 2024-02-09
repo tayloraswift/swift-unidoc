@@ -21,7 +21,7 @@ class MarkdownBlock:MarkdownElement
     }
     /// Emits nothing, unless it has been overridden.
     open
-    func emit(into _:inout MarkdownBinaryEncoder)
+    func emit(into _:inout Markdown.BinaryEncoder)
     {
     }
 }

@@ -21,7 +21,7 @@ extension MarkdownBlock
 
         /// Emits a heading element.
         public override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.h(self.level), { $0[.id] = self.id }] { super.emit(into: &$0) }
         }

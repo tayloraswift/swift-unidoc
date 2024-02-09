@@ -17,7 +17,7 @@ extension MarkdownBlock
 
         /// Emits an `li` element.
         public override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.li]
             {

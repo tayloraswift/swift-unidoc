@@ -3,7 +3,7 @@ import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
 
-extension MarkdownCodeLanguage.Swift
+extension Markdown.SwiftLanguage
 {
     @frozen public
     struct Highlighter
@@ -14,10 +14,10 @@ extension MarkdownCodeLanguage.Swift
         }
     }
 }
-extension MarkdownCodeLanguage.Swift.Highlighter:MarkdownCodeHighlighter
+extension Markdown.SwiftLanguage.Highlighter:Markdown.CodeHighlighter
 {
     public
-    func emit(_ text:consuming String, into binary:inout MarkdownBinaryEncoder)
+    func emit(_ text:consuming String, into binary:inout Markdown.BinaryEncoder)
     {
         //  Last I checked, SwiftParser already does this internally in its
         //  ``String``-based parsing API. Since we need to load the original

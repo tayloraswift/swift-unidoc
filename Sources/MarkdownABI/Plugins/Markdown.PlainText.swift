@@ -1,4 +1,4 @@
-extension MarkdownCodeLanguage
+extension Markdown
 {
     /// An uninhabited type that markdown parsers can substitute for ``MarkdownBlock.Code``’s
     /// type parameter when emitting code blocks without a code language.
@@ -7,7 +7,7 @@ extension MarkdownCodeLanguage
     {
     }
 }
-extension MarkdownCodeLanguage.PlainText:MarkdownCodeLanguageType
+extension Markdown.PlainText:Markdown.CodeLanguageType
 {
     /// Uncallable.
     @inlinable public

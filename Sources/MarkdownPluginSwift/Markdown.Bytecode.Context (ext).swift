@@ -1,7 +1,7 @@
 import MarkdownABI
 import SwiftIDEUtils
 
-extension MarkdownBytecode.Context
+extension Markdown.Bytecode.Context
 {
     init?(classification:SyntaxClassification)
     {

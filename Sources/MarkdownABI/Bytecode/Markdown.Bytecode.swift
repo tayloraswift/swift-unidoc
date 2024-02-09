@@ -1,16 +1,19 @@
-@frozen public
-struct MarkdownBytecode:Equatable, Sendable
+extension Markdown
 {
-    public
-    var bytes:[UInt8]
-
-    @inlinable public
-    init(bytes:[UInt8])
+    @frozen public
+    struct Bytecode:Equatable, Sendable
     {
-        self.bytes = bytes
+        public
+        var bytes:[UInt8]
+
+        @inlinable public
+        init(bytes:[UInt8])
+        {
+            self.bytes = bytes
+        }
     }
 }
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     @inlinable public
     var isEmpty:Bool
@@ -18,17 +21,17 @@ extension MarkdownBytecode
         self.bytes.isEmpty
     }
 }
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     @inlinable public
-    init(with encode:(inout MarkdownBinaryEncoder) throws -> ()) rethrows
+    init(with encode:(inout Markdown.BinaryEncoder) throws -> ()) rethrows
     {
-        var encoder:MarkdownBinaryEncoder = .init()
+        var encoder:Markdown.BinaryEncoder = .init()
         try encode(&encoder)
         self = encoder.bytecode
     }
 }
-extension MarkdownBytecode:ExpressibleByArrayLiteral
+extension Markdown.Bytecode:ExpressibleByArrayLiteral
 {
     @inlinable public
     init(arrayLiteral:UInt8...)
@@ -36,7 +39,7 @@ extension MarkdownBytecode:ExpressibleByArrayLiteral
         self.init(bytes: arrayLiteral)
     }
 }
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     @inlinable internal mutating
     func write(marker:Marker)
@@ -159,10 +162,10 @@ extension MarkdownBytecode
         self.bytes.append(contentsOf: utf8)
     }
 }
-extension MarkdownBytecode:Sequence
+extension Markdown.Bytecode:Sequence
 {
     @inlinable public
-    func makeIterator() -> MarkdownBinaryDecoder
+    func makeIterator() -> Markdown.BinaryDecoder
     {
         .init(bytes: self.bytes)
     }

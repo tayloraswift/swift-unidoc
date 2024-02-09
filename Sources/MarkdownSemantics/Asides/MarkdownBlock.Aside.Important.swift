@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Important:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .important }
+        var context:Markdown.Bytecode.Context { .important }
     }
 }

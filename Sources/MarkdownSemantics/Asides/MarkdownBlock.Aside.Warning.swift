@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Warning:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .warning }
+        var context:Markdown.Bytecode.Context { .warning }
     }
 }

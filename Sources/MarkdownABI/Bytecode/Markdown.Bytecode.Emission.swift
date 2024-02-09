@@ -1,4 +1,4 @@
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     /// An instruction that emits a void element.
     @frozen public

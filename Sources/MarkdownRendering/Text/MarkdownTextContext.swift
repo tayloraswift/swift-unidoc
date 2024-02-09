@@ -5,7 +5,7 @@ enum MarkdownTextContext
     case invisible
     case visible
 
-    init(from markdown:MarkdownBytecode.Context)
+    init(from markdown:Markdown.Bytecode.Context)
     {
         switch markdown
         {

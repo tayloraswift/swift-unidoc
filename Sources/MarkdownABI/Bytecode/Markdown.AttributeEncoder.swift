@@ -1,21 +1,24 @@
-@frozen public
-struct MarkdownAttributeEncoder
+extension Markdown
 {
-    @usableFromInline internal
-    var bytecode:MarkdownBytecode
-
-    @inlinable internal
-    init(bytecode:MarkdownBytecode)
+    @frozen public
+    struct AttributeEncoder
     {
-        self.bytecode = bytecode
+        @usableFromInline internal
+        var bytecode:Bytecode
+
+        @inlinable internal
+        init(bytecode:Bytecode)
+        {
+            self.bytecode = bytecode
+        }
     }
 }
-extension MarkdownAttributeEncoder
+extension Markdown.AttributeEncoder
 {
     /// Serializes an empty attribute, if the assigned boolean is true.
     /// Does nothing if it is false. The getter always returns false.
     @inlinable public
-    subscript(attribute:MarkdownBytecode.Attribute) -> Bool
+    subscript(attribute:Markdown.Bytecode.Attribute) -> Bool
     {
         get
         {
@@ -27,7 +30,7 @@ extension MarkdownAttributeEncoder
         }
     }
     @inlinable public
-    subscript(attribute:MarkdownBytecode.Attribute) -> String?
+    subscript(attribute:Markdown.Bytecode.Attribute) -> String?
     {
         get
         {
@@ -43,7 +46,7 @@ extension MarkdownAttributeEncoder
         }
     }
     @inlinable public
-    subscript(attribute:MarkdownBytecode.Attribute) -> Int?
+    subscript(attribute:Markdown.Bytecode.Attribute) -> Int?
     {
         get
         {

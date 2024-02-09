@@ -14,14 +14,14 @@ extension SymbolGraph
     struct ArticleNode:Equatable, Sendable
     {
         public
-        var headline:MarkdownBytecode
+        var headline:Markdown.Bytecode
         public
         var article:Article
         public
         var topics:[Topic]
 
         @inlinable public
-        init(headline:MarkdownBytecode, article:Article = .init(), topics:[Topic] = [])
+        init(headline:Markdown.Bytecode, article:Article = .init(), topics:[Topic] = [])
         {
             self.headline = headline
             self.article = article

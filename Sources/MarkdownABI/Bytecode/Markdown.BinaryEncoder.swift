@@ -1,19 +1,22 @@
-@frozen public
-struct MarkdownBinaryEncoder
+extension Markdown
 {
-    @usableFromInline internal
-    var attribute:MarkdownAttributeEncoder
-
-    @inlinable internal
-    init()
+    @frozen public
+    struct BinaryEncoder
     {
-        self.attribute = .init(bytecode: [])
+        @usableFromInline internal
+        var attribute:AttributeEncoder
+
+        @inlinable internal
+        init()
+        {
+            self.attribute = .init(bytecode: [])
+        }
     }
 }
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
     @inlinable public internal(set)
-    var bytecode:MarkdownBytecode
+    var bytecode:Markdown.Bytecode
     {
         _read
         {
@@ -25,7 +28,7 @@ extension MarkdownBinaryEncoder
         }
     }
 }
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
     @inlinable public static
     func += (self:inout Self, codepoint:Unicode.Scalar)
@@ -53,11 +56,11 @@ extension MarkdownBinaryEncoder
         self.bytecode.write(reference: reference)
     }
 }
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
     @inlinable public
-    subscript(_ emission:MarkdownBytecode.Emission,
-        attributes:(inout MarkdownAttributeEncoder) -> () = { _ in }) -> Void
+    subscript(_ emission:Markdown.Bytecode.Emission,
+        attributes:(inout Markdown.AttributeEncoder) -> () = { _ in }) -> Void
     {
         mutating get
         {
@@ -66,8 +69,8 @@ extension MarkdownBinaryEncoder
         }
     }
     @inlinable public
-    subscript(_ context:MarkdownBytecode.Context,
-        attributes:(inout MarkdownAttributeEncoder) -> (),
+    subscript(_ context:Markdown.Bytecode.Context,
+        attributes:(inout Markdown.AttributeEncoder) -> (),
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
@@ -79,7 +82,7 @@ extension MarkdownBinaryEncoder
         }
     }
     @inlinable public
-    subscript(_ context:MarkdownBytecode.Context,
+    subscript(_ context:Markdown.Bytecode.Context,
         content encode:(inout Self) -> () = { _ in }) -> Void
     {
         mutating get
@@ -90,15 +93,15 @@ extension MarkdownBinaryEncoder
         }
     }
 }
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
     /// Emits the UTF-8 contents of the assigned string, if non-nil, into
     /// this binary, framed by the specified context. The setter does nothing
     /// if the assigned value is nil; it will not create an empty context.
     /// The getter always returns nil.
     @inlinable public
-    subscript<String>(_ context:MarkdownBytecode.Context,
-        attributes:(inout MarkdownAttributeEncoder) -> () = { _ in }) -> String?
+    subscript<String>(_ context:Markdown.Bytecode.Context,
+        attributes:(inout Markdown.AttributeEncoder) -> () = { _ in }) -> String?
         where String:StringProtocol
     {
         get

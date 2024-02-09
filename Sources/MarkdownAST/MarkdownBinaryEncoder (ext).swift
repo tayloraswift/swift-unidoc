@@ -1,9 +1,9 @@
 import MarkdownABI
 
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
-    subscript<Value>(_ context:MarkdownBytecode.Context,
-        attributes:(inout MarkdownAttributeEncoder) -> () = { _ in }) -> Value?
+    subscript<Value>(_ context:Markdown.Bytecode.Context,
+        attributes:(inout Markdown.AttributeEncoder) -> () = { _ in }) -> Value?
         where Value:MarkdownElement
     {
         get

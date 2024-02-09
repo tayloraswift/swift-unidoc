@@ -8,10 +8,10 @@ extension Snippet
         public
         let id:String
         public
-        let bytecode:MarkdownBytecode
+        let bytecode:Markdown.Bytecode
 
         @inlinable public
-        init(id:String, bytecode:MarkdownBytecode)
+        init(id:String, bytecode:Markdown.Bytecode)
         {
             self.id = id
             self.bytecode = bytecode

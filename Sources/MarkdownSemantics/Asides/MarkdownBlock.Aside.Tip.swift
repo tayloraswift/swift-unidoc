@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Tip:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .tip }
+        var context:Markdown.Bytecode.Context { .tip }
     }
 }

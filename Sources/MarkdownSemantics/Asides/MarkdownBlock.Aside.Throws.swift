@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Throws:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .throws }
+        var context:Markdown.Bytecode.Context { .throws }
     }
 }

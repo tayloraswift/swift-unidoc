@@ -1,7 +1,7 @@
 import MarkdownABI
 import MarkdownAST
 
-extension MarkdownCodeLanguageType
+extension Markdown.CodeLanguageType
 {
     func attach(to code:String) -> MarkdownBlock
     {

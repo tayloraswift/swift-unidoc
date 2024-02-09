@@ -1,4 +1,4 @@
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     @frozen public
     enum Attribute:UInt8, RawRepresentable, Equatable, Hashable, Sendable

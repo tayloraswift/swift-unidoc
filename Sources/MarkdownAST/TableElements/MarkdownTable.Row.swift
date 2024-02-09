@@ -50,7 +50,7 @@ extension MarkdownTable.Row:MarkdownElement
         }
     }
     public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
         binary[.tr]
         {

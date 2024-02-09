@@ -4,7 +4,7 @@ import MarkdownABI
 extension HTML.ContentEncoder
 {
     mutating
-    func emit(element:MarkdownBytecode.Emission,
+    func emit(element:Markdown.Bytecode.Emission,
         with attributes:MarkdownElementContext.AttributeList)
     {
         let html:HTML.VoidElement

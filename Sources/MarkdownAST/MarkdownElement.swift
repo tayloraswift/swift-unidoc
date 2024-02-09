@@ -11,7 +11,7 @@ protocol MarkdownElement
     func outline(
         by register:(MarkdownInline.Autolink) throws -> Int?) rethrows
 
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
 }
 extension MarkdownElement
 {

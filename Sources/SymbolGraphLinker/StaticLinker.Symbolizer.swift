@@ -65,7 +65,7 @@ extension StaticLinker.Symbolizer
         {
             if  case nil = $0
             {
-                let headline:MarkdownBytecode = .init
+                let headline:Markdown.Bytecode = .init
                 {
                     //  Don’t emit the enclosing `h1` tag!
                     for element:MarkdownInline.Block in title.elements

@@ -1,7 +1,7 @@
 import MarkdownABI
 import SwiftIDEUtils
 
-extension MarkdownBinaryEncoder
+extension Markdown.BinaryEncoder
 {
     subscript<UTF8>(highlight classification:SyntaxClassification) -> UTF8?
         where UTF8:Collection<UInt8>
@@ -16,7 +16,7 @@ extension MarkdownBinaryEncoder
                 return
             }
 
-            if  let context:MarkdownBytecode.Context = .init(classification: classification)
+            if  let context:Markdown.Bytecode.Context = .init(classification: classification)
             {
                 self[context] { $0 += value }
             }

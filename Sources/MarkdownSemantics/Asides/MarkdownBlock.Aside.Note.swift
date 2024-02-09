@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Note:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .note }
+        var context:Markdown.Bytecode.Context { .note }
     }
 }

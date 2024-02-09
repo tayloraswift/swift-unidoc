@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Attention:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .attention }
+        var context:Markdown.Bytecode.Context { .attention }
     }
 }

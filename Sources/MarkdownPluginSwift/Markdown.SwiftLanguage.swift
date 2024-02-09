@@ -1,14 +1,13 @@
 import MarkdownABI
-import MarkdownRendering
 import Snippets
 import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
 
-extension MarkdownCodeLanguage
+extension Markdown
 {
     @frozen public
-    struct Swift
+    struct SwiftLanguage
     {
         @inlinable internal
         init()
@@ -16,7 +15,7 @@ extension MarkdownCodeLanguage
         }
     }
 }
-extension MarkdownCodeLanguage.Swift:MarkdownCodeLanguageType
+extension Markdown.SwiftLanguage:Markdown.CodeLanguageType
 {
     @inlinable public
     var name:String { "swift" }
@@ -24,7 +23,7 @@ extension MarkdownCodeLanguage.Swift:MarkdownCodeLanguageType
     @inlinable public
     var highlighter:Highlighter { .init() }
 }
-extension MarkdownCodeLanguage.Swift
+extension Markdown.SwiftLanguage
 {
     public
     func parse(snippet utf8:[UInt8]) -> (overview:String, slices:[Snippet.Slice])
@@ -94,7 +93,7 @@ extension MarkdownCodeLanguage.Swift
         {
             (slice:SnippetParser.Slice) in
 
-            let bytecode:MarkdownBytecode = .init
+            let bytecode:Markdown.Bytecode = .init
             {
                 ranges:
                 for var range:Range<Int> in slice.ranges

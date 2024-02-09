@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Complexity:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .complexity }
+        var context:Markdown.Bytecode.Context { .complexity }
     }
 }

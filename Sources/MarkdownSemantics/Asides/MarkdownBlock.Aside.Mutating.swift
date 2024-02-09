@@ -7,6 +7,6 @@ extension MarkdownBlock.Aside
     class Mutating:MarkdownBlock.Aside
     {
         public class override
-        var context:MarkdownBytecode.Context { .mutating }
+        var context:Markdown.Bytecode.Context { .mutating }
     }
 }

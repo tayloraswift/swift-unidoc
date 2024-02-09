@@ -18,7 +18,7 @@ extension MarkdownInline
 extension MarkdownInline.Code:MarkdownElement
 {
     public
-    func emit(into binary:inout MarkdownBinaryEncoder)
+    func emit(into binary:inout Markdown.BinaryEncoder)
     {
         binary[.code] = self.text
     }

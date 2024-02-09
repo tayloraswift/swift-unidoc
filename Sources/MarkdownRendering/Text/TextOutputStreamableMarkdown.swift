@@ -3,7 +3,7 @@ import MarkdownABI
 public
 protocol TextOutputStreamableMarkdown:TextOutputStreamable, CustomStringConvertible
 {
-    var bytecode:MarkdownBytecode { get }
+    var bytecode:Markdown.Bytecode { get }
 
     /// Writes arbitrary content to the provided UTF-8 output, identified by
     /// the given reference.
@@ -48,7 +48,7 @@ extension TextOutputStreamableMarkdown
         var attributes:MarkdownTextContext.AttributeContext = .init()
         var stack:[MarkdownTextContext] = []
 
-        for instruction:MarkdownInstruction in self.bytecode
+        for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
             {

@@ -1,4 +1,4 @@
-extension MarkdownBytecode
+extension Markdown.Bytecode
 {
     /// Markers inhabit the unassigned codepoints of the UTF-8 encoding.
     ///

@@ -6,12 +6,12 @@ extension MarkdownTable
     class AnyCell:MarkdownBlock.Container<MarkdownInline.Block>
     {
         class
-        var context:MarkdownBytecode.Context { .td }
+        var context:Markdown.Bytecode.Context { .td }
 
         /// Emits this cell as an element determined by the dynamic type of this instance,
         /// without any alignment attributes.
         public final override
-        func emit(into binary:inout MarkdownBinaryEncoder)
+        func emit(into binary:inout Markdown.BinaryEncoder)
         {
             self.emit(into: &binary, alignment: nil)
         }
@@ -20,7 +20,7 @@ extension MarkdownTable
 extension MarkdownTable.AnyCell
 {
     final
-    func emit(into binary:inout MarkdownBinaryEncoder, alignment:MarkdownTable.Alignment?)
+    func emit(into binary:inout Markdown.BinaryEncoder, alignment:MarkdownTable.Alignment?)
     {
         binary[Self.context]
         {
