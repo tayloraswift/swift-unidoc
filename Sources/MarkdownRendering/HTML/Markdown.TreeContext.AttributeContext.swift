@@ -1,6 +1,6 @@
 import MarkdownABI
 
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     //  TODO: investigate if it is worthwhile to track `href` and `id` as separate instance
     //  properties.
@@ -21,7 +21,7 @@ extension MarkdownElementContext
         }
     }
 }
-extension MarkdownElementContext.AttributeContext
+extension Markdown.TreeContext.AttributeContext
 {
     mutating
     func buffer(utf8 codeunit:UInt8) -> Void?
@@ -53,6 +53,6 @@ extension MarkdownElementContext.AttributeContext
         }
     }
 }
-extension MarkdownElementContext.AttributeContext:MarkdownAttributeContext
+extension Markdown.TreeContext.AttributeContext:MarkdownAttributeContext
 {
 }

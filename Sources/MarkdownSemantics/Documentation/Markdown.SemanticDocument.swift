@@ -1,31 +1,34 @@
 import MarkdownAST
 
-@frozen public
-struct MarkdownDocumentation
+extension Markdown
 {
-    public
-    var metadata:Metadata
-    public
-    var overview:Markdown.BlockParagraph?
-    public
-    var details:Details
-    public
-    var topics:[Topic]
-
-    @inlinable public
-    init(
-        metadata:Metadata,
-        overview:Markdown.BlockParagraph?,
-        details:Details,
-        topics:[Topic])
+    @frozen public
+    struct SemanticDocument
     {
-        self.metadata = metadata
-        self.overview = overview
-        self.details = details
-        self.topics = topics
+        public
+        var metadata:SemanticMetadata
+        public
+        var overview:BlockParagraph?
+        public
+        var details:SemanticSections
+        public
+        var topics:[SemanticTopic]
+
+        @inlinable public
+        init(
+            metadata:SemanticMetadata,
+            overview:BlockParagraph?,
+            details:SemanticSections,
+            topics:[SemanticTopic])
+        {
+            self.metadata = metadata
+            self.overview = overview
+            self.details = details
+            self.topics = topics
+        }
     }
 }
-extension MarkdownDocumentation
+extension Markdown.SemanticDocument
 {
     /// Merges the given documentation into this documentation.
     ///
@@ -63,7 +66,7 @@ extension MarkdownDocumentation
 
     @_documentation(metadata: "see: merge(appending:)")
     public consuming
-    func merged(appending body:MarkdownDocumentation) -> MarkdownDocumentation
+    func merged(appending body:Markdown.SemanticDocument) -> Markdown.SemanticDocument
     {
         self.merge(appending: body)
         return self

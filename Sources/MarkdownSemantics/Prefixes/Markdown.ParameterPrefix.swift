@@ -1,16 +1,19 @@
 import Codelinks
 import MarkdownAST
 
-struct MarkdownParameterPrefix:Equatable, Hashable, Sendable
+extension Markdown
 {
-    let name:String
-
-    init(name:String)
+    struct ParameterPrefix:Equatable, Hashable, Sendable
     {
-        self.name = name
+        let name:String
+
+        init(name:String)
+        {
+            self.name = name
+        }
     }
 }
-extension MarkdownParameterPrefix:MarkdownSemanticPrefix
+extension Markdown.ParameterPrefix:Markdown.SemanticPrefix
 {
     static
     var radius:Int { 4 }

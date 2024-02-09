@@ -1,30 +1,33 @@
 import MarkdownAST
 import UnidocDiagnostics
 
-@frozen public
-struct MarkdownInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicator<Int32>
+extension Markdown
 {
-    public
-    var diagnostics:DiagnosticContext<Symbolicator>
-
-    private
-    var topicsHeading:Int?
-    private
-    var topics:[MarkdownDocumentation.Topic]
-    private
-    var blocks:[Markdown.BlockElement]
-
-    public
-    init(diagnostics:consuming DiagnosticContext<Symbolicator>)
+    @frozen public
+    struct BlockInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicator<Int32>
     {
-        self.diagnostics = diagnostics
+        public
+        var diagnostics:DiagnosticContext<Symbolicator>
 
-        self.topicsHeading = nil
-        self.topics = []
-        self.blocks = []
+        private
+        var topicsHeading:Int?
+        private
+        var topics:[Markdown.SemanticTopic]
+        private
+        var blocks:[Markdown.BlockElement]
+
+        public
+        init(diagnostics:consuming DiagnosticContext<Symbolicator>)
+        {
+            self.diagnostics = diagnostics
+
+            self.topicsHeading = nil
+            self.topics = []
+            self.blocks = []
+        }
     }
 }
-extension MarkdownInterpreter
+extension Markdown.BlockInterpreter
 {
     private mutating
     func append(_ block:Markdown.BlockElement)
@@ -57,7 +60,7 @@ extension MarkdownInterpreter
     }
 
     private mutating
-    func load() -> (article:[Markdown.BlockElement], topics:[MarkdownDocumentation.Topic])
+    func load() -> (article:[Markdown.BlockElement], topics:[Markdown.SemanticTopic])
     {
         defer
         {
@@ -93,7 +96,7 @@ extension MarkdownInterpreter
             return
         }
 
-        var pending:[MarkdownDocumentation.Topic] = []
+        var pending:[Markdown.SemanticTopic] = []
         var current:Int = self.blocks.index(after: start)
 
         if  current == self.blocks.endIndex
@@ -111,7 +114,7 @@ extension MarkdownInterpreter
                     where: h3(_:))
             {
                 guard
-                let topic:MarkdownDocumentation.Topic = .init(heading: heading,
+                let topic:Markdown.SemanticTopic = .init(heading: heading,
                     body: self.blocks[current ..< next])
                 else
                 {
@@ -124,7 +127,7 @@ extension MarkdownInterpreter
                 continue
             }
             else if
-                let topic:MarkdownDocumentation.Topic = .init(heading: heading,
+                let topic:Markdown.SemanticTopic = .init(heading: heading,
                     body: self.blocks[current...])
             {
                 self.topics += pending
@@ -137,10 +140,10 @@ extension MarkdownInterpreter
         }
     }
 }
-extension MarkdownInterpreter
+extension Markdown.BlockInterpreter
 {
     public mutating
-    func organize(_ blocks:ArraySlice<Markdown.BlockElement>) -> MarkdownDocumentation
+    func organize(_ blocks:ArraySlice<Markdown.BlockElement>) -> Markdown.SemanticDocument
     {
         var parameters:(discussion:[Markdown.BlockElement], list:[Markdown.BlockParameter]) =
         (
@@ -150,7 +153,7 @@ extension MarkdownInterpreter
         var returns:[Markdown.BlockElement] = []
         var `throws`:[Markdown.BlockElement] = []
 
-        var metadata:MarkdownDocumentation.Metadata = .init()
+        var metadata:Markdown.SemanticMetadata = .init()
 
         for block:Markdown.BlockElement in blocks
         {
@@ -160,7 +163,7 @@ extension MarkdownInterpreter
                 var items:[Markdown.BlockItem] = []
                 for item:Markdown.BlockItem in list.elements
                 {
-                    guard let prefix:MarkdownBlockPrefix = .extract(from: &item.elements)
+                    guard let prefix:Markdown.BlockPrefix = .extract(from: &item.elements)
                     else
                     {
                         items.append(item)
@@ -180,7 +183,7 @@ extension MarkdownInterpreter
                             case let list as Markdown.BlockListUnordered:
                                 for item:Markdown.BlockItem in list.elements
                                 {
-                                    let parameter:MarkdownParameterNamePrefix? = .extract(
+                                    let parameter:Markdown.ParameterNamePrefix? = .extract(
                                         from: &item.elements)
                                     parameters.list.append(.init(elements: item.elements,
                                         name: parameter?.name ?? "_"))
@@ -208,7 +211,7 @@ extension MarkdownInterpreter
                 }
 
             case let quote as Markdown.BlockQuote:
-                guard let prefix:MarkdownBlockPrefix = .extract(from: &quote.elements)
+                guard let prefix:Markdown.BlockPrefix = .extract(from: &quote.elements)
                 else
                 {
                     self.append(quote)
@@ -259,7 +262,7 @@ extension MarkdownInterpreter
         }
 
         var article:[Markdown.BlockElement]
-        let topics:[MarkdownDocumentation.Topic]
+        let topics:[Markdown.SemanticTopic]
 
         (article, topics) = self.load()
 

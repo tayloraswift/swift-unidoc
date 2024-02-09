@@ -1,7 +1,7 @@
 import HTML
 import MarkdownABI
 
-extension MarkdownTextContext
+extension Markdown.TextContext
 {
     struct AttributeContext
     {
@@ -14,7 +14,7 @@ extension MarkdownTextContext
         }
     }
 }
-extension MarkdownTextContext.AttributeContext:MarkdownAttributeContext
+extension Markdown.TextContext.AttributeContext:MarkdownAttributeContext
 {
     func buffer(utf8 codeunit:UInt8) -> Void?
     {

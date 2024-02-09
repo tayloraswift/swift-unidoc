@@ -1,6 +1,6 @@
 import HTML
 
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     /// A signage context, which typically renders as an `aside` HTML element.
     /// Most markdown “asides” are signage contexts, but we prefer the term
@@ -35,7 +35,7 @@ extension MarkdownElementContext
         case warning
     }
 }
-extension MarkdownElementContext.Signage:CustomStringConvertible
+extension Markdown.TreeContext.Signage:CustomStringConvertible
 {
     var description:String
     {

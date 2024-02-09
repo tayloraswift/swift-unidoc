@@ -1,10 +1,13 @@
-import MarkdownABI
-
-enum MarkdownTextContext
+extension Markdown
 {
-    case invisible
-    case visible
-
+    enum TextContext
+    {
+        case invisible
+        case visible
+    }
+}
+extension Markdown.TextContext
+{
     init(from markdown:Markdown.Bytecode.Context)
     {
         switch markdown

@@ -1,7 +1,11 @@
 import MarkdownAST
 
+extension Markdown
+{
+    typealias SemanticPrefix = _MarkdownSemanticPrefix
+}
 @rethrows
-protocol MarkdownSemanticPrefix
+protocol _MarkdownSemanticPrefix
 {
     /// The maximum number of top-level elements ``extract(from:)`` will
     /// inspect for prefix patterns, including the span containing the
@@ -16,7 +20,7 @@ protocol MarkdownSemanticPrefix
     /// not including, an unformatted `:` character.
     init?(from elements:__shared [Markdown.InlineElement]) rethrows
 }
-extension MarkdownSemanticPrefix
+extension Markdown.SemanticPrefix
 {
     /// Extracts a prefix pattern from the given array of block elements,
     /// if one matches. This function only mutates the array if it returns

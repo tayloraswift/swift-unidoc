@@ -24,11 +24,11 @@ extension MarkdownSource
 extension MarkdownSource
 {
     @_spi(testable) public borrowing
-    func parse(_:MarkdownDocumentation.Type = MarkdownDocumentation.self,
+    func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
         using parser:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>,
-        with diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> MarkdownDocumentation
+        with diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> Markdown.SemanticDocument
     {
-        var interpreter:MarkdownInterpreter<StaticSymbolicator> = .init(
+        var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
         defer
         {
@@ -42,7 +42,7 @@ extension MarkdownSource
         using parser:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>,
         with diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> StaticLinker.Supplement
     {
-        var interpreter:MarkdownInterpreter<StaticSymbolicator> = .init(
+        var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
         defer
         {

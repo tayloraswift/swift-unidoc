@@ -1,4 +1,4 @@
-extension MarkdownDocumentation
+extension Markdown.SemanticMetadata
 {
     @frozen public
     enum MergeBehavior

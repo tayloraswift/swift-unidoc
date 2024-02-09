@@ -5,7 +5,7 @@ extension HTML.ContentEncoder
 {
     mutating
     func emit(element:Markdown.Bytecode.Emission,
-        with attributes:MarkdownElementContext.AttributeList)
+        with attributes:Markdown.TreeContext.AttributeList)
     {
         let html:HTML.VoidElement
 
@@ -40,13 +40,13 @@ extension HTML.ContentEncoder
 {
     private mutating
     func open(_ element:HTML.ContainerElement,
-        with attributes:MarkdownElementContext.AttributeList)
+        with attributes:Markdown.TreeContext.AttributeList)
     {
         self.open(element) { attributes.encode(to: &$0) }
     }
     mutating
-    func open(context:MarkdownElementContext,
-        with attributes:MarkdownElementContext.AttributeList)
+    func open(context:Markdown.TreeContext,
+        with attributes:Markdown.TreeContext.AttributeList)
     {
         switch context
         {
@@ -84,7 +84,7 @@ extension HTML.ContentEncoder
         }
     }
     mutating
-    func close(context:MarkdownElementContext)
+    func close(context:Markdown.TreeContext)
     {
         switch context
         {

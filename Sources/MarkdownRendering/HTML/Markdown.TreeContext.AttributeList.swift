@@ -2,7 +2,7 @@ import HTML
 import MarkdownABI
 import URI
 
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     struct AttributeList
     {
@@ -24,7 +24,7 @@ extension MarkdownElementContext
         }
     }
 }
-extension MarkdownElementContext.AttributeList
+extension Markdown.TreeContext.AttributeList
 {
     mutating
     func append(class enumerated:some RawRepresentable<String>)
@@ -70,7 +70,7 @@ extension MarkdownElementContext.AttributeList
         self.id = nil
     }
 }
-extension MarkdownElementContext.AttributeList
+extension Markdown.TreeContext.AttributeList
 {
     func encode(to attributes:inout HTML.AttributeEncoder)
     {

@@ -609,7 +609,7 @@ extension StaticLinker
             .init(comment: $0, in: location?.file)
         }
 
-        let markdown:(parsed:MarkdownDocumentation, file:Int32?)?
+        let markdown:(parsed:Markdown.SemanticDocument, file:Int32?)?
 
         switch (comment, supplement)
         {
@@ -634,7 +634,7 @@ extension StaticLinker
                 fallthrough
             }
 
-            let body:MarkdownDocumentation = comment.parse(
+            let body:Markdown.SemanticDocument = comment.parse(
                 using: self.doccommentParser,
                 with: &self.tables.diagnostics)
 
@@ -742,7 +742,7 @@ extension StaticLinker
                 let comment:MarkdownSource = .init(comment: comment,
                     in: file.map { self.symbolizer.intern($0) })
 
-                let parsed:MarkdownDocumentation = comment.parse(
+                let parsed:Markdown.SemanticDocument = comment.parse(
                     using: self.doccommentParser,
                     with: &self.tables.diagnostics)
 

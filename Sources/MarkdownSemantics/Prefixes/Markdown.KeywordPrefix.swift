@@ -1,37 +1,40 @@
 import MarkdownABI
 import MarkdownAST
 
-@frozen public
-enum MarkdownKeywordPrefix:String, Equatable, Hashable, Sendable
+extension Markdown
 {
-    case attention
-    case author
-    case authors
-    case bug
-    case complexity
-    case copyright
-    case date
-    case experiment
-    case important
-    case invariant
-    case mutating = "mutatingvariant"
-    case nonmutating = "nonmutatingvariant"
-    case note
-    case parameters
-    case postcondition
-    case precondition
-    case remark
-    case requires
-    case returns
-    case seealso
-    case since
-    case `throws`
-    case tip
-    case todo
-    case version
-    case warning
+    @frozen public
+    enum KeywordPrefix:String, Equatable, Hashable, Sendable
+    {
+        case attention
+        case author
+        case authors
+        case bug
+        case complexity
+        case copyright
+        case date
+        case experiment
+        case important
+        case invariant
+        case mutating = "mutatingvariant"
+        case nonmutating = "nonmutatingvariant"
+        case note
+        case parameters
+        case postcondition
+        case precondition
+        case remark
+        case requires
+        case returns
+        case seealso
+        case since
+        case `throws`
+        case tip
+        case todo
+        case version
+        case warning
+    }
 }
-extension MarkdownKeywordPrefix
+extension Markdown.KeywordPrefix
 {
     func callAsFunction(_ discussion:__owned [Markdown.BlockElement]) -> Markdown.BlockElement
     {
@@ -66,7 +69,7 @@ extension MarkdownKeywordPrefix
         }
     }
 }
-extension MarkdownKeywordPrefix:MarkdownSemanticPrefix
+extension Markdown.KeywordPrefix:Markdown.SemanticPrefix
 {
     /// If a keyword pattern uses formatting, the formatting must apply
     /// to the entire pattern.

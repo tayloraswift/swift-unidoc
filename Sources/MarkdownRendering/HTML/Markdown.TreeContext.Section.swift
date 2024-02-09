@@ -1,6 +1,6 @@
 import HTML
 
-extension MarkdownElementContext
+extension Markdown.TreeContext
 {
     /// A section context, which typically renders as an `section` HTML element.
     /// The most famous section context is probably ``parameters``, but some
@@ -14,11 +14,11 @@ extension MarkdownElementContext
         case `throws`
     }
 }
-extension MarkdownElementContext.Section:Identifiable
+extension Markdown.TreeContext.Section:Identifiable
 {
     var id:String { "ss:\(self.rawValue)" }
 }
-extension MarkdownElementContext.Section:CustomStringConvertible
+extension Markdown.TreeContext.Section:CustomStringConvertible
 {
     var description:String
     {

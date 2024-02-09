@@ -1,16 +1,19 @@
 import Codelinks
 import MarkdownAST
 
-struct MarkdownParameterNamePrefix
+extension Markdown
 {
-    let name:String
-
-    init(name:String)
+    struct ParameterNamePrefix
     {
-        self.name = name
+        let name:String
+
+        init(name:String)
+        {
+            self.name = name
+        }
     }
 }
-extension MarkdownParameterNamePrefix:MarkdownSemanticPrefix
+extension Markdown.ParameterNamePrefix:Markdown.SemanticPrefix
 {
     /// If a parameter name uses formatting, the formatting must apply
     /// to the entire pattern.

@@ -1,7 +1,7 @@
 import MarkdownABI
 
-/// Common interface for ``MarkdownElementContext.AttributeContext`` and
-/// ``MarkdownTextContext.AttributeContext``.
+/// Common interface for ``Markdown.TreeContext.AttributeContext`` and
+/// ``Markdown.TextContext.AttributeContext``.
 ///
 /// We never actually dispatch through this protocol, but it is helpful for understanding how
 /// the markdown VM works.
