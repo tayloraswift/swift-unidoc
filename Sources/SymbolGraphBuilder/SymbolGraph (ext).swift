@@ -83,7 +83,7 @@ extension SymbolGraph
             let articles:[[StaticLinker.Article]] = profiler.measure(\.linking)
             {
                 //  Calling this is mandatory, even if there are no supplements!
-                linker.attach(markdown: markdown, snippets: snippets)
+                linker.attach(snippets: snippets, markdown: markdown)
             }
 
             _ = consume markdown
