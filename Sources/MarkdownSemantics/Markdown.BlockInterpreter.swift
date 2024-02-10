@@ -68,8 +68,18 @@ extension Markdown.BlockInterpreter
                 //      legitimized anywhere else.
                 guard
                 let i:String.Index = value.firstIndex(of: "/"),
-                let j:String.Index = value.lastIndex(of: "/"),
-                case "/Snippets" = value[i ..< j]
+                let j:String.Index = value.lastIndex(of: "/")
+                else
+                {
+                    //  TODO: emit diagnostic.
+                    continue
+                }
+
+                //  OK for the path to contain additional intermediate path components, which
+                //  are just as irrelevant as the package name, because snippet names are
+                //  unique within a package.
+                guard
+                case "Snippets" = value[value.index(after: i)...].prefix(while: { $0 != "/" })
                 else
                 {
                     //  TODO: emit diagnostic.
