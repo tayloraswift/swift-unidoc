@@ -48,6 +48,11 @@ extension SPM.PackageSources
         }
 
         let snippets:FilePath = root.appending(snippetsDirectory)
+        if !snippets.directory.exists()
+        {
+            return
+        }
+
         try snippets.directory.walk
         {
             let file:(path:FilePath, extension:String)
