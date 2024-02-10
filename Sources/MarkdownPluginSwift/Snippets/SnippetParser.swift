@@ -28,7 +28,7 @@ extension SnippetParser
     private mutating
     func visit(trivia:Trivia, at position:AbsolutePosition)
     {
-        var newline:(position:AbsolutePosition, indent:Int)? = nil
+        var newline:(indent:Int, end:AbsolutePosition)? = nil
         var current:AbsolutePosition = position
         for piece:TriviaPiece in trivia
         {
@@ -44,8 +44,12 @@ extension SnippetParser
 
             switch piece
             {
-            case .newlines, .carriageReturnLineFeeds:
-                newline = (position: range.lowerBound, indent: 0)
+            case .newlines:
+                newline = (indent: 0, end: min(current.advanced(by: 1), range.upperBound))
+                continue
+
+            case .carriageReturnLineFeeds:
+                newline = (indent: 0, end: min(current.advanced(by: 2), range.upperBound))
                 continue
 
             case .spaces(let count):
@@ -70,7 +74,7 @@ extension SnippetParser
             }
 
             guard
-            let leading:(position:AbsolutePosition, indent:Int) = newline
+            let (indent, before):(Int, AbsolutePosition) = newline
             else
             {
                 //  We only care about line comments at the beginning of a line.
@@ -88,8 +92,8 @@ extension SnippetParser
                 //  newline. So code that uses these indices **must** clamp them to the bounds
                 //  of the source text.
                 self.push(marker: .init(statement: statement,
-                    indent: leading.indent,
-                    before: leading.position,
+                    indent: indent,
+                    before: before,
                     after: range.upperBound.advanced(by: 1),
                     line: location.line))
             }
