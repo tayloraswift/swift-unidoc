@@ -26,7 +26,7 @@ extension Markdown.SwiftLanguage:Markdown.CodeLanguageType
 extension Markdown.SwiftLanguage
 {
     public
-    func parse(snippet utf8:[UInt8]) -> (overview:String, slices:[Snippet.Slice])
+    func parse(snippet utf8:[UInt8]) -> (overview:String, slices:[Markdown.SnippetSlice])
     {
         //  It is safe to escape the pointer to ``Parser.parse(source:maximumNestingLevel:)``,
         //  see: https://swiftinit.org/docs/swift-syntax/swiftparser/parser.init(_:maximumnestinglevel:parsetransition:arena:)
@@ -34,6 +34,7 @@ extension Markdown.SwiftLanguage
         {
             Parser.parse(source: $0)
         }
+
         var start:AbsolutePosition = parsed.position
         var text:String = ""
         lines:
@@ -78,7 +79,8 @@ extension Markdown.SwiftLanguage
             text.append("\n")
         }
 
-        var parser:SnippetParser = .init(start: start)
+        var parser:SnippetParser = .init(sourcemap: .init(fileName: "", tree: parsed),
+            start: start)
         for token:TokenSyntax in parsed.tokens(viewMode: .sourceAccurate)
         {
             parser.visit(token: token)
@@ -89,7 +91,7 @@ extension Markdown.SwiftLanguage
         var spans:SyntaxClassifications.Iterator = parsed.classifications.makeIterator()
         var span:SyntaxClassifiedRange? = spans.next()
 
-        let rendered:[Snippet.Slice] = slices.map
+        let rendered:[Markdown.SnippetSlice] = slices.map
         {
             (slice:SnippetParser.Slice) in
 
@@ -133,7 +135,7 @@ extension Markdown.SwiftLanguage
                 }
             }
 
-            return .init(id: slice.id, bytecode: bytecode)
+            return .init(id: slice.id, line: slice.line, code: bytecode)
         }
 
         return (text, rendered)

@@ -8,11 +8,13 @@ extension SnippetParser
     struct Slice
     {
         let id:String
+        let line:Int
         var ranges:[Range<Int>]
 
-        init(id:String, ranges:[Range<Int>])
+        init(id:String, line:Int, ranges:[Range<Int>])
         {
             self.id = id
+            self.line = line
             self.ranges = ranges
         }
     }

@@ -10,9 +10,9 @@ extension SnippetParser
         private
         var start:AbsolutePosition?
 
-        init(id:String, at position:AbsolutePosition, indent:Int = 0)
+        init(id:String, position:AbsolutePosition, marker:(line:Int, indent:Int) = (1, 0))
         {
-            self.slice = .init(id: id, indent: indent)
+            self.slice = .init(id: id, marker: marker)
             self.start = position
         }
     }

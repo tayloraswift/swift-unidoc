@@ -31,6 +31,12 @@ extension Markdown.BinaryEncoder
 extension Markdown.BinaryEncoder
 {
     @inlinable public static
+    func += (self:inout Self, bytecode:Markdown.Bytecode)
+    {
+        self.bytecode.bytes += bytecode.bytes
+    }
+
+    @inlinable public static
     func += (self:inout Self, codepoint:Unicode.Scalar)
     {
         self.bytecode.write(utf8: codepoint.utf8)

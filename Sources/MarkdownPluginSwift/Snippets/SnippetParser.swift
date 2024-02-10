@@ -2,13 +2,18 @@ import SwiftSyntax
 
 struct SnippetParser
 {
+    private
+    let sourcemap:SourceLocationConverter
+
     var complete:[SliceBounds]
     var current:SliceFetus?
 
-    init(start position:AbsolutePosition)
+    init(sourcemap:SourceLocationConverter, start position:AbsolutePosition)
     {
+        self.sourcemap = sourcemap
+
         self.complete = []
-        self.current = .init(id: "", at: position)
+        self.current = .init(id: "", position: position)
     }
 }
 extension SnippetParser
@@ -74,6 +79,7 @@ extension SnippetParser
 
             if  let statement:SliceMarker.Statement = .init(lineComment: line, skip: skip)
             {
+                let location:SourceLocation = self.sourcemap.location(for: current)
                 //  We know that line comments always extend to the end of the line.
                 //  Therefore, `range.upperBound` “always” points to a newline, and the start of
                 //  the next line is one after the index after the end of the comment.
@@ -84,7 +90,8 @@ extension SnippetParser
                 self.push(marker: .init(statement: statement,
                     indent: leading.indent,
                     before: leading.position,
-                    after: range.upperBound.advanced(by: 1)))
+                    after: range.upperBound.advanced(by: 1),
+                    line: location.line))
             }
             else
             {
@@ -138,7 +145,9 @@ extension SnippetParser
                 self.complete.append(slice)
             }
 
-            self.current = .init(id: id, at: marker.after, indent: marker.indent)
+            self.current = .init(id: id,
+                position: marker.after,
+                marker: (line: marker.line, indent: marker.indent))
         }
     }
 }

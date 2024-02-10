@@ -9,6 +9,7 @@ import MarkdownAST
 import MarkdownParsing
 import MarkdownRendering
 import MarkdownSemantics
+import OrderedCollections
 import Signatures
 import Snippets
 import Sources
@@ -33,6 +34,8 @@ struct StaticLinker:~Copyable
     private
     var symbolizer:Symbolizer
     private
+    var snippets:[String: Markdown.Snippet]
+    private
     var router:Router
     private
     var tables:Tables
@@ -54,6 +57,7 @@ struct StaticLinker:~Copyable
         self.nominations = nominations
 
         self.symbolizer = .init(modules: modules)
+        self.snippets = [:]
         self.router = .init()
         self.tables = .init()
 
@@ -249,13 +253,6 @@ extension StaticLinker
 
 extension StaticLinker
 {
-    // struct Snippet
-    // {
-
-    // }
-}
-extension StaticLinker
-{
     public mutating
     func attach(
         markdown:[[MarkdownSourceFile]],
@@ -278,47 +275,32 @@ extension StaticLinker
 
         //  Right now we only do one pass over the snippets, since no one should be referencing
         //  snippets from other snippets.
-        let scopes:StaticResolver.Scopes = .init(
-            codelink: .init(namespace: nil, imports: self.symbolizer.importAll, path: []),
-            doclink: nil)
-
-        for snippet:SwiftSourceFile in supplements
+        self.snippets = supplements.reduce(into: [:])
         {
-            let (description, slices):(String, [Snippet.Slice]) = swift.parse(
-                snippet: snippet.utf8)
+            let (caption, slices):(String, [Markdown.SnippetSlice]) = swift.parse(
+                snippet: $1.utf8)
 
-            let file:Int32 = self.symbolizer.intern(snippet.path)
-            let article:SymbolGraph.Article?
+            let id:Int32 = self.symbolizer.intern($1.path)
+            let blocks:[Markdown.BlockElement]
 
-            if  description.allSatisfy(\.isWhitespace)
+            if  caption.allSatisfy(\.isWhitespace)
             {
-                article = nil
+                blocks = []
             }
             else
             {
-                let blocks:[Markdown.BlockElement] = self.doccommentParser.parse(MarkdownSource.init(
-                    location: .init(position: .zero, file: file),
-                    text: description))
-
-                article = self.tables.resolving(with: scopes)
-                {
-                    $0.link(blocks: blocks, file: file)
-                }
-
-                print("Snippet '\(snippet.name)':")
-                print("--------------------")
-                print("\(article!.overview.safe)")
-                print("\(article!.details.safe)")
-                print("--------------------")
+                blocks = self.doccommentParser.parse(.init(
+                    location: .init(position: .zero, file: id),
+                    text: caption))
             }
 
-            for slice:Snippet.Slice in slices
+            let index:OrderedDictionary<String, Markdown.SnippetSlice> = slices.reduce(
+                into: [:])
             {
-                print("Snippet '\(snippet.name).\(slice.id)':")
-                print("--------------------")
-                print("\(slice.bytecode.safe)")
-                print("--------------------")
+                $0[$1.id] = $1
             }
+
+            $0[$1.name] = .init(id: id, caption: blocks, slices: index)
         }
     }
 
@@ -390,8 +372,12 @@ extension StaticLinker
             location: .init(position: .zero, file: file),
             text: article.text)
 
-        let supplement:Supplement = source.parse(using: self.markdownParser,
-            with: &self.tables.diagnostics)
+        //  There is no point in passing the snippets table here, because snippets are not
+        //  attached until after all the markdown supplements have been attached.
+        let supplement:Supplement = source.parse(
+            markdownParser: self.markdownParser,
+            snippetsTable: [:],
+            diagnostics: &self.tables.diagnostics)
 
         guard let headline:Supplement.Headline = supplement.headline
         else
@@ -623,8 +609,9 @@ extension StaticLinker
             markdown =
             (
                 parsed: comment.parse(
-                    using: self.doccommentParser,
-                    with: &self.tables.diagnostics),
+                    markdownParser: self.doccommentParser,
+                    snippetsTable: self.snippets,
+                    diagnostics: &self.tables.diagnostics),
                 file: nil
             )
 
@@ -635,8 +622,9 @@ extension StaticLinker
             }
 
             let body:Markdown.SemanticDocument = comment.parse(
-                using: self.doccommentParser,
-                with: &self.tables.diagnostics)
+                markdownParser: self.doccommentParser,
+                snippetsTable: self.snippets,
+                diagnostics: &self.tables.diagnostics)
 
             markdown =
             (
@@ -743,8 +731,9 @@ extension StaticLinker
                     in: file.map { self.symbolizer.intern($0) })
 
                 let parsed:Markdown.SemanticDocument = comment.parse(
-                    using: self.doccommentParser,
-                    with: &self.tables.diagnostics)
+                    markdownParser: self.doccommentParser,
+                    snippetsTable: self.snippets,
+                    diagnostics: &self.tables.diagnostics)
 
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access

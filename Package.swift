@@ -99,7 +99,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.12.0")),
+            from: "0.12.1")),
         //.package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
@@ -108,14 +108,17 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
 
+        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(
+            from: "1.1.0")),
+
         /// swift-nio has a low rate of breakage, and can be trusted with a major-only
         /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.62.0"),
+            from: "2.63.0"),
         /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
         /// major-only version requirement.
         .package(url: "https://github.com/apple/swift-nio-ssl",
-            from: "2.25.0"),
+            from: "2.26.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.29.0")),
@@ -127,7 +130,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "509.0.2"),
+            exact: "509.1.1"),
     ],
     targets:
     [
@@ -332,7 +335,10 @@ let package:Package = .init(
                 .target(name: "Codelinks"),
                 .target(name: "MarkdownAST"),
                 .target(name: "Sources"),
+                .target(name: "Snippets"),
                 .target(name: "UnidocDiagnostics"),
+
+                .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
         .target(name: "MD5", dependencies:
