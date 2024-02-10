@@ -18,7 +18,7 @@ extension Main.Bindings:TestBattery
     static
     func run(tests:TestGroup)
     {
-        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
+        let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
         var ignore:DiagnosticContext<StaticSymbolicator> = .init()
 
         if  let tests:TestGroup = tests / "Basic"
@@ -28,8 +28,10 @@ extension Main.Bindings:TestBattery
 
             I think for me, um.
             """
-            let documentation:StaticLinker.Supplement = markdown.parse(using: parser,
-                with: &ignore)
+            let documentation:StaticLinker.Supplement = markdown.parse(
+                markdownParser: markdownParser,
+                snippetsTable: [:],
+                diagnostics: &ignore)
 
             tests.expect(documentation.headline?.binding?.text ==? "Taylor")
         }
@@ -40,8 +42,10 @@ extension Main.Bindings:TestBattery
 
             I think for me, um.
             """
-            let documentation:StaticLinker.Supplement = markdown.parse(using: parser,
-                with: &ignore)
+            let documentation:StaticLinker.Supplement = markdown.parse(
+                markdownParser: markdownParser,
+                snippetsTable: [:],
+                diagnostics: &ignore)
 
             tests.expect(documentation.headline?.binding?.text ==? "Taylor")
         }

@@ -33,11 +33,11 @@ extension Main.Doclinks:TestBattery
             ),
         ]
         {
-            let tree:MarkdownTree = .init { parser.parse(source) }
+            let tree:Markdown.Tree = .init { parser.parse(source) }
             if  let tests:TestGroup = tests / name,
-                let paragraph:MarkdownBlock.Paragraph = tests.expect(
-                    value: tree.blocks.first as? MarkdownBlock.Paragraph),
-                let autolink:MarkdownInline.Autolink = tests.expect(
+                let paragraph:Markdown.BlockParagraph = tests.expect(
+                    value: tree.blocks.first as? Markdown.BlockParagraph),
+                let autolink:Markdown.InlineAutolink = tests.expect(
                     value:
                     {
                         switch $0

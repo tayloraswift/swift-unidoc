@@ -9,5 +9,5 @@ import MarkdownRendering
 extension Unidoc.Passage:HTML.OutputStreamableMarkdown
 {
     public
-    var bytecode:MarkdownBytecode { [] }
+    var bytecode:Markdown.Bytecode { [] }
 }

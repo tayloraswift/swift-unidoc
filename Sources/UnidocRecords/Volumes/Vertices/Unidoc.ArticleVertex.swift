@@ -23,7 +23,7 @@ extension Unidoc
         var file:Unidoc.Scalar? { self.readme }
 
         public
-        var headline:MarkdownBytecode
+        var headline:Markdown.Bytecode
         public
         var overview:Unidoc.Passage?
         public
@@ -36,7 +36,7 @@ extension Unidoc
             stem:Unidoc.Stem,
             culture:Unidoc.Scalar,
             readme:Unidoc.Scalar? = nil,
-            headline:MarkdownBytecode = [],
+            headline:Markdown.Bytecode = [],
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
             group:Unidoc.Group? = nil)

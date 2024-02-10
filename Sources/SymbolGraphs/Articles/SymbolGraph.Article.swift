@@ -17,9 +17,9 @@ extension SymbolGraph
         public
         var outlines:[Outline]
         public
-        var overview:MarkdownBytecode
+        var overview:Markdown.Bytecode
         public
-        var details:MarkdownBytecode
+        var details:Markdown.Bytecode
         /// The number of outlines used by the overview paragraph alone.
         public
         var fold:Int
@@ -28,8 +28,8 @@ extension SymbolGraph
 
         @inlinable public
         init(outlines:[Outline] = [],
-            overview:MarkdownBytecode = [],
-            details:MarkdownBytecode = [],
+            overview:Markdown.Bytecode = [],
+            details:Markdown.Bytecode = [],
             fold:Int? = nil,
             file:Int32? = nil)
         {

@@ -64,7 +64,7 @@ extension StaticResolver
     }
 
     mutating
-    func outline(_ autolink:MarkdownInline.Autolink,
+    func outline(_ autolink:Markdown.InlineAutolink,
         as codelink:Codelink) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
@@ -91,7 +91,7 @@ extension StaticResolver
         }
     }
     mutating
-    func outline(_ autolink:MarkdownInline.Autolink,
+    func outline(_ autolink:Markdown.InlineAutolink,
         as doclink:Doclink) -> SymbolGraph.Outline?
     {
         self.doclinks.resolve(doclink).map

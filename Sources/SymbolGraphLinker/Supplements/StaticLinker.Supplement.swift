@@ -9,13 +9,13 @@ extension StaticLinker
         public
         let headline:Headline?
         public
-        let parsed:MarkdownDocumentation
+        let parsed:Markdown.SemanticDocument
         public
         let source:MarkdownSource
 
         @inlinable public
         init(headline:consuming Headline?,
-            parsed:consuming MarkdownDocumentation,
+            parsed:consuming Markdown.SemanticDocument,
             source:consuming MarkdownSource)
         {
             self.headline = headline
