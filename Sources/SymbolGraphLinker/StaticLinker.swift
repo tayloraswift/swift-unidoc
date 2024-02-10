@@ -278,30 +278,13 @@ extension StaticLinker
         //  snippets from other snippets.
         return supplements.reduce(into: [:])
         {
-            let (caption, slices):(String, [Markdown.SnippetSlice]) = swift.parse(
+            let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swift.parse(
                 snippet: $1.utf8)
 
-            let id:Int32 = self.symbolizer.intern($1.path)
-            let blocks:[Markdown.BlockElement]
-
-            if  caption.allSatisfy(\.isWhitespace)
-            {
-                blocks = []
-            }
-            else
-            {
-                blocks = self.doccommentParser.parse(.init(
-                    location: .init(position: .zero, file: id),
-                    text: caption))
-            }
-
-            let index:OrderedDictionary<String, Markdown.SnippetSlice> = slices.reduce(
-                into: [:])
-            {
-                $0[$1.id] = $1
-            }
-
-            $0[$1.name] = .init(id: id, caption: blocks, slices: index)
+            $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
+                caption: snippet.caption,
+                slices: snippet.slices,
+                using: self.doccommentParser)
         }
     }
 
