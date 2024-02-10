@@ -274,7 +274,8 @@ extension Markdown.BlockInterpreter
                 var items:[Markdown.BlockItem] = []
                 for item:Markdown.BlockItem in list.elements
                 {
-                    guard let prefix:Markdown.BlockPrefix = .extract(from: &item.elements)
+                    guard
+                    let prefix:Markdown.BlockPrefix = .extract(from: &item.elements)
                     else
                     {
                         items.append(item)

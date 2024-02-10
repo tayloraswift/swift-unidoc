@@ -26,7 +26,7 @@ extension Markdown.SwiftLanguage:Markdown.CodeLanguageType
 extension Markdown.SwiftLanguage
 {
     public
-    func parse(snippet utf8:[UInt8]) -> (overview:String, slices:[Markdown.SnippetSlice])
+    func parse(snippet utf8:[UInt8]) -> (caption:String, slices:[Markdown.SnippetSlice])
     {
         //  It is safe to escape the pointer to ``Parser.parse(source:maximumNestingLevel:)``,
         //  see: https://swiftinit.org/docs/swift-syntax/swiftparser/parser.init(_:maximumnestinglevel:parsetransition:arena:)
@@ -36,7 +36,7 @@ extension Markdown.SwiftLanguage
         }
 
         var start:AbsolutePosition = parsed.position
-        var text:String = ""
+        var caption:String = ""
         lines:
         for piece:TriviaPiece in parsed.leadingTrivia
         {
@@ -75,8 +75,8 @@ extension Markdown.SwiftLanguage
                 fatalError("Encountered a line comment with no leading slashes!")
             }
 
-            text += line[i...].drop(while: \.isWhitespace)
-            text.append("\n")
+            caption += line[i...].drop(while: \.isWhitespace)
+            caption.append("\n")
         }
 
         var parser:SnippetParser = .init(sourcemap: .init(fileName: "", tree: parsed),
@@ -138,6 +138,6 @@ extension Markdown.SwiftLanguage
             return .init(id: slice.id, line: slice.line, code: bytecode)
         }
 
-        return (text, rendered)
+        return (caption, rendered)
     }
 }
