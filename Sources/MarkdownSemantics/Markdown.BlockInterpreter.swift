@@ -80,16 +80,26 @@ extension Markdown.BlockInterpreter
 
             default:
                 //  TODO: emit diagnostic.
+                print("Unknown @Snippet argument: \(argument)")
                 continue
             }
         }
 
         guard
-        let name:String,
+        let name:String
+        else
+        {
+            //  TODO: emit diagnostic.
+            print("Missing @Snippet name")
+            return
+        }
+        guard
         let snippet:Markdown.Snippet = snippets[name]
         else
         {
             //  TODO: emit diagnostic.
+            print("Unknown @Snippet name: '\(name)'")
+            print("Available snippets: \(snippets.keys.sorted())")
             return
         }
 
@@ -102,6 +112,7 @@ extension Markdown.BlockInterpreter
             else
             {
                 //  TODO: emit diagnostic.
+                print("Unknown @Snippet slice: '\(slice)'")
             }
         }
         else

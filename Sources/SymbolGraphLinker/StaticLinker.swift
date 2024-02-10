@@ -254,28 +254,29 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(
-        markdown:[[MarkdownSourceFile]],
-        snippets:[SwiftSourceFile]) -> [[Article]]
+    func attach(snippets:[SwiftSourceFile], markdown:[[MarkdownSourceFile]]) -> [[Article]]
     {
-        //  Markdown supplements are attached first, because the snippets may reference them.
-        defer { self.attach(snippets: snippets) }
-        return  self.attach(markdown: markdown)
+        //  We attach snippets first, because they can be referenced by the markdown
+        //  supplements. This works even if the snippet captions contain references to articles,
+        //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
+        //  resolution does not take place until we link the written documentation.
+        self.snippets = self.attach(snippets: snippets)
+        return          self.attach(markdown: markdown)
     }
 
     private mutating
-    func attach(snippets supplements:[SwiftSourceFile])
+    func attach(snippets supplements:[SwiftSourceFile]) -> [String: Markdown.Snippet]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
         else
         {
-            return
+            return [:]
         }
 
         //  Right now we only do one pass over the snippets, since no one should be referencing
         //  snippets from other snippets.
-        self.snippets = supplements.reduce(into: [:])
+        return supplements.reduce(into: [:])
         {
             let (caption, slices):(String, [Markdown.SnippetSlice]) = swift.parse(
                 snippet: $1.utf8)
@@ -372,11 +373,9 @@ extension StaticLinker
             location: .init(position: .zero, file: file),
             text: article.text)
 
-        //  There is no point in passing the snippets table here, because snippets are not
-        //  attached until after all the markdown supplements have been attached.
         let supplement:Supplement = source.parse(
             markdownParser: self.markdownParser,
-            snippetsTable: [:],
+            snippetsTable: self.snippets,
             diagnostics: &self.tables.diagnostics)
 
         guard let headline:Supplement.Headline = supplement.headline
