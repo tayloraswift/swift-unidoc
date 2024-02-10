@@ -29,6 +29,94 @@ extension Markdown
 }
 extension Markdown.BlockInterpreter
 {
+    /// We currently always eagarly inline snippet slices, which simplifies the rendering model.
+    ///
+    /// As long as people are not reusing the same slices in multiple places, this has no
+    /// performance drawbacks. No one should be doing that (extensively) anyways, because that
+    /// would result in documentation that is hard to browse.
+    private mutating
+    func inline(_ snippet:Markdown.BlockDirective, from snippets:[String: Markdown.Snippet])
+    {
+        var slice:String? = nil
+        var name:String? = nil
+
+        for (argument, value):(String, String) in snippet.arguments
+        {
+            switch argument
+            {
+            case "slice":
+                slice = value
+
+            //  This is a Unidoc extension, and is not actually part of SE-0356. But SE-0356 is
+            //  really poorly written and the `path:` syntax is just awful.
+            case "id":
+                name = value
+
+            case "path":
+                //  We are going to ignore the first path component, which is the package name,
+                //  for several reasons.
+                //
+                //  1.  It serves no purpose to qualify a snippet path with the package name,
+                //      other than to accommodate a flawed implementation of Swift DocC.
+                //
+                //  2.  Package names are extrinsic to the documentation, and would need to be
+                //      kept up-to-date with the package name in the `Package.swift`.
+                //
+                //  3.  Package names can contain URL-unfriendly characters, which would cause
+                //      all of their snippets to become unusable. Therefore, DocC `path:`
+                //      syntax imposes an additional limitation on package names that is not
+                //      legitimized anywhere else.
+                guard
+                let i:String.Index = value.firstIndex(of: "/"),
+                let j:String.Index = value.lastIndex(of: "/"),
+                case "/Snippets" = value[i ..< j]
+                else
+                {
+                    //  TODO: emit diagnostic.
+                    continue
+                }
+
+                name = String.init(value[value.index(after: j)...])
+
+            default:
+                //  TODO: emit diagnostic.
+                continue
+            }
+        }
+
+        guard
+        let name:String,
+        let snippet:Markdown.Snippet = snippets[name]
+        else
+        {
+            //  TODO: emit diagnostic.
+            return
+        }
+
+        if  let slice:String
+        {
+            if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
+            {
+                self.blocks.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+            }
+            else
+            {
+                //  TODO: emit diagnostic.
+            }
+        }
+        else
+        {
+            //  Snippet captions cannot contain topics, so we can just add them directly to
+            //  the ``blocks`` list.
+            self.blocks += snippet.caption
+
+            for slice:Markdown.SnippetSlice in snippet.slices.values
+            {
+                self.blocks.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+            }
+        }
+    }
+
     private mutating
     func append(_ block:Markdown.BlockElement)
     {
@@ -140,10 +228,12 @@ extension Markdown.BlockInterpreter
         }
     }
 }
+
 extension Markdown.BlockInterpreter
 {
     public mutating
-    func organize(_ blocks:ArraySlice<Markdown.BlockElement>) -> Markdown.SemanticDocument
+    func organize(_ blocks:ArraySlice<Markdown.BlockElement>,
+        snippets:[String: Markdown.Snippet]) -> Markdown.SemanticDocument
     {
         var parameters:(discussion:[Markdown.BlockElement], list:[Markdown.BlockParameter]) =
         (
@@ -211,7 +301,8 @@ extension Markdown.BlockInterpreter
                 }
 
             case let quote as Markdown.BlockQuote:
-                guard let prefix:Markdown.BlockPrefix = .extract(from: &quote.elements)
+                guard
+                let prefix:Markdown.BlockPrefix = .extract(from: &quote.elements)
                 else
                 {
                     self.append(quote)
@@ -246,9 +337,7 @@ extension Markdown.BlockInterpreter
                     metadata.update(with: block.elements)
 
                 case "Snippet":
-                    //  Don’t know how to handle these yet, so we just render them
-                    //  as code blocks.
-                    self.append(block)
+                    self.inline(block, from: snippets)
 
                 case _:
                     //  Don’t know how to handle these yet, so we just render them

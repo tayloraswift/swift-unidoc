@@ -7,13 +7,13 @@ extension SnippetParser
     struct SliceBounds
     {
         let id:String
-        var indent:Int
+        var marker:(line:Int, indent:Int)
         var ranges:[Range<AbsolutePosition>]
 
-        init(id:String, indent:Int)
+        init(id:String, marker:(line:Int, indent:Int))
         {
             self.id = id
-            self.indent = indent
+            self.marker = marker
             self.ranges = []
         }
     }
@@ -47,7 +47,7 @@ extension SnippetParser.SliceBounds
         }
 
         //  Compute maximum removable indentation.
-        var indent:Int = self.indent
+        var indent:Int = self.marker.indent
         for range:Range<Int> in ranges
         {
             /// We initialize this to 0 and not nil because we assume the range starts at the
@@ -83,12 +83,12 @@ extension SnippetParser.SliceBounds
         }
 
 
-        if  self.indent == 0
+        if  self.marker.indent == 0
         {
-            return .init(id: self.id, ranges: ranges)
+            return .init(id: self.id, line: self.marker.line, ranges: ranges)
         }
 
-        var slice:SnippetParser.Slice = .init(id: self.id, ranges: [])
+        var slice:SnippetParser.Slice = .init(id: self.id, line: self.marker.line, ranges: [])
             slice.ranges.reserveCapacity(ranges.count)
 
         for range:Range<Int> in ranges
@@ -112,7 +112,7 @@ extension SnippetParser.SliceBounds
                     continue
 
                 case    (_, let i?):
-                    slice.punch(hole: (i ..< j).prefix(self.indent))
+                    slice.punch(hole: (i ..< j).prefix(self.marker.indent))
                     start = nil
 
                 case    (_, nil):

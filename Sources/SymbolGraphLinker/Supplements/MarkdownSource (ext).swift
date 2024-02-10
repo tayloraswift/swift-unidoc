@@ -25,8 +25,9 @@ extension MarkdownSource
 {
     @_spi(testable) public borrowing
     func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
-        using parser:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>,
-        with diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> Markdown.SemanticDocument
+        markdownParser markdown:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>,
+        snippetsTable:[String: Markdown.Snippet],
+        diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> Markdown.SemanticDocument
     {
         var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
@@ -34,13 +35,14 @@ extension MarkdownSource
         {
             diagnostics = interpreter.diagnostics
         }
-        return interpreter.organize(parser.parse(self)[...])
+        return interpreter.organize(markdown.parse(self)[...], snippets: snippetsTable)
     }
 
     @_spi(testable) public consuming
     func parse(_:StaticLinker.Supplement.Type = StaticLinker.Supplement.self,
-        using parser:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>,
-        with diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> StaticLinker.Supplement
+        markdownParser markdown:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>,
+        snippetsTable:[String: Markdown.Snippet],
+        diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> StaticLinker.Supplement
     {
         var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
@@ -49,18 +51,18 @@ extension MarkdownSource
             diagnostics = interpreter.diagnostics
         }
 
-        let blocks:[Markdown.BlockElement] = parser.parse(copy self)
+        let blocks:[Markdown.BlockElement] = markdown.parse(copy self)
 
         if  case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
             return .init(headline: .init(heading),
-                parsed: interpreter.organize(blocks.dropFirst()),
+                parsed: interpreter.organize(blocks.dropFirst(), snippets: snippetsTable),
                 source: self)
         }
         else
         {
             return .init(headline: nil,
-                parsed: interpreter.organize(blocks[...]),
+                parsed: interpreter.organize(blocks[...], snippets: snippetsTable),
                 source: self)
         }
     }
