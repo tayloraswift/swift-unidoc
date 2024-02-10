@@ -10,12 +10,12 @@ extension SymbolGraph
         public
         var outlines:[Outline]
         public
-        var overview:MarkdownBytecode
+        var overview:Markdown.Bytecode
         public
         var members:[Outline]
 
         @inlinable public
-        init(outlines:[Outline], overview:MarkdownBytecode, members:[Outline])
+        init(outlines:[Outline], overview:Markdown.Bytecode, members:[Outline])
         {
             self.outlines = outlines
             self.overview = overview

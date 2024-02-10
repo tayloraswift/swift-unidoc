@@ -7,8 +7,11 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
+import MarkdownRendering
 import MarkdownSemantics
+import OrderedCollections
 import Signatures
+import Snippets
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
@@ -24,10 +27,14 @@ struct StaticLinker:~Copyable
     private
     let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>
     private
+    let swiftParser:Markdown.SwiftLanguage?
+    private
     let nominations:Compiler.Nominations
 
     private
     var symbolizer:Symbolizer
+    private
+    var snippets:[String: Markdown.Snippet]
     private
     var router:Router
     private
@@ -39,16 +46,18 @@ struct StaticLinker:~Copyable
     public
     init(nominations:Compiler.Nominations,
         modules:[SymbolGraph.Module],
-        plugins:[any MarkdownCodeLanguageType] = [])
+        plugins:[any Markdown.CodeLanguageType] = [])
     {
+        let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
         //  If we were given a plugin that says it can highlight swift,
         //  make it the default plugin for the doccomment parser.
-        self.doccommentParser = .init(plugins: plugins,
-            default: plugins.first { $0.name == "swift" })
+        self.doccommentParser = .init(plugins: plugins, default: swift)
         self.markdownParser = .init(plugins: plugins)
+        self.swiftParser = swift as? Markdown.SwiftLanguage
         self.nominations = nominations
 
         self.symbolizer = .init(modules: modules)
+        self.snippets = [:]
         self.router = .init()
         self.tables = .init()
 
@@ -245,7 +254,42 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(supplements:[[MarkdownSourceFile]])
+    func attach(snippets:[SwiftSourceFile], markdown:[[MarkdownSourceFile]]) -> [[Article]]
+    {
+        //  We attach snippets first, because they can be referenced by the markdown
+        //  supplements. This works even if the snippet captions contain references to articles,
+        //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
+        //  resolution does not take place until we link the written documentation.
+        self.snippets = self.attach(snippets: snippets)
+        return          self.attach(markdown: markdown)
+    }
+
+    private mutating
+    func attach(snippets supplements:[SwiftSourceFile]) -> [String: Markdown.Snippet]
+    {
+        guard
+        let swift:Markdown.SwiftLanguage = self.swiftParser
+        else
+        {
+            return [:]
+        }
+
+        //  Right now we only do one pass over the snippets, since no one should be referencing
+        //  snippets from other snippets.
+        return supplements.reduce(into: [:])
+        {
+            let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swift.parse(
+                snippet: $1.utf8)
+
+            $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
+                caption: snippet.caption,
+                slices: snippet.slices,
+                using: self.doccommentParser)
+        }
+    }
+
+    private mutating
+    func attach(markdown supplements:[[MarkdownSourceFile]]) -> [[Article]]
     {
         let articles:[[Article]] = zip(supplements.indices, supplements).map
         {
@@ -295,32 +339,9 @@ extension StaticLinker
                 hash: .init(hashing: "\(namespace)")))
         }
 
-        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
-        {
-            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
-            for article:Article in articles
-            {
-                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
-                {
-                    if  let standalone:Int32 = article.standalone
-                    {
-                        (
-                            self.symbolizer.graph.articles.nodes[standalone].article,
-                            self.symbolizer.graph.articles.nodes[standalone].topics
-                        ) = $0.link(attached: article.body, file: article.file)
-                    }
-                    else
-                    {
-                        //  This is the article for the module’s landing page.
-                        (
-                            self.symbolizer.graph.cultures[culture].article,
-                            self.symbolizer.graph.cultures[culture].topics
-                        ) = $0.link(attached: article.body, file: article.file)
-                    }
-                }
-            }
-        }
+        return articles
     }
+
     /// Parses and stores the given supplemental documentation if it has a binding
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
@@ -335,8 +356,10 @@ extension StaticLinker
             location: .init(position: .zero, file: file),
             text: article.text)
 
-        let supplement:Supplement = source.parse(using: self.markdownParser,
-            with: &self.tables.diagnostics)
+        let supplement:Supplement = source.parse(
+            markdownParser: self.markdownParser,
+            snippetsTable: self.snippets,
+            diagnostics: &self.tables.diagnostics)
 
         guard let headline:Supplement.Headline = supplement.headline
         else
@@ -403,7 +426,7 @@ extension StaticLinker
     }
 
     private
-    func resolve(decl binding:MarkdownInline.Autolink,
+    func resolve(decl binding:Markdown.InlineAutolink,
         in namespace:Symbol.Module) throws -> Int32?
     {
         //  Special rule for article bindings: if the text of the codelink matches
@@ -554,7 +577,7 @@ extension StaticLinker
             .init(comment: $0, in: location?.file)
         }
 
-        let markdown:(parsed:MarkdownDocumentation, file:Int32?)?
+        let markdown:(parsed:Markdown.SemanticDocument, file:Int32?)?
 
         switch (comment, supplement)
         {
@@ -568,8 +591,9 @@ extension StaticLinker
             markdown =
             (
                 parsed: comment.parse(
-                    using: self.doccommentParser,
-                    with: &self.tables.diagnostics),
+                    markdownParser: self.doccommentParser,
+                    snippetsTable: self.snippets,
+                    diagnostics: &self.tables.diagnostics),
                 file: nil
             )
 
@@ -579,9 +603,10 @@ extension StaticLinker
                 fallthrough
             }
 
-            let body:MarkdownDocumentation = comment.parse(
-                using: self.doccommentParser,
-                with: &self.tables.diagnostics)
+            let body:Markdown.SemanticDocument = comment.parse(
+                markdownParser: self.doccommentParser,
+                snippetsTable: self.snippets,
+                diagnostics: &self.tables.diagnostics)
 
             markdown =
             (
@@ -687,14 +712,15 @@ extension StaticLinker
                 let comment:MarkdownSource = .init(comment: comment,
                     in: file.map { self.symbolizer.intern($0) })
 
-                let parsed:MarkdownDocumentation = comment.parse(
-                    using: self.doccommentParser,
-                    with: &self.tables.diagnostics)
+                let parsed:Markdown.SemanticDocument = comment.parse(
+                    markdownParser: self.doccommentParser,
+                    snippetsTable: self.snippets,
+                    diagnostics: &self.tables.diagnostics)
 
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
-                let importAll:[Symbol.Module] = self.symbolizer.importAll ;
-
+                let importAll:[Symbol.Module] = self.symbolizer.importAll
+                ;
                 {
                     let scopes:StaticResolver.Scopes = .init(
                         codelink: .init(
@@ -709,6 +735,38 @@ extension StaticLinker
                     }
 
                 } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
+            }
+        }
+    }
+}
+extension StaticLinker
+{
+    public mutating
+    func link(articles:[[Article]])
+    {
+        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
+        {
+            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
+            for article:Article in articles
+            {
+                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
+                {
+                    if  let standalone:Int32 = article.standalone
+                    {
+                        (
+                            self.symbolizer.graph.articles.nodes[standalone].article,
+                            self.symbolizer.graph.articles.nodes[standalone].topics
+                        ) = $0.link(attached: article.body, file: article.file)
+                    }
+                    else
+                    {
+                        //  This is the article for the module’s landing page.
+                        (
+                            self.symbolizer.graph.cultures[culture].article,
+                            self.symbolizer.graph.cultures[culture].topics
+                        ) = $0.link(attached: article.body, file: article.file)
+                    }
+                }
             }
         }
     }

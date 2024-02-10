@@ -60,15 +60,15 @@ extension StaticLinker.Symbolizer
     /// with the same mangled name has not already been indexed. (This function checks
     /// for duplicates.)
     mutating
-    func allocate(article:Symbol.Article, title:consuming MarkdownBlock.Heading) -> Int32?
+    func allocate(article:Symbol.Article, title:consuming Markdown.BlockHeading) -> Int32?
     {
         {
             if  case nil = $0
             {
-                let headline:MarkdownBytecode = .init
+                let headline:Markdown.Bytecode = .init
                 {
                     //  Don’t emit the enclosing `h1` tag!
-                    for element:MarkdownInline.Block in title.elements
+                    for element:Markdown.InlineElement in title.elements
                     {
                         element.emit(into: &$0)
                     }

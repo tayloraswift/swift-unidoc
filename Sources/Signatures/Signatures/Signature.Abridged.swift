@@ -6,10 +6,10 @@ extension Signature
     struct Abridged:Equatable, Sendable
     {
         public
-        let bytecode:MarkdownBytecode
+        let bytecode:Markdown.Bytecode
 
         @inlinable public
-        init(bytecode:MarkdownBytecode = [])
+        init(bytecode:Markdown.Bytecode = [])
         {
             self.bytecode = bytecode
         }

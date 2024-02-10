@@ -6,12 +6,12 @@ extension Signature
     struct Expanded:Equatable
     {
         public
-        let bytecode:MarkdownBytecode
+        let bytecode:Markdown.Bytecode
         public
         let scalars:[Scalar]
 
         @inlinable public
-        init(bytecode:MarkdownBytecode = [], scalars:[Scalar] = [])
+        init(bytecode:Markdown.Bytecode = [], scalars:[Scalar] = [])
         {
             self.bytecode = bytecode
             self.scalars = scalars

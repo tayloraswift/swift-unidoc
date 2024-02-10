@@ -10,11 +10,11 @@ struct ProseSection
     private
     let context:any Swiftinit.VertexPageContext
 
-    let bytecode:MarkdownBytecode
+    let bytecode:Markdown.Bytecode
     let outlines:[Unidoc.Outline]
 
     init(_ context:any Swiftinit.VertexPageContext,
-        bytecode:MarkdownBytecode,
+        bytecode:Markdown.Bytecode,
         outlines:[Unidoc.Outline])
     {
         self.context = context
@@ -32,7 +32,7 @@ extension ProseSection
 }
 extension ProseSection:HTML.OutputStreamableMarkdown
 {
-    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
     {
         guard case .href = attribute,
         self.outlines.indices.contains(reference)

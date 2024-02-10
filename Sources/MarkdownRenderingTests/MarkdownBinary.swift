@@ -2,13 +2,13 @@ import HTML
 import MarkdownABI
 import MarkdownRendering
 
-/// A thin wrapper around some ``MarkdownBytecode``, which conforms to
+/// A thin wrapper around some ``Markdown.Bytecode``, which conforms to
 /// ``MarkdownExecutable``, and can be rendered to HTML.
 struct MarkdownBinary:Equatable, Sendable
 {
-    let bytecode:MarkdownBytecode
+    let bytecode:Markdown.Bytecode
 
-    init(bytecode:MarkdownBytecode)
+    init(bytecode:Markdown.Bytecode)
     {
         self.bytecode = bytecode
     }

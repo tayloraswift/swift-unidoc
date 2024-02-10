@@ -14,12 +14,12 @@ extension SPM
         /// What is being built.
         let id:ID
         /// Where to emit documentation artifacts to.
-        let output:ArtifactDirectory
+        let output:ArtifactsDirectory
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
         var root:FilePath
 
-        init(id:ID, output:ArtifactDirectory, root:FilePath)
+        init(id:ID, output:ArtifactsDirectory, root:FilePath)
         {
             self.id = id
             self.output = output
@@ -128,7 +128,7 @@ extension SPM.Build
         let container:SPM.Workspace = try await shared.create("\(package)")
         let checkouts:SPM.CheckoutDirectory = try await container.create("checkouts",
             clean: clean.contains(.checkouts))
-        let artifacts:ArtifactDirectory = try await container.create("artifacts@\(refname)",
+        let artifacts:ArtifactsDirectory = try await container.create("artifacts@\(refname)",
             clean: clean.contains(.artifacts))
 
         let cloned:FilePath = checkouts.path / "\(package)"
@@ -225,7 +225,6 @@ extension SPM.Build:DocumentationBuild
         let scratch:SPM.BuildDirectory = try await swift.build(package: self.root,
             log: log.build)
 
-
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
         var dependencies:[PackageNode] = []
@@ -241,7 +240,7 @@ extension SPM.Build:DocumentationBuild
                 on: platform,
                 as: pin.identity)
 
-            let sources:SPM.Build.Sources = try .init(scanning: dependency)
+            let sources:SPM.PackageSources = try .init(scanning: dependency)
                 sources.yield(include: &include)
 
             dependencies.append(dependency)
@@ -296,6 +295,7 @@ extension SPM.Build:DocumentationBuild
             root: manifest.root)
 
         let artifacts:Artifacts = try await swift.dump(from: flatNode,
+            snippetsDirectory: manifest.snippets,
             include: &include,
             output: self.output,
             triple: swift.triple,

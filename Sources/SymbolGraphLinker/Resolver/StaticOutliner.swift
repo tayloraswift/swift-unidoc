@@ -38,7 +38,7 @@ extension StaticOutliner
 extension StaticOutliner
 {
     private mutating
-    func outline(autolink:MarkdownInline.Autolink) -> Int?
+    func outline(autolink:Markdown.InlineAutolink) -> Int?
     {
         self.cache(autolink.text)
         {
@@ -96,86 +96,6 @@ extension StaticOutliner
         }
     }
 }
-extension StaticLinker
-{
-    struct RenameParsingError:Error, Equatable
-    {
-        let redirect:UnqualifiedPath
-        let target:String
-
-        init(redirect:UnqualifiedPath, target:String)
-        {
-            self.redirect = redirect
-            self.target = target
-        }
-    }
-}
-extension StaticLinker.RenameParsingError:Diagnostic
-{
-    typealias Symbolicator = StaticSymbolicator
-
-    static
-    func += (output:inout DiagnosticOutput<StaticSymbolicator>, self:Self)
-    {
-        output[.warning] += """
-        rename target '\(self.target)' for '\(self.redirect)' could not be parsed
-        """
-    }
-}
-
-extension StaticLinker
-{
-    struct RenameTargetError:Error
-    {
-        let overloads:[CodelinkResolver<Int32>.Overload]
-        let redirect:UnqualifiedPath
-        let target:Codelink
-
-        init(overloads:[CodelinkResolver<Int32>.Overload],
-            redirect:UnqualifiedPath,
-            target:Codelink)
-        {
-            self.overloads = overloads
-            self.redirect = redirect
-            self.target = target
-        }
-    }
-}
-extension StaticLinker.RenameTargetError:Diagnostic
-{
-    typealias Symbolicator = StaticSymbolicator
-
-    static
-    func += (output:inout DiagnosticOutput<StaticSymbolicator>, self:Self)
-    {
-        if  self.overloads.isEmpty
-        {
-            output[.warning] += """
-            rename target '\(self.target)' for '\(self.redirect)' \
-            does not refer to any known declarations
-            """
-        }
-        else
-        {
-            output[.warning] += """
-            rename target '\(self.target)' for '\(self.redirect)' is ambiguous
-            """
-        }
-    }
-
-    var notes:[InvalidCodelinkError<StaticSymbolicator>.Note]
-    {
-        self.overloads.map
-        {
-            .init(suggested: .init(
-                    base: self.target.base,
-                    path: self.target.path,
-                    suffix: .hash($0.hash)),
-                target: $0.target)
-        }
-    }
-}
-
 extension StaticOutliner
 {
     mutating
@@ -187,14 +107,14 @@ extension StaticOutliner
     }
 
     mutating
-    func link(attached body:MarkdownDocumentation,
+    func link(attached body:Markdown.SemanticDocument,
         file:Int32?) -> (SymbolGraph.Article, [SymbolGraph.Topic])
     {
-        let overview:MarkdownBytecode = self.link(overview: body.overview)
+        let overview:Markdown.Bytecode = self.link(overview: body.overview)
 
         let fold:Int = self.cache.fold
 
-        let details:MarkdownBytecode = self.link(details: body.details)
+        let details:Markdown.Bytecode = self.link(details: body.details)
 
         let article:SymbolGraph.Article = .init(
             outlines: self.cache.clear(),
@@ -209,16 +129,16 @@ extension StaticOutliner
     }
 
     mutating
-    func link(article body:MarkdownDocumentation,
+    func link(article body:Markdown.SemanticDocument,
         file:Int32?) -> SymbolGraph.Article
     {
-        let overview:MarkdownBytecode = self.link(overview: body.overview)
+        let overview:Markdown.Bytecode = self.link(overview: body.overview)
 
         let fold:Int = self.cache.fold
 
         //  We don’t support topics lists in extension documentation.
         //  So we just render them into the article as lists of links.
-        let details:MarkdownBytecode = self.link(
+        let details:Markdown.Bytecode = self.link(
             details: body.details,
             topics: body.topics)
 
@@ -229,19 +149,39 @@ extension StaticOutliner
             fold: fold,
             file: file)
     }
+
+    mutating
+    func link(blocks:[Markdown.BlockElement], file:Int32) -> SymbolGraph.Article
+    {
+        let rendered:Markdown.Bytecode = .init
+        {
+            for block:Markdown.BlockElement in blocks
+            {
+                block.outline { self.outline(autolink: $0) }
+                block.emit(into: &$0)
+            }
+        }
+
+        return .init(
+            outlines: self.cache.clear(),
+            overview: rendered,
+            details: [],
+            fold: nil,
+            file: file)
+    }
 }
 extension StaticOutliner
 {
     private mutating
-    func link(topics:[MarkdownDocumentation.Topic]) -> [SymbolGraph.Topic]
+    func link(topics:[Markdown.SemanticTopic]) -> [SymbolGraph.Topic]
     {
         topics.map
         {
-            (topic:MarkdownDocumentation.Topic) in
+            (topic:Markdown.SemanticTopic) in
 
-            let overview:MarkdownBytecode = .init
+            let overview:Markdown.Bytecode = .init
             {
-                (binary:inout MarkdownBinaryEncoder) in topic.visit(members: false)
+                (binary:inout Markdown.BinaryEncoder) in topic.visit(members: false)
                 {
                     $0.outline { self.outline(autolink: $0) }
                     $0.emit(into: &binary)
@@ -250,7 +190,7 @@ extension StaticOutliner
 
             let outlines:[SymbolGraph.Outline] = self.cache.clear()
 
-            for member:MarkdownInline.Autolink in topic.members
+            for member:Markdown.InlineAutolink in topic.members
             {
                 let _:Int? = self.outline(autolink: member)
             }
@@ -264,25 +204,26 @@ extension StaticOutliner
     }
 
     private mutating
-    func link(overview:MarkdownBlock.Paragraph?) -> MarkdownBytecode
+    func link(overview:Markdown.BlockParagraph?) -> Markdown.Bytecode
     {
         .init
         {
-            (binary:inout MarkdownBinaryEncoder) in overview.map
+            (binary:inout Markdown.BinaryEncoder) in overview.map
             {
                 $0.outline { self.outline(autolink: $0) }
                 $0.emit(into: &binary)
             }
         }
     }
+
     private mutating
     func link(
-        details:MarkdownDocumentation.Details,
-        topics:[MarkdownDocumentation.Topic] = []) -> MarkdownBytecode
+        details:Markdown.SemanticSections,
+        topics:[Markdown.SemanticTopic] = []) -> Markdown.Bytecode
     {
         .init
         {
-            (binary:inout MarkdownBinaryEncoder) in
+            (binary:inout Markdown.BinaryEncoder) in
 
             details.visit
             {
@@ -290,7 +231,7 @@ extension StaticOutliner
                 $0.emit(into: &binary)
             }
 
-            for topic:MarkdownDocumentation.Topic in topics
+            for topic:Markdown.SemanticTopic in topics
             {
                 topic.visit(members: true)
                 {

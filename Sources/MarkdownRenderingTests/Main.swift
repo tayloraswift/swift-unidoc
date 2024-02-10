@@ -10,7 +10,7 @@ enum Main:TestMain, TestBattery
     func run(tests:TestGroup,
         expecting expected:String,
         plain:String,
-        from markdown:(inout MarkdownBinaryEncoder) -> ())
+        from markdown:(inout Markdown.BinaryEncoder) -> ())
     {
         tests.do
         {
@@ -302,7 +302,7 @@ enum Main:TestMain, TestBattery
         }
         if  let tests:TestGroup = tests / "Attributes" / "Align"
         {
-            for pseudo:MarkdownBytecode.Attribute in [.center, .left, .right]
+            for pseudo:Markdown.Bytecode.Attribute in [.center, .left, .right]
             {
                 if  let tests:TestGroup = tests / "\(pseudo)"
                 {
@@ -393,7 +393,7 @@ enum Main:TestMain, TestBattery
         {
             struct Renderable:HTML.OutputStreamableMarkdown
             {
-                let bytecode:MarkdownBytecode = .init
+                let bytecode:Markdown.Bytecode = .init
                 {
                     $0[.p]
                     {
@@ -420,7 +420,7 @@ enum Main:TestMain, TestBattery
         {
             struct Renderable:HTML.OutputStreamableMarkdown
             {
-                let bytecode:MarkdownBytecode
+                let bytecode:Markdown.Bytecode
 
                 init(reference:Int)
                 {
@@ -440,7 +440,7 @@ enum Main:TestMain, TestBattery
                     }
                 }
 
-                func load(_ reference:Int, for _:MarkdownBytecode.Attribute) -> String?
+                func load(_ reference:Int, for _:Markdown.Bytecode.Attribute) -> String?
                 {
                     reference & 1 == 0 ? nil : "swiftinit.org"
                 }

@@ -15,14 +15,14 @@ typealias HyperTextRenderableMarkdown = HTML.OutputStreamableMarkdown
 public
 protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
 {
-    var bytecode:MarkdownBytecode { get }
+    var bytecode:Markdown.Bytecode { get }
 
     /// Returns the value for an attribute identified by the given reference.
     /// If the witness returns nil, the renderer will omit the attribute.
     ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.
-    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
@@ -32,7 +32,7 @@ extension HTML.OutputStreamableMarkdown
 {
     /// Returns nil.
     @inlinable public
-    func load(_ reference:Int, for attribute:MarkdownBytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
     {
         nil
     }
@@ -61,24 +61,24 @@ extension HTML.OutputStreamableMarkdown
     public
     func render(to html:inout HTML.ContentEncoder) throws
     {
-        var attributes:MarkdownElementContext.AttributeContext = .init()
-        var stack:[MarkdownElementContext] = []
+        var attributes:Markdown.TreeContext.AttributeContext = .init()
+        var stack:[Markdown.TreeContext] = []
 
         defer
         {
-            for context:MarkdownElementContext in stack.reversed()
+            for context:Markdown.TreeContext in stack.reversed()
             {
                 html.close(context: context)
             }
         }
 
         var newlines:Int = 0
-        for instruction:MarkdownInstruction in self.bytecode
+        for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
             {
             case .invalid:
-                throw MarkdownRenderingError.invalidInstruction
+                throw Markdown.RenderingError.invalidInstruction
 
             case .attribute(let attribute, nil):
                 attributes.flush(beginning: attribute)
@@ -106,7 +106,7 @@ extension HTML.OutputStreamableMarkdown
             case .push(let element):
                 attributes.flush()
 
-                let context:MarkdownElementContext = .init(from: element,
+                let context:Markdown.TreeContext = .init(from: element,
                     attributes: &attributes.list)
 
                 html.emit(newlines: &newlines)
@@ -128,7 +128,7 @@ extension HTML.OutputStreamableMarkdown
                     html.close(context: context)
 
                 case nil:
-                    throw MarkdownRenderingError.illegalInstruction
+                    throw Markdown.RenderingError.illegalInstruction
                 }
 
             case .utf8(let codeunit):
@@ -162,7 +162,7 @@ extension HTML.OutputStreamableMarkdown
         guard stack.isEmpty
         else
         {
-            throw MarkdownRenderingError.interrupted
+            throw Markdown.RenderingError.interrupted
         }
     }
 }

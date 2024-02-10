@@ -57,7 +57,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
 
     var description:String?
     {
-        if  let overview:MarkdownBytecode = self.vertex.overview?.markdown
+        if  let overview:Markdown.Bytecode = self.vertex.overview?.markdown
         {
             "\(self.context.prose(overview))"
         }
@@ -259,7 +259,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                     } = "Browse conforming types"
                 }
             }
-            if  let markdown:MarkdownBytecode = self.vertex.details?.markdown
+            if  let markdown:Markdown.Bytecode = self.vertex.details?.markdown
             {
                 $0 += self.context.prose(markdown)
             }

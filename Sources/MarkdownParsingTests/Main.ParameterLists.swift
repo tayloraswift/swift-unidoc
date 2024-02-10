@@ -55,25 +55,25 @@ extension Main.ParameterLists:TestBattery
             ),
         ]
         {
-            let tree:MarkdownTree = .init { parser.parse(source) }
+            let tree:Markdown.Tree = .init { parser.parse(source) }
             if  let tests:TestGroup = tests / shape,
 
                 tests.expect(tree.blocks.count ==? 1),
 
-                let list:MarkdownBlock.UnorderedList = tests.expect(
-                    value: tree.blocks.first as? MarkdownBlock.UnorderedList),
+                let list:Markdown.BlockListUnordered = tests.expect(
+                    value: tree.blocks.first as? Markdown.BlockListUnordered),
 
                 tests.expect(list.elements.count ==? 1),
 
-                let item:MarkdownBlock.Item = tests.expect(
+                let item:Markdown.BlockItem = tests.expect(
                     value: list.elements.first),
 
                 tests.expect(item.elements.count ==? 2),
 
-                tests.expect(true: item.elements[0] is MarkdownBlock.Paragraph),
+                tests.expect(true: item.elements[0] is Markdown.BlockParagraph),
 
-                let parameters:MarkdownBlock.UnorderedList = tests.expect(
-                    value: item.elements[1] as? MarkdownBlock.UnorderedList),
+                let parameters:Markdown.BlockListUnordered = tests.expect(
+                    value: item.elements[1] as? Markdown.BlockListUnordered),
 
                 tests.expect(parameters.elements.count ==? 3)
             {

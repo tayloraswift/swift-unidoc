@@ -51,7 +51,7 @@ extension IdentifiablePageContext
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
     }
-    func prose(_ bytecode:MarkdownBytecode) -> ProseSection
+    func prose(_ bytecode:Markdown.Bytecode) -> ProseSection
     {
         //  We need to use the shared outlines, and not the array from the passage
         //  record, lest we make a frameshift indexing error.
