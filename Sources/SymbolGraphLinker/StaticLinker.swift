@@ -254,18 +254,21 @@ extension StaticLinker
 extension StaticLinker
 {
     public mutating
-    func attach(snippets:[SwiftSourceFile], markdown:[[MarkdownSourceFile]]) -> [[Article]]
+    func attach(
+        snippets:[any StaticTextFile<Symbol.Module>],
+        markdown:[[any StaticTextFile<Symbol.Article>]]) throws -> [[Article]]
     {
         //  We attach snippets first, because they can be referenced by the markdown
         //  supplements. This works even if the snippet captions contain references to articles,
         //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
         //  resolution does not take place until we link the written documentation.
-        self.snippets = self.attach(snippets: snippets)
-        return          self.attach(markdown: markdown)
+        self.snippets = try self.attach(snippets: snippets)
+        return          try self.attach(markdown: markdown)
     }
 
     private mutating
-    func attach(snippets supplements:[SwiftSourceFile]) -> [String: Markdown.Snippet]
+    func attach(
+        snippets:[any StaticTextFile<Symbol.Module>]) throws -> [String: Markdown.Snippet]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
@@ -276,10 +279,10 @@ extension StaticLinker
 
         //  Right now we only do one pass over the snippets, since no one should be referencing
         //  snippets from other snippets.
-        return supplements.reduce(into: [:])
+        return try snippets.reduce(into: [:])
         {
             let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swift.parse(
-                snippet: $1.utf8)
+                snippet: try $1.utf8())
 
             $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
                 caption: snippet.caption,
@@ -289,18 +292,19 @@ extension StaticLinker
     }
 
     private mutating
-    func attach(markdown supplements:[[MarkdownSourceFile]]) -> [[Article]]
+    func attach(
+        markdown:[[any StaticTextFile<Symbol.Article>]]) throws -> [[Article]]
     {
-        let articles:[[Article]] = zip(supplements.indices, supplements).map
+        let articles:[[Article]] = try zip(markdown.indices, markdown).map
         {
             let namespace:Symbol.Module = self.symbolizer.graph.namespaces[$0.0]
 
             var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
 
-            for file:MarkdownSourceFile in $0.1
+            for file:any StaticTextFile<Symbol.Article> in $0.1
             {
-                if  let article:Article = self.attach(supplement: file, in: namespace)
+                if  let article:Article = try self.attach(supplement: file, in: namespace)
                 {
                     articles.append(article)
 
@@ -346,15 +350,15 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement article:MarkdownSourceFile,
-        in namespace:Symbol.Module) -> Article?
+    func attach(supplement article:any StaticTextFile<Symbol.Article>,
+        in namespace:Symbol.Module) throws -> Article?
     {
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
         let file:Int32 = self.symbolizer.intern(article.path)
         let source:MarkdownSource = .init(
             location: .init(position: .zero, file: file),
-            text: article.text)
+            text: try article.read())
 
         let supplement:Supplement = source.parse(
             markdownParser: self.markdownParser,
@@ -407,19 +411,19 @@ extension StaticLinker
             }
 
         case .heading(let heading):
-            let id:String = .init(article.id)
-            if  let scalar:Int32 = self.symbolizer.allocate(article: article.symbol,
+            let name:String = article.name
+            if  let scalar:Int32 = self.symbolizer.allocate(article: article.id,
                     title: heading)
             {
                 //  Make the standalone article visible for doclink resolution.
-                self.tables.doclinks[.documentation(namespace), id] = scalar
+                self.tables.doclinks[.documentation(namespace), name] = scalar
                 //  Assign the standalone article a URI.
-                self.router[namespace, id][nil, default: []].append(scalar)
+                self.router[namespace, name][nil, default: []].append(scalar)
                 return .init(standalone: scalar, file: file, body: supplement.parsed)
             }
             else
             {
-                self.tables.diagnostics[source] = DuplicateSymbolError.article(id: id)
+                self.tables.diagnostics[source] = DuplicateSymbolError.article(name: name)
                 return nil
             }
         }

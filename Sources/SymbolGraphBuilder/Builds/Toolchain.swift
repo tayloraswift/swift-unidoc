@@ -236,51 +236,12 @@ extension Toolchain
 }
 extension Toolchain
 {
-    /// Dumps the symbols for the given package, using the `output` workspace as the
-    /// output directory.
-    func dump(from package:PackageNode,
-        snippetsDirectory:String,
-        include:inout [FilePath],
-        output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Artifacts
-    {
-        let sources:SPM.PackageSources = try .init(scanning: package,
-            snippetsDirectory: snippetsDirectory)
-
-        let cultures:[Artifacts.Culture] = try await self.dump(
-            modules: sources.cultures,
-            include: &include,
-            output: output,
-            triple: triple,
-            pretty: pretty)
-
-        return .init(cultures: cultures, snippets: sources.snippets, root: package.root)
-    }
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
     func dump(modules:[SPM.NominalSources],
+        include:[FilePath],
         output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Artifacts
-    {
-        var include:[FilePath] = []
-        let cultures:[Artifacts.Culture] = try await self.dump(
-            modules: modules,
-            include: &include,
-            output: output,
-            triple: triple,
-            pretty: pretty)
-
-        return .init(cultures: cultures, snippets: [])
-    }
-
-    private
-    func dump(modules:[SPM.NominalSources],
-        include:inout [FilePath],
-        output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool) async throws -> [Artifacts.Culture]
+        pretty:Bool) async throws -> [Artifacts]
     {
         for sources:SPM.NominalSources in modules
         {
@@ -294,10 +255,10 @@ extension Toolchain
                 //  Only dump symbols for library targets.
                 switch sources.module.type
                 {
-                case .binary:       include += sources.include
+                case .binary:       break
                 case .executable:   continue
-                case .regular:      include += sources.include
-                case .macro:        include += sources.include
+                case .regular:      break
+                case .macro:        break
                 case .plugin:       continue
                 case .snippet:      continue
                 case .system:       continue
@@ -316,7 +277,7 @@ extension Toolchain
                 "symbolgraph-extract",
 
                 "-module-name",                     "\(sources.module.id)",
-                "-target",                          "\(triple)",
+                "-target",                          "\(self.triple)",
                 "-minimum-access-level",            "internal",
                 "-output-dir",                      "\(output.path)",
                 "-emit-extension-block-symbols",
@@ -399,27 +360,7 @@ extension Toolchain
 
         return modules.map
         {
-            .init($0.module,
-                articles: $0.articles,
-                artifacts: output.path,
-                parts: parts[$0.module.id, default: []])
+            .init(directory: output, parts: parts[$0.module.id, default: []])
         }
-    }
-}
-extension Toolchain
-{
-    @available(*, deprecated)
-    public
-    func generateDocs(for build:Toolchain.Build,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
-    {
-        try await .init(building: build, with: self, pretty: pretty)
-    }
-    @available(*, deprecated)
-    public
-    func generateDocs(for build:SPM.Build,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
-    {
-        try await .init(building: build, with: self, pretty: pretty)
     }
 }

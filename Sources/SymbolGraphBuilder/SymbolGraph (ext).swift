@@ -12,28 +12,35 @@ import UnidocDiagnostics
 extension SymbolGraph
 {
     static
-    func build(from artifacts:Artifacts) async throws -> Self
+    func build(package:SPM.PackageSources, from artifacts:[Artifacts]) async throws -> Self
     {
+        precondition(package.cultures.count == artifacts.count,
+            "Mismatched cultures and artifacts!")
+
+        let root:Symbol.FileBase? = (package.root?.path.string).map(Symbol.FileBase.init(_:))
+
         let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
         let (extensions):[Compiler.Extension]
 
         var profiler:BuildProfiler = .init()
         do
         {
-            var compiler:Compiler = .init(root: artifacts.root)
+            var compiler:Compiler = .init(root: root)
 
-            for culture:Artifacts.Culture in artifacts.cultures
+            for (culture, artifacts):(SPM.NominalSources, Artifacts) in zip(
+                package.cultures,
+                artifacts)
             {
                 let parts:[SymbolGraphPart] = try profiler.measure(\.loadingSymbols)
                 {
-                    try culture.loadSymbols()
+                    try artifacts.load()
                 }
 
                 try profiler.measure(\.compiling)
                 {
                     try compiler.compile(
                         language: culture.module.language ?? .swift,
-                        culture: culture.id,
+                        culture: culture.module.id,
                         parts: parts)
                 }
             }
@@ -57,7 +64,7 @@ extension SymbolGraph
         do
         {
             var linker:StaticLinker = .init(nominations: nominations,
-                modules: artifacts.cultures.map(\.module),
+                modules: package.cultures.map(\.module),
                 plugins: [.swift])
 
             let scalarPositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
@@ -69,25 +76,25 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            let markdown:[[MarkdownSourceFile]]
-            let snippets:[SwiftSourceFile]
+            let markdown:[[Markdown.SourceFile]] = package.cultures.map(\.articles)
+            let snippets:[Markdown.SnippetFile] = package.snippets
 
-            (markdown, snippets) = try profiler.measure(\.loadingSources)
-            {
-                (
-                    try artifacts.loadMarkdown(),
-                    try artifacts.loadSnippets()
-                )
-            }
-
-            let articles:[[StaticLinker.Article]] = profiler.measure(\.linking)
+            let articles:[[StaticLinker.Article]] = try profiler.measure(\.linking)
             {
                 //  Calling this is mandatory, even if there are no supplements!
-                linker.attach(snippets: snippets, markdown: markdown)
+                try linker.attach(snippets: snippets, markdown: markdown)
             }
 
-            _ = consume markdown
-            _ = consume snippets
+            for markdown:Markdown.SourceFile in (consume markdown).joined()
+            {
+                profiler.loadingSources += markdown.loadingTime
+                profiler.linking -= markdown.loadingTime
+            }
+            for snippet:Markdown.SnippetFile in (consume snippets)
+            {
+                profiler.loadingSources += snippet.loadingTime
+                profiler.linking -= snippet.loadingTime
+            }
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
@@ -99,7 +106,7 @@ extension SymbolGraph
                 return try linker.load()
             }
 
-            linker.status(root: artifacts.root).emit(colors: .enabled)
+            linker.status(root: root).emit(colors: .enabled)
 
             print("""
                 Linked documentation!

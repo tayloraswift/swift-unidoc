@@ -5,7 +5,7 @@ extension StaticLinker
 {
     enum DuplicateSymbolError:Equatable, Error, Sendable
     {
-        case article(id:String)
+        case article(name:String)
     }
 }
 extension StaticLinker.DuplicateSymbolError:Diagnostic
@@ -17,9 +17,9 @@ extension StaticLinker.DuplicateSymbolError:Diagnostic
     {
         switch self
         {
-        case .article(let id):
+        case .article(let name):
             output[.warning] = """
-            markdown article cannot have the same mangled name ('\(id)') as another \
+            markdown article cannot have the same mangled name ('\(name)') as another \
             article in the same module
             """
         }

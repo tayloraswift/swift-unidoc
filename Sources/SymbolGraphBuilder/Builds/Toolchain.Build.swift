@@ -1,4 +1,5 @@
 import SymbolGraphs
+import System
 
 extension Toolchain
 {
@@ -6,12 +7,12 @@ extension Toolchain
     struct Build
     {
         /// Where to emit documentation artifacts to.
-        let output:ArtifactsDirectory
+        let artifacts:ArtifactsDirectory
 
         private
-        init(output:ArtifactsDirectory)
+        init(artifacts:ArtifactsDirectory)
         {
-            self.output = output
+            self.artifacts = artifacts
         }
     }
 }
@@ -21,64 +22,59 @@ extension Toolchain.Build
     func swift(in shared:SPM.Workspace, clean:Bool = false) async throws -> Self
     {
         let container:SPM.Workspace = try await shared.create("swift", clean: clean)
-        return .init(output: try await container.create("artifacts"))
+        return .init(artifacts: try await container.create("artifacts"))
     }
 }
 extension Toolchain.Build:DocumentationBuild
 {
-    func compile(with swift:Toolchain,
-        pretty:Bool) async throws -> (SymbolGraphMetadata, Artifacts)
+    func compile(with swift:Toolchain) async throws -> (SymbolGraphMetadata, SPM.PackageSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let artifacts:Artifacts = try await swift.dump(
-            modules:
-            [
-                //  0:
-                .toolchain(module: "Swift"),
-                //  1:
-                .toolchain(module: "_Concurrency",
-                    dependencies: 0),
-                //  2:
-                .toolchain(module: "Distributed",
-                    dependencies: 0, 1),
+        let sources:[SPM.NominalSources] =
+        [
+            //  0:
+            .toolchain(module: "Swift"),
+            //  1:
+            .toolchain(module: "_Concurrency",
+                dependencies: 0),
+            //  2:
+            .toolchain(module: "Distributed",
+                dependencies: 0, 1),
 
-                //  3:
-                .toolchain(module: "_Differentiation",
-                    dependencies: 0),
+            //  3:
+            .toolchain(module: "_Differentiation",
+                dependencies: 0),
 
-                //  4:
-                .toolchain(module: "_RegexParser",
-                    dependencies: 0),
-                //  5:
-                .toolchain(module: "_StringProcessing",
-                    dependencies: 0, 4),
-                //  6:
-                .toolchain(module: "RegexBuilder",
-                    dependencies: 0, 4, 5),
+            //  4:
+            .toolchain(module: "_RegexParser",
+                dependencies: 0),
+            //  5:
+            .toolchain(module: "_StringProcessing",
+                dependencies: 0, 4),
+            //  6:
+            .toolchain(module: "RegexBuilder",
+                dependencies: 0, 4, 5),
 
-                //  7:
-                .toolchain(module: "Cxx",
-                    dependencies: 0),
+            //  7:
+            .toolchain(module: "Cxx",
+                dependencies: 0),
 
-                //  8:
-                .toolchain(module: "Dispatch",
-                    dependencies: 0),
-                //  9:
-                .toolchain(module: "DispatchIntrospection",
-                    dependencies: 0),
-                // 10:
-                .toolchain(module: "Foundation",
-                    dependencies: 0, 8),
-                // 11:
-                .toolchain(module: "FoundationNetworking",
-                    dependencies: 0, 8, 10),
-                // 12:
-                .toolchain(module: "FoundationXML",
-                    dependencies: 0, 8, 10),
-            ],
-            output: self.output,
-            triple: swift.triple,
-            pretty: pretty)
+            //  8:
+            .toolchain(module: "Dispatch",
+                dependencies: 0),
+            //  9:
+            .toolchain(module: "DispatchIntrospection",
+                dependencies: 0),
+            // 10:
+            .toolchain(module: "Foundation",
+                dependencies: 0, 8),
+            // 11:
+            .toolchain(module: "FoundationNetworking",
+                dependencies: 0, 8, 10),
+            // 12:
+            .toolchain(module: "FoundationXML",
+                dependencies: 0, 8, 10),
+        ]
 
         let metadata:SymbolGraphMetadata = .swift(swift.version,
             tagname: swift.tagname,
@@ -90,9 +86,9 @@ extension Toolchain.Build:DocumentationBuild
                     cultures: [Int].init(0 ... 7)),
                 .init(name: "__corelibs__", type: .library(.automatic),
                     dependencies: [],
-                    cultures: [Int].init(artifacts.cultures.indices)),
+                    cultures: [Int].init(sources.indices)),
             ])
 
-        return (metadata, artifacts)
+        return (metadata, .init(cultures: sources))
     }
 }
