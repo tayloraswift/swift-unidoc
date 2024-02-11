@@ -10,12 +10,10 @@ extension SPM
     {
         private(set)
         var resources:[SPM.ResourceFile]
-        private(set)
-        var tutorials:[Markdown.SourceFile]
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
         private(set)
-        var articles:[Markdown.SourceFile]
+        var markdown:[SPM.SourceFile]
 
         private(set)
         var module:SymbolGraph.Module
@@ -27,8 +25,7 @@ extension SPM
         init(_ module:SymbolGraph.Module, origin:Origin? = nil)
         {
             self.resources = []
-            self.tutorials = []
-            self.articles = []
+            self.markdown = []
 
             self.module = module
             self.origin = origin
@@ -96,12 +93,10 @@ extension SPM.NominalSources
 
         defer
         {
-            self.articles.sort { $0.id < $1.id }
+            self.markdown.sort { $0.id < $1.id }
             include += headers.sorted { $0.string < $1.string }
         }
 
-        //  Precompute this once, since it’s used in the loop below.
-        let module:Symbol.Module = self.module.id
         try path.directory.walk
         {
             let file:(path:FilePath, extension:String)
@@ -112,18 +107,20 @@ extension SPM.NominalSources
             }
             else
             {
-                //  directory, or some extensionless file we don’t care about
+                //  This is a directory, or some extensionless file we don’t care about
                 return
             }
 
+            if  file.extension == "docc"
+            {
+                //  This is a directory.
+                return
+            }
             if  file.extension == "md"
             {
                 //  It’s common to list markdown files under exclude paths.
-                let supplement:Markdown.SourceFile = .init(location: file.path,
-                    path: root.rebase(file.path),
-                    in: module)
-
-                self.articles.append(supplement)
+                let supplement:SPM.SourceFile = .init(location: file.path, root: root)
+                self.markdown.append(supplement)
                 return
             }
 
@@ -151,11 +148,8 @@ extension SPM.NominalSources
                 switch file.extension
                 {
                 case "tutorial":
-                    let tutorial:Markdown.SourceFile = .init(location: file.path,
-                        path: root.rebase(file.path),
-                        in: module)
-
-                    self.tutorials.append(tutorial)
+                    let tutorial:SPM.SourceFile = .init(location: file.path, root: root)
+                    self.markdown.append(tutorial)
 
                 default:
                     //  Inside a *.docc directory, everything that is not markdown or a tutorial
