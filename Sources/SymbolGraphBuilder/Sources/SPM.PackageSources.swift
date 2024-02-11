@@ -23,7 +23,7 @@ extension SPM
             self.snippets = snippets
             self.cultures = cultures
 
-            self.include = []
+            self.include = include
 
             self.root = root
         }

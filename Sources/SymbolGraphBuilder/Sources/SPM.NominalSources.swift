@@ -8,6 +8,10 @@ extension SPM
     /// Stores information about the source files for a module.
     struct NominalSources
     {
+        private(set)
+        var resources:[SPM.ResourceFile]
+        private(set)
+        var tutorials:[Markdown.SourceFile]
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
         private(set)
@@ -22,10 +26,12 @@ extension SPM
         private
         init(_ module:SymbolGraph.Module, origin:Origin? = nil)
         {
+            self.resources = []
+            self.tutorials = []
+            self.articles = []
+
             self.module = module
             self.origin = origin
-
-            self.articles = []
         }
     }
 }
@@ -99,7 +105,6 @@ extension SPM.NominalSources
         try path.directory.walk
         {
             let file:(path:FilePath, extension:String)
-
             if  let `extension`:String = $1.extension
             {
                 file.extension = `extension`
@@ -111,8 +116,7 @@ extension SPM.NominalSources
                 return
             }
 
-            guard file.extension != "md"
-            else
+            if  file.extension == "md"
             {
                 //  It’s common to list markdown files under exclude paths.
                 let supplement:Markdown.SourceFile = .init(location: file.path,
@@ -131,33 +135,66 @@ extension SPM.NominalSources
                     return
                 }
             }
-
-            switch file.extension
+            //  TODO: might also benefit from a better algorithm.
+            var inDocC:Bool = false
+            for component:FilePath.Component in $0.components
             {
-            case "swift":
-                self.module.language |= .swift
+                if  case "docc"? = component.extension
+                {
+                    inDocC = true
+                    break
+                }
+            }
 
-            case "h":
-                //  Header files don’t indicate a C or C++ module on their own.
-                headers.update(with: $0)
+            if  inDocC
+            {
+                switch file.extension
+                {
+                case "tutorial":
+                    let tutorial:Markdown.SourceFile = .init(location: file.path,
+                        path: root.rebase(file.path),
+                        in: module)
 
-            case "modulemap":
-                //  But modulemaps do.
-                headers.update(with: $0)
-                fallthrough
+                    self.tutorials.append(tutorial)
 
-            case "c":
-                self.module.language |= .c
+                default:
+                    //  Inside a *.docc directory, everything that is not markdown or a tutorial
+                    //  is a resource.
+                    let resource:SPM.ResourceFile = .init(location: file.path,
+                        path: root.rebase(file.path))
 
-            case "hpp", "hxx":
-                headers.update(with: $0)
-                fallthrough
+                    self.resources.append(resource)
+                }
+            }
+            else
+            {
+                switch file.extension
+                {
+                case "swift":
+                    self.module.language |= .swift
 
-            case "cpp", "cxx":
-                self.module.language |= .cpp
+                case "h":
+                    //  Header files don’t indicate a C or C++ module on their own.
+                    headers.update(with: $0)
 
-            case _:
-                break
+                case "modulemap":
+                    //  But modulemaps do.
+                    headers.update(with: $0)
+                    fallthrough
+
+                case "c":
+                    self.module.language |= .c
+
+                case "hpp", "hxx":
+                    headers.update(with: $0)
+                    fallthrough
+
+                case "cpp", "cxx":
+                    self.module.language |= .cpp
+
+                default:
+                    print("Unknown file type: \(file.path)")
+                }
             }
         }
     }

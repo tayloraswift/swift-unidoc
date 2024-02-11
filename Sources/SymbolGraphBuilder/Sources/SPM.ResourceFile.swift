@@ -1,54 +1,24 @@
+import SymbolGraphLinker
+import Symbols
 import System
 
 extension SPM
 {
-    class ResourceFile<Content>
+    class ResourceFile:SPM.Resource<[UInt8]>
     {
-        /// The amount of time it took to load this file from disk.
-        private(set)
-        var loadingTime:Duration
-        private
-        let location:FilePath
+        let path:Symbol.File
+        let name:String
 
-        init(location:FilePath)
+        init(location:FilePath, path:Symbol.File)
         {
-            self.loadingTime = .zero
-            self.location = location
+            self.path = path
+            self.name = String.init(self.path.last)
+
+            super.init(location: location)
         }
     }
 }
-extension SPM.ResourceFile
+extension SPM.ResourceFile:Identifiable
 {
-    private
-    func time<T>(while body:() throws -> T) rethrows -> T
-    {
-        let start:ContinuousClock.Instant = .now
-        defer
-        {
-            self.loadingTime += start.duration(to: .now)
-        }
-        return try body()
-    }
-}
-extension SPM.ResourceFile<[UInt8]>
-{
-    public
-    func read() throws -> [UInt8]
-    {
-        try self.time { try self.location.read() }
-    }
-}
-extension SPM.ResourceFile<String>
-{
-    public
-    func read() throws -> String
-    {
-        try self.time { try self.location.read() }
-    }
-
-    public
-    func utf8() throws -> [UInt8]
-    {
-        try self.time { try self.location.read() }
-    }
+    var id:Symbol.File { self.path }
 }
