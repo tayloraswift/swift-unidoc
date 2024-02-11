@@ -6,7 +6,7 @@ import System
 extension Markdown
 {
     final
-    class SnippetFile:SPM.ResourceFile<String>
+    class SnippetFile:SPM.Resource<String>
     {
         let path:Symbol.File
         let name:String

@@ -7,7 +7,7 @@ import URI
 extension Markdown
 {
     final
-    class SourceFile:SPM.ResourceFile<String>, Identifiable
+    class SourceFile:SPM.Resource<String>, Identifiable
     {
         let path:Symbol.File
         /// An identifier that can be used to link this file across package boundaries.
