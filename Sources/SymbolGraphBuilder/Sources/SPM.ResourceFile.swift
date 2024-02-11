@@ -4,21 +4,20 @@ import System
 
 extension SPM
 {
+    final
     class ResourceFile:SPM.Resource<[UInt8]>
     {
-        let path:Symbol.File
         let name:String
 
+        override
         init(location:FilePath, path:Symbol.File)
         {
-            self.path = path
-            self.name = String.init(self.path.last)
-
-            super.init(location: location)
+            self.name = String.init(path.last)
+            super.init(location: location, path: path)
         }
     }
 }
-extension SPM.ResourceFile:Identifiable
+extension SPM.ResourceFile:StaticResourceFile
 {
-    var id:Symbol.File { self.path }
+    typealias Content = [UInt8]
 }

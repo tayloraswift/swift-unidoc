@@ -4,23 +4,25 @@ import MarkdownSemantics
 extension StaticLinker
 {
     @frozen public
-    struct Supplement
+    enum Supplement
     {
-        public
-        let headline:Headline?
-        public
-        let parsed:Markdown.SemanticDocument
-        public
-        let source:MarkdownSource
-
-        @inlinable public
-        init(headline:consuming Headline?,
-            parsed:consuming Markdown.SemanticDocument,
-            source:consuming MarkdownSource)
+        case supplement(Headline, Markdown.SemanticDocument)
+        case tutorials(Markdown.BlockDirective)
+        case tutorial(Markdown.BlockDirective)
+        case untitled
+    }
+}
+extension StaticLinker.Supplement
+{
+    @inlinable public
+    var headline:Headline?
+    {
+        switch self
         {
-            self.headline = headline
-            self.parsed = parsed
-            self.source = source
+        case .supplement(let headline, _):  headline
+        case .tutorials:                    nil
+        case .tutorial:                     nil
+        case .untitled:                     nil
         }
     }
 }

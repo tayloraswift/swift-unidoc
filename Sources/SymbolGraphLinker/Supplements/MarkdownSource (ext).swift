@@ -55,15 +55,26 @@ extension MarkdownSource
 
         if  case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
-            return .init(headline: .init(heading),
-                parsed: interpreter.organize(blocks.dropFirst(), snippets: snippetsTable),
-                source: self)
+            let headline:StaticLinker.Supplement.Headline = .init(heading)
+            let document:Markdown.SemanticDocument = interpreter.organize(blocks.dropFirst(),
+                snippets: snippetsTable)
+
+            return .supplement(headline, document)
         }
-        else
+        else if
+            case (let directive as Markdown.BlockDirective)? = blocks.first
         {
-            return .init(headline: nil,
-                parsed: interpreter.organize(blocks[...], snippets: snippetsTable),
-                source: self)
+            if  case "Tutorials" = directive.name, blocks.count == 1
+            {
+                return .tutorials(directive)
+            }
+            else if
+                case "Tutorial" = directive.name, blocks.count == 1
+            {
+                return .tutorial(directive)
+            }
         }
+
+        return .untitled
     }
 }

@@ -41,7 +41,7 @@ struct StaticLinker:~Copyable
     var tables:Tables
 
     private
-    var supplements:[Int32: Supplement]
+    var supplements:[Int32: (source:MarkdownSource, body:Markdown.SemanticDocument)]
 
     public
     init(nominations:Compiler.Nominations,
@@ -255,8 +255,8 @@ extension StaticLinker
 {
     public mutating
     func attach(
-        snippets:[any StaticTextFile<Symbol.Module>],
-        markdown:[[any StaticTextFile<Symbol.Article>]]) throws -> [[Article]]
+        snippets:[any StaticTextFile],
+        markdown:[[any StaticTextFile]]) throws -> [[Article]]
     {
         //  We attach snippets first, because they can be referenced by the markdown
         //  supplements. This works even if the snippet captions contain references to articles,
@@ -268,7 +268,7 @@ extension StaticLinker
 
     private mutating
     func attach(
-        snippets:[any StaticTextFile<Symbol.Module>]) throws -> [String: Markdown.Snippet]
+        snippets:[any StaticTextFile]) throws -> [String: Markdown.Snippet]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
@@ -293,7 +293,7 @@ extension StaticLinker
 
     private mutating
     func attach(
-        markdown:[[any StaticTextFile<Symbol.Article>]]) throws -> [[Article]]
+        markdown:[[any StaticTextFile]]) throws -> [[Article]]
     {
         let articles:[[Article]] = try zip(markdown.indices, markdown).map
         {
@@ -302,7 +302,7 @@ extension StaticLinker
             var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
 
-            for file:any StaticTextFile<Symbol.Article> in $0.1
+            for file:any StaticTextFile in $0.1
             {
                 if  let article:Article = try self.attach(supplement: file, in: namespace)
                 {
@@ -350,31 +350,21 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement article:any StaticTextFile<Symbol.Article>,
-        in namespace:Symbol.Module) throws -> Article?
+    func attach(supplement:any StaticTextFile, in namespace:Symbol.Module) throws -> Article?
     {
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
-        let file:Int32 = self.symbolizer.intern(article.path)
+        let file:Int32 = self.symbolizer.intern(supplement.path)
         let source:MarkdownSource = .init(
             location: .init(position: .zero, file: file),
-            text: try article.read())
+            text: try supplement.read())
 
-        let supplement:Supplement = source.parse(
+        switch source.parse(
             markdownParser: self.markdownParser,
             snippetsTable: self.snippets,
             diagnostics: &self.tables.diagnostics)
-
-        guard let headline:Supplement.Headline = supplement.headline
-        else
         {
-            self.tables.diagnostics[source] = SupplementError.untitled
-            return nil
-        }
-
-        switch headline
-        {
-        case .binding(let binding):
+        case .supplement(.binding(let binding), let body):
             let decl:Int32?
             do
             {
@@ -395,7 +385,7 @@ extension StaticLinker
                 {
                     if  case nil = $0
                     {
-                        $0 = supplement
+                        $0 = (source, body)
                     }
                     else
                     {
@@ -407,25 +397,41 @@ extension StaticLinker
             }
             else
             {
-                return .init(standalone: nil, file: file, body: supplement.parsed)
+                return .init(standalone: nil, file: file, body: body)
             }
 
-        case .heading(let heading):
-            let name:String = article.name
-            if  let scalar:Int32 = self.symbolizer.allocate(article: article.id,
+        case .supplement(.heading(let heading), let body):
+            let name:String = supplement.name
+            let id:Symbol.Article = .init(namespace, name)
+
+            if  let scalar:Int32 = self.symbolizer.allocate(article: id,
                     title: heading)
             {
                 //  Make the standalone article visible for doclink resolution.
                 self.tables.doclinks[.documentation(namespace), name] = scalar
                 //  Assign the standalone article a URI.
                 self.router[namespace, name][nil, default: []].append(scalar)
-                return .init(standalone: scalar, file: file, body: supplement.parsed)
+                return .init(standalone: scalar, file: file, body: body)
             }
             else
             {
                 self.tables.diagnostics[source] = DuplicateSymbolError.article(name: name)
                 return nil
             }
+
+        case .tutorials(_):
+            fallthrough
+
+        case .tutorial(_):
+            let name:String = supplement.name
+            let id:Symbol.Article = .init(namespace, name)
+
+            print("Skipping tutorial \(id)")
+            return nil
+
+        case .untitled:
+            self.tables.diagnostics[source] = SupplementError.untitled
+            return nil
         }
     }
 
@@ -575,7 +581,6 @@ extension StaticLinker
             self.symbolizer.intern($0)
         }
 
-        let supplement:Supplement? = self.supplements.removeValue(forKey: address)
         let comment:MarkdownSource? = decl.comment.map
         {
             .init(comment: $0, in: location?.file)
@@ -583,7 +588,7 @@ extension StaticLinker
 
         let markdown:(parsed:Markdown.SemanticDocument, file:Int32?)?
 
-        switch (comment, supplement)
+        switch (comment, self.supplements.removeValue(forKey: address))
         {
         case (nil, nil):
             markdown = nil
@@ -602,7 +607,7 @@ extension StaticLinker
             )
 
         case (let comment?, let supplement?):
-            if  case .override? = supplement.parsed.metadata.merge
+            if  case .override? = supplement.body.metadata.merge
             {
                 fallthrough
             }
@@ -614,14 +619,14 @@ extension StaticLinker
 
             markdown =
             (
-                parsed: body.merged(appending: supplement.parsed),
+                parsed: body.merged(appending: supplement.body),
                 file: supplement.source.location?.file
             )
 
         case (nil, let supplement?):
             markdown =
             (
-                parsed: supplement.parsed,
+                parsed: supplement.body,
                 file: supplement.source.location?.file
             )
         }

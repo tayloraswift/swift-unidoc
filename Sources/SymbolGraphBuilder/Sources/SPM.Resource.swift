@@ -1,3 +1,4 @@
+import Symbols
 import System
 
 extension SPM
@@ -10,10 +11,13 @@ extension SPM
         private
         let location:FilePath
 
-        init(location:FilePath)
+        let path:Symbol.File
+
+        init(location:FilePath, path:Symbol.File)
         {
             self.loadingTime = .zero
             self.location = location
+            self.path = path
         }
     }
 }
@@ -27,7 +31,7 @@ extension SPM.Resource
         {
             self.loadingTime += start.duration(to: .now)
         }
-        print("Loading file \(self.location) ...")
+        print("Loading file \(self.path) ...")
         return try body()
     }
 }

@@ -1,7 +1,7 @@
 import Symbols
 
 public
-protocol StaticResourceFile<ID>:AnyObject, Identifiable
+protocol StaticResourceFile:AnyObject, Identifiable
 {
     associatedtype Content
 
@@ -14,8 +14,4 @@ protocol StaticResourceFile<ID>:AnyObject, Identifiable
     /// The name of the resource file. This is a scalar string and should not include any path
     /// separators. It only needs to be unique within a single module.
     var name:String { get }
-
-    /// An identifier for the resource file that is unique across an entire package.
-    override
-    var id:ID { get }
 }

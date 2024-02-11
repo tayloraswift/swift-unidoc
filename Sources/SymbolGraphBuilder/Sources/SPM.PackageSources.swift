@@ -7,7 +7,7 @@ extension SPM
     /// Stores information about the source files for a package.
     struct PackageSources
     {
-        var snippets:[Markdown.SnippetFile]
+        var snippets:[SPM.SourceFile]
         var cultures:[NominalSources]
 
         var include:[FilePath]
@@ -15,7 +15,7 @@ extension SPM
         let root:SPM.PackageRoot?
 
         init(
-            snippets:[Markdown.SnippetFile] = [],
+            snippets:[SPM.SourceFile] = [],
             cultures:[NominalSources] = [],
             include:[FilePath] = [],
             root:SPM.PackageRoot? = nil)
@@ -76,7 +76,8 @@ extension SPM.PackageSources
 
             if  file.extension == "swift"
             {
-                let snippet:Markdown.SnippetFile = .init(location: file.path,
+                //  Should we be mangling URL-unsafe characters?
+                let snippet:SPM.SourceFile = .init(location: file.path,
                     path: root.rebase(file.path),
                     name: $1.stem)
 
