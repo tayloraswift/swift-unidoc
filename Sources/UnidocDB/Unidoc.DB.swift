@@ -7,7 +7,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocLinker
 @_spi(testable)
 import UnidocRecords

@@ -17,7 +17,7 @@ import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 
 public
 struct StaticLinker:~Copyable
@@ -41,7 +41,7 @@ struct StaticLinker:~Copyable
     var tables:Tables
 
     private
-    var supplements:[Int32: (source:MarkdownSource, body:Markdown.SemanticDocument)]
+    var supplements:[Int32: (source:Markdown.Source, body:Markdown.SemanticDocument)]
 
     public
     init(nominations:Compiler.Nominations,
@@ -356,9 +356,7 @@ extension StaticLinker
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
         let file:Int32 = self.symbolizer.intern(supplement.path)
-        let source:MarkdownSource = .init(
-            location: .init(position: .zero, file: file),
-            text: try supplement.read())
+        let source:Markdown.Source = .init(file: file, text: try supplement.read())
 
         switch source.parse(
             markdownParser: self.markdownParser,
@@ -373,7 +371,7 @@ extension StaticLinker
             }
             catch let diagnosis as any Diagnostic<StaticSymbolicator>
             {
-                self.tables.diagnostics[binding] = diagnosis
+                self.tables.diagnostics[binding.source] = diagnosis
                 return nil
             }
             catch
@@ -390,7 +388,7 @@ extension StaticLinker
                     }
                     else
                     {
-                        self.tables.diagnostics[binding] = SupplementError.multiple
+                        self.tables.diagnostics[binding.source] = SupplementError.multiple
                     }
                 } (&self.supplements[decl])
 
@@ -583,7 +581,7 @@ extension StaticLinker
             self.symbolizer.intern($0)
         }
 
-        let comment:MarkdownSource? = decl.comment.map
+        let comment:Markdown.Source? = decl.comment.map
         {
             .init(comment: $0, in: location?.file)
         }
@@ -622,14 +620,14 @@ extension StaticLinker
             markdown =
             (
                 parsed: body.merged(appending: supplement.body),
-                file: supplement.source.location?.file
+                file: supplement.source.origin?.file
             )
 
         case (nil, let supplement?):
             markdown =
             (
                 parsed: supplement.body,
-                file: supplement.source.location?.file
+                file: supplement.source.origin?.file
             )
         }
 
@@ -720,7 +718,7 @@ extension StaticLinker
             if  let comment:Compiler.Doccomment
             {
                 //  Only intern the file path for the extension block with the longest comment
-                let comment:MarkdownSource = .init(comment: comment,
+                let comment:Markdown.Source = .init(comment: comment,
                     in: file.map { self.symbolizer.intern($0) })
 
                 let parsed:Markdown.SemanticDocument = comment.parse(
@@ -742,7 +740,7 @@ extension StaticLinker
 
                     $0.article = self.tables.resolving(with: scopes)
                     {
-                        $0.link(article: parsed, file: comment.location?.file)
+                        $0.link(article: parsed, file: comment.origin?.file)
                     }
 
                 } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
@@ -826,9 +824,9 @@ extension StaticLinker
     }
 
     public consuming
-    func status(root:Symbol.FileBase?) -> some Diagnostics
+    func status(root:Symbol.FileBase?) -> DiagnosticMessages
     {
-        self.tables.diagnostics.with(symbolicator: .init(
+        self.tables.diagnostics.symbolicated(with: .init(
             graph: self.symbolizer.graph,
             root: root))
     }

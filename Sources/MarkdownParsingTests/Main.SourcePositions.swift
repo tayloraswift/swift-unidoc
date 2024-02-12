@@ -16,7 +16,7 @@ extension Main.SourcePositions:TestBattery
     func run(tests:TestGroup)
     {
         let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
-        for (name, source, expected):(String, MarkdownSource, (line:Int, column:Int)) in
+        for (name, source, expected):(String, Markdown.Source, (line:Int, column:Int)) in
         [
             (
                 "ZeroZero",

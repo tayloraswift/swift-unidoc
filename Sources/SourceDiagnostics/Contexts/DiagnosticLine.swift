@@ -1,13 +1,10 @@
-extension SourceContext
+@frozen public
+enum DiagnosticLine:Equatable, Sendable
 {
-    @frozen public
-    enum Line:Equatable, Sendable
-    {
-        case annotation(ClosedRange<Int>)
-        case source(String)
-    }
+    case annotation(ClosedRange<Int>)
+    case source(String)
 }
-extension SourceContext.Line
+extension DiagnosticLine
 {
     func description(colors:TerminalColors) -> String
     {

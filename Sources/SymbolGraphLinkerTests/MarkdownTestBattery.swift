@@ -4,7 +4,7 @@ import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
 import Testing
-import UnidocDiagnostics
+import SourceDiagnostics
 
 @_spi(testable)
 import SymbolGraphLinker
@@ -15,10 +15,10 @@ protocol MarkdownTestBattery:TestBattery
 extension MarkdownTestBattery
 {
     static
-    func run(tests:TestGroup, markdown:MarkdownSource, expected:String, topics:[Int] = [])
+    func run(tests:TestGroup, markdown:Markdown.Source, expected:String, topics:[Int] = [])
     {
         let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
-        var ignore:DiagnosticContext<StaticSymbolicator> = .init()
+        var ignore:Diagnostics<StaticSymbolicator> = .init()
 
         tests.do
         {

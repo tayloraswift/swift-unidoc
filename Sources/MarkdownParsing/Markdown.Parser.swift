@@ -1,5 +1,6 @@
 import MarkdownABI
 import MarkdownAST
+import Sources
 
 extension Markdown
 {
@@ -12,7 +13,7 @@ extension Markdown
         let `default`:(any Markdown.CodeLanguageType)?
 
         private
-        var errors:[any Error] = []
+        var errors:[_ParserError] = []
 
         private
         init(
@@ -39,7 +40,8 @@ extension Markdown.Parser
 extension Markdown.Parser:Markdown.ParsingEngine
 {
     public
-    func parse(_ source:borrowing MarkdownSource) -> [Markdown.BlockElement]
+    func parse(_ source:borrowing Markdown.Source,
+        onError:(any Error, SourceReference<Markdown.Source>) -> ()) -> [Markdown.BlockElement]
     {
         let document:_Document = .init(parsing: source.text, options:
         [
@@ -50,6 +52,7 @@ extension Markdown.Parser:Markdown.ParsingEngine
         var blocks:[Markdown.BlockElement] = []
             blocks.reserveCapacity(document.childCount)
 
+        /// There really ought to be a more elegant way to do this...
         var _copy:Self = self
         for child:any _BlockMarkup in document.blockChildren
         {
@@ -64,6 +67,11 @@ extension Markdown.Parser:Markdown.ParsingEngine
             blocks.append(block)
         }
 
+        for error:Markdown._ParserError in _copy.errors
+        {
+            onError(error.problem, error.subject)
+        }
+
         return blocks
     }
 }
@@ -71,7 +79,7 @@ extension Markdown.Parser
 {
     private mutating
     func parse(block markup:/* borrowing */ any _BlockMarkup,
-        from source:borrowing MarkdownSource) -> Markdown.BlockElement?
+        from source:Markdown.Source) -> Markdown.BlockElement?
     {
         switch /* copy */ markup
         {
@@ -97,7 +105,9 @@ extension Markdown.Parser
                 }
                 catch let error
                 {
-                    self.errors.append(error)
+                    self.errors.append(.init(problem: error, at: .init(
+                        from: argument.nameRange,
+                        in: source)))
                 }
             }
 
@@ -116,7 +126,9 @@ extension Markdown.Parser
                 }
                 catch let error
                 {
-                    self.errors.append(error)
+                    self.errors.append(.init(problem: error, at: .init(
+                        from: child.range,
+                        in: source)))
                 }
             }
 
@@ -219,7 +231,7 @@ extension Markdown.Parser
     private mutating
     func parse(
         item markup:/* borrowing */ _ListItem,
-        from source:borrowing MarkdownSource) -> Markdown.BlockItem
+        from source:borrowing Markdown.Source) -> Markdown.BlockItem
     {
         .init(
             checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },

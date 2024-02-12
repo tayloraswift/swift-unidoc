@@ -1,5 +1,5 @@
 import MarkdownAST
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension Markdown
 {
@@ -7,7 +7,7 @@ extension Markdown
     struct BlockInterpreter<Symbolicator> where Symbolicator:DiagnosticSymbolicator<Int32>
     {
         public
-        var diagnostics:DiagnosticContext<Symbolicator>
+        var diagnostics:Diagnostics<Symbolicator>
 
         private
         var topicsHeading:Int?
@@ -17,7 +17,7 @@ extension Markdown
         var blocks:[Markdown.BlockElement]
 
         public
-        init(diagnostics:consuming DiagnosticContext<Symbolicator>)
+        init(diagnostics:consuming Diagnostics<Symbolicator>)
         {
             self.diagnostics = diagnostics
 

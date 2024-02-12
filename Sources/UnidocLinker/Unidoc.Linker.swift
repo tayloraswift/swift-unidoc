@@ -4,7 +4,7 @@ import Signatures
 import SymbolGraphs
 import Symbols
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocRecords
 
 @available(*, deprecated, renamed: "Unidoc.Linker")
@@ -20,7 +20,7 @@ extension Unidoc
     @frozen public
     struct Linker:~Copyable
     {
-        var diagnostics:DiagnosticContext<Unidoc.Symbolicator>
+        var diagnostics:Diagnostics<Unidoc.Symbolicator>
 
         private
         let byPackageName:[Symbol.Package: Graph]
@@ -136,13 +136,13 @@ extension Unidoc.Linker
     }
 
     public consuming
-    func status() -> some Diagnostics
+    func status() -> DiagnosticMessages
     {
-        let diagnostics:DiagnosticContext<Unidoc.Symbolicator> = self.diagnostics
+        let diagnostics:Diagnostics<Unidoc.Symbolicator> = self.diagnostics
         let symbols:Unidoc.Symbolicator = .init(context: self,
             root: self.current.metadata.root)
 
-        return diagnostics.with(symbolicator: symbols)
+        return diagnostics.symbolicated(with: symbols)
     }
 }
 extension Unidoc.Linker

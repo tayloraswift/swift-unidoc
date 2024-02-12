@@ -3,6 +3,7 @@ import Codelinks
 
 extension InvalidCodelinkError
 {
+    /// TODO: this doesn’t belong in this module.
     @frozen public
     struct Note
     {

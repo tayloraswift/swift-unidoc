@@ -2,7 +2,7 @@ import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
 import Testing
-import UnidocDiagnostics
+import SourceDiagnostics
 
 @_spi(testable)
 import SymbolGraphLinker
@@ -19,11 +19,11 @@ extension Main.Bindings:TestBattery
     func run(tests:TestGroup)
     {
         let markdownParser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
-        var ignore:DiagnosticContext<StaticSymbolicator> = .init()
+        var ignore:Diagnostics<StaticSymbolicator> = .init()
 
         if  let tests:TestGroup = tests / "Basic"
         {
-            let markdown:MarkdownSource = """
+            let markdown:Markdown.Source = """
             # ``Taylor``
 
             I think for me, um.
@@ -37,7 +37,7 @@ extension Main.Bindings:TestBattery
         }
         if  let tests:TestGroup = tests / "TrailingComment"
         {
-            let markdown:MarkdownSource = """
+            let markdown:Markdown.Source = """
             # ``Taylor`` <!-- Allison -->
 
             I think for me, um.

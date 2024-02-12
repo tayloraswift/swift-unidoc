@@ -1,6 +1,6 @@
 import Signatures
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 
 struct ConstraintReductionError:Error, Equatable, Sendable
 {

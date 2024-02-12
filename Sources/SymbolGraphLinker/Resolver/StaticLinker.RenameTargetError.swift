@@ -1,7 +1,7 @@
 import Codelinks
 import CodelinkResolution
 import LexicalPaths
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension StaticLinker
 {

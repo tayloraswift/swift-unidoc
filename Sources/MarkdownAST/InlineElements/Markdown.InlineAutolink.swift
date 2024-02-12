@@ -7,7 +7,7 @@ extension Markdown
     {
         /// Where in the markdown source text this autolink was parsed from.
         public
-        let source:SourceReference<MarkdownSource>
+        let source:SourceReference<Markdown.Source>
         /// The text value of this autolink.
         public
         let text:String
@@ -16,7 +16,7 @@ extension Markdown
         let code:Bool
 
         @inlinable public
-        init(source:SourceReference<MarkdownSource>, text:String, code:Bool)
+        init(source:SourceReference<Markdown.Source>, text:String, code:Bool)
         {
             self.source = source
             self.text = text

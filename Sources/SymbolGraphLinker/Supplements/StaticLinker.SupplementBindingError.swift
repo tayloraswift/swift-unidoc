@@ -1,6 +1,6 @@
 import CodelinkResolution
 import Codelinks
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension StaticLinker
 {

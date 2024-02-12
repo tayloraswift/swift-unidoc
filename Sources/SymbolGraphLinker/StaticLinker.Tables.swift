@@ -1,17 +1,17 @@
 import CodelinkResolution
 import DoclinkResolution
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension StaticLinker
 {
     struct Tables:~Copyable
     {
-        var diagnostics:DiagnosticContext<StaticSymbolicator>
+        var diagnostics:Diagnostics<StaticSymbolicator>
 
         var codelinks:CodelinkResolver<Int32>.Table
         var doclinks:DoclinkResolver.Table
 
-        init(diagnostics:DiagnosticContext<StaticSymbolicator> = .init(),
+        init(diagnostics:Diagnostics<StaticSymbolicator> = .init(),
             codelinks:CodelinkResolver<Int32>.Table = .init(),
             doclinks:DoclinkResolver.Table = .init())
         {

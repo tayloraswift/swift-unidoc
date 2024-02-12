@@ -15,7 +15,7 @@ extension Main.Doclinks:TestBattery
     func run(tests:TestGroup)
     {
         let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
-        for (name, source, expected):(String, MarkdownSource, String) in
+        for (name, source, expected):(String, Markdown.Source, String) in
         [
             (
                 "Basic",

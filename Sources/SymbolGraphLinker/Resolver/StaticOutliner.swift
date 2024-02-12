@@ -7,10 +7,10 @@ import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
+import SourceDiagnostics
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
-import UnidocDiagnostics
 
 /// A type that can outline autolinks from markdown documentation and
 /// statically-resolve some of the autolinks with caching.
@@ -30,7 +30,7 @@ struct StaticOutliner:~Copyable
 extension StaticOutliner
 {
     consuming
-    func diagnostics() -> DiagnosticContext<StaticSymbolicator>
+    func diagnostics() -> Diagnostics<StaticSymbolicator>
     {
         (consume self).resolver.diagnostics
     }
@@ -84,11 +84,11 @@ extension StaticOutliner
                 return .unresolved(.init(
                     link: autolink.text,
                     type: type,
-                    location: autolink.location))
+                    location: autolink.source.start))
             }
             else
             {
-                self.resolver.diagnostics[autolink] =
+                self.resolver.diagnostics[autolink.source] =
                     InvalidAutolinkError<StaticSymbolicator>.init(expression: autolink.text)
 
                 return nil

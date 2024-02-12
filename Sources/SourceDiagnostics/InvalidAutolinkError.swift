@@ -1,3 +1,4 @@
+/// TODO: this doesn’t belong in this module.
 @frozen public
 struct InvalidAutolinkError<Symbolicator>:Equatable, Error
     where Symbolicator:DiagnosticSymbolicator

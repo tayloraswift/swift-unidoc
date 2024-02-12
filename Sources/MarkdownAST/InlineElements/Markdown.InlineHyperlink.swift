@@ -22,7 +22,7 @@ extension Markdown
 extension Markdown.InlineHyperlink
 {
     @inlinable public
-    init(source:SourceReference<MarkdownSource>,
+    init(source:SourceReference<Markdown.Source>,
         target:String?,
         elements:[Markdown.InlineSpan])
     {
@@ -51,7 +51,7 @@ extension Markdown.InlineHyperlink
     /// Creates a link element using the given URL as both the link target and the
     /// link text.
     @inlinable public
-    init(source:SourceReference<MarkdownSource>, url:String)
+    init(source:SourceReference<Markdown.Source>, url:String)
     {
         self.init(source: source, target: url, elements: [.text(url)])
     }

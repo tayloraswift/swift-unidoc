@@ -1,5 +1,5 @@
 import FNV1
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension StaticLinker
 {

@@ -59,6 +59,7 @@ let package:Package = .init(
         .library(name: "SemanticVersions", targets: ["SemanticVersions"]),
         .library(name: "Signatures", targets: ["Signatures"]),
         .library(name: "Sitemaps", targets: ["Sitemaps"]),
+        .library(name: "SourceDiagnostics", targets: ["SourceDiagnostics"]),
         .library(name: "Sources", targets: ["Sources"]),
 
         .library(name: "Swiftinit", targets: ["Swiftinit"]),
@@ -82,7 +83,6 @@ let package:Package = .init(
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
-        .library(name: "UnidocDiagnostics", targets: ["UnidocDiagnostics"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
@@ -315,6 +315,7 @@ let package:Package = .init(
         .target(name: "MarkdownParsing", dependencies:
             [
                 .target(name: "MarkdownAST"),
+                .target(name: "SourceDiagnostics"),
                 //  TODO: this links Foundation. Need to find a replacement.
                 .product(name: "Markdown", package: "swift-markdown"),
             ]),
@@ -336,7 +337,7 @@ let package:Package = .init(
                 .target(name: "MarkdownAST"),
                 .target(name: "Sources"),
                 .target(name: "Snippets"),
-                .target(name: "UnidocDiagnostics"),
+                .target(name: "SourceDiagnostics"),
 
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
@@ -480,7 +481,7 @@ let package:Package = .init(
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
-                .target(name: "UnidocDiagnostics"),
+                .target(name: "SourceDiagnostics"),
                 .target(name: "URI"),
             ]),
 
@@ -543,7 +544,7 @@ let package:Package = .init(
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
-        .target(name: "UnidocDiagnostics", dependencies:
+        .target(name: "SourceDiagnostics", dependencies:
             [
                 .target(name: "CodelinkResolution"),
                 .target(name: "Signatures"),
@@ -554,7 +555,7 @@ let package:Package = .init(
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "UnidocDiagnostics"),
+                .target(name: "SourceDiagnostics"),
                 .target(name: "UnidocRecords"),
             ]),
 
