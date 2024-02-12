@@ -1,7 +1,16 @@
+import Sources
+
 extension Markdown
 {
     class BlockLeaf:BlockElement
     {
+        var source:SourceReference<Markdown.Source>?
+
+        override
+        init()
+        {
+            self.source = nil
+        }
     }
 }
 extension Markdown.BlockLeaf

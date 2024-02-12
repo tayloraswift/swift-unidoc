@@ -23,7 +23,7 @@ extension Markdown.Source
 }
 extension Markdown.Source
 {
-    @_spi(testable) public borrowing
+    @_spi(testable) public
     func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftComment>,
         snippetsTable:[String: Markdown.Snippet],
@@ -44,7 +44,7 @@ extension Markdown.Source
         return interpreter.organize(blocks[...], snippets: snippetsTable)
     }
 
-    @_spi(testable) public consuming
+    @_spi(testable) public
     func parse(_:StaticLinker.Supplement.Type = StaticLinker.Supplement.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftFlavor>,
         snippetsTable:[String: Markdown.Snippet],

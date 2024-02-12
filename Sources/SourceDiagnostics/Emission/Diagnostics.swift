@@ -55,7 +55,7 @@ extension Diagnostics
 extension Diagnostics
 {
     @inlinable public
-    subscript<Frame>(subject:SourceReference<Frame>) -> DiagnosticAlert?
+    subscript<Frame>(subject:SourceReference<Frame>?) -> DiagnosticAlert?
         where Frame:DiagnosticFrame<Symbolicator.Address>
     {
         get { nil }
@@ -68,7 +68,8 @@ extension Diagnostics
                 return
             }
 
-            self.unsymbolicated.append(.literal(value, context: .around(subject)))
+            self.unsymbolicated.append(.literal(value,
+                context: subject.map(DiagnosticContext.around(_:))))
         }
     }
 }
@@ -77,7 +78,7 @@ extension Diagnostics
     /// Emits a diagnostic pointing to the given source range. Contextual lines will be
     /// extracted if possible.
     @inlinable public
-    subscript<Frame>(subject:SourceReference<Frame>) -> (any Diagnostic<Symbolicator>)?
+    subscript<Frame>(subject:SourceReference<Frame>?) -> (any Diagnostic<Symbolicator>)?
         where Frame:DiagnosticFrame<Symbolicator.Address>
     {
         get { nil }
@@ -90,7 +91,8 @@ extension Diagnostics
                 return
             }
 
-            self.unsymbolicated.append(.symbolic(value, context: .around(subject)))
+            self.unsymbolicated.append(.symbolic(value,
+                context: subject.map(DiagnosticContext.around(_:))))
         }
     }
     /// Emits a contextless diagnostic pointing to the given source location. If nil, the
@@ -111,19 +113,6 @@ extension Diagnostics
 
             self.unsymbolicated.append(.symbolic(value,
                 context: subject.map { .init(location: $0) }))
-        }
-    }
-    /// Emits a contextless diagnostic pointing to the top of the given source frame.
-    ///
-    /// This is a syntactical shortcut for `self[subject.origin] = value`.
-    @inlinable public
-    subscript(
-        subject:some DiagnosticFrame<Symbolicator.Address>) -> (any Diagnostic<Symbolicator>)?
-    {
-        get { nil }
-        set (value)
-        {
-            self[subject.origin] = value
         }
     }
 }

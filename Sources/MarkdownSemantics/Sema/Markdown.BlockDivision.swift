@@ -1,12 +1,17 @@
 import MarkdownAST
+import Sources
 
 extension Markdown
 {
     public
     class BlockDivision:Markdown.BlockContainer<Markdown.BlockElement>
     {
+        public
+        var source:SourceReference<Markdown.Source>?
+
         init()
         {
+            self.source = nil
             super.init([])
         }
     }

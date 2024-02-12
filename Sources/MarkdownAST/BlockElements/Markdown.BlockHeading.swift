@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 extension Markdown
 {
@@ -6,13 +7,20 @@ extension Markdown
     class BlockHeading:BlockContainer<Markdown.InlineElement>
     {
         public
+        let source:SourceReference<Markdown.Source>?
+
+        public
         var level:Int
         public
         var id:String?
 
         @inlinable public
-        init(level:Int, id:String? = nil, elements:[Markdown.InlineElement])
+        init(source:SourceReference<Markdown.Source>?,
+            level:Int,
+            id:String? = nil,
+            elements:[Markdown.InlineElement])
         {
+            self.source = source
             self.level = level
             self.id = id
 

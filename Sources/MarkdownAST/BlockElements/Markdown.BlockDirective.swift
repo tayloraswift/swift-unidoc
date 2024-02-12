@@ -1,4 +1,5 @@
 import MarkdownABI
+import Sources
 
 extension Markdown
 {
@@ -7,6 +8,9 @@ extension Markdown
     class BlockDirective:BlockContainer<BlockElement>
     {
         public
+        var source:SourceReference<Markdown.Source>?
+
+        public
         var name:String
         public
         var arguments:[(name:String, value:String)]
@@ -14,6 +18,7 @@ extension Markdown
         @inlinable public
         init(name:String)
         {
+            self.source = nil
             self.name = name
             self.arguments = []
             super.init([])

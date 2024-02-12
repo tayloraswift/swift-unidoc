@@ -1,16 +1,20 @@
 import MarkdownAST
+import Sources
 
 extension Markdown
 {
     public final
     class Tutorial:BlockContainer<Tutorial.Section>
     {
+        public
+        var source:SourceReference<Markdown.Source>?
         private(set)
         var intro:Intro?
 
         public
         init()
         {
+            self.source = nil
             self.intro = nil
             super.init([])
         }
