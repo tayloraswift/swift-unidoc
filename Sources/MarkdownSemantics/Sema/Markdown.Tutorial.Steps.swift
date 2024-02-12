@@ -1,10 +1,15 @@
+import Sources
+
 extension Markdown.Tutorial
 {
     final
     class Steps:Markdown.BlockContainer<Step>
     {
+        var source:SourceReference<Markdown.Source>?
+
         init()
         {
+            self.source = nil
             super.init([])
         }
     }

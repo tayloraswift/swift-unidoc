@@ -5,8 +5,9 @@ extension Markdown
     {
         private(set)
         var poster:String?
+        /// Not to be confused with ``source``.
         private(set)
-        var source:String?
+        var src:String?
         private(set)
         var alt:String?
 
@@ -14,7 +15,7 @@ extension Markdown
         init()
         {
             self.poster = nil
-            self.source = nil
+            self.src = nil
             self.alt = nil
             super.init()
         }
@@ -36,13 +37,13 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
             self.poster = value
 
         case "source":
-            guard case nil = self.source
+            guard case nil = self.src
             else
             {
                 throw ArgumentError.duplicated(option)
             }
 
-            self.source = value
+            self.src = value
 
         case "alt":
             guard case nil = self.alt

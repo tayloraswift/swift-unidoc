@@ -13,7 +13,7 @@ extension Markdown
         let `default`:(any Markdown.CodeLanguageType)?
 
         private
-        var errors:[_ParserError] = []
+        var errors:[(any Error, at:SourceReference<Source>)] = []
 
         private
         init(
@@ -67,9 +67,9 @@ extension Markdown.Parser:Markdown.ParsingEngine
             blocks.append(block)
         }
 
-        for error:Markdown._ParserError in _copy.errors
+        for (error, subject):(any Error, SourceReference<Markdown.Source>) in _copy.errors
         {
-            onError(error.problem, error.subject)
+            onError(error, subject)
         }
 
         return blocks
@@ -97,6 +97,8 @@ extension Markdown.Parser
                 return nil
             }
 
+            directive.source = .init(from: block.nameRange, in: source)
+
             for argument:_DirectiveArgument in block.argumentText.parseNameValueArguments()
             {
                 do
@@ -105,9 +107,7 @@ extension Markdown.Parser
                 }
                 catch let error
                 {
-                    self.errors.append(.init(problem: error, at: .init(
-                        from: argument.nameRange,
-                        in: source)))
+                    self.errors.append((error, at: .init(from: argument.nameRange, in: source)))
                 }
             }
 
@@ -126,9 +126,7 @@ extension Markdown.Parser
                 }
                 catch let error
                 {
-                    self.errors.append(.init(problem: error, at: .init(
-                        from: child.range,
-                        in: source)))
+                    self.errors.append((error, at: .init(from: child.range, in: source)))
                 }
             }
 
@@ -150,7 +148,9 @@ extension Markdown.Parser
             }
 
         case let block as _Heading:
-            return Markdown.BlockHeading.init(level: block.level,
+            return Markdown.BlockHeading.init(
+                source: .init(from: block.range, in: source),
+                level: block.level,
                 elements: block.inlineChildren.map
                 {
                     Markdown.InlineElement.init(from: $0, in: source)

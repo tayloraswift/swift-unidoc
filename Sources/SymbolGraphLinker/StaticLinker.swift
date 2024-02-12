@@ -414,7 +414,8 @@ extension StaticLinker
             }
             else
             {
-                self.tables.diagnostics[source] = DuplicateSymbolError.article(name: name)
+                self.tables.diagnostics[heading.source] = DuplicateSymbolError.article(
+                    name: name)
                 return nil
             }
 
@@ -426,11 +427,10 @@ extension StaticLinker
             let id:Symbol.Article = .init(namespace, name)
 
             print("Skipping tutorial \(id)")
-            dump(block)
             return nil
 
         case .untitled:
-            self.tables.diagnostics[source] = SupplementError.untitled
+            self.tables.diagnostics[source.origin] = SupplementError.untitled
             return nil
         }
     }

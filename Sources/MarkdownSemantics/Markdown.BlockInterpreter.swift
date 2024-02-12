@@ -62,13 +62,6 @@ extension Markdown.BlockInterpreter:Markdown.SemanticInterpreter
 extension Markdown.BlockInterpreter
 {
     private mutating
-    func record(error:any Error, in block:Markdown.BlockElement)
-    {
-        //  TODO: unimplemented
-        dump(error)
-    }
-
-    private mutating
     func load() -> (article:[Markdown.BlockElement], topics:[Markdown.SemanticTopic])
     {
         defer
@@ -256,7 +249,7 @@ extension Markdown.BlockInterpreter
                 }
                 catch let error
                 {
-                    self.record(error: error, in: block)
+                    self.diagnostics[block.source] = .error(error)
                 }
 
             case let block as Markdown.BlockDirective:
