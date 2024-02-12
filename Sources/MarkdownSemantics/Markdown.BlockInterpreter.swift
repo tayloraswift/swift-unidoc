@@ -27,118 +27,9 @@ extension Markdown
         }
     }
 }
-extension Markdown.BlockInterpreter
+extension Markdown.BlockInterpreter:Markdown.SemanticInterpreter
 {
-    /// We currently always eagarly inline snippet slices, which simplifies the rendering model.
-    ///
-    /// As long as people are not reusing the same slices in multiple places, this has no
-    /// performance drawbacks. No one should be doing that (extensively) anyways, because that
-    /// would result in documentation that is hard to browse.
-    private mutating
-    func inline(_ snippet:Markdown.BlockDirective, from snippets:[String: Markdown.Snippet])
-    {
-        var slice:String? = nil
-        var name:String? = nil
-
-        for (argument, value):(String, String) in snippet.arguments
-        {
-            switch argument
-            {
-            case "slice":
-                slice = value
-
-            //  This is a Unidoc extension, and is not actually part of SE-0356. But SE-0356 is
-            //  really poorly written and the `path:` syntax is just awful.
-            case "id":
-                name = value
-
-            case "path":
-                //  We are going to ignore the first path component, which is the package name,
-                //  for several reasons.
-                //
-                //  1.  It serves no purpose to qualify a snippet path with the package name,
-                //      other than to accommodate a flawed implementation of Swift DocC.
-                //
-                //  2.  Package names are extrinsic to the documentation, and would need to be
-                //      kept up-to-date with the package name in the `Package.swift`.
-                //
-                //  3.  Package names can contain URL-unfriendly characters, which would cause
-                //      all of their snippets to become unusable. Therefore, DocC `path:`
-                //      syntax imposes an additional limitation on package names that is not
-                //      legitimized anywhere else.
-                guard
-                let i:String.Index = value.firstIndex(of: "/"),
-                let j:String.Index = value.lastIndex(of: "/")
-                else
-                {
-                    //  TODO: emit diagnostic.
-                    continue
-                }
-
-                //  OK for the path to contain additional intermediate path components, which
-                //  are just as irrelevant as the package name, because snippet names are
-                //  unique within a package.
-                guard
-                case "Snippets" = value[value.index(after: i)...].prefix(while: { $0 != "/" })
-                else
-                {
-                    //  TODO: emit diagnostic.
-                    continue
-                }
-
-                name = String.init(value[value.index(after: j)...])
-
-            default:
-                //  TODO: emit diagnostic.
-                print("Unknown @Snippet argument: \(argument)")
-                continue
-            }
-        }
-
-        guard
-        let name:String
-        else
-        {
-            //  TODO: emit diagnostic.
-            print("Missing @Snippet name")
-            return
-        }
-        guard
-        let snippet:Markdown.Snippet = snippets[name]
-        else
-        {
-            //  TODO: emit diagnostic.
-            print("Unknown @Snippet name: '\(name)'")
-            print("Available snippets: \(snippets.keys.sorted())")
-            return
-        }
-
-        if  let slice:String
-        {
-            if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
-            {
-                self.blocks.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
-            }
-            else
-            {
-                //  TODO: emit diagnostic.
-                print("Unknown @Snippet slice: '\(slice)'")
-            }
-        }
-        else
-        {
-            //  Snippet captions cannot contain topics, so we can just add them directly to
-            //  the ``blocks`` list.
-            self.blocks += snippet.caption
-
-            for slice:Markdown.SnippetSlice in snippet.slices.values
-            {
-                self.blocks.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
-            }
-        }
-    }
-
-    private mutating
+    mutating
     func append(_ block:Markdown.BlockElement)
     {
         defer
@@ -166,6 +57,15 @@ extension Markdown.BlockInterpreter
         {
             self.topicsHeading = nil
         }
+    }
+}
+extension Markdown.BlockInterpreter
+{
+    private mutating
+    func record(error:any Error, in block:Markdown.BlockElement)
+    {
+        //  TODO: unimplemented
+        dump(error)
     }
 
     private mutating
@@ -349,17 +249,21 @@ extension Markdown.BlockInterpreter
                     self.append(aside(quote.elements))
                 }
 
+            case let block as Markdown.BlockCodeReference:
+                do
+                {
+                    try block.inline(into: &self, from: snippets)
+                }
+                catch let error
+                {
+                    self.record(error: error, in: block)
+                }
+
             case let block as Markdown.BlockDirective:
                 switch block.name
                 {
-                case "Comment":
-                    continue
-
                 case "Metadata":
                     metadata.update(with: block.elements)
-
-                case "Snippet":
-                    self.inline(block, from: snippets)
 
                 case _:
                     //  Don’t know how to handle these yet, so we just render them

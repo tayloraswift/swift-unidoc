@@ -33,7 +33,7 @@ extension Markdown.Snippet
     init(id:Int32,
         caption:String,
         slices:[Markdown.SnippetSlice],
-        using parser:borrowing some MarkdownParser)
+        using parser:borrowing some Markdown.ParsingEngine)
     {
         let index:OrderedDictionary<String, Markdown.SnippetSlice> = slices.reduce(
             into: [:])
@@ -48,7 +48,7 @@ extension Markdown.Snippet
         }
 
         //  Most documentation magic is not available to snippet captions (recursive snippets
-        //  especially), but we still want the magic aside blocks to work.
+        //  especially), but we still want the magical aside blocks to work.
         var blocks:[Markdown.BlockElement] = []
         for block:Markdown.BlockElement in parser.parse(.init(location: .init(
                 position: .zero,

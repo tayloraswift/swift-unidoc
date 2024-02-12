@@ -18,7 +18,7 @@ extension Main.Bindings:TestBattery
     static
     func run(tests:TestGroup)
     {
-        let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
+        let markdownParser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
         var ignore:DiagnosticContext<StaticSymbolicator> = .init()
 
         if  let tests:TestGroup = tests / "Basic"

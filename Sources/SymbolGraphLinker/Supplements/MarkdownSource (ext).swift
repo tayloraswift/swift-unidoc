@@ -25,7 +25,7 @@ extension MarkdownSource
 {
     @_spi(testable) public borrowing
     func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
-        markdownParser markdown:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>,
+        markdownParser markdown:Markdown.Parser<Markdown.SwiftComment>,
         snippetsTable:[String: Markdown.Snippet],
         diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> Markdown.SemanticDocument
     {
@@ -40,7 +40,7 @@ extension MarkdownSource
 
     @_spi(testable) public consuming
     func parse(_:StaticLinker.Supplement.Type = StaticLinker.Supplement.self,
-        markdownParser markdown:borrowing SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>,
+        markdownParser markdown:borrowing Markdown.Parser<Markdown.SwiftFlavor>,
         snippetsTable:[String: Markdown.Snippet],
         diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> StaticLinker.Supplement
     {

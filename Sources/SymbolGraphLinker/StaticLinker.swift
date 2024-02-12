@@ -23,9 +23,9 @@ public
 struct StaticLinker:~Copyable
 {
     private
-    let doccommentParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdownComment>
+    let doccommentParser:Markdown.Parser<Markdown.SwiftComment>
     private
-    let markdownParser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown>
+    let markdownParser:Markdown.Parser<Markdown.SwiftFlavor>
     private
     let swiftParser:Markdown.SwiftLanguage?
     private
@@ -255,6 +255,7 @@ extension StaticLinker
 {
     public mutating
     func attach(
+        resources:[[any StaticResourceFile]],
         snippets:[any StaticTextFile],
         markdown:[[any StaticTextFile]]) throws -> [[Article]]
     {
@@ -419,14 +420,15 @@ extension StaticLinker
                 return nil
             }
 
-        case .tutorials(_):
+        case .tutorials(let block):
             fallthrough
 
-        case .tutorial(_):
+        case .tutorial(let block):
             let name:String = supplement.name
             let id:Symbol.Article = .init(namespace, name)
 
             print("Skipping tutorial \(id)")
+            dump(block)
             return nil
 
         case .untitled:

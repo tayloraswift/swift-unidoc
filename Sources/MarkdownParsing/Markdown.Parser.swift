@@ -1,24 +1,32 @@
 import MarkdownABI
 import MarkdownAST
 
-@frozen public
-struct SwiftFlavoredMarkdownParser<Flavor> where Flavor:MarkdownFlavor
+extension Markdown
 {
-    private
-    let plugins:[String: any Markdown.CodeLanguageType]
-    private
-    let `default`:(any Markdown.CodeLanguageType)?
-
-    private
-    init(
-        plugins:[String: any Markdown.CodeLanguageType],
-        default:(any Markdown.CodeLanguageType)? = nil)
+    @frozen public
+    struct Parser<Flavor> where Flavor:Markdown.ParsingFlavor
     {
-        self.plugins = plugins
-        self.default = `default`
+        private
+        let plugins:[String: any Markdown.CodeLanguageType]
+        private
+        let `default`:(any Markdown.CodeLanguageType)?
+
+        private
+        var errors:[any Error] = []
+
+        private
+        init(
+            plugins:[String: any Markdown.CodeLanguageType],
+            default:(any Markdown.CodeLanguageType)? = nil)
+        {
+            self.plugins = plugins
+            self.default = `default`
+
+            self.errors = []
+        }
     }
 }
-extension SwiftFlavoredMarkdownParser
+extension Markdown.Parser
 {
     public
     init(
@@ -28,7 +36,7 @@ extension SwiftFlavoredMarkdownParser
         self.init(plugins: plugins.reduce(into: [:]) { $0[$1.name] = $1 }, default: `default`)
     }
 }
-extension SwiftFlavoredMarkdownParser:MarkdownParser
+extension Markdown.Parser:Markdown.ParsingEngine
 {
     public
     func parse(_ source:borrowing MarkdownSource) -> [Markdown.BlockElement]
@@ -39,41 +47,80 @@ extension SwiftFlavoredMarkdownParser:MarkdownParser
             .parseSymbolLinks,
         ])
 
-        var blocks:[Markdown.BlockElement] = document.blockChildren.compactMap
-        {
-            self.block(from: $0, in: source)
-        }
+        var blocks:[Markdown.BlockElement] = []
+            blocks.reserveCapacity(document.childCount)
 
-        Flavor.transform(blocks: &blocks)
+        var _copy:Self = self
+        for child:any _BlockMarkup in document.blockChildren
+        {
+            guard
+            let block:Markdown.BlockElement = _copy.parse(block: child, from: source)
+            else
+            {
+                continue
+            }
+
+            Flavor.process(toplevel: block)
+            blocks.append(block)
+        }
 
         return blocks
     }
 }
-extension SwiftFlavoredMarkdownParser
+extension Markdown.Parser
 {
-    private
-    func block(
-        from markup:/* borrowing */ any _BlockMarkup,
-        in source:borrowing MarkdownSource) -> Markdown.BlockElement?
+    private mutating
+    func parse(block markup:/* borrowing */ any _BlockMarkup,
+        from source:borrowing MarkdownSource) -> Markdown.BlockElement?
     {
         switch /* copy */ markup
         {
         case let block as _BlockQuote:
             return Markdown.BlockQuote.init(block.blockChildren.compactMap
                 {
-                    self.block(from: $0, in: source)
+                    self.parse(block: $0, from: source)
                 })
 
         case let block as _BlockDirective:
-            return Markdown.BlockDirective.init(name: block.name,
-                arguments: block.argumentText.parseNameValueArguments().map
+            guard
+            let directive:any Markdown.BlockDirectiveType = Flavor[instantiating: block.name]
+            else
+            {
+                return nil
+            }
+
+            for argument:_DirectiveArgument in block.argumentText.parseNameValueArguments()
+            {
+                do
                 {
-                    ($0.name, $0.value)
-                },
-                elements: block.blockChildren.compactMap
+                    try directive.configure(option: argument.name, value: argument.value)
+                }
+                catch let error
                 {
-                    self.block(from: $0, in: source)
-                })
+                    self.errors.append(error)
+                }
+            }
+
+            for child:any _BlockMarkup in block.blockChildren
+            {
+                guard
+                let block:Markdown.BlockElement = self.parse(block: child, from: source)
+                else
+                {
+                    continue
+                }
+
+                do
+                {
+                    try directive.append(block)
+                }
+                catch let error
+                {
+                    self.errors.append(error)
+                }
+            }
+
+            return directive
 
         case let block as _CodeBlock:
             if  let language:String = block.language
@@ -143,18 +190,18 @@ extension SwiftFlavoredMarkdownParser
                 })
 
         case let block as _ListItem:
-            return self.item(from: block, in: source)
+            return self.parse(item: block, from: source)
 
         case let block as _OrderedList:
             return Markdown.BlockListOrdered.init(block.listItems.map
                 {
-                    self.item(from: $0, in: source)
+                    self.parse(item: $0, from: source)
                 })
 
         case let block as _UnorderedList:
             return Markdown.BlockListUnordered.init(block.listItems.map
                 {
-                    self.item(from: $0, in: source)
+                    self.parse(item: $0, from: source)
                 })
 
         case is _ThematicBreak:
@@ -169,16 +216,16 @@ extension SwiftFlavoredMarkdownParser
         }
     }
 
-    private
-    func item(
-        from markup:/* borrowing */ _ListItem,
-        in source:borrowing MarkdownSource) -> Markdown.BlockItem
+    private mutating
+    func parse(
+        item markup:/* borrowing */ _ListItem,
+        from source:borrowing MarkdownSource) -> Markdown.BlockItem
     {
         .init(
             checkbox: markup.checkbox.flatMap { $0 == .checked ? .checked : nil },
             elements: markup.blockChildren.compactMap
             {
-                self.block(from: $0, in: source)
+                self.parse(block: $0, from: source)
             })
     }
 }

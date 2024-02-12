@@ -2,6 +2,7 @@ import MarkdownABI
 
 extension Markdown
 {
+    /// An untyped block directive.
     public final
     class BlockDirective:BlockContainer<BlockElement>
     {
@@ -11,13 +12,11 @@ extension Markdown
         var arguments:[(name:String, value:String)]
 
         @inlinable public
-        init(name:String,
-            arguments:[(name:String, value:String)] = [],
-            elements:[BlockElement] = [])
+        init(name:String)
         {
             self.name = name
-            self.arguments = arguments
-            super.init(elements)
+            self.arguments = []
+            super.init([])
         }
 
         /// Emits a fallback description of the directive.
@@ -43,5 +42,19 @@ extension Markdown
                 super.emit(into: &$0)
             }
         }
+    }
+}
+extension Markdown.BlockDirective:Markdown.BlockDirectiveType
+{
+    @inlinable public
+    func configure(option:String, value:String) throws
+    {
+        self.arguments.append((option, value))
+    }
+
+    @inlinable public
+    func append(_ element:Markdown.BlockElement) throws
+    {
+        self.elements.append(element)
     }
 }
