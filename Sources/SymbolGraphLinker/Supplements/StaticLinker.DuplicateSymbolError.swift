@@ -1,5 +1,5 @@
 import Sources
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension StaticLinker
 {

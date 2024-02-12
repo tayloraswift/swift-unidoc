@@ -4,7 +4,7 @@ import Doclinks
 import Sources
 import SymbolGraphs
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocRecords
 
 extension Unidoc
@@ -27,8 +27,14 @@ extension Unidoc.Resolver
 {
     private
     var current:Unidoc.Linker.Graph { self.context.current }
-}
 
+    private
+    var diagnostics:Diagnostics<Unidoc.Symbolicator>
+    {
+        _read   { yield  self.context.diagnostics }
+        _modify { yield &self.context.diagnostics }
+    }
+}
 extension Unidoc.Resolver
 {
     mutating
@@ -191,15 +197,17 @@ extension Unidoc.Resolver
         resolved:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
     )?
     {
-        let autolink:Autolink = .init(unresolved,
-            location: unresolved.location?.map { self.current.id + $0 })
+        let location:SourceLocation<Unidoc.Scalar>? = unresolved.location?.map
+        {
+            self.current.id + $0
+        }
 
         guard
-        let codelink:Codelink = autolink.parsed
+        let codelink:Codelink = .init(parsing: unresolved)
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.context.diagnostics[autolink] = InvalidAutolinkError<Unidoc.Symbolicator>.init(
+            self.diagnostics[location] = InvalidAutolinkError<Unidoc.Symbolicator>.init(
                 expression: unresolved.link)
 
             return nil
@@ -208,7 +216,7 @@ extension Unidoc.Resolver
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.context.diagnostics[autolink] = InvalidCodelinkError<Unidoc.Symbolicator>.init(
+            self.diagnostics[location] = InvalidCodelinkError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 

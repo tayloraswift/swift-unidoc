@@ -50,10 +50,7 @@ extension Markdown.Snippet
         //  Most documentation magic is not available to snippet captions (recursive snippets
         //  especially), but we still want the magical aside blocks to work.
         var blocks:[Markdown.BlockElement] = []
-        for block:Markdown.BlockElement in parser.parse(.init(location: .init(
-                position: .zero,
-                file: id),
-            text: caption))
+        for block:Markdown.BlockElement in parser.parse(.init(file: id, text: caption))
         {
             switch block
             {

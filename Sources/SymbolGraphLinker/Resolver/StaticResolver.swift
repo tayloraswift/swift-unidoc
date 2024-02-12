@@ -6,11 +6,11 @@ import LexicalPaths
 import MarkdownAST
 import Sources
 import SymbolGraphs
-import UnidocDiagnostics
+import SourceDiagnostics
 
 struct StaticResolver:~Copyable
 {
-    var diagnostics:DiagnosticContext<StaticSymbolicator>
+    var diagnostics:Diagnostics<StaticSymbolicator>
 
     private
     let codelinks:CodelinkResolver<Int32>
@@ -18,7 +18,7 @@ struct StaticResolver:~Copyable
     let doclinks:DoclinkResolver
 
     init(
-        diagnostics:consuming DiagnosticContext<StaticSymbolicator>,
+        diagnostics:consuming Diagnostics<StaticSymbolicator>,
         codelinks:CodelinkResolver<Int32>,
         doclinks:DoclinkResolver)
     {
@@ -69,6 +69,9 @@ extension StaticResolver
     {
         switch self.codelinks.resolve(codelink)
         {
+        case .some([]):
+            return nil
+
         case .one(let overload):
             let text:String = codelink.path.visible.joined(separator: " ")
             switch overload.target
@@ -81,12 +84,10 @@ extension StaticResolver
             }
 
         case .some(let overloads):
-            if !overloads.isEmpty
-            {
-                self.diagnostics[autolink] = InvalidCodelinkError<StaticSymbolicator>.init(
-                    overloads: overloads,
-                    codelink: codelink)
-            }
+            self.diagnostics[autolink.source] = InvalidCodelinkError<StaticSymbolicator>.init(
+                overloads: overloads,
+                codelink: codelink)
+
             return nil
         }
     }

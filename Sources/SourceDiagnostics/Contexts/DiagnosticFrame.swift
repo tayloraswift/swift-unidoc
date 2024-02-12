@@ -1,15 +1,27 @@
-import MarkdownAST
 import Sources
-import UnidocDiagnostics
 
-extension MarkdownSource
+/// A `DiagnosticFrame` is something that can provide contextual source code for a
+/// ``Diagnostic``.
+public
+protocol DiagnosticFrame<File>
+{
+    associatedtype File
+
+    /// The absolute location of the source ``text`` within a larger source file, if known. If
+    /// the source text originated from a standalone file, this should be
+    /// ``SourceLocation/zero``.
+    var origin:SourceLocation<File>? { get }
+    /// The full source text.
+    var text:String { get }
+}
+extension DiagnosticFrame
 {
     /// Extracts a source context for the given source range. This subscript interprets the
     /// range bounds as offsets from ``location``, not the beginning of whatever larger file
     /// the markdown source originated from.
-    subscript(range:Range<SourcePosition>) -> SourceContext
+    subscript(range:Range<SourcePosition>) -> [DiagnosticLine]
     {
-        var context:SourceContext = []
+        var context:[DiagnosticLine] = []
 
         let source:[Substring] = self.text.split(omittingEmptySubsequences: false,
             whereSeparator: \.isNewline)
@@ -20,25 +32,16 @@ extension MarkdownSource
             to: source.indices)
         for (l, line):(Int, Substring) in zip(shown, source[shown])
         {
-            context.lines.append(.source(String.init(line)))
+            context.append(.source(String.init(line)))
 
             if  lines ~= l
             {
                 let start:Int = l == lines.lowerBound ? range.lowerBound.column : 0
                 let end:Int = l == lines.upperBound ? range.upperBound.column : line.count
-                context.lines.append(.annotation(start ... max(start, end - 1)))
+                context.append(.annotation(start ... max(start, end - 1)))
             }
         }
 
         return context
-    }
-}
-extension MarkdownSource:DiagnosticSubject
-{
-    /// TODO: include text snippet
-    public
-    var context:SourceContext
-    {
-        .init()
     }
 }

@@ -16,46 +16,6 @@ protocol DiagnosticSymbolicator<Address>
 }
 extension DiagnosticSymbolicator
 {
-    func symbolicate(_ diagnostics:consuming DiagnosticContext<Self>) -> [DiagnosticMessage]
-    {
-        var output:DiagnosticOutput<Self> = .init(symbolicator: self)
-        for group:DiagnosticContext<Self>.Group in diagnostics.unsymbolicated
-        {
-            switch group
-            {
-            case .contextual(let diagnostic, location: let location, context: let context):
-                defer
-                {
-                    output.append(diagnostic, with: context)
-                }
-                guard
-                let location:SourceLocation<Self.Address> = location
-                else
-                {
-                    continue
-                }
-
-                if  let file:String = self.path(of: location.file)
-                {
-                    output.messages.append(.sourceLocation(.init(
-                        position: location.position,
-                        file: file)))
-                }
-                else
-                {
-                    output.messages.append(.sourceLocation(nil))
-                }
-
-            case .general(let diagnostic):
-                output.append(diagnostic, with: .init())
-            }
-        }
-
-        return output.messages
-    }
-}
-extension DiagnosticSymbolicator
-{
     /// Returns the demangled signature of the scalar symbol referenced by the given
     /// scalar. The scalar must refer to a declaration and not an article.
     @inlinable public

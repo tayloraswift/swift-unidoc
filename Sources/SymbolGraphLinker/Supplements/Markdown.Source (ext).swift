@@ -3,9 +3,9 @@ import MarkdownParsing
 import MarkdownSemantics
 import Sources
 import SymbolGraphCompiler
-import UnidocDiagnostics
+import SourceDiagnostics
 
-extension MarkdownSource
+extension Markdown.Source
 {
     convenience
     init(comment:borrowing Compiler.Doccomment, in file:Int32?)
@@ -13,45 +13,54 @@ extension MarkdownSource
         if  let position:SourcePosition = comment.start,
             let file:Int32
         {
-            self.init(location: .init(position: position, file: file), text: comment.text)
+            self.init(origin: .init(position: position, file: file), text: comment.text)
         }
         else
         {
-            self.init(location: nil, text: comment.text)
+            self.init(origin: nil, text: comment.text)
         }
     }
 }
-extension MarkdownSource
+extension Markdown.Source
 {
     @_spi(testable) public borrowing
     func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftComment>,
         snippetsTable:[String: Markdown.Snippet],
-        diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> Markdown.SemanticDocument
+        diagnostics:inout Diagnostics<StaticSymbolicator>) -> Markdown.SemanticDocument
     {
+        let blocks:[Markdown.BlockElement] = markdown.parse(self)
+        {
+            diagnostics[$1] = .warning($0)
+        }
+
         var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
         defer
         {
             diagnostics = interpreter.diagnostics
         }
-        return interpreter.organize(markdown.parse(self)[...], snippets: snippetsTable)
+
+        return interpreter.organize(blocks[...], snippets: snippetsTable)
     }
 
     @_spi(testable) public consuming
     func parse(_:StaticLinker.Supplement.Type = StaticLinker.Supplement.self,
-        markdownParser markdown:borrowing Markdown.Parser<Markdown.SwiftFlavor>,
+        markdownParser markdown:Markdown.Parser<Markdown.SwiftFlavor>,
         snippetsTable:[String: Markdown.Snippet],
-        diagnostics:inout DiagnosticContext<StaticSymbolicator>) -> StaticLinker.Supplement
+        diagnostics:inout Diagnostics<StaticSymbolicator>) -> StaticLinker.Supplement
     {
+        let blocks:[Markdown.BlockElement] = markdown.parse(self)
+        {
+            diagnostics[$1] = .warning($0)
+        }
+
         var interpreter:Markdown.BlockInterpreter<StaticSymbolicator> = .init(
             diagnostics: consume diagnostics)
         defer
         {
             diagnostics = interpreter.diagnostics
         }
-
-        let blocks:[Markdown.BlockElement] = markdown.parse(copy self)
 
         if  case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {

@@ -16,7 +16,7 @@ extension Main.ParameterLists:TestBattery
     {
         let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
 
-        for (shape, source):(String, MarkdownSource) in
+        for (shape, source):(String, Markdown.Source) in
         [
             (
                 "Tight",

@@ -7,7 +7,7 @@ import SymbolGraphLinker
 import SymbolGraphParts
 import SymbolGraphs
 import Symbols
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension SymbolGraph
 {

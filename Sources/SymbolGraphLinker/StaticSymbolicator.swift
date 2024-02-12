@@ -1,6 +1,6 @@
 import SymbolGraphs
 import Symbols
-import UnidocDiagnostics
+import SourceDiagnostics
 
 @_spi(testable) public
 struct StaticSymbolicator:Sendable
