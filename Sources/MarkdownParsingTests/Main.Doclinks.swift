@@ -1,5 +1,6 @@
 import MarkdownAST
 import MarkdownParsing
+import MarkdownSemantics
 import Testing
 
 extension Main
@@ -13,7 +14,7 @@ extension Main.Doclinks:TestBattery
     static
     func run(tests:TestGroup)
     {
-        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
+        let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
         for (name, source, expected):(String, MarkdownSource, String) in
         [
             (
