@@ -28,8 +28,11 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
         case "Comment":             nil as Markdown.BlockDirective?
         //  The @Column directive is actually row-like, because it appears **inside** a block
         //  of columns. Don’t know why Apple does this. Think different I guess.
-        case "Column":              Markdown.BlockDivision.init(size: 1)
-        case "ContentAndMedia":     Markdown.BlockDivision.init(size: nil)
+        //
+        //  @Column is supposed to get a default `size` of 1, but we would never use that value
+        //  because it’s also the default in CSS.
+        case "Column":              Markdown.BlockDivision.init()
+        case "ContentAndMedia":     Markdown.BlockDivision.init()
         case "Image":               Markdown.BlockImage.init()
         case "Intro":               Markdown.Tutorial.Intro.init()
         //  See note about @Column.

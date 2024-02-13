@@ -22,9 +22,10 @@ extension Markdown
         {
             binary[.div]
             {
-                //  Let’s not encode that long string if we can help it.
                 $0[.class] = "columns"
-                $0[.style] = self.count.map { "grid-template-columns: repeat(\($0), 1fr);" }
+                $0[.style] = """
+                grid-template-columns: repeat(\(self.count ?? self.elements.count), 1fr);
+                """
             }
                 content:
             {
