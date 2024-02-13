@@ -1,0 +1,39 @@
+pre
+{
+    margin: 2rem 0 2rem;
+    line-height: 1.5rem;
+}
+// line numbers
+pre.snippet
+{
+    overflow: scroll;
+    padding-bottom: 0.5rem;
+    padding-left: 3rem;
+
+    code
+    {
+        counter-set: line 0;
+        white-space: pre;
+
+        span.newline
+        {
+            counter-increment: line;
+        }
+        span.newline:after
+        {
+            color: $light-snippet-line-number;
+
+            position: relative;
+            display: inline-block;
+            content: counter(line);
+            width: 0;
+            right: 2rem;
+            direction: rtl;
+            word-wrap: normal;
+        }
+    }
+    code.language-swift
+    {
+        color: $light-swift;
+    }
+}

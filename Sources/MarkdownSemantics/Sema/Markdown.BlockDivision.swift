@@ -11,10 +11,10 @@ extension Markdown
         private(set)
         var size:Int?
 
-        init(size:Int?)
+        init()
         {
             self.source = nil
-            self.size = size
+            self.size = nil
             super.init([])
         }
 
@@ -40,17 +40,16 @@ extension Markdown.BlockDivision:Markdown.BlockDirectiveType
         switch option
         {
         case "size":
+            guard case nil = self.size
+            else
+            {
+                throw ArgumentError.duplicated(option)
+            }
             guard
             let size:Int = .init(value)
             else
             {
                 throw ArgumentError.size(value)
-            }
-            //  This is checked differently, because sometimes ``size`` gets a default value.
-            if  let previous:Int = self.size,
-                    previous != size
-            {
-                throw ArgumentError.duplicated(option)
             }
 
             self.size = size
