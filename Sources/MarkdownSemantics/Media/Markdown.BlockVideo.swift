@@ -1,8 +1,12 @@
+import Sources
+
 extension Markdown
 {
     final
-    class BlockVideo:BlockLeaf
+    class BlockVideo:BlockContainer<BlockElement>
     {
+        var source:SourceReference<Markdown.Source>?
+
         private(set)
         var poster:String?
         /// Not to be confused with ``source``.
@@ -11,13 +15,41 @@ extension Markdown
         private(set)
         var alt:String?
 
-        override
         init()
         {
+            self.source = nil
             self.poster = nil
             self.src = nil
             self.alt = nil
-            super.init()
+            super.init([])
+        }
+
+        override
+        func emit(into binary:inout Markdown.BinaryEncoder)
+        {
+            binary[.figure]
+            {
+                //  $0[.video, { $0[.poster] = self.poster }]
+                $0[.video]
+                {
+                    // `<video>` does not support alt text.
+                    $0[.source]
+                    {
+                        $0[.src] = self.src
+                        // $0[.alt] = self.alt
+                    }
+                }
+
+                if  self.elements.isEmpty
+                {
+                    return
+                }
+
+                $0[.figcaption]
+                {
+                    super.emit(into: &$0)
+                }
+            }
         }
     }
 }
@@ -36,7 +68,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
 
             self.poster = value
 
-        case "source":
+        case "src", "source":
             guard case nil = self.src
             else
             {

@@ -8,8 +8,11 @@ extension Markdown.TreeContext
     {
         private(set)
         var others:[(name:HTML.Attribute, value:String)]
+        //  TODO: measure if we would be better off accumulating into a single string.
         private(set)
         var classes:[String]
+        private(set)
+        var style:String
         private(set)
         var href:String?
         private(set)
@@ -19,6 +22,7 @@ extension Markdown.TreeContext
         {
             self.others = []
             self.classes = []
+            self.style = ""
             self.href = nil
             self.id = nil
         }
@@ -53,6 +57,8 @@ extension Markdown.TreeContext.AttributeList
         case .src:      self.others.append((.src, value))
         case .title:    self.others.append((.title, value))
 
+        case .style:    self.style += value
+
         case .external:
             self.others.append((.rel, "\(HTML.Attribute.Rel.nofollow)"))
             self.others.append((.rel, "\(HTML.Attribute.Rel.noopener)"))
@@ -66,6 +72,7 @@ extension Markdown.TreeContext.AttributeList
     {
         self.others.removeAll(keepingCapacity: keepCapacity)
         self.classes.removeAll(keepingCapacity: keepCapacity)
+        self.style.removeAll(keepingCapacity: keepCapacity)
         self.href = nil
         self.id = nil
     }
@@ -75,6 +82,7 @@ extension Markdown.TreeContext.AttributeList
     func encode(to attributes:inout HTML.AttributeEncoder)
     {
         attributes.class = self.classes.isEmpty ? nil : self.classes.joined(separator: " ")
+        attributes.style = self.style.isEmpty ? nil : self.style
         attributes.href = self.href
         attributes.id = self.id?.encoded
 

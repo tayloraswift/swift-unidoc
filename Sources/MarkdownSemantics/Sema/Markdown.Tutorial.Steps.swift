@@ -12,6 +12,15 @@ extension Markdown.Tutorial
             self.source = nil
             super.init([])
         }
+
+        override
+        func emit(into binary:inout Markdown.BinaryEncoder)
+        {
+            binary[.ol, { $0[.class] = "steps" }]
+            {
+                super.emit(into: &$0)
+            }
+        }
     }
 }
 extension Markdown.Tutorial.Steps:Markdown.BlockDirectiveType

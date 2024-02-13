@@ -6,7 +6,7 @@ extension Markdown.Bytecode
     {
         case transparent = 0x00
 
-        //  HTML elements.
+        //  HTML elements, native to Markdown.
         case a = 0x01
         case blockquote
         case code
@@ -33,6 +33,82 @@ extension Markdown.Bytecode
         case th
         case tr
         case ul
+
+        //  HTML elements, not native to Markdown.
+        //
+        //  New in 0.8.18. We don’t currently use most of these, but I would rather not keep
+        //  adding non-contiguous cases to this enum.
+        case html = 0x20
+        case head
+        case body
+        case abbr
+        case audio
+        case b
+        case bdi
+        case bdo
+        case address
+        case article
+        case aside
+        case button
+        case canvas
+        case caption
+        case colgroup
+        case cite
+        case data
+        case datalist
+        case del
+        case details
+        case dialog
+        case dfn
+        case div
+        case embed
+        case fieldset
+        case figcaption
+        case figure
+        case footer
+        case form
+        case header
+        case i
+        case iframe
+        case ins
+        case kbd
+        case label
+        case legend
+        case main
+        case map
+        case mark
+        case menu
+        case meter
+        case nav
+        case noscript
+        case object
+        case optgroup
+        case option
+        case output
+        case picture
+        case portal
+        case progress
+        case q
+        case rp
+        case rt
+        case ruby
+        case samp
+        case small
+        case section
+        case span
+        case select
+        case slot
+        case sub
+        case summary
+        case sup
+        case template
+        case textarea
+        case tfoot
+        case time
+        case title
+        case u
+        case `var`
+        case video
 
         //  Snippet pseudoelement.
         case snippet = 0x9F

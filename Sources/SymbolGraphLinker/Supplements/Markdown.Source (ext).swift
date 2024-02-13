@@ -71,17 +71,9 @@ extension Markdown.Source
             return .supplement(headline, document)
         }
         else if
-            case (let directive as Markdown.BlockDirective)? = blocks.first
+            case (let tutorial as Markdown.Tutorial)? = blocks.first, blocks.count == 1
         {
-            if  case "Tutorials" = directive.name, blocks.count == 1
-            {
-                return .tutorials(directive)
-            }
-            else if
-                case "Tutorial" = directive.name, blocks.count == 1
-            {
-                return .tutorial(directive)
-            }
+            return .tutorial(tutorial)
         }
 
         return .untitled

@@ -4,10 +4,13 @@ import Sources
 extension Markdown
 {
     public final
-    class Tutorial:BlockContainer<Tutorial.Section>
+    class Tutorial:BlockContainer<BlockSection>
     {
         public
         var source:SourceReference<Markdown.Source>?
+
+        private(set)
+        var requirement:String?
         private(set)
         var intro:Intro?
 
@@ -15,7 +18,10 @@ extension Markdown
         init()
         {
             self.source = nil
+
+            self.requirement = nil
             self.intro = nil
+
             super.init([])
         }
     }
@@ -49,6 +55,12 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
             self.elements.append(section)
         }
         else if
+            case nil = self.requirement,
+            case let requirement as Requirement = element
+        {
+            self.requirement = requirement.title
+        }
+        else if
             case nil = self.intro
         {
             guard
@@ -58,7 +70,10 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
                 throw StructuralError.intro(type: type(of: element))
             }
 
+            //  We do need to also add the intro to the list of children, otherwise it will not
+            //  get visited.
             self.intro = intro
+            self.elements.append(intro)
         }
         else
         {

@@ -419,8 +419,11 @@ extension StaticLinker
                 return nil
             }
 
-        case .tutorials(let block):
-            fallthrough
+        case .tutorials(_):
+            let name:String = supplement.name
+            let id:Symbol.Article = .init(namespace, name)
+            print("Skipping tutorial \(id)")
+            return nil
 
         case .tutorial(let block):
             let name:String = supplement.name
