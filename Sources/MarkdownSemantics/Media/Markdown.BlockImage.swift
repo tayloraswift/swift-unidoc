@@ -1,20 +1,50 @@
+import Sources
+
 extension Markdown
 {
+    /// A `BlockImage` is a generalization of Apple’s various `@Image` directives. It renders as
+    /// a `<figure>` element containing an `<img>` element and an optional `<figcaption>`
+    /// element. Unlike most of the Apple `@Image` directives, it can contain children. The
+    /// children go into the `<figcaption>` element.
     final
-    class BlockImage:BlockLeaf
+    class BlockImage:BlockContainer<BlockElement>
     {
+        var source:SourceReference<Markdown.Source>?
+
         /// Not to be confused with ``source``.
         private(set)
         var src:String?
         private(set)
         var alt:String?
 
-        override
         init()
         {
             self.src = nil
             self.alt = nil
-            super.init()
+            super.init([])
+        }
+
+        override
+        func emit(into binary:inout Markdown.BinaryEncoder)
+        {
+            binary[.figure]
+            {
+                $0[.img]
+                {
+                    $0[.src] = self.src
+                    $0[.alt] = self.alt
+                }
+
+                if  self.elements.isEmpty
+                {
+                    return
+                }
+
+                $0[.figcaption]
+                {
+                    super.emit(into: &$0)
+                }
+            }
         }
     }
 }
@@ -24,7 +54,7 @@ extension Markdown.BlockImage:Markdown.BlockDirectiveType
     {
         switch option
         {
-        case "source":
+        case "src", "source":
             guard case nil = self.src
             else
             {

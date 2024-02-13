@@ -2,6 +2,8 @@ import MarkdownABI
 
 extension Markdown
 {
+    /// A `BlockCodeLiteral` is like a ``BlockCode``, but it contains code that has already been
+    /// highlighted and compiled to bytecode.
     final
     class BlockCodeLiteral:BlockElement
     {

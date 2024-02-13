@@ -146,6 +146,12 @@ extension Markdown.BlockInterpreter
 extension Markdown.BlockInterpreter
 {
     public mutating
+    func organize(tutorial:Markdown.Tutorial)
+    {
+
+    }
+
+    public mutating
     func organize(_ blocks:ArraySlice<Markdown.BlockElement>,
         snippets:[String: Markdown.Snippet]) -> Markdown.SemanticDocument
     {

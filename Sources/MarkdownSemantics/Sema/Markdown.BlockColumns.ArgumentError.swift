@@ -1,8 +1,8 @@
-extension Markdown.BlockDivision
+extension Markdown.BlockColumns
 {
     enum ArgumentError:Error
     {
-        case size(String)
+        case count(String)
 
         case duplicated(String)
         case unexpected(String)

@@ -3,25 +3,60 @@ import Sources
 
 extension Markdown
 {
-    public
+    final
     class BlockDivision:Markdown.BlockContainer<Markdown.BlockElement>
     {
-        public
         var source:SourceReference<Markdown.Source>?
 
-        init()
+        private(set)
+        var size:Int?
+
+        init(size:Int?)
         {
             self.source = nil
+            self.size = size
             super.init([])
+        }
+
+        override
+        func emit(into binary:inout Markdown.BinaryEncoder)
+        {
+            binary[.div]
+            {
+                $0[.style] = self.size.map { "grid-column: span \($0);" }
+            }
+                content:
+            {
+                super.emit(into: &$0)
+            }
         }
     }
 }
 extension Markdown.BlockDivision:Markdown.BlockDirectiveType
 {
-    /// Always throws an error, as this directive does not support any options.
     public final
     func configure(option:String, value:String) throws
     {
-        throw ArgumentError.unexpected(option)
+        switch option
+        {
+        case "size":
+            guard
+            let size:Int = .init(value)
+            else
+            {
+                throw ArgumentError.size(value)
+            }
+            //  This is checked differently, because sometimes ``size`` gets a default value.
+            if  let previous:Int = self.size,
+                    previous != size
+            {
+                throw ArgumentError.duplicated(option)
+            }
+
+            self.size = size
+
+        case let option:
+            throw ArgumentError.unexpected(option)
+        }
     }
 }

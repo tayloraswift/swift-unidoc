@@ -8,7 +8,7 @@ extension StaticLinker
     {
         case supplement(Headline, Markdown.SemanticDocument)
         case tutorials(Markdown.BlockDirective)
-        case tutorial(Markdown.BlockDirective)
+        case tutorial(Markdown.Tutorial)
         case untitled
     }
 }

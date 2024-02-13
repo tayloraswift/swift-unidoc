@@ -1,6 +1,6 @@
 extension Markdown.Tutorial
 {
-    public final
+    final
     class Section:Markdown.BlockSection
     {
     }
