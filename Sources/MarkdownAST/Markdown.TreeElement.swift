@@ -14,8 +14,7 @@ protocol _MarkdownTreeElement
     /// Replaces symbolic codelinks in this element’s inline content
     /// with references.
     mutating
-    func outline(
-        by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
 
     func emit(into binary:inout Markdown.BinaryEncoder)
 }

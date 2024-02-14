@@ -13,7 +13,6 @@ extension Markdown
         public
         var source:SourceReference<Markdown.Source>?
 
-        private(set)
         var title:String?
 
         init()

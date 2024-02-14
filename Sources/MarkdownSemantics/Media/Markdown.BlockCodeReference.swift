@@ -84,9 +84,8 @@ extension Markdown.BlockCodeReference
     /// As long as people are not reusing the same slices in multiple places, this has no
     /// performance drawbacks. No one should be doing that (extensively) anyways, because that
     /// would result in documentation that is hard to browse.
-    func inline(
-        into interpreter:inout some Markdown.SemanticInterpreter,
-        from snippets:[String: Markdown.Snippet]) throws
+    func inline(snippets:[String: Markdown.Snippet],
+        into yield:(consuming Markdown.BlockElement) -> ()) throws
     {
         guard
         let name:String = self.name,
@@ -100,7 +99,7 @@ extension Markdown.BlockCodeReference
         {
             if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
             {
-                interpreter.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
             }
             else
             {
@@ -113,11 +112,11 @@ extension Markdown.BlockCodeReference
             //  the ``blocks`` list.
             for block:Markdown.BlockElement in snippet.caption
             {
-                interpreter.append(block)
+                yield(block)
             }
             for slice:Markdown.SnippetSlice in snippet.slices.values
             {
-                interpreter.append(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
             }
         }
     }
