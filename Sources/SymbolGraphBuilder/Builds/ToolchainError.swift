@@ -3,7 +3,7 @@ import SymbolGraphs
 public
 enum ToolchainError:Error, Equatable, Sendable
 {
-    case developmentSnapshotNotSupported
+    case malformedSwiftVersion
     case malformedSplash
     case malformedTriple
     case unsupportedTriple(Triple)
@@ -15,8 +15,8 @@ extension ToolchainError:CustomStringConvertible
     {
         switch self
         {
-        case .developmentSnapshotNotSupported:
-            "Development snapshots are not supported"
+        case .malformedSwiftVersion:
+            "Failed to parse 'swift --version' output (malformed version number)"
         case .malformedSplash:
             "Failed to parse 'swift --version' output (splash is clipped or malformed)"
         case .malformedTriple:

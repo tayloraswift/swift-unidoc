@@ -21,13 +21,14 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// from.
     public
     var triple:Triple
+
     /// The swift toolchain the relevant documentation was generated with, which is used to
     /// select a version of the standard library to link against.
     ///
     /// This became mandatory for standard library symbol graphs in version 8 of the metadata
     /// format.
     public
-    var swift:AnyVersion
+    var swift:SwiftVersion
     /// The swift tools version declared in the package manifest, if the relevant documentation
     /// was generated from a package. New in 0.8.14.
     public
@@ -61,7 +62,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     init(package:Package,
         commit:Commit?,
         triple:Triple,
-        swift:AnyVersion,
+        swift:SwiftVersion,
         tools:PatchVersion? = nil,
         manifests:[MinorVersion] = [],
         requirements:[PlatformRequirement] = [],
@@ -89,27 +90,24 @@ struct SymbolGraphMetadata:Equatable, Sendable
 extension SymbolGraphMetadata
 {
     public static
-    func swift(_ swift:AnyVersion,
-        tagname:String,
+    func swift(_ swift:SwiftVersion,
+        commit:Commit?,
         triple:Triple,
         products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>) -> Self
     {
         let display:String
-        switch swift.canonical
+        switch swift.nightly
         {
-        case .stable(.release(let version, _)):
-            display = "Swift \(version.minor)"
+        case nil:
+            display = "Swift \(swift.version.minor)"
 
-        case .stable(let version):
-            display = "Swift \(version)"
-
-        case .unstable:
-            display = "Swift Nightly"
+        case .DEVELOPMENT_SNAPSHOT:
+            display = "Swift \(swift.version.minor) Nightly"
         }
 
         return .init(
             package: .init(name: .swift),
-            commit: .init(name: tagname),
+            commit: commit,
             triple: triple,
             swift: swift,
             products: products,
@@ -127,7 +125,8 @@ extension SymbolGraphMetadata
         case commit_hash = "revision"
         case commit_refname = "refname"
         case triple
-        case swift = "toolchain"
+        case swift_version = "toolchain"
+        case swift_nightly = "toolchain_type"
         case tools
         case manifests
         case requirements
@@ -158,7 +157,8 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
         bson[.commit_hash] = self.commit?.sha1
         bson[.commit_refname] = self.commit?.name
         bson[.triple] = self.triple
-        bson[.swift] = self.swift
+        bson[.swift_version] = self.swift.version
+        bson[.swift_nightly] = self.swift.nightly
         bson[.tools] = self.tools
         bson[.manifests] = self.manifests.isEmpty ? nil : self.manifests
 
@@ -183,7 +183,9 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
                 .init(name: $0, sha1: try bson[.commit_hash]?.decode())
             },
             triple: try bson[.triple].decode(),
-            swift: try bson[.swift].decode(),
+            swift: .init(
+                version: try bson[.swift_version].decode(),
+                nightly: try bson[.swift_nightly]?.decode()),
             tools: try bson[.tools]?.decode(),
             manifests: try bson[.manifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],

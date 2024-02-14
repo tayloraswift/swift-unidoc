@@ -78,7 +78,7 @@ extension Toolchain.Build:DocumentationBuild
         ]
 
         let metadata:SymbolGraphMetadata = .swift(swift.version,
-            tagname: swift.tagname,
+            commit: swift.commit,
             triple: swift.triple,
             products:
             [
