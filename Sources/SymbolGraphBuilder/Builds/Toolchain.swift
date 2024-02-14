@@ -11,9 +11,9 @@ import System
 struct Toolchain
 {
     public
-    let version:AnyVersion
+    let version:SwiftVersion
     public
-    let tagname:String
+    let commit:SymbolGraphMetadata.Commit?
     public
     let triple:Triple
     /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
@@ -22,10 +22,10 @@ struct Toolchain
     let swift:String
 
     private
-    init(version:AnyVersion, tagname:String, triple:Triple, swift:String)
+    init(version:SwiftVersion, commit:SymbolGraphMetadata.Commit?, triple:Triple, swift:String)
     {
         self.version = version
-        self.tagname = tagname
+        self.commit = commit
         self.triple = triple
         self.swift = swift
     }
@@ -33,7 +33,7 @@ struct Toolchain
 extension Toolchain
 {
     private
-    init(parsing splash:String, swift:String) throws
+    init(parsing splash:String, swift command:String) throws
     {
         //  Splash should consist of two complete lines of the form
         //
@@ -50,53 +50,65 @@ extension Toolchain
         let toolchain:[Substring] = lines[0].split(separator: " ")
         let triple:[Substring] = lines[1].split(separator: " ")
 
-        guard   toolchain.count >= 4,
-                toolchain[0 ... 1] == ["Swift", "version"],
-                triple.count == 2,
-                triple[0] == "Target:"
+        guard
+            toolchain.count >= 4,
+            toolchain[0 ... 1] == ["Swift", "version"],
+            triple.count == 2,
+            triple[0] == "Target:"
         else
         {
             throw ToolchainError.malformedSplash
         }
-
-        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
-        //  Target: x86_64-unknown-linux-gnu
-        if  toolchain.count > 4
-        {
-            throw ToolchainError.developmentSnapshotNotSupported
-        }
-
-        let parenthesized:Substring = toolchain[3]
-
-        guard parenthesized.startIndex < parenthesized.endIndex
-        else
-        {
-            throw ToolchainError.malformedSplash
-        }
-
-        let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
-        let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
-
-        guard   i < j,
-        case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
-        else
-        {
-            throw ToolchainError.malformedSplash
-        }
-
-        if  let triple:Triple = .init(triple[1])
-        {
-
-            self.init(
-                version: .init(toolchain[2]),
-                tagname: .init(parenthesized[i ..< j]),
-                triple: triple,
-                swift: swift)
-        }
+        guard
+        let triple:Triple = .init(triple[1])
         else
         {
             throw ToolchainError.malformedTriple
         }
+
+        let commit:SymbolGraphMetadata.Commit?
+        let swift:SwiftVersion
+        if  toolchain.count == 4,
+            let version:NumericVersion = .init(toolchain[2])
+        {
+            let parenthesized:Substring = toolchain[3]
+
+            guard parenthesized.startIndex < parenthesized.endIndex
+            else
+            {
+                throw ToolchainError.malformedSplash
+            }
+
+            let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
+            let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
+
+            guard i < j,
+            case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
+            else
+            {
+                throw ToolchainError.malformedSplash
+            }
+
+            commit = .init(name: String.init(parenthesized[i ..< j]), sha1: nil)
+            swift = .init(version: PatchVersion.init(padding: version))
+        }
+        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+        //  Target: x86_64-unknown-linux-gnu
+        else if
+            toolchain.count == 7,
+            let version:MinorVersion = .init(toolchain[2].prefix { $0 != "-" })
+        {
+            commit = nil
+            swift = .init(
+                version: .v(version.components.major, version.components.minor, 0),
+                nightly: .DEVELOPMENT_SNAPSHOT)
+        }
+        else
+        {
+            throw ToolchainError.malformedSwiftVersion
+        }
+
+        self.init(version: swift, commit: commit, triple: triple, swift: command)
     }
 
     public static

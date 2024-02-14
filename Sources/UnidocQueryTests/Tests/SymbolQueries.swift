@@ -36,7 +36,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         do
         {
             //  Use the cached binary if available.
-            swift = try .load(package: .swift, at: toolchain.version, in: workspace.path)
+            swift = try .load(swift: toolchain.version, in: workspace.path)
         }
         catch
         {

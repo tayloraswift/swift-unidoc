@@ -30,7 +30,7 @@ struct SymbolGraphs:MongoTestBattery
                     package: .init(scope: "apple", name: .swift),
                     commit: .init(name: "swift-5.8.1-RELEASE"),
                     triple: triple,
-                    swift: .stable(.release(.v(5, 8, 1))),
+                    swift: .init(version: .v(5, 8, 1)),
                     products: []),
                 graph: empty)
 
