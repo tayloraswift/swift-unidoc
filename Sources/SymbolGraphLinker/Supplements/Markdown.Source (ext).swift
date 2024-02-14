@@ -48,7 +48,7 @@ extension Markdown.Source
     func parse(_:StaticLinker.Supplement.Type = StaticLinker.Supplement.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftFlavor>,
         snippetsTable:[String: Markdown.Snippet],
-        diagnostics:inout Diagnostics<StaticSymbolicator>) -> StaticLinker.Supplement
+        diagnostics:inout Diagnostics<StaticSymbolicator>) throws -> StaticLinker.Supplement
     {
         let blocks:[Markdown.BlockElement] = markdown.parse(self)
         {
@@ -62,7 +62,27 @@ extension Markdown.Source
             diagnostics = interpreter.diagnostics
         }
 
-        if  case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
+        if  case (let tutorial as Markdown.Tutorial)? = blocks.first
+        {
+            guard blocks.count == 1
+            else
+            {
+                throw StaticLinker.SupplementError.extraBlocksInTutorial
+            }
+
+            guard
+            let headline:String = tutorial.headline, !headline.isEmpty
+            else
+            {
+                throw StaticLinker.SupplementError.untitledTutorial
+            }
+
+            let document:Markdown.SemanticDocument = interpreter.organize(tutorial: tutorial,
+                snippets: snippetsTable)
+            return .tutorial(headline, document)
+        }
+        else if
+            case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
             let headline:StaticLinker.Supplement.Headline = .init(heading)
             let document:Markdown.SemanticDocument = interpreter.organize(blocks.dropFirst(),
@@ -70,12 +90,9 @@ extension Markdown.Source
 
             return .supplement(headline, document)
         }
-        else if
-            case (let tutorial as Markdown.Tutorial)? = blocks.first, blocks.count == 1
+        else
         {
-            return .tutorial(tutorial)
+            throw StaticLinker.SupplementError.untitled
         }
-
-        return .untitled
     }
 }

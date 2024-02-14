@@ -64,7 +64,7 @@ extension CodelinkV3.Scope
             if  separator == ".",
                 let next:CodelinkV3.Identifier = .init(parsing: &codepoints)
             {
-                prefix.append(consume last)
+                prefix.append(last)
                 last = next.unencased
             }
             else

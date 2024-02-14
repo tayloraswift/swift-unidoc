@@ -18,9 +18,9 @@ extension Unidoc.Stem
     }
 
     @inlinable public static
-    func article(_ namespace:Symbol.Module, _ name:Substring) -> Self
+    func article(_ namespace:Symbol.Module, path:Substring) -> Self
     {
-        "\(namespace) \(name)"
+        "\(namespace) \(path)"
     }
 
     public static

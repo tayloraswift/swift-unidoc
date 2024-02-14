@@ -3,13 +3,13 @@ import MarkdownSemantics
 
 extension StaticLinker
 {
+    @_spi(testable)
     @frozen public
     enum Supplement
     {
         case supplement(Headline, Markdown.SemanticDocument)
         case tutorials(Markdown.BlockDirective)
-        case tutorial(Markdown.Tutorial)
-        case untitled
+        case tutorial(String, Markdown.SemanticDocument)
     }
 }
 extension StaticLinker.Supplement
@@ -22,7 +22,6 @@ extension StaticLinker.Supplement
         case .supplement(let headline, _):  headline
         case .tutorials:                    nil
         case .tutorial:                     nil
-        case .untitled:                     nil
         }
     }
 }

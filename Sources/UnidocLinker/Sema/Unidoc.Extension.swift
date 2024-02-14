@@ -54,7 +54,7 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
         self.details == nil
     }
 
-    __consuming
+    consuming
     func assemble(signature:Unidoc.ExtensionSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
     {
