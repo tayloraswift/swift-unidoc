@@ -22,7 +22,8 @@ extension Toolchain.Build
     func swift(in shared:SPM.Workspace, clean:Bool = false) async throws -> Self
     {
         let container:SPM.Workspace = try await shared.create("swift", clean: clean)
-        return .init(artifacts: try await container.create("artifacts"))
+        return .init(artifacts: try await container.create("artifacts", clean: clean,
+            as: ArtifactsDirectory.self)) // https://github.com/apple/swift/issues/71602
     }
 }
 extension Toolchain.Build:DocumentationBuild

@@ -120,8 +120,8 @@ extension SwiftinitClient
         {
             fatalError("No package search path specified.")
         }
-
-        let bson:BSON.Document = .init(encoding: consume archive)
+        //  https://github.com/apple/swift/issues/71607
+        let bson:BSON.Document = .init(encoding: /* consume */ archive)
 
         try await self.connect
         {

@@ -305,7 +305,7 @@ extension Unidoc.DB
         let symbol:Symbol.Edition = volume.metadata.symbol
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
-            snapshot: consume snapshot,
+            snapshot: /* consume */ snapshot, // https://github.com/apple/swift/issues/71605
             with: session)
 
         let uplinked:Unidoc.UplinkStatus = .init(

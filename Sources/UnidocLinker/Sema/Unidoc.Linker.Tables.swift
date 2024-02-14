@@ -8,7 +8,8 @@ import UnidocRecords
 
 extension Unidoc.Linker
 {
-    struct Tables//:~Copyable
+    //  https://github.com/apple/swift/issues/71606
+    struct Tables //:~Copyable
     {
         private
         let contexts:[SymbolGraph.ModuleContext]

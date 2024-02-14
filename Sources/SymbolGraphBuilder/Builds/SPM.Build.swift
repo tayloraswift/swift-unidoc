@@ -83,7 +83,8 @@ extension SPM.Build
         let container:SPM.Workspace = try await shared.create("\(package)", clean: clean)
 
         return .init(id: .unversioned(package),
-            artifacts: try await container.create("artifacts"),
+            // https://github.com/apple/swift/issues/71602
+            artifacts: try await container.create("artifacts", as: ArtifactsDirectory.self),
             root: packages / "\(package)")
     }
 
@@ -128,9 +129,11 @@ extension SPM.Build
 
         let container:SPM.Workspace = try await shared.create("\(package)")
         let checkouts:SPM.CheckoutDirectory = try await container.create("checkouts",
-            clean: clean.contains(.checkouts))
+            clean: clean.contains(.checkouts),
+            as: SPM.CheckoutDirectory.self) // https://github.com/apple/swift/issues/71602
         let artifacts:ArtifactsDirectory = try await container.create("artifacts@\(refname)",
-            clean: clean.contains(.artifacts))
+            clean: clean.contains(.artifacts),
+            as: ArtifactsDirectory.self)    // ditto
 
         let cloned:FilePath = checkouts.path / "\(package)"
 
