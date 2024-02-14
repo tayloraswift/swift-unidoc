@@ -47,49 +47,9 @@ extension Markdown.Snippet
             return
         }
 
-        //  Most documentation magic is not available to snippet captions (recursive snippets
-        //  especially), but we still want the magical aside blocks to work.
-        var blocks:[Markdown.BlockElement] = []
-        for block:Markdown.BlockElement in parser.parse(.init(file: id, text: caption))
-        {
-            switch block
-            {
-            case let list as Markdown.BlockListUnordered:
-                var items:[Markdown.BlockItem] = []
-                for item:Markdown.BlockItem in list.elements
-                {
-                    if  let prefix:Markdown.BlockPrefix = .extract(from: &item.elements),
-                        case .keywords(let aside) = prefix
-                    {
-                        blocks.append(aside(item.elements))
-                    }
-                    else
-                    {
-                        items.append(item)
-                    }
-                }
-                if !items.isEmpty
-                {
-                    list.elements = items
-                    blocks.append(list)
-                }
-
-            case let quote as Markdown.BlockQuote:
-                if  case .keywords(let aside) = Markdown.BlockPrefix.extract(
-                        from: &quote.elements)
-                {
-                    blocks.append(aside(quote.elements))
-                }
-                else
-                {
-                    blocks.append(quote)
-                }
-
-            case let block:
-                blocks.append(block)
-            }
-        }
-
-        self.init(id: id, caption: blocks, slices: index)
+        //  We don’t need to do anything special to the caption, because flavor processing will
+        //  be performed after it is inlined into a document.
+        let caption:[Markdown.BlockElement] = parser.parse(.init(file: id, text: caption))
+        self.init(id: id, caption: caption, slices: index)
     }
 }

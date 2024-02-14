@@ -145,10 +145,78 @@ extension Markdown.BlockInterpreter
 
 extension Markdown.BlockInterpreter
 {
-    public mutating
-    func organize(tutorial:Markdown.Tutorial)
+    private mutating
+    func rewrite(children:inout [Markdown.BlockElement],
+        inlining snippets:[String: Markdown.Snippet])
     {
+        var blocks:[Markdown.BlockElement] = []
+            blocks.reserveCapacity(children.count)
 
+        for block:Markdown.BlockElement in consume children
+        {
+            guard
+            case let block as Markdown.BlockCodeReference = block
+            else
+            {
+                Markdown.SwiftFlavor.rewrite(child: block, into: &blocks)
+                continue
+            }
+            do
+            {
+                try block.inline(snippets: snippets)
+                {
+                    //  The snippet inliner might have yielded something that looks like a
+                    //  magical block, so we still need to rewrite it.
+                    Markdown.SwiftFlavor.rewrite(child: $0, into: &blocks)
+                }
+            }
+            catch let error
+            {
+                self.diagnostics[block.source] = .error(error)
+            }
+        }
+
+        children = blocks
+    }
+}
+extension Markdown.BlockInterpreter
+{
+    public mutating
+    func organize(tutorial:Markdown.Tutorial,
+        snippets:[String: Markdown.Snippet]) -> Markdown.SemanticDocument
+    {
+        tutorial.rewrite
+        {
+            self.rewrite(children: &$0, inlining: snippets)
+        }
+
+        guard
+        let intro:Markdown.Tutorial.Intro = tutorial.overview
+        else
+        {
+            return .tutorial(overview: nil, sections: tutorial.sections)
+        }
+        guard
+        case let paragraph as Markdown.BlockParagraph = intro.elements.first
+        else
+        {
+            return .tutorial(overview: nil, sections: [intro] + tutorial.sections)
+        }
+
+        let i:Int = intro.elements.index(after: intro.elements.startIndex)
+        if  i < intro.elements.endIndex
+        {
+            /// This is a weird tutorial, one that contains multiple introductory paragraphs.
+            /// We will treat the first paragraph as the overview, and then repack the rest
+            /// of the elements into a synthetic body section.
+            let section:Markdown.Tutorial.Section = .init()
+                section.elements = [_].init(intro.elements[i...])
+            return .tutorial(overview: paragraph, sections: [section] + tutorial.sections)
+        }
+        else
+        {
+            return .tutorial(overview: paragraph, sections: tutorial.sections)
+        }
     }
 
     public mutating
@@ -167,6 +235,11 @@ extension Markdown.BlockInterpreter
 
         for block:Markdown.BlockElement in blocks
         {
+            block.rewrite
+            {
+                self.rewrite(children: &$0, inlining: snippets)
+            }
+
             switch block
             {
             case let list as Markdown.BlockListUnordered:
@@ -248,26 +321,22 @@ extension Markdown.BlockInterpreter
                     self.append(aside(quote.elements))
                 }
 
+            case let block as Markdown.BlockMetadata:
+                metadata.update(docc: block)
+
             case let block as Markdown.BlockCodeReference:
+                //  We still need to do this here, as it is a top-level block and therefore
+                //  not subject to the automatic rewrite.
                 do
                 {
-                    try block.inline(into: &self, from: snippets)
+                    try block.inline(snippets: snippets)
+                    {
+                        self.append($0)
+                    }
                 }
                 catch let error
                 {
                     self.diagnostics[block.source] = .error(error)
-                }
-
-            case let block as Markdown.BlockDirective:
-                switch block.name
-                {
-                case "Metadata":
-                    metadata.update(with: block.elements)
-
-                case _:
-                    //  Don’t know how to handle these yet, so we just render them
-                    //  as code blocks.
-                    self.append(block)
                 }
 
             case let block:

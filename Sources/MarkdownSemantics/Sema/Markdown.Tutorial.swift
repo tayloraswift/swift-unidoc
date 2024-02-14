@@ -4,25 +4,51 @@ import Sources
 extension Markdown
 {
     public final
-    class Tutorial:BlockContainer<BlockSection>
+    class Tutorial:BlockElement
     {
         public
         var source:SourceReference<Markdown.Source>?
 
-        private(set)
+        public private(set)
         var requirement:String?
+        /// The tutorial’s headline, which was extracted from its ``Intro``.
+        public private(set)
+        var headline:String?
+        /// The tutorial’s overview, which is an `@Intro` that has had its ``Intro/title``
+        /// removed and stored in ``headline``.
         private(set)
-        var intro:Intro?
+        var overview:Intro?
+        private(set)
+        var sections:[Section]
 
-        public
+        public override
         init()
         {
             self.source = nil
 
             self.requirement = nil
-            self.intro = nil
+            self.headline = nil
+            self.overview = nil
+            self.sections = []
 
-            super.init([])
+            super.init()
+        }
+
+        public override
+        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+        {
+            try self.traverse { try $0.outline(by: register) }
+        }
+
+        public override
+        func traverse(_ visit:(Markdown.BlockElement) throws -> ()) rethrows
+        {
+            try super.traverse(visit)
+            try self.overview?.traverse(visit)
+            for section:Section in self.sections
+            {
+                try section.traverse(visit)
+            }
         }
     }
 }
@@ -52,7 +78,7 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
         //  Apple won’t tolerate this, but we are not Apple.
         if  case let section as Section = element
         {
-            self.elements.append(section)
+            self.sections.append(section)
         }
         else if
             case nil = self.requirement,
@@ -61,7 +87,7 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
             self.requirement = requirement.title
         }
         else if
-            case nil = self.intro
+            case nil = self.overview
         {
             guard
             case let intro as Intro = element
@@ -70,10 +96,9 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
                 throw StructuralError.intro(type: type(of: element))
             }
 
-            //  We do need to also add the intro to the list of children, otherwise it will not
-            //  get visited.
-            self.intro = intro
-            self.elements.append(intro)
+            defer { intro.title = nil }
+            self.headline = intro.title
+            self.overview = intro
         }
         else
         {

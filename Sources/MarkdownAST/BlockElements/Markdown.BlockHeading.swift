@@ -37,6 +37,15 @@ extension Markdown
 }
 extension Markdown.BlockHeading
 {
+    /// A convenience initializer for creating a heading containing plain text.
+    @inlinable public static
+    func h(_ level:Int, text:String) -> Markdown.BlockHeading
+    {
+        .init(source: nil, level: level, elements: [.text(text)])
+    }
+}
+extension Markdown.BlockHeading
+{
     /// Clips the heading to the specified maximum level. For example, if `level` is 3, then
     /// this function will demote `h1` and `h2` headings to `h3`, but it will leave `h3` and
     /// `h4` headings alone. This function will never demote headings beyond `h6`.

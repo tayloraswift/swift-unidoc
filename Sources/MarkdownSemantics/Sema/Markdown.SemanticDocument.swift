@@ -30,6 +30,22 @@ extension Markdown
 }
 extension Markdown.SemanticDocument
 {
+    static
+    func tutorial(overview:Markdown.BlockParagraph?, sections:[Markdown.BlockElement]) -> Self
+    {
+        return .init(
+            metadata: .init(),
+            overview: overview,
+            details: .init(
+                parameters: nil,
+                returns: nil,
+                throws: nil,
+                article: sections),
+            topics: [])
+    }
+}
+extension Markdown.SemanticDocument
+{
     /// Merges the given documentation into this documentation.
     ///
     /// If this documentation has no Parameters, Returns, or Throws sections,
