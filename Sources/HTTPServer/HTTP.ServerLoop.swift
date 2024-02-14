@@ -567,7 +567,7 @@ extension HTTP.ServerLoop
                     headers: headers,
                     address: address,
                     service: service,
-                    body: /* consume */ body)
+                    body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
                 return try await cop.pause { try await self.response(for: request) }
             }

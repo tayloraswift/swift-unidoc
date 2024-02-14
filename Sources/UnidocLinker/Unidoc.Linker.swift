@@ -17,8 +17,9 @@ typealias DynamicLinker = Unidoc.Linker
 
 extension Unidoc
 {
+    //  https://github.com/apple/swift/issues/71606
     @frozen public
-    struct Linker /* :~Copyable */
+    struct Linker //:~Copyable
     {
         var diagnostics:Diagnostics<Unidoc.Symbolicator>
 

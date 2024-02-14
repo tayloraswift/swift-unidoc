@@ -32,7 +32,6 @@ extension StaticOutliner
     consuming
     func diagnostics() -> Diagnostics<StaticSymbolicator>
     {
-        //(consume self).resolver.diagnostics
         self.resolver.diagnostics
     }
 }
