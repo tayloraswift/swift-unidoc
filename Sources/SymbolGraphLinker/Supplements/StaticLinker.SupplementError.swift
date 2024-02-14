@@ -7,6 +7,8 @@ extension StaticLinker
     {
         case multiple
         case untitled
+        case untitledTutorial
+        case extraBlocksInTutorial
     }
 }
 extension StaticLinker.SupplementError:Diagnostic
@@ -26,6 +28,16 @@ extension StaticLinker.SupplementError:Diagnostic
         case .untitled:
             output[.warning] = """
             markdown supplement has no title
+            """
+
+        case .untitledTutorial:
+            output[.warning] = """
+            markdown tutorial has no title
+            """
+
+        case .extraBlocksInTutorial:
+            output[.warning] = """
+            markdown tutorial contains extra blocks
             """
         }
     }

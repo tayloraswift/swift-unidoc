@@ -43,7 +43,7 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
         self.unconditional.isEmpty && self.conditional.isEmpty
     }
 
-    __consuming
+    consuming
     func assemble(signature:Unidoc.ConformanceSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ConformerGroup
     {

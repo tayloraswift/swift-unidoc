@@ -358,10 +358,28 @@ extension StaticLinker
         let file:Int32 = self.symbolizer.intern(supplement.path)
         let source:Markdown.Source = .init(file: file, text: try supplement.read())
 
-        switch source.parse(
-            markdownParser: self.markdownParser,
-            snippetsTable: self.snippets,
-            diagnostics: &self.tables.diagnostics)
+        let name:String = supplement.name
+        let id:Symbol.Article = .article(namespace, name)
+
+        let supplement:Supplement
+        do
+        {
+            supplement = try source.parse(
+                markdownParser: self.markdownParser,
+                snippetsTable: self.snippets,
+                diagnostics: &self.tables.diagnostics)
+        }
+        catch let error as SupplementError
+        {
+            self.tables.diagnostics[source.origin] = error
+            return nil
+        }
+        catch // I wish swift had typed throws
+        {
+            fatalError("unreachable")
+        }
+
+        switch supplement
         {
         case .supplement(.binding(let binding), let body):
             let decl:Int32?
@@ -400,9 +418,6 @@ extension StaticLinker
             }
 
         case .supplement(.heading(let heading), let body):
-            let name:String = supplement.name
-            let id:Symbol.Article = .init(namespace, name)
-
             if  let scalar:Int32 = self.symbolizer.allocate(article: id,
                     title: heading)
             {
@@ -412,28 +427,25 @@ extension StaticLinker
                 self.router[namespace, name][nil, default: []].append(scalar)
                 return .init(standalone: scalar, file: file, body: body)
             }
-            else
-            {
-                self.tables.diagnostics[heading.source] = DuplicateSymbolError.article(
-                    name: name)
-                return nil
-            }
+
+            self.tables.diagnostics[heading.source] = DuplicateSymbolError.article(name: name)
+            return nil
 
         case .tutorials(_):
-            let name:String = supplement.name
-            let id:Symbol.Article = .init(namespace, name)
             print("Skipping tutorial \(id)")
             return nil
 
-        case .tutorial(let block):
-            let name:String = supplement.name
-            let id:Symbol.Article = .init(namespace, name)
+        case .tutorial(let headline, let body):
+            //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
+            if  let scalar:Int32 = self.symbolizer.allocate(article: id,
+                    title: .h(1, text: headline))
+            {
+                self.tables.doclinks[.tutorials(namespace), name] = scalar
+                self.router[namespace, name][nil, default: []].append(scalar)
+                return .init(standalone: scalar, file: file, body: body)
+            }
 
-            print("Skipping tutorial \(id)")
-            return nil
-
-        case .untitled:
-            self.tables.diagnostics[source.origin] = SupplementError.untitled
+            self.tables.diagnostics[source.origin] = DuplicateSymbolError.article(name: name)
             return nil
         }
     }

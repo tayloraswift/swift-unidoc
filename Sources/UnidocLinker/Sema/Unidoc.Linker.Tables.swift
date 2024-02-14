@@ -8,7 +8,7 @@ import UnidocRecords
 
 extension Unidoc.Linker
 {
-    struct Tables:~Copyable
+    struct Tables//:~Copyable
     {
         private
         let contexts:[SymbolGraph.ModuleContext]
@@ -457,9 +457,14 @@ extension Unidoc.Linker.Tables
         {
             let symbol:Symbol.Article = self.current.articles.symbols[a]
             let scalar:Unidoc.Scalar = self.current.id + a
-
+            /// >   Note:
+            /// Constructing the stem by joining the `namespace.module` with the `symbol.path`
+            /// should result in the same stem that you would obtain by just copying the raw
+            /// article symbol itself, because articles should never migrate between modules.
+            /// However, we tend to emphasize the distinction between module culture and module
+            /// namespace elsewhere, so we will continue to construct the stem pedantically.
             var vertex:Unidoc.ArticleVertex = .init(id: scalar,
-                stem: .article(namespace.module, symbol.name),
+                stem: .article(namespace.module, path: symbol.path),
                 culture: namespace.culture,
                 readme: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,

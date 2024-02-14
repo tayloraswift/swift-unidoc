@@ -7,18 +7,32 @@ extension Symbol.Article:BSONDecodable, BSONEncodable
 }
 extension Symbol.Article
 {
-    @inlinable public
-    init(_ bundle:borrowing Symbol.Module, _ name:borrowing String)
+    /// Creates an article symbol.
+    @inlinable public static
+    func article(_ namespace:borrowing Symbol.Module, _ name:borrowing String) -> Self
     {
-        self.init(rawValue: "\(bundle) \(name)")
+        .init(rawValue: "\(namespace) \(name)")
     }
+    /// Creates an article symbol appropriate for a tutorial. Tutorials are always scoped to
+    /// the `tutorials/` path prefix, and will never collide with articles, even if there is an
+    /// article named `tutorials` in the same module.
+    // @inlinable public static
+    // func tutorial(_ namespace:borrowing Symbol.Module, _ name:borrowing String) -> Self
+    // {
+    //     .init(rawValue: "\(namespace) tutorials \(name)")
+    // }
 
+    /// Returns the space-separated article path without the module qualifier.
     @inlinable public
-    var name:Substring
+    var path:Substring
     {
-        self.rawValue.firstIndex(of: " ").map
+        if  let i:String.Index = self.rawValue.firstIndex(of: " ")
         {
-            self.rawValue[self.rawValue.index(after: $0)...]
-        } ?? self.rawValue[...]
+            self.rawValue[self.rawValue.index(after: i)...]
+        }
+        else
+        {
+            self.rawValue[...]
+        }
     }
 }
