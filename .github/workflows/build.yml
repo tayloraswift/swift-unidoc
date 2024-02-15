@@ -14,8 +14,7 @@ jobs:
         strategy:
             matrix:
                 image:
-                -   5.9.2-amazonlinux2
-                -   5.9.2-jammy
+                -   tayloraswift/nightly-5.10-amazonlinux2023
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
@@ -36,7 +35,7 @@ jobs:
                         --name swift-environment \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
-                        swift:${{ matrix.image }} \
+                        ${{ matrix.image }} \
                         /bin/bash $(echo .github/pipeline)
 
             -   name: export binary tools
