@@ -41,28 +41,17 @@ extension Markdown
             }
         }
 
-        /// Recursively calls ``Markdown.Tree.outline(by:)`` for each block
-        /// in this parameter list’s discussion, and each constituent
-        /// parameter.
         public override
-        func outline(by register:(InlineAutolink) throws -> Int?) rethrows
+        func traverse(with visit:(BlockElement) throws -> ()) rethrows
         {
-            //  This element only contains block elements, so we can just forward the closure
-            //  to the traversal method.
-            try self.traverse { try $0.outline(by: register) }
-        }
-
-        public override
-        func traverse(_ visit:(BlockElement) throws -> ()) rethrows
-        {
-            try super.traverse(visit)
+            try super.traverse(with: visit)
             for block:BlockElement in self.discussion
             {
-                try block.traverse(visit)
+                try block.traverse(with: visit)
             }
             for parameter:BlockParameter in self.list
             {
-                try parameter.traverse(visit)
+                try parameter.traverse(with: visit)
             }
         }
     }

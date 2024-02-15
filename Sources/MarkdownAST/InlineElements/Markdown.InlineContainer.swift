@@ -30,14 +30,6 @@ extension Markdown.InlineContainer:Sendable where Element:Sendable
 }
 extension Markdown.InlineContainer:Markdown.TreeElement
 {
-    @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-    {
-        for index:Int in self.elements.indices
-        {
-            try self.elements[index].outline(by: register)
-        }
-    }
     public
     func emit(into binary:inout Markdown.BinaryEncoder)
     {
@@ -65,6 +57,15 @@ extension Markdown.InlineContainer:Markdown.TextElement
         for element:Element in self.elements
         {
             text += element
+        }
+    }
+
+    @inlinable public mutating
+    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    {
+        for index:Int in self.elements.indices
+        {
+            try self.elements[index].outline(by: register)
         }
     }
 }

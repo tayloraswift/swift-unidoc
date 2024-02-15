@@ -32,31 +32,24 @@ extension Markdown.Table.Row:RandomAccessCollection
         self.cells.endIndex
     }
     @inlinable public
-    subscript(index:Int) -> Element
+    subscript(index:Int) -> (alignment:Markdown.Table.Alignment?, cell:Cell)
     {
-        .init(
-            alignment: self.alignments.indices.contains(index) ? self.alignments[index] : nil,
-            cell: self.cells[index])
+        (
+            self.alignments.indices.contains(index) ? self.alignments[index] : nil,
+            self.cells[index]
+        )
     }
 }
 extension Markdown.Table.Row:Markdown.TreeElement
 {
-    @inlinable public
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-    {
-        for element:Element in self
-        {
-            try element.outline(by: register)
-        }
-    }
     public
     func emit(into binary:inout Markdown.BinaryEncoder)
     {
         binary[.tr]
         {
-            for element:Element in self
+            for (alignment, cell):(Markdown.Table.Alignment?, Cell) in self
             {
-                element.emit(into: &$0)
+                cell.emit(into: &$0, alignment: alignment)
             }
         }
     }

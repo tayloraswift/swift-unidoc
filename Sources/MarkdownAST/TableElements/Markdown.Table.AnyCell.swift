@@ -3,13 +3,16 @@ import MarkdownABI
 extension Markdown.Table
 {
     public
-    class AnyCell:Markdown.BlockContainer<Markdown.InlineElement>
+    class AnyCell:Markdown.BlockProse
     {
         class
         var context:Markdown.Bytecode.Context { .td }
 
         /// Emits this cell as an element determined by the dynamic type of this instance,
         /// without any alignment attributes.
+        ///
+        /// This method will never actually be called, because ``Markdown.Table`` bypasses it
+        /// in favor of the ``emit(into:alignment:)`` method.
         public final override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {

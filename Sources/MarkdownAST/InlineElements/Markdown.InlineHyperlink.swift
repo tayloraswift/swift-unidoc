@@ -58,18 +58,6 @@ extension Markdown.InlineHyperlink
 }
 extension Markdown.InlineHyperlink:Markdown.TreeElement
 {
-    @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-    {
-        if  case .safe(let expression, let source)? = self.target,
-            let reference:Int = try register(.init(source: source,
-                text: expression,
-                code: false))
-        {
-            self.target = .outlined(reference)
-        }
-    }
-
     public
     func emit(into binary:inout Markdown.BinaryEncoder)
     {
@@ -110,6 +98,18 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
         for element:Markdown.InlineSpan in self.elements
         {
             text += element
+        }
+    }
+
+    @inlinable public mutating
+    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    {
+        if  case .safe(let expression, let source)? = self.target,
+            let reference:Int = try register(.init(source: source,
+                text: expression,
+                code: false))
+        {
+            self.target = .outlined(reference)
         }
     }
 }
