@@ -4,10 +4,10 @@ import Sources
 extension Markdown
 {
     public final
-    class BlockHeading:BlockContainer<Markdown.InlineElement>
+    class BlockHeading:BlockProse
     {
         public
-        let source:SourceReference<Markdown.Source>?
+        let source:SourceReference<Source>?
 
         public
         var level:Int
@@ -15,10 +15,10 @@ extension Markdown
         var id:String?
 
         @inlinable public
-        init(source:SourceReference<Markdown.Source>?,
+        init(source:SourceReference<Source>?,
             level:Int,
             id:String? = nil,
-            elements:[Markdown.InlineElement])
+            elements:[InlineElement])
         {
             self.source = source
             self.level = level

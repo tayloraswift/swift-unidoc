@@ -35,19 +35,13 @@ extension Markdown
         }
 
         public override
-        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+        func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
         {
-            try self.traverse { try $0.outline(by: register) }
-        }
-
-        public override
-        func traverse(_ visit:(Markdown.BlockElement) throws -> ()) rethrows
-        {
-            try super.traverse(visit)
-            try self.overview?.traverse(visit)
+            try super.traverse(with: visit)
+            try self.overview?.traverse(with: visit)
             for section:Section in self.sections
             {
-                try section.traverse(visit)
+                try section.traverse(with: visit)
             }
         }
     }

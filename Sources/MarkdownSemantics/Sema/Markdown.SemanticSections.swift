@@ -41,16 +41,33 @@ extension Markdown.SemanticSections
 }
 extension Markdown.SemanticSections
 {
-    /// Calls ``yield`` once for each block in the structure.
+    /// Calls ``visit`` recursively for all blocks in the structure.
     ///
     /// This coroutine visits the ``parameters``, then the ``returns``, then the ``throws``,
     /// and finally the ``article``.
     @inlinable public
-    func visit(_ yield:(Markdown.BlockElement) throws -> ()) rethrows
+    func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
     {
-        try self.parameters.map(yield)
-        try self.returns.map(yield)
-        try self.throws.map(yield)
-        try self.article.forEach(yield)
+        try self.parameters?.traverse(with: visit)
+        try self.returns?.traverse(with: visit)
+        try self.throws?.traverse(with: visit)
+
+        for block:Markdown.BlockElement in self.article
+        {
+            try block.traverse(with: visit)
+        }
+    }
+
+    @inlinable public
+    func emit(into binary:inout Markdown.BinaryEncoder)
+    {
+        self.parameters?.emit(into: &binary)
+        self.returns?.emit(into: &binary)
+        self.throws?.emit(into: &binary)
+
+        for block:Markdown.BlockElement in self.article
+        {
+            block.emit(into: &binary)
+        }
     }
 }

@@ -20,26 +20,43 @@ extension Markdown
 }
 extension Markdown.SemanticTopic
 {
-    /// Calls ``yield`` once for each block in the structure. If `members` is true, this
-    /// function will materialize the topic’s ``members`` as an unordered list of autolinks
-    /// at the end of the ``article``.
-    @inlinable public
-    func visit(members:Bool = true, _ yield:(Markdown.BlockElement) throws -> ()) rethrows
+    @inlinable
+    var list:Markdown.BlockListUnordered
     {
-        try self.article.forEach(yield)
-
-        guard members
-        else
-        {
-            return
-        }
-
         let items:[Markdown.BlockItem] = self.members.map
         {
             .init(elements: [Markdown.BlockParagraph.init([.autolink($0)])])
         }
+        return .init(items)
+    }
 
-        try yield(Markdown.BlockListUnordered.init(items))
+    /// Calls ``visit`` recursively for all blocks in the structure. If `members` is true, this
+    /// function will materialize the topic’s ``members`` as an unordered list of autolinks at
+    /// the end of the ``article``.
+    @inlinable public
+    func traverse(members:Bool = true, with visit:(Markdown.BlockElement) throws -> ()) rethrows
+    {
+        for block:Markdown.BlockElement in self.article
+        {
+            try block.traverse(with: visit)
+        }
+        if  members
+        {
+            try self.list.traverse(with: visit)
+        }
+    }
+
+    @inlinable public
+    func emit(members:Bool = true, into binary:inout Markdown.BinaryEncoder)
+    {
+        for block:Markdown.BlockElement in self.article
+        {
+            block.emit(into: &binary)
+        }
+        if  members
+        {
+            self.list.emit(into: &binary)
+        }
     }
 }
 extension Markdown.SemanticTopic

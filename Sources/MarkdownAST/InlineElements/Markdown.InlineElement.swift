@@ -22,32 +22,6 @@ extension Markdown
 }
 extension Markdown.InlineElement:Markdown.TreeElement
 {
-    @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-    {
-        switch self
-        {
-        case .autolink(let autolink):
-            if  let reference:Int = try register(autolink)
-            {
-                self = .reference(reference)
-            }
-
-        case .container(var container):
-            self = .text("")
-            defer { self = .container(container) }
-            try container.outline(by: register)
-
-        case .link(var link):
-            self = .text("")
-            defer { self = .link(link) }
-            try link.outline(by: register)
-
-        case .code, .html, .image, .reference, .text:
-            return
-        }
-    }
-
     @inlinable public
     func emit(into binary:inout Markdown.BinaryEncoder)
     {
@@ -94,6 +68,32 @@ extension Markdown.InlineElement:Markdown.TextElement
         case .link(let link):           text += link
         case .reference:                return
         case .text(let part):           text += part
+        }
+    }
+
+    @inlinable public mutating
+    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    {
+        switch self
+        {
+        case .autolink(let autolink):
+            if  let reference:Int = try register(autolink)
+            {
+                self = .reference(reference)
+            }
+
+        case .container(var container):
+            self = .text("")
+            defer { self = .container(container) }
+            try container.outline(by: register)
+
+        case .link(var link):
+            self = .text("")
+            defer { self = .link(link) }
+            try link.outline(by: register)
+
+        case .code, .html, .image, .reference, .text:
+            return
         }
     }
 }

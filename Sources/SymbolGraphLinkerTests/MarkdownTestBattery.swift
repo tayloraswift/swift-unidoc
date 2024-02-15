@@ -35,10 +35,7 @@ extension MarkdownTestBattery
             {
                 (encoder:inout Markdown.BinaryEncoder)in
 
-                documentation.details.visit
-                {
-                    $0.emit(into: &encoder)
-                }
+                documentation.details.emit(into: &encoder)
             })
             let html:HTML = try .init
             {

@@ -157,7 +157,7 @@ extension StaticOutliner
         {
             for block:Markdown.BlockElement in blocks
             {
-                block.outline { self.outline(autolink: $0) }
+                block.traverse { $0.outline { self.outline(autolink: $0) } }
                 block.emit(into: &$0)
             }
         }
@@ -179,13 +179,11 @@ extension StaticOutliner
         {
             (topic:Markdown.SemanticTopic) in
 
+            topic.traverse(members: false) { $0.outline { self.outline(autolink: $0) } }
+
             let overview:Markdown.Bytecode = .init
             {
-                (binary:inout Markdown.BinaryEncoder) in topic.visit(members: false)
-                {
-                    $0.outline { self.outline(autolink: $0) }
-                    $0.emit(into: &binary)
-                }
+                topic.emit(members: false, into: &$0)
             }
 
             let outlines:[SymbolGraph.Outline] = self.cache.clear()
@@ -225,19 +223,13 @@ extension StaticOutliner
         {
             (binary:inout Markdown.BinaryEncoder) in
 
-            details.visit
-            {
-                $0.outline { self.outline(autolink: $0) }
-                $0.emit(into: &binary)
-            }
+            details.traverse { $0.outline { self.outline(autolink: $0) } }
+            details.emit(into: &binary)
 
             for topic:Markdown.SemanticTopic in topics
             {
-                topic.visit(members: true)
-                {
-                    $0.outline { self.outline(autolink: $0) }
-                    $0.emit(into: &binary)
-                }
+                topic.traverse(members: true) { $0.outline { self.outline(autolink: $0) } }
+                topic.emit(members: true, into: &binary)
             }
         }
     }
