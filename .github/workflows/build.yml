@@ -37,11 +37,3 @@ jobs:
                         -w /swift/swift-unidoc \
                         ${{ matrix.image }} \
                         /bin/bash .github/pipeline
-
-            -   name: export binary tools
-                uses: actions/upload-artifact@v3
-                with:
-                    name: unidoc-tools-${{ matrix.image }}
-                    path: |
-                        .build/release/SwiftinitServer
-                        .build/release/UnidocBuild
