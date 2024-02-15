@@ -282,15 +282,19 @@ extension Toolchain
                 """
             }
 
-            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
+            let module:Symbol.Module = sources.module.id
+
+            print("Dumping symbols for module '\(module)' (\(label))")
 
             var arguments:[String] =
             [
                 "symbolgraph-extract",
 
-                "-module-name",                     "\(sources.module.id)",
+                "-module-name",                     "\(module)",
                 "-target",                          "\(self.triple)",
-                "-minimum-access-level",            "internal",
+                "-minimum-access-level",            module == "_Concurrency"
+                    ? "public" // https://github.com/apple/swift/issues/71635
+                    : "internal",
                 "-output-dir",                      "\(output.path)",
                 "-emit-extension-block-symbols",
                 "-include-spi-symbols",
@@ -325,7 +329,7 @@ extension Toolchain
                 catch SystemProcessError.exit(139, _)
                 {
                     print("""
-                    Failed to dump symbols for module '\(sources.module.id)' due to SIGSEGV \
+                    Failed to dump symbols for module '\(module)' due to SIGSEGV \
                     from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
                     compiler; see https://github.com/apple/swift/issues/68767.
                     """)
