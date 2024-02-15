@@ -8,10 +8,10 @@ extension Markdown
     /// `<h2>` element containing the section ``title``, if present. The `<h2>` element has
     /// a clickable anchor.
     public
-    class BlockSection:Markdown.BlockContainer<Markdown.BlockElement>
+    class BlockSection:BlockContainer<BlockElement>
     {
         public
-        var source:SourceReference<Markdown.Source>?
+        var source:SourceReference<Source>?
 
         var title:String?
 

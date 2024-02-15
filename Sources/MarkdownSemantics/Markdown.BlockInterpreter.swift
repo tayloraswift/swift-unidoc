@@ -155,7 +155,7 @@ extension Markdown.BlockInterpreter
         for block:Markdown.BlockElement in consume children
         {
             guard
-            case let block as Markdown.BlockCodeReference = block
+            case let block as Markdown.BlockCodeFragment = block
             else
             {
                 Markdown.SwiftFlavor.rewrite(child: block, into: &blocks)
@@ -324,7 +324,7 @@ extension Markdown.BlockInterpreter
             case let block as Markdown.BlockMetadata:
                 metadata.update(docc: block)
 
-            case let block as Markdown.BlockCodeReference:
+            case let block as Markdown.BlockCodeFragment:
                 //  We still need to do this here, as it is a top-level block and therefore
                 //  not subject to the automatic rewrite.
                 do
