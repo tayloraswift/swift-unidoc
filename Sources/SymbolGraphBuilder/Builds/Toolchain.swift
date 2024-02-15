@@ -286,20 +286,52 @@ extension Toolchain
 
             print("Dumping symbols for module '\(module)' (\(label))")
 
+            // https://github.com/apple/swift/issues/71635
+            let _minimumACL:String
+            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
+            {
+                switch module
+                {
+                case "_Concurrency":        _minimumACL = "public"
+                case "_Differentiation":    _minimumACL = "public"
+                case "_StringProcessing":   _minimumACL = "internal"
+                case "Foundation":          _minimumACL = "internal"
+                default:                    _minimumACL = "internal"
+                }
+            }
+            else
+            {
+                _minimumACL = "internal"
+            }
+
             var arguments:[String] =
             [
                 "symbolgraph-extract",
 
                 "-module-name",                     "\(module)",
                 "-target",                          "\(self.triple)",
-                "-minimum-access-level",            module == "_Concurrency"
-                    ? "public" // https://github.com/apple/swift/issues/71635
-                    : "internal",
+                "-minimum-access-level",            _minimumACL,
                 "-output-dir",                      "\(output.path)",
-                "-emit-extension-block-symbols",
+                // "-emit-extension-block-symbols",
                 "-include-spi-symbols",
                 "-skip-inherited-docs",
             ]
+
+            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
+            {
+                switch module
+                {
+                case "_StringProcessing":   break
+                case "Foundation":          break
+                default:
+                    arguments.append("-emit-extension-block-symbols")
+                }
+            }
+            else
+            {
+                arguments.append("-emit-extension-block-symbols")
+            }
+
             if  pretty
             {
                 arguments.append("-pretty-print")
