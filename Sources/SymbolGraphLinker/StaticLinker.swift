@@ -7,7 +7,6 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
-import MarkdownRendering
 import MarkdownSemantics
 import OrderedCollections
 import Signatures
@@ -34,6 +33,8 @@ struct StaticLinker:~Copyable
     private
     var symbolizer:Symbolizer
     private
+    var resources:[[String: any ResourceFile]]
+    private
     var snippets:[String: Markdown.Snippet]
     private
     var router:Router
@@ -57,6 +58,7 @@ struct StaticLinker:~Copyable
         self.nominations = nominations
 
         self.symbolizer = .init(modules: modules)
+        self.resources = []
         self.snippets = [:]
         self.router = .init()
         self.tables = .init()
@@ -250,48 +252,26 @@ extension StaticLinker
         }
     }
 }
-
-extension StaticLinker
-{
-    struct Resources
-    {
-        let namespace:Symbol.Module
-        let named:[String: any StaticResourceFile]
-
-        private
-        init(namespace:Symbol.Module, table:[String: any StaticResourceFile])
-        {
-            self.namespace = namespace
-            self.named = table
-        }
-    }
-}
-extension StaticLinker.Resources
-{
-    init(namespace:Symbol.Module, resources:[any StaticResourceFile])
-    {
-        self.init(namespace: namespace, table: resources.reduce(into: [:]) { $0[$1.name] = $1 })
-    }
-}
 extension StaticLinker
 {
     public mutating
     func attach(
-        resources:[[any StaticResourceFile]],
-        snippets:[any StaticTextFile],
-        markdown:[[any StaticTextFile]]) throws -> [[Article]]
+        resources:[[any ResourceFile]],
+        snippets:[any ResourceFile],
+        markdown:[[any ResourceFile]]) throws -> [[Article]]
     {
         //  We attach snippets first, because they can be referenced by the markdown
         //  supplements. This works even if the snippet captions contain references to articles,
         //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
         //  resolution does not take place until we link the written documentation.
+        self.resources = resources.map { $0.reduce(into: [:]) { $0[$1.name] = $1 } }
         self.snippets = try self.attach(snippets: snippets)
-        return          try self.attach(markdown: markdown, with: resources)
+        return          try self.attach(markdown: markdown)
     }
 
     private mutating
     func attach(
-        snippets:[any StaticTextFile]) throws -> [String: Markdown.Snippet]
+        snippets:[any ResourceFile]) throws -> [String: Markdown.Snippet]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
@@ -305,7 +285,7 @@ extension StaticLinker
         return try snippets.reduce(into: [:])
         {
             let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swift.parse(
-                snippet: try $1.utf8())
+                snippet: try $1.read(as: [UInt8].self))
 
             $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
                 caption: snippet.caption,
@@ -315,21 +295,18 @@ extension StaticLinker
     }
 
     private mutating
-    func attach(markdown:[[any StaticTextFile]],
-        with resources:[[any StaticResourceFile]]) throws -> [[Article]]
+    func attach(markdown:[[any ResourceFile]]) throws -> [[Article]]
     {
         let articles:[[Article]] = try markdown.indices.map
         {
-            let resources:Resources = .init(
-                namespace: self.symbolizer.graph.namespaces[$0],
-                resources: resources[$0])
+            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[$0]
 
             var scalars:(first:Int32, last:Int32)? = nil
             var articles:[Article] = []
 
-            for file:any StaticTextFile in markdown[$0]
+            for file:any ResourceFile in markdown[$0]
             {
-                if  let article:Article = try self.attach(supplement: file, with: resources)
+                if  let article:Article = try self.attach(supplement: file, in: namespace)
                 {
                     articles.append(article)
 
@@ -375,15 +352,17 @@ extension StaticLinker
     /// that resolves to a known symbol. If the parsed article lacks a symbol binding
     /// altogether, it is considered a standalone article.
     private mutating
-    func attach(supplement:any StaticTextFile, with resources:Resources) throws -> Article?
+    func attach(supplement:any ResourceFile,
+        in namespace:Symbol.Module) throws -> Article?
     {
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
         let file:Int32 = self.symbolizer.intern(supplement.path)
-        let source:Markdown.Source = .init(file: file, text: try supplement.read())
+        let source:Markdown.Source = .init(file: file,
+            text: try supplement.read(as: String.self))
 
         let name:String = supplement.name
-        let id:Symbol.Article = .article(resources.namespace, name)
+        let id:Symbol.Article = .article(namespace, name)
 
         let supplement:Supplement
         do
@@ -409,7 +388,7 @@ extension StaticLinker
             let decl:Int32?
             do
             {
-                decl = try self.resolve(decl: binding, in: resources.namespace)
+                decl = try self.resolve(decl: binding, in: namespace)
             }
             catch let diagnosis as any Diagnostic<StaticSymbolicator>
             {
@@ -446,9 +425,9 @@ extension StaticLinker
                     title: heading)
             {
                 //  Make the standalone article visible for doclink resolution.
-                self.tables.doclinks[.documentation(resources.namespace), name] = scalar
+                self.tables.doclinks[.documentation(namespace), name] = scalar
                 //  Assign the standalone article a URI.
-                self.router[resources.namespace, name][nil, default: []].append(scalar)
+                self.router[namespace, name][nil, default: []].append(scalar)
                 return .init(standalone: scalar, file: file, body: body)
             }
 
@@ -464,8 +443,8 @@ extension StaticLinker
             if  let scalar:Int32 = self.symbolizer.allocate(article: id,
                     title: .h(1, text: headline))
             {
-                self.tables.doclinks[.tutorials(resources.namespace), name] = scalar
-                self.router[resources.namespace, name][nil, default: []].append(scalar)
+                self.tables.doclinks[.tutorials(namespace), name] = scalar
+                self.router[namespace, name][nil, default: []].append(scalar)
                 return .init(standalone: scalar, file: file, body: body)
             }
 
@@ -789,30 +768,96 @@ extension StaticLinker
 }
 extension StaticLinker
 {
-    public mutating
-    func link(articles:[[Article]])
+    private mutating
+    func inline(resources:[String: any ResourceFile],
+        into sections:Markdown.SemanticSections) throws
     {
-        for (culture, articles):(Int, [Article]) in zip(articles.indices, articles)
+        var last:ResourceText? = nil
+        try sections.traverse
+        {
+            guard
+            case let reference as Markdown.BlockCodeReference = $0
+            else
+            {
+                return
+            }
+
+            guard
+            let file:String = reference.file
+            else
+            {
+                self.tables.diagnostics[reference.source] = ResourceError.fileRequired(
+                    argument: "file")
+                return
+            }
+            guard
+            let file:any ResourceFile = resources[file]
+            else
+            {
+                self.tables.diagnostics[reference.source] = ResourceError.fileNotFound(file)
+                return
+            }
+
+            let code:ResourceText = .init(utf8: try file.read(as: [UInt8].self))
+            defer
+            {
+                last = code
+            }
+
+            let base:ResourceText?
+            switch reference.base
+            {
+            case .file(let file)?:
+                if  let file:any ResourceFile = resources[file]
+                {
+                    base = .init(utf8: try file.read(as: [UInt8].self))
+                    break
+                }
+
+                self.tables.diagnostics[reference.source] = ResourceError.fileNotFound(file)
+                base = nil
+
+            case .auto?:
+                base = last
+
+            case nil:
+                base = nil
+            }
+
+            reference.inline(code: code, base: base, with: self.swiftParser)
+        }
+    }
+    public mutating
+    func link(articles:[[Article]]) throws
+    {
+        for culture:Int in articles.indices
         {
             let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
-            for article:Article in articles
+            let resources:[String: any ResourceFile] = self.resources[culture]
+
+            for article:Article in articles[culture]
             {
+                try self.inline(resources: resources, into: article.body.details)
+
                 self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
                 {
+
+                    let documentation:(SymbolGraph.Article, [SymbolGraph.Topic]) = $0.link(
+                        attached: article.body,
+                        file: article.file)
+
                     if  let standalone:Int32 = article.standalone
                     {
-                        (
-                            self.symbolizer.graph.articles.nodes[standalone].article,
-                            self.symbolizer.graph.articles.nodes[standalone].topics
-                        ) = $0.link(attached: article.body, file: article.file)
+                        {
+                            ($0.article, $0.topics) = documentation
+                        } (&self.symbolizer.graph.articles.nodes[standalone])
                     }
                     else
                     {
                         //  This is the article for the module’s landing page.
-                        (
-                            self.symbolizer.graph.cultures[culture].article,
-                            self.symbolizer.graph.cultures[culture].topics
-                        ) = $0.link(attached: article.body, file: article.file)
+                        {
+                            ($0.article, $0.topics) = documentation
+                        } (&self.symbolizer.graph.cultures[culture])
                     }
                 }
             }

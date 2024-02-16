@@ -1,3 +1,4 @@
+import MarkdownABI
 import MarkdownAST
 import Sources
 
@@ -9,7 +10,9 @@ extension Markdown
         public
         var source:SourceReference<Source>?
 
-        private(set)
+        public private(set)
+        var language:String?
+        public private(set)
         var title:String?
 
         /// The name of the snippet, **including** its file extension.
@@ -20,6 +23,9 @@ extension Markdown
         public private(set)
         var base:DiffBase?
 
+        public
+        var code:Markdown.Bytecode?
+
         init()
         {
             self.source = nil
@@ -27,7 +33,30 @@ extension Markdown
             self.file = nil
             self.base = .auto
 
+            self.code = nil
+
             super.init([])
+        }
+
+        public override
+        func emit(into binary:inout Markdown.BinaryEncoder)
+        {
+            binary[.h3] = self.title
+            if  let code:Markdown.Bytecode = self.code
+            {
+                binary[.snippet, { $0[.language] = self.language }] { $0 += code }
+            }
+            else
+            {
+                binary[.pre]
+                {
+                    $0[.dl]
+                    {
+                        $0[.dt] = "Code"
+                        $0[.dd] = "\(self.file ?? "undefined") (unavailable)"
+                    }
+                }
+            }
         }
     }
 }
@@ -38,6 +67,11 @@ extension Markdown.BlockCodeReference:Markdown.BlockDirectiveType
     {
         switch option
         {
+        case "language":
+            //  Cannot check for duplicates, because the language can be guessed from the file
+            //  extension.
+            self.language = value
+
         case "title", "name":
             guard case nil = self.title
             else
@@ -55,6 +89,14 @@ extension Markdown.BlockCodeReference:Markdown.BlockDirectiveType
             }
 
             self.file = value
+
+            //  Guess the language from the file extension
+            if  case nil = self.language,
+                let i:String.Index = value.lastIndex(of: "."),
+                    i < value.endIndex
+            {
+                self.language = String.init(value[value.index(after: i)...])
+            }
 
         case "base", "previousFile":
             switch self.base

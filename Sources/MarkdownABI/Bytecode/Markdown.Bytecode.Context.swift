@@ -4,6 +4,8 @@ extension Markdown.Bytecode
     @frozen public
     enum Context:UInt8, RawRepresentable, Equatable, Hashable, Sendable
     {
+        //  IMPORTANT! The raw values of these cases are part of the ABI!
+
         case transparent = 0x00
 
         //  HTML elements, native to Markdown.
@@ -131,7 +133,7 @@ extension Markdown.Bytecode
         case `class`
         case type
         case `typealias`
-        /// New in 8.0.
+        /// New in 0.8.0.
         case indent
 
         //  Section elements.
@@ -167,6 +169,16 @@ extension Markdown.Bytecode
 }
 extension Markdown.Bytecode.Context
 {
+    @inlinable public static
+    func diff(_ type:Markdown.DiffType) -> Self
+    {
+        switch type
+        {
+        case .delete:   .del
+        case .insert:   .ins
+        case .update:   .mark
+        }
+    }
     /// Returns a heading context, clamping the given heading `level`. If
     /// `level` is less than 1, this function returns ``h1``. If `level`
     /// is greater than 6, this function returns ``h6``.

@@ -77,8 +77,8 @@ extension SymbolGraph
             }
 
             let resources:[[SPM.ResourceFile]] = package.cultures.map(\.resources)
-            let markdown:[[SPM.SourceFile]] = package.cultures.map(\.markdown)
-            let snippets:[SPM.SourceFile] = package.snippets
+            let markdown:[[SPM.ResourceFile]] = package.cultures.map(\.markdown)
+            let snippets:[SPM.ResourceFile] = package.snippets
 
             let articles:[[StaticLinker.Article]] = try profiler.measure(\.linking)
             {
@@ -93,12 +93,12 @@ extension SymbolGraph
                 profiler.loadingSources += resource.loadingTime
                 profiler.linking -= resource.loadingTime
             }
-            for markdown:SPM.SourceFile in (consume markdown).joined()
+            for markdown:SPM.ResourceFile in (consume markdown).joined()
             {
                 profiler.loadingSources += markdown.loadingTime
                 profiler.linking -= markdown.loadingTime
             }
-            for snippet:SPM.SourceFile in (consume snippets)
+            for snippet:SPM.ResourceFile in (consume snippets)
             {
                 profiler.loadingSources += snippet.loadingTime
                 profiler.linking -= snippet.loadingTime
@@ -106,7 +106,7 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                linker.link(articles: articles)
+                try linker.link(articles: articles)
 
                 linker.link(namespaces: namespaces, at: scalarPositions)
                 linker.link(extensions: extensions, at: extensionPositions)
