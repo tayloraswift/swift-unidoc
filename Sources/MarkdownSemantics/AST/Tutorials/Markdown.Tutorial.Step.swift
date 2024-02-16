@@ -1,12 +1,14 @@
+import MarkdownAST
 import Sources
 
 extension Markdown.Tutorial
 {
     /// A `Step` is synonymous with a ``BlockItem``. It takes no arguments and can contain any
     /// ``BlockElement``. It is unclear why Apple invented this directive.
-    final
+    public final
     class Step:Markdown.BlockContainer<Markdown.BlockElement>
     {
+        public
         var source:SourceReference<Markdown.Source>?
 
         init()
@@ -15,7 +17,7 @@ extension Markdown.Tutorial
             super.init([])
         }
 
-        override
+        public override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.li]
@@ -28,7 +30,7 @@ extension Markdown.Tutorial
 extension Markdown.Tutorial.Step:Markdown.BlockDirectiveType
 {
     /// Always throws an error, as this directive does not support any options.
-    final
+    public final
     func configure(option:String, value:String) throws
     {
         throw ArgumentError.unexpected(option)

@@ -1,10 +1,12 @@
+import MarkdownAST
 import Sources
 
 extension Markdown.Tutorial
 {
-    final
+    public final
     class Steps:Markdown.BlockContainer<Step>
     {
+        public
         var source:SourceReference<Markdown.Source>?
 
         init()
@@ -13,7 +15,7 @@ extension Markdown.Tutorial
             super.init([])
         }
 
-        override
+        public override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.ol, { $0[.class] = "steps" }]
