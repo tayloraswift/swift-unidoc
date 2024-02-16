@@ -38,14 +38,17 @@ pre.snippet
         ins
         {
             background-color: $light-diff-insert;
+            text-decoration: inherit;
         }
         del
         {
             background-color: $light-diff-delete;
+            text-decoration: inherit;
         }
         mark
         {
             background-color: $light-diff-update;
+            text-decoration: inherit;
         }
     }
     code.language-swift

@@ -128,21 +128,19 @@ extension Markdown.SwiftLanguage
 
             for case (var range, let type) in diff
             {
-                guard
-                let type:Markdown.DiffType
+                if  let type:Markdown.DiffType
+                {
+                    output[.diff(type)]
+                    {
+                        output in
+                        cursor.step(through: &range)
+                        {
+                            output[highlight: $1] = utf8[$0]
+                        }
+                    }
+                }
                 else
                 {
-                    cursor.step(through: &range)
-                    {
-                        output[highlight: $1] = utf8[$0]
-                    }
-                    return
-                }
-
-                output[.diff(type)]
-                {
-                    (output:inout Markdown.BinaryEncoder) in
-
                     cursor.step(through: &range)
                     {
                         output[highlight: $1] = utf8[$0]
