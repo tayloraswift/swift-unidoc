@@ -1,3 +1,5 @@
+@import "Colors";
+
 pre
 {
     margin: 2rem 0 2rem;
@@ -30,6 +32,20 @@ pre.snippet
             right: 2rem;
             direction: rtl;
             word-wrap: normal;
+        }
+
+        //  diffs
+        ins
+        {
+            background-color: $light-diff-insert;
+        }
+        del
+        {
+            background-color: $light-diff-delete;
+        }
+        mark
+        {
+            background-color: $light-diff-update;
         }
     }
     code.language-swift
