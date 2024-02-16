@@ -9,11 +9,11 @@ extension SPM
     struct NominalSources
     {
         private(set)
-        var resources:[SPM.ResourceFile]
+        var resources:[ResourceFile]
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
         private(set)
-        var markdown:[SPM.SourceFile]
+        var markdown:[ResourceFile]
 
         private(set)
         var module:SymbolGraph.Module
@@ -119,7 +119,7 @@ extension SPM.NominalSources
             if  file.extension == "md"
             {
                 //  It’s common to list markdown files under exclude paths.
-                let supplement:SPM.SourceFile = .init(location: file.path, root: root)
+                let supplement:SPM.ResourceFile = .init(location: file.path, root: root)
                 self.markdown.append(supplement)
                 return
             }
@@ -148,7 +148,7 @@ extension SPM.NominalSources
                 switch file.extension
                 {
                 case "tutorial":
-                    let tutorial:SPM.SourceFile = .init(location: file.path, root: root)
+                    let tutorial:SPM.ResourceFile = .init(location: file.path, root: root)
                     self.markdown.append(tutorial)
 
                 default:
