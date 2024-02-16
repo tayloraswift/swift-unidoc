@@ -25,6 +25,7 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
     {
         switch directive
         {
+        case "Chapter":                 Markdown.Tutorial.Section.init()
         case "Code":                    Markdown.BlockCodeReference.init()
         case "Comment":                 nil as Markdown.BlockDirective?
         //  The @Column directive is actually row-like, because it appears **inside** a block
@@ -34,21 +35,30 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
         //  because it’s also the default in CSS.
         case "Column":                  Markdown.BlockDivision.init()
         case "ContentAndMedia":         Markdown.BlockDivision.init()
+        case "Documentation":           Markdown.Tutorials.Documentation.init()
         case "DocumentationExtension":  Markdown.BlockMetadata.DocumentationExtension.init()
+        case "Downloads":               Markdown.Tutorials.Downloads.init()
+        case "Forums":                  Markdown.Tutorials.Forums.init()
         case "Image":                   Markdown.BlockImage.init()
         case "Intro":                   Markdown.Tutorial.Intro.init()
         case "IsRoot":                  Markdown.BlockMetadata.IsRoot.init()
         case "Metadata":                Markdown.BlockMetadata.init()
+        case "Resources":               Markdown.Tutorials.ExternalResources.init()
         //  See note about @Column.
         case "Row":                     Markdown.BlockColumns.init()
+        case "SampleCode":              Markdown.Tutorials.SampleCode.init()
         case "Section":                 Markdown.Tutorial.Section.init()
         case "Snippet":                 Markdown.BlockCodeFragment.init()
         case "Stack":                   Markdown.BlockColumns.init()
         case "Steps":                   Markdown.Tutorial.Steps.init()
         case "Step":                    Markdown.Tutorial.Step.init()
         case "TechnologyRoot":          Markdown.BlockMetadata.IsRoot.init()
+        case "TutorialReference":       Markdown.BlockTopicReference.init()
         case "Tutorial":                Markdown.Tutorial.init()
+        case "Tutorials":               Markdown.Tutorials.init()
         case "Video":                   Markdown.BlockVideo.init()
+        case "Videos":                  Markdown.Tutorials.Videos.init()
+        case "Volume":                  Markdown.Tutorial.Section.init()
         case "XcodeRequirement":        Markdown.Tutorial.Requirement.init()
         case let name:                  Markdown.BlockDirective.init(name: name)
         }

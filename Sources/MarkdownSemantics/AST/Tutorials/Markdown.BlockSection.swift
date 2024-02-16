@@ -22,12 +22,17 @@ extension Markdown
             super.init([])
         }
 
+        class
+        var titleDefault:String? { nil }
+
         public final override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.section]
             {
-                $0[.h2] { $0[.id] = self.title } = self.title
+                let title:String? = self.title ?? Self.titleDefault
+
+                $0[.h2] { $0[.id] = title } = title
 
                 super.emit(into: &$0)
             }
@@ -39,11 +44,14 @@ extension Markdown.BlockSection:Markdown.BlockDirectiveType
     public final
     func configure(option:String, value:String) throws
     {
-        guard case "title" = option
-        else
+        switch option
         {
+        case "title", "name":
+            break
+        case let option:
             throw ArgumentError.unexpected(option)
         }
+
         guard case nil = self.title
         else
         {

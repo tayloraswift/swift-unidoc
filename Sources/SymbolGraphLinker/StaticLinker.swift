@@ -434,9 +434,9 @@ extension StaticLinker
             self.tables.diagnostics[heading.source] = DuplicateSymbolError.article(name: name)
             return nil
 
-        case .tutorials(_):
-            print("Skipping tutorial \(id)")
-            return nil
+        case .tutorials(let headline, let body):
+            //  For now we just treat these like individual tutorials.
+            fallthrough
 
         case .tutorial(let headline, let body):
             //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
