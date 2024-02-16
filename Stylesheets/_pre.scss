@@ -1,75 +1,36 @@
-$pre-line-height: 1.5rem;
-$pre-gutter-width: 3rem;
-
 pre
 {
     margin: 2rem 0 2rem;
-    line-height: $pre-line-height;
+    line-height: 1.5rem;
 }
 // line numbers
 pre.snippet
 {
     overflow: scroll;
     padding-bottom: 0.5rem;
-    padding-left: $pre-gutter-width;
-
-    position: relative;
+    padding-left: 3rem;
 
     code
     {
         counter-set: line 0;
         white-space: pre;
 
-        position: relative;
-
-        div.diff
+        span.newline
         {
-            //line-height: 175%;
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            left: -$pre-gutter-width;
-            //top: -40px;
-
-            width: 2rem;
-
-            span::before
-            {
-                content: 'M';
-            }
-
-            span
-            {
-                z-index: 0;
-                display: block;
-                //height: 40px;
-            }
-            span.i
-            {
-                background-color: rgba(0, 255, 0, 0.2);
-            }
+            counter-increment: line;
         }
+        span.newline:after
+        {
+            color: $light-snippet-line-number;
 
-        // span.newline
-        // {
-        //     counter-increment: line;
-        // }
-        // span.newline:after
-        // {
-        //     height: 0px;
-        //     color: $light-snippet-line-number;
-
-        //     position: relative;
-        //     display: inline-block;
-        //     content: counter(line);
-        //     width: 0;
-        //     right: 2rem;
-        //     direction: rtl;
-        //     word-wrap: normal;
-
-        //     z-index: -1;
-        // }
+            position: relative;
+            display: inline-block;
+            content: counter(line);
+            width: 0;
+            right: 2rem;
+            direction: rtl;
+            word-wrap: normal;
+        }
     }
     code.language-swift
     {
