@@ -48,13 +48,6 @@ extension StaticLinker.ResourceText
         var layer:[(range:Range<Int>, color:Markdown.DiffType?)] = []
         var start:Int = self.whole.startIndex
 
-        defer
-        {
-            if  start < self.whole.endIndex
-            {
-                layer.append((start ..< self.whole.endIndex, nil))
-            }
-        }
         for case .insert(_, let line, _) in difference.insertions
         {
             defer
@@ -69,6 +62,11 @@ extension StaticLinker.ResourceText
             {
                 layer.append((line.startIndex ..< line.endIndex, .insert))
             }
+        }
+
+        if  start < self.whole.endIndex
+        {
+            layer.append((start ..< self.whole.endIndex, nil))
         }
 
         return layer
