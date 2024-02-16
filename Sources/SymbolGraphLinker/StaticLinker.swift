@@ -779,6 +779,13 @@ extension StaticLinker
             case let reference as Markdown.BlockCodeReference = $0
             else
             {
+                /// The traversal is preorder, but it actually wouldn’t matter if the traversal
+                /// were postorder.
+                if  $0 is Markdown.Tutorial.Steps
+                {
+                    last = nil
+                }
+
                 return
             }
 
