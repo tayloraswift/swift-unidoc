@@ -8,7 +8,7 @@ extension StaticLinker
     enum Supplement
     {
         case supplement(Headline, Markdown.SemanticDocument)
-        case tutorials(Markdown.BlockDirective)
+        case tutorials(String, Markdown.SemanticDocument)
         case tutorial(String, Markdown.SemanticDocument)
     }
 }

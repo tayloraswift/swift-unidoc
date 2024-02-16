@@ -79,7 +79,10 @@ extension Markdown.Source
 
             let document:Markdown.SemanticDocument = interpreter.organize(tutorial: tutorial,
                 snippets: snippetsTable)
-            return .tutorial(headline, document)
+
+            return tutorial is Markdown.Tutorials
+                ? .tutorials(headline, document)
+                : .tutorial(headline, document)
         }
         else if
             case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1

@@ -3,7 +3,7 @@ import Sources
 
 extension Markdown
 {
-    public final
+    public
     class Tutorial:BlockElement
     {
         public
@@ -34,7 +34,7 @@ extension Markdown
             super.init()
         }
 
-        public override
+        public final override
         func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
         {
             try super.traverse(with: visit)
@@ -48,7 +48,7 @@ extension Markdown
 }
 extension Markdown.Tutorial:Markdown.BlockDirectiveType
 {
-    public
+    public final
     func configure(option:String, value:String) throws
     {
         switch option
@@ -66,7 +66,7 @@ extension Markdown.Tutorial:Markdown.BlockDirectiveType
         }
     }
 
-    public
+    public final
     func append(_ element:Markdown.BlockElement) throws
     {
         //  Apple won’t tolerate this, but we are not Apple.
