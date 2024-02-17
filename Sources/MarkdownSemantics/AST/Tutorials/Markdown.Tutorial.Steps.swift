@@ -39,7 +39,7 @@ extension Markdown.Tutorial
             try super.traverse(with: visit)
             for step:Step in self.list
             {
-                try visit(step)
+                try step.traverse(with: visit)
             }
         }
     }
