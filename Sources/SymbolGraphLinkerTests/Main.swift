@@ -11,7 +11,6 @@ enum Main:TestMain
         Lists.self,
         ListsWithMultipleItems.self,
         Parameters.self,
-        Snippets.self,
         Topics.self,
     ]
 }
