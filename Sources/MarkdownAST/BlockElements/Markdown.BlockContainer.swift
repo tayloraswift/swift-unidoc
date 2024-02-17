@@ -29,7 +29,7 @@ extension Markdown
         func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
         {
             try super.traverse(with: visit)
-            for case let element as Markdown.BlockElement in self.elements
+            for element:Markdown.BlockElement in self.elements
             {
                 try element.traverse(with: visit)
             }
