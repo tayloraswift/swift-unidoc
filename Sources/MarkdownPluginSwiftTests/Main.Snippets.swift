@@ -235,6 +235,45 @@ extension Main.Snippets:TestBattery
 
                 """)
         }
+        if  let tests:TestGroup = tests / "AnonymousNonContiguous"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                //  Here’s how to say ‘hi’ to Barbie.
+
+                //  snippet.hide
+                @main
+                enum Main
+                {
+                    // snippet.show
+                    static func main()
+                    {
+                        print("Hi Barbie!")
+
+                        //  snippet.hide
+
+                        print("Hi Ken!")
+
+                        //  snippet.show
+                    }
+                    // snippet.end
+                }
+
+                """,
+                caption:
+                """
+                Here’s how to say ‘hi’ to Barbie.
+                """,
+                slices:
+                """
+                static func main()
+                {
+                    print("Hi Barbie!")
+                }
+
+                """)
+        }
         if  let tests:TestGroup = tests / "Empty"
         {
             Self.run(tests: tests,
