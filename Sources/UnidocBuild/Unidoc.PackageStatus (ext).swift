@@ -3,13 +3,20 @@ import UnidocAPI
 
 extension Unidoc.PackageStatus
 {
-    func choose(force:Bool) -> Edition?
+    func choose(force:Main.Options.Force?) -> Edition?
     {
+        switch force
+        {
+        case .prerelease?:  return self.prerelease
+        case .release?:     return self.release
+        case nil:           break
+        }
+
         /// Only build prereleases if the latest release has already been built, and
         /// the prerelease has a higher patch version.
-        if  self.release.graphs == 0 || force
+        if  self.release.graphs == 0
         {
-            self.release
+            return self.release
         }
         else if
             let prerelease:Edition = self.prerelease,
@@ -18,11 +25,11 @@ extension Unidoc.PackageStatus
             let release:SemanticVersion = .init(refname: self.release.tag),
                 release.patch < version.patch
         {
-            prerelease
+            return prerelease
         }
         else
         {
-            nil
+            return nil
         }
     }
 }
