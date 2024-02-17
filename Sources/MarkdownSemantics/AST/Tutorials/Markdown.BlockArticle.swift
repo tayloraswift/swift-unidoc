@@ -17,7 +17,7 @@ extension Markdown
         private(set)
         var overview:Intro?
         private(set)
-        var sections:[Section]
+        var sections:[BlockElement]
 
         public override
         init()
@@ -36,7 +36,7 @@ extension Markdown
         {
             try super.traverse(with: visit)
             try self.overview?.traverse(with: visit)
-            for section:Section in self.sections
+            for section:BlockElement in self.sections
             {
                 try section.traverse(with: visit)
             }
@@ -66,7 +66,8 @@ extension Markdown
             }
             else
             {
-                throw StructuralError.child(type: type(of: element))
+                //  `@Tutorial` cannot contain these, but `@Article` can.
+                self.sections.append(element)
             }
         }
     }
