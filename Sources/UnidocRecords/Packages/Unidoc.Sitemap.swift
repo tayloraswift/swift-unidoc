@@ -3,7 +3,6 @@ import MD5
 import SymbolGraphs
 import Symbols
 import Unidoc
-import URI
 
 extension Unidoc
 {

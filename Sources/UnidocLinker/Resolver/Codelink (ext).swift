@@ -4,7 +4,7 @@ import SymbolGraphs
 
 extension Codelink
 {
-    init?(parsing unresolved:borrowing SymbolGraph.Outline.Unresolved)
+    init?(parsing unresolved:__shared /* borrowing */ SymbolGraph.Outline.Unresolved)
     {
         switch unresolved.type
         {

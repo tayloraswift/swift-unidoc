@@ -8,7 +8,7 @@ import SourceDiagnostics
 extension Markdown.Source
 {
     convenience
-    init(comment:borrowing Compiler.Doccomment, in file:Int32?)
+    init(comment:__shared /* borrowing */ Compiler.Doccomment, in file:Int32?)
     {
         if  let position:SourcePosition = comment.start,
             let file:Int32
