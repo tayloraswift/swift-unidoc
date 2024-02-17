@@ -32,6 +32,16 @@ extension Markdown.Tutorial
                 }
             }
         }
+
+        override
+        func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
+        {
+            try super.traverse(with: visit)
+            for step:Step in self.list
+            {
+                try visit(step)
+            }
+        }
     }
 }
 extension Markdown.Tutorial.Steps:Markdown.BlockDirectiveType
