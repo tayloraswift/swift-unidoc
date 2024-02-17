@@ -3,7 +3,7 @@ import Sources
 
 extension Markdown.Tutorial
 {
-    public final
+    final
     class Steps:Markdown.BlockContainer<Step>
     {
         public
@@ -15,7 +15,7 @@ extension Markdown.Tutorial
             super.init([])
         }
 
-        public override
+        override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             binary[.ol, { $0[.class] = "steps" }]
@@ -28,13 +28,11 @@ extension Markdown.Tutorial
 extension Markdown.Tutorial.Steps:Markdown.BlockDirectiveType
 {
     /// Always throws an error, as this directive does not support any options.
-    public
     func configure(option:String, value:String) throws
     {
         throw ArgumentError.unexpected(option)
     }
 
-    public
     func append(_ element:Markdown.BlockElement) throws
     {
         guard
