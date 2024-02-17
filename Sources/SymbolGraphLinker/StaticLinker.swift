@@ -780,20 +780,13 @@ extension StaticLinker
     func inline(resources:[String: any ResourceFile],
         into sections:Markdown.SemanticSections) throws
     {
-        var last:ResourceText? = nil
+        var last:[String?: ResourceText] = [:]
         try sections.traverse
         {
             guard
             case let reference as Markdown.BlockCodeReference = $0
             else
             {
-                /// The traversal is preorder, but it actually wouldn’t matter if the traversal
-                /// were postorder.
-                if  $0 is Markdown.Tutorial.Steps
-                {
-                    last = nil
-                }
-
                 return
             }
 
@@ -816,7 +809,7 @@ extension StaticLinker
             let code:ResourceText = .init(utf8: try file.read(as: [UInt8].self))
             defer
             {
-                last = code
+                last[reference.title] = code
             }
 
             let base:ResourceText?
@@ -833,7 +826,7 @@ extension StaticLinker
                 base = nil
 
             case .auto?:
-                base = last
+                base = last[reference.title]
 
             case nil:
                 base = nil
