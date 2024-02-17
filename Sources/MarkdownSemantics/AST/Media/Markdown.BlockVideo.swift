@@ -29,6 +29,8 @@ extension Markdown
         {
             binary[.figure]
             {
+                //  TODO: implement this
+                /*
                 //  $0[.video, { $0[.poster] = self.poster }]
                 $0[.video]
                 {
@@ -39,6 +41,7 @@ extension Markdown
                         // $0[.alt] = self.alt
                     }
                 }
+                */
 
                 if  self.elements.isEmpty
                 {
