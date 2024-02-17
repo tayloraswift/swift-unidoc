@@ -5,8 +5,10 @@ extension StaticLinker.Supplement
     @frozen public
     enum Headline
     {
-        case binding(Markdown.InlineAutolink)
-        case heading(Markdown.BlockHeading)
+        case supplement(Markdown.InlineAutolink)
+        case standalone(Markdown.BlockHeading)
+        case tutorials(String)
+        case tutorial(String)
     }
 }
 extension StaticLinker.Supplement.Headline
@@ -16,8 +18,10 @@ extension StaticLinker.Supplement.Headline
     {
         switch self
         {
-        case .binding(let binding): binding
-        case .heading:              nil
+        case .supplement(let binding):  binding
+        case .standalone:               nil
+        case .tutorials:                nil
+        case .tutorial:                 nil
         }
     }
 }
@@ -28,11 +32,11 @@ extension StaticLinker.Supplement.Headline
         //  Do not expect exactly one inline element, there may be HTML comments.
         if  case .autolink(let binding)? = heading.elements.first
         {
-            self = .binding(binding)
+            self = .supplement(binding)
         }
         else
         {
-            self = .heading(heading)
+            self = .standalone(heading)
         }
     }
 }
