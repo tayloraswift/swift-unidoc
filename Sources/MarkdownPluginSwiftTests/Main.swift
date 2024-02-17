@@ -8,6 +8,7 @@ enum Main:TestMain
     [
         Diffs.self,
         Signatures.self,
+        Snippets.self,
         InterestingKeywords.self,
     ]
 }
