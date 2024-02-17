@@ -29,11 +29,14 @@ extension Markdown
         {
             binary[.figure]
             {
+                //  TODO: implement this
+                /*
                 $0[.img]
                 {
                     $0[.src] = self.src
                     $0[.alt] = self.alt
                 }
+                */
 
                 if  self.elements.isEmpty
                 {
