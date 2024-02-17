@@ -25,7 +25,7 @@ extension Markdown
         }
 
         /// Visits this container, and then each of its children, if they are block elements.
-        @inlinable public final override
+        @inlinable open override
         func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
         {
             try super.traverse(with: visit)
