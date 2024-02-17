@@ -1,3 +1,5 @@
+import Sources
+
 extension Markdown
 {
     /// A `BlockCodeFragment` models a code snippet (`@Snippet`) that is embedded in the
@@ -43,7 +45,7 @@ extension Markdown
 }
 extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         switch option
         {

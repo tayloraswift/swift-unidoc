@@ -1,3 +1,5 @@
+import Sources
+
 extension Markdown.Tutorial
 {
     final
@@ -17,7 +19,7 @@ extension Markdown.Tutorial
 extension Markdown.Tutorial.Requirement:Markdown.BlockDirectiveType
 {
     public
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         switch option
         {

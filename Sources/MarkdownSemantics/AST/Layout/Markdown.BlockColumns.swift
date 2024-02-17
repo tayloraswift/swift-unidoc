@@ -36,7 +36,7 @@ extension Markdown
 }
 extension Markdown.BlockColumns:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         switch option
         {

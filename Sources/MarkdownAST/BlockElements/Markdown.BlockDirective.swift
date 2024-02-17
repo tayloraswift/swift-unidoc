@@ -52,7 +52,7 @@ extension Markdown
 extension Markdown.BlockDirective:Markdown.BlockDirectiveType
 {
     @inlinable public
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         self.arguments.append((option, value))
     }

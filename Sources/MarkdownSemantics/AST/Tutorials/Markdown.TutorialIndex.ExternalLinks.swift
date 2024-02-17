@@ -45,7 +45,7 @@ extension Markdown.TutorialIndex
 extension Markdown.TutorialIndex.ExternalLinks:Markdown.BlockDirectiveType
 {
     final
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         switch option
         {
