@@ -1,8 +1,7 @@
-extension Markdown.Tutorials.ExternalLinks
+extension Markdown.TutorialArticle
 {
     enum ArgumentError:Error
     {
-        case duplicated(String)
         case unexpected(String)
     }
 }

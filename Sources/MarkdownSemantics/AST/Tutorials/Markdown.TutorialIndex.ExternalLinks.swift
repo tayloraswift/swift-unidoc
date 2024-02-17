@@ -1,6 +1,6 @@
 import Sources
 
-extension Markdown.Tutorials
+extension Markdown.TutorialIndex
 {
     class ExternalLinks:Markdown.BlockContainer<Markdown.BlockElement>
     {
@@ -42,7 +42,7 @@ extension Markdown.Tutorials
         }
     }
 }
-extension Markdown.Tutorials.ExternalLinks:Markdown.BlockDirectiveType
+extension Markdown.TutorialIndex.ExternalLinks:Markdown.BlockDirectiveType
 {
     final
     func configure(option:String, value:String) throws

@@ -62,7 +62,7 @@ extension Markdown.Source
             diagnostics = interpreter.diagnostics
         }
 
-        if  case (let tutorial as Markdown.Tutorial)? = blocks.first
+        if  case (let tutorial as Markdown.BlockArticle)? = blocks.first
         {
             guard blocks.count == 1
             else
@@ -80,7 +80,7 @@ extension Markdown.Source
             let document:Markdown.SemanticDocument = interpreter.organize(tutorial: tutorial,
                 snippets: snippetsTable)
 
-            return tutorial is Markdown.Tutorials
+            return tutorial is Markdown.TutorialIndex
                 ? .tutorials(headline, document)
                 : .tutorial(headline, document)
         }

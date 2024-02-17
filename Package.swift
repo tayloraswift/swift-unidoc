@@ -334,6 +334,7 @@ let package:Package = .init(
         .target(name: "MarkdownSemantics", dependencies:
             [
                 .target(name: "Codelinks"),
+                .target(name: "Doclinks"),
                 .target(name: "MarkdownAST"),
                 .target(name: "Sources"),
                 .target(name: "Snippets"),

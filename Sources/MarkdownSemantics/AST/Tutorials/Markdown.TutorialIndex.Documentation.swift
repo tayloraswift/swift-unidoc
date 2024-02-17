@@ -1,4 +1,4 @@
-extension Markdown.Tutorials
+extension Markdown.TutorialIndex
 {
     final
     class Documentation:ExternalLinks
