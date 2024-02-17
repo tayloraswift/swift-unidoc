@@ -94,9 +94,9 @@ extension Compiler
 }
 extension Compiler.Decl
 {
-    init(from vertex:borrowing SymbolGraphPart.Vertex,
-        as symbol:consuming Symbol.Decl,
-        in culture:borrowing Compiler.Culture) throws
+    init(from vertex:__shared /* borrowing */ SymbolGraphPart.Vertex,
+        as symbol:/* consuming */ Symbol.Decl,
+        in culture:__shared /* borrowing */ Compiler.Culture) throws
     {
         guard case .decl(let phylum) = vertex.phylum
         else
@@ -106,7 +106,7 @@ extension Compiler.Decl
 
         let language:Phylum.Language
         if  case .swift = culture.language,
-            case .c = (copy symbol).language
+            case .c = symbol.language
         {
             language = .c
         }
