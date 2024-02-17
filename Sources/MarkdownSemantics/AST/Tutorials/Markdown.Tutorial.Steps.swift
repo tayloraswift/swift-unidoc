@@ -4,23 +4,32 @@ import Sources
 extension Markdown.Tutorial
 {
     final
-    class Steps:Markdown.BlockContainer<Step>
+    class Steps:Markdown.BlockContainer<Markdown.BlockElement>
     {
         public
         var source:SourceReference<Markdown.Source>?
 
+        private
+        var list:[Step]
+
         init()
         {
             self.source = nil
+            self.list = []
             super.init([])
         }
 
         override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
+            super.emit(into: &binary)
+
             binary[.ol, { $0[.class] = "steps" }]
             {
-                super.emit(into: &$0)
+                for step:Step in self.list
+                {
+                    step.emit(into: &$0)
+                }
             }
         }
     }
@@ -35,13 +44,13 @@ extension Markdown.Tutorial.Steps:Markdown.BlockDirectiveType
 
     func append(_ element:Markdown.BlockElement) throws
     {
-        guard
-        case let step as Markdown.Tutorial.Step = element
+        if  case let step as Markdown.Tutorial.Step = element
+        {
+            self.list.append(step)
+        }
         else
         {
-            throw StructuralError.step(type: type(of: element))
+            self.elements.append(element)
         }
-
-        self.elements.append(step)
     }
 }
