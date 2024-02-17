@@ -182,7 +182,7 @@ extension Markdown.BlockInterpreter
 extension Markdown.BlockInterpreter
 {
     public mutating
-    func organize(tutorial:Markdown.Tutorial,
+    func organize(tutorial:Markdown.BlockArticle,
         snippets:[String: Markdown.Snippet]) -> Markdown.SemanticDocument
     {
         tutorial.rewrite
@@ -191,7 +191,7 @@ extension Markdown.BlockInterpreter
         }
 
         guard
-        let intro:Markdown.Tutorial.Intro = tutorial.overview
+        let intro:Markdown.BlockArticle.Intro = tutorial.overview
         else
         {
             return .tutorial(overview: nil, sections: tutorial.sections)
@@ -209,7 +209,7 @@ extension Markdown.BlockInterpreter
             /// This is a weird tutorial, one that contains multiple introductory paragraphs.
             /// We will treat the first paragraph as the overview, and then repack the rest
             /// of the elements into a synthetic body section.
-            let section:Markdown.Tutorial.Section = .init()
+            let section:Markdown.BlockArticle.Section = .init()
                 section.elements = [_].init(intro.elements[i...])
             return .tutorial(overview: paragraph, sections: [section] + tutorial.sections)
         }

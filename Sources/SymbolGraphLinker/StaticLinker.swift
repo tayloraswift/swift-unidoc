@@ -361,8 +361,7 @@ extension StaticLinker
         let source:Markdown.Source = .init(file: file,
             text: try supplement.read(as: String.self))
 
-        let name:String = supplement.name
-        let id:Symbol.Article = .article(namespace, name)
+        var name:String = supplement.name
 
         let supplement:Supplement
         do
@@ -421,6 +420,8 @@ extension StaticLinker
             }
 
         case .supplement(.heading(let heading), let body):
+            let id:Symbol.Article = .article(namespace, name)
+
             if  let scalar:Int32 = self.symbolizer.allocate(article: id,
                     title: heading)
             {
@@ -435,16 +436,23 @@ extension StaticLinker
             return nil
 
         case .tutorials(let headline, let body):
+            name = "index"
             //  For now we just treat these like individual tutorials.
             fallthrough
 
         case .tutorial(let headline, let body):
+            let id:Symbol.Article = .tutorial(namespace, name)
             //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
             if  let scalar:Int32 = self.symbolizer.allocate(article: id,
                     title: .h(1, text: headline))
             {
+                //  If it would not collide with a standalone article, we can allow the tutorial
+                //  to be referenced as an article.
+                {
+                    $0 = $0 ?? scalar
+                } (&self.tables.doclinks[.documentation(namespace), name])
                 self.tables.doclinks[.tutorials(namespace), name] = scalar
-                self.router[namespace, name][nil, default: []].append(scalar)
+                self.router[namespace, "\(name).tutorial"][nil, default: []].append(scalar)
                 return .init(standalone: scalar, file: file, body: body)
             }
 

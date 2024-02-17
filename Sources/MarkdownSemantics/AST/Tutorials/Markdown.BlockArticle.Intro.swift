@@ -1,4 +1,4 @@
-extension Markdown.Tutorial
+extension Markdown.BlockArticle
 {
     final
     class Intro:Markdown.BlockSection

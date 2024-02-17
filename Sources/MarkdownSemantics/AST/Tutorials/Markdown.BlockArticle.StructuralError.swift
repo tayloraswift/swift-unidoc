@@ -1,4 +1,4 @@
-extension Markdown.Tutorial
+extension Markdown.BlockArticle
 {
     enum StructuralError:Error
     {

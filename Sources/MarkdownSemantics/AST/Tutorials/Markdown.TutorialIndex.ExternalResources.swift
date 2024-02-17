@@ -1,4 +1,4 @@
-extension Markdown.Tutorials
+extension Markdown.TutorialIndex
 {
     public final
     class ExternalResources:Markdown.BlockSection
