@@ -1,3 +1,5 @@
+import Sources
+
 extension Markdown.BlockMetadata
 {
     final
@@ -16,7 +18,7 @@ extension Markdown.BlockMetadata
 }
 extension Markdown.BlockMetadata.DocumentationExtension:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String) throws
+    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
     {
         switch option
         {
