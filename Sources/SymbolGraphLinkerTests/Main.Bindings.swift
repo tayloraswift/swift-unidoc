@@ -38,7 +38,7 @@ extension Main.Bindings:TestBattery
                 return
             }
 
-            tests.expect(documentation.headline?.binding?.text ==? "Taylor")
+            tests.expect(documentation.type.binding?.text ==? "Taylor")
         }
         if  let tests:TestGroup = tests / "TrailingComment"
         {
@@ -57,7 +57,7 @@ extension Main.Bindings:TestBattery
                 return
             }
 
-            tests.expect(documentation.headline?.binding?.text ==? "Taylor")
+            tests.expect(documentation.type.binding?.text ==? "Taylor")
         }
         if  let tests:TestGroup = tests / "Tutorial"
         {
@@ -78,7 +78,7 @@ extension Main.Bindings:TestBattery
                 return
             }
             guard
-            case .tutorial(let headline, _) = documentation
+            case .tutorial(let headline) = documentation.type
             else
             {
                 tests.expect(value: nil as Markdown.Tutorial?)

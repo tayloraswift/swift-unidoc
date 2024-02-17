@@ -5,23 +5,18 @@ extension StaticLinker
 {
     @_spi(testable)
     @frozen public
-    enum Supplement
+    struct Supplement
     {
-        case supplement(Headline, Markdown.SemanticDocument)
-        case tutorials(String, Markdown.SemanticDocument)
-        case tutorial(String, Markdown.SemanticDocument)
-    }
-}
-extension StaticLinker.Supplement
-{
-    @inlinable public
-    var headline:Headline?
-    {
-        switch self
+        public
+        let type:Headline
+        public
+        let body:Markdown.SemanticDocument
+
+        @inlinable public
+        init(type:Headline, body:Markdown.SemanticDocument)
         {
-        case .supplement(let headline, _):  headline
-        case .tutorials:                    nil
-        case .tutorial:                     nil
+            self.type = type
+            self.body = body
         }
     }
 }

@@ -80,9 +80,10 @@ extension Markdown.Source
             let document:Markdown.SemanticDocument = interpreter.organize(tutorial: tutorial,
                 snippets: snippetsTable)
 
-            return tutorial is Markdown.TutorialIndex
-                ? .tutorials(headline, document)
-                : .tutorial(headline, document)
+            return .init(type: tutorial is Markdown.TutorialIndex
+                    ? .tutorials(headline)
+                    : .tutorial(headline),
+                body: document)
         }
         else if
             case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
@@ -91,7 +92,7 @@ extension Markdown.Source
             let document:Markdown.SemanticDocument = interpreter.organize(blocks.dropFirst(),
                 snippets: snippetsTable)
 
-            return .supplement(headline, document)
+            return .init(type: headline, body: document)
         }
         else
         {

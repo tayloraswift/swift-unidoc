@@ -361,7 +361,12 @@ extension StaticLinker
         let source:Markdown.Source = .init(file: file,
             text: try supplement.read(as: String.self))
 
-        var name:String = supplement.name
+        let name:String = supplement.name
+
+        let title:Markdown.BlockHeading
+        let scope:DoclinkResolver.Scope
+        let route:Route
+        let id:Symbol.Article
 
         let supplement:Supplement
         do
@@ -381,9 +386,9 @@ extension StaticLinker
             fatalError("unreachable")
         }
 
-        switch supplement
+        switch supplement.type
         {
-        case .supplement(.binding(let binding), let body):
+        case .supplement(let binding):
             let decl:Int32?
             do
             {
@@ -404,7 +409,7 @@ extension StaticLinker
                 {
                     if  case nil = $0
                     {
-                        $0 = (source, body)
+                        $0 = (source, supplement.body)
                     }
                     else
                     {
@@ -416,46 +421,54 @@ extension StaticLinker
             }
             else
             {
-                return .init(standalone: nil, file: file, body: body)
+                return .init(standalone: nil, file: file, body: supplement.body)
             }
 
-        case .supplement(.heading(let heading), let body):
-            let id:Symbol.Article = .article(namespace, name)
+        case .standalone(let heading):
+            title = heading
+            scope = .documentation(namespace)
+            route = .article(namespace, name)
+            id = .article(namespace, name)
 
-            if  let scalar:Int32 = self.symbolizer.allocate(article: id,
-                    title: heading)
-            {
-                //  Make the standalone article visible for doclink resolution.
-                self.tables.doclinks[.documentation(namespace), name] = scalar
-                //  Assign the standalone article a URI.
-                self.router[namespace, name][nil, default: []].append(scalar)
-                return .init(standalone: scalar, file: file, body: body)
-            }
+        case .tutorials(let headline):
+            title = .h(1, text: headline)
+            scope = .tutorials(namespace)
+            route = .article(namespace, "index.tutorial")
+            id = .tutorial(namespace, "index")
 
-            self.tables.diagnostics[heading.source] = DuplicateSymbolError.article(name: name)
-            return nil
-
-        case .tutorials(let headline, let body):
-            name = "index"
-            //  For now we just treat these like individual tutorials.
-            fallthrough
-
-        case .tutorial(let headline, let body):
-            let id:Symbol.Article = .tutorial(namespace, name)
+        case .tutorial(let headline):
             //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
-            if  let scalar:Int32 = self.symbolizer.allocate(article: id,
-                    title: .h(1, text: headline))
+            title = .h(1, text: headline)
+            scope = .tutorials(namespace)
+            route = .article(namespace, "\(name).tutorial")
+            id = .tutorial(namespace, name)
+        }
+
+        if  let scalar:Int32 = self.symbolizer.allocate(article: id, title: title)
+        {
+             //  Make the standalone article visible for doclink resolution.
+            self.tables.doclinks[scope, name] = scalar
+
+            if  case .tutorials = scope
             {
                 //  If it would not collide with a standalone article, we can allow the tutorial
                 //  to be referenced as an article.
                 {
                     $0 = $0 ?? scalar
                 } (&self.tables.doclinks[.documentation(namespace), name])
-                self.tables.doclinks[.tutorials(namespace), name] = scalar
-                self.router[namespace, "\(name).tutorial"][nil, default: []].append(scalar)
-                return .init(standalone: scalar, file: file, body: body)
             }
 
+            self.router[route][nil, default: []].append(scalar)
+            return .init(standalone: scalar, file: file, body: supplement.body)
+        }
+        else if
+            let titleLocation:SourceReference<Markdown.Source> = title.source
+        {
+            self.tables.diagnostics[titleLocation] = DuplicateSymbolError.article(name: name)
+            return nil
+        }
+        else
+        {
             self.tables.diagnostics[source.origin] = DuplicateSymbolError.article(name: name)
             return nil
         }

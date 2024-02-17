@@ -35,16 +35,15 @@ extension StaticLinker.Router
             yield &self.paths[.decl(namespace, path, phylum), default: [:]]
         }
     }
-    subscript(namespace:Symbol.Module,
-        name:String) -> InlineDictionary<FNV24?, InlineArray<Int32>>
+    subscript(route:StaticLinker.Route) -> InlineDictionary<FNV24?, InlineArray<Int32>>
     {
         _read
         {
-            yield  self.paths[.article(namespace, name), default: [:]]
+            yield  self.paths[route, default: [:]]
         }
         _modify
         {
-            yield &self.paths[.article(namespace, name), default: [:]]
+            yield &self.paths[route, default: [:]]
         }
     }
 }
