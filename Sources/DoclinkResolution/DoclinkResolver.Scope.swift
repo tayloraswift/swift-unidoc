@@ -19,12 +19,23 @@ extension DoclinkResolver.Scope:RandomAccessCollection
     @inlinable public
     subscript(index:Int) -> String
     {
-        switch (index, self)
+        switch self
         {
-        case    (1, .documentation):                "documentation"
-        case    (1,     .tutorials):                "tutorials"
-        case    (_, .documentation(let namespace)),
-                (_,     .tutorials(let namespace)): "\(namespace)"
+        case .documentation(let namespace):
+            switch index
+            {
+            case 0: "\(namespace)"
+            case 1: "documentation"
+            case _: "\(namespace)"
+            }
+
+        case .tutorials(let namespace):
+            switch index
+            {
+            case 0: "\(namespace)"
+            case 1: "documentation"
+            case _: "tutorials"
+            }
         }
     }
 }
