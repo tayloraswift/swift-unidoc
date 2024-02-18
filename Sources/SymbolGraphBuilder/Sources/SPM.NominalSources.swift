@@ -186,6 +186,11 @@ extension SPM.NominalSources
                 case "cpp", "cxx":
                     self.module.language |= .cpp
 
+                case "txt":
+                    //  The most common culprit is a `CMakeLists.txt`.
+                    //  It’s not worth warning about these.
+                    break
+
                 default:
                     print("Unknown file type: \(file.path)")
                 }

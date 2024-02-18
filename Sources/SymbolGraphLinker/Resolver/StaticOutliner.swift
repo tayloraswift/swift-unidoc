@@ -75,6 +75,9 @@ extension StaticOutliner
                 }
                 else
                 {
+                    self.resolver.diagnostics[autolink.source] =
+                        Warning.doclinkNotStaticallyResolvable(doclink)
+
                     type = .doc
                 }
             }

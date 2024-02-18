@@ -589,7 +589,7 @@ extension StaticLinker
         }
     }
 
-    public mutating
+    private mutating
     func link(decls:[Compiler.Decl],
         at addresses:ClosedRange<Int32>,
         of culture:Symbol.Module,
