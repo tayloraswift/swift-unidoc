@@ -49,6 +49,19 @@ extension Markdown
                 }
             }
         }
+
+        override
+        func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
+        {
+            //  Not ``AnyReference/filePath(_:)``!
+            if  case .inline(let expression) = self.src,
+                case let reference? = try register(.file(expression))
+            {
+                self.src = .outlined(reference)
+            }
+
+            try super.outline(by: register)
+        }
     }
 }
 extension Markdown.BlockImage:Markdown.BlockDirectiveType
