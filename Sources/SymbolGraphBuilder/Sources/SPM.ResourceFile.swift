@@ -68,7 +68,7 @@ extension SPM.ResourceFile
         return try body()
     }
 }
-extension SPM.ResourceFile:StaticLinker.ResourceFile
+extension SPM.ResourceFile:SSGC.ResourceFile
 {
     func read(as _:[UInt8].Type = [UInt8].self) throws -> [UInt8]
     {

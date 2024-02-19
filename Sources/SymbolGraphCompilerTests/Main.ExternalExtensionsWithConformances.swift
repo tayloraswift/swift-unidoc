@@ -18,9 +18,9 @@ extension Main.ExternalExtensionsWithConformances:CompilerTestBattery
 
     static
     func run(tests:TestGroup,
-        nominations:Compiler.Nominations,
-        namespaces:[[Compiler.Namespace]],
-        extensions:[Compiler.Extension])
+        nominations:SSGC.Nominations,
+        namespaces:[[SSGC.Namespace]],
+        extensions:[SSGC.Extension])
     {
     }
 }

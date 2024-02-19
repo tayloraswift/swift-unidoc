@@ -19,7 +19,7 @@ extension Main.Bindings:TestBattery
     func run(tests:TestGroup)
     {
         let markdownParser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
-        var ignore:Diagnostics<StaticSymbolicator> = .init()
+        var ignore:Diagnostics<SSGC.Symbolicator> = .init()
 
         if  let tests:TestGroup = tests / "Basic"
         {
@@ -29,7 +29,7 @@ extension Main.Bindings:TestBattery
             I think for me, um.
             """
             guard
-            let documentation:StaticLinker.Supplement = tests.expect(value: try? markdown.parse(
+            let documentation:SSGC.Supplement = tests.expect(value: try? markdown.parse(
                 markdownParser: markdownParser,
                 snippetsTable: [:],
                 diagnostics: &ignore))
@@ -48,7 +48,7 @@ extension Main.Bindings:TestBattery
             I think for me, um.
             """
             guard
-            let documentation:StaticLinker.Supplement = tests.expect(value: try? markdown.parse(
+            let documentation:SSGC.Supplement = tests.expect(value: try? markdown.parse(
                 markdownParser: markdownParser,
                 snippetsTable: [:],
                 diagnostics: &ignore))
@@ -69,7 +69,7 @@ extension Main.Bindings:TestBattery
             }
             """
             guard
-            let documentation:StaticLinker.Supplement = tests.expect(value: try? markdown.parse(
+            let documentation:SSGC.Supplement = tests.expect(value: try? markdown.parse(
                 markdownParser: markdownParser,
                 snippetsTable: [:],
                 diagnostics: &ignore))

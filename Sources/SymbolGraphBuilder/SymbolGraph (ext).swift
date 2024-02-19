@@ -19,13 +19,13 @@ extension SymbolGraph
 
         let root:Symbol.FileBase? = (package.root?.path.string).map(Symbol.FileBase.init(_:))
 
-        let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
-        let (extensions):[Compiler.Extension]
+        let (namespaces, nominations):([[SSGC.Namespace]], SSGC.Nominations)
+        let (extensions):[SSGC.Extension]
 
         var profiler:BuildProfiler = .init()
         do
         {
-            var compiler:Compiler = .init(root: root)
+            var checker:SSGC.TypeChecker = .init(root: root)
 
             for (culture, artifacts):(SPM.NominalSources, Artifacts) in zip(
                 package.cultures,
@@ -38,15 +38,15 @@ extension SymbolGraph
 
                 try profiler.measure(\.compiling)
                 {
-                    try compiler.compile(
+                    try checker.compile(
                         language: culture.module.language ?? .swift,
                         culture: culture.module.id,
                         parts: parts)
                 }
             }
 
-            (namespaces, nominations) = compiler.declarations.load()
-            (extensions) = compiler.extensions.load()
+            (namespaces, nominations) = checker.declarations.load()
+            (extensions) = checker.extensions.load()
 
             print("""
                 Compiled documentation!
@@ -63,7 +63,7 @@ extension SymbolGraph
         }
         do
         {
-            var linker:StaticLinker = .init(nominations: nominations,
+            var linker:SSGC.Linker = .init(nominations: nominations,
                 modules: package.cultures.map(\.module),
                 plugins: [.swift])
 
@@ -80,7 +80,7 @@ extension SymbolGraph
             let markdown:[[SPM.ResourceFile]] = package.cultures.map(\.markdown)
             let snippets:[SPM.ResourceFile] = package.snippets
 
-            let articles:[[StaticLinker.Article]] = try profiler.measure(\.linking)
+            let articles:[[SSGC.Article]] = try profiler.measure(\.linking)
             {
                 //  Calling this is mandatory, even if there are no supplements!
                 try linker.attach(resources: resources,
