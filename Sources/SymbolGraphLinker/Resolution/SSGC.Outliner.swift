@@ -17,6 +17,7 @@ extension SSGC
 {
     /// A type that can outline autolinks from markdown documentation and
     /// statically-resolve some of the autolinks with caching.
+    @_spi(testable) public
     struct Outliner:~Copyable
     {
         private
@@ -41,7 +42,15 @@ extension SSGC.Outliner
 }
 extension SSGC.Outliner
 {
-    private mutating
+    @_spi(testable)
+    public mutating
+    func outlines() -> [SymbolGraph.Outline]
+    {
+        self.cache.clear()
+    }
+
+    @_spi(testable)
+    public mutating
     func outline(reference:Markdown.AnyReference) -> Int?
     {
         switch reference

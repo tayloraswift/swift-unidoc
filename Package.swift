@@ -5,8 +5,7 @@ import CompilerPluginSupport
 let package:Package = .init(
     name: "swift-unidoc",
     platforms: [.macOS(.v11)],
-    products:
-    [
+    products: [
         .library(name: "guides", targets: ["guides"]),
 
 
@@ -91,8 +90,7 @@ let package:Package = .init(
 
         .library(name: "URI", targets: ["URI"]),
     ],
-    dependencies:
-    [
+    dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
            from: "0.3.4")),
 
@@ -132,27 +130,25 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-syntax",
             exact: "509.1.1"),
     ],
-    targets:
-    [
+    targets: [
         .target(name: "guides", path: "Guides"),
 
 
         .macro(name: "UnidocMacros",
-            dependencies:
-            [
+            dependencies: [
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
             ],
             path: "Plugins/UnidocMacros"),
 
-        .target(name: "DynamicLookupMacros", dependencies:
-            [
+        .target(name: "DynamicLookupMacros",
+            dependencies: [
                 .target(name: "UnidocMacros"),
             ],
             path: "Macros/DynamicLookupMacros"),
 
-        .target(name: "IntegerEncodingMacros", dependencies:
-            [
+        .target(name: "IntegerEncodingMacros",
+            dependencies: [
                 .target(name: "UnidocMacros"),
             ],
             path: "Macros/IntegerEncodingMacros"),
@@ -160,65 +156,65 @@ let package:Package = .init(
 
         .target(name: "AvailabilityDomain"),
 
-        .target(name: "Availability", dependencies:
-            [
+        .target(name: "Availability",
+            dependencies: [
                 .target(name: "AvailabilityDomain"),
                 .target(name: "SemanticVersions"),
             ]),
 
-        .target(name: "Codelinks", dependencies:
-            [
+        .target(name: "Codelinks",
+            dependencies: [
                 .target(name: "FNV1"),
                 .target(name: "LexicalPaths"),
             ]),
 
-        .target(name: "CodelinkResolution", dependencies:
-            [
+        .target(name: "CodelinkResolution",
+            dependencies: [
                 .target(name: "Codelinks"),
                 .target(name: "Symbols"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
             ]),
 
-        .target(name: "Doclinks", dependencies:
-            [
+        .target(name: "Doclinks",
+            dependencies: [
                 .target(name: "URI"),
             ]),
 
-        .target(name: "DoclinkResolution", dependencies:
-            [
+        .target(name: "DoclinkResolution",
+            dependencies: [
                 .target(name: "Doclinks"),
                 .target(name: "Symbols"),
             ]),
 
         .target(name: "FNV1"),
 
-        .target(name: "GitHubClient", dependencies:
-            [
+        .target(name: "GitHubClient",
+            dependencies: [
                 .target(name: "GitHubAPI"),
                 .target(name: "HTTPClient"),
 
                 .product(name: "Base64", package: "swift-hash"),
             ]),
 
-        .target(name: "GitHubAPI", dependencies:
-            [
+        .target(name: "GitHubAPI",
+            dependencies: [
                 .target(name: "JSON"),
                 .target(name: "UnixTime"),
             ]),
 
-        .target(name: "HTML", dependencies:
-            [
+        .target(name: "HTML",
+            dependencies: [
                 .target(name: "DOM"),
             ]),
 
-        .target(name: "DOM", dependencies:
-            [
+        .target(name: "DOM",
+            dependencies: [
                 .target(name: "DynamicLookupMacros"),
             ]),
 
-        .target(name: "HTTP", dependencies:
-            [
+        .target(name: "HTTP",
+            dependencies: [
                 .target(name: "ISO"),
                 .target(name: "Media"),
                 .target(name: "MD5"),
@@ -226,8 +222,8 @@ let package:Package = .init(
                 .product(name: "NIOCore", package: "swift-nio"),
             ]),
 
-        .target(name: "HTTPClient", dependencies:
-            [
+        .target(name: "HTTPClient",
+            dependencies: [
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "Media"),
@@ -238,8 +234,8 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
-        .target(name: "HTTPServer", dependencies:
-            [
+        .target(name: "HTTPServer",
+            dependencies: [
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
@@ -260,36 +256,36 @@ let package:Package = .init(
 
         .target(name: "InlineDictionary"),
 
-        .target(name: "ISO", dependencies:
-            [
+        .target(name: "ISO",
+            dependencies: [
                 .target(name: "IntegerEncodingMacros"),
             ]),
 
         .target(name: "JSONAST"),
 
-        .target(name: "JSONDecoding", dependencies:
-            [
+        .target(name: "JSONDecoding",
+            dependencies: [
                 .target(name: "JSONAST"),
             ]),
 
-        .target(name: "JSONEncoding", dependencies:
-            [
+        .target(name: "JSONEncoding",
+            dependencies: [
                 .target(name: "JSONAST"),
             ]),
 
-        .target(name: "JSONLegacy", dependencies:
-            [
+        .target(name: "JSONLegacy",
+            dependencies: [
                 .target(name: "JSONDecoding"),
             ]),
 
-        .target(name: "JSONParsing", dependencies:
-            [
+        .target(name: "JSONParsing",
+            dependencies: [
                 .target(name: "JSONAST"),
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "JSON", dependencies:
-            [
+        .target(name: "JSON",
+            dependencies: [
                 .target(name: "JSONDecoding"),
                 .target(name: "JSONEncoding"),
                 .target(name: "JSONParsing"),
@@ -299,37 +295,37 @@ let package:Package = .init(
 
         .target(name: "MarkdownABI"),
 
-        .target(name: "MarkdownRendering", dependencies:
-            [
+        .target(name: "MarkdownRendering",
+            dependencies: [
                 .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
                 .target(name: "URI"),
             ]),
 
-        .target(name: "MarkdownAST", dependencies:
-            [
+        .target(name: "MarkdownAST",
+            dependencies: [
                 .target(name: "MarkdownABI"),
                 .target(name: "Sources"),
             ]),
 
-        .target(name: "MarkdownLinking", dependencies:
-            [
+        .target(name: "MarkdownLinking",
+            dependencies: [
                 .target(name: "Codelinks"),
                 .target(name: "Doclinks"),
                 .target(name: "MarkdownAST"),
                 .target(name: "SourceDiagnostics"),
             ]),
 
-        .target(name: "MarkdownParsing", dependencies:
-            [
+        .target(name: "MarkdownParsing",
+            dependencies: [
                 .target(name: "MarkdownAST"),
                 .target(name: "SourceDiagnostics"),
                 //  TODO: this links Foundation. Need to find a replacement.
                 .product(name: "Markdown", package: "swift-markdown"),
             ]),
 
-        .target(name: "MarkdownPluginSwift", dependencies:
-            [
+        .target(name: "MarkdownPluginSwift",
+            dependencies: [
                 .target(name: "MarkdownABI"),
                 .target(name: "Signatures"),
                 .target(name: "Snippets"),
@@ -339,8 +335,8 @@ let package:Package = .init(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]),
 
-        .target(name: "MarkdownSemantics", dependencies:
-            [
+        .target(name: "MarkdownSemantics",
+            dependencies: [
                 .target(name: "MarkdownLinking"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
@@ -348,36 +344,36 @@ let package:Package = .init(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
-        .target(name: "MD5", dependencies:
-            [
+        .target(name: "MD5",
+            dependencies: [
                 .target(name: "InlineBuffer"),
             ]),
 
         .target(name: "Media"),
 
-        .target(name: "Multiparts", dependencies:
-            [
+        .target(name: "Multiparts",
+            dependencies: [
                 .target(name: "Media"),
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "PackageGraphs", dependencies:
-            [
+        .target(name: "PackageGraphs",
+            dependencies: [
                 .target(name: "SymbolGraphs"),
             ]),
 
-        .target(name: "PackageMetadata", dependencies:
-            [
+        .target(name: "PackageMetadata",
+            dependencies: [
                 .target(name: "JSON"),
                 .target(name: "PackageGraphs"),
             ]),
 
-        .target(name: "S3", dependencies:
-            [
+        .target(name: "S3",
+            dependencies: [
             ]),
 
-        .target(name: "S3Client", dependencies:
-            [
+        .target(name: "S3Client",
+            dependencies: [
                 .target(name: "HTTPClient"),
                 .target(name: "Media"),
                 .target(name: "S3"),
@@ -389,42 +385,42 @@ let package:Package = .init(
 
         .target(name: "SemanticVersions"),
 
-        .target(name: "SHA1", dependencies:
-            [
+        .target(name: "SHA1",
+            dependencies: [
                 .target(name: "InlineBuffer"),
             ]),
 
-        .target(name: "Signatures", dependencies:
-            [
+        .target(name: "Signatures",
+            dependencies: [
                 .target(name: "Availability"),
                 .target(name: "MarkdownABI")
             ]),
 
-        .target(name: "Sitemaps", dependencies:
-            [
+        .target(name: "Sitemaps",
+            dependencies: [
                 .target(name: "DOM"),
             ]),
 
-        .target(name: "Snippets", dependencies:
-            [
+        .target(name: "Snippets",
+            dependencies: [
                 .target(name: "MarkdownABI"),
             ]),
 
         .target(name: "Sources"),
 
-        .target(name: "Swiftinit", dependencies:
-            [
+        .target(name: "Swiftinit",
+            dependencies: [
                 .target(name: "URI"),
             ]),
 
-        .target(name: "SwiftinitAssets", dependencies:
-            [
+        .target(name: "SwiftinitAssets",
+            dependencies: [
                 .target(name: "SwiftinitPages"),
                 .target(name: "System"),
             ]),
 
-        .target(name: "SwiftinitPages", dependencies:
-            [
+        .target(name: "SwiftinitPages",
+            dependencies: [
                 .target(name: "GitHubAPI"),
                 .target(name: "SwiftinitRender"),
                 .target(name: "UnidocAPI"),
@@ -432,8 +428,8 @@ let package:Package = .init(
                 .target(name: "UnidocQueries"),
             ]),
 
-        .target(name: "SwiftinitPlugins", dependencies:
-            [
+        .target(name: "SwiftinitPlugins",
+            dependencies: [
                 .target(name: "SwiftinitRender"),
                 .target(name: "UnidocDB"),
 
@@ -442,8 +438,8 @@ let package:Package = .init(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ]),
 
-        .target(name: "SwiftinitRender", dependencies:
-            [
+        .target(name: "SwiftinitRender",
+            dependencies: [
                 .target(name: "HTTP"),
                 .target(name: "HTML"),
                 .target(name: "MarkdownRendering"),
@@ -452,13 +448,13 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .target(name: "Symbols", dependencies:
-            [
+        .target(name: "Symbols",
+            dependencies: [
                 .target(name: "Sources"),
             ]),
 
-        .target(name: "SymbolGraphBuilder", dependencies:
-            [
+        .target(name: "SymbolGraphBuilder",
+            dependencies: [
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
@@ -466,14 +462,14 @@ let package:Package = .init(
                 .target(name: "System"),
             ]),
 
-        .target(name: "SymbolGraphCompiler", dependencies:
-            [
+        .target(name: "SymbolGraphCompiler",
+            dependencies: [
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
-        .target(name: "SymbolGraphLinker", dependencies:
-            [
+        .target(name: "SymbolGraphLinker",
+            dependencies: [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "InlineArray"),
@@ -491,8 +487,8 @@ let package:Package = .init(
                 .target(name: "URI"),
             ]),
 
-        .target(name: "SymbolGraphParts", dependencies:
-            [
+        .target(name: "SymbolGraphParts",
+            dependencies: [
                 .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
                 //  This is the point where the symbol graph compiler becomes infected with a
@@ -506,8 +502,8 @@ let package:Package = .init(
                 .target(name: "Symbols"),
             ]),
 
-        .target(name: "SymbolGraphs", dependencies:
-            [
+        .target(name: "SymbolGraphs",
+            dependencies: [
                 .target(name: "LexicalPaths"),
                 .target(name: "SemanticVersions"),
                 .target(name: "SHA1"),
@@ -521,43 +517,43 @@ let package:Package = .init(
                 "README.md",
             ]),
 
-        .target(name: "SymbolGraphTesting", dependencies:
-            [
+        .target(name: "SymbolGraphTesting",
+            dependencies: [
                 .target(name: "SymbolGraphs"),
                 .target(name: "System"),
 
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .target(name: "UA", dependencies:
-            [
+        .target(name: "UA",
+            dependencies: [
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
         .target(name: "Unidoc"),
 
-        .target(name: "UnidocAPI", dependencies:
-            [
+        .target(name: "UnidocAPI",
+            dependencies: [
                 .target(name: "JSON"),
                 .target(name: "Unidoc"),
             ]),
 
-        .target(name: "UnidocDB", dependencies:
-            [
+        .target(name: "UnidocDB",
+            dependencies: [
                 .target(name: "GitHubAPI"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnixTime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
-        .target(name: "SourceDiagnostics", dependencies:
-            [
+        .target(name: "SourceDiagnostics",
+            dependencies: [
                 .target(name: "CodelinkResolution"),
                 .target(name: "Signatures"),
             ]),
 
-        .target(name: "UnidocLinker", dependencies:
-            [
+        .target(name: "UnidocLinker",
+            dependencies: [
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownRendering"),
@@ -565,22 +561,22 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .target(name: "UnidocProfiling", dependencies:
-            [
+        .target(name: "UnidocProfiling",
+            dependencies: [
                 .target(name: "HTTPServer"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "UA"),
             ]),
 
-        .target(name: "UnidocQueries", dependencies:
-            [
+        .target(name: "UnidocQueries",
+            dependencies: [
                 .target(name: "UnidocDB"),
                 .target(name: "UnidocRecords"),
             ]),
 
-        .target(name: "UnidocRecords", dependencies:
-            [
+        .target(name: "UnidocRecords",
+            dependencies: [
                 .target(name: "FNV1"),
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
@@ -589,35 +585,35 @@ let package:Package = .init(
 
         .target(name: "UnixTime"),
 
-        .target(name: "URI", dependencies:
-            [
+        .target(name: "URI",
+            dependencies: [
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "System", dependencies:
-            [
+        .target(name: "System",
+            dependencies: [
                 .product(name: "SystemPackage", package: "swift-system"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
 
-        .executableTarget(name: "S3Export", dependencies:
-            [
+        .executableTarget(name: "S3Export",
+            dependencies: [
                 .target(name: "S3Client"),
                 .target(name: "System"),
                 .target(name: "SwiftinitAssets"),
             ]),
 
-        .executableTarget(name: "UnidocBuild", dependencies:
-            [
+        .executableTarget(name: "UnidocBuild",
+            dependencies: [
                 .target(name: "HTTPClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
             ]),
 
-        .executableTarget(name: "SwiftinitServer", dependencies:
-            [
+        .executableTarget(name: "SwiftinitServer",
+            dependencies: [
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Multiparts"),
@@ -630,117 +626,117 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "CodelinkTests", dependencies:
-            [
+        .executableTarget(name: "CodelinkTests",
+            dependencies: [
                 .target(name: "Codelinks"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "DoclinkTests", dependencies:
-            [
+        .executableTarget(name: "DoclinkTests",
+            dependencies: [
                 .target(name: "Doclinks"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "FNV1Tests", dependencies:
-            [
+        .executableTarget(name: "FNV1Tests",
+            dependencies: [
                 .target(name: "FNV1"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "IPTests", dependencies:
-            [
+        .executableTarget(name: "IPTests",
+            dependencies: [
                 .target(name: "IP"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownParsingTests", dependencies:
-            [
+        .executableTarget(name: "MarkdownParsingTests",
+            dependencies: [
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownPluginSwiftTests", dependencies:
-            [
+        .executableTarget(name: "MarkdownPluginSwiftTests",
+            dependencies: [
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "MarkdownRendering"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownRenderingTests", dependencies:
-            [
+        .executableTarget(name: "MarkdownRenderingTests",
+            dependencies: [
                 .target(name: "MarkdownRendering"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MD5Tests", dependencies:
-            [
+        .executableTarget(name: "MD5Tests",
+            dependencies: [
                 .target(name: "MD5"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "PackageMetadataTests", dependencies:
-            [
+        .executableTarget(name: "PackageMetadataTests",
+            dependencies: [
                 .target(name: "PackageMetadata"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "S3Tests", dependencies:
-            [
+        .executableTarget(name: "S3Tests",
+            dependencies: [
                 .target(name: "S3Client"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SemanticVersionTests", dependencies:
-            [
+        .executableTarget(name: "SemanticVersionTests",
+            dependencies: [
                 .target(name: "SemanticVersions"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolGraphBuilderTests", dependencies:
-            [
+        .executableTarget(name: "SymbolGraphBuilderTests",
+            dependencies: [
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
             ]),
 
-        .executableTarget(name: "SymbolGraphCompilerTests", dependencies:
-            [
+        .executableTarget(name: "SymbolGraphCompilerTests",
+            dependencies: [
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolGraphLinkerTests", dependencies:
-            [
+        .executableTarget(name: "SymbolGraphLinkerTests",
+            dependencies: [
                 .target(name: "HTML"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "SymbolGraphLinker"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolGraphPartTests", dependencies:
-            [
+        .executableTarget(name: "SymbolGraphPartTests",
+            dependencies: [
                 .target(name: "SymbolGraphParts"),
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolGraphTests", dependencies:
-            [
+        .executableTarget(name: "SymbolGraphTests",
+            dependencies: [
                 .target(name: "SymbolGraphs"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolTests", dependencies:
-            [
+        .executableTarget(name: "SymbolTests",
+            dependencies: [
                 .target(name: "Symbols"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SystemTests", dependencies:
-            [
+        .executableTarget(name: "SystemTests",
+            dependencies: [
                 .target(name: "System"),
                 .product(name: "Testing", package: "swift-grammar"),
             ],
@@ -749,20 +745,20 @@ let package:Package = .init(
                 "directories",
             ]),
 
-        .executableTarget(name: "UATests", dependencies:
-            [
+        .executableTarget(name: "UATests",
+            dependencies: [
                 .target(name: "UA"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "UnidocRecordsTests", dependencies:
-            [
+        .executableTarget(name: "UnidocRecordsTests",
+            dependencies: [
                 .target(name: "UnidocRecords"),
                 .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "UnidocDBTests", dependencies:
-            [
+        .executableTarget(name: "UnidocDBTests",
+            dependencies: [
                 .target(name: "UnidocDB"),
                 .target(name: "GitHubClient"),
                 .target(name: "SymbolGraphBuilder"),
@@ -770,16 +766,16 @@ let package:Package = .init(
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "UnidocQueryTests", dependencies:
-            [
+        .executableTarget(name: "UnidocQueryTests",
+            dependencies: [
                 .target(name: "UnidocQueries"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "URITests", dependencies:
-            [
+        .executableTarget(name: "URITests",
+            dependencies: [
                 .target(name: "URI"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
