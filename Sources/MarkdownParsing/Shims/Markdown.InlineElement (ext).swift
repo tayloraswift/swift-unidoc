@@ -35,12 +35,18 @@ extension Markdown.InlineElement:ParsableAsInlineMarkup
             self = .container(.init(from: span, in: source, as: .strong))
 
         case let image as _Image:
-            self = .image(.init(target: image.source,
-                title: image.title,
+            self = .image(.init(
                 elements: image.inlineChildren.map
                 {
                     Markdown.InlineSpan.init(from: $0, in: source)
-                }))
+                },
+                target: image.source.map
+                {
+                    .inline(.init(
+                        source: .init(from: image.range, in: copy source),
+                        string: $0))
+                },
+                title: image.title))
 
         case let link as _SymbolLink:
             // exclude the backticks from the source range

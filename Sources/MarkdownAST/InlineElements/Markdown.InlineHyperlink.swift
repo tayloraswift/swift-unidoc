@@ -38,7 +38,10 @@ extension Markdown.InlineHyperlink
                 limitedBy: target.endIndex),
             target[..<start] == "./"
         {
-            self.init(target: .safe(String.init(target[start...]), source), elements: elements)
+            self.init(target: .safe(.init(
+                    source: source,
+                    string: String.init(target[start...]))),
+                elements: elements)
         }
         else
         {
@@ -77,7 +80,7 @@ extension Markdown.InlineHyperlink:Markdown.TreeElement
             switch target
             {
             case .outlined(let reference):  $0[.href] = reference
-            case .safe(let url, _):         $0[.href] = url
+            case .safe(let link):           $0[.href] = link.string
             case .unsafe(let url):          $0[.external] = url
             }
         }
@@ -102,10 +105,10 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
     }
 
     @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
-        if  case .safe(let expression, let source)? = self.target,
-            let reference:Int = try register(.doc(link: expression, at: source))
+        if  case .safe(let link)? = self.target,
+            let reference:Int = try register(.link(link))
         {
             self.target = .outlined(reference)
         }

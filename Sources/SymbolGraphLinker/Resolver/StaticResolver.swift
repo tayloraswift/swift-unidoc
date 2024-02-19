@@ -65,8 +65,8 @@ extension StaticResolver
     }
 
     mutating
-    func outline(_ autolink:Markdown.InlineAutolink,
-        as codelink:Codelink) -> SymbolGraph.Outline?
+    func outline(_ codelink:Codelink,
+        at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
         {
@@ -85,7 +85,7 @@ extension StaticResolver
             }
 
         case .some(let overloads):
-            self.diagnostics[autolink.source] = InvalidCodelinkError<StaticSymbolicator>.init(
+            self.diagnostics[source] = InvalidCodelinkError<StaticSymbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 
@@ -93,8 +93,8 @@ extension StaticResolver
         }
     }
     mutating
-    func outline(_ autolink:Markdown.InlineAutolink,
-        as doclink:Doclink) -> SymbolGraph.Outline?
+    func outline(_ doclink:Doclink,
+        at _:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
         self.doclinks.resolve(doclink).map
         {

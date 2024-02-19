@@ -19,12 +19,12 @@ extension Markdown.Tutorial
 extension Markdown.Tutorial.Requirement:Markdown.BlockDirectiveType
 {
     public
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
         case "title":
-            self.title = value
+            self.title = value.string
 
         case "destination":
             return

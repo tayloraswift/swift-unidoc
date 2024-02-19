@@ -35,7 +35,7 @@ extension Markdown
 extension Markdown.BlockDivision:Markdown.BlockDirectiveType
 {
     public final
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -46,10 +46,10 @@ extension Markdown.BlockDivision:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
             guard
-            let size:Int = .init(value)
+            let size:Int = .init(value.string)
             else
             {
-                throw ArgumentError.size(value)
+                throw ArgumentError.size(value.string)
             }
 
             self.size = size

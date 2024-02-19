@@ -18,7 +18,7 @@ extension Markdown.BlockMetadata
 }
 extension Markdown.BlockMetadata.DocumentationExtension:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -28,7 +28,7 @@ extension Markdown.BlockMetadata.DocumentationExtension:Markdown.BlockDirectiveT
             {
                 throw ArgumentError.duplicated(option)
             }
-            switch value
+            switch value.string
             {
             case "append":      self.mergeBehavior = .append
             case "override":    self.mergeBehavior = .override

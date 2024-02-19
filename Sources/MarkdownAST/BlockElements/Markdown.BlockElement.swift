@@ -29,7 +29,7 @@ extension Markdown
         /// >   It is not a good idea to call this method directly if the goal is to outline
         /// >   all references in a document. Instead, wrap the call in ``traverse(with:)``.
         @inlinable open
-        func outline(by _:(Markdown.InlineAutolink) throws -> Int?) rethrows
+        func outline(by _:(Markdown.AnyReference) throws -> Int?) rethrows
         {
         }
 

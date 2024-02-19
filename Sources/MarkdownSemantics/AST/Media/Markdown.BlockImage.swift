@@ -13,7 +13,7 @@ extension Markdown
 
         /// Not to be confused with ``source``.
         private(set)
-        var src:String?
+        var src:Outlinable<SourceString>?
         private(set)
         var alt:String?
 
@@ -53,7 +53,7 @@ extension Markdown
 }
 extension Markdown.BlockImage:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -64,7 +64,7 @@ extension Markdown.BlockImage:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.src = value
+            self.src = .inline(value)
 
         case "alt":
             guard case nil = self.alt
@@ -73,7 +73,7 @@ extension Markdown.BlockImage:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.alt = value
+            self.alt = value.string
 
         case let option:
             throw ArgumentError.unexpected(option)

@@ -105,8 +105,9 @@ extension Markdown.Parser
                 {
                     try directive.configure(
                         option: argument.name,
-                        value: argument.value,
-                        from: .init(from: argument.valueRange, in: source))
+                        value: .init(
+                            source: .init(from: argument.valueRange, in: source),
+                            string: argument.value))
                 }
                 catch let error
                 {

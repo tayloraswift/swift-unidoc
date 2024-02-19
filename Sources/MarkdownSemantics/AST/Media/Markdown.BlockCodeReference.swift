@@ -63,8 +63,9 @@ extension Markdown
 extension Markdown.BlockCodeReference:Markdown.BlockDirectiveType
 {
     public
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
+        let value:String = value.string
         switch option
         {
         case "language":

@@ -58,7 +58,7 @@ extension Markdown
 }
 extension Markdown.BlockVideo:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -69,7 +69,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.poster = value
+            self.poster = value.string
 
         case "src", "source":
             guard case nil = self.src
@@ -78,7 +78,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.src = value
+            self.src = value.string
 
         case "alt":
             guard case nil = self.alt
@@ -87,7 +87,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.alt = value
+            self.alt = value.string
 
         case let option:
             throw ArgumentError.unexpected(option)
