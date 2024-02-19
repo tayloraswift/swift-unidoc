@@ -44,10 +44,11 @@ extension Markdown.InlineElement:ParsableAsInlineMarkup
 
         case let link as _SymbolLink:
             // exclude the backticks from the source range
-            self = .autolink(.init(
-                source: .init(trimming: 2, from: link.range, in: copy source),
-                text: link.destination ?? "",
-                code: true))
+            let link:Markdown.InlineAutolink = .code(
+                link: link.destination ?? "",
+                at: .init(trimming: 2, from: link.range, in: copy source))
+
+            self = .autolink(link)
 
         case let link as _Link:
             let elements:[Markdown.InlineSpan] = link.inlineChildren.map
@@ -61,17 +62,20 @@ extension Markdown.InlineElement:ParsableAsInlineMarkup
                     elements[0] == .text(destination)
             {
                 // exclude the angle brackets from the source range
-                self = .autolink(.init(
-                    source: .init(trimming: 1, from: link.range, in: copy source),
-                    text: String.init(destination[destination.index(after: colon)...]),
-                    code: false))
+                let link:Markdown.InlineAutolink = .doc(
+                    link: String.init(destination[destination.index(after: colon)...]),
+                    at: .init(trimming: 1, from: link.range, in: copy source))
+
+                self = .autolink(link)
             }
             else
             {
-                self = .link(.init(
+                let link:Markdown.InlineHyperlink = .init(
                     source: .init(trimming: 1, from: link.range, in: copy source),
                     target: link.destination,
-                    elements: elements))
+                    elements: elements)
+
+                self = .link(link)
             }
 
         case let unsupported:

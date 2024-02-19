@@ -60,7 +60,7 @@ extension Markdown.InlineElement:Markdown.TextElement
     {
         switch self
         {
-        case .autolink(let autolink):   text += autolink.text
+        case .autolink(let autolink):   text += autolink.text.string
         case .container(let container): text += container
         case .code(let code):           text += code
         case .html:                     return

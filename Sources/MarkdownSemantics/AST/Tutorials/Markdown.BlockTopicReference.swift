@@ -41,7 +41,8 @@ extension Markdown
                 switch target
                 {
                 case .unresolved(let autolink):
-                    $0[.li] { $0[.code] = autolink.text }
+                    $0[.li] { $0[.code] = autolink.text.string }
+
                 case .resolved(let reference):
                     $0[.li] { $0 &= reference }
                 }
@@ -70,9 +71,7 @@ extension Markdown.BlockTopicReference:Markdown.BlockDirectiveType
                 throw ArgumentError.doclink(value)
             }
 
-            self.target = .unresolved(.init(source: source,
-                text: doclink.text,
-                code: false))
+            self.target = .unresolved(.doc(link: doclink.text, at: source))
 
         case let option:
             throw ArgumentError.unexpected(option)

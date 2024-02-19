@@ -20,7 +20,7 @@ extension StaticLinker
 }
 extension StaticLinker.ResourceText
 {
-    init(utf8:[UInt8], trimmingTrailingNewlines:Bool = true)
+    init(utf8:[UInt8], trimmingTrailingNewlines:Bool)
     {
         self.init(
             lines: utf8.split(omittingEmptySubsequences: false) { $0 == 0x0A },

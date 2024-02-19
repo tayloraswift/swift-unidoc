@@ -38,7 +38,7 @@ extension Main.Bindings:TestBattery
                 return
             }
 
-            tests.expect(documentation.type.binding?.text ==? "Taylor")
+            tests.expect(documentation.type.binding?.text.string ==? "Taylor")
         }
         if  let tests:TestGroup = tests / "TrailingComment"
         {
@@ -57,7 +57,7 @@ extension Main.Bindings:TestBattery
                 return
             }
 
-            tests.expect(documentation.type.binding?.text ==? "Taylor")
+            tests.expect(documentation.type.binding?.text.string ==? "Taylor")
         }
         if  let tests:TestGroup = tests / "Tutorial"
         {

@@ -1,4 +1,5 @@
 import MarkdownAST
+import MarkdownLinking
 import SourceDiagnostics
 
 extension Markdown

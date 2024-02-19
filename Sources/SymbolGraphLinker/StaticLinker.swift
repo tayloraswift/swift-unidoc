@@ -6,6 +6,7 @@ import InlineArray
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
+import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
 import OrderedCollections
@@ -33,7 +34,7 @@ struct StaticLinker:~Copyable
     private
     var symbolizer:Symbolizer
     private
-    var resources:[[String: any ResourceFile]]
+    var resources:[[String: Resource]]
     private
     var snippets:[String: Markdown.Snippet]
     private
@@ -264,7 +265,13 @@ extension StaticLinker
         //  supplements. This works even if the snippet captions contain references to articles,
         //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
         //  resolution does not take place until we link the written documentation.
-        self.resources = resources.map { $0.reduce(into: [:]) { $0[$1.name] = $1 } }
+        self.resources = resources.map
+        {
+            $0.reduce(into: [:])
+            {
+                $0[$1.name] = .init(file: $1, id: self.symbolizer.intern($1.path))
+            }
+        }
         self.snippets = try self.attach(snippets: snippets)
         return          try self.attach(markdown: markdown)
     }
@@ -481,15 +488,15 @@ extension StaticLinker
         //  Special rule for article bindings: if the text of the codelink matches
         //  the current namespace, then the article is the primary article for
         //  that module.
-        if  binding.text == "\(namespace)"
+        if  binding.text.string == "\(namespace)"
         {
             return nil
         }
 
-        guard let codelink:Codelink = .init(binding.text)
+        guard let codelink:Codelink = .init(binding.text.string)
         else
         {
-            throw InvalidAutolinkError<StaticSymbolicator>.init(expression: binding.text)
+            throw InvalidAutolinkError<StaticSymbolicator>.init(binding.text)
         }
 
         //  A qualified codelink with a single component that matches the current
@@ -542,6 +549,9 @@ extension StaticLinker
     func link(namespaces sources:[[Compiler.Namespace]],
         at destinations:[[SymbolGraph.Namespace]])
     {
+        precondition(self.symbolizer.graph.cultures.count == destinations.count)
+        precondition(self.symbolizer.graph.cultures.count == sources.count)
+
         //  First pass: expose and link unqualified features.
         for (sources, destinations):
             ([Compiler.Namespace], [SymbolGraph.Namespace]) in zip(sources, destinations)
@@ -572,14 +582,16 @@ extension StaticLinker
         }
 
         //  Second pass: link everything else.
-        for ((sources, destinations), culture):
-            (([Compiler.Namespace], [SymbolGraph.Namespace]), Symbol.Module) in zip(zip(
-                sources,
-                destinations),
+        for (c, module):(Int, Symbol.Module) in zip(
+            self.symbolizer.graph.cultures.indices,
             self.symbolizer.graph.namespaces)
         {
+            let culture:Culture = .init(resources: self.resources[c],
+                imports: self.symbolizer.importAll,
+                module: module)
+
             for (source, destination):
-                (Compiler.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
+                (Compiler.Namespace, SymbolGraph.Namespace) in zip(sources[c], destinations[c])
             {
                 self.link(decls: source.decls,
                     at: destination.range,
@@ -592,7 +604,7 @@ extension StaticLinker
     private mutating
     func link(decls:[Compiler.Decl],
         at addresses:ClosedRange<Int32>,
-        of culture:Symbol.Module,
+        of culture:Culture,
         in namespace:Symbol.Module)
     {
         for (address, decl):(Int32, Compiler.Decl) in zip(addresses, decls)
@@ -604,7 +616,7 @@ extension StaticLinker
     private mutating
     func link(decl:Compiler.Decl,
         at address:Int32,
-        of culture:Symbol.Module,
+        of culture:Culture,
         in namespace:Symbol.Module)
     {
         let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
@@ -679,12 +691,10 @@ extension StaticLinker
 
         if  markdown != nil || renamed != nil
         {
-            let scopes:StaticResolver.Scopes = self.symbolizer.scopes(
+            (linked, rename) = self.tables.resolving(with: .init(
                 namespace: namespace,
                 culture: culture,
-                scope: decl.phylum.scope(trimming: decl.path))
-
-            (linked, rename) = self.tables.resolving(with: scopes)
+                scope: decl.phylum.scope(trimming: decl.path)))
             {
                 (outliner:inout StaticOutliner) in
                 (
@@ -767,15 +777,16 @@ extension StaticLinker
 
                 //  Need to load these before mutating the symbol graph to avoid
                 //  overlapping access
-                let importAll:[Symbol.Module] = self.symbolizer.importAll
+                let imports:[Symbol.Module] = self.symbolizer.importAll
                 ;
                 {
                     let scopes:StaticResolver.Scopes = .init(
-                        codelink: .init(
-                            namespace: self.symbolizer.graph.namespaces[$0.namespace],
-                            imports: importAll,
-                            path: [String].init(`extension`.path)),
-                        doclink: .documentation(self.symbolizer.graph.namespaces[$0.culture]))
+                        namespace: self.symbolizer.graph.namespaces[$0.namespace],
+                        culture: .init(
+                            resources: self.resources[$0.culture],
+                            imports: imports,
+                            module: self.symbolizer.graph.namespaces[$0.culture]),
+                        scope: [String].init(`extension`.path))
 
                     $0.article = self.tables.resolving(with: scopes)
                     {
@@ -790,7 +801,7 @@ extension StaticLinker
 extension StaticLinker
 {
     private mutating
-    func inline(resources:[String: any ResourceFile],
+    func inline(resources:[String: Resource],
         into sections:Markdown.SemanticSections) throws
     {
         var last:[String?: ResourceText] = [:]
@@ -812,14 +823,14 @@ extension StaticLinker
                 return
             }
             guard
-            let file:any ResourceFile = resources[file]
+            let file:Resource = resources[file]
             else
             {
                 self.tables.diagnostics[reference.source] = ResourceError.fileNotFound(file)
                 return
             }
 
-            let code:ResourceText = .init(utf8: try file.read(as: [UInt8].self))
+            let code:ResourceText = try file.text()
             defer
             {
                 last[reference.title] = code
@@ -829,9 +840,9 @@ extension StaticLinker
             switch reference.base
             {
             case .file(let file)?:
-                if  let file:any ResourceFile = resources[file]
+                if  let file:Resource = resources[file]
                 {
-                    base = .init(utf8: try file.read(as: [UInt8].self))
+                    base = try file.text()
                     break
                 }
 
@@ -851,16 +862,17 @@ extension StaticLinker
     public mutating
     func link(articles:[[Article]]) throws
     {
-        for culture:Int in articles.indices
+        for c:Int in articles.indices
         {
-            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[culture]
-            let resources:[String: any ResourceFile] = self.resources[culture]
+            let culture:Culture = .init(resources: self.resources[c],
+                imports: self.symbolizer.importAll,
+                module: self.symbolizer.graph.namespaces[c])
 
-            for article:Article in articles[culture]
+            for article:Article in articles[c]
             {
-                try self.inline(resources: resources, into: article.body.details)
+                try self.inline(resources: culture.resources, into: article.body.details)
 
-                self.tables.resolving(with: self.symbolizer.scopes(culture: namespace))
+                self.tables.resolving(with: .init(culture: culture))
                 {
 
                     let documentation:(SymbolGraph.Article, [SymbolGraph.Topic]) = $0.link(
@@ -878,7 +890,7 @@ extension StaticLinker
                         //  This is the article for the module’s landing page.
                         {
                             ($0.article, $0.topics) = documentation
-                        } (&self.symbolizer.graph.cultures[culture])
+                        } (&self.symbolizer.graph.cultures[c])
                     }
                 }
             }

@@ -49,7 +49,7 @@ extension Main.Doclinks:TestBattery
                     } (paragraph.elements.first))
             {
                 tests.expect(false: autolink.code)
-                tests.expect(autolink.text ==? expected)
+                tests.expect(autolink.text.string ==? expected)
             }
         }
     }

@@ -5,6 +5,7 @@ import Doclinks
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
+import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
 import SourceDiagnostics
@@ -45,7 +46,7 @@ extension StaticOutliner
             var type:SymbolGraph.Outline.Unresolved.LinkType? = nil
             if  autolink.code
             {
-                if  let codelink:Codelink = .init(autolink.text)
+                if  let codelink:Codelink = .init(autolink.text.string)
                 {
                     if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
                             as: codelink)
@@ -58,7 +59,7 @@ extension StaticOutliner
                     }
                 }
             }
-            else if let doclink:Doclink = .init(doc: autolink.text[...])
+            else if let doclink:Doclink = .init(doc: autolink.text.string[...])
             {
                 if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
                         as: doclink)
@@ -85,14 +86,14 @@ extension StaticOutliner
             if  let type:SymbolGraph.Outline.Unresolved.LinkType
             {
                 return .unresolved(.init(
-                    link: autolink.text,
+                    link: autolink.text.string,
                     type: type,
                     location: autolink.source.start))
             }
             else
             {
                 self.resolver.diagnostics[autolink.source] =
-                    InvalidAutolinkError<StaticSymbolicator>.init(expression: autolink.text)
+                    InvalidAutolinkError<StaticSymbolicator>.init(autolink.text)
 
                 return nil
             }

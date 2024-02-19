@@ -1,6 +1,7 @@
 import Codelinks
 import CodelinkResolution
 import LexicalPaths
+import MarkdownLinking
 import SourceDiagnostics
 
 extension StaticLinker

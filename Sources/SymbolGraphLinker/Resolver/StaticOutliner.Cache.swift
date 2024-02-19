@@ -1,11 +1,14 @@
+import MarkdownAST
 import SymbolGraphs
 
 extension StaticOutliner
 {
+    /// This is keyed by ``Markdown.SourceString`` and not just ``String`` because link
+    /// resolution varies depending on its location.
     struct Cache
     {
         private
-        var references:[String: Int]
+        var references:[Markdown.SourceString: Int]
         private
         var outlines:[SymbolGraph.Outline]
 
@@ -28,7 +31,7 @@ extension StaticOutliner.Cache
     }
 
     mutating
-    func callAsFunction(_ key:String,
+    func callAsFunction(_ key:Markdown.SourceString,
         with populate:() throws -> SymbolGraph.Outline?) rethrows -> Int?
     {
         try
