@@ -19,14 +19,14 @@ extension Main.DefaultImplementations:CompilerTestBattery
 
     static
     func run(tests:TestGroup,
-        nominations:Compiler.Nominations,
-        namespaces:[[Compiler.Namespace]],
-        extensions:[Compiler.Extension])
+        nominations:SSGC.Nominations,
+        namespaces:[[SSGC.Namespace]],
+        extensions:[SSGC.Extension])
     {
         var features:[Symbol.Decl: [Symbol.Decl]] = [:]
-        for namespace:Compiler.Namespace in namespaces.joined()
+        for namespace:SSGC.Namespace in namespaces.joined()
         {
-            for decl:Compiler.Decl in namespace.decls
+            for decl:SSGC.Decl in namespace.decls
             {
                 features[decl.id, default: []] += decl.features
             }

@@ -18,7 +18,7 @@ extension MarkdownTestBattery
     func run(tests:TestGroup, markdown:Markdown.Source, expected:String, topics:[Int] = [])
     {
         let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
-        var ignore:Diagnostics<StaticSymbolicator> = .init()
+        var ignore:Diagnostics<SSGC.Symbolicator> = .init()
 
         tests.do
         {
