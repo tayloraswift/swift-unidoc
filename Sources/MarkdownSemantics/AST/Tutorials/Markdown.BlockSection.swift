@@ -42,7 +42,7 @@ extension Markdown
 extension Markdown.BlockSection:Markdown.BlockDirectiveType
 {
     public final
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -58,6 +58,6 @@ extension Markdown.BlockSection:Markdown.BlockDirectiveType
             throw ArgumentError.duplicated(option)
         }
 
-        self.title = value
+        self.title = value.string
     }
 }

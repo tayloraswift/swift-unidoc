@@ -39,17 +39,28 @@ extension StaticOutliner
 extension StaticOutliner
 {
     private mutating
-    func outline(autolink:Markdown.InlineAutolink) -> Int?
+    func outline(reference:Markdown.AnyReference) -> Int?
     {
-        self.cache(autolink.text)
+        switch reference
+        {
+        case .code(let link):       self.outline(link: link, code: true)
+        case .link(let link):       self.outline(link: link, code: false)
+        case .file(let link):       nil
+        case .filePath(let text):   nil
+        }
+    }
+    private mutating
+    func outline(link:Markdown.SourceString, code:Bool) -> Int?
+    {
+        self.cache(link)
         {
             var type:SymbolGraph.Outline.Unresolved.LinkType? = nil
-            if  autolink.code
+            if  code
             {
-                if  let codelink:Codelink = .init(autolink.text.string)
+                if  let codelink:Codelink = .init(link.string)
                 {
-                    if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
-                            as: codelink)
+                    if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
+                            at: link.source)
                     {
                         return outline
                     }
@@ -59,24 +70,24 @@ extension StaticOutliner
                     }
                 }
             }
-            else if let doclink:Doclink = .init(doc: autolink.text.string[...])
+            else if let doclink:Doclink = .init(doc: link.string[...])
             {
-                if  let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
-                        as: doclink)
+                if  let outline:SymbolGraph.Outline = self.resolver.outline(doclink,
+                        at: link.source)
                 {
                     return outline
                 }
                 //  Resolution might still succeed by reinterpreting the doclink as a codelink.
                 else if !doclink.absolute,
                     let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
-                    let outline:SymbolGraph.Outline = self.resolver.outline(autolink,
-                        as: codelink)
+                    let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
+                        at: link.source)
                 {
                     return outline
                 }
                 else
                 {
-                    self.resolver.diagnostics[autolink.source] =
+                    self.resolver.diagnostics[link.source] =
                         Warning.doclinkNotStaticallyResolvable(doclink)
 
                     type = .doc
@@ -86,14 +97,14 @@ extension StaticOutliner
             if  let type:SymbolGraph.Outline.Unresolved.LinkType
             {
                 return .unresolved(.init(
-                    link: autolink.text.string,
+                    link: link.string,
                     type: type,
-                    location: autolink.source.start))
+                    location: link.source.start))
             }
             else
             {
-                self.resolver.diagnostics[autolink.source] =
-                    InvalidAutolinkError<StaticSymbolicator>.init(autolink.text)
+                self.resolver.diagnostics[link.source] =
+                    InvalidAutolinkError<StaticSymbolicator>.init(link)
 
                 return nil
             }
@@ -161,7 +172,7 @@ extension StaticOutliner
         {
             for block:Markdown.BlockElement in blocks
             {
-                block.traverse { $0.outline { self.outline(autolink: $0) } }
+                block.traverse { $0.outline { self.outline(reference: $0) } }
                 block.emit(into: &$0)
             }
         }
@@ -183,7 +194,7 @@ extension StaticOutliner
         {
             (topic:Markdown.SemanticTopic) in
 
-            topic.traverse(members: false) { $0.outline { self.outline(autolink: $0) } }
+            topic.traverse(members: false) { $0.outline { self.outline(reference: $0) } }
 
             let overview:Markdown.Bytecode = .init
             {
@@ -192,9 +203,9 @@ extension StaticOutliner
 
             let outlines:[SymbolGraph.Outline] = self.cache.clear()
 
-            for member:Markdown.InlineAutolink in topic.members
+            for link:Markdown.InlineAutolink in topic.members
             {
-                let _:Int? = self.outline(autolink: member)
+                let _:Int? = self.outline(link: link.text, code: link.code)
             }
 
             let members:[SymbolGraph.Outline] = self.cache.clear()
@@ -212,7 +223,7 @@ extension StaticOutliner
         {
             (binary:inout Markdown.BinaryEncoder) in overview.map
             {
-                $0.outline { self.outline(autolink: $0) }
+                $0.outline { self.outline(reference: $0) }
                 $0.emit(into: &binary)
             }
         }
@@ -227,12 +238,12 @@ extension StaticOutliner
         {
             (binary:inout Markdown.BinaryEncoder) in
 
-            details.traverse { $0.outline { self.outline(autolink: $0) } }
+            details.traverse { $0.outline { self.outline(reference: $0) } }
             details.emit(into: &binary)
 
             for topic:Markdown.SemanticTopic in topics
             {
-                topic.traverse(members: true) { $0.outline { self.outline(autolink: $0) } }
+                topic.traverse(members: true) { $0.outline { self.outline(reference: $0) } }
                 topic.emit(members: true, into: &binary)
             }
         }

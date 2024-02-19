@@ -27,7 +27,7 @@ extension Markdown
         /// Calls the superclass method, and then calls ``Markdown.TreeElement/outline(by:)``
         /// on each of the inline elements in this container.
         @inlinable public final override
-        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+        func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
         {
             try super.outline(by: register)
             for index:Int in self.elements.indices

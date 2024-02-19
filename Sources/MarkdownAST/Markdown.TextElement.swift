@@ -19,7 +19,7 @@ protocol _MarkdownTextElement:Markdown.TreeElement
     /// Replaces symbolic codelinks in this element’s inline content
     /// with references.
     mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
 }
 extension Markdown.TextElement
 {
@@ -33,7 +33,7 @@ extension Markdown.TextElement
 
     /// Does nothing.
     @inlinable public mutating
-    func outline(by _:(Markdown.InlineAutolink) throws -> Int?)
+    func outline(by _:(Markdown.AnyReference) throws -> Int?)
     {
     }
 }

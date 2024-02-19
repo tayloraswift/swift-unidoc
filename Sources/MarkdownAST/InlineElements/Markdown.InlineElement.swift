@@ -72,28 +72,44 @@ extension Markdown.InlineElement:Markdown.TextElement
     }
 
     @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
-        switch self
+        switch /* consume */ self
         {
         case .autolink(let autolink):
-            if  let reference:Int = try register(autolink)
+            guard
+            let reference:Int = try register(.init(autolink))
+            else
             {
-                self = .reference(reference)
+                self = .autolink(autolink)
+                return
             }
 
+            self = .reference(reference)
+
         case .container(var container):
-            self = .text("")
             defer { self = .container(container) }
             try container.outline(by: register)
 
+        case .code(let code):
+            self = .code(code)
+
+        case .html(let html):
+            self = .html(html)
+
+        case .image(var image):
+            defer { self = .image(image) }
+            try image.outline(by: register)
+
         case .link(var link):
-            self = .text("")
             defer { self = .link(link) }
             try link.outline(by: register)
 
-        case .code, .html, .image, .reference, .text:
-            return
+        case .reference(let reference):
+            self = .reference(reference)
+
+        case .text(let text):
+            self = .text(text)
         }
     }
 }

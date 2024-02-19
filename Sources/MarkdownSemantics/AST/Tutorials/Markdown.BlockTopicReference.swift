@@ -7,7 +7,7 @@ extension Markdown
     final
     class BlockTopicReference:Markdown.BlockLeaf
     {
-        var target:Target?
+        var target:Outlinable<SourceString>?
 
         override
         init()
@@ -17,12 +17,12 @@ extension Markdown
         }
 
         override
-        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
+        func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
         {
-            if  case let .unresolved(autolink) = self.target,
-                case let reference? = try register(autolink)
+            if  case .inline(let expression) = self.target,
+                case let reference? = try register(.link(expression))
             {
-                self.target = .resolved(reference)
+                self.target = .outlined(reference)
             }
         }
 
@@ -30,7 +30,7 @@ extension Markdown
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             guard
-            let target:Target = self.target
+            let target:Outlinable<SourceString> = self.target
             else
             {
                 return
@@ -40,10 +40,10 @@ extension Markdown
             {
                 switch target
                 {
-                case .unresolved(let autolink):
-                    $0[.li] { $0[.code] = autolink.text.string }
+                case .inline(let link):
+                    $0[.li] { $0[.code] = link.string }
 
-                case .resolved(let reference):
+                case .outlined(let reference):
                     $0[.li] { $0 &= reference }
                 }
             }
@@ -52,9 +52,7 @@ extension Markdown
 }
 extension Markdown.BlockTopicReference:Markdown.BlockDirectiveType
 {
-    func configure(option:String,
-        value:String,
-        from source:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -65,13 +63,13 @@ extension Markdown.BlockTopicReference:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicate(option)
             }
             guard
-            let doclink:Doclink = .init(value)
+            let doclink:Doclink = .init(value.string)
             else
             {
-                throw ArgumentError.doclink(value)
+                throw ArgumentError.doclink(value.string)
             }
 
-            self.target = .unresolved(.doc(link: doclink.text, at: source))
+            self.target = .inline(.init(source: value.source, string: doclink.text))
 
         case let option:
             throw ArgumentError.unexpected(option)

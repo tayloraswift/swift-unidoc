@@ -7,7 +7,7 @@ extension Markdown.InlineHyperlink
     {
         case outlined   (Int)
 
-        case safe       (String, SourceReference<Markdown.Source>)
+        case safe       (Markdown.SourceString)
         case unsafe     (String)
     }
 }

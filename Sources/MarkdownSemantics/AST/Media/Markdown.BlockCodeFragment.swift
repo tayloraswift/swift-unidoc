@@ -45,8 +45,9 @@ extension Markdown
 }
 extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
+        let value:String = value.string
         switch option
         {
         case "slice":

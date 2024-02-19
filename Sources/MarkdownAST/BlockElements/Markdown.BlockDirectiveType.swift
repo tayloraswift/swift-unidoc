@@ -10,7 +10,7 @@ extension Markdown
 public
 protocol _MarkdownBlockDirectiveType:Markdown.BlockElement
 {
-    func configure(option:String, value:String, from:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     func append(_ element:Markdown.BlockElement) throws
 
     /// Associates a source location with this block. For ideal formatting, this source range

@@ -36,7 +36,7 @@ extension Markdown
 }
 extension Markdown.BlockColumns:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
@@ -47,10 +47,10 @@ extension Markdown.BlockColumns:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
             guard
-            let count:Int = .init(value)
+            let count:Int = .init(value.string)
             else
             {
-                throw ArgumentError.count(value)
+                throw ArgumentError.count(value.string)
             }
 
             self.count = count

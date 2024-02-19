@@ -30,7 +30,7 @@ extension Markdown.Tutorial.Step:Markdown.BlockDirectiveType
 {
     /// Always throws an error, as this directive does not support any options.
     final
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         throw ArgumentError.unexpected(option)
     }

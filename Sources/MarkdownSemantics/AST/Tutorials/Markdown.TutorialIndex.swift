@@ -13,7 +13,7 @@ extension Markdown
 extension Markdown.TutorialIndex:Markdown.BlockDirectiveType
 {
     public
-    func configure(option:String, value:String, from _:SourceReference<Markdown.Source>) throws
+    func configure(option:String, value:Markdown.SourceString) throws
     {
         switch option
         {
