@@ -29,14 +29,14 @@ extension Markdown
         {
             binary[.figure]
             {
-                //  TODO: implement this
-                /*
-                $0[.img]
+                if  case .outlined(let reference) = self.src
                 {
-                    $0[.src] = self.src
-                    $0[.alt] = self.alt
+                    $0[.img]
+                    {
+                        $0[.src] = reference
+                        $0[.alt] = self.alt
+                    }
                 }
-                */
 
                 if  self.elements.isEmpty
                 {

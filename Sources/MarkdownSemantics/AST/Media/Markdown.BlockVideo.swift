@@ -8,10 +8,10 @@ extension Markdown
         var source:SourceReference<Markdown.Source>?
 
         private(set)
-        var poster:String?
+        var poster:Outlinable<SourceString>?
         /// Not to be confused with ``source``.
         private(set)
-        var src:String?
+        var src:Outlinable<SourceString>?
         private(set)
         var alt:String?
 
@@ -29,19 +29,21 @@ extension Markdown
         {
             binary[.figure]
             {
-                //  TODO: implement this
-                /*
-                //  $0[.video, { $0[.poster] = self.poster }]
+                if  case (nil, nil) = (self.poster, self.src)
+                {
+                    return
+                }
+
                 $0[.video]
                 {
+                    //  if  case .outlined(let reference) = self.poster
+                    //  {
+                    //      $0[.poster] = reference
+                    //  }
+
                     // `<video>` does not support alt text.
-                    $0[.source]
-                    {
-                        $0[.src] = self.src
-                        // $0[.alt] = self.alt
-                    }
+                    $0[.source] { $0[.src] = self.src }
                 }
-                */
 
                 if  self.elements.isEmpty
                 {
@@ -53,6 +55,24 @@ extension Markdown
                     super.emit(into: &$0)
                 }
             }
+        }
+
+        override
+        func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
+        {
+            if  case .inline(let expression) = self.poster,
+                case let reference? = try register(.file(expression))
+            {
+                self.poster = .outlined(reference)
+            }
+
+            if  case .inline(let expression) = self.src,
+                case let reference? = try register(.file(expression))
+            {
+                self.src = .outlined(reference)
+            }
+
+            try super.outline(by: register)
         }
     }
 }
@@ -69,7 +89,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.poster = value.string
+            self.poster = .inline(value)
 
         case "src", "source":
             guard case nil = self.src
@@ -78,7 +98,7 @@ extension Markdown.BlockVideo:Markdown.BlockDirectiveType
                 throw ArgumentError.duplicated(option)
             }
 
-            self.src = value.string
+            self.src = .inline(value)
 
         case "alt":
             guard case nil = self.alt
