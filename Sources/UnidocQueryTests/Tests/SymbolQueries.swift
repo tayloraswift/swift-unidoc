@@ -160,9 +160,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             ]
             {
                 guard
-                    let tests:TestGroup = tests / name,
-                    let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = tests.expect(
-                        value: query)
+                let tests:TestGroup = tests / name,
+                let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = tests.expect(
+                    value: query)
                 else
                 {
                     continue
@@ -241,9 +241,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree),
                     let overview:Unidoc.Passage = tests.expect(
-                        value: vertex.overview),
-                    tests.expect(overview.outlines.count ==? 5)
+                        value: vertex.overview)
                 {
+                    //  This checks that we cached the two instances of `Barbie.ID`
+                    tests.expect(overview.outlines.count ==? 5)
                     tests.expect(tree.rows ..?
                         [
                             .init(

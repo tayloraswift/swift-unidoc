@@ -52,7 +52,7 @@ extension StaticOutliner
     private mutating
     func outline(link:Markdown.SourceString, code:Bool) -> Int?
     {
-        self.cache(link)
+        self.cache(link.string)
         {
             var type:SymbolGraph.Outline.Unresolved.LinkType? = nil
             if  code
