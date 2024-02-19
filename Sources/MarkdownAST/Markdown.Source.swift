@@ -30,6 +30,22 @@ extension Markdown
         }
     }
 }
+extension Markdown.Source:Equatable
+{
+    /// Two ``Markdown.Source`` instances are equal if and only they are the same instance,
+    /// regardless of their contents.
+    @inlinable public static
+    func == (s:Markdown.Source, t:Markdown.Source) -> Bool { s === t }
+}
+extension Markdown.Source:Hashable
+{
+    /// The hash value of a ``Markdown.Source`` is the hash value of its identity.
+    @inlinable public
+    func hash(into hasher:inout Hasher)
+    {
+        ObjectIdentifier.init(self).hash(into: &hasher)
+    }
+}
 extension Markdown.Source
 {
     @inlinable public convenience

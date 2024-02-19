@@ -4,6 +4,7 @@ import DoclinkResolution
 import Doclinks
 import LexicalPaths
 import MarkdownAST
+import MarkdownLinking
 import Sources
 import SymbolGraphs
 import SourceDiagnostics

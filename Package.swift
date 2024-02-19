@@ -312,6 +312,14 @@ let package:Package = .init(
                 .target(name: "Sources"),
             ]),
 
+        .target(name: "MarkdownLinking", dependencies:
+            [
+                .target(name: "Codelinks"),
+                .target(name: "Doclinks"),
+                .target(name: "MarkdownAST"),
+                .target(name: "SourceDiagnostics"),
+            ]),
+
         .target(name: "MarkdownParsing", dependencies:
             [
                 .target(name: "MarkdownAST"),
@@ -333,10 +341,7 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics", dependencies:
             [
-                .target(name: "Codelinks"),
-                .target(name: "Doclinks"),
-                .target(name: "MarkdownAST"),
-                .target(name: "Sources"),
+                .target(name: "MarkdownLinking"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
 
@@ -556,7 +561,7 @@ let package:Package = .init(
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "SourceDiagnostics"),
+                .target(name: "MarkdownLinking"),
                 .target(name: "UnidocRecords"),
             ]),
 

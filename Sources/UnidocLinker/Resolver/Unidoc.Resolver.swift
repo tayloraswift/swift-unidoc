@@ -1,10 +1,11 @@
 import CodelinkResolution
 import Codelinks
 import Doclinks
+import MarkdownLinking
+import SourceDiagnostics
 import Sources
 import SymbolGraphs
 import Unidoc
-import SourceDiagnostics
 import UnidocRecords
 
 extension Unidoc
@@ -208,7 +209,7 @@ extension Unidoc.Resolver
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
             self.diagnostics[location] = InvalidAutolinkError<Unidoc.Symbolicator>.init(
-                expression: unresolved.link)
+                string: unresolved.link)
 
             return nil
         }

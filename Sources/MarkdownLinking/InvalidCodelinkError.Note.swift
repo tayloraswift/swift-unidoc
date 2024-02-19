@@ -1,5 +1,6 @@
 import CodelinkResolution
 import Codelinks
+import SourceDiagnostics
 
 extension InvalidCodelinkError
 {

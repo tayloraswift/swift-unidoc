@@ -105,9 +105,7 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
     func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
     {
         if  case .safe(let expression, let source)? = self.target,
-            let reference:Int = try register(.init(source: source,
-                text: expression,
-                code: false))
+            let reference:Int = try register(.doc(link: expression, at: source))
         {
             self.target = .outlined(reference)
         }

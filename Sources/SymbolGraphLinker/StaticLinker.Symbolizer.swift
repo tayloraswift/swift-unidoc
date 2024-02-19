@@ -9,8 +9,8 @@ extension StaticLinker
 {
     struct Symbolizer
     {
-        /// Interned module names. This only contains modules that
-        /// are not included in the symbol graph being linked.
+        /// Interned module names. This only contains modules that are not included in the
+        /// symbol graph being linked.
         private
         var modules:[Symbol.Module: Int]
 
@@ -41,24 +41,11 @@ extension StaticLinker.Symbolizer
     {
         .init(self.graph.namespaces[self.graph.cultures.indices])
     }
-
-    func scopes(
-        namespace:Symbol.Module? = nil,
-        culture:Symbol.Module,
-        scope:[String] = []) -> StaticResolver.Scopes
-    {
-        .init(
-            codelink: .init(namespace: namespace ?? culture,
-                imports: self.importAll,
-                path: scope),
-            doclink: .documentation(culture))
-    }
 }
 extension StaticLinker.Symbolizer
 {
-    /// Indexes the given article and appends it to the symbol graph, if an article
-    /// with the same mangled name has not already been indexed. (This function checks
-    /// for duplicates.)
+    /// Indexes the given article and appends it to the symbol graph, if an article with the
+    /// same mangled name has not already been indexed. (This function checks for duplicates.)
     mutating
     func allocate(article:Symbol.Article, title:consuming Markdown.BlockHeading) -> Int32?
     {
@@ -87,9 +74,9 @@ extension StaticLinker.Symbolizer
 
     /// Indexes the given declaration and appends it to the symbol graph.
     ///
-    /// This function only populates basic information (flags and path)
-    /// about the declaration, the rest should only be added after completing
-    /// a full pass over all the declarations and extensions.
+    /// This function only populates basic information (flags and path) about the declaration,
+    /// the rest should only be added after completing a full pass over all the declarations and
+    /// extensions.
     ///
     /// This function doesn’t check for duplicates.
     mutating
@@ -106,9 +93,9 @@ extension StaticLinker.Symbolizer
         return scalar
     }
 
-    /// Indexes the declaration extended by the given extension and appends
-    /// the (empty) declaration to the symbol graph, if it has not already
-    /// been indexed. (This function checks for duplicates.)
+    /// Indexes the declaration extended by the given extension and appends the (empty)
+    /// declaration to the symbol graph, if it has not already been indexed. (This function
+    /// checks for duplicates.)
     mutating
     func allocate(extension:Compiler.Extension) -> Int32
     {
@@ -132,9 +119,8 @@ extension StaticLinker.Symbolizer
 }
 extension StaticLinker.Symbolizer
 {
-    /// Returns the scalar for the given declaration symbol,
-    /// registering it in the symbol table if needed. You should never
-    /// call ``allocate(decl:)`` or ``allocate(extension:)`` after
+    /// Returns the scalar for the given declaration symbol, registering it in the symbol table
+    /// if needed. You should never call ``allocate(decl:)`` or ``allocate(extension:)`` after
     /// calling this function.
     mutating
     func intern(_ id:Symbol.Decl) -> Int32

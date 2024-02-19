@@ -1,7 +1,7 @@
 import CodelinkResolution
 import Codelinks
+import SourceDiagnostics
 
-/// TODO: this doesn’t belong in this module.
 @frozen public
 struct InvalidCodelinkError<Symbolicator>:Error, Equatable
     where   Symbolicator:DiagnosticSymbolicator,

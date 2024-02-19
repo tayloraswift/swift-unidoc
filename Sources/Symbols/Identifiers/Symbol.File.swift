@@ -31,6 +31,15 @@ extension Symbol.File
             self.path[...]
         }
     }
+    /// Returns the file extension, if any.
+    @inlinable public
+    var type:Substring?
+    {
+        self.last.lastIndex(of: ".").map
+        {
+            self.path[self.path.index(after: $0)...]
+        }
+    }
 }
 extension Symbol.File:CustomStringConvertible
 {
