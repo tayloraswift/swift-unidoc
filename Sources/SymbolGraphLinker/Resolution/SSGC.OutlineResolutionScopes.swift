@@ -4,12 +4,12 @@ import Symbols
 
 extension SSGC
 {
+    @_spi(testable) public
     struct OutlineResolutionScopes
     {
         let resources:[String: SSGC.Resource]
         let codelink:CodelinkResolver<Int32>.Scope
-        //  Optional, in case we ever want to support some kind of neutrally-scoped linker mode.
-        let doclink:DoclinkResolver.Scope?
+        let doclink:DoclinkResolver.Scope
 
         private
         init(resources:[String: SSGC.Resource],
@@ -35,6 +35,7 @@ extension SSGC.OutlineResolutionScopes
     ///         resolutions, and also codelink resolutions if `namespace` is nil.
     ///     -   scope:
     ///         Additional implicit path components for codelink resolutions only.
+    @_spi(testable) public
     init(namespace:Symbol.Module? = nil,
         culture:SSGC.Linker.Culture,
         scope:[String] = [])
@@ -43,6 +44,6 @@ extension SSGC.OutlineResolutionScopes
             codelink: .init(namespace: namespace ?? culture.module,
                 imports: culture.imports,
                 path: scope),
-            doclink: .documentation(culture.module))
+            doclink: .init(namespace: culture.module))
     }
 }

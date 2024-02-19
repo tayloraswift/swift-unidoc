@@ -374,8 +374,8 @@ extension SSGC.Linker
 
         let name:String = supplement.name
 
+        let prefix:DoclinkResolver.Prefix
         let title:Markdown.BlockHeading
-        let scope:DoclinkResolver.Scope
         let route:SSGC.Route
         let id:Symbol.Article
 
@@ -436,21 +436,21 @@ extension SSGC.Linker
             }
 
         case .standalone(let heading):
+            prefix = .documentation(namespace)
             title = heading
-            scope = .documentation(namespace)
             route = .article(namespace, name)
             id = .article(namespace, name)
 
         case .tutorials(let headline):
+            prefix = .tutorials(namespace)
             title = .h(1, text: headline)
-            scope = .tutorials(namespace)
             route = .article(namespace, "index.tutorial")
             id = .tutorial(namespace, "index")
 
         case .tutorial(let headline):
             //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
+            prefix = .tutorials(namespace)
             title = .h(1, text: headline)
-            scope = .tutorials(namespace)
             route = .article(namespace, "\(name).tutorial")
             id = .tutorial(namespace, name)
         }
@@ -458,17 +458,7 @@ extension SSGC.Linker
         if  let scalar:Int32 = self.symbolizer.allocate(article: id, title: title)
         {
              //  Make the standalone article visible for doclink resolution.
-            self.tables.doclinks[scope, name] = scalar
-
-            if  case .tutorials = scope
-            {
-                //  If it would not collide with a standalone article, we can allow the tutorial
-                //  to be referenced as an article.
-                {
-                    $0 = $0 ?? scalar
-                } (&self.tables.doclinks[.documentation(namespace), name])
-            }
-
+            self.tables.doclinks[prefix, name] = scalar
             self.router[route][nil, default: []].append(scalar)
             return .init(standalone: scalar, file: file, body: supplement.body)
         }

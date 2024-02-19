@@ -4,13 +4,17 @@ import SourceDiagnostics
 
 extension SSGC.Linker
 {
+    @_spi(testable) public
     struct Tables:~Copyable
     {
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
+        @_spi(testable) public
         var codelinks:CodelinkResolver<Int32>.Table
+        @_spi(testable) public
         var doclinks:DoclinkResolver.Table
 
+        @_spi(testable) public
         init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
             codelinks:CodelinkResolver<Int32>.Table = .init(),
             doclinks:DoclinkResolver.Table = .init())
@@ -23,7 +27,7 @@ extension SSGC.Linker
 }
 extension SSGC.Linker.Tables
 {
-    mutating
+    @_spi(testable) public mutating
     func resolving<Success>(with scopes:SSGC.OutlineResolutionScopes,
         do body:(inout SSGC.Outliner) throws -> Success) rethrows -> Success
     {

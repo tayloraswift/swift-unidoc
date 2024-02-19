@@ -1,11 +1,13 @@
 extension SSGC
 {
+    @_spi(testable) public
     struct Resource
     {
         private
         let file:any ResourceFile
         let id:Int32
 
+        @_spi(testable) public
         init(file:any ResourceFile, id:Int32)
         {
             self.file = file

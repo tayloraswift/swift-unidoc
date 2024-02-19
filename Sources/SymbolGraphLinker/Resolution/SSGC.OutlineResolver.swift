@@ -99,7 +99,7 @@ extension SSGC.OutlineResolver
     func outline(_ doclink:Doclink,
         at _:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
-        self.doclinks.resolve(doclink).map
+        self.doclinks.resolve(doclink, docc: true).map
         {
             .scalar($0, text: doclink.path.last ?? "")
         }
