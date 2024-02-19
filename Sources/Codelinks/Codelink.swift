@@ -87,18 +87,20 @@ extension Codelink:LosslessStringConvertible
         while true
         {
             let k:String.Index = string.index(before: j)
-            if  k == i
-            {
-                return nil
-            }
-            else if string[k] == "/"
-            {
-                j = k
-            }
+
+            guard case "/" = string[k]
             else
             {
                 break
             }
+
+            if  k == i
+            {
+                //  String only contains slashes.
+                return nil
+            }
+
+            j = k
         }
 
         if  string[i] != "/"
