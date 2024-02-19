@@ -3,12 +3,14 @@ import SymbolGraphs
 
 extension StaticOutliner
 {
-    /// This is keyed by ``Markdown.SourceString`` and not just ``String`` because link
-    /// resolution varies depending on its location.
+    /// This is just keyed by ``String`` and not ``Markdown.SourceString``, otherwise caching
+    /// would be pointless. Because link resolution varies depending on where the markdown
+    /// containing the link is located, this means the cache is only valid for a single
+    /// ``Markdown.Source``.
     struct Cache
     {
         private
-        var references:[Markdown.SourceString: Int]
+        var references:[String: Int]
         private
         var outlines:[SymbolGraph.Outline]
 
@@ -31,7 +33,7 @@ extension StaticOutliner.Cache
     }
 
     mutating
-    func callAsFunction(_ key:Markdown.SourceString,
+    func callAsFunction(_ key:String,
         with populate:() throws -> SymbolGraph.Outline?) rethrows -> Int?
     {
         try
