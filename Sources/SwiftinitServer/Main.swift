@@ -16,9 +16,7 @@ struct Main
     var development:Swiftinit.ServerOptions.Development
 
     var redirect:Bool
-    /// Whether to enable GitHub integration if access keys are available.
-    /// Defaults to false.
-    var github:Bool
+    var mirror:Bool
     var mongo:Mongo.Host
 
     private
@@ -28,7 +26,7 @@ struct Main
         self.certificates = "Local/Server/Certificates"
         self.development = .init()
         self.redirect = false
-        self.github = false
+        self.mirror = false
         self.mongo = "unidoc-mongod"
     }
 }
@@ -84,6 +82,9 @@ extension Main
             case "--enable-whitelists":
                 self.development.whitelists = true
 
+            case "-q", "--mirror":
+                self.mirror = true
+
             case "-r", "--redirect":
                 self.redirect = true
 
@@ -104,7 +105,9 @@ extension Main
                 }
 
             case "--enable-github":
-                self.github = true
+                Log[.warning] = """
+                This option is deprecated, GitHub integration is now always enabled.
+                """
 
             case "-p", "--port":
                 guard let port:String = arguments.next()
@@ -155,31 +158,36 @@ extension Main
             // configuration.applicationProtocols = ["h2", "http/1.1"]
             configuration.applicationProtocols = ["h2"]
 
-        var options:Swiftinit.ServerOptions = .init(
-            authority: self.authority.init(tls: try .init(configuration: configuration)))
+        let authority:any ServerAuthority = self.authority.init(
+            tls: try .init(configuration: configuration))
 
         let assets:FilePath = "Assets"
+        let github:GitHub.Integration?
         do
         {
-            options.github = try .load(secrets: assets / "secrets", active: self.github)
+            github = try .load(secrets: assets / "secrets")
         }
         catch let error
         {
             //  Temporary workaround for bypassing backtrace collection.
             Log[.debug] = "GitHub integration disabled (\(error))"
+            github = nil
         }
 
         if  self.authority is Localhost.Type
         {
-            options.mode = .development(.init(source: assets), self.development)
-            options.bucket = self.development.bucket
+            return .init(authority: authority,
+                github: github,
+                bucket: self.development.bucket,
+                mode: .development(.init(source: assets), self.development))
         }
         else
         {
-            options.bucket = .init(region: .us_east_1, name: "symbolgraphs")
+            return .init(authority: authority,
+                github: github,
+                bucket: .init(region: .us_east_1, name: "symbolgraphs"),
+                mode: .production(mirror: self.mirror))
         }
-
-        return options
     }
 
     private consuming
@@ -222,18 +230,25 @@ extension Main
             {
                 @Sendable (pool:Mongo.SessionPool) in
 
-                var plugins:[any Swiftinit.ServerPlugin] =
-                [
-                    Swiftinit.LinkerPlugin.init(bucket: options.bucket),
-                ]
+                var plugins:[any Swiftinit.ServerPlugin] = []
 
                 if  options.whitelists
                 {
                     plugins.append(Swiftinit.PolicyPlugin.init())
                 }
-                if  let github:GitHub.Integration = options.github,
-                        github.active
+
+                nonmirror:
+                if !options.mode.mirror
                 {
+                    plugins.append(Swiftinit.LinkerPlugin.init(bucket: options.bucket))
+
+                    guard
+                    let github:GitHub.Integration = options.github
+                    else
+                    {
+                        break nonmirror
+                    }
+
                     plugins.append(GitHub.CrawlerPlugin<GitHub.RepoTelescope>.init(
                         api: github.api,
                         id: "telescope"))
