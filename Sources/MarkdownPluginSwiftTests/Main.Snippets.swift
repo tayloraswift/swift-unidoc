@@ -88,28 +88,6 @@ extension Main.Snippets:TestBattery
 
                 """)
         }
-        if  let tests:TestGroup = tests / "CollapseWhitespace"
-        {
-            Self.run(tests: tests,
-                snippet:
-                """
-                /// Here’s how to say ‘hi’ to Barbie.
-
-
-
-                print("Hi Barbie!")
-
-                """,
-                caption:
-                """
-                Here’s how to say ‘hi’ to Barbie.
-                """,
-                slices:
-                """
-                print("Hi Barbie!")
-
-                """)
-        }
         if  let tests:TestGroup = tests / "TriviaOnly"
         {
             Self.run(tests: tests,
@@ -135,13 +113,17 @@ extension Main.Snippets:TestBattery
             Self.run(tests: tests,
                 snippet:
                 """
-                /// Here’s how to say ‘hi’ to Barbie.
+                /// Here’s how to say ‘hi’ to Barbie and Skipper.
 
                 // snippet.HI_BARBIE
 
                 // print("Hi Barbie!")
 
+                // snippet.hide
 
+                // snippet.show
+
+                // print("Hi Skipper!")
 
                 // snippet.end
 
@@ -150,10 +132,11 @@ extension Main.Snippets:TestBattery
                 """
                 Here’s how to say ‘hi’ to Barbie.
                 """,
-                slices:
+                slices: // This should preserve the empty line before `Hi Skipper!`.
                 """
-
                 // print("Hi Barbie!")
+
+                // print("Hi Skipper!")
 
                 """)
         }
@@ -271,6 +254,51 @@ extension Main.Snippets:TestBattery
                 {
                     print("Hi Barbie!")
                 }
+
+                """)
+        }
+        if  let tests:TestGroup = tests / "AnonymousCollapseWhitespace"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                /// Here’s how to say ‘hi’ to Barbie.
+
+
+
+                print("Hi Barbie!")
+
+                """,
+                caption:
+                """
+                Here’s how to say ‘hi’ to Barbie.
+                """,
+                slices:
+                """
+                print("Hi Barbie!")
+
+                """)
+        }
+        if  let tests:TestGroup = tests / "NominalCollapseWhitespace"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                /// Here’s how to say ‘hi’ to Barbie.
+
+
+                //  snippet.BARBIE
+
+                print("Hi Barbie!")
+
+                """,
+                caption:
+                """
+                Here’s how to say ‘hi’ to Barbie.
+                """,
+                slices:
+                """
+                print("Hi Barbie!")
 
                 """)
         }
