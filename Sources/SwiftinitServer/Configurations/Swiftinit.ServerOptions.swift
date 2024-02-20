@@ -15,7 +15,7 @@ extension Swiftinit
         init(authority:any ServerAuthority,
             github:GitHub.Integration? = nil,
             bucket:AWS.S3.Bucket? = nil,
-            mode:Mode = .production)
+            mode:Mode = .production(mirror: false))
         {
             self.authority = authority
             self.github = github
