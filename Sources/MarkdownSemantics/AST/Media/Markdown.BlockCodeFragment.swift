@@ -123,6 +123,15 @@ extension Markdown.BlockCodeFragment
 
         if  let slice:String = self.slice
         {
+            //  If this is the first slice, we should also inline the caption.
+            if  case slice? = snippet.slices.keys.first
+            {
+                for block:Markdown.BlockElement in snippet.caption
+                {
+                    yield(block)
+                }
+            }
+
             if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
             {
                 yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
