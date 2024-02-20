@@ -45,6 +45,48 @@ extension SSGC.Outliner
 }
 extension SSGC.Outliner
 {
+    private
+    func locate(resource name:String) -> SSGC.Resource?
+    {
+        if  let resource:SSGC.Resource = self.resources[name]
+        {
+            return resource
+        }
+
+        if  let dot:String.Index = name.lastIndex(of: ".")
+        {
+            //  We can only fuzz file names for image resources!
+            switch name[name.index(after: dot)...]
+            {
+            case "gif":     break
+            case "jpg":     break
+            case "jpeg":    break
+            case "png":     break
+            case "svg":     break
+            case "webp":    break
+            default:        return nil
+            }
+
+            return self.resources["\(name[..<dot])@2x\(name[dot...])"]
+                ?? self.resources["\(name[..<dot])~dark\(name[dot...])"]
+                ?? self.resources["\(name[..<dot])~dark@2x\(name[dot...])"]
+        }
+        for guess:String in ["svg", "webp", "png", "jpg", "jpeg", "gif"]
+        {
+            if  let resource:SSGC.Resource = self.resources["\(name).\(guess)"]
+                ?? self.resources["\(name)@2x.\(guess)"]
+                ?? self.resources["\(name)~dark.\(guess)"]
+                ?? self.resources["\(name)~dark@2x.\(guess)"]
+            {
+                return resource
+            }
+        }
+
+        return nil
+    }
+}
+extension SSGC.Outliner
+{
     @_spi(testable)
     public mutating
     func outlines() -> [SymbolGraph.Outline]
@@ -56,7 +98,7 @@ extension SSGC.Outliner
     public mutating
     func outline(reference:Markdown.AnyReference) -> Int?
     {
-        let name:String
+        let name:Markdown.SourceString
 
         switch reference
         {
@@ -67,25 +109,30 @@ extension SSGC.Outliner
             return self.outline(link: link, code: false)
 
         case .file(let link):
-            name = link.string
+            name = link
 
-        case .filePath(let text):
+        case .filePath(let link):
             //  Right now we don’t have a better way to handle file paths.
             guard
-            let i:String.Index = text.string.lastIndex(of: "/")
+            let i:String.Index = link.string.lastIndex(of: "/")
             else
             {
-                name = text.string
+                name = link
                 break
             }
 
-            name = String.init(text.string[text.string.index(after: i)...])
+            name = .init(
+                source: link.source,
+                string: String.init(link.string[link.string.index(after: i)...]))
         }
 
-        return self.resources[name].map
+        if  let resource:SSGC.Resource = self.locate(resource: name.string)
         {
-            self.cache.append(outline: .vertex($0.id, text: name))
+            return self.cache.append(outline: .vertex(resource.id, text: name.string))
         }
+
+        self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
+        return nil
     }
 
     private mutating
