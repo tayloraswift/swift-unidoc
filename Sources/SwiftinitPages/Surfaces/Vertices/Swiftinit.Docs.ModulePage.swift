@@ -106,7 +106,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
 
             if  let readme:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.context.link(file: readme)
+                $0 ?= self.context.link(source: readme)
             }
         }
 

@@ -57,7 +57,8 @@ extension Unidoc.Resolver
     }
 
     mutating
-    func link(topic:SymbolGraph.Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
+    func link(
+        topic:SymbolGraph.Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
     {
         let overview:Unidoc.Passage? = topic.overview.isEmpty ? nil : .init(
             outlines: topic.outlines.map { self.expand($0) },
@@ -83,24 +84,20 @@ extension Unidoc.Resolver
 
         switch outline
         {
-        case    .scalar(let scalar, text: let text):
-            if      let _:Int = scalar / .decl,
-                    let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
+        case    .vertex(let id, text: let text):
+            if      let _:Int = id / .decl,
+                    let id:Unidoc.Scalar = self.current.scalars.decls[id]
             {
-                return .path(text, self.context.expand(scalar, to: words(in: text)))
+                return .path(text, self.context.expand(id, to: words(in: text)))
             }
-            else if let _:Int = scalar / .article
+            else if let namespace:Int = id / .module,
+                    let id:Unidoc.Scalar = self.current.scalars.modules[namespace]
             {
-                return .path(text, [self.current.id + scalar])
+                return .path(text, [id])
             }
-            else if let _:Int = scalar / .file
+            else
             {
-                //  TODO: implement me
-            }
-            else if let namespace:Int = scalar / .module,
-                    let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
-            {
-                return .path(text, [scalar])
+                return .path(text, [self.current.id + id])
             }
 
         case    .vector(let feature, self: let heir, text: let text):
@@ -146,7 +143,7 @@ extension Unidoc.Resolver
     {
         switch outline
         {
-        case   .scalar(let scalar, text: _):
+        case   .vertex(let scalar, text: _):
             if      let _:Int = scalar / .decl,
                     let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
             {

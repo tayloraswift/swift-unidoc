@@ -49,11 +49,12 @@ extension Swiftinit.VertexPageContext
         }
     }
 
-    func link(file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
+    func link(source file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
     {
         guard
         let refname:String = self[file.edition]?.refname,
-        case (let file, let origin?)? = self[file: file]
+        let vertex:Unidoc.FileVertex = self[file: file],
+        let origin:Unidoc.PackageOrigin = self.origin
         else
         {
             return nil
@@ -66,12 +67,32 @@ extension Swiftinit.VertexPageContext
         {
         case .github(let origin):
             icon = .github
-            blob = "\(origin.https)/blob/\(refname)/\(file.symbol)"
+            blob = "\(origin.https)/blob/\(refname)/\(vertex.symbol)"
         }
 
         return .init(target: line.map { "\(blob)#L\($0 + 1)" } ?? blob,
             icon: icon,
-            file: file.symbol.last,
+            file: vertex.symbol.last,
             line: line)
+    }
+
+    func link(media file:Unidoc.FileVertex) -> String?
+    {
+        guard
+        let refname:String = self[file.id.edition]?.refname,
+        let origin:Unidoc.PackageOrigin = self.origin
+        else
+        {
+            return nil
+        }
+
+        switch origin
+        {
+        case .github(let origin):
+            return """
+            https://raw.githubusercontent.com\
+            /\(origin.owner)/\(origin.name)/\(refname)/\(file.symbol)
+            """
+        }
     }
 }

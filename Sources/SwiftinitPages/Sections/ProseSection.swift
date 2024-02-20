@@ -46,12 +46,22 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             return text
 
         case .path(_, let scalars):
-            if  let target:Unidoc.Scalar = scalars.last
-            {
-                return self.context[vertex: target]?.url
-            }
+            guard
+            let target:Unidoc.Scalar = scalars.last
             else
             {
+                return nil
+            }
+
+            switch self.context[vertex: target]
+            {
+            case (_, let url?)?:
+                return url
+
+            case (.file(let vertex), nil)?:
+                return self.context.link(media: vertex)
+
+            default:
                 return nil
             }
         }
