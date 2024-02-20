@@ -1,0 +1,13 @@
+@import 'Colors';
+
+blockquote
+{
+    margin: 2rem 0;
+    font-style: italic;
+    color: $light-foreground-fade;
+
+    em
+    {
+        font-style: normal;
+    }
+}

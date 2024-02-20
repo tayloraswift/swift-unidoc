@@ -34,12 +34,12 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
     {
-        guard case .href = attribute,
-        self.outlines.indices.contains(reference)
+        guard self.outlines.indices.contains(reference)
         else
         {
             return nil
         }
+
         switch self.outlines[reference]
         {
         case .text(let text):
@@ -53,12 +53,19 @@ extension ProseSection:HTML.OutputStreamableMarkdown
                 return nil
             }
 
-            switch self.context[vertex: target]
+            switch attribute
             {
-            case (_, let url?)?:
-                return url
+            case .href:
+                return self.context[vertex: target]?.url
 
-            case (.file(let vertex), nil)?:
+            case .src:
+                guard
+                case (.file(let vertex), nil)? = self.context[vertex: target]
+                else
+                {
+                    return nil
+                }
+
                 return self.context.link(media: vertex)
 
             default:

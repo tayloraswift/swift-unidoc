@@ -1,7 +1,7 @@
 @import 'Mixins/BackdropBlur';
+@import 'blockquote';
 @import 'Calendar';
 @import 'Cards';
-@import 'Charts';
 @import 'Colors';
 @import 'code';
 @import 'div.columns';
@@ -9,6 +9,7 @@
 @import 'div.logo';
 @import 'div.more';
 @import 'dl';
+@import 'figure';
 @import 'form';
 @import 'Headings';
 @import 'kbd';
@@ -133,7 +134,7 @@ body main
     }
     section.details
     {
-        p
+        p, figure
         {
             max-width: 40rem;
         }
