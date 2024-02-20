@@ -159,10 +159,16 @@ extension Main
             authority: self.authority.init(tls: try .init(configuration: configuration)))
 
         let assets:FilePath = "Assets"
-        if  self.github
+        do
         {
-            options.github = try .load(secrets: assets / "secrets")
+            options.github = try .load(secrets: assets / "secrets", active: self.github)
         }
+        catch let error
+        {
+            //  Temporary workaround for bypassing backtrace collection.
+            Log[.debug] = "GitHub integration disabled (\(error))"
+        }
+
         if  self.authority is Localhost.Type
         {
             options.mode = .development(.init(source: assets), self.development)
@@ -225,7 +231,8 @@ extension Main
                 {
                     plugins.append(Swiftinit.PolicyPlugin.init())
                 }
-                if  let github:GitHub.Integration = options.github
+                if  let github:GitHub.Integration = options.github,
+                        github.active
                 {
                     plugins.append(GitHub.CrawlerPlugin<GitHub.RepoTelescope>.init(
                         api: github.api,
