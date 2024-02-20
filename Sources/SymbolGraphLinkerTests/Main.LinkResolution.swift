@@ -54,8 +54,8 @@ extension Main.LinkResolution:TestBattery
                     tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
-                        .scalar(0, text: "A b"),
-                        .scalar(1, text: "A c"),
+                        .vertex(0, text: "A b"),
+                        .vertex(1, text: "A c"),
                     ])
                 }
             }
@@ -76,10 +76,10 @@ extension Main.LinkResolution:TestBattery
                     tests.expect(value: $0.outline(reference: .code(_string("c"))))
 
                     tests.expect($0.outlines() ..? [
-                        .scalar(0, text: "A b"),
-                        .scalar(1, text: "A c"),
-                        .scalar(0, text: "b"),
-                        .scalar(1, text: "c"),
+                        .vertex(0, text: "A b"),
+                        .vertex(1, text: "A c"),
+                        .vertex(0, text: "b"),
+                        .vertex(1, text: "c"),
                     ])
                 }
             }
@@ -113,8 +113,8 @@ extension Main.LinkResolution:TestBattery
                     tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
-                        .scalar(0, text: "A b"),
-                        .scalar(1, text: "A c")
+                        .vertex(0, text: "A b"),
+                        .vertex(1, text: "A c")
                     ])
                 }
             }
@@ -168,10 +168,10 @@ extension Main.LinkResolution:TestBattery
 
 
                 tests.expect($0.outlines() ..? [
-                    .scalar(2, text: "OtherTutorial"),
-                    .scalar(2, text: "OtherTutorial"),
-                    .scalar(1, text: "GettingStarted"),
-                    .scalar(0, text: "GettingStarted"),
+                    .vertex(2, text: "OtherTutorial"),
+                    .vertex(2, text: "OtherTutorial"),
+                    .vertex(1, text: "GettingStarted"),
+                    .vertex(0, text: "GettingStarted"),
                 ])
             }
         }
@@ -202,9 +202,9 @@ extension Main.LinkResolution:TestBattery
 
 
                 tests.expect($0.outlines() ..? [
-                    .scalar(2, text: "OtherTutorial"),
-                    .scalar(1, text: "GettingStarted"),
-                    .scalar(0, text: "GettingStarted"),
+                    .vertex(2, text: "OtherTutorial"),
+                    .vertex(1, text: "GettingStarted"),
+                    .vertex(0, text: "GettingStarted"),
                 ])
             }
         }

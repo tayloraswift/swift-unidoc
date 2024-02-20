@@ -21,12 +21,15 @@ extension SSGC
     struct Outliner:~Copyable
     {
         private
+        let resources:[String: SSGC.Resource]
+        private
         var resolver:OutlineResolver
         private
         var cache:Cache
 
-        init(resolver:consuming OutlineResolver)
+        init(resources:[String: SSGC.Resource], resolver:consuming OutlineResolver)
         {
+            self.resources = resources
             self.resolver = resolver
             self.cache = .init()
         }
@@ -53,14 +56,38 @@ extension SSGC.Outliner
     public mutating
     func outline(reference:Markdown.AnyReference) -> Int?
     {
+        let name:String
+
         switch reference
         {
-        case .code(let link):       self.outline(link: link, code: true)
-        case .link(let link):       self.outline(link: link, code: false)
-        case .file(let link):       nil
-        case .filePath(let text):   nil
+        case .code(let link):
+            return self.outline(link: link, code: true)
+
+        case .link(let link):
+            return self.outline(link: link, code: false)
+
+        case .file(let link):
+            name = link.string
+
+        case .filePath(let text):
+            //  Right now we don’t have a better way to handle file paths.
+            guard
+            let i:String.Index = text.string.lastIndex(of: "/")
+            else
+            {
+                name = text.string
+                break
+            }
+
+            name = String.init(text.string[text.string.index(after: i)...])
+        }
+
+        return self.resources[name].map
+        {
+            self.cache.append(outline: .vertex($0.id, text: name))
         }
     }
+
     private mutating
     func outline(link:Markdown.SourceString, code:Bool) -> Int?
     {

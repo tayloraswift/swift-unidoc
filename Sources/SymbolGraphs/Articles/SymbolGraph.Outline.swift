@@ -7,7 +7,7 @@ extension SymbolGraph
     @frozen public
     enum Outline:Equatable, Hashable, Sendable
     {
-        case scalar(Int32, text:String)
+        case vertex(Int32, text:String)
         case vector(Int32, self:Int32, text:String)
         case unresolved(Unresolved)
     }
@@ -22,8 +22,8 @@ extension SymbolGraph.Outline
         case unresolved_unidocV3 = "C"
 
         case location = "L"
-        case scalar = "R"
-        case `self` = "S"
+        case vector_self = "S"
+        case vertex_self = "R"
         case text = "T"
     }
 }
@@ -34,13 +34,13 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
     {
         switch self
         {
-        case .scalar(let scalar, text: let text):
-            bson[.scalar] = scalar
+        case .vertex(let id, text: let text):
+            bson[.vertex_self] = id
             bson[.text] = text
 
-        case .vector(let scalar, self: let heir, text: let text):
-            bson[.scalar] = scalar
-            bson[.self] = heir
+        case .vector(let id, self: let heir, text: let text):
+            bson[.vertex_self] = id
+            bson[.vector_self] = heir
             bson[.text] = text
 
         case .unresolved(let self):
@@ -60,17 +60,17 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        if  let scalar:Int32 = try bson[.scalar]?.decode()
+        if  let id:Int32 = try bson[.vertex_self]?.decode()
         {
             let text:String = try bson[.text].decode()
 
-            if  let heir:Int32 = try bson[.self]?.decode()
+            if  let heir:Int32 = try bson[.vector_self]?.decode()
             {
-                self = .vector(scalar, self: heir, text: text)
+                self = .vector(id, self: heir, text: text)
             }
             else
             {
-                self = .scalar(scalar, text: text)
+                self = .vertex(id, text: text)
             }
 
             return

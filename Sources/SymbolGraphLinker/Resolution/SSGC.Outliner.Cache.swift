@@ -26,6 +26,13 @@ extension SSGC.Outliner.Cache
     var fold:Int { self.outlines.endIndex }
 
     mutating
+    func append(outline:SymbolGraph.Outline) -> Int
+    {
+        defer { self.outlines.append(outline) }
+        return self.outlines.endIndex
+    }
+
+    mutating
     func clear() -> [SymbolGraph.Outline]
     {
         defer { self = .init() }

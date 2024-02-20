@@ -34,10 +34,11 @@ extension SSGC.Linker.Tables
         let codelinks:CodelinkResolver<Int32>.Table = self.codelinks
         let doclinks:DoclinkResolver.Table = self.doclinks
 
-        var outliner:SSGC.Outliner = .init(resolver: .init(
-            diagnostics: (consume self).diagnostics,
-            codelinks: .init(table: codelinks, scope: scopes.codelink),
-            doclinks: .init(table: doclinks, scope: scopes.doclink)))
+        var outliner:SSGC.Outliner = .init(resources: scopes.resources,
+            resolver: .init(
+                diagnostics: (consume self).diagnostics,
+                codelinks: .init(table: codelinks, scope: scopes.codelink),
+                doclinks: .init(table: doclinks, scope: scopes.doclink)))
 
         do
         {

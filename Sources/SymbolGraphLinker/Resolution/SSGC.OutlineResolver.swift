@@ -54,8 +54,8 @@ extension SSGC.OutlineResolver
         case .one(let overload):
             return switch overload.target
             {
-            case .scalar(let address):          address
-            case .vector(let address, self: _): address
+            case .scalar(let id):           id
+            case .vector(let id, self: _):  id
             }
 
         case .some(let overloads):
@@ -80,11 +80,11 @@ extension SSGC.OutlineResolver
             let text:String = codelink.path.visible.joined(separator: " ")
             switch overload.target
             {
-            case .scalar(let address):
-                return .scalar(address, text: text)
+            case .scalar(let id):
+                return .vertex(id, text: text)
 
-            case .vector(let address, self: let heir):
-                return .vector(address, self: heir, text: text)
+            case .vector(let id, self: let heir):
+                return .vector(id, self: heir, text: text)
             }
 
         case .some(let overloads):
@@ -101,7 +101,7 @@ extension SSGC.OutlineResolver
     {
         self.doclinks.resolve(doclink, docc: true).map
         {
-            .scalar($0, text: doclink.path.last ?? "")
+            .vertex($0, text: doclink.path.last ?? "")
         }
     }
 }

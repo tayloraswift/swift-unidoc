@@ -121,11 +121,11 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.vertex.location
             {
-                $0 ?= self.context.link(file: location.file, line: location.position.line)
+                $0 ?= self.context.link(source: location.file, line: location.position.line)
             }
             if  let file:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.context.link(file: file)
+                $0 ?= self.context.link(source: file)
             }
         }
 

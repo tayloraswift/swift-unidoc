@@ -142,6 +142,9 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
     var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }
 
     @usableFromInline
+    var origin:Unidoc.PackageOrigin? { self.repo?.origin }
+
+    @usableFromInline
     subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
         self.cache.volumes.secondary[volume]
@@ -183,12 +186,8 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
     }
 
     @usableFromInline
-    subscript(file id:Unidoc.Scalar) ->
-    (
-        vertex:Unidoc.FileVertex,
-        origin:Unidoc.PackageOrigin?
-    )?
+    subscript(file id:Unidoc.Scalar) -> Unidoc.FileVertex?
     {
-        self.cache.vertices[id]?.vertex.file.map { (vertex: $0, origin: self.repo?.origin) }
+        self.cache.vertices[id]?.vertex.file
     }
 }
