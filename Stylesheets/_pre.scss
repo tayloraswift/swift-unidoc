@@ -9,8 +9,11 @@ pre
 pre.snippet
 {
     overflow: scroll;
-    padding-bottom: 0.5rem;
-    padding-left: 3rem;
+    padding: 0.5rem 0 0.5rem 3rem;
+
+    background-color: $light-code-well;
+    scrollbar-color: $light-accent-barbie-pink transparent;
+    scrollbar-gutter: stable;
 
     code
     {
