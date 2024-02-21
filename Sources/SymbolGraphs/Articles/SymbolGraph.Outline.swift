@@ -18,6 +18,7 @@ extension SymbolGraph.Outline
     enum CodingKey:String, Sendable
     {
         case unresolved_doc = "D"
+        case unresolved_web = "W"
         case unresolved_ucf = "U"
         case unresolved_unidocV3 = "C"
 
@@ -49,6 +50,7 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
             switch self.type
             {
             case .doc:      bson[.unresolved_doc] = self.link
+            case .web:      bson[.unresolved_web] = self.link
             case .ucf:      bson[.unresolved_ucf] = self.link
             case .unidocV3: bson[.unresolved_unidocV3] = self.link
             }
@@ -79,15 +81,22 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
         let type:Unresolved.LinkType
         let link:String
 
-        if  let text:String = try bson[.unresolved_doc]?.decode()
+        //  These are unscientifically ordered by likelihood.
+        if  let text:String = try bson[.unresolved_ucf]?.decode()
+        {
+            type = .ucf
+            link = text
+        }
+        else if
+            let text:String = try bson[.unresolved_doc]?.decode()
         {
             type = .doc
             link = text
         }
         else if
-            let text:String = try bson[.unresolved_ucf]?.decode()
+            let text:String = try bson[.unresolved_web]?.decode()
         {
-            type = .ucf
+            type = .web
             link = text
         }
         else
