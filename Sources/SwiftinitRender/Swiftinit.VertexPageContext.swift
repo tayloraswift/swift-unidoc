@@ -17,7 +17,7 @@ protocol _SwiftinitVertexPageContext:AnyObject
 {
     /// Returns the metadata document for the principal volume of the associated page.
     var volume:Unidoc.VolumeMetadata { get }
-    var origin:Unidoc.PackageOrigin? { get }
+    var repo:Unidoc.PackageRepo? { get }
 
     /// Returns the metadata document for the specified volume, if available.
     subscript(volume:Unidoc.Edition) -> Unidoc.VolumeMetadata? { get }

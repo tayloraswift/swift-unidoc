@@ -18,6 +18,7 @@ class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
     private
     var cache:Cache
 
+    @usableFromInline
     let repo:Unidoc.PackageRepo?
 
     init(cache:Cache, repo:Unidoc.PackageRepo?)
@@ -140,9 +141,6 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
 {
     @usableFromInline
     var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }
-
-    @usableFromInline
-    var origin:Unidoc.PackageOrigin? { self.repo?.origin }
 
     @usableFromInline
     subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?

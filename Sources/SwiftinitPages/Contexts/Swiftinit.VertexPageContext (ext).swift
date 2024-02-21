@@ -54,7 +54,7 @@ extension Swiftinit.VertexPageContext
         guard
         let refname:String = self[file.edition]?.refname,
         let vertex:Unidoc.FileVertex = self[file: file],
-        let origin:Unidoc.PackageOrigin = self.origin
+        let origin:Unidoc.PackageOrigin = self.repo?.origin
         else
         {
             return nil
@@ -79,14 +79,15 @@ extension Swiftinit.VertexPageContext
     func link(media file:Unidoc.FileVertex) -> String?
     {
         guard
-        let refname:String = self[file.id.edition]?.refname,
-        let origin:Unidoc.PackageOrigin = self.origin
+        let repo:Unidoc.PackageRepo = self.repo
         else
         {
             return nil
         }
 
-        switch origin
+        let refname:String = self[file.id.edition]?.refname ?? repo.master
+
+        switch repo.origin
         {
         case .github(let origin):
             return """
