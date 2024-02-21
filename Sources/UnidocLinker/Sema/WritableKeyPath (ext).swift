@@ -4,10 +4,13 @@ import UnidocRecords
 
 extension WritableKeyPath<Unidoc.Stats.Coverage, Int>
 {
+    //  TODO: This is a temporary solution. This statistic should not depend on the snapshot.
+    //  Ideally, we should reformulate the scoring system to assign a “expected” amount of
+    //  documentation for each declaration, which does not depend on other declarations.
     static
     func classify(_ decl:SymbolGraph.Decl,
-        from snapshot:Unidoc.Linker.Graph,
-        at local:Int32) -> WritableKeyPath<Unidoc.Stats.Coverage, Int>
+        _from snapshot:Unidoc.Linker.Graph,
+        _at local:Int32) -> WritableKeyPath<Unidoc.Stats.Coverage, Int>
     {
         if  case _? = decl.article
         {

@@ -14,12 +14,18 @@ extension Unidoc
     {
         private
         let codelinks:CodelinkResolver<Scalar>
+        private
+        let caseless:CodelinkResolver<Scalar>
         private(set)
         var context:Linker
 
-        init(codelinks:CodelinkResolver<Scalar>, context:consuming Linker)
+        init(
+            codelinks:CodelinkResolver<Scalar>,
+            caseless:CodelinkResolver<Scalar>,
+            context:consuming Linker)
         {
             self.codelinks = codelinks
+            self.caseless = caseless
             self.context = context
         }
     }
@@ -110,33 +116,74 @@ extension Unidoc.Resolver
             }
 
         case    .unresolved(let unresolved):
+            let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+            let codelink:Codelink
+
+            resolution:
             if  case .web = unresolved.type
             {
                 let domain:Substring = unresolved.link.prefix { $0 != "/" }
-                //  We will follow links to Apple, GitHub, and reputable open-source indexes.
-                let safe:Bool = switch domain
+
+                if  let link:Codelink = .init(translating: unresolved.link, to: domain)
                 {
-                case "developer.apple.com":     true
-                case "www.freebsd.org":         true
-                case "github.com":              true
-                case "tools.ietf.org":          true
-                case "man7.org":                true
-                case "developer.mozilla.org":   true
-                case "docs.scala-lang.org":     true
-                case "swiftinit.org":           true
-                case "forums.swift.org":        true
-                case "swift.org":               true
-                case "en.wikipedia.org":        true
-                default:                        false
+                    codelink = link
+                }
+                else
+                {
+                    let root:Substring
+                    if  let j:String.Index = domain.lastIndex(of: "."),
+                        let i:String.Index = domain[..<j].lastIndex(of: ".")
+                    {
+                        root = domain[domain.index(after: i)...]
+                    }
+                    else
+                    {
+                        root = domain
+                    }
+                    //  We will follow links to GitHub and reputable open-source indexes.
+                    let safe:Bool = switch root
+                    {
+                    case "freebsd.org":     true
+                    case "github.com":      true
+                    case "ietf.org":        true
+                    case "man7.org":        true
+                    case "mozilla.org":     true
+                    case "scala-lang.org":  true
+                    case "swiftinit.org":   true
+                    case "swift.org":       true
+                    case "wikipedia.org":   true
+                    default:                false
+                    }
+
+                    return .link(https: unresolved.link, safe: safe)
                 }
 
-                return .link(https: unresolved.link, safe: safe)
-            }
+                //  Translation always lowercases the URL, so we need to use the collated table.
+                switch self.caseless.resolve(codelink)
+                {
+                case .some(let overloads):
+                    guard
+                    let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
+                    else
+                    {
+                        //  Not an error, this was only speculative.
+                        return .link(https: unresolved.link, safe: false)
+                    }
 
-            guard
-            let (codelink, resolution):
-                (Codelink, CodelinkResolver<Unidoc.Scalar>.Overload.Target?) =
+                    resolution = overload.target
+
+                case .one(let overload):
+                    resolution = overload.target
+                }
+
+                print("DEBUG: successful translation of '\(unresolved.link)'")
+            }
+            else if
+                let resolved:(Codelink, CodelinkResolver<Unidoc.Scalar>.Overload.Target?) =
                     self.resolve(unresolved)
+            {
+                (codelink, resolution) = resolved
+            }
             else
             {
                 return .text(unresolved.link)

@@ -247,30 +247,31 @@ extension Unidoc.Linker
         {
             for (dependencies, cultures):([Symbol.Package: Set<String>], [Int]) in groups
             {
-                var shared:SymbolGraph.ModuleContext = .init()
-
-                if  let swift:Graph = self[dynamic: .swift]
+                let shared:SymbolGraph.ModuleContext = .init
                 {
-                    shared.add(snapshot: swift, context: self, filter: nil)
-                }
-                for (package, products):(Symbol.Package, Set<String>) in
-                    dependencies.sorted(by: { $0.key < $1.key })
-                {
-                    guard
-                    let snapshot:Graph = self[dynamic: package]
-                    else
+                    if  let swift:Graph = self[dynamic: .swift]
                     {
-                        continue
+                        $0.add(snapshot: swift, context: self, filter: nil)
                     }
-
-                    var filter:Set<Int> = []
-                    for product:SymbolGraph.Product in snapshot.metadata.products
-                        where products.contains(product.name)
+                    for (package, products):(Symbol.Package, Set<String>) in
+                        dependencies.sorted(by: { $0.key < $1.key })
                     {
-                        filter.formUnion(product.cultures)
-                    }
+                        guard
+                        let snapshot:Graph = self[dynamic: package]
+                        else
+                        {
+                            continue
+                        }
 
-                    shared.add(snapshot: snapshot, context: self, filter: filter)
+                        var filter:Set<Int> = []
+                        for product:SymbolGraph.Product in snapshot.metadata.products
+                            where products.contains(product.name)
+                        {
+                            filter.formUnion(product.cultures)
+                        }
+
+                        $0.add(snapshot: snapshot, context: self, filter: filter)
+                    }
                 }
 
                 for c:Int in cultures
@@ -427,6 +428,10 @@ extension Unidoc.Linker
     {
         var resolver:Unidoc.Resolver = .init(
             codelinks: .init(table: module.codelinks, scope: .init(
+                namespace: namespace,
+                imports: module.imports,
+                path: scope)),
+            caseless: .init(table: module.caseless, scope: .init(
                 namespace: namespace,
                 imports: module.imports,
                 path: scope)),

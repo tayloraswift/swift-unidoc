@@ -34,6 +34,29 @@ extension CodelinkResolver.Overloads
         }
     }
 
+    @inlinable mutating
+    func overload(with overloads:Self)
+    {
+        switch (consume self, overloads)
+        {
+        case    (.one(let one), .one(let other)):
+            self = .some([one, other])
+
+        case    (.one(let one), .some([])),
+                (.some([]), .one(let one)):
+            self = .one(one)
+
+        case    (.some(var some), .one(let one)),
+                (.one(let one), .some(var some)):
+            some.append(one)
+            self = .some(some)
+
+        case    (.some(var some), .some(let others)):
+            some += others
+            self = .some(some)
+        }
+    }
+
     @inlinable public mutating
     func overload(with overload:CodelinkResolver<Scalar>.Overload)
     {
