@@ -293,7 +293,7 @@ extension Unidoc.DB
         {
             func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
             {
-                throw Unidoc.GraphLoaderError.unavailable
+                fatalError("unreachable")
             }
         }
 

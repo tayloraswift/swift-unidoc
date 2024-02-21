@@ -131,7 +131,7 @@ extension Unidoc.Snapshot
         }
         else
         {
-            throw Unidoc.GraphLoaderError.unavailable
+            throw Unidoc.GraphLoaderError.unavailable(self.metadata.package.id)
         }
     }
 }
