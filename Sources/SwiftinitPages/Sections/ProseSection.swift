@@ -32,7 +32,7 @@ extension ProseSection
 }
 extension ProseSection:HTML.OutputStreamableMarkdown
 {
-    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
         guard self.outlines.indices.contains(reference)
         else
@@ -44,6 +44,23 @@ extension ProseSection:HTML.OutputStreamableMarkdown
         {
         case .text(let text):
             return text
+
+        case .link(https: let url, safe: let safe):
+            switch attribute
+            {
+            case .href:
+                if !safe
+                {
+                    attribute = .external
+                }
+                fallthrough
+
+            case .external:
+                return "https://\(url)"
+
+            default:
+                return nil
+            }
 
         case .path(_, let scalars):
             guard
@@ -84,6 +101,10 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
+        case .link:
+            //  No reason this should ever appear here.
+            return
+
         case .text(let text):
             html[.code] = text
 
@@ -114,6 +135,10 @@ extension ProseSection:TextOutputStreamableMarkdown
         }
         switch self.outlines[reference]
         {
+        case .link:
+            //  No reason this should ever appear here.
+            return
+
         case .text(let text):
             utf8 += text.utf8
 

@@ -110,6 +110,29 @@ extension Unidoc.Resolver
             }
 
         case    .unresolved(let unresolved):
+            if  case .web = unresolved.type
+            {
+                let domain:Substring = unresolved.link.prefix { $0 != "/" }
+                //  We will follow links to Apple, GitHub, and reputable open-source indexes.
+                let safe:Bool = switch domain
+                {
+                case "developer.apple.com":     true
+                case "www.freebsd.org":         true
+                case "github.com":              true
+                case "tools.ietf.org":          true
+                case "man7.org":                true
+                case "developer.mozilla.org":   true
+                case "docs.scala-lang.org":     true
+                case "swiftinit.org":           true
+                case "forums.swift.org":        true
+                case "swift.org":               true
+                case "en.wikipedia.org":        true
+                default:                        false
+                }
+
+                return .link(https: unresolved.link, safe: safe)
+            }
+
             guard
             let (codelink, resolution):
                 (Codelink, CodelinkResolver<Unidoc.Scalar>.Overload.Target?) =
