@@ -9,7 +9,7 @@ figure
     }
 }
 
-figure.decl div.pie-color > svg g
+figure.chart.decl svg > g
 {
     > *
     {
@@ -76,7 +76,22 @@ figure.decl div.pie-color > svg g
         fill: rgb(255, 154, 38);
     }
 }
-figure.coverage div.pie-color > svg g
+figure.chart.spis svg > g
+{
+    > *.none
+    {
+        fill: rgb(238, 238, 238);
+    }
+    > *.unknown
+    {
+        fill: rgb(255, 210, 85);
+    }
+    > *.nominal
+    {
+        fill: rgb(103, 131, 255);
+    }
+}
+figure.chart.coverage svg > g
 {
     > *.undocumented
     {
