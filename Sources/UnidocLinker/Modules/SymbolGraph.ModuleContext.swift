@@ -19,15 +19,29 @@ extension SymbolGraph
 
         private(set)
         var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
+        /// This is needed to support URL translation from other package indexes.
+        private(set)
+        var caseless:CodelinkResolver<Unidoc.Scalar>.Table
         private(set)
         var imports:[Symbol.Module]
 
+        private
         init()
         {
             self.conformances = []
             self.codelinks = .init()
+            self.caseless = .init()
             self.imports = []
         }
+    }
+}
+extension SymbolGraph.ModuleContext
+{
+    init(with build:(inout Self) throws -> ()) rethrows
+    {
+        self.init()
+        try build(&self)
+        self.caseless = self.codelinks.caseless()
     }
 }
 extension SymbolGraph.ModuleContext
