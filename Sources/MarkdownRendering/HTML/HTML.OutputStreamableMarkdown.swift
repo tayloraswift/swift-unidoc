@@ -20,9 +20,13 @@ protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
     /// Returns the value for an attribute identified by the given reference.
     /// If the witness returns nil, the renderer will omit the attribute.
     ///
+    /// The witness can change the attribute that will be rendered by modifying the argument.
+    /// This is useful for replacing ``Markdown.Bytecode.Attribute/href`` with
+    /// ``Markdown.Bytecode.Attribute/external``
+    ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.
-    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
@@ -32,7 +36,7 @@ extension HTML.OutputStreamableMarkdown
 {
     /// Returns nil.
     @inlinable public
-    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
         nil
     }
@@ -83,10 +87,10 @@ extension HTML.OutputStreamableMarkdown
             case .attribute(let attribute, nil):
                 attributes.flush(beginning: attribute)
 
-            case .attribute(let attribute, let reference?):
+            case .attribute(var attribute, let reference?):
                 attributes.flush()
 
-                if  let value:String = self.load(reference, for: attribute)
+                if  let value:String = self.load(reference, for: &attribute)
                 {
                     attributes.list.append(value: value, as: attribute)
                 }
