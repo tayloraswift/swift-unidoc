@@ -18,6 +18,9 @@ extension Codelink
 
             self.init(doclink.path.joined(separator: "/"))
 
+        case .web:
+            return nil
+
         case .ucf:
             self.init(unresolved.link)
 

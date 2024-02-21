@@ -106,6 +106,21 @@ extension SSGC.Outliner
             return self.outline(link: link, code: true)
 
         case .link(let link):
+            if  let colon:String.Index = link.string.firstIndex(of: ":"),
+                let start:String.Index = link.string.index(colon,
+                    offsetBy: 3,
+                    limitedBy: link.string.endIndex)
+            {
+                var url:Substring { link.string[start...] }
+
+                switch link.string[..<start]
+                {
+                case "https://":    return self.outline(translating: link, to: url)
+                case "http://":     return self.outline(translating: link, to: url)
+                default:            break
+                }
+            }
+
             return self.outline(link: link, code: false)
 
         case .file(let link):
@@ -133,6 +148,15 @@ extension SSGC.Outliner
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
         return nil
+    }
+
+    private mutating
+    func outline(translating link:Markdown.SourceString, to url:Substring) -> Int?
+    {
+        self.cache.append(outline: .unresolved(.init(
+            link: String.init(url),
+            type: .web,
+            location: link.source.start)))
     }
 
     private mutating
