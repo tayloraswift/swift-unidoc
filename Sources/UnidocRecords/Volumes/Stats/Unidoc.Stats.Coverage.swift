@@ -32,34 +32,26 @@ extension Unidoc.Stats.Coverage:ExpressibleByDictionaryLiteral
         self.init(undocumented: 0, indirect: 0, direct: 0)
     }
 }
-extension Unidoc.Stats.Coverage
+extension Unidoc.Stats.Coverage:Unidoc.StatsCounters,
+    BSONDocumentEncodable,
+    BSONDocumentDecodable
 {
     @frozen public
-    enum CodingKey:String, Sendable
+    enum CodingKey:String, Sendable, CaseIterable
     {
         case undocumented = "U"
         case indirect = "I"
         case direct = "D"
     }
-}
-extension Unidoc.Stats.Coverage:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
+
+    @inlinable public static
+    subscript(key:CodingKey) -> WritableKeyPath<Self, Int>
     {
-        bson[.undocumented] = self.undocumented != 0 ? self.undocumented : nil
-        bson[.indirect] = self.indirect != 0 ? self.indirect : nil
-        bson[.direct] = self.direct != 0 ? self.direct : nil
-    }
-}
-extension Unidoc.Stats.Coverage:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(
-            undocumented: try bson[.undocumented]?.decode() ?? 0,
-            indirect: try bson[.indirect]?.decode() ?? 0,
-            direct: try bson[.direct]?.decode() ?? 0)
+        switch key
+        {
+        case .undocumented: \.undocumented
+        case .indirect:     \.indirect
+        case .direct:       \.direct
+        }
     }
 }

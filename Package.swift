@@ -581,6 +581,9 @@ let package:Package = .init(
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
+
+                .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "BSON_OrderedCollections", package: "swift-mongodb"),
             ]),
 
         .target(name: "UnixTime"),
