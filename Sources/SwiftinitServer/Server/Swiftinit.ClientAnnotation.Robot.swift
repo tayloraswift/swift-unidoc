@@ -19,6 +19,9 @@ extension Swiftinit.ClientAnnotation
 
         /// Amazon CloudFront.
         case cloudfront
+
+        case discoursebot
+
         /// Crawler belonging to DuckDuckGo, an American search engine. Only the favicon
         /// bot is active today.
         case duckduckbot

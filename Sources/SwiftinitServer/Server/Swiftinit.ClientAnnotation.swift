@@ -36,6 +36,7 @@ extension Swiftinit.ClientAnnotation
         case .robot(.bingbot):          \.verifiedBingbot
         case .robot(.cloudfront):       \.tooling
         case .robot(.bytespider):       \.otherRobot
+        case .robot(.discoursebot):     \.likelyDiscoursebot
         case .robot(.duckduckbot):      \.likelyMinorSearchEngine
         case .robot(.google):           \.otherRobot
         case .robot(.googlebot):        \.verifiedGooglebot
@@ -63,7 +64,24 @@ extension Swiftinit.ClientAnnotation
         }
 
         guard
-        let agent:String = headers.userAgent,
+        let agent:String = headers.userAgent
+        else
+        {
+            return .robot(.tool)
+        }
+
+        if  case "*"? = headers.acceptLanguage,
+            agent == """
+            Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) \
+            AppleWebKit/605.1.15 (KHTML, like Gecko) \
+            Version/14.0 Safari/605.1.15
+            """
+        {
+            // This is *probably* the Swift Forums bot.
+            return .robot(.discoursebot)
+        }
+
+        guard
         let agent:UA = .init(agent)
         else
         {

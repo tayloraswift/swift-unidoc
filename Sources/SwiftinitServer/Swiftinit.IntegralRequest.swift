@@ -54,6 +54,7 @@ extension Swiftinit.IntegralRequest:HTTP.ServerIntegralRequest
         case .robot(.bingbot):      break
         case .robot(.bytespider):   return nil
         case .robot(.cloudfront):   break
+        case .robot(.discoursebot): break
         case .robot(.duckduckbot):  break
         case .robot(.google):       break
         case .robot(.googlebot):    break
