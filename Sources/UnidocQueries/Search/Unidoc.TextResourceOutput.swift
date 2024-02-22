@@ -27,8 +27,8 @@ extension Unidoc.TextResourceOutput:MongoMasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case text = "J"
-        case hash = "H"
+        case text
+        case hash
     }
 }
 extension Unidoc.TextResourceOutput:BSONDocumentDecodable

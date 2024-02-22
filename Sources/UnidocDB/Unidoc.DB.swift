@@ -460,6 +460,19 @@ extension Unidoc.DB
     {
         //  We assume compressing the search JSON will take a (relatively) long time, so we do
         //  it before performing any database operations.
+        //
+        //  Our gzip compression is about 1.5 percent worse than Amazon CloudFront’s
+        //  compression, which uses the Brotli algorithm. But it saves us local disk space,
+        //  because we always store a copy of the search index in the database.
+        //
+        //  Amazon CloudFront will not re-compress files we have already compressed, so this
+        //  means users will need to download 1.5 percent more data to use the search index.
+        //  We think this is an acceptable trade-off, because compressing the search index
+        //  locally means we can add more symbols to each search index.
+        //
+        //  We could get the best of both worlds by decompressing the search index before
+        //  transferring it out to Amazon CloudFront. But that just doesn’t seem worth the CPU
+        //  cycles, either for us or for Amazon.
         let search:Unidoc.TextResource<Symbol.Edition> = .init(id: volume.id,
             text: .init(compressing: volume.index.utf8))
 

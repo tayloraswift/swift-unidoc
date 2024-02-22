@@ -44,57 +44,44 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
+        typealias Document = Unidoc.TextResource<CollectionOrigin.Element.ID>
+
         pipeline[stage: .match] = .init
         {
-            $0[Unidoc.TextResource<CollectionOrigin.Element.ID>[.id]] = self.id
-        }
-
-        guard
-        let tag:MD5 = self.tag
-        else
-        {
-            return
+            $0[Document[.id]] = self.id
         }
 
         pipeline[stage: .set] = .init
         {
-            $0[Unidoc.TextResourceOutput[.hash]] =
-                Unidoc.TextResource<CollectionOrigin.Element.ID>[.hash]
-
+            $0[Unidoc.TextResourceOutput[.hash]] = Document[.hash]
             $0[Unidoc.TextResourceOutput[.text]] = .expr
             {
-                $0[.cond] =
-                (
-                    if: .expr
-                    {
-                        $0[.eq] =
-                        (
-                            tag,
-                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.hash]
-                        )
-                    },
-                    then: .expr
-                    {
-                        $0[.binarySize] = .expr
+                if  let tag:MD5 = self.tag
+                {
+                    $0[.cond] =
+                    (
+                        if: .expr
                         {
-                            $0[.coalesce] =
-                            (
-                                Unidoc.TextResource<CollectionOrigin.Element.ID>[.gzip],
-                                Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
-                            )
+                            $0[.eq] = (tag, Document[.hash])
+                        },
+                        then: .expr
+                        {
+                            $0[.binarySize] = .expr
+                            {
+                                $0[.coalesce] = (Document[.gzip], Document[.utf8])
+                            }
+                        },
+                        else: .expr
+                        {
+                            $0[.coalesce] = (Document[.gzip], Document[.utf8])
                         }
-                    },
-                    else: .expr
-                    {
-                        $0[.coalesce] =
-                        (
-                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.gzip],
-                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
-                        )
-                    }
-                )
+                    )
+                }
+                else
+                {
+                    $0[.coalesce] = (Document[.gzip], Document[.utf8])
+                }
             }
         }
     }
 }
-
