@@ -51,13 +51,6 @@ extension Unidoc.Volume
 }
 extension Unidoc.Volume
 {
-    @available(*, deprecated)
-    @inlinable public
-    var search:Unidoc.TextResource<Symbol.Edition>
-    {
-        .init(id: self.id, text: .utf8(self.index.utf8[...]))
-    }
-
     public
     func sitemap() -> Unidoc.Sitemap
     {
