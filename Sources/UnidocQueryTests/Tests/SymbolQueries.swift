@@ -244,7 +244,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         value: vertex.overview)
                 {
                     //  This checks that we cached the two instances of `Barbie.ID`
-                    tests.expect(overview.outlines.count ==? 5)
+                    tests.expect(overview.outlines.count ==? 6)
                     tests.expect(tree.rows ..?
                         [
                             .init(
@@ -285,41 +285,33 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
-
-                    for outline:Unidoc.Outline in overview.outlines
+                    let lengths:[String: Int] = overview.outlines.reduce(into: [:])
                     {
-                        let scalars:[Unidoc.Scalar]?
-                        switch outline
-                        {
-                        case    .path("Int", let path),
-                                .path("ID", let path),
-                                .path("Barbie", let path):
-                            tests.expect(path.count ==? 1)
-                            scalars = path
-
-                        case    .path("Barbie ID", let path):
-                            tests.expect(path.count ==? 2)
-                            scalars = path
-
-                        case    .path("BarbieCore Barbie ID", let path):
-                            tests.expect(path.count ==? 2)
-                            scalars = path
-
-                        case _:
-                            scalars = nil
-                        }
-
-                        guard let scalars:[Unidoc.Scalar] = tests.expect(value: scalars)
+                        guard
+                        case .path(let words, let path) = $1
                         else
                         {
-                            continue
+                            tests.expect(value: nil as [Unidoc.Scalar]?)
+                            return
+                        }
+                        for id:Unidoc.Scalar in path
+                        {
+                            tests.expect(true: secondaries.contains(id))
                         }
 
-                        for scalar:Unidoc.Scalar in scalars
-                        {
-                            tests.expect(true: secondaries.contains(scalar))
-                        }
+                        $0[words, default: 0] += path.count
                     }
+                    //  The ``Int.max`` test case is especially valuable because not only is it
+                    //  a multi-component cross-package reference, but the `max` member is also
+                    //  being inherited from ``SignedInteger``.
+                    tests.expect(lengths ==? [
+                            "Int": 1,
+                            "Int max": 2,
+                            "ID": 1,
+                            "Barbie": 1,
+                            "Barbie ID": 2,
+                            "BarbieCore Barbie ID": 3,
+                        ])
                 }
             }
         }

@@ -450,6 +450,7 @@ let package:Package = .init(
 
         .target(name: "Symbols",
             dependencies: [
+                .target(name: "FNV1"),
                 .target(name: "Sources"),
             ]),
 

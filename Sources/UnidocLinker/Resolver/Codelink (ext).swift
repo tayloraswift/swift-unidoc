@@ -10,7 +10,7 @@ extension Codelink
         {
         case .doc:
             guard
-            let doclink:Doclink = .init(unresolved.link)
+            let doclink:Doclink = .init(doc: unresolved.link[...])
             else
             {
                 return nil
@@ -18,11 +18,11 @@ extension Codelink
 
             self.init(doclink.path.joined(separator: "/"))
 
-        case .web:
-            return nil
-
         case .ucf:
             self.init(unresolved.link)
+
+        case .web:
+            return nil
 
         case .unidocV3:
             guard

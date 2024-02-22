@@ -12,6 +12,27 @@ extension SymbolGraph
         case unresolved(Unresolved)
     }
 }
+//  These are only here to make it obvious these links do not contain a scheme.
+extension SymbolGraph.Outline
+{
+    @inlinable public static
+    func unresolved(doc link:String, location:SourceLocation<Int32>?) -> Self
+    {
+        .unresolved(.init(link: link, type: .doc, location: location))
+    }
+
+    @inlinable public static
+    func unresolved(web link:String, location:SourceLocation<Int32>?) -> Self
+    {
+        .unresolved(.init(link: link, type: .web, location: location))
+    }
+
+    @inlinable public static
+    func unresolved(ucf link:String, location:SourceLocation<Int32>?) -> Self
+    {
+        .unresolved(.init(link: link, type: .ucf, location: location))
+    }
+}
 extension SymbolGraph.Outline
 {
     public

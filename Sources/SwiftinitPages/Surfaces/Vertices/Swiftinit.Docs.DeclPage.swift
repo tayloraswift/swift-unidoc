@@ -235,7 +235,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                 {
                     $0[.code]
                     {
-                        let hash:FNV24 = .init(hashing: "\(self.vertex.symbol)")
+                        let hash:FNV24 = .init(truncating: .decl(self.vertex.symbol))
                         $0 += "FNV24: ["
                         $0[.span] { $0.class = "fnv24" } = "\(hash)"
                         $0 += "]"

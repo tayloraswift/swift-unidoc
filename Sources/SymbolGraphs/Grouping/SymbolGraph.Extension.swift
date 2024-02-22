@@ -8,6 +8,11 @@ extension SymbolGraph
     {
         public
         let conditions:[GenericConstraint<Int32>]
+        /// The index of the namespace in which the extended type is declared. For extensions
+        /// that extend types declared in the **same package**, this is the same index as the
+        /// one you would obtaine by iterating cultural namespaces, and is therefore redundant.
+        /// For extensions that extend types declared in **other packages**, this is the
+        /// **only** way to know what namespace the extended type is declared in.
         public
         let namespace:Int
         public

@@ -115,29 +115,52 @@ extension Unidoc.Linker.Graph
 }
 extension Unidoc.Linker.Graph
 {
-    func namespace(of declaration:Unidoc.Scalar) -> Symbol.Module?
-    {
-        (declaration - self.id).map(self.namespace(of:)) ?? nil
-    }
     /// Returns the module namespace of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
     ///
     /// This returns nil if the requested declaration is a top-level declaration, of if it
     /// is not a citizen of this snapshot.
-    func namespace(of declaration:Int32) -> Symbol.Module?
+    func namespace(of declaration:Unidoc.Scalar) -> Symbol.Module?
     {
-        self.qualifiers[declaration].map { self.namespaces[$0] }
+        (declaration - self.id).map(self.namespace(of:)) ?? nil
     }
 
-    func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
+    /// Returns the lexical scope of the requested declaration, if the requested declaration
+    /// is a citizen of this snapshot and is not a top-level declaration. If the requested
+    /// declaration is a top-level declaration, this returns the module it is namespaced to.
+    func ancestor(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
     {
-        (declaration - self.id).map(self.scope(of:)) ?? nil
+        (declaration - self.id).map(self.ancestor(of:)) ?? nil
     }
+
     /// Returns the lexical scope of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
     ///
     /// This returns nil if the requested declaration is a top-level declaration, or if it
     /// is not a citizen of this snapshot.
+    func scope(of declaration:Unidoc.Scalar) -> Unidoc.Scalar?
+    {
+        (declaration - self.id).map(self.scope(of:)) ?? nil
+    }
+
+}
+extension Unidoc.Linker.Graph
+{
+    private
+    func namespace(of declaration:Int32) -> Symbol.Module?
+    {
+        self.qualifiers[declaration].map { self.namespaces[$0] }
+    }
+
+    private
+    func ancestor(of declaration:Int32) -> Unidoc.Scalar?
+    {
+        self.hierarchy[declaration] ?? self.qualifiers[declaration].flatMap
+        {
+            self.scalars.modules[$0]
+        }
+    }
+
     func scope(of declaration:Int32) -> Unidoc.Scalar?
     {
         self.hierarchy[declaration]
