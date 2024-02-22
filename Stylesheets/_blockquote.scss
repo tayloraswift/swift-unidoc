@@ -10,4 +10,8 @@ blockquote
     {
         font-style: normal;
     }
+    img
+    {
+        @include inline-image;
+    }
 }

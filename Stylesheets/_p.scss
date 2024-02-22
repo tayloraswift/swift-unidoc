@@ -9,6 +9,10 @@ p
     {
         @include inline-code;
     }
+    img
+    {
+        @include inline-image;
+    }
 }
 
 p.note
