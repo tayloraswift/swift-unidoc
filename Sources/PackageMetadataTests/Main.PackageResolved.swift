@@ -102,7 +102,7 @@ extension Main.PackageResolved:TestBattery
             tests.do
             {
                 let filepath:FilePath = "Package.resolved"
-                let json:JSON = .init(utf8: try filepath.read())
+                let json:JSON = .init(utf8: try filepath.read()[...])
                 let _:SPM.DependencyResolutions = try json.decode()
             }
         }

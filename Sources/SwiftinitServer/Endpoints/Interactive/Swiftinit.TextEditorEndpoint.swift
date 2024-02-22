@@ -34,7 +34,10 @@ extension Swiftinit.TextEditorEndpoint:RestrictedEndpoint
             try await server.db.metadata.find(id: .robots_txt, with: session)
 
         let page:Swiftinit.TextEditorPage = .init(
-            string: text.map { String.init(decoding: $0.utf8, as: UTF8.self) } ?? "",
+            string: try text.map
+            {
+                String.init(decoding: try $0.text.utf8(), as: UTF8.self)
+            } ?? "",
             action: action)
 
         return .ok(page.resource(format: server.format))

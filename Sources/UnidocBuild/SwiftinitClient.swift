@@ -51,7 +51,7 @@ extension SwiftinitClient
 {
     func uplink(editions:FilePath) async throws
     {
-        let json:JSON = .init(utf8: try editions.read())
+        let json:JSON = .init(utf8: try editions.read()[...])
         let coordinates:[Coordinates] = try json.decode()
         for coordinates:Coordinates in coordinates.sorted()
         {

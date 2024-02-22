@@ -47,7 +47,8 @@ extension HTTP.ServerMessage
             copying: .init(
                 headers: .init(),
                 content: .string(Authority.redact(error: error)),
-                type: .text(.plain, charset: .utf8)),
+                type: .text(.plain, charset: .utf8),
+                gzip: false),
             using: allocator)
     }
 }
@@ -119,5 +120,9 @@ extension HTTP.ServerMessage
         self.headers.add(name: "access-control-allow-origin", value: "*")
         self.headers.add(name: "content-length", value: "\(length)")
         self.headers.add(name: "content-type",   value: "\(resource.type)")
+        if  resource.gzip
+        {
+            self.headers.add(name: "content-encoding", value: "gzip")
+        }
     }
 }

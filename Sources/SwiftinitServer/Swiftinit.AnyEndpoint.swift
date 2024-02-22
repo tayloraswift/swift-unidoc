@@ -458,9 +458,8 @@ extension Swiftinit.AnyEndpoint
                 if  let item:MultipartForm.Item = form.first(
                         where: { $0.header.name == "text" })
                 {
-                    return .procedural(Swiftinit.TextUpdateEndpoint.init(text: .init(
-                        id: .robots_txt,
-                        utf8: [UInt8].init(item.value))))
+                    return .procedural(Swiftinit.TextUpdateEndpoint.init(
+                        text: .init(id: .robots_txt, text: .utf8(item.value))))
                 }
 
             default:

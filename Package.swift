@@ -543,6 +543,7 @@ let package:Package = .init(
                 .target(name: "GitHubAPI"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnixTime"),
+                .product(name: "LZ77", package: "swift-png"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -625,7 +626,6 @@ let package:Package = .init(
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),
                 .target(name: "SwiftinitPlugins"),
-                .product(name: "LZ77", package: "swift-png"),
             ]),
 
 

@@ -10,14 +10,14 @@ extension Unidoc
     struct TextResourceOutput:Sendable
     {
         public
-        let utf8:Content
+        let text:Content
         public
         let hash:MD5
 
         @inlinable public
-        init(utf8:Content, hash:MD5)
+        init(text:Content, hash:MD5)
         {
-            self.utf8 = utf8
+            self.text = text
             self.hash = hash
         }
     }
@@ -27,7 +27,7 @@ extension Unidoc.TextResourceOutput:MongoMasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case utf8 = "J"
+        case text = "J"
         case hash = "H"
     }
 }
@@ -36,18 +36,23 @@ extension Unidoc.TextResourceOutput:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let utf8:Content = try bson[.utf8].decode
+        let text:Content = try bson[.text].decode
         {
-            if  case .string(let utf8) = $0
+            if  case .binary(let gzip) = $0
+            {
+                .inline(.gzip(gzip.bytes))
+            }
+            else if
+                case .string(let utf8) = $0
             {
                 //  Do we really need to copy the bytes here?
-                .binary([UInt8].init(utf8.bytes))
+                .inline(.utf8(utf8.bytes))
             }
             else
             {
                 .length(try $0.cast { try $0.as(Int.self) })
             }
         }
-        self.init(utf8: utf8, hash: try bson[.hash].decode())
+        self.init(text: text, hash: try bson[.hash].decode())
     }
 }
