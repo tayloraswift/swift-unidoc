@@ -9,6 +9,7 @@ extension ServerProfile.ByClient
         case likelyYandexbot
         case likelyMinorSearchEngine
         case likelyAhrefsbot
+        case likelyDiscoursebot
         case otherRobot
         case tooling
         case barbie
@@ -28,6 +29,7 @@ extension ServerProfile.ByClient.SectorKey:Identifiable
         case .likelyYandexbot:              "yandexbot"
         case .likelyMinorSearchEngine:      "minor-search-engine"
         case .likelyAhrefsbot:              "ahrefsbot"
+        case .likelyDiscoursebot:           "discoursebot"
         case .otherRobot:                   "robot"
         case .tooling:                      "tooling"
         case .barbie:                       "barbie"
@@ -46,9 +48,10 @@ extension ServerProfile.ByClient.SectorKey:PieSectorKey
         case .verifiedBingbot:              "Bingbots (Verified)"
         case .likelyBaiduspider:            "Baiduspiders"
         case .likelyYandexbot:              "Yandexbots"
-        case .likelyMinorSearchEngine:      "Minor Search Engines"
+        case .likelyMinorSearchEngine:      "Minor search engines"
         case .likelyAhrefsbot:              "Ahrefsbots"
-        case .otherRobot:                   "Other Robots"
+        case .likelyDiscoursebot:           "Discourse forums"
+        case .otherRobot:                   "Other robots"
         case .tooling:                      "Tooling"
         case .barbie:                       "Barbies"
         case .bratz:                        "Bratz"
