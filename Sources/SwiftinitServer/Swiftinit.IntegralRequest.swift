@@ -198,11 +198,15 @@ extension Swiftinit.IntegralRequest
                 with: .init(uri.query?.parameters))
 
         case Swiftinit.Root.blog.id:
-            endpoint = .get(articles: trunk,
+            endpoint = .get(blog: "Articles", trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.docs.id, Swiftinit.Root.docc.id, Swiftinit.Root.hist.id:
             endpoint = .get(docs: trunk, path,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Swiftinit.Root.help.id:
+            endpoint = .get(blog: "Help", trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.lunr.id:

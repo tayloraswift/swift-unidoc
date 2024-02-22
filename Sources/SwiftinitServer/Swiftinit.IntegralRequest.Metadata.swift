@@ -1,4 +1,5 @@
 import HTTP
+import HTTPServer
 import IP
 import NIOHPACK
 import NIOHTTP1
@@ -19,6 +20,7 @@ extension Swiftinit.IntegralRequest
         let service:IP.Service?
         let path:String
 
+        private
         init(
             annotation:Swiftinit.ClientAnnotation,
             cookies:Swiftinit.Cookies,
@@ -97,5 +99,14 @@ extension Swiftinit.IntegralRequest.Metadata
             address: address,
             service: service,
             path: path)
+
+        if  case .robot(.discoursebot) = self.annotation
+        {
+            Log[.debug] = """
+            Approved possible Swift Forums robot
+                User-Agent: '\(headers.userAgent ?? "")'
+                IP Address: \(address)
+            """
+        }
     }
 }

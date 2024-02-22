@@ -189,7 +189,11 @@ extension Unidoc.Resolver
                 return .text(unresolved.link)
             }
 
-            let text:String = codelink.path.visible.joined(separator: ".")
+            /// This looks a lot like a stem, but it always uses spaces, never tabs.
+            /// Its purpose is to allow splitting the path into words without parsing the
+            /// Swift language grammar.
+            var path:String { codelink.path.visible.joined(separator: " ") }
+            var text:String { codelink.path.visible.joined(separator: ".") }
             let length:Int = codelink.path.visible.count
 
             switch resolution
@@ -198,10 +202,10 @@ extension Unidoc.Resolver
                 return .text(text)
 
             case .scalar(let scalar)?:
-                return .path(text, self.context.expand(scalar, to: length))
+                return .path(path, self.context.expand(scalar, to: length))
 
             case .vector(let feature, self: let heir)?:
-                return .path(text, self.context.expand((heir, feature), to: length))
+                return .path(path, self.context.expand((heir, feature), to: length))
             }
         }
 

@@ -145,12 +145,13 @@ extension Swiftinit.AnyEndpoint
     }
 
     static
-    func get(articles trunk:String,
+    func get(blog:String,
+        _ trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
         .explainable(Swiftinit.BlogEndpoint.init(query: .init(
                 volume: .init(package: "__swiftinit", version: "__max"),
-                vertex: .init(path: ["Articles", trunk], hash: nil))),
+                vertex: .init(path: [blog, trunk], hash: nil))),
             parameters: parameters)
     }
 

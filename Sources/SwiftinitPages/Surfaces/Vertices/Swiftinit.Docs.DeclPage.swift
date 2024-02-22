@@ -221,6 +221,14 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                 $0[.p, { $0.class = "symbol" }]
                 {
                     $0[.code] = self.vertex.symbol.rawValue
+
+                    $0[.span, { $0.class = "parenthetical" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "/help/what-are-mangled-names"
+                        } = "What are these?"
+                    }
                 }
 
                 $0[.p]

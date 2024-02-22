@@ -11,6 +11,7 @@ extension Swiftinit
         case blog
         case docs
         case docc
+        case help
         case hist
         case login
         case lunr
@@ -53,6 +54,7 @@ extension Swiftinit.Root:Identifiable
         case .blog:         "articles"
         case .docs:         "docs"
         case .docc:         "docc"
+        case .help:         "help"
         case .hist:         "hist"
         case .login:        "login"
         case .lunr:         "lunr"
