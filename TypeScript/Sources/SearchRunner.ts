@@ -20,9 +20,9 @@ export class SearchRunner {
             for (let i = 0; i < symbols.length; i++) {
                 const symbol: AnySymbol = symbols[i];
                 if ('module' in symbol) {
-                    this.add({ i: i, mwords: symbol.keywords });
+                    this.add({ i: i, mwords: symbol.keywords }, { boost: symbol.weight });
                 } else {
-                    this.add({ i: i, pwords: symbol.keywords });
+                    this.add({ i: i, pwords: symbol.keywords }, { boost: 10 });
                 }
             }
         });
