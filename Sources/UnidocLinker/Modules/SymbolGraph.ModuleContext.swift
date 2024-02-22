@@ -76,7 +76,7 @@ extension SymbolGraph.ModuleContext
                 self.codelinks[module].overload(with: .init(
                     target: .scalar(c),
                     phylum: nil,
-                    hash: .init(hashing: "\(module)")))
+                    hash: .init(truncating: .module(module))))
             }
 
             for namespace:SymbolGraph.Namespace in culture.namespaces
@@ -100,7 +100,8 @@ extension SymbolGraph.ModuleContext
             let node:SymbolGraph.DeclNode = snapshot.decls.nodes[s]
             let symbol:Symbol.Decl = snapshot.decls.symbols[s]
 
-            guard let s:Unidoc.Scalar = snapshot.scalars.decls[s]
+            guard
+            let s:Unidoc.Scalar = snapshot.scalars.decls[s]
             else
             {
                 continue
@@ -108,21 +109,38 @@ extension SymbolGraph.ModuleContext
 
             if  let citizen:SymbolGraph.Decl = node.decl
             {
+                //  Extensions extend a declaration in the same package. The namespace is just
+                //  the namespace referenced in `namespace`.
                 self.codelinks[qualifier, citizen.path].overload(with: .init(
                     target: .scalar(s),
                     phylum: citizen.phylum,
-                    hash: .init(hashing: "\(symbol)")))
-            }
-            if  node.extensions.isEmpty
-            {
-                continue
-            }
-            //  Extension may extend a scalar from a different package.
-            if  let outer:SymbolGraph.Decl = node.decl ??
-                    context[s.package]?.decls[s.citizen]?.decl
-            {
+                    hash: .init(truncating: .decl(symbol))))
+
                 self.add(extensions: node.extensions,
-                    extending: (s, symbol, outer.path),
+                    extending: (s, symbol, citizen),
+                    qualifier: qualifier,
+                    snapshot: snapshot,
+                    context: context,
+                    filter: filter)
+            }
+            else if
+                let first:SymbolGraph.Extension = node.extensions.first,
+                let outer:SymbolGraph.Decl = context[s.package]?.decls[s.citizen]?.decl
+            {
+                //  Extensions extend a declaration in a different package. We know all the
+                //  extensions must share the same namespace, and we also know that a copy of
+                //  that string is present in the symbol graph we are adding. Therefore, the
+                //  namespace referenced by the first extension in the list is the namespace for
+                //  all the extensions.
+                let qualifier:Symbol.Module = snapshot.namespaces[first.namespace]
+
+                //  We know that at least one such extension must exist, because otherwise the
+                //  hollow node would not exist in the symbol graph in the first place. If there
+                //  are no extensions, the node should not be hollow, and we should have taken
+                //  the other branch of the `if` statement.
+                self.add(extensions: node.extensions,
+                    extending: (s, symbol, outer),
+                    qualifier: qualifier,
                     snapshot: snapshot,
                     context: context,
                     filter: filter)
@@ -135,12 +153,31 @@ extension SymbolGraph.ModuleContext
         (
             scalar:Unidoc.Scalar,
             symbol:Symbol.Decl,
-            path:UnqualifiedPath
+            decl:SymbolGraph.Decl
         ),
+        qualifier:Symbol.Module,
         snapshot:Unidoc.Linker.Graph,
         context:borrowing Unidoc.Linker,
         filter:Set<Int>?)
     {
+        //  We really shouldn’t have to do this, but lib/SymbolGraphGen just sucks.
+        for f:Int32 in outer.decl.features
+        {
+            var symbol:Symbol.Decl.Vector
+            {
+                .init(snapshot.decls.symbols[f], self: outer.symbol)
+            }
+            if  let f:Unidoc.Scalar = snapshot.scalars.decls[f],
+                let inner:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
+            {
+                self.codelinks[qualifier, outer.decl.path, inner.path.last]
+                    .overload(with: .init(
+                        target: .vector(f, self: outer.scalar),
+                        phylum: inner.phylum,
+                        hash: .init(truncating: .decl(symbol))))
+            }
+        }
+
         for `extension`:SymbolGraph.Extension in extensions where
             filter?.contains(`extension`.culture) ?? true
         {
@@ -167,21 +204,20 @@ extension SymbolGraph.ModuleContext
                 continue
             }
 
-            //  This can be completely different from the namespace of the extended type!
-            let qualifier:Symbol.Module = snapshot.namespaces[`extension`.namespace]
             for f:Int32 in `extension`.features
             {
-                let symbol:Symbol.Decl.Vector = .init(snapshot.decls.symbols[f],
-                    self: outer.symbol)
-
+                var symbol:Symbol.Decl.Vector
+                {
+                    .init(snapshot.decls.symbols[f], self: outer.symbol)
+                }
                 if  let f:Unidoc.Scalar = snapshot.scalars.decls[f],
                     let inner:SymbolGraph.Decl = context[f.package]?.decls[f.citizen]?.decl
                 {
-                    self.codelinks[qualifier, outer.path, inner.path.last]
+                    self.codelinks[qualifier, outer.decl.path, inner.path.last]
                         .overload(with: .init(
                             target: .vector(f, self: outer.scalar),
                             phylum: inner.phylum,
-                            hash: .init(hashing: "\(symbol)")))
+                            hash: .init(truncating: .decl(symbol))))
                 }
             }
         }

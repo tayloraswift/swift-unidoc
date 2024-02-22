@@ -171,7 +171,7 @@ extension Unidoc.Linker
     {
         self.expand(vector.0, to: length - 1) + [vector.1]
     }
-    func expand(_ scalar:Unidoc.Scalar, to length:Int = .max) -> [Unidoc.Scalar]
+    func expand(_ scalar:Unidoc.Scalar, to length:Int) -> [Unidoc.Scalar]
     {
         var current:Unidoc.Scalar = scalar
         var path:[Unidoc.Scalar] = [current]
@@ -181,16 +181,34 @@ extension Unidoc.Linker
 
         for _:Int in 1 ..< max(1, length)
         {
-            if  case let next? = self[current.package]?.scope(of: current),
-                case nil = seen.update(with: next)
-            {
-                path.append(next)
-                current = next
-            }
+            guard
+            let next:Unidoc.Scalar = self[current.package]?.ancestor(of: current),
+            case nil = seen.update(with: next)
             else
             {
                 break
             }
+
+            path.append(next)
+            current = next
+        }
+
+        return path.reversed()
+    }
+    /// This function looks very similar to `expand(_:to:)`, but it never includes the module
+    /// namespace!
+    func expand(_ scalar:Unidoc.Scalar) -> [Unidoc.Scalar]
+    {
+        var current:Unidoc.Scalar = scalar
+        var path:[Unidoc.Scalar] = [current]
+        var seen:Set<Unidoc.Scalar> = [current]
+
+        while let next:Unidoc.Scalar = self[current.package]?.scope(of: current),
+            case nil = seen.update(with: next)
+        {
+
+            path.append(next)
+            current = next
         }
 
         return path.reversed()

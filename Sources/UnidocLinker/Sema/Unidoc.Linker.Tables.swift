@@ -280,6 +280,7 @@ extension Unidoc.Linker.Tables
                                 by: Unidoc.SemanticPriority.self)))
                     }
 
+                    //  We really shouldn’t have to do this, but lib/SymbolGraphGen just sucks.
                     for f:Int32 in decl.features
                     {
                         //  The feature might have been declared in a different package!

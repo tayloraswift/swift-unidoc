@@ -153,10 +153,8 @@ extension SSGC.Outliner
     private mutating
     func outline(translating link:Markdown.SourceString, to url:Substring) -> Int?
     {
-        self.cache.append(outline: .unresolved(.init(
-            link: String.init(url),
-            type: .web,
-            location: link.source.start)))
+        self.cache.append(outline: .unresolved(web: String.init(url),
+            location: link.source.start))
     }
 
     private mutating
@@ -164,21 +162,23 @@ extension SSGC.Outliner
     {
         self.cache(link.string)
         {
-            var type:SymbolGraph.Outline.Unresolved.LinkType? = nil
+            resolution:
             if  code
             {
-                if  let codelink:Codelink = .init(link.string)
+                guard
+                let codelink:Codelink = .init(link.string)
+                else
                 {
-                    if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                            at: link.source)
-                    {
-                        return outline
-                    }
-                    else
-                    {
-                        type = .ucf
-                    }
+                    break resolution
                 }
+
+                if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
+                        at: link.source)
+                {
+                    return outline
+                }
+
+                return .unresolved(ucf: link.string, location: link.source.start)
             }
             else if let doclink:Doclink = .init(doc: link.string[...])
             {
@@ -195,29 +195,17 @@ extension SSGC.Outliner
                 {
                     return outline
                 }
-                else
-                {
-                    self.resolver.diagnostics[link.source] =
-                        Warning.doclinkNotStaticallyResolvable(doclink)
 
-                    type = .doc
-                }
-            }
-
-            if  let type:SymbolGraph.Outline.Unresolved.LinkType
-            {
-                return .unresolved(.init(
-                    link: link.string,
-                    type: type,
-                    location: link.source.start))
-            }
-            else
-            {
                 self.resolver.diagnostics[link.source] =
-                    InvalidAutolinkError<SSGC.Symbolicator>.init(link)
+                    Warning.doclinkNotStaticallyResolvable(doclink)
 
-                return nil
+                return .unresolved(doc: link.string, location: link.source.start)
             }
+
+            self.resolver.diagnostics[link.source] =
+                InvalidAutolinkError<SSGC.Symbolicator>.init(link)
+
+            return nil
         }
     }
 }

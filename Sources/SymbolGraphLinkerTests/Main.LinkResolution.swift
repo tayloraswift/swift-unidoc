@@ -133,8 +133,8 @@ extension Main.LinkResolution:TestBattery
                     tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
-                        .unresolved(.init(link: "A.b", type: .ucf, location: nil)),
-                        .unresolved(.init(link: "A.c", type: .ucf, location: nil))
+                        .unresolved(ucf: "A.b", location: nil),
+                        .unresolved(ucf: "A.c", location: nil)
                     ])
                 }
             }

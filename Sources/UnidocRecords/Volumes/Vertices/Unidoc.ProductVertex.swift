@@ -38,8 +38,8 @@ extension Unidoc
 extension Unidoc.ProductVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
-    var stem:Unidoc.Stem { .product(Symbol.Module.init(mangling: self.symbol)) }
+    var stem:Unidoc.Stem { .product(self.symbol) }
 
     @inlinable public
-    var hash:FNV24.Extended { .init(hashing: "s:p:\(self.symbol)") }
+    var hash:FNV24.Extended { .product(self.symbol) }
 }

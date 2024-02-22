@@ -169,7 +169,7 @@ extension SSGC.Linker
                     self.symbolizer.graph.namespaces[destination.index]
                 for (scalar, decl) in zip(destination.range, source.decls)
                 {
-                    let hash:FNV24 = .init(hashing: "\(decl.id)")
+                    let hash:FNV24 = .init(truncating: .decl(decl.id))
                     //  Make the decl visible to codelink resolution.
                     self.tables.codelinks[qualifier, decl.path].overload(with: .init(
                         target: .scalar(scalar),
@@ -353,7 +353,7 @@ extension SSGC.Linker
             self.tables.codelinks[namespace].overload(with: .init(
                 target: .scalar(n * .module),
                 phylum: nil,
-                hash: .init(hashing: "\(namespace)")))
+                hash: .init(truncating: .module(namespace))))
         }
 
         return articles

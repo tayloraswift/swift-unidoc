@@ -1,5 +1,6 @@
 import FNV1
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocAPI
 
@@ -52,5 +53,5 @@ extension Unidoc.CultureVertex:Unidoc.PrincipalVertex
     var stem:Unidoc.Stem { .module(self.module.id) }
 
     @inlinable public
-    var hash:FNV24.Extended { .init(hashing: "s:m:\(self.module.id)") }
+    var hash:FNV24.Extended { .module(self.module.id) }
 }

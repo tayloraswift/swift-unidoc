@@ -7,7 +7,8 @@ extension Barbie
     /// namespace. We can also refer to it as ``Barbie.ID``, or
     /// ``BarbieCore.Barbie.ID``. As an optimization, Unidoc combines multiple
     /// occurrences of the same codelink, such as ``Barbie.ID``, into a single
-    /// outline. We can also reference standard library types like ``Int``.
+    /// outline. We can also reference standard library types like ``Int``. And we can reference
+    /// nested standard library types like ``Int.max``.
     public
     enum Dreamhouse
     {
