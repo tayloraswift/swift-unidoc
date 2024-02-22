@@ -60,7 +60,9 @@ extension Unidoc.TextResource:BSONDocumentEncodable, BSONEncodable
         case .gzip(let gzip):
             bson[.hash] = MD5.init(hashing: gzip)
             bson[.gzip] = BSON.BinaryView<ArraySlice<UInt8>>.init(
-                subtype: .compressed,
+                //  Do NOT use `compressed` here. That has a special meaning to MongoDB,
+                //  and newer versions of `mongod` will reject it.
+                subtype: .generic,
                 bytes: gzip)
         }
     }
