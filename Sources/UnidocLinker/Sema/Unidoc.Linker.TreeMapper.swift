@@ -44,18 +44,45 @@ extension Unidoc.Linker.TreeMapper
     {
         self.local[vertex.id] = (vertex.shoot, vertex.flags)
 
+        var flags:Flags?
+        {
+            if !vertex.signature.availability.isGenerallyRecommended
+            {
+                return .deprecated
+            }
+            else if case _? = vertex.signature.spis
+            {
+                return .spi
+            }
+            else
+            {
+                return nil
+            }
+        }
+
         switch vertex.phylum
         {
         case .actor, .class, .struct, .enum, .protocol, .macro(.attached):
             self.trees[vertex.culture, default: []].types[vertex.shoot] =
                 (.culture, vertex.flags)
 
-        case .func(nil), .var(nil), .macro(.freestanding):
-            //  Global procedures show up in search, but not in the type tree.
-            self.trees[vertex.culture, default: []].procs.append(vertex.shoot)
+        case .typealias:
+            //  Typealiases show up in search, but not in the type tree. Typealiases are often
+            //  deprecated, and disappear from signatures. That’s why people search for them.
+            fallthrough
 
-        case _:
-            return
+        case .associatedtype, .case, .func, .macro(.freestanding), .var:
+            //  Don’t include C declarations in search.
+            if  vertex.flags.cdecl
+            {
+                break
+            }
+
+            self.trees[vertex.culture, default: []].extra.append((vertex.shoot, flags))
+
+        case .operator, .deinitializer, .initializer, .subscript:
+            //  These all look the same, so they probably wouldn’t be very useful in search.
+            break
         }
     }
 }
@@ -206,12 +233,13 @@ extension Unidoc.Linker.TreeMapper
                                 $0["h"] = noun.shoot.hash?.value
                             }
                         }
-                        for shoot:Unidoc.Shoot in members.procs
+                        for (shoot, flags):(Unidoc.Shoot, Flags?) in members.extra
                         {
                             $0[+, Any.self]
                             {
                                 $0["s"] = shoot.stem.rawValue
                                 $0["h"] = shoot.hash?.value
+                                $0["f"] = flags
                             }
                         }
                     }

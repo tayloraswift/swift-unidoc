@@ -1,5 +1,6 @@
 export type ModularSymbol = {
     module: string;
+    weight: number;
     keywords: string[];
     display: string;
     uri: string;
