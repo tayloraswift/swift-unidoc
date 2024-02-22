@@ -29,6 +29,7 @@ extension Swiftinit.ExplanatoryEndpoint:PublicEndpoint
 
         return .ok(.init(
             content: .string(explanation),
-            type: .text(.plain, charset: .utf8)))
+            type: .text(.plain, charset: .utf8),
+            gzip: false))
     }
 }

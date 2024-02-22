@@ -183,7 +183,7 @@ extension Toolchain
                 return try $0.readAll()
             }
 
-            json = .init(utf8: utf8)
+            json = .init(utf8: utf8[...])
         }
         catch let error
         {

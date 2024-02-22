@@ -6,11 +6,13 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
+@available(*, deprecated, renamed: "Unidoc.TextResourceQuery")
 public
 typealias SearchIndexQuery = Unidoc.TextResourceQuery
 
 extension Unidoc
 {
+    /// A query that can avoid fetching the resource’s data if the hash matches.
     @frozen public
     struct TextResourceQuery<CollectionOrigin>:Equatable, Hashable, Sendable
         where CollectionOrigin:Mongo.CollectionModel
@@ -59,7 +61,7 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
             $0[Unidoc.TextResourceOutput[.hash]] =
                 Unidoc.TextResource<CollectionOrigin.Element.ID>[.hash]
 
-            $0[Unidoc.TextResourceOutput[.utf8]] = .expr
+            $0[Unidoc.TextResourceOutput[.text]] = .expr
             {
                 $0[.cond] =
                 (
@@ -73,10 +75,23 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
                     },
                     then: .expr
                     {
-                        $0[.binarySize] =
-                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
+                        $0[.binarySize] = .expr
+                        {
+                            $0[.coalesce] =
+                            (
+                                Unidoc.TextResource<CollectionOrigin.Element.ID>[.gzip],
+                                Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
+                            )
+                        }
                     },
-                    else: Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
+                    else: .expr
+                    {
+                        $0[.coalesce] =
+                        (
+                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.gzip],
+                            Unidoc.TextResource<CollectionOrigin.Element.ID>[.utf8]
+                        )
+                    }
                 )
             }
         }

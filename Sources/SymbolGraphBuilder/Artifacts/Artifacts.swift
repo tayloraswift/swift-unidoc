@@ -31,7 +31,7 @@ extension Artifacts
 
             do
             {
-                return try .init(json: .init(utf8: try path.read()), id: $0)
+                return try .init(json: .init(utf8: try path.read()[...]), id: $0)
             }
             catch let error
             {

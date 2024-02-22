@@ -48,7 +48,8 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         {
             return .notFound(.init(
                 content: .string("Snapshot not found."),
-                type: .text(.plain, charset: .utf8)))
+                type: .text(.plain, charset: .utf8),
+                gzip: false))
         }
 
         guard

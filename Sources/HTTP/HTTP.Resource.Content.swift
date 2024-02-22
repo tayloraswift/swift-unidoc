@@ -5,10 +5,18 @@ extension HTTP.Resource
     @frozen public
     enum Content:Equatable, Sendable
     {
-        case binary([UInt8])
+        case binary(ArraySlice<UInt8>)
         case buffer(ByteBuffer)
         case string(String)
         case length(Int)
+    }
+}
+extension HTTP.Resource.Content
+{
+    @inlinable public static
+    func binary(_ bytes:[UInt8]) -> Self
+    {
+        .binary(bytes[...])
     }
 }
 extension HTTP.Resource.Content

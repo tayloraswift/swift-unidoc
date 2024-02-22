@@ -34,7 +34,8 @@ extension Swiftinit.GraphPlacementEndpoint:BlockingEndpoint
             let json:JSON = .encode(uploaded)
 
             return .ok(.init(content: .binary(json.utf8),
-                type: .application(.json, charset: .utf8)))
+                type: .application(.json, charset: .utf8),
+                gzip: false))
         }
     }
 }

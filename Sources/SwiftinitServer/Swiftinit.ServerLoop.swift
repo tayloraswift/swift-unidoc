@@ -302,7 +302,8 @@ extension Swiftinit.ServerLoop
                 locale: metadata.annotation.locale))
             ?? .notFound(.init(
                 content: .string("not found"),
-                type: .text(.plain, charset: .utf8)))
+                type: .text(.plain, charset: .utf8),
+                gzip: false))
 
         let duration:Duration = .now - initiated
 

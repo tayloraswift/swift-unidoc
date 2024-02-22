@@ -40,7 +40,7 @@ extension CompilerTestBattery
             return tests.do
             {
                 let part:SymbolGraphPart = try .init(
-                    json: .init(utf8: try path.read([UInt8].self)),
+                    json: .init(utf8: try path.read([UInt8].self)[...]),
                     id: id)
 
                 tests.expect(part.metadata.version ==? .v(0, 6, 0))

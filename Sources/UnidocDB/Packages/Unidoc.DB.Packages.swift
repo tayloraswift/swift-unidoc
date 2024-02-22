@@ -252,6 +252,6 @@ extension Unidoc.DB.Packages
             }
         }
 
-        return .init(id: .packages_json, utf8: json.utf8)
+        return .init(id: .packages_json, text: .utf8(json.utf8[...]))
     }
 }

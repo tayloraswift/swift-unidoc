@@ -17,17 +17,14 @@ extension Unidoc
         let id:ID
         /// The raw UTF8 data. The server never parses it back; it is only ever sent to the
         /// client as opaque data.
-        ///
-        /// There are many things we could do to make this JSON smaller. But none of them would
-        /// be as effective as applying a general text compression algorithm to the raw string.
         public
-        let utf8:[UInt8]
+        let text:TextStorage
 
         @inlinable public
-        init(id:ID, utf8:[UInt8])
+        init(id:ID, text:TextStorage)
         {
             self.id = id
-            self.utf8 = utf8
+            self.text = text
         }
     }
 }
@@ -39,6 +36,9 @@ extension Unidoc.TextResource
         case id = "_id"
         /// Contains a UTF-8 string.
         case utf8 = "J"
+        /// Contains a UTF-8 string, compressed with the LZ77 DEFLATE algorithm, and wrapped
+        /// in a gzip container.
+        case gzip = "Z"
         /// Never decoded from the database.
         case hash = "H"
     }
@@ -50,8 +50,19 @@ extension Unidoc.TextResource:BSONDocumentEncodable, BSONEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.utf8] = BSON.UTF8View<[UInt8]>.init(bytes: self.utf8)
-        bson[.hash] = MD5.init(hashing: self.utf8)
+
+        switch self.text
+        {
+        case .utf8(let utf8):
+            bson[.hash] = MD5.init(hashing: utf8)
+            bson[.utf8] = BSON.UTF8View<ArraySlice<UInt8>>.init(bytes: utf8)
+
+        case .gzip(let gzip):
+            bson[.hash] = MD5.init(hashing: gzip)
+            bson[.gzip] = BSON.BinaryView<ArraySlice<UInt8>>.init(
+                subtype: .compressed,
+                bytes: gzip)
+        }
     }
 }
 extension Unidoc.TextResource:BSONDocumentDecodable, BSONDecodable
@@ -60,11 +71,17 @@ extension Unidoc.TextResource:BSONDocumentDecodable, BSONDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: try bson[.id].decode(),
-            utf8: try bson[.utf8].decode(as: BSON.UTF8View<ArraySlice<UInt8>>.self)
+        let text:Unidoc.TextStorage
+        if  let gzip:BSON.BinaryView<ArraySlice<UInt8>> = try bson[.gzip]?.decode()
         {
-            /// Are we better off performing this copy in the first place?
-            [UInt8].init($0.bytes)
-        })
+            text = .gzip(gzip.bytes)
+        }
+        else
+        {
+            let utf8:BSON.UTF8View<ArraySlice<UInt8>> = try bson[.utf8].decode()
+            text = .utf8(utf8.bytes)
+        }
+
+        self.init(id: try bson[.id].decode(), text: text)
     }
 }

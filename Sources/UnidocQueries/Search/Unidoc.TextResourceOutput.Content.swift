@@ -1,9 +1,11 @@
+import UnidocRecords
+
 extension Unidoc.TextResourceOutput
 {
     @frozen public
     enum Content:Sendable
     {
-        case binary([UInt8])
+        case inline(Unidoc.TextStorage)
         case length(Int)
     }
 }
