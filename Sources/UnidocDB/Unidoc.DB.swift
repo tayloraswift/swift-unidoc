@@ -458,6 +458,11 @@ extension Unidoc.DB
         clear:Bool = true,
         with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
+        //  We assume compressing the search JSON will take a (relatively) long time, so we do
+        //  it before performing any database operations.
+        let search:Unidoc.TextResource<Symbol.Edition> = .init(id: volume.id,
+            text: .init(compressing: volume.index.utf8))
+
         if  clear
         {
             try await self.vertices.clear(range: volume.edition, with: session)
@@ -476,7 +481,7 @@ extension Unidoc.DB
         }
 
         try await self.volumes.insert(some: volume.metadata, with: session)
-        try await self.search.insert(some: volume.search, with: session)
+        try await self.search.insert(some: search, with: session)
         try await self.trees.insert(some: volume.trees, with: session)
 
         try await self.vertices.insert(volume.vertices, with: session)
