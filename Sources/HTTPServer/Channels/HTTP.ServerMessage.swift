@@ -118,11 +118,19 @@ extension HTTP.ServerMessage
         }
 
         self.headers.add(name: "access-control-allow-origin", value: "*")
-        self.headers.add(name: "content-length", value: "\(length)")
-        self.headers.add(name: "content-type",   value: "\(resource.type)")
+
+        //  The rest of these headers should only appear if there is physical content.
+        if  case nil = buffer
+        {
+            return
+        }
+
         if  resource.gzip
         {
             self.headers.add(name: "content-encoding", value: "gzip")
         }
+
+        self.headers.add(name: "content-length", value: "\(length)")
+        self.headers.add(name: "content-type",   value: "\(resource.type)")
     }
 }
