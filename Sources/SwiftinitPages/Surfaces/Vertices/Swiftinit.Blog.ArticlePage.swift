@@ -28,7 +28,12 @@ extension Swiftinit.Blog.ArticlePage
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.volume.title) Documentation" }
+    var title:String { "\(self.vertex.headline.safe)" }
+
+    var description:String?
+    {
+        self.vertex.overview.map { "\(self.context.prose($0.markdown))" }
+    }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
 {
