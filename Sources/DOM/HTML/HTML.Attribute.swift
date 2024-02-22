@@ -2,7 +2,7 @@ import DynamicLookupMacros
 
 extension HTML
 {
-    @GenerateDynamicMemberFactory(excluding: "rel")
+    @GenerateDynamicMemberFactory(excluding: "rel", "property")
     @frozen public
     enum Attribute:String, DOM.Attribute, Equatable, Hashable, Sendable
     {
@@ -136,5 +136,9 @@ extension HTML
         case value
         case width
         case wrap
+
+        /// A non-standard HTML attribute defined in [RDFa](https://en.wikipedia.org/wiki/RDFa)
+        /// for use in the `<meta>` tag.
+        case property
     }
 }
