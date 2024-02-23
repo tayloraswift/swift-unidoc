@@ -169,7 +169,6 @@ extension Main.LinkResolution:TestBattery
 
                 tests.expect($0.outlines() ..? [
                     .vertex(2, text: "OtherTutorial"),
-                    .vertex(2, text: "OtherTutorial"),
                     .vertex(1, text: "GettingStarted"),
                     .vertex(0, text: "GettingStarted"),
                 ])
