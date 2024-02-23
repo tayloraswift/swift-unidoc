@@ -172,9 +172,10 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
             default:
                 break
             }
-
-            $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
         }
+
+        main[.section, { $0.class = "details literature" }] =
+            (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += self.groups
     }

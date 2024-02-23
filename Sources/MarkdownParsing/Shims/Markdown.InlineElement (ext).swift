@@ -62,14 +62,12 @@ extension Markdown.InlineElement:ParsableAsInlineMarkup
                 Markdown.InlineSpan.init(from: $0, in: source)
             }
             if  let destination:String = link.destination,
-                let colon:String.Index = destination.firstIndex(of: ":"),
-                    destination[..<colon] == "doc",
                     elements.count == 1,
                     elements[0] == .text(destination)
             {
                 // exclude the angle brackets from the source range
                 let link:Markdown.InlineAutolink = .doc(
-                    link: String.init(destination[destination.index(after: colon)...]),
+                    link: destination,
                     at: .init(trimming: 1, from: link.range, in: copy source))
 
                 self = .autolink(link)

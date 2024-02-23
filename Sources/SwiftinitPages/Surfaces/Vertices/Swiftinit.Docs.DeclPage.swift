@@ -254,7 +254,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        main[.section, { $0.class = "details literature" }]
         {
             if  case .protocol = self.vertex.phylum
             {

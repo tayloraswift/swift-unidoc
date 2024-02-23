@@ -228,10 +228,33 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// The type itself lives in ``BarbieHousing``, but it is namespaced to
         /// ``BarbieCore.Barbie``, and its codelinks should resolve relative to that
         /// namespace.
-        if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
+        for case (let tests?, let path, let expected) in
+        [
+            (
+                tests / "Barbie" / "Dreamhouse",
+                ["barbiecore", "barbie", "dreamhouse"][...],
+                [
+                    "Int": [1],
+                    "Int max": [2],
+                    "ID": [1],
+                    "Barbie": [1],
+                    "Barbie ID": [2],
+                    "BarbieCore Barbie ID": [3],
+                ] as [String: [Int]]
+            ),
+            (
+                tests / "Barbie" / "Dreamhouse" / "Keys",
+                ["barbiecore", "barbie", "dreamhouse", "keys"][...],
+                [
+                    "Int": [1],
+                    "max": [2], // expands to two components because it is a vector symbol
+                    "ID": [1, 1, 1],
+                    "Barbie": [1],
+                ] as [String: [Int]]
+            ),
+        ]
         {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "swift-malibu", ["barbiecore", "barbie", "dreamhouse"])
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("swift-malibu", path)
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
@@ -285,7 +308,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
-                    let lengths:[String: Int] = overview.outlines.reduce(into: [:])
+                    let lengths:[String: [Int]] = overview.outlines.reduce(into: [:])
                     {
                         guard
                         case .path(let words, let path) = $1
@@ -299,19 +322,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                             tests.expect(true: secondaries.contains(id))
                         }
 
-                        $0[words, default: 0] += path.count
+                        $0[words, default: []].append(path.count)
                     }
                     //  The ``Int.max`` test case is especially valuable because not only is it
                     //  a multi-component cross-package reference, but the `max` member is also
                     //  being inherited from ``SignedInteger``.
-                    tests.expect(lengths ==? [
-                            "Int": 1,
-                            "Int max": 2,
-                            "ID": 1,
-                            "Barbie": 1,
-                            "Barbie ID": 2,
-                            "BarbieCore Barbie ID": 3,
-                        ])
+                    tests.expect(lengths ==? expected)
                 }
             }
         }

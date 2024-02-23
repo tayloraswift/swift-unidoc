@@ -10,5 +10,10 @@ dl
     dd
     {
         grid-column: 2;
+
+        > p:first-child
+        {
+            margin-top: 0;
+        }
     }
 }
